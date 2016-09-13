@@ -12,12 +12,16 @@ import android.content.ContentResolver;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
+import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -128,7 +132,10 @@ public class ThumbnailStreamOpenerTest {
     }
 
     public ThumbnailStreamOpener get() {
-      return new ThumbnailStreamOpener(service, query, byteArrayPool, getContentResolver());
+      List<ImageHeaderParser> parsers = new ArrayList<ImageHeaderParser>();
+      parsers.add(new DefaultImageHeaderParser());
+      return new ThumbnailStreamOpener(
+          parsers, service, query, byteArrayPool, getContentResolver());
     }
   }
 }

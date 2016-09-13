@@ -1,12 +1,13 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.GIF;
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.JPEG;
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.PNG;
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.PNG_A;
-import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.UNKNOWN;
+import static com.bumptech.glide.load.ImageHeaderParser.ImageType.GIF;
+import static com.bumptech.glide.load.ImageHeaderParser.ImageType.JPEG;
+import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG;
+import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG_A;
+import static com.bumptech.glide.load.ImageHeaderParser.ImageType.UNKNOWN;
 
 import android.util.Log;
+import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.util.Preconditions;
 import java.io.IOException;
@@ -18,44 +19,8 @@ import java.nio.charset.Charset;
 /**
  * A class for parsing the exif orientation and other data from an image header.
  */
-public class ImageHeaderParser {
-  private static final String TAG = "ImageHeaderParser";
-  /**
-   * A constant indicating we were unable to parse the orientation from the image either because
-   * no exif segment containing orientation data existed, or because of an I/O error attempting to
-   * read the exif segment.
-   */
-  public static final int UNKNOWN_ORIENTATION = -1;
-
-  /**
-   * The format of the image data including whether or not the image may include transparent
-   * pixels.
-   */
-  public enum ImageType {
-    GIF(true),
-    JPEG(false),
-    /** PNG type with alpha. */
-    PNG_A(true),
-    /** PNG type without alpha. */
-    PNG(false),
-    /** WebP type with alpha. */
-    WEBP_A(true),
-    /** WebP type without alpha. */
-    WEBP(false),
-    /**
-     * Unrecognized type.
-     */
-    UNKNOWN(false);
-    private final boolean hasAlpha;
-
-    ImageType(boolean hasAlpha) {
-      this.hasAlpha = hasAlpha;
-    }
-
-    public boolean hasAlpha() {
-      return hasAlpha;
-    }
-  }
+public final class DefaultImageHeaderParser implements ImageHeaderParser {
+  private static final String TAG = "DefaultImageHeaderParser";
 
   private static final int GIF_HEADER = 0x474946;
   private static final int PNG_HEADER = 0x89504E47;
@@ -89,28 +54,29 @@ public class ImageHeaderParser {
   private static final int WEBP_EXTENDED_ALPHA_FLAG = 1 << 4;
   private static final int WEBP_LOSSLESS_ALPHA_FLAG = 1 << 3;
 
-  private final ArrayPool byteArrayPool;
-  private final Reader reader;
-
-  public ImageHeaderParser(InputStream is, ArrayPool byteArrayPool) {
-    Preconditions.checkNotNull(is);
-    this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
-    reader = new StreamReader(is);
+  @Override
+  public ImageType getType(InputStream is) throws IOException {
+    return getType(new StreamReader(Preconditions.checkNotNull(is)));
   }
 
-  public ImageHeaderParser(ByteBuffer byteBuffer, ArrayPool byteArrayPool) {
-    Preconditions.checkNotNull(byteBuffer);
-    this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
-    reader = new ByteBufferReader(byteBuffer);
+  @Override
+  public ImageType getType(ByteBuffer byteBuffer) throws IOException {
+    return getType(new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)));
   }
 
-  // 0xD0A3C68 -> <htm
-  // 0xCAFEBABE -> <!DOCTYPE...
-  public boolean hasAlpha() throws IOException {
-    return getType().hasAlpha();
+  @Override
+  public int getOrientation(InputStream is, ArrayPool byteArrayPool) throws IOException {
+    return getOrientation(new StreamReader(Preconditions.checkNotNull(is)),
+        Preconditions.checkNotNull(byteArrayPool));
   }
 
-  public ImageType getType() throws IOException {
+  @Override
+  public int getOrientation(ByteBuffer byteBuffer, ArrayPool byteArrayPool) throws IOException {
+    return getOrientation(new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)),
+        Preconditions.checkNotNull(byteArrayPool));
+  }
+
+  private ImageType getType(Reader reader) throws IOException {
     int firstTwoBytes = reader.getUInt16();
 
     // JPEG.
@@ -171,7 +137,7 @@ public class ImageHeaderParser {
    * contain an orientation
    * @throws IOException
    */
-  public int getOrientation() throws IOException {
+  private int getOrientation(Reader reader, ArrayPool byteArrayPool) throws IOException {
     final int magicNumber = reader.getUInt16();
 
     if (!handles(magicNumber)) {
@@ -180,7 +146,7 @@ public class ImageHeaderParser {
       }
       return UNKNOWN_ORIENTATION;
     } else {
-      int exifSegmentLength = moveToExifSegmentAndGetLength();
+      int exifSegmentLength = moveToExifSegmentAndGetLength(reader);
       if (exifSegmentLength == -1) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Failed to parse exif segment length, or exif segment not found");
@@ -190,14 +156,15 @@ public class ImageHeaderParser {
 
       byte[] exifData = byteArrayPool.get(exifSegmentLength, byte[].class);
       try {
-        return parseExifSegment(exifData, exifSegmentLength);
+        return parseExifSegment(reader, exifData, exifSegmentLength);
       } finally {
         byteArrayPool.put(exifData, byte[].class);
       }
     }
   }
 
-  private int parseExifSegment(byte[] tempArray, int exifSegmentLength) throws IOException {
+  private int parseExifSegment(Reader reader, byte[] tempArray, int exifSegmentLength)
+      throws IOException {
     int read = reader.read(tempArray, exifSegmentLength);
     if (read != exifSegmentLength) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -237,7 +204,7 @@ public class ImageHeaderParser {
    * Moves reader to the start of the exif segment and returns the length of the exif segment or
    * {@code -1} if no exif segment is found.
    */
-  private int moveToExifSegmentAndGetLength() throws IOException {
+  private int moveToExifSegmentAndGetLength(Reader reader) throws IOException {
     short segmentId, segmentType;
     int segmentLength;
     while (true) {
@@ -513,4 +480,3 @@ public class ImageHeaderParser {
     }
   }
 }
-
