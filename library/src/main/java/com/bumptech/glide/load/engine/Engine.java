@@ -154,6 +154,7 @@ public class Engine implements EngineJobListener,
       Options options,
       boolean isMemoryCacheable,
       boolean useUnlimitedSourceExecutorPool,
+      boolean onlyRetrieveFromCache,
       ResourceCallback cb) {
     Util.assertMainThread();
     long startTime = LogTime.getLogTime();
@@ -203,6 +204,7 @@ public class Engine implements EngineJobListener,
         diskCacheStrategy,
         transformations,
         isTransformationRequired,
+        onlyRetrieveFromCache,
         options,
         engineJob);
     jobs.put(key, engineJob);
@@ -418,6 +420,7 @@ public class Engine implements EngineJobListener,
         DiskCacheStrategy diskCacheStrategy,
         Map<Class<?>, Transformation<?>> transformations,
         boolean isTransformationRequired,
+        boolean onlyRetrieveFromCache,
         Options options,
         DecodeJob.Callback<R> callback) {
       DecodeJob<R> result = (DecodeJob<R>) pool.acquire();
@@ -434,6 +437,7 @@ public class Engine implements EngineJobListener,
           diskCacheStrategy,
           transformations,
           isTransformationRequired,
+          onlyRetrieveFromCache,
           options,
           callback,
           creationOrder++);

@@ -58,6 +58,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private Stage stage;
   private RunReason runReason;
   private long startFetchTime;
+  private boolean onlyRetrieveFromCache;
 
   private Thread currentThread;
   @Synthetic Key currentSourceKey;
@@ -88,6 +89,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       DiskCacheStrategy diskCacheStrategy,
       Map<Class<?>, Transformation<?>> transformations,
       boolean isTransformationRequired,
+      boolean onlyRetrieveFromCache,
       Options options,
       Callback<R> callback,
       int order) {
@@ -112,6 +114,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     this.width = width;
     this.height = height;
     this.diskCacheStrategy = diskCacheStrategy;
+    this.onlyRetrieveFromCache = onlyRetrieveFromCache;
     this.options = options;
     this.callback = callback;
     this.order = order;
@@ -316,7 +319,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         return diskCacheStrategy.decodeCachedData()
             ? Stage.DATA_CACHE : getNextStage(Stage.DATA_CACHE);
       case DATA_CACHE:
-        return Stage.SOURCE;
+        // Skip loading from source if the user opted to only retrieve the resource from cache.
+        return onlyRetrieveFromCache ? Stage.FINISHED : Stage.SOURCE;
       case SOURCE:
       case FINISHED:
         return Stage.FINISHED;

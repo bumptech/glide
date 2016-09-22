@@ -278,7 +278,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), eq(100), eq(100),
             eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
             eq(harness.transformations), anyBoolean(), any(Options.class),
-            anyBoolean(), anyBoolean(), any(ResourceCallback.class));
+            anyBoolean(), anyBoolean(), anyBoolean(), any(ResourceCallback.class));
   }
 
   @Test
@@ -297,7 +297,7 @@ public class SingleRequestTest {
        .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(), anyInt(),
           eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
           eq(harness.transformations), anyBoolean(), any(Options.class),
-          anyBoolean(), anyBoolean(), any(ResourceCallback.class)))
+          anyBoolean(), anyBoolean(), anyBoolean(), any(ResourceCallback.class)))
         .thenReturn(loadStatus);
 
     SingleRequest<List> request = harness.getRequest();
@@ -541,7 +541,8 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), anyBoolean(), any(ResourceCallback.class)))
+            any(Options.class), anyBoolean(), anyBoolean(), anyBoolean(),
+            any(ResourceCallback.class)))
         .thenAnswer(new Answer<Object>() {
           @Override
           public Object answer(InvocationOnMock invocation) throws Throwable {
@@ -655,7 +656,8 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), anyBoolean(), any(ResourceCallback.class));
+            any(Options.class), anyBoolean(), anyBoolean(), anyBoolean(),
+            any(ResourceCallback.class));
   }
 
   @Test
@@ -677,7 +679,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), eq(100), eq(100),
             eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
             eq(harness.transformations), anyBoolean(), any(Options.class),
-            anyBoolean(), anyBoolean(), any(ResourceCallback.class)))
+            anyBoolean(), anyBoolean(), anyBoolean(), any(ResourceCallback.class)))
         .thenAnswer(new CallResourceCallback(harness.resource));
     SingleRequest<List> request = harness.getRequest();
 
@@ -706,7 +708,8 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), anyBoolean(), any(ResourceCallback.class));
+            any(Options.class), anyBoolean(), anyBoolean(), anyBoolean(),
+            any(ResourceCallback.class));
   }
 
 
@@ -724,7 +727,8 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), eq(Boolean.TRUE), any(ResourceCallback.class));
+            any(Options.class), anyBoolean(), eq(Boolean.TRUE), anyBoolean(),
+            any(ResourceCallback.class));
   }
 
   @Test
@@ -741,7 +745,8 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), eq(Boolean.FALSE), any(ResourceCallback.class));
+            any(Options.class), anyBoolean(), eq(Boolean.FALSE), anyBoolean(),
+            any(ResourceCallback.class));
   }
 
   // TODO do we want to move these to Util?

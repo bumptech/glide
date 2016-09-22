@@ -483,6 +483,7 @@ public class EngineTest {
     GlideContext glideContext = mock(GlideContext.class);
     boolean isMemoryCacheable = true;
     boolean useUnlimitedSourceGeneratorPool = false;
+    boolean onlyRetrieveFromCache = false;
 
     public EngineTestHarness() {
       when(keyFactory.buildKey(eq(model), eq(signature), anyInt(), anyInt(), eq(transformations),
@@ -515,6 +516,7 @@ public class EngineTest {
           options,
           isMemoryCacheable,
           useUnlimitedSourceGeneratorPool,
+          onlyRetrieveFromCache,
           cb);
     }
   }

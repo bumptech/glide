@@ -63,6 +63,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private static final int TRANSFORMATION_ALLOWED = 1 << 16;
   private static final int TRANSFORMATION_REQUIRED = 1 << 17;
   private static final int USE_UNLIMITED_SOURCE_GENERATORS_POOL = 1 << 18;
+  private static final int ONLY_RETRIEVE_FROM_CACHE = 1 << 19;
 
   private int fields;
 
@@ -89,6 +90,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   private Resources.Theme theme;
   private boolean isAutoCloneEnabled;
   private boolean useUnlimitedSourceGeneratorsPool;
+  private boolean onlyRetrieveFromCache;
 
   /**
    * Applies a multiplier to the {@link com.bumptech.glide.request.target.Target}'s size before
@@ -121,6 +123,20 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
     this.useUnlimitedSourceGeneratorsPool = flag;
     fields |= USE_UNLIMITED_SOURCE_GENERATORS_POOL;
+
+    return selfOrThrowIfLocked();
+  }
+
+  /**
+   * If set to true, will only load an item if found in the cache, and will not fetch from source.
+   */
+  public final CHILD getOnlyRetrieveFromCache(boolean flag) {
+    if (isAutoCloneEnabled) {
+      return clone().getOnlyRetrieveFromCache(flag);
+    }
+
+    this.onlyRetrieveFromCache = flag;
+    fields |= ONLY_RETRIEVE_FROM_CACHE;
 
     return selfOrThrowIfLocked();
   }
@@ -817,6 +833,9 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     if (isSet(other.fields, TRANSFORMATION)) {
       transformations.putAll(other.transformations);
     }
+    if (isSet(other.fields, ONLY_RETRIEVE_FROM_CACHE)) {
+      onlyRetrieveFromCache = other.onlyRetrieveFromCache;
+    }
 
     // Applying options with dontTransform() is expected to clear our transformations.
     if (!isTransformationAllowed) {
@@ -959,5 +978,9 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
 
   public final boolean getUseUnlimitedSourceGeneratorsPool() {
     return useUnlimitedSourceGeneratorsPool;
+  }
+
+  public final boolean getOnlyRetrieveFromCache() {
+    return onlyRetrieveFromCache;
   }
 }
