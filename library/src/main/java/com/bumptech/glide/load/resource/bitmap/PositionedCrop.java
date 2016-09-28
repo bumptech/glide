@@ -1,13 +1,9 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import static android.os.Build.ID;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.FloatRange;
-
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-
 import java.security.MessageDigest;
 
 /**
@@ -30,39 +26,46 @@ import java.security.MessageDigest;
  * Does not maintain the image's aspect ratio
  */
 public class PositionedCrop extends BitmapTransformation {
-  private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
-  private float xPercentage = 0.5f;
-  private float yPercentage = 0.5f;
+  public static final float START = 0;
+  public static final float CENTER = 0.5f;
+  public static final float END = 1;
 
-  public PositionedCrop(Context context, @FloatRange(from = 0.0, to = 1.0) float xPercentage, @FloatRange(from = 0.0, to = 1.0) float yPercentage) {
+  private final float xPercentage;
+  private final float yPercentage;
+
+  public PositionedCrop(Context context, @FloatRange(from = 0.0, to = 1.0) float xPercentage,
+      @FloatRange(from = 0.0, to = 1.0) float yPercentage) {
     super(context);
     this.xPercentage = xPercentage;
     this.yPercentage = yPercentage;
   }
 
-  public PositionedCrop(BitmapPool bitmapPool, @FloatRange(from = 0.0, to = 1.0) float xPercentage, @FloatRange(from = 0.0, to = 1.0) float yPercentage) {
+  public PositionedCrop(BitmapPool bitmapPool, @FloatRange(from = 0.0, to = 1.0) float xPercentage,
+      @FloatRange(from = 0.0, to = 1.0) float yPercentage) {
     super(bitmapPool);
     this.xPercentage = xPercentage;
     this.yPercentage = yPercentage;
   }
 
   // Bitmap doesn't implement equals, so == and .equals are equivalent here.
-  @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
   protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
 
-    return TransformationUtils.cropPosition(pool, toTransform, outWidth, outHeight, xPercentage, yPercentage);
+    return TransformationUtils.cropPosition(pool, toTransform, outWidth, outHeight, xPercentage,
+        yPercentage);
   }
 
   public String getId() {
-    return "PositionedCrop.com.bumptech.glide.load.resource.bitmap.x:" + xPercentage + ".y:" + yPercentage;
+    return "PositionedCrop.com.bumptech.glide.load.resource.bitmap(x=" + xPercentage + ",y="
+        + yPercentage + ")";
   }
 
   @Override
   public boolean equals(Object o) {
     if (o instanceof PositionedCrop) {
-      return ((PositionedCrop) o).xPercentage == xPercentage && ((PositionedCrop) o).yPercentage == yPercentage;
+      return ((PositionedCrop) o).xPercentage == xPercentage && ((PositionedCrop) o).yPercentage
+          == yPercentage;
     } else {
       return false;
     }
@@ -75,6 +78,6 @@ public class PositionedCrop extends BitmapTransformation {
 
   @Override
   public void updateDiskCacheKey(MessageDigest messageDigest) {
-    messageDigest.update(ID_BYTES);
+    messageDigest.update(getId().getBytes(CHARSET));
   }
 }

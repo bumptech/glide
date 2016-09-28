@@ -10,7 +10,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;

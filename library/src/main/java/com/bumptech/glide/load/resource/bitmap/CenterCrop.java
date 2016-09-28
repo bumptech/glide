@@ -1,9 +1,7 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.content.Context;
-
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-
 import java.security.MessageDigest;
 
 /**
@@ -18,16 +16,16 @@ public class CenterCrop extends PositionedCrop {
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
   public CenterCrop(Context context) {
-    super(context, 0.5f, 0.5f);
+    super(context, PositionedCrop.CENTER, PositionedCrop.CENTER);
   }
 
   public CenterCrop(BitmapPool bitmapPool) {
-    super(bitmapPool, 0.5f, 0.5f);
+    super(bitmapPool, PositionedCrop.CENTER, PositionedCrop.CENTER);
   }
 
   @Override
   public boolean equals(Object o) {
-    return o instanceof CenterCrop;
+    return o != null && getClass() == o.getClass();
   }
 
   @Override

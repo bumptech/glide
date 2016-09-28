@@ -13,6 +13,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.media.ExifInterface;
 import android.os.Build;
+import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -34,9 +35,8 @@ public final class TransformationUtils {
   private static final Paint CIRCLE_CROP_BITMAP_PAINT;
   /**
    * https://github.com/bumptech/glide/issues/738 On some devices (Moto X with android 5.1) bitmap
-   * drawing is not thread safe.
-   * This lock only locks for these specific devices. For other types of devices the lock is always
-   * available and therefore does not impact performance
+   * drawing is not thread safe. This lock only locks for these specific devices. For other types of
+   * devices the lock is always available and therefore does not impact performance
    */
   private static final Lock BITMAP_DRAWABLE_LOCK = "XT1097".equals(Build.MODEL)
       // TODO: Switch to Build.VERSION_CODES.LOLLIPOP_MR1 when apps have updated target API levels.
@@ -64,37 +64,15 @@ public final class TransformationUtils {
    * Bitmap with the given dimensions is passed in as well.
    *
    * @param pool     The BitmapPool to obtain a bitmap from.
-   * @param inBitmap   The Bitmap to resize.
+   * @param inBitmap The Bitmap to resize.
    * @param width    The width in pixels of the final Bitmap.
    * @param height   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
   public static Bitmap centerCrop(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
       int height) {
-    if (inBitmap.getWidth() == width && inBitmap.getHeight() == height) {
-      return inBitmap;
-    }
-    // From ImageView/Bitmap.createScaledBitmap.
-    final float scale;
-    float dx = 0, dy = 0;
-    Matrix m = new Matrix();
-    if (inBitmap.getWidth() * height > width * inBitmap.getHeight()) {
-      scale = (float) height / (float) inBitmap.getHeight();
-      dx = (width - inBitmap.getWidth() * scale) * 0.5f;
-    } else {
-      scale = (float) width / (float) inBitmap.getWidth();
-      dy = (height - inBitmap.getHeight() * scale) * 0.5f;
-    }
-
-    m.setScale(scale, scale);
-    m.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
-
-    Bitmap result = pool.get(width, height, getSafeConfig(inBitmap));
-    // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
-    TransformationUtils.setAlpha(inBitmap, result);
-
-    applyMatrix(inBitmap, result, m);
-    return result;
+    return cropPosition(pool, inBitmap, width, height, PositionedCrop.CENTER,
+        PositionedCrop.CENTER);
   }
 
   /**
@@ -102,16 +80,19 @@ public final class TransformationUtils {
    * dimensions. This operation is significantly less expensive in terms of memory if a mutable
    * Bitmap with the given dimensions is passed in as well.
    *
-   * @param pool     The BitmapPool to obtain a bitmap from.
-   * @param inBitmap   The Bitmap to resize.
-   * @param width    The width in pixels of the final Bitmap.
-   * @param height   The height in pixels of the final Bitmap.
-   * @param xPercentage The horizontal percentage of the crop. 0.0f => left, 0.5f => center, 1.0f => right or anything in between 0 and 1
-   * @param yPercentage The vertical percentage of the crop. 0.0f => top, 0.5f => center, 1.0f => bottom or anything in between 0 and 1
+   * @param pool        The BitmapPool to obtain a bitmap from.
+   * @param inBitmap    The Bitmap to resize.
+   * @param width       The width in pixels of the final Bitmap.
+   * @param height      The height in pixels of the final Bitmap.
+   * @param xPercentage The horizontal percentage of the crop. 0.0f => left, 0.5f => center, 1.0f =>
+   *                    right or anything in between 0 and 1
+   * @param yPercentage The vertical percentage of the crop. 0.0f => top, 0.5f => center, 1.0f =>
+   *                    bottom or anything in between 0 and 1
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
   public static Bitmap cropPosition(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
-      int height, float xPercentage, float yPercentage) {
+      int height, @FloatRange(from = 0.0, to = 1.0) float xPercentage, @FloatRange(from = 0.0,
+      to = 1.0) float yPercentage) {
     if (inBitmap.getWidth() == width && inBitmap.getHeight() == height) {
       return inBitmap;
     }
@@ -121,12 +102,10 @@ public final class TransformationUtils {
     Matrix m = new Matrix();
     if (inBitmap.getWidth() * height > width * inBitmap.getHeight()) {
       scale = (float) height / (float) inBitmap.getHeight();
-      dx = (width - inBitmap.getWidth() * scale) * 0.5f;
-      dx *= xPercentage;
+      dx = (width - inBitmap.getWidth() * scale) * xPercentage;
     } else {
       scale = (float) width / (float) inBitmap.getWidth();
-      dy = (height - inBitmap.getHeight() * scale) * 0.5f;
-      dy *= yPercentage;
+      dy = (height - inBitmap.getHeight() * scale) * yPercentage;
     }
 
     m.setScale(scale, scale);
@@ -144,10 +123,10 @@ public final class TransformationUtils {
    * An expensive operation to resize the given Bitmap down so that it fits within the given
    * dimensions maintain the original proportions.
    *
-   * @param pool   The BitmapPool obtain a bitmap from.
-   * @param inBitmap  The Bitmap to shrink.
-   * @param width  The width in pixels the final image will fit within.
-   * @param height The height in pixels the final image will fit within.
+   * @param pool     The BitmapPool obtain a bitmap from.
+   * @param inBitmap The Bitmap to shrink.
+   * @param width    The width in pixels the final image will fit within.
+   * @param height   The height in pixels the final image will fit within.
    * @return A new Bitmap shrunk to fit within the given dimensions, or toFit if toFit's width or
    * height matches the given dimensions and toFit fits within the given dimensions
    */
@@ -200,15 +179,15 @@ public final class TransformationUtils {
    * If the Bitmap is smaller or equal to the Target it returns the original size, if not then
    * {@link #fitCenter(BitmapPool, Bitmap, int, int)} is called instead.
    *
-   * @param pool   The BitmapPool obtain a bitmap from.
-   * @param inBitmap  The Bitmap to center.
-   * @param width  The width in pixels of the target.
-   * @param height The height in pixels of the target.
+   * @param pool     The BitmapPool obtain a bitmap from.
+   * @param inBitmap The Bitmap to center.
+   * @param width    The width in pixels of the target.
+   * @param height   The height in pixels of the target.
    * @return returns input Bitmap if smaller or equal to target, or toFit if the Bitmap's width or
    * height is larger than the given dimensions
    */
   public static Bitmap centerInside(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
-                                 int height) {
+      int height) {
     if (inBitmap.getWidth() <= width && inBitmap.getHeight() <= height) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "requested target size larger or equal to input, returning input");
@@ -224,12 +203,11 @@ public final class TransformationUtils {
 
   /**
    * Sets the alpha of the Bitmap we're going to re-use to the alpha of the Bitmap we're going to
-   * transform. This keeps {@link Bitmap#hasAlpha()}} consistent before and after
-   * the transformation for transformations that don't add or remove transparent pixels.
+   * transform. This keeps {@link Bitmap#hasAlpha()}} consistent before and after the transformation
+   * for transformations that don't add or remove transparent pixels.
    *
-   * @param inBitmap The {@link Bitmap} that will be transformed.
-   * @param outBitmap   The {@link Bitmap} that will be returned from the
-   *                    transformation.
+   * @param inBitmap  The {@link Bitmap} that will be transformed.
+   * @param outBitmap The {@link Bitmap} that will be returned from the transformation.
    */
   public static void setAlpha(Bitmap inBitmap, Bitmap outBitmap) {
     setAlphaIfAvailable(outBitmap, inBitmap.hasAlpha());
@@ -330,13 +308,13 @@ public final class TransformationUtils {
   }
 
   /**
-   * Crop the image to a circle and resize to the specified width/height.  The circle crop will
-   * have the same width and height equal to the min-edge of the result image.
+   * Crop the image to a circle and resize to the specified width/height.  The circle crop will have
+   * the same width and height equal to the min-edge of the result image.
    *
-   * @param pool   The BitmapPool obtain a bitmap from.
+   * @param pool       The BitmapPool obtain a bitmap from.
    * @param inBitmap   The Bitmap to resize.
-   * @param destWidth    The width in pixels of the final Bitmap.
-   * @param destHeight   The height in pixels of the final Bitmap.
+   * @param destWidth  The width in pixels of the final Bitmap.
+   * @param destHeight The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
   public static Bitmap circleCrop(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap,
@@ -401,9 +379,9 @@ public final class TransformationUtils {
   /**
    * Creates a bitmap from a source bitmap and rounds the corners.
    *
-   * @param inBitmap the source bitmap to use as a basis for the created bitmap.
-   * @param width the width of the generated bitmap.
-   * @param height the height of the generated bitmap.
+   * @param inBitmap       the source bitmap to use as a basis for the created bitmap.
+   * @param width          the width of the generated bitmap.
+   * @param height         the height of the generated bitmap.
    * @param roundingRadius the corner radius to be applied (in device-specific pixels).
    * @return a {@link Bitmap} similar to inBitmap but with rounded corners.
    * @throws IllegalArgumentException if roundingRadius, width or height is 0 or less.
