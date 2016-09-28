@@ -98,6 +98,49 @@ public final class TransformationUtils {
   }
 
   /**
+   * A potentially expensive operation to crop the given Bitmap so that it fills the given
+   * dimensions. This operation is significantly less expensive in terms of memory if a mutable
+   * Bitmap with the given dimensions is passed in as well.
+   *
+   * @param pool     The BitmapPool to obtain a bitmap from.
+   * @param inBitmap   The Bitmap to resize.
+   * @param width    The width in pixels of the final Bitmap.
+   * @param height   The height in pixels of the final Bitmap.
+   * @param xPercentage The horizontal percentage of the crop. 0.0f => left, 0.5f => center, 1.0f => right or anything in between 0 and 1
+   * @param yPercentage The vertical percentage of the crop. 0.0f => top, 0.5f => center, 1.0f => bottom or anything in between 0 and 1
+   * @return The resized Bitmap (will be recycled if recycled is not null).
+   */
+  public static Bitmap cropPosition(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
+      int height, float xPercentage, float yPercentage) {
+    if (inBitmap.getWidth() == width && inBitmap.getHeight() == height) {
+      return inBitmap;
+    }
+    // From ImageView/Bitmap.createScaledBitmap.
+    final float scale;
+    float dx = 0, dy = 0;
+    Matrix m = new Matrix();
+    if (inBitmap.getWidth() * height > width * inBitmap.getHeight()) {
+      scale = (float) height / (float) inBitmap.getHeight();
+      dx = (width - inBitmap.getWidth() * scale) * 0.5f;
+      dx *= xPercentage;
+    } else {
+      scale = (float) width / (float) inBitmap.getWidth();
+      dy = (height - inBitmap.getHeight() * scale) * 0.5f;
+      dy *= yPercentage;
+    }
+
+    m.setScale(scale, scale);
+    m.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
+
+    Bitmap result = pool.get(width, height, getSafeConfig(inBitmap));
+    // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
+    TransformationUtils.setAlpha(inBitmap, result);
+
+    applyMatrix(inBitmap, result, m);
+    return result;
+  }
+
+  /**
    * An expensive operation to resize the given Bitmap down so that it fits within the given
    * dimensions maintain the original proportions.
    *
@@ -181,11 +224,11 @@ public final class TransformationUtils {
 
   /**
    * Sets the alpha of the Bitmap we're going to re-use to the alpha of the Bitmap we're going to
-   * transform. This keeps {@link android.graphics.Bitmap#hasAlpha()}} consistent before and after
+   * transform. This keeps {@link Bitmap#hasAlpha()}} consistent before and after
    * the transformation for transformations that don't add or remove transparent pixels.
    *
-   * @param inBitmap The {@link android.graphics.Bitmap} that will be transformed.
-   * @param outBitmap   The {@link android.graphics.Bitmap} that will be returned from the
+   * @param inBitmap The {@link Bitmap} that will be transformed.
+   * @param outBitmap   The {@link Bitmap} that will be returned from the
    *                    transformation.
    */
   public static void setAlpha(Bitmap inBitmap, Bitmap outBitmap) {
