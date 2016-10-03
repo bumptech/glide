@@ -1,7 +1,6 @@
 package com.bumptech.glide.module;
 
 import android.content.Context;
-
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 
@@ -19,7 +18,7 @@ import com.bumptech.glide.Registry;
  *                      public class FlickrGlideModule implements GlideModule {
  *                          {@literal @}Override
  *                          public void applyOptions(Context context, GlideBuilder builder) {
- *                              buidler.setDecodeFormat(DecodeFormat.ALWAYS_ARGB_8888);
+ *                              builder.setDecodeFormat(DecodeFormat.ALWAYS_ARGB_8888);
  *                          }
  *
  *                          {@literal @}Override

@@ -1,13 +1,12 @@
 package com.bumptech.glide.provider;
 
 import com.bumptech.glide.load.ResourceDecoder;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Contains an ordered list of {@link ResourceDecoder}s capable of decoding arbitrary data types
- * into arbitrary resource types from highest priority decoders to loweset priority decoders.
+ * into arbitrary resource types from highest priority decoders to lowest priority decoders.
  */
 @SuppressWarnings("rawtypes")
 public class ResourceDecoderRegistry {

@@ -2,7 +2,6 @@ package com.bumptech.glide.samples.flickr.api;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -91,6 +90,7 @@ public class Photo implements Parcelable {
     return getPartialUrl();
   }
 
+  @SuppressWarnings({"PMD.SimplifyBooleanReturns", "RedundantIfStatement"})
   @Override
   public boolean equals(Object o) {
     if (this == o) {

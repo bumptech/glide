@@ -2,7 +2,6 @@ package com.bumptech.glide.manager;
 
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Util;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -123,5 +122,10 @@ public class RequestTracker {
         }
       }
     }
+  }
+
+  @Override
+  public String toString() {
+    return super.toString() + "{numRequests=" + requests.size() + ", isPaused=" + isPaused + "}";
   }
 }

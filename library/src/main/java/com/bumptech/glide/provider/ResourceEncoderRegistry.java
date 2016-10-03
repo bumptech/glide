@@ -1,7 +1,7 @@
 package com.bumptech.glide.provider;
 
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.ResourceEncoder;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +18,7 @@ public class ResourceEncoderRegistry {
   }
 
   @SuppressWarnings("unchecked")
+  @Nullable
   public synchronized <Z> ResourceEncoder<Z> get(Class<Z> resourceClass) {
     int size = encoders.size();
     for (int i = 0; i < size; i++) {

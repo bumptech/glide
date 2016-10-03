@@ -2,14 +2,12 @@ package com.bumptech.glide.load.resource.gif;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.util.Preconditions;
-
 import java.security.MessageDigest;
 
 /**
@@ -37,7 +35,7 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
 
     // The drawable needs to be initialized with the correct width and height in order for a view
     // displaying it to end up with the right dimensions. Since our transformations may arbitrarily
-    // modify the dimensions of our gif, here we create a stand in for a frame and pass it to the
+    // modify the dimensions of our GIF, here we create a stand in for a frame and pass it to the
     // transformation to see what the final transformed dimensions will be so that our drawable can
     // report the correct intrinsic width and height.
     Bitmap firstFrame = drawable.getFirstFrame();

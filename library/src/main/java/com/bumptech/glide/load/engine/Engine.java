@@ -2,21 +2,26 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.support.v4.util.Pools;
 import android.util.Log;
-
+import com.bumptech.glide.GlideContext;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Options;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.DiskCacheAdapter;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
-
+import com.bumptech.glide.util.pool.FactoryPools;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Responsible for starting loads and managing active and cached resources.
@@ -25,13 +30,15 @@ public class Engine implements EngineJobListener,
     MemoryCache.ResourceRemovedListener,
     EngineResource.ResourceListener {
   private static final String TAG = "Engine";
-  private final Map<Key, EngineJob> jobs;
+  private static final int JOB_POOL_SIZE = 150;
+  private final Map<Key, EngineJob<?>> jobs;
   private final EngineKeyFactory keyFactory;
   private final MemoryCache cache;
   private final EngineJobFactory engineJobFactory;
   private final Map<Key, WeakReference<EngineResource<?>>> activeResources;
   private final ResourceRecycler resourceRecycler;
   private final LazyDiskCacheProvider diskCacheProvider;
+  private final DecodeJobFactory decodeJobFactory;
 
   // Lazily instantiate to avoid exceptions if Glide is initialized on a background thread. See
   // #295.
@@ -41,10 +48,10 @@ public class Engine implements EngineJobListener,
    * Allows a request to indicate it no longer is interested in a given load.
    */
   public static class LoadStatus {
-    private final EngineJob engineJob;
+    private final EngineJob<?> engineJob;
     private final ResourceCallback cb;
 
-    public LoadStatus(ResourceCallback cb, EngineJob engineJob) {
+    public LoadStatus(ResourceCallback cb, EngineJob<?> engineJob) {
       this.cb = cb;
       this.engineJob = engineJob;
     }
@@ -54,16 +61,26 @@ public class Engine implements EngineJobListener,
     }
   }
 
-  public Engine(MemoryCache memoryCache, DiskCache.Factory diskCacheFactory,
-      ExecutorService diskCacheService, ExecutorService sourceService) {
-    this(memoryCache, diskCacheFactory, diskCacheService, sourceService, null, null, null, null,
-        null);
+  public Engine(MemoryCache memoryCache,
+      DiskCache.Factory diskCacheFactory,
+      GlideExecutor diskCacheExecutor,
+      GlideExecutor sourceExecutor,
+      GlideExecutor sourceUnlimitedExecutor) {
+    this(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor, sourceUnlimitedExecutor,
+        null, null, null, null, null, null);
   }
 
   // Visible for testing.
-  Engine(MemoryCache cache, DiskCache.Factory diskCacheFactory, ExecutorService diskCacheService,
-      ExecutorService sourceService, Map<Key, EngineJob> jobs, EngineKeyFactory keyFactory,
-      Map<Key, WeakReference<EngineResource<?>>> activeResources, EngineJobFactory engineJobFactory,
+  Engine(MemoryCache cache,
+      DiskCache.Factory diskCacheFactory,
+      GlideExecutor diskCacheExecutor,
+      GlideExecutor sourceExecutor,
+      GlideExecutor sourceUnlimitedExecutor,
+      Map<Key, EngineJob<?>> jobs,
+      EngineKeyFactory keyFactory,
+      Map<Key, WeakReference<EngineResource<?>>> activeResources,
+      EngineJobFactory engineJobFactory,
+      DecodeJobFactory decodeJobFactory,
       ResourceRecycler resourceRecycler) {
     this.cache = cache;
     this.diskCacheProvider = new LazyDiskCacheProvider(diskCacheFactory);
@@ -84,9 +101,15 @@ public class Engine implements EngineJobListener,
     this.jobs = jobs;
 
     if (engineJobFactory == null) {
-      engineJobFactory = new EngineJobFactory(diskCacheService, sourceService, this);
+      engineJobFactory = new EngineJobFactory(diskCacheExecutor, sourceExecutor,
+          sourceUnlimitedExecutor, this);
     }
     this.engineJobFactory = engineJobFactory;
+
+    if (decodeJobFactory == null) {
+      decodeJobFactory = new DecodeJobFactory(diskCacheProvider);
+    }
+    this.decodeJobFactory = decodeJobFactory;
 
     if (resourceRecycler == null) {
       resourceRecycler = new ResourceRecycler();
@@ -115,34 +138,47 @@ public class Engine implements EngineJobListener,
    * @param height The target height in pixels of the desired resource.
    * @param cb     The callback that will be called when the load completes.
    */
-  public <Z, R> LoadStatus load(RequestContext<?, R> requestContext, int width, int height,
+  public <R> LoadStatus load(
+      GlideContext glideContext,
+      Object model,
+      Key signature,
+      int width,
+      int height,
+      Class<?> resourceClass,
+      Class<R> transcodeClass,
+      Priority priority,
+      DiskCacheStrategy diskCacheStrategy,
+      Map<Class<?>, Transformation<?>> transformations,
+      boolean isTransformationRequired,
+      Options options,
+      boolean isMemoryCacheable,
+      boolean useUnlimitedSourceExecutorPool,
       ResourceCallback cb) {
     Util.assertMainThread();
     long startTime = LogTime.getLogTime();
 
-    requestContext.setDimens(width, height);
+    EngineKey key = keyFactory.buildKey(model, signature, width, height, transformations,
+        resourceClass, transcodeClass, options);
 
-    EngineKey key = keyFactory.buildKey(requestContext, width, height);
-
-    EngineResource<?> cached = loadFromCache(key, requestContext.isMemoryCacheable());
+    EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
     if (cached != null) {
-      cb.onResourceReady(cached);
+      cb.onResourceReady(cached, DataSource.MEMORY_CACHE);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         logWithTimeAndKey("Loaded resource from cache", startTime, key);
       }
       return null;
     }
 
-    EngineResource<?> active = loadFromActiveResources(key, requestContext.isMemoryCacheable());
+    EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
     if (active != null) {
-      cb.onResourceReady(active);
+      cb.onResourceReady(active, DataSource.MEMORY_CACHE);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         logWithTimeAndKey("Loaded resource from active resources", startTime, key);
       }
       return null;
     }
 
-    EngineJob current = jobs.get(key);
+    EngineJob<?> current = jobs.get(key);
     if (current != null) {
       current.addCallback(cb);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -151,8 +187,22 @@ public class Engine implements EngineJobListener,
       return new LoadStatus(cb, current);
     }
 
-    EngineJob<R> engineJob = engineJobFactory.build(key, requestContext.isMemoryCacheable());
-    DecodeJob<R> decodeJob = new DecodeJob<>(requestContext, key, width, height, diskCacheProvider,
+    EngineJob<R> engineJob = engineJobFactory.build(key, isMemoryCacheable,
+        useUnlimitedSourceExecutorPool);
+    DecodeJob<R> decodeJob = decodeJobFactory.build(
+        glideContext,
+        model,
+        key,
+        signature,
+        width,
+        height,
+        resourceClass,
+        transcodeClass,
+        priority,
+        diskCacheStrategy,
+        transformations,
+        isTransformationRequired,
+        options,
         engineJob);
     jobs.put(key, engineJob);
     engineJob.addCallback(cb);
@@ -204,22 +254,22 @@ public class Engine implements EngineJobListener,
   private EngineResource<?> getEngineResourceFromCache(Key key) {
     Resource<?> cached = cache.remove(key);
 
-    final EngineResource result;
+    final EngineResource<?> result;
     if (cached == null) {
       result = null;
     } else if (cached instanceof EngineResource) {
       // Save an object allocation if we've cached an EngineResource (the typical case).
-      result = (EngineResource) cached;
+      result = (EngineResource<?>) cached;
     } else {
-      result = new EngineResource(cached, true /*isMemoryCacheable*/);
+      result = new EngineResource<>(cached, true /*isMemoryCacheable*/);
     }
     return result;
   }
 
-  public void release(Resource resource) {
+  public void release(Resource<?> resource) {
     Util.assertMainThread();
     if (resource instanceof EngineResource) {
-      ((EngineResource) resource).release();
+      ((EngineResource<?>) resource).release();
     } else {
       throw new IllegalArgumentException("Cannot release anything but an EngineResource");
     }
@@ -244,7 +294,7 @@ public class Engine implements EngineJobListener,
   @Override
   public void onEngineJobCancelled(EngineJob engineJob, Key key) {
     Util.assertMainThread();
-    EngineJob current = jobs.get(key);
+    EngineJob<?> current = jobs.get(key);
     if (engineJob.equals(current)) {
       jobs.remove(key);
     }
@@ -339,20 +389,84 @@ public class Engine implements EngineJobListener,
   }
 
   // Visible for testing.
-  static class EngineJobFactory {
-    private final ExecutorService diskCacheService;
-    private final ExecutorService sourceService;
-    private final EngineJobListener listener;
+  static class DecodeJobFactory {
+    private final DecodeJob.DiskCacheProvider diskCacheProvider;
+    private final Pools.Pool<DecodeJob<?>> pool = FactoryPools.simple(JOB_POOL_SIZE,
+        new FactoryPools.Factory<DecodeJob<?>>() {
+          @Override
+          public DecodeJob<?> create() {
+            return new DecodeJob<Object>(diskCacheProvider, pool);
+          }
+        });
+    private int creationOrder;
 
-    public EngineJobFactory(ExecutorService diskCacheService, ExecutorService sourceService,
-        EngineJobListener listener) {
-      this.diskCacheService = diskCacheService;
-      this.sourceService = sourceService;
+    DecodeJobFactory(DecodeJob.DiskCacheProvider diskCacheProvider) {
+      this.diskCacheProvider = diskCacheProvider;
+    }
+
+    @SuppressWarnings("unchecked")
+    <R> DecodeJob<R> build(GlideContext glideContext,
+        Object model,
+        EngineKey loadKey,
+        Key signature,
+        int width,
+        int height,
+        Class<?> resourceClass,
+        Class<R> transcodeClass,
+        Priority priority,
+        DiskCacheStrategy diskCacheStrategy,
+        Map<Class<?>, Transformation<?>> transformations,
+        boolean isTransformationRequired,
+        Options options,
+        DecodeJob.Callback<R> callback) {
+      DecodeJob<R> result = (DecodeJob<R>) pool.acquire();
+      return result.init(
+          glideContext,
+          model,
+          loadKey,
+          signature,
+          width,
+          height,
+          resourceClass,
+          transcodeClass,
+          priority,
+          diskCacheStrategy,
+          transformations,
+          isTransformationRequired,
+          options,
+          callback,
+          creationOrder++);
+    }
+  }
+
+  // Visible for testing.
+  static class EngineJobFactory {
+    private final GlideExecutor diskCacheExecutor;
+    private final GlideExecutor sourceExecutor;
+    private final GlideExecutor sourceUnlimitedExecutor;
+    private final EngineJobListener listener;
+    private final Pools.Pool<EngineJob<?>> pool = FactoryPools.simple(JOB_POOL_SIZE,
+        new FactoryPools.Factory<EngineJob<?>>() {
+          @Override
+          public EngineJob<?> create() {
+            return new EngineJob<Object>(diskCacheExecutor, sourceExecutor, sourceUnlimitedExecutor,
+                listener, pool);
+          }
+        });
+
+    EngineJobFactory(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
+        GlideExecutor sourceUnlimitedExecutor, EngineJobListener listener) {
+      this.diskCacheExecutor = diskCacheExecutor;
+      this.sourceExecutor = sourceExecutor;
+      this.sourceUnlimitedExecutor = sourceUnlimitedExecutor;
       this.listener = listener;
     }
 
-    public <R> EngineJob<R> build(Key key, boolean isMemoryCacheable) {
-      return new EngineJob<>(key, diskCacheService, sourceService, isMemoryCacheable, listener);
+    @SuppressWarnings("unchecked")
+    <R> EngineJob<R> build(Key key, boolean isMemoryCacheable,
+        boolean useUnlimitedSourceGeneratorPool) {
+      EngineJob<R> result = (EngineJob<R>) pool.acquire();
+      return result.init(key, isMemoryCacheable, useUnlimitedSourceGeneratorPool);
     }
   }
 }

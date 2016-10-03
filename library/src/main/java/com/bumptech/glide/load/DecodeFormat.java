@@ -1,7 +1,5 @@
 package com.bumptech.glide.load;
 
-import android.os.Build;
-
 /**
  * Options for setting the value of {@link android.graphics.Bitmap#getConfig()} for
  * {@link android.graphics.Bitmap}s returned by {@link com.bumptech.glide.load.ResourceDecoder}s.
@@ -34,14 +32,7 @@ public enum DecodeFormat {
   PREFER_RGB_565;
 
   /**
-   * There is a rendering issue in KitKat and L (or at least L MR1) when reusing mixed format
-   * bitmaps. See #301.
-   */
-  public static final boolean REQUIRE_ARGB_8888 =
-      Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-
-  /**
    * The default value for DecodeFormat.
    */
-  public static final DecodeFormat DEFAULT = REQUIRE_ARGB_8888 ? PREFER_ARGB_8888 : PREFER_RGB_565;
+  public static final DecodeFormat DEFAULT = PREFER_ARGB_8888;
 }

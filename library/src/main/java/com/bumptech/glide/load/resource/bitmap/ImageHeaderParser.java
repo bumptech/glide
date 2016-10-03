@@ -7,10 +7,8 @@ import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageTyp
 import static com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType.UNKNOWN;
 
 import android.util.Log;
-
-import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.util.Preconditions;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -22,6 +20,12 @@ import java.nio.charset.Charset;
  */
 public class ImageHeaderParser {
   private static final String TAG = "ImageHeaderParser";
+  /**
+   * A constant indicating we were unable to parse the orientation from the image either because
+   * no exif segment containing orientation data existed, or because of an I/O error attempting to
+   * read the exif segment.
+   */
+  public static final int UNKNOWN_ORIENTATION = -1;
 
   /**
    * The format of the image data including whether or not the image may include transparent
@@ -34,6 +38,10 @@ public class ImageHeaderParser {
     PNG_A(true),
     /** PNG type without alpha. */
     PNG(false),
+    /** WebP type with alpha. */
+    WEBP_A(true),
+    /** WebP type without alpha. */
+    WEBP(false),
     /**
      * Unrecognized type.
      */
@@ -65,17 +73,32 @@ public class ImageHeaderParser {
   private static final int EXIF_SEGMENT_TYPE = 0xE1;
   private static final int ORIENTATION_TAG_TYPE = 0x0112;
   private static final int[] BYTES_PER_FORMAT = { 0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8 };
+  // WebP-related
+  // "RIFF"
+  private static final int RIFF_HEADER = 0x52494646;
+  // "WEBP"
+  private static final int WEBP_HEADER = 0x57454250;
+  // "VP8" null.
+  private static final int VP8_HEADER = 0x56503800;
+  private static final int VP8_HEADER_MASK = 0xFFFFFF00;
+  private static final int VP8_HEADER_TYPE_MASK = 0x000000FF;
+  // 'X'
+  private static final int VP8_HEADER_TYPE_EXTENDED = 0x00000058;
+  // 'L'
+  private static final int VP8_HEADER_TYPE_LOSSLESS = 0x0000004C;
+  private static final int WEBP_EXTENDED_ALPHA_FLAG = 1 << 4;
+  private static final int WEBP_LOSSLESS_ALPHA_FLAG = 1 << 3;
 
-  private final ByteArrayPool byteArrayPool;
+  private final ArrayPool byteArrayPool;
   private final Reader reader;
 
-  public ImageHeaderParser(InputStream is, ByteArrayPool byteArrayPool) {
+  public ImageHeaderParser(InputStream is, ArrayPool byteArrayPool) {
     Preconditions.checkNotNull(is);
     this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
     reader = new StreamReader(is);
   }
 
-  public ImageHeaderParser(ByteBuffer byteBuffer, ByteArrayPool byteArrayPool) {
+  public ImageHeaderParser(ByteBuffer byteBuffer, ArrayPool byteArrayPool) {
     Preconditions.checkNotNull(byteBuffer);
     this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
     reader = new ByteBufferReader(byteBuffer);
@@ -111,7 +134,33 @@ public class ImageHeaderParser {
       return GIF;
     }
 
-    return UNKNOWN;
+    // WebP (reads up to 21 bytes). See https://developers.google.com/speed/webp/docs/riff_container
+    // for details.
+    if (firstFourBytes != RIFF_HEADER) {
+      return UNKNOWN;
+    }
+    // Bytes 4 - 7 contain length information. Skip these.
+    reader.skip(4);
+    final int thirdFourBytes = reader.getUInt16() << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
+    if (thirdFourBytes != WEBP_HEADER) {
+      return UNKNOWN;
+    }
+    final int fourthFourBytes = reader.getUInt16() << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
+    if ((fourthFourBytes & VP8_HEADER_MASK) != VP8_HEADER) {
+      return UNKNOWN;
+    }
+    if ((fourthFourBytes & VP8_HEADER_TYPE_MASK) == VP8_HEADER_TYPE_EXTENDED) {
+      // Skip some more length bytes and check for transparency/alpha flag.
+      reader.skip(4);
+      return (reader.getByte() & WEBP_EXTENDED_ALPHA_FLAG) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
+    }
+    if ((fourthFourBytes & VP8_HEADER_TYPE_MASK) == VP8_HEADER_TYPE_LOSSLESS) {
+      // See chromium.googlesource.com/webm/libwebp/+/master/doc/webp-lossless-bitstream-spec.txt
+      // for more info.
+      reader.skip(4);
+      return (reader.getByte() & WEBP_LOSSLESS_ALPHA_FLAG) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
+    }
+    return ImageType.WEBP;
   }
 
   /**
@@ -126,51 +175,89 @@ public class ImageHeaderParser {
     final int magicNumber = reader.getUInt16();
 
     if (!handles(magicNumber)) {
-      return -1;
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Parser doesn't handle magic number: " + magicNumber);
+      }
+      return UNKNOWN_ORIENTATION;
     } else {
-      byte[] exifData = getExifSegment();
-      boolean hasJpegExifPreamble =
-          exifData != null && exifData.length > JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length;
-
-      if (hasJpegExifPreamble) {
-        for (int i = 0; i < JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length; i++) {
-          if (exifData[i] != JPEG_EXIF_SEGMENT_PREAMBLE_BYTES[i]) {
-            hasJpegExifPreamble = false;
-            break;
-          }
+      int exifSegmentLength = moveToExifSegmentAndGetLength();
+      if (exifSegmentLength == -1) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Failed to parse exif segment length, or exif segment not found");
         }
+        return UNKNOWN_ORIENTATION;
       }
 
-      if (hasJpegExifPreamble) {
-        return parseExifSegment(new RandomAccessReader(exifData));
-      } else {
-        return -1;
+      byte[] exifData = byteArrayPool.get(exifSegmentLength, byte[].class);
+      try {
+        return parseExifSegment(exifData, exifSegmentLength);
+      } finally {
+        byteArrayPool.put(exifData, byte[].class);
       }
     }
   }
 
-  private byte[] getExifSegment() throws IOException {
+  private int parseExifSegment(byte[] tempArray, int exifSegmentLength) throws IOException {
+    int read = reader.read(tempArray, exifSegmentLength);
+    if (read != exifSegmentLength) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Unable to read exif segment data"
+            + ", length: " + exifSegmentLength
+            + ", actually read: " + read);
+      }
+      return UNKNOWN_ORIENTATION;
+    }
+
+    boolean hasJpegExifPreamble = hasJpegExifPreamble(tempArray, exifSegmentLength);
+    if (hasJpegExifPreamble) {
+      return parseExifSegment(new RandomAccessReader(tempArray, exifSegmentLength));
+    } else {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Missing jpeg exif preamble");
+      }
+      return UNKNOWN_ORIENTATION;
+    }
+  }
+
+  private boolean hasJpegExifPreamble(byte[] exifData, int exifSegmentLength) {
+    boolean result =
+        exifData != null && exifSegmentLength > JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length;
+    if (result) {
+      for (int i = 0; i < JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length; i++) {
+        if (exifData[i] != JPEG_EXIF_SEGMENT_PREAMBLE_BYTES[i]) {
+          result = false;
+          break;
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Moves reader to the start of the exif segment and returns the length of the exif segment or
+   * {@code -1} if no exif segment is found.
+   */
+  private int moveToExifSegmentAndGetLength() throws IOException {
     short segmentId, segmentType;
     int segmentLength;
     while (true) {
       segmentId = reader.getUInt8();
-
       if (segmentId != SEGMENT_START_ID) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Unknown segmentId=" + segmentId);
         }
-        return null;
+        return -1;
       }
 
       segmentType = reader.getUInt8();
 
       if (segmentType == SEGMENT_SOS) {
-        return null;
+        return -1;
       } else if (segmentType == MARKER_EOI) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Found MARKER_EOI in exif segment");
         }
-        return null;
+        return -1;
       }
 
       // Segment length includes bytes for segment length.
@@ -185,26 +272,10 @@ public class ImageHeaderParser {
                     + ", wanted to skip: " + segmentLength
                     + ", but actually skipped: " + skipped);
             }
-            return null;
+            return -1;
         }
       } else {
-        byte[] segmentData = byteArrayPool.get(segmentLength);
-        try {
-          int read = reader.read(segmentData);
-          if (read != segmentLength) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-              Log.d(TAG, "Unable to read segment data"
-                  + ", type: " + segmentType
-                  + ", length: " + segmentLength
-                  + ", actually read: " + read);
-            }
-            return null;
-          } else {
-            return segmentData;
-          }
-        } finally {
-          byteArrayPool.put(segmentData);
-        }
+        return segmentLength;
       }
     }
   }
@@ -233,7 +304,6 @@ public class ImageHeaderParser {
     int tagOffset, tagType, formatCode, componentCount;
     for (int i = 0; i < tagCount; i++) {
       tagOffset = calcTagOffset(firstIfdOffset, i);
-
       tagType = segmentData.getInt16(tagOffset);
 
       // We only want orientation.
@@ -261,7 +331,7 @@ public class ImageHeaderParser {
       }
 
       if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Got tagIndex=" + i + " tagType=" + tagType + " formatCode =" + formatCode
+        Log.d(TAG, "Got tagIndex=" + i + " tagType=" + tagType + " formatCode=" + formatCode
             + " componentCount=" + componentCount);
       }
 
@@ -310,9 +380,10 @@ public class ImageHeaderParser {
   private static class RandomAccessReader {
     private final ByteBuffer data;
 
-    public RandomAccessReader(byte[] data) {
-      this.data = ByteBuffer.wrap(data);
-      this.data.order(ByteOrder.BIG_ENDIAN);
+    public RandomAccessReader(byte[] data, int length) {
+      this.data = (ByteBuffer) ByteBuffer.wrap(data)
+          .order(ByteOrder.BIG_ENDIAN)
+          .limit(length);
     }
 
     public void order(ByteOrder byteOrder) {
@@ -320,7 +391,7 @@ public class ImageHeaderParser {
     }
 
     public int length() {
-      return data.array().length;
+      return data.remaining();
     }
 
     public int getInt32(int offset) {
@@ -336,7 +407,7 @@ public class ImageHeaderParser {
     int getUInt16() throws IOException;
     short getUInt8() throws IOException;
     long skip(long total) throws IOException;
-    int read(byte[] buffer) throws IOException;
+    int read(byte[] buffer, int byteCount) throws IOException;
     int getByte() throws IOException;
   }
 
@@ -367,9 +438,9 @@ public class ImageHeaderParser {
     }
 
     @Override
-    public int read(byte[] buffer) throws IOException {
-      int toRead = Math.min(buffer.length, byteBuffer.remaining());
-      byteBuffer.get(buffer);
+    public int read(byte[] buffer, int byteCount) throws IOException {
+      int toRead = Math.min(byteCount, byteBuffer.remaining());
+      byteBuffer.get(buffer, 0 /*dstOffset*/, byteCount);
       return toRead;
     }
 
@@ -427,13 +498,13 @@ public class ImageHeaderParser {
     }
 
     @Override
-    public int read(byte[] buffer) throws IOException {
-      int toRead = buffer.length;
+    public int read(byte[] buffer, int byteCount) throws IOException {
+      int toRead = byteCount;
       int read;
-      while (toRead > 0 && ((read = is.read(buffer, buffer.length - toRead, toRead)) != -1)) {
+      while (toRead > 0 && ((read = is.read(buffer, byteCount - toRead, toRead)) != -1)) {
         toRead -= read;
       }
-      return buffer.length - toRead;
+      return byteCount - toRead;
     }
 
     @Override

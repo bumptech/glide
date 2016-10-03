@@ -1,7 +1,6 @@
 package com.bumptech.glide;
 
-import android.content.Context;
-
+import android.support.v4.util.Pools.Pool;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -20,7 +19,7 @@ import com.bumptech.glide.provider.LoadPathCache;
 import com.bumptech.glide.provider.ModelToResourceClassCache;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
-
+import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,9 +38,10 @@ public class Registry {
   private final ModelToResourceClassCache modelToResourceClassCache =
       new ModelToResourceClassCache();
   private final LoadPathCache loadPathCache = new LoadPathCache();
+  private final Pool<List<Exception>> exceptionListPool = FactoryPools.threadSafeList();
 
-  public Registry(Context context) {
-    this.modelLoaderRegistry = new ModelLoaderRegistry(context.getApplicationContext());
+  public Registry() {
+    this.modelLoaderRegistry = new ModelLoaderRegistry(exceptionListPool);
     this.encoderRegistry = new EncoderRegistry();
     this.decoderRegistry = new ResourceDecoderRegistry();
     this.resourceEncoderRegistry = new ResourceEncoderRegistry();
@@ -129,7 +129,8 @@ public class Registry {
       if (decodePaths.isEmpty()) {
         result = null;
       } else {
-        result = new LoadPath<>(dataClass, decodePaths);
+        result = new LoadPath<>(dataClass, resourceClass, transcodeClass, decodePaths,
+            exceptionListPool);
       }
       loadPathCache.put(dataClass, resourceClass, transcodeClass, result);
     }
@@ -153,14 +154,15 @@ public class Registry {
             decoderRegistry.getDecoders(dataClass, registeredResourceClass);
         ResourceTranscoder<TResource, Transcode> transcoder =
             transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
-        decodePaths.add(new DecodePath<>(dataClass, decoders, transcoder));
+        decodePaths.add(new DecodePath<>(dataClass, registeredResourceClass,
+            registeredTranscodeClass, decoders, transcoder, exceptionListPool));
       }
     }
     return decodePaths;
   }
 
-  public List<Class<?>> getRegisteredResourceClasses(Class<?> modelClass,
-      Class<?> resourceClass) {
+  public <Model, TResource, Transcode> List<Class<?>> getRegisteredResourceClasses(
+      Class<Model> modelClass, Class<TResource> resourceClass, Class<Transcode> transcodeClass) {
     List<Class<?>> result = modelToResourceClassCache.get(modelClass, resourceClass);
 
     if (result == null) {
@@ -170,8 +172,10 @@ public class Registry {
         List<? extends Class<?>> registeredResourceClasses =
             decoderRegistry.getResourceClasses(dataClass, resourceClass);
         for (Class<?> registeredResourceClass : registeredResourceClasses) {
-          if (!result.contains(registeredResourceClass)) {
-            result.add(registeredResourceClass);
+          List<Class<Transcode>> registeredTranscodeClasses = transcoderRegistry
+              .getTranscodeClasses(registeredResourceClass, transcodeClass);
+          if (!registeredTranscodeClasses.isEmpty() && !result.contains(registeredResourceClass)) {
+              result.add(registeredResourceClass);
           }
         }
       }
@@ -225,7 +229,7 @@ public class Registry {
       super("Failed to find any ModelLoaders for model: " + model);
     }
 
-    public NoModelLoaderAvailableException(Class modelClass, Class dataClass) {
+    public NoModelLoaderAvailableException(Class<?> modelClass, Class<?> dataClass) {
       super("Failed to find any ModelLoaders for model: " + modelClass + " and data: " + dataClass);
     }
   }

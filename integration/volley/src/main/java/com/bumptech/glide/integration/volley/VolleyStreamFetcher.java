@@ -1,7 +1,6 @@
 package com.bumptech.glide.integration.volley;
 
 import android.util.Log;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -9,12 +8,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;
@@ -24,6 +21,7 @@ import java.util.Map;
  * A DataFetcher backed by volley for fetching images via http.
  */
 public class VolleyStreamFetcher implements DataFetcher<InputStream> {
+  private static final String TAG = "VolleyStreamFetcher";
   public static final VolleyRequestFactory DEFAULT_REQUEST_FACTORY = new VolleyRequestFactory() {
     @Override
     public Request<byte[]> create(String url, DataCallback<? super InputStream> callback,
@@ -93,7 +91,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   }
 
   /**
-   * Default {@link com.android.volley.Request} implementation for Glide that recives errors and
+   * Default {@link com.android.volley.Request} implementation for Glide that receives errors and
    * results on volley's background thread.
    */
   public static class GlideRequest extends Request<byte[]> {
@@ -125,10 +123,10 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
 
     @Override
     protected VolleyError parseNetworkError(VolleyError volleyError) {
-      if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Volley failed to retrieve response", volleyError);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Volley failed to retrieve response", volleyError);
       }
-      callback.onDataReady(null);
+      callback.onLoadFailed(volleyError);
       return super.parseNetworkError(volleyError);
     }
 

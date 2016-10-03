@@ -2,19 +2,23 @@ apply plugin: 'com.android.application'
 
 dependencies {
     compile project(':library')
-    compile 'com.google.code.gson:gson:2.2.4'
+    compile(project(':integration:recyclerview')) {
+        transitive = false
+    }
+    compile 'com.google.code.gson:gson:2.3'
+    compile "com.android.support:recyclerview-v7:${SUPPORT_V7_VERSION}"
 }
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
-    buildToolsVersion BUILD_TOOLS_VERSION
+    buildToolsVersion BUILD_TOOLS_VERSION as String
 
     defaultConfig {
         applicationId 'com.bumptech.glide.samples.giphy'
-        minSdkVersion 14
+        minSdkVersion 14 // TODO uses Holo.Light.DarkActionBar theme
         targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 1
-        versionName '1.0.0'
+        versionName '1.0'
     }
 
     compileOptions {

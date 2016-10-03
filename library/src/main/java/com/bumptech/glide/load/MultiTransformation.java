@@ -1,7 +1,6 @@
 package com.bumptech.glide.load;
 
 import com.bumptech.glide.load.engine.Resource;
-
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +23,7 @@ public class MultiTransformation<T> implements Transformation<T> {
   }
 
   public MultiTransformation(Collection<? extends Transformation<T>> transformationList) {
-    if (transformationList.size() < 1) {
+    if (transformationList.isEmpty()) {
       throw new IllegalArgumentException(
           "MultiTransformation must contain at least one Transformation");
     }

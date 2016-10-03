@@ -1,11 +1,9 @@
 package com.bumptech.glide.load.model;
 
 import android.util.Log;
-
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.util.ByteBufferUtil;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;

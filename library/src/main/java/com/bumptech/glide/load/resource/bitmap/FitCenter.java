@@ -2,9 +2,8 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-
 import java.security.MessageDigest;
 
 /**
@@ -25,8 +24,9 @@ public class FitCenter extends BitmapTransformation {
   }
 
   @Override
-  protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-    return TransformationUtils.fitCenter(toTransform, pool, outWidth, outHeight);
+  protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth,
+      int outHeight) {
+    return TransformationUtils.fitCenter(pool, toTransform, outWidth, outHeight);
   }
 
   @Override

@@ -11,9 +11,13 @@ public abstract class DownsampleStrategy {
    * requested size.
    *
    * <p>This method will upscale if the requested width and height are greater than the source width
-   * and height. To avoid upscaling, use {@link #AT_LEAST} or {@link #AT_MOST}.
+   * and height. To avoid upscaling, use {@link #AT_LEAST}, {@link #AT_MOST} or
+   * {@link #CENTER_INSIDE}.
+   *
+   * <p>On pre-KitKat devices, this is equivalent to {@link #AT_MOST} because only power of
+   * two downsampling can be used.
    */
-  public static final DownsampleStrategy CENTER_INSIDE = new CenterInside();
+  public static final DownsampleStrategy FIT_CENTER = new FitCenter();
 
   /**
    * Scales, maintaining the original aspect ratio, so that one of the image's dimensions is
@@ -21,7 +25,11 @@ public abstract class DownsampleStrategy {
    * the requested size.
    *
    * <p>This method will upscale if the requested width and height are greater than the source width
-   * and height. To avoid upscaling, use {@link #AT_LEAST} or {@link #AT_MOST}.
+   * and height. To avoid upscaling, use {@link #AT_LEAST}, {@link #AT_MOST},
+   * or {@link #CENTER_INSIDE}.
+   *
+   * <p>On pre-KitKat devices, this is equivalent to {@link #AT_LEAST} because only power of
+   * two downsampling can be used.
    */
   public static final DownsampleStrategy CENTER_OUTSIDE = new CenterOutside();
 
@@ -36,6 +44,15 @@ public abstract class DownsampleStrategy {
    * dimensions, with no restrictions on the image's smallest dimension.
    */
   public static final DownsampleStrategy AT_MOST = new AtMost();
+
+  /**
+   * Returns the original image if it is smaller than the target, otherwise it will be downscaled
+   * maintaining its original aspect ratio, so that one of the image's dimensions is exactly equal
+   * to the requested size and the other is less or equal than the requested size.
+   *
+   * <p>This method will not upscale.</p>
+   */
+  public static final DownsampleStrategy CENTER_INSIDE = new CenterInside();
 
   /**
    * Performs no downsampling or scaling.
@@ -57,6 +74,9 @@ public abstract class DownsampleStrategy {
    * {@link android.graphics.BitmapFactory.Options#inDensity}. Because of rounding errors the scale
    * factor may not be applied precisely.
    *
+   * <p>The float scaling factor will only be applied on KitKat+. Prior to KitKat, only the power
+   * of two downsampling will be applied.
+   *
    * @param sourceWidth   The width in pixels of the image to be downsampled.
    * @param sourceHeight  The height in pixels of the image to be downsampled.
    * @param requestedWidth  The width in pixels of the view/target the image will be displayed in.
@@ -77,7 +97,7 @@ public abstract class DownsampleStrategy {
   public abstract SampleSizeRounding getSampleSizeRounding(int sourceWidth, int sourceHeight,
       int requestedWidth, int requestedHeight);
 
-  private static class CenterInside extends DownsampleStrategy {
+  private static class FitCenter extends DownsampleStrategy {
 
     @Override
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
@@ -150,6 +170,23 @@ public abstract class DownsampleStrategy {
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
       return 1f;
+    }
+
+    @Override
+    public SampleSizeRounding getSampleSizeRounding(int sourceWidth, int sourceHeight,
+        int requestedWidth, int requestedHeight) {
+      return SampleSizeRounding.QUALITY;
+    }
+  }
+
+  private static class CenterInside extends DownsampleStrategy {
+
+    @Override
+    public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
+        int requestedHeight) {
+
+      return Math.min(1.f,
+          FIT_CENTER.getScaleFactor(sourceWidth, sourceHeight, requestedWidth, requestedHeight));
     }
 
     @Override

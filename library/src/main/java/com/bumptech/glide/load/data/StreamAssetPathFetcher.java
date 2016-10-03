@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.data;
 
 import android.content.res.AssetManager;
-
 import java.io.IOException;
 import java.io.InputStream;
 

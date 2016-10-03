@@ -2,11 +2,10 @@ package com.bumptech.glide.integration.gifencoder;
 
 import android.graphics.Bitmap;
 import android.util.Log;
-
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
+import com.bumptech.glide.gifdecoder.StandardGifDecoder;
 import com.bumptech.glide.gifencoder.AnimatedGifEncoder;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Option;
@@ -21,7 +20,6 @@ import com.bumptech.glide.load.resource.gif.GifBitmapProvider;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.util.ByteBufferUtil;
 import com.bumptech.glide.util.LogTime;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -116,7 +114,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
 
     }
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Re-encoded gif with " + drawable.getFrameCount() + " frames and "
+      Log.v(TAG, "Re-encoded GIF with " + drawable.getFrameCount() + " frames and "
           + drawable.getBuffer().limit() + " bytes in " + LogTime.getElapsedMillis(startTime)
           + " ms");
     }
@@ -157,8 +155,8 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
     try {
       ByteBufferUtil.toFile(data, file);
     } catch (IOException e) {
-      if (Logs.isEnabled(Log.WARN)) {
-        Logs.log(Log.WARN, "Failed to write gif data", e);
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Failed to write GIF data", e);
       }
       return false;
     }
@@ -193,7 +191,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
   static class Factory {
 
     public GifDecoder buildDecoder(GifDecoder.BitmapProvider bitmapProvider) {
-      return new GifDecoder(bitmapProvider);
+      return new StandardGifDecoder(bitmapProvider);
     }
 
     public GifHeaderParser buildParser() {

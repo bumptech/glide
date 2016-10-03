@@ -3,9 +3,8 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
-
+import android.support.annotation.Nullable;
 import com.bumptech.glide.util.Util;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -57,6 +56,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
   }
 
   @Override
+  @Nullable
   public Bitmap get(int width, int height, Bitmap.Config config) {
     int size = Util.getBitmapByteSize(width, height, config);
     Key bestKey = findBestKey(size, config);
@@ -89,6 +89,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
   }
 
   @Override
+  @Nullable
   public Bitmap removeLast() {
     Bitmap removed = groupedMap.removeLast();
     if (removed != null) {
@@ -210,7 +211,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
       if (o instanceof Key) {
         Key other = (Key) o;
         return size == other.size
-            && (config == null ? other.config == null : config.equals(other.config));
+            && Util.bothNullOrEqual(config, other.config);
       }
       return false;
     }

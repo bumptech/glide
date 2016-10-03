@@ -4,7 +4,6 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.util.Preconditions;
-
 import java.security.MessageDigest;
 import java.util.Map;
 

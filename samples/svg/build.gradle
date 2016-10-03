@@ -1,15 +1,16 @@
 apply plugin: 'com.android.application'
 
-repositories {
-    mavenCentral()
+dependencies {
+    compile project(':library')
+    compile 'com.caverock:androidsvg:1.2.1'
 }
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
-    buildToolsVersion BUILD_TOOLS_VERSION
+    buildToolsVersion BUILD_TOOLS_VERSION as String
 
     defaultConfig {
-        applicationId 'com.bumptech.svgsample.app'
+        applicationId 'com.bumptech.glide.samples.svg'
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
 
@@ -23,12 +24,7 @@ android {
     }
 }
 
-dependencies {
-    compile project(':library')
-    compile 'com.caverock:androidsvg:1.2.1'
-}
-
 task run(type: Exec, dependsOn: 'installDebug') {
     description 'Installs the APK and runs the main activity: "gradlew :samples:???:run"'
-    commandLine "${android.sdkDirectory}/platform-tools/adb", 'shell', 'am', 'start', '-n', 'com.bumptech.svgsample.app/.MainActivity'
+    commandLine "${android.sdkDirectory}/platform-tools/adb", 'shell', 'am', 'start', '-n', 'com.bumptech.glide.samples.svg/.MainActivity'
 }

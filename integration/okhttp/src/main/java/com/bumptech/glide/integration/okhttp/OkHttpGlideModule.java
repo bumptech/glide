@@ -1,12 +1,10 @@
 package com.bumptech.glide.integration.okhttp;
 
 import android.content.Context;
-
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.module.GlideModule;
-
 import java.io.InputStream;
 
 /**
@@ -17,7 +15,10 @@ import java.io.InputStream;
  * <p> If you're using gradle, you can include this module simply by depending on the aar, the
  * module will be merged in by manifest merger. For other build systems or for more more
  * information, see {@link com.bumptech.glide.module.GlideModule}. </p>
+ *
+ * @deprecated replaced with com.bumptech.glide.integration.okhttp3.OkHttpGlideModule.
  */
+@Deprecated
 public class OkHttpGlideModule implements GlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {

@@ -44,6 +44,8 @@ def getAndroidJar() {
     "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdkVersion()}/android.jar"
 }
 
+project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
+
 // Generate javadocs and sources containing batched documentation and sources for all internal projects.
 ['release', 'debug'].each { variantName ->
 
@@ -57,7 +59,7 @@ def getAndroidJar() {
         classpath = files(getAndroidLibraryVariants(variantName).collect {
             files(it.javaCompile.classpath.files, getAndroidJar())
         })
-        classpath += getInternalJavaProjects().collect { files(it.configurations.compile) }
+        classpath += getInternalJavaProjects().collect { files(it.configurations.compile) }.sum()
 
         options {
             links("http://docs.oracle.com/javase/7/docs/api/")
@@ -66,16 +68,16 @@ def getAndroidJar() {
 
         exclude '**/BuildConfig.java'
         exclude '**/R.java'
-    }
+    } as Javadoc
 
     def cleanJavadocTask = task("clean${variantName.capitalize()}Javadoc", type: Delete) {
         delete javadocTask.destinationDir
-    }
+    } as Task
     clean.dependsOn(cleanJavadocTask)
 
     def javadocJarTask = task("${variantName}JavadocJar", type: Jar) {
       from javadocTask.destinationDir
-    }
+    } as Task
     javadocJarTask.dependsOn(javadocTask)
 }
 
@@ -91,7 +93,7 @@ jar {
 }
 
 getAllInternalProjects().each { project ->
-    jar.dependsOn(project.build)
+    jar.dependsOn(project.tasks.build)
 }
 
 artifacts {
@@ -102,5 +104,3 @@ artifacts {
         classifier 'sources'
     }
 }
-
-apply from: "$rootProject.projectDir/scripts/upload.gradle"

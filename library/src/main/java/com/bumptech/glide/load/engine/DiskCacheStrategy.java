@@ -6,13 +6,13 @@ import com.bumptech.glide.load.EncodeStrategy;
 /**
  * Set of available caching strategies for media.
  */
-public enum DiskCacheStrategy {
+public abstract class DiskCacheStrategy {
 
   /**
    * Caches remote data with both {@link #DATA} and {@link #RESOURCE}, and local data with
    * {@link #RESOURCE} only.
    */
-  ALL(true /*decodeCachedData*/, true /*decodeCachedResource*/) {
+  public static final DiskCacheStrategy ALL = new DiskCacheStrategy() {
     @Override
     public boolean isDataCacheable(DataSource dataSource) {
       return dataSource == DataSource.REMOTE;
@@ -23,11 +23,22 @@ public enum DiskCacheStrategy {
         EncodeStrategy encodeStrategy) {
       return dataSource != DataSource.RESOURCE_DISK_CACHE && dataSource != DataSource.MEMORY_CACHE;
     }
-  },
+
+    @Override
+    public boolean decodeCachedResource() {
+      return true;
+    }
+
+    @Override
+    public boolean decodeCachedData() {
+      return true;
+    }
+  };
+
   /**
    * Saves no data to cache.
    */
-  NONE(false /*decodeCachedData*/, false /*decodeCachedResource*/) {
+  public static final DiskCacheStrategy NONE = new DiskCacheStrategy() {
     @Override
     public boolean isDataCacheable(DataSource dataSource) {
       return false;
@@ -38,11 +49,22 @@ public enum DiskCacheStrategy {
         EncodeStrategy encodeStrategy) {
       return false;
     }
-  },
+
+    @Override
+    public boolean decodeCachedResource() {
+      return false;
+    }
+
+    @Override
+    public boolean decodeCachedData() {
+      return false;
+    }
+  };
+
   /**
    * Writes retrieved data directly to the disk cache before it's decoded.
    */
-  DATA(true /*decodeCachedData*/, false /*decodeCachedResource*/) {
+  public static final DiskCacheStrategy DATA = new DiskCacheStrategy() {
     @Override
     public boolean isDataCacheable(DataSource dataSource) {
       return dataSource != DataSource.DATA_DISK_CACHE && dataSource != DataSource.MEMORY_CACHE;
@@ -53,11 +75,22 @@ public enum DiskCacheStrategy {
         EncodeStrategy encodeStrategy) {
       return false;
     }
-  },
+
+    @Override
+    public boolean decodeCachedResource() {
+      return false;
+    }
+
+    @Override
+    public boolean decodeCachedData() {
+      return true;
+    }
+  };
+
   /**
    * Writes resources to disk after they've been decoded.
    */
-  RESOURCE(false /*decodeCachedData*/, true /*decodeCachedResource*/) {
+  public static final DiskCacheStrategy RESOURCE = new DiskCacheStrategy() {
     @Override
     public boolean isDataCacheable(DataSource dataSource) {
       return false;
@@ -68,7 +101,18 @@ public enum DiskCacheStrategy {
         EncodeStrategy encodeStrategy) {
       return dataSource != DataSource.RESOURCE_DISK_CACHE && dataSource != DataSource.MEMORY_CACHE;
     }
-  },
+
+    @Override
+    public boolean decodeCachedResource() {
+      return true;
+    }
+
+    @Override
+    public boolean decodeCachedData() {
+      return false;
+    }
+  };
+
   /**
    * Tries to intelligently choose a strategy based on the data source of the
    * {@link com.bumptech.glide.load.data.DataFetcher} and the
@@ -76,7 +120,7 @@ public enum DiskCacheStrategy {
    * {@link com.bumptech.glide.load.ResourceEncoder} (if an
    * {@link com.bumptech.glide.load.ResourceEncoder} is available).
    */
-  AUTOMATIC(true /*decodeCachedData*/, true /*decodeCachedResource*/) {
+  public static final DiskCacheStrategy AUTOMATIC = new DiskCacheStrategy() {
     @Override
     public boolean isDataCacheable(DataSource dataSource) {
       return dataSource == DataSource.REMOTE;
@@ -89,24 +133,34 @@ public enum DiskCacheStrategy {
           || dataSource == DataSource.LOCAL)
           && encodeStrategy == EncodeStrategy.TRANSFORMED;
     }
+
+    @Override
+    public boolean decodeCachedResource() {
+      return true;
+    }
+
+    @Override
+    public boolean decodeCachedData() {
+      return true;
+    }
   };
-
-  private final boolean decodeCachedData;
-  private final boolean decodeCachedResource;
-
-  DiskCacheStrategy(boolean decodeCachedData,
-      boolean decodeCachedResource) {
-    this.decodeCachedData = decodeCachedData;
-    this.decodeCachedResource = decodeCachedResource;
-  }
 
   /**
    * Returns true if this request should cache the original unmodified data.
+   *
+   * @param dataSource Indicates where the data was originally retrieved.
    */
   public abstract boolean isDataCacheable(DataSource dataSource);
 
   /**
    * Returns true if this request should cache the final transformed resource.
+   *
+   * @param isFromAlternateCacheKey {@code true} if the resource we've decoded was loaded using an
+   *                                alternative, rather than the primary, cache key.
+   * @param dataSource Indicates where the data used to decode the resource was originally
+   *                   retrieved.
+   * @param encodeStrategy The {@link EncodeStrategy} the {@link
+   * com.bumptech.glide.load.ResourceEncoder} will use to encode the resource.
    */
   public abstract boolean isResourceCacheable(boolean isFromAlternateCacheKey,
       DataSource dataSource, EncodeStrategy encodeStrategy);
@@ -114,14 +168,10 @@ public enum DiskCacheStrategy {
   /**
    * Returns true if this request should attempt to decode cached resource data.
    */
-  public boolean decodeCachedResource() {
-    return decodeCachedResource;
-  }
+  public abstract boolean decodeCachedResource();
 
   /**
    * Returns true if this request should attempt to decode cached source data.
    */
-  public boolean decodeCachedData() {
-    return decodeCachedData;
-  }
+  public abstract boolean decodeCachedData();
 }

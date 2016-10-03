@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data;
 
+import android.support.annotation.Nullable;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 
@@ -29,7 +30,14 @@ public interface DataFetcher<T> {
     /**
      * Called with the loaded data if the load succeeded, or with {@code null} if the load failed.
      */
-    void onDataReady(T data);
+    void onDataReady(@Nullable T data);
+
+    /**
+     * Called when the load fails.
+     *
+     * @param e a non-null {@link Exception} indicating why the load failed.
+     */
+    void onLoadFailed(Exception e);
   }
 
   /**

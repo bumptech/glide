@@ -26,4 +26,20 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
 
+    <!-- DecodeJob tasks are ordered, but equivalent ordering does not imply equality -->
+    <Match>
+        <Class name="com.bumptech.glide.load.engine.DecodeJob" />
+        <Bug pattern="EQ_COMPARETO_USE_OBJECT_EQUALS" />
+    </Match>
+    <Match>
+       <Class name="com.bumptech.glide.load.engine.GlideException$IndentedPrintStream" />
+       <Bug pattern="DM_DEFAULT_ENCODING" />
+    </Match>
+
+    <!-- We make a best effort attempt to acquire the cpu count from a fixed path -->
+    <Match>
+      <Class name="com.bumptech.glide.load.engine.executor.GlideExecutor" />
+      <Bug pattern="DMI_HARDCODED_ABSOLUTE_FILENAME" />
+    </Match>
+
 </FindBugsFilter>

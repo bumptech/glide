@@ -2,9 +2,8 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-
 import java.security.MessageDigest;
 
 /**
@@ -29,14 +28,9 @@ public class CenterCrop extends BitmapTransformation {
   // Bitmap doesn't implement equals, so == and .equals are equivalent here.
   @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
-  protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-    final Bitmap toReuse = pool.get(outWidth, outHeight,
-        toTransform.getConfig() != null ? toTransform.getConfig() : Bitmap.Config.ARGB_8888);
-    Bitmap transformed = TransformationUtils.centerCrop(toReuse, toTransform, outWidth, outHeight);
-    if (toReuse != null && toReuse != transformed && !pool.put(toReuse)) {
-      toReuse.recycle();
-    }
-    return transformed;
+  protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth,
+      int outHeight) {
+    return TransformationUtils.centerCrop(pool, toTransform, outWidth, outHeight);
   }
 
   @Override

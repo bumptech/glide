@@ -2,7 +2,6 @@ package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
-
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,10 +39,11 @@ final class DiskCacheWriteLocker {
     WriteLock writeLock;
     synchronized (this) {
       writeLock = Preconditions.checkNotNull(locks.get(key));
-      Preconditions.checkArgument(writeLock.interestedThreads >= 1,
-          "Cannot release a lock that is not held"
-              + ", key: " + key
-              + ", interestedThreads: " + writeLock.interestedThreads);
+      if (writeLock.interestedThreads < 1) {
+        throw new IllegalStateException("Cannot release a lock that is not held"
+            + ", key: " + key
+            + ", interestedThreads: " + writeLock.interestedThreads);
+      }
 
       writeLock.interestedThreads--;
       if (writeLock.interestedThreads == 0) {

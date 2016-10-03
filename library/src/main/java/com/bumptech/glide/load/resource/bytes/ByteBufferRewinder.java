@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.resource.bytes;
 
 import com.bumptech.glide.load.data.DataRewinder;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -17,7 +16,7 @@ public class ByteBufferRewinder implements DataRewinder<ByteBuffer> {
 
   @Override
   public ByteBuffer rewindAndGet() throws IOException {
-    buffer.rewind();
+    buffer.position(0);
     return buffer;
   }
 

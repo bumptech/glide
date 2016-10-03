@@ -1,7 +1,6 @@
 package com.bumptech.glide.integration.volley;
 
 import android.content.Context;
-
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.load.Options;
@@ -9,7 +8,6 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-
 import java.io.InputStream;
 
 /**
@@ -73,8 +71,7 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     }
 
     @Override
-    public ModelLoader<GlideUrl, InputStream> build(Context context,
-        MultiModelLoaderFactory factory) {
+    public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory factory) {
       return new VolleyUrlLoader(requestQueue, requestFactory);
     }
 

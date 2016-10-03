@@ -1,0 +1,26 @@
+apply plugin: 'com.android.library'
+
+dependencies {
+    compile project(':library')
+
+    compile "com.squareup.okhttp3:okhttp:${OK_HTTP_VERSION}"
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION as String
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+
+        versionName VERSION_NAME as String
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

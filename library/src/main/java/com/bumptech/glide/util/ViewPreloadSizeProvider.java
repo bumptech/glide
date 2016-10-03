@@ -1,12 +1,10 @@
 package com.bumptech.glide.util;
 
 import android.view.View;
-
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
-
 import java.util.Arrays;
 
 /**
@@ -40,7 +38,7 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
    *             android.view.ViewTreeObserver .OnPreDrawListener}
    */
   public ViewPreloadSizeProvider(View view) {
-    setView(view);
+    this.viewTarget = new SizeViewTarget(view, this);
   }
 
   @Override
@@ -75,14 +73,13 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
   }
 
   private static final class SizeViewTarget extends ViewTarget<View, Object> {
-
     public SizeViewTarget(View view, SizeReadyCallback callback) {
       super(view);
       getSize(callback);
     }
 
     @Override
-    public void onResourceReady(Object resource, Transition transition) {
+    public void onResourceReady(Object resource, Transition<? super Object> transition) {
       // Do nothing
     }
   }

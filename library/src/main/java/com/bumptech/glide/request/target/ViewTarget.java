@@ -3,17 +3,18 @@ package com.bumptech.glide.request.target;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.Nullable;
+import android.support.v4.view.ViewCompat;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Preconditions;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,11 +34,15 @@ import java.util.List;
  * View#setTag(Object)} on a view, consider using {@link BaseTarget} or {@link SimpleTarget}
  * instead. </p>
  *
+ * <p> Subclasses must call super in {@link #onLoadCleared(Drawable)} </p>
+ *
  * @param <T> The specific subclass of view wrapped by this target.
  * @param <Z> The resource type this target will receive.
  */
 public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   private static final String TAG = "ViewTarget";
+  private static boolean isTagUsedAtLeastOnce = false;
+  @Nullable private static Integer tagId = null;
 
   protected final T view;
   private final SizeDeterminer sizeDeterminer;
@@ -68,14 +73,20 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     sizeDeterminer.getSize(cb);
   }
 
+  @Override
+  public void onLoadCleared(Drawable placeholder) {
+    super.onLoadCleared(placeholder);
+    sizeDeterminer.clearCallbacksAndListener();
+  }
+
   /**
    * Stores the request using {@link View#setTag(Object)}.
    *
    * @param request {@inheritDoc}
    */
   @Override
-  public void setRequest(Request request) {
-    view.setTag(request);
+  public void setRequest(@Nullable Request request) {
+    setTag(request);
   }
 
   /**
@@ -90,8 +101,9 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * com.bumptech.glide.request.Request}. </p>
    */
   @Override
+  @Nullable
   public Request getRequest() {
-    Object tag = view.getTag();
+    Object tag = getTag();
     Request request = null;
     if (tag != null) {
       if (tag instanceof Request) {
@@ -109,15 +121,58 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     return "Target for: " + view;
   }
 
+  private void setTag(@Nullable Object tag) {
+    if (tagId == null) {
+      isTagUsedAtLeastOnce = true;
+      view.setTag(tag);
+    } else {
+      view.setTag(tagId, tag);
+    }
+  }
+
+  @Nullable
+  private Object getTag() {
+    if (tagId == null) {
+      return view.getTag();
+    } else {
+      return view.getTag(tagId);
+    }
+  }
+
+  /**
+   * Sets the android resource id to use in conjunction with {@link View#setTag(int, Object)}
+   * to store temporary state allowing loads to be automatically cancelled and resources re-used
+   * in scrolling lists.
+   *
+   * <p>
+   *   If no tag id is set, Glide will use {@link View#setTag(Object)}.
+   * </p>
+   *
+   * <p>
+   *   Warning: prior to Android 4.0 tags were stored in a static map. Using this method prior
+   *   to Android 4.0 may cause memory leaks and isn't recommended. If you do use this method
+   *   on older versions, be sure to call {@link com.bumptech.glide.RequestManager#clear(View)} on
+   *   any view you start a load into to ensure that the static state is removed.
+   * </p>
+   *
+   * @param tagId The android resource to use.
+   */
+  public static void setTagId(int tagId) {
+      if (ViewTarget.tagId != null || isTagUsedAtLeastOnce) {
+          throw new IllegalArgumentException("You cannot set the tag id more than once or change"
+              + " the tag id after the first request has been made");
+      }
+      ViewTarget.tagId = tagId;
+  }
+
   private static class SizeDeterminer {
     // Some negative sizes (WRAP_CONTENT) are valid, 0 is never valid.
     private static final int PENDING_SIZE = 0;
-
     private final View view;
     private final List<SizeReadyCallback> cbs = new ArrayList<>();
 
-    private SizeDeterminerLayoutListener layoutListener;
-    private Point displayDimens;
+    @Nullable private SizeDeterminerLayoutListener layoutListener;
+    @Nullable private Point displayDimens;
 
     public SizeDeterminer(View view) {
       this.view = view;
@@ -127,7 +182,6 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       for (SizeReadyCallback cb : cbs) {
         cb.onSizeReady(width, height);
       }
-      cbs.clear();
     }
 
     private void checkCurrentDimens() {
@@ -142,24 +196,20 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       }
 
       notifyCbs(currentWidth, currentHeight);
-      // Keep a reference to the layout listener and remove it here
-      // rather than having the observer remove itself because the observer
-      // we add the listener to will be almost immediately merged into
-      // another observer and will therefore never be alive. If we instead
-      // keep a reference to the listener and remove it here, we get the
-      // current view tree observer and should succeed.
-      ViewTreeObserver observer = view.getViewTreeObserver();
-      if (observer.isAlive()) {
-        observer.removeOnPreDrawListener(layoutListener);
-      }
-      layoutListener = null;
+      clearCallbacksAndListener();
     }
 
-    public void getSize(SizeReadyCallback cb) {
+    void getSize(SizeReadyCallback cb) {
       int currentWidth = getViewWidthOrParam();
       int currentHeight = getViewHeightOrParam();
       if (isSizeValid(currentWidth) && isSizeValid(currentHeight)) {
-        cb.onSizeReady(currentWidth, currentHeight);
+        int paddingAdjustedWidth = currentWidth == WindowManager.LayoutParams.WRAP_CONTENT
+            ? currentWidth
+            : currentWidth - ViewCompat.getPaddingStart(view) - ViewCompat.getPaddingEnd(view);
+        int paddingAdjustedHeight = currentHeight == LayoutParams.WRAP_CONTENT
+            ? currentHeight
+            : currentHeight - view.getPaddingTop() - view.getPaddingBottom();
+        cb.onSizeReady(paddingAdjustedWidth, paddingAdjustedHeight);
       } else {
         // We want to notify callbacks in the order they were added and we only expect one or two
         // callbacks to
@@ -173,6 +223,21 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
           observer.addOnPreDrawListener(layoutListener);
         }
       }
+    }
+
+    void clearCallbacksAndListener() {
+      // Keep a reference to the layout listener and remove it here
+      // rather than having the observer remove itself because the observer
+      // we add the listener to will be almost immediately merged into
+      // another observer and will therefore never be alive. If we instead
+      // keep a reference to the listener and remove it here, we get the
+      // current view tree observer and should succeed.
+      ViewTreeObserver observer = view.getViewTreeObserver();
+      if (observer.isAlive()) {
+        observer.removeOnPreDrawListener(layoutListener);
+      }
+      layoutListener = null;
+      cbs.clear();
     }
 
     private int getViewHeightOrParam() {

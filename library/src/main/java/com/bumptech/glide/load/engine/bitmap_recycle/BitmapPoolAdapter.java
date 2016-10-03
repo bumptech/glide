@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 
 /**
  * An {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool BitmapPool} implementation
@@ -19,18 +20,20 @@ public class BitmapPoolAdapter implements BitmapPool {
   }
 
   @Override
-  public boolean put(Bitmap bitmap) {
-    return false;
+  public void put(Bitmap bitmap) {
+    bitmap.recycle();
   }
 
+  @NonNull
   @Override
   public Bitmap get(int width, int height, Bitmap.Config config) {
-    return null;
+    return Bitmap.createBitmap(width, height, config);
   }
 
+  @NonNull
   @Override
   public Bitmap getDirty(int width, int height, Bitmap.Config config) {
-    return null;
+    return get(width, height, config);
   }
 
   @Override
