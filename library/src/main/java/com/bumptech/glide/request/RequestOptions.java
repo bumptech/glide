@@ -144,7 +144,7 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
   }
 
   /**
-   * Returns a {@link RequestOptions} object with {@link #circleCrop(Context)} set.
+   * Returns a {@link RequestOptions} object with {@link #centerCrop(Context)} set.
    */
   public static RequestOptions centerCropTransform(Context context) {
     if (centerCropOptions == null) {
