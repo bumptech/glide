@@ -47,6 +47,19 @@ public final class Downsampler {
       Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy",
           DownsampleStrategy.AT_LEAST);
 
+  /**
+   * Ensure that the size of the bitmap is fixed to the requested width and height of the
+   * resource from the caller.  The final resource dimensions may differ from the requested
+   * width and height, and thus setting this to true may result in the bitmap size differing
+   * from the resource dimensions.
+   *
+   * This can be used as a performance optimization for KitKat and above by fixing the size of the
+   * bitmap for a collection of requested resources so that the bitmap pool will not need to
+   * allocate new bitmaps for images of different sizes.
+   */
+  public static final Option<Boolean> FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS =
+      Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.FixBitmapSize", false);
+
   private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
   private static final String ICO_MIME_TYPE = "image/x-ico";
   private static final Set<String> NO_DOWNSAMPLE_PRE_N_MIME_TYPES =
@@ -151,10 +164,12 @@ public final class Downsampler {
 
     DecodeFormat decodeFormat = options.get(DECODE_FORMAT);
     DownsampleStrategy downsampleStrategy = options.get(DOWNSAMPLE_STRATEGY);
+    boolean fixBitmapToRequestedDimensions = options.get(FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS);
 
     try {
       Bitmap result = decodeFromWrappedStreams(is, bitmapFactoryOptions,
-          downsampleStrategy, decodeFormat, requestedWidth, requestedHeight, callbacks);
+          downsampleStrategy, decodeFormat, requestedWidth, requestedHeight,
+          fixBitmapToRequestedDimensions, callbacks);
       return BitmapResource.obtain(result, bitmapPool);
     } finally {
       releaseOptions(bitmapFactoryOptions);
@@ -165,7 +180,7 @@ public final class Downsampler {
   private Bitmap decodeFromWrappedStreams(InputStream is,
       BitmapFactory.Options options, DownsampleStrategy downsampleStrategy,
       DecodeFormat decodeFormat, int requestedWidth, int requestedHeight,
-      DecodeCallbacks callbacks) throws IOException {
+      boolean fixBitmapToRequestedDimensions, DecodeCallbacks callbacks) throws IOException {
 
     int[] sourceDimensions = getDimensions(is, options, callbacks);
     int sourceWidth = sourceDimensions[0];
@@ -179,11 +194,47 @@ public final class Downsampler {
     if (options.inPreferredConfig != Bitmap.Config.ARGB_8888) {
       options.inDither = true;
     }
-    calculateScaling(downsampleStrategy, degreesToRotate, sourceWidth, sourceHeight, requestedWidth,
-        requestedHeight, options);
 
-    Bitmap downsampled = downsampleWithSize(is, options, bitmapPool, sourceWidth,
-        sourceHeight, callbacks);
+    int targetWidth = requestedWidth == Target.SIZE_ORIGINAL ? sourceWidth : requestedWidth;
+    int targetHeight = requestedHeight == Target.SIZE_ORIGINAL ? sourceHeight : requestedHeight;
+
+    calculateScaling(downsampleStrategy, degreesToRotate, sourceWidth, sourceHeight, targetWidth,
+        targetHeight, options);
+
+    boolean isKitKatOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+    // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
+    if ((options.inSampleSize == 1 || isKitKatOrGreater)
+        && shouldUsePool(is)) {
+      int expectedWidth;
+      int expectedHeight;
+      if (fixBitmapToRequestedDimensions && isKitKatOrGreater) {
+        expectedWidth = targetWidth;
+        expectedHeight = targetHeight;
+      } else {
+        float densityMultiplier = isScaling(options)
+            ? (float) options.inTargetDensity / options.inDensity : 1f;
+        int sampleSize = options.inSampleSize;
+        int downsampledWidth = (int) Math.ceil(sourceWidth / (float) sampleSize);
+        int downsampledHeight = (int) Math.ceil(sourceHeight / (float) sampleSize);
+        expectedWidth = Math.round(downsampledWidth * densityMultiplier);
+        expectedHeight = Math.round(downsampledHeight * densityMultiplier);
+
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+          Log.v(TAG, "Calculated target [" + expectedWidth + "x" + expectedHeight + "] for source"
+              + " [" + sourceWidth + "x" + sourceHeight + "]"
+              + ", sampleSize: " + sampleSize
+              + ", targetDensity: " + options.inTargetDensity
+              + ", density: " + options.inDensity
+              + ", density multiplier: " + densityMultiplier);
+        }
+      }
+      // If this isn't an image, or BitmapFactory was unable to parse the size, width and height
+      // will be -1 here.
+      if (expectedWidth > 0 && expectedHeight > 0) {
+        setInBitmap(options, bitmapPool, expectedWidth, expectedHeight);
+      }
+    }
+    Bitmap downsampled = decodeStream(is, options, callbacks);
     callbacks.onDecodeComplete(bitmapPool, downsampled);
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -208,15 +259,12 @@ public final class Downsampler {
 
   // Visible for testing.
   static void calculateScaling(DownsampleStrategy downsampleStrategy, int degreesToRotate,
-      int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight,
+      int sourceWidth, int sourceHeight, int targetWidth, int targetHeight,
       BitmapFactory.Options options) {
     // We can't downsample source content if we can't determine its dimensions.
     if (sourceWidth <= 0 || sourceHeight <= 0) {
       return;
     }
-
-    int targetHeight = requestedHeight == Target.SIZE_ORIGINAL ? sourceHeight : requestedHeight;
-    int targetWidth = requestedWidth == Target.SIZE_ORIGINAL ? sourceWidth : requestedWidth;
 
     final float exactScaleFactor;
     if (degreesToRotate == 90 || degreesToRotate == 270) {
@@ -304,39 +352,6 @@ public final class Downsampler {
       is.reset();
     }
     return orientation;
-  }
-
-  private Bitmap downsampleWithSize(InputStream is, BitmapFactory.Options options,
-      BitmapPool pool, int sourceWidth, int sourceHeight, DecodeCallbacks callbacks)
-      throws IOException {
-    // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
-    if ((options.inSampleSize == 1 || Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT)
-        && shouldUsePool(is)) {
-
-      float densityMultiplier = isScaling(options)
-          ? (float) options.inTargetDensity / options.inDensity : 1f;
-
-      int sampleSize = options.inSampleSize;
-      int downsampledWidth = (int) Math.ceil(sourceWidth / (float) sampleSize);
-      int downsampledHeight = (int) Math.ceil(sourceHeight / (float) sampleSize);
-      int expectedWidth = Math.round(downsampledWidth * densityMultiplier);
-      int expectedHeight = Math.round(downsampledHeight * densityMultiplier);
-
-      if (Log.isLoggable(TAG, Log.VERBOSE)) {
-        Log.v(TAG, "Calculated target [" + expectedWidth + "x" + expectedHeight + "] for source"
-            + " [" + sourceWidth + "x" + sourceHeight + "]"
-            + ", sampleSize: " + sampleSize
-            + ", targetDensity: " + options.inTargetDensity
-            + ", density: " + options.inDensity
-            + ", density multiplier: " + densityMultiplier);
-      }
-      // If this isn't an image, or BitmapFactory was unable to parse the size, width and height
-      // will be -1 here.
-      if (expectedWidth > 0 && expectedHeight > 0) {
-        setInBitmap(options, pool, expectedWidth, expectedHeight, options.inPreferredConfig);
-      }
-    }
-    return decodeStream(is, options, callbacks);
   }
 
   private boolean shouldUsePool(InputStream is) throws IOException {
@@ -488,10 +503,10 @@ public final class Downsampler {
 
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   private static void setInBitmap(BitmapFactory.Options options, BitmapPool bitmapPool, int width,
-      int height, Bitmap.Config config) {
+      int height) {
     if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {
       // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
-      options.inBitmap = bitmapPool.getDirty(width, height, config);
+      options.inBitmap = bitmapPool.getDirty(width, height, options.inPreferredConfig);
     }
   }
 

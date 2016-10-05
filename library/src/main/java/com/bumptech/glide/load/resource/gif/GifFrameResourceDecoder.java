@@ -25,8 +25,7 @@ public final class GifFrameResourceDecoder implements ResourceDecoder<GifDecoder
   }
 
   @Override
-  public Resource<Bitmap> decode(GifDecoder source, int width, int height,
-      Options options) {
+  public Resource<Bitmap> decode(GifDecoder source, int width, int height, Options options) {
     Bitmap bitmap = source.getNextFrame();
     return BitmapResource.obtain(bitmap, bitmapPool);
   }
