@@ -11,10 +11,12 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.DownsamplerTest.AllocationSizeBitmap;
 import com.bumptech.glide.tests.Util;
 import java.io.ByteArrayInputStream;
@@ -22,6 +24,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +57,11 @@ public class DownsamplerTest {
         RuntimeEnvironment.application.getResources().getDisplayMetrics();
     when(byteArrayPool.get(anyInt(), Matchers.eq(byte[].class)))
         .thenReturn(new byte[ArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
-    downsampler = new Downsampler(displayMetrics, bitmapPool, byteArrayPool);
+
+    List<ImageHeaderParser> parsers = new ArrayList<ImageHeaderParser>();
+    parsers.add(new DefaultImageHeaderParser());
+
+    downsampler = new Downsampler(parsers, displayMetrics, bitmapPool, byteArrayPool);
 
     initialSdkVersion = Build.VERSION.SDK_INT;
   }

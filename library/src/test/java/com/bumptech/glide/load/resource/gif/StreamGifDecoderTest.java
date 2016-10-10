@@ -2,12 +2,16 @@ package com.bumptech.glide.load.resource.gif;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
+import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +34,10 @@ public class StreamGifDecoderTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    decoder = new StreamGifDecoder(byteBufferDecoder, new LruArrayPool());
+    List<ImageHeaderParser> parsers = new ArrayList<ImageHeaderParser>();
+    parsers.add(new DefaultImageHeaderParser());
+
+    decoder = new StreamGifDecoder(parsers, byteBufferDecoder, new LruArrayPool());
     options = new Options();
   }
 
