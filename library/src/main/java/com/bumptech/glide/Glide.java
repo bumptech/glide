@@ -48,7 +48,6 @@ import com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.ByteBufferBitmapDecoder;
-import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
@@ -189,15 +188,12 @@ public class Glide implements ComponentCallbacks2 {
 
     final Resources resources = context.getResources();
 
-    registry = new Registry();
-    registry.register(new DefaultImageHeaderParser());
-
-    Downsampler downsampler = new Downsampler(registry.getImageHeaderParsers(),
-        resources.getDisplayMetrics(), bitmapPool, arrayPool);
+    Downsampler downsampler =
+        new Downsampler(resources.getDisplayMetrics(), bitmapPool, arrayPool);
     ByteBufferGifDecoder byteBufferGifDecoder =
-        new ByteBufferGifDecoder(context, registry.getImageHeaderParsers(), bitmapPool, arrayPool);
-
-    registry.register(ByteBuffer.class, new ByteBufferEncoder())
+        new ByteBufferGifDecoder(context, bitmapPool, arrayPool);
+    registry = new Registry()
+        .register(ByteBuffer.class, new ByteBufferEncoder())
         .register(InputStream.class, new StreamEncoder(arrayPool))
         /* Bitmaps */
         .append(ByteBuffer.class, Bitmap.class,
@@ -218,7 +214,7 @@ public class Glide implements ComponentCallbacks2 {
         .register(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
         /* GIFs */
         .prepend(InputStream.class, GifDrawable.class,
-            new StreamGifDecoder(registry.getImageHeaderParsers(), byteBufferGifDecoder, arrayPool))
+            new StreamGifDecoder(byteBufferGifDecoder, arrayPool))
         .prepend(ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
         .register(GifDrawable.class, new GifDrawableEncoder())
         /* GIF Frames */
