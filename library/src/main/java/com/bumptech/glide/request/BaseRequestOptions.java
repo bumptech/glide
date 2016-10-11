@@ -130,9 +130,9 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
   /**
    * If set to true, will only load an item if found in the cache, and will not fetch from source.
    */
-  public final CHILD getOnlyRetrieveFromCache(boolean flag) {
+  public final CHILD onlyRetrieveFromCache(boolean flag) {
     if (isAutoCloneEnabled) {
-      return clone().getOnlyRetrieveFromCache(flag);
+      return clone().onlyRetrieveFromCache(flag);
     }
 
     this.onlyRetrieveFromCache = flag;
