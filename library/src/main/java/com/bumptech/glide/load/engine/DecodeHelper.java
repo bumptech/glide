@@ -198,8 +198,14 @@ final class DecodeHelper<Transcode> {
       int size = loadData.size();
       for (int i = 0; i < size; i++) {
         LoadData<?> data = loadData.get(i);
-        cacheKeys.add(data.sourceKey);
-        cacheKeys.addAll(data.alternateKeys);
+        if (!cacheKeys.contains(data.sourceKey)) {
+          cacheKeys.add(data.sourceKey);
+        }
+        for (int j = 0; j < data.alternateKeys.size(); j++) {
+          if (!cacheKeys.contains(data.alternateKeys.get(j))) {
+            cacheKeys.add(data.alternateKeys.get(j));
+          }
+        }
       }
     }
     return cacheKeys;
