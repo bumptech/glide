@@ -34,7 +34,7 @@ baseurl: '/glide'
 permalink: none
 
 # Syntax highlighting
-highlighter: pygments
+highlighter: rouge
 
 # Since these are pages, it doesn't really matter
 future: true
@@ -42,16 +42,7 @@ future: true
 # Exclude non-site files
 exclude: ['bin', 'README.md']
 
-# Use the redcarpet Markdown renderer
-markdown: redcarpet
-redcarpet:
-    extensions: [
-        'no_intra_emphasis',
-        'fenced_code_blocks',
-        'autolink',
-        'strikethrough',
-        'superscript',
-        'with_toc_data',
-        'tables',
-        'hardwrap'
-    ]
+# Use the kramdown Markdown renderer
+markdown: kramdown
+kramdown:
+  input: GFM
