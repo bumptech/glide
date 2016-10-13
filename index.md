@@ -20,7 +20,6 @@ Glide uses a simple fluent API that allows users to make most requests in a  sin
 
 ```java
 Glide.with(fragment)
-    .asDrawable()
     .load(url)
     .into(imageView);
 ```
