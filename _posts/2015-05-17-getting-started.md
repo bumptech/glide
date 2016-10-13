@@ -13,7 +13,6 @@ Loading images with Glide is easy and in many cases requires only a single line:
 
 ```java
 Glide.with(fragment)
-    .asDrawable()
     .load(myUrl)
     .into(imageView);
 ```
@@ -36,7 +35,6 @@ Loading images in a ListView or RecyclerView uses the same load line as if you w
 public void onBindViewHolder(ViewHolder holder, int position) {
     String url = urls.get(position);
     Glide.with(fragment)
-        .asDrawable()
         .load(url)
         .into(holder.imageView);
 }
@@ -55,7 +53,6 @@ public void onBindViewHolder(ViewHolder holder, int position) {
     } else {
         String url = urls.get(position);
         Glide.with(fragment)
-            .asDrawable()
             .load(url)
             .into(holder.imageView);
     }
