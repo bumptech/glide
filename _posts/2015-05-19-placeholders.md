@@ -18,7 +18,7 @@ Glide allows users to specify three different placeholders that are used under d
 
 #### Placeholder
 
-Placeholders are Drawables that are shown while a request is in progress. When a request completes successfully, the placeholder is replaced with the requested resource. If the requested resource is loaded from memoy, the placeholder may never be shown. If the request fails and an error Drawable is not set, the placeholder will continue to be displayed. Similarly if the requested url/model is ``null`` and neither an error Drawable nor a fallback Drawable are set, the placeholder will also continue to be displayed.
+Placeholders are Drawables that are shown while a request is in progress. When a request completes successfully, the placeholder is replaced with the requested resource. If the requested resource is loaded from memory, the placeholder may never be shown. If the request fails and an error Drawable is not set, the placeholder will continue to be displayed. Similarly if the requested url/model is ``null`` and neither an error Drawable nor a fallback Drawable are set, the placeholder will also continue to be displayed.
 
 #### Error
 
@@ -26,12 +26,12 @@ Error Drawables are shown when a request permanently fails. Error Drawables are 
 
 #### Fallback
 
-Fallback Drawables are shown when the requested url/model is ``null``. The primary purpose of fallback Drawables is to allow users to indicate whether or not ``null`` is expected. For example, a ``null`` profile url may indicate that the user has not set a profile photo and that a default should be used. However, ``null`` may also indicate that metadata is invalid or coldn't be retrieved. By default Glide treats ``null`` urls/models as errors, so users who expect ``null`` should set a fallback Drawable.
+Fallback Drawables are shown when the requested url/model is ``null``. The primary purpose of fallback Drawables is to allow users to indicate whether or not ``null`` is expected. For example, a ``null`` profile url may indicate that the user has not set a profile photo and that a default should be used. However, ``null`` may also indicate that meta-data is invalid or couldn't be retrieved. By default Glide treats ``null`` urls/models as errors, so users who expect ``null`` should set a fallback Drawable.
 
 ### FAQ
 
 ##### Are placeholders loaded asynchronously?
-No. Placeholders are loaded from Android resources on the main thread. We typically expect plcaeholders to be small and easily cacheable by the system resource cache.
+No. Placeholders are loaded from Android resources on the main thread. We typically expect placeholders to be small and easily cacheable by the system resource cache.
 
 ##### Are Transformations applied to placeholders?
 No. Transformations are applied only to the requested resource, not to any placeholder. If you're loading circular images for example, you may want to include circular placeholder resources with your application. Alternatively you could also consider a custom View to clip your placeholder in the same manner as your Transformation.
