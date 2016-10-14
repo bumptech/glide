@@ -179,6 +179,87 @@ public class ImageHeaderParserTest {
     assertEquals(ImageType.PNG, parser.getType());
   }
 
+  @Test
+  public void getOrientation_withExifSegmentLessThanLength_returnsUnknown() throws IOException {
+    ByteBuffer jpegHeaderBytes = getExifMagicNumber();
+    byte[] data = new byte[] {
+        jpegHeaderBytes.get(0), jpegHeaderBytes.get(1),
+        (byte) ImageHeaderParser.SEGMENT_START_ID,
+        (byte) ImageHeaderParser.EXIF_SEGMENT_TYPE,
+        // SEGMENT_LENGTH
+        (byte) 0xFF, (byte) 0xFF,
+    };
+    ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+    ImageHeaderParser parser = new ImageHeaderParser(byteBuffer, byteArrayPool);
+    assertEquals(ImageHeaderParser.UNKNOWN_ORIENTATION, parser.getOrientation());
+  }
+
+  @Test
+  public void getOrientation_withNonExifSegmentLessThanLength_returnsUnknown() throws IOException {
+    ByteBuffer jpegHeaderBytes = getExifMagicNumber();
+    byte[] data = new byte[] {
+        jpegHeaderBytes.get(0), jpegHeaderBytes.get(1),
+        (byte) ImageHeaderParser.SEGMENT_START_ID,
+        // SEGMENT_TYPE (NOT EXIF_SEGMENT_TYPE)
+        (byte) 0xE5,
+        // SEGMENT_LENGTH
+        (byte) 0xFF, (byte) 0xFF,
+    };
+    ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+    ImageHeaderParser parser = new ImageHeaderParser(byteBuffer, byteArrayPool);
+    assertEquals(ImageHeaderParser.UNKNOWN_ORIENTATION, parser.getOrientation());
+  }
+
+  @Test
+  public void getOrientation_withExifSegmentAndPreambleButLessThanLength_returnsUnknown()
+      throws IOException {
+    ByteBuffer jpegHeaderBytes = getExifMagicNumber();
+    ByteBuffer exifSegmentPreamble =
+        ByteBuffer.wrap(ImageHeaderParser.JPEG_EXIF_SEGMENT_PREAMBLE_BYTES);
+
+    ByteBuffer data = ByteBuffer.allocate(2 + 1 + 1 + 2 + exifSegmentPreamble.capacity());
+    data.put(jpegHeaderBytes)
+        .put((byte) ImageHeaderParser.SEGMENT_START_ID)
+        .put((byte) ImageHeaderParser.EXIF_SEGMENT_TYPE)
+        // SEGMENT_LENGTH, add two because length includes the segment length short, and one to go
+        // beyond the preamble bytes length for the test.
+        .putShort((short) (ImageHeaderParser.JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length + 2 + 1))
+        .put(ImageHeaderParser.JPEG_EXIF_SEGMENT_PREAMBLE_BYTES);
+
+    data.position(0);
+    ImageHeaderParser parser = new ImageHeaderParser(data, byteArrayPool);
+    assertEquals(ImageHeaderParser.UNKNOWN_ORIENTATION, parser.getOrientation());
+  }
+
+  @Test
+  public void getOrientation_withExifSegmentAndPreambleAndMoreThanLengthButLessThanExpected_returnsUnknown()
+      throws IOException {
+    ByteBuffer jpegHeaderBytes = getExifMagicNumber();
+    ByteBuffer exifSegmentPreamble =
+        ByteBuffer.wrap(ImageHeaderParser.JPEG_EXIF_SEGMENT_PREAMBLE_BYTES);
+
+    ByteBuffer data = ByteBuffer.allocate(2 + 1 + 1 + 2 + exifSegmentPreamble.capacity() + 2 + 1);
+    data.put(jpegHeaderBytes)
+        .put((byte) ImageHeaderParser.SEGMENT_START_ID)
+        .put((byte) ImageHeaderParser.EXIF_SEGMENT_TYPE)
+        // SEGMENT_LENGTH, add two because length includes the segment length short, and one to go
+        // beyond the preamble bytes length for the test.
+        .putShort((short) (ImageHeaderParser.JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length + 2 + 1))
+        .put(ImageHeaderParser.JPEG_EXIF_SEGMENT_PREAMBLE_BYTES);
+
+    data.position(0);
+    ImageHeaderParser parser = new ImageHeaderParser(data, byteArrayPool);
+    assertEquals(ImageHeaderParser.UNKNOWN_ORIENTATION, parser.getOrientation());
+  }
+
+
+  private static ByteBuffer getExifMagicNumber() {
+    ByteBuffer jpegHeaderBytes = ByteBuffer.allocate(2);
+    jpegHeaderBytes.putShort((short) ImageHeaderParser.EXIF_MAGIC_NUMBER);
+    jpegHeaderBytes.position(0);
+    return jpegHeaderBytes;
+  }
+
   private interface ParserTestCase {
     void run(ImageHeaderParser parser) throws IOException;
   }

@@ -59,18 +59,18 @@ public class ImageHeaderParser {
 
   private static final int GIF_HEADER = 0x474946;
   private static final int PNG_HEADER = 0x89504E47;
-  private static final int EXIF_MAGIC_NUMBER = 0xFFD8;
+  static final int EXIF_MAGIC_NUMBER = 0xFFD8;
   // "MM".
   private static final int MOTOROLA_TIFF_MAGIC_NUMBER = 0x4D4D;
   // "II".
   private static final int INTEL_TIFF_MAGIC_NUMBER = 0x4949;
-  private static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
-  private static final byte[] JPEG_EXIF_SEGMENT_PREAMBLE_BYTES =
+  static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
+  static final byte[] JPEG_EXIF_SEGMENT_PREAMBLE_BYTES =
       JPEG_EXIF_SEGMENT_PREAMBLE.getBytes(Charset.forName("UTF-8"));
   private static final int SEGMENT_SOS = 0xDA;
   private static final int MARKER_EOI = 0xD9;
-  private static final int SEGMENT_START_ID = 0xFF;
-  private static final int EXIF_SEGMENT_TYPE = 0xE1;
+  static final int SEGMENT_START_ID = 0xFF;
+  static final int EXIF_SEGMENT_TYPE = 0xE1;
   private static final int ORIENTATION_TAG_TYPE = 0x0112;
   private static final int[] BYTES_PER_FORMAT = { 0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8 };
   // WebP-related
@@ -377,29 +377,33 @@ public class ImageHeaderParser {
         || imageMagicNumber == INTEL_TIFF_MAGIC_NUMBER;
   }
 
-  private static class RandomAccessReader {
+  private static final class RandomAccessReader {
     private final ByteBuffer data;
 
-    public RandomAccessReader(byte[] data, int length) {
+    RandomAccessReader(byte[] data, int length) {
       this.data = (ByteBuffer) ByteBuffer.wrap(data)
           .order(ByteOrder.BIG_ENDIAN)
           .limit(length);
     }
 
-    public void order(ByteOrder byteOrder) {
+    void order(ByteOrder byteOrder) {
       this.data.order(byteOrder);
     }
 
-    public int length() {
+    int length() {
       return data.remaining();
     }
 
-    public int getInt32(int offset) {
-      return data.getInt(offset);
+    int getInt32(int offset) {
+      return isAvailable(offset, 4) ? data.getInt(offset) : -1;
     }
 
-    public short getInt16(int offset) {
-      return data.getShort(offset);
+    short getInt16(int offset) {
+      return isAvailable(offset, 2) ? data.getShort(offset) : -1;
+    }
+
+    private boolean isAvailable(int offset, int byteSize) {
+      return data.remaining() - offset >= byteSize;
     }
   }
 
@@ -411,11 +415,11 @@ public class ImageHeaderParser {
     int getByte() throws IOException;
   }
 
-  private static class ByteBufferReader implements Reader {
+  private static final class ByteBufferReader implements Reader {
 
     private final ByteBuffer byteBuffer;
 
-    public ByteBufferReader(ByteBuffer byteBuffer) {
+    ByteBufferReader(ByteBuffer byteBuffer) {
       this.byteBuffer = byteBuffer;
       byteBuffer.order(ByteOrder.BIG_ENDIAN);
     }
@@ -440,7 +444,10 @@ public class ImageHeaderParser {
     @Override
     public int read(byte[] buffer, int byteCount) throws IOException {
       int toRead = Math.min(byteCount, byteBuffer.remaining());
-      byteBuffer.get(buffer, 0 /*dstOffset*/, byteCount);
+      if (toRead == 0) {
+        return -1;
+      }
+      byteBuffer.get(buffer, 0 /*dstOffset*/, toRead);
       return toRead;
     }
 
@@ -453,10 +460,10 @@ public class ImageHeaderParser {
     }
   }
 
-  private static class StreamReader implements Reader {
+  private static final class StreamReader implements Reader {
     private final InputStream is;
     // Motorola / big endian byte order.
-    public StreamReader(InputStream is) {
+    StreamReader(InputStream is) {
       this.is = is;
     }
 
