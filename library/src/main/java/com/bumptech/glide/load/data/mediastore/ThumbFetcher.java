@@ -39,8 +39,10 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
 
   private static ThumbFetcher build(Context context, Uri uri, ThumbnailQuery query) {
     ArrayPool byteArrayPool = Glide.get(context).getArrayPool();
-    return new ThumbFetcher(
-        uri, new ThumbnailStreamOpener(query, byteArrayPool, context.getContentResolver()));
+    ThumbnailStreamOpener opener = new ThumbnailStreamOpener(
+        Glide.get(context).getRegistry().getImageHeaderParsers(), query, byteArrayPool,
+        context.getContentResolver());
+    return new ThumbFetcher(uri, opener);
   }
 
   // Visible for testing.

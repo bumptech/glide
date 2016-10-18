@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
-import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
+import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.testutil.TestResourceUtil;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +29,7 @@ public class ExifTest {
     InputStream is = null;
     try {
       is = open(filePrefix + "_" + expectedOrientation + ".jpg");
-      assertEquals(new ImageHeaderParser(is, byteArrayPool).getOrientation(),
+      assertEquals(new DefaultImageHeaderParser().getOrientation(is, byteArrayPool),
           expectedOrientation);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -52,7 +52,7 @@ public class ExifTest {
   @Test
   public void testIssue387() throws IOException {
     InputStream is = TestResourceUtil.openResource(getClass(), "issue387_rotated_jpeg.jpg");
-    assertThat(new ImageHeaderParser(is, byteArrayPool).getOrientation()).isEqualTo(6);
+    assertThat(new DefaultImageHeaderParser().getOrientation(is, byteArrayPool)).isEqualTo(6);
   }
 
   @Test

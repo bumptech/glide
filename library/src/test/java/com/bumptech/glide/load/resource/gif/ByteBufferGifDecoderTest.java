@@ -12,12 +12,16 @@ import static org.mockito.Mockito.when;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
+import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
+import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,10 +60,14 @@ public class ByteBufferGifDecoderTest {
         eq(gifHeader), isA(ByteBuffer.class), anyInt()))
         .thenReturn(gifDecoder);
 
+    List<ImageHeaderParser> parsers = new ArrayList<ImageHeaderParser>();
+    parsers.add(new DefaultImageHeaderParser());
+
     options = new Options();
     decoder =
         new ByteBufferGifDecoder(
             RuntimeEnvironment.application,
+            parsers,
             bitmapPool,
             new LruArrayPool(ARRAY_POOL_SIZE_BYTES),
             parserPool,
