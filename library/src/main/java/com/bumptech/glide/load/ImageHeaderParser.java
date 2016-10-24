@@ -23,6 +23,7 @@ public interface ImageHeaderParser {
   enum ImageType {
     GIF(true),
     JPEG(false),
+    RAW(false),
     /** PNG type with alpha. */
     PNG_A(true),
     /** PNG type without alpha. */
