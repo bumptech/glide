@@ -21,6 +21,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -33,7 +34,7 @@ class GifFrameLoader {
   private final Handler handler;
   private final Context context;
   private final List<FrameCallback> callbacks = new ArrayList<>();
-  private final RequestManager requestManager;
+  @Synthetic final RequestManager requestManager;
   private final BitmapPool bitmapPool;
 
   private boolean isRunning = false;
@@ -245,6 +246,9 @@ class GifFrameLoader {
     public static final int MSG_DELAY = 1;
     public static final int MSG_CLEAR = 2;
 
+    @Synthetic
+    FrameLoaderCallback() { }
+
     @Override
     public boolean handleMessage(Message msg) {
       if (msg.what == MSG_DELAY) {
@@ -262,7 +266,7 @@ class GifFrameLoader {
   // Visible for testing.
   static class DelayTarget extends SimpleTarget<Bitmap> {
     private final Handler handler;
-    private final int index;
+    @Synthetic final int index;
     private final long targetTime;
     private Bitmap resource;
 

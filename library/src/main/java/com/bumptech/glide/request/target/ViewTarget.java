@@ -15,6 +15,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Synthetic;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -184,7 +185,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       }
     }
 
-    private void checkCurrentDimens() {
+    @Synthetic
+    void checkCurrentDimens() {
       if (cbs.isEmpty()) {
         return;
       }

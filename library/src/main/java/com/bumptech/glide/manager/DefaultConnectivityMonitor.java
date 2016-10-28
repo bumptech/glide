@@ -6,15 +6,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import com.bumptech.glide.util.Synthetic;
 
 /**
  * Uses {@link android.net.ConnectivityManager} to identify connectivity changes.
  */
 class DefaultConnectivityMonitor implements ConnectivityMonitor {
   private final Context context;
-  private final ConnectivityListener listener;
+  @Synthetic final ConnectivityListener listener;
 
-  private boolean isConnected;
+  @Synthetic boolean isConnected;
   private boolean isRegistered;
 
   private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
@@ -53,7 +54,8 @@ class DefaultConnectivityMonitor implements ConnectivityMonitor {
     isRegistered = false;
   }
 
-  private boolean isConnected(Context context) {
+  @Synthetic
+  boolean isConnected(Context context) {
     ConnectivityManager connectivityManager =
         (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();

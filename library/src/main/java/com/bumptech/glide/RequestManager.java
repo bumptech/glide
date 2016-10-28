@@ -28,6 +28,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.io.File;
 
@@ -51,7 +52,7 @@ public class RequestManager implements LifecycleListener {
           .skipMemoryCache(true);
 
   private final Glide glide;
-  private final Lifecycle lifecycle;
+  @Synthetic final Lifecycle lifecycle;
   private final RequestTracker requestTracker;
   private final RequestManagerTreeNode treeNode;
   private final TargetTracker targetTracker = new TargetTracker();

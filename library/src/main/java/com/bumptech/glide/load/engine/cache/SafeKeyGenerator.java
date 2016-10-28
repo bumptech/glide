@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine.cache;
 import android.support.v4.util.Pools;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.LruCache;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
 import com.bumptech.glide.util.pool.StateVerifier;
@@ -54,7 +55,7 @@ public class SafeKeyGenerator {
 
   private static final class PoolableDigestContainer implements FactoryPools.Poolable {
 
-    private final MessageDigest messageDigest;
+    @Synthetic final MessageDigest messageDigest;
     private final StateVerifier stateVerifier = StateVerifier.newInstance();
 
     PoolableDigestContainer(MessageDigest messageDigest) {

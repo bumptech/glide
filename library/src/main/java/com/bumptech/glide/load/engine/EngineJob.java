@@ -8,6 +8,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools.Poolable;
 import com.bumptech.glide.util.pool.StateVerifier;
@@ -162,7 +163,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     return isCancelled;
   }
 
-  private void handleResultOnMainThread() {
+  @Synthetic
+  void handleResultOnMainThread() {
     stateVerifier.throwIfRecycled();
     if (isCancelled) {
       resource.recycle();
@@ -193,7 +195,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     release(false /*isRemovedFromQueue*/);
   }
 
-  private void handleCancelledOnMainThread() {
+  @Synthetic
+  void handleCancelledOnMainThread() {
     stateVerifier.throwIfRecycled();
     if (!isCancelled) {
       throw new IllegalStateException("Not cancelled");
@@ -243,7 +246,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     }
   }
 
-  private void handleExceptionOnMainThread() {
+  @Synthetic
+  void handleExceptionOnMainThread() {
     stateVerifier.throwIfRecycled();
     if (isCancelled) {
       release(false /*isRemovedFromQueue*/);
@@ -279,6 +283,9 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   }
 
   private static class MainThreadCallback implements Handler.Callback {
+
+    @Synthetic
+    MainThreadCallback() { }
 
     @Override
     public boolean handleMessage(Message message) {

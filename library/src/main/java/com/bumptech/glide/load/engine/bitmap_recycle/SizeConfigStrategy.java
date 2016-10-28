@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.util.HashMap;
 import java.util.Map;
@@ -178,7 +179,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
   static final class Key implements Poolable {
     private final KeyPool pool;
 
-    private int size;
+    @Synthetic int size;
     private Bitmap.Config config;
 
     public Key(KeyPool pool) {
@@ -224,7 +225,8 @@ public class SizeConfigStrategy implements LruPoolStrategy {
     }
   }
 
-  private static String getBitmapString(int size, Bitmap.Config config) {
+  @Synthetic
+  static String getBitmapString(int size, Bitmap.Config config) {
     return "[" + size + "](" + config + ")";
   }
 

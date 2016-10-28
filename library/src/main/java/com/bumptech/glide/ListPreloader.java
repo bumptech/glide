@@ -5,6 +5,7 @@ import android.widget.AbsListView;
 import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.util.List;
 import java.util.Queue;
@@ -210,8 +211,11 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   }
 
   private static class PreloadTarget extends BaseTarget<Object> {
-    private int photoHeight;
-    private int photoWidth;
+    @Synthetic int photoHeight;
+    @Synthetic int photoWidth;
+
+    @Synthetic
+    PreloadTarget() { }
 
     @Override
     public void onResourceReady(Object resource, Transition<? super Object> transition) {

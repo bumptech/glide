@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.support.v4.util.Pools;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.pool.FactoryPools;
 import com.bumptech.glide.util.pool.StateVerifier;
 
@@ -32,7 +33,8 @@ final class LockedResource<Z> implements Resource<Z>,
     return result;
   }
 
-  private LockedResource() { }
+  @Synthetic
+  LockedResource() { }
 
   private void init(Resource<Z> toWrap) {
     isRecycled = false;

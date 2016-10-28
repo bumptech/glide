@@ -142,9 +142,9 @@ public final class ByteBufferUtil {
   }
 
   static final class SafeArray {
-    private final int offset;
-    private final int limit;
-    private final byte[] data;
+    @Synthetic final int offset;
+    @Synthetic final int limit;
+    @Synthetic final byte[] data;
 
     public SafeArray(byte[] data, int offset, int limit) {
       this.data = data;

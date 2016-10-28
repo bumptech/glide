@@ -4,6 +4,7 @@ import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.bumptech.glide.util.Synthetic;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.concurrent.BlockingQueue;
@@ -316,8 +317,8 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    */
   private static final class DefaultThreadFactory implements ThreadFactory {
     private final String name;
-    private final UncaughtThrowableStrategy uncaughtThrowableStrategy;
-    private final boolean preventNetworkOperations;
+    @Synthetic final UncaughtThrowableStrategy uncaughtThrowableStrategy;
+    @Synthetic final boolean preventNetworkOperations;
     private int threadNum;
 
     DefaultThreadFactory(String name, UncaughtThrowableStrategy uncaughtThrowableStrategy,

@@ -35,4 +35,24 @@
     </rule>
 
 
+    <!--Overrides default check to avoid violation when @Synthetic annotation is present-->
+    <rule ref="rulesets/java/design.xml/UncommentedEmptyConstructor"
+          message="Document empty constructor">
+
+        <properties>
+            <property name="xpath">
+                <value>
+                    <![CDATA[
+//ConstructorDeclaration[@Private='false'][count(BlockStatement) = 0 and
+($ignoreExplicitConstructorInvocation = 'true' or not(ExplicitConstructorInvocation)) and @containsComment = 'false'
+ and not(../Annotation/MarkerAnnotation/Name[@Image='Synthetic'])]
+ ]]>
+                </value>
+            </property>
+
+        </properties>
+
+    </rule>
+
+
 </ruleset>

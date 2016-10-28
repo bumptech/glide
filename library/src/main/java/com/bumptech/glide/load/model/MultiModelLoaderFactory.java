@@ -5,6 +5,7 @@ import android.support.v4.util.Pools.Pool;
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -163,8 +164,8 @@ public class MultiModelLoaderFactory {
 
   private static class Entry<Model, Data> {
     private final Class<Model> modelClass;
-    private final Class<Data> dataClass;
-    private final ModelLoaderFactory<Model, Data> factory;
+    @Synthetic final Class<Data> dataClass;
+    @Synthetic final ModelLoaderFactory<Model, Data> factory;
 
     public Entry(Class<Model> modelClass, Class<Data> dataClass,
         ModelLoaderFactory<Model, Data> factory) {
@@ -190,6 +191,9 @@ public class MultiModelLoaderFactory {
   }
 
   private static class EmptyModelLoader implements ModelLoader<Object, Object> {
+
+    @Synthetic
+    EmptyModelLoader() { }
 
     @Nullable
     @Override

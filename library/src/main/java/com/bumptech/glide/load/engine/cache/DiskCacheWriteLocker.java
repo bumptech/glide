@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine.cache;
 
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,11 +65,17 @@ final class DiskCacheWriteLocker {
   private static class WriteLock  {
     final Lock lock = new ReentrantLock();
     int interestedThreads;
+
+    @Synthetic
+    WriteLock() { }
   }
 
   private static class WriteLockPool {
     private static final int MAX_POOL_SIZE = 10;
     private final Queue<WriteLock> pool = new ArrayDeque<>();
+
+    @Synthetic
+    WriteLockPool() { }
 
     WriteLock obtain() {
       WriteLock result;
