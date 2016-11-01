@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import com.bumptech.glide.util.Synthetic;
+
 /**
  * Indicates the algorithm to use when downsampling images.
  */
@@ -99,6 +101,9 @@ public abstract class DownsampleStrategy {
 
   private static class FitCenter extends DownsampleStrategy {
 
+    @Synthetic
+    FitCenter() { }
+
     @Override
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
@@ -115,7 +120,11 @@ public abstract class DownsampleStrategy {
   }
 
   private static class CenterOutside extends DownsampleStrategy {
-     @Override
+
+    @Synthetic
+    CenterOutside() { }
+
+    @Override
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
       float widthPercentage = requestedWidth / (float) sourceWidth;
@@ -132,6 +141,9 @@ public abstract class DownsampleStrategy {
 
   private static class AtLeast extends DownsampleStrategy {
 
+    @Synthetic
+    AtLeast() { }
+
     @Override
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
@@ -147,6 +159,10 @@ public abstract class DownsampleStrategy {
   }
 
   private static class AtMost extends DownsampleStrategy {
+
+    @Synthetic
+    AtMost() { }
+
     @Override
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
@@ -166,7 +182,11 @@ public abstract class DownsampleStrategy {
   }
 
   private static class None extends DownsampleStrategy {
-     @Override
+
+    @Synthetic
+    None() { }
+
+    @Override
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,
         int requestedHeight) {
       return 1f;
@@ -180,6 +200,9 @@ public abstract class DownsampleStrategy {
   }
 
   private static class CenterInside extends DownsampleStrategy {
+
+    @Synthetic
+    CenterInside() { }
 
     @Override
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,

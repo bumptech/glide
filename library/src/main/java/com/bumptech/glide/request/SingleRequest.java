@@ -16,6 +16,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.util.LogTime;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
 import com.bumptech.glide.util.pool.StateVerifier;
@@ -136,7 +137,8 @@ public final class SingleRequest<R> implements Request,
     return request;
   }
 
-  private SingleRequest() {
+  @Synthetic
+  SingleRequest() {
     // just create, instances are reused with recycle/init
   }
 

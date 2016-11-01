@@ -6,6 +6,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
+import com.bumptech.glide.util.Synthetic;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -24,8 +25,8 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "OkHttpFetcher";
   private final OkHttpClient client;
   private final GlideUrl url;
-  private InputStream stream;
-  private ResponseBody responseBody;
+  @Synthetic InputStream stream;
+  @Synthetic ResponseBody responseBody;
 
   public OkHttpStreamFetcher(OkHttpClient client, GlideUrl url) {
     this.client = client;

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.transcode;
 
+import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +76,7 @@ public class TranscoderRegistry {
   private static final class Entry<Z, R> {
     private final Class<Z> fromClass;
     private final Class<R> toClass;
-    private final ResourceTranscoder<Z, R> transcoder;
+    @Synthetic final ResourceTranscoder<Z, R> transcoder;
 
     Entry(Class<Z> fromClass, Class<R> toClass, ResourceTranscoder<Z, R> transcoder) {
       this.fromClass = fromClass;

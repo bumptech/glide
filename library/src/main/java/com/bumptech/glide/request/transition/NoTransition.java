@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.transition;
 
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.util.Synthetic;
 
 /**
  * A simple {@link Transition} that performs no actions.
@@ -9,7 +10,7 @@ import com.bumptech.glide.load.DataSource;
  * {@link com.bumptech.glide.request.target.Target}.
  */
 public class NoTransition<R> implements Transition<R> {
-  private static final NoTransition<?> NO_ANIMATION = new NoTransition<Object>();
+  @Synthetic static final NoTransition<?> NO_ANIMATION = new NoTransition<Object>();
   @SuppressWarnings("rawtypes")
   private static final TransitionFactory<?> NO_ANIMATION_FACTORY = new NoAnimationFactory();
 
