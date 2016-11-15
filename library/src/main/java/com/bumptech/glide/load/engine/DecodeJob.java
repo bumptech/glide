@@ -354,6 +354,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   @Override
   public void onDataFetcherFailed(Key attemptedKey, Exception e, DataFetcher<?> fetcher,
       DataSource dataSource) {
+    fetcher.cleanup();
     GlideException exception = new GlideException("Fetching data failed", e);
     exception.setLoggingDetails(attemptedKey, dataSource, fetcher.getDataClass());
     exceptions.add(exception);
