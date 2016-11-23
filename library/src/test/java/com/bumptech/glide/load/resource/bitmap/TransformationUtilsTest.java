@@ -353,7 +353,7 @@ public class TransformationUtilsTest {
     assertTrue(toRotate == zero);
 
     Bitmap ninety = TransformationUtils.rotateImage(toRotate, 90);
-    assertTrue(Shadows.shadowOf(ninety).getDescription().contains("rotate=90.0"));
+    assertThat(Shadows.shadowOf(ninety).getDescription()).contains("rotate=90.0");
     assertEquals(toRotate.getWidth(), toRotate.getHeight());
   }
 
