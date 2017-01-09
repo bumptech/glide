@@ -3,6 +3,8 @@ layout: page
 title: "Debugging"
 category: doc
 date: 2017-01-09 07:14:59
+order: 7
+disqus: 1
 ---
 
 ### Debugging
@@ -75,4 +77,3 @@ To save object allocations, you can re-use the same ``RequestListener`` for mult
 [6]: https://github.com/bumptech/glide/blob/6ddb5f0598b1a5a5a51647fb968e998d6cabbd3d/library/src/main/java/com/bumptech/glide/request/BaseRequestOptions.java#L333
 [7]: https://github.com/bumptech/glide/blob/6ddb5f0598b1a5a5a51647fb968e998d6cabbd3d/library/src/main/java/com/bumptech/glide/request/RequestListener.java
 [8]: https://github.com/bumptech/glide/blob/6ddb5f0598b1a5a5a51647fb968e998d6cabbd3d/library/src/main/java/com/bumptech/glide/RequestBuilder.java#L117
-7

@@ -58,12 +58,26 @@ To make contributions to this documentation site:
 3. Make your contributions.
 4. Send a [pull request][2] on GitHub.
 
-#### Modifying the site
+#### Modifying existing pages
 
 The pages you see on the docs page are located in the ``_pages`` folder and can be modified in place.
 
+#### Adding a new page
 New pages can be added using ``./bin/jekyll-page <page_name> <category>``. ``<page_name>`` is the title of the page, ``<category>`` matches one of the sections in the left hand nav. Typically ``<category>`` should be ``doc`` so that the page is placed under the ``Documentation`` section.
 
+When adding a new page, make sure you add ``disqus: 1`` and ``order: <n>`` to the header. The number you give to order is used to order the pages within the subsection, with 0 being the first page. To just add the page at the end (a reasonable default), find the order value for the last page in the section and use that value + 1 for your new page.
+
+The final header will look something like this: 
+```
+---
+layout: page
+title: "Targets"
+category: doc
+date: 2015-05-26 07:03:23
+order: 6
+disqus: 1
+---
+```
 
 #### Viewing your local changes
 
