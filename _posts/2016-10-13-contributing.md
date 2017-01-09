@@ -22,7 +22,7 @@ To make contributions to Glide's source:
 
 #### Building the project.
 
-To build the project, you typically need to run a single gradle command from the project root directory: 
+To build the project, you typically need to run a single gradle command from the project root directory:
 
 ``./gradlew build``
 
@@ -31,13 +31,13 @@ To build the project, you typically need to run a single gradle command from the
 
 ##### Tests
 
-All of Glide's tests, including unit tests and code analysis, are run when you build the project. 
+All of Glide's tests, including unit tests and code analysis, are run when you build the project.
 
 You can run just the tests using: ``./gradlew test``.
 
 ##### Sample projects
 
-Glide's test are not completely comprehensive and do not effectively test for performance regressions. To verify your changes work and do not negatively affect performance (or improve performance!), it's also a good idea to try running one or more of Glide's sample projects. 
+Glide's test are not completely comprehensive and do not effectively test for performance regressions. To verify your changes work and do not negatively affect performance (or improve performance!), it's also a good idea to try running one or more of Glide's sample projects.
 
 Glide's sample projects are located in samples/. Sample projects can be built and installed onto a device or emulator using gradle:
 
@@ -60,18 +60,16 @@ To make contributions to this documentation site:
 
 #### Modifying the site
 
-The pages you see on the docs page are located in the ``_pages`` folder and can be modified in place. 
+The pages you see on the docs page are located in the ``_pages`` folder and can be modified in place.
 
-New pages can be added using ``./bin/jekyll ./bin/jekyll-page <page_name> <category>``. ``<page_name>`` is the title of the page, ``<category>`` matches one of the sections in the left hand nav. Typically ``<category>`` should be ``doc`` so that the page is placed under the ``Documentation`` section.
+New pages can be added using ``./bin/jekyll-page <page_name> <category>``. ``<page_name>`` is the title of the page, ``<category>`` matches one of the sections in the left hand nav. Typically ``<category>`` should be ``doc`` so that the page is placed under the ``Documentation`` section.
 
 
 #### Viewing your local changes
 
 To view your local changes, you will need to install jekyll and the gems used by the docs page:
 
-1. ``sudo gem install jekyll``
-2. ``sudo gem install redcarpet``
-3. ``sudo gem install pygments.rb``
+``sudo gem install jekyll redcarpet pygments.rb``
 
 Then you can run jekyll locally:
 
@@ -81,4 +79,3 @@ Finally you can view a version of the site with your local changes: ``http://127
 
 [1]: https://github.com/bumptech/glide
 [2]: https://help.github.com/articles/creating-a-pull-request/
- 
