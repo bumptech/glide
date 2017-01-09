@@ -40,7 +40,7 @@ highlighter: rouge
 future: true
 
 # Exclude non-site files
-exclude: ['bin', 'README.md', 'javadocs']
+exclude: ['bin', 'README.md', 'javadocs', 'samples', 'testutil', 'third_party', 'library', 'build']
 
 # Use the kramdown Markdown renderer
 markdown: kramdown
