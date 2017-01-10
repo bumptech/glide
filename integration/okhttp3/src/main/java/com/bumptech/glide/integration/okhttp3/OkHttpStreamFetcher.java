@@ -1,7 +1,6 @@
 package com.bumptech.glide.integration.okhttp3;
 
 import android.util.Log;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
