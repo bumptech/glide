@@ -460,7 +460,13 @@ public class GifHeaderParser {
     int blockSize;
     do {
       blockSize = read();
-      rawData.position(rawData.position() + blockSize);
+      int newPosition = rawData.position() + blockSize;
+      if (newPosition <= rawData.limit()) {
+        rawData.position(newPosition);
+      } else {
+        header.status = STATUS_FORMAT_ERROR;
+        return;
+      }
     } while (blockSize > 0);
   }
 
