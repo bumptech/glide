@@ -60,6 +60,8 @@ Depending on your ProGuard (DexGuard) config and usage, you may need to include 
   **[] $VALUES;
   public *;
 }
+
+# for DexGuard only
 -keepresourcexmlelements manifest/application/meta-data@value=GlideModule
 ```
 
