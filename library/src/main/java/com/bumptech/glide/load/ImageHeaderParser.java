@@ -47,8 +47,8 @@ public interface ImageHeaderParser {
     }
   }
 
-  public ImageType getType(InputStream is) throws IOException;
-  public ImageType getType(ByteBuffer byteBuffer) throws IOException;
+  ImageType getType(InputStream is) throws IOException;
+  ImageType getType(ByteBuffer byteBuffer) throws IOException;
 
   /**
    * Parse the orientation from the image header. If it doesn't handle this image type (or this is
@@ -58,6 +58,6 @@ public interface ImageHeaderParser {
    * contain an orientation
    * @throws IOException
    */
-  public int getOrientation(InputStream is, ArrayPool byteArrayPool) throws IOException;
-  public int getOrientation(ByteBuffer byteBuffer, ArrayPool byteArrayPool) throws IOException;
+  int getOrientation(InputStream is, ArrayPool byteArrayPool) throws IOException;
+  int getOrientation(ByteBuffer byteBuffer, ArrayPool byteArrayPool) throws IOException;
 }

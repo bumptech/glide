@@ -17,7 +17,7 @@ public final class ImageHeaderParserUtils {
   // will resize up to this amount if necessary.
   private static final int MARK_POSITION = 5 * 1024 * 1024;
 
-  private ImageHeaderParserUtils() {}
+  private ImageHeaderParserUtils() { }
 
   /** Returns the ImageType for the given InputStream. */
   public static ImageType getType(List<ImageHeaderParser> parsers, @Nullable InputStream is,

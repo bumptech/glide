@@ -373,7 +373,7 @@ public final class Downsampler {
 
     boolean hasAlpha = false;
     try {
-      hasAlpha = ImageHeaderParserUtils.getType(parsers, is, byteArrayPool).hasAlpha();;
+      hasAlpha = ImageHeaderParserUtils.getType(parsers, is, byteArrayPool).hasAlpha();
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Cannot determine whether the image has alpha or not from header"

@@ -464,11 +464,12 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     return stateVerifier;
   }
 
-  private class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
+  private final class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
 
     private final DataSource dataSource;
 
-    private DecodeCallback(DataSource dataSource) {
+    @Synthetic
+    DecodeCallback(DataSource dataSource) {
       this.dataSource = dataSource;
     }
 

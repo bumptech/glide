@@ -208,8 +208,8 @@ public class DefaultImageHeaderParserTest {
         assertEquals(ImageType.UNKNOWN, parser.getType(is));
       }
       @Override
-      public void run(DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
-          throws IOException {
+      public void run(DefaultImageHeaderParser parser, ByteBuffer byteBuffer,
+          ArrayPool byteArrayPool) throws IOException {
         assertEquals(ImageType.UNKNOWN, parser.getType(byteBuffer));
       }
     });
@@ -296,7 +296,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void getOrientation_withExifSegmentAndPreambleAndMoreThanLengthButLessThanExpected_returnsUnknown()
+  public void getOrientation_withExifSegmentAndPreambleBetweenLengthAndExpected_returnsUnknown()
       throws IOException {
     ByteBuffer jpegHeaderBytes = getExifMagicNumber();
     ByteBuffer exifSegmentPreamble =
