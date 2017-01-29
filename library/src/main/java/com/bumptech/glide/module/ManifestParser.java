@@ -60,9 +60,13 @@ public final class ManifestParser {
     Object module;
     try {
       module = clazz.newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
+    } catch (InstantiationException e) {
       throw new RuntimeException("Unable to instantiate GlideModule implementation for " + clazz,
-          e);
+              e);
+      // These can't be combined until API minimum is 19.
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException("Unable to instantiate GlideModule implementation for " + clazz,
+              e);
     }
 
     if (!(module instanceof GlideModule)) {
