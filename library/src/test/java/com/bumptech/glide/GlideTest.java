@@ -100,8 +100,7 @@ public class GlideTest {
   public void setUp() throws Exception {
     Glide.tearDown();
 
-    RobolectricPackageManager pm =
-        (RobolectricPackageManager) RuntimeEnvironment.application.getPackageManager();
+    RobolectricPackageManager pm = RuntimeEnvironment.getRobolectricPackageManager();
     ApplicationInfo info =
         pm.getApplicationInfo(RuntimeEnvironment.application.getPackageName(), 0);
     info.metaData = new Bundle();
