@@ -446,7 +446,7 @@ public final class Downsampler {
     // densities here so we calculate the final Bitmap size correctly.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       options.inTargetDensity = adjustTargetDensityForError(adjustedScaleFactor);
-      options.inDensity = DENSITY_PRECISION_MULTIPLIER;
+      options.inDensity = getDensityMultiplier(adjustedScaleFactor);
     }
     if (isScaling(options)) {
       options.inScaled = true;
@@ -473,10 +473,17 @@ public final class Downsampler {
    * the final scale factor is as close to our target as possible.
    */
   private static int adjustTargetDensityForError(double adjustedScaleFactor) {
-    int targetDensity = round(DENSITY_PRECISION_MULTIPLIER * adjustedScaleFactor);
-    float scaleFactorWithError = targetDensity / (float) DENSITY_PRECISION_MULTIPLIER;
+    int densityMultiplier = getDensityMultiplier(adjustedScaleFactor);
+    int targetDensity = round(densityMultiplier * adjustedScaleFactor);
+    float scaleFactorWithError = targetDensity / (float) densityMultiplier;
     double difference = adjustedScaleFactor / scaleFactorWithError;
     return round(difference * targetDensity);
+  }
+
+  private static int getDensityMultiplier(double adjustedScaleFactor) {
+    return (int) Math.round(
+        Integer.MAX_VALUE
+            * (adjustedScaleFactor <= 1D ? adjustedScaleFactor : 1 / adjustedScaleFactor));
   }
 
   // This is weird, but it matches the logic in a bunch of Android views/framework classes for
