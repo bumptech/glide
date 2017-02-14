@@ -150,7 +150,7 @@ public final class Util {
   }
 
   /**
-   * Returns {@code true} if called on the main thread, {@code false} otherwise.
+   * Returns {@code true} if called on a background thread, {@code false} otherwise.
    */
   public static boolean isOnBackgroundThread() {
     return !isOnMainThread();
