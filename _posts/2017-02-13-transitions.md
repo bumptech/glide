@@ -1,0 +1,54 @@
+---
+layout: page
+title: "Transitions"
+category: doc
+date: 2017-02-13 19:40:27
+order: 7
+disqus: 1
+---
+
+### About
+
+[``Transitions``][1] in Glide allow you to define how Glide should transition from a placeholder to a newly loaded image or from a thumbnail to a full size image. Transitions act within the context of a single request, not across multiple requests. As a result, [``Transitions``][1] do **NOT** allow you to define an animation (like a cross fade) from one request to another request. 
+
+### Specifying Transitions
+For an overview and code sample, see the [Options documentation][18].
+
+[``TransitionOptions``][12] are used to specify the transitions for a particular request. [``TransitionOptions``][12] are set for a request using the [``transition()``][13] method in [``RequestBuilder``][14]. Type specific transitions can be specified using [``BitmapTransitionOptions``][15] or [``DrawableTransitionOptions``][16]. For types other than ``Bitmaps`` and ``Drawables`` [``GenericTransitionOptions``][17] can be used. 
+
+### Performance Tips
+Animations in Android can be expensive, particularly if a large number are started at once. Cross fades and other animations involving changes in alpha can be especially expensive. In addition, animations often take substantially longer to run than images take to decode. Gratuitous use of animations in lists and grids can make image loading feel slow and janky. To maximize performance, consider avoiding animations when using Glide to load images into ListViews, GridViews, or RecyclerViews, especially when you expect images to be cached or fast to load most of the time. Instead consider pre-loading so that images are in memory when users scroll to them. 
+
+### Common Errors
+
+#### Cross fading with placeholders and transparent images
+Glide's default cross fade animation leverages [``TransitionDrawable``][8]. [``TransitionDrawable``][8] offers two animation modes, controlled by [``setCrossFadeEnabled()``][9]. When cross fades are disabled, the image that is transitioned to is faded in on top of the image that was already showing. When cross fades are enabled, the image that is being transitioned from is animated from opaque to transparent and the image that is being transitioned to is animated from transparent to opaque. 
+
+In Glide, we default to disabling cross fades because it typically provides a much nicer looking animation. An actual cross fade where the alpha of both images is changing at once often produces a white flash in the middle of the animation where both images are partially opaque. 
+
+Unfortunately althoug disabling cross fades is typically a better default, it can also lead to problems when the image that is being loaded contains transparent pixels. When the placeholder is larger than the image that is being loaded or the image is partially transparent, disabling cross fades results in the placeholder being visible behind the image after the animation finishes. If you are loading transparent images with placeholders, you can enable cross fades by adjusting the options in [``DrawableCrossFadeFactory``][10] and passing the result into [``transition()``][11].
+
+#### Cross fading across requests.
+[``Transitions``][1] do not allow you to cross fade between two different images that are loaded with different requests. Glide by default will cancel any existing requests when you start a new load into an existing View or Target (See [Targets documentation][19] for more details). As a result, if you want to load two different images and cross fade between them, you cannot do so with Glide directly. Strategies like waiting for the first load to finish, grabbing a Bitmap or Drawable out of the View, starting a second load, and then manually animating between the Drawale or Bitmap and the new image are unsafe and may result in crashes or graphical corruption. 
+
+Instead, the easiest way to cross fade across two different images loaded in two separate requests is to use [``ViewSwitcher``][2] containing two [``ImageViews``][3]. Load the first image into the result of [``getNextView()``][4]. Then load the second image into the next result of [``getNextView()``][4] and use a [``RequestListener``][5] to call [``showNext()``][6] when the second image load finishes. For better control, you can also follow the strategy outlined in the [developer documentation][7]. As with the [``ViewSwitcher``][2], only start the cross fade after the second image load finishes.
+
+[1]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/transition/Transition.html
+[2]: https://developer.android.com/reference/android/widget/ViewSwitcher.html
+[3]: https://developer.android.com/reference/android/widget/ImageView.html
+[4]: https://developer.android.com/reference/android/widget/ViewSwitcher.html#getNextView()
+[5]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
+[6]: https://developer.android.com/reference/android/widget/ViewAnimator.html#showNext()
+[7]: https://developer.android.com/training/animation/crossfade.html
+[8]: https://developer.android.com/reference/android/graphics/drawable/TransitionDrawable.html
+[9]: https://developer.android.com/reference/android/graphics/drawable/TransitionDrawable.html#setCrossFadeEnabled(boolean)
+[10]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/transition/DrawableCrossFadeFactory.html
+[11]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html#transition(com.bumptech.glide.request.transition.TransitionFactory)
+[12]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html
+[13]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#transition(com.bumptech.glide.TransitionOptions)
+[14]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
+[15]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
+[16]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html
+[17]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
+[18]: /glide/doc/options.html#transitionoptions
+[19]: /glide/doc/targets.html#targets-and-automatic-cancellation
