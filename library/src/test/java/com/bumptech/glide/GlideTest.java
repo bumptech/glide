@@ -89,7 +89,7 @@ import org.robolectric.shadows.ShadowBitmap;
     GlideTest.ShadowFileDescriptorContentResolver.class,
     GlideTest.ShadowMediaMetadataRetriever.class, GlideShadowLooper.class,
     GlideTest.MutableShadowBitmap.class })
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "deprecation"})
 public class GlideTest {
   @SuppressWarnings("rawtypes")
   private Target target = null;
@@ -141,8 +141,8 @@ public class GlideTest {
 
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide =
-        new GlideBuilder(getContext()).setMemoryCache(memoryCache).setBitmapPool(bitmapPool)
-            .createGlide();
+        new GlideBuilder().setMemoryCache(memoryCache).setBitmapPool(bitmapPool)
+            .createGlide(getContext());
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -155,8 +155,8 @@ public class GlideTest {
     MemoryCache memoryCache = mock(MemoryCache.class);
 
     Glide glide =
-        new GlideBuilder(getContext()).setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
-            .createGlide();
+        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
+            .createGlide(getContext());
 
     glide.clearMemory();
 
@@ -170,8 +170,8 @@ public class GlideTest {
     MemoryCache memoryCache = mock(MemoryCache.class);
 
     Glide glide =
-        new GlideBuilder(getContext()).setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
-            .createGlide();
+        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
+            .createGlide(getContext());
 
     final int level = 123;
 

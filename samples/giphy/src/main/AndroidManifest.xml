@@ -20,10 +20,5 @@
             </intent-filter>
         </activity>
         <activity android:name=".FullscreenActivity"/>
-
-        <meta-data
-            android:name="com.bumptech.glide.samples.giphy.GiphyGlideModule"
-            android:value="GlideModule"/>
     </application>
-
 </manifest>

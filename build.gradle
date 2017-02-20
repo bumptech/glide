@@ -67,6 +67,11 @@ subprojects { project ->
             options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
         }
     }
+
+    // We generate a combined javadoc, no need to create javadocs for each library independently.
+    if (!project.name.equals('glide')) {
+        tasks.withType(Javadoc).all { enabled = false }
+    }
 }
 
 task wrapper(type: Wrapper) {

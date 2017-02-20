@@ -20,6 +20,7 @@ public final class ManifestParser {
     this.context = context;
   }
 
+  @SuppressWarnings("deprecation")
   public List<GlideModule> parse() {
     if (Log.isLoggable(TAG, Log.DEBUG)) {
       Log.d(TAG, "Loading Glide modules");
@@ -29,7 +30,13 @@ public final class ManifestParser {
       ApplicationInfo appInfo = context.getPackageManager()
           .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
       if (appInfo.metaData == null) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Got null app info metadata");
+        }
         return modules;
+      }
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Got app info metadata: " + appInfo.metaData);
       }
       for (String key : appInfo.metaData.keySet()) {
         if (GLIDE_MODULE_VALUE.equals(appInfo.metaData.get(key))) {
@@ -49,6 +56,7 @@ public final class ManifestParser {
     return modules;
   }
 
+  @SuppressWarnings("deprecation")
   private static GlideModule parseModule(String className) {
     Class<?> clazz;
     try {

@@ -7,6 +7,7 @@ dependencies {
     }
     compile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
     compile "com.android.support:recyclerview-v7:${SUPPORT_V7_VERSION}"
+    annotationProcessor project(':annotation:compiler')
 }
 
 android {

@@ -1,7 +1,5 @@
 package com.bumptech.glide.module;
 
-import android.content.Context;
-import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 
 /**
@@ -52,28 +50,9 @@ import com.bumptech.glide.Registry;
  * applying conflicting settings in different modules. If an application depends on libraries that
  * have conflicting modules, the application should consider avoiding the library modules and
  * instead providing their required dependencies in a single application module. </p>
+ *
+ * @deprecated Libraries should use {@link ChildGlideModule} and Applications should use
+ * {@link RootGlideModule}.
  */
-public interface GlideModule {
-
-  /**
-   * Lazily apply options to a {@link com.bumptech.glide.GlideBuilder} immediately before the Glide
-   * singleton is created.
-   *
-   * <p> This method will be called once and only once per implementation. </p>
-   *
-   * @param context An Application {@link android.content.Context}.
-   * @param builder The {@link com.bumptech.glide.GlideBuilder} that will be used to create Glide.
-   */
-  void applyOptions(Context context, GlideBuilder builder);
-
-  /**
-   * Lazily register components immediately after the Glide singleton is created but before any
-   * requests can be started.
-   *
-   * <p> This method will be called once and only once per implementation. </p>
-   *
-   * @param context  An Application {@link android.content.Context}.
-   * @param registry An {@link com.bumptech.glide.Registry} to use to register components.
-   */
-  void registerComponents(Context context, Registry registry);
-}
+@Deprecated
+public interface GlideModule extends RegistersComponents, AppliesOptions { }

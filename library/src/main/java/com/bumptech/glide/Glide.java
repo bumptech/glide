@@ -75,7 +75,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A singleton to present a simple static interface for building requests with
@@ -145,22 +148,89 @@ public class Glide implements ComponentCallbacks2 {
     if (glide == null) {
       synchronized (Glide.class) {
         if (glide == null) {
-          Context applicationContext = context.getApplicationContext();
-          List<GlideModule> modules = new ManifestParser(applicationContext).parse();
-
-          GlideBuilder builder = new GlideBuilder(applicationContext);
-          for (GlideModule module : modules) {
-            module.applyOptions(applicationContext, builder);
-          }
-          glide = builder.createGlide();
-          for (GlideModule module : modules) {
-            module.registerComponents(applicationContext, glide.registry);
-          }
+          glide = initGlide(context);
         }
       }
     }
 
     return glide;
+  }
+
+  @SuppressWarnings("deprecation")
+  private static Glide initGlide(Context context) {
+    Context applicationContext = context.getApplicationContext();
+
+    GeneratedRootGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
+    List<GlideModule> manifestModules = Collections.emptyList();
+    if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
+      manifestModules = new ManifestParser(applicationContext).parse();
+    }
+
+    if (annotationGeneratedModule != null
+        && !annotationGeneratedModule.getExcludedModuleClasses().isEmpty()) {
+      Set<Class<?>> excludedModuleClasses =
+          annotationGeneratedModule.getExcludedModuleClasses();
+      for (Iterator<GlideModule> iterator = manifestModules.iterator(); iterator.hasNext();) {
+        GlideModule current = iterator.next();
+        if (!excludedModuleClasses.contains(current.getClass())) {
+          continue;
+        }
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "RootGlideModule excludes manifest GlideModule: " + current);
+        }
+        iterator.remove();
+      }
+    }
+
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+      for (GlideModule glideModule : manifestModules) {
+        Log.d(TAG, "Discovered GlideModule from manifest: " + glideModule.getClass());
+      }
+    }
+
+    GlideBuilder builder = new GlideBuilder();
+    for (GlideModule module : manifestModules) {
+      module.applyOptions(applicationContext, builder);
+    }
+    if (annotationGeneratedModule != null) {
+      annotationGeneratedModule.applyOptions(applicationContext, builder);
+    }
+    Glide glide = builder.createGlide(applicationContext);
+    for (GlideModule module : manifestModules) {
+      module.registerComponents(applicationContext, glide.registry);
+    }
+    if (annotationGeneratedModule != null) {
+      annotationGeneratedModule.registerComponents(applicationContext, glide.registry);
+    }
+    return glide;
+  }
+
+  @Nullable
+  @SuppressWarnings({"unchecked", "deprecation"})
+  private static GeneratedRootGlideModule getAnnotationGeneratedGlideModules() {
+    GeneratedRootGlideModule result = null;
+    try {
+      Class<GeneratedRootGlideModule> clazz =
+          (Class<GeneratedRootGlideModule>)
+              Class.forName("com.bumptech.glide.GeneratedRootGlideModuleImpl");
+      result = clazz.newInstance();
+    } catch (ClassNotFoundException e) {
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Failed to find GeneratedRootGlideModule. You should include an"
+            + " annotationProcessor compile dependency on com.github.bumptech.glide:glide:compiler"
+            + " in your application and a @GlideModule annotated RootGlideModule implementation or"
+            + " ChildGlideModules will be silently ignored");
+      }
+    } catch (InstantiationException e) {
+      throw new IllegalStateException("GeneratedRootGlideModuleImpl is implemented incorrectly."
+          + " If you've manually implemented this class, remove your implementation. The Annotation"
+          + " processor will generate a correct implementation.", e);
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException("GeneratedRootGlideModuleImpl is implemented incorrectly."
+          + " If you've manually implemented this class, remove your implementation. The Annotation"
+          + " processor will generate a correct implementation.", e);
+    }
+    return result;
   }
 
   @VisibleForTesting

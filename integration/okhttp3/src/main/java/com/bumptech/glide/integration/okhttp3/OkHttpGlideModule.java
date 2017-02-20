@@ -15,7 +15,11 @@ import java.io.InputStream;
  * <p> If you're using gradle, you can include this module simply by depending on the aar, the
  * module will be merged in by manifest merger. For other build systems or for more more
  * information, see {@link com.bumptech.glide.module.GlideModule}. </p>
+ *
+ * @deprecated Replaced by {@link OkHttpChildGlideModule} for Applications that use Glide's
+ * annotations.
  */
+@Deprecated
 public class OkHttpGlideModule implements GlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {

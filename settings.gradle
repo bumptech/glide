@@ -1,7 +1,9 @@
 exec {
-  commandLine "git", "submodule", "update", "--init", "--recursive"
+    commandLine "git", "submodule", "update", "--init", "--recursive"
 }
 include ':library'
+include ':annotation'
+include ':annotation:compiler'
 include ':glide'
 include ':third_party:gif_decoder'
 include ':third_party:disklrucache'

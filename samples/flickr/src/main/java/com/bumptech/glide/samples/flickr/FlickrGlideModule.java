@@ -1,23 +1,25 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
-import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
-import com.bumptech.glide.module.GlideModule;
+import com.bumptech.glide.annotation.GlideModule;
+import com.bumptech.glide.module.RootGlideModule;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import java.io.InputStream;
 
 /**
- * {@link com.bumptech.glide.module.GlideModule} for the Flickr sample app.
+ * Register {@link FlickrModelLoader} for the Flickr sample app.
  */
-public class FlickrGlideModule implements GlideModule {
-  @Override
-  public void applyOptions(Context context, GlideBuilder builder) {
-    // Do nothing.
-  }
-
+@GlideModule
+public class FlickrGlideModule extends RootGlideModule {
   @Override
   public void registerComponents(Context context, Registry registry) {
     registry.append(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
+  }
+
+  // Disable manifest parsing to avoid adding similar modules twice.
+  @Override
+  public boolean isManifestParsingEnabled() {
+    return false;
   }
 }

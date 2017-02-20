@@ -1,69 +1,141 @@
 apply plugin: 'java'
 
-evaluationDependsOn(':third_party:gif_decoder')
-evaluationDependsOn(':third_party:disklrucache')
-evaluationDependsOn(':library')
+// The paths of Android projects that should be included in the jar and javadoc.
+static def getAndroidPathsForJar() {
+    [':third_party:gif_decoder', ':library']
+}
+
+// The paths of Java projects that should be included in the jar and javadoc.
+static def getJavaPathsForJar() {
+    [':third_party:disklrucache']
+}
+
+// The paths of Android projects that should be included only in Javadoc, not in the jar.
+static def getAndroidPathsForJavadoc() {
+    [
+            ':integration:okhttp',
+            ':integration:okhttp3',
+            ':integration:volley',
+            ':integration:gifencoder'
+    ]
+}
+
+// The paths of Java projects that should be included only in Javadoc, not in the jar.
+static def getJavaPathsForJavadoc() {
+    [':annotation', ':annotation:compiler']
+}
+
+(getAndroidPathsForJavadoc() + getAndroidPathsForJar() +
+        getJavaPathsForJar() + getJavaPathsForJavadoc()).forEach {
+    evaluationDependsOn(it)
+}
+
+def asProjects(paths) {
+    paths.collect { project(it) }
+}
 
 def getAndroidSdkDirectory() {
-  project(':library').android.sdkDirectory
+    project(':library').android.sdkDirectory
 }
 
 def getAndroidCompileSdkVersion() {
-  project(':library').android.compileSdkVersion
+    project(':library').android.compileSdkVersion
 }
 
-def getInternalAndroidProjects() {
-    [':third_party:gif_decoder', ':library'].collect { project(it) }
-}
-def getInternalJavaProjects() {
-    [':third_party:disklrucache'].collect { project(it) }
+def getInternalAndroidProjectsForJar() {
+    asProjects(getAndroidPathsForJar())
 }
 
-def getAllInternalProjects() {
-    getInternalAndroidProjects() + getInternalJavaProjects()
+def getInternalJavaProjectsForJar() {
+    asProjects(getJavaPathsForJar())
 }
 
-def getReleaseVariantAndroidProjects() {
-    getAndroidLibraryVariants('release')
+def getInternalAndroidProjectsForJavadoc() {
+    asProjects(getAndroidPathsForJavadoc())
 }
 
-def getAndroidLibraryVariants(variantName) {
-    getInternalAndroidProjects().collect { project ->
+def getInternalJavaProjectsForJavadoc() {
+    asProjects(getJavaPathsForJavadoc())
+}
+
+def getReleaseVariantAndroidProjectsForJar() {
+    getAndroidLibraryVariantsForJar('release')
+}
+
+def getAndroidLibraryVariantsForJar(variantName) {
+    getAndroidLibraryVariants(getInternalAndroidProjectsForJar(), variantName)
+}
+
+def getAndroidLibraryVariantsForJavadoc(variantName) {
+    getAndroidLibraryVariants(getInternalAndroidProjectsForJavadoc(), variantName)
+}
+
+static def getAndroidLibraryVariants(projects, variantName) {
+    projects.collect { project ->
         project.android.libraryVariants.findAll { type ->
             type.buildType.name.equalsIgnoreCase(variantName)
         }
     }.sum()
 }
 
-def getSourceFilesForVariant(variantName) {
-    getAndroidLibraryVariants(variantName).collect { it.javaCompile.source } +
-            getInternalJavaProjects().collect { it.sourceSets.main.allJava }
+def getSourceFilesForVariantJar(variantName) {
+    getAndroidLibraryVariantsForJar(variantName).collect { it.javaCompile.source } +
+            getInternalJavaProjectsForJar().collect { it.sourceSets.main.allJava }
+}
+
+def getSourceFilesForVariantJavadoc(variantName) {
+    getAndroidLibraryVariantsForJavadoc(variantName).collect { it.javaCompile.source } +
+            getInternalJavaProjectsForJavadoc().collect { it.sourceSets.main.allJava }
 }
 
 def getAndroidJar() {
     "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdkVersion()}/android.jar"
 }
 
+def getSupportJar() {
+    "${getAndroidSdkDirectory()}/extras/android/support/v4/android-support-v4.jar"
+}
+
 project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 
-// Generate javadocs and sources containing batched documentation and sources for all internal projects.
+// Generate javadocs and sources containing batched documentation and sources for all internal
+// projects.
 ['release', 'debug'].each { variantName ->
 
     task("${variantName}SourceJar", type: Jar) {
-      from getSourceFilesForVariant(variantName)
+      from getSourceFilesForVariantJar(variantName)
     }
 
     def javadocTask = task("${variantName}Javadoc", type: Javadoc) {
-        source = getSourceFilesForVariant(variantName)
+        source = getSourceFilesForVariantJar(variantName)
+        source += getSourceFilesForVariantJavadoc(variantName)
 
-        classpath = files(getAndroidLibraryVariants(variantName).collect {
-            files(it.javaCompile.classpath.files, getAndroidJar())
+        classpath = files(getAndroidLibraryVariantsForJar(variantName).collect {
+            files(it.javaCompile.classpath.files, getAndroidJar(), getSupportJar())
         })
-        classpath += getInternalJavaProjects().collect { files(it.configurations.compile) }.sum()
+        classpath += files(getAndroidLibraryVariantsForJavadoc(variantName).collect {
+            files(it.javaCompile.classpath.files, getAndroidJar(), getSupportJar())
+        })
+        classpath += getInternalJavaProjectsForJavadoc().collect {
+            it.sourceSets.main.compileClasspath
+        }
+        classpath += getInternalJavaProjectsForJar().collect {
+            it.sourceSets.main.compileClasspath
+        }
+        // Finds dependencies of Android packages that would otherwise be ignored (Volley in
+        // particular)
+        classpath += getInternalAndroidProjectsForJavadoc().collect {
+            files("${it.projectDir}/build/intermediates/classes/release")
+        }
 
         options {
             links("http://docs.oracle.com/javase/7/docs/api/")
-            linksOffline("http://d.android.com/reference", "${getAndroidSdkDirectory()}/docs/reference")
+            links("https://square.github.io/okhttp/3.x/okhttp/")
+            links("https://square.github.io/okhttp/2.x/okhttp/")
+            // TODO: Ideally this would point to something hosted by Android.
+            links("http://afzaln.com/volley/")
+            linksOffline("http://d.android.com/reference",
+                    "${getAndroidSdkDirectory()}/docs/reference")
         }
 
         exclude '**/BuildConfig.java'
@@ -76,23 +148,30 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
     clean.dependsOn(cleanJavadocTask)
 
     def javadocJarTask = task("${variantName}JavadocJar", type: Jar) {
-      from javadocTask.destinationDir
+        from javadocTask.destinationDir
     } as Task
     javadocJarTask.dependsOn(javadocTask)
 }
 
 jar {
     from files(
-            getReleaseVariantAndroidProjects().collect { variant ->
+            getReleaseVariantAndroidProjectsForJar().collect { variant ->
                 variant.javaCompile.destinationDir
             }
     )
     exclude "**/R.class"
     exclude "**/BuildConfig.class"
-    from files(getInternalJavaProjects().collect { it.sourceSets.main.output })
+    from files(getInternalJavaProjectsForJar().collect { it.sourceSets.main.output })
 }
 
-getAllInternalProjects().each { project ->
+def getAllInternalProjectBuildDeps() {
+    getInternalAndroidProjectsForJar() + getInternalJavaProjectsForJar() +
+            getInternalJavaProjectsForJavadoc() + getInternalAndroidProjectsForJavadoc()
+}
+
+getAllInternalProjectBuildDeps().each { project ->
+    releaseJavadoc.dependsOn(project.tasks.assemble)
+    debugJavadoc.dependsOn(project.tasks.assemble)
     jar.dependsOn(project.tasks.build)
 }
 

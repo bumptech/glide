@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 
 dependencies {
     compile project(':library')
+    annotationProcessor project(':annotation:compiler')
     compile 'com.caverock:androidsvg:1.2.1'
 }
 

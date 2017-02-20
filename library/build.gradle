@@ -18,6 +18,7 @@ coveralls {
 dependencies {
     compile project(':third_party:gif_decoder')
     compile project(':third_party:disklrucache')
+    compile project(':annotation')
     compile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
 
     testCompile project(':testutil')
@@ -140,8 +141,9 @@ afterEvaluate {
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"
 // exclude <dependency> tag for android support-v4 library from :glide's pom
 // this will ensure that this warning will not prevent the build from completing:
-// Module 'com.github.bumptech.glide:glide:4.0.0-SNAPSHOT' depends on one or more Android Libraries but is a jar
-// most users will need to override support-v4 version anyway if a newer version is available
+// Module 'com.github.bumptech.glide:glide:4.0.0-SNAPSHOT' depends on one or more Android Libraries
+// but is a jar. Most users will need to override support-v4 version anyway if a newer version is
+// available
 // TODO make support-v4 a <scope>runtime</scope> dependency in pom.xml
 afterEvaluate {
     uploadArchives.repositories.mavenDeployer.pom.whenConfigured { p ->

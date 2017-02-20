@@ -24,8 +24,6 @@ import com.bumptech.glide.request.RequestOptions;
  * A builder class for setting default structural classes for Glide to use.
  */
 public final class GlideBuilder {
-  private final Context context;
-
   private Engine engine;
   private BitmapPool bitmapPool;
   private ArrayPool arrayPool;
@@ -38,8 +36,8 @@ public final class GlideBuilder {
   private int logLevel = Log.INFO;
   private RequestOptions defaultRequestOptions = new RequestOptions();
 
-  GlideBuilder(Context context) {
-    this.context = context.getApplicationContext();
+  GlideBuilder() {
+    // Package private visibility.
   }
 
   /**
@@ -260,7 +258,7 @@ public final class GlideBuilder {
     return this;
   }
 
-  Glide createGlide() {
+  Glide createGlide(Context context) {
     if (sourceExecutor == null) {
       sourceExecutor = GlideExecutor.newSourceExecutor();
     }
