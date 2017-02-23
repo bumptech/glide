@@ -75,6 +75,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -87,6 +88,7 @@ public class Glide implements ComponentCallbacks2 {
   private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
   private static final String TAG = "Glide";
   private static volatile Glide glide;
+  private static boolean modulesEnabled = true;
 
   private final Engine engine;
   private final BitmapPool bitmapPool;
@@ -137,6 +139,17 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   /**
+   * Enable or disable the parsing of AndroidManifest.xml
+   * looking for {@link GlideModule} implementations.
+   * Must be called before accessing the Glide singleton; otherwise, has no effect.
+   */
+  public static void setModulesEnabled(boolean enabled) {
+    synchronized (Glide.class) {
+      modulesEnabled = enabled;
+    }
+  }
+
+  /**
    * Get the singleton.
    *
    * @return the singleton
@@ -146,9 +159,8 @@ public class Glide implements ComponentCallbacks2 {
       synchronized (Glide.class) {
         if (glide == null) {
           Context applicationContext = context.getApplicationContext();
-          List<GlideModule> modules = new ManifestParser(applicationContext).parse();
-
           GlideBuilder builder = new GlideBuilder(applicationContext);
+          List<GlideModule> modules = parseGlideModules(applicationContext);
           for (GlideModule module : modules) {
             module.applyOptions(applicationContext, builder);
           }
@@ -161,6 +173,18 @@ public class Glide implements ComponentCallbacks2 {
     }
 
     return glide;
+  }
+
+  /**
+   * If modules are enabled, parses the application manifest and returns the configured modules.
+   * Otherwise, returns an empty list.
+   */
+  private static List<GlideModule> parseGlideModules(Context applicationContext) {
+    if (modulesEnabled) {
+      return new ManifestParser(applicationContext).parse();
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   @VisibleForTesting
