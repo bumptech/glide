@@ -2,7 +2,10 @@ package com.bumptech.glide;
 
 import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
 import static com.bumptech.glide.request.RequestOptions.placeholderOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -43,6 +46,7 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
+import com.bumptech.glide.load.model.stream.HttpGlideUrlLoader;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
@@ -63,6 +67,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
@@ -545,6 +550,44 @@ public class GlideTest {
 
     verify(firstTarget).onResourceReady(isA(Drawable.class), isA(Transition.class));
     verify(secondTarget).onResourceReady(notNull(Drawable.class), isA(Transition.class));
+  }
+
+  @Test
+  public void testSetModulesEnabledTrue() throws Exception {
+    // teaDown glide instance first so we have a clean slate and not the Glide.get() call in setUp
+    Glide.tearDown();
+
+    // This is the default, so it should be a no-op
+    Glide.setModulesEnabled(true);
+
+    Glide glide = Glide.get(getContext());
+    List<ModelLoader<GlideUrl, ?>> modelLoaders =
+        glide.getRegistry().getModelLoaders(mock(GlideUrl.class));
+
+    // With modules enabled, SetupModule below should have been initialized,
+    // so the default modelLoader should NOT be configured
+    assertEquals(1, modelLoaders.size());
+    assertFalse(modelLoaders.get(0) instanceof HttpGlideUrlLoader);
+  }
+
+  @Test
+  public void testSetModulesEnabledFalse() throws Exception {
+    // teaDown glide instance first so we have a clean slate and not the Glide.get() call in setUp
+    Glide.tearDown();
+
+    Glide.setModulesEnabled(false);
+    try {
+      Glide glide = Glide.get(getContext());
+      List<ModelLoader<GlideUrl, ?>> modelLoaders =
+          glide.getRegistry().getModelLoaders(mock(GlideUrl.class));
+
+      // With modules disabled, SetupModule below should not have been initialized,
+      // so the default modelLoader should remain
+      assertEquals(1, modelLoaders.size());
+      assertTrue(modelLoaders.get(0) instanceof HttpGlideUrlLoader);
+    } finally {
+      Glide.setModulesEnabled(true);
+    }
   }
 
   @SuppressWarnings("unchecked")
