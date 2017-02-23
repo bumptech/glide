@@ -137,6 +137,7 @@ public class GlideTest {
   @After
   public void tearDown() {
     Glide.tearDown();
+    Glide.setModulesEnabled(true);
   }
 
   @Test
@@ -554,7 +555,7 @@ public class GlideTest {
 
   @Test
   public void testSetModulesEnabledTrue() throws Exception {
-    // teaDown glide instance first so we have a clean slate and not the Glide.get() call in setUp
+    // tearDown glide instance first so we have a clean slate and not the Glide.get() call in setUp
     Glide.tearDown();
 
     // This is the default, so it should be a no-op
@@ -572,22 +573,19 @@ public class GlideTest {
 
   @Test
   public void testSetModulesEnabledFalse() throws Exception {
-    // teaDown glide instance first so we have a clean slate and not the Glide.get() call in setUp
+    // tearDown glide instance first so we have a clean slate and not the Glide.get() call in setUp
     Glide.tearDown();
 
     Glide.setModulesEnabled(false);
-    try {
-      Glide glide = Glide.get(getContext());
-      List<ModelLoader<GlideUrl, ?>> modelLoaders =
-          glide.getRegistry().getModelLoaders(mock(GlideUrl.class));
 
-      // With modules disabled, SetupModule below should not have been initialized,
-      // so the default modelLoader should remain
-      assertEquals(1, modelLoaders.size());
-      assertTrue(modelLoaders.get(0) instanceof HttpGlideUrlLoader);
-    } finally {
-      Glide.setModulesEnabled(true);
-    }
+    Glide glide = Glide.get(getContext());
+    List<ModelLoader<GlideUrl, ?>> modelLoaders =
+        glide.getRegistry().getModelLoaders(mock(GlideUrl.class));
+
+    // With modules disabled, SetupModule below should not have been initialized,
+    // so the default modelLoader should remain
+    assertEquals(1, modelLoaders.size());
+    assertTrue(modelLoaders.get(0) instanceof HttpGlideUrlLoader);
   }
 
   @SuppressWarnings("unchecked")
