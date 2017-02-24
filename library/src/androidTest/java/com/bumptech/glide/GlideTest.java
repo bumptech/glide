@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -21,6 +23,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
@@ -47,6 +50,7 @@ import com.bumptech.glide.load.resource.gifbitmap.GifBitmapWrapper;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
+import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -67,6 +71,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
+import org.robolectric.res.builder.RobolectricPackageManager;
 import org.robolectric.shadows.ShadowBitmap;
 
 import java.io.ByteArrayInputStream;
@@ -713,6 +718,74 @@ public class GlideTest {
 
         secondRequest.load(fakeUri).into(secondTarget);
         verify(secondTarget).onResourceReady(eq(secondResult), any(GlideAnimation.class));
+    }
+
+    @Test
+    public void testSetModulesEnabledTrue() throws Exception {
+        // tearDown glide instance first so we have a clean slate and not the Glide.get() call in setUp
+        Glide.tearDown();
+
+        // Register a module in the manifest
+        setupMockModule();
+
+        // Reset the static counters
+        MockModule.applyOptionsCallCount = MockModule.registerComponentsCallCount = 0;
+
+        // This is the default, so it should be a no-op
+        Glide.setModulesEnabled(true);
+
+        Glide.get(getContext());
+
+        // With modules enabled, MockModule below should have been initialized,
+        // so the counters should both be 1
+        assertEquals(1, MockModule.registerComponentsCallCount);
+        assertEquals(1, MockModule.applyOptionsCallCount);
+    }
+
+    @Test
+    public void testSetModulesEnabledFalse() throws Exception {
+        // tearDown glide instance first so we have a clean slate and not the Glide.get() call in setUp
+        Glide.tearDown();
+
+        // Register a module in the manifest
+        setupMockModule();
+
+        // Reset the static counters
+        MockModule.applyOptionsCallCount = MockModule.registerComponentsCallCount = 0;
+
+        Glide.setModulesEnabled(false);
+
+        Glide.get(getContext());
+
+        // With modules disabled, MockModule below should not have been initialized,
+        // so the counters should still be 0
+        assertEquals(0, MockModule.registerComponentsCallCount);
+        assertEquals(0, MockModule.applyOptionsCallCount);
+    }
+
+    private void setupMockModule() throws Exception {
+        RobolectricPackageManager pm =
+                (RobolectricPackageManager) Robolectric.application.getPackageManager();
+        ApplicationInfo info =
+                pm.getApplicationInfo(Robolectric.application.getPackageName(), 0);
+        info.metaData = new Bundle();
+        info.metaData.putString(MockModule.class.getName(), "GlideModule");
+    }
+
+    public static class MockModule implements GlideModule {
+
+        static int applyOptionsCallCount;
+        static int registerComponentsCallCount;
+
+        @Override
+        public void applyOptions(Context context, GlideBuilder builder) {
+            applyOptionsCallCount++;
+        }
+
+        @Override
+        public void registerComponents(Context context, Glide glide) {
+            registerComponentsCallCount++;
+        }
     }
 
     @SuppressWarnings("unchecked")
