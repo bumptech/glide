@@ -139,8 +139,7 @@ public class Glide {
     }
 
     /**
-     * Enable or disable the parsing of AndroidManifest.xml
-     * looking for {@link GlideModule} implementations.
+     * Enable or disable the parsing of AndroidManifest.xml looking for {@link GlideModule} implementations.
      * @throws IllegalArgumentException if the Glide singleton has already been created.
      */
     public static void setModulesEnabled(boolean enabled) {
