@@ -1,19 +1,22 @@
 package com.bumptech.glide.load.resource.drawable;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -21,9 +24,11 @@ import org.robolectric.annotation.Config;
 public class DrawableResourceTest {
   private TestDrawable drawable;
   private DrawableResource<TestDrawable> resource;
+  private Resources resources;
 
   @Before
   public void setUp() {
+    resources = RuntimeEnvironment.application.getResources();
     drawable = mock(TestDrawable.class);
     resource = new DrawableResource<TestDrawable>(drawable) {
       @Override
@@ -50,12 +55,13 @@ public class DrawableResourceTest {
 
   @Test
   public void testReturnsNewDrawableOnGet() {
-    GifDrawable expected = mock(GifDrawable.class);
+    Drawable expected =
+        new BitmapDrawable(resources, Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
     Drawable.ConstantState constantState = mock(Drawable.ConstantState.class);
     when(constantState.newDrawable()).thenReturn(expected);
     when(drawable.getConstantState()).thenReturn(constantState);
 
-    assertEquals(expected, resource.get());
+    assertThat(resource.get()).isEqualTo(expected);
 
     verify(drawable).getConstantState();
     verify(constantState).newDrawable();

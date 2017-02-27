@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import android.support.v4.util.Pools.Pool;
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
-import com.bumptech.glide.tests.Util;
+import com.bumptech.glide.testlib.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.ArrayList;
 import java.util.List;

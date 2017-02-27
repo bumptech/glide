@@ -6,6 +6,7 @@
 
 <suppressions>
     <suppress files=".*[/\\]library[/\\]src[/\\]test[/\\].*" checks="Javadoc.*"/>
+    <suppress files=".*[/\\]integration[/\\]gifdecoder[/\\]src[/\\]test[/\\].*" checks="Javadoc.*"/>
     <suppress files=".*[/\\]gif_encoder[/\\].*" checks=".*"/>
     <suppress files=".*RequestBuilder.java|ChildLoadProvider.java|TransitionOptions.java|BaseDecodeOptions.java|RequestOptions.java" checks="NoClone" />
 </suppressions>

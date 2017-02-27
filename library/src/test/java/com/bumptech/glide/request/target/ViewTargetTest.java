@@ -19,7 +19,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.tests.Util;
+import com.bumptech.glide.testlib.Util;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.After;
@@ -416,7 +416,7 @@ public class ViewTargetTest {
 
   @Test
   public void getSize_withValidWidthAndHeight_preV19_layoutRequested_doesNotCallSizeReady() {
-    Util.setSdkVersionInt(18);
+    Util.setSdkVersionInt(sdkVersion);
     shadowView
         .setWidth(100)
         .setHeight(100)

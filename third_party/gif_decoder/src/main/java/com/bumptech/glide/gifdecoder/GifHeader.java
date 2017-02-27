@@ -23,7 +23,7 @@ public class GifHeader {
   int[] gct = null;
   @GifDecoder.GifDecodeStatus
   int status = GifDecoder.STATUS_OK;
-  int frameCount = 0;
+  public int frameCount = 0;
 
   GifFrame currentFrame;
   List<GifFrame> frames = new ArrayList<>();

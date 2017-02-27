@@ -1,0 +1,38 @@
+/** Shared test classes used in tests across all components. */
+
+tasks.whenTaskAdded { task ->
+    if (task.name.equals("lint")) {
+        task.enabled = false
+    }
+}
+
+apply plugin: 'com.android.library'
+
+dependencies {
+    compile project(':testutil')
+    compile 'com.google.guava:guava-testlib:18.0'
+    compile "com.google.truth:truth:${TRUTH_VERSION}"
+    compile "junit:junit:${JUNIT_VERSION}"
+    compile "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    compile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    compile "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
+    compile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION as String
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+
+        versionName VERSION_NAME as String
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}
+

@@ -43,7 +43,6 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.module.GlideModule;
@@ -52,9 +51,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.tests.GlideShadowLooper;
-import com.bumptech.glide.tests.Util;
-import com.bumptech.glide.testutil.TestResourceUtil;
+import com.bumptech.glide.testlib.GlideShadowLooper;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -405,29 +402,6 @@ public class GlideTest {
   }
 
   @Test
-  public void testReceivesGif() throws IOException {
-    String fakeUri = "content://fake";
-    InputStream testGifData = openResource("test.gif");
-    mockUri(Uri.parse(fakeUri), testGifData);
-
-    requestManager.asGif().load(fakeUri).into(target);
-
-    verify(target).onResourceReady(isA(GifDrawable.class), isA(Transition.class));
-  }
-
-  @Test
-  public void testReceivesGifBytes() throws IOException {
-    String fakeUri = "content://fake";
-    InputStream testGifData = openResource("test.gif");
-    mockUri(Uri.parse(fakeUri), testGifData);
-
-    requestManager.as(byte[].class).apply(decodeTypeOf(GifDrawable.class)).load(fakeUri)
-        .into(target);
-
-    verify(target).onResourceReady(isA(byte[].class), isA(Transition.class));
-  }
-
-  @Test
   public void testReceivesBitmapBytes() {
     String fakeUri = "content://fake";
     mockUri(fakeUri);
@@ -551,7 +525,7 @@ public class GlideTest {
   private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource)
       throws Exception {
     DataFetcher<Z> failFetcher = mock(DataFetcher.class);
-    doAnswer(new Util.CallDataReady<>(null))
+    doAnswer(new CallDataReady<>(null))
         .when(failFetcher)
         .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
     when(failFetcher.getDataClass()).thenReturn(failResource);
@@ -609,7 +583,7 @@ public class GlideTest {
     ModelLoader<T, InputStream> modelLoader = mock(ModelLoader.class);
     DataFetcher<InputStream> fetcher = mock(DataFetcher.class);
     try {
-      doAnswer(new Util.CallDataReady<>(new ByteArrayInputStream(new byte[0]))).when(fetcher)
+      doAnswer(new CallDataReady<>(new ByteArrayInputStream(new byte[0]))).when(fetcher)
           .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
     } catch (Exception e) {
       // Do nothing.
@@ -620,10 +594,6 @@ public class GlideTest {
     when(modelLoader.handles(isA(modelClass))).thenReturn(true);
 
     return modelLoader;
-  }
-
-  private InputStream openResource(String imageName) throws IOException {
-    return TestResourceUtil.openResource(getClass(), imageName);
   }
 
   private static class CallSizeReady implements Answer<Void> {
@@ -678,7 +648,7 @@ public class GlideTest {
       DataFetcher<Y> mockStreamFetcher = mock(DataFetcher.class);
       when(mockStreamFetcher.getDataClass()).thenReturn(dataClass);
       try {
-        doAnswer(new Util.CallDataReady<>(loadedData))
+        doAnswer(new CallDataReady<>(loadedData))
             .when(mockStreamFetcher)
             .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
       } catch (Exception e) {
@@ -759,6 +729,23 @@ public class GlideTest {
       Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
       Shadows.shadowOf(bitmap).appendDescription(" from MediaMetadataRetriever");
       return bitmap;
+    }
+  }
+
+  private static final class CallDataReady<T> implements Answer<Void> {
+    private final T data;
+
+    CallDataReady(T data) {
+      this.data = data;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+      DataFetcher.DataCallback<T> callback =
+          (DataFetcher.DataCallback<T>) invocationOnMock.getArguments()[1];
+      callback.onDataReady(data);
+      return null;
     }
   }
 }

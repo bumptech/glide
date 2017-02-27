@@ -2,9 +2,9 @@ package com.bumptech.glide.load.resource.drawable;
 
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+
 import com.bumptech.glide.load.engine.Initializable;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.util.Preconditions;
 
 /**
@@ -39,8 +39,8 @@ public abstract class DrawableResource<T extends Drawable> implements Resource<T
   public void initialize() {
     if (drawable instanceof BitmapDrawable) {
       ((BitmapDrawable) drawable).getBitmap().prepareToDraw();
-    } else if (drawable instanceof GifDrawable) {
-      ((GifDrawable) drawable).getFirstFrame().prepareToDraw();
+    } else if (drawable instanceof Initializable) {
+      ((Initializable) drawable).initialize();
     }
   }
 }

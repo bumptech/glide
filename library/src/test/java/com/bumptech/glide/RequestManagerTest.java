@@ -1,6 +1,6 @@
 package com.bumptech.glide;
 
-import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
+import static com.bumptech.glide.testlib.BackgroundUtil.testInBackground;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
@@ -17,8 +17,8 @@ import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
-import com.bumptech.glide.tests.BackgroundUtil;
-import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.testlib.BackgroundUtil;
+import com.bumptech.glide.testlib.GlideShadowLooper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

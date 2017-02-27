@@ -23,10 +23,6 @@ import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
-import com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
-import com.bumptech.glide.load.resource.gif.StreamGifDecoder;
 import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
@@ -66,7 +62,6 @@ public class RequestOptions implements Cloneable {
   private static RequestOptions centerCropOptions;
   private static RequestOptions circleCropOptions;
   private static RequestOptions noTransformOptions;
-  private static RequestOptions noAnimationOptions;
 
   private int fields;
   private float sizeMultiplier = 1f;
@@ -319,19 +314,6 @@ public class RequestOptions implements Cloneable {
    */
   public static RequestOptions encodeFormatOf(@NonNull Bitmap.CompressFormat format) {
     return new RequestOptions().encodeFormat(format);
-  }
-
-  /**
-   * Returns a new {@link com.bumptech.glide.request.RequestOptions} with {@link #dontAnimate()}
-   * called.
-   */
-  public static RequestOptions noAnimation() {
-    if (noAnimationOptions == null) {
-      noAnimationOptions = new RequestOptions()
-          .dontAnimate()
-          .autoClone();
-    }
-    return noAnimationOptions;
   }
 
   private static boolean isSet(int fields, int flag) {
@@ -925,16 +907,13 @@ public class RequestOptions implements Cloneable {
   }
 
   /**
-   * Applies the given {@link Transformation} for
-   * {@link Bitmap Bitmaps} to the default types ({@link Bitmap},
-   * {@link android.graphics.drawable.BitmapDrawable}, and
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable})
-   * and throws an exception if asked to transform an unknown type.
+   * Applies the given {@link Transformation} for {@link Bitmap Bitmaps} to the default types
+   * ({@link Bitmap},{@link android.graphics.drawable.BitmapDrawable}) and throws an exception if
+   * asked to transform an unknown type.
    *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
-   * @param transformation Any {@link Transformation} for
-   *                       {@link Bitmap}s.
+   * @param transformation Any {@link Transformation} for {@link Bitmap}s.
    * @see #optionalTransform(Transformation)
    * @see #optionalTransform(Class, Transformation)
    */
@@ -950,10 +929,8 @@ public class RequestOptions implements Cloneable {
   }
 
   /**
-   * Applies the given {@link Transformation} for
-   * {@link Bitmap Bitmaps} to the default types ({@link Bitmap},
-   * {@link android.graphics.drawable.BitmapDrawable}, and
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable}) and ignores unknown types.
+   * Applies the given {@link Transformation} for {@link Bitmap Bitmaps} to the default types
+   * ({@link Bitmap}, * {@link android.graphics.drawable.BitmapDrawable}, and ignores unknown types.
    *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
@@ -970,10 +947,8 @@ public class RequestOptions implements Cloneable {
   }
 
   /**
-   * Applies the given {@link Transformation} for
-   * {@link Bitmap Bitmaps} to the default types ({@link Bitmap},
-   * {@link android.graphics.drawable.BitmapDrawable}, and
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable}) and ignores unknown types.
+   * Applies the given {@link Transformation} for {@link Bitmap Bitmaps} to the default types
+   * ({@link Bitmap}, * {@link android.graphics.drawable.BitmapDrawable} and ignores unknown types.
    *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
@@ -991,7 +966,6 @@ public class RequestOptions implements Cloneable {
     // TODO: remove BitmapDrawable decoder and this transformation.
     optionalTransform(BitmapDrawable.class,
         new BitmapDrawableTransformation(transformation));
-    optionalTransform(GifDrawable.class, new GifDrawableTransformation(transformation));
     return selfOrThrowIfLocked();
   }
 
@@ -1065,23 +1039,6 @@ public class RequestOptions implements Cloneable {
     fields &= ~TRANSFORMATION_REQUIRED;
     isTransformationAllowed = false;
     fields |= TRANSFORMATION_ALLOWED;
-    return selfOrThrowIfLocked();
-  }
-
-  /**
-   * Disables resource decoders that return animated resources so any resource returned will be
-   * static.
-   *
-   * <p> To disable transitions (fades etc) use
-   * {@link com.bumptech.glide.TransitionOptions#dontTransition()}</p>
-   */
-  public RequestOptions dontAnimate() {
-    if (isAutoCloneEnabled) {
-      return clone().dontAnimate();
-    }
-
-    set(ByteBufferGifDecoder.DISABLE_ANIMATION, true);
-    set(StreamGifDecoder.DISABLE_ANIMATION, true);
     return selfOrThrowIfLocked();
   }
 

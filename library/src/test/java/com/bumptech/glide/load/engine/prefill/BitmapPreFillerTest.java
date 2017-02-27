@@ -15,7 +15,7 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
-import com.bumptech.glide.tests.Util.CreateBitmap;
+import com.bumptech.glide.testlib.Util.CreateBitmap;
 import com.bumptech.glide.util.Util;
 import com.google.common.collect.Range;
 import java.util.ArrayList;

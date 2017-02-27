@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.testlib.Util.cast;
 import static com.bumptech.glide.tests.Util.anyContext;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
@@ -18,6 +19,7 @@ import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.testlib.Util.WriteDigest;
 import com.bumptech.glide.tests.KeyAssertions;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
@@ -113,8 +115,7 @@ public class BitmapDrawableTransformationTest {
         .thenReturn(transformed);
 
     transformation.transform(context, drawableResourceToTransform, outWidth, outHeight);
-    ArgumentCaptor<Resource<Bitmap>> captor = Util.cast(ArgumentCaptor.forClass(Resource.class));
-
+    ArgumentCaptor<Resource<Bitmap>> captor = cast(ArgumentCaptor.forClass(Resource.class));
     verify(wrapped).transform(anyContext(), captor.capture(), eq(outWidth), eq(outHeight));
 
     assertThat(captor.getValue().get()).isEqualTo(bitmapToTransform);
@@ -122,12 +123,12 @@ public class BitmapDrawableTransformationTest {
 
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
-    doAnswer(new Util.WriteDigest("wrapped")).when(wrapped)
+    doAnswer(new WriteDigest("wrapped")).when(wrapped)
         .updateDiskCacheKey(any(MessageDigest.class));
     KeyAssertions.assertSame(transformation, new BitmapDrawableTransformation(wrapped));
 
     @SuppressWarnings("unchecked") Transformation<Bitmap> other = mock(Transformation.class);
-    doAnswer(new Util.WriteDigest("other")).when(other)
+    doAnswer(new WriteDigest("other")).when(other)
         .updateDiskCacheKey(any(MessageDigest.class));
     KeyAssertions.assertDifferent(transformation, new BitmapDrawableTransformation(other));
   }

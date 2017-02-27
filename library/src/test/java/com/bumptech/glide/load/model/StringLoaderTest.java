@@ -12,7 +12,7 @@ import android.net.Uri;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.tests.Util;
+import com.bumptech.glide.testlib.Util;
 import java.io.File;
 import java.io.IOException;
 import org.junit.Before;

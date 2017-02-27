@@ -1,3 +1,4 @@
+/** Handles obtaining test resources in different environments. */
 apply plugin: 'java'
 
 dependencies {

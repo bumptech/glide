@@ -60,10 +60,10 @@ final class AppModuleProcessor {
     }
   }
 
-  boolean maybeWriteAppModule() {
-    // appGlideModules is added to in order to catch errors where multiple AppGlideModules may be
-    // present for a single application or library. Because we only add to appGlideModules, we use
-    // isGeneratedAppGlideModuleWritten to make sure the GeneratedAppGlideModule is written at
+  boolean maybeWriteMergedClasses() {
+    // rootGlideModules is added to in order to catch errors where multiple RootGlideModules may be
+    // present for a single application or library. Because we only add to rootGlideModules, we use
+    // isGeneratedRootGlideModuleWritten to make sure the GeneratedRootGlideModule is written at
     // most once.
     if (appGlideModules.isEmpty()) {
       return false;

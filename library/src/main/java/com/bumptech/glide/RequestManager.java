@@ -14,7 +14,6 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
@@ -45,7 +44,6 @@ import java.io.File;
  */
 public class RequestManager implements LifecycleListener {
   private static final RequestOptions DECODE_TYPE_BITMAP = decodeTypeOf(Bitmap.class).lock();
-  private static final RequestOptions DECODE_TYPE_GIF = decodeTypeOf(GifDrawable.class).lock();
   private static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
       diskCacheStrategyOf(DiskCacheStrategy.DATA).priority(Priority.LOW)
           .skipMemoryCache(true);
@@ -291,31 +289,12 @@ public class RequestManager implements LifecycleListener {
   }
 
   /**
-   * Attempts to always load the resource as a
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
+   * Returns a new {@link RequestBuilder} that will load the resource as any available
+   * {@link Drawable} subclass or fail.
    *
-   * <p> If the underlying data is not a GIF, this will fail. As a result, this should only be used
-   * if the model represents an animated GIF and the caller wants to interact with the GifDrawable
-   * directly. Normally using just {@link #asDrawable()} is sufficient because it will determine
-   * whether or not the given data represents an animated GIF and return the appropriate {@link
-   * Drawable}, animated or not, automatically. </p>
-   *
-   * @return A new request builder for loading a
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
-   */
-  public RequestBuilder<GifDrawable> asGif() {
-    return as(GifDrawable.class).transition(new DrawableTransitionOptions()).apply(DECODE_TYPE_GIF);
-  }
-
-  /**
-   * Attempts to always load the resource using any registered {@link
-   * com.bumptech.glide.load.ResourceDecoder}s that can decode any subclass of {@link Drawable}.
-   *
-   * <p> By default, may return either a {@link android.graphics.drawable.BitmapDrawable} or {@link
-   * GifDrawable}, but if additional decoders are registered for other {@link Drawable} subclasses,
-   * any of those subclasses may also be returned. </p>
-   *
-   * @return A new request builder for loading a {@link Drawable}.
+   * <p> By default, this will return just a {@link android.graphics.drawable.BitmapDrawable}
+   * but if additional decoders are registered for other {@link Drawable} subclasses, any of those
+   * {@link Drawable} subclasses may also be returned.
    */
   public RequestBuilder<Drawable> asDrawable() {
     return as(Drawable.class).transition(new DrawableTransitionOptions());

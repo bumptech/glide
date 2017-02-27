@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.tests.Util;
+import com.bumptech.glide.testlib.Util;
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;

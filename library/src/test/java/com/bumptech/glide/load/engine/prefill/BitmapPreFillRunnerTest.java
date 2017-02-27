@@ -21,7 +21,7 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
-import com.bumptech.glide.tests.Util.CreateBitmap;
+import com.bumptech.glide.testlib.Util.CreateBitmap;
 import com.bumptech.glide.util.Util;
 import java.util.ArrayList;
 import java.util.HashMap;

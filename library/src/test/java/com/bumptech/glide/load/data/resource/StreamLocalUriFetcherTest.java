@@ -10,7 +10,7 @@ import android.net.Uri;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.StreamLocalUriFetcher;
-import com.bumptech.glide.tests.ContentResolverShadow;
+import com.bumptech.glide.testlib.ContentResolverShadow;
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;

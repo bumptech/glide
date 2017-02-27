@@ -1,15 +1,13 @@
 package com.bumptech.glide.gifdecoder;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.testutil.TestUtil;
 import java.io.IOException;
-import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,8 +42,8 @@ public class GifDecoderTest {
     decoder.setData(header, data);
     decoder.advance();
     Bitmap bitmap = decoder.getNextFrame();
-    assertNotNull(bitmap);
-    assertEquals(GifDecoder.STATUS_OK, decoder.getStatus());
+    assertThat(bitmap).isNotNull();
+    assertThat(decoder.getStatus()).isEqualTo(GifDecoder.STATUS_OK);
   }
 
   @Test
@@ -55,7 +53,7 @@ public class GifDecoderTest {
     byte[] data = new byte[0];
     GifDecoder decoder = new StandardGifDecoder(provider);
     decoder.setData(gifheader, data);
-    assertEquals(-1, decoder.getCurrentFrameIndex());
+    assertThat(decoder.getCurrentFrameIndex()).isEqualTo(-1);
   }
 
   @Test
@@ -96,7 +94,7 @@ public class GifDecoderTest {
     GifDecoder decoder = new StandardGifDecoder(provider);
     decoder.setData(gifheader, data);
     decoder.advance();
-    assertEquals(0, decoder.getCurrentFrameIndex());
+    assertThat(decoder.getCurrentFrameIndex()).isEqualTo(0);
   }
 
   @Test
@@ -109,7 +107,7 @@ public class GifDecoderTest {
     decoder.advance();
     decoder.advance();
     decoder.advance();
-    assertEquals(0, decoder.getCurrentFrameIndex());
+    assertThat(decoder.getCurrentFrameIndex()).isEqualTo(0);
   }
 
   @Test
@@ -121,10 +119,10 @@ public class GifDecoderTest {
     decoder.setData(gifheader, data);
     decoder.advance();
     decoder.advance();
-    assertEquals(1, decoder.getCurrentFrameIndex());
+    assertThat(decoder.getCurrentFrameIndex()).isEqualTo(1);
 
     decoder.setData(gifheader, data);
-    assertEquals(-1, decoder.getCurrentFrameIndex());
+    assertThat(decoder.getCurrentFrameIndex()).isEqualTo(-1);
   }
 
   @Test
@@ -143,8 +141,8 @@ public class GifDecoderTest {
     decoder.getNextFrame();
     decoder.advance();
     Bitmap firstFrameTwice = decoder.getNextFrame();
-    assertTrue(Arrays.equals((((CustomShadowBitmap) shadowOf(firstFrame))).getPixels(),
-        (((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels()));
+    assertThat((((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels())
+        .isEqualTo((((CustomShadowBitmap) shadowOf(firstFrame))).getPixels());
   }
 
   @Test
@@ -162,8 +160,8 @@ public class GifDecoderTest {
     decoder.getNextFrame();
     decoder.advance();
     Bitmap firstFrameTwice = decoder.getNextFrame();
-    assertTrue(Arrays.equals((((CustomShadowBitmap) shadowOf(firstFrame))).getPixels(),
-        (((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels()));
+    assertThat((((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels())
+        .isEqualTo((((CustomShadowBitmap) shadowOf(firstFrame))).getPixels());
   }
 
   /**

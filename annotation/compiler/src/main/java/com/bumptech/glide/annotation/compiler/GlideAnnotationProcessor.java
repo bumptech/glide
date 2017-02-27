@@ -122,7 +122,7 @@ public final class GlideAnnotationProcessor extends AbstractProcessor {
     }
 
     if (!isGeneratedAppGlideModuleWritten) {
-      isGeneratedAppGlideModuleWritten = appModuleProcessor.maybeWriteAppModule();
+      isGeneratedAppGlideModuleWritten = appModuleProcessor.maybeWriteMergedClasses();
     }
     return true;
   }

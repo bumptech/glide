@@ -1,6 +1,6 @@
 package com.bumptech.glide;
 
-import static com.bumptech.glide.tests.Util.cast;
+import static com.bumptech.glide.testlib.Util.cast;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

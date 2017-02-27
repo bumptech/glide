@@ -4,8 +4,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.testlib.Util.WriteDigest;
 import com.bumptech.glide.tests.KeyAssertions;
-import com.bumptech.glide.tests.Util.WriteDigest;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

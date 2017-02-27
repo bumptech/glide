@@ -14,8 +14,8 @@ import static org.mockito.Mockito.when;
 
 import android.app.Application;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.testlib.Util;
 import com.bumptech.glide.tests.KeyAssertions;
-import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.junit.Before;

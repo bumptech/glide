@@ -1,6 +1,6 @@
 package com.bumptech.glide;
 
-import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
+import static com.bumptech.glide.testlib.BackgroundUtil.testInBackground;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.tests.BackgroundUtil;
+import com.bumptech.glide.testlib.BackgroundUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

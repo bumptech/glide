@@ -14,7 +14,7 @@ import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
-import com.bumptech.glide.tests.ContentResolverShadow;
+import com.bumptech.glide.testlib.ContentResolverShadow;
 import java.io.FileNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
