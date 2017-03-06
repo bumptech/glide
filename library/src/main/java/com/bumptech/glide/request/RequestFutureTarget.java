@@ -81,17 +81,15 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
 
   @Override
   public synchronized boolean cancel(boolean mayInterruptIfRunning) {
-    if (isCancelled) {
-      return true;
+    if (isDone()) {
+      return false;
     }
-
-    final boolean result = !isDone();
-    if (result) {
-      isCancelled = true;
-      waiter.notifyAll(this);
+    isCancelled = true;
+    waiter.notifyAll(this);
+    if (mayInterruptIfRunning) {
+      clearOnMainThread();
     }
-    clearOnMainThread();
-    return result;
+    return true;
   }
 
   @Override

@@ -76,17 +76,17 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testClearsRequestOnMainThreadIfNotYetDoneOnCancel() {
+  public void cancel_withMayInterruptIfRunningTrueAndNotFinishedRequest_clearsFutureOnMainThread() {
     future.cancel(true);
 
     verify(handler).post(eq(future));
   }
 
   @Test
-  public void testClearsOnMainThreadWhenClearCalled() {
+  public void cancel_withInterruptFalseAndNotFinishedRequest_doesNotclearFutureOnMainThread() {
     future.cancel(false);
 
-    verify(handler).post(eq(future));
+    verify(handler, never()).post(eq(future));
   }
 
   @Test
