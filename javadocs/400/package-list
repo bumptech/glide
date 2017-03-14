@@ -1,6 +1,13 @@
 com.bumptech.glide
+com.bumptech.glide.annotation
+com.bumptech.glide.annotation.compiler
 com.bumptech.glide.disklrucache
 com.bumptech.glide.gifdecoder
+com.bumptech.glide.gifencoder
+com.bumptech.glide.integration.gifencoder
+com.bumptech.glide.integration.okhttp
+com.bumptech.glide.integration.okhttp3
+com.bumptech.glide.integration.volley
 com.bumptech.glide.load
 com.bumptech.glide.load.data
 com.bumptech.glide.load.data.mediastore
@@ -26,3 +33,4 @@ com.bumptech.glide.request.target
 com.bumptech.glide.request.transition
 com.bumptech.glide.signature
 com.bumptech.glide.util
+com.bumptech.glide.util.pool
