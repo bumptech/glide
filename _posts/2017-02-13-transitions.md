@@ -6,9 +6,10 @@ date: 2017-02-13 19:40:27
 order: 7
 disqus: 1
 ---
+* TOC
+{:toc}
 
 ### About
-
 [``Transitions``][1] in Glide allow you to define how Glide should transition from a placeholder to a newly loaded image or from a thumbnail to a full size image. Transitions act within the context of a single request, not across multiple requests. As a result, [``Transitions``][1] do **NOT** allow you to define an animation (like a cross fade) from one request to another request. 
 
 ### Specifying Transitions

@@ -6,6 +6,8 @@ date: 2017-03-14 13:37:04
 order: 8
 disqus: 1
 ---
+* TOC
+{:toc}
 
 ### Setup
 For Glide's configuration to work properly, libraries and applications need to perform a certain set of steps. Note that libraries that do not wish to register additional components are not required to do this.

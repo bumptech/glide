@@ -6,9 +6,10 @@ date: 2015-05-21 20:04:53
 order: 5
 disqus: 1
 ---
+* TOC
+{:toc}
 
 ### About
-
 [Transformations][1] in Glide take a resource, mutate it, and return the mutated resource. Typically transformations are used to crop, or apply filters to Bitmaps, but they can also be used to transform animated GIFs, or even custom resource types.
 
 ### Built in types
@@ -20,7 +21,6 @@ Glide includes a number of built in transformations, including:
 * [CircleCrop][6]
 
 ### Applying Transformations
-
 Transformations are applied using the [RequestOptions][9] class:
 
 ```java
@@ -47,13 +47,11 @@ Glide.with(fragment)
 For more information on using RequestOptions, see the [Options][3] wiki page.
 
 ### Automatic Transformations for ImageViews
-
 When you start a load into an [ImageView][7] in Glide, Glide may automatically apply either [FitCenter][2] or [CenterCrop][4], depending on the [ScaleType][8] of the view. If the scale type is ``CENTER_CROP``, Glide will automatically apply the ``CenterCrop`` transformation. If the scale type is ``FIT_CENTER`` or ``CENTER_INSIDE``, Glide will automatically apply the ``FitCenter`` transformation.
 
 You can always override the default transformation by applying a [RequestOptions][9] with a ``Transformation`` set. In addition, you can ensure no ``Transformation`` is automatically applied using [``dontTransform()``][10].
 
 ### Application and custom resources
-
 Because Glide 4.0 allows you to specify a super type of the resource you're going to decode, you may not know exactly what type of transformation to apply. For example, when you use [``asDrawable()``][11] (or just ``with()`` since ``asDrawable()`` is the default) to ask for a Drawable resource, you may get either the [``BitmapDrawable``][12] subclass, or the [``GifDrawable``][13] subclass. 
 
 To ensure any ``Transformation`` you add to your ``RequestOptions`` is applied, Glide adds your ``Transformation`` to a map keyed on the resource class you provide to [``transform()``][14]. When a resource is successfully decoded , Glide uses the map to retrieve a corresponding ``Transformation``. 

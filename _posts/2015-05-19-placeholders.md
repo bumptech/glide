@@ -6,26 +6,23 @@ date: 2015-05-19 07:14:23
 order: 4
 disqus: 1
 ---
+* TOC
+{:toc}
 
 ### Types
-
 Glide allows users to specify three different placeholders that are used under different circumstances:
 
 * [placeholder][1]
 * [error][2]
 * [fallback][3]
 
-
 #### Placeholder
-
 Placeholders are Drawables that are shown while a request is in progress. When a request completes successfully, the placeholder is replaced with the requested resource. If the requested resource is loaded from memory, the placeholder may never be shown. If the request fails and an error Drawable is not set, the placeholder will continue to be displayed. Similarly if the requested url/model is ``null`` and neither an error Drawable nor a fallback Drawable are set, the placeholder will also continue to be displayed.
 
 #### Error
-
 Error Drawables are shown when a request permanently fails. Error Drawables are also shown if the requested url/model is ``null`` and no fallback Drawable is set
 
 #### Fallback
-
 Fallback Drawables are shown when the requested url/model is ``null``. The primary purpose of fallback Drawables is to allow users to indicate whether or not ``null`` is expected. For example, a ``null`` profile url may indicate that the user has not set a profile photo and that a default should be used. However, ``null`` may also indicate that meta-data is invalid or couldn't be retrieved. By default Glide treats ``null`` urls/models as errors, so users who expect ``null`` should set a fallback Drawable.
 
 ### FAQ
