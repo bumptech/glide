@@ -148,7 +148,7 @@ public class Glide implements ComponentCallbacks2 {
     if (glide == null) {
       synchronized (Glide.class) {
         if (glide == null) {
-          glide = initGlide(context);
+          initGlide(context);
         }
       }
     }
@@ -157,7 +157,7 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @SuppressWarnings("deprecation")
-  private static Glide initGlide(Context context) {
+  private static void initGlide(Context context) {
     Context applicationContext = context.getApplicationContext();
 
     GeneratedRootGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
@@ -195,14 +195,13 @@ public class Glide implements ComponentCallbacks2 {
     if (annotationGeneratedModule != null) {
       annotationGeneratedModule.applyOptions(applicationContext, builder);
     }
-    Glide glide = builder.createGlide(applicationContext);
+    glide = builder.createGlide(applicationContext);
     for (GlideModule module : manifestModules) {
       module.registerComponents(applicationContext, glide.registry);
     }
     if (annotationGeneratedModule != null) {
       annotationGeneratedModule.registerComponents(applicationContext, glide.registry);
     }
-    return glide;
   }
 
   @Nullable
