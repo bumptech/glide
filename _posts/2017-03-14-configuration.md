@@ -3,12 +3,9 @@ layout: page
 title: "Configuration"
 category: doc
 date: 2017-03-14 13:37:04
-order: 9
+order: 8
 disqus: 1
 ---
-## Configuration
-
-Glide v4 relies on two classes, [``RootGlideModule``][1] and [``ChildGlideModule``][2], to configure the Glide singleton. Both classes are allowed to register additional compontents, like [``ModelLoaders``][3], [``ResourceDecoders``][4] etc. Only the [``RootGlideModules``][1] are allowed to configure application specific settings, like cache implementations and sizes. 
 
 ### Setup
 For Glide's configuration to work properly, libraries and applications need to perform a certain set of steps. Note that libraries that do not wish to register additional components are not required to do this.
@@ -30,12 +27,18 @@ public final class OkHttpChildGlideModule extends ChildGlideModule {
 }
 ```
 
+Using the [``@GlideModule``][5] annotation requires a dependency on Glide's annotations:
+```groovy
+annotationProcessor 'com.github.bumptech.glide:annotation:1.0.0-SNAPSHOT'
+```
+
 #### Applications
 Applications must:
 1. Add exactly one [``RootGlideModule``][1] implementation
 2. Optionally add one or more [``ChildGlideModule``][2] implementations.
 3. Add the [``@GlideModule``][5] annotation to the [``RootGlideModule``][1] implementation and all [``ChildGlideModule``][2] implementations.
 4. Add a dependency on Glide's annotation processor.
+5. Add a proguard keep for [``RootGlideModules``][1].
 
 An example [``RootGlideModule``][1] from Glide's [Flickr sample app][8] looks like this:
 ```java
@@ -48,9 +51,15 @@ public class FlickrGlideModule extends RootGlideModule {
 }
 ```
 
-To add a dependency on Glide's annotation processor with Gradle:
+Including Glide's annotation processor requires dependencies on Glide's annotations and the annotation processor:
 ```groovy
+annotationProcessor 'com.github.bumptech.glide:annotation:1.0.0-SNAPSHOT'
 annotationProcessor 'com.github.bumptech.glide:compiler:1.0.0-SNAPSHOT'
+```
+
+Finally, you should keep RootGlideModule implementations in your ``proguard.cfg``:
+```
+-keep public class * extends com.bumptech.glide.RootGlideModule
 ```
 
 ### Application Options
@@ -155,6 +164,7 @@ public class YourAppGlideModule extends RootGlideModule {
 
 
 ### Key components
+Glide v4 relies on two classes, [``RootGlideModule``][1] and [``ChildGlideModule``][2], to configure the Glide singleton. Both classes are allowed to register additional components, like [``ModelLoaders``][3], [``ResourceDecoders``][4] etc. Only the [``RootGlideModules``][1] are allowed to configure application specific settings, like cache implementations and sizes. 
 
 #### RootGlideModule
 All applications must add a [``RootGlideModule``][1] implementation, even if the Application is not changing any additional settings or implementing any methods in [``RootGlideModule``][1]. The [``RootGlideModule``][1] implementation acts as a signal that allows Glide's annotation processor to generate a single combined class with with all discovered [``ChildGlideModules``][2].

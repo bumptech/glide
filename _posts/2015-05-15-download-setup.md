@@ -58,6 +58,7 @@ If you use proguard, you may need to add the following lines to your ``proguard.
 
 ```
 -keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public class * extends com.bumptech.glide.RootGlideModule
 -keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
     **[] $VALUES;
     public *;
