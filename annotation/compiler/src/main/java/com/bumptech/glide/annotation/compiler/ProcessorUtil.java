@@ -2,6 +2,7 @@ package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.compiler.GlideAnnotationProcessor.DEBUG;
 
+import com.bumptech.glide.annotation.GlideExtension;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import java.lang.annotation.Annotation;
@@ -25,6 +26,8 @@ final class ProcessorUtil {
       GLIDE_MODULE_PACKAGE_NAME + "." + ROOT_GLIDE_MODULE_SIMPLE_NAME;
   private static final String CHILD_GLIDE_MODULE_QUALIFIED_NAME =
       GLIDE_MODULE_PACKAGE_NAME + "." + CHILD_GLIDE_MODULE_SIMPLE_NAME;
+  private static final String COMPILER_PACKAGE_NAME =
+      GlideAnnotationProcessor.class.getPackage().getName();
 
   private final ProcessingEnvironment processingEnv;
   private final TypeElement rootGlideModuleType;
@@ -52,6 +55,14 @@ final class ProcessorUtil {
   boolean isChildGlideModule(TypeElement element) {
     return processingEnv.getTypeUtils().isAssignable(element.asType(),
         childGlideModuleType.asType());
+  }
+
+  boolean isExtension(TypeElement element) {
+    return element.getAnnotation(GlideExtension.class) != null;
+  }
+
+  void writeIndexer(TypeSpec indexer) {
+    writeClass(COMPILER_PACKAGE_NAME, indexer);
   }
 
   void writeClass(String packageName, TypeSpec clazz) {

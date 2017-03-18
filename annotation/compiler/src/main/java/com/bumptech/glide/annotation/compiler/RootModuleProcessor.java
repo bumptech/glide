@@ -1,10 +1,9 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static java.util.Collections.addAll;
-
 import com.bumptech.glide.annotation.GlideModule;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,10 +25,13 @@ final class RootModuleProcessor {
   private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
   private final List<TypeElement> rootGlideModules = new ArrayList<>();
+  private final RequestOptionsGenerator requestOptionsGenerator;
 
   RootModuleProcessor(ProcessingEnvironment processingEnv, ProcessorUtil processorUtil) {
     this.processingEnv = processingEnv;
     this.processorUtil = processorUtil;
+
+    requestOptionsGenerator = new RequestOptionsGenerator(processingEnv);
   }
 
   void processModules(Set<? extends TypeElement> set, RoundEnvironment env) {
@@ -62,36 +64,60 @@ final class RootModuleProcessor {
     // current implementation.
     PackageElement glideGenPackage =
         processingEnv.getElementUtils().getPackageElement(COMPILER_PACKAGE_NAME);
-    Set<String> glideModuleClassNames = getGlideModuleClassNames(glideGenPackage);
+    FoundIndexedClassNames indexedClassNames = getIndexedClassNames(glideGenPackage);
 
     TypeSpec generatedRootGlideModule =
         RootModuleGenerator.generate(
             processingEnv, rootGlideModules.get(0).getQualifiedName().toString(),
-            glideModuleClassNames);
+            indexedClassNames.glideModules);
     writeRootModule(generatedRootGlideModule);
 
-    processorUtil.infoLog("Wrote GeneratedRootGlideModule with: " + glideModuleClassNames);
+    processorUtil.infoLog("Wrote GeneratedRootGlideModule with: " + indexedClassNames.glideModules);
+
+    if (!indexedClassNames.extensions.isEmpty()) {
+      TypeSpec generatedRequestOptions =
+          requestOptionsGenerator.generate(indexedClassNames.extensions);
+      writeRequestOptions(generatedRequestOptions);
+    }
+
     return true;
   }
 
   @SuppressWarnings("unchecked")
-  private Set<String> getGlideModuleClassNames(PackageElement glideGenPackage) {
+  private FoundIndexedClassNames getIndexedClassNames(PackageElement glideGenPackage) {
     Set<String> glideModules = new HashSet<>();
+    Set<String> extensions = new HashSet<>();
     List<? extends Element> glideGeneratedElements = glideGenPackage.getEnclosedElements();
     for (Element indexer : glideGeneratedElements) {
-      ModuleIndex annotation = indexer.getAnnotation(ModuleIndex.class);
+      Index annotation = indexer.getAnnotation(Index.class);
       // If the annotation is null, it means we've come across another class in the same package
       // that we can safely ignore.
       if (annotation != null) {
-        addAll(glideModules, annotation.glideModules());
+        Collections.addAll(glideModules, annotation.modules());
+        Collections.addAll(extensions, annotation.extensions());
       }
     }
 
     processorUtil.debugLog("Found GlideModules: " + glideModules);
-    return glideModules;
+    return new FoundIndexedClassNames(glideModules, extensions);
   }
 
   private void writeRootModule(TypeSpec rootModule) {
     processorUtil.writeClass(GENERATED_ROOT_MODULE_PACKAGE_NAME, rootModule);
+  }
+
+  private void writeRequestOptions(TypeSpec requestOptions) {
+    processorUtil.writeClass(RequestOptionsGenerator.GENERATED_REQUEST_OPTIONS_PACKAGE_NAME,
+        requestOptions);
+  }
+
+  private static final class FoundIndexedClassNames {
+    final Set<String> glideModules;
+    final Set<String> extensions;
+
+    private FoundIndexedClassNames(Set<String> glideModules, Set<String> extensions) {
+      this.glideModules = glideModules;
+      this.extensions = extensions;
+    }
   }
 }

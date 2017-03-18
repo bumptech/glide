@@ -3,25 +3,23 @@ package com.bumptech.glide.annotation.compiler;
 import com.bumptech.glide.annotation.GlideModule;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.TypeElement;
 
 /**
- * Generates {@link ModuleIndex} annotated classes for all
- * {@link com.bumptech.glide.module.ChildGlideModule} implementations.
+ * Generates Indexer classes annotated with {@link Index} for all
+ * {@link com.bumptech.glide.module.ChildGlideModule}s.
  */
 final class ChildModuleProcessor {
-  private static final String COMPILER_PACKAGE_NAME =
-      GlideAnnotationProcessor.class.getPackage().getName();
-
   private ProcessorUtil processorUtil;
+  private IndexerGenerator indexerGenerator;
 
-  ChildModuleProcessor(ProcessorUtil processorUtil) {
+  ChildModuleProcessor(ProcessorUtil processorUtil, IndexerGenerator indexerGenerator) {
     this.processorUtil = processorUtil;
+    this.indexerGenerator = indexerGenerator;
   }
 
   boolean processModules(Set<? extends TypeElement> set, RoundEnvironment env) {
@@ -46,8 +44,8 @@ final class ChildModuleProcessor {
       return false;
     }
 
-    TypeSpec indexer = GlideIndexerGenerator.generate(childGlideModules);
-    writeIndexer(indexer);
+    TypeSpec indexer = indexerGenerator.generate(childGlideModules);
+    processorUtil.writeIndexer(indexer);
     processorUtil.debugLog("Wrote an Indexer this round, skipping the root module to ensure all "
         + "indexers are found");
      // If I write an Indexer in a round in the target package, then try to find all classes in
@@ -57,14 +55,7 @@ final class ChildModuleProcessor {
     return true;
   }
 
-  private void writeIndexer(TypeSpec indexer) {
-    processorUtil.writeClass(COMPILER_PACKAGE_NAME, indexer);
-  }
-
   Set<String> getSupportedAnnotationTypes() {
-    return new HashSet<>(Arrays.asList(
-        ModuleIndex.class.getName(),
-        GlideModule.class.getName()
-    ));
+    return Collections.singleton(GlideModule.class.getName());
   }
 }
