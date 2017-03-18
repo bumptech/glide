@@ -1,7 +1,5 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static com.bumptech.glide.annotation.compiler.ModuleAnnotationProcessor.INDEXER_NAME_PREFIX;
-
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeSpec;
@@ -29,6 +27,7 @@ import javax.lang.model.element.TypeElement;
  * </pre>
  */
 final class GlideIndexerGenerator {
+  private static final String INDEXER_NAME_PREFIX = "GlideIndexer_";
 
   private GlideIndexerGenerator() { }
 
