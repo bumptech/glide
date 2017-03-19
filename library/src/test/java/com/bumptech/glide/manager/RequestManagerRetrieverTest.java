@@ -44,7 +44,7 @@ public class RequestManagerRetrieverTest {
 
   @Before
   public void setUp() {
-    retriever = new RequestManagerRetriever();
+    retriever = new RequestManagerRetriever(null /*factory*/);
 
     harnesses =
         new RetrieverHarness[] { new DefaultRetrieverHarness(), new SupportRetrieverHarness() };

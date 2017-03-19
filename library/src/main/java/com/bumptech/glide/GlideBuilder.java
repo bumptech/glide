@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
@@ -18,6 +19,8 @@ import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
+import com.bumptech.glide.manager.RequestManagerRetriever;
+import com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory;
 import com.bumptech.glide.request.RequestOptions;
 
 /**
@@ -35,6 +38,8 @@ public final class GlideBuilder {
   private ConnectivityMonitorFactory connectivityMonitorFactory;
   private int logLevel = Log.INFO;
   private RequestOptions defaultRequestOptions = new RequestOptions();
+  @Nullable
+  private RequestManagerFactory requestManagerFactory;
 
   GlideBuilder() {
     // Package private visibility.
@@ -252,6 +257,12 @@ public final class GlideBuilder {
     return this;
   }
 
+  GlideBuilder setRequestManagerFactory(
+      @Nullable RequestManagerRetriever.RequestManagerFactory factory) {
+    this.requestManagerFactory = factory;
+    return this;
+  }
+
   // For testing.
   GlideBuilder setEngine(Engine engine) {
     this.engine = engine;
@@ -301,12 +312,16 @@ public final class GlideBuilder {
           GlideExecutor.newUnlimitedSourceExecutor());
     }
 
+    RequestManagerRetriever requestManagerRetriever = new RequestManagerRetriever(
+        requestManagerFactory);
+
     return new Glide(
         context,
         engine,
         memoryCache,
         bitmapPool,
         arrayPool,
+        requestManagerRetriever,
         connectivityMonitorFactory,
         logLevel,
         defaultRequestOptions.lock());

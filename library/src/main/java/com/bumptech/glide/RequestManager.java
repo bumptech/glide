@@ -87,7 +87,6 @@ public class RequestManager implements LifecycleListener {
 
     final Context context = glide.getGlideContext().getBaseContext();
 
-
     connectivityMonitor =
         factory.build(context, new RequestManagerConnectivityListener(requestTracker));
 

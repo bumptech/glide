@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -27,11 +28,6 @@ public class RequestManagerRetriever implements Handler.Callback {
   // Visible for testing.
   static final String FRAGMENT_TAG = "com.bumptech.glide.manager";
   private static final String TAG = "RMRetriever";
-
-  /**
-   * The singleton instance of RequestManagerRetriever.
-   */
-  private static final RequestManagerRetriever INSTANCE = new RequestManagerRetriever();
 
   private static final int ID_REMOVE_FRAGMENT_MANAGER = 1;
   private static final int ID_REMOVE_SUPPORT_FRAGMENT_MANAGER = 2;
@@ -59,16 +55,11 @@ public class RequestManagerRetriever implements Handler.Callback {
    * Main thread handler to handle cleaning up pending fragment maps.
    */
   private final Handler handler;
-
-  /**
-   * Retrieves and returns the RequestManagerRetriever singleton.
-   */
-  public static RequestManagerRetriever get() {
-    return INSTANCE;
-  }
+  private final RequestManagerFactory factory;
 
   // Visible for testing.
-  RequestManagerRetriever() {
+  public RequestManagerRetriever(@Nullable RequestManagerFactory factory) {
+    this.factory = factory != null ? factory : DEFAULT_FACTORY;
     handler = new Handler(Looper.getMainLooper(), this /* Callback */);
   }
 
@@ -85,8 +76,7 @@ public class RequestManagerRetriever implements Handler.Callback {
           // TODO(b/27524013): Factor out this Glide.get() call.
           Glide glide = Glide.get(context);
           applicationManager =
-              new RequestManager(
-                  glide, new ApplicationLifecycle(), new EmptyRequestManagerTreeNode());
+              factory.build(glide, new ApplicationLifecycle(), new EmptyRequestManagerTreeNode());
         }
       }
     }
@@ -183,7 +173,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   }
 
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-  RequestManager fragmentGet(Context context, android.app.FragmentManager fm,
+  private RequestManager fragmentGet(Context context, android.app.FragmentManager fm,
       android.app.Fragment parentHint) {
     RequestManagerFragment current = getRequestManagerFragment(fm, parentHint);
     RequestManager requestManager = current.getRequestManager();
@@ -191,7 +181,7 @@ public class RequestManagerRetriever implements Handler.Callback {
       // TODO(b/27524013): Factor out this Glide.get() call.
       Glide glide = Glide.get(context);
       requestManager =
-          new RequestManager(glide, current.getLifecycle(), current.getRequestManagerTreeNode());
+          factory.build(glide, current.getLifecycle(), current.getRequestManagerTreeNode());
       current.setRequestManager(requestManager);
     }
     return requestManager;
@@ -214,14 +204,15 @@ public class RequestManagerRetriever implements Handler.Callback {
     return current;
   }
 
-  RequestManager supportFragmentGet(Context context, FragmentManager fm, Fragment parentHint) {
+  private RequestManager supportFragmentGet(Context context, FragmentManager fm,
+      Fragment parentHint) {
     SupportRequestManagerFragment current = getSupportRequestManagerFragment(fm, parentHint);
     RequestManager requestManager = current.getRequestManager();
     if (requestManager == null) {
       // TODO(b/27524013): Factor out this Glide.get() call.
       Glide glide = Glide.get(context);
       requestManager =
-          new RequestManager(glide, current.getLifecycle(), current.getRequestManagerTreeNode());
+          factory.build(glide, current.getLifecycle(), current.getRequestManagerTreeNode());
       current.setRequestManager(requestManager);
     }
     return requestManager;
@@ -252,4 +243,20 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
     return handled;
   }
+
+  /**
+   * Used internally to create {@link RequestManager}s.
+   */
+  public interface RequestManagerFactory {
+    RequestManager build(
+        Glide glide, Lifecycle lifecycle, RequestManagerTreeNode requestManagerTreeNode);
+  }
+
+  private static final RequestManagerFactory DEFAULT_FACTORY = new RequestManagerFactory() {
+    @Override
+    public RequestManager build(Glide glide, Lifecycle lifecycle,
+        RequestManagerTreeNode requestManagerTreeNode) {
+      return new RequestManager(glide, lifecycle, requestManagerTreeNode);
+    }
+  };
 }

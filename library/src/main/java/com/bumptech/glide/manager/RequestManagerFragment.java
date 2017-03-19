@@ -7,6 +7,7 @@ import android.app.Fragment;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.util.Synthetic;
 import java.util.Collections;
@@ -145,7 +146,7 @@ public class RequestManagerFragment extends Fragment {
 
   private void registerFragmentWithRoot(Activity activity) {
     unregisterFragmentWithRoot();
-    rootRequestManagerFragment = RequestManagerRetriever.get()
+    rootRequestManagerFragment = Glide.get(activity).getRequestManagerRetriever()
         .getRequestManagerFragment(activity.getFragmentManager(), null);
     if (rootRequestManagerFragment != this) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
