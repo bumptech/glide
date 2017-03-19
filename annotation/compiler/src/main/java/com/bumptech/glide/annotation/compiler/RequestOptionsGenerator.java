@@ -25,12 +25,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Types;
 
 /**
  * Generates a new implementation of {@link com.bumptech.glide.request.BaseRequestOptions}
@@ -73,10 +70,11 @@ final class RequestOptionsGenerator {
   static final String GENERATED_REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide";
   private static final String BASE_REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
   private static final String BASE_REQUEST_OPTIONS_SIMPLE_NAME = "BaseRequestOptions";
-  private static final String BASE_REQUEST_OPTIONS_QUALIFIED_NAME =
+  static final String BASE_REQUEST_OPTIONS_QUALIFIED_NAME =
       BASE_REQUEST_OPTIONS_PACKAGE_NAME + "." + BASE_REQUEST_OPTIONS_SIMPLE_NAME;
 
   private final ProcessingEnvironment processingEnvironment;
+  private ProcessorUtil processorUtil;
   private final ClassName glideOptionsName;
   private final ParameterizedTypeName baseRequestOptionsOfGlideOptions;
   private final ClassName baseRequestOptionsName;
@@ -84,8 +82,9 @@ final class RequestOptionsGenerator {
   private int nextStaticFieldUniqueId;
 
   RequestOptionsGenerator(
-      ProcessingEnvironment processingEnvironment) {
+      ProcessingEnvironment processingEnvironment, ProcessorUtil processorUtil) {
     this.processingEnvironment = processingEnvironment;
+    this.processorUtil = processorUtil;
 
     glideOptionsName = ClassName.get(GENERATED_REQUEST_OPTIONS_PACKAGE_NAME,
         GENERATED_REQUEST_OPTIONS_SIMPLE_NAME);
@@ -138,16 +137,9 @@ final class RequestOptionsGenerator {
 
   private List<MethodAndStaticVar> generateMethodsForExtensions(
       Set<String> glideExtensionClassNames) {
-    List<ExecutableElement> requestOptionExtensionMethods = new ArrayList<>();
-    for (String glideExtensionClassName : glideExtensionClassNames) {
-      TypeElement glideExtension = processingEnvironment.getElementUtils()
-          .getTypeElement(glideExtensionClassName);
-      for (Element element : glideExtension.getEnclosedElements()) {
-        if (element.getAnnotation(ExtendsRequestOptions.class) != null) {
-          requestOptionExtensionMethods.add((ExecutableElement) element);
-        }
-      }
-    }
+    List<ExecutableElement> requestOptionExtensionMethods =
+        processorUtil.findAnnotatedElementsInClasses(
+            glideExtensionClassNames, ExtendsRequestOptions.class);
 
     List<MethodAndStaticVar> result = new ArrayList<>(requestOptionExtensionMethods.size());
     for (ExecutableElement requestOptionsExtensionMethod : requestOptionExtensionMethods) {
@@ -157,53 +149,6 @@ final class RequestOptionsGenerator {
     return result;
   }
 
-  /**
-   * Returns a safe String to use in a Javadoc that will function in a link.
-   *
-   * <p>This method exists because by Javadoc doesn't handle type parameters({@literal <T>}
-   * in {@literal BaseRequestOptions<T>} for example).
-   */
-  private Object getJavadocSafeName(Element element) {
-    Types typeUtils = processingEnvironment.getTypeUtils();
-    TypeMirror type = element.asType();
-    if (typeUtils.asElement(type) == null) {
-      // If there is no Element, it's a primitive and can't have additional types, so we're done.
-      return ClassName.get(element.asType());
-    }
-    Name simpleName = typeUtils.asElement(type).getSimpleName();
-    return ClassName.bestGuess(simpleName.toString());
-  }
-
-  private CodeBlock generateSeeMethodJavadoc(ExecutableElement method) {
-    // Use the simple name of the containing type instead of just the containing type's TypeMirror
-    // so that we avoid appending <CHILD> or other type arguments to the class and breaking
-    // Javadoc's linking.
-    // With this we get @see BaseRequestOptions#methodName().
-    // With just ClassName.get(element.getEnclosingElement().asType()), we get:
-    // @see BaseRequestOptions<CHILD>#methodName().
-    return generateSeeMethodJavadoc(getJavadocSafeName(method.getEnclosingElement()),
-        method.getSimpleName().toString(), method.getParameters());
-  }
-
-  private CodeBlock generateSeeMethodJavadoc(
-      Object methodContainingClassName, String methodSimpleName,
-      List<? extends VariableElement> methodParameters) {
-    String javadocString = "@see $T#$L(";
-    List<Object> javadocArgs = new ArrayList<>();
-    javadocArgs.add(methodContainingClassName);
-    javadocArgs.add(methodSimpleName);
-
-    for (VariableElement variable : methodParameters) {
-      javadocString += "$T, ";
-      javadocArgs.add(getJavadocSafeName(variable));
-
-    }
-    if (javadocArgs.size() > 2) {
-      javadocString = javadocString.substring(0, javadocString.length() - 2);
-    }
-    javadocString += ")\n";
-    return CodeBlock.of(javadocString, javadocArgs.toArray(new Object[0]));
-  }
 
   private List<MethodAndStaticVar> generateMethodForRequestOptionsExtension(
       ExecutableElement element) {
@@ -222,7 +167,7 @@ final class RequestOptionsGenerator {
     String methodName = element.getSimpleName().toString();
     MethodSpec.Builder builder = MethodSpec.methodBuilder(methodName)
         .addModifiers(Modifier.PUBLIC)
-        .addJavadoc(generateSeeMethodJavadoc(element))
+        .addJavadoc(processorUtil.generateSeeMethodJavadoc(element))
         .returns(glideOptionsName);
 
     // The 0th element is expected to be a BaseRequestOptions object.
@@ -244,7 +189,8 @@ final class RequestOptionsGenerator {
       callSuper += ")";
 
       builder.addStatement(callSuper, args.toArray(new Object[0]))
-          .addJavadoc(generateSeeMethodJavadoc(baseRequestOptionsName, methodName, parameters))
+          .addJavadoc(processorUtil.generateSeeMethodJavadoc(
+              baseRequestOptionsName, methodName, parameters))
           .addAnnotation(Override.class);
     }
 
@@ -280,30 +226,13 @@ final class RequestOptionsGenerator {
   }
 
   private List<MethodAndStaticVar> generateStaticEquivalentsForBaseRequestOptions() {
-    List<ExecutableElement> elements = new ArrayList<>();
-    for (Element element : baseRequestOptionsType.getEnclosedElements()) {
-      if (element.getKind() != ElementKind.METHOD
-        ||  !element.getModifiers().contains(Modifier.PUBLIC)
-        ||  element.getModifiers().contains(Modifier.STATIC)) {
-        continue;
-      }
-      ExecutableElement executableElement = (ExecutableElement) element;
-      if (returnsBaseRequestOptionsObject(executableElement)) {
-        elements.add(executableElement);
-      }
-    }
-
+    List<ExecutableElement> instanceMethodsThatReturnBaseRequestOptions =
+        processorUtil.findInstanceMethodsReturning(baseRequestOptionsType, baseRequestOptionsType);
     List<MethodAndStaticVar> staticMethods = new ArrayList<>();
-    for (ExecutableElement element : elements) {
+    for (ExecutableElement element : instanceMethodsThatReturnBaseRequestOptions) {
       staticMethods.add(generateStaticMethodEquivalent(element, false /*ignoreFirst*/));
     }
     return staticMethods;
-  }
-
-  private boolean returnsBaseRequestOptionsObject(ExecutableElement method) {
-    return processingEnvironment.getTypeUtils().isAssignable(
-        method.getReturnType(),
-        baseRequestOptionsType.asType());
   }
 
   private MethodAndStaticVar generateStaticMethodEquivalent(ExecutableElement instanceMethod,
@@ -325,7 +254,7 @@ final class RequestOptionsGenerator {
 
     MethodSpec.Builder methodSpecBuilder = MethodSpec.methodBuilder(staticMethodName)
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-        .addJavadoc(generateSeeMethodJavadoc(instanceMethod))
+        .addJavadoc(processorUtil.generateSeeMethodJavadoc(instanceMethod))
         .returns(glideOptionsName);
 
     List<? extends VariableElement> parameters = instanceMethod.getParameters();

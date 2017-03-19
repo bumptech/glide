@@ -66,14 +66,14 @@ public class RequestManager implements LifecycleListener {
   private final ConnectivityMonitor connectivityMonitor;
 
   @NonNull
-  private BaseRequestOptions<?> defaultRequestOptions;
-  @NonNull
   private BaseRequestOptions<?> requestOptions;
 
   public RequestManager(Glide glide, Lifecycle lifecycle, RequestManagerTreeNode treeNode) {
     this(glide, lifecycle, treeNode, new RequestTracker(), glide.getConnectivityMonitorFactory());
   }
 
+  // Our usage is safe here.
+  @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
   RequestManager(
       Glide glide,
       Lifecycle lifecycle,
@@ -101,10 +101,17 @@ public class RequestManager implements LifecycleListener {
     }
     lifecycle.addListener(connectivityMonitor);
 
-    defaultRequestOptions = glide.getGlideContext().getDefaultRequestOptions();
-    requestOptions = defaultRequestOptions;
+    setRequestOptions(glide.getGlideContext().getDefaultRequestOptions());
 
     glide.registerRequestManager(this);
+  }
+
+  protected void setRequestOptions(@NonNull BaseRequestOptions<?> toSet) {
+    this.requestOptions = toSet.clone().autoLock();
+  }
+
+  private void updateRequestOptions(BaseRequestOptions<?> toUpdate) {
+    this.requestOptions.apply(toUpdate);
   }
 
   /**
@@ -126,9 +133,7 @@ public class RequestManager implements LifecycleListener {
    * @return This request manager.
    */
   public RequestManager applyDefaultRequestOptions(RequestOptions requestOptions) {
-    BaseRequestOptions<?> toMutate = this.requestOptions == defaultRequestOptions
-        ? this.requestOptions.clone() : this.defaultRequestOptions;
-    this.requestOptions = toMutate.apply(requestOptions);
+    updateRequestOptions(requestOptions);
     return this;
   }
 
@@ -150,8 +155,7 @@ public class RequestManager implements LifecycleListener {
    * @return This request manager.
    */
   public RequestManager setDefaultRequestOptions(RequestOptions requestOptions) {
-    this.defaultRequestOptions = requestOptions;
-    this.requestOptions = requestOptions;
+    setRequestOptions(requestOptions);
     return this;
   }
 

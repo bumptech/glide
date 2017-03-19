@@ -13,4 +13,10 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface GlideModule { }
+public @interface GlideModule {
+  /**
+   * Returns the name of the class that will be used as a replacement for
+   * {@link com.bumptech.glide.Glide} in Applications that depend on Glide's generated code.
+   */
+  String glideName() default "GlideApp";
+}

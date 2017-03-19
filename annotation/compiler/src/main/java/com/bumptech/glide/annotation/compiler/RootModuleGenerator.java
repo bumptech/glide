@@ -7,17 +7,11 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeSpec.Builder;
 import com.squareup.javapoet.WildcardTypeName;
-import com.sun.tools.javac.code.Attribute;
-import com.sun.tools.javac.util.List;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
@@ -78,21 +72,23 @@ final class RootModuleGenerator {
   private static final String GLIDE_LOG_TAG = "Glide";
   private static final String GENERATED_ROOT_MODULE_IMPL_SIMPLE_NAME =
       "GeneratedRootGlideModuleImpl";
-  // TODO: When manifest parsing is no longer supported, just use RootGlideModule directly.
   private static final String GENERATED_ROOT_MODULE_PACKAGE_NAME = "com.bumptech.glide";
   private static final String GENERATED_ROOT_MODULE_SIMPLE_NAME = "GeneratedRootGlideModule";
+  private final ProcessorUtil processorUtil;
 
-  private RootModuleGenerator() { }
+  RootModuleGenerator(ProcessorUtil processorUtil) {
+    this.processorUtil = processorUtil;
+  }
 
-  static TypeSpec generate(ProcessingEnvironment processingEnv,
-      String rootGlideModuleClassName, Set<String> childGlideModuleClassNames) {
-    ClassName rootGlideModule = ClassName.bestGuess(rootGlideModuleClassName);
+  TypeSpec generate(TypeElement rootGlideModule, Set<String> childGlideModuleClassNames,
+      boolean isGeneratedRequestManagerFactoryPresent) {
+    ClassName rootGlideModuleClassName = ClassName.get(rootGlideModule);
     Set<String> excludedGlideModuleClassNames =
-        getExcludedGlideModuleClassNames(processingEnv, rootGlideModuleClassName);
+        getExcludedGlideModuleClassNames(rootGlideModule);
 
     MethodSpec constructor =
         generateConstructor(
-            rootGlideModule, childGlideModuleClassNames, excludedGlideModuleClassNames);
+            rootGlideModuleClassName, childGlideModuleClassNames, excludedGlideModuleClassNames);
 
     MethodSpec registerComponents =
         generateRegisterComponents(childGlideModuleClassNames, excludedGlideModuleClassNames);
@@ -117,7 +113,7 @@ final class RootModuleGenerator {
             .addStatement("return rootGlideModule.isManifestParsingEnabled()", rootGlideModule)
             .build();
 
-    return TypeSpec.classBuilder(GENERATED_ROOT_MODULE_IMPL_SIMPLE_NAME)
+    Builder builder = TypeSpec.classBuilder(GENERATED_ROOT_MODULE_IMPL_SIMPLE_NAME)
         .addModifiers(Modifier.FINAL)
         .addAnnotation(
             AnnotationSpec.builder(SuppressWarnings.class)
@@ -126,17 +122,31 @@ final class RootModuleGenerator {
         )
         .superclass(
             ClassName.get(GENERATED_ROOT_MODULE_PACKAGE_NAME, GENERATED_ROOT_MODULE_SIMPLE_NAME))
-        .addField(rootGlideModule, "rootGlideModule", Modifier.PRIVATE, Modifier.FINAL)
+        .addField(rootGlideModuleClassName, "rootGlideModule", Modifier.PRIVATE, Modifier.FINAL)
         .addMethod(constructor)
         .addMethod(applyOptions)
         .addMethod(registerComponents)
         .addMethod(isManifestParsingEnabled)
-        .addMethod(getExcludedModuleClasses)
-        .build();
+        .addMethod(getExcludedModuleClasses);
+
+    if (isGeneratedRequestManagerFactoryPresent) {
+      ClassName generatedRequestManagerFactoryClassName =
+          ClassName.get(
+              RequestManagerFactoryGenerator.GENERATED_REQUEST_MANAGER_FACTORY_PACKAGE_NAME,
+              RequestManagerFactoryGenerator.GENERATED_REQUEST_MANAGER_FACTORY_SIMPLE_NAME);
+
+      builder.addMethod(
+          MethodSpec.methodBuilder("getRequestManagerFactory")
+              .addAnnotation(Override.class)
+              .returns(generatedRequestManagerFactoryClassName)
+              .addStatement("return new $T()", generatedRequestManagerFactoryClassName)
+              .build());
+    }
+    return builder.build();
   }
 
   // TODO: When we drop support for parsing GlideModules from AndroidManifests, remove this method.
-  private static MethodSpec generateGetExcludedModuleClasses(Set<String> excludedClassNames) {
+  private MethodSpec generateGetExcludedModuleClasses(Set<String> excludedClassNames) {
     TypeName wildCardOfObject = WildcardTypeName.subtypeOf(Object.class);
     ParameterizedTypeName classOfWildcardOfObjet =
         ParameterizedTypeName.get(ClassName.get(Class.class), wildCardOfObject);
@@ -167,7 +177,7 @@ final class RootModuleGenerator {
     return builder.build();
   }
 
-  private static MethodSpec generateRegisterComponents(Set<String> childGlideModuleClassNames,
+  private MethodSpec generateRegisterComponents(Set<String> childGlideModuleClassNames,
       Set<String> excludedGlideModuleClassNames) {
     MethodSpec.Builder registerComponents =
         MethodSpec.methodBuilder("registerComponents")
@@ -189,7 +199,7 @@ final class RootModuleGenerator {
     return registerComponents.build();
   }
 
-  private static MethodSpec generateConstructor(ClassName rootGlideModule,
+  private MethodSpec generateConstructor(ClassName rootGlideModule,
       Set<String> childGlideModuleClassNames, Set<String> excludedGlideModuleClassNames) {
     MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder();
     constructorBuilder.addStatement("rootGlideModule = new $T()", rootGlideModule);
@@ -216,42 +226,8 @@ final class RootModuleGenerator {
     return constructorBuilder.build();
   }
 
-  private static Set<String> getExcludedGlideModuleClassNames(ProcessingEnvironment processingEnv,
-      String rootGlideModuleClassName) {
-    TypeElement rootGlideModule = processingEnv
-        .getElementUtils()
-        .getTypeElement(rootGlideModuleClassName);
-    String excludedModulesName = Excludes.class.getName();
-    AnnotationValue excludedModuleAnnotationValue = null;
-    for (AnnotationMirror annotationMirror : rootGlideModule.getAnnotationMirrors()) {
-      // Two different AnnotationMirrors the same class might not be equal, so compare Strings
-      // instead. This check is necessary because a given class may have multiple Annotations.
-      if (!excludedModulesName.equals(annotationMirror.getAnnotationType().toString())) {
-        continue;
-      }
-      Set<? extends Map.Entry<? extends ExecutableElement, ? extends AnnotationValue>> values =
-          annotationMirror.getElementValues().entrySet();
-      // Excludes has only one value. If we ever change that, we'd need to iterate over all
-      // values in the entry set and compare the keys to whatever our Annotation's attribute is
-      // (usually value).
-      if (values.size() != 1) {
-        throw new IllegalArgumentException("Expected single value, but found: " + values);
-      }
-      excludedModuleAnnotationValue = values.iterator().next().getValue();
-      if (excludedModuleAnnotationValue == null) {
-        throw new NullPointerException("Failed to find Excludes#value");
-      }
-    }
-    // If the RootGlideModule class is not annotated, then there are no classes to exclude.
-    if (excludedModuleAnnotationValue == null) {
-      return Collections.emptySet();
-    }
-    List values = (List) excludedModuleAnnotationValue.getValue();
-    Set<String> result = new HashSet<>(values.size());
-    for (Object value : values) {
-      Attribute.Class clazz = (Attribute.Class) value;
-      result.add(clazz.getValue().toString());
-    }
-    return result;
+  private Set<String> getExcludedGlideModuleClassNames(TypeElement rootGlideModule) {
+    return processorUtil.findClassValuesFromAnnotationOnClassAsNames(
+        rootGlideModule, Excludes.class);
   }
 }

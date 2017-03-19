@@ -34,10 +34,25 @@ import javax.lang.model.element.TypeElement;
  *     {@link com.bumptech.glide.module.ChildGlideModule}s and the
  *     original {@link com.bumptech.glide.module.RootGlideModule} in the correct order when Glide is
  *     initialized.
- *   <li>{@link com.bumptech.glide.annotation.GlideExtension}s - A
- *   {@link com.bumptech.glide.request.BaseRequestOptions} implementation that contains static
- *   versions of all builder methods in the base class and both static and instance versions of
- *   methods in all {@link com.bumptech.glide.annotation.GlideExtension}s.
+ *   <li>{@link com.bumptech.glide.annotation.GlideExtension}s -
+ *   <ul>
+ *     <li>A {@link com.bumptech.glide.request.BaseRequestOptions} implementation that contains
+ *     static versions of all builder methods in the base class and both static and instance
+ *     versions of methods in all {@link com.bumptech.glide.annotation.GlideExtension}s.
+ *     <li>If one or more methods in one or more
+ *     {@link com.bumptech.glide.annotation.GlideExtension} annotated classes are annotated with
+ *     {@link com.bumptech.glide.annotation.ExtendsRequestManager}:
+ *     <ul>
+ *       <li>A {@link com.bumptech.glide.RequestManager} implementation containing a generated
+ *       method for each method annotated with
+ *       {@link com.bumptech.glide.annotation.ExtendsRequestManager}.
+ *       <li>A {@link com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory}
+ *       implementation that produces the generated {@link com.bumptech.glide.RequestManager}s.
+ *       <li>A {@link com.bumptech.glide.Glide} look-alike that implements all static methods in
+ *       the {@link com.bumptech.glide.Glide} singleton and returns the generated
+ *       {@link com.bumptech.glide.RequestManager} implementation when appropriate.
+ *     </ul>
+ *   </ul>
  * </ul>
  *
  * <p>{@link com.bumptech.glide.module.RootGlideModule} implementations must only be included in

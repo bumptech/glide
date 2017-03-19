@@ -6,7 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Identifies methods that extend {@link com.bumptech.glide.request.BaseRequestOptions}.
+ * Identifies methods in {@link GlideExtension} annotated classes that extend
+ * {@link com.bumptech.glide.request.BaseRequestOptions}.
  *
  * <p>All annotated methods will be added to a single
  * {@link com.bumptech.glide.request.BaseRequestOptions} implementation generated per application.

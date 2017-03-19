@@ -189,7 +189,11 @@ public class Glide implements ComponentCallbacks2 {
       }
     }
 
-    GlideBuilder builder = new GlideBuilder();
+    RequestManagerRetriever.RequestManagerFactory factory =
+        annotationGeneratedModule != null
+            ? annotationGeneratedModule.getRequestManagerFactory() : null;
+    GlideBuilder builder = new GlideBuilder()
+        .setRequestManagerFactory(factory);
     for (GlideModule module : manifestModules) {
       module.applyOptions(applicationContext, builder);
     }

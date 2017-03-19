@@ -14,8 +14,10 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 
 /**
- * Generates the final {@link com.bumptech.glide.module.RootGlideModule} class after processing
- * all {@link GlideModule} annotated classes.
+ * Runs the final steps of Glide's annotation process and generates the combined
+ * {@link com.bumptech.glide.module.RootGlideModule}, {@link com.bumptech.glide.Glide},
+ * {@link com.bumptech.glide.RequestManager}, and
+ * {@link com.bumptech.glide.request.BaseRequestOptions} classes.
  */
 final class RootModuleProcessor {
   private static final String GENERATED_ROOT_MODULE_PACKAGE_NAME = "com.bumptech.glide";
@@ -26,12 +28,20 @@ final class RootModuleProcessor {
   private final ProcessorUtil processorUtil;
   private final List<TypeElement> rootGlideModules = new ArrayList<>();
   private final RequestOptionsGenerator requestOptionsGenerator;
+  private final RequestManagerGenerator requestManagerGenerator;
+  private final RootModuleGenerator rootModuleGenerator;
+  private final RequestManagerFactoryGenerator requestManagerFactoryGenerator;
+  private final GlideGenerator glideGenerator;
 
   RootModuleProcessor(ProcessingEnvironment processingEnv, ProcessorUtil processorUtil) {
     this.processingEnv = processingEnv;
     this.processorUtil = processorUtil;
 
-    requestOptionsGenerator = new RequestOptionsGenerator(processingEnv);
+    rootModuleGenerator = new RootModuleGenerator(processorUtil);
+    requestOptionsGenerator = new RequestOptionsGenerator(processingEnv, processorUtil);
+    requestManagerGenerator = new RequestManagerGenerator(processingEnv, processorUtil);
+    requestManagerFactoryGenerator = new RequestManagerFactoryGenerator(processingEnv);
+    glideGenerator = new GlideGenerator(processingEnv, processorUtil);
   }
 
   void processModules(Set<? extends TypeElement> set, RoundEnvironment env) {
@@ -66,21 +76,40 @@ final class RootModuleProcessor {
         processingEnv.getElementUtils().getPackageElement(COMPILER_PACKAGE_NAME);
     FoundIndexedClassNames indexedClassNames = getIndexedClassNames(glideGenPackage);
 
-    TypeSpec generatedRootGlideModule =
-        RootModuleGenerator.generate(
-            processingEnv, rootGlideModules.get(0).getQualifiedName().toString(),
-            indexedClassNames.glideModules);
-    writeRootModule(generatedRootGlideModule);
+    TypeElement rootModule = rootGlideModules.get(0);
 
-    processorUtil.infoLog("Wrote GeneratedRootGlideModule with: " + indexedClassNames.glideModules);
-
+    boolean isGeneratedRequestManagerFactoryPresent = false;
     if (!indexedClassNames.extensions.isEmpty()) {
       TypeSpec generatedRequestOptions =
           requestOptionsGenerator.generate(indexedClassNames.extensions);
       writeRequestOptions(generatedRequestOptions);
+
+      TypeSpec requestManager = requestManagerGenerator.generate(
+          generatedRequestOptions, indexedClassNames.extensions);
+      if (requestManager != null) {
+        isGeneratedRequestManagerFactoryPresent = true;
+        writeRequestManager(requestManager);
+
+        TypeSpec requestManagerFactory = requestManagerFactoryGenerator.generate(requestManager);
+        writeRequestManagerFactory(requestManagerFactory);
+
+        TypeSpec glide = glideGenerator.generate(getGlideName(rootModule), requestManager);
+        writeGlide(glide);
+      }
     }
 
+    TypeSpec generatedRootGlideModule =
+        rootModuleGenerator.generate(rootModule, indexedClassNames.glideModules,
+            isGeneratedRequestManagerFactoryPresent);
+    writeRootModule(generatedRootGlideModule);
+
+    processorUtil.infoLog("Wrote GeneratedRootGlideModule with: " + indexedClassNames.glideModules);
+
     return true;
+  }
+
+  private String getGlideName(TypeElement rootModule) {
+    return rootModule.getAnnotation(GlideModule.class).glideName();
   }
 
   @SuppressWarnings("unchecked")
@@ -100,6 +129,21 @@ final class RootModuleProcessor {
 
     processorUtil.debugLog("Found GlideModules: " + glideModules);
     return new FoundIndexedClassNames(glideModules, extensions);
+  }
+
+  private void writeGlide(TypeSpec glide) {
+    processorUtil.writeClass(GlideGenerator.GENERATED_GLIDE_PACKAGE_NAME, glide);
+  }
+
+  private void writeRequestManager(TypeSpec requestManager) {
+    processorUtil.writeClass(
+        RequestManagerGenerator.GENERATED_REQUEST_MANAGER_PACKAGE_NAME, requestManager);
+  }
+
+  private void writeRequestManagerFactory(TypeSpec requestManagerFactory) {
+    processorUtil.writeClass(
+        RequestManagerFactoryGenerator.GENERATED_REQUEST_MANAGER_FACTORY_PACKAGE_NAME,
+        requestManagerFactory);
   }
 
   private void writeRootModule(TypeSpec rootModule) {
