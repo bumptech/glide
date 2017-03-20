@@ -30,6 +30,7 @@ final class RootModuleProcessor {
   private final RequestOptionsGenerator requestOptionsGenerator;
   private final RequestManagerGenerator requestManagerGenerator;
   private final RootModuleGenerator rootModuleGenerator;
+  private final RequestBuilderGenerator requestBuilderGenerator;
   private final RequestManagerFactoryGenerator requestManagerFactoryGenerator;
   private final GlideGenerator glideGenerator;
 
@@ -42,6 +43,7 @@ final class RootModuleProcessor {
     requestManagerGenerator = new RequestManagerGenerator(processingEnv, processorUtil);
     requestManagerFactoryGenerator = new RequestManagerFactoryGenerator(processingEnv);
     glideGenerator = new GlideGenerator(processingEnv, processorUtil);
+    requestBuilderGenerator = new RequestBuilderGenerator(processingEnv, processorUtil);
   }
 
   void processModules(Set<? extends TypeElement> set, RoundEnvironment env) {
@@ -84,18 +86,21 @@ final class RootModuleProcessor {
           requestOptionsGenerator.generate(indexedClassNames.extensions);
       writeRequestOptions(generatedRequestOptions);
 
-      TypeSpec requestManager = requestManagerGenerator.generate(
-          generatedRequestOptions, indexedClassNames.extensions);
-      if (requestManager != null) {
-        isGeneratedRequestManagerFactoryPresent = true;
-        writeRequestManager(requestManager);
+      TypeSpec generatedRequestBuilder =
+          requestBuilderGenerator.generate(generatedRequestOptions);
+      writeRequestBuilder(generatedRequestBuilder);
 
-        TypeSpec requestManagerFactory = requestManagerFactoryGenerator.generate(requestManager);
-        writeRequestManagerFactory(requestManagerFactory);
+      TypeSpec requestManager =
+          requestManagerGenerator.generate(
+              generatedRequestOptions, generatedRequestBuilder, indexedClassNames.extensions);
+      isGeneratedRequestManagerFactoryPresent = true;
+      writeRequestManager(requestManager);
 
-        TypeSpec glide = glideGenerator.generate(getGlideName(rootModule), requestManager);
-        writeGlide(glide);
-      }
+      TypeSpec requestManagerFactory = requestManagerFactoryGenerator.generate(requestManager);
+      writeRequestManagerFactory(requestManagerFactory);
+
+      TypeSpec glide = glideGenerator.generate(getGlideName(rootModule), requestManager);
+      writeGlide(glide);
     }
 
     TypeSpec generatedRootGlideModule =
@@ -153,6 +158,11 @@ final class RootModuleProcessor {
   private void writeRequestOptions(TypeSpec requestOptions) {
     processorUtil.writeClass(RequestOptionsGenerator.GENERATED_REQUEST_OPTIONS_PACKAGE_NAME,
         requestOptions);
+  }
+
+  private void writeRequestBuilder(TypeSpec requestBuilder) {
+    processorUtil.writeClass(
+        RequestBuilderGenerator.GENERATED_REQUEST_BUILDER_PACKAGE_NAME, requestBuilder);
   }
 
   private static final class FoundIndexedClassNames {

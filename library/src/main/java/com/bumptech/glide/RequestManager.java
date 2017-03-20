@@ -51,7 +51,7 @@ public class RequestManager implements LifecycleListener {
       diskCacheStrategyOf(DiskCacheStrategy.DATA).priority(Priority.LOW)
           .skipMemoryCache(true);
 
-  private final Glide glide;
+  protected final Glide glide;
   @Synthetic final Lifecycle lifecycle;
   private final RequestTracker requestTracker;
   private final RequestManagerTreeNode treeNode;

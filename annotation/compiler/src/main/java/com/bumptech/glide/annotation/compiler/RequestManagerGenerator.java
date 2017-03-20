@@ -3,12 +3,17 @@ package com.bumptech.glide.annotation.compiler;
 import com.bumptech.glide.annotation.ExtendsRequestManager;
 import com.bumptech.glide.annotation.GlideExtension;
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -16,6 +21,9 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
 /**
@@ -42,8 +50,6 @@ import javax.lang.model.util.Elements;
 final class RequestManagerGenerator {
   private static final String GLIDE_QUALIFIED_NAME =
       "com.bumptech.glide.Glide";
-  private static final String REQUEST_BUILDER_QUALIFIED_NAME =
-      "com.bumptech.glide.RequestBuilder";
   private static final String REQUEST_MANAGER_QUALIFIED_NAME =
       "com.bumptech.glide.RequestManager";
   private static final String LIFECYCLE_QUALIFIED_NAME =
@@ -59,11 +65,13 @@ final class RequestManagerGenerator {
 
   private ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
-  private final ClassName requestBuilderClassName;
   private final ClassName requestManagerClassName;
   private final TypeElement lifecycleType;
   private final TypeElement requestManagerTreeNodeType;
   private final TypeElement glideType;
+  private final TypeElement requestManagerType;
+  private final TypeElement requestBuilderType;
+  private ClassName generatedRequestBuilderClassName;
 
   RequestManagerGenerator(ProcessingEnvironment processingEnv, ProcessorUtil processorUtil) {
     this.processingEnv = processingEnv;
@@ -71,31 +79,25 @@ final class RequestManagerGenerator {
 
     Elements elementUtils = processingEnv.getElementUtils();
 
-    TypeElement requestBuilderType = elementUtils.getTypeElement(REQUEST_BUILDER_QUALIFIED_NAME);
-    requestBuilderClassName = ClassName.get(requestBuilderType);
-
-    TypeElement requestManagerType = elementUtils.getTypeElement(REQUEST_MANAGER_QUALIFIED_NAME);
+    requestManagerType = elementUtils.getTypeElement(REQUEST_MANAGER_QUALIFIED_NAME);
     requestManagerClassName = ClassName.get(requestManagerType);
 
     lifecycleType = elementUtils.getTypeElement(LIFECYCLE_QUALIFIED_NAME);
     requestManagerTreeNodeType =
         elementUtils.getTypeElement(REQUEST_MANAGER_TREE_NODE_QUALIFIED_NAME);
 
+    requestBuilderType =
+        elementUtils.getTypeElement(RequestBuilderGenerator.REQUEST_BUILDER_QUALIFIED_NAME);
+
     glideType = elementUtils.getTypeElement(GLIDE_QUALIFIED_NAME);
   }
 
   @Nullable
-  TypeSpec generate(TypeSpec requestOptions, Set<String> glideExtensions) {
-    List<MethodSpec> requestManagerMethods = generateRequestManagerMethods(glideExtensions);
-    if (requestManagerMethods.isEmpty()) {
-      return null;
-    }
-    return generateRequestManager(requestOptions, glideExtensions);
-  }
-
-
-  private TypeSpec generateRequestManager(TypeSpec requestOptions, Set<String> glideExtensions) {
-     return TypeSpec.classBuilder(GENERATED_REQUEST_MANAGER_SIMPLE_NAME)
+  TypeSpec generate(TypeSpec requestOptions, TypeSpec requestBuilder, Set<String> glideExtensions) {
+    generatedRequestBuilderClassName =
+        ClassName.get(
+            RequestBuilderGenerator.GENERATED_REQUEST_BUILDER_PACKAGE_NAME, requestBuilder.name);
+    return TypeSpec.classBuilder(GENERATED_REQUEST_MANAGER_SIMPLE_NAME)
          .superclass(requestManagerClassName)
          .addJavadoc("Includes all additions from methods in {@link $T}s\n"
                  + "annotated with {@link $T}\n"
@@ -103,18 +105,111 @@ final class RequestManagerGenerator {
                  + "<p>Generated code, do not modify\n",
              GlideExtension.class, ExtendsRequestManager.class)
          .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-         .addMethod(MethodSpec.constructorBuilder()
-                 .addParameter(ClassName.get(glideType), "glide")
-                 .addParameter(ClassName.get(lifecycleType), "lifecycle")
-                 .addParameter(ClassName.get(requestManagerTreeNodeType), "treeNode")
-                 .addStatement("super(glide, lifecycle, treeNode)")
-                 .build())
-         .addMethods(generateRequestManagerMethods(glideExtensions))
+         .addMethod(generateAsMethod(requestBuilder))
+         .addMethod(generateCallSuperConstructor())
+         .addMethods(generateAdditionalRequestManagerMethods(glideExtensions))
+         .addMethods(generateRequestManagerMethodOverrides())
          .addMethod(generateOverrideSetRequestOptions(requestOptions))
          .build();
   }
 
-  private List<MethodSpec> generateRequestManagerMethods(Set<String> glideExtensions) {
+  private MethodSpec generateCallSuperConstructor() {
+    return MethodSpec.constructorBuilder()
+        .addParameter(ClassName.get(glideType), "glide")
+        .addParameter(ClassName.get(lifecycleType), "lifecycle")
+        .addParameter(ClassName.get(requestManagerTreeNodeType), "treeNode")
+        .addStatement("super(glide, lifecycle, treeNode)")
+        .build();
+  }
+
+  private MethodSpec generateAsMethod(TypeSpec requestBuilder) {
+    TypeVariableName resourceType = TypeVariableName.get("ResourceType");
+    ParameterizedTypeName classOfResouceType = ParameterizedTypeName
+        .get(ClassName.get(Class.class), resourceType);
+
+    ClassName generatedRequestBuilderClassName =
+        ClassName.get(RequestBuilderGenerator.REQUEST_BUILDER_PACKAGE_NAME,
+            requestBuilder.name);
+
+    ParameterizedTypeName requestBuilderOfResourceType = ParameterizedTypeName
+        .get(generatedRequestBuilderClassName, resourceType);
+
+    return MethodSpec.methodBuilder("as")
+        .addModifiers(Modifier.PUBLIC)
+        .addAnnotation(Override.class)
+        .addTypeVariable(TypeVariableName.get("ResourceType"))
+        .addParameter(classOfResouceType, "resourceClass")
+        .returns(requestBuilderOfResourceType)
+        .addStatement("return new $T<>(glide.getGlideContext(), this, resourceClass)",
+            this.generatedRequestBuilderClassName)
+        .build();
+  }
+
+  private List<MethodSpec> generateRequestManagerMethodOverrides() {
+    // Without the erasure, this is a RequestBuilder<Y>. A RequestBuilder<X> is not assignable to a
+    // RequestBuilder<Y>. After type erasure this is a RequestBuilder. A RequestBuilder<X> is
+    // assignable to the raw RequestBuilder.
+    TypeMirror rawRequestBuilder = processingEnv.getTypeUtils()
+        .erasure(requestBuilderType.asType());
+
+    final TypeElement classType =
+        processingEnv.getElementUtils().getTypeElement(Class.class.getCanonicalName());
+    final TypeMirror rawClassType = processingEnv.getTypeUtils().erasure(classType.asType());
+
+    return FluentIterable.from(
+        processorUtil.findInstanceMethodsReturning(requestManagerType, rawRequestBuilder))
+        .filter(new Predicate<ExecutableElement>() {
+          @Override
+          public boolean apply(ExecutableElement input) {
+            // Skip the <T> as(Class<T>) method.
+            return !input.getSimpleName().toString().equals("as")
+                || input.getParameters().size() != 1
+                || !processingEnv.getTypeUtils().isAssignable(
+                    input.getParameters().get(0).asType(), rawClassType);
+          }
+        })
+        .transform(new Function<ExecutableElement, MethodSpec>() {
+          @Override
+          public MethodSpec apply(ExecutableElement input) {
+            return generateRequestManagerMethodOverride(input);
+          }
+        })
+        .toList();
+  }
+
+  /**
+   * Generates overrides of existing RequestManager methods so that they return our generated
+   * RequestBuilder subtype.
+   */
+  private MethodSpec generateRequestManagerMethodOverride(ExecutableElement methodToOverride) {
+     // We've already verified that this method returns a RequestBuilder and RequestBuilders have
+    // exactly one type argument, so this is safe unless those assumptions change.
+    TypeMirror typeArgument =
+        ((DeclaredType) methodToOverride.getReturnType()).getTypeArguments().get(0);
+
+    ParameterizedTypeName generatedRequestBuilderOfType =
+        ParameterizedTypeName.get(generatedRequestBuilderClassName, ClassName.get(typeArgument));
+
+    return MethodSpec.overriding(methodToOverride)
+        .returns(generatedRequestBuilderOfType)
+        .addCode(CodeBlock.builder()
+            .add("return ($T) super.$N(",
+                generatedRequestBuilderOfType, methodToOverride.getSimpleName())
+            .add(FluentIterable.from(methodToOverride.getParameters())
+                .transform(new Function<VariableElement, String>() {
+                  @Override
+                  public String apply(VariableElement input) {
+                    return input.getSimpleName().toString();
+                  }
+                })
+                .join(Joiner.on(", ")))
+            .add(");\n")
+            .build())
+        .build();
+  }
+
+  private List<MethodSpec> generateAdditionalRequestManagerMethods(
+      Set<String> glideExtensions) {
     List<ExecutableElement> requestManagerExtensionMethods =
         processorUtil.findAnnotatedElementsInClasses(glideExtensions, ExtendsRequestManager.class);
 
@@ -122,17 +217,18 @@ final class RequestManagerGenerator {
         new Function<ExecutableElement, MethodSpec>() {
           @Override
           public MethodSpec apply(ExecutableElement input) {
-            return generateRequestManagerMethod(input);
+            return generateAdditionalRequestManagerMethod(input);
           }
         });
   }
 
-  private MethodSpec generateRequestManagerMethod(ExecutableElement extensionMethod) {
+  // Generates methods added to RequestManager via GlideExtensions.
+  private MethodSpec generateAdditionalRequestManagerMethod(ExecutableElement extensionMethod) {
     String returnType = processorUtil.findClassValuesFromAnnotationOnClassAsNames(extensionMethod,
         ExtendsRequestManager.class).iterator().next();
     ClassName returnTypeClassName = ClassName.bestGuess(returnType);
     ParameterizedTypeName parameterizedTypeName =
-        ParameterizedTypeName.get(requestBuilderClassName, returnTypeClassName);
+        ParameterizedTypeName.get(generatedRequestBuilderClassName, returnTypeClassName);
 
     return MethodSpec.methodBuilder(extensionMethod.getSimpleName().toString())
         .addModifiers(Modifier.PUBLIC)
@@ -140,8 +236,8 @@ final class RequestManagerGenerator {
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
         .addStatement(
             "$T requestBuilder = this.as($T.class)", parameterizedTypeName, returnTypeClassName)
-        .addStatement("$T.$N(requestBuilder)", extensionMethod.getEnclosingElement(),
-            extensionMethod.getSimpleName())
+        .addStatement("$T.$N(requestBuilder)",
+            extensionMethod.getEnclosingElement(), extensionMethod.getSimpleName())
         .addStatement("return requestBuilder")
         .build();
   }
