@@ -204,7 +204,7 @@ public class RequestManagerRetrieverTest {
     retriever.get(fragment);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testThrowsIfSupportFragmentNotAttached() {
     Fragment fragment = new Fragment();
     retriever.get(fragment);

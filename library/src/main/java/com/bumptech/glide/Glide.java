@@ -16,6 +16,7 @@ import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.data.InputStreamRewinder;
@@ -69,6 +70,7 @@ import com.bumptech.glide.module.ManifestParser;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.io.InputStream;
@@ -499,12 +501,10 @@ public class Glide implements ComponentCallbacks2 {
   private static RequestManagerRetriever getRetriever(@Nullable Context context) {
     // Context could be null for other reasons (ie the user passes in null), but in practice it will
     // only occur due to errors with the Fragment lifecycle.
-    if (context == null) {
-      throw new IllegalArgumentException(
-          "You cannot start a load on a Fragment where getActivity() returns null (which usually"
-              + " occurs when getActivity() is called before the Fragment is attached or after the"
-              + " Fragment is destroyed).");
-    }
+    Preconditions.checkNotNull(
+        "You cannot start a load on a not yet attached View or a  Fragment where getActivity() "
+            + "returns null (which usually occurs when getActivity() is called before the Fragment "
+            + "is attached or after the Fragment is destroyed).");
     return Glide.get(context).getRequestManagerRetriever();
   }
 
@@ -578,6 +578,30 @@ public class Glide implements ComponentCallbacks2 {
    */
   public static RequestManager with(Fragment fragment) {
     return getRetriever(fragment.getActivity()).get(fragment);
+  }
+
+  /**
+   * Begin a load with Glide that will be tied to the lifecycle of the {@link Fragment},
+   * {@link android.app.Fragment}, or {@link Activity} that contains the View.
+   *
+   * <p>A {@link Fragment} or {@link android.app.Fragment} is assumed to contain a View if the View
+   * is a child of the View returned by the {@link Fragment#getView()}} method.
+   *
+   * <p>This method will not work if the View is not attached. Prefer the Activity and Fragment
+   * variants unless you're loading in a View subclass.
+   *
+   * <p>This method may be inefficient for large hierarchies. Consider memoizing the result after
+   * the View is attached.
+   *
+   * <p>When used in Applications that use the non-support {@link android.app.Fragment} classes,
+   * calling this method will produce noisy logs from {@link android.app.FragmentManager}. Consider
+   * avoiding entirely or using the {@link Fragment}s from the support library instead.
+   *
+   * @param view The view to search for a containing Fragment or Activity from.
+   * @return A RequestManager that can be used to start a load.
+   */
+  public static RequestManager with(View view) {
+    return getRetriever(view.getContext()).get(view);
   }
 
   public Registry getRegistry() {
