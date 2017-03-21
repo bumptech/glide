@@ -20,8 +20,10 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -111,7 +113,7 @@ final class RequestBuilderGenerator {
   private final ParameterizedTypeName generatedRequestBuilderOfTranscodeType;
   private final TypeElement baseRequestOptionsType;
   private final TypeElement requestBuilderType;
-  private ClassName generatedRequestOptionsClassName;
+  private ClassName requestOptionsClassName;
 
   RequestBuilderGenerator(ProcessingEnvironment processingEnv, ProcessorUtil processorUtil) {
     this.processingEnv = processingEnv;
@@ -132,10 +134,18 @@ final class RequestBuilderGenerator {
         BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
   }
 
-  TypeSpec generate(TypeSpec generatedOptions) {
-    generatedRequestOptionsClassName =
-        ClassName.get(
-            RequestOptionsGenerator.GENERATED_REQUEST_OPTIONS_PACKAGE_NAME, generatedOptions.name);
+  TypeSpec generate(@Nullable TypeSpec generatedOptions) {
+    if (generatedOptions != null) {
+      requestOptionsClassName =
+          ClassName.get(
+              RequestOptionsGenerator.GENERATED_REQUEST_OPTIONS_PACKAGE_NAME,
+              generatedOptions.name);
+    } else {
+      requestOptionsClassName =
+          ClassName.get(
+              RequestOptionsGenerator.REQUEST_OPTIONS_PACKAGE_NAME,
+              RequestBuilderGenerator.BASE_REQUEST_OPTIONS_SIMPLE_NAME);
+    }
 
     ParameterizedTypeName requestBuilderOfTranscodeType =
         ParameterizedTypeName.get(
@@ -295,7 +305,10 @@ final class RequestBuilderGenerator {
    * {@link com.bumptech.glide.RequestBuilder} subclass.
    */
   private List<MethodSpec> generateGeneratedRequestOptionsEquivalents(
-      final TypeSpec generatedOptions) {
+      @Nullable final TypeSpec generatedOptions) {
+    if (generatedOptions == null) {
+      return Collections.emptyList();
+    }
     return FluentIterable
         .from(generatedOptions.methodSpecs)
         .filter(new Predicate<MethodSpec>() {
@@ -332,7 +345,7 @@ final class RequestBuilderGenerator {
           }
         }).contains(Override.class.getCanonicalName())
         && requestOptionMethod.returnType.toString()
-            .equals(generatedRequestOptionsClassName.toString());
+            .equals(requestOptionMethod.toString());
   }
 
    /**
@@ -354,19 +367,19 @@ final class RequestBuilderGenerator {
         .build();
 
     return MethodSpec.methodBuilder(requestOptionMethod.name)
-        .addJavadoc(processorUtil.generateSeeMethodJavadoc(
-            generatedRequestOptionsClassName, requestOptionMethod))
+        .addJavadoc(
+            processorUtil.generateSeeMethodJavadoc(requestOptionsClassName, requestOptionMethod))
         .addModifiers(Modifier.PUBLIC)
         .addParameters(requestOptionMethod.parameters)
         .returns(generatedRequestBuilderOfTranscodeType)
         .beginControlFlow(
-            "if (getMutableOptions() instanceof $T)", generatedRequestOptionsClassName)
+            "if (getMutableOptions() instanceof $T)", requestOptionsClassName)
         .addCode("this.requestOptions = (($T) getMutableOptions())",
-            generatedRequestOptionsClassName)
+            requestOptionsClassName)
         .addCode(callRequestOptionsMethod)
         .nextControlFlow("else")
         .addCode(CodeBlock.of("this.requestOptions = new $T().apply(this.requestOptions)",
-                generatedRequestOptionsClassName))
+            requestOptionsClassName))
         .addCode(callRequestOptionsMethod)
         .endControlFlow()
         .addStatement("return this")

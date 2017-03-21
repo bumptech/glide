@@ -80,32 +80,30 @@ final class RootModuleProcessor {
 
     TypeElement rootModule = rootGlideModules.get(0);
 
-    boolean isGeneratedRequestManagerFactoryPresent = false;
+    TypeSpec generatedRequestOptions = null;
     if (!indexedClassNames.extensions.isEmpty()) {
-      TypeSpec generatedRequestOptions =
+      generatedRequestOptions =
           requestOptionsGenerator.generate(indexedClassNames.extensions);
       writeRequestOptions(generatedRequestOptions);
-
-      TypeSpec generatedRequestBuilder =
-          requestBuilderGenerator.generate(generatedRequestOptions);
-      writeRequestBuilder(generatedRequestBuilder);
-
-      TypeSpec requestManager =
-          requestManagerGenerator.generate(
-              generatedRequestOptions, generatedRequestBuilder, indexedClassNames.extensions);
-      isGeneratedRequestManagerFactoryPresent = true;
-      writeRequestManager(requestManager);
-
-      TypeSpec requestManagerFactory = requestManagerFactoryGenerator.generate(requestManager);
-      writeRequestManagerFactory(requestManagerFactory);
-
-      TypeSpec glide = glideGenerator.generate(getGlideName(rootModule), requestManager);
-      writeGlide(glide);
     }
 
+    TypeSpec generatedRequestBuilder =
+        requestBuilderGenerator.generate(generatedRequestOptions);
+    writeRequestBuilder(generatedRequestBuilder);
+
+    TypeSpec requestManager =
+        requestManagerGenerator.generate(
+            generatedRequestOptions, generatedRequestBuilder, indexedClassNames.extensions);
+    writeRequestManager(requestManager);
+
+    TypeSpec requestManagerFactory = requestManagerFactoryGenerator.generate(requestManager);
+    writeRequestManagerFactory(requestManagerFactory);
+
+    TypeSpec glide = glideGenerator.generate(getGlideName(rootModule), requestManager);
+    writeGlide(glide);
+
     TypeSpec generatedRootGlideModule =
-        rootModuleGenerator.generate(rootModule, indexedClassNames.glideModules,
-            isGeneratedRequestManagerFactoryPresent);
+        rootModuleGenerator.generate(rootModule, indexedClassNames.glideModules);
     writeRootModule(generatedRootGlideModule);
 
     processorUtil.infoLog("Wrote GeneratedRootGlideModule with: " + indexedClassNames.glideModules);

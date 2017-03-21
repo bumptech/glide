@@ -73,6 +73,9 @@ final class RequestOptionsGenerator {
   static final String BASE_REQUEST_OPTIONS_QUALIFIED_NAME =
       BASE_REQUEST_OPTIONS_PACKAGE_NAME + "." + BASE_REQUEST_OPTIONS_SIMPLE_NAME;
 
+  static final String REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
+  static final String REQUEST_OPTIONS_SIMPLE_NAME = "RequestOptions";
+
   private final ProcessingEnvironment processingEnvironment;
   private ProcessorUtil processorUtil;
   private final ClassName glideOptionsName;

@@ -36,7 +36,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private static final TransitionOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
       new GenericTransitionOptions<Object>();
   // Used in generated subclasses
-  @SuppressWarnings("WeakerAccess")
   static final BaseRequestOptions<?> DOWNLOAD_ONLY_OPTIONS =
       new RequestOptions().diskCacheStrategy(DiskCacheStrategy.DATA).priority(Priority.LOW)
           .skipMemoryCache(true);
@@ -60,13 +59,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private boolean isModelSet;
   private boolean isThumbnailBuilt;
 
-  RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
-    this(other.context, other.requestManager, transcodeClass);
-    model = other.model;
-    isModelSet = other.isModelSet;
-    requestOptions = other.requestOptions;
-  }
-
   RequestBuilder(GlideContext context, RequestManager requestManager,
       Class<TranscodeType> transcodeClass) {
     this.requestManager = requestManager;
@@ -75,6 +67,13 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
 
     this.defaultRequestOptions = requestManager.getDefaultRequestOptions();
     this.requestOptions = defaultRequestOptions;
+  }
+
+  protected RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
+    this(other.context, other.requestManager, transcodeClass);
+    model = other.model;
+    isModelSet = other.isModelSet;
+    requestOptions = other.requestOptions;
   }
 
   /**

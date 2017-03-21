@@ -80,8 +80,7 @@ final class RootModuleGenerator {
     this.processorUtil = processorUtil;
   }
 
-  TypeSpec generate(TypeElement rootGlideModule, Set<String> childGlideModuleClassNames,
-      boolean isGeneratedRequestManagerFactoryPresent) {
+  TypeSpec generate(TypeElement rootGlideModule, Set<String> childGlideModuleClassNames) {
     ClassName rootGlideModuleClassName = ClassName.get(rootGlideModule);
     Set<String> excludedGlideModuleClassNames =
         getExcludedGlideModuleClassNames(rootGlideModule);
@@ -129,19 +128,17 @@ final class RootModuleGenerator {
         .addMethod(isManifestParsingEnabled)
         .addMethod(getExcludedModuleClasses);
 
-    if (isGeneratedRequestManagerFactoryPresent) {
-      ClassName generatedRequestManagerFactoryClassName =
-          ClassName.get(
-              RequestManagerFactoryGenerator.GENERATED_REQUEST_MANAGER_FACTORY_PACKAGE_NAME,
-              RequestManagerFactoryGenerator.GENERATED_REQUEST_MANAGER_FACTORY_SIMPLE_NAME);
+    ClassName generatedRequestManagerFactoryClassName =
+        ClassName.get(
+            RequestManagerFactoryGenerator.GENERATED_REQUEST_MANAGER_FACTORY_PACKAGE_NAME,
+            RequestManagerFactoryGenerator.GENERATED_REQUEST_MANAGER_FACTORY_SIMPLE_NAME);
 
-      builder.addMethod(
-          MethodSpec.methodBuilder("getRequestManagerFactory")
-              .addAnnotation(Override.class)
-              .returns(generatedRequestManagerFactoryClassName)
-              .addStatement("return new $T()", generatedRequestManagerFactoryClassName)
-              .build());
-    }
+    builder.addMethod(
+        MethodSpec.methodBuilder("getRequestManagerFactory")
+            .addAnnotation(Override.class)
+            .returns(generatedRequestManagerFactoryClassName)
+            .addStatement("return new $T()", generatedRequestManagerFactoryClassName)
+            .build());
     return builder.build();
   }
 
