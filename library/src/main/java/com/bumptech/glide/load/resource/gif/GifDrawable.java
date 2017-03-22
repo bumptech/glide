@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
+import static com.bumptech.glide.gifdecoder.GifDecoder.TOTAL_ITERATION_COUNT_FOREVER;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -324,7 +326,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     }
 
     if (loopCount == LOOP_INTRINSIC) {
-      maxLoopCount = state.frameLoader.getLoopCount();
+      int intrinsicCount = state.frameLoader.getLoopCount();
+      maxLoopCount =
+          (intrinsicCount == TOTAL_ITERATION_COUNT_FOREVER) ? LOOP_FOREVER : intrinsicCount;
     } else {
       maxLoopCount = loopCount;
     }

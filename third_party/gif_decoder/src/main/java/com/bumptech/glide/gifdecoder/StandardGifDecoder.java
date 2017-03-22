@@ -200,7 +200,26 @@ public class StandardGifDecoder implements GifDecoder {
 
   @Override
   public int getLoopCount() {
+    if (header.loopCount == GifHeader.NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST) {
+      return 1;
+    }
     return header.loopCount;
+  }
+
+  @Override
+  public int getNetscapeLoopCount() {
+    return header.loopCount;
+  }
+
+  @Override
+  public int getTotalIterationCount() {
+    if (header.loopCount == GifHeader.NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST) {
+      return 1;
+    }
+    if (header.loopCount == GifHeader.NETSCAPE_LOOP_COUNT_FOREVER) {
+      return TOTAL_ITERATION_COUNT_FOREVER;
+    }
+    return header.loopCount + 1;
   }
 
   @Override
