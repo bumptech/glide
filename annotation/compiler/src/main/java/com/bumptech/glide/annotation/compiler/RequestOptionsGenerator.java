@@ -1,10 +1,10 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static com.bumptech.glide.annotation.ExtendsRequestOptions.OVERRIDE_EXTEND;
-import static com.bumptech.glide.annotation.ExtendsRequestOptions.OVERRIDE_NONE;
+import static com.bumptech.glide.annotation.GlideOption.OVERRIDE_EXTEND;
+import static com.bumptech.glide.annotation.GlideOption.OVERRIDE_NONE;
 
-import com.bumptech.glide.annotation.ExtendsRequestOptions;
 import com.bumptech.glide.annotation.GlideExtension;
+import com.bumptech.glide.annotation.GlideOption;
 import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -32,7 +32,7 @@ import javax.lang.model.element.VariableElement;
 /**
  * Generates a new implementation of {@link com.bumptech.glide.request.BaseRequestOptions}
  * containing static versions of methods included in the base class and static and instance versions
- * of all methods annotated with {@link ExtendsRequestOptions} in classes annotated with
+ * of all methods annotated with {@link GlideOption} in classes annotated with
  * {@link GlideExtension}.
  *
  * <p>The generated class looks something like this:
@@ -74,7 +74,6 @@ final class RequestOptionsGenerator {
       BASE_REQUEST_OPTIONS_PACKAGE_NAME + "." + BASE_REQUEST_OPTIONS_SIMPLE_NAME;
 
   static final String REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
-  static final String REQUEST_OPTIONS_SIMPLE_NAME = "RequestOptions";
 
   private final ProcessingEnvironment processingEnvironment;
   private ProcessorUtil processorUtil;
@@ -142,7 +141,7 @@ final class RequestOptionsGenerator {
       Set<String> glideExtensionClassNames) {
     List<ExecutableElement> requestOptionExtensionMethods =
         processorUtil.findAnnotatedElementsInClasses(
-            glideExtensionClassNames, ExtendsRequestOptions.class);
+            glideExtensionClassNames, GlideOption.class);
 
     List<MethodAndStaticVar> result = new ArrayList<>(requestOptionExtensionMethods.size());
     for (ExecutableElement requestOptionsExtensionMethod : requestOptionExtensionMethods) {
@@ -159,7 +158,7 @@ final class RequestOptionsGenerator {
     int overrideType = getOverrideType(element);
     if (isOverridingBaseRequestOptionsMethod && overrideType == OVERRIDE_NONE) {
       throw new IllegalArgumentException("Accidentally attempting to override a method in"
-          + " BaseRequestOptions. Add an 'override' value in the @ExtendsRequestOptions annotation"
+          + " BaseRequestOptions. Add an 'override' value in the @GlideOption annotation"
           + " if this is intentional. Offending method: "
           + element.getEnclosingElement() + "#" + element);
     } else if (!isOverridingBaseRequestOptionsMethod && overrideType != OVERRIDE_NONE) {
@@ -365,29 +364,29 @@ final class RequestOptionsGenerator {
   }
 
   private static int getOverrideType(ExecutableElement element) {
-    ExtendsRequestOptions extendsRequestOptions =
-        element.getAnnotation(ExtendsRequestOptions.class);
-    return extendsRequestOptions.override();
+    GlideOption glideOption =
+        element.getAnnotation(GlideOption.class);
+    return glideOption.override();
   }
 
   @Nullable
   private static String getStaticMethodName(ExecutableElement element) {
-    ExtendsRequestOptions extendsRequestOptions =
-        element.getAnnotation(ExtendsRequestOptions.class);
-    String result = extendsRequestOptions != null ? extendsRequestOptions.staticMethodName() : null;
+    GlideOption glideOption =
+        element.getAnnotation(GlideOption.class);
+    String result = glideOption != null ? glideOption.staticMethodName() : null;
     return Strings.emptyToNull(result);
   }
 
   private static boolean memoizeStaticMethod(ExecutableElement element) {
-    ExtendsRequestOptions extendsRequestOptions =
-        element.getAnnotation(ExtendsRequestOptions.class);
-    return extendsRequestOptions != null && extendsRequestOptions.memoizeStaticMethod();
+    GlideOption glideOption =
+        element.getAnnotation(GlideOption.class);
+    return glideOption != null && glideOption.memoizeStaticMethod();
   }
 
   private static boolean skipStaticMethod(ExecutableElement element) {
-    ExtendsRequestOptions extendsRequestOptions =
-        element.getAnnotation(ExtendsRequestOptions.class);
-    return extendsRequestOptions != null && extendsRequestOptions.skipStaticMethod();
+    GlideOption glideOption =
+        element.getAnnotation(GlideOption.class);
+    return glideOption != null && glideOption.skipStaticMethod();
   }
 
   private static final class MethodAndStaticVar {

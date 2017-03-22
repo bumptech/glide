@@ -1,7 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
-import com.bumptech.glide.annotation.ExtendsRequestOptions;
 import com.bumptech.glide.annotation.GlideExtension;
+import com.bumptech.glide.annotation.GlideOption;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -36,7 +36,7 @@ import javax.lang.model.type.TypeMirror;
 /**
  * Generates a {@link com.bumptech.glide.RequestBuilder} subclass containing all methods from
  * the base class, all methods from {@link com.bumptech.glide.request.BaseRequestOptions} and all
- * non-override {@link ExtendsRequestOptions} annotated methods in {@link GlideExtension} annotated
+ * non-override {@link GlideOption} annotated methods in {@link GlideExtension} annotated
  * classes.
  *
  * <p>Generated code looks like this:
@@ -156,7 +156,7 @@ final class RequestBuilderGenerator {
         .addJavadoc("Contains all public methods from {@link $T}, all options from\n",
             requestBuilderType)
         .addJavadoc("{@link $T} and all generated options from\n", baseRequestOptionsType)
-        .addJavadoc("{@link $T} in annotated methods in\n", ExtendsRequestOptions.class)
+        .addJavadoc("{@link $T} in annotated methods in\n", GlideOption.class)
         .addJavadoc("{@link $T} annotated classes.\n", GlideExtension.class)
         .addJavadoc("\n")
         .addJavadoc("<p>Generated code, do not modify.\n")
@@ -300,7 +300,7 @@ final class RequestBuilderGenerator {
 
   /**
    * Generates methods with equivalent names and arguments to methods annotated with
-   * {@link com.bumptech.glide.annotation.ExtendsRequestOptions} in
+   * {@link GlideOption} in
    * {@link com.bumptech.glide.annotation.GlideExtension}s that return our generated
    * {@link com.bumptech.glide.RequestBuilder} subclass.
    */

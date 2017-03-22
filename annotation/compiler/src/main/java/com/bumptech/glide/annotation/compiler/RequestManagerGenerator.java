@@ -1,7 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
-import com.bumptech.glide.annotation.ExtendsRequestManager;
 import com.bumptech.glide.annotation.GlideExtension;
+import com.bumptech.glide.annotation.GlideType;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
@@ -30,7 +30,7 @@ import javax.lang.model.util.Elements;
 
 /**
  * Generates an implementation of {@link com.bumptech.glide.RequestManager} that contains generated
- * methods from {@link GlideExtension}s and {@link ExtendsRequestManager}.
+ * methods from {@link GlideExtension}s and {@link GlideType}.
  *
  * <p>Generated {@link com.bumptech.glide.RequestManager} implementations look like this:
  * <pre>
@@ -106,7 +106,7 @@ final class RequestManagerGenerator {
                  + "annotated with {@link $T}\n"
                  + "\n"
                  + "<p>Generated code, do not modify\n",
-             GlideExtension.class, ExtendsRequestManager.class)
+             GlideExtension.class, GlideType.class)
          .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
          .addMethod(generateAsMethod(requestBuilder))
          .addMethod(generateCallSuperConstructor())
@@ -217,7 +217,7 @@ final class RequestManagerGenerator {
   private List<MethodSpec> generateAdditionalRequestManagerMethods(
       Set<String> glideExtensions) {
     List<ExecutableElement> requestManagerExtensionMethods =
-        processorUtil.findAnnotatedElementsInClasses(glideExtensions, ExtendsRequestManager.class);
+        processorUtil.findAnnotatedElementsInClasses(glideExtensions, GlideType.class);
 
     return Lists.transform(requestManagerExtensionMethods,
         new Function<ExecutableElement, MethodSpec>() {
@@ -231,7 +231,7 @@ final class RequestManagerGenerator {
   // Generates methods added to RequestManager via GlideExtensions.
   private MethodSpec generateAdditionalRequestManagerMethod(ExecutableElement extensionMethod) {
     String returnType = processorUtil.findClassValuesFromAnnotationOnClassAsNames(extensionMethod,
-        ExtendsRequestManager.class).iterator().next();
+        GlideType.class).iterator().next();
     ClassName returnTypeClassName = ClassName.bestGuess(returnType);
     ParameterizedTypeName parameterizedTypeName =
         ParameterizedTypeName.get(generatedRequestBuilderClassName, returnTypeClassName);

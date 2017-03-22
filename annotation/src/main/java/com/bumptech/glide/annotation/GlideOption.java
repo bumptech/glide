@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 // Needs to be parsed from class files in JAR.
 @Retention(RetentionPolicy.CLASS)
-public @interface ExtendsRequestOptions {
+public @interface GlideOption {
    /** Does not intend to override a method in a super class. */
   int OVERRIDE_NONE = 0;
   /** Expects to call super and then add additional functionality to an overridden method. */
@@ -64,7 +64,7 @@ public @interface ExtendsRequestOptions {
    * {@code true} to prevent a static builder method from being generated.
    *
    * <p>By default static methods are generated for all methods annotated with
-   * {@link ExtendsRequestOptions}. These static factory methods allow for a cleaner API when used
+   * {@link GlideOption}. These static factory methods allow for a cleaner API when used
    * with {@link com.bumptech.glide.RequestBuilder#apply}. The static factory method by default
    * simply creates a new {@link com.bumptech.glide.request.BaseRequestOptions} object, calls the
    * instance version of the method on it and returns it. For example:

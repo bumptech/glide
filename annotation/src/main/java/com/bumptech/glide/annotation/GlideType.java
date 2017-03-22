@@ -21,14 +21,14 @@ import java.lang.annotation.Target;
  * <p>Methods with this annotation will only be found if they are contained in a class annotated
  * with {@link GlideExtension}.
  *
- * <p>Methods annotated with ExtendsRequestManager must have a single parameter. The type of the
+ * <p>Methods annotated with GlideType must have a single parameter. The type of the
  * single parameter must be {@link com.bumptech.glide.request.BaseRequestOptions}, with a type
  * matching the value of {@link #value()}.
  */
 @Target(ElementType.METHOD)
 // Needs to be parsed from class files in JAR.
 @Retention(RetentionPolicy.CLASS)
-public @interface ExtendsRequestManager {
+public @interface GlideType {
 
   /**
    * A Resource class name, like GifDrawable.class, Bitmap.class etc.

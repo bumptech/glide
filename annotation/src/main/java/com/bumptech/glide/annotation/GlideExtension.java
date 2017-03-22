@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Indicate a class that extends Glide's public API.
  *
- * @see ExtendsRequestOptions
+ * @see GlideOption
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)

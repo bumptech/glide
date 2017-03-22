@@ -8,7 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.Priority;
-import com.bumptech.glide.annotation.ExtendsRequestOptions;
+import com.bumptech.glide.annotation.GlideOption;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Option;
@@ -403,7 +403,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * <p> Even if this object was locked, the cloned object returned from this method will not be
    * locked. </p>
    */
-  @ExtendsRequestOptions(skipStaticMethod = true)
+  @GlideOption(skipStaticMethod = true)
   @SuppressWarnings("unchecked")
   @Override
   public final CHILD clone() {
@@ -421,7 +421,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     }
   }
 
-  @ExtendsRequestOptions(staticMethodName = "optionOf")
+  @GlideOption(staticMethodName = "optionOf")
   public final <T> CHILD set(@NonNull Option<T> option, @NonNull T value) {
     if (isAutoCloneEnabled) {
       return clone().set(option, value);
@@ -433,7 +433,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     return selfOrThrowIfLocked();
   }
 
-  @ExtendsRequestOptions(staticMethodName = "decodeTypeOf")
+  @GlideOption(staticMethodName = "decodeTypeOf")
   public final CHILD decode(@NonNull Class<?> resourceClass) {
     if (isAutoCloneEnabled) {
       return clone().decode(resourceClass);
@@ -514,7 +514,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
    * @see #centerCrop(android.content.Context)
    */
-  @ExtendsRequestOptions(
+  @GlideOption(
       staticMethodName = "optionalCenterCropTransform",
       memoizeStaticMethod = true
   )
@@ -532,7 +532,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #transform(Class, com.bumptech.glide.load.Transformation)
    * @see #optionalCenterCrop(android.content.Context)
    */
-  @ExtendsRequestOptions(
+  @GlideOption(
       staticMethodName = "centerCropTransform",
       memoizeStaticMethod = true
   )
@@ -550,7 +550,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
    * @see #fitCenter(android.content.Context)
    */
-  @ExtendsRequestOptions(
+  @GlideOption(
       staticMethodName = "optionalFitCenterTransform",
       memoizeStaticMethod = true
   )
@@ -568,7 +568,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #transform(Class, com.bumptech.glide.load.Transformation)
    * @see #optionalFitCenter(android.content.Context)
    */
-  @ExtendsRequestOptions(
+  @GlideOption(
       staticMethodName = "fitCenterTransform",
       memoizeStaticMethod = true
   )
@@ -586,7 +586,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
    * @see #centerInside(Context) (android.content.Context)
    */
-  @ExtendsRequestOptions(
+  @GlideOption(
       staticMethodName = "optionalCenterInsideTransform",
       memoizeStaticMethod = true
   )
@@ -604,7 +604,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #transform(Class, com.bumptech.glide.load.Transformation)
    * @see #optionalCenterInside(Context) (android.content.Context)
    */
-  @ExtendsRequestOptions(
+  @GlideOption(
       staticMethodName = "centerInsideTransform",
       memoizeStaticMethod = true
   )
@@ -621,7 +621,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalTransform(Context, Transformation)
    * @see #circleCrop(Context)
    */
-  @ExtendsRequestOptions(
+  @GlideOption(
       staticMethodName = "optionalCircleCropTransform",
       memoizeStaticMethod = true
   )
@@ -639,7 +639,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #transform(Class, Transformation)
    * @see #optionalCenterCrop(Context)
    */
-  @ExtendsRequestOptions(
+  @GlideOption(
       staticMethodName = "circleCropTransform",
       memoizeStaticMethod = true
   )
@@ -682,7 +682,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #optionalTransform(android.content.Context, com.bumptech.glide.load.Transformation)
    * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
    */
-  @ExtendsRequestOptions(staticMethodName = "bitmapTransform")
+  @GlideOption(staticMethodName = "bitmapTransform")
   public CHILD transform(Context context, @NonNull Transformation<Bitmap> transformation) {
     if (isAutoCloneEnabled) {
       return clone().transform(context, transformation);
@@ -708,7 +708,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * @see #transform(android.content.Context, com.bumptech.glide.load.Transformation)
    * @see #transform(Class, com.bumptech.glide.load.Transformation)
    */
-  @ExtendsRequestOptions(staticMethodName = "optionalBitmapTransform")
+  @GlideOption(staticMethodName = "optionalBitmapTransform")
   public CHILD optionalTransform(Context context, Transformation<Bitmap> transformation) {
     if (isAutoCloneEnabled) {
       return clone().optionalTransform(context, transformation);
@@ -780,7 +780,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * resource classes and allows unknown resource types to be transformed without throwing an
    * exception.
    */
-  @ExtendsRequestOptions(
+  @GlideOption(
       staticMethodName = "noTransformation",
       memoizeStaticMethod = true
   )
@@ -815,7 +815,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
     return selfOrThrowIfLocked();
   }
 
-  @ExtendsRequestOptions(skipStaticMethod = true)
+  @GlideOption(skipStaticMethod = true)
   public final CHILD apply(BaseRequestOptions<?> other) {
     if (isAutoCloneEnabled) {
       return clone().apply(other);
@@ -900,7 +900,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * <p> Once locked, the only way to unlock is to use {@link #clone()} </p>
    */
   @SuppressWarnings("unchecked")
-  @ExtendsRequestOptions(skipStaticMethod = true)
+  @GlideOption(skipStaticMethod = true)
   public final CHILD lock() {
     isLocked = true;
     // This is the only place we should not check locked.
@@ -915,7 +915,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    * <p>Auto clone is not retained by cloned objects returned from mutations. The cloned objects
    * are mutable and are not locked.
    */
-  @ExtendsRequestOptions(skipStaticMethod = true)
+  @GlideOption(skipStaticMethod = true)
   public final CHILD autoLock() {
     if (isLocked && !isAutoCloneEnabled) {
       throw new IllegalStateException("You cannot auto lock an already locked options object"

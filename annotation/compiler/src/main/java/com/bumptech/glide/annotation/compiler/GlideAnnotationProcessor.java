@@ -1,5 +1,6 @@
 package com.bumptech.glide.annotation.compiler;
 
+import com.bumptech.glide.annotation.GlideType;
 import com.google.auto.service.AutoService;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,11 +42,11 @@ import javax.lang.model.element.TypeElement;
  *     versions of methods in all {@link com.bumptech.glide.annotation.GlideExtension}s.
  *     <li>If one or more methods in one or more
  *     {@link com.bumptech.glide.annotation.GlideExtension} annotated classes are annotated with
- *     {@link com.bumptech.glide.annotation.ExtendsRequestManager}:
+ *     {@link GlideType}:
  *     <ul>
  *       <li>A {@link com.bumptech.glide.RequestManager} implementation containing a generated
  *       method for each method annotated with
- *       {@link com.bumptech.glide.annotation.ExtendsRequestManager}.
+ *       {@link GlideType}.
  *       <li>A {@link com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory}
  *       implementation that produces the generated {@link com.bumptech.glide.RequestManager}s.
  *       <li>A {@link com.bumptech.glide.Glide} look-alike that implements all static methods in
