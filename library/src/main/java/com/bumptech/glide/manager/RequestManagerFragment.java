@@ -23,7 +23,6 @@ import java.util.Set;
  * @see com.bumptech.glide.manager.RequestManagerRetriever
  * @see com.bumptech.glide.RequestManager
  */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class RequestManagerFragment extends Fragment {
   private static final String TAG = "RMFragment";
   private final ActivityFragmentLifecycle lifecycle;

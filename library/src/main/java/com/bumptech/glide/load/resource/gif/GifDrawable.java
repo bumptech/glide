@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.gif;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -11,7 +10,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.VisibleForTesting;
 import android.view.Gravity;
 import com.bumptech.glide.Glide;
@@ -282,10 +280,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     return PixelFormat.TRANSPARENT;
   }
 
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   @Override
   public void onFrameReady() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && getCallback() == null) {
+    if (getCallback() == null) {
       stop();
       invalidateSelf();
       return;

@@ -1,14 +1,12 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -287,12 +285,8 @@ public final class GlideBuilder {
     }
 
     if (bitmapPool == null) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-        int size = memorySizeCalculator.getBitmapPoolSize();
-        bitmapPool = new LruBitmapPool(size);
-      } else {
-        bitmapPool = new BitmapPoolAdapter();
-      }
+      int size = memorySizeCalculator.getBitmapPoolSize();
+      bitmapPool = new LruBitmapPool(size);
     }
 
     if (arrayPool == null) {

@@ -169,15 +169,8 @@ public class LruBitmapPool implements BitmapPool {
   // Setting these two values provides Bitmaps that are essentially equivalent to those returned
   // from Bitmap.createBitmap.
   private static void normalize(Bitmap bitmap) {
-    maybeSetAlpha(bitmap);
+    bitmap.setHasAlpha(true);
     maybeSetPreMultiplied(bitmap);
-  }
-
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-  private static void maybeSetAlpha(Bitmap bitmap) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-      bitmap.setHasAlpha(true);
-    }
   }
 
   @TargetApi(Build.VERSION_CODES.KITKAT)

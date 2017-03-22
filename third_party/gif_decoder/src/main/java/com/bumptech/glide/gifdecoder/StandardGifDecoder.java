@@ -28,9 +28,7 @@ import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_NONE;
 import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_PREVIOUS;
 import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_UNSPECIFIED;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -763,14 +761,7 @@ public class StandardGifDecoder implements GifDecoder {
     Bitmap.Config config = isFirstFrameTransparent
         ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
     Bitmap result = bitmapProvider.obtain(downsampledWidth, downsampledHeight, config);
-    setAlpha(result);
+    result.setHasAlpha(true);
     return result;
-  }
-
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-  private static void setAlpha(Bitmap bitmap) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-      bitmap.setHasAlpha(true);
-    }
   }
 }

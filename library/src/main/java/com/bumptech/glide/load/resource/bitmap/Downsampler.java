@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import com.bumptech.glide.load.DecodeFormat;
@@ -451,31 +452,27 @@ public final class Downsampler {
         + ", thread: " + Thread.currentThread().getName());
   }
 
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   private static String getInBitmapString(BitmapFactory.Options options) {
-    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
-        ? getBitmapString(options.inBitmap) : null;
+    return getBitmapString(options.inBitmap);
   }
 
+  @Nullable
   @TargetApi(Build.VERSION_CODES.KITKAT)
   private static String getBitmapString(Bitmap bitmap) {
-    final String result;
     if (bitmap == null) {
-      result = null;
-    } else {
-      String sizeString = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
-          ? " (" + bitmap.getAllocationByteCount() + ")" : "";
-      result = "[" + bitmap.getWidth() + "x" + bitmap.getHeight() + "] " + bitmap.getConfig()
-          + sizeString;
+      return null;
     }
-    return result;
+
+    String sizeString = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
+        ? " (" + bitmap.getAllocationByteCount() + ")" : "";
+    return  "[" + bitmap.getWidth() + "x" + bitmap.getHeight() + "] " + bitmap.getConfig()
+        + sizeString;
   }
 
   // BitmapFactory throws an IllegalArgumentException if any error occurs attempting to decode a
   // file when inBitmap is non-null, including those caused by partial or corrupt data. We still log
   // the error because the IllegalArgumentException is supposed to catch errors reusing Bitmaps, so
   // want some useful log output. In most cases this can be safely treated as a normal IOException.
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   private static IOException newIoExceptionForInBitmapAssertion(IllegalArgumentException e,
       int outWidth, int outHeight, String outMimeType, BitmapFactory.Options options) {
     return new IOException("Exception decoding bitmap"
@@ -485,16 +482,12 @@ public final class Downsampler {
           + ", inBitmap: " + getInBitmapString(options), e);
   }
 
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   private static void setInBitmap(BitmapFactory.Options options, BitmapPool bitmapPool, int width,
       int height) {
-    if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {
-      // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
-      options.inBitmap = bitmapPool.getDirty(width, height, options.inPreferredConfig);
-    }
+    // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
+    options.inBitmap = bitmapPool.getDirty(width, height, options.inPreferredConfig);
   }
 
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   private static synchronized BitmapFactory.Options getDefaultOptions() {
     BitmapFactory.Options decodeBitmapOptions;
     synchronized (OPTIONS_QUEUE) {
@@ -515,7 +508,6 @@ public final class Downsampler {
     }
   }
 
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   private static void resetOptions(BitmapFactory.Options decodeBitmapOptions) {
     decodeBitmapOptions.inTempStorage = null;
     decodeBitmapOptions.inDither = false;
@@ -528,11 +520,8 @@ public final class Downsampler {
     decodeBitmapOptions.outWidth = 0;
     decodeBitmapOptions.outHeight = 0;
     decodeBitmapOptions.outMimeType = null;
-
-    if (Build.VERSION_CODES.HONEYCOMB <= Build.VERSION.SDK_INT) {
-      decodeBitmapOptions.inBitmap = null;
-      decodeBitmapOptions.inMutable = true;
-    }
+    decodeBitmapOptions.inBitmap = null;
+    decodeBitmapOptions.inMutable = true;
   }
 
   /**

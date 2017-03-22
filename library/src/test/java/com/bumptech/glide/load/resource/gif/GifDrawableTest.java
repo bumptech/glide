@@ -198,7 +198,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testStopsWhenCurrentFrameFinishesIfHasNoCallbackAndIsAtLeastAtHoneycomb() {
+  public void testStopsWhenCurrentFrameFinishesIfHasNoCallback() {
     drawable.setIsRunning(true);
     drawable.setCallback(null);
     drawable.onFrameReady();
@@ -207,18 +207,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testDoesNotStopWhenCurrentFrameFinishesIfHasNoCallbackAndIsPreHoneycomb() {
-    Util.setSdkVersionInt(10);
-
-    drawable.setIsRunning(true);
-    drawable.setCallback(null);
-    drawable.onFrameReady();
-
-    assertTrue(drawable.isRunning());
-  }
-
-  @Test
-  public void testUnsubscribesWhenCurrentFinishesIfHasNoCallbackAndIsAtLeastAtHoneycomb() {
+  public void testUnsubscribesWhenCurrentFinishesIfHasNoCallback() {
     drawable.setIsRunning(true);
     drawable.setCallback(null);
     drawable.onFrameReady();

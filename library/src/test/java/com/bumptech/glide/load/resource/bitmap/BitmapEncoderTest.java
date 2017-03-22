@@ -68,7 +68,6 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
   public void testEncoderEncodesJpegWithNullFormatAndBitmapWithoutAlpha() throws IOException {
     harness.setFormat(null);
     harness.bitmap.setHasAlpha(false);
@@ -79,7 +78,6 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
   public void testEncoderEncodesPngWithNullFormatAndBitmapWithAlpha() throws IOException {
     harness.setFormat(null);
     harness.bitmap.setHasAlpha(true);

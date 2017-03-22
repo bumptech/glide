@@ -5,13 +5,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.os.Build;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
 import org.junit.Before;
@@ -87,7 +85,6 @@ public class CircleCropTest {
     }
   }
 
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
   private Bitmap createBitmapWithRedCircle(int width, int height) {
     int minEdge = Math.min(width, height);
     float radius = minEdge / 2f;

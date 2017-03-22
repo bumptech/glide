@@ -1,10 +1,8 @@
 package com.bumptech.glide.request.target;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.util.Log;
@@ -273,7 +271,6 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       }
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     @SuppressWarnings("deprecation")
     private Point getDisplayDimens() {
       if (displayDimens != null) {
@@ -282,12 +279,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       WindowManager windowManager =
           (WindowManager) view.getContext().getSystemService(Context.WINDOW_SERVICE);
       Display display = windowManager.getDefaultDisplay();
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-        displayDimens = new Point();
-        display.getSize(displayDimens);
-      } else {
-        displayDimens = new Point(display.getWidth(), display.getHeight());
-      }
+      displayDimens = new Point();
+      display.getSize(displayDimens);
       return displayDimens;
     }
 
