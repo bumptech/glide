@@ -390,15 +390,15 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       }
       switch (view.getScaleType()) {
         case CENTER_CROP:
-          requestOptions.optionalCenterCrop(context);
+          requestOptions.optionalCenterCrop();
           break;
         case CENTER_INSIDE:
-          requestOptions.optionalCenterInside(context);
+          requestOptions.optionalCenterInside();
           break;
         case FIT_CENTER:
         case FIT_START:
         case FIT_END:
-          requestOptions.optionalFitCenter(context);
+          requestOptions.optionalFitCenter();
           break;
         //$CASES-OMITTED$
         default:

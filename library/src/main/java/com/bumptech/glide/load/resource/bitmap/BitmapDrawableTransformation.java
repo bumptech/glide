@@ -15,31 +15,43 @@ import java.security.MessageDigest;
  */
 public class BitmapDrawableTransformation implements Transformation<BitmapDrawable> {
 
-  private final Context context;
-  private final BitmapPool bitmapPool;
   private final Transformation<Bitmap> wrapped;
 
-  public BitmapDrawableTransformation(Context context, Transformation<Bitmap> wrapped) {
-    this(context, Glide.get(context).getBitmapPool(), wrapped);
-  }
-
-  // Visible for testing.
-  BitmapDrawableTransformation(Context context, BitmapPool bitmapPool,
-      Transformation<Bitmap> wrapped) {
-    this.context = context.getApplicationContext();
-    this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
+  public BitmapDrawableTransformation(Transformation<Bitmap> wrapped) {
     this.wrapped = Preconditions.checkNotNull(wrapped);
   }
 
+  /**
+   * @deprecated use {@link #BitmapDrawableTransformation(Transformation)}}
+   */
+  @Deprecated
+  public BitmapDrawableTransformation(
+      @SuppressWarnings("unused") Context context, Transformation<Bitmap> wrapped) {
+    this(wrapped);
+  }
+
+  /**
+   * @deprecated use {@link #BitmapDrawableTransformation(Transformation)}}
+   */
+  @Deprecated
+  public BitmapDrawableTransformation(
+      @SuppressWarnings("unused") Context context,
+      @SuppressWarnings("unused") BitmapPool bitmapPool,
+      Transformation<Bitmap> wrapped) {
+    this(wrapped);
+  }
+
   @Override
-  public Resource<BitmapDrawable> transform(Resource<BitmapDrawable> drawableResourceToTransform,
-      int outWidth, int outHeight) {
+  public Resource<BitmapDrawable> transform(
+      Context context, Resource<BitmapDrawable> drawableResourceToTransform, int outWidth,
+      int outHeight) {
     BitmapDrawable drawableToTransform = drawableResourceToTransform.get();
     Bitmap bitmapToTransform = drawableToTransform.getBitmap();
 
+    BitmapPool bitmapPool = Glide.get(context).getBitmapPool();
     BitmapResource bitmapResourceToTransform = BitmapResource.obtain(bitmapToTransform, bitmapPool);
     Resource<Bitmap> transformedBitmapResource =
-        wrapped.transform(bitmapResourceToTransform, outWidth, outHeight);
+        wrapped.transform(context, bitmapResourceToTransform, outWidth, outHeight);
 
     if (transformedBitmapResource.equals(bitmapResourceToTransform)) {
       return drawableResourceToTransform;

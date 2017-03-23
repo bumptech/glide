@@ -19,19 +19,31 @@ public class CircleCrop extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.CircleCrop." + VERSION;
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
-  public CircleCrop(Context context) {
-    super(context);
+  public CircleCrop() {
+    // Intentionally empty.
   }
 
-  public CircleCrop(BitmapPool bitmapPool) {
-    super(bitmapPool);
+  /**
+   * @deprecated Use {@link #CircleCrop()}.
+   */
+  @Deprecated
+  public CircleCrop(@SuppressWarnings("unused") Context context) {
+    this();
+  }
+
+  /**
+   * @deprecated Use {@link #CircleCrop()}
+   */
+  @Deprecated
+  public CircleCrop(@SuppressWarnings("unused") BitmapPool bitmapPool) {
+    this();
   }
 
   // Bitmap doesn't implement equals, so == and .equals are equivalent here.
   @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
-  protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth,
-      int outHeight) {
+  protected Bitmap transform(
+      @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
     return TransformationUtils.circleCrop(pool, toTransform, outWidth, outHeight);
   }
 

@@ -480,7 +480,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       Resource<Z> transformed = decoded;
       if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
         appliedTransformation = decodeHelper.getTransformation(resourceSubClass);
-        transformed = appliedTransformation.transform(decoded, width, height);
+        transformed = appliedTransformation.transform(glideContext, decoded, width, height);
       }
       // TODO: Make this the responsibility of the Transformation.
       if (!decoded.equals(transformed)) {

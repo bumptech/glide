@@ -141,7 +141,7 @@ public class GlideTest {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide =
         new GlideBuilder().setMemoryCache(memoryCache).setBitmapPool(bitmapPool)
-            .createGlide(getContext());
+            .build(getContext());
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -155,7 +155,7 @@ public class GlideTest {
 
     Glide glide =
         new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
-            .createGlide(getContext());
+            .build(getContext());
 
     glide.clearMemory();
 
@@ -170,7 +170,7 @@ public class GlideTest {
 
     Glide glide =
         new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
-            .createGlide(getContext());
+            .build(getContext());
 
     final int level = 123;
 

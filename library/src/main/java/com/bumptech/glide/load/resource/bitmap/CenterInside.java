@@ -17,17 +17,29 @@ public class CenterInside extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.CenterInside";
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
-  public CenterInside(Context context) {
-    super(context);
+  public CenterInside() {
+    // Intentionally empty.
   }
 
-  public CenterInside(BitmapPool bitmapPool) {
-    super(bitmapPool);
+  /**
+   * Use {@link #CenterInside()}.
+   */
+  @Deprecated
+  public CenterInside(@SuppressWarnings("unused") Context context) {
+    this();
+  }
+
+  /**
+   * Use {@link #CenterInside()}.
+   */
+  @Deprecated
+  public CenterInside(@SuppressWarnings("unused") BitmapPool bitmapPool) {
+    this();
   }
 
   @Override
-  protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth,
-      int outHeight) {
+  protected Bitmap transform(
+      @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
     return TransformationUtils.centerInside(pool, toTransform, outWidth, outHeight);
   }
 

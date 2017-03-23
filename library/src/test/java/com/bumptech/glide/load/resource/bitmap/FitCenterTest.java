@@ -7,10 +7,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -19,12 +22,14 @@ import com.bumptech.glide.tests.KeyAssertions;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -36,10 +41,10 @@ public class FitCenterTest {
 
   @Mock Resource<Bitmap> resource;
   @Mock Transformation<Bitmap> transformation;
-  private BitmapPool pool;
   private FitCenter fitCenter;
   private int bitmapWidth;
   private int bitmapHeight;
+  private Application context;
 
   @Before
   public void setUp() {
@@ -49,36 +54,44 @@ public class FitCenterTest {
     Bitmap bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
     when(resource.get()).thenReturn(bitmap);
 
-    pool = new BitmapPoolAdapter();
+    BitmapPool pool = new BitmapPoolAdapter();
+    context = RuntimeEnvironment.application;
+    Glide.init(new GlideBuilder().setBitmapPool(pool).build(context));
 
-    fitCenter = new FitCenter(pool);
+
+    fitCenter = new FitCenter();
+  }
+
+  @After
+  public void tearDown() {
+    Glide.tearDown();
   }
 
   @Test
   public void testReturnsGivenResourceIfMatchesSizeExactly() {
     Resource<Bitmap> result =
-        fitCenter.transform(resource, bitmapWidth, bitmapHeight);
+        fitCenter.transform(context, resource, bitmapWidth, bitmapHeight);
 
     assertEquals(resource, result);
   }
 
   @Test
   public void testDoesNotRecycleGivenResourceIfMatchesSizeExactly() {
-    fitCenter.transform(resource, bitmapWidth, bitmapHeight);
+    fitCenter.transform(context, resource, bitmapWidth, bitmapHeight);
 
     verify(resource, never()).recycle();
   }
 
   @Test
   public void testDoesNotRecycleGivenResource() {
-    fitCenter.transform(resource, 50, 50);
+    fitCenter.transform(context, resource, 50, 50);
 
     verify(resource, never()).recycle();
   }
 
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
-    KeyAssertions.assertSame(fitCenter, new FitCenter(pool));
+    KeyAssertions.assertSame(fitCenter, new FitCenter());
 
     doAnswer(new Util.WriteDigest("other")).when(transformation)
         .updateDiskCacheKey(any(MessageDigest.class));

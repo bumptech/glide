@@ -11,7 +11,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Application;
 import android.graphics.Bitmap;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -19,12 +22,14 @@ import com.bumptech.glide.tests.KeyAssertions;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
@@ -39,6 +44,7 @@ public class CenterCropTest {
   private int bitmapWidth;
   private int bitmapHeight;
   private Bitmap bitmap;
+  private Application context;
 
   @Before
   public void setUp() {
@@ -50,8 +56,15 @@ public class CenterCropTest {
 
     when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class)))
         .thenAnswer(new Util.CreateBitmap());
+    context = RuntimeEnvironment.application;
+    Glide.init(new GlideBuilder().setBitmapPool(pool).build(context));
 
-    centerCrop = new CenterCrop(pool);
+    centerCrop = new CenterCrop();
+  }
+
+  @After
+  public void tearDown() {
+    Glide.tearDown();
   }
 
   @Test
@@ -59,7 +72,7 @@ public class CenterCropTest {
     reset(pool);
     when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(null);
 
-    centerCrop.transform(resource, 100, 100);
+    centerCrop.transform(context, resource, 100, 100);
 
     verify(pool, never()).put(any(Bitmap.class));
   }
@@ -67,21 +80,21 @@ public class CenterCropTest {
   @Test
   public void testReturnsGivenResourceIfMatchesSizeExactly() {
     Resource<Bitmap> result =
-        centerCrop.transform(resource, bitmapWidth, bitmapHeight);
+        centerCrop.transform(context, resource, bitmapWidth, bitmapHeight);
 
     assertEquals(resource, result);
   }
 
   @Test
   public void testDoesNotRecycleGivenResourceIfMatchesSizeExactly() {
-    centerCrop.transform(resource, bitmapWidth, bitmapHeight);
+    centerCrop.transform(context, resource, bitmapWidth, bitmapHeight);
 
     verify(resource, never()).recycle();
   }
 
   @Test
   public void testDoesNotRecycleGivenResource() {
-    centerCrop.transform(resource, 50, 50);
+    centerCrop.transform(context, resource, 50, 50);
 
     verify(resource, never()).recycle();
   }
@@ -90,7 +103,7 @@ public class CenterCropTest {
   public void testAsksBitmapPoolForArgb8888IfInConfigIsNull() {
     Shadows.shadowOf(bitmap).setConfig(null);
 
-    centerCrop.transform(resource, 10, 10);
+    centerCrop.transform(context, resource, 10, 10);
 
     verify(pool).get(anyInt(), anyInt(), eq(Bitmap.Config.ARGB_8888));
     verify(pool, never()).get(anyInt(), anyInt(), (Bitmap.Config) isNull());
@@ -107,7 +120,7 @@ public class CenterCropTest {
       when(resource.get()).thenReturn(toTransform);
 
       Resource<Bitmap> result =
-          centerCrop.transform(resource, expectedWidth, expectedHeight);
+          centerCrop.transform(context, resource, expectedWidth, expectedHeight);
       Bitmap transformed = result.get();
       assertEquals(expectedWidth, transformed.getWidth());
       assertEquals(expectedHeight, transformed.getHeight());
@@ -125,7 +138,7 @@ public class CenterCropTest {
       when(resource.get()).thenReturn(toTransform);
 
       Resource<Bitmap> result =
-          centerCrop.transform(resource, expectedWidth, expectedHeight);
+          centerCrop.transform(context, resource, expectedWidth, expectedHeight);
       Bitmap transformed = result.get();
       assertEquals(expectedWidth, transformed.getWidth());
       assertEquals(expectedHeight, transformed.getHeight());
@@ -134,7 +147,7 @@ public class CenterCropTest {
 
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
-    KeyAssertions.assertSame(centerCrop, new CenterCrop(pool));
+    KeyAssertions.assertSame(centerCrop, new CenterCrop());
 
     doAnswer(new Util.WriteDigest("other")).when(transformation)
         .updateDiskCacheKey(any(MessageDigest.class));

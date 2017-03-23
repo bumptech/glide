@@ -1,5 +1,6 @@
 package com.bumptech.glide.load;
 
+import android.content.Context;
 import com.bumptech.glide.load.engine.Resource;
 
 /**
@@ -40,6 +41,7 @@ public interface Transformation<T> extends Key {
    * Transformation. Otherwise the resource you request may be loaded from disk cache and your
    * Transformation may not be called.
    *
+   * @param context The Application context
    * @param resource  The resource to transform.
    * @param outWidth  The width of the view or target the resource will be displayed in, or {@link
    *                  com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate the
@@ -49,5 +51,5 @@ public interface Transformation<T> extends Key {
    *                  original resource height.
    * @return The transformed resource.
    */
-  Resource<T> transform(Resource<T> resource, int outWidth, int outHeight);
+  Resource<T> transform(Context context, Resource<T> resource, int outWidth, int outHeight);
 }
