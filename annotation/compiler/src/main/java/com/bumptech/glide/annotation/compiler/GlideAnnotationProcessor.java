@@ -92,7 +92,7 @@ public final class GlideAnnotationProcessor extends AbstractProcessor {
 
   @Override
   public SourceVersion getSupportedSourceVersion() {
-    return SourceVersion.RELEASE_7;
+    return SourceVersion.latestSupported();
   }
 
    /**
