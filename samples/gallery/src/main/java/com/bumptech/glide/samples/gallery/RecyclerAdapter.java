@@ -3,11 +3,9 @@ package com.bumptech.glide.samples.gallery;
 import static com.bumptech.glide.request.RequestOptions.fitCenterTransform;
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -120,21 +118,13 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
   }
 
   // Display#getSize(Point)
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
   @SuppressWarnings("deprecation")
   private static int getScreenWidth(Context context) {
     WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     Display display = wm.getDefaultDisplay();
-
-    final int result;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-      Point size = new Point();
-      display.getSize(size);
-      result = size.x;
-    } else {
-      result = display.getWidth();
-    }
-    return result;
+    Point size = new Point();
+    display.getSize(size);
+    return size.x;
   }
 
   /**

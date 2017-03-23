@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -190,14 +189,7 @@ public final class TransformationUtils {
    *                    transformation.
    */
   public static void setAlpha(Bitmap inBitmap, Bitmap outBitmap) {
-    setAlphaIfAvailable(outBitmap, inBitmap.hasAlpha());
-  }
-
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
-  private static void setAlphaIfAvailable(Bitmap bitmap, boolean hasAlpha) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1 && bitmap != null) {
-      bitmap.setHasAlpha(hasAlpha);
-    }
+    outBitmap.setHasAlpha(inBitmap.hasAlpha());
   }
 
   /**
@@ -320,7 +312,7 @@ public final class TransformationUtils {
     Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
 
     Bitmap result = pool.get(destMinEdge, destMinEdge, Bitmap.Config.ARGB_8888);
-    setAlphaIfAvailable(result, true /*hasAlpha*/);
+    result.setHasAlpha(true);
 
     BITMAP_DRAWABLE_LOCK.lock();
     try {
@@ -376,7 +368,7 @@ public final class TransformationUtils {
     Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
     Bitmap result = pool.get(width, height, Bitmap.Config.ARGB_8888);
 
-    setAlphaIfAvailable(result, true /* hasAlpha */);
+    result.setHasAlpha(true);
 
     BitmapShader shader = new BitmapShader(toTransform, Shader.TileMode.CLAMP,
         Shader.TileMode.CLAMP);

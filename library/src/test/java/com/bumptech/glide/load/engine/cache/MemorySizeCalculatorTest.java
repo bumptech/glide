@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
+import com.bumptech.glide.load.engine.cache.MemorySizeCalculatorTest.LowRamActivityManager;
 import com.bumptech.glide.tests.Util;
 import com.google.common.collect.Range;
 import org.junit.After;
@@ -17,10 +18,13 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.shadows.ShadowActivityManager;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(manifest = Config.NONE, sdk = 19, shadows = LowRamActivityManager.class)
 public class MemorySizeCalculatorTest {
   private MemorySizeHarness harness;
   private int initialSdkVersion;
@@ -28,6 +32,7 @@ public class MemorySizeCalculatorTest {
   @Before
   public void setUp() {
     initialSdkVersion = Build.VERSION.SDK_INT;
+    Util.setSdkVersionInt(18);
     harness = new MemorySizeHarness();
   }
 
@@ -64,7 +69,7 @@ public class MemorySizeCalculatorTest {
 
     float memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
-    assertThat((float) memoryCacheSize)
+    assertThat(memoryCacheSize)
         .isIn(Range.atMost(memoryClassBytes * harness.sizeMultiplier));
   }
 
@@ -133,10 +138,11 @@ public class MemorySizeCalculatorTest {
 
   @Test
   public void testByteArrayPoolSize_withLowRamDevice_isHalfTheSpecifiedBytes() {
-    ShadowActivityManager activityManager = Shadows.shadowOf(harness.activityManager);
+    LowRamActivityManager activityManager =
+        (LowRamActivityManager) ShadowExtractor.extract(harness.activityManager);
+    Util.setSdkVersionInt(19);
     activityManager.setMemoryClass(getLargeEnoughMemoryClass());
-
-    Util.setSdkVersionInt(10);
+    activityManager.setIsLowRam(true);
 
     int byteArrayPoolSize = harness.getCalculator().getArrayPoolSizeInBytes();
     assertThat(byteArrayPoolSize).isEqualTo(harness.byteArrayPoolSizeBytes / 2);
@@ -179,6 +185,21 @@ public class MemorySizeCalculatorTest {
 
     public int getScreenSize() {
       return pixelSize * pixelSize * bytesPerPixel;
+    }
+  }
+
+  @Implements(ActivityManager.class)
+  public static final class LowRamActivityManager extends ShadowActivityManager {
+
+    private boolean isLowRam;
+
+    void setIsLowRam(boolean isLowRam) {
+      this.isLowRam = isLowRam;
+    }
+
+    @Implementation
+    public boolean isLowRamDevice() {
+      return isLowRam;
     }
   }
 }
