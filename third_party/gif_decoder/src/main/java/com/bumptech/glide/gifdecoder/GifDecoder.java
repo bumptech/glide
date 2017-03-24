@@ -240,9 +240,26 @@ public class GifDecoder {
     /**
      * Gets the "Netscape" iteration count, if any. A count of 0 means repeat indefinitely.
      *
+     * @deprecated Use {@link #getNetscapeIterationCount()} instead.
+     *             This method cannot distinguish whether the iteration count is 1 or doesn't exist.
      * @return iteration count if one was specified, else 1.
      */
+    @Deprecated
     public int getLoopCount() {
+        if (header.loopCount == GifHeader.NETSCAPE_ITERATION_COUNT_DOES_NOT_EXIST) {
+            return 1;
+        }
+        return header.loopCount;
+    }
+
+    /**
+     * Gets the "Netscape" iteration count, if any. A count of 0 ({@link GifHeader#NETSCAPE_ITERATION_COUNT_FOREVER})
+     * means repeat indefinitely. It must not be a negative value.
+     *
+     * @return iteration count if one was specified,
+     *         else -1 ({@link GifHeader#NETSCAPE_ITERATION_COUNT_DOES_NOT_EXIST}).
+     */
+    public int getNetscapeIterationCount() {
         return header.loopCount;
     }
 

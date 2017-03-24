@@ -389,7 +389,7 @@ public class GifDrawableTest {
         runLoops(loopCount, frameCount);
 
         verifyRanLoops(loopCount, frameCount);
-        assertFalse(drawable.isRunning());
+        assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
     }
 
     @Test
@@ -405,6 +405,7 @@ public class GifDrawableTest {
         runLoops(loopCount, frameCount);
 
         verifyRanLoops(loopCount, frameCount);
+        assertTrue("drawable should be still running", drawable.isRunning());
     }
 
     @Test
@@ -420,7 +421,7 @@ public class GifDrawableTest {
         runLoops(loopCount, frameCount);
 
         verifyRanLoops(loopCount, frameCount);
-        assertFalse(drawable.isRunning());
+        assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
     }
 
     @Test
@@ -436,7 +437,7 @@ public class GifDrawableTest {
         runLoops(loopCount, frameCount);
 
         verifyRanLoops(loopCount, frameCount);
-        assertFalse(drawable.isRunning());
+        assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
     }
 
     @Test
@@ -448,6 +449,7 @@ public class GifDrawableTest {
 
         drawable.onFrameReady(0);
         drawable.onFrameReady(1);
+        assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
 
         drawable.start();
 
@@ -456,7 +458,7 @@ public class GifDrawableTest {
 
         // 4 onFrameReady(), 2 start()
         verify(cb, times(4 + 2)).invalidateDrawable(eq(drawable));
-        assertFalse(drawable.isRunning());
+        assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
     }
 
     @Test
@@ -470,6 +472,7 @@ public class GifDrawableTest {
         drawable.start();
 
         runLoops(initialLoopCount, frameCount);
+        assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
 
         final int newLoopCount = 2;
 
@@ -481,6 +484,7 @@ public class GifDrawableTest {
         int numStarts = 2;
         int expectedFrames = (initialLoopCount + newLoopCount) * frameCount + numStarts;
         verify(cb, times(expectedFrames)).invalidateDrawable(eq(drawable));
+        assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -492,7 +496,26 @@ public class GifDrawableTest {
     public void testUsesDecoderNetscapeLoopCountIfLoopCountIsLoopIntrinsic() {
         final int frameCount = 3;
         final int loopCount = 2;
-        when(gifDecoder.getLoopCount()).thenReturn(loopCount);
+        when(gifDecoder.getNetscapeIterationCount()).thenReturn(loopCount);
+        when(gifDecoder.getFrameCount()).thenReturn(frameCount);
+        drawable.setLoopCount(GlideDrawable.LOOP_INTRINSIC);
+        drawable.setVisible(true, true);
+        drawable.start();
+
+        // According to
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=592735#c5,
+        // the image should be displayed for a total of ((netscape loop count) + 1) loops.
+        runLoops(loopCount + 1, frameCount);
+
+        verifyRanLoops(loopCount + 1, frameCount);
+        assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
+    }
+
+    @Test
+    public void testLoopsForeverIfLoopCountIsLoopIntrinsicAndNetscapeLoopCountIsZero() {
+        final int frameCount = 3;
+        final int loopCount = 40;
+        when(gifDecoder.getNetscapeIterationCount()).thenReturn(GifHeader.NETSCAPE_ITERATION_COUNT_FOREVER);
         when(gifDecoder.getFrameCount()).thenReturn(frameCount);
         drawable.setLoopCount(GlideDrawable.LOOP_INTRINSIC);
         drawable.setVisible(true, true);
@@ -501,6 +524,23 @@ public class GifDrawableTest {
         runLoops(loopCount, frameCount);
 
         verifyRanLoops(loopCount, frameCount);
+        assertTrue("drawable should be still running", drawable.isRunning());
+    }
+
+    @Test
+    public void testLoopsOnceIfLoopCountIsLoopIntrinsicAndNetscapeLoopCountDoesntExist() {
+        final int frameCount = 3;
+        final int loopCount = 1;
+        when(gifDecoder.getNetscapeIterationCount()).thenReturn(GifHeader.NETSCAPE_ITERATION_COUNT_DOES_NOT_EXIST);
+        when(gifDecoder.getFrameCount()).thenReturn(frameCount);
+        drawable.setLoopCount(GlideDrawable.LOOP_INTRINSIC);
+        drawable.setVisible(true, true);
+        drawable.start();
+
+        runLoops(loopCount, frameCount);
+
+        verifyRanLoops(loopCount, frameCount);
+        assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
     }
 
     @Test
@@ -600,6 +640,7 @@ public class GifDrawableTest {
     private void runLoops(int loopCount, int frameCount) {
         for (int loop = 0; loop < loopCount; loop++) {
             for (int frame = 0; frame < frameCount; frame++) {
+                assertTrue("drawable should be started before calling drawable.onFrameReady()", drawable.isRunning());
                 drawable.onFrameReady(frame);
             }
         }
