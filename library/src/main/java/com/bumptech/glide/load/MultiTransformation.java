@@ -1,5 +1,6 @@
 package com.bumptech.glide.load;
 
+import android.content.Context;
 import com.bumptech.glide.load.engine.Resource;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -31,11 +32,12 @@ public class MultiTransformation<T> implements Transformation<T> {
   }
 
   @Override
-  public Resource<T> transform(Resource<T> resource, int outWidth, int outHeight) {
+  public Resource<T> transform(
+      Context context, Resource<T> resource, int outWidth, int outHeight) {
     Resource<T> previous = resource;
 
     for (Transformation<T> transformation : transformations) {
-      Resource<T> transformed = transformation.transform(previous, outWidth, outHeight);
+      Resource<T> transformed = transformation.transform(context, previous, outWidth, outHeight);
       if (previous != null && !previous.equals(resource) && !previous.equals(transformed)) {
         previous.recycle();
       }

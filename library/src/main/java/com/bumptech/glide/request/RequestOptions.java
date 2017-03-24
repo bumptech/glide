@@ -120,59 +120,108 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
   }
 
   /**
-   * Returns a {@link RequestOptions} object with {@link #fitCenter(Context)} set.
+   * Returns a {@link RequestOptions} object with {@link #fitCenter()} set.
+   *
+   * @deprecated Use {@link #fitCenterTransform()}.
    */
+  @Deprecated
   public static RequestOptions fitCenterTransform(Context context) {
+    return fitCenterTransform();
+  }
+
+  /**
+   * Returns a {@link RequestOptions} object with {@link #fitCenter()} set.
+   */
+  public static RequestOptions fitCenterTransform() {
     if (fitCenterOptions == null) {
       fitCenterOptions = new RequestOptions()
-          .fitCenter(context.getApplicationContext())
+          .fitCenter()
           .autoLock();
     }
     return fitCenterOptions;
   }
 
   /**
-   * Returns a {@link RequestOptions} object with {@link #centerInside(Context)} set.
+   * Returns a {@link RequestOptions} object with {@link #centerInside()} set.
+   *
+   * @deprecated Use {@link #centerInsideTransform()}.
    */
+  @Deprecated
   public static RequestOptions centerInsideTransform(Context context) {
+    return centerInsideTransform();
+  }
+
+  /**
+   * Returns a {@link RequestOptions} object with {@link #centerInside()} set.
+   */
+  public static RequestOptions centerInsideTransform() {
     if (centerInsideOptions == null) {
       centerInsideOptions = new RequestOptions()
-              .centerInside(context.getApplicationContext())
+              .centerInside()
               .autoLock();
     }
     return centerInsideOptions;
   }
 
   /**
-   * Returns a {@link RequestOptions} object with {@link #centerCrop(Context)} set.
+   * Returns a {@link RequestOptions} object with {@link #centerCrop()} set.
+   *
+   * @deprecated Use {@link #centerCropTransform()}.
    */
   public static RequestOptions centerCropTransform(Context context) {
+    return centerCropTransform();
+  }
+
+  /**
+   * Returns a {@link RequestOptions} object with {@link #centerCrop()} set.
+   */
+  public static RequestOptions centerCropTransform() {
     if (centerCropOptions == null) {
       centerCropOptions = new RequestOptions()
-          .centerCrop(context.getApplicationContext())
+          .centerCrop()
           .autoLock();
     }
     return centerCropOptions;
   }
 
   /**
-   * Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop(Context)} set.
+   * Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop()} set.
+   *
+   * @deprecated Use {@link #circleCropTransform()}.
    */
+  @Deprecated
   public static RequestOptions circleCropTransform(Context context) {
+    return circleCropTransform();
+  }
+
+  /**
+   * Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop()} set.
+   */
+  public static RequestOptions circleCropTransform() {
     if (circleCropOptions == null) {
       circleCropOptions = new RequestOptions()
-          .circleCrop(context.getApplicationContext())
+          .circleCrop()
           .autoLock();
     }
     return circleCropOptions;
   }
 
   /**
-   * Returns a {@link RequestOptions} object with {@link #transform(Context, Transformation)} set.
+   * Returns a {@link RequestOptions} object with {@link #transform(Transformation)} set.
+   *
+   * @deprecated Use {@link #bitmapTransform(Transformation)}.
    */
-  public static RequestOptions bitmapTransform(Context context,
-      @NonNull Transformation<Bitmap> transformation) {
-    return new RequestOptions().transform(context, transformation);
+  @Deprecated
+  public static RequestOptions bitmapTransform(
+      Context context, @NonNull Transformation<Bitmap> transformation) {
+    return bitmapTransform(transformation);
+  }
+
+  /**
+   * Returns a {@link RequestOptions} object with {@link #transform(Transformation)} set.
+   */
+  public static RequestOptions bitmapTransform(@NonNull Transformation<Bitmap> transformation) {
+    return new RequestOptions().transform(transformation);
   }
 
   /**

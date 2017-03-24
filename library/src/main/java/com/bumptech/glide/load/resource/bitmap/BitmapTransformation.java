@@ -52,23 +52,29 @@ import com.bumptech.glide.util.Util;
  */
 public abstract class BitmapTransformation implements Transformation<Bitmap> {
 
-  private final BitmapPool bitmapPool;
-
-  public BitmapTransformation(Context context) {
-    this(Glide.get(context).getBitmapPool());
+  public BitmapTransformation() {
+    // Intentionally empty.
   }
 
-  public BitmapTransformation(BitmapPool bitmapPool) {
-    this.bitmapPool = bitmapPool;
+  @Deprecated
+  public BitmapTransformation(@SuppressWarnings("unused") Context context) {
+    this();
+  }
+
+  @Deprecated
+  public BitmapTransformation(@SuppressWarnings("unused") BitmapPool bitmapPool) {
+    this();
   }
 
   @Override
-  public final Resource<Bitmap> transform(Resource<Bitmap> resource, int outWidth, int outHeight) {
+  public final Resource<Bitmap> transform(
+      Context context, Resource<Bitmap> resource, int outWidth, int outHeight) {
     if (!Util.isValidDimensions(outWidth, outHeight)) {
       throw new IllegalArgumentException(
           "Cannot apply transformation on width: " + outWidth + " or height: " + outHeight
               + " less than or equal to zero and not Target.SIZE_ORIGINAL");
     }
+    BitmapPool bitmapPool = Glide.get(context).getBitmapPool();
     Bitmap toTransform = resource.get();
     int targetWidth = outWidth == Target.SIZE_ORIGINAL ? toTransform.getWidth() : outWidth;
     int targetHeight = outHeight == Target.SIZE_ORIGINAL ? toTransform.getHeight() : outHeight;
@@ -111,6 +117,6 @@ public abstract class BitmapTransformation implements Transformation<Bitmap> {
    * @param outHeight   The ideal height of the transformed bitmap (the transformed height does not
    *                    need to match exactly).
    */
-  protected abstract Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
-      int outWidth, int outHeight);
+  protected abstract Bitmap transform(
+      @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight);
 }

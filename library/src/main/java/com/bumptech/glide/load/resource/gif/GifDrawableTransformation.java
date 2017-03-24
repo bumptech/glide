@@ -17,20 +17,32 @@ import java.security.MessageDigest;
  */
 public class GifDrawableTransformation implements Transformation<GifDrawable> {
   private final Transformation<Bitmap> wrapped;
-  private final BitmapPool bitmapPool;
 
-  public GifDrawableTransformation(Context context, Transformation<Bitmap> wrapped) {
-    this(wrapped, Glide.get(context).getBitmapPool());
+  public GifDrawableTransformation(Transformation<Bitmap> wrapped) {
+    this.wrapped = Preconditions.checkNotNull(wrapped);
   }
 
-  public GifDrawableTransformation(Transformation<Bitmap> wrapped, BitmapPool bitmapPool) {
-    this.wrapped = Preconditions.checkNotNull(wrapped);
-    this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
+  /**
+   * @deprecated Use {@link #GifDrawableTransformation(Transformation)}.
+   */
+  @Deprecated
+  public GifDrawableTransformation(
+      @SuppressWarnings("unused") Context context, Transformation<Bitmap> wrapped) {
+    this(wrapped);
+  }
+
+  /**
+   * @deprecated Use {@link #GifDrawableTransformation(Transformation)}
+   */
+  @Deprecated
+  public GifDrawableTransformation(
+      Transformation<Bitmap> wrapped, @SuppressWarnings("unused") BitmapPool bitmapPool) {
+    this(wrapped);
   }
 
   @Override
-  public Resource<GifDrawable> transform(Resource<GifDrawable> resource, int outWidth,
-      int outHeight) {
+  public Resource<GifDrawable> transform(
+      Context context, Resource<GifDrawable> resource, int outWidth, int outHeight) {
     GifDrawable drawable = resource.get();
 
     // The drawable needs to be initialized with the correct width and height in order for a view
@@ -38,9 +50,10 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
     // modify the dimensions of our GIF, here we create a stand in for a frame and pass it to the
     // transformation to see what the final transformed dimensions will be so that our drawable can
     // report the correct intrinsic width and height.
+    BitmapPool bitmapPool = Glide.get(context).getBitmapPool();
     Bitmap firstFrame = drawable.getFirstFrame();
     Resource<Bitmap> bitmapResource = new BitmapResource(firstFrame, bitmapPool);
-    Resource<Bitmap> transformed = wrapped.transform(bitmapResource, outWidth, outHeight);
+    Resource<Bitmap> transformed = wrapped.transform(context, bitmapResource, outWidth, outHeight);
     if (!bitmapResource.equals(transformed)) {
       bitmapResource.recycle();
     }

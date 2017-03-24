@@ -159,6 +159,16 @@ public class Glide implements ComponentCallbacks2 {
     return glide;
   }
 
+  @VisibleForTesting
+  public static void init(Glide glide) {
+    Glide.glide = glide;
+  }
+
+  @VisibleForTesting
+  public static void tearDown() {
+    glide = null;
+  }
+
   @SuppressWarnings("deprecation")
   private static void initGlide(Context context) {
     Context applicationContext = context.getApplicationContext();
@@ -202,7 +212,7 @@ public class Glide implements ComponentCallbacks2 {
     if (annotationGeneratedModule != null) {
       annotationGeneratedModule.applyOptions(applicationContext, builder);
     }
-    glide = builder.createGlide(applicationContext);
+    glide = builder.build(applicationContext);
     for (GlideModule module : manifestModules) {
       module.registerComponents(applicationContext, glide.registry);
     }
@@ -237,11 +247,6 @@ public class Glide implements ComponentCallbacks2 {
           + " processor will generate a correct implementation.", e);
     }
     return result;
-  }
-
-  @VisibleForTesting
-  public static void tearDown() {
-    glide = null;
   }
 
   @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)

@@ -6,6 +6,7 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.mock;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import com.bumptech.glide.load.DataSource;
@@ -42,6 +43,10 @@ public class Util {
 
   public static DataSource isADataSource() {
     return isA(DataSource.class);
+  }
+
+  public static Context anyContext() {
+    return any(Context.class);
   }
 
   /**

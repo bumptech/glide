@@ -5,13 +5,17 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +37,14 @@ public class CircleCropTest {
     MockitoAnnotations.initMocks(this);
     when(bitmapPool.get(anyInt(), anyInt(), any(Bitmap.Config.class)))
         .thenAnswer(new Util.CreateBitmap());
-    circleCrop = new CircleCrop(RuntimeEnvironment.application);
+    Context context = RuntimeEnvironment.application;
+    Glide.init(new GlideBuilder().setBitmapPool(bitmapPool).build(context));
+    circleCrop = new CircleCrop();
+  }
+
+  @After
+  public void tearDown() {
+    Glide.tearDown();
   }
 
   @Test

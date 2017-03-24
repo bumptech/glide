@@ -13,6 +13,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
@@ -65,6 +67,8 @@ public class ReEncodingGifResourceEncoderTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
+    Application context = RuntimeEnvironment.application;
+
     ReEncodingGifResourceEncoder.Factory factory = mock(ReEncodingGifResourceEncoder.Factory.class);
     when(factory.buildDecoder(any(GifDecoder.BitmapProvider.class))).thenReturn(decoder);
     when(factory.buildParser()).thenReturn(parser);
@@ -73,7 +77,7 @@ public class ReEncodingGifResourceEncoderTest {
         .thenReturn(frameResource);
 
     // TODO Util.anyResource once Util is moved to testutil module (remove unchecked above!)
-    when(frameTransformation.transform(any(Resource.class), anyInt(), anyInt()))
+    when(frameTransformation.transform(anyContext(), any(Resource.class), anyInt(), anyInt()))
         .thenReturn(frameResource);
 
     when(gifDrawable.getFrameTransformation()).thenReturn(frameTransformation);
@@ -81,11 +85,11 @@ public class ReEncodingGifResourceEncoderTest {
 
     when(resource.get()).thenReturn(gifDrawable);
 
-    encoder = new ReEncodingGifResourceEncoder(mock(BitmapPool.class), factory);
+    encoder = new ReEncodingGifResourceEncoder(context, mock(BitmapPool.class), factory);
     options = new Options();
     options.set(ReEncodingGifResourceEncoder.ENCODE_TRANSFORMATION, true);
 
-    file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
+    file = new File(context.getCacheDir(), "test");
   }
 
   @After
@@ -245,7 +249,8 @@ public class ReEncodingGifResourceEncoderTest {
 
     Bitmap transformedFrame = Bitmap.createBitmap(200, 200, Bitmap.Config.RGB_565);
     when(transformedResource.get()).thenReturn(transformedFrame);
-    when(frameTransformation.transform(eq(frameResource), eq(expectedWidth), eq(expectedHeight)))
+    when(frameTransformation.transform(
+        anyContext(), eq(frameResource), eq(expectedWidth), eq(expectedHeight)))
         .thenReturn(transformedResource);
     when(gifDrawable.getFrameTransformation()).thenReturn(frameTransformation);
 
@@ -257,7 +262,7 @@ public class ReEncodingGifResourceEncoderTest {
   @Test
   public void testRecyclesFrameResourceBeforeWritingIfTransformedResourceIsDifferent() {
     when(decoder.getFrameCount()).thenReturn(1);
-    when(frameTransformation.transform(eq(frameResource), anyInt(), anyInt()))
+    when(frameTransformation.transform(anyContext(), eq(frameResource), anyInt(), anyInt()))
         .thenReturn(transformedResource);
     Bitmap expected = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
     when(transformedResource.get()).thenReturn(expected);
@@ -276,7 +281,7 @@ public class ReEncodingGifResourceEncoderTest {
     when(decoder.getFrameCount()).thenReturn(1);
     Bitmap expected = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
     when(transformedResource.get()).thenReturn(expected);
-    when(frameTransformation.transform(eq(frameResource), anyInt(), anyInt()))
+    when(frameTransformation.transform(anyContext(), eq(frameResource), anyInt(), anyInt()))
         .thenReturn(transformedResource);
 
     when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
@@ -291,7 +296,7 @@ public class ReEncodingGifResourceEncoderTest {
   @Test
   public void testRecyclesFrameResourceAfterWritingIfFrameResourceIsNotTransformed() {
     when(decoder.getFrameCount()).thenReturn(1);
-    when(frameTransformation.transform(eq(frameResource), anyInt(), anyInt()))
+    when(frameTransformation.transform(anyContext(), eq(frameResource), anyInt(), anyInt()))
         .thenReturn(frameResource);
     Bitmap expected = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888);
     when(frameResource.get()).thenReturn(expected);
@@ -329,5 +334,9 @@ public class ReEncodingGifResourceEncoderTest {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private static Context anyContext() {
+    return any(Context.class);
   }
 }

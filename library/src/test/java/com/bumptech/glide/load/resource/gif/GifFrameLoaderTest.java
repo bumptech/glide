@@ -82,7 +82,6 @@ public class GifFrameLoaderTest {
   private GifFrameLoader createGifFrameLoader(Handler handler) {
     Glide glide = getGlideSingleton();
     return new GifFrameLoader(
-        glide.getContext(),
         glide.getBitmapPool(),
         requestManager,
         gifDecoder,
