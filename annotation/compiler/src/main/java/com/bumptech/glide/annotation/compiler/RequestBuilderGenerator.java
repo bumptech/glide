@@ -345,7 +345,7 @@ final class RequestBuilderGenerator {
           }
         }).contains(Override.class.getCanonicalName())
         && requestOptionMethod.returnType.toString()
-            .equals(requestOptionMethod.toString());
+            .equals(requestOptionsClassName.toString());
   }
 
    /**
