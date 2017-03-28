@@ -8,6 +8,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
@@ -103,6 +104,10 @@ final class RequestManagerGenerator {
                  + "\n"
                  + "<p>Generated code, do not modify\n",
              GlideExtension.class, GlideType.class)
+        .addAnnotation(
+            AnnotationSpec.builder(SuppressWarnings.class)
+                .addMember("value", "$S", "deprecation")
+                .build())
          .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
          .addMethod(generateAsMethod(generatedCodePackageName, requestBuilder))
          .addMethod(generateCallSuperConstructor())

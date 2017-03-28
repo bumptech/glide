@@ -6,6 +6,7 @@ import static com.bumptech.glide.annotation.GlideOption.OVERRIDE_NONE;
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
 import com.google.common.base.Strings;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.CodeBlock.Builder;
@@ -108,6 +109,10 @@ final class RequestOptionsGenerator {
     allMethodsAndStaticVars.addAll(methodsForExtensions);
 
     TypeSpec.Builder classBuilder = TypeSpec.classBuilder(GENERATED_REQUEST_OPTIONS_SIMPLE_NAME)
+        .addAnnotation(
+            AnnotationSpec.builder(SuppressWarnings.class)
+                .addMember("value", "$S", "deprecation")
+                .build())
         .addJavadoc(generateClassJavadoc(glideExtensionClassNames))
         .addModifiers(Modifier.FINAL)
         .addModifiers(Modifier.PUBLIC)
