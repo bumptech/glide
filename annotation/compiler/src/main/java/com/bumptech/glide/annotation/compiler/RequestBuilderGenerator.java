@@ -88,13 +88,12 @@ final class RequestBuilderGenerator {
   private static final String BASE_REQUEST_OPTIONS_QUALIFIED_NAME =
       BASE_REQUEST_OPTIONS_PACKAGE_NAME + "." + BASE_REQUEST_OPTIONS_SIMPLE_NAME;
 
-  static final String REQUEST_BUILDER_PACKAGE_NAME = "com.bumptech.glide";
+  private static final String REQUEST_BUILDER_PACKAGE_NAME = "com.bumptech.glide";
   private static final String REQUEST_BUILDER_SIMPLE_NAME = "RequestBuilder";
   static final String REQUEST_BUILDER_QUALIFIED_NAME =
       REQUEST_BUILDER_PACKAGE_NAME + "." + REQUEST_BUILDER_SIMPLE_NAME;
 
   // Uses package private methods and variables.
-  static final String GENERATED_REQUEST_BUILDER_PACKAGE_NAME = REQUEST_BUILDER_PACKAGE_NAME;
   private static final String GENERATED_REQUEST_BUILDER_SIMPLE_NAME = "GlideRequest";
 
   /**
@@ -108,9 +107,9 @@ final class RequestBuilderGenerator {
 
   private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
-  private final ClassName generatedRequestBuilderClassName;
+  private ClassName generatedRequestBuilderClassName;
   private final TypeVariableName transcodeTypeName;
-  private final ParameterizedTypeName generatedRequestBuilderOfTranscodeType;
+  private ParameterizedTypeName generatedRequestBuilderOfTranscodeType;
   private final TypeElement baseRequestOptionsType;
   private final TypeElement requestBuilderType;
   private ClassName requestOptionsClassName;
@@ -122,24 +121,21 @@ final class RequestBuilderGenerator {
     requestBuilderType = processingEnv.getElementUtils()
         .getTypeElement(REQUEST_BUILDER_QUALIFIED_NAME);
 
-    generatedRequestBuilderClassName =
-        ClassName.get(
-            GENERATED_REQUEST_BUILDER_PACKAGE_NAME, GENERATED_REQUEST_BUILDER_SIMPLE_NAME);
     transcodeTypeName = TypeVariableName.get(TRANSCODE_TYPE_NAME);
-
-    generatedRequestBuilderOfTranscodeType =
-        ParameterizedTypeName.get(generatedRequestBuilderClassName, transcodeTypeName);
 
     baseRequestOptionsType = processingEnv.getElementUtils().getTypeElement(
         BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
   }
 
-  TypeSpec generate(@Nullable TypeSpec generatedOptions) {
+  TypeSpec generate(String generatedCodePackageName, @Nullable TypeSpec generatedOptions) {
+    generatedRequestBuilderClassName =
+        ClassName.get(generatedCodePackageName, GENERATED_REQUEST_BUILDER_SIMPLE_NAME);
+    generatedRequestBuilderOfTranscodeType =
+        ParameterizedTypeName.get(generatedRequestBuilderClassName, transcodeTypeName);
+
     if (generatedOptions != null) {
       requestOptionsClassName =
-          ClassName.get(
-              RequestOptionsGenerator.GENERATED_REQUEST_OPTIONS_PACKAGE_NAME,
-              generatedOptions.name);
+          ClassName.get(generatedCodePackageName, generatedOptions.name);
     } else {
       requestOptionsClassName =
           ClassName.get(
@@ -166,6 +162,7 @@ final class RequestBuilderGenerator {
         .addAnnotation(
             AnnotationSpec.builder(SuppressWarnings.class)
                 .addMember("value", "$S", "unused")
+                .addMember("value", "$S", "deprecation")
                 .build())
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
         .addTypeVariable(transcodeTypeName)
@@ -401,14 +398,14 @@ final class RequestBuilderGenerator {
         .addStatement("super($N, $N)", "transcodeClass", "other")
         .build();
 
-    ClassName glideContext = ClassName.get("com.bumptech.glide", "GlideContext");
+    ClassName glide = ClassName.get("com.bumptech.glide", "Glide");
     ClassName requestManager = ClassName.get("com.bumptech.glide", "RequestManager");
     MethodSpec secondConstructor =
         MethodSpec.constructorBuilder()
-            .addParameter(glideContext, "context")
+            .addParameter(glide, "glide")
             .addParameter(requestManager, "requestManager")
             .addParameter(classOfTranscodeType, "transcodeClass")
-            .addStatement("super($N, $N ,$N)", "context", "requestManager", "transcodeClass")
+            .addStatement("super($N, $N ,$N)", "glide", "requestManager", "transcodeClass")
             .build();
     return ImmutableList.of(firstConstructor, secondConstructor);
   }

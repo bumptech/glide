@@ -69,10 +69,10 @@ import javax.lang.model.element.TypeElement;
  * </pre>
  */
 final class RootModuleGenerator {
+  static final String GENERATED_ROOT_MODULE_PACKAGE_NAME = "com.bumptech.glide";
   private static final String GLIDE_LOG_TAG = "Glide";
   private static final String GENERATED_ROOT_MODULE_IMPL_SIMPLE_NAME =
       "GeneratedRootGlideModuleImpl";
-  private static final String GENERATED_ROOT_MODULE_PACKAGE_NAME = "com.bumptech.glide";
   private static final String GENERATED_ROOT_MODULE_SIMPLE_NAME = "GeneratedRootGlideModule";
   private final ProcessorUtil processorUtil;
 

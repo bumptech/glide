@@ -59,11 +59,8 @@ final class RequestManagerGenerator {
   private static final String REQUEST_MANAGER_TREE_NODE_QUALIFIED_NAME =
       "com.bumptech.glide.manager.RequestManagerTreeNode";
 
-  static final String GENERATED_REQUEST_MANAGER_PACKAGE_NAME =
-      "com.bumptech.glide";
   private static final String GENERATED_REQUEST_MANAGER_SIMPLE_NAME =
       "GlideRequests";
-
 
   private ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
@@ -96,10 +93,9 @@ final class RequestManagerGenerator {
 
   @Nullable
   TypeSpec generate(
-      @Nullable TypeSpec requestOptions, TypeSpec requestBuilder, Set<String> glideExtensions) {
-    generatedRequestBuilderClassName =
-        ClassName.get(
-            RequestBuilderGenerator.GENERATED_REQUEST_BUILDER_PACKAGE_NAME, requestBuilder.name);
+      String generatedCodePackageName, @Nullable TypeSpec requestOptions, TypeSpec requestBuilder,
+      Set<String> glideExtensions) {
+    generatedRequestBuilderClassName = ClassName.get(generatedCodePackageName, requestBuilder.name);
     return TypeSpec.classBuilder(GENERATED_REQUEST_MANAGER_SIMPLE_NAME)
          .superclass(requestManagerClassName)
          .addJavadoc("Includes all additions from methods in {@link $T}s\n"
@@ -108,19 +104,21 @@ final class RequestManagerGenerator {
                  + "<p>Generated code, do not modify\n",
              GlideExtension.class, GlideType.class)
          .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-         .addMethod(generateAsMethod(requestBuilder))
+         .addMethod(generateAsMethod(generatedCodePackageName, requestBuilder))
          .addMethod(generateCallSuperConstructor())
          .addMethods(generateAdditionalRequestManagerMethods(glideExtensions))
          .addMethods(generateRequestManagerMethodOverrides())
          .addMethods(
              FluentIterable.from(
-                 Collections.singletonList(generateOverrideSetRequestOptions(requestOptions)))
+                 Collections.singletonList(
+                     generateOverrideSetRequestOptions(generatedCodePackageName, requestOptions)))
                  .filter(Predicates.<MethodSpec>notNull()))
          .build();
   }
 
   private MethodSpec generateCallSuperConstructor() {
     return MethodSpec.constructorBuilder()
+        .addModifiers(Modifier.PUBLIC)
         .addParameter(ClassName.get(glideType), "glide")
         .addParameter(ClassName.get(lifecycleType), "lifecycle")
         .addParameter(ClassName.get(requestManagerTreeNodeType), "treeNode")
@@ -128,14 +126,13 @@ final class RequestManagerGenerator {
         .build();
   }
 
-  private MethodSpec generateAsMethod(TypeSpec requestBuilder) {
+  private MethodSpec generateAsMethod(String generatedCodePackageName, TypeSpec requestBuilder) {
     TypeVariableName resourceType = TypeVariableName.get("ResourceType");
     ParameterizedTypeName classOfResouceType = ParameterizedTypeName
         .get(ClassName.get(Class.class), resourceType);
 
     ClassName generatedRequestBuilderClassName =
-        ClassName.get(RequestBuilderGenerator.REQUEST_BUILDER_PACKAGE_NAME,
-            requestBuilder.name);
+        ClassName.get(generatedCodePackageName, requestBuilder.name);
 
     ParameterizedTypeName requestBuilderOfResourceType = ParameterizedTypeName
         .get(generatedRequestBuilderClassName, resourceType);
@@ -146,7 +143,7 @@ final class RequestManagerGenerator {
         .addTypeVariable(TypeVariableName.get("ResourceType"))
         .addParameter(classOfResouceType, "resourceClass")
         .returns(requestBuilderOfResourceType)
-        .addStatement("return new $T<>(glide.getGlideContext(), this, resourceClass)",
+        .addStatement("return new $T<>(glide, this, resourceClass)",
             this.generatedRequestBuilderClassName)
         .build();
   }
@@ -254,7 +251,8 @@ final class RequestManagerGenerator {
    * accidentally wipes out some logic in overidden methods in our generated subclass.
    */
   @Nullable
-  private MethodSpec generateOverrideSetRequestOptions(@Nullable TypeSpec generatedRequestOptions) {
+  private MethodSpec generateOverrideSetRequestOptions(
+      String generatedCodePackageName, @Nullable TypeSpec generatedRequestOptions) {
     if (generatedRequestOptions == null) {
       return null;
     }
@@ -268,9 +266,8 @@ final class RequestManagerGenerator {
 
     // This class may have just been generated and therefore may not be found if we try to obtain
     // it via Elements, so use just the String version instead.
-    String generatedRequestOptionsQualfiedName =
-        RequestOptionsGenerator.GENERATED_REQUEST_OPTIONS_PACKAGE_NAME + "."
-                + generatedRequestOptions.name;
+    String generatedRequestOptionsQualifiedName =
+        generatedCodePackageName + "." + generatedRequestOptions.name;
 
     String methodName = "setRequestOptions";
     String parameterName = "toSet";
@@ -283,11 +280,11 @@ final class RequestManagerGenerator {
                 .addAnnotation(ClassName.get(androidNonNullType))
                 .build())
         .beginControlFlow("if ($N instanceof $L)",
-            parameterName, generatedRequestOptionsQualfiedName)
+            parameterName, generatedRequestOptionsQualifiedName)
         .addStatement("super.$N($N)", methodName, parameterName)
         .nextControlFlow("else")
         .addStatement("super.setRequestOptions(new $L().apply($N))",
-            generatedRequestOptionsQualfiedName, parameterName)
+            generatedRequestOptionsQualifiedName, parameterName)
         .endControlFlow()
         .build();
   }

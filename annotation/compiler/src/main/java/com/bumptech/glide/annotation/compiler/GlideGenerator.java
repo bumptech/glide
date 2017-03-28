@@ -71,8 +71,6 @@ final class GlideGenerator {
   private static final String GLIDE_QUALIFIED_NAME =
       "com.bumptech.glide.Glide";
 
-  static final String GENERATED_GLIDE_PACKAGE_NAME = "com.bumptech.glide";
-
   private static final String REQUEST_MANAGER_QUALIFIED_NAME =
       "com.bumptech.glide.RequestManager";
 
@@ -92,7 +90,8 @@ final class GlideGenerator {
     glideType = elementUtils.getTypeElement(GLIDE_QUALIFIED_NAME);
   }
 
-  TypeSpec generate(String glideName, TypeSpec generatedRequestManager) {
+  TypeSpec generate(
+      String generatedCodePackageName, String glideName, TypeSpec generatedRequestManager) {
     return TypeSpec.classBuilder(glideName)
         .addJavadoc(
             "The entry point for interacting with Glide for Applications\n"
@@ -107,18 +106,20 @@ final class GlideGenerator {
         .addMethod(MethodSpec.constructorBuilder()
             .addModifiers(Modifier.PRIVATE)
             .build())
-        .addMethods(generateOverridesForGlideMethods(generatedRequestManager))
+        .addMethods(
+            generateOverridesForGlideMethods(generatedCodePackageName, generatedRequestManager))
         .build();
   }
 
   private List<MethodSpec> generateOverridesForGlideMethods(
-      final TypeSpec generatedRequestManager) {
+      final String generatedCodePackageName, final TypeSpec generatedRequestManager) {
     return Lists.transform(discoverGlideMethodsToOverride(),
         new Function<ExecutableElement, MethodSpec>() {
           @Override
           public MethodSpec apply(ExecutableElement input) {
             if (isGlideWithMethod(input)) {
-              return overrideGlideWithMethod(generatedRequestManager, input);
+              return overrideGlideWithMethod(
+                  generatedCodePackageName, generatedRequestManager, input);
             } else {
               return overrideGlideStaticMethod(input);
             }
@@ -175,10 +176,9 @@ final class GlideGenerator {
   }
 
   private MethodSpec overrideGlideWithMethod(
-      TypeSpec generatedRequestManager, ExecutableElement methodToOverride) {
+      String packageName, TypeSpec generatedRequestManager, ExecutableElement methodToOverride) {
     ClassName generatedRequestManagerClassName =
-        ClassName.get(RequestManagerGenerator.GENERATED_REQUEST_MANAGER_PACKAGE_NAME,
-            generatedRequestManager.name);
+        ClassName.get(packageName, generatedRequestManager.name);
     List<? extends VariableElement> parameters = methodToOverride.getParameters();
     Preconditions.checkArgument(
         parameters.size() == 1, "Expected size of 1, but got %s", methodToOverride);

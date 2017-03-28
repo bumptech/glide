@@ -379,7 +379,7 @@ public class RequestManager implements LifecycleListener {
    * @return A new request builder for loading the given resource class.
    */
   public <ResourceType> RequestBuilder<ResourceType> as(Class<ResourceType> resourceClass) {
-    return new RequestBuilder<>(glide.getGlideContext(), this, resourceClass);
+    return new RequestBuilder<>(glide, this, resourceClass);
   }
 
   /**

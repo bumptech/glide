@@ -67,7 +67,6 @@ import javax.lang.model.element.VariableElement;
  */
 final class RequestOptionsGenerator {
   private static final String GENERATED_REQUEST_OPTIONS_SIMPLE_NAME = "GlideOptions";
-  static final String GENERATED_REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide";
   private static final String BASE_REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
   private static final String BASE_REQUEST_OPTIONS_SIMPLE_NAME = "BaseRequestOptions";
   static final String BASE_REQUEST_OPTIONS_QUALIFIED_NAME =
@@ -76,11 +75,10 @@ final class RequestOptionsGenerator {
   static final String REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
 
   private final ProcessingEnvironment processingEnvironment;
-  private ProcessorUtil processorUtil;
-  private final ClassName glideOptionsName;
-  private final ParameterizedTypeName baseRequestOptionsOfGlideOptions;
   private final ClassName baseRequestOptionsName;
   private final TypeElement baseRequestOptionsType;
+  private final ProcessorUtil processorUtil;
+  private ClassName glideOptionsName;
   private int nextStaticFieldUniqueId;
 
   RequestOptionsGenerator(
@@ -88,18 +86,20 @@ final class RequestOptionsGenerator {
     this.processingEnvironment = processingEnvironment;
     this.processorUtil = processorUtil;
 
-    glideOptionsName = ClassName.get(GENERATED_REQUEST_OPTIONS_PACKAGE_NAME,
-        GENERATED_REQUEST_OPTIONS_SIMPLE_NAME);
     baseRequestOptionsName = ClassName.get(BASE_REQUEST_OPTIONS_PACKAGE_NAME,
         BASE_REQUEST_OPTIONS_SIMPLE_NAME);
-    baseRequestOptionsOfGlideOptions =
-        ParameterizedTypeName.get(baseRequestOptionsName, glideOptionsName);
 
     baseRequestOptionsType = processingEnvironment.getElementUtils().getTypeElement(
         BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
   }
 
-  TypeSpec generate(Set<String> glideExtensionClassNames) {
+  TypeSpec generate(String generatedCodePackageName, Set<String> glideExtensionClassNames) {
+    glideOptionsName =
+        ClassName.get(generatedCodePackageName, GENERATED_REQUEST_OPTIONS_SIMPLE_NAME);
+
+    ParameterizedTypeName baseRequestOptionsOfGlideOptions = ParameterizedTypeName
+        .get(baseRequestOptionsName, glideOptionsName);
+
     List<MethodAndStaticVar> staticEquivalents = generateStaticEquivalentsForBaseRequestOptions();
     List<MethodAndStaticVar> methodsForExtensions =
         generateMethodsForExtensions(glideExtensionClassNames);

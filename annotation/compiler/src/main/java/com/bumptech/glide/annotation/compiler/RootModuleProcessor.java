@@ -20,7 +20,6 @@ import javax.lang.model.element.TypeElement;
  * {@link com.bumptech.glide.request.BaseRequestOptions} classes.
  */
 final class RootModuleProcessor {
-  private static final String GENERATED_ROOT_MODULE_PACKAGE_NAME = "com.bumptech.glide";
   private static final String COMPILER_PACKAGE_NAME =
       GlideAnnotationProcessor.class.getPackage().getName();
 
@@ -69,7 +68,8 @@ final class RootModuleProcessor {
     if (rootGlideModules.isEmpty()) {
       return false;
     }
-    processorUtil.debugLog("Processing root module: " + rootGlideModules.iterator().next());
+    TypeElement rootModule = rootGlideModules.get(0);
+    processorUtil.debugLog("Processing root module: " + rootModule);
     // If this package is null, it means there are no classes with this package name. One way this
     // could happen is if we process an annotation and reach this point without writing something
     // to the package. We do not error check here because that shouldn't happen with the
@@ -78,29 +78,35 @@ final class RootModuleProcessor {
         processingEnv.getElementUtils().getPackageElement(COMPILER_PACKAGE_NAME);
     FoundIndexedClassNames indexedClassNames = getIndexedClassNames(glideGenPackage);
 
-    TypeElement rootModule = rootGlideModules.get(0);
+    // Write all generated code to the package containing the RootGlideModule. Doing so fixes
+    // classpath collisions if more than one Application containing a RootGlideModule is included
+    // in a project.
+    String generatedCodePackageName = rootModule.getEnclosingElement().toString();
 
     TypeSpec generatedRequestOptions = null;
     if (!indexedClassNames.extensions.isEmpty()) {
       generatedRequestOptions =
-          requestOptionsGenerator.generate(indexedClassNames.extensions);
-      writeRequestOptions(generatedRequestOptions);
+          requestOptionsGenerator.generate(generatedCodePackageName, indexedClassNames.extensions);
+      writeRequestOptions(generatedCodePackageName, generatedRequestOptions);
     }
 
     TypeSpec generatedRequestBuilder =
-        requestBuilderGenerator.generate(generatedRequestOptions);
-    writeRequestBuilder(generatedRequestBuilder);
+        requestBuilderGenerator.generate(generatedCodePackageName, generatedRequestOptions);
+    writeRequestBuilder(generatedCodePackageName, generatedRequestBuilder);
 
     TypeSpec requestManager =
         requestManagerGenerator.generate(
-            generatedRequestOptions, generatedRequestBuilder, indexedClassNames.extensions);
-    writeRequestManager(requestManager);
+            generatedCodePackageName, generatedRequestOptions, generatedRequestBuilder,
+            indexedClassNames.extensions);
+    writeRequestManager(generatedCodePackageName, requestManager);
 
-    TypeSpec requestManagerFactory = requestManagerFactoryGenerator.generate(requestManager);
+    TypeSpec requestManagerFactory =
+        requestManagerFactoryGenerator.generate(generatedCodePackageName, requestManager);
     writeRequestManagerFactory(requestManagerFactory);
 
-    TypeSpec glide = glideGenerator.generate(getGlideName(rootModule), requestManager);
-    writeGlide(glide);
+    TypeSpec glide =
+        glideGenerator.generate(generatedCodePackageName, getGlideName(rootModule), requestManager);
+    writeGlide(generatedCodePackageName, glide);
 
     TypeSpec generatedRootGlideModule =
         rootModuleGenerator.generate(rootModule, indexedClassNames.glideModules);
@@ -134,33 +140,32 @@ final class RootModuleProcessor {
     return new FoundIndexedClassNames(glideModules, extensions);
   }
 
-  private void writeGlide(TypeSpec glide) {
-    processorUtil.writeClass(GlideGenerator.GENERATED_GLIDE_PACKAGE_NAME, glide);
+  private void writeGlide(String packageName, TypeSpec glide) {
+    processorUtil.writeClass(packageName, glide);
   }
 
-  private void writeRequestManager(TypeSpec requestManager) {
-    processorUtil.writeClass(
-        RequestManagerGenerator.GENERATED_REQUEST_MANAGER_PACKAGE_NAME, requestManager);
+  private void writeRequestManager(String packageName, TypeSpec requestManager) {
+    processorUtil.writeClass(packageName, requestManager);
   }
 
+  // We dont' care about collisions in IDEs since this class isn't an API class.
   private void writeRequestManagerFactory(TypeSpec requestManagerFactory) {
     processorUtil.writeClass(
-        RequestManagerFactoryGenerator.GENERATED_REQUEST_MANAGER_FACTORY_PACKAGE_NAME,
-        requestManagerFactory);
+        RootModuleGenerator.GENERATED_ROOT_MODULE_PACKAGE_NAME, requestManagerFactory);
   }
 
+  // The root module we generate subclasses a package private class. We don't care about classpath
+  // collisions in IDEs since this class isn't an API class.
   private void writeRootModule(TypeSpec rootModule) {
-    processorUtil.writeClass(GENERATED_ROOT_MODULE_PACKAGE_NAME, rootModule);
+    processorUtil.writeClass(RootModuleGenerator.GENERATED_ROOT_MODULE_PACKAGE_NAME, rootModule);
   }
 
-  private void writeRequestOptions(TypeSpec requestOptions) {
-    processorUtil.writeClass(RequestOptionsGenerator.GENERATED_REQUEST_OPTIONS_PACKAGE_NAME,
-        requestOptions);
+  private void writeRequestOptions(String packageName, TypeSpec requestOptions) {
+    processorUtil.writeClass(packageName, requestOptions);
   }
 
-  private void writeRequestBuilder(TypeSpec requestBuilder) {
-    processorUtil.writeClass(
-        RequestBuilderGenerator.GENERATED_REQUEST_BUILDER_PACKAGE_NAME, requestBuilder);
+  private void writeRequestBuilder(String packageName, TypeSpec requestBuilder) {
+    processorUtil.writeClass(packageName, requestBuilder);
   }
 
   private static final class FoundIndexedClassNames {

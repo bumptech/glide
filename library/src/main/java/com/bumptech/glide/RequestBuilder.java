@@ -36,7 +36,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private static final TransitionOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
       new GenericTransitionOptions<Object>();
   // Used in generated subclasses
-  static final BaseRequestOptions<?> DOWNLOAD_ONLY_OPTIONS =
+  protected static final BaseRequestOptions<?> DOWNLOAD_ONLY_OPTIONS =
       new RequestOptions().diskCacheStrategy(DiskCacheStrategy.DATA).priority(Priority.LOW)
           .skipMemoryCache(true);
 
@@ -44,8 +44,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private final RequestManager requestManager;
   private final Class<TranscodeType> transcodeClass;
   private final BaseRequestOptions<?> defaultRequestOptions;
+  private final Glide glide;
 
-  @NonNull BaseRequestOptions<?> requestOptions;
+  @NonNull protected BaseRequestOptions<?> requestOptions;
   @SuppressWarnings("unchecked")
   private TransitionOptions<?, ? super TranscodeType> transitionOptions =
       (TransitionOptions<?, ? super TranscodeType>) DEFAULT_ANIMATION_OPTIONS;
@@ -59,18 +60,18 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private boolean isModelSet;
   private boolean isThumbnailBuilt;
 
-  RequestBuilder(GlideContext context, RequestManager requestManager,
+  protected RequestBuilder(Glide glide, RequestManager requestManager,
       Class<TranscodeType> transcodeClass) {
+    this.glide = glide;
     this.requestManager = requestManager;
-    this.context = Preconditions.checkNotNull(context);
+    this.context = glide.getGlideContext();
     this.transcodeClass = transcodeClass;
-
     this.defaultRequestOptions = requestManager.getDefaultRequestOptions();
     this.requestOptions = defaultRequestOptions;
   }
 
   protected RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
-    this(other.context, other.requestManager, transcodeClass);
+    this(other.glide, other.requestManager, transcodeClass);
     model = other.model;
     isModelSet = other.isModelSet;
     requestOptions = other.requestOptions;
@@ -89,7 +90,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     return this;
   }
 
-  BaseRequestOptions<?> getMutableOptions() {
+  protected BaseRequestOptions<?> getMutableOptions() {
     return defaultRequestOptions == this.requestOptions
         ? this.requestOptions.clone() : this.requestOptions;
   }
@@ -545,7 +546,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     return getDownloadOnlyRequest().submit(width, height);
   }
 
-  RequestBuilder<File> getDownloadOnlyRequest() {
+  protected RequestBuilder<File> getDownloadOnlyRequest() {
     return new RequestBuilder<>(File.class, this).apply(DOWNLOAD_ONLY_OPTIONS);
   }
 

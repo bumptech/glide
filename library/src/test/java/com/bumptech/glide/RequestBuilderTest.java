@@ -13,6 +13,7 @@ import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.BackgroundUtil;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,10 +29,17 @@ import org.robolectric.annotation.Config;
 public class RequestBuilderTest {
   @Mock GlideContext glideContext;
   @Mock RequestManager requestManager;
+  private Glide glide;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
+    glide = Glide.get(RuntimeEnvironment.application);
+  }
+
+  @After
+  public void tearDown() {
+    Glide.tearDown();
   }
 
   @Test(expected = NullPointerException.class)
@@ -109,7 +117,7 @@ public class RequestBuilderTest {
     when(glideContext.getDefaultRequestOptions()).thenReturn(new RequestOptions());
     when(requestManager.getDefaultRequestOptions())
         .thenReturn((BaseRequestOptions) new RequestOptions());
-    return new RequestBuilder<>(glideContext, requestManager, Object.class)
+    return new RequestBuilder<>(glide, requestManager, Object.class)
         .load((Object) null);
   }
 }
