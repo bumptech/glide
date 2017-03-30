@@ -93,6 +93,10 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     urlConnection.setUseCaches(false);
     urlConnection.setDoInput(true);
 
+    // Stop the urlConnection instance of HttpUrlConnection from following redirects so that
+    // redirects will be handled by recursive calls to this method, loadDataWithRedirects.
+    urlConnection.setInstanceFollowRedirects(false);
+
     // Connect explicitly to avoid errors in decoders if connection fails.
     urlConnection.connect();
     if (isCancelled) {
