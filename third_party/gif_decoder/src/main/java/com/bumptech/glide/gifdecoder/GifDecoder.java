@@ -72,6 +72,12 @@ public class GifDecoder {
      * Unable to fully decode the current frame.
      */
     public static final int STATUS_PARTIAL_DECODE = 3;
+
+    /**
+     * The total iteration count which means repeat forever.
+     */
+    public static final int TOTAL_ITERATION_COUNT_FOREVER = 0;
+
     /**
      * max decoder pixel stack size.
      */
@@ -238,29 +244,65 @@ public class GifDecoder {
     }
 
     /**
-     * Gets the "Netscape" iteration count, if any. A count of 0 means repeat indefinitely.
+     * Gets the "Netscape" loop count, if any. A count of 0 means repeat indefinitely.
      *
-     * @deprecated Use {@link #getNetscapeIterationCount()} instead.
-     *             This method cannot distinguish whether the iteration count is 1 or doesn't exist.
-     * @return iteration count if one was specified, else 1.
+     * @deprecated Use {@link #getNetscapeLoopCount()} instead.
+     *             This method cannot distinguish whether the loop count is 1 or doesn't exist.
+     * @return loop count if one was specified, else 1.
      */
     @Deprecated
     public int getLoopCount() {
-        if (header.loopCount == GifHeader.NETSCAPE_ITERATION_COUNT_DOES_NOT_EXIST) {
+        if (header.loopCount == GifHeader.NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST) {
             return 1;
         }
         return header.loopCount;
     }
 
     /**
-     * Gets the "Netscape" iteration count, if any. A count of 0 ({@link GifHeader#NETSCAPE_ITERATION_COUNT_FOREVER})
+     * Gets the "Netscape" loop count, if any. A count of 0 ({@link GifHeader#NETSCAPE_LOOP_COUNT_FOREVER})
      * means repeat indefinitely. It must not be a negative value.
+     * <br>
+     * Use {@link #getTotalIterationCount()} to know how many times the animation sequence should be displayed.
      *
-     * @return iteration count if one was specified,
-     *         else -1 ({@link GifHeader#NETSCAPE_ITERATION_COUNT_DOES_NOT_EXIST}).
+     * @return loop count if one was specified,
+     *         else -1 ({@link GifHeader#NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST}).
      */
-    public int getNetscapeIterationCount() {
+    public int getNetscapeLoopCount() {
         return header.loopCount;
+    }
+
+    /**
+     * Gets the total count which represents how many times the animation sequence should be displayed.
+     * A count of 0 ({@link #TOTAL_ITERATION_COUNT_FOREVER}) means repeat indefinitely.
+     * It must not be a negative value.
+     * <p>
+     *     The total count is calculated as follows by using {@link #getNetscapeLoopCount()}.
+     *     This behavior is the same as most web browsers.
+     *     <table border='1'>
+     *         <tr class='TableSubHeadingColor'><th>{@code getNetscapeLoopCount()}</th>
+     *             <th>The total count</th></tr>
+     *         <tr><td>{@link GifHeader#NETSCAPE_LOOP_COUNT_FOREVER}</td>
+     *             <td>{@link #TOTAL_ITERATION_COUNT_FOREVER}</td></tr>
+     *         <tr><td>{@link GifHeader#NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST}</td>
+     *             <td>1</td></tr>
+     *         <tr><td>{@code n (n > 0)}</td>
+     *             <td>{@code n +1}</td></tr>
+     *     </table>
+     * </p>
+     *
+     * @see <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=592735#c5">Discussion about
+     *      the iteration count of animated GIFs (Chromium Issue 592735)</a>
+     *
+     * @return total iteration count calculated from "Netscape" loop count.
+     */
+    public int getTotalIterationCount() {
+        if (header.loopCount == GifHeader.NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST) {
+            return 1;
+        }
+        if (header.loopCount == GifHeader.NETSCAPE_LOOP_COUNT_FOREVER) {
+            return TOTAL_ITERATION_COUNT_FOREVER;
+        }
+        return header.loopCount + 1;
     }
 
     /**
