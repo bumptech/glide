@@ -18,7 +18,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.internal.ShadowExtractor;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowNotificationManager;
 
 @RunWith(RobolectricTestRunner.class)
@@ -37,7 +37,7 @@ public class NotificationTargetTest {
   public void setUp() {
     NotificationManager notificationManager = (NotificationManager) RuntimeEnvironment.application
         .getSystemService(Context.NOTIFICATION_SERVICE);
-    shadowManager = (UpdateShadowNotificationManager) ShadowExtractor.extract(notificationManager);
+    shadowManager = (UpdateShadowNotificationManager) Shadow.extract(notificationManager);
 
     remoteViews = mock(RemoteViews.class);
     viewId = 123;

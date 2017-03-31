@@ -41,7 +41,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.internal.ShadowExtractor;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowCanvas;
 
 @RunWith(RobolectricTestRunner.class)
@@ -94,7 +94,7 @@ public class GifDrawableTest {
     drawable.draw(canvas);
 
     BitmapTrackingShadowCanvas shadowCanvas =
-        (BitmapTrackingShadowCanvas) ShadowExtractor.extract(canvas);
+        (BitmapTrackingShadowCanvas) Shadow.extract(canvas);
     assertThat(shadowCanvas.getDrawnBitmaps()).containsExactly(firstFrame);
   }
 

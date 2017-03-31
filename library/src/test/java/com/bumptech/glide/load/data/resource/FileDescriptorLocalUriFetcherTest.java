@@ -24,7 +24,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.internal.ShadowExtractor;
+import org.robolectric.shadow.api.Shadow;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18, shadows = { ContentResolverShadow.class })
@@ -43,7 +43,7 @@ public class FileDescriptorLocalUriFetcherTest {
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();
-    ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
+    ContentResolverShadow shadow = (ContentResolverShadow) Shadow.extract(contentResolver);
 
     AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
     ParcelFileDescriptor parcelFileDescriptor = mock(ParcelFileDescriptor.class);
@@ -62,7 +62,7 @@ public class FileDescriptorLocalUriFetcherTest {
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();
-    ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
+    ContentResolverShadow shadow = (ContentResolverShadow) Shadow.extract(contentResolver);
     shadow.registerFileDescriptor(uri, null /*fileDescriptor*/);
 
     FileDescriptorLocalUriFetcher fetcher =

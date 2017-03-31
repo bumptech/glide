@@ -32,7 +32,7 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.internal.ShadowExtractor;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowDisplay;
 import org.robolectric.shadows.ShadowView;
 
@@ -50,9 +50,9 @@ public class ViewTargetTest {
     view = new View(RuntimeEnvironment.application);
     target = new TestViewTarget(view);
 
-    shadowView = (SizedShadowView) ShadowExtractor.extract(view);
+    shadowView = (SizedShadowView) Shadow.extract(view);
     shadowObserver =
-        (PreDrawShadowViewTreeObserver) ShadowExtractor.extract(view.getViewTreeObserver());
+        (PreDrawShadowViewTreeObserver) Shadow.extract(view.getViewTreeObserver());
   }
 
   @Test

@@ -22,7 +22,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.internal.ShadowExtractor;
+import org.robolectric.shadow.api.Shadow;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18, shadows = { ContentResolverShadow.class })
@@ -40,7 +40,7 @@ public class StreamLocalUriFetcherTest {
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();
-    ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
+    ContentResolverShadow shadow = (ContentResolverShadow) Shadow.extract(contentResolver);
     shadow.registerInputStream(uri, new ByteArrayInputStream(new byte[0]));
 
     StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context.getContentResolver(), uri);
@@ -54,7 +54,7 @@ public class StreamLocalUriFetcherTest {
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();
-    ContentResolverShadow shadow = (ContentResolverShadow) ShadowExtractor.extract(contentResolver);
+    ContentResolverShadow shadow = (ContentResolverShadow) Shadow.extract(contentResolver);
 
     shadow.registerInputStream(uri, null /*inputStream*/);
 

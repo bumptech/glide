@@ -77,8 +77,8 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
-import org.robolectric.internal.ShadowExtractor;
 import org.robolectric.res.builder.RobolectricPackageManager;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowBitmap;
 
 /**
@@ -578,7 +578,7 @@ public class GlideTest {
     }
     ContentResolver contentResolver = RuntimeEnvironment.application.getContentResolver();
     ShadowFileDescriptorContentResolver shadowContentResolver =
-        (ShadowFileDescriptorContentResolver) ShadowExtractor.extract(contentResolver);
+        (ShadowFileDescriptorContentResolver) Shadow.extract(contentResolver);
     shadowContentResolver.registerInputStream(uri, is);
 
     AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
