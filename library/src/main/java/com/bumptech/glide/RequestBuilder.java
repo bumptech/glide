@@ -401,7 +401,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
         case FIT_END:
           requestOptions.optionalFitCenter();
           break;
-        //$CASES-OMITTED$
+        case FIT_XY:
+          requestOptions.optionalCenterInside();
+          break;
+        case CENTER:
+        case MATRIX:
         default:
           // Do nothing.
       }
