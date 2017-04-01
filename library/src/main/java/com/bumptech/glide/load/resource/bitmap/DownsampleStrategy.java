@@ -62,9 +62,9 @@ public abstract class DownsampleStrategy {
   public static final DownsampleStrategy NONE = new None();
 
   /**
-   * Default strategy, currently {@link #AT_LEAST}.
+   * Default strategy, currently {@link #CENTER_OUTSIDE}.
    */
-  public static final DownsampleStrategy DEFAULT = AT_LEAST;
+  public static final DownsampleStrategy DEFAULT = CENTER_OUTSIDE;
 
   /**
    * Returns a float (0, +infinity) indicating a scale factor to apply to the source
