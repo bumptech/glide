@@ -110,23 +110,24 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
         source = getSourceFilesForVariantJar(variantName)
         source += getSourceFilesForVariantJavadoc(variantName)
 
-        classpath = files(getAndroidLibraryVariantsForJar(variantName).collect {
+        def classpathFiles = files(getAndroidLibraryVariantsForJar(variantName).collect {
             files(it.javaCompile.classpath.files, getAndroidJar(), getSupportJar())
         })
-        classpath += files(getAndroidLibraryVariantsForJavadoc(variantName).collect {
+        classpathFiles += files(getAndroidLibraryVariantsForJavadoc(variantName).collect {
             files(it.javaCompile.classpath.files, getAndroidJar(), getSupportJar())
         })
-        classpath += getInternalJavaProjectsForJavadoc().collect {
-            it.sourceSets.main.compileClasspath
-        }
-        classpath += getInternalJavaProjectsForJar().collect {
-            it.sourceSets.main.compileClasspath
-        }
+        classpathFiles += (getInternalJavaProjectsForJavadoc().collect {
+            it.sourceSets.main.compileClasspath.files
+        }.flatten())
+        classpathFiles += (getInternalJavaProjectsForJar().collect {
+            it.sourceSets.main.compileClasspath.files
+        }.flatten())
         // Finds dependencies of Android packages that would otherwise be ignored (Volley in
         // particular)
-        classpath += getInternalAndroidProjectsForJavadoc().collect {
+        classpathFiles += getInternalAndroidProjectsForJavadoc().collect {
             files("${it.projectDir}/build/intermediates/classes/release")
         }
+        classpath = files(classpathFiles)
 
         options {
             links("http://docs.oracle.com/javase/7/docs/api/")

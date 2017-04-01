@@ -82,12 +82,8 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
 
   @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   private InputStream openContactPhotoInputStream(ContentResolver contentResolver, Uri contactUri) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-      return ContactsContract.Contacts.openContactPhotoInputStream(contentResolver, contactUri);
-    } else {
-      return ContactsContract.Contacts.openContactPhotoInputStream(contentResolver, contactUri,
-          true /*preferHighres*/);
-    }
+    return ContactsContract.Contacts.openContactPhotoInputStream(contentResolver, contactUri,
+        true /*preferHighres*/);
   }
 
   @Override
