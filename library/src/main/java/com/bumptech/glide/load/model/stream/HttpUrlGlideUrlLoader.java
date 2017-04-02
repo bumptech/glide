@@ -16,7 +16,7 @@ import java.io.InputStream;
  * An {@link com.bumptech.glide.load.model.ModelLoader} for translating {@link com.bumptech.glide.load.model.GlideUrl}
  * (http/https URLS) into {@link java.io.InputStream} data.
  */
-public class HttpUrlGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
+public class HttpUrlGlideUrlLoader implements StreamModelLoader<GlideUrl> {
 
     private final ModelCache<GlideUrl, GlideUrl> modelCache;
 

@@ -17,7 +17,7 @@ import java.io.InputStream;
  * it falls back to the wrapped {@link com.bumptech.glide.load.model.ModelLoader} to load the
  * {@link java.io.InputStream} data.
  */
-public class MediaStoreStreamLoader implements ModelLoader<Uri, InputStream> {
+public class MediaStoreStreamLoader implements StreamModelLoader<Uri> {
     private final Context context;
     private final ModelLoader<Uri, InputStream> uriLoader;
 
