@@ -7,6 +7,7 @@ import com.bumptech.glide.load.model.GenericLoaderFactory;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
+import com.bumptech.glide.load.model.stream.StreamModelLoader;
 import com.squareup.okhttp.OkHttpClient;
 
 import java.io.InputStream;
@@ -14,7 +15,7 @@ import java.io.InputStream;
 /**
  * A simple model loader for fetching media over http/https using OkHttp.
  */
-public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
+public class OkHttpUrlLoader implements StreamModelLoader<GlideUrl> {
 
     /**
      * The default factory for {@link OkHttpUrlLoader}s.
