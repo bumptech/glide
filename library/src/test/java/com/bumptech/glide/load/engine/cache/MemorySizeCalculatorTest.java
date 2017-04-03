@@ -20,7 +20,7 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.internal.ShadowExtractor;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowActivityManager;
 
 @RunWith(RobolectricTestRunner.class)
@@ -139,7 +139,7 @@ public class MemorySizeCalculatorTest {
   @Test
   public void testByteArrayPoolSize_withLowRamDevice_isHalfTheSpecifiedBytes() {
     LowRamActivityManager activityManager =
-        (LowRamActivityManager) ShadowExtractor.extract(harness.activityManager);
+        (LowRamActivityManager) Shadow.extract(harness.activityManager);
     Util.setSdkVersionInt(19);
     activityManager.setMemoryClass(getLargeEnoughMemoryClass());
     activityManager.setIsLowRam(true);
