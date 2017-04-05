@@ -22,7 +22,6 @@ import com.squareup.javapoet.WildcardTypeName;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -102,7 +101,7 @@ final class RequestBuilderGenerator {
    */
   private static final String TRANSCODE_TYPE_NAME = "TranscodeType";
   /** A set of method names to avoid overriding from BaseRequestOptions. */
-  private static final Set<String> EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS =
+  private static final ImmutableSet<String> EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS =
       ImmutableSet.of("clone", "apply", "autoLock", "lock");
 
   private final ProcessingEnvironment processingEnv;
