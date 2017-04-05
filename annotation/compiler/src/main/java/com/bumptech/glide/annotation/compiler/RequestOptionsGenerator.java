@@ -305,7 +305,7 @@ final class RequestOptionsGenerator {
           "if ($T.$N == null)", glideOptionsName, staticVariableName)
           .addStatement("$T.$N =\n" + createNewOptionAndCall + ".$N",
               glideOptionsName, staticVariableName, glideOptionsName, instanceMethodName,
-              "autoLock()")
+              "autoClone()")
           .endControlFlow()
           .addStatement("return $T.$N", glideOptionsName, staticVariableName);
     } else {

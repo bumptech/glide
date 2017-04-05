@@ -86,12 +86,12 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
   public static RequestOptions skipMemoryCacheOf(boolean skipMemoryCache) {
     if (skipMemoryCache) {
       if (skipMemoryCacheTrueOptions == null) {
-        skipMemoryCacheTrueOptions = new RequestOptions().skipMemoryCache(true).autoLock();
+        skipMemoryCacheTrueOptions = new RequestOptions().skipMemoryCache(true).autoClone();
       }
       return skipMemoryCacheTrueOptions;
     } else {
       if (skipMemoryCacheFalseOptions == null) {
-        skipMemoryCacheFalseOptions = new RequestOptions().skipMemoryCache(false).autoLock();
+        skipMemoryCacheFalseOptions = new RequestOptions().skipMemoryCache(false).autoClone();
       }
       return skipMemoryCacheFalseOptions;
     }
@@ -136,7 +136,7 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
     if (fitCenterOptions == null) {
       fitCenterOptions = new RequestOptions()
           .fitCenter()
-          .autoLock();
+          .autoClone();
     }
     return fitCenterOptions;
   }
@@ -158,7 +158,7 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
     if (centerInsideOptions == null) {
       centerInsideOptions = new RequestOptions()
               .centerInside()
-              .autoLock();
+              .autoClone();
     }
     return centerInsideOptions;
   }
@@ -180,7 +180,7 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
     if (centerCropOptions == null) {
       centerCropOptions = new RequestOptions()
           .centerCrop()
-          .autoLock();
+          .autoClone();
     }
     return centerCropOptions;
   }
@@ -202,7 +202,7 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
     if (circleCropOptions == null) {
       circleCropOptions = new RequestOptions()
           .circleCrop()
-          .autoLock();
+          .autoClone();
     }
     return circleCropOptions;
   }
@@ -232,7 +232,7 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
     if (noTransformOptions == null) {
       noTransformOptions = new RequestOptions()
           .dontTransform()
-          .autoLock();
+          .autoClone();
     }
     return noTransformOptions;
   }
@@ -297,7 +297,7 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
     if (noAnimationOptions == null) {
       noAnimationOptions = new RequestOptions()
           .dontAnimate()
-          .autoLock();
+          .autoClone();
     }
     return noAnimationOptions;
   }
