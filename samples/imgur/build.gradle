@@ -1,0 +1,57 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION
+
+    defaultConfig {
+        applicationId "com.bumptech.glide.samples.imgur"
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile project(':library')
+    annotationProcessor project(':annotation:compiler')
+
+    compile "com.google.dagger:dagger:${DAGGER_VERSION}"
+    annotationProcessor("com.google.dagger:dagger-compiler:${DAGGER_VERSION}", {
+        exclude group: 'com.google.code.findbugs', module: "jsr305"
+    })
+    compile("com.google.dagger:dagger-android:${DAGGER_VERSION}", {
+        exclude group: 'com.google.code.findbugs', module: "jsr305"
+    })
+
+    compile "com.squareup.okhttp3:okhttp:${OK_HTTP_VERSION}"
+    compile 'com.squareup.retrofit2:retrofit:2.2.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.2.0'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.2.0'
+
+    compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'io.reactivex:rxjava:1.2.9'
+
+    compile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    compile "com.android.support:cardview-v7:${ANDROID_SUPPORT_VERSION}"
+    compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+}
+
+task run(type: Exec, dependsOn: 'installDebug') {
+    description 'Installs the APK and runs the main activity: "gradlew :samples:???:run"'
+    commandLine "${android.sdkDirectory}/platform-tools/adb", 'shell', 'am', 'start', '-n', 'com.bumptech.glide.samples.card/.MainActivity'
+}

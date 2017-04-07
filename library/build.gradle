@@ -69,6 +69,7 @@ afterEvaluate {
     if (tasks.findByName("assembleDebug") == null) {
         return
     }
+
     task findbugs(type: FindBugs, dependsOn: assembleDebug) {
 
         description 'Run findbugs'
