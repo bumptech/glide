@@ -69,7 +69,7 @@ public class GifHeaderParserTest {
         byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_0.gif");
         parser.setData(data);
         GifHeader header = parser.parseHeader();
-        assertEquals(GifHeader.NETSCAPE_ITERATION_COUNT_FOREVER, header.loopCount);
+        assertEquals(GifHeader.NETSCAPE_LOOP_COUNT_FOREVER, header.loopCount);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class GifHeaderParserTest {
         byte[] data = TestUtil.resourceToBytes(getClass(), "gif_without_netscape_iteration.gif");
         parser.setData(data);
         GifHeader header = parser.parseHeader();
-        assertEquals(GifHeader.NETSCAPE_ITERATION_COUNT_DOES_NOT_EXIST, header.loopCount);
+        assertEquals(GifHeader.NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST, header.loopCount);
     }
 
     @Test

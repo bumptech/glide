@@ -493,29 +493,26 @@ public class GifDrawableTest {
     }
 
     @Test
-    public void testUsesDecoderNetscapeLoopCountIfLoopCountIsLoopIntrinsic() {
+    public void testUsesDecoderTotalIterationCountIfLoopCountIsLoopIntrinsic() {
         final int frameCount = 3;
         final int loopCount = 2;
-        when(gifDecoder.getNetscapeIterationCount()).thenReturn(loopCount);
+        when(gifDecoder.getTotalIterationCount()).thenReturn(loopCount);
         when(gifDecoder.getFrameCount()).thenReturn(frameCount);
         drawable.setLoopCount(GlideDrawable.LOOP_INTRINSIC);
         drawable.setVisible(true, true);
         drawable.start();
 
-        // According to
-        // https://bugs.chromium.org/p/chromium/issues/detail?id=592735#c5,
-        // the image should be displayed for a total of ((netscape loop count) + 1) loops.
-        runLoops(loopCount + 1, frameCount);
+        runLoops(loopCount, frameCount);
 
-        verifyRanLoops(loopCount + 1, frameCount);
+        verifyRanLoops(loopCount, frameCount);
         assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
     }
 
     @Test
-    public void testLoopsForeverIfLoopCountIsLoopIntrinsicAndNetscapeLoopCountIsZero() {
+    public void testLoopsForeverIfLoopCountIsLoopIntrinsicAndTotalIterationCountIsForever() {
         final int frameCount = 3;
         final int loopCount = 40;
-        when(gifDecoder.getNetscapeIterationCount()).thenReturn(GifHeader.NETSCAPE_ITERATION_COUNT_FOREVER);
+        when(gifDecoder.getTotalIterationCount()).thenReturn(GifDecoder.TOTAL_ITERATION_COUNT_FOREVER);
         when(gifDecoder.getFrameCount()).thenReturn(frameCount);
         drawable.setLoopCount(GlideDrawable.LOOP_INTRINSIC);
         drawable.setVisible(true, true);
@@ -525,22 +522,6 @@ public class GifDrawableTest {
 
         verifyRanLoops(loopCount, frameCount);
         assertTrue("drawable should be still running", drawable.isRunning());
-    }
-
-    @Test
-    public void testLoopsOnceIfLoopCountIsLoopIntrinsicAndNetscapeLoopCountDoesntExist() {
-        final int frameCount = 3;
-        final int loopCount = 1;
-        when(gifDecoder.getNetscapeIterationCount()).thenReturn(GifHeader.NETSCAPE_ITERATION_COUNT_DOES_NOT_EXIST);
-        when(gifDecoder.getFrameCount()).thenReturn(frameCount);
-        drawable.setLoopCount(GlideDrawable.LOOP_INTRINSIC);
-        drawable.setVisible(true, true);
-        drawable.start();
-
-        runLoops(loopCount, frameCount);
-
-        verifyRanLoops(loopCount, frameCount);
-        assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
     }
 
     @Test

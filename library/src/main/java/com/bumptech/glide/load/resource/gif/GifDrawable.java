@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
+import static com.bumptech.glide.gifdecoder.GifDecoder.TOTAL_ITERATION_COUNT_FOREVER;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -309,23 +311,8 @@ public class GifDrawable extends GlideDrawable implements GifFrameLoader.FrameCa
         }
 
         if (loopCount == LOOP_INTRINSIC) {
-            int netscapeIterationCount = decoder.getNetscapeIterationCount();
-            switch (netscapeIterationCount) {
-                case GifHeader.NETSCAPE_ITERATION_COUNT_DOES_NOT_EXIST:
-                    maxLoopCount = 1;
-                    break;
-                case GifHeader.NETSCAPE_ITERATION_COUNT_FOREVER:
-                    maxLoopCount = LOOP_FOREVER;
-                    break;
-                default:
-                    // According to
-                    // https://bugs.chromium.org/p/chromium/issues/detail?id=592735#c5,
-                    // if "Netscape" iteration count is n,
-                    // the image should be displayed for a total of (n + 1) loops
-                    // because most web browsers behave like this.
-                    maxLoopCount = netscapeIterationCount + 1;
-                    break;
-            }
+            int intrinsicCount = decoder.getTotalIterationCount();
+            maxLoopCount = (intrinsicCount == TOTAL_ITERATION_COUNT_FOREVER) ? LOOP_FOREVER : intrinsicCount;
         } else {
             maxLoopCount = loopCount;
         }
