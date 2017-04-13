@@ -1117,22 +1117,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    *
    * <p>Auto clone is not retained by cloned objects returned from mutations. The cloned objects
    * are mutable and are not locked.
-   *
-   * @deprecated Use {@link #autoClone()} instead.
-   */
-  @GlideOption(skipStaticMethod = true)
-  @Deprecated
-  public final CHILD autoLock() {
-    return autoClone();
-  }
-
-  /**
-   * Similar to {@link #lock()} except that mutations cause a {@link #clone()} operation to happen
-   * before the mutation resulting in all methods returning a new Object and leaving the original
-   * locked object unmodified.
-   *
-   * <p>Auto clone is not retained by cloned objects returned from mutations. The cloned objects
-   * are mutable and are not locked.
    */
   public final CHILD autoClone() {
     if (isLocked && !isAutoCloneEnabled) {
