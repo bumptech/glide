@@ -1,6 +1,5 @@
 package com.bumptech.glide.samples.gallery;
 
-import static com.bumptech.glide.request.RequestOptions.fitCenterTransform;
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 
 import android.content.Context;
@@ -18,6 +17,7 @@ import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.signature.MediaStoreSignature;
 import java.util.Collections;
 import java.util.List;
@@ -37,9 +37,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
 
   RecyclerAdapter(Context context, List<MediaStoreData> data, RequestManager requestManager) {
     this.data = data;
-    requestBuilder = requestManager
-        .asDrawable()
-        .apply(fitCenterTransform(context));
+    requestBuilder = requestManager.asDrawable().apply(RequestOptions.fitCenterTransform());
 
     setHasStableIds(true);
 

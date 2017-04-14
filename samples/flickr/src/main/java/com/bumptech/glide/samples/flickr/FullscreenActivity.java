@@ -1,6 +1,5 @@
 package com.bumptech.glide.samples.flickr;
 
-
 import static com.bumptech.glide.request.RequestOptions.fitCenterTransform;
 
 import android.content.Context;
@@ -30,9 +29,6 @@ public class FullscreenActivity extends FragmentActivity {
     ImageView fullscreenView = (ImageView) findViewById(R.id.fullscreen_view);
     Photo photo = getIntent().getParcelableExtra(ARG_PHOTO);
 
-    Glide.with(this)
-        .load(photo)
-        .apply(fitCenterTransform(this))
-        .into(fullscreenView);
+    Glide.with(this).load(photo).apply(fitCenterTransform()).into(fullscreenView);
   }
 }
