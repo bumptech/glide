@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.request.Request;
 
 /**
@@ -22,27 +23,28 @@ public abstract class BaseTarget<Z> implements Target<Z> {
   private Request request;
 
   @Override
-  public void setRequest(Request request) {
+  public void setRequest(@Nullable Request request) {
     this.request = request;
   }
 
   @Override
+  @Nullable
   public Request getRequest() {
     return request;
   }
 
   @Override
-  public void onLoadCleared(Drawable placeholder) {
+  public void onLoadCleared(@Nullable Drawable placeholder) {
     // Do nothing.
   }
 
   @Override
-  public void onLoadStarted(Drawable placeholder) {
+  public void onLoadStarted(@Nullable Drawable placeholder) {
     // Do nothing.
   }
 
   @Override
-  public void onLoadFailed(Drawable errorDrawable) {
+  public void onLoadFailed(@Nullable Drawable errorDrawable) {
     // Do nothing.
   }
 
