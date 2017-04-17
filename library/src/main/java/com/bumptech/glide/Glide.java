@@ -187,7 +187,7 @@ public class Glide implements ComponentCallbacks2 {
         GlideModule current = iterator.next();
         if (excludedModuleClasses.contains(current.getClass())) {
           if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "RootGlideModule excludes manifest GlideModule: " + current);
+            Log.d(TAG, "RootGlideModule excludes manifest GlideModule: " + current.getClass());
           }
           iterator.remove();
         }
