@@ -25,6 +25,32 @@ Glide.with(fragment).clear(imageView);
 
 Although it's good practice to clear loads you no longer need, you're not required to do so. In fact, Glide will automatically clear the load and recycle any resources used by the load when the Activity or Fragment you pass in to [``Glide.with()``][1] is destroyed.
 
+### Applications
+
+Applications can add an appropriately annotated [``RootGlideModule``][6] implementation to generate a fluent API that inlines most options, including those defined in integration libraries:
+
+```java
+package com.example.myapp;
+
+import com.bumptech.glide.annotation.GlideModule;
+import com.bumptech.glide.module.RootGlideModule;
+
+@GlideModule
+public final class MyAppGlideModule extends RootGlideModule {}
+```
+
+The API is generated in the same package as the [``RootGlideModule``][6] and is named ``GlideApp`` by default. Applications can use the API by starting all loads with ``GlideApp.with()`` instead of ``Glide.with()``:
+
+```java
+GlideApp.with(fragment)
+   .placeholder(placeholder)
+   .fitCenter()
+   .load(myUrl)
+   .into(imageView);
+```
+
+See Glide's generated API page for more information.
+
 ### ListView and RecyclerView
 
 Loading images in a ListView or RecyclerView uses the same load line as if you were loading in to a single View. Glide handles View re-use and request cancellation automatically:
@@ -68,3 +94,4 @@ Although the examples we've shown here are for RecyclerView, the same principles
 [3]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/BaseRequestOptions.html#fallback(int)
 [4]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/RequestManager.html#clear(com.bumptech.glide.request.target.Target)
 [5]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/request/target/Target.html
+[6]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/RootGlideModule.html

@@ -3,7 +3,7 @@ layout: page
 title: "Debugging"
 category: doc
 date: 2017-01-09 07:14:59
-order: 9
+order: 10 
 disqus: 1
 ---
 * TOC
