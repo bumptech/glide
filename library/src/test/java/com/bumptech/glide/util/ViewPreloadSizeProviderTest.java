@@ -46,6 +46,7 @@ public class ViewPreloadSizeProviderTest {
     int height = 456;
     provider.onSizeReady(width, height);
     view.setLayoutParams(new ViewGroup.LayoutParams(1, 1));
+    view.layout(0, 0, 1, 1);
 
     provider.setView(view);
 
@@ -58,6 +59,7 @@ public class ViewPreloadSizeProviderTest {
     int width = 123;
     int height = 456;
     view.setLayoutParams(new ViewGroup.LayoutParams(width, height));
+    view.layout(0, 0, width, height);
 
     provider.setView(view);
 
@@ -81,6 +83,7 @@ public class ViewPreloadSizeProviderTest {
     int width = 100;
     int height = 200;
     view.setLayoutParams(new ViewGroup.LayoutParams(width, height));
+    view.layout(0, 0, width, height);
 
     provider = new ViewPreloadSizeProvider<>(view);
 

@@ -15,17 +15,22 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.tests.Util;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
@@ -37,22 +42,31 @@ import org.robolectric.shadows.ShadowDisplay;
 import org.robolectric.shadows.ShadowView;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18, shadows = { ViewTargetTest.SizedShadowView.class,
+@Config(manifest = Config.NONE, sdk = 19, shadows = { ViewTargetTest.SizedShadowView.class,
     ViewTargetTest.PreDrawShadowViewTreeObserver.class })
 public class ViewTargetTest {
   private View view;
   private ViewTarget<View, Object> target;
   private SizedShadowView shadowView;
   private PreDrawShadowViewTreeObserver shadowObserver;
+  @Mock private SizeReadyCallback cb;
+  @Mock private Request request;
+  private int sdkVersion;
 
   @Before
   public void setUp() {
+    sdkVersion = Build.VERSION.SDK_INT;
+    MockitoAnnotations.initMocks(this);
     view = new View(RuntimeEnvironment.application);
     target = new TestViewTarget(view);
 
-    shadowView = (SizedShadowView) Shadow.extract(view);
-    shadowObserver =
-        (PreDrawShadowViewTreeObserver) Shadow.extract(view.getViewTreeObserver());
+    shadowView = Shadow.extract(view);
+    shadowObserver = Shadow.extract(view.getViewTreeObserver());
+  }
+
+  @After
+  public void tearDown() {
+    Util.setSdkVersionInt(sdkVersion);
   }
 
   @Test
@@ -73,8 +87,6 @@ public class ViewTargetTest {
 
   @Test
   public void testCanSetAndRetrieveRequest() {
-    Request request = mock(Request.class);
-
     target.setRequest(request);
 
     assertEquals(request, target.getRequest());
@@ -82,8 +94,6 @@ public class ViewTargetTest {
 
   @Test
   public void testRetrievesRequestFromPreviousTargetForView() {
-    Request request = mock(Request.class);
-
     target.setRequest(request);
 
     ViewTarget<View, Object> second = new TestViewTarget(view);
@@ -94,10 +104,11 @@ public class ViewTargetTest {
   @Test
   public void testSizeCallbackIsCalledSynchronouslyIfViewSizeSet() {
     int dimens = 333;
-    shadowView.setWidth(dimens);
-    shadowView.setHeight(dimens);
+    shadowView
+        .setWidth(dimens)
+        .setHeight(dimens)
+        .setIsLaidOut(true);
 
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     verify(cb).onSizeReady(eq(dimens), eq(dimens));
@@ -108,8 +119,8 @@ public class ViewTargetTest {
     int dimens = 444;
     LayoutParams layoutParams = new LayoutParams(dimens, dimens);
     view.setLayoutParams(layoutParams);
+    shadowView.setIsLaidOut(true);
 
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     verify(cb).onSizeReady(eq(dimens), eq(dimens));
@@ -141,11 +152,11 @@ public class ViewTargetTest {
     LayoutParams layoutParams =
         new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     view.setLayoutParams(layoutParams);
+    shadowView.setIsLaidOut(true);
 
     int width = 123;
     int height = 456;
     setDisplayDimens(width, height);
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     verify(cb).onSizeReady(eq(width), eq(height));
@@ -159,8 +170,8 @@ public class ViewTargetTest {
     int height = 100;
     LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, height);
     view.setLayoutParams(params);
+    shadowView.setIsLaidOut(true);
 
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     verify(cb).onSizeReady(eq(displayWidth), eq(height));
@@ -173,8 +184,8 @@ public class ViewTargetTest {
     int width = 100;
     LayoutParams params = new LayoutParams(width, LayoutParams.WRAP_CONTENT);
     view.setLayoutParams(params);
+    shadowView.setIsLaidOut(true);
 
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     verify(cb).onSizeReady(eq(width), eq(displayHeight));
@@ -188,7 +199,6 @@ public class ViewTargetTest {
     LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
     view.setLayoutParams(params);
 
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     verify(cb, never()).onSizeReady(anyInt(), anyInt());
@@ -209,7 +219,6 @@ public class ViewTargetTest {
     LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
     view.setLayoutParams(params);
 
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     verify(cb, never()).onSizeReady(anyInt(), anyInt());
@@ -226,7 +235,6 @@ public class ViewTargetTest {
     LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     view.setLayoutParams(params);
 
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     verify(cb, never()).onSizeReady(anyInt(), anyInt());
@@ -242,7 +250,6 @@ public class ViewTargetTest {
 
   @Test
   public void testSizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParams() {
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     int width = 12;
@@ -275,7 +282,6 @@ public class ViewTargetTest {
 
   @Test
   public void testDoesNotNotifyCallbackTwiceIfAddedTwice() {
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
     target.getSize(cb);
 
@@ -316,7 +322,6 @@ public class ViewTargetTest {
 
   @Test
   public void testSizeCallbackIsNotCalledPreDrawIfNoDimensSetOnPreDraw() {
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
     shadowObserver.fireOnPreDrawListeners();
 
@@ -326,7 +331,6 @@ public class ViewTargetTest {
 
   @Test
   public void testSizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParamsButLayoutParamsSetLater() {
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     int width = 689;
@@ -340,7 +344,6 @@ public class ViewTargetTest {
 
   @Test
   public void testCallbackIsNotCalledTwiceIfPreDrawFiresTwice() {
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     LayoutParams layoutParams = new LayoutParams(1234, 4123);
@@ -371,7 +374,6 @@ public class ViewTargetTest {
 
   @Test
   public void testDoesNotThrowOnPreDrawIfViewTreeObserverIsDead() {
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     target.getSize(cb);
 
     int width = 1;
@@ -391,13 +393,37 @@ public class ViewTargetTest {
 
   @Test
   public void testDecreasesDimensionsByViewPadding() {
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
     view.setLayoutParams(new LayoutParams(100, 100));
     view.setPadding(25, 25, 25, 25);
+    shadowView.setIsLaidOut(true);
 
     target.getSize(cb);
 
     verify(cb).onSizeReady(50, 50);
+  }
+
+  @Test
+  public void getSize_withValidWidthAndHeight_notLaidOut_doesNotCallSizeReady() {
+    shadowView
+        .setWidth(100)
+        .setHeight(100)
+        .setIsLaidOut(false);
+    target.getSize(cb);
+
+    verify(cb, never()).onSizeReady(anyInt(), anyInt());
+  }
+
+  @Test
+  public void getSize_withValidWidthAndHeight_preV19_layoutRequested_doesNotCallSizeReady() {
+    Util.setSdkVersionInt(18);
+    shadowView
+        .setWidth(100)
+        .setHeight(100)
+        .requestLayout();
+
+    target.getSize(cb);
+
+    verify(cb, never()).onSizeReady(anyInt(), anyInt());
   }
 
   @Implements(ViewTreeObserver.class)
@@ -449,13 +475,27 @@ public class ViewTargetTest {
   public static class SizedShadowView extends ShadowView {
     private int width;
     private int height;
+    private boolean isLaidOut;
+    private boolean isLayoutRequested;
 
-    public void setWidth(int width) {
+    public SizedShadowView setWidth(int width) {
       this.width = width;
+      return this;
     }
 
-    public void setHeight(int height) {
+    public SizedShadowView setHeight(int height) {
       this.height = height;
+      return this;
+    }
+
+    public SizedShadowView setIsLaidOut(boolean isLaidOut) {
+      this.isLaidOut = isLaidOut;
+      return this;
+    }
+
+    @Implementation
+    public void requestLayout() {
+      isLayoutRequested = true;
     }
 
     @Implementation
@@ -467,6 +507,17 @@ public class ViewTargetTest {
     public int getHeight() {
       return height;
     }
+
+    @Implementation
+    public boolean isLaidOut() {
+      return isLaidOut;
+    }
+
+    @Implementation
+    public boolean isLayoutRequested() {
+      return isLayoutRequested;
+    }
+
   }
 
   private static class TestViewTarget extends ViewTarget<View, Object> {

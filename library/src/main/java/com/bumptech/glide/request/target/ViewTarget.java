@@ -3,6 +3,7 @@ package com.bumptech.glide.request.target;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.util.Log;
@@ -202,7 +203,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     void getSize(SizeReadyCallback cb) {
       int currentWidth = getViewWidthOrParam();
       int currentHeight = getViewHeightOrParam();
-      if (isSizeValid(currentWidth) && isSizeValid(currentHeight)) {
+      if (isViewStateValid() && isSizeValid(currentWidth) && isSizeValid(currentHeight)) {
         int paddingAdjustedWidth = currentWidth == WindowManager.LayoutParams.WRAP_CONTENT
             ? currentWidth
             : currentWidth - ViewCompat.getPaddingStart(view) - ViewCompat.getPaddingEnd(view);
@@ -238,6 +239,13 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       }
       layoutListener = null;
       cbs.clear();
+    }
+
+    private boolean isViewStateValid() {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        return view.isLaidOut();
+      }
+      return !view.isLayoutRequested();
     }
 
     private int getViewHeightOrParam() {

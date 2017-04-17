@@ -110,6 +110,7 @@ public class GlideTest {
     target = mock(Target.class);
     imageView = new ImageView(RuntimeEnvironment.application);
     imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
+    imageView.layout(0, 0, 100, 100);
     doAnswer(new CallSizeReady()).when(target).getSize(isA(SizeReadyCallback.class));
 
     Handler bgHandler = mock(Handler.class);
