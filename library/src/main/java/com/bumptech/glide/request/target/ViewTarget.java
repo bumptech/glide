@@ -1,17 +1,12 @@
 package com.bumptech.glide.request.target;
 
-import android.content.Context;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.Nullable;
-import android.support.v4.view.ViewCompat;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
@@ -166,15 +161,14 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   }
 
   private static class SizeDeterminer {
-    // Some negative sizes (WRAP_CONTENT) are valid, 0 is never valid.
+    // Some negative sizes (Target.SIZE_ORIGINAL) are valid, 0 is never valid.
     private static final int PENDING_SIZE = 0;
     private final View view;
     private final List<SizeReadyCallback> cbs = new ArrayList<>();
 
     @Nullable private SizeDeterminerLayoutListener layoutListener;
-    @Nullable private Point displayDimens;
 
-    public SizeDeterminer(View view) {
+    SizeDeterminer(View view) {
       this.view = view;
     }
 
@@ -190,9 +184,9 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
         return;
       }
 
-      int currentWidth = getViewWidthOrParam();
-      int currentHeight = getViewHeightOrParam();
-      if (!isSizeValid(currentWidth) || !isSizeValid(currentHeight)) {
+      int currentWidth = getTargetWidth();
+      int currentHeight = getTargetHeight();
+      if (!isViewStateAndSizeValid(currentWidth, currentHeight)) {
         return;
       }
 
@@ -201,28 +195,22 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     }
 
     void getSize(SizeReadyCallback cb) {
-      int currentWidth = getViewWidthOrParam();
-      int currentHeight = getViewHeightOrParam();
-      if (isViewStateValid() && isSizeValid(currentWidth) && isSizeValid(currentHeight)) {
-        int paddingAdjustedWidth = currentWidth == WindowManager.LayoutParams.WRAP_CONTENT
-            ? currentWidth
-            : currentWidth - ViewCompat.getPaddingStart(view) - ViewCompat.getPaddingEnd(view);
-        int paddingAdjustedHeight = currentHeight == LayoutParams.WRAP_CONTENT
-            ? currentHeight
-            : currentHeight - view.getPaddingTop() - view.getPaddingBottom();
-        cb.onSizeReady(paddingAdjustedWidth, paddingAdjustedHeight);
-      } else {
-        // We want to notify callbacks in the order they were added and we only expect one or two
-        // callbacks to
-        // be added a time, so a List is a reasonable choice.
-        if (!cbs.contains(cb)) {
-          cbs.add(cb);
-        }
-        if (layoutListener == null) {
-          final ViewTreeObserver observer = view.getViewTreeObserver();
-          layoutListener = new SizeDeterminerLayoutListener(this);
-          observer.addOnPreDrawListener(layoutListener);
-        }
+      int currentWidth = getTargetWidth();
+      int currentHeight = getTargetHeight();
+      if (isViewStateAndSizeValid(currentWidth, currentHeight)) {
+        cb.onSizeReady(currentWidth, currentHeight);
+        return;
+      }
+
+      // We want to notify callbacks in the order they were added and we only expect one or two
+      // callbacks to be added a time, so a List is a reasonable choice.
+      if (!cbs.contains(cb)) {
+        cbs.add(cb);
+      }
+      if (layoutListener == null) {
+        ViewTreeObserver observer = view.getViewTreeObserver();
+        layoutListener = new SizeDeterminerLayoutListener(this);
+        observer.addOnPreDrawListener(layoutListener);
       }
     }
 
@@ -241,6 +229,10 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       cbs.clear();
     }
 
+    private boolean isViewStateAndSizeValid(int width, int height) {
+      return isViewStateValid() && isSizeValid(width) && isSizeValid(height);
+    }
+
     private boolean isViewStateValid() {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         return view.isLaidOut();
@@ -248,59 +240,48 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       return !view.isLayoutRequested();
     }
 
-    private int getViewHeightOrParam() {
-      final LayoutParams layoutParams = view.getLayoutParams();
-      if (isSizeValid(view.getHeight())) {
-        return view.getHeight();
-      } else if (layoutParams != null) {
-        return getSizeForParam(layoutParams.height, true /*isHeight*/);
+    private int getTargetHeight() {
+      int verticalPadding = view.getPaddingTop() + view.getPaddingBottom();
+      LayoutParams layoutParams = view.getLayoutParams();
+      int layoutParamSize = layoutParams != null ? layoutParams.height : PENDING_SIZE;
+      return getTargetDimen(view.getHeight(), layoutParamSize, verticalPadding);
+    }
+
+    private int getTargetWidth() {
+      int horizontalPadding = view.getPaddingLeft() + view.getPaddingRight();
+      LayoutParams layoutParams = view.getLayoutParams();
+      int layoutParamSize = layoutParams != null ? layoutParams.width : PENDING_SIZE;
+      return getTargetDimen(view.getWidth(), layoutParamSize, horizontalPadding);
+    }
+
+    private int getTargetDimen(int viewSize, int paramSize, int paddingSize) {
+      int adjustedViewSize = viewSize - paddingSize;
+      if (isSizeValid(adjustedViewSize)) {
+        return adjustedViewSize;
+      }
+
+      if (paramSize == PENDING_SIZE) {
+        return PENDING_SIZE;
+      }
+
+      if (paramSize == LayoutParams.WRAP_CONTENT) {
+        return SIZE_ORIGINAL;
+      } else if (paramSize > 0) {
+        return paramSize - paddingSize;
       } else {
         return PENDING_SIZE;
       }
-    }
-
-    private int getViewWidthOrParam() {
-      final LayoutParams layoutParams = view.getLayoutParams();
-      if (isSizeValid(view.getWidth())) {
-        return view.getWidth();
-      } else if (layoutParams != null) {
-        return getSizeForParam(layoutParams.width, false /*isHeight*/);
-      } else {
-        return PENDING_SIZE;
-      }
-    }
-
-    private int getSizeForParam(int param, boolean isHeight) {
-      if (param == LayoutParams.WRAP_CONTENT) {
-        Point displayDimens = getDisplayDimens();
-        return isHeight ? displayDimens.y : displayDimens.x;
-      } else {
-        return param;
-      }
-    }
-
-    @SuppressWarnings("deprecation")
-    private Point getDisplayDimens() {
-      if (displayDimens != null) {
-        return displayDimens;
-      }
-      WindowManager windowManager =
-          (WindowManager) view.getContext().getSystemService(Context.WINDOW_SERVICE);
-      Display display = windowManager.getDefaultDisplay();
-      displayDimens = new Point();
-      display.getSize(displayDimens);
-      return displayDimens;
     }
 
     private boolean isSizeValid(int size) {
-      return size > 0 || size == LayoutParams.WRAP_CONTENT;
+      return size > 0 || size == SIZE_ORIGINAL;
     }
 
     private static class SizeDeterminerLayoutListener implements ViewTreeObserver
         .OnPreDrawListener {
       private final WeakReference<SizeDeterminer> sizeDeterminerRef;
 
-      public SizeDeterminerLayoutListener(SizeDeterminer sizeDeterminer) {
+      SizeDeterminerLayoutListener(SizeDeterminer sizeDeterminer) {
         sizeDeterminerRef = new WeakReference<>(sizeDeterminer);
       }
 
