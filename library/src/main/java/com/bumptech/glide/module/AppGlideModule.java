@@ -6,21 +6,21 @@ import com.bumptech.glide.GlideBuilder;
 /**
  * Defines a set of dependencies and options to use when initializing Glide within an application.
  *
- * <p>There can be at most one RootGlideModule in an application. Only Applications can include a
- * RootGlideModule. Libraries must use {@link ChildGlideModule}.
+ * <p>There can be at most one {@link AppGlideModule} in an application. Only Applications
+ * can include a {@link AppGlideModule}. Libraries must use {@link ChildGlideModule}.
  *
- * <p>Classes that extend RootGlideModule must be annotated with
+ * <p>Classes that extend {@link AppGlideModule} must be annotated with
  * {@link com.bumptech.glide.annotation.GlideModule} to be processed correctly.
  *
- * <p>Classes that extend RootGlideModule can optionally be annotated with
+ * <p>Classes that extend {@link AppGlideModule} can optionally be annotated with
  * {@link com.bumptech.glide.annotation.Excludes} to optionally exclude one or more
  * {@link ChildGlideModule} and/or {@link GlideModule} classes.
  *
  * <p>Once an application has migrated itself and all libraries it depends on to use Glide's
- * annotation processor, RootGlideModule implementations should override
+ * annotation processor, {@link AppGlideModule} implementations should override
  * {@link #isManifestParsingEnabled()} and return {@code false}.
  */
-public abstract class RootGlideModule extends ChildGlideModule implements AppliesOptions {
+public abstract class AppGlideModule extends ChildGlideModule implements AppliesOptions {
   /**
    * Returns {@code true} if Glide should check the AndroidManifest for {@link GlideModule}s.
    *

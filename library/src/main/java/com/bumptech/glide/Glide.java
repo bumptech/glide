@@ -173,7 +173,7 @@ public class Glide implements ComponentCallbacks2 {
   private static void initGlide(Context context) {
     Context applicationContext = context.getApplicationContext();
 
-    GeneratedRootGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
+    GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
     List<GlideModule> manifestModules = Collections.emptyList();
     if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
       manifestModules = new ManifestParser(applicationContext).parse();
@@ -189,7 +189,7 @@ public class Glide implements ComponentCallbacks2 {
           continue;
         }
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "RootGlideModule excludes manifest GlideModule: " + current);
+          Log.d(TAG, "AppGlideModule excludes manifest GlideModule: " + current);
         }
         iterator.remove();
       }
@@ -223,26 +223,26 @@ public class Glide implements ComponentCallbacks2 {
 
   @Nullable
   @SuppressWarnings({"unchecked", "deprecation"})
-  private static GeneratedRootGlideModule getAnnotationGeneratedGlideModules() {
-    GeneratedRootGlideModule result = null;
+  private static GeneratedAppGlideModule getAnnotationGeneratedGlideModules() {
+    GeneratedAppGlideModule result = null;
     try {
-      Class<GeneratedRootGlideModule> clazz =
-          (Class<GeneratedRootGlideModule>)
-              Class.forName("com.bumptech.glide.GeneratedRootGlideModuleImpl");
+      Class<GeneratedAppGlideModule> clazz =
+          (Class<GeneratedAppGlideModule>)
+              Class.forName("com.bumptech.glide.GeneratedAppGlideModuleImpl");
       result = clazz.newInstance();
     } catch (ClassNotFoundException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Failed to find GeneratedRootGlideModule. You should include an"
+        Log.w(TAG, "Failed to find GeneratedAppGlideModule. You should include an"
             + " annotationProcessor compile dependency on com.github.bumptech.glide:glide:compiler"
-            + " in your application and a @GlideModule annotated RootGlideModule implementation or"
+            + " in your application and a @GlideModule annotated AppGlideModule implementation or"
             + " ChildGlideModules will be silently ignored");
       }
     } catch (InstantiationException e) {
-      throw new IllegalStateException("GeneratedRootGlideModuleImpl is implemented incorrectly."
+      throw new IllegalStateException("GeneratedAppGlideModuleImpl is implemented incorrectly."
           + " If you've manually implemented this class, remove your implementation. The Annotation"
           + " processor will generate a correct implementation.", e);
     } catch (IllegalAccessException e) {
-      throw new IllegalStateException("GeneratedRootGlideModuleImpl is implemented incorrectly."
+      throw new IllegalStateException("GeneratedAppGlideModuleImpl is implemented incorrectly."
           + " If you've manually implemented this class, remove your implementation. The Annotation"
           + " processor will generate a correct implementation.", e);
     }

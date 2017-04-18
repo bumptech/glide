@@ -9,9 +9,9 @@ import java.lang.annotation.Target;
  * Specifies a set of GlideModule and/or ChildGlideModule classes that should be excluded
  * from an application.
  *
- * <p>Used only on RootGlideModules. Adding this annotation to other classes will have no affect.
+ * <p>Used only on AppGlideModules. Adding this annotation to other classes will have no affect.
  *
- * <p>Cannot be used to exclude RootGlideModules (there must be at most one per Application anyway).
+ * <p>Cannot be used to exclude AppGlideModules (there must be at most one per Application anyway).
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

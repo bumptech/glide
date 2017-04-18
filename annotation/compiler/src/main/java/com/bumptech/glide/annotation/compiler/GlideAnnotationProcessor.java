@@ -16,7 +16,7 @@ import javax.lang.model.element.TypeElement;
  * Generates classes based on Glide's annotations that configure Glide, add support for additional
  * resource types, and/or extend Glide's API.
  *
- * <p>This processor discovers all {@link com.bumptech.glide.module.RootGlideModule} and
+ * <p>This processor discovers all {@link AppGlideModule} and
  * {@link com.bumptech.glide.module.ChildGlideModule} implementations that are
  * annotated with {@link com.bumptech.glide.annotation.GlideModule}. Any implementations missing the
  * annotation will be ignored.
@@ -29,11 +29,11 @@ import javax.lang.model.element.TypeElement;
  *   <li>For {@link com.bumptech.glide.module.ChildGlideModule}s - A GlideIndexer class in a
  *      specific package that will later be used by the processor to discover all
  *      {@link com.bumptech.glide.module.ChildGlideModule} classes.
- *   <li>For {@link com.bumptech.glide.module.RootGlideModule}s - A single
- *      {@link com.bumptech.glide.module.RootGlideModule} implementation
- *     ({@link com.bumptech.glide.GeneratedRootGlideModule}) that calls all
+ *   <li>For {@link AppGlideModule}s - A single
+ *      {@link AppGlideModule} implementation
+ *     ({@link com.bumptech.glide.GeneratedAppGlideModule}) that calls all
  *     {@link com.bumptech.glide.module.ChildGlideModule}s and the
- *     original {@link com.bumptech.glide.module.RootGlideModule} in the correct order when Glide is
+ *     original {@link AppGlideModule} in the correct order when Glide is
  *     initialized.
  *   <li>{@link com.bumptech.glide.annotation.GlideExtension}s -
  *   <ul>
@@ -56,20 +56,20 @@ import javax.lang.model.element.TypeElement;
  *   </ul>
  * </ul>
  *
- * <p>{@link com.bumptech.glide.module.RootGlideModule} implementations must only be included in
+ * <p>{@link AppGlideModule} implementations must only be included in
  * applications, not in libraries. There must be exactly one
- * {@link com.bumptech.glide.module.RootGlideModule} implementation per
- * Application. The {@link com.bumptech.glide.module.RootGlideModule} class is
+ * {@link AppGlideModule} implementation per
+ * Application. The {@link AppGlideModule} class is
  * used as a signal that all modules have been found and that the final merged
- * {@link com.bumptech.glide.GeneratedRootGlideModule} impl can be created.
+ * {@link com.bumptech.glide.GeneratedAppGlideModule} impl can be created.
  */
 @AutoService(Processor.class)
 public final class GlideAnnotationProcessor extends AbstractProcessor {
   static final boolean DEBUG = false;
   private ProcessorUtil processorUtil;
   private ChildModuleProcessor childModuleProcessor;
-  private RootModuleProcessor rootModuleProcessor;
-  private boolean isGeneratedRootGlideModuleWritten;
+  private AppModuleProcessor appModuleProcessor;
+  private boolean isGeneratedAppGlideModuleWritten;
   private ExtensionProcessor extensionProcessor;
 
   @Override
@@ -78,7 +78,7 @@ public final class GlideAnnotationProcessor extends AbstractProcessor {
     processorUtil = new ProcessorUtil(processingEnvironment);
     IndexerGenerator indexerGenerator = new IndexerGenerator(processorUtil);
     childModuleProcessor = new ChildModuleProcessor(processorUtil, indexerGenerator);
-    rootModuleProcessor = new RootModuleProcessor(processingEnvironment, processorUtil);
+    appModuleProcessor = new AppModuleProcessor(processingEnvironment, processorUtil);
     extensionProcessor = new ExtensionProcessor(processorUtil, indexerGenerator);
   }
 
@@ -98,12 +98,12 @@ public final class GlideAnnotationProcessor extends AbstractProcessor {
    /**
    * Each round we do the following:
    * <ol>
-   *   <li>Find all RootGlideModules and save them to an instance variable (throw if > 1).
+   *   <li>Find all AppGlideModules and save them to an instance variable (throw if > 1).
    *   <li>Find all ChildGlideModules
    *   <li>For each ChildGlideModule, write an Indexer with an Annotation with the class name.
    *   <li>If we wrote any Indexers, return and wait for the next round.
-   *   <li>If we didn't write any Indexers and there is a RootGlideModule, write the
-   *   GeneratedRootGlideModule. Once the GeneratedRootGlideModule is written, we expect to be
+   *   <li>If we didn't write any Indexers and there is a AppGlideModule, write the
+   *   GeneratedAppGlideModule. Once the GeneratedAppGlideModule is written, we expect to be
    *   finished. Any further generation of related classes will result in errors.
    * </ol>
    */
@@ -112,17 +112,17 @@ public final class GlideAnnotationProcessor extends AbstractProcessor {
     processorUtil.process();
     boolean newModulesWritten = childModuleProcessor.processModules(set, env);
     boolean newExtensionWritten = extensionProcessor.processExtensions(set, env);
-    rootModuleProcessor.processModules(set, env);
+    appModuleProcessor.processModules(set, env);
 
     if (newExtensionWritten || newModulesWritten) {
-      if (isGeneratedRootGlideModuleWritten) {
-        throw new IllegalStateException("Cannot process annotations after writing RootGlideModule");
+      if (isGeneratedAppGlideModuleWritten) {
+        throw new IllegalStateException("Cannot process annotations after writing AppGlideModule");
       }
       return true;
     }
 
-    if (!isGeneratedRootGlideModuleWritten) {
-      isGeneratedRootGlideModuleWritten = rootModuleProcessor.maybeWriteRootModule();
+    if (!isGeneratedAppGlideModuleWritten) {
+      isGeneratedAppGlideModuleWritten = appModuleProcessor.maybeWriteAppModule();
     }
     return true;
   }

@@ -16,10 +16,10 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 /**
- * Generates a new implementation of a RootGlideModule that calls all included ChildGlideModules and
- * the original RootGlideModule.
+ * Generates a new implementation of a AppGlideModule that calls all included ChildGlideModules and
+ * the original AppGlideModule.
  *
- * <p>The generated class will always call the RootGlideModule last to give it priority over choices
+ * <p>The generated class will always call the AppGlideModule last to give it priority over choices
  * made or classes registered in ChildGlideModules.
  *
  * <p>Android logging is included to allow developers to see exactly which modules are included at
@@ -28,13 +28,13 @@ import javax.lang.model.element.TypeElement;
  * <p>The generated class looks something like this:
  * <pre>
  * <code>
- *  final class GeneratedRootGlideModuleImpl extends com.bumptech.glide.GeneratedRootGlideModule {
- *    private final com.bumptech.glide.samples.giphy.GiphyGlideModule rootGlideModule;
+ *  final class GeneratedAppGlideModuleImpl extends com.bumptech.glide.GeneratedAppGlideModule {
+ *    private final com.bumptech.glide.samples.giphy.GiphyGlideModule appGlideModule;
  *
- *    GeneratedRootGlideModule() {
- *      rootGlideModule = new com.bumptech.glide.samples.giphy.GiphyGlideModule();
+ *    GeneratedAppGlideModule() {
+ *      appGlideModule = new com.bumptech.glide.samples.giphy.GiphyGlideModule();
  *      if (android.util.Log.isLoggable("Glide", android.util.Log.DEBUG)) {
- *        android.util.Log.d("Glide", "Discovered RootGlideModule from annotation:"
+ *        android.util.Log.d("Glide", "Discovered AppGlideModule from annotation:"
  *            + " com.bumptech.glide.samples.giphy.GiphyGlideModule");
  *        android.util.Log.d("Glide", "Discovered ChildGlideModule from annotation:"
  *            + "com.bumptech.glide.integration.okhttp3.OkHttpChildGlideModule");
@@ -44,7 +44,7 @@ import javax.lang.model.element.TypeElement;
  *    {@literal @java.lang.Override}
  *    public void applyOptions(android.content.Context context,
  *        com.bumptech.glide.GlideBuilder builder) {
- *      rootGlideModule.applyOptions(context, builder);
+ *      appGlideModule.applyOptions(context, builder);
  *    }
  *
  *    {@literal @java.lang.Override}
@@ -52,42 +52,42 @@ import javax.lang.model.element.TypeElement;
  *        com.bumptech.glide.Registry registry) {
  *      new com.bumptech.glide.integration.okhttp3.OkHttpChildGlideModule()
  *          .registerComponents(context, registry);
- *      rootGlideModule.registerComponents(context, registry);
+ *      appGlideModule.registerComponents(context, registry);
  *    }
  *
  *    {@literal @java.lang.Override}
  *    public boolean isManifestParsingEnabled() {
- *      return rootGlideModule.isManifestParsingEnabled();
+ *      return appGlideModule.isManifestParsingEnabled();
  *    }
  *
  *    {@literal @java.lang.Override}
  *    public java.util.Set<java.lang.Class<?>> getExcludedModuleClasses() {
- *      return rootGlideModule.getExcludedModuleClasses();
+ *      return appGlideModule.getExcludedModuleClasses();
  *    }
  *  }
  * </code>
  * </pre>
  */
-final class RootModuleGenerator {
+final class AppModuleGenerator {
   static final String GENERATED_ROOT_MODULE_PACKAGE_NAME = "com.bumptech.glide";
   private static final String GLIDE_LOG_TAG = "Glide";
-  private static final String GENERATED_ROOT_MODULE_IMPL_SIMPLE_NAME =
-      "GeneratedRootGlideModuleImpl";
-  private static final String GENERATED_ROOT_MODULE_SIMPLE_NAME = "GeneratedRootGlideModule";
+  private static final String GENERATED_APP_MODULE_IMPL_SIMPLE_NAME =
+      "GeneratedAppGlideModuleImpl";
+  private static final String GENERATED_ROOT_MODULE_SIMPLE_NAME = "GeneratedAppGlideModule";
   private final ProcessorUtil processorUtil;
 
-  RootModuleGenerator(ProcessorUtil processorUtil) {
+  AppModuleGenerator(ProcessorUtil processorUtil) {
     this.processorUtil = processorUtil;
   }
 
-  TypeSpec generate(TypeElement rootGlideModule, Set<String> childGlideModuleClassNames) {
-    ClassName rootGlideModuleClassName = ClassName.get(rootGlideModule);
+  TypeSpec generate(TypeElement appGlideModule, Set<String> childGlideModuleClassNames) {
+    ClassName appGlideModuleClassName = ClassName.get(appGlideModule);
     Set<String> excludedGlideModuleClassNames =
-        getExcludedGlideModuleClassNames(rootGlideModule);
+        getExcludedGlideModuleClassNames(appGlideModule);
 
     MethodSpec constructor =
         generateConstructor(
-            rootGlideModuleClassName, childGlideModuleClassNames, excludedGlideModuleClassNames);
+            appGlideModuleClassName, childGlideModuleClassNames, excludedGlideModuleClassNames);
 
     MethodSpec registerComponents =
         generateRegisterComponents(childGlideModuleClassNames, excludedGlideModuleClassNames);
@@ -101,7 +101,7 @@ final class RootModuleGenerator {
             .addAnnotation(Override.class)
             .addParameter(ClassName.get("android.content", "Context"), "context")
             .addParameter(ClassName.get("com.bumptech.glide", "GlideBuilder"), "builder")
-            .addStatement("rootGlideModule.applyOptions(context, builder)", rootGlideModule)
+            .addStatement("appGlideModule.applyOptions(context, builder)", appGlideModule)
             .build();
 
     MethodSpec isManifestParsingEnabled =
@@ -109,10 +109,10 @@ final class RootModuleGenerator {
             .addModifiers(Modifier.PUBLIC)
             .addAnnotation(Override.class)
             .returns(boolean.class)
-            .addStatement("return rootGlideModule.isManifestParsingEnabled()", rootGlideModule)
+            .addStatement("return appGlideModule.isManifestParsingEnabled()", appGlideModule)
             .build();
 
-    Builder builder = TypeSpec.classBuilder(GENERATED_ROOT_MODULE_IMPL_SIMPLE_NAME)
+    Builder builder = TypeSpec.classBuilder(GENERATED_APP_MODULE_IMPL_SIMPLE_NAME)
         .addModifiers(Modifier.FINAL)
         .addAnnotation(
             AnnotationSpec.builder(SuppressWarnings.class)
@@ -121,7 +121,7 @@ final class RootModuleGenerator {
         )
         .superclass(
             ClassName.get(GENERATED_ROOT_MODULE_PACKAGE_NAME, GENERATED_ROOT_MODULE_SIMPLE_NAME))
-        .addField(rootGlideModuleClassName, "rootGlideModule", Modifier.PRIVATE, Modifier.FINAL)
+        .addField(appGlideModuleClassName, "appGlideModule", Modifier.PRIVATE, Modifier.FINAL)
         .addMethod(constructor)
         .addMethod(applyOptions)
         .addMethod(registerComponents)
@@ -191,15 +191,15 @@ final class RootModuleGenerator {
       registerComponents.addStatement(
           "new $T().registerComponents(context, registry)", moduleClassName);
     }
-    // Order matters here. The RootGlideModule must be called last.
-    registerComponents.addStatement("rootGlideModule.registerComponents(context, registry)");
+    // Order matters here. The AppGlideModule must be called last.
+    registerComponents.addStatement("appGlideModule.registerComponents(context, registry)");
     return registerComponents.build();
   }
 
-  private MethodSpec generateConstructor(ClassName rootGlideModule,
+  private MethodSpec generateConstructor(ClassName appGlideModule,
       Set<String> childGlideModuleClassNames, Set<String> excludedGlideModuleClassNames) {
     MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder();
-    constructorBuilder.addStatement("rootGlideModule = new $T()", rootGlideModule);
+    constructorBuilder.addStatement("appGlideModule = new $T()", appGlideModule);
 
     ClassName androidLogName = ClassName.get("android.util", "Log");
 
@@ -207,13 +207,13 @@ final class RootModuleGenerator {
     constructorBuilder.beginControlFlow("if ($T.isLoggable($S, $T.DEBUG))",
         androidLogName, GLIDE_LOG_TAG, androidLogName);
     constructorBuilder.addStatement("$T.d($S, $S)", androidLogName, GLIDE_LOG_TAG,
-        "Discovered RootGlideModule from annotation: " + rootGlideModule);
+        "Discovered AppGlideModule from annotation: " + appGlideModule);
     // Excluded GlideModule classes from the manifest are logged in Glide's singleton.
     for (String glideModule : childGlideModuleClassNames) {
       ClassName moduleClassName = ClassName.bestGuess(glideModule);
       if (excludedGlideModuleClassNames.contains(glideModule)) {
         constructorBuilder.addStatement("$T.d($S, $S)", androidLogName, GLIDE_LOG_TAG,
-            "RootGlideModule excludes ChildGlideModule from annotation: " + moduleClassName);
+            "AppGlideModule excludes ChildGlideModule from annotation: " + moduleClassName);
       } else {
         constructorBuilder.addStatement("$T.d($S, $S)", androidLogName, GLIDE_LOG_TAG,
             "Discovered ChildGlideModule from annotation: " + moduleClassName);
@@ -223,8 +223,8 @@ final class RootModuleGenerator {
     return constructorBuilder.build();
   }
 
-  private Set<String> getExcludedGlideModuleClassNames(TypeElement rootGlideModule) {
+  private Set<String> getExcludedGlideModuleClassNames(TypeElement appGlideModule) {
     return processorUtil.findClassValuesFromAnnotationOnClassAsNames(
-        rootGlideModule, Excludes.class);
+        appGlideModule, Excludes.class);
   }
 }

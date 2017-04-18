@@ -24,16 +24,16 @@ final class ChildModuleProcessor {
 
   boolean processModules(Set<? extends TypeElement> set, RoundEnvironment env) {
      // Order matters here, if we find an Indexer below, we return before writing the root module.
-    // If we fail to add to rootModules before then, we might accidentally skip a valid RootModule.
+    // If we fail to add to appModules before then, we might accidentally skip a valid RootModule.
     List<TypeElement> childGlideModules = new ArrayList<>();
     for (TypeElement element : processorUtil.getElementsFor(GlideModule.class, env)) {
       // Root elements are added separately and must be checked separately because they're sub
       // classes of ChildGlideModules.
-      if (processorUtil.isRootGlideModule(element)) {
+      if (processorUtil.isAppGlideModule(element)) {
         continue;
       } else if (!processorUtil.isChildGlideModule(element)) {
         throw new IllegalStateException("@GlideModule can only be applied to ChildGlideModule"
-            + " and RootGlideModule implementations, not: " + element);
+            + " and AppGlideModule implementations, not: " + element);
       }
 
       childGlideModules.add(element);
@@ -46,12 +46,12 @@ final class ChildModuleProcessor {
 
     TypeSpec indexer = indexerGenerator.generate(childGlideModules);
     processorUtil.writeIndexer(indexer);
-    processorUtil.debugLog("Wrote an Indexer this round, skipping the root module to ensure all "
+    processorUtil.debugLog("Wrote an Indexer this round, skipping the app module to ensure all "
         + "indexers are found");
      // If I write an Indexer in a round in the target package, then try to find all classes in
     // the target package, my newly written Indexer won't be found. Since we wrote a class with
     // an Annotation handled by this processor, we know we will be called again in the next round
-    // and we can safely wait to write our RootModule until then.
+    // and we can safely wait to write our AppGlideModule until then.
     return true;
   }
 

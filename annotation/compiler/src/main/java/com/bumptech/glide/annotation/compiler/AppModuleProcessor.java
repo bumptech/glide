@@ -15,29 +15,29 @@ import javax.lang.model.element.TypeElement;
 
 /**
  * Runs the final steps of Glide's annotation process and generates the combined
- * {@link com.bumptech.glide.module.RootGlideModule}, {@link com.bumptech.glide.Glide},
+ * {@link AppGlideModule}, {@link com.bumptech.glide.Glide},
  * {@link com.bumptech.glide.RequestManager}, and
  * {@link com.bumptech.glide.request.BaseRequestOptions} classes.
  */
-final class RootModuleProcessor {
+final class AppModuleProcessor {
   private static final String COMPILER_PACKAGE_NAME =
       GlideAnnotationProcessor.class.getPackage().getName();
 
   private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
-  private final List<TypeElement> rootGlideModules = new ArrayList<>();
+  private final List<TypeElement> appGlideModules = new ArrayList<>();
   private final RequestOptionsGenerator requestOptionsGenerator;
   private final RequestManagerGenerator requestManagerGenerator;
-  private final RootModuleGenerator rootModuleGenerator;
+  private final AppModuleGenerator appModuleGenerator;
   private final RequestBuilderGenerator requestBuilderGenerator;
   private final RequestManagerFactoryGenerator requestManagerFactoryGenerator;
   private final GlideGenerator glideGenerator;
 
-  RootModuleProcessor(ProcessingEnvironment processingEnv, ProcessorUtil processorUtil) {
+  AppModuleProcessor(ProcessingEnvironment processingEnv, ProcessorUtil processorUtil) {
     this.processingEnv = processingEnv;
     this.processorUtil = processorUtil;
 
-    rootModuleGenerator = new RootModuleGenerator(processorUtil);
+    appModuleGenerator = new AppModuleGenerator(processorUtil);
     requestOptionsGenerator = new RequestOptionsGenerator(processingEnv, processorUtil);
     requestManagerGenerator = new RequestManagerGenerator(processingEnv, processorUtil);
     requestManagerFactoryGenerator = new RequestManagerFactoryGenerator(processingEnv);
@@ -47,29 +47,29 @@ final class RootModuleProcessor {
 
   void processModules(Set<? extends TypeElement> set, RoundEnvironment env) {
      for (TypeElement element : processorUtil.getElementsFor(GlideModule.class, env)) {
-       if (processorUtil.isRootGlideModule(element)) {
-         rootGlideModules.add(element);
+       if (processorUtil.isAppGlideModule(element)) {
+         appGlideModules.add(element);
        }
      }
 
-    processorUtil.debugLog("got root modules: " + rootGlideModules);
+    processorUtil.debugLog("got app modules: " + appGlideModules);
 
-    if (rootGlideModules.size() > 1) {
+    if (appGlideModules.size() > 1) {
       throw new IllegalStateException(
-          "You cannot have more than one RootGlideModule, found: " + rootGlideModules);
+          "You cannot have more than one AppGlideModule, found: " + appGlideModules);
     }
   }
 
-  boolean maybeWriteRootModule() {
-    // rootGlideModules is added to in order to catch errors where multiple RootGlideModules may be
-    // present for a single application or library. Because we only add to rootGlideModules, we use
-    // isGeneratedRootGlideModuleWritten to make sure the GeneratedRootGlideModule is written at
+  boolean maybeWriteAppModule() {
+    // appGlideModules is added to in order to catch errors where multiple AppGlideModules may be
+    // present for a single application or library. Because we only add to appGlideModules, we use
+    // isGeneratedAppGlideModuleWritten to make sure the GeneratedAppGlideModule is written at
     // most once.
-    if (rootGlideModules.isEmpty()) {
+    if (appGlideModules.isEmpty()) {
       return false;
     }
-    TypeElement rootModule = rootGlideModules.get(0);
-    processorUtil.debugLog("Processing root module: " + rootModule);
+    TypeElement appModule = appGlideModules.get(0);
+    processorUtil.debugLog("Processing app module: " + appModule);
     // If this package is null, it means there are no classes with this package name. One way this
     // could happen is if we process an annotation and reach this point without writing something
     // to the package. We do not error check here because that shouldn't happen with the
@@ -78,10 +78,10 @@ final class RootModuleProcessor {
         processingEnv.getElementUtils().getPackageElement(COMPILER_PACKAGE_NAME);
     FoundIndexedClassNames indexedClassNames = getIndexedClassNames(glideGenPackage);
 
-    // Write all generated code to the package containing the RootGlideModule. Doing so fixes
-    // classpath collisions if more than one Application containing a RootGlideModule is included
+    // Write all generated code to the package containing the AppGlideModule. Doing so fixes
+    // classpath collisions if more than one Application containing a AppGlideModule is included
     // in a project.
-    String generatedCodePackageName = rootModule.getEnclosingElement().toString();
+    String generatedCodePackageName = appModule.getEnclosingElement().toString();
 
     TypeSpec generatedRequestOptions = null;
     if (!indexedClassNames.extensions.isEmpty()) {
@@ -105,20 +105,20 @@ final class RootModuleProcessor {
     writeRequestManagerFactory(requestManagerFactory);
 
     TypeSpec glide =
-        glideGenerator.generate(generatedCodePackageName, getGlideName(rootModule), requestManager);
+        glideGenerator.generate(generatedCodePackageName, getGlideName(appModule), requestManager);
     writeGlide(generatedCodePackageName, glide);
 
-    TypeSpec generatedRootGlideModule =
-        rootModuleGenerator.generate(rootModule, indexedClassNames.glideModules);
-    writeRootModule(generatedRootGlideModule);
+    TypeSpec generatedAppGlideModule =
+        appModuleGenerator.generate(appModule, indexedClassNames.glideModules);
+    writeAppModule(generatedAppGlideModule);
 
-    processorUtil.infoLog("Wrote GeneratedRootGlideModule with: " + indexedClassNames.glideModules);
+    processorUtil.infoLog("Wrote GeneratedAppGlideModule with: " + indexedClassNames.glideModules);
 
     return true;
   }
 
-  private String getGlideName(TypeElement rootModule) {
-    return rootModule.getAnnotation(GlideModule.class).glideName();
+  private String getGlideName(TypeElement appModule) {
+    return appModule.getAnnotation(GlideModule.class).glideName();
   }
 
   @SuppressWarnings("unchecked")
@@ -151,13 +151,13 @@ final class RootModuleProcessor {
   // We dont' care about collisions in IDEs since this class isn't an API class.
   private void writeRequestManagerFactory(TypeSpec requestManagerFactory) {
     processorUtil.writeClass(
-        RootModuleGenerator.GENERATED_ROOT_MODULE_PACKAGE_NAME, requestManagerFactory);
+        AppModuleGenerator.GENERATED_ROOT_MODULE_PACKAGE_NAME, requestManagerFactory);
   }
 
-  // The root module we generate subclasses a package private class. We don't care about classpath
+  // The app module we generate subclasses a package private class. We don't care about classpath
   // collisions in IDEs since this class isn't an API class.
-  private void writeRootModule(TypeSpec rootModule) {
-    processorUtil.writeClass(RootModuleGenerator.GENERATED_ROOT_MODULE_PACKAGE_NAME, rootModule);
+  private void writeAppModule(TypeSpec appModule) {
+    processorUtil.writeClass(AppModuleGenerator.GENERATED_ROOT_MODULE_PACKAGE_NAME, appModule);
   }
 
   private void writeRequestOptions(String packageName, TypeSpec requestOptions) {

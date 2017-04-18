@@ -10,7 +10,7 @@ import com.bumptech.glide.Registry;
  * <p>Any number of ChildGlideModules can be contained within any library or application.
  *
  * <p>ChildGlideModules are called in no defined order. If ChildGlideModules within an application
- * conflict, {@link RootGlideModule}s can use the {@link com.bumptech.glide.annotation.Excludes}
+ * conflict, {@link AppGlideModule}s can use the {@link com.bumptech.glide.annotation.Excludes}
  * annotation to selectively remove one or more of the conflicting modules.
  */
 public abstract class ChildGlideModule implements RegistersComponents {

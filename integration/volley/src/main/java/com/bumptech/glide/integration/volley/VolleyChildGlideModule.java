@@ -4,6 +4,7 @@ import android.content.Context;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.module.AppGlideModule;
 import com.bumptech.glide.module.ChildGlideModule;
 import java.io.InputStream;
 
@@ -13,7 +14,7 @@ import java.io.InputStream;
  * Volley based {@link com.bumptech.glide.load.model.ModelLoader}.
  *
  * <p>For Applications that depend on this library and include an
- * {@link com.bumptech.glide.module.RootGlideModule} and Glide's annotation processor, this class
+ * {@link AppGlideModule} and Glide's annotation processor, this class
  * will be automatically included.
  */
 @GlideModule

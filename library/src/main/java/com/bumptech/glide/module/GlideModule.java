@@ -52,7 +52,7 @@ import com.bumptech.glide.Registry;
  * instead providing their required dependencies in a single application module. </p>
  *
  * @deprecated Libraries should use {@link ChildGlideModule} and Applications should use
- * {@link RootGlideModule}.
+ * {@link AppGlideModule}.
  */
 @Deprecated
 public interface GlideModule extends RegistersComponents, AppliesOptions { }
