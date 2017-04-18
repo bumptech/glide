@@ -121,16 +121,6 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
 
   /**
    * Returns a {@link RequestOptions} object with {@link #fitCenter()} set.
-   *
-   * @deprecated Use {@link #fitCenterTransform()}.
-   */
-  @Deprecated
-  public static RequestOptions fitCenterTransform(Context context) {
-    return fitCenterTransform();
-  }
-
-  /**
-   * Returns a {@link RequestOptions} object with {@link #fitCenter()} set.
    */
   public static RequestOptions fitCenterTransform() {
     if (fitCenterOptions == null) {
