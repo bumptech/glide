@@ -391,6 +391,30 @@ public class ViewTargetTest {
   }
 
   @Test
+  public void getSize_withLayoutParams_notLaidOut_doesCallSizeReady() {
+    shadowView
+        .setLayoutParams(new LayoutParams(10, 10))
+        .setWidth(100)
+        .setHeight(100)
+        .setIsLaidOut(false);
+    target.getSize(cb);
+
+    verify(cb, times(1)).onSizeReady(anyInt(), anyInt());
+  }
+
+  @Test
+  public void getSize_withLayoutParams_zeroWidthHeight_notLaidOut_doesNotCallSizeReady() {
+    shadowView
+        .setLayoutParams(new LayoutParams(0, 0))
+        .setWidth(100)
+        .setHeight(100)
+        .setIsLaidOut(false);
+    target.getSize(cb);
+
+    verify(cb, never()).onSizeReady(anyInt(), anyInt());
+  }
+
+  @Test
   public void getSize_withValidWidthAndHeight_preV19_layoutRequested_doesNotCallSizeReady() {
     Util.setSdkVersionInt(18);
     shadowView
@@ -466,6 +490,7 @@ public class ViewTargetTest {
   public static class SizedShadowView extends ShadowView {
     private int width;
     private int height;
+    private LayoutParams layoutParams;
     private boolean isLaidOut;
     private boolean isLayoutRequested;
 
@@ -476,6 +501,11 @@ public class ViewTargetTest {
 
     public SizedShadowView setHeight(int height) {
       this.height = height;
+      return this;
+    }
+
+    public SizedShadowView setLayoutParams(LayoutParams layoutParams) {
+      this.layoutParams = layoutParams;
       return this;
     }
 
@@ -509,6 +539,10 @@ public class ViewTargetTest {
       return isLayoutRequested;
     }
 
+    @Implementation
+    public LayoutParams getLayoutParams() {
+      return layoutParams;
+    }
   }
 
   private static class TestViewTarget extends ViewTarget<View, Object> {

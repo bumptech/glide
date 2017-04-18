@@ -234,6 +234,14 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     }
 
     private boolean isViewStateValid() {
+      // We consider the view state as valid if the view has
+      // non-null layout params and a non-zero layout width and height.
+      if (view.getLayoutParams() != null
+          && view.getLayoutParams().width > 0
+          && view.getLayoutParams().height > 0) {
+        return true;
+      }
+
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         return view.isLaidOut();
       }
