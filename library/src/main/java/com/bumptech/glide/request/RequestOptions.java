@@ -167,16 +167,6 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
 
   /**
    * Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop()} set.
-   *
-   * @deprecated Use {@link #circleCropTransform()}.
-   */
-  @Deprecated
-  public static RequestOptions circleCropTransform(Context context) {
-    return circleCropTransform();
-  }
-
-  /**
-   * Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop()} set.
    */
   public static RequestOptions circleCropTransform() {
     if (circleCropOptions == null) {
