@@ -16,7 +16,7 @@ import java.io.InputStream;
  * module will be merged in by manifest merger. For other build systems or for more more
  * information, see {@link com.bumptech.glide.module.GlideModule}.
  *
- * @deprecated Replaced with {@link VolleyChildGlideModule}.
+ * @deprecated Replaced with {@link VolleyLibraryGlideModule}.
  */
 @Deprecated
 public class VolleyGlideModule implements GlideModule {

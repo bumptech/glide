@@ -235,7 +235,7 @@ public class Glide implements ComponentCallbacks2 {
         Log.w(TAG, "Failed to find GeneratedAppGlideModule. You should include an"
             + " annotationProcessor compile dependency on com.github.bumptech.glide:glide:compiler"
             + " in your application and a @GlideModule annotated AppGlideModule implementation or"
-            + " ChildGlideModules will be silently ignored");
+            + " LibraryGlideModules will be silently ignored");
       }
     } catch (InstantiationException e) {
       throw new IllegalStateException("GeneratedAppGlideModuleImpl is implemented incorrectly."

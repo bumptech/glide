@@ -16,11 +16,11 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 /**
- * Generates a new implementation of a AppGlideModule that calls all included ChildGlideModules and
- * the original AppGlideModule.
+ * Generates a new implementation of a AppGlideModule that calls all included LibraryGlideModules
+ * and the original AppGlideModule.
  *
  * <p>The generated class will always call the AppGlideModule last to give it priority over choices
- * made or classes registered in ChildGlideModules.
+ * made or classes registered in LibraryGlideModules.
  *
  * <p>Android logging is included to allow developers to see exactly which modules are included at
  * runtime.
@@ -36,8 +36,8 @@ import javax.lang.model.element.TypeElement;
  *      if (android.util.Log.isLoggable("Glide", android.util.Log.DEBUG)) {
  *        android.util.Log.d("Glide", "Discovered AppGlideModule from annotation:"
  *            + " com.bumptech.glide.samples.giphy.GiphyGlideModule");
- *        android.util.Log.d("Glide", "Discovered ChildGlideModule from annotation:"
- *            + "com.bumptech.glide.integration.okhttp3.OkHttpChildGlideModule");
+ *        android.util.Log.d("Glide", "Discovered LibraryGlideModule from annotation:"
+ *            + "com.bumptech.glide.integration.okhttp3.OkHttpLibraryGlideModule");
  *      }
  *    }
  *
@@ -50,7 +50,7 @@ import javax.lang.model.element.TypeElement;
  *    {@literal @java.lang.Override}
  *    public void registerComponents(android.content.Context context,
  *        com.bumptech.glide.Registry registry) {
- *      new com.bumptech.glide.integration.okhttp3.OkHttpChildGlideModule()
+ *      new com.bumptech.glide.integration.okhttp3.OkHttpLibraryGlideModule()
  *          .registerComponents(context, registry);
  *      appGlideModule.registerComponents(context, registry);
  *    }
@@ -80,17 +80,17 @@ final class AppModuleGenerator {
     this.processorUtil = processorUtil;
   }
 
-  TypeSpec generate(TypeElement appGlideModule, Set<String> childGlideModuleClassNames) {
+  TypeSpec generate(TypeElement appGlideModule, Set<String> libraryGlideModuleClassNames) {
     ClassName appGlideModuleClassName = ClassName.get(appGlideModule);
     Set<String> excludedGlideModuleClassNames =
         getExcludedGlideModuleClassNames(appGlideModule);
 
     MethodSpec constructor =
         generateConstructor(
-            appGlideModuleClassName, childGlideModuleClassNames, excludedGlideModuleClassNames);
+            appGlideModuleClassName, libraryGlideModuleClassNames, excludedGlideModuleClassNames);
 
     MethodSpec registerComponents =
-        generateRegisterComponents(childGlideModuleClassNames, excludedGlideModuleClassNames);
+        generateRegisterComponents(libraryGlideModuleClassNames, excludedGlideModuleClassNames);
 
     MethodSpec getExcludedModuleClasses =
         generateGetExcludedModuleClasses(excludedGlideModuleClassNames);
@@ -174,7 +174,7 @@ final class AppModuleGenerator {
     return builder.build();
   }
 
-  private MethodSpec generateRegisterComponents(Set<String> childGlideModuleClassNames,
+  private MethodSpec generateRegisterComponents(Set<String> libraryGlideModuleClassNames,
       Set<String> excludedGlideModuleClassNames) {
     MethodSpec.Builder registerComponents =
         MethodSpec.methodBuilder("registerComponents")
@@ -183,7 +183,7 @@ final class AppModuleGenerator {
             .addParameter(ClassName.get("android.content", "Context"), "context")
             .addParameter(ClassName.get("com.bumptech.glide", "Registry"), "registry");
 
-    for (String glideModule : childGlideModuleClassNames) {
+    for (String glideModule : libraryGlideModuleClassNames) {
       if (excludedGlideModuleClassNames.contains(glideModule)) {
         continue;
       }
@@ -197,7 +197,7 @@ final class AppModuleGenerator {
   }
 
   private MethodSpec generateConstructor(ClassName appGlideModule,
-      Set<String> childGlideModuleClassNames, Set<String> excludedGlideModuleClassNames) {
+      Set<String> libraryGlideModuleClassNames, Set<String> excludedGlideModuleClassNames) {
     MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder();
     constructorBuilder.addStatement("appGlideModule = new $T()", appGlideModule);
 
@@ -209,14 +209,14 @@ final class AppModuleGenerator {
     constructorBuilder.addStatement("$T.d($S, $S)", androidLogName, GLIDE_LOG_TAG,
         "Discovered AppGlideModule from annotation: " + appGlideModule);
     // Excluded GlideModule classes from the manifest are logged in Glide's singleton.
-    for (String glideModule : childGlideModuleClassNames) {
+    for (String glideModule : libraryGlideModuleClassNames) {
       ClassName moduleClassName = ClassName.bestGuess(glideModule);
       if (excludedGlideModuleClassNames.contains(glideModule)) {
         constructorBuilder.addStatement("$T.d($S, $S)", androidLogName, GLIDE_LOG_TAG,
-            "AppGlideModule excludes ChildGlideModule from annotation: " + moduleClassName);
+            "AppGlideModule excludes LibraryGlideModule from annotation: " + moduleClassName);
       } else {
         constructorBuilder.addStatement("$T.d($S, $S)", androidLogName, GLIDE_LOG_TAG,
-            "Discovered ChildGlideModule from annotation: " + moduleClassName);
+            "Discovered LibraryGlideModule from annotation: " + moduleClassName);
       }
     }
     constructorBuilder.endControlFlow();

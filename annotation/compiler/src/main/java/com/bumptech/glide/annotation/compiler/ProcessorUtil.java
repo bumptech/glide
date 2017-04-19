@@ -47,17 +47,17 @@ import javax.tools.Diagnostic;
 final class ProcessorUtil {
   private static final String GLIDE_MODULE_PACKAGE_NAME = "com.bumptech.glide.module";
   private static final String APP_GLIDE_MODULE_SIMPLE_NAME = "AppGlideModule";
-  private static final String CHILD_GLIDE_MODULE_SIMPLE_NAME = "ChildGlideModule";
+  private static final String LIBRARY_GLIDE_MODULE_SIMPLE_NAME = "LibraryGlideModule";
   private static final String APP_GLIDE_MODULE_QUALIFIED_NAME =
       GLIDE_MODULE_PACKAGE_NAME + "." + APP_GLIDE_MODULE_SIMPLE_NAME;
-  private static final String CHILD_GLIDE_MODULE_QUALIFIED_NAME =
-      GLIDE_MODULE_PACKAGE_NAME + "." + CHILD_GLIDE_MODULE_SIMPLE_NAME;
+  private static final String LIBRARY_GLIDE_MODULE_QUALIFIED_NAME =
+      GLIDE_MODULE_PACKAGE_NAME + "." + LIBRARY_GLIDE_MODULE_SIMPLE_NAME;
   private static final String COMPILER_PACKAGE_NAME =
       GlideAnnotationProcessor.class.getPackage().getName();
 
   private final ProcessingEnvironment processingEnv;
   private final TypeElement appGlideModuleType;
-  private final TypeElement childGlideModuleType;
+  private final TypeElement libraryGlideModuleType;
   private int round;
 
   ProcessorUtil(ProcessingEnvironment processingEnv) {
@@ -65,8 +65,8 @@ final class ProcessorUtil {
 
     appGlideModuleType =
         processingEnv.getElementUtils().getTypeElement(APP_GLIDE_MODULE_QUALIFIED_NAME);
-    childGlideModuleType =
-        processingEnv.getElementUtils().getTypeElement(CHILD_GLIDE_MODULE_QUALIFIED_NAME);
+    libraryGlideModuleType =
+        processingEnv.getElementUtils().getTypeElement(LIBRARY_GLIDE_MODULE_QUALIFIED_NAME);
   }
 
   void process() {
@@ -78,9 +78,9 @@ final class ProcessorUtil {
         appGlideModuleType.asType());
   }
 
-  boolean isChildGlideModule(TypeElement element) {
+  boolean isLibraryGlideModule(TypeElement element) {
     return processingEnv.getTypeUtils().isAssignable(element.asType(),
-        childGlideModuleType.asType());
+        libraryGlideModuleType.asType());
   }
 
   boolean isExtension(TypeElement element) {

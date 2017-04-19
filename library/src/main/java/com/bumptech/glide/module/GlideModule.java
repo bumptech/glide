@@ -51,7 +51,7 @@ import com.bumptech.glide.Registry;
  * have conflicting modules, the application should consider avoiding the library modules and
  * instead providing their required dependencies in a single application module. </p>
  *
- * @deprecated Libraries should use {@link ChildGlideModule} and Applications should use
+ * @deprecated Libraries should use {@link LibraryGlideModule} and Applications should use
  * {@link AppGlideModule}.
  */
 @Deprecated

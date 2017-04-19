@@ -1,11 +1,11 @@
-package com.bumptech.glide.integration.okhttp;
+package com.bumptech.glide.integration.okhttp3;
 
 import android.content.Context;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.module.AppGlideModule;
-import com.bumptech.glide.module.ChildGlideModule;
+import com.bumptech.glide.module.LibraryGlideModule;
 import java.io.InputStream;
 
 /**
@@ -16,7 +16,7 @@ import java.io.InputStream;
  * will be automatically included.
  */
 @GlideModule
-public class OkHttpChildGlideModule extends ChildGlideModule {
+public final class OkHttpLibraryGlideModule extends LibraryGlideModule {
   @Override
   public void registerComponents(Context context, Registry registry) {
     registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory());

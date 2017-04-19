@@ -11,13 +11,13 @@ import javax.lang.model.element.TypeElement;
 
 /**
  * Generates Indexer classes annotated with {@link Index} for all
- * {@link com.bumptech.glide.module.ChildGlideModule}s.
+ * {@link LibraryGlideModule}s.
  */
-final class ChildModuleProcessor {
+final class LibraryModuleProcessor {
   private ProcessorUtil processorUtil;
   private IndexerGenerator indexerGenerator;
 
-  ChildModuleProcessor(ProcessorUtil processorUtil, IndexerGenerator indexerGenerator) {
+  LibraryModuleProcessor(ProcessorUtil processorUtil, IndexerGenerator indexerGenerator) {
     this.processorUtil = processorUtil;
     this.indexerGenerator = indexerGenerator;
   }
@@ -25,26 +25,26 @@ final class ChildModuleProcessor {
   boolean processModules(Set<? extends TypeElement> set, RoundEnvironment env) {
      // Order matters here, if we find an Indexer below, we return before writing the root module.
     // If we fail to add to appModules before then, we might accidentally skip a valid RootModule.
-    List<TypeElement> childGlideModules = new ArrayList<>();
+    List<TypeElement> libraryGlideModules = new ArrayList<>();
     for (TypeElement element : processorUtil.getElementsFor(GlideModule.class, env)) {
       // Root elements are added separately and must be checked separately because they're sub
-      // classes of ChildGlideModules.
+      // classes of LibraryGlideModules.
       if (processorUtil.isAppGlideModule(element)) {
         continue;
-      } else if (!processorUtil.isChildGlideModule(element)) {
-        throw new IllegalStateException("@GlideModule can only be applied to ChildGlideModule"
+      } else if (!processorUtil.isLibraryGlideModule(element)) {
+        throw new IllegalStateException("@GlideModule can only be applied to LibraryGlideModule"
             + " and AppGlideModule implementations, not: " + element);
       }
 
-      childGlideModules.add(element);
+      libraryGlideModules.add(element);
     }
 
-    processorUtil.debugLog("got child modules: " + childGlideModules);
-    if (childGlideModules.isEmpty()) {
+    processorUtil.debugLog("got child modules: " + libraryGlideModules);
+    if (libraryGlideModules.isEmpty()) {
       return false;
     }
 
-    TypeSpec indexer = indexerGenerator.generate(childGlideModules);
+    TypeSpec indexer = indexerGenerator.generate(libraryGlideModules);
     processorUtil.writeIndexer(indexer);
     processorUtil.debugLog("Wrote an Indexer this round, skipping the app module to ensure all "
         + "indexers are found");
