@@ -133,16 +133,6 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
 
   /**
    * Returns a {@link RequestOptions} object with {@link #centerInside()} set.
-   *
-   * @deprecated Use {@link #centerInsideTransform()}.
-   */
-  @Deprecated
-  public static RequestOptions centerInsideTransform(Context context) {
-    return centerInsideTransform();
-  }
-
-  /**
-   * Returns a {@link RequestOptions} object with {@link #centerInside()} set.
    */
   public static RequestOptions centerInsideTransform() {
     if (centerInsideOptions == null) {
