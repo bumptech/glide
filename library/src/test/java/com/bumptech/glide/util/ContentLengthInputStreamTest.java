@@ -6,6 +6,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import org.junit.Before;
@@ -71,7 +72,7 @@ public class ContentLengthInputStreamTest {
     when(wrapped.read()).thenReturn(0);
 
     assertThat(is.read()).isEqualTo(0);
-    assertThat(is.available()).isEqualTo(contentLength);
+    assertThat(is.available()).isEqualTo(contentLength - 1);
   }
 
   @Test
@@ -129,5 +130,28 @@ public class ContentLengthInputStreamTest {
     InputStream is = ContentLengthInputStream.obtain(wrapped, "invalid_length");
     when(wrapped.read(any(byte[].class), anyInt(), anyInt())).thenReturn(-1);
     is.read(new byte[10], 0, 0);
+  }
+
+  @Test
+  public void testRead_readWithZeroes_doesNotThrow() throws IOException {
+    ByteArrayInputStream inner = new ByteArrayInputStream(new byte[] {0, 0, 0});
+    InputStream is = ContentLengthInputStream.obtain(inner, 3);
+
+    assertThat(is.read()).isEqualTo(0);
+    assertThat(is.read()).isEqualTo(0);
+    assertThat(is.read()).isEqualTo(0);
+    assertThat(is.read()).isEqualTo(-1);
+  }
+
+  @Test
+  public void testRead_readWithHighValues_doesNotThrow() throws IOException {
+    ByteArrayInputStream inner =
+        new ByteArrayInputStream(new byte[] {(byte) 0xF0, (byte) 0xA0, (byte) 0xFF});
+    InputStream is = ContentLengthInputStream.obtain(inner, 3);
+
+    assertThat(is.read()).isEqualTo(0xF0);
+    assertThat(is.read()).isEqualTo(0xA0);
+    assertThat(is.read()).isEqualTo(0xFF);
+    assertThat(is.read()).isEqualTo(-1);
   }
 }

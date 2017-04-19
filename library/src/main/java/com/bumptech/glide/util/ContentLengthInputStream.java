@@ -51,7 +51,9 @@ public final class ContentLengthInputStream extends FilterInputStream {
 
   @Override
   public synchronized int read() throws IOException {
-    return checkReadSoFarOrThrow(super.read());
+    int value = super.read();
+    checkReadSoFarOrThrow(value >= 0 ? 1 : -1);
+    return value;
   }
 
   @Override
