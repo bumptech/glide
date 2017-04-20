@@ -69,7 +69,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     fullRequest = Glide.with(this)
         .asDrawable()
         .transition(withNoTransition())
-        .apply(centerCropTransform(getActivity()));
+        .apply(centerCropTransform());
 
     thumbnailRequest = Glide.with(this)
         .asDrawable()

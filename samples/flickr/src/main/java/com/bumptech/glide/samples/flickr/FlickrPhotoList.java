@@ -80,7 +80,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     final RequestManager requestManager = Glide.with(this);
     fullRequest = requestManager
         .asDrawable()
-        .apply(centerCropTransform(getActivity())
+        .apply(centerCropTransform()
             .placeholder(new ColorDrawable(Color.GRAY)));
 
     thumbRequest = requestManager
