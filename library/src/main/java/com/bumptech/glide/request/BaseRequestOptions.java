@@ -814,30 +814,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
-   * @param context        Any {@link android.content.Context}.
-   * @param transformation Any {@link com.bumptech.glide.load.Transformation} for
-   *                       {@link android.graphics.Bitmap}s.
-   * @see #optionalTransform(android.content.Context, com.bumptech.glide.load.Transformation)
-   * @see #optionalTransform(Class, com.bumptech.glide.load.Transformation)
-   *
-   * @deprecated See {@link #transform(Transformation)}.
-   */
-  @Deprecated
-  @GlideOption(staticMethodName = "bitmapTransform")
-  public CHILD transform(
-      @SuppressWarnings("unused") Context context, @NonNull Transformation<Bitmap> transformation) {
-    return transform(transformation);
-  }
-
-  /**
-   * Applies the given {@link com.bumptech.glide.load.Transformation} for
-   * {@link android.graphics.Bitmap Bitmaps} to the default types ({@link android.graphics.Bitmap},
-   * {@link android.graphics.drawable.BitmapDrawable}, and
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable})
-   * and throws an exception if asked to transform an unknown type.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()}.
-   *
    * @param transformation Any {@link com.bumptech.glide.load.Transformation} for
    *                       {@link android.graphics.Bitmap}s.
    * @see #optionalTransform(com.bumptech.glide.load.Transformation)
