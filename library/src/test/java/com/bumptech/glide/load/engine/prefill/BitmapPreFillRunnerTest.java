@@ -129,7 +129,7 @@ public class BitmapPreFillRunnerTest {
   public void testPreFillHandlerDoesNotPostIfHasNoBitmapsToAllocate() {
     BitmapPreFillRunner handler = getHandler(new HashMap<PreFillType, Integer>());
     handler.run();
-    verify(mainHandler, never()).postDelayed(any(Runnable.class), anyInt());
+    verify(mainHandler, never()).postDelayed(any(Runnable.class), anyLong());
   }
 
   @Test
