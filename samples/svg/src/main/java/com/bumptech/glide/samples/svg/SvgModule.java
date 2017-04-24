@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.PictureDrawable;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.annotation.GlideModule;
-import com.bumptech.glide.module.RootGlideModule;
+import com.bumptech.glide.module.AppGlideModule;
 import com.caverock.androidsvg.SVG;
 import java.io.InputStream;
 
@@ -12,7 +12,7 @@ import java.io.InputStream;
  * Module for the SVG sample app.
  */
 @GlideModule
-public class SvgModule extends RootGlideModule {
+public class SvgModule extends AppGlideModule {
   @Override
   public void registerComponents(Context context, Registry registry) {
     registry.register(SVG.class, PictureDrawable.class, new SvgDrawableTranscoder())
