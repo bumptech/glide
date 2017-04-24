@@ -14,6 +14,14 @@ One of the larger changes in Glide v4 is the way the library handles options (``
 
 ### RequestBuilder
 
+Includes methods like:
+```java
+listener()
+thumbnail()
+load()
+into()
+```
+
 In Glide v4 there is only a single [``RequestBuilder``][5] with a single type that indicates the type of item you're attempting to load (``Bitmap``, ``Drawable``, ``GifDrawable`` etc). The ``RequestBuilder`` provides direct access to options that affect the load process itself, including the model (url, uri etc) you want to load, any [``thumbnail()``][6] requests and any [``RequestListener``s][7]. The ``RequestBuilder`` also is the place where you start the load using [``into()``][8] or [``preload()``][9]:
 
 ```java
@@ -22,15 +30,24 @@ RequestBuilder<Drawable> requestBuilder = Glide.with(fragment)
 
 requestBuilder
     .thumbnail(Glide.with(fragment)
-        .override(100, 100)
-        .load(url))
+        .load(thumbnailUrl))
     .listener(requestListener)
+    .load(url)
     .into(imageView);
 ```
 
 ### RequestOptions
 
-Options like ``centerCrop()``, ``placeholder()`` and others are moved into a separate object called [``RequestOptions``][10]:
+Includes methods like:
+```java
+centerCrop()
+placeholder()
+error()
+priority()
+diskCacheStrategy()
+```
+
+Most options have moved into a separate object called [``RequestOptions``][10]:
 
 ```
 RequestOptions options = new RequestOptions()
@@ -59,6 +76,32 @@ Glide.with(fragment)
     .into(bitmapView);
 ```
     
+
+### TransitionOptions
+
+Includes methods like:
+```java
+crossFade()
+animate()
+```
+
+Options that control transitions from placeholders to images and/or between thumbnails and the full image have been moved into [``TransitionOptions``][13].
+
+To apply transitions (formerly animations), use one of the transition options that matches the type of resource you're requesting:
+
+* [``GenericTransitionOptions``][14]
+* [``DrawableTransitionOptions``][15]
+* [``BitmapTransitionOptions``][16]
+
+To remove any default transition, use [``TransitionOptions.dontTransition()``][17].
+
+Transitions are applied to a request using [``RequestBuilder``][5]:
+
+```java
+Glide.with(fragment)
+    .load(url)
+    .transition(withCrossFade(R.anim.fade_in, 300));
+```
 
 ### Generated API
 
@@ -91,6 +134,86 @@ GlideApp.with(fragment)
 ```
 
 You can still use the generated ``RequestOptions`` subclass to apply the same set of options to multiple loads, but generated ``RequestBuilder`` subclass may be more convenient in most cases.
+
+## Types and Targets
+
+### Picking Resource Types
+
+Glide allows you to specify what type of resource you want to load. If you specify a super type, Glide will attempt to load any available subtypes. For example, if you request a Drawable, Glide may load either a BitmapDrawable or a GifDrawable. If you request a GifDrawable, Glide will either load a GifDrawable or error if the image isn't a GIF (even if it happens to be a perfectly valid image).
+
+Drawables are requested by default:
+
+```java
+Glide.with(fragment).load(url)
+```
+  
+To request a Bitmap:
+
+```java
+Glide.with(fragment).asBitmap()
+```
+
+To obtain a filepath (best for local images):
+
+```java
+Glide.with(fragment).asFile()
+```
+
+To download a remote file into cache and obtain a file path:
+
+```java
+Glide.with(fragment).downloadOnly()
+// or if you have the url already:
+Glide.with(fragmetn).download(url);
+```
+
+### Drawables
+
+``GlideDrawable`` in Glide v3 has been removed in favor of the standard Android [``Drawable``][18]. ``GlideBitmapDrawable`` has been removed in favor of [``BitmapDrawable``][19].
+
+If you want to know if a Drawable is animated, you can check if it is an instance of [``Animatable``][20]:
+
+```java
+boolean isAnimated = drawable instanceof Animatable
+```
+
+### Targets
+
+The signature of ``onResourceReady`` has changed. For example, for ``Drawables``:
+
+```java
+onResourceReady(GlideDrawable drawable, GlideAnimation<? super GlideDrawable> anim) 
+```
+
+is now:
+
+```java
+onResourceReady(Drawable drawable, Transition<? super Drawable> transition);
+```
+
+Similarly the signature of ``onLoadFailed`` has also changed:
+```java
+onLoadFailed(Exception e, Drawable errorDrawable)
+```
+
+is now:
+
+```java
+onLoadFailed(Drawable errorDrawable)
+```
+
+If you need more information about the errors that caused the load to fail, you can use [``RequestListener``][21].
+
+
+#### Cancellation
+
+``Glide.clear(Target)`` has moved into [``RequestManager``][22]:
+
+```java
+Glide.with(fragment).clear(target)
+```
+
+Although it's not required, it's most performant to use the ``RequestManager`` that started the load to also clear the load. Glide v4 keeps track of requests per Activity and Fragment so clearing needs to remove the request at the appropriate level.
 
 ## Configuration
 In Glide v3, configuration is performed via one or more [``GlideModules``][1]. In Glide v4, configuration is done via a similar but slightly more sophisticated system.
@@ -204,3 +327,13 @@ public class GiphyGlideModule extends RootGlideModule {
 [10]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html
 [11]: generatedapi.html
 [12]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
+[13]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
+[14]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
+[15]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html
+[16]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
+[17]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html#dontTransition--
+[18]: https://developer.android.com/reference/android/graphics/drawable/Drawable.html
+[19]: https://developer.android.com/reference/android/graphics/drawable/BitmapDrawable.html
+[20]: https://developer.android.com/reference/android/graphics/drawable/Animatable.html
+[21]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
+[22]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestManager.html
