@@ -145,16 +145,6 @@ public final class RequestOptions extends BaseRequestOptions<RequestOptions> {
 
   /**
    * Returns a {@link RequestOptions} object with {@link #centerCrop()} set.
-   *
-   * @deprecated Use {@link #centerCropTransform()}.
-   */
-  @Deprecated
-  public static RequestOptions centerCropTransform(Context context) {
-    return centerCropTransform();
-  }
-
-  /**
-   * Returns a {@link RequestOptions} object with {@link #centerCrop()} set.
    */
   public static RequestOptions centerCropTransform() {
     if (centerCropOptions == null) {
