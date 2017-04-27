@@ -14,14 +14,14 @@ For Glide's configuration to work properly, libraries and applications need to p
 
 #### Libraries
 Libraries must:
-1. Add one or more [``ChildGlideModule``][2] implementations.
-2. Add the [``@GlideModule``][5] annotation to every [``ChildGlideModule``][2] implementation
+1. Add one or more [``LibraryGlideModule``][2] implementations.
+2. Add the [``@GlideModule``][5] annotation to every [``LibraryGlideModule``][2] implementation
 3. Add a dependency on Glide's annotation processor.
 
-An example [``ChildGlideModule``][2] from Glide's [OkHttp integration library][7] looks like this:
+An example [``LibraryGlideModule``][2] from Glide's [OkHttp integration library][7] looks like this:
 ```java
 @GlideModule
-public final class OkHttpChildGlideModule extends ChildGlideModule {
+public final class OkHttpLibraryGlideModule extends LibraryGlideModule {
   @Override
   public void registerComponents(Context context, Registry registry) {
     registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory());
@@ -37,8 +37,8 @@ annotationProcessor 'com.github.bumptech.glide:annotation:1.0.0-SNAPSHOT'
 #### Applications
 Applications must:
 1. Add exactly one [``AppGlideModule``][1] implementation
-2. Optionally add one or more [``ChildGlideModule``][2] implementations.
-3. Add the [``@GlideModule``][5] annotation to the [``AppGlideModule``][1] implementation and all [``ChildGlideModule``][2] implementations.
+2. Optionally add one or more [``LibraryGlideModule``][2] implementations.
+3. Add the [``@GlideModule``][5] annotation to the [``AppGlideModule``][1] implementation and all [``LibraryGlideModule``][2] implementations.
 4. Add a dependency on Glide's annotation processor.
 5. Add a proguard keep for [``AppGlideModules``][1].
 
@@ -166,26 +166,26 @@ public class YourAppGlideModule extends AppGlideModule {
 
 
 ### Key components
-Glide v4 relies on two classes, [``AppGlideModule``][1] and [``ChildGlideModule``][2], to configure the Glide singleton. Both classes are allowed to register additional components, like [``ModelLoaders``][3], [``ResourceDecoders``][4] etc. Only the [``AppGlideModules``][1] are allowed to configure application specific settings, like cache implementations and sizes. 
+Glide v4 relies on two classes, [``AppGlideModule``][1] and [``LibraryGlideModule``][2], to configure the Glide singleton. Both classes are allowed to register additional components, like [``ModelLoaders``][3], [``ResourceDecoders``][4] etc. Only the [``AppGlideModules``][1] are allowed to configure application specific settings, like cache implementations and sizes. 
 
 #### AppGlideModule
-All applications must add a [``AppGlideModule``][1] implementation, even if the Application is not changing any additional settings or implementing any methods in [``AppGlideModule``][1]. The [``AppGlideModule``][1] implementation acts as a signal that allows Glide's annotation processor to generate a single combined class with with all discovered [``ChildGlideModules``][2].
+All applications must add a [``AppGlideModule``][1] implementation, even if the Application is not changing any additional settings or implementing any methods in [``AppGlideModule``][1]. The [``AppGlideModule``][1] implementation acts as a signal that allows Glide's annotation processor to generate a single combined class with with all discovered [``LibraryGlideModules``][2].
 
 There can be only one [``AppGlideModule``][1] implementation in a given application (having more than one produce errors at compile time). As a result, libraries must never provide a [``AppGlideModule``][1] implementation. 
 
 #### @GlideModule
-In order for Glide to properly discover [``AppGlideModule``][1] and [``ChildGlideModule``][2] implementations, all implementations of both classes must be annotated with the [``@GlideModule``][5] annotation. The annotation will allow Glide's [annotation processor][6] to discover all implementations at compile time. 
+In order for Glide to properly discover [``AppGlideModule``][1] and [``LibraryGlideModule``][2] implementations, all implementations of both classes must be annotated with the [``@GlideModule``][5] annotation. The annotation will allow Glide's [annotation processor][6] to discover all implementations at compile time. 
 
 #### Annotation Processor
-In addition, to enable discovery of the [``AppGlideModule``][1] and [``ChildGlideModules``][2] all libraries and applications must also include a dependency on Glide's annotation processor. 
+In addition, to enable discovery of the [``AppGlideModule``][1] and [``LibraryGlideModules``][2] all libraries and applications must also include a dependency on Glide's annotation processor. 
 
 [1]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
-[2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/ChildGlideModule.html
+[2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
 [3]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
 [4]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/ResourceDecoder.html
 [5]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideModule.html
 [6]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/compiler/ModuleAnnotationProcessor.html
-[7]: https://github.com/bumptech/glide/blob/master/integration/okhttp3/src/main/java/com/bumptech/glide/integration/okhttp3/OkHttpChildGlideModule.java
+[7]: https://github.com/bumptech/glide/blob/master/integration/okhttp3/src/main/java/com/bumptech/glide/integration/okhttp3/OkHttpLibraryGlideModule.java
 [8]: https://github.com/bumptech/glide/blob/master/samples/flickr/src/main/java/com/bumptech/glide/samples/flickr/FlickrGlideModule.java
 [9]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/MemoryCache.html
 [10]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/LruResourceCache.html

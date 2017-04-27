@@ -259,11 +259,11 @@ public class GiphyGlideModule extends AppGlideModule {
 
 Note that the ``@GlideModule`` annotation is required.
 
-If your application has multiple ``GlideModule``s, convert one of them to a ``AppGlideModule`` and the others to [``ChildGlideModule``s][3]. ``ChildGlideModule``s will not be discovered unless a ``AppGlideModule`` is present, so you cannot use only ``ChildGlideModule``s. 
+If your application has multiple ``GlideModule``s, convert one of them to a ``AppGlideModule`` and the others to [``LibraryGlideModule``s][3]. ``LibraryGlideModule``s will not be discovered unless a ``AppGlideModule`` is present, so you cannot use only ``LibraryGlideModule``s. 
 
 ### Libraries
 
-Libraries that have one or more ``GlideModule``s should use [``ChildGlideModule``][3] instead of [``AppGlideModule``][2]. Libraries should not use [``AppGlideModule``s][2] because there can only be one per Application, so including it in a library would not only prevent users of the library from setting their own options, but it would also cause conflicts if multiple libraries included a ``AppGlideModule``. 
+Libraries that have one or more ``GlideModule``s should use [``LibraryGlideModule``][3] instead of [``AppGlideModule``][2]. Libraries should not use [``AppGlideModule``s][2] because there can only be one per Application, so including it in a library would not only prevent users of the library from setting their own options, but it would also cause conflicts if multiple libraries included a ``AppGlideModule``. 
 
 For example, the Volley ``GlideModule`` in v3:
 
@@ -281,11 +281,11 @@ public class VolleyGlideModule implements GlideModule {
 }
 ```
 
-Can be converted to a ``ChildGlideModule`` in v4:
+Can be converted to a ``LibraryGlideModule`` in v4:
 
 ```java
 @GlideModule
-public class VolleyChildGlideModule extends ChildGlideModule {
+public class VolleyLibraryGlideModule extends LibraryGlideModule {
   @Override
   public void registerComponents(Context context, Registry registry) {
     registry.replace(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(context));
@@ -295,7 +295,7 @@ public class VolleyChildGlideModule extends ChildGlideModule {
 
 ### Manifest parsing
 
-To ease the migration, manifest parsing and the older [``GlideModule``][1] interface are deprecated, but still supported in v4. ``AppGlideModule``s, ``ChildGlideModule``s and the deprecated ``GlideModule``s can all coexist in an application.
+To ease the migration, manifest parsing and the older [``GlideModule``][1] interface are deprecated, but still supported in v4. ``AppGlideModule``s, ``LibraryGlideModule``s and the deprecated ``GlideModule``s can all coexist in an application.
 
 However, to avoid the performance overhead of checking metadata (and associated bugs), you can disable manifest parsing once your migration is complete by overriding a method in your ``AppGlideModule``:
 
@@ -317,7 +317,7 @@ public class GiphyGlideModule extends AppGlideModule {
 
 [1]: http://sjudd.github.io/glide/javadocs/360/com/bumptech/glide/module/GlideModule.html
 [2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
-[3]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/ChildGlideModule.html
+[3]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
 [4]: configuration.html
 [5]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
 [6]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#thumbnail-com.bumptech.glide.RequestBuilder-
