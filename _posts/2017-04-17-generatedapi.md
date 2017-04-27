@@ -21,21 +21,21 @@ Although both of these tasks can be accomplished by hand by writing custom subcl
 
 ### Getting Started
 
-To trigger the API generation, include a [``RootGlideModule``][4] implementation in your application:
+To trigger the API generation, include a [``AppGlideModule``][4] implementation in your application:
 
 ```java
 package com.example.myapp;
 
 import com.bumptech.glide.annotation.GlideModule;
-import com.bumptech.glide.module.RootGlideModule;
+import com.bumptech.glide.module.AppGlideModule;
 
 @GlideModule
-public final class MyAppGlideModule extends RootGlideModule {}
+public final class MyAppGlideModule extends AppGlideModule {}
 ```
 
-Note that [``RootGlideModule``][4] implementations must always be annotated with [``@GlideModule``][5]. If the annotation is not present, the module will not be discovered and you will see a warning in your logs with the ``Glide`` log tag that indicates that the module couldn't be found.
+Note that [``AppGlideModule``][4] implementations must always be annotated with [``@GlideModule``][5]. If the annotation is not present, the module will not be discovered and you will see a warning in your logs with the ``Glide`` log tag that indicates that the module couldn't be found.
 
-The API is generated in the same package as the [``RootGlideModule``][4] implementation provided by the application and is named ``GlideApp`` by default. Applications can use the API by starting all loads with ``GlideApp.with()`` instead of ``Glide.with()``:
+The API is generated in the same package as the [``AppGlideModule``][4] implementation provided by the application and is named ``GlideApp`` by default. Applications can use the API by starting all loads with ``GlideApp.with()`` instead of ``Glide.with()``:
 
 ```java
 GlideApp.with(fragment)
@@ -55,7 +55,7 @@ The [``GlideExtension``][6] annotation identifies a class that extends Glide's A
 
 Classes annotated with [``GlideExtension``][6] are expected to be utility classes. They should have a private and empty constructor. Classes annotated with GlideExtension should also be final and contain only static methods. Annotated classes may contain static variables and may reference other classes or objects.
 
-An application may implement as many [``GlideExtension``][6] annotated classes as they'd like. Libraries can also implement an arbitrary number of [``GlideExtension``][6] annotated classes. When a [``RootGlideModule``][4] is found, all available [``GlideExtensions``][6] will be merged to create a single API with all available extensions. Conflicts will result in compliation errors in Glide's annotation processor.
+An application may implement as many [``GlideExtension``][6] annotated classes as they'd like. Libraries can also implement an arbitrary number of [``GlideExtension``][6] annotated classes. When a [``AppGlideModule``][4] is found, all available [``GlideExtensions``][6] will be merged to create a single API with all available extensions. Conflicts will result in compliation errors in Glide's annotation processor.
 
 GlideExtension annotated classes can define two types of extension methods:
 
@@ -178,7 +178,7 @@ Methods annotated with ``GlideType`` must take a [``RequestBuilder<T>``][2] as t
 [1]: https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html
 [2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
 [3]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html
-[4]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/RootGlideModule.html
+[4]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
 [5]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideModule.html
 [6]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
 [7]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideOption.html

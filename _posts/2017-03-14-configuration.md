@@ -36,16 +36,16 @@ annotationProcessor 'com.github.bumptech.glide:annotation:1.0.0-SNAPSHOT'
 
 #### Applications
 Applications must:
-1. Add exactly one [``RootGlideModule``][1] implementation
+1. Add exactly one [``AppGlideModule``][1] implementation
 2. Optionally add one or more [``ChildGlideModule``][2] implementations.
-3. Add the [``@GlideModule``][5] annotation to the [``RootGlideModule``][1] implementation and all [``ChildGlideModule``][2] implementations.
+3. Add the [``@GlideModule``][5] annotation to the [``AppGlideModule``][1] implementation and all [``ChildGlideModule``][2] implementations.
 4. Add a dependency on Glide's annotation processor.
-5. Add a proguard keep for [``RootGlideModules``][1].
+5. Add a proguard keep for [``AppGlideModules``][1].
 
-An example [``RootGlideModule``][1] from Glide's [Flickr sample app][8] looks like this:
+An example [``AppGlideModule``][1] from Glide's [Flickr sample app][8] looks like this:
 ```java
 @GlideModule
-public class FlickrGlideModule extends RootGlideModule {
+public class FlickrGlideModule extends AppGlideModule {
   @Override
   public void registerComponents(Context context, Registry registry) {
     registry.append(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
@@ -59,21 +59,21 @@ annotationProcessor 'com.github.bumptech.glide:annotation:1.0.0-SNAPSHOT'
 annotationProcessor 'com.github.bumptech.glide:compiler:1.0.0-SNAPSHOT'
 ```
 
-Finally, you should keep RootGlideModule implementations in your ``proguard.cfg``:
+Finally, you should keep AppGlideModule implementations in your ``proguard.cfg``:
 ```
--keep public class * extends com.bumptech.glide.RootGlideModule
+-keep public class * extends com.bumptech.glide.AppGlideModule
 ```
 
 ### Application Options
-Glide allows applications to use [``RootGlideModule``][1] implementations to completely control Glide's memory and disk cache usage. Glide tries to provide reasonable defaults for most applications, but for some applications, it will be necessary to customize these values. Be sure to measure the results of any changes to avoid performance regressions.
+Glide allows applications to use [``AppGlideModule``][1] implementations to completely control Glide's memory and disk cache usage. Glide tries to provide reasonable defaults for most applications, but for some applications, it will be necessary to customize these values. Be sure to measure the results of any changes to avoid performance regressions.
 
 #### Memory cache
 By default, Glide uses [``LruResourceCache``][10], a default implementation of the [``MemoryCache``][9] interface that uses a fixed amount of memory with LRU eviction. The size of the [``LruResourceCache``][10] is determined by Glide's [``MemorySizeCalculator``][11] class, which looks at the device memory class, whether or not the device is low ram and the screen resolution. 
 
-Applications can customize the [``MemoryCache``][9] size in their [``RootGlideModule``][1] with the [``applyOptions(Context, GlideBuilder)``][12] method by configuring [``MemorySizeCalculator``][11]:
+Applications can customize the [``MemoryCache``][9] size in their [``AppGlideModule``][1] with the [``applyOptions(Context, GlideBuilder)``][12] method by configuring [``MemorySizeCalculator``][11]:
 ```java
 @GlideModule
-public class YourAppGlideModule extends RootGlideModule {
+public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     MemorySizeCalculator calculator = new MemorySizeCalculator.Builder(context)
@@ -88,7 +88,7 @@ Applications can also directly override the cache size:
 
 ```java
 @GlideModule
-public class YourAppGlideModule extends RootGlideModule {
+public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     int memoryCacheSizeBytes = 1024 * 1024 * 20; // 20mb
@@ -100,7 +100,7 @@ public class YourAppGlideModule extends RootGlideModule {
 Applications can even provide their own implementation of [``MemoryCache``][9]:
 ```java
 @GlideModule
-public class YourAppGlideModule extends RootGlideModule {
+public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     builder.setMemoryCache(new YourAppMemoryCacheImpl());
@@ -114,7 +114,7 @@ Glide uses [``DiskLruCacheWrapper``][13] as the default [``DiskCache``][14]. [``
 Applications can change the location to external storage if the media they display is public (obtained from websites without authentication, search engines etc):
 ```java
 @GlideModule
-public class YourAppGlideModule extends RootGlideModule {
+public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     builder.setDiskCache(new ExternalDiskCacheFactory(context));
@@ -125,7 +125,7 @@ public class YourAppGlideModule extends RootGlideModule {
 Applications can change the size of the disk, for either the internal or external disk caches:
 ```java
 @GlideModule
-public class YourAppGlideModule extends RootGlideModule {
+public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     int diskCacheSizeBytes = 1024 * 1024 * 100; // 100 MB
@@ -137,7 +137,7 @@ public class YourAppGlideModule extends RootGlideModule {
 Applications can change the name of the folder the cache is placed in within external or internal storage:
 ```java
 @GlideModule
-public class YourAppGlideModule extends RootGlideModule {
+public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     int diskCacheSizeBytes = 1024 * 1024 * 100; // 100 MB
@@ -151,7 +151,7 @@ Applications can also choose to implement the [``DiskCache``][14] interface them
 
 ```java
 @GlideModule
-public class YourAppGlideModule extends RootGlideModule {
+public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     builder.setDiskCache(new DiskCache.Factory() {
@@ -166,20 +166,20 @@ public class YourAppGlideModule extends RootGlideModule {
 
 
 ### Key components
-Glide v4 relies on two classes, [``RootGlideModule``][1] and [``ChildGlideModule``][2], to configure the Glide singleton. Both classes are allowed to register additional components, like [``ModelLoaders``][3], [``ResourceDecoders``][4] etc. Only the [``RootGlideModules``][1] are allowed to configure application specific settings, like cache implementations and sizes. 
+Glide v4 relies on two classes, [``AppGlideModule``][1] and [``ChildGlideModule``][2], to configure the Glide singleton. Both classes are allowed to register additional components, like [``ModelLoaders``][3], [``ResourceDecoders``][4] etc. Only the [``AppGlideModules``][1] are allowed to configure application specific settings, like cache implementations and sizes. 
 
-#### RootGlideModule
-All applications must add a [``RootGlideModule``][1] implementation, even if the Application is not changing any additional settings or implementing any methods in [``RootGlideModule``][1]. The [``RootGlideModule``][1] implementation acts as a signal that allows Glide's annotation processor to generate a single combined class with with all discovered [``ChildGlideModules``][2].
+#### AppGlideModule
+All applications must add a [``AppGlideModule``][1] implementation, even if the Application is not changing any additional settings or implementing any methods in [``AppGlideModule``][1]. The [``AppGlideModule``][1] implementation acts as a signal that allows Glide's annotation processor to generate a single combined class with with all discovered [``ChildGlideModules``][2].
 
-There can be only one [``RootGlideModule``][1] implementation in a given application (having more than one produce errors at compile time). As a result, libraries must never provide a [``RootGlideModule``][1] implementation. 
+There can be only one [``AppGlideModule``][1] implementation in a given application (having more than one produce errors at compile time). As a result, libraries must never provide a [``AppGlideModule``][1] implementation. 
 
 #### @GlideModule
-In order for Glide to properly discover [``RootGlideModule``][1] and [``ChildGlideModule``][2] implementations, all implementations of both classes must be annotated with the [``@GlideModule``][5] annotation. The annotation will allow Glide's [annotation processor][6] to discover all implementations at compile time. 
+In order for Glide to properly discover [``AppGlideModule``][1] and [``ChildGlideModule``][2] implementations, all implementations of both classes must be annotated with the [``@GlideModule``][5] annotation. The annotation will allow Glide's [annotation processor][6] to discover all implementations at compile time. 
 
 #### Annotation Processor
-In addition, to enable discovery of the [``RootGlideModule``][1] and [``ChildGlideModules``][2] all libraries and applications must also include a dependency on Glide's annotation processor. 
+In addition, to enable discovery of the [``AppGlideModule``][1] and [``ChildGlideModules``][2] all libraries and applications must also include a dependency on Glide's annotation processor. 
 
-[1]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/RootGlideModule.html
+[1]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
 [2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/ChildGlideModule.html
 [3]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
 [4]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/ResourceDecoder.html
@@ -190,7 +190,7 @@ In addition, to enable discovery of the [``RootGlideModule``][1] and [``ChildGli
 [9]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/MemoryCache.html
 [10]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/LruResourceCache.html
 [11]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/MemorySizeCalculator.html
-[12]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/RootGlideModule.html#applyOptions-android.content.Context-com.bumptech.glide.GlideBuilder-
+[12]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html#applyOptions-android.content.Context-com.bumptech.glide.GlideBuilder-
 [13]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskLruCacheWrapper.html
 [14]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.html
 [15]: https://github.com/bumptech/glide/blob/master/library/src/main/java/com/bumptech/glide/load/engine/cache/DiskCache.java#L18

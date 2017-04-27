@@ -27,19 +27,19 @@ Although it's good practice to clear loads you no longer need, you're not requir
 
 ### Applications
 
-Applications can add an appropriately annotated [``RootGlideModule``][6] implementation to generate a fluent API that inlines most options, including those defined in integration libraries:
+Applications can add an appropriately annotated [``AppGlideModule``][6] implementation to generate a fluent API that inlines most options, including those defined in integration libraries:
 
 ```java
 package com.example.myapp;
 
 import com.bumptech.glide.annotation.GlideModule;
-import com.bumptech.glide.module.RootGlideModule;
+import com.bumptech.glide.module.AppGlideModule;
 
 @GlideModule
-public final class MyAppGlideModule extends RootGlideModule {}
+public final class MyAppGlideModule extends AppGlideModule {}
 ```
 
-The API is generated in the same package as the [``RootGlideModule``][6] and is named ``GlideApp`` by default. Applications can use the API by starting all loads with ``GlideApp.with()`` instead of ``Glide.with()``:
+The API is generated in the same package as the [``AppGlideModule``][6] and is named ``GlideApp`` by default. Applications can use the API by starting all loads with ``GlideApp.with()`` instead of ``Glide.with()``:
 
 ```java
 GlideApp.with(fragment)
@@ -94,4 +94,4 @@ Although the examples we've shown here are for RecyclerView, the same principles
 [3]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/BaseRequestOptions.html#fallback(int)
 [4]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/RequestManager.html#clear(com.bumptech.glide.request.target.Target)
 [5]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/request/target/Target.html
-[6]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/RootGlideModule.html
+[6]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html

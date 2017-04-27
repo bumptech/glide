@@ -105,7 +105,7 @@ Glide.with(fragment)
 
 ### Generated API
 
-To make it even easier to use Glide v4, Glide now also offers a generated API for Applications. Applications can access the generated API by including an appropriately annotated [``RootGlideModule``][[2] implementation. See the [Generated API][11] page for details on how this works.
+To make it even easier to use Glide v4, Glide now also offers a generated API for Applications. Applications can access the generated API by including an appropriately annotated [``AppGlideModule``][[2] implementation. See the [Generated API][11] page for details on how this works.
 
 The generated API adds a ``GlideApp`` class, that provides access to ``RequestBuilder`` and ``RequestOptions`` subclasses. The ``RequestOptions`` subclass contains all methods in ``RequestOptions`` and any methods defined in [``GlideExtensions``][12]. The ``RequestBuilder`` subclass provides access to all methods in the generated ``RequestOptions`` subclass without having to use ``apply``:
 
@@ -222,7 +222,7 @@ For details on the new system, see the [Configuration][4] page.
 
 ### Applications
 
-Applications that have a single [``GlideModule``][1] can convert their ``GlideModule`` into a [``RootGlideModule``][2].
+Applications that have a single [``GlideModule``][1] can convert their ``GlideModule`` into a [``AppGlideModule``][2].
 
 In Glide v3, you might have a ``GlideModule`` like this:
 
@@ -240,11 +240,11 @@ public class GiphyGlideModule implements GlideModule {
 }
 ```
 
-In Glide v4, you would convert it into a ``RootGlideModule`` that looks like this:
+In Glide v4, you would convert it into a ``AppGlideModule`` that looks like this:
 
 ```java
 @GlideModule
-public class GiphyGlideModule extends RootGlideModule {
+public class GiphyGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     builder.setMemoryCache(new LruResourceCache(10 * 1024 * 1024));
@@ -259,11 +259,11 @@ public class GiphyGlideModule extends RootGlideModule {
 
 Note that the ``@GlideModule`` annotation is required.
 
-If your application has multiple ``GlideModule``s, convert one of them to a ``RootGlideModule`` and the others to [``ChildGlideModule``s][3]. ``ChildGlideModule``s will not be discovered unless a ``RootGlideModule`` is present, so you cannot use only ``ChildGlideModule``s. 
+If your application has multiple ``GlideModule``s, convert one of them to a ``AppGlideModule`` and the others to [``ChildGlideModule``s][3]. ``ChildGlideModule``s will not be discovered unless a ``AppGlideModule`` is present, so you cannot use only ``ChildGlideModule``s. 
 
 ### Libraries
 
-Libraries that have one or more ``GlideModule``s should use [``ChildGlideModule``][3] instead of [``RootGlideModule``][2]. Libraries should not use [``RootGlideModule``s][2] because there can only be one per Application, so including it in a library would not only prevent users of the library from setting their own options, but it would also cause conflicts if multiple libraries included a ``RootGlideModule``. 
+Libraries that have one or more ``GlideModule``s should use [``ChildGlideModule``][3] instead of [``AppGlideModule``][2]. Libraries should not use [``AppGlideModule``s][2] because there can only be one per Application, so including it in a library would not only prevent users of the library from setting their own options, but it would also cause conflicts if multiple libraries included a ``AppGlideModule``. 
 
 For example, the Volley ``GlideModule`` in v3:
 
@@ -295,13 +295,13 @@ public class VolleyChildGlideModule extends ChildGlideModule {
 
 ### Manifest parsing
 
-To ease the migration, manifest parsing and the older [``GlideModule``][1] interface are deprecated, but still supported in v4. ``RootGlideModule``s, ``ChildGlideModule``s and the deprecated ``GlideModule``s can all coexist in an application.
+To ease the migration, manifest parsing and the older [``GlideModule``][1] interface are deprecated, but still supported in v4. ``AppGlideModule``s, ``ChildGlideModule``s and the deprecated ``GlideModule``s can all coexist in an application.
 
-However, to avoid the performance overhead of checking metadata (and associated bugs), you can disable manifest parsing once your migration is complete by overriding a method in your ``RootGlideModule``:
+However, to avoid the performance overhead of checking metadata (and associated bugs), you can disable manifest parsing once your migration is complete by overriding a method in your ``AppGlideModule``:
 
 ```java
 @GlideModule
-public class GiphyGlideModule extends RootGlideModule {
+public class GiphyGlideModule extends AppGlideModule {
   @Override
   public boolean isManifestParsingEnabled() {
     return false;
@@ -316,7 +316,7 @@ public class GiphyGlideModule extends RootGlideModule {
 
 
 [1]: http://sjudd.github.io/glide/javadocs/360/com/bumptech/glide/module/GlideModule.html
-[2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/RootGlideModule.html
+[2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
 [3]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/ChildGlideModule.html
 [4]: configuration.html
 [5]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
