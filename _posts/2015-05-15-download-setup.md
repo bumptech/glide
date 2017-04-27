@@ -7,7 +7,7 @@ order: 1
 disqus: 1
 ---
 
-### Download 
+### Download
 
 Glide's public releases are accessible in a number of ways.
 
@@ -25,7 +25,8 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.bumptech.glide:glide:4.0.0'
+    compile 'com.github.bumptech.glide:glide:4.0.0-SNAPSHOT'
+    compile 'com.github.bumptech.glide.annotation:compiler:4.0.0-SNAPSHOT'
     compile 'com.android.support:support-v4:19.1.0'
 }
 ```
@@ -67,5 +68,3 @@ If you use proguard, you may need to add the following lines to your ``proguard.
 
 [1]: https://github.com/bumptech/glide/releases/download/v3.6.0/glide-3.6.0.jar
 [2]: http://developer.android.com/tools/support-library/features.html#v4
-
-
