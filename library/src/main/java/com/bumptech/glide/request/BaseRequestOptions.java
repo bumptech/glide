@@ -712,26 +712,6 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
-   * @param context Any {@link Context}.
-   * @see #optionalTransform(Context, Transformation)
-   * @see #circleCrop(Context)
-   *
-   * @deprecated use {@link #optionalCircleCrop()}.
-   */
-  @Deprecated
-  @GlideOption(
-      staticMethodName = "optionalCircleCropTransform",
-      memoizeStaticMethod = true
-  )
-  public CHILD optionalCircleCrop(@SuppressWarnings("unused") Context context) {
-    return optionalCircleCrop();
-  }
-
-  /**
-   * Applies {@link CircleCrop} to all default types, and ignores unknown types.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()}.
-   *
    * @see #optionalTransform(Transformation)
    * @see #circleCrop()
    */
@@ -751,7 +731,7 @@ public abstract class BaseRequestOptions<CHILD extends BaseRequestOptions<CHILD>
    *
    * @param context Any {@link Context}.
    * @see #transform(Class, Transformation)
-   * @see #optionalCenterCrop(Context)
+   * @see #optionalCenterCrop()
    *
    * @deprecated Use {@link #circleCrop()}.
    */
