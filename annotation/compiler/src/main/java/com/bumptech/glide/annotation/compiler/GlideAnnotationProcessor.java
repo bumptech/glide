@@ -37,7 +37,7 @@ import javax.lang.model.element.TypeElement;
  *     initialized.
  *   <li>{@link com.bumptech.glide.annotation.GlideExtension}s -
  *   <ul>
- *     <li>A {@link com.bumptech.glide.request.BaseRequestOptions} implementation that contains
+ *     <li>A {@link com.bumptech.glide.request.RequestOptions} implementation that contains
  *     static versions of all builder methods in the base class and both static and instance
  *     versions of methods in all {@link com.bumptech.glide.annotation.GlideExtension}s.
  *     <li>If one or more methods in one or more

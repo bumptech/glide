@@ -60,7 +60,7 @@ final class GlideExtensionValidator {
     VariableElement first = executableElement.getParameters().get(0);
     TypeMirror expected = first.asType();
     if (!expected.toString().equals(
-        "com.bumptech.glide.request.BaseRequestOptions<?>")) {
+        "com.bumptech.glide.request.RequestOptions")) {
       throw new IllegalArgumentException("@GlideOption methods must take a"
           + " RequestOptions object as their first parameter, but given: " + expected);
     }
@@ -70,7 +70,7 @@ final class GlideExtensionValidator {
     validateStaticVoid(executableElement, GlideType.class);
     if (executableElement.getParameters().size() != 1) {
       throw new IllegalArgumentException("@GlideType methods must take a"
-          + " BaseRequestOptions object as their first and only parameter, found multiple for: "
+          + " RequestOptions object as their first and only parameter, found multiple for: "
       + executableElement.getEnclosingElement() + "#" + executableElement);
     }
 

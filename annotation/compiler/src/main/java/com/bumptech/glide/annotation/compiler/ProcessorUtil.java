@@ -139,9 +139,9 @@ final class ProcessorUtil {
     // Use the simple name of the containing type instead of just the containing type's TypeMirror
     // so that we avoid appending <CHILD> or other type arguments to the class and breaking
     // Javadoc's linking.
-    // With this we get @see BaseRequestOptions#methodName().
+    // With this we get @see RequestOptions#methodName().
     // With just ClassName.get(element.getEnclosingElement().asType()), we get:
-    // @see BaseRequestOptions<CHILD>#methodName().
+    // @see RequestOptions<CHILD>#methodName().
     return generateSeeMethodJavadoc(getJavadocSafeName(method.getEnclosingElement()),
         method.getSimpleName().toString(), method.getParameters());
   }
@@ -210,7 +210,7 @@ final class ProcessorUtil {
    * Returns a safe String to use in a Javadoc that will function in a link.
    *
    * <p>This method exists because by Javadoc doesn't handle type parameters({@literal <T>}
-   * in {@literal BaseRequestOptions<T>} for example).
+   * in {@literal RequestOptions<T>} for example).
    */
   private TypeName getJavadocSafeName(Element element) {
     Types typeUtils = processingEnv.getTypeUtils();
@@ -243,6 +243,13 @@ final class ProcessorUtil {
   List<ExecutableElement> findInstanceMethodsReturning(TypeElement clazz, TypeElement returnType) {
     return FluentIterable.from(clazz.getEnclosedElements())
         .filter(new FilterPublicMethods(returnType, MethodType.INSTANCE))
+        .transform(new ToMethod())
+        .toList();
+  }
+
+  List<ExecutableElement> findStaticMethodsReturning(TypeElement clazz, TypeElement returnType) {
+    return FluentIterable.from(clazz.getEnclosedElements())
+        .filter(new FilterPublicMethods(returnType, MethodType.STATIC))
         .transform(new ToMethod())
         .toList();
   }
@@ -345,7 +352,7 @@ final class ProcessorUtil {
         method.getReturnType(), expectedReturnType);
   }
 
-  private final class ToMethod implements Function<Element, ExecutableElement> {
+  private static final class ToMethod implements Function<Element, ExecutableElement> {
 
     @Nullable
     @Override

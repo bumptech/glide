@@ -14,15 +14,15 @@ import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
-public class BaseRequestOptionsTest {
+public class RequestOptionsTest {
 
-  private TestOptions options;
+  private RequestOptions options;
   @Mock private Transformation<Bitmap> transformation;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    options = new TestOptions();
+    options = new RequestOptions();
   }
 
   @Test
@@ -42,7 +42,7 @@ public class BaseRequestOptionsTest {
 
   @Test
   public void testIsTransformationSet_afterApplyingOptionsWithTransform_isTrue() {
-    TestOptions other = new TestOptions();
+    RequestOptions other = new RequestOptions();
     other.transform(Bitmap.class, transformation);
     options.apply(other);
     assertThat(options.isTransformationSet()).isTrue();
@@ -75,7 +75,7 @@ public class BaseRequestOptionsTest {
     assertThat(options.getTransformations()).isEmpty();
   }
 
-  @Test
+@Test
   public void testApplyingTransformation_overridesDontTransform() {
     options.dontTransform();
     options.transform(transformation);
@@ -88,7 +88,7 @@ public class BaseRequestOptionsTest {
   @Test
   public void testApplyingOptions_withDontTransform_overridesTransformations() {
     options.transform(transformation);
-    TestOptions other = new TestOptions();
+    RequestOptions other = new RequestOptions();
     other.dontTransform();
 
     options.apply(other);
@@ -102,7 +102,7 @@ public class BaseRequestOptionsTest {
   @Test
   public void testApplyingOptions_withTransformation_overridesDontTransform() {
     options.dontTransform();
-    TestOptions other = new TestOptions();
+    RequestOptions other = new RequestOptions();
     other.transform(transformation);
 
     options.apply(other);
@@ -116,7 +116,7 @@ public class BaseRequestOptionsTest {
   @Test
   public void testApplyingDefaultOptions_withDontTransform_retainsDontTransform() {
     options.dontTransform();
-    options.apply(new TestOptions());
+    options.apply(new RequestOptions());
 
     assertThat(options.isTransformationAllowed()).isFalse();
     assertThat(options.isTransformationRequired()).isFalse();
@@ -126,14 +126,10 @@ public class BaseRequestOptionsTest {
   @Test
   public void testApplyingDefaultOptions_withTransform_retrainsTransform() {
     options.transform(transformation);
-    options.apply(new TestOptions());
+    options.apply(new RequestOptions());
 
     assertThat(options.isTransformationAllowed()).isTrue();
     assertThat(options.isTransformationRequired()).isTrue();
     assertThat(options.getTransformations()).containsEntry(Bitmap.class, transformation);
-  }
-
-  private static class TestOptions extends BaseRequestOptions<TestOptions> {
-    // Empty.
   }
 }

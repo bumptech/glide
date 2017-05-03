@@ -27,14 +27,13 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
  * Generates a {@link com.bumptech.glide.RequestBuilder} subclass containing all methods from
- * the base class, all methods from {@link com.bumptech.glide.request.BaseRequestOptions} and all
+ * the base class, all methods from {@link com.bumptech.glide.request.RequestOptions} and all
  * non-override {@link GlideOption} annotated methods in {@link GlideExtension} annotated
  * classes.
  *
@@ -69,7 +68,7 @@ import javax.lang.model.type.TypeMirror;
  *   }
  *
  *   /**
- *    * {@literal @see} BaseRequestOptions#sizeMultiplier(float)
+ *    * {@literal @see} RequestOptions#sizeMultiplier(float)
  *    *\/
  *   public GlideRequest<TranscodeType> sizeMultiplier(float sizeMultiplier) {
  *     this.requestOptions = getMutableOptions().sizeMultiplier(sizeMultiplier);
@@ -82,10 +81,10 @@ import javax.lang.model.type.TypeMirror;
  * </pre>
  */
 final class RequestBuilderGenerator {
-  private static final String BASE_REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
-  private static final String BASE_REQUEST_OPTIONS_SIMPLE_NAME = "BaseRequestOptions";
-  private static final String BASE_REQUEST_OPTIONS_QUALIFIED_NAME =
-      BASE_REQUEST_OPTIONS_PACKAGE_NAME + "." + BASE_REQUEST_OPTIONS_SIMPLE_NAME;
+  private static final String REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
+  private static final String REQUEST_OPTIONS_SIMPLE_NAME = "RequestOptions";
+  private static final String REQUEST_OPTIONS_QUALIFIED_NAME =
+      REQUEST_OPTIONS_PACKAGE_NAME + "." + REQUEST_OPTIONS_SIMPLE_NAME;
 
   private static final String REQUEST_BUILDER_PACKAGE_NAME = "com.bumptech.glide";
   private static final String REQUEST_BUILDER_SIMPLE_NAME = "RequestBuilder";
@@ -100,7 +99,7 @@ final class RequestBuilderGenerator {
    * e.g. RequestBuilder<TranscodeType>
    */
   private static final String TRANSCODE_TYPE_NAME = "TranscodeType";
-  /** A set of method names to avoid overriding from BaseRequestOptions. */
+  /** A set of method names to avoid overriding from RequestOptions. */
   private static final ImmutableSet<String> EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS =
       ImmutableSet.of("clone", "apply", "autoLock", "lock", "autoClone");
 
@@ -109,7 +108,7 @@ final class RequestBuilderGenerator {
   private ClassName generatedRequestBuilderClassName;
   private final TypeVariableName transcodeTypeName;
   private ParameterizedTypeName generatedRequestBuilderOfTranscodeType;
-  private final TypeElement baseRequestOptionsType;
+  private final TypeElement requestOptionsType;
   private final TypeElement requestBuilderType;
   private ClassName requestOptionsClassName;
 
@@ -122,8 +121,8 @@ final class RequestBuilderGenerator {
 
     transcodeTypeName = TypeVariableName.get(TRANSCODE_TYPE_NAME);
 
-    baseRequestOptionsType = processingEnv.getElementUtils().getTypeElement(
-        BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
+    requestOptionsType = processingEnv.getElementUtils().getTypeElement(
+        REQUEST_OPTIONS_QUALIFIED_NAME);
   }
 
   TypeSpec generate(String generatedCodePackageName, @Nullable TypeSpec generatedOptions) {
@@ -139,7 +138,7 @@ final class RequestBuilderGenerator {
       requestOptionsClassName =
           ClassName.get(
               RequestOptionsGenerator.REQUEST_OPTIONS_PACKAGE_NAME,
-              RequestBuilderGenerator.BASE_REQUEST_OPTIONS_SIMPLE_NAME);
+              RequestBuilderGenerator.REQUEST_OPTIONS_SIMPLE_NAME);
     }
 
     ParameterizedTypeName requestBuilderOfTranscodeType =
@@ -150,14 +149,14 @@ final class RequestBuilderGenerator {
     return TypeSpec.classBuilder(GENERATED_REQUEST_BUILDER_SIMPLE_NAME)
         .addJavadoc("Contains all public methods from {@link $T}, all options from\n",
             requestBuilderType)
-        .addJavadoc("{@link $T} and all generated options from\n", baseRequestOptionsType)
+        .addJavadoc("{@link $T} and all generated options from\n", requestOptionsType)
         .addJavadoc("{@link $T} in annotated methods in\n", GlideOption.class)
         .addJavadoc("{@link $T} annotated classes.\n", GlideExtension.class)
         .addJavadoc("\n")
         .addJavadoc("<p>Generated code, do not modify.\n")
         .addJavadoc("\n")
         .addJavadoc("@see $T\n", requestBuilderType)
-        .addJavadoc("@see $T\n", baseRequestOptionsType)
+        .addJavadoc("@see $T\n", requestOptionsType)
         .addAnnotation(
             AnnotationSpec.builder(SuppressWarnings.class)
                 .addMember("value", "$S", "unused")
@@ -169,7 +168,6 @@ final class RequestBuilderGenerator {
         .addMethods(generateConstructors())
         .addMethod(generateDownloadOnlyRequestMethod())
         .addMethods(generateGeneratedRequestOptionsEquivalents(generatedOptions))
-        .addMethods(generateBaseRequestOptionsEquivalents())
         .addMethods(generateRequestBuilderOverrides())
         .build();
   }
@@ -224,77 +222,6 @@ final class RequestBuilderGenerator {
   }
 
   /**
-   * Generates methods with equivalent names and arguments to those in
-   * {@link com.bumptech.glide.request.BaseRequestOptions} that modify the internal request options
-   * object and return our generated {@link com.bumptech.glide.RequestBuilder} subclass.
-   *
-   * <p>Equivalents methods are only generated for public and non-static methods that return {@link
-   * com.bumptech.glide.request.BaseRequestOptions}.
-   *
-   * <p>Certain methods are excluded because they either overlap or don't make sense on a request
-   * builder (see {@link #EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS}.
-   */
-  private List<MethodSpec> generateBaseRequestOptionsEquivalents() {
-    return FluentIterable.from(
-        processorUtil.findInstanceMethodsReturning(baseRequestOptionsType, baseRequestOptionsType))
-        .filter(new Predicate<ExecutableElement>() {
-          @Override
-          public boolean apply(ExecutableElement input) {
-            return !EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS.contains(
-                input.getSimpleName().toString());
-          }
-        })
-        .transform(new Function<ExecutableElement, MethodSpec>() {
-          @Override
-          public MethodSpec apply(ExecutableElement input) {
-            return generateBaseRequestOptionEquivalent(input);
-          }
-        })
-        .toList();
-  }
-
-  /**
-   * Generates a particular method equivalent to a method in
-   * {@link com.bumptech.glide.request.BaseRequestOptions}.
-   */
-  private MethodSpec generateBaseRequestOptionEquivalent(ExecutableElement methodToOverride) {
-    return MethodSpec.methodBuilder(methodToOverride.getSimpleName().toString())
-        .addModifiers(Modifier.PUBLIC)
-        .addJavadoc(processorUtil.generateSeeMethodJavadoc(methodToOverride))
-        .addTypeVariables(Lists.transform(methodToOverride.getTypeParameters(),
-            new Function<TypeParameterElement, TypeVariableName>() {
-              @Override
-              public TypeVariableName apply(TypeParameterElement input) {
-                return TypeVariableName.get(input.getSimpleName().toString());
-              }
-            }))
-        .addParameters(Lists.transform(methodToOverride.getParameters(),
-            new Function<VariableElement, ParameterSpec>() {
-              @Override
-            public ParameterSpec apply(VariableElement input) {
-              return ParameterSpec.get(input);
-            }
-          }))
-        .returns(generatedRequestBuilderOfTranscodeType)
-        .addCode(CodeBlock.builder()
-            .add("this.requestOptions = getMutableOptions()")
-            .add(".$N(", methodToOverride.getSimpleName().toString())
-            .add(FluentIterable
-                .from(methodToOverride.getParameters())
-                .transform(new Function<VariableElement, String>() {
-                  @Override
-                  public String apply(VariableElement input) {
-                    return input.getSimpleName().toString();
-                  }
-                })
-                .join(Joiner.on(", ")))
-            .add(");\n")
-            .build())
-        .addStatement("return this")
-        .build();
-  }
-
-  /**
    * Generates methods with equivalent names and arguments to methods annotated with
    * {@link GlideOption} in
    * {@link com.bumptech.glide.annotation.GlideExtension}s that return our generated
@@ -331,15 +258,10 @@ final class RequestBuilderGenerator {
    * methods that override other methods to avoid duplicates.
    */
   private boolean isUsefulGeneratedRequestOption(MethodSpec requestOptionMethod) {
-    return requestOptionMethod.hasModifier(Modifier.PUBLIC)
+    return
+        !EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS.contains(requestOptionMethod.name)
+        && requestOptionMethod.hasModifier(Modifier.PUBLIC)
         && !requestOptionMethod.hasModifier(Modifier.STATIC)
-        && !Lists.transform(requestOptionMethod.annotations,
-        new Function<AnnotationSpec, String>() {
-          @Override
-          public String apply(AnnotationSpec input) {
-            return input.type.toString();
-          }
-        }).contains(Override.class.getCanonicalName())
         && requestOptionMethod.returnType.toString()
             .equals(requestOptionsClassName.toString());
   }
@@ -366,6 +288,7 @@ final class RequestBuilderGenerator {
         .addJavadoc(
             processorUtil.generateSeeMethodJavadoc(requestOptionsClassName, requestOptionMethod))
         .addModifiers(Modifier.PUBLIC)
+        .addTypeVariables(requestOptionMethod.typeVariables)
         .addParameters(requestOptionMethod.parameters)
         .returns(generatedRequestBuilderOfTranscodeType)
         .beginControlFlow(

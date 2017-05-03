@@ -146,7 +146,7 @@ public final class GlideBuilder {
    * Sets the default {@link RequestOptions} to use for all loads across the app.
    *
    * <p>Applying additional options with {@link
-   * RequestBuilder#apply(com.bumptech.glide.request.BaseRequestOptions)} will override defaults
+   * RequestBuilder#apply(RequestOptions)} will override defaults
    * set here.
    *
    * @param requestOptions The options to use by default.

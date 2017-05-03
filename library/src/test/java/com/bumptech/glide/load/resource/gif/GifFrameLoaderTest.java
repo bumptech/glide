@@ -24,7 +24,6 @@ import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.gif.GifFrameLoader.DelayTarget;
 import com.bumptech.glide.load.resource.gif.GifFrameLoader.FrameCallback;
-import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -129,7 +128,7 @@ public class GifFrameLoaderTest {
 
     InOrder order = inOrder(gifDecoder, requestBuilder);
     order.verify(gifDecoder).advance();
-    order.verify(requestBuilder).apply(isA(BaseRequestOptions.class));
+    order.verify(requestBuilder).apply(isA(RequestOptions.class));
     order.verify(requestBuilder).into(aTarget());
   }
 

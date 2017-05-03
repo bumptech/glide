@@ -85,7 +85,7 @@ public final class SingleRequest<R> implements Request,
   private GlideContext glideContext;
   private Object model;
   private Class<R> transcodeClass;
-  private BaseRequestOptions<?> requestOptions;
+  private RequestOptions requestOptions;
   private int overrideWidth;
   private int overrideHeight;
   private Priority priority;
@@ -107,7 +107,7 @@ public final class SingleRequest<R> implements Request,
       GlideContext glideContext,
       Object model,
       Class<R> transcodeClass,
-      BaseRequestOptions<?> requestOptions,
+      RequestOptions requestOptions,
       int overrideWidth,
       int overrideHeight,
       Priority priority,
@@ -146,7 +146,7 @@ public final class SingleRequest<R> implements Request,
       GlideContext glideContext,
       Object model,
       Class<R> transcodeClass,
-      BaseRequestOptions<?> requestOptions,
+      RequestOptions requestOptions,
       int overrideWidth,
       int overrideHeight,
       Priority priority,

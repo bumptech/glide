@@ -5,7 +5,14 @@ import static com.bumptech.glide.annotation.GlideOption.OVERRIDE_NONE;
 
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -13,7 +20,6 @@ import com.squareup.javapoet.CodeBlock.Builder;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
@@ -31,7 +37,7 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 
 /**
- * Generates a new implementation of {@link com.bumptech.glide.request.BaseRequestOptions}
+ * Generates a new implementation of {@link com.bumptech.glide.request.RequestOptions}
  * containing static versions of methods included in the base class and static and instance versions
  * of all methods annotated with {@link GlideOption} in classes annotated with
  * {@link GlideExtension}.
@@ -39,18 +45,15 @@ import javax.lang.model.element.VariableElement;
  * <p>The generated class looks something like this:
  * <pre>
  * <code>
- * public final class GlideOptions
- *     extends com.bumptech.glide.request.BaseRequestOptions<com.bumptech.glide.GlideOptions> {
- *   public static com.bumptech.glide.GlideOptions sizeMultiplierOf(float sizeMultiplier) {
- *     return new com.bumptech.glide.GlideOptions().sizeMultiplier(sizeMultiplier);
+ * public final class GlideOptions extends com.bumptech.glide.request.RequestOptions {
+ *
+ *   public static com.google.android.apps.photos.glide.GlideOptions signatureOf(
+ *       com.bumptech.glide.load.Key arg0) {
+ *     return new com.google.android.apps.photos.glide.GlideOptions()
+ *         .apply(com.bumptech.glide.request.RequestOptions.signatureOf(arg0));
  *   }
  *
- *   public static com.bumptech.glide.GlideOptions useUnlimitedSourceGeneratorsPoolOf(
- *       boolean flag) {
- *     return new com.bumptech.glide.GlideOptions().useUnlimitedSourceGeneratorsPool(flag);
- *   }
- *
- *   ... // The rest of the static versions of methods from BaseRequestOptions go here.
+ *   ... // The rest of the static versions of methods from RequestOptions go here.
  *
  *   // Now on to methods generated from an extension:
  *   public com.bumptech.glide.GlideOptions dontAnimate() {
@@ -58,7 +61,7 @@ import javax.lang.model.element.VariableElement;
  *     return this;
  *   }
  *
- *   public static com.bumptech.glide.GlideOptions noAnimate() {
+ *   public static com.bumptech.glide.GlideOptions noAnimation() {
  *     return new com.bumptech.glide.GlideOptions().dontAnimate();
  *   }
  * }
@@ -68,16 +71,14 @@ import javax.lang.model.element.VariableElement;
  */
 final class RequestOptionsGenerator {
   private static final String GENERATED_REQUEST_OPTIONS_SIMPLE_NAME = "GlideOptions";
-  private static final String BASE_REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
-  private static final String BASE_REQUEST_OPTIONS_SIMPLE_NAME = "BaseRequestOptions";
-  static final String BASE_REQUEST_OPTIONS_QUALIFIED_NAME =
-      BASE_REQUEST_OPTIONS_PACKAGE_NAME + "." + BASE_REQUEST_OPTIONS_SIMPLE_NAME;
-
   static final String REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
+  private static final String REQUEST_OPTIONS_SIMPLE_NAME = "RequestOptions";
+  static final String REQUEST_OPTIONS_QUALIFIED_NAME =
+      REQUEST_OPTIONS_PACKAGE_NAME + "." + REQUEST_OPTIONS_SIMPLE_NAME;
 
   private final ProcessingEnvironment processingEnvironment;
-  private final ClassName baseRequestOptionsName;
-  private final TypeElement baseRequestOptionsType;
+  private final ClassName requestOptionsName;
+  private final TypeElement requestOptionsType;
   private final ProcessorUtil processorUtil;
   private ClassName glideOptionsName;
   private int nextStaticFieldUniqueId;
@@ -87,25 +88,46 @@ final class RequestOptionsGenerator {
     this.processingEnvironment = processingEnvironment;
     this.processorUtil = processorUtil;
 
-    baseRequestOptionsName = ClassName.get(BASE_REQUEST_OPTIONS_PACKAGE_NAME,
-        BASE_REQUEST_OPTIONS_SIMPLE_NAME);
+    requestOptionsName = ClassName.get(REQUEST_OPTIONS_PACKAGE_NAME,
+        REQUEST_OPTIONS_SIMPLE_NAME);
 
-    baseRequestOptionsType = processingEnvironment.getElementUtils().getTypeElement(
-        BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
+    requestOptionsType = processingEnvironment.getElementUtils().getTypeElement(
+        REQUEST_OPTIONS_QUALIFIED_NAME);
   }
 
   TypeSpec generate(String generatedCodePackageName, Set<String> glideExtensionClassNames) {
     glideOptionsName =
         ClassName.get(generatedCodePackageName, GENERATED_REQUEST_OPTIONS_SIMPLE_NAME);
 
-    ParameterizedTypeName baseRequestOptionsOfGlideOptions = ParameterizedTypeName
-        .get(baseRequestOptionsName, glideOptionsName);
-
-    List<MethodAndStaticVar> staticEquivalents = generateStaticEquivalentsForBaseRequestOptions();
     List<MethodAndStaticVar> methodsForExtensions =
         generateMethodsForExtensions(glideExtensionClassNames);
-    List<MethodAndStaticVar> allMethodsAndStaticVars
-        = new ArrayList<>(staticEquivalents);
+
+    Set<MethodSignature> extensionMethodSignatures = ImmutableSet.copyOf(
+        Iterables.transform(methodsForExtensions,
+            new Function<MethodAndStaticVar, MethodSignature>() {
+              @Nullable
+              @Override
+              public MethodSignature apply(MethodAndStaticVar f) {
+                return new MethodSignature(f.method);
+              }
+            }));
+
+    List<MethodAndStaticVar> staticOverrides = generateStaticMethodOverridesForRequestOptions();
+    List<MethodSpec> instanceOverrides = generateInstanceMethodOverridesForRequestOptions();
+
+    List<MethodAndStaticVar> allMethodsAndStaticVars = new ArrayList<>();
+    for (MethodAndStaticVar item : staticOverrides) {
+      if (extensionMethodSignatures.contains(new MethodSignature(item.method))) {
+        continue;
+      }
+      allMethodsAndStaticVars.add(item);
+    }
+    for (MethodSpec methodSpec : instanceOverrides) {
+      if (extensionMethodSignatures.contains(new MethodSignature(methodSpec))) {
+        continue;
+      }
+      allMethodsAndStaticVars.add(new MethodAndStaticVar(methodSpec));
+    }
     allMethodsAndStaticVars.addAll(methodsForExtensions);
 
     TypeSpec.Builder classBuilder = TypeSpec.classBuilder(GENERATED_REQUEST_OPTIONS_SIMPLE_NAME)
@@ -116,7 +138,7 @@ final class RequestOptionsGenerator {
         .addJavadoc(generateClassJavadoc(glideExtensionClassNames))
         .addModifiers(Modifier.FINAL)
         .addModifiers(Modifier.PUBLIC)
-        .superclass(baseRequestOptionsOfGlideOptions);
+        .superclass(requestOptionsName);
 
     for (MethodAndStaticVar methodAndStaticVar : allMethodsAndStaticVars) {
       if (methodAndStaticVar.method != null) {
@@ -134,7 +156,7 @@ final class RequestOptionsGenerator {
         .add("Automatically generated from {@link $T} annotated classes.\n",
             GlideExtension.class)
         .add("\n")
-        .add("@see $T\n", baseRequestOptionsName);
+        .add("@see $T\n", requestOptionsName);
 
     for (String glideExtensionClass : glideExtensionClassNames) {
       builder.add("@see $T\n", ClassName.bestGuess(glideExtensionClass));
@@ -150,25 +172,53 @@ final class RequestOptionsGenerator {
 
     List<MethodAndStaticVar> result = new ArrayList<>(requestOptionExtensionMethods.size());
     for (ExecutableElement requestOptionsExtensionMethod : requestOptionExtensionMethods) {
-      result.addAll(generateMethodForRequestOptionsExtension(requestOptionsExtensionMethod));
+      result.addAll(generateMethodsForRequestOptionsExtension(requestOptionsExtensionMethod));
     }
 
     return result;
   }
 
+  private List<MethodSpec> generateInstanceMethodOverridesForRequestOptions() {
+    return Lists.transform(
+        processorUtil.findInstanceMethodsReturning(requestOptionsType, requestOptionsType),
+        new Function<ExecutableElement, MethodSpec>() {
+          @Override
+          public MethodSpec apply(ExecutableElement input) {
+            return generateRequestOptionOverride(input);
+          }
+        });
+  }
 
-  private List<MethodAndStaticVar> generateMethodForRequestOptionsExtension(
+  private MethodSpec generateRequestOptionOverride(ExecutableElement methodToOverride) {
+    return MethodSpec.overriding(methodToOverride)
+        .returns(glideOptionsName)
+        .addCode(CodeBlock.builder()
+            .add("return ($T) super.$N(", glideOptionsName, methodToOverride.getSimpleName())
+            .add(FluentIterable.from(methodToOverride.getParameters())
+                .transform(new Function<VariableElement, String>() {
+                  @Override
+                  public String apply(VariableElement input) {
+                    return input.getSimpleName().toString();
+                  }
+                })
+                .join(Joiner.on(", ")))
+            .add(");\n")
+            .build())
+        .build();
+  }
+
+  private List<MethodAndStaticVar> generateMethodsForRequestOptionsExtension(
       ExecutableElement element) {
-    boolean isOverridingBaseRequestOptionsMethod = isMethodInBaseRequestOptions(element);
+    boolean isOverridingRequestOptionsMethod = isMethodInRequestOptions(element);
     int overrideType = getOverrideType(element);
-    if (isOverridingBaseRequestOptionsMethod && overrideType == OVERRIDE_NONE) {
+    if (isOverridingRequestOptionsMethod && overrideType == OVERRIDE_NONE) {
       throw new IllegalArgumentException("Accidentally attempting to override a method in"
-          + " BaseRequestOptions. Add an 'override' value in the @GlideOption annotation"
+          + " RequestOptions. Add an 'override' value in the @GlideOption annotation"
           + " if this is intentional. Offending method: "
           + element.getEnclosingElement() + "#" + element);
-    } else if (!isOverridingBaseRequestOptionsMethod && overrideType != OVERRIDE_NONE) {
+    } else if (!isOverridingRequestOptionsMethod && overrideType != OVERRIDE_NONE) {
       throw new IllegalArgumentException("Requested to override an existing method in"
-          + " BaseRequestOptions, but no such method was found. Offending method: "
+          + " RequestOptions, but no such method was found. Offending method: "
           + element.getEnclosingElement() + "#" + element);
     }
     String methodName = element.getSimpleName().toString();
@@ -177,7 +227,7 @@ final class RequestOptionsGenerator {
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(element))
         .returns(glideOptionsName);
 
-    // The 0th element is expected to be a BaseRequestOptions object.
+    // The 0th element is expected to be a RequestOptions object.
     List<? extends VariableElement> parameters =
         element.getParameters().subList(1, element.getParameters().size());
 
@@ -197,7 +247,7 @@ final class RequestOptionsGenerator {
 
       builder.addStatement(callSuper, args.toArray(new Object[0]))
           .addJavadoc(processorUtil.generateSeeMethodJavadoc(
-              baseRequestOptionsName, methodName, parameters))
+              requestOptionsName, methodName, parameters))
           .addAnnotation(Override.class);
     }
 
@@ -205,7 +255,7 @@ final class RequestOptionsGenerator {
       builder.addParameter(getParameterSpec(variable));
     }
 
-    // Adds: <AnnotatedClass>.<thisMethodName>(BaseRequestOptions<?>, <arg1>, <arg2>, <argN>);
+    // Adds: <AnnotatedClass>.<thisMethodName>(RequestOptions<?>, <arg1>, <arg2>, <argN>);
     List<Object> args = new ArrayList<>();
     String code = "$T.$L($L, ";
     args.add(ClassName.get(element.getEnclosingElement().asType()));
@@ -224,26 +274,133 @@ final class RequestOptionsGenerator {
     builder.addStatement("return this");
 
     List<MethodAndStaticVar> result = new ArrayList<>();
+
     result.add(new MethodAndStaticVar(builder.build()));
-    if (!isOverridingBaseRequestOptionsMethod) {
-      result.add(generateStaticMethodEquivalent(element, true /*ignoreFirst*/));
-    }
+    result.add(generateStaticMethodEquivalentForExtensionMethod(element));
 
     return result;
   }
 
-  private List<MethodAndStaticVar> generateStaticEquivalentsForBaseRequestOptions() {
-    List<ExecutableElement> instanceMethodsThatReturnBaseRequestOptions =
-        processorUtil.findInstanceMethodsReturning(baseRequestOptionsType, baseRequestOptionsType);
+  private List<MethodAndStaticVar> generateStaticMethodOverridesForRequestOptions() {
+    List<ExecutableElement> staticMethodsThatReturnRequestOptions =
+        processorUtil.findStaticMethodsReturning(requestOptionsType, requestOptionsType);
     List<MethodAndStaticVar> staticMethods = new ArrayList<>();
-    for (ExecutableElement element : instanceMethodsThatReturnBaseRequestOptions) {
-      staticMethods.add(generateStaticMethodEquivalent(element, false /*ignoreFirst*/));
+    for (ExecutableElement element : staticMethodsThatReturnRequestOptions) {
+      if (element.getAnnotation(Deprecated.class) != null) {
+        continue;
+      }
+      staticMethods.add(generateStaticMethodEquivalentForRequestOptionsStaticMethod(element));
     }
     return staticMethods;
   }
 
-  private MethodAndStaticVar generateStaticMethodEquivalent(ExecutableElement instanceMethod,
-      boolean ignoreFirst) {
+  /**
+   * This method is a bit of a hack, but it lets us tie the static version of a method with the
+   * instance version. In turn that lets us call the instance versions on the generated subclass,
+   * instead of just delegating to the RequestOptions static methods. Using the instance methods
+   * on the generated subclass allows our static methods to properly call code that overrides
+   * an existing method in RequestOptions.
+   *
+   * <p>The string names here just map between the static methods in
+   * {@link com.bumptech.glide.request.RequestOptions} and the instance methods they call.
+   */
+  private static String getInstanceMethodNameFromStaticMethodName(String staticMethodName) {
+    String equivalentInstanceMethodName;
+    if ("bitmapTransform".equals(staticMethodName)) {
+      equivalentInstanceMethodName = "transform";
+    } else if ("decodeTypeOf".equals(staticMethodName)) {
+      equivalentInstanceMethodName = "decode";
+    } else if (staticMethodName.endsWith("Transform")) {
+      equivalentInstanceMethodName = staticMethodName.substring(0, staticMethodName.length() - 9);
+    } else if (staticMethodName.endsWith("Of")) {
+      equivalentInstanceMethodName = staticMethodName.substring(0, staticMethodName.length() - 2);
+    } else if ("noTransformation".equals(staticMethodName)) {
+      equivalentInstanceMethodName = "dontTransform";
+    } else if ("noAnimation".equals(staticMethodName)) {
+      equivalentInstanceMethodName = "dontAnimate";
+    } else if (staticMethodName.equals("option")) {
+      equivalentInstanceMethodName = "set";
+    } else {
+      throw new IllegalArgumentException("Unrecognized static method name: " + staticMethodName);
+    }
+    return equivalentInstanceMethodName;
+  }
+
+  private MethodAndStaticVar generateStaticMethodEquivalentForRequestOptionsStaticMethod(
+      ExecutableElement staticMethod) {
+    boolean memoize = memoizeStaticMethodFromArguments(staticMethod);
+    String staticMethodName = staticMethod.getSimpleName().toString();
+
+    String equivalentInstanceMethodName =
+        getInstanceMethodNameFromStaticMethodName(staticMethodName);
+
+    MethodSpec.Builder methodSpecBuilder =
+        MethodSpec.methodBuilder(staticMethodName)
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+        .addJavadoc(processorUtil.generateSeeMethodJavadoc(staticMethod))
+        .returns(glideOptionsName);
+
+    List<? extends VariableElement> parameters = staticMethod.getParameters();
+    String createNewOptionAndCall = "new $T().$N(";
+    if (!parameters.isEmpty()) {
+      for (VariableElement parameter : parameters) {
+        methodSpecBuilder.addParameter(getParameterSpec(parameter));
+        createNewOptionAndCall += parameter.getSimpleName().toString();
+        // use the Application Context to avoid memory leaks.
+        if (memoize && isAndroidContext(parameter)) {
+          createNewOptionAndCall += ".getApplicationContext()";
+        }
+        createNewOptionAndCall += ", ";
+      }
+      createNewOptionAndCall =
+          createNewOptionAndCall.substring(0, createNewOptionAndCall.length() - 2);
+    }
+    createNewOptionAndCall += ")";
+
+    FieldSpec requiredStaticField = null;
+    if (memoize) {
+      // Generates code that looks like:
+      // if (GlideOptions.<methodName> == null) {
+      //   GlideOptions.<methodName> = new GlideOptions().<methodName>().autoClone()
+      // }
+
+      // Mix in an incrementing unique id to handle method overloading.
+      String staticVariableName = staticMethodName + nextStaticFieldUniqueId++;
+      requiredStaticField = FieldSpec.builder(glideOptionsName, staticVariableName)
+          .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+          .build();
+      methodSpecBuilder.beginControlFlow(
+          "if ($T.$N == null)", glideOptionsName, staticVariableName)
+          .addStatement("$T.$N =\n" + createNewOptionAndCall + ".$N",
+              glideOptionsName, staticVariableName, glideOptionsName, equivalentInstanceMethodName,
+              "autoClone()")
+          .endControlFlow()
+          .addStatement("return $T.$N", glideOptionsName, staticVariableName);
+    } else {
+      // Generates code that looks like:
+      // return new GlideOptions().<methodName>()
+      methodSpecBuilder.addStatement(
+          "return " + createNewOptionAndCall, glideOptionsName, equivalentInstanceMethodName);
+    }
+
+    List<? extends TypeParameterElement> typeParameters = staticMethod.getTypeParameters();
+    for (TypeParameterElement typeParameterElement : typeParameters) {
+      methodSpecBuilder.addTypeVariable(
+          TypeVariableName.get(typeParameterElement.getSimpleName().toString()));
+    }
+
+    return new MethodAndStaticVar(methodSpecBuilder.build(), requiredStaticField);
+  }
+
+  private static boolean memoizeStaticMethodFromArguments(ExecutableElement staticMethod) {
+    return staticMethod.getParameters().isEmpty()
+        || (staticMethod.getParameters().size() == 1
+        && staticMethod.getParameters().get(0).getSimpleName().toString()
+        .equals("android.content.Context"));
+  }
+
+  private MethodAndStaticVar generateStaticMethodEquivalentForExtensionMethod(
+      ExecutableElement instanceMethod) {
     boolean skipStaticMethod = skipStaticMethod(instanceMethod);
     if (skipStaticMethod) {
       return new MethodAndStaticVar();
@@ -257,7 +414,7 @@ final class RequestOptionsGenerator {
         staticMethodName = instanceMethodName + "Of";
       }
     }
-    boolean memoize = memoizeStaticMethod(instanceMethod);
+    boolean memoize = memoizeStaticMethodFromAnnotation(instanceMethod);
 
     MethodSpec.Builder methodSpecBuilder = MethodSpec.methodBuilder(staticMethodName)
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -265,14 +422,16 @@ final class RequestOptionsGenerator {
         .returns(glideOptionsName);
 
     List<? extends VariableElement> parameters = instanceMethod.getParameters();
-    if (ignoreFirst) {
-      if (parameters.isEmpty()) {
-        throw new IllegalArgumentException(
-            "Expected non-empty parameters for: " + instanceMethod);
-      }
-      // Remove is not supported.
-      parameters = parameters.subList(1, parameters.size());
+
+    // Always remove the first parameter because it's always RequestOptions in extensions. The
+    // actual method we want to generate will pass the RequestOptions in to the extension method,
+    // but should not itself require a RequestOptions object to be passed in.
+    if (parameters.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Expected non-empty parameters for: " + instanceMethod);
     }
+    // Remove is not supported.
+    parameters = parameters.subList(1, parameters.size());
 
     String createNewOptionAndCall = "new $T().$L(";
     if (!parameters.isEmpty()) {
@@ -293,7 +452,7 @@ final class RequestOptionsGenerator {
     FieldSpec requiredStaticField = null;
     if (memoize) {
       // if (GlideOptions.<methodName> == null) {
-      //   GlideOptions.<methodName> = new GlideOptions().<methodName>().autoLock()
+      //   GlideOptions.<methodName> = new GlideOptions().<methodName>().autoClone()
       // }
 
       // Mix in an incrementing unique id to handle method overloading.
@@ -328,13 +487,13 @@ final class RequestOptionsGenerator {
     return element.toString().equals("android.content.Context");
   }
 
-  private boolean isMethodInBaseRequestOptions(ExecutableElement toFind) {
+  private boolean isMethodInRequestOptions(ExecutableElement toFind) {
     // toFind is a method in a GlideExtension whose first argument is a BaseRequestOptions<?> type.
     // Since we're comparing against methods in BaseRequestOptions itself, we need to drop that
     // first type.
     List<String> toFindParameterNames = getComparableParameterNames(toFind, true /*skipFirst*/);
     String toFindSimpleName = toFind.getSimpleName().toString();
-    for (Element element : baseRequestOptionsType.getEnclosedElements()) {
+    for (Element element : requestOptionsType.getEnclosedElements()) {
       if (element.getKind() != ElementKind.METHOD) {
         continue;
       }
@@ -382,7 +541,7 @@ final class RequestOptionsGenerator {
     return Strings.emptyToNull(result);
   }
 
-  private static boolean memoizeStaticMethod(ExecutableElement element) {
+  private static boolean memoizeStaticMethodFromAnnotation(ExecutableElement element) {
     GlideOption glideOption =
         element.getAnnotation(GlideOption.class);
     return glideOption != null && glideOption.memoizeStaticMethod();
@@ -411,6 +570,42 @@ final class RequestOptionsGenerator {
     MethodAndStaticVar(@Nullable MethodSpec method, @Nullable FieldSpec staticField) {
       this.method = method;
       this.staticField = staticField;
+    }
+  }
+
+  private static final class MethodSignature {
+    private final TypeName returnType;
+    private final List<TypeName> parameterTypes;
+    private final Set<Modifier> modifiers;
+
+    MethodSignature(MethodSpec spec) {
+      modifiers = spec.modifiers;
+      returnType = spec.returnType;
+      parameterTypes =
+          Lists.transform(spec.parameters, new Function<ParameterSpec, TypeName>() {
+            @Nullable
+            @Override
+            public TypeName apply(ParameterSpec parameterSpec) {
+              return parameterSpec.type;
+
+            }
+          });
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (o instanceof MethodSignature) {
+        MethodSignature other = (MethodSignature) o;
+        return returnType.equals(other.returnType)
+            && parameterTypes.equals(other.parameterTypes)
+            && modifiers.equals(other.modifiers);
+      }
+      return false;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hashCode(returnType, parameterTypes, modifiers);
     }
   }
 }

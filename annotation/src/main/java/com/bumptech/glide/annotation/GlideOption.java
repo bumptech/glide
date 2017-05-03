@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 
 /**
  * Identifies methods in {@link GlideExtension} annotated classes that extend
- * {@link com.bumptech.glide.request.BaseRequestOptions}.
+ * {@link com.bumptech.glide.request.RequestOptions}.
  *
  * <p>All annotated methods will be added to a single
- * {@link com.bumptech.glide.request.BaseRequestOptions} implementation generated per application.
+ * {@link com.bumptech.glide.request.RequestOptions} implementation generated per application.
  * Overlapping method names in different extensions may cause errors at compile time.
  *
  * <p>Static equivalents of annotated methods will also be generated.
@@ -51,7 +51,7 @@ public @interface GlideOption {
 
   /**
    * {@code true} to indicate that it's safe to statically memoize the result of this method using
-   * {@link com.bumptech.glide.request.BaseRequestOptions#autoClone()}.
+   * {@link com.bumptech.glide.request.RequestOptions#autoClone()}.
    *
    * <p>This method should only be used for no-arg methods where there's only a single possible
    * value.
@@ -66,7 +66,7 @@ public @interface GlideOption {
    * <p>By default static methods are generated for all methods annotated with
    * {@link GlideOption}. These static factory methods allow for a cleaner API when used
    * with {@link com.bumptech.glide.RequestBuilder#apply}. The static factory method by default
-   * simply creates a new {@link com.bumptech.glide.request.BaseRequestOptions} object, calls the
+   * simply creates a new {@link com.bumptech.glide.request.RequestOptions} object, calls the
    * instance version of the method on it and returns it. For example:
    * <pre>
    * <code>
