@@ -358,7 +358,7 @@ public class GifDrawableTest {
     runLoops(loopCount, frameCount);
 
     verifyRanLoops(loopCount, frameCount);
-    assertFalse(drawable.isRunning());
+    assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
   }
 
   @Test
@@ -374,6 +374,7 @@ public class GifDrawableTest {
     runLoops(loopCount, frameCount);
 
     verifyRanLoops(loopCount, frameCount);
+    assertTrue("drawable should be still running", drawable.isRunning());
   }
 
   @Test
@@ -389,7 +390,7 @@ public class GifDrawableTest {
     runLoops(loopCount, frameCount);
 
     verifyRanLoops(loopCount, frameCount);
-    assertFalse(drawable.isRunning());
+    assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
   }
 
   @Test
@@ -405,7 +406,7 @@ public class GifDrawableTest {
     runLoops(loopCount, frameCount);
 
     verifyRanLoops(loopCount, frameCount);
-    assertFalse(drawable.isRunning());
+    assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
   }
 
   @Test
@@ -418,6 +419,7 @@ public class GifDrawableTest {
     drawable.onFrameReady();
     when(frameLoader.getCurrentIndex()).thenReturn(1);
     drawable.onFrameReady();
+    assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
 
     drawable.start();
 
@@ -428,7 +430,7 @@ public class GifDrawableTest {
 
     // 4 onFrameReady(), 2 start()
     verify(cb, times(4 + 2)).invalidateDrawable(eq(drawable));
-    assertFalse(drawable.isRunning());
+    assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
   }
 
   @Test
@@ -442,6 +444,7 @@ public class GifDrawableTest {
     drawable.start();
 
     runLoops(initialLoopCount, frameCount);
+    assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
 
     final int newLoopCount = 2;
 
@@ -453,6 +456,7 @@ public class GifDrawableTest {
     int numStarts = 2;
     int expectedFrames = (initialLoopCount + newLoopCount) * frameCount + numStarts;
     verify(cb, times(expectedFrames)).invalidateDrawable(eq(drawable));
+    assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -461,7 +465,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testUsesDecoderNetscapeLoopCountIfLoopCountIsLoopIntrinsic() {
+  public void testUsesDecoderTotalLoopCountIfLoopCountIsLoopIntrinsic() {
     final int frameCount = 3;
     final int loopCount = 2;
     when(frameLoader.getLoopCount()).thenReturn(loopCount);
@@ -473,7 +477,25 @@ public class GifDrawableTest {
     runLoops(loopCount, frameCount);
 
     verifyRanLoops(loopCount, frameCount);
+    assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
   }
+
+  @Test
+  public void testLoopsForeverIfLoopCountIsLoopIntrinsicAndTotalIterationCountIsForever() {
+    final int frameCount = 3;
+    final int loopCount = 40;
+    when(frameLoader.getLoopCount()).thenReturn(GifDecoder.TOTAL_ITERATION_COUNT_FOREVER);
+    when(frameLoader.getFrameCount()).thenReturn(frameCount);
+    drawable.setLoopCount(GifDrawable.LOOP_INTRINSIC);
+    drawable.setVisible(true, true);
+    drawable.start();
+
+    runLoops(loopCount, frameCount);
+
+    verifyRanLoops(loopCount, frameCount);
+    assertTrue("drawable should be still running", drawable.isRunning());
+  }
+
 
   @Test
   public void testDoesNotDrawFrameAfterRecycle() {
@@ -551,6 +573,8 @@ public class GifDrawableTest {
     for (int loop = 0; loop < loopCount; loop++) {
       for (int frame = 0; frame < frameCount; frame++) {
         when(frameLoader.getCurrentIndex()).thenReturn(frame);
+        assertTrue("drawable should be started before calling drawable.onFrameReady()",
+            drawable.isRunning());
         drawable.onFrameReady();
       }
     }

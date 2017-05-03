@@ -59,6 +59,36 @@ public class GifDecoderTest {
   }
 
   @Test
+  public void testTotalIterationCountIsOneIfNetscapeLoopCountDoesntExist() {
+    GifHeader gifheader = new GifHeader();
+    gifheader.loopCount = GifHeader.NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST;
+    byte[] data = new byte[0];
+    GifDecoder decoder = new StandardGifDecoder(provider);
+    decoder.setData(gifheader, data);
+    assertEquals(1, decoder.getTotalIterationCount());
+  }
+
+  @Test
+  public void testTotalIterationCountIsForeverIfNetscapeLoopCountIsForever() {
+    GifHeader gifheader = new GifHeader();
+    gifheader.loopCount = GifHeader.NETSCAPE_LOOP_COUNT_FOREVER;
+    byte[] data = new byte[0];
+    GifDecoder decoder = new StandardGifDecoder(provider);
+    decoder.setData(gifheader, data);
+    assertEquals(GifDecoder.TOTAL_ITERATION_COUNT_FOREVER, decoder.getTotalIterationCount());
+  }
+
+  @Test
+  public void testTotalIterationCountIsTwoIfNetscapeLoopCountIsOne() {
+    GifHeader gifheader = new GifHeader();
+    gifheader.loopCount = 1;
+    byte[] data = new byte[0];
+    GifDecoder decoder = new StandardGifDecoder(provider);
+    decoder.setData(gifheader, data);
+    assertEquals(2, decoder.getTotalIterationCount());
+  }
+
+  @Test
   public void testAdvanceIncrementsFrameIndex() {
     GifHeader gifheader = new GifHeader();
     gifheader.frameCount = 4;
