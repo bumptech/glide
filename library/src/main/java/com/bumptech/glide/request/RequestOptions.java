@@ -249,6 +249,16 @@ public class RequestOptions implements Cloneable {
 
   /**
    * Returns a {@link RequestOptions} object with {@link #dontTransform()} set.
+   *
+   * @deprecated use {@link #noTransformation()}
+   */
+  @Deprecated
+  public static RequestOptions noTransform() {
+    return noTransformation();
+  }
+
+  /**
+   * Returns a {@link RequestOptions} object with {@link #dontTransform()} set.
    */
   public static RequestOptions noTransformation() {
     if (noTransformOptions == null) {
