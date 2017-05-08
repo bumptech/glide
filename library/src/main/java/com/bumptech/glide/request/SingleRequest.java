@@ -238,6 +238,7 @@ public final class SingleRequest<R> implements Request,
    */
   void cancel() {
     stateVerifier.throwIfRecycled();
+    target.removeCallback(this);
     status = Status.CANCELLED;
     if (loadStatus != null) {
       loadStatus.cancel();

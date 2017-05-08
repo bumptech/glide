@@ -84,6 +84,13 @@ public interface Target<R> extends LifecycleListener {
   void getSize(SizeReadyCallback cb);
 
   /**
+   * Removes the given callback from the pending set if it's still retained.
+   *
+   * @param cb The callback to remove.
+   */
+  void removeCallback(SizeReadyCallback cb);
+
+  /**
    * Sets the current request for this target to retain, should not be called outside of Glide.
    */
   void setRequest(@Nullable Request request);

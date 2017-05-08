@@ -69,6 +69,11 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   }
 
   @Override
+  public void removeCallback(SizeReadyCallback cb) {
+    sizeDeterminer.removeCallback(cb);
+  }
+
+  @Override
   public void onLoadCleared(Drawable placeholder) {
     super.onLoadCleared(placeholder);
     sizeDeterminer.clearCallbacksAndListener();
@@ -212,6 +217,10 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
         layoutListener = new SizeDeterminerLayoutListener(this);
         observer.addOnPreDrawListener(layoutListener);
       }
+    }
+
+    void removeCallback(SizeReadyCallback cb) {
+      cbs.remove(cb);
     }
 
     void clearCallbacksAndListener() {

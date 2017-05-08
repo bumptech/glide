@@ -125,6 +125,11 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     cb.onSizeReady(width, height);
   }
 
+  @Override
+  public void removeCallback(SizeReadyCallback cb) {
+    // Do nothing because we do not retain references to SizeReadyCallbacks.
+  }
+
   /**
    * {@inheritDoc}
    */

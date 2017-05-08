@@ -836,6 +836,11 @@ public class SingleRequestTest {
     }
 
     @Override
+    public void removeCallback(SizeReadyCallback cb) {
+      // Do nothing.
+    }
+
+    @Override
     public void setRequest(Request request) {
     }
 

@@ -64,4 +64,9 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
     }
     cb.onSizeReady(width, height);
   }
+
+  @Override
+  public void removeCallback(SizeReadyCallback cb) {
+    // Do nothing, we never retain a reference to the callback.
+  }
 }
