@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     compile 'com.github.bumptech.glide:glide:4.0.0-SNAPSHOT'
-    compile 'com.github.bumptech.glide.annotation:compiler:4.0.0-SNAPSHOT'
+    compile 'com.github.bumptech.glide:compiler:4.0.0-SNAPSHOT'
     compile 'com.android.support:support-v4:19.1.0'
 }
 ```
