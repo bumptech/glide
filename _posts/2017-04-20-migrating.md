@@ -10,7 +10,7 @@ disqus: 1
 {:toc}
 
 ## Options
-One of the larger changes in Glide v4 is the way the library handles options (``centerCrop()``, ``placeholder()`` etc). In Glide v3, options were handled individually by a series of complicated multityped builders. 
+One of the larger changes in Glide v4 is the way the library handles options (``centerCrop()``, ``placeholder()`` etc). In Glide v3, options were handled individually by a series of complicated multityped builders. In Glide v4 these have been replaced by a single builder with a single type and a series of options objects that can be provided to the builder. Glide's [generated API][11] simplifies this further by merging options from the options objects and from any included integration libraries with the builder to create a single fluent API.
 
 ### RequestBuilder
 
@@ -310,10 +310,6 @@ public class GiphyGlideModule extends AppGlideModule {
   ...
 }
 ```
-
-
-
-
 
 [1]: http://sjudd.github.io/glide/javadocs/360/com/bumptech/glide/module/GlideModule.html
 [2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
