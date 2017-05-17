@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
 import android.widget.TextView;
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.prefill.PreFillType;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.samples.flickr.api.Api;
@@ -157,7 +156,8 @@ public class FlickrSearchActivity extends AppCompatActivity
     if (savedInstanceState == null) {
       // Weight values determined experimentally by measuring the number of incurred GCs while
       // scrolling through the various photo grids/lists.
-      Glide.get(this).preFillBitmapPool(new PreFillType.Builder(smallGridSize).setWeight(1),
+      GlideApp.get(this).preFillBitmapPool(
+          new PreFillType.Builder(smallGridSize).setWeight(1),
           new PreFillType.Builder(mediumGridSize).setWeight(1),
           new PreFillType.Builder(screenWidth / 2, listHeightSize).setWeight(6));
     }
@@ -191,13 +191,13 @@ public class FlickrSearchActivity extends AppCompatActivity
   @Override
   public void onTrimMemory(int level) {
     super.onTrimMemory(level);
-    Glide.get(this).trimMemory(level);
+    GlideApp.get(this).trimMemory(level);
   }
 
   @Override
   public void onLowMemory() {
     super.onLowMemory();
-    Glide.get(this).clearMemory();
+    GlideApp.get(this).clearMemory();
   }
 
   private void executeSearch(String searchString) {
@@ -284,13 +284,13 @@ public class FlickrSearchActivity extends AppCompatActivity
       super.setPrimaryItem(container, position, object);
       if (position != mLastPosition) {
         if (mLastPosition >= 0) {
-          Glide.with(mLastFragment).pauseRequests();
+          GlideApp.with(mLastFragment).pauseRequests();
         }
         Fragment current = (Fragment) object;
         mLastPosition = position;
         mLastFragment = current;
         if (current.isAdded()) {
-          Glide.with(current).resumeRequests();
+          GlideApp.with(current).resumeRequests();
         }
       }
     }
@@ -349,7 +349,7 @@ public class FlickrSearchActivity extends AppCompatActivity
           return;
         }
 
-        FutureTarget<File> futureTarget = Glide.with(context)
+        FutureTarget<File> futureTarget = GlideApp.with(context)
             .downloadOnly()
             .load(photo)
             .submit(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
@@ -365,7 +365,7 @@ public class FlickrSearchActivity extends AppCompatActivity
             Log.d(TAG, "Got ExecutionException waiting for background downloadOnly", e);
           }
         }
-        Glide.with(context).clear(futureTarget);
+        GlideApp.with(context).clear(futureTarget);
       }
     }
   }

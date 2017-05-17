@@ -1,8 +1,6 @@
 package com.bumptech.glide.samples.flickr;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
-import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -17,10 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
@@ -39,8 +35,8 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
   private FlickrPhotoListAdapter adapter;
   private List<Photo> currentPhotos;
   private RecyclerView list;
-  private RequestBuilder<Drawable> fullRequest;
-  private RequestBuilder<Drawable> thumbRequest;
+  private GlideRequest<Drawable> fullRequest;
+  private GlideRequest<Drawable> thumbRequest;
   private ViewPreloadSizeProvider<Photo> preloadSizeProvider;
   private LinearLayoutManager layoutManager;
 
@@ -68,8 +64,9 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     list.setAdapter(adapter);
 
     preloadSizeProvider = new ViewPreloadSizeProvider<>();
-    RecyclerViewPreloader<Photo> preloader = new RecyclerViewPreloader<>(Glide.with(this), adapter,
-        preloadSizeProvider, PRELOAD_AHEAD_ITEMS);
+    RecyclerViewPreloader<Photo> preloader =
+        new RecyclerViewPreloader<>(
+            GlideApp.with(this), adapter, preloadSizeProvider, PRELOAD_AHEAD_ITEMS);
     list.addOnScrollListener(preloader);
     list.setItemViewCacheSize(0);
 
@@ -77,23 +74,23 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
       adapter.setPhotos(currentPhotos);
     }
 
-    final RequestManager requestManager = Glide.with(this);
-    fullRequest = requestManager
+    final GlideRequests glideRequests = GlideApp.with(this);
+    fullRequest = glideRequests
         .asDrawable()
-        .apply(centerCropTransform()
-            .placeholder(new ColorDrawable(Color.GRAY)));
+        .centerCrop()
+        .placeholder(new ColorDrawable(Color.GRAY));
 
-    thumbRequest = requestManager
+    thumbRequest = glideRequests
         .asDrawable()
-        .apply(diskCacheStrategyOf(DiskCacheStrategy.DATA)
-            .override(Api.SQUARE_THUMB_SIZE))
+        .diskCacheStrategy(DiskCacheStrategy.DATA)
+        .override(Api.SQUARE_THUMB_SIZE)
         .transition(withCrossFade());
 
     list.setRecyclerListener(new RecyclerView.RecyclerListener() {
       @Override
       public void onViewRecycled(RecyclerView.ViewHolder holder) {
         PhotoTitleViewHolder vh = (PhotoTitleViewHolder) holder;
-        requestManager.clear(vh.imageView);
+        glideRequests.clear(vh.imageView);
       }
     });
 

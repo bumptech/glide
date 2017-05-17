@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.provider.ContactsContract.Contacts;
 import android.view.View;
 import android.widget.ImageView;
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 
@@ -72,20 +71,21 @@ public class MainActivity extends Activity {
 
   @TargetApi(VERSION_CODES.ICE_CREAM_SANDWICH)
   private void showContact(long id) {
+    GlideRequests glideRequests = GlideApp.with(this);
     RequestOptions originalSize = new RequestOptions().override(Target.SIZE_ORIGINAL);
 
     Uri contactUri = ContentUris.withAppendedId(Contacts.CONTENT_URI, id);
-    Glide.with(this).load(contactUri).apply(originalSize).into(imageViewContact);
+    glideRequests.load(contactUri).apply(originalSize).into(imageViewContact);
 
     Uri lookupUri = Contacts.getLookupUri(getContentResolver(), contactUri);
-    Glide.with(this).load(lookupUri).apply(originalSize).into(imageViewLookup);
+    glideRequests.load(lookupUri).apply(originalSize).into(imageViewLookup);
 
     Uri photoUri = Uri.withAppendedPath(contactUri, Contacts.Photo.CONTENT_DIRECTORY);
-    Glide.with(this).load(photoUri).apply(originalSize).into(imageViewPhoto);
+    glideRequests.load(photoUri).apply(originalSize).into(imageViewPhoto);
 
     if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH) {
       Uri displayPhotoUri = Uri.withAppendedPath(contactUri, Contacts.Photo.DISPLAY_PHOTO);
-      Glide.with(this).load(displayPhotoUri).apply(originalSize).into(imageViewDisplayPhoto);
+      glideRequests.load(displayPhotoUri).apply(originalSize).into(imageViewDisplayPhoto);
     }
   }
 }

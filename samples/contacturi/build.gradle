@@ -4,6 +4,7 @@ dependencies {
     compile project(':library')
     compile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
     compile "com.android.support:appcompat-v7:${SUPPORT_V7_VERSION}"
+    annotationProcessor project(':annotation:compiler')
 }
 
 android {
