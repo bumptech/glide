@@ -93,5 +93,5 @@ Although the examples we've shown here are for RecyclerView, the same principles
 [2]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/BaseRequestOptions.html#placeholder(int)
 [3]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/BaseRequestOptions.html#fallback(int)
 [4]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/RequestManager.html#clear(com.bumptech.glide.request.target.Target)
-[5]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/request/target/Target.html
-[6]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
+[5]: javadocs/400/com/bumptech/glide/request/target/Target.html
+[6]: javadocs/400/com/bumptech/glide/module/AppGlideModule.html

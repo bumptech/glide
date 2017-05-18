@@ -176,13 +176,13 @@ Methods annotated with ``GlideType`` must take a [``RequestBuilder<T>``][2] as t
 
 
 [1]: https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html
-[2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
-[3]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html
-[4]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
-[5]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideModule.html
-[6]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
-[7]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideOption.html
-[8]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideType.html
-[9]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/request/BaseRequestOptions.html
-[10]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/Option.html
-[11]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestManager.html
+[2]: javadocs/400/com/bumptech/glide/RequestBuilder.html
+[3]: javadocs/400/com/bumptech/glide/request/RequestOptions.html
+[4]: javadocs/400/com/bumptech/glide/module/AppGlideModule.html
+[5]: javadocs/400/com/bumptech/glide/annotation/GlideModule.html
+[6]: javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
+[7]: javadocs/400/com/bumptech/glide/annotation/GlideOption.html
+[8]: javadocs/400/com/bumptech/glide/annotation/GlideType.html
+[9]: javadocs/400/com/bumptech/glide/request/BaseRequestOptions.html
+[10]: javadocs/400/com/bumptech/glide/load/Option.html
+[11]: javadocs/400/com/bumptech/glide/RequestManager.html
