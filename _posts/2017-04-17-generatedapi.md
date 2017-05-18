@@ -78,7 +78,7 @@ public class MyAppExtension {
   private static final int MINI_THUMB_SIZE = 100;
    
   @GlideOption
-  public static void miniThumb(BaseRequestOptions<?> options) {
+  public static void miniThumb(RequestOptions<?> options) {
     options
       .fitCenter()
       .override(MINI_THUMB_SIZE);
@@ -88,7 +88,7 @@ public class MyAppExtension {
 This will generate a method in a [``RequestOptions``][3] subclass that looks like this:
 
 ```java
-public class GlideOptions extends BaseRequestOptions<GlideOptions>
+public class GlideOptions extends RequestOptions<GlideOptions>
   
   public GlideOptions miniThumb() {
     MyAppExtension.miniThumb(this);
@@ -98,11 +98,11 @@ public class GlideOptions extends BaseRequestOptions<GlideOptions>
 }
 ```
 
-You can include as many additional arguments in your methods as you want, as long as the first argument is always [``BaseRequestOptions<?>``][9]:
+You can include as many additional arguments in your methods as you want, as long as the first argument is always [``RequestOptions<?>``][9]:
 
 ```java
 @GlideOption
-public static void miniThumb(BaseRequestOptions<?> options, int size) {
+public static void miniThumb(RequestOptions<?> options, int size) {
   options
     .fitCenter()
     .override(size);
@@ -183,6 +183,6 @@ Methods annotated with ``GlideType`` must take a [``RequestBuilder<T>``][2] as t
 [6]: javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
 [7]: javadocs/400/com/bumptech/glide/annotation/GlideOption.html
 [8]: javadocs/400/com/bumptech/glide/annotation/GlideType.html
-[9]: javadocs/400/com/bumptech/glide/request/BaseRequestOptions.html
+[9]: javadocs/400/com/bumptech/glide/request/RequestOptions.html
 [10]: javadocs/400/com/bumptech/glide/load/Option.html
 [11]: javadocs/400/com/bumptech/glide/RequestManager.html

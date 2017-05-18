@@ -90,8 +90,8 @@ By calling [``clear()``][4] or ``into(View)`` on the ``View``, you're cancelling
 Although the examples we've shown here are for RecyclerView, the same principles apply to ListView as well.
 
 [1]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/Glide.html#with(android.support.v4.app.Fragment)
-[2]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/BaseRequestOptions.html#placeholder(int)
-[3]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/BaseRequestOptions.html#fallback(int)
+[2]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#placeholder(int)
+[3]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#fallback(int)
 [4]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/RequestManager.html#clear(com.bumptech.glide.request.target.Target)
 [5]: javadocs/400/com/bumptech/glide/request/target/Target.html
 [6]: javadocs/400/com/bumptech/glide/module/AppGlideModule.html
