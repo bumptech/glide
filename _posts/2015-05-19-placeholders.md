@@ -90,7 +90,7 @@ No. Transformations are applied only to the requested resource, not to any place
 ##### Is it ok to use the same Drawable as a placeholder in multiple Views?
 Usually, but not always. Any non-stateful Drawable (like BitmapDrawable) is typically ok to display in multiple views at once. Stateful Drawables however, are typically not safe to display in multiple views at the same time because multiple Views will mutate the state at once. For stateful Drawables, pass in a resource id, or use ``newDrawable()`` to pass in a new copy to each request.
 
-[1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#placeholder(int)
-[2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#error(int)
-[3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#fallback(int)
+[1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#placeholder-int-
+[2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#error-int-
+[3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#fallback-int-
 [4]: generatedapi.html

@@ -44,9 +44,9 @@ Instead, the easiest way to cross fade across two different images loaded in two
 [8]: https://developer.android.com/reference/android/graphics/drawable/TransitionDrawable.html
 [9]: https://developer.android.com/reference/android/graphics/drawable/TransitionDrawable.html#setCrossFadeEnabled(boolean)
 [10]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/transition/DrawableCrossFadeFactory.html
-[11]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html#transition(com.bumptech.glide.request.transition.TransitionFactory)
+[11]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html#transition-com.bumptech.glide.request.transition.TransitionFactory-
 [12]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html
-[13]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#transition(com.bumptech.glide.TransitionOptions)
+[13]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#transition-com.bumptech.glide.TransitionOptions-
 [14]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
 [15]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
 [16]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html

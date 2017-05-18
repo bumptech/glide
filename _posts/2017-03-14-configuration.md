@@ -184,7 +184,7 @@ In addition, to enable discovery of the [``AppGlideModule``][1] and [``LibraryGl
 [3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
 [4]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/ResourceDecoder.html
 [5]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/GlideModule.html
-[6]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/compiler/ModuleAnnotationProcessor.html
+[6]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/compiler/GlideAnnotationProcessor.html
 [7]: https://github.com/bumptech/glide/blob/master/integration/okhttp3/src/main/java/com/bumptech/glide/integration/okhttp3/OkHttpLibraryGlideModule.java
 [8]: https://github.com/bumptech/glide/blob/master/samples/flickr/src/main/java/com/bumptech/glide/samples/flickr/FlickrGlideModule.java
 [9]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/MemoryCache.html
@@ -193,9 +193,9 @@ In addition, to enable discovery of the [``AppGlideModule``][1] and [``LibraryGl
 [12]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html#applyOptions-android.content.Context-com.bumptech.glide.GlideBuilder-
 [13]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskLruCacheWrapper.html
 [14]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.html
-[15]: https://github.com/bumptech/glide/blob/master/library/src/main/java/com/bumptech/glide/load/engine/cache/DiskCache.java#L18
-[16]: https://github.com/bumptech/glide/blob/master/library/src/main/java/com/bumptech/glide/load/engine/cache/DiskCache.java#L19
+[15]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.Factory.html#DEFAULT_DISK_CACHE_SIZE
+[16]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.Factory.html#DEFAULT_DISK_CACHE_DIR
 [17]: https://developer.android.com/reference/android/content/Context.html#getCacheDir()
-[18]: https://github.com/bumptech/glide/blob/master/library/src/main/java/com/bumptech/glide/load/engine/cache/DiskCache.java#L15
+[18]: {{ site.url}}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.Factory.html
 [19]: https://developer.android.com/reference/android/os/StrictMode.html
 

@@ -62,11 +62,11 @@ Glide.with(fragment)
 To save object allocations, you can re-use the same ``RequestListener`` for multiple loads.
 
 
-[1]: https://github.com/bumptech/glide/blob/6ddb5f0598b1a5a5a51647fb968e998d6cabbd3d/library/src/main/java/com/bumptech/glide/GlideBuilder.java#L248
-[2]: https://github.com/bumptech/glide/blob/6ddb5f0598b1a5a5a51647fb968e998d6cabbd3d/library/src/main/java/com/bumptech/glide/RequestBuilder.java#L345
-[3]: https://github.com/bumptech/glide/blob/6ddb5f0598b1a5a5a51647fb968e998d6cabbd3d/library/src/main/java/com/bumptech/glide/RequestBuilder.java#L456
-[4]: https://github.com/bumptech/glide/blob/master/library/src/main/java/com/bumptech/glide/request/target/Target.java#L84
-[5]: https://github.com/bumptech/glide/blob/master/library/src/main/java/com/bumptech/glide/request/target/ViewTarget.java
-[6]: https://github.com/bumptech/glide/blob/6ddb5f0598b1a5a5a51647fb968e998d6cabbd3d/library/src/main/java/com/bumptech/glide/request/RequestOptions.java#L333
-[7]: https://github.com/bumptech/glide/blob/6ddb5f0598b1a5a5a51647fb968e998d6cabbd3d/library/src/main/java/com/bumptech/glide/request/RequestListener.java
-[8]: https://github.com/bumptech/glide/blob/6ddb5f0598b1a5a5a51647fb968e998d6cabbd3d/library/src/main/java/com/bumptech/glide/RequestBuilder.java#L117
+[1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/GlideBuilder.html#setLogLevel-int-
+[2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#into-android.widget.ImageView-
+[3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#submit-int-int-
+[4]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/target/Target.html#getSize-com.bumptech.glide.request.target.SizeReadyCallback-
+[5]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/target/ViewTarget.html
+[6]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#override-int-int-
+[7]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
+[8]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#listener-com.bumptech.glide.request.RequestListener-
