@@ -34,22 +34,22 @@ Unfortunately althoug disabling cross fades is typically a better default, it ca
 
 Instead, the easiest way to cross fade across two different images loaded in two separate requests is to use [``ViewSwitcher``][2] containing two [``ImageViews``][3]. Load the first image into the result of [``getNextView()``][4]. Then load the second image into the next result of [``getNextView()``][4] and use a [``RequestListener``][5] to call [``showNext()``][6] when the second image load finishes. For better control, you can also follow the strategy outlined in the [developer documentation][7]. As with the [``ViewSwitcher``][2], only start the cross fade after the second image load finishes.
 
-[1]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/transition/Transition.html
+[1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/transition/Transition.html
 [2]: https://developer.android.com/reference/android/widget/ViewSwitcher.html
 [3]: https://developer.android.com/reference/android/widget/ImageView.html
 [4]: https://developer.android.com/reference/android/widget/ViewSwitcher.html#getNextView()
-[5]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
+[5]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
 [6]: https://developer.android.com/reference/android/widget/ViewAnimator.html#showNext()
 [7]: https://developer.android.com/training/animation/crossfade.html
 [8]: https://developer.android.com/reference/android/graphics/drawable/TransitionDrawable.html
 [9]: https://developer.android.com/reference/android/graphics/drawable/TransitionDrawable.html#setCrossFadeEnabled(boolean)
-[10]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/request/transition/DrawableCrossFadeFactory.html
-[11]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html#transition(com.bumptech.glide.request.transition.TransitionFactory)
-[12]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html
-[13]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#transition(com.bumptech.glide.TransitionOptions)
-[14]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
-[15]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
-[16]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html
-[17]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
+[10]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/transition/DrawableCrossFadeFactory.html
+[11]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html#transition(com.bumptech.glide.request.transition.TransitionFactory)
+[12]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html
+[13]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#transition(com.bumptech.glide.TransitionOptions)
+[14]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
+[15]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
+[16]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html
+[17]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
 [18]: /glide/doc/options.html#transitionoptions
 [19]: /glide/doc/targets.html#targets-and-automatic-cancellation
