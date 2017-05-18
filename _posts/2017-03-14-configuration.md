@@ -179,20 +179,20 @@ In order for Glide to properly discover [``AppGlideModule``][1] and [``LibraryGl
 #### Annotation Processor
 In addition, to enable discovery of the [``AppGlideModule``][1] and [``LibraryGlideModules``][2] all libraries and applications must also include a dependency on Glide's annotation processor. 
 
-[1]: javadocs/400/com/bumptech/glide/module/AppGlideModule.html
-[2]: javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
-[3]: javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
-[4]: javadocs/400/com/bumptech/glide/load/ResourceDecoder.html
-[5]: javadocs/400/com/bumptech/glide/annotation/GlideModule.html
-[6]: javadocs/400/com/bumptech/glide/annotation/compiler/ModuleAnnotationProcessor.html
+[1]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
+[2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
+[3]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
+[4]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/ResourceDecoder.html
+[5]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideModule.html
+[6]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/compiler/ModuleAnnotationProcessor.html
 [7]: https://github.com/bumptech/glide/blob/master/integration/okhttp3/src/main/java/com/bumptech/glide/integration/okhttp3/OkHttpLibraryGlideModule.java
 [8]: https://github.com/bumptech/glide/blob/master/samples/flickr/src/main/java/com/bumptech/glide/samples/flickr/FlickrGlideModule.java
-[9]: javadocs/400/com/bumptech/glide/load/engine/cache/MemoryCache.html
-[10]: javadocs/400/com/bumptech/glide/load/engine/cache/LruResourceCache.html
-[11]: javadocs/400/com/bumptech/glide/load/engine/cache/MemorySizeCalculator.html
-[12]: javadocs/400/com/bumptech/glide/module/AppGlideModule.html#applyOptions-android.content.Context-com.bumptech.glide.GlideBuilder-
-[13]: javadocs/400/com/bumptech/glide/load/engine/cache/DiskLruCacheWrapper.html
-[14]: javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.html
+[9]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/MemoryCache.html
+[10]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/LruResourceCache.html
+[11]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/MemorySizeCalculator.html
+[12]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html#applyOptions-android.content.Context-com.bumptech.glide.GlideBuilder-
+[13]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskLruCacheWrapper.html
+[14]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.html
 [15]: https://github.com/bumptech/glide/blob/master/library/src/main/java/com/bumptech/glide/load/engine/cache/DiskCache.java#L18
 [16]: https://github.com/bumptech/glide/blob/master/library/src/main/java/com/bumptech/glide/load/engine/cache/DiskCache.java#L19
 [17]: https://developer.android.com/reference/android/content/Context.html#getCacheDir()

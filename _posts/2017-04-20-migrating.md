@@ -311,25 +311,25 @@ public class GiphyGlideModule extends AppGlideModule {
 }
 ```
 
-[1]: javadocs/360/com/bumptech/glide/module/GlideModule.html
-[2]: javadocs/400/com/bumptech/glide/module/AppGlideModule.html
-[3]: javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
+[1]: http://sjudd.github.io/glide/javadocs/360/com/bumptech/glide/module/GlideModule.html
+[2]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
+[3]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
 [4]: configuration.html
-[5]: javadocs/400/com/bumptech/glide/RequestBuilder.html
-[6]: javadocs/400/com/bumptech/glide/RequestBuilder.html#thumbnail-com.bumptech.glide.RequestBuilder-
-[7]: javadocs/400/com/bumptech/glide/RequestBuilder.html#listener-com.bumptech.glide.request.RequestListener-
-[8]: javadocs/400/com/bumptech/glide/RequestBuilder.html#into-Y-
-[9]: javadocs/400/com/bumptech/glide/RequestBuilder.html#preload-int-int-
-[10]: javadocs/400/com/bumptech/glide/request/RequestOptions.html
+[5]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
+[6]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#thumbnail-com.bumptech.glide.RequestBuilder-
+[7]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#listener-com.bumptech.glide.request.RequestListener-
+[8]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#into-Y-
+[9]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#preload-int-int-
+[10]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html
 [11]: generatedapi.html
-[12]: javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
-[13]: javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
-[14]: javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
-[15]: javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html
-[16]: javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
-[17]: javadocs/400/com/bumptech/glide/TransitionOptions.html#dontTransition--
+[12]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
+[13]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
+[14]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
+[15]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html
+[16]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
+[17]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html#dontTransition--
 [18]: https://developer.android.com/reference/android/graphics/drawable/Drawable.html
 [19]: https://developer.android.com/reference/android/graphics/drawable/BitmapDrawable.html
 [20]: https://developer.android.com/reference/android/graphics/drawable/Animatable.html
-[21]: javadocs/400/com/bumptech/glide/request/RequestListener.html
-[22]: javadocs/400/com/bumptech/glide/RequestManager.html
+[21]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
+[22]: http://sjudd.github.io/glide/javadocs/400/com/bumptech/glide/RequestManager.html
