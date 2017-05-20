@@ -4,7 +4,7 @@ title: "Contributing"
 category: dev
 date: 2016-10-13 08:29:39
 disqus: 1
-order: 1
+order: 2
 ---
 * TOC
 {:toc}

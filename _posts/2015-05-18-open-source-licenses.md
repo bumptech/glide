@@ -3,6 +3,7 @@ layout: page
 title: "Open Source Licenses"
 category: dev
 date: 2015-05-18 19:40:30
+order: 3
 ---
 
 #### [Jekyll Docs Plugin][1]
