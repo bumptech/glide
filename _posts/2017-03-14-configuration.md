@@ -179,6 +179,43 @@ In order for Glide to properly discover [``AppGlideModule``][1] and [``LibraryGl
 #### Annotation Processor
 In addition, to enable discovery of the [``AppGlideModule``][1] and [``LibraryGlideModules``][2] all libraries and applications must also include a dependency on Glide's annotation processor. 
 
+### Conflicts
+Applications may depend on multiple libraries, each of which may contain one or more [``LibraryGlideModules``][2]. In rare cases, these [``LibraryGlideModules``][2] may define conflicting options or otherwise include behavior the application would like to avoid. Applications can resolve these conflicts or avoid unwanted dependencies by adding an [``@Excludes``][20] annotation to their [``AppGlideModule``][1].
+
+For example if you depend on a library that has a [``LibraryGlideModule``][2] that you'd like to avoid, say ``com.example.unwanted.GlideModule``:
+
+```java
+@Excludes("com.example.unwanted.GlideModule")
+@GlideModule
+public final class MyAppGlideModule extends AppGlideModule { }
+```
+
+You can also excludes multiple modules:
+
+```java
+@Excludes({"com.example.unwanted.GlideModule", "com.example.conflicing.GlideModule"})
+@GlideModule
+public final class MyAppGlideModule extends AppGlideModule { }
+```
+
+[``@Excludes``][20] can be used to exclude both [``LibraryGlideModules``][2] and legacy, deprecated [``GlideModule``][21] implementations if you're still in the process of migrating from Glide v3.
+
+
+### Manifest Parsing
+To maintain backward compatibility with Glide v3's [``GlideModules``][21], Glide still parses ``AndroidManifest.xml`` files from both the application and any included libraries and will include any legacy [``GlideModules``][21] listed in the manifest. Although this functionality will be removed in a future version, we've retained the behavior for now to ease the transition.
+
+If you've already migrated to the Glide v4 [``AppGlideModule``][1] and [``LibraryGlideModule``][2], you can disable manifest parsing entirely. Doing so can improve the initial startup time of Glide and avoid some potential problems with trying to parse metadata. To disable manifest parsing, override the [``isManifestParsingEnabled()``][22] method in your [``AppGlideModule``][1] implemenation:
+
+```java
+@GlideModule
+public final class MyAppGlideModule extends AppGlideModule {
+  @Override
+  public boolean isManifestParsingEnabled() {
+    return false;
+  }
+}
+```
+
 [1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
 [2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
 [3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
@@ -198,4 +235,6 @@ In addition, to enable discovery of the [``AppGlideModule``][1] and [``LibraryGl
 [17]: https://developer.android.com/reference/android/content/Context.html#getCacheDir()
 [18]: {{ site.url}}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.Factory.html
 [19]: https://developer.android.com/reference/android/os/StrictMode.html
-
+[20]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/annotation/Excludes.html
+[21]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/module/GlideModule.html
+[22]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html#isManifestParsingEnabled--
