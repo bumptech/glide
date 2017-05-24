@@ -311,6 +311,78 @@ public class GiphyGlideModule extends AppGlideModule {
 }
 ```
 
+### ``using()``, ModelLoader, StreamModelLoader.
+
+#### ModelLoader
+
+The [``ModelLoader``][26] API exists in Glide v4 and serves the same purpose that it did in Glide v3, but a few of the specifics have changed.
+
+First specific subtypes of ``ModelLoader``, like ``StreamModelLoader`` are now unnecessary and users can implement ``ModelLoader`` directly. For example, a ``StreamModelLoader<File>`` would now be implemented and referred to as a ``ModelLoader<File, InputStream>``.
+
+Second, instead of returning a ``DataFetcher`` directly, ``ModelLoader``s now return [``LoadData``][27]. ``LoadData`` is a very simple wrapper that contains a disk cache key and a ``DataFetcher``.
+
+Third, ``ModelLoaders`` have a ``handles()`` method, so that you can register more than one ModelLoader with the same type parameters.
+
+Converting a ``ModelLoader`` from the v3 API to the v4 API is almost always straight forward. If you just return a ``DataFetcher`` in your v3 ``ModelLoader``:
+
+```java
+public final class MyModelLoader implements StreamModelLoader<File> {
+
+  @Override
+  public DataFetcher<InputStream> getResourceFetcher(File model, int width, int height) {
+    return new MyDataFetcher(model);
+  }
+}
+```
+
+Then all you need to do in your v4 equivalent is wrap the data fetcher:
+
+```java
+public final class MyModelLoader implements ModelLoader<File, InputStream> {
+
+  @Override
+  public LoadData<InputStream> buildLoadData(File model, int width, int height,
+      Options options) {
+    return new LoadData<>(model, new MyDataFetcher(model));
+  }
+
+  @Override
+  public void handles(File model) {
+    return true;
+  }
+}
+```
+
+Note that the model is passed in to the ``LoadData`` to act as part of the cache key, in addition to the ``DataFetcher``. This pattern provides more control over the disk cache key in some specialized circumstances. Most implementations can just pass their model directly into ``LoadData`` as is done above.
+
+If you'd only like to use your ModelLoader for some models you can use the ``handles()`` method to inspect the model before you try to load it. If you return ``false`` from ``handles()`` your ``ModelLoader`` will not be to load the given model, even if the types of your ``ModelLoader`` (``File`` and ``InputStream`` in this example) match.
+
+For example, if you're writing encrypted images to disk in a specific folder, you could use the ``handles()`` method to implement a ``ModelLoader`` that decrypted images from that specific folder but wasn't used when loading ``File``s from other folders:
+
+```java
+public final class MyModelLoader implements ModelLoader<File, InputStream> {
+  private static final String ENCRYPTED_PATH = "/my/encrypted/folder";
+
+  @Override
+  public LoadData<InputStream> buildLoadData(File model, int width, int height,
+      Options options) {
+    return new LoadData<>(model, new MyDataFetcher(model));
+  }
+
+  @Override
+  public void handles(File model) {
+    return model.getAbsolutePath().startsWith(ENCRYPTED_PATH);
+  }
+}
+```
+
+
+#### ``using()``
+
+The [``using()``][23] API was removed in Glide 4 to encourage users to [register][24] their components once with a [``AppGlideModule``][2] to avoid object re-use. Rather than creating a new ``ModelLoader`` each time you load an image, you register it once in an [``AppGlideModule``][2] and let Glide inspect your model (the object you pass to [``load()``][25]) to figure out when to use your registered ``ModelLoader``.
+
+To make sure you only use your ``ModelLoader`` for certain models, implement ``handles()`` as shown above to inspect each model and return true only if your ``ModelLoader`` should be used.
+
 [1]: {{ site.url }}/glide/javadocs/360/com/bumptech/glide/module/GlideModule.html
 [2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
 [3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
@@ -333,3 +405,8 @@ public class GiphyGlideModule extends AppGlideModule {
 [20]: https://developer.android.com/reference/android/graphics/drawable/Animatable.html
 [21]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
 [22]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html
+[23]: {{ site.url }}/glide/javadocs/380/com/bumptech/glide/RequestManager.html#using(com.bumptech.glide.load.model.stream.StreamByteArrayLoader)
+[24]: {{ site.url }}/glide/doc/generatedapi.html
+[25]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#load-java.lang.Object-
+[26]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
+[27]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.LoadData.html

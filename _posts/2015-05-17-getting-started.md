@@ -49,7 +49,7 @@ GlideApp.with(fragment)
    .into(imageView);
 ```
 
-See Glide's generated API page for more information.
+See Glide's [generated API page][7] for more information.
 
 ### ListView and RecyclerView
 
@@ -95,3 +95,4 @@ Although the examples we've shown here are for RecyclerView, the same principles
 [4]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html#clear-com.bumptech.glide.request.target.Target-
 [5]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/target/Target.html
 [6]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
+[7]: {{ site.url }}/glide/doc/generatedapi.html
