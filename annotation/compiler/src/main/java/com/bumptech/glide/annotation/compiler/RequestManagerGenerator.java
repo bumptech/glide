@@ -170,10 +170,7 @@ final class RequestManagerGenerator {
           @Override
           public boolean apply(ExecutableElement input) {
             // Skip the <T> as(Class<T>) method.
-            return !input.getSimpleName().toString().equals("as")
-                || input.getParameters().size() != 1
-                || !processingEnv.getTypeUtils().isAssignable(
-                    input.getParameters().get(0).asType(), rawClassType);
+            return !input.getSimpleName().toString().equals("as");
           }
         })
         .transform(new Function<ExecutableElement, MethodSpec>() {
