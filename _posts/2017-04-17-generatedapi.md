@@ -78,7 +78,7 @@ public class MyAppExtension {
   private static final int MINI_THUMB_SIZE = 100;
    
   @GlideOption
-  public static void miniThumb(RequestOptions<?> options) {
+  public static void miniThumb(RequestOptions options) {
     options
       .fitCenter()
       .override(MINI_THUMB_SIZE);
@@ -88,7 +88,7 @@ public class MyAppExtension {
 This will generate a method in a [``RequestOptions``][3] subclass that looks like this:
 
 ```java
-public class GlideOptions extends RequestOptions<GlideOptions>
+public class GlideOptions extends RequestOptions {
   
   public GlideOptions miniThumb() {
     MyAppExtension.miniThumb(this);
@@ -98,11 +98,11 @@ public class GlideOptions extends RequestOptions<GlideOptions>
 }
 ```
 
-You can include as many additional arguments in your methods as you want, as long as the first argument is always [``RequestOptions<?>``][9]:
+You can include as many additional arguments in your methods as you want, as long as the first argument is always [``RequestOptions``][9]:
 
 ```java
 @GlideOption
-public static void miniThumb(RequestOptions<?> options, int size) {
+public static void miniThumb(RequestOptions options, int size) {
   options
     .fitCenter()
     .override(size);
