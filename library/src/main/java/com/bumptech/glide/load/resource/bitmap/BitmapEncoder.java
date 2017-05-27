@@ -52,10 +52,11 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
   @Override
   public boolean encode(Resource<Bitmap> resource, File file, Options options) {
     final Bitmap bitmap = resource.get();
-    TraceCompat.beginSection("encode: [" + bitmap.getWidth() + "x" + bitmap.getHeight() + "]");
+    Bitmap.CompressFormat format = getFormat(bitmap, options);
+    TraceCompat.beginSection(
+        "encode: [" + bitmap.getWidth() + "x" + bitmap.getHeight() + "] " + format);
     try {
       long start = LogTime.getLogTime();
-      Bitmap.CompressFormat format = getFormat(bitmap, options);
       int quality = options.get(COMPRESSION_QUALITY);
 
       boolean success = false;
@@ -81,7 +82,9 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
 
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Compressed with type: " + format + " of size " + Util.getBitmapByteSize(bitmap)
-            + " in " + LogTime.getElapsedMillis(start));
+            + " in " + LogTime.getElapsedMillis(start)
+            + ", options format: " + options.get(COMPRESSION_FORMAT)
+            + ", hasAlpha: " + bitmap.hasAlpha());
       }
       return success;
     } finally {
