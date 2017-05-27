@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
+import android.support.v4.os.TraceCompat;
 import android.util.Log;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Option;
@@ -51,37 +52,41 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
   @Override
   public boolean encode(Resource<Bitmap> resource, File file, Options options) {
     final Bitmap bitmap = resource.get();
-
-    long start = LogTime.getLogTime();
-    Bitmap.CompressFormat format = getFormat(bitmap, options);
-    int quality = options.get(COMPRESSION_QUALITY);
-
-    boolean success = false;
-    OutputStream os = null;
+    TraceCompat.beginSection("encode: [" + bitmap.getWidth() + "x" + bitmap.getHeight() + "]");
     try {
-      os = new FileOutputStream(file);
-      bitmap.compress(format, quality, os);
-      os.close();
-      success = true;
-    } catch (IOException e) {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Failed to encode Bitmap", e);
-      }
-    } finally {
-      if (os != null) {
-        try {
-          os.close();
-        } catch (IOException e) {
-          // Do nothing.
+      long start = LogTime.getLogTime();
+      Bitmap.CompressFormat format = getFormat(bitmap, options);
+      int quality = options.get(COMPRESSION_QUALITY);
+
+      boolean success = false;
+      OutputStream os = null;
+      try {
+        os = new FileOutputStream(file);
+        bitmap.compress(format, quality, os);
+        os.close();
+        success = true;
+      } catch (IOException e) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Failed to encode Bitmap", e);
+        }
+      } finally {
+        if (os != null) {
+          try {
+            os.close();
+          } catch (IOException e) {
+            // Do nothing.
+          }
         }
       }
-    }
 
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Compressed with type: " + format + " of size " + Util.getBitmapByteSize(bitmap)
-          + " in " + LogTime.getElapsedMillis(start));
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Compressed with type: " + format + " of size " + Util.getBitmapByteSize(bitmap)
+            + " in " + LogTime.getElapsedMillis(start));
+      }
+      return success;
+    } finally {
+      TraceCompat.endSection();
     }
-    return success;
   }
 
   private Bitmap.CompressFormat getFormat(Bitmap bitmap, Options options) {

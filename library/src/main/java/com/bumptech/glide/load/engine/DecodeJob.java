@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.v4.os.TraceCompat;
 import android.support.v4.util.Pools;
 import android.util.Log;
 import com.bumptech.glide.GlideContext;
@@ -212,6 +213,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     // This should be much more fine grained, but since Java's thread pool implementation silently
     // swallows all otherwise fatal exceptions, this will at least make it obvious to developers
     // that something is failing.
+    TraceCompat.beginSection("DecodeJob#run");
     try {
       if (isCancelled) {
         notifyFailed();
@@ -231,6 +233,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       if (!isCancelled) {
         throw e;
       }
+    } finally {
+      TraceCompat.endSection();
     }
   }
 
@@ -347,7 +351,12 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       runReason = RunReason.DECODE_DATA;
       callback.reschedule(this);
     } else {
-      decodeFromRetrievedData();
+      TraceCompat.beginSection("DecodeJob.decodeFromRetrievedData");
+      try {
+        decodeFromRetrievedData();
+      } finally {
+        TraceCompat.endSection();
+      }
     }
   }
 
@@ -585,11 +594,13 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
 
     void encode(DiskCacheProvider diskCacheProvider, Options options) {
+      TraceCompat.beginSection("DecodeJob.encode");
       try {
         diskCacheProvider.getDiskCache().put(key,
             new DataCacheWriter<>(encoder, toEncode, options));
       } finally {
         toEncode.unlock();
+        TraceCompat.endSection();
       }
     }
 
