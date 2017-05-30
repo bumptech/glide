@@ -164,7 +164,7 @@ To download a remote file into cache and obtain a file path:
 ```java
 Glide.with(fragment).downloadOnly()
 // or if you have the url already:
-Glide.with(fragmetn).download(url);
+Glide.with(fragment).download(url);
 ```
 
 ### Drawables
