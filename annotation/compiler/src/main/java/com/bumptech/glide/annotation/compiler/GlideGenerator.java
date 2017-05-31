@@ -4,6 +4,7 @@ import com.bumptech.glide.annotation.GlideExtension;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -11,6 +12,7 @@ import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -144,6 +146,11 @@ final class GlideGenerator {
                     return ParameterSpec.get(input);
                   }
             }));
+
+
+    for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
+      builder.addAnnotation(AnnotationSpec.get(mirror));
+    }
 
     boolean returnsValue = element != null;
     if (returnsValue) {
