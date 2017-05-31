@@ -2,10 +2,8 @@ package com.bumptech.glide.load.engine.prefill;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.testing.EqualsTester;
-
 import android.graphics.Bitmap;
-
+import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;

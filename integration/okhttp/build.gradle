@@ -1,13 +1,10 @@
 apply plugin: 'com.android.library'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    compile project(':glide')
+    compile project(':library')
+    annotationProcessor project(':annotation:compiler')
 
-    compile "com.squareup.okhttp:okhttp:${OK_HTTP_VERSION}"
+    compile "com.squareup.okhttp:okhttp:2.7.1"
 }
 
 android {
@@ -18,7 +15,6 @@ android {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
 
-        versionCode VERSION_CODE as int
         versionName VERSION_NAME as String
     }
 
@@ -28,4 +24,4 @@ android {
     }
 }
 
-apply from: "$rootProject.projectDir/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

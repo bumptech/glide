@@ -1,137 +1,33 @@
 package com.bumptech.glide.gifdecoder;
 
-/**
- * Copyright (c) 2013 Xcellent Creations, Inc.
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.os.Build;
-import android.util.Log;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import android.support.annotation.IntDef;
+import android.support.annotation.NonNull;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Arrays;
 
 /**
- * Reads frame data from a GIF image source and decodes it into individual frames for animation
- * purposes.  Image data can be read from either and InputStream source or a byte[].
- *
- * This class is optimized for running animations with the frames, there are no methods to get
- * individual frame images, only to decode the next frame in the animation sequence.  Instead, it
- * lowers its memory footprint by only housing the minimum data necessary to decode the next frame
- * in the animation sequence.
- *
- * The animation must be manually moved forward using {@link #advance()} before requesting the next
- * frame.  This method must also be called before you request the first frame or an error will
- * occur.
- *
- * Implementation adapted from sample code published in Lyons. (2004). <em>Java for
- * Programmers</em>, republished under the MIT Open Source License
+ * Shared interface for GIF decoders.
  */
-public class GifDecoder {
-  private static final String TAG = GifDecoder.class.getSimpleName();
+public interface GifDecoder {
+  /** File read status: No errors. */
+  int STATUS_OK = 0;
+  /** File read status: Error decoding file (may be partially decoded). */
+  int STATUS_FORMAT_ERROR = 1;
+  /** File read status: Unable to open source. */
+  int STATUS_OPEN_ERROR = 2;
+  /** Unable to fully decode the current frame. */
+  int STATUS_PARTIAL_DECODE = 3;
+  /** The total iteration count which means repeat forever. */
+  int TOTAL_ITERATION_COUNT_FOREVER = 0;
 
-  /**
-   * File read status: No errors.
-   */
-  public static final int STATUS_OK = 0;
-  /**
-   * File read status: Error decoding file (may be partially decoded).
-   */
-  public static final int STATUS_FORMAT_ERROR = 1;
-  /**
-   * File read status: Unable to open source.
-   */
-  public static final int STATUS_OPEN_ERROR = 2;
-  /**
-   * Unable to fully decode the current frame.
-   */
-  public static final int STATUS_PARTIAL_DECODE = 3;
-  /**
-   * max decoder pixel stack size.
-   */
-  private static final int MAX_STACK_SIZE = 4096;
-
-  /**
-   * GIF Disposal Method meaning take no action.
-   */
-  private static final int DISPOSAL_UNSPECIFIED = 0;
-  /**
-   * GIF Disposal Method meaning leave canvas from previous frame.
-   */
-  private static final int DISPOSAL_NONE = 1;
-  /**
-   * GIF Disposal Method meaning clear canvas to background color.
-   */
-  private static final int DISPOSAL_BACKGROUND = 2;
-  /**
-   * GIF Disposal Method meaning clear canvas to frame before last.
-   */
-  private static final int DISPOSAL_PREVIOUS = 3;
-
-  private static final int NULL_CODE = -1;
-
-  private static final int INITIAL_FRAME_POINTER = -1;
-
-  private static final int BYTES_PER_INTEGER = 4;
-
-  // We can't tell if a gif has transparency to decode a partial frame on top of a previous
-  // frame, or if the final frame will actually have transparent pixels, so we must always use a
-  // format that supports  transparency. We can't use ARGB_4444 because of framework issues drawing
-  // onto ARGB_4444 Bitmaps using Canvas.
-  private static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.ARGB_8888;
-
-  // Global File Header values and parsing flags.
-  // Active color table.
-  private int[] act;
-
-  // Raw GIF data from input source.
-  private ByteBuffer rawData;
-
-  // Raw data read working array.
-  private final byte[] block = new byte[256];
-
-  private GifHeaderParser parser;
-
-  // LZW decoder working arrays.
-  private short[] prefix;
-  private byte[] suffix;
-  private byte[] pixelStack;
-  private byte[] mainPixels;
-  private int[] mainScratch;
-
-  private int framePointer;
-  private GifHeader header;
-  private BitmapProvider bitmapProvider;
-  private Bitmap previousImage;
-  private boolean savePrevious;
-  private int status;
-  private int sampleSize;
-  private int downsampledHeight;
-  private int downsampledWidth;
-  private boolean isFirstFrameTransparent;
+  /** Android Lint annotation for status codes that can be used with a GIF decoder. */
+  @Retention(RetentionPolicy.SOURCE)
+  @IntDef(value = {STATUS_OK, STATUS_FORMAT_ERROR, STATUS_OPEN_ERROR, STATUS_PARTIAL_DECODE})
+  @interface GifDecodeStatus {
+  }
 
   /**
    * An interface that can be used to provide reused {@link android.graphics.Bitmap}s to avoid GCs
@@ -139,48 +35,49 @@ public class GifDecoder {
    */
   public interface BitmapProvider {
     /**
-     * Returns an {@link Bitmap} with exactly the given dimensions and config, or null if no such
-     * {@link Bitmap} could be obtained.
+     * Returns an {@link Bitmap} with exactly the given dimensions and config.
      *
      * @param width  The width in pixels of the desired {@link android.graphics.Bitmap}.
      * @param height The height in pixels of the desired {@link android.graphics.Bitmap}.
      * @param config The {@link android.graphics.Bitmap.Config} of the desired {@link
      *               android.graphics.Bitmap}.
      */
+    @NonNull
     Bitmap obtain(int width, int height, Bitmap.Config config);
 
     /**
      * Releases the given Bitmap back to the pool.
      */
     void release(Bitmap bitmap);
+
+    /**
+     * Returns a byte array used for decoding and generating the frame bitmap.
+     *
+     * @param size the size of the byte array to obtain
+     */
+    byte[] obtainByteArray(int size);
+
+    /**
+     * Releases the given byte array back to the pool.
+     */
+    void release(byte[] bytes);
+
+    /**
+     * Returns an int array used for decoding/generating the frame bitmaps.
+     */
+    int[] obtainIntArray(int size);
+
+    /**
+     * Release the given array back to the pool.
+     */
+    void release(int[] array);
   }
 
-  public GifDecoder(BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData) {
-    this(provider, gifHeader, rawData, 1 /*sampleSize*/);
-  }
+  int getWidth();
 
-  public GifDecoder(BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData,
-      int sampleSize) {
-    this(provider);
-    setData(gifHeader, rawData, sampleSize);
-  }
+  int getHeight();
 
-  public GifDecoder(BitmapProvider provider) {
-    this.bitmapProvider = provider;
-    header = new GifHeader();
-  }
-
-  public int getWidth() {
-    return header.width;
-  }
-
-  public int getHeight() {
-    return header.height;
-  }
-
-  public ByteBuffer getData() {
-    return rawData;
-  }
+  ByteBuffer getData();
 
   /**
    * Returns the current status of the decoder.
@@ -189,16 +86,13 @@ public class GifDecoder {
    * was decoded successfully and/or completely. Format and open failures persist across frames.
    * </p>
    */
-  public int getStatus() {
-    return status;
-  }
+  @GifDecodeStatus
+  int getStatus();
 
   /**
    * Move the animation frame counter forward.
    */
-  public void advance() {
-    framePointer = (framePointer + 1) % header.frameCount;
-  }
+  void advance();
 
   /**
    * Gets display duration for specified frame.
@@ -206,130 +100,95 @@ public class GifDecoder {
    * @param n int index of frame.
    * @return delay in milliseconds.
    */
-  public int getDelay(int n) {
-    int delay = -1;
-    if ((n >= 0) && (n < header.frameCount)) {
-      delay = header.frames.get(n).delay;
-    }
-    return delay;
-  }
+  int getDelay(int n);
 
   /**
    * Gets display duration for the upcoming frame in ms.
    */
-  public int getNextDelay() {
-    if (header.frameCount <= 0 || framePointer < 0) {
-      return -1;
-    }
-
-    return getDelay(framePointer);
-  }
+  int getNextDelay();
 
   /**
    * Gets the number of frames read from file.
    *
    * @return frame count.
    */
-  public int getFrameCount() {
-    return header.frameCount;
-  }
+  int getFrameCount();
 
   /**
    * Gets the current index of the animation frame, or -1 if animation hasn't not yet started.
    *
    * @return frame index.
    */
-  public int getCurrentFrameIndex() {
-    return framePointer;
-  }
-
-  public void resetFrameIndex() {
-    framePointer = -1;
-  }
+  int getCurrentFrameIndex();
 
   /**
-   * Gets the "Netscape" iteration count, if any. A count of 0 means repeat indefinitely.
-   *
-   * @return iteration count if one was specified, else 1.
+   * Resets the frame pointer to before the 0th frame, as if we'd never used this decoder to
+   * decode any frames.
    */
-  public int getLoopCount() {
-    return header.loopCount;
-  }
+  void resetFrameIndex();
+
+  /**
+   * Gets the "Netscape" loop count, if any. A count of 0 means repeat indefinitely.
+   *
+   * @deprecated Use {@link #getNetscapeLoopCount()} instead.
+   *             This method cannot distinguish whether the loop count is 1 or doesn't exist.
+   * @return loop count if one was specified, else 1.
+   */
+  @Deprecated
+  int getLoopCount();
+
+  /**
+   * Gets the "Netscape" loop count, if any.
+   * A count of 0 ({@link GifHeader#NETSCAPE_LOOP_COUNT_FOREVER}) means repeat indefinitely.
+   * It must not be a negative value.
+   * <br>
+   * Use {@link #getTotalIterationCount()}
+   * to know how many times the animation sequence should be displayed.
+   *
+   * @return loop count if one was specified,
+   *         else -1 ({@link GifHeader#NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST}).
+   */
+  int getNetscapeLoopCount();
+
+  /**
+   * Gets the total count
+   * which represents how many times the animation sequence should be displayed.
+   * A count of 0 ({@link #TOTAL_ITERATION_COUNT_FOREVER}) means repeat indefinitely.
+   * It must not be a negative value.
+   * <p>
+   *     The total count is calculated as follows by using {@link #getNetscapeLoopCount()}.
+   *     This behavior is the same as most web browsers.
+   *     <table border='1'>
+   *         <tr class='tableSubHeadingColor'><th>{@code getNetscapeLoopCount()}</th>
+   *             <th>The total count</th></tr>
+   *         <tr><td>{@link GifHeader#NETSCAPE_LOOP_COUNT_FOREVER}</td>
+   *             <td>{@link #TOTAL_ITERATION_COUNT_FOREVER}</td></tr>
+   *         <tr><td>{@link GifHeader#NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST}</td>
+   *             <td>{@code 1}</td></tr>
+   *         <tr><td>{@code n (n > 0)}</td>
+   *             <td>{@code n + 1}</td></tr>
+   *     </table>
+   * </p>
+   *
+   * @see <a href="https://bugs.chromium.org/p/chromium/issues/detail?id=592735#c5">Discussion about
+   *      the iteration count of animated GIFs (Chromium Issue 592735)</a>
+   *
+   * @return total iteration count calculated from "Netscape" loop count.
+   */
+  int getTotalIterationCount();
 
   /**
    * Returns an estimated byte size for this decoder based on the data provided to {@link
    * #setData(GifHeader, byte[])}, as well as internal buffers.
    */
-  public int getByteSize() {
-    return rawData.limit() + mainPixels.length + (mainScratch.length * BYTES_PER_INTEGER);
-  }
+  int getByteSize();
 
   /**
    * Get the next frame in the animation sequence.
    *
    * @return Bitmap representation of frame.
    */
-  public synchronized Bitmap getNextFrame() {
-    if (header.frameCount <= 0 || framePointer < 0) {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "unable to decode frame, frameCount=" + header.frameCount + " framePointer="
-            + framePointer);
-      }
-      status = STATUS_FORMAT_ERROR;
-    }
-    if (status == STATUS_FORMAT_ERROR || status == STATUS_OPEN_ERROR) {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Unable to decode frame, status=" + status);
-      }
-      return null;
-    }
-    status = STATUS_OK;
-
-    GifFrame currentFrame = header.frames.get(framePointer);
-    GifFrame previousFrame = null;
-    int previousIndex = framePointer - 1;
-    if (previousIndex >= 0) {
-      previousFrame = header.frames.get(previousIndex);
-    }
-
-    final int savedBgColor = header.bgColor;
-
-    // Set the appropriate color table.
-    if (currentFrame.lct == null) {
-      act = header.gct;
-    } else {
-      act = currentFrame.lct;
-      if (header.bgIndex == currentFrame.transIndex) {
-        header.bgColor = 0;
-      }
-    }
-
-    int save = 0;
-    if (currentFrame.transparency) {
-      save = act[currentFrame.transIndex];
-      // Set transparent color if specified.
-      act[currentFrame.transIndex] = 0;
-    }
-    if (act == null) {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "No Valid Color Table");
-      }
-      // No color table defined.
-      status = STATUS_FORMAT_ERROR;
-      return null;
-    }
-
-    // Transfer pixel data to image.
-    Bitmap result = setPixels(currentFrame, previousFrame);
-
-    // Reset the transparent pixel in the color table
-    if (currentFrame.transparency) {
-      act[currentFrame.transIndex] = save;
-    }
-    header.bgColor = savedBgColor;
-
-    return result;
-  }
+  Bitmap getNextFrame();
 
   /**
    * Reads GIF image from stream.
@@ -337,97 +196,16 @@ public class GifDecoder {
    * @param is containing GIF file.
    * @return read status code (0 = no errors).
    */
-  public int read(InputStream is, int contentLength) {
-    if (is != null) {
-      try {
-        int capacity = (contentLength > 0) ? (contentLength + 4096) : 16384;
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream(capacity);
-        int nRead;
-        byte[] data = new byte[16384];
-        while ((nRead = is.read(data, 0, data.length)) != -1) {
-          buffer.write(data, 0, nRead);
-        }
-        buffer.flush();
+  @GifDecodeStatus
+  int read(InputStream is, int contentLength);
 
-        read(buffer.toByteArray());
-      } catch (IOException e) {
-        Log.w(TAG, "Error reading data from stream", e);
-      }
-    } else {
-      status = STATUS_OPEN_ERROR;
-    }
+  void clear();
 
-    try {
-      if (is != null) {
-        is.close();
-      }
-    } catch (IOException e) {
-      Log.w(TAG, "Error closing stream", e);
-    }
+  void setData(GifHeader header, byte[] data);
 
-    return status;
-  }
+  void setData(GifHeader header, ByteBuffer buffer);
 
-  public void clear() {
-    header = null;
-    mainPixels = null;
-    mainScratch = null;
-    if (previousImage != null) {
-      bitmapProvider.release(previousImage);
-    }
-    previousImage = null;
-    rawData = null;
-    isFirstFrameTransparent = false;
-  }
-
-  public synchronized void setData(GifHeader header, byte[] data) {
-    setData(header, ByteBuffer.wrap(data));
-  }
-
-  public synchronized void setData(GifHeader header, ByteBuffer buffer) {
-    setData(header, buffer, 1);
-  }
-
-  public synchronized void setData(GifHeader header, ByteBuffer buffer, int sampleSize) {
-    if (sampleSize <= 0) {
-      throw new IllegalArgumentException("Sample size must be >=0, not: " + sampleSize);
-    }
-    // Make sure sample size is a power of 2.
-    sampleSize = Integer.highestOneBit(sampleSize);
-    this.status = STATUS_OK;
-    this.header = header;
-    isFirstFrameTransparent = false;
-    framePointer = INITIAL_FRAME_POINTER;
-    // Initialize the raw data buffer.
-    rawData = buffer.asReadOnlyBuffer();
-    rawData.position(0);
-    rawData.order(ByteOrder.LITTLE_ENDIAN);
-
-    // No point in specially saving an old frame if we're never going to use it.
-    savePrevious = false;
-    for (GifFrame frame : header.frames) {
-      if (frame.dispose == DISPOSAL_PREVIOUS) {
-        savePrevious = true;
-        break;
-      }
-    }
-
-    this.sampleSize = sampleSize;
-    // Now that we know the size, init scratch arrays.
-    // TODO: Find a way to avoid this entirely or at least downsample it
-    // (either should be possible).
-    mainPixels = new byte[header.width * header.height];
-    mainScratch = new int[(header.width / sampleSize) * (header.height / sampleSize)];
-    downsampledWidth = header.width / sampleSize;
-    downsampledHeight = header.height / sampleSize;
-  }
-
-  private GifHeaderParser getHeaderParser() {
-    if (parser == null) {
-      parser = new GifHeaderParser();
-    }
-    return parser;
-  }
+  void setData(GifHeader header, ByteBuffer buffer, int sampleSize);
 
   /**
    * Reads GIF image from byte array.
@@ -435,355 +213,7 @@ public class GifDecoder {
    * @param data containing GIF file.
    * @return read status code (0 = no errors).
    */
-  public synchronized int read(byte[] data) {
-    this.header = getHeaderParser().setData(data).parseHeader();
-    if (data != null) {
-      setData(header, data);
-    }
+  @GifDecodeStatus
+  int read(byte[] data);
 
-    return status;
-  }
-
-  /**
-   * Creates new frame image from current data (and previous frames as specified by their
-   * disposition codes).
-   */
-  private Bitmap setPixels(GifFrame currentFrame, GifFrame previousFrame) {
-    // Final location of blended pixels.
-    final int[] dest = mainScratch;
-
-    // fill in starting image contents based on last image's dispose code
-    if (previousFrame != null && previousFrame.dispose > DISPOSAL_UNSPECIFIED) {
-      // We don't need to do anything for DISPOSAL_NONE, if it has the correct pixels so will our
-      // mainScratch and therefore so will our dest array.
-      if (previousFrame.dispose == DISPOSAL_BACKGROUND) {
-        // Start with a canvas filled with the background color
-        int c = 0;
-        if (!currentFrame.transparency) {
-          c = header.bgColor;
-        } else if (framePointer == 0) {
-          // TODO: We should check and see if all individual pixels are replaced. If they are, the
-          // first frame isn't actually transparent. For now, it's simpler and safer to assume
-          // drawing a transparent background means the GIF contains transparency.
-          isFirstFrameTransparent = true;
-        }
-        Arrays.fill(dest, c);
-      } else if (previousFrame.dispose == DISPOSAL_PREVIOUS && previousImage != null) {
-        // Start with the previous frame
-        previousImage.getPixels(dest, 0, downsampledWidth, 0, 0, downsampledWidth,
-            downsampledHeight);
-      }
-    }
-
-    // Decode pixels for this frame  into the global pixels[] scratch.
-    decodeBitmapData(currentFrame);
-
-    int downsampledIH = currentFrame.ih / sampleSize;
-    int downsampledIY = currentFrame.iy / sampleSize;
-    int downsampledIW = currentFrame.iw / sampleSize;
-    int downsampledIX = currentFrame.ix / sampleSize;
-    // Copy each source line to the appropriate place in the destination.
-    int pass = 1;
-    int inc = 8;
-    int iline = 0;
-    boolean isFirstFrame = framePointer == 0;
-    for (int i = 0; i < downsampledIH; i++) {
-      int line = i;
-      if (currentFrame.interlace) {
-        if (iline >= downsampledIH) {
-          pass++;
-          switch (pass) {
-            case 2:
-              iline = 4;
-              break;
-            case 3:
-              iline = 2;
-              inc = 4;
-              break;
-            case 4:
-              iline = 1;
-              inc = 2;
-              break;
-            default:
-              break;
-          }
-        }
-        line = iline;
-        iline += inc;
-      }
-      line += downsampledIY;
-      if (line < downsampledHeight) {
-        int k = line * downsampledWidth;
-        // Start of line in dest.
-        int dx = k + downsampledIX;
-        // End of dest line.
-        int dlim = dx + downsampledIW;
-        if (k + downsampledWidth < dlim) {
-          // Past dest edge.
-          dlim = k + downsampledWidth;
-        }
-        // Start of line in source.
-        int sx = i * sampleSize * currentFrame.iw;
-        int maxPositionInSource = sx + ((dlim - dx) * sampleSize);
-        while (dx < dlim) {
-          // Map color and insert in destination.
-          int averageColor = averageColorsNear(sx, maxPositionInSource, currentFrame.iw);
-          if (averageColor != 0) {
-            dest[dx] = averageColor;
-          } else if (!isFirstFrameTransparent && isFirstFrame) {
-            isFirstFrameTransparent = true;
-          }
-          sx += sampleSize;
-          dx++;
-        }
-      }
-    }
-
-    // Copy pixels into previous image
-    if (savePrevious && (currentFrame.dispose == DISPOSAL_UNSPECIFIED
-        || currentFrame.dispose == DISPOSAL_NONE)) {
-      if (previousImage == null) {
-        previousImage = getNextBitmap();
-      }
-      previousImage.setPixels(dest, 0, downsampledWidth, 0, 0, downsampledWidth,
-          downsampledHeight);
-    }
-
-    // Set pixels for current image.
-    Bitmap result = getNextBitmap();
-    result.setPixels(dest, 0, downsampledWidth, 0, 0, downsampledWidth, downsampledHeight);
-    return result;
-  }
-
-  private int averageColorsNear(int positionInMainPixels, int maxPositionInMainPixels,
-      int currentFrameIw) {
-    int alphaSum = 0;
-    int redSum = 0;
-    int greenSum = 0;
-    int blueSum = 0;
-
-    int totalAdded = 0;
-    // Find the pixels in the current row.
-    for (int i = positionInMainPixels;
-        i < positionInMainPixels + sampleSize && i < mainPixels.length
-        && i < maxPositionInMainPixels; i++) {
-      int currentColorIndex = ((int) mainPixels[i]) & 0xff;
-      int currentColor = act[currentColorIndex];
-      if (currentColor != 0) {
-        alphaSum += currentColor >> 24 & 0x000000ff;
-        redSum += currentColor >> 16 & 0x000000ff;
-        greenSum += currentColor >> 8 & 0x000000ff;
-        blueSum += currentColor & 0x000000ff;
-        totalAdded++;
-      }
-    }
-    // Find the pixels in the next row.
-    for (int i = positionInMainPixels + currentFrameIw;
-        i < positionInMainPixels + currentFrameIw + sampleSize && i < mainPixels.length
-        && i < maxPositionInMainPixels; i++) {
-      int currentColorIndex = ((int) mainPixels[i]) & 0xff;
-      int currentColor = act[currentColorIndex];
-      if (currentColor != 0) {
-        alphaSum += currentColor >> 24 & 0x000000ff;
-        redSum += currentColor >> 16 & 0x000000ff;
-        greenSum += currentColor >> 8 & 0x000000ff;
-        blueSum += currentColor & 0x000000ff;
-        totalAdded++;
-      }
-    }
-    if (totalAdded == 0) {
-      return 0;
-    } else {
-      return ((alphaSum / totalAdded) << 24)
-          | ((redSum / totalAdded) << 16)
-          | ((greenSum / totalAdded) << 8)
-          | (blueSum / totalAdded);
-     }
-  }
-
-  /**
-   * Decodes LZW image data into pixel array. Adapted from John Cristy's BitmapMagick.
-   */
-  private void decodeBitmapData(GifFrame frame) {
-    if (frame != null) {
-      // Jump to the frame start position.
-      rawData.position(frame.bufferFrameStart);
-    }
-
-    int npix = (frame == null) ? header.width * header.height : frame.iw * frame.ih;
-    int available, clear, codeMask, codeSize, endOfInformation, inCode, oldCode, bits, code, count,
-        i, datum,
-        dataSize, first, top, bi, pi;
-
-    if (mainPixels == null || mainPixels.length < npix) {
-      // Allocate new pixel array.
-      mainPixels = new byte[npix];
-    }
-    if (prefix == null) {
-      prefix = new short[MAX_STACK_SIZE];
-    }
-    if (suffix == null) {
-      suffix = new byte[MAX_STACK_SIZE];
-    }
-    if (pixelStack == null) {
-      pixelStack = new byte[MAX_STACK_SIZE + 1];
-    }
-
-    // Initialize GIF data stream decoder.
-    dataSize = read();
-    clear = 1 << dataSize;
-    endOfInformation = clear + 1;
-    available = clear + 2;
-    oldCode = NULL_CODE;
-    codeSize = dataSize + 1;
-    codeMask = (1 << codeSize) - 1;
-    for (code = 0; code < clear; code++) {
-      // XXX ArrayIndexOutOfBoundsException.
-      prefix[code] = 0;
-      suffix[code] = (byte) code;
-    }
-
-    // Decode GIF pixel stream.
-    datum = bits = count = first = top = pi = bi = 0;
-    for (i = 0; i < npix; ) {
-      // Load bytes until there are enough bits for a code.
-      if (count == 0) {
-        // Read a new data block.
-        count = readBlock();
-        if (count <= 0) {
-          status = STATUS_PARTIAL_DECODE;
-          break;
-        }
-        bi = 0;
-      }
-
-      datum += (((int) block[bi]) & 0xff) << bits;
-      bits += 8;
-      bi++;
-      count--;
-
-      while (bits >= codeSize) {
-        // Get the next code.
-        code = datum & codeMask;
-        datum >>= codeSize;
-        bits -= codeSize;
-
-        // Interpret the code.
-        if (code == clear) {
-          // Reset decoder.
-          codeSize = dataSize + 1;
-          codeMask = (1 << codeSize) - 1;
-          available = clear + 2;
-          oldCode = NULL_CODE;
-          continue;
-        }
-
-        if (code > available) {
-          status = STATUS_PARTIAL_DECODE;
-          break;
-        }
-
-        if (code == endOfInformation) {
-          break;
-        }
-
-        if (oldCode == NULL_CODE) {
-          pixelStack[top++] = suffix[code];
-          oldCode = code;
-          first = code;
-          continue;
-        }
-        inCode = code;
-        if (code >= available) {
-          pixelStack[top++] = (byte) first;
-          code = oldCode;
-        }
-        while (code >= clear) {
-          pixelStack[top++] = suffix[code];
-          code = prefix[code];
-        }
-        first = ((int) suffix[code]) & 0xff;
-        pixelStack[top++] = (byte) first;
-
-        // Add a new string to the string table.
-        if (available < MAX_STACK_SIZE) {
-          prefix[available] = (short) oldCode;
-          suffix[available] = (byte) first;
-          available++;
-          if (((available & codeMask) == 0) && (available < MAX_STACK_SIZE)) {
-            codeSize++;
-            codeMask += available;
-          }
-        }
-        oldCode = inCode;
-
-        while (top > 0) {
-          // Pop a pixel off the pixel stack.
-          mainPixels[pi++] = pixelStack[--top];
-          i++;
-        }
-      }
-    }
-
-    // Clear missing pixels.
-    for (i = pi; i < npix; i++) {
-      mainPixels[i] = 0;
-    }
-  }
-
-  /**
-   * Reads a single byte from the input stream.
-   */
-  private int read() {
-    int curByte = 0;
-    try {
-      curByte = rawData.get() & 0xFF;
-    } catch (Exception e) {
-      status = STATUS_FORMAT_ERROR;
-    }
-    return curByte;
-  }
-
-  /**
-   * Reads next variable length block from input.
-   *
-   * @return number of bytes stored in "buffer".
-   */
-  private int readBlock() {
-    int blockSize = read();
-    int n = 0;
-    if (blockSize > 0) {
-      try {
-        int count;
-        while (n < blockSize) {
-          count = blockSize - n;
-          rawData.get(block, n, count);
-
-          n += count;
-        }
-      } catch (Exception e) {
-        Log.w(TAG, "Error Reading Block", e);
-        status = STATUS_FORMAT_ERROR;
-      }
-    }
-    return n;
-  }
-
-  private Bitmap getNextBitmap() {
-    Bitmap.Config config = isFirstFrameTransparent
-        ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
-    Bitmap result = bitmapProvider.obtain(downsampledWidth, downsampledHeight, config);
-    if (result == null) {
-      result = Bitmap.createBitmap(downsampledWidth, downsampledHeight, config);
-    }
-    setAlpha(result);
-    return result;
-  }
-
-  @TargetApi(12)
-  private static void setAlpha(Bitmap bitmap) {
-    if (Build.VERSION.SDK_INT >= 12) {
-      bitmap.setHasAlpha(true);
-    }
-  }
 }

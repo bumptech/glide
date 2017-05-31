@@ -12,16 +12,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.SocketTimeoutException;
 
 @RunWith(JUnit4.class)
 public class ExceptionCatchingInputStreamTest {

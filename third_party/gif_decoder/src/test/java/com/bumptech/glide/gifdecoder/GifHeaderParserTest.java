@@ -4,18 +4,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import com.bumptech.glide.gifdecoder.test.GifBytesTestUtil;
 import com.bumptech.glide.testutil.TestUtil;
-
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 /**
  * Tests for {@link com.bumptech.glide.gifdecoder.GifHeaderParser}.
@@ -64,6 +63,58 @@ public class GifHeaderParserTest {
     assertEquals(1, header.frameCount);
     assertNotNull(header.frames.get(0));
     assertEquals(GifDecoder.STATUS_OK, header.status);
+  }
+
+  @Test
+  public void testCanReadNetscapeIterationCountIfNetscapeIterationCountIsZero() throws IOException {
+    byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_0.gif");
+    parser.setData(data);
+    GifHeader header = parser.parseHeader();
+    assertEquals(GifHeader.NETSCAPE_LOOP_COUNT_FOREVER, header.loopCount);
+  }
+
+  @Test
+  public void testCanReadNetscapeIterationCountIfNetscapeIterationCountIs_1() throws IOException {
+    byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_1.gif");
+    parser.setData(data);
+    GifHeader header = parser.parseHeader();
+    assertEquals(1, header.loopCount);
+  }
+
+  @Test
+  public void testCanReadNetscapeIterationCountIfNetscapeIterationCountIs_0x0F()
+      throws IOException {
+    byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_255.gif");
+    parser.setData(data);
+    GifHeader header = parser.parseHeader();
+    assertEquals(255, header.loopCount);
+  }
+
+  @Test
+  public void testCanReadNetscapeIterationCountIfNetscapeIterationCountIs_0x10()
+      throws IOException {
+    byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_256.gif");
+    parser.setData(data);
+    GifHeader header = parser.parseHeader();
+    assertEquals(256, header.loopCount);
+  }
+
+  @Test
+  public void testCanReadNetscapeIterationCountIfNetscapeIterationCountIs_0xFF()
+      throws IOException {
+    byte[] data = TestUtil.resourceToBytes(getClass(), "gif_netscape_iteration_65535.gif");
+    parser.setData(data);
+    GifHeader header = parser.parseHeader();
+    assertEquals(65535, header.loopCount);
+  }
+
+  @Test
+  public void testLoopCountReturnsMinusOneWithoutNetscapeIterationCount()
+          throws IOException {
+    byte[] data = TestUtil.resourceToBytes(getClass(), "gif_without_netscape_iteration.gif");
+    parser.setData(data);
+    GifHeader header = parser.parseHeader();
+    assertEquals(GifHeader.NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST, header.loopCount);
   }
 
   @Test
@@ -213,6 +264,49 @@ public class GifHeaderParserTest {
     assertEquals(expectedFrames, header.frameCount);
     assertEquals(expectedFrames, header.frames.size());
   }
+
+  @Test
+  public void testIsAnimatedMultipleFrames() {
+    final int lzwMinCodeSize = 2;
+    final int numFrames = 3;
+
+    final int frameSize =
+        GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+            + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize);
+    ByteBuffer buffer =
+        ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH + numFrames * frameSize)
+            .order(ByteOrder.LITTLE_ENDIAN);
+
+    GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
+    for (int i = 0; i < numFrames; i++) {
+      GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0 /*numColors*/);
+      GifBytesTestUtil.writeFakeImageData(buffer, 2);
+    }
+
+    parser.setData(buffer.array());
+    assertTrue(parser.isAnimated());
+  }
+
+  @Test
+  public void testIsNotAnimatedOneFrame() {
+    final int lzwMinCodeSize = 2;
+
+    final int frameSize =
+        GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+            + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize);
+
+    ByteBuffer buffer =
+        ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH + frameSize)
+            .order(ByteOrder.LITTLE_ENDIAN);
+
+    GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
+    GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0 /*numColors*/);
+    GifBytesTestUtil.writeFakeImageData(buffer, 2);
+
+    parser.setData(buffer.array());
+    assertFalse(parser.isAnimated());
+  }
+
 
   @Test(expected = IllegalStateException.class)
   public void testThrowsIfParseHeaderCalledBeforeSetData() {

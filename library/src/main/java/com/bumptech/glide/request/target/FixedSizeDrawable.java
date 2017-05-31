@@ -10,8 +10,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Synthetic;
 
 /**
  * A wrapper drawable to square the wrapped drawable so that it expands to fill a square with
@@ -81,7 +81,6 @@ public class FixedSizeDrawable extends Drawable {
     wrapped.setFilterBitmap(filter);
   }
 
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   @Override
   public Callback getCallback() {
     return wrapped.getCallback();
@@ -196,8 +195,8 @@ public class FixedSizeDrawable extends Drawable {
 
   static class State extends ConstantState {
     private final ConstantState wrapped;
-    private final int width;
-    private final int height;
+    @Synthetic final int width;
+    @Synthetic final int height;
 
     State(State other) {
       this(other.wrapped, other.width, other.height);

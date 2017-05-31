@@ -5,14 +5,12 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import com.bumptech.glide.signature.ObjectKey;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 
@@ -99,8 +97,14 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File>  {
    */
   public static final class Factory implements ModelLoaderFactory<Uri, File> {
 
+    private final Context context;
+
+    public Factory(Context context) {
+      this.context = context;
+    }
+
     @Override
-    public ModelLoader<Uri, File> build(Context context, MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<Uri, File> build(MultiModelLoaderFactory multiFactory) {
       return new MediaStoreFileLoader(context);
     }
 

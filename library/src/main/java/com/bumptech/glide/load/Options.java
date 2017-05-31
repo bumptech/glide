@@ -2,7 +2,6 @@ package com.bumptech.glide.load;
 
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.SimpleArrayMap;
-
 import java.security.MessageDigest;
 import java.util.Map;
 

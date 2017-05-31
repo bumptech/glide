@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.view.View;
 import android.view.animation.Animation;
-
+import com.bumptech.glide.load.DataSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,18 +23,18 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE)
 public class ViewTransitionAnimationFactoryTest {
   private ViewTransition.ViewTransitionAnimationFactory viewTransitionAnimationFactory;
-  private ViewAnimationFactory factory;
+  private ViewAnimationFactory<Object> factory;
 
   @Before
   public void setUp() {
     viewTransitionAnimationFactory = mock(ViewTransition.ViewTransitionAnimationFactory.class);
-    factory = new ViewAnimationFactory(viewTransitionAnimationFactory);
+    factory = new ViewAnimationFactory<>(viewTransitionAnimationFactory);
   }
 
   @Test
   public void testFactoryReturnsNoAnimationIfFromMemoryCache() {
     Transition<Object> animation =
-        factory.build(true /*isFromMemoryCache*/, true /*isFirstResource*/);
+        factory.build(DataSource.MEMORY_CACHE, true /*isFirstResource*/);
     assertEquals(NoTransition.get(), animation);
     verify(viewTransitionAnimationFactory, never()).build(RuntimeEnvironment.application);
   }
@@ -42,7 +42,7 @@ public class ViewTransitionAnimationFactoryTest {
   @Test
   public void testFactoryReturnsNoAnimationIfNotFirstResource() {
     Transition<Object> animation =
-        factory.build(false /*isFromMemoryCache*/, false /*isFirstResource*/);
+        factory.build(DataSource.DATA_DISK_CACHE, false /*isFirstResource*/);
     assertEquals(NoTransition.get(), animation);
     verify(viewTransitionAnimationFactory, never()).build(RuntimeEnvironment.application);
   }
@@ -50,7 +50,7 @@ public class ViewTransitionAnimationFactoryTest {
   @Test
   public void testFactoryReturnsActualAnimationIfNotIsFromMemoryCacheAndIsFirstResource() {
     Transition<Object> transition =
-        factory.build(false /*isFromMemoryCache*/, true /*isFirstResource*/);
+        factory.build(DataSource.DATA_DISK_CACHE, true /*isFirstResource*/);
 
     Animation animation = mock(Animation.class);
     when(viewTransitionAnimationFactory.build(any(Context.class))).thenReturn(animation);

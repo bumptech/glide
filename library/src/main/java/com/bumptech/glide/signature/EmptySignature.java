@@ -1,7 +1,6 @@
 package com.bumptech.glide.signature;
 
 import com.bumptech.glide.load.Key;
-
 import java.security.MessageDigest;
 
 /**

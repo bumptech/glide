@@ -36,4 +36,10 @@
        <Bug pattern="DM_DEFAULT_ENCODING" />
     </Match>
 
+    <!-- We make a best effort attempt to acquire the cpu count from a fixed path -->
+    <Match>
+      <Class name="com.bumptech.glide.load.engine.executor.GlideExecutor" />
+      <Bug pattern="DMI_HARDCODED_ABSOLUTE_FILENAME" />
+    </Match>
+
 </FindBugsFilter>

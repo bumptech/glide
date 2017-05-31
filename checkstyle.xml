@@ -14,6 +14,9 @@
         <property name="message" value="Line has trailing spaces."/>
     </module>
 
+    <!-- Ensure trailling newline for compatibility -->
+    <module name="NewlineAtEndOfFile" />
+
     <!-- Space after 'for' and 'if' -->
     <module name="RegexpSingleline">
         <property name="format" value="^\s*(for|if)\b[^ ]"/>
@@ -93,7 +96,7 @@
 
           <property name="sortStaticImportsAlphabetically" value="true"/>
            <property name="severity" value="error"/>
-           <property name="groups" value="com.google,*,java,javax"/>
+           <property name="groups" value="*"/>
            <!-- This ensures that static imports go first. -->
            <property name="option" value="top"/>
            <property name="tokens" value="STATIC_IMPORT, IMPORT"/>

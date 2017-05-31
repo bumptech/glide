@@ -1,11 +1,10 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
@@ -28,20 +27,22 @@ import java.util.Map;
  */
 public class GlideUrl implements Key {
   private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%";
-  private final URL url;
   private final Headers headers;
-  private final String stringUrl;
+  @Nullable private final URL url;
+  @Nullable private final String stringUrl;
 
-  private String safeStringUrl;
-  private URL safeUrl;
-  private volatile byte[] cacheKeyBytes;
+  @Nullable private String safeStringUrl;
+  @Nullable private URL safeUrl;
+  @Nullable private volatile byte[] cacheKeyBytes;
+
+  private int hashCode;
 
   public GlideUrl(URL url) {
-    this(url, Headers.NONE);
+    this(url, Headers.DEFAULT);
   }
 
   public GlideUrl(String url) {
-    this(url, Headers.NONE);
+    this(url, Headers.DEFAULT);
   }
 
   public GlideUrl(URL url, Headers headers) {
@@ -140,8 +141,10 @@ public class GlideUrl implements Key {
 
   @Override
   public int hashCode() {
-    int hashCode = getCacheKey().hashCode();
-    hashCode = 31 * hashCode + headers.hashCode();
+    if (hashCode == 0) {
+      hashCode = getCacheKey().hashCode();
+      hashCode = 31 * hashCode + headers.hashCode();
+    }
     return hashCode;
   }
 }

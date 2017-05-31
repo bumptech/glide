@@ -1,12 +1,7 @@
 apply plugin: 'com.android.library'
-apply plugin: 'org.robolectric'
-
-repositories {
-    mavenCentral()
-}
 
 dependencies {
-    compile project(':glide')
+    compile project(':library')
 
     testCompile project(":testutil")
     testCompile "com.google.truth:truth:${TRUTH_VERSION}"
@@ -30,7 +25,6 @@ android {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
 
-        versionCode = VERSION_CODE as int
         versionName = VERSION_NAME as String
     }
 
@@ -40,4 +34,4 @@ android {
     }
 }
 
-apply from: "$rootProject.projectDir/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

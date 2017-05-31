@@ -14,7 +14,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.widget.ImageView;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,7 +72,7 @@ public class DrawableCrossFadeViewAnimationTest {
     Transition<Drawable> defaultAnimation = mock(Transition.class);
     int duration = 200;
     DrawableCrossFadeTransition animation =
-        new DrawableCrossFadeTransition(defaultAnimation, duration);
+        new DrawableCrossFadeTransition(defaultAnimation, duration, true /*isCrossFadeEnabled*/);
   }
 }
 

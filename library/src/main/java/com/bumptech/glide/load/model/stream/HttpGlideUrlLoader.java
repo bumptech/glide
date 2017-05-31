@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.model.stream;
 
-import android.content.Context;
-
+import android.support.annotation.Nullable;
+import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.HttpUrlFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -9,7 +9,6 @@ import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-
 import java.io.InputStream;
 
 /**
@@ -17,8 +16,16 @@ import java.io.InputStream;
  * com.bumptech.glide.load.model.GlideUrl} (http/https URLS) into {@link java.io.InputStream} data.
  */
 public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
+  /**
+   * An integer option that is used to determine the maximum connect and read timeout durations (in
+   * milliseconds) for network connections.
+   *
+   * <p>Defaults to 2500ms.
+   */
+  public static final Option<Integer> TIMEOUT = Option.memory(
+      "com.bumptech.glide.load.model.stream.HttpGlideUrlLoader.Timeout", 2500);
 
-  private final ModelCache<GlideUrl, GlideUrl> modelCache;
+  @Nullable private final ModelCache<GlideUrl, GlideUrl> modelCache;
 
   public HttpGlideUrlLoader() {
     this(null);
@@ -41,7 +48,8 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
         url = model;
       }
     }
-    return new LoadData<>(url, new HttpUrlFetcher(url));
+    int timeout = options.get(TIMEOUT);
+    return new LoadData<>(url, new HttpUrlFetcher(url, timeout));
   }
 
   @Override
@@ -56,8 +64,7 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     private final ModelCache<GlideUrl, GlideUrl> modelCache = new ModelCache<>(500);
 
     @Override
-    public ModelLoader<GlideUrl, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new HttpGlideUrlLoader(modelCache);
     }
 

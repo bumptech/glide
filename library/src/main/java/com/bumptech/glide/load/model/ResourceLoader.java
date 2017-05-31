@@ -1,14 +1,12 @@
 package com.bumptech.glide.load.model;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.bumptech.glide.load.Options;
-
 import java.io.InputStream;
 
 /**
@@ -22,10 +20,6 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   private final ModelLoader<Uri, Data> uriLoader;
   private final Resources resources;
 
-  public ResourceLoader(Context context, ModelLoader<Uri, Data> uriLoader) {
-    this(context.getResources(), uriLoader);
-  }
-
   public ResourceLoader(Resources resources, ModelLoader<Uri, Data> uriLoader) {
     this.resources = resources;
     this.uriLoader = uriLoader;
@@ -38,6 +32,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
     return uri == null ? null : uriLoader.buildLoadData(uri, width, height, options);
   }
 
+  @Nullable
   private Uri getResourceUri(Integer model) {
     try {
       return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://"
@@ -63,10 +58,15 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
    */
   public static class StreamFactory implements ModelLoaderFactory<Integer, InputStream> {
 
+    private final Resources resources;
+
+    public StreamFactory(Resources resources) {
+      this.resources = resources;
+    }
+
     @Override
-    public ModelLoader<Integer, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
-      return new ResourceLoader<>(context, multiFactory.build(Uri.class, InputStream.class));
+    public ModelLoader<Integer, InputStream> build(MultiModelLoaderFactory multiFactory) {
+      return new ResourceLoader<>(resources, multiFactory.build(Uri.class, InputStream.class));
     }
 
     @Override
@@ -81,11 +81,16 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   public static class FileDescriptorFactory
       implements ModelLoaderFactory<Integer, ParcelFileDescriptor> {
 
+    private final Resources resources;
+
+    public FileDescriptorFactory(Resources resources) {
+      this.resources = resources;
+    }
+
     @Override
-    public ModelLoader<Integer, ParcelFileDescriptor> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
-      return new ResourceLoader<>(context,
-          multiFactory.build(Uri.class, ParcelFileDescriptor.class));
+    public ModelLoader<Integer, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
+      return new ResourceLoader<>(
+          resources, multiFactory.build(Uri.class, ParcelFileDescriptor.class));
     }
 
     @Override

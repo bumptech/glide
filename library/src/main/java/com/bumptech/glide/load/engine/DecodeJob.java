@@ -2,9 +2,7 @@ package com.bumptech.glide.load.engine;
 
 import android.support.v4.util.Pools;
 import android.util.Log;
-
 import com.bumptech.glide.GlideContext;
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.DataSource;
@@ -17,8 +15,9 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.util.LogTime;
-import com.bumptech.glide.util.Preconditions;
-
+import com.bumptech.glide.util.Synthetic;
+import com.bumptech.glide.util.pool.FactoryPools.Poolable;
+import com.bumptech.glide.util.pool.StateVerifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,37 +33,43 @@ import java.util.Map;
  */
 class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     Runnable,
-    Comparable<DecodeJob<?>> {
+    Comparable<DecodeJob<?>>,
+    Poolable {
   private static final String TAG = "DecodeJob";
-  private static final RunReason INITIAL_RUN_REASON = RunReason.INITIALIZE;
 
+  @Synthetic final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
+  private final List<Exception> exceptions = new ArrayList<>();
+  private final StateVerifier stateVerifier = StateVerifier.newInstance();
   private final DiskCacheProvider diskCacheProvider;
   private final Pools.Pool<DecodeJob<?>> pool;
-  private final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
-  private final List<Exception> exceptions = new ArrayList<>();
+  @Synthetic final DeferredEncodeManager<?> deferredEncodeManager = new DeferredEncodeManager<>();
+  private final ReleaseManager releaseManager = new ReleaseManager();
+
   private GlideContext glideContext;
-  private Key signature;
+  @Synthetic Key signature;
   private Priority priority;
   private EngineKey loadKey;
-  private int width;
-  private int height;
-  private DiskCacheStrategy diskCacheStrategy;
-  private Options options;
+  @Synthetic int width;
+  @Synthetic int height;
+  @Synthetic DiskCacheStrategy diskCacheStrategy;
+  @Synthetic Options options;
   private Callback<R> callback;
   private int order;
   private Stage stage;
-  private RunReason runReason = INITIAL_RUN_REASON;
-  private volatile DataFetcherGenerator generator;
+  private RunReason runReason;
+  private long startFetchTime;
+  private boolean onlyRetrieveFromCache;
+
   private Thread currentThread;
-  private Key currentSourceKey;
+  @Synthetic Key currentSourceKey;
+  private Key currentAttemptingKey;
   private Object currentData;
   private DataSource currentDataSource;
   private DataFetcher<?> currentFetcher;
-  private long startFetchTime;
 
-  private volatile boolean isCancelled;
+  private volatile DataFetcherGenerator currentGenerator;
   private volatile boolean isCallbackNotified;
-  private Key currentAttemptingKey;
+  private volatile boolean isCancelled;
 
   DecodeJob(DiskCacheProvider diskCacheProvider, Pools.Pool<DecodeJob<?>> pool) {
     this.diskCacheProvider = diskCacheProvider;
@@ -84,6 +89,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       DiskCacheStrategy diskCacheStrategy,
       Map<Class<?>, Transformation<?>> transformations,
       boolean isTransformationRequired,
+      boolean onlyRetrieveFromCache,
       Options options,
       Callback<R> callback,
       int order) {
@@ -108,14 +114,59 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     this.width = width;
     this.height = height;
     this.diskCacheStrategy = diskCacheStrategy;
+    this.onlyRetrieveFromCache = onlyRetrieveFromCache;
     this.options = options;
     this.callback = callback;
     this.order = order;
+    this.runReason = RunReason.INITIALIZE;
     return this;
   }
 
-  void release() {
+  /**
+   * Returns true if this job will attempt to decode a resource from the disk cache, and false if it
+   * will always decode from source.
+   */
+  boolean willDecodeFromCache() {
+    Stage firstStage = getNextStage(Stage.INITIALIZE);
+    return firstStage == Stage.RESOURCE_CACHE || firstStage == Stage.DATA_CACHE;
+  }
+
+  /**
+   * Called when this object is no longer in use externally.
+   *
+   * @param isRemovedFromQueue {@code true} if we've been removed from the queue and {@link #run}
+   *                           is neither in progress nor will ever be called again.
+   */
+  void release(boolean isRemovedFromQueue) {
+    if (releaseManager.release(isRemovedFromQueue)) {
+      releaseInternal();
+    }
+  }
+
+  /**
+   * Called when we've finished encoding (either because the encode process is complete, or because
+   * we don't have anything to encode).
+   */
+  private void onEncodeComplete() {
+    if (releaseManager.onEncodeComplete()) {
+      releaseInternal();
+    }
+  }
+
+  /**
+   * Called when the load has failed due to a an error or a series of errors.
+   */
+  private void onLoadFailed() {
+    if (releaseManager.onFailed()) {
+      releaseInternal();
+    }
+  }
+
+  private void releaseInternal() {
+    releaseManager.reset();
+    deferredEncodeManager.clear();
     decodeHelper.clear();
+    isCallbackNotified = false;
     glideContext = null;
     signature = null;
     options = null;
@@ -123,8 +174,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     loadKey = null;
     callback = null;
     stage = null;
-    runReason = INITIAL_RUN_REASON;
-    generator = null;
+    currentGenerator = null;
     currentThread = null;
     currentSourceKey = null;
     currentData = null;
@@ -132,7 +182,6 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     currentFetcher = null;
     startFetchTime = 0L;
     isCancelled = false;
-    isCallbackNotified = false;
     exceptions.clear();
     pool.release(this);
   }
@@ -150,40 +199,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     return priority.ordinal();
   }
 
-  /**
-   * Why we're being executed again.
-   */
-  private enum RunReason {
-    /** The first time we've been submitted. */
-    INITIALIZE,
-    /**
-     * We want to switch from the disk cache service to the source executor.
-     */
-    SWITCH_TO_SOURCE_SERVICE,
-    /**
-     * We retrieved some data on a thread we don't own and want to switch back to our thread to
-     * process the data.
-     */
-    DECODE_DATA,
-  }
-
-  /**
-   * Where we're trying to decode data from.
-   */
-  private enum Stage {
-    /** The initial stage. */
-    INITIALIZE,
-    /** Decode from a cached resource. */
-    RESOURCE_CACHE,
-    /** Decode from cached source data. */
-    DATA_CACHE,
-    /** Decode from retrieved source. */
-    SOURCE,
-  }
-
   public void cancel() {
     isCancelled = true;
-    DataFetcherGenerator local = generator;
+    DataFetcherGenerator local = currentGenerator;
     if (local != null) {
       local.cancel();
     }
@@ -202,9 +220,14 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       runWrapped();
     } catch (RuntimeException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "DecodeJob threw unexpectedly, isCancelled: " + isCancelled, e);
+        Log.d(TAG, "DecodeJob threw unexpectedly"
+            + ", isCancelled: " + isCancelled
+            + ", stage: " + stage, e);
       }
-      notifyFailed();
+      // When we're encoding we've already notified our callback and it isn't safe to do so again.
+      if (stage != Stage.ENCODE) {
+        notifyFailed();
+      }
       if (!isCancelled) {
         throw e;
       }
@@ -215,7 +238,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
      switch (runReason) {
       case INITIALIZE:
         stage = getNextStage(Stage.INITIALIZE);
-        generator = getNextGenerator();
+        currentGenerator = getNextGenerator();
         runGenerators();
         break;
       case SWITCH_TO_SOURCE_SERVICE:
@@ -230,9 +253,6 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private DataFetcherGenerator getNextGenerator() {
-    if (stage == null) {
-      return null;
-    }
     switch (stage) {
       case RESOURCE_CACHE:
         return new ResourceCacheGenerator(decodeHelper, this);
@@ -240,6 +260,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         return new DataCacheGenerator(decodeHelper, this);
       case SOURCE:
         return new SourceGenerator(decodeHelper, this);
+      case FINISHED:
+        return null;
       default:
         throw new IllegalStateException("Unrecognized stage: " + stage);
     }
@@ -249,9 +271,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     currentThread = Thread.currentThread();
     startFetchTime = LogTime.getLogTime();
     boolean isStarted = false;
-    while (!isCancelled && generator != null && !(isStarted = generator.startNext())) {
+    while (!isCancelled && currentGenerator != null
+        && !(isStarted = currentGenerator.startNext())) {
       stage = getNextStage(stage);
-      generator = getNextGenerator();
+      currentGenerator = getNextGenerator();
 
       if (stage == Stage.SOURCE) {
         reschedule();
@@ -259,7 +282,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       }
     }
     // We've run out of stages and generators, give up.
-    if ((stage == null || isCancelled) && !isStarted) {
+    if ((stage == Stage.FINISHED || isCancelled) && !isStarted) {
       notifyFailed();
     }
 
@@ -271,22 +294,23 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     setNotifiedOrThrow();
     GlideException e = new GlideException("Failed to load resource", new ArrayList<>(exceptions));
     callback.onLoadFailed(e);
+    onLoadFailed();
   }
 
-  private void notifyComplete(Resource<R> resource) {
+  private void notifyComplete(Resource<R> resource, DataSource dataSource) {
     setNotifiedOrThrow();
-    callback.onResourceReady(resource);
+    callback.onResourceReady(resource, dataSource);
   }
 
   private void setNotifiedOrThrow() {
-    Preconditions.checkArgument(!isCallbackNotified, "Already notified callback");
+    stateVerifier.throwIfRecycled();
+    if (isCallbackNotified) {
+      throw new IllegalStateException("Already notified");
+    }
     isCallbackNotified = true;
   }
 
   private Stage getNextStage(Stage current) {
-    if (current == null) {
-      return null;
-    }
     switch (current) {
       case INITIALIZE:
         return diskCacheStrategy.decodeCachedResource()
@@ -295,9 +319,13 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         return diskCacheStrategy.decodeCachedData()
             ? Stage.DATA_CACHE : getNextStage(Stage.DATA_CACHE);
       case DATA_CACHE:
-        return Stage.SOURCE;
+        // Skip loading from source if the user opted to only retrieve the resource from cache.
+        return onlyRetrieveFromCache ? Stage.FINISHED : Stage.SOURCE;
+      case SOURCE:
+      case FINISHED:
+        return Stage.FINISHED;
       default:
-        return null;
+        throw new IllegalArgumentException("Unrecognized stage: " + current);
     }
   }
 
@@ -326,6 +354,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   @Override
   public void onDataFetcherFailed(Key attemptedKey, Exception e, DataFetcher<?> fetcher,
       DataSource dataSource) {
+    fetcher.cleanup();
     GlideException exception = new GlideException("Fetching data failed", e);
     exception.setLoggingDetails(attemptedKey, dataSource, fetcher.getDataClass());
     exceptions.add(exception);
@@ -338,7 +367,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private void decodeFromRetrievedData() {
-    if (Logs.isEnabled(Log.VERBOSE)) {
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logWithTimeAndKey("Retrieved data", startFetchTime,
           "data: " + currentData
           + ", cache key: " + currentSourceKey
@@ -352,19 +381,37 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       exceptions.add(e);
     }
     if (resource != null) {
-      notifyComplete(resource);
-      cleanup();
+      notifyEncodeAndRelease(resource, currentDataSource);
     } else {
       runGenerators();
     }
   }
 
-  private void cleanup() {
-    currentData = null;
-    currentDataSource = null;
-    currentFetcher = null;
-    currentSourceKey = null;
-    currentThread = null;
+  private void notifyEncodeAndRelease(Resource<R> resource, DataSource dataSource) {
+    if (resource instanceof Initializable) {
+      ((Initializable) resource).initialize();
+    }
+
+    Resource<R> result = resource;
+    LockedResource<R> lockedResource = null;
+    if (deferredEncodeManager.hasResourceToEncode()) {
+      lockedResource = LockedResource.obtain(resource);
+      result = lockedResource;
+    }
+
+    notifyComplete(result, dataSource);
+
+    stage = Stage.ENCODE;
+    try {
+      if (deferredEncodeManager.hasResourceToEncode()) {
+        deferredEncodeManager.encode(diskCacheProvider, options);
+      }
+    } finally {
+      if (lockedResource != null) {
+        lockedResource.unlock();
+      }
+      onEncodeComplete();
+    }
   }
 
   private <Data> Resource<R> decodeFromData(DataFetcher<?> fetcher, Data data,
@@ -375,7 +422,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       }
       long startTime = LogTime.getLogTime();
       Resource<R> result = decodeFromFetcher(data, dataSource);
-      if (Logs.isEnabled(Log.VERBOSE)) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
         logWithTimeAndKey("Decoded result " + result, startTime);
       }
       return result;
@@ -407,18 +454,22 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private void logWithTimeAndKey(String message, long startTime, String extraArgs) {
-    Logs.log(Log.VERBOSE,
-        message + " in " + LogTime.getElapsedMillis(startTime) + ", load key: " + loadKey + (
-            extraArgs != null ? ", " + extraArgs : "") + ", thread: " + Thread.currentThread()
-            .getName());
+    Log.v(TAG, message + " in " + LogTime.getElapsedMillis(startTime) + ", load key: " + loadKey
+        + (extraArgs != null ? ", " + extraArgs : "") + ", thread: "
+        + Thread.currentThread().getName());
   }
 
+  @Override
+  public StateVerifier getVerifier() {
+    return stateVerifier;
+  }
 
-  class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
+  private final class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
 
     private final DataSource dataSource;
 
-    public DecodeCallback(DataSource dataSource) {
+    @Synthetic
+    DecodeCallback(DataSource dataSource) {
       this.dataSource = dataSource;
     }
 
@@ -429,7 +480,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       Resource<Z> transformed = decoded;
       if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
         appliedTransformation = decodeHelper.getTransformation(resourceSubClass);
-        transformed = appliedTransformation.transform(decoded, width, height);
+        transformed = appliedTransformation.transform(glideContext, decoded, width, height);
       }
       // TODO: Make this the responsibility of the Transformation.
       if (!decoded.equals(transformed)) {
@@ -446,7 +497,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         encodeStrategy = EncodeStrategy.NONE;
       }
 
-      long startEncodeTime = LogTime.getLogTime();
+      Resource<Z> result = transformed;
       boolean isFromAlternateCacheKey = !decodeHelper.isSourceKey(currentSourceKey);
       if (diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource,
           encodeStrategy)) {
@@ -463,15 +514,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
           throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);
         }
 
-        diskCacheProvider.getDiskCache().put(key, new DataCacheWriter<>(encoder, transformed,
-            options));
-        if (Logs.isEnabled(Log.VERBOSE)) {
-          logWithTimeAndKey("Encoded resource to cache", startEncodeTime,
-              "cache key: " + key
-              + ", encode strategy: " + encodeStrategy);
-        }
+        LockedResource<Z> lockedResult = LockedResource.obtain(transformed);
+        deferredEncodeManager.init(key, encoder, lockedResult);
+        result = lockedResult;
       }
-      return transformed;
+      return result;
     }
 
     @SuppressWarnings("unchecked")
@@ -480,9 +527,86 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
   }
 
+  /**
+   * Responsible for indicating when it is safe for the job to be cleared and returned to the pool.
+   */
+  private static class ReleaseManager {
+    private boolean isReleased;
+    private boolean isEncodeComplete;
+    private boolean isFailed;
+
+    @Synthetic
+    ReleaseManager() { }
+
+    synchronized boolean release(boolean isRemovedFromQueue) {
+      isReleased = true;
+      return isComplete(isRemovedFromQueue);
+    }
+
+    synchronized boolean onEncodeComplete() {
+      isEncodeComplete = true;
+      return isComplete(false /*isRemovedFromQueue*/);
+    }
+
+    synchronized boolean onFailed() {
+      isFailed = true;
+      return isComplete(false /*isRemovedFromQueue*/);
+    }
+
+    synchronized void reset() {
+      isEncodeComplete = false;
+      isReleased = false;
+      isFailed = false;
+    }
+
+    private boolean isComplete(boolean isRemovedFromQueue) {
+      return (isFailed || isRemovedFromQueue || isEncodeComplete) && isReleased;
+    }
+  }
+
+  /**
+   * Allows transformed resources to be encoded after the transcoded result is already delivered
+   * to requestors.
+   */
+  private static class DeferredEncodeManager<Z> {
+    private Key key;
+    private ResourceEncoder<Z> encoder;
+    private LockedResource<Z> toEncode;
+
+    @Synthetic
+    DeferredEncodeManager() { }
+
+    // We just need the encoder and resource type to match, which this will enforce.
+    @SuppressWarnings("unchecked")
+    <X> void init(Key key, ResourceEncoder<X> encoder, LockedResource<X> toEncode) {
+      this.key = key;
+      this.encoder = (ResourceEncoder<Z>) encoder;
+      this.toEncode = (LockedResource<Z>) toEncode;
+    }
+
+    void encode(DiskCacheProvider diskCacheProvider, Options options) {
+      try {
+        diskCacheProvider.getDiskCache().put(key,
+            new DataCacheWriter<>(encoder, toEncode, options));
+      } finally {
+        toEncode.unlock();
+      }
+    }
+
+    boolean hasResourceToEncode() {
+      return toEncode != null;
+    }
+
+    void clear() {
+      key = null;
+      encoder = null;
+      toEncode = null;
+    }
+  }
+
   interface Callback<R> {
 
-    void onResourceReady(Resource<R> resource);
+    void onResourceReady(Resource<R> resource, DataSource dataSource);
 
     void onLoadFailed(GlideException e);
 
@@ -491,5 +615,40 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   interface DiskCacheProvider {
     DiskCache getDiskCache();
+  }
+
+  /**
+   * Why we're being executed again.
+   */
+  private enum RunReason {
+    /** The first time we've been submitted. */
+    INITIALIZE,
+    /**
+     * We want to switch from the disk cache service to the source executor.
+     */
+    SWITCH_TO_SOURCE_SERVICE,
+    /**
+     * We retrieved some data on a thread we don't own and want to switch back to our thread to
+     * process the data.
+     */
+    DECODE_DATA,
+  }
+
+  /**
+   * Where we're trying to decode data from.
+   */
+  private enum Stage {
+    /** The initial stage. */
+    INITIALIZE,
+    /** Decode from a cached resource. */
+    RESOURCE_CACHE,
+    /** Decode from cached source data. */
+    DATA_CACHE,
+    /** Decode from retrieved source. */
+    SOURCE,
+    /** Encoding transformed resources after a successful load. */
+    ENCODE,
+    /** No more viable stages. */
+    FINISHED,
   }
 }

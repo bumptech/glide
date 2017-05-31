@@ -1,7 +1,5 @@
 package com.bumptech.glide.samples.flickr;
 
-import android.content.Context;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelCache;
@@ -11,7 +9,6 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
-
 import java.io.InputStream;
 import java.util.List;
 
@@ -29,8 +26,7 @@ public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
     private final ModelCache<Photo, GlideUrl> modelCache = new ModelCache<Photo, GlideUrl>(500);
 
     @Override
-    public ModelLoader<Photo, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<Photo, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new FlickrModelLoader(multiFactory.build(GlideUrl.class, InputStream.class),
           modelCache);
     }

@@ -9,7 +9,6 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:${ANDROID_GRADLE_VERSION}"
         classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${COVERALLS_GRADLE_VERSION}"
-        classpath "org.robolectric:robolectric-gradle-plugin:${ROBOLECTRIC_GRADLE_VERSION}"
     }
 }
 
@@ -40,11 +39,11 @@ subprojects { project ->
     apply plugin: 'checkstyle'
 
     checkstyle {
-        toolVersion = "6.6"
+        toolVersion = '6.12.1'
     }
 
     checkstyle {
-        configFile = new File(rootDir, 'checkstyle.xml')
+        configFile = rootProject.file('checkstyle.xml')
         configProperties.checkStyleConfigDir = rootProject.rootDir
     }
 
@@ -65,13 +64,17 @@ subprojects { project ->
 
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
-            if (!name.contains('Test')) {
-                options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
-            }
+            options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
         }
+    }
+
+    // We generate a combined javadoc, no need to create javadocs for each library independently.
+    if (!project.name.equals('glide')) {
+        tasks.withType(Javadoc).all { enabled = false }
     }
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.2.1'
+    gradleVersion = '2.9'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }

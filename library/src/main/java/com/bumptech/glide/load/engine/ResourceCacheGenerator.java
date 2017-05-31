@@ -6,7 +6,6 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoader.LoadData;
-
 import java.io.File;
 import java.util.List;
 
@@ -40,6 +39,9 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   @Override
   public boolean startNext() {
     List<Key> sourceIds = helper.getCacheKeys();
+    if (sourceIds.isEmpty()) {
+      return false;
+    }
     List<Class<?>> resourceClasses = helper.getRegisteredResourceClasses();
     while (modelLoaders == null || !hasNextModelLoader()) {
       resourceClassIndex++;

@@ -1,17 +1,21 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.when;
 
-import android.annotation.TargetApi;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-
+import com.bumptech.glide.tests.Util;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +35,16 @@ public class CircleCropTest {
   @Before
   public void setup() {
     MockitoAnnotations.initMocks(this);
-    circleCrop = new CircleCrop(RuntimeEnvironment.application);
+    when(bitmapPool.get(anyInt(), anyInt(), any(Bitmap.Config.class)))
+        .thenAnswer(new Util.CreateBitmap());
+    Context context = RuntimeEnvironment.application;
+    Glide.init(new GlideBuilder().setBitmapPool(bitmapPool).build(context));
+    circleCrop = new CircleCrop();
+  }
+
+  @After
+  public void tearDown() {
+    Glide.tearDown();
   }
 
   @Test
@@ -83,20 +96,18 @@ public class CircleCropTest {
     }
   }
 
-  @TargetApi(12)
   private Bitmap createBitmapWithRedCircle(int width, int height) {
-    Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    int minEdge = Math.min(width, height);
+    float radius = minEdge / 2f;
+
+    Bitmap result = Bitmap.createBitmap(minEdge, minEdge, Bitmap.Config.ARGB_8888);
     result.setHasAlpha(true);
     Canvas canvas = new Canvas(result);
     Paint paint = new Paint();
+    paint.setAntiAlias(true);
     paint.setColor(Color.RED);
 
-    int minEdge = Math.min(width, height);
-    float radius = minEdge / 2f;
-    int left = (width - minEdge) / 2;
-    int top = (height - minEdge) / 2;
-
-    canvas.drawCircle(left + radius, top + radius, radius, paint);
+    canvas.drawCircle(radius, radius, radius, paint);
     return result;
   }
 

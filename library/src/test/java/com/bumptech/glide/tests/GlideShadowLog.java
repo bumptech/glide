@@ -1,7 +1,6 @@
 package com.bumptech.glide.tests;
 
 import android.util.Log;
-
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowLog;

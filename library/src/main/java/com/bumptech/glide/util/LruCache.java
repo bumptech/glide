@@ -1,5 +1,6 @@
 package com.bumptech.glide.util;
 
+import android.support.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -93,6 +94,7 @@ public class LruCache<T, Y> {
    *
    * @param key The key to check.
    */
+  @Nullable
   public synchronized Y get(T key) {
     return cache.get(key);
   }
@@ -133,6 +135,7 @@ public class LruCache<T, Y> {
    *
    * @param key The key to remove the item at.
    */
+  @Nullable
   public synchronized Y remove(T key) {
     final Y value = cache.remove(key);
     if (value != null) {

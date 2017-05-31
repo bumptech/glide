@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.widget.RemoteViews;
-
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
 
@@ -17,7 +16,6 @@ import com.bumptech.glide.util.Preconditions;
  * for every subsequent load. </p>
  */
 public class AppWidgetTarget extends SimpleTarget<Bitmap> {
-
   private final int[] widgetIds;
   private final ComponentName componentName;
   private final RemoteViews remoteViews;
@@ -29,16 +27,16 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
    * it.
    *
    * @param context     Context to use in the AppWidgetManager initialization.
-   * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
-   * @param viewId      The id of the ImageView view that will load the image.
    * @param width       Desired width in pixels of the bitmap that will be loaded. (Needs to be
    *                    manually put because of RemoteViews limitations.)
    * @param height      Desired height in pixels of the bitmap that will be loaded. (Needs to be
    *                    manually put because of RemoteViews limitations.)
+   * @param viewId      The id of the ImageView view that will load the image.
+   * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
    * @param widgetIds   The int[] that contains the widget ids of an application.
    */
-  public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId, int width,
-      int height, int... widgetIds) {
+  public AppWidgetTarget(Context context, int width, int height,
+      int viewId, RemoteViews remoteViews, int... widgetIds) {
     super(width, height);
     if (widgetIds.length == 0) {
       throw new IllegalArgumentException("WidgetIds must have length > 0");
@@ -56,29 +54,30 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
    * that uses {@link #SIZE_ORIGINAL} as the target width and height.
    *
    * @param context     Context to use in the AppWidgetManager initialization.
-   * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
    * @param viewId      The id of the ImageView view that will load the image.
+   * @param remoteViews RemoteViews object which contains the ImageView that will load the bitmap.
    * @param widgetIds   The int[] that contains the widget ids of an application.
    */
-  public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId, int... widgetIds) {
-    this(context, remoteViews, viewId, SIZE_ORIGINAL, SIZE_ORIGINAL, widgetIds);
+  public AppWidgetTarget(Context context,
+      int viewId, RemoteViews remoteViews, int... widgetIds) {
+    this(context, SIZE_ORIGINAL, SIZE_ORIGINAL, viewId, remoteViews, widgetIds);
   }
 
   /**
    * Constructor using a ComponentName to get a handle on the Widget in order to update it.
    *
    * @param context       Context to use in the AppWidgetManager initialization.
-   * @param remoteViews   RemoteViews object which contains the ImageView that will load the
-   *                      bitmap.
-   * @param viewId        The id of the ImageView view that will load the image.
    * @param width         Desired width in pixels of the bitmap that will be loaded. (Needs to be
    *                      manually put because of RemoteViews limitations.)
    * @param height        Desired height in pixels of the bitmap that will be loaded. (Needs to be
    *                      manually put because of RemoteViews limitations.)
+   * @param viewId        The id of the ImageView view that will load the image.
+   * @param remoteViews   RemoteViews object which contains the ImageView that will load the
+   *                      bitmap.
    * @param componentName The ComponentName that refers to our AppWidget.
    */
-  public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId, int width,
-      int height, ComponentName componentName) {
+  public AppWidgetTarget(Context context, int width, int height,
+      int viewId, RemoteViews remoteViews, ComponentName componentName) {
     super(width, height);
     this.context = Preconditions.checkNotNull(context, "Context can not be null!");
     this.remoteViews =
@@ -94,14 +93,14 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
    * order to update it that uses {@link #SIZE_ORIGINAL} as the target width and height.
    *
    * @param context       Context to use in the AppWidgetManager initialization.
+   * @param viewId        The id of the ImageView view that will load the image.
    * @param remoteViews   RemoteViews object which contains the ImageView that will load the
    *                      bitmap.
-   * @param viewId        The id of the ImageView view that will load the image.
    * @param componentName The ComponentName that refers to our AppWidget.
    */
-  public AppWidgetTarget(Context context, RemoteViews remoteViews, int viewId,
-      ComponentName componentName) {
-    this(context, remoteViews, viewId, SIZE_ORIGINAL, SIZE_ORIGINAL, componentName);
+  public AppWidgetTarget(Context context,
+      int viewId, RemoteViews remoteViews, ComponentName componentName) {
+    this(context, SIZE_ORIGINAL, SIZE_ORIGINAL, viewId, remoteViews, componentName);
   }
 
   /**

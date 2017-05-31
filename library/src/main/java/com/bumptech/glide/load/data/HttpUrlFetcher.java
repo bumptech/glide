@@ -2,14 +2,13 @@ package com.bumptech.glide.load.data;
 
 import android.text.TextUtils;
 import android.util.Log;
-
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.HttpException;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
 import com.bumptech.glide.util.LogTime;
-
+import com.bumptech.glide.util.Synthetic;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -22,10 +21,7 @@ import java.util.Map;
  */
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "HttpUrlFetcher";
-  private static final String ENCODING_HEADER = "Accept-Encoding";
-  private static final String DEFAULT_ENCODING = "identity";
   private static final int MAXIMUM_REDIRECTS = 5;
-  private static final int DEFAULT_TIMEOUT_MS = 2500;
   // Visible for testing.
   static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY =
       new DefaultHttpUrlConnectionFactory();
@@ -38,8 +34,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   private InputStream stream;
   private volatile boolean isCancelled;
 
-  public HttpUrlFetcher(GlideUrl glideUrl) {
-    this(glideUrl, DEFAULT_TIMEOUT_MS, DEFAULT_CONNECTION_FACTORY);
+  public HttpUrlFetcher(GlideUrl glideUrl, int timeout) {
+    this(glideUrl, timeout, DEFAULT_CONNECTION_FACTORY);
   }
 
   // Visible for testing.
@@ -57,16 +53,16 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/,
           glideUrl.getHeaders());
     } catch (IOException e) {
-      if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Failed to load data for url", e);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to load data for url", e);
       }
       callback.onLoadFailed(e);
       return;
     }
 
-    if (Logs.isEnabled(Log.VERBOSE)) {
-      Logs.log(Log.VERBOSE, "Finished http url fetcher fetch in "
-          + LogTime.getElapsedMillis(startTime) + " ms and loaded " + result);
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.v(TAG, "Finished http url fetcher fetch in " + LogTime.getElapsedMillis(startTime)
+          + " ms and loaded " + result);
     }
     callback.onDataReady(result);
   }
@@ -81,6 +77,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       try {
         if (lastUrl != null && url.toURI().equals(lastUrl.toURI())) {
           throw new HttpException("In re-direct loop");
+
         }
       } catch (URISyntaxException e) {
         // Do nothing, this is best effort.
@@ -91,15 +88,14 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
       urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());
     }
-    // Do our best to avoid gzip since it's both inefficient for images and also makes it more
-    // difficult for us to detect and prevent partial content rendering. See #440.
-    if (TextUtils.isEmpty(urlConnection.getRequestProperty(ENCODING_HEADER))) {
-      urlConnection.setRequestProperty(ENCODING_HEADER, DEFAULT_ENCODING);
-    }
     urlConnection.setConnectTimeout(timeout);
     urlConnection.setReadTimeout(timeout);
     urlConnection.setUseCaches(false);
     urlConnection.setDoInput(true);
+
+    // Stop the urlConnection instance of HttpUrlConnection from following redirects so that
+    // redirects will be handled by recursive calls to this method, loadDataWithRedirects.
+    urlConnection.setInstanceFollowRedirects(false);
 
     // Connect explicitly to avoid errors in decoders if connection fails.
     urlConnection.connect();
@@ -172,35 +168,11 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     HttpURLConnection build(URL url) throws IOException;
   }
 
-  /**
-   * Thrown when an http request fails.
-   *
-   * <p>Exposes the specific status code or {@link #UNKNOWN} via {@link #getStatusCode()} so
-   * users may attempt to retry certain types of errors.
-   */
-  public static final class HttpException extends IOException {
-    public static final int UNKNOWN = -1;
-    private int statusCode;
-
-    HttpException(int statusCode) {
-      this("Http request failed with status code: " + statusCode, statusCode);
-    }
-
-    HttpException(String message) {
-      this(message, UNKNOWN);
-    }
-
-    HttpException(String message, int statusCode) {
-      super(message);
-      this.statusCode = statusCode;
-    }
-
-    public int getStatusCode() {
-      return statusCode;
-    }
-  }
-
   private static class DefaultHttpUrlConnectionFactory implements HttpUrlConnectionFactory {
+
+    @Synthetic
+    DefaultHttpUrlConnectionFactory() { }
+
     @Override
     public HttpURLConnection build(URL url) throws IOException {
       return (HttpURLConnection) url.openConnection();

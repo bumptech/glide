@@ -1,5 +1,6 @@
 package com.bumptech.glide.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -112,6 +113,27 @@ public final class ByteBufferUtil {
     return new ByteBufferStream(buffer);
   }
 
+  public static ByteBuffer fromStream(InputStream stream) throws IOException {
+    ByteArrayOutputStream outStream = new ByteArrayOutputStream(BUFFER_SIZE);
+
+    byte[] buffer = BUFFER_REF.getAndSet(null);
+    if (buffer == null) {
+      buffer = new byte[BUFFER_SIZE];
+    }
+
+    int n = -1;
+    while ((n = stream.read(buffer)) >= 0) {
+      outStream.write(buffer, 0, n);
+    }
+
+    BUFFER_REF.set(buffer);
+
+    byte[] bytes = outStream.toByteArray();
+
+    // Some resource decoders require a direct byte buffer. Prefer allocateDirect() over wrap()
+    return (ByteBuffer) ByteBuffer.allocateDirect(bytes.length).put(bytes).position(0);
+  }
+
   private static SafeArray getSafeArray(ByteBuffer byteBuffer) {
     if (!byteBuffer.isReadOnly() && byteBuffer.hasArray()) {
       return new SafeArray(byteBuffer.array(), byteBuffer.arrayOffset(), byteBuffer.limit());
@@ -120,9 +142,9 @@ public final class ByteBufferUtil {
   }
 
   static final class SafeArray {
-    private final int offset;
-    private final int limit;
-    private final byte[] data;
+    @Synthetic final int offset;
+    @Synthetic final int limit;
+    @Synthetic final byte[] data;
 
     public SafeArray(byte[] data, int offset, int limit) {
       this.data = data;

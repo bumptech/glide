@@ -3,7 +3,6 @@ package com.bumptech.glide.request.target;
 import static org.mockito.Mockito.mock;
 
 import com.bumptech.glide.request.transition.Transition;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

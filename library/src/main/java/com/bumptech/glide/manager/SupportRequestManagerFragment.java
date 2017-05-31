@@ -1,12 +1,14 @@
 package com.bumptech.glide.manager;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-
+import android.util.Log;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-
+import com.bumptech.glide.util.Synthetic;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,15 +23,16 @@ import java.util.Set;
  * @see com.bumptech.glide.RequestManager
  */
 public class SupportRequestManagerFragment extends Fragment {
+  private static final String TAG = "SupportRMFragment";
   private final ActivityFragmentLifecycle lifecycle;
   private final RequestManagerTreeNode requestManagerTreeNode =
       new SupportFragmentRequestManagerTreeNode();
   private final HashSet<SupportRequestManagerFragment> childRequestManagerFragments =
       new HashSet<>();
 
-  private SupportRequestManagerFragment rootRequestManagerFragment;
-  private RequestManager requestManager;
-  private Fragment parentFragmentHint;
+  @Nullable private SupportRequestManagerFragment rootRequestManagerFragment;
+  @Nullable private RequestManager requestManager;
+  @Nullable private Fragment parentFragmentHint;
 
   public SupportRequestManagerFragment() {
     this(new ActivityFragmentLifecycle());
@@ -57,6 +60,7 @@ public class SupportRequestManagerFragment extends Fragment {
   /**
    * Returns the current {@link com.bumptech.glide.RequestManager} or null if none is put.
    */
+  @Nullable
   public RequestManager getRequestManager() {
     return requestManager;
   }
@@ -131,7 +135,7 @@ public class SupportRequestManagerFragment extends Fragment {
 
   private void registerFragmentWithRoot(FragmentActivity activity) {
     unregisterFragmentWithRoot();
-    rootRequestManagerFragment = RequestManagerRetriever.get()
+    rootRequestManagerFragment = Glide.get(activity).getRequestManagerRetriever()
         .getSupportRequestManagerFragment(activity.getSupportFragmentManager(), null);
     if (rootRequestManagerFragment != this) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
@@ -146,9 +150,16 @@ public class SupportRequestManagerFragment extends Fragment {
   }
 
   @Override
-  public void onAttach(Activity activity) {
-    super.onAttach(activity);
-    registerFragmentWithRoot(getActivity());
+  public void onAttach(Context context) {
+    super.onAttach(context);
+    try {
+      registerFragmentWithRoot(getActivity());
+    } catch (IllegalStateException e) {
+      // OnAttach can be called after the activity is destroyed, see #497.
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Unable to register fragment with root", e);
+      }
+    }
   }
 
   @Override
@@ -193,6 +204,10 @@ public class SupportRequestManagerFragment extends Fragment {
   }
 
   private class SupportFragmentRequestManagerTreeNode implements RequestManagerTreeNode {
+
+    @Synthetic
+    SupportFragmentRequestManagerTreeNode() { }
+
     @Override
     public Set<RequestManager> getDescendants() {
       Set<SupportRequestManagerFragment> descendantFragments =

@@ -1,12 +1,11 @@
 package com.bumptech.glide.load.model;
 
-import android.content.Context;
-
+import android.support.annotation.Nullable;
+import android.support.v4.util.Pools.Pool;
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
 import com.bumptech.glide.load.Options;
-import com.bumptech.glide.load.engine.ExceptionListPool;
 import com.bumptech.glide.util.Preconditions;
-
+import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,19 +20,18 @@ public class MultiModelLoaderFactory {
   private static final Factory DEFAULT_FACTORY = new Factory();
   private static final ModelLoader<Object, Object> EMPTY_MODEL_LOADER = new EmptyModelLoader();
   private final List<Entry<?, ?>> entries = new ArrayList<>();
-  private final Context context;
   private final Factory factory;
   private final Set<Entry<?, ?>> alreadyUsedEntries = new HashSet<>();
-  private final ExceptionListPool exceptionListPool;
+  private final Pool<List<Exception>> exceptionListPool;
 
-  public MultiModelLoaderFactory(Context context, ExceptionListPool exceptionListPool) {
-    this(context, exceptionListPool, DEFAULT_FACTORY);
+  public MultiModelLoaderFactory(Pool<List<Exception>> exceptionListPool) {
+    this(exceptionListPool, DEFAULT_FACTORY);
   }
 
   // Visible for testing.
-  MultiModelLoaderFactory(Context context, ExceptionListPool exceptionListPool, Factory factory) {
+  MultiModelLoaderFactory(Pool<List<Exception>> exceptionListPool,
+      Factory factory) {
     this.exceptionListPool = exceptionListPool;
-    this.context = context.getApplicationContext();
     this.factory = factory;
   }
 
@@ -74,23 +72,28 @@ public class MultiModelLoaderFactory {
   }
 
   synchronized <Model> List<ModelLoader<Model, ?>> build(Class<Model> modelClass) {
-    List<ModelLoader<Model, ?>> loaders = new ArrayList<>();
-    for (Entry<?, ?> entry : entries) {
-      // Avoid stack overflow recursively creating model loaders by only creating loaders in
-      // recursive requests if they haven't been created earlier in the chain. For example:
-      // A Uri loader may translate to another model, which in turn may translate back to a Uri.
-      // The original Uri loader won't be provided to the intermediate model loader, although other
-      // Uri loaders will be.
-      if (alreadyUsedEntries.contains(entry)) {
-        continue;
+    try {
+      List<ModelLoader<Model, ?>> loaders = new ArrayList<>();
+      for (Entry<?, ?> entry : entries) {
+        // Avoid stack overflow recursively creating model loaders by only creating loaders in
+        // recursive requests if they haven't been created earlier in the chain. For example:
+        // A Uri loader may translate to another model, which in turn may translate back to a Uri.
+        // The original Uri loader won't be provided to the intermediate model loader, although
+        // other Uri loaders will be.
+        if (alreadyUsedEntries.contains(entry)) {
+          continue;
+        }
+        if (entry.handles(modelClass)) {
+          alreadyUsedEntries.add(entry);
+          loaders.add(this.<Model, Object>build(entry));
+          alreadyUsedEntries.remove(entry);
+        }
       }
-      if (entry.handles(modelClass)) {
-        alreadyUsedEntries.add(entry);
-        loaders.add(this.<Model, Object>build(entry));
-        alreadyUsedEntries.remove(entry);
-      }
+      return loaders;
+    } catch (Throwable t) {
+      alreadyUsedEntries.clear();
+      throw t;
     }
-    return loaders;
   }
 
   synchronized List<Class<?>> getDataClasses(Class<?> modelClass) {
@@ -105,37 +108,42 @@ public class MultiModelLoaderFactory {
 
   public synchronized <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass,
       Class<Data> dataClass) {
-    List<ModelLoader<Model, Data>> loaders = new ArrayList<>();
-    boolean ignoredAnyEntries = false;
-    for (Entry<?, ?> entry : entries) {
-      // Avoid stack overflow recursively creating model loaders by only creating loaders in
-      // recursive requests if they haven't been created earlier in the chain. For example:
-      // A Uri loader may translate to another model, which in turn may translate back to a Uri.
-      // The original Uri loader won't be provided to the intermediate model loader, although other
-      // Uri loaders will be.
-      if (alreadyUsedEntries.contains(entry)) {
-        ignoredAnyEntries = true;
-        continue;
+    try {
+      List<ModelLoader<Model, Data>> loaders = new ArrayList<>();
+      boolean ignoredAnyEntries = false;
+      for (Entry<?, ?> entry : entries) {
+        // Avoid stack overflow recursively creating model loaders by only creating loaders in
+        // recursive requests if they haven't been created earlier in the chain. For example:
+        // A Uri loader may translate to another model, which in turn may translate back to a Uri.
+        // The original Uri loader won't be provided to the intermediate model loader, although
+        // other Uri loaders will be.
+        if (alreadyUsedEntries.contains(entry)) {
+          ignoredAnyEntries = true;
+          continue;
+        }
+        if (entry.handles(modelClass, dataClass)) {
+          alreadyUsedEntries.add(entry);
+          loaders.add(this.<Model, Data>build(entry));
+          alreadyUsedEntries.remove(entry);
+        }
       }
-      if (entry.handles(modelClass, dataClass)) {
-        alreadyUsedEntries.add(entry);
-        loaders.add(this.<Model, Data>build(entry));
-        alreadyUsedEntries.remove(entry);
-      }
-    }
-    if (loaders.size() > 1) {
-      return factory.build(loaders, exceptionListPool);
-    } else if (loaders.size() == 1) {
-      return loaders.get(0);
-    } else {
-      // Avoid crashing if recursion results in no loaders available. The assertion is supposed to
-      // catch completely unhandled types, recursion may mean a subtype isn't handled somewhere
-      // down the stack, which is often ok.
-      if (ignoredAnyEntries) {
-        return emptyModelLoader();
+      if (loaders.size() > 1) {
+        return factory.build(loaders, exceptionListPool);
+      } else if (loaders.size() == 1) {
+        return loaders.get(0);
       } else {
-        throw new NoModelLoaderAvailableException(modelClass, dataClass);
+        // Avoid crashing if recursion results in no loaders available. The assertion is supposed to
+        // catch completely unhandled types, recursion may mean a subtype isn't handled somewhere
+        // down the stack, which is often ok.
+        if (ignoredAnyEntries) {
+          return emptyModelLoader();
+        } else {
+          throw new NoModelLoaderAvailableException(modelClass, dataClass);
+        }
       }
+    } catch (Throwable t) {
+      alreadyUsedEntries.clear();
+      throw t;
     }
   }
 
@@ -146,8 +154,7 @@ public class MultiModelLoaderFactory {
 
   @SuppressWarnings("unchecked")
   private <Model, Data> ModelLoader<Model, Data> build(Entry<?, ?> entry) {
-    return (ModelLoader<Model, Data>) Preconditions
-        .checkNotNull(entry.factory.build(context, this));
+    return (ModelLoader<Model, Data>) Preconditions.checkNotNull(entry.factory.build(this));
   }
 
   @SuppressWarnings("unchecked")
@@ -157,8 +164,8 @@ public class MultiModelLoaderFactory {
 
   private static class Entry<Model, Data> {
     private final Class<Model> modelClass;
-    private final Class<Data> dataClass;
-    private final ModelLoaderFactory<Model, Data> factory;
+    @Synthetic final Class<Data> dataClass;
+    @Synthetic final ModelLoaderFactory<Model, Data> factory;
 
     public Entry(Class<Model> modelClass, Class<Data> dataClass,
         ModelLoaderFactory<Model, Data> factory) {
@@ -178,16 +185,20 @@ public class MultiModelLoaderFactory {
 
   static class Factory {
     public <Model, Data> MultiModelLoader<Model, Data> build(
-        List<ModelLoader<Model, Data>> modelLoaders, ExceptionListPool exceptionListPool) {
+        List<ModelLoader<Model, Data>> modelLoaders, Pool<List<Exception>> exceptionListPool) {
       return new MultiModelLoader<>(modelLoaders, exceptionListPool);
     }
   }
 
   private static class EmptyModelLoader implements ModelLoader<Object, Object> {
 
+    @Synthetic
+    EmptyModelLoader() { }
+
+    @Nullable
     @Override
     public LoadData<Object> buildLoadData(Object o, int width, int height, Options options) {
-      throw new UnsupportedOperationException("EmptyModelLoader does not handle data");
+      return null;
     }
 
     @Override

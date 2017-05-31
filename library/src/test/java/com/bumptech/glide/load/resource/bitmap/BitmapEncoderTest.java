@@ -1,18 +1,20 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.tests.Util.mockResource;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-
+import android.os.Build;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.ByteBufferUtil;
-
+import java.io.File;
+import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,16 +23,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowBitmap;
-
-import java.io.File;
-import java.io.IOException;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18, shadows = {
-    BitmapEncoderTest.AlphaShadowBitmap.class })
+@Config(manifest = Config.NONE, sdk = 18)
 public class BitmapEncoderTest {
   private EncoderHarness harness;
 
@@ -62,6 +57,7 @@ public class BitmapEncoderTest {
   }
 
   @Test
+  @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   public void testEncoderObeysNonNullCompressFormat() throws IOException {
     Bitmap.CompressFormat format = Bitmap.CompressFormat.WEBP;
     harness.setFormat(format);
@@ -107,9 +103,8 @@ public class BitmapEncoderTest {
     assertThat(string).contains(expected);
   }
 
-  @SuppressWarnings("unchecked")
   private static class EncoderHarness {
-    Resource<Bitmap> resource = mock(Resource.class);
+    Resource<Bitmap> resource = mockResource();
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     Options options = new Options();
     File file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
@@ -135,23 +130,6 @@ public class BitmapEncoderTest {
 
     public void tearDown() {
       file.delete();
-    }
-  }
-
-  @Implements(Bitmap.class)
-  public static class AlphaShadowBitmap extends ShadowBitmap {
-    private boolean hasAlpha;
-
-    @SuppressWarnings("unused")
-    @Implementation
-    public void setHasAlpha(boolean hasAlpha) {
-      this.hasAlpha = hasAlpha;
-    }
-
-    @SuppressWarnings("unused")
-    @Implementation
-    public boolean hasAlpha() {
-      return hasAlpha;
     }
   }
 }

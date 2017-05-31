@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Looper;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
 

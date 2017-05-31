@@ -3,6 +3,7 @@ package com.bumptech.glide.integration.gifencoder;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -12,8 +13,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
-
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
@@ -26,7 +28,10 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.UnitTransformation;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.util.ByteBufferUtil;
-
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,11 +42,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 
 /**
  * Tests for {@link com.bumptech.glide.integration.gifencoder.ReEncodingGifResourceEncoder}.
@@ -54,8 +54,9 @@ public class ReEncodingGifResourceEncoderTest {
   @Mock GifHeaderParser parser;
   @Mock AnimatedGifEncoder gifEncoder;
   @Mock Resource<Bitmap> frameResource;
-  @Mock Transformation<Bitmap> frameTransformation;
   @Mock GifDrawable gifDrawable;
+  @Mock Transformation<Bitmap> frameTransformation;
+  @Mock Resource<Bitmap> transformedResource;
 
   private ReEncodingGifResourceEncoder encoder;
   private Options options;
@@ -66,6 +67,8 @@ public class ReEncodingGifResourceEncoderTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
+    Application context = RuntimeEnvironment.application;
+
     ReEncodingGifResourceEncoder.Factory factory = mock(ReEncodingGifResourceEncoder.Factory.class);
     when(factory.buildDecoder(any(GifDecoder.BitmapProvider.class))).thenReturn(decoder);
     when(factory.buildParser()).thenReturn(parser);
@@ -73,7 +76,8 @@ public class ReEncodingGifResourceEncoderTest {
     when(factory.buildFrameResource(any(Bitmap.class), any(BitmapPool.class)))
         .thenReturn(frameResource);
 
-    when(frameTransformation.transform(any(Resource.class), anyInt(), anyInt()))
+    // TODO Util.anyResource once Util is moved to testutil module (remove unchecked above!)
+    when(frameTransformation.transform(anyContext(), any(Resource.class), anyInt(), anyInt()))
         .thenReturn(frameResource);
 
     when(gifDrawable.getFrameTransformation()).thenReturn(frameTransformation);
@@ -81,11 +85,11 @@ public class ReEncodingGifResourceEncoderTest {
 
     when(resource.get()).thenReturn(gifDrawable);
 
-    encoder = new ReEncodingGifResourceEncoder(mock(BitmapPool.class), factory);
+    encoder = new ReEncodingGifResourceEncoder(context, mock(BitmapPool.class), factory);
     options = new Options();
     options.set(ReEncodingGifResourceEncoder.ENCODE_TRANSFORMATION, true);
 
-    file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
+    file = new File(context.getCacheDir(), "test");
   }
 
   @After
@@ -115,6 +119,8 @@ public class ReEncodingGifResourceEncoderTest {
   @Test
   public void testEncode_withEncodeTransformationFalse_writesSourceDataToStream()
       throws IOException {
+    // Most likely an instance of http://stackoverflow.com/q/991489/253468
+    assumeTrue(!System.getProperty("os.name").startsWith("Windows"));
     options.set(ReEncodingGifResourceEncoder.ENCODE_TRANSFORMATION, false);
     String expected = "testString";
     byte[] data = expected.getBytes("UTF-8");
@@ -242,12 +248,11 @@ public class ReEncodingGifResourceEncoderTest {
     when(gifDrawable.getIntrinsicHeight()).thenReturn(expectedHeight);
 
     Bitmap transformedFrame = Bitmap.createBitmap(200, 200, Bitmap.Config.RGB_565);
-    final Resource<Bitmap> transformedResource = mock(Resource.class);
     when(transformedResource.get()).thenReturn(transformedFrame);
-    Transformation<Bitmap> transformation = mock(Transformation.class);
-    when(transformation.transform(eq(frameResource), eq(expectedWidth), eq(expectedHeight)))
+    when(frameTransformation.transform(
+        anyContext(), eq(frameResource), eq(expectedWidth), eq(expectedHeight)))
         .thenReturn(transformedResource);
-    when(gifDrawable.getFrameTransformation()).thenReturn(transformation);
+    when(gifDrawable.getFrameTransformation()).thenReturn(frameTransformation);
 
     encoder.encode(resource, file, options);
 
@@ -257,8 +262,7 @@ public class ReEncodingGifResourceEncoderTest {
   @Test
   public void testRecyclesFrameResourceBeforeWritingIfTransformedResourceIsDifferent() {
     when(decoder.getFrameCount()).thenReturn(1);
-    Resource<Bitmap> transformedResource = mock(Resource.class);
-    when(frameTransformation.transform(eq(frameResource), anyInt(), anyInt()))
+    when(frameTransformation.transform(anyContext(), eq(frameResource), anyInt(), anyInt()))
         .thenReturn(transformedResource);
     Bitmap expected = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
     when(transformedResource.get()).thenReturn(expected);
@@ -276,9 +280,8 @@ public class ReEncodingGifResourceEncoderTest {
   public void testRecyclesTransformedResourceAfterWritingIfTransformedResourceIsDifferent() {
     when(decoder.getFrameCount()).thenReturn(1);
     Bitmap expected = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
-    Resource<Bitmap> transformedResource = mock(Resource.class);
     when(transformedResource.get()).thenReturn(expected);
-    when(frameTransformation.transform(eq(frameResource), anyInt(), anyInt()))
+    when(frameTransformation.transform(anyContext(), eq(frameResource), anyInt(), anyInt()))
         .thenReturn(transformedResource);
 
     when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
@@ -293,7 +296,7 @@ public class ReEncodingGifResourceEncoderTest {
   @Test
   public void testRecyclesFrameResourceAfterWritingIfFrameResourceIsNotTransformed() {
     when(decoder.getFrameCount()).thenReturn(1);
-    when(frameTransformation.transform(eq(frameResource), anyInt(), anyInt()))
+    when(frameTransformation.transform(anyContext(), eq(frameResource), anyInt(), anyInt()))
         .thenReturn(frameResource);
     Bitmap expected = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888);
     when(frameResource.get()).thenReturn(expected);
@@ -310,6 +313,8 @@ public class ReEncodingGifResourceEncoderTest {
   @Test
   public void testWritesBytesDirectlyToDiskIfTransformationIsUnitTransformation()
       throws IOException {
+    // Most likely an instance of http://stackoverflow.com/q/991489/253468
+    assumeTrue(!System.getProperty("os.name").startsWith("Windows"));
     when(gifDrawable.getFrameTransformation()).thenReturn(UnitTransformation.<Bitmap>get());
     String expected = "expected";
     when(gifDrawable.getBuffer()).thenReturn(ByteBuffer.wrap(expected.getBytes()));
@@ -329,5 +334,9 @@ public class ReEncodingGifResourceEncoderTest {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private static Context anyContext() {
+    return any(Context.class);
   }
 }

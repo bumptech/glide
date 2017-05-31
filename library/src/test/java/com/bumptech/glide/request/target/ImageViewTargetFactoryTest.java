@@ -8,7 +8,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +40,7 @@ public class ImageViewTargetFactoryTest {
     BitmapDrawable drawable = new BitmapDrawable(RuntimeEnvironment.application.getResources(),
         Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444));
 
-    Target target = factory.buildTarget(view, BitmapDrawable.class);
+    Target<BitmapDrawable> target = factory.buildTarget(view, BitmapDrawable.class);
     target.onResourceReady(drawable, null);
     assertThat(target).isInstanceOf(DrawableImageViewTarget.class);
   }

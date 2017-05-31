@@ -4,7 +4,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.util.LruCache;
-
+import com.bumptech.glide.util.Util;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
@@ -37,10 +37,10 @@ final class ResourceCacheKey implements Key {
     if (o instanceof ResourceCacheKey) {
       ResourceCacheKey other = (ResourceCacheKey) o;
       return height == other.height && width == other.width
-          && (transformation == null
-              ? other.transformation == null : transformation.equals(other.transformation))
+          && Util.bothNullOrEqual(transformation, other.transformation)
           && decodedResourceClass.equals(other.decodedResourceClass)
-          && sourceKey.equals(other.sourceKey) && signature.equals(other.signature)
+          && sourceKey.equals(other.sourceKey)
+          && signature.equals(other.signature)
           && options.equals(other.options);
     }
     return false;

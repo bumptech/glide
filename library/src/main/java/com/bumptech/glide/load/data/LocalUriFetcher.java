@@ -1,14 +1,10 @@
 package com.bumptech.glide.load.data;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -20,31 +16,31 @@ import java.io.IOException;
  *            java.io.InputStream} or {@link android.os.ParcelFileDescriptor}.
  */
 public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
+  private static final String TAG = "LocalUriFetcher";
   private final Uri uri;
-  private final Context context;
+  private final ContentResolver contentResolver;
   private T data;
 
   /**
    * Opens an input stream for a uri pointing to a local asset. Only certain uris are supported
    *
-   * @param context Any {@link android.content.Context}.
+   * @param contentResolver Any {@link android.content.ContentResolver}.
    * @param uri     A Uri pointing to a local asset. This load will fail if the uri isn't openable
    *                by {@link ContentResolver#openInputStream(android.net.Uri)}
    * @see ContentResolver#openInputStream(android.net.Uri)
    */
-  public LocalUriFetcher(Context context, Uri uri) {
-    this.context = context.getApplicationContext();
+  public LocalUriFetcher(ContentResolver contentResolver, Uri uri) {
+    this.contentResolver = contentResolver;
     this.uri = uri;
   }
 
   @Override
   public final void loadData(Priority priority, DataCallback<? super T> callback) {
-    ContentResolver contentResolver = context.getContentResolver();
     try {
       data = loadResource(uri, contentResolver);
     } catch (FileNotFoundException e) {
-      if (Logs.isEnabled(Log.DEBUG)) {
-        Logs.log(Log.DEBUG, "Failed to open Uri", e);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to open Uri", e);
       }
       callback.onLoadFailed(e);
       return;

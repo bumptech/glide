@@ -1,5 +1,8 @@
 package com.bumptech.glide.load.engine;
 
+import static com.bumptech.glide.tests.Util.anyResource;
+import static com.bumptech.glide.tests.Util.isADataSource;
+import static com.bumptech.glide.tests.Util.mockResource;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -18,16 +21,20 @@ import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
-
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,12 +43,9 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
-
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18, shadows = { GlideShadowLooper.class })
+@SuppressWarnings("unchecked")
 public class EngineTest {
   private EngineTestHarness harness;
 
@@ -93,7 +97,6 @@ public class EngineTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testCallbackIsAddedToExistingRunnerWithExistingLoad() {
     harness.doLoad();
 
@@ -119,7 +122,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource));
+    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
@@ -128,7 +131,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb, never()).onResourceReady(isNull(Resource.class));
+    verify(harness.cb, never()).onResourceReady(isNull(Resource.class), isADataSource());
   }
 
   @Test
@@ -171,13 +174,13 @@ public class EngineTest {
   @Test
   public void testActiveResourcesIsNotCheckedIfReturnedFromCache() {
     when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(harness.resource);
-    EngineResource other = mock(EngineResource.class);
+    EngineResource<?> other = mock(EngineResource.class);
     harness.activeResources.put(harness.cacheKey, new WeakReference<EngineResource<?>>(other));
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource));
-    verify(harness.cb, never()).onResourceReady(eq(other));
+    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
+    verify(harness.cb, never()).onResourceReady(eq(other), isADataSource());
   }
 
   @Test
@@ -198,7 +201,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource));
+    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
@@ -217,28 +220,28 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource));
+    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
   public void testHandlesNonEngineResourcesFromCacheIfPresent() {
     final Object expected = new Object();
-    Resource fromCache = mock(Resource.class);
+    @SuppressWarnings("rawtypes") Resource fromCache = mockResource();
     when(fromCache.get()).thenReturn(expected);
     when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(fromCache);
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        Resource resource = (Resource) invocationOnMock.getArguments()[0];
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+        Resource<?> resource = (Resource<?>) invocationOnMock.getArguments()[0];
         assertEquals(expected, resource.get());
         return null;
       }
-    }).when(harness.cb).onResourceReady(any(Resource.class));
+    }).when(harness.cb).onResourceReady(anyResource(), isADataSource());
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(any(Resource.class));
+    verify(harness.cb).onResourceReady(anyResource(), isADataSource());
   }
 
   @Test
@@ -307,7 +310,7 @@ public class EngineTest {
     harness.engine.onEngineJobComplete(harness.cacheKey, harness.resource);
 
     WeakReference<EngineResource<?>> resourceRef = harness.activeResources.get(harness.cacheKey);
-    assertEquals(harness.resource, resourceRef.get());
+    assertThat(harness.resource).isEqualTo(resourceRef.get());
   }
 
   @Test
@@ -346,19 +349,18 @@ public class EngineTest {
     final Object expected = new Object();
     when(harness.resource.isCacheable()).thenReturn(true);
     when(harness.resource.get()).thenReturn(expected);
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         Resource<?> resource = (Resource<?>) invocationOnMock.getArguments()[1];
         assertEquals(expected, resource.get());
         return null;
       }
-    }).when(harness.cache).put(eq(harness.cacheKey), any(Resource.class));
+    }).when(harness.cache).put(eq(harness.cacheKey), anyResource());
 
     harness.engine.onResourceReleased(harness.cacheKey, harness.resource);
 
-
-    verify(harness.cache).put(eq(harness.cacheKey), any(Resource.class));
+    verify(harness.cache).put(eq(harness.cacheKey), anyResource());
   }
 
   @Test
@@ -415,10 +417,23 @@ public class EngineTest {
 
   @Test
   public void testFactoryIsGivenNecessaryArguments() {
-    boolean isMemoryCacheable = true;
     harness.doLoad();
 
-    verify(harness.engineJobFactory).build(eq(harness.cacheKey), eq(isMemoryCacheable));
+    verify(harness.engineJobFactory).build(
+        eq(harness.cacheKey),
+        eq(true) /*isMemoryCacheable*/,
+        eq(false) /*useUnlimitedSourceGeneratorPool*/);
+  }
+
+  @Test
+  public void testFactoryIsGivenNecessaryArgumentsWithUnlimitedPool() {
+    harness.useUnlimitedSourceGeneratorPool = true;
+    harness.doLoad();
+
+    verify(harness.engineJobFactory).build(
+        eq(harness.cacheKey),
+        eq(true) /*isMemoryCacheable*/,
+        eq(true) /*useUnlimitedSourceGeneratorPool*/);
   }
 
   @Test
@@ -430,7 +445,7 @@ public class EngineTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testThrowsIfAskedToReleaseNonEngineResource() {
-    harness.engine.release(mock(Resource.class));
+    harness.engine.release(mockResource());
   }
 
   @Test(expected = RuntimeException.class)
@@ -443,13 +458,13 @@ public class EngineTest {
     });
   }
 
-  @SuppressWarnings("unchecked")
   private static class EngineTestHarness {
     EngineKey cacheKey = mock(EngineKey.class);
     EngineKeyFactory keyFactory = mock(EngineKeyFactory.class);
     ResourceCallback cb = mock(ResourceCallback.class);
+    @SuppressWarnings("rawtypes")
     EngineResource resource = mock(EngineResource.class);
-    Map<Key, EngineJob> jobs = new HashMap<>();
+    Map<Key, EngineJob<?>> jobs = new HashMap<>();
     Map<Key, WeakReference<EngineResource<?>>> activeResources = new HashMap<>();
 
     int width = 100;
@@ -457,7 +472,7 @@ public class EngineTest {
 
     Object model = new Object();
     MemoryCache cache = mock(MemoryCache.class);
-    EngineJob job;
+    EngineJob<?> job;
     Engine engine;
     Engine.EngineJobFactory engineJobFactory = mock(Engine.EngineJobFactory.class);
     Engine.DecodeJobFactory decodeJobFactory = mock(Engine.DecodeJobFactory.class);
@@ -467,6 +482,8 @@ public class EngineTest {
     Options options = new Options();
     GlideContext glideContext = mock(GlideContext.class);
     boolean isMemoryCacheable = true;
+    boolean useUnlimitedSourceGeneratorPool = false;
+    boolean onlyRetrieveFromCache = false;
 
     public EngineTestHarness() {
       when(keyFactory.buildKey(eq(model), eq(signature), anyInt(), anyInt(), eq(transformations),
@@ -474,26 +491,32 @@ public class EngineTest {
 
       job = mock(EngineJob.class);
 
-      engine = new Engine(cache, mock(DiskCache.Factory.class), mock(GlideExecutor.class),
-          mock(GlideExecutor.class), jobs, keyFactory, activeResources, engineJobFactory,
-          decodeJobFactory, resourceRecycler);
+      engine = new Engine(cache, mock(DiskCache.Factory.class),
+          GlideExecutor.newDiskCacheExecutor(),
+          MockGlideExecutor.newMainThreadExecutor(),
+          MockGlideExecutor.newMainThreadUnlimitedExecutor(),
+          jobs, keyFactory, activeResources,
+          engineJobFactory, decodeJobFactory, resourceRecycler);
     }
 
     public Engine.LoadStatus doLoad() {
-      when(engineJobFactory.build(eq(cacheKey), anyBoolean())).thenReturn(job);
+      when(engineJobFactory.build(eq(cacheKey), anyBoolean(), anyBoolean()))
+          .thenReturn((EngineJob<Object>) job);
       return engine.load(glideContext,
           model,
           signature,
           width,
           height,
-          Object.class,
-          Object.class,
+          Object.class /*resourceClass*/,
+          Object.class /*transcodeClass*/,
           Priority.HIGH,
           DiskCacheStrategy.ALL,
           transformations,
           false /*isTransformationRequired*/,
           options,
           isMemoryCacheable,
+          useUnlimitedSourceGeneratorPool,
+          onlyRetrieveFromCache,
           cb);
     }
   }

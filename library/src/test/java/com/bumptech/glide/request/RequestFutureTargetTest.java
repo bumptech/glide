@@ -13,9 +13,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.os.Handler;
-
 import com.bumptech.glide.request.target.SizeReadyCallback;
-
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,11 +25,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
@@ -79,17 +76,17 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testClearsRequestOnMainThreadIfNotYetDoneOnCancel() {
+  public void cancel_withMayInterruptIfRunningTrueAndNotFinishedRequest_clearsFutureOnMainThread() {
     future.cancel(true);
 
     verify(handler).post(eq(future));
   }
 
   @Test
-  public void testClearsOnMainThreadWhenClearCalled() {
+  public void cancel_withInterruptFalseAndNotFinishedRequest_doesNotclearFutureOnMainThread() {
     future.cancel(false);
 
-    verify(handler).post(eq(future));
+    verify(handler, never()).post(eq(future));
   }
 
   @Test
@@ -207,12 +204,20 @@ public class RequestFutureTargetTest {
     future.get();
   }
 
+  @Test
+  public void testGetSucceedsOnMainThreadIfDone()
+      throws ExecutionException, InterruptedException {
+    future = new RequestFutureTarget<>(handler, width, height, true, waiter);
+    future.onResourceReady(new Object(), null);
+    future.get();
+  }
+
   @Test(expected = InterruptedException.class)
   public void testThrowsInterruptedExceptionIfThreadInterruptedWhenDoneWaiting()
       throws InterruptedException, ExecutionException {
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         Thread.currentThread().interrupt();
         return null;
       }
@@ -224,9 +229,9 @@ public class RequestFutureTargetTest {
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionIfLoadFailsWhileWaiting()
       throws ExecutionException, InterruptedException {
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         future.onLoadFailed(null);
         return null;
       }
@@ -237,9 +242,9 @@ public class RequestFutureTargetTest {
   @Test(expected = CancellationException.class)
   public void testThrowsCancellationExceptionIfCancelledWhileWaiting()
       throws ExecutionException, InterruptedException {
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         future.cancel(false);
         return null;
       }
@@ -289,9 +294,9 @@ public class RequestFutureTargetTest {
   public void testReturnsResourceIfReceivedWhileWaiting()
       throws ExecutionException, InterruptedException {
     final Object expected = new Object();
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         future.onResourceReady(expected, null);
         return null;
       }

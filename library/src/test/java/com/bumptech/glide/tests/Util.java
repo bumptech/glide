@@ -1,16 +1,17 @@
 package com.bumptech.glide.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
+import static org.mockito.Mockito.mock;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Build;
-
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
-
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.robolectric.util.ReflectionHelpers;
-
+import com.bumptech.glide.load.engine.Resource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,15 +19,52 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
+import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.robolectric.util.ReflectionHelpers;
 
+// FIXME move to testutil module
 public class Util {
 
-  public static String getExpectedClassId(Class clazz) {
+  public static String getExpectedClassId(Class<?> clazz) {
     return clazz.getSimpleName() + "." + clazz.getPackage().getName();
   }
 
-  public static void assertClassHasValidId(Class clazz, String id) {
-    assertEquals(getExpectedClassId(clazz), id);
+  /**
+   * Gives the proper generic type to the {@link ArgumentCaptor}.
+   * Only useful when the captor's {@code T} is also a generic type.
+   * Without this it's really ugly to have a properly typed captor object.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> ArgumentCaptor<T> cast(ArgumentCaptor<?> captor) {
+    return (ArgumentCaptor<T>) captor;
+  }
+
+  public static DataSource isADataSource() {
+    return isA(DataSource.class);
+  }
+
+  public static Context anyContext() {
+    return any(Context.class);
+  }
+
+  /**
+   * Creates a Mockito argument matcher to be used in verify.
+   * It returns a generic typed {@link Resource} to prevent unchecked warnings.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Resource<T> anyResource() {
+    return any(Resource.class);
+  }
+
+  /**
+   * Creates a Mockito mock object.
+   * It returns a generic typed {@link Resource} to prevent unchecked warnings.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Resource<T> mockResource() {
+    return mock(Resource.class);
   }
 
   public static boolean isWindows() {
@@ -110,6 +148,17 @@ public class Util {
           (DataFetcher.DataCallback<T>) invocationOnMock.getArguments()[1];
       callback.onDataReady(data);
       return null;
+    }
+  }
+
+  public static class CreateBitmap implements Answer<Bitmap> {
+
+    @Override
+    public Bitmap answer(InvocationOnMock invocation) throws Throwable {
+      int width = (Integer) invocation.getArguments()[0];
+      int height = (Integer) invocation.getArguments()[1];
+      Bitmap.Config config = (Bitmap.Config) invocation.getArguments()[2];
+      return Bitmap.createBitmap(width, height, config);
     }
   }
 }

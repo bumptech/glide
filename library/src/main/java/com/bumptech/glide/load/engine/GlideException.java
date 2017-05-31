@@ -1,10 +1,10 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
-
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -57,10 +57,10 @@ public final class GlideException extends Exception {
   /**
    * Returns a list of causes that are immediate children of this exception.
    *
-   * @see #getRootCauses().
-   *
    * <p>Causes may or may not be {@link GlideException GlideExceptions}. Causes may also not be root
-   * causes, and in turn my have been caused by other failures.
+   * causes, and in turn my have been caused by other failures.</p>
+   *
+   * @see #getRootCauses()
    */
   public List<Exception> getCauses() {
     return causes;
@@ -91,7 +91,7 @@ public final class GlideException extends Exception {
     Log.e(tag, getClass() + ": " + getMessage());
     List<Exception> causes = getRootCauses();
     for (int i = 0, size = causes.size(); i < size; i++) {
-      Log.e(tag, "Root cause (" + (i + 1) + " of " + size + ")", causes.get(i));
+      Log.i(tag, "Root cause (" + (i + 1) + " of " + size + ")", causes.get(i));
     }
   }
 
@@ -178,6 +178,7 @@ public final class GlideException extends Exception {
   }
 
   private static final class IndentedAppendable implements Appendable {
+    private static final String EMPTY_SEQUENCE = "";
     private static final String INDENT = "  ";
     private final Appendable appendable;
     private boolean printedNewLine = true;
@@ -198,19 +199,31 @@ public final class GlideException extends Exception {
     }
 
     @Override
-    public Appendable append(CharSequence charSequence) throws IOException {
+    public Appendable append(@Nullable CharSequence charSequence) throws IOException {
+      charSequence = safeSequence(charSequence);
       return append(charSequence, 0, charSequence.length());
     }
 
     @Override
-    public Appendable append(CharSequence csq, int start, int end) throws IOException {
+    public Appendable append(@Nullable CharSequence charSequence, int start, int end)
+        throws IOException {
+      charSequence = safeSequence(charSequence);
       if (printedNewLine) {
         printedNewLine = false;
         appendable.append(INDENT);
       }
-      printedNewLine = csq.length() > 0 && csq.charAt(end - 1) == '\n';
-      appendable.append(csq, start, end);
+      printedNewLine = charSequence.length() > 0 && charSequence.charAt(end - 1) == '\n';
+      appendable.append(charSequence, start, end);
       return this;
+    }
+
+    @NonNull
+    private CharSequence safeSequence(@Nullable CharSequence sequence) {
+      if (sequence == null) {
+        return EMPTY_SEQUENCE;
+      } else {
+        return sequence;
+      }
     }
   }
 }

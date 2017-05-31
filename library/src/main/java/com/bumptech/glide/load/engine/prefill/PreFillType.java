@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine.prefill;
 
 import android.graphics.Bitmap;
-
+import android.support.annotation.Nullable;
 import com.bumptech.glide.util.Preconditions;
 
 /**
@@ -133,7 +133,7 @@ public final class PreFillType {
      * @param config The config to use, or null to use Glide's default.
      * @return This builder.
      */
-    public Builder setConfig(Bitmap.Config config) {
+    public Builder setConfig(@Nullable Bitmap.Config config) {
       this.config = config;
       return this;
     }

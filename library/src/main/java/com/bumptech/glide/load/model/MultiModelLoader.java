@@ -1,15 +1,14 @@
 package com.bumptech.glide.load.model;
 
+import android.support.v4.util.Pools.Pool;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcher.DataCallback;
-import com.bumptech.glide.load.engine.ExceptionListPool;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.util.Preconditions;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,10 +25,10 @@ import java.util.List;
 class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
   private final List<ModelLoader<Model, Data>> modelLoaders;
-  private final ExceptionListPool exceptionListPool;
+  private final Pool<List<Exception>> exceptionListPool;
 
   MultiModelLoader(List<ModelLoader<Model, Data>> modelLoaders,
-      ExceptionListPool exceptionListPool) {
+      Pool<List<Exception>> exceptionListPool) {
     this.modelLoaders = modelLoaders;
     this.exceptionListPool = exceptionListPool;
   }
@@ -73,13 +72,13 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
   static class MultiFetcher<Data> implements DataFetcher<Data>, DataCallback<Data> {
 
     private final List<DataFetcher<Data>> fetchers;
-    private final ExceptionListPool exceptionListPool;
+    private final Pool<List<Exception>> exceptionListPool;
     private int currentIndex;
     private Priority priority;
     private DataCallback<? super Data> callback;
     private List<Exception> exceptions;
 
-    MultiFetcher(List<DataFetcher<Data>> fetchers, ExceptionListPool exceptionListPool) {
+    MultiFetcher(List<DataFetcher<Data>> fetchers, Pool<List<Exception>> exceptionListPool) {
       this.exceptionListPool = exceptionListPool;
       Preconditions.checkNotEmpty(fetchers);
       this.fetchers = fetchers;

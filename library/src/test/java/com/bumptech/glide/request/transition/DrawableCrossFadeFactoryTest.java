@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
 
 import android.graphics.drawable.Drawable;
-
+import com.bumptech.glide.load.DataSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,24 +22,25 @@ public class DrawableCrossFadeFactoryTest {
   @Before
   public void setUp() {
     ViewAnimationFactory<Drawable> viewAnimationFactory = mock(ViewAnimationFactory.class);
-    factory = new DrawableCrossFadeFactory(viewAnimationFactory, 100 /*duration*/);
+    factory = new DrawableCrossFadeFactory(viewAnimationFactory, 100 /*duration*/,
+        false /*isCrossFadeEnabled*/);
   }
 
   @Test
   public void testReturnsNoAnimationIfFromMemoryCache() {
     assertEquals(NoTransition.<Drawable>get(),
-        factory.build(true /*isFromMemoryCache*/, true /*isFirstResource*/));
+        factory.build(DataSource.MEMORY_CACHE, true /*isFirstResource*/));
   }
 
   @Test
   public void testReturnsReturnsAnimationIfNotFromMemoryCacheAndIsFirstResource() {
     assertNotEquals(NoTransition.<Drawable>get(),
-        factory.build(false /*isFromMemoryCache*/, true /*isFirstResource*/));
+        factory.build(DataSource.DATA_DISK_CACHE, true /*isFirstResource*/));
   }
 
   @Test
-  public void testReturnsAnimationIfNotFromMemocyCacheAndNotIsFirstResource() {
+  public void testReturnsAnimationIfNotFromMemoryCacheAndNotIsFirstResource() {
     assertNotEquals(NoTransition.<Drawable>get(),
-        factory.build(false /*isFromMemoryCache*/, false /*isFirstResource*/));
+        factory.build(DataSource.DATA_DISK_CACHE, false /*isFirstResource*/));
   }
 }

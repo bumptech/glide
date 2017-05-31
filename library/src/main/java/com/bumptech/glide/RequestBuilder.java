@@ -3,10 +3,10 @@ package com.bumptech.glide;
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.widget.ImageView;
-
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
@@ -18,10 +18,9 @@ import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.target.PreloadTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ApplicationVersionSignature;
-import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
-
 import java.io.File;
 import java.net.URL;
 import java.util.UUID;
@@ -33,55 +32,79 @@ import java.util.UUID;
  * {@link com.bumptech.glide.request.target.Target}.
  */
 public class RequestBuilder<TranscodeType> implements Cloneable {
-  private static final BaseRequestOptions DEFAULT_REQUEST_OPTIONS = new RequestOptions();
   private static final TransitionOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
       new GenericTransitionOptions<Object>();
-  private static final BaseRequestOptions DOWNLOAD_ONLY_OPTIONS =
+  // Used in generated subclasses
+  protected static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
       new RequestOptions().diskCacheStrategy(DiskCacheStrategy.DATA).priority(Priority.LOW)
           .skipMemoryCache(true);
 
   private final GlideContext context;
   private final RequestManager requestManager;
   private final Class<TranscodeType> transcodeClass;
+  private final RequestOptions defaultRequestOptions;
+  private final Glide glide;
 
-  private BaseRequestOptions<?> requestOptions = DEFAULT_REQUEST_OPTIONS;
+  @NonNull protected RequestOptions requestOptions;
   @SuppressWarnings("unchecked")
   private TransitionOptions<?, ? super TranscodeType> transitionOptions =
       (TransitionOptions<?, ? super TranscodeType>) DEFAULT_ANIMATION_OPTIONS;
 
-  private Object model;
+  @Nullable private Object model;
   // model may occasionally be null, so to enforce that load() was called, put a boolean rather
   // than relying on model not to be null.
+  @Nullable private RequestListener<TranscodeType> requestListener;
+  @Nullable private RequestBuilder<TranscodeType> thumbnailBuilder;
+  @Nullable private Float thumbSizeMultiplier;
   private boolean isModelSet;
-  private RequestListener<TranscodeType> requestListener;
-  private RequestBuilder<TranscodeType> thumbnailBuilder;
-  private Float thumbSizeMultiplier;
   private boolean isThumbnailBuilt;
 
-  RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
-    this(other.context, other.requestManager, transcodeClass);
+  protected RequestBuilder(Glide glide, RequestManager requestManager,
+      Class<TranscodeType> transcodeClass) {
+    this.glide = glide;
+    this.requestManager = requestManager;
+    this.context = glide.getGlideContext();
+    this.transcodeClass = transcodeClass;
+    this.defaultRequestOptions = requestManager.getDefaultRequestOptions();
+    this.requestOptions = defaultRequestOptions;
+  }
+
+  protected RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
+    this(other.glide, other.requestManager, transcodeClass);
     model = other.model;
     isModelSet = other.isModelSet;
     requestOptions = other.requestOptions;
   }
 
-  RequestBuilder(GlideContext context, RequestManager requestManager,
-      Class<TranscodeType> transcodeClass) {
-    this.requestManager = requestManager;
-    this.context = Preconditions.checkNotNull(context);
-    this.transcodeClass = transcodeClass;
-    requestOptions = context.getOptions().clone();
-  }
-
-  public RequestBuilder<TranscodeType> apply(BaseRequestOptions requestOptions) {
+  /**
+   * Applies the given options to the request, options set or unset in the given options will
+   * replace those previously set in options in this class.
+   *
+   * @see RequestOptions#apply(RequestOptions)
+   * @return This request builder.
+   */
+  public RequestBuilder<TranscodeType> apply(@NonNull RequestOptions requestOptions) {
     Preconditions.checkNotNull(requestOptions);
-    this.requestOptions = DEFAULT_REQUEST_OPTIONS.equals(this.requestOptions) ? requestOptions
-        : this.requestOptions.apply(requestOptions);
+    this.requestOptions = getMutableOptions().apply(requestOptions);
     return this;
   }
 
+  protected RequestOptions getMutableOptions() {
+    return defaultRequestOptions == this.requestOptions
+        ? this.requestOptions.clone() : this.requestOptions;
+  }
+
+  /**
+   * Sets the {@link TransitionOptions} to use to transition from the placeholder or thumbnail when
+   * this load completes.
+   *
+   * <p>The given {@link TransitionOptions} will replace any {@link TransitionOptions} set
+   * previously.
+   *
+   * @return This request builder.
+   */
   public RequestBuilder<TranscodeType> transition(
-      TransitionOptions<?, ? super TranscodeType> transitionOptions) {
+      @NonNull TransitionOptions<?, ? super TranscodeType> transitionOptions) {
     this.transitionOptions = Preconditions.checkNotNull(transitionOptions);
     return this;
   }
@@ -95,7 +118,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @return This request builder.
    */
   @SuppressWarnings("unchecked")
-  public RequestBuilder<TranscodeType> listener(RequestListener<TranscodeType> requestListener) {
+  public RequestBuilder<TranscodeType> listener(
+      @Nullable RequestListener<TranscodeType> requestListener) {
     this.requestListener = requestListener;
 
     return this;
@@ -115,7 +139,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * <p> Recursive calls to thumbnail are supported. </p>
    */
   @SuppressWarnings("unchecked")
-  public RequestBuilder<TranscodeType> thumbnail(RequestBuilder<TranscodeType> thumbnailRequest) {
+  public RequestBuilder<TranscodeType> thumbnail(
+      @Nullable RequestBuilder<TranscodeType> thumbnailRequest) {
     this.thumbnailBuilder = thumbnailRequest;
 
     return this;
@@ -123,8 +148,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
 
   /**
    * Loads a resource in an identical manner to this request except with the dimensions of the
-   * target multiplied by the given size multiplier. If the thumbnail load completes before the
-   * fullsize load, the thumbnail will be shown. If the thumbnail load completes after the fullsize
+   * target multiplied by the given size multiplier. If the thumbnail load completes before the full
+   * size load, the thumbnail will be shown. If the thumbnail load completes after the full size
    * load, the thumbnail will not be shown.
    *
    * <p> Note - The thumbnail resource will be smaller than the size requested so the target (or
@@ -134,9 +159,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * <p> Almost all options will be copied from the original load, including the {@link
    * com.bumptech.glide.load.model.ModelLoader}, {@link com.bumptech.glide.load.ResourceDecoder},
    * and {@link com.bumptech.glide.load.Transformation}s. However,
-   * {@link com.bumptech.glide.request.BaseRequestOptions#placeholder(int)} and
-   * {@link com.bumptech.glide.request.BaseRequestOptions#error(int)}, and
-   * {@link #listener(RequestListener)} will only be used on the fullsize load and will not be
+   * {@link com.bumptech.glide.request.RequestOptions#placeholder(int)} and
+   * {@link com.bumptech.glide.request.RequestOptions#error(int)}, and
+   * {@link #listener(RequestListener)} will only be used on the full size load and will not be
    * copied for the thumbnail load. </p>
    *
    * <p> Recursive calls to thumbnail are supported. </p>
@@ -155,7 +180,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     return this;
   }
 
-
   /**
    * Sets the specific model to load data for.
    *
@@ -166,11 +190,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @return This request builder.
    */
   @SuppressWarnings("unchecked")
-  public RequestBuilder<TranscodeType> load(Object model) {
+  public RequestBuilder<TranscodeType> load(@Nullable Object model) {
     return loadGeneric(model);
   }
 
-  private RequestBuilder<TranscodeType> loadGeneric(Object model) {
+  private RequestBuilder<TranscodeType> loadGeneric(@Nullable Object model) {
     this.model = model;
     isModelSet = true;
     return this;
@@ -182,11 +206,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * <p> Note - this method caches data using only the given String as the cache key. If the data is
    * a Uri outside of your control, or you otherwise expect the data represented by the given String
    * to change without the String identifier changing, Consider using
-   * {@link com.bumptech.glide.request.BaseRequestOptions#signature(com.bumptech.glide.load.Key)} to
+   * {@link com.bumptech.glide.request.RequestOptions#signature(com.bumptech.glide.load.Key)} to
    * mixin a signature you create that identifies the data currently at the given String that will
    * invalidate the cache if that data changes. Alternatively, using
    * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
-   * {@link com.bumptech.glide.request.BaseRequestOptions#skipMemoryCache(boolean)} may be
+   * {@link com.bumptech.glide.request.RequestOptions#skipMemoryCache(boolean)} may be
    * appropriate.
    * </p>
    *
@@ -195,7 +219,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param string A file path, or a uri or url handled by
    * {@link com.bumptech.glide.load.model.UriLoader}.
    */
-  public RequestBuilder<TranscodeType> load(String string) {
+  public RequestBuilder<TranscodeType> load(@Nullable String string) {
     return loadGeneric(string);
   }
 
@@ -205,11 +229,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * <p> Note - this method caches data at Uris using only the Uri itself as the cache key. The data
    * represented by Uris from some content providers may change without the Uri changing, which
    * means using this method can lead to displaying stale data. Consider using
-   * {@link com.bumptech.glide.request.BaseRequestOptions#signature(com.bumptech.glide.load.Key)} to
+   * {@link com.bumptech.glide.request.RequestOptions#signature(com.bumptech.glide.load.Key)} to
    * mixin a signature you create based on the data at the given Uri that will invalidate the cache
    * if that data changes. Alternatively, using
    * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
-   * {@link com.bumptech.glide.request.BaseRequestOptions#skipMemoryCache(boolean)} may be
+   * {@link com.bumptech.glide.request.RequestOptions#skipMemoryCache(boolean)} may be
    * appropriate. </p>
    *
    * @see #load(Object)
@@ -217,7 +241,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param uri The Uri representing the image. Must be of a type handled by
    * {@link com.bumptech.glide.load.model.UriLoader}.
    */
-  public RequestBuilder<TranscodeType> load(Uri uri) {
+  public RequestBuilder<TranscodeType> load(@Nullable Uri uri) {
     return loadGeneric(uri);
   }
 
@@ -227,11 +251,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * <p> Note - this method caches data for Files using only the file path itself as the cache key.
    * The data in the File can change so using this method can lead to displaying stale data. If you
    * expect the data in the File to change, Consider using
-   * {@link com.bumptech.glide.request.BaseRequestOptions#signature(com.bumptech.glide.load.Key)}
+   * {@link com.bumptech.glide.request.RequestOptions#signature(com.bumptech.glide.load.Key)}
    * to mixin a signature you create that identifies the data currently in the File that will
    * invalidate the cache if that data changes. Alternatively, using
    * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or
-   * {@link com.bumptech.glide.request.BaseRequestOptions#skipMemoryCache(boolean)} may be
+   * {@link com.bumptech.glide.request.RequestOptions#skipMemoryCache(boolean)} may be
    * appropriate.
    * </p>
    *
@@ -239,7 +263,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * @param file The File containing the image
    */
-  public RequestBuilder<TranscodeType> load(File file) {
+  public RequestBuilder<TranscodeType> load(@Nullable File file) {
     return loadGeneric(file);
   }
 
@@ -255,14 +279,14 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * version code before each install and you replace a Drawable with different data without
    * changing the Drawable name, you may see inconsistent cached data. To get around this, consider
    * using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} via
-   * {@link BaseRequestOptions#diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy)}
+   * {@link RequestOptions#diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy)}
    * during development, and re-enabling the default
    * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE} for release builds. </p>
    *
    * @see #load(Integer)
    * @see com.bumptech.glide.signature.ApplicationVersionSignature
    */
-  public RequestBuilder<TranscodeType> load(Integer resourceId) {
+  public RequestBuilder<TranscodeType> load(@Nullable Integer resourceId) {
     return loadGeneric(resourceId).apply(signatureOf(ApplicationVersionSignature.obtain(context)));
   }
 
@@ -276,7 +300,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * {@link #load(android.net.Uri)} or {@link #load(String)}.
    */
   @Deprecated
-  public RequestBuilder<TranscodeType> load(URL url) {
+  public RequestBuilder<TranscodeType> load(@Nullable URL url) {
     return loadGeneric(url);
   }
 
@@ -289,8 +313,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param model the data to load.
    * @see #load(Object)
    */
-  public RequestBuilder<TranscodeType> load(byte[] model) {
-    return loadGeneric(model).apply(signatureOf(new StringSignature(UUID.randomUUID().toString()))
+  public RequestBuilder<TranscodeType> load(@Nullable byte[] model) {
+    return loadGeneric(model).apply(signatureOf(new ObjectKey(UUID.randomUUID().toString()))
         .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true /*skipMemoryCache*/));
   }
 
@@ -322,13 +346,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @return The given target.
    * @see RequestManager#clear(Target)
    */
-  public <Y extends Target<TranscodeType>> Y into(Y target) {
+  public <Y extends Target<TranscodeType>> Y into(@NonNull Y target) {
     Util.assertMainThread();
-    if (target == null) {
-      throw new IllegalArgumentException("You must pass in a non null Target");
-    }
+    Preconditions.checkNotNull(target);
     if (!isModelSet) {
-      throw new IllegalArgumentException("You must first put a model (try #load())");
+      throw new IllegalArgumentException("You must call #load() before calling #into()");
     }
 
     Request previous = target.getRequest();
@@ -358,24 +380,31 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    */
   public Target<TranscodeType> into(ImageView view) {
     Util.assertMainThread();
-    if (view == null) {
-      throw new IllegalArgumentException("You must pass in a non null View");
-    }
+    Preconditions.checkNotNull(view);
 
-    if (!requestOptions.isTransformationSet() && view.getScaleType() != null) {
+    if (!requestOptions.isTransformationSet()
+        && requestOptions.isTransformationAllowed()
+        && view.getScaleType() != null) {
       if (requestOptions.isLocked()) {
         requestOptions = requestOptions.clone();
       }
       switch (view.getScaleType()) {
         case CENTER_CROP:
-          requestOptions.optionalCenterCrop(context);
+          requestOptions.optionalCenterCrop();
+          break;
+        case CENTER_INSIDE:
+          requestOptions.optionalCenterInside();
           break;
         case FIT_CENTER:
         case FIT_START:
         case FIT_END:
-          requestOptions.optionalFitCenter(context);
+          requestOptions.optionalFitCenter();
           break;
-        //$CASES-OMITTED$
+        case FIT_XY:
+          requestOptions.optionalCenterInside();
+          break;
+        case CENTER:
+        case MATRIX:
         default:
           // Do nothing.
       }
@@ -389,29 +418,65 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * @param width  The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
    *               overridden by
-   *               {@link com.bumptech.glide.request.BaseRequestOptions#override(int, int)} if
+   *               {@link com.bumptech.glide.request.RequestOptions#override(int, int)} if
    *               previously called.
    * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
    *               overridden by
-   *               {@link com.bumptech.glide.request.BaseRequestOptions#override(int, int)}} if
+   *               {@link com.bumptech.glide.request.RequestOptions#override(int, int)}} if
    *               previously called).
-   * @return An {@link com.bumptech.glide.request.FutureTarget} that can be used to obtain the
-   * resource in a blocking manner.
    * @see RequestManager#clear(Target)
+   *
+   * @deprecated Use {@link #submit(int, int)} instead.
    */
+  @Deprecated
   public FutureTarget<TranscodeType> into(int width, int height) {
+    return submit(width, height);
+  }
+
+  /**
+   * Returns a future that can be used to do a blocking get on a background thread.
+   *
+   * <p>This method defaults to {@link Target#SIZE_ORIGINAL} for the width and the height. However,
+   * since the width and height will be overridden by values passed to {@link
+   * RequestOptions#override(int, int)}, this method can be used whenever {@link RequestOptions}
+   * with override values are applied, or whenever you want to retrieve the image in its original
+   * size.
+   *
+   * @see #submit(int, int)
+   * @see #into(Target)
+   */
+  public FutureTarget<TranscodeType> submit() {
+    return submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
+  }
+
+  /**
+   * Returns a future that can be used to do a blocking get on a background thread.
+   *
+   * @param width  The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
+   *               overridden by
+   *               {@link com.bumptech.glide.request.RequestOptions#override(int, int)} if
+   *               previously called.
+   * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
+   *               overridden by
+   *               {@link com.bumptech.glide.request.RequestOptions#override(int, int)}} if
+   *               previously called).
+   */
+  public FutureTarget<TranscodeType> submit(int width, int height) {
     final RequestFutureTarget<TranscodeType> target =
         new RequestFutureTarget<>(context.getMainHandler(), width, height);
 
-    // TODO: Currently all loads must be started on the main thread...
-    context.getMainHandler().post(new Runnable() {
-      @Override
-      public void run() {
-        if (!target.isCancelled()) {
-          into(target);
+    if (Util.isOnBackgroundThread()) {
+      context.getMainHandler().post(new Runnable() {
+        @Override
+        public void run() {
+          if (!target.isCancelled()) {
+            into(target);
+          }
         }
-      }
-    });
+      });
+    } else {
+      into(target);
+    }
 
     return target;
   }
@@ -424,11 +489,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * @param width  The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
    *               overridden by
-   *               {@link com.bumptech.glide.request.BaseRequestOptions#override(int, int)} if
+   *               {@link com.bumptech.glide.request.RequestOptions#override(int, int)} if
    *               previously called.
    * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
    *               overridden by
-   *               {@link com.bumptech.glide.request.BaseRequestOptions#override(int, int)}} if
+   *               {@link com.bumptech.glide.request.RequestOptions#override(int, int)}} if
    *               previously called).
    * @return A {@link Target} that can be used to cancel the load via
    * {@link RequestManager#clear(Target)}.
@@ -459,7 +524,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param target The Target that will receive the cache File when the load completes
    * @param <Y>    The type of Target.
    * @return The given Target.
+   *
+   * @deprecated Use {@link RequestManager#downloadOnly()} and {@link #into(Target)}.
    */
+  @Deprecated
   public <Y extends Target<File>> Y downloadOnly(Y target) {
     return getDownloadOnlyRequest().into(target);
   }
@@ -473,12 +541,15 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param height The height in pixels to use to fetch the data.
    * @return A {@link java.util.concurrent.Future} that can be used to retrieve the cache File
    * containing the data.
+   *
+   * @deprecated Use {@link RequestManager#downloadOnly()} and {@link #into(int, int)}.
    */
+  @Deprecated
   public FutureTarget<File> downloadOnly(int width, int height) {
-    return getDownloadOnlyRequest().into(width, height);
+    return getDownloadOnlyRequest().submit(width, height);
   }
 
-  private RequestBuilder<File> getDownloadOnlyRequest() {
+  protected RequestBuilder<File> getDownloadOnlyRequest() {
     return new RequestBuilder<>(File.class, this).apply(DOWNLOAD_ONLY_OPTIONS);
   }
 
@@ -502,7 +573,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   }
 
   private Request buildRequestRecursive(Target<TranscodeType> target,
-      ThumbnailRequestCoordinator parentCoordinator,
+      @Nullable ThumbnailRequestCoordinator parentCoordinator,
       TransitionOptions<?, ? super TranscodeType> transitionOptions,
       Priority priority, int overrideWidth, int overrideHeight) {
     if (thumbnailBuilder != null) {
@@ -544,7 +615,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
       Request fullRequest = obtainRequest(target, requestOptions, coordinator, transitionOptions,
           priority, overrideWidth, overrideHeight);
-      BaseRequestOptions<?> thumbnailOptions = requestOptions.clone()
+      RequestOptions thumbnailOptions = requestOptions.clone()
           .sizeMultiplier(thumbSizeMultiplier);
 
       Request thumbnailRequest = obtainRequest(target, thumbnailOptions, coordinator,
@@ -560,7 +631,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   }
 
   private Request obtainRequest(Target<TranscodeType> target,
-      BaseRequestOptions<?> requestOptions, RequestCoordinator requestCoordinator,
+      RequestOptions requestOptions, RequestCoordinator requestCoordinator,
       TransitionOptions<?, ? super TranscodeType> transitionOptions, Priority priority,
       int overrideWidth, int overrideHeight) {
     requestOptions.lock();

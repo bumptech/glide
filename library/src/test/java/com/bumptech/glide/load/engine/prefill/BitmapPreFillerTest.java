@@ -4,30 +4,30 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.Range;
-
 import android.graphics.Bitmap;
-
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.tests.Util.CreateBitmap;
 import com.bumptech.glide.util.Util;
-
+import com.google.common.collect.Range;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
@@ -45,15 +45,16 @@ public class BitmapPreFillerTest {
   private final int poolSize = BITMAPS_IN_CACHE * defaultBitmapSize;
   private final int cacheSize = BITMAPS_IN_POOL * defaultBitmapSize;
 
-  private BitmapPool pool;
+  @Mock BitmapPool pool;
+  @Mock MemoryCache cache;
   private BitmapPreFiller bitmapPreFiller;
-  private MemoryCache cache;
 
   @Before
   public void setUp() {
-    pool = mock(BitmapPool.class);
+    MockitoAnnotations.initMocks(this);
     when(pool.getMaxSize()).thenReturn(poolSize);
-    cache = mock(MemoryCache.class);
+    when(pool.getDirty(anyInt(), anyInt(), any(Bitmap.Config.class)))
+        .thenAnswer(new CreateBitmap());
     when(cache.getMaxSize()).thenReturn(cacheSize);
 
     bitmapPreFiller = new BitmapPreFiller(cache, pool, DecodeFormat.DEFAULT);
@@ -265,7 +266,8 @@ public class BitmapPreFillerTest {
     bitmapPreFiller.preFill(builder);
 
     InOrder order = inOrder(builder);
-    order.verify(builder).setConfig(Bitmap.Config.RGB_565);
+    order.verify(builder).setConfig(DecodeFormat.DEFAULT == DecodeFormat.PREFER_ARGB_8888
+        ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
     order.verify(builder).build();
   }
 

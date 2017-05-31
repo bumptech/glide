@@ -9,17 +9,15 @@ import static org.mockito.Mockito.verify;
 
 import android.app.Activity;
 import android.support.v4.app.FragmentActivity;
-
 import com.bumptech.glide.RequestManager;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.exceptions.base.MockitoAssertionError;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
@@ -167,7 +165,7 @@ public class RequestManagerFragmentTest {
 
     ActivityFragmentLifecycle getFragmentLifecycle();
 
-    ActivityController getController();
+    ActivityController<?> getController();
 
     void onLowMemory();
 
@@ -218,7 +216,7 @@ public class RequestManagerFragmentTest {
     }
 
     @Override
-    public ActivityController getController() {
+    public ActivityController<?> getController() {
       return controller;
     }
 
@@ -276,7 +274,7 @@ public class RequestManagerFragmentTest {
     }
 
     @Override
-    public ActivityController getController() {
+    public ActivityController<?> getController() {
       return supportController;
     }
 

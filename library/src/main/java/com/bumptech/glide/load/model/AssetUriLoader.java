@@ -1,17 +1,14 @@
 package com.bumptech.glide.load.model;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorAssetPathFetcher;
 import com.bumptech.glide.load.data.StreamAssetPathFetcher;
 import com.bumptech.glide.signature.ObjectKey;
-
 import java.io.InputStream;
 
 /**
@@ -61,10 +58,15 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
   public static class StreamFactory implements ModelLoaderFactory<Uri, InputStream>,
       AssetFetcherFactory<InputStream> {
 
+    private final AssetManager assetManager;
+
+    public StreamFactory(AssetManager assetManager) {
+      this.assetManager = assetManager;
+    }
+
     @Override
-    public ModelLoader<Uri, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
-      return new AssetUriLoader<>(context.getAssets(), this);
+    public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
+      return new AssetUriLoader<>(assetManager, this);
     }
 
     @Override
@@ -85,10 +87,15 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
       ParcelFileDescriptor>,
       AssetFetcherFactory<ParcelFileDescriptor> {
 
+    private final AssetManager assetManager;
+
+    public FileDescriptorFactory(AssetManager assetManager) {
+      this.assetManager = assetManager;
+    }
+
     @Override
-    public ModelLoader<Uri, ParcelFileDescriptor> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
-      return new AssetUriLoader<>(context.getAssets(), this);
+    public ModelLoader<Uri, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
+      return new AssetUriLoader<>(assetManager, this);
     }
 
     @Override

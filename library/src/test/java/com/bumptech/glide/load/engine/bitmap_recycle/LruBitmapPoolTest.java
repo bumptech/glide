@@ -2,7 +2,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-import static android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,7 +13,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,12 +25,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowBitmap;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
@@ -102,18 +100,18 @@ public class LruBitmapPoolTest {
   }
 
   @Test
-  public void testTrimMemoryBackgroundOrLessRemovesHalfOfBitmaps() {
-    testTrimMemory(MAX_SIZE, TRIM_MEMORY_BACKGROUND, MAX_SIZE / 2);
+  public void testTrimMemoryUiHiddenOrLessRemovesHalfOfBitmaps() {
+    testTrimMemory(MAX_SIZE, TRIM_MEMORY_UI_HIDDEN, MAX_SIZE / 2);
   }
 
   @Test
-  public void testTrimMemoryBackgroundOrLessRemovesNoBitmapsIfPoolLessThanHalfFull() {
-    testTrimMemory(MAX_SIZE / 2, TRIM_MEMORY_BACKGROUND, 0);
+  public void testTrimMemoryUiHiddenOrLessRemovesNoBitmapsIfPoolLessThanHalfFull() {
+    testTrimMemory(MAX_SIZE / 2, TRIM_MEMORY_UI_HIDDEN, 0);
   }
 
   @Test
-  public void testTrimMemoryModerateOrGreaterRemovesAllBitmaps() {
-    for (int trimLevel : new int[] { TRIM_MEMORY_MODERATE, TRIM_MEMORY_COMPLETE }) {
+  public void testTrimMemoryBackgroundOrGreaterRemovesAllBitmaps() {
+    for (int trimLevel : new int[] { TRIM_MEMORY_BACKGROUND, TRIM_MEMORY_COMPLETE }) {
       testTrimMemory(MAX_SIZE, trimLevel, MAX_SIZE);
     }
   }

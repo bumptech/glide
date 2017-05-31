@@ -2,10 +2,8 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-
 import java.security.MessageDigest;
 
 /**
@@ -21,25 +19,32 @@ public class CircleCrop extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.CircleCrop." + VERSION;
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
-  public CircleCrop(Context context) {
-    super(context);
+  public CircleCrop() {
+    // Intentionally empty.
   }
 
-  public CircleCrop(BitmapPool bitmapPool) {
-    super(bitmapPool);
+  /**
+   * @deprecated Use {@link #CircleCrop()}.
+   */
+  @Deprecated
+  public CircleCrop(@SuppressWarnings("unused") Context context) {
+    this();
+  }
+
+  /**
+   * @deprecated Use {@link #CircleCrop()}
+   */
+  @Deprecated
+  public CircleCrop(@SuppressWarnings("unused") BitmapPool bitmapPool) {
+    this();
   }
 
   // Bitmap doesn't implement equals, so == and .equals are equivalent here.
   @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
-  protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-    final Bitmap toReuse = pool.get(outWidth, outHeight,
-        toTransform.getConfig() != null ? toTransform.getConfig() : Config.ARGB_8888);
-    Bitmap transformed = TransformationUtils.circleCrop(toReuse, toTransform, outWidth, outHeight);
-    if (toReuse != null && toReuse != transformed && !pool.put(toReuse)) {
-      toReuse.recycle();
-    }
-    return transformed;
+  protected Bitmap transform(
+      @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+    return TransformationUtils.circleCrop(pool, toTransform, outWidth, outHeight);
   }
 
   @Override

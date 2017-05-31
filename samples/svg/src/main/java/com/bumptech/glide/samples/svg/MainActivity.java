@@ -1,7 +1,6 @@
 package com.bumptech.glide.samples.svg;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -12,10 +11,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
-
 import java.io.File;
 
 /**
@@ -36,10 +33,10 @@ public class MainActivity extends Activity {
     imageViewRes = (ImageView) findViewById(R.id.svg_image_view1);
     imageViewNet = (ImageView) findViewById(R.id.svg_image_view2);
 
-    requestBuilder = Glide.with(this)
+    requestBuilder = GlideApp.with(this)
         .as(PictureDrawable.class)
-        .apply(placeholderOf(R.drawable.image_loading)
-            .error(R.drawable.image_error))
+        .placeholder(R.drawable.image_loading)
+        .error(R.drawable.image_error)
         .transition(withCrossFade())
         .listener(new SvgSoftwareLayerSetter());
   }
@@ -52,9 +49,10 @@ public class MainActivity extends Activity {
 
   public void clearCache(View v) {
     Log.w(TAG, "clearing cache");
-    Glide.with(this).clear(imageViewRes);
-    Glide.with(this).clear(imageViewNet);
-    Glide.get(this).clearMemory();
+    GlideRequests glideRequests = GlideApp.with(this);
+    glideRequests.clear(imageViewRes);
+    glideRequests.clear(imageViewNet);
+    GlideApp.get(this).clearMemory();
     File cacheDir = Glide.getPhotoCacheDir(this);
     if (cacheDir.isDirectory()) {
       for (File child : cacheDir.listFiles()) {

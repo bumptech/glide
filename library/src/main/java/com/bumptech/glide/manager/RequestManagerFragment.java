@@ -5,9 +5,11 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Build;
-
+import android.support.annotation.Nullable;
+import android.util.Log;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-
+import com.bumptech.glide.util.Synthetic;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,17 +23,17 @@ import java.util.Set;
  * @see com.bumptech.glide.manager.RequestManagerRetriever
  * @see com.bumptech.glide.RequestManager
  */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class RequestManagerFragment extends Fragment {
+  private static final String TAG = "RMFragment";
   private final ActivityFragmentLifecycle lifecycle;
   private final RequestManagerTreeNode requestManagerTreeNode =
       new FragmentRequestManagerTreeNode();
   private final HashSet<RequestManagerFragment> childRequestManagerFragments =
       new HashSet<>();
 
-  private RequestManager requestManager;
-  private RequestManagerFragment rootRequestManagerFragment;
-  private Fragment parentFragmentHint;
+  @Nullable private RequestManager requestManager;
+  @Nullable private RequestManagerFragment rootRequestManagerFragment;
+  @Nullable private Fragment parentFragmentHint;
 
   public RequestManagerFragment() {
     this(new ActivityFragmentLifecycle());
@@ -59,6 +61,7 @@ public class RequestManagerFragment extends Fragment {
   /**
    * Returns the current {@link com.bumptech.glide.RequestManager} or null if none exists.
    */
+  @Nullable
   public RequestManager getRequestManager() {
     return requestManager;
   }
@@ -142,7 +145,7 @@ public class RequestManagerFragment extends Fragment {
 
   private void registerFragmentWithRoot(Activity activity) {
     unregisterFragmentWithRoot();
-    rootRequestManagerFragment = RequestManagerRetriever.get()
+    rootRequestManagerFragment = Glide.get(activity).getRequestManagerRetriever()
         .getRequestManagerFragment(activity.getFragmentManager(), null);
     if (rootRequestManagerFragment != this) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
@@ -159,7 +162,14 @@ public class RequestManagerFragment extends Fragment {
   @Override
   public void onAttach(Activity activity) {
     super.onAttach(activity);
-    registerFragmentWithRoot(getActivity());
+    try {
+      registerFragmentWithRoot(activity);
+    } catch (IllegalStateException e) {
+      // OnAttach can be called after the activity is destroyed, see #497.
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Unable to register fragment with root", e);
+      }
+    }
   }
 
   @Override
@@ -189,6 +199,7 @@ public class RequestManagerFragment extends Fragment {
 
   @Override
   public void onTrimMemory(int level) {
+    super.onTrimMemory(level);
     // If an activity is re-created, onTrimMemory may be called before a manager is ever put.
     // See #329.
     if (requestManager != null) {
@@ -198,6 +209,7 @@ public class RequestManagerFragment extends Fragment {
 
   @Override
   public void onLowMemory() {
+    super.onLowMemory();
     // If an activity is re-created, onLowMemory may be called before a manager is ever put.
     // See #329.
     if (requestManager != null) {
@@ -211,6 +223,10 @@ public class RequestManagerFragment extends Fragment {
   }
 
   private class FragmentRequestManagerTreeNode implements RequestManagerTreeNode {
+
+    @Synthetic
+    FragmentRequestManagerTreeNode() { }
+
     @Override
     public Set<RequestManager> getDescendants() {
       Set<RequestManagerFragment> descendantFragments = getDescendantRequestManagerFragments();

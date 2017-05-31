@@ -2,23 +2,22 @@ package com.bumptech.glide.load.data;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.bumptech.glide.load.engine.bitmap_recycle.LruByteArrayPool;
-import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
+import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.testutil.TestResourceUtil;
-
+import java.io.IOException;
+import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class ExifOrientationStreamTest {
-  private LruByteArrayPool byteArrayPool;
+  private ArrayPool byteArrayPool;
 
   private InputStream openOrientationExample(boolean isLandscape, int item) {
     String filePrefix = isLandscape ? "Landscape" : "Portrait";
@@ -28,7 +27,7 @@ public class ExifOrientationStreamTest {
 
   @Before
   public void setUp() {
-    byteArrayPool = new LruByteArrayPool();
+    byteArrayPool = new LruArrayPool();
   }
 
   @Test
@@ -37,13 +36,12 @@ public class ExifOrientationStreamTest {
       for (int j = 0; j < 8; j++) {
         InputStream toWrap = openOrientationExample(true /*isLandscape*/, j + 1);
         InputStream wrapped = new ExifOrientationStream(toWrap, i);
-        ImageHeaderParser parser = new ImageHeaderParser(wrapped, byteArrayPool);
-        assertThat(parser.getOrientation()).isEqualTo(i);
+        DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
+        assertThat(parser.getOrientation(wrapped, byteArrayPool)).isEqualTo(i);
 
         toWrap = openOrientationExample(false /*isLandscape*/, j + 1);
         wrapped = new ExifOrientationStream(toWrap, i);
-        parser = new ImageHeaderParser(wrapped, byteArrayPool);
-        assertThat(parser.getOrientation()).isEqualTo(i);
+        assertThat(parser.getOrientation(wrapped, byteArrayPool)).isEqualTo(i);
       }
     }
   }

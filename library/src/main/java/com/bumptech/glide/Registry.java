@@ -1,14 +1,13 @@
 package com.bumptech.glide;
 
-import android.content.Context;
-
+import android.support.v4.util.Pools.Pool;
 import com.bumptech.glide.load.Encoder;
+import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.data.DataRewinderRegistry;
 import com.bumptech.glide.load.engine.DecodePath;
-import com.bumptech.glide.load.engine.ExceptionListPool;
 import com.bumptech.glide.load.engine.LoadPath;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -17,11 +16,12 @@ import com.bumptech.glide.load.model.ModelLoaderRegistry;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.load.resource.transcode.TranscoderRegistry;
 import com.bumptech.glide.provider.EncoderRegistry;
+import com.bumptech.glide.provider.ImageHeaderParserRegistry;
 import com.bumptech.glide.provider.LoadPathCache;
 import com.bumptech.glide.provider.ModelToResourceClassCache;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
-
+import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,20 +36,21 @@ public class Registry {
   private final ResourceEncoderRegistry resourceEncoderRegistry;
   private final DataRewinderRegistry dataRewinderRegistry;
   private final TranscoderRegistry transcoderRegistry;
+  private final ImageHeaderParserRegistry imageHeaderParserRegistry;
 
   private final ModelToResourceClassCache modelToResourceClassCache =
       new ModelToResourceClassCache();
   private final LoadPathCache loadPathCache = new LoadPathCache();
-  private final ExceptionListPool exceptionListPool = new ExceptionListPool();
+  private final Pool<List<Exception>> exceptionListPool = FactoryPools.threadSafeList();
 
-  public Registry(Context context) {
-    this.modelLoaderRegistry =
-        new ModelLoaderRegistry(context.getApplicationContext(), exceptionListPool);
+  public Registry() {
+    this.modelLoaderRegistry = new ModelLoaderRegistry(exceptionListPool);
     this.encoderRegistry = new EncoderRegistry();
     this.decoderRegistry = new ResourceDecoderRegistry();
     this.resourceEncoderRegistry = new ResourceEncoderRegistry();
     this.dataRewinderRegistry = new DataRewinderRegistry();
     this.transcoderRegistry = new TranscoderRegistry();
+    this.imageHeaderParserRegistry = new ImageHeaderParserRegistry();
   }
 
   public <Data> Registry register(Class<Data> dataClass, Encoder<Data> encoder) {
@@ -83,6 +84,11 @@ public class Registry {
   public <TResource, Transcode> Registry register(Class<TResource> resourceClass,
       Class<Transcode> transcodeClass, ResourceTranscoder<TResource, Transcode> transcoder) {
     transcoderRegistry.register(resourceClass, transcodeClass, transcoder);
+    return this;
+  }
+
+  public Registry register(ImageHeaderParser parser) {
+    imageHeaderParserRegistry.add(parser);
     return this;
   }
 
@@ -223,6 +229,14 @@ public class Registry {
     return result;
   }
 
+  public List<ImageHeaderParser> getImageHeaderParsers() {
+    List<ImageHeaderParser> result = imageHeaderParserRegistry.getParsers();
+    if (result.isEmpty()) {
+      throw new NoImageHeaderParserException();
+    }
+    return result;
+  }
+
   /**
    * Thrown when no {@link com.bumptech.glide.load.model.ModelLoader} is registered for a given
    * model class.
@@ -232,7 +246,7 @@ public class Registry {
       super("Failed to find any ModelLoaders for model: " + model);
     }
 
-    public NoModelLoaderAvailableException(Class modelClass, Class dataClass) {
+    public NoModelLoaderAvailableException(Class<?> modelClass, Class<?> dataClass) {
       super("Failed to find any ModelLoaders for model: " + modelClass + " and data: " + dataClass);
     }
   }
@@ -261,6 +275,15 @@ public class Registry {
   public static class MissingComponentException extends RuntimeException {
     public MissingComponentException(String message) {
       super(message);
+    }
+  }
+
+  /**
+   * Thrown when no {@link ImageHeaderParser} is registered.
+   */
+  public static final class NoImageHeaderParserException extends MissingComponentException {
+    public NoImageHeaderParserException() {
+      super("Failed to find image header parser.");
     }
   }
 }

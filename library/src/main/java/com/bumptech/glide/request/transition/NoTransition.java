@@ -1,5 +1,8 @@
 package com.bumptech.glide.request.transition;
 
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.util.Synthetic;
+
 /**
  * A simple {@link Transition} that performs no actions.
  *
@@ -7,17 +10,20 @@ package com.bumptech.glide.request.transition;
  * {@link com.bumptech.glide.request.target.Target}.
  */
 public class NoTransition<R> implements Transition<R> {
-  private static final NoTransition<?> NO_ANIMATION = new NoTransition<Object>();
+  @Synthetic static final NoTransition<?> NO_ANIMATION = new NoTransition<Object>();
   @SuppressWarnings("rawtypes")
   private static final TransitionFactory<?> NO_ANIMATION_FACTORY = new NoAnimationFactory();
 
   /**
    * A factory that always returns the same {@link NoTransition}.
+   *
+   * @param <R> the resource type that will be transitioned into a
+   * {@link com.bumptech.glide.request.target.Target}.
    */
   public static class NoAnimationFactory<R> implements TransitionFactory<R> {
     @SuppressWarnings("unchecked")
     @Override
-    public Transition<R> build(boolean isFromMemoryCache, boolean isFirstResource) {
+    public Transition<R> build(DataSource dataSource, boolean isFirstResource) {
       return (Transition<R>) NO_ANIMATION;
     }
   }

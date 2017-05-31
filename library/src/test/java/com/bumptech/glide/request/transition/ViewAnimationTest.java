@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.view.animation.Animation;
 import android.widget.ImageView;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -12,7 +12,6 @@ import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoader.LoadData;
 import com.bumptech.glide.load.resource.UnitTransformation;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +136,7 @@ final class DecodeHelper<Transcode> {
   <Z> Transformation<Z> getTransformation(Class<Z> resourceClass) {
     Transformation<Z> result = (Transformation<Z>) transformations.get(resourceClass);
      if (result == null) {
-      if (!transformations.isEmpty() && isTransformationRequired) {
+      if (transformations.isEmpty() && isTransformationRequired) {
         throw new IllegalArgumentException(
             "Missing transformation for " + resourceClass + ". If you wish to"
                 + " ignore unknown resource types, use the optional transformation methods.");
@@ -199,8 +198,14 @@ final class DecodeHelper<Transcode> {
       int size = loadData.size();
       for (int i = 0; i < size; i++) {
         LoadData<?> data = loadData.get(i);
-        cacheKeys.add(data.sourceKey);
-        cacheKeys.addAll(data.alternateKeys);
+        if (!cacheKeys.contains(data.sourceKey)) {
+          cacheKeys.add(data.sourceKey);
+        }
+        for (int j = 0; j < data.alternateKeys.size(); j++) {
+          if (!cacheKeys.contains(data.alternateKeys.get(j))) {
+            cacheKeys.add(data.alternateKeys.get(j));
+          }
+        }
       }
     }
     return cacheKeys;

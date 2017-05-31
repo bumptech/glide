@@ -1,8 +1,6 @@
 package com.bumptech.glide.load.engine;
 
 import android.util.Log;
-
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
@@ -10,7 +8,6 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoader.LoadData;
 import com.bumptech.glide.util.LogTime;
-
 import java.util.Collections;
 
 /**
@@ -24,6 +21,7 @@ import java.util.Collections;
 class SourceGenerator implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object>,
     DataFetcherGenerator.FetcherReadyCallback {
+  private static final String TAG = "SourceGenerator";
 
   private final DecodeHelper<?> helper;
   private final FetcherReadyCallback cb;
@@ -78,8 +76,8 @@ class SourceGenerator implements DataFetcherGenerator,
           new DataCacheWriter<>(encoder, dataToCache, helper.getOptions());
       originalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
       helper.getDiskCache().put(originalKey, writer);
-      if (Logs.isEnabled(Log.VERBOSE)) {
-        Logs.log(Log.VERBOSE, "Finished encoding source to cache"
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Finished encoding source to cache"
             + ", key: " + originalKey
             + ", data: " + dataToCache
             + ", encoder: " + encoder

@@ -1,13 +1,11 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.v4.util.Pools.Pool;
 import android.util.Log;
-
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,16 +19,17 @@ import java.util.List;
  *                       returned to the caller.
  */
 public class DecodePath<DataType, ResourceType, Transcode> {
+  private static final String TAG = "DecodePath";
   private final Class<DataType> dataClass;
   private final List<? extends ResourceDecoder<DataType, ResourceType>> decoders;
   private final ResourceTranscoder<ResourceType, Transcode> transcoder;
-  private final ExceptionListPool listPool;
+  private final Pool<List<Exception>> listPool;
   private final String failureMessage;
 
   public DecodePath(Class<DataType> dataClass, Class<ResourceType> resourceClass,
       Class<Transcode> transcodeClass,
       List<? extends ResourceDecoder<DataType, ResourceType>> decoders,
-      ResourceTranscoder<ResourceType, Transcode> transcoder, ExceptionListPool listPool) {
+      ResourceTranscoder<ResourceType, Transcode> transcoder, Pool<List<Exception>> listPool) {
     this.dataClass = dataClass;
     this.decoders = decoders;
     this.transcoder = transcoder;
@@ -68,8 +67,8 @@ public class DecodePath<DataType, ResourceType, Transcode> {
           result = decoder.decode(data, width, height, options);
         }
       } catch (IOException e) {
-        if (Logs.isEnabled(Log.VERBOSE)) {
-          Logs.log(Log.VERBOSE, "Failed to decode data for " + decoder, e);
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+          Log.v(TAG, "Failed to decode data for " + decoder, e);
         }
         exceptions.add(e);
       }

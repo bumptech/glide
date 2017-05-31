@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:id="@+id/flickr_photo_list"
-          android:layout_width="fill_parent"
-          android:layout_height="fill_parent"
-          android:cacheColorHint="#00000000"
-          android:scrollingCache="false">
-</ListView>
+<android.support.v7.widget.RecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/flickr_photo_list" />
 

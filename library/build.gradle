@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'org.robolectric'
 apply plugin: 'maven'
 apply plugin: 'findbugs'
 apply plugin: 'pmd'
@@ -19,21 +18,26 @@ coveralls {
 dependencies {
     compile project(':third_party:gif_decoder')
     compile project(':third_party:disklrucache')
+    compile project(':annotation')
     compile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
-
+    provided "com.android.support:appcompat-v7:${SUPPORT_V7_VERSION}"
     testCompile project(':testutil')
     testCompile 'com.google.guava:guava-testlib:18.0'
     testCompile "com.google.truth:truth:${TRUTH_VERSION}"
     testCompile "junit:junit:${JUNIT_VERSION}"
-    testCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
+    testCompile "org.mockito:mockito-core:${MOCKITO_VERSION}"
     testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testCompile "com.squareup.okhttp:mockwebserver:${MOCKWEBSERVER_VERSION}"
+    testCompile "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
     testCompile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
 }
 
 android.testOptions.unitTests.all {
     // configure max heap size of the test JVM
     maxHeapSize = '2048m'
+    if (JavaVersion.current() <= JavaVersion.VERSION_1_7) {
+        // Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=2048m; support was removed in 8.0
+        jvmArgs '-XX:MaxPermSize=2048m'
+    }
 }
 
 android {
@@ -44,8 +48,9 @@ android {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
 
-        versionCode VERSION_CODE as int
         versionName VERSION_NAME as String
+
+        consumerProguardFiles 'proguard-rules.txt'
     }
 
     buildTypes {
@@ -82,6 +87,10 @@ afterEvaluate {
 
     check.dependsOn('findbugs')
 
+    pmd {
+        toolVersion '5.4.0'
+    }
+
     task pmd(type: Pmd) {
         targetJdk = TargetJdk.VERSION_1_7
 
@@ -102,9 +111,9 @@ afterEvaluate {
 
     check.dependsOn('pmd')
 
-    task jacocoTestReport(type: JacocoReport, dependsOn: testDebug) {
-        def coverageSourceDirs = ['src/main/java']
-        group = "Reporting"
+   task jacocoTestReport(type: JacocoReport, dependsOn: testDebugUnitTest) {
+       def coverageSourceDirs = ['src/main/java']
+       group = "Reporting"
         description = "Generate Jacoco coverage reports"
 
         classDirectories = fileTree(
@@ -126,5 +135,18 @@ afterEvaluate {
             xml.enabled = true
             html.enabled = true
         }
+    }
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+// exclude <dependency> tag for android support-v4 library from :glide's pom
+// this will ensure that this warning will not prevent the build from completing:
+// Module 'com.github.bumptech.glide:glide:4.0.0-SNAPSHOT' depends on one or more Android Libraries
+// but is a jar. Most users will need to override support-v4 version anyway if a newer version is
+// available
+// TODO make support-v4 a <scope>runtime</scope> dependency in pom.xml
+afterEvaluate {
+    uploadArchives.repositories.mavenDeployer.pom.whenConfigured { p ->
+        p.dependencies = p.dependencies.findAll { dep -> dep.artifactId != "support-v4" }
     }
 }

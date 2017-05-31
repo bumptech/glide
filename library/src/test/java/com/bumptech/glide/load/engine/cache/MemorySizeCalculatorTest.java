@@ -4,14 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.Range;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
-
+import com.bumptech.glide.load.engine.cache.MemorySizeCalculatorTest.LowRamActivityManager;
 import com.bumptech.glide.tests.Util;
-
+import com.google.common.collect.Range;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,10 +18,13 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowActivityManager;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(manifest = Config.NONE, sdk = 19, shadows = LowRamActivityManager.class)
 public class MemorySizeCalculatorTest {
   private MemorySizeHarness harness;
   private int initialSdkVersion;
@@ -31,6 +32,7 @@ public class MemorySizeCalculatorTest {
   @Before
   public void setUp() {
     initialSdkVersion = Build.VERSION.SDK_INT;
+    Util.setSdkVersionInt(18);
     harness = new MemorySizeHarness();
   }
 
@@ -67,7 +69,7 @@ public class MemorySizeCalculatorTest {
 
     float memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
-    assertThat((float) memoryCacheSize)
+    assertThat(memoryCacheSize)
         .isIn(Range.atMost(memoryClassBytes * harness.sizeMultiplier));
   }
 
@@ -136,12 +138,13 @@ public class MemorySizeCalculatorTest {
 
   @Test
   public void testByteArrayPoolSize_withLowRamDevice_isHalfTheSpecifiedBytes() {
-    ShadowActivityManager activityManager = Shadows.shadowOf(harness.activityManager);
+    LowRamActivityManager activityManager =
+        (LowRamActivityManager) Shadow.extract(harness.activityManager);
+    Util.setSdkVersionInt(19);
     activityManager.setMemoryClass(getLargeEnoughMemoryClass());
+    activityManager.setIsLowRam(true);
 
-    Util.setSdkVersionInt(10);
-
-    int byteArrayPoolSize = harness.getCalculator().getByteArrayPoolSize();
+    int byteArrayPoolSize = harness.getCalculator().getArrayPoolSizeInBytes();
     assertThat(byteArrayPoolSize).isEqualTo(harness.byteArrayPoolSizeBytes / 2);
   }
 
@@ -161,7 +164,7 @@ public class MemorySizeCalculatorTest {
     float memoryCacheScreens = MemorySizeCalculator.Builder.MEMORY_CACHE_TARGET_SCREENS;
     float bitmapPoolScreens = MemorySizeCalculator.Builder.BITMAP_POOL_TARGET_SCREENS;
     float sizeMultiplier = MemorySizeCalculator.Builder.MAX_SIZE_MULTIPLIER;
-    int byteArrayPoolSizeBytes = MemorySizeCalculator.Builder.BYTE_ARRAY_POOL_SIZE_BYTES;
+    int byteArrayPoolSizeBytes = MemorySizeCalculator.Builder.ARRAY_POOL_SIZE_BYTES;
     ActivityManager activityManager =
         (ActivityManager) RuntimeEnvironment.application.getSystemService(Context.ACTIVITY_SERVICE);
     MemorySizeCalculator.ScreenDimensions screenDimensions =
@@ -176,12 +179,27 @@ public class MemorySizeCalculatorTest {
           .setMaxSizeMultiplier(sizeMultiplier)
           .setActivityManager(activityManager)
           .setScreenDimensions(screenDimensions)
-          .setByteArrayPoolSize(byteArrayPoolSizeBytes)
+          .setArrayPoolSize(byteArrayPoolSizeBytes)
           .build();
     }
 
     public int getScreenSize() {
       return pixelSize * pixelSize * bytesPerPixel;
+    }
+  }
+
+  @Implements(ActivityManager.class)
+  public static final class LowRamActivityManager extends ShadowActivityManager {
+
+    private boolean isLowRam;
+
+    void setIsLowRam(boolean isLowRam) {
+      this.isLowRam = isLowRam;
+    }
+
+    @Implementation
+    public boolean isLowRamDevice() {
+      return isLowRam;
     }
   }
 }

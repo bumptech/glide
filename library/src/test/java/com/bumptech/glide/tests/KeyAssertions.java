@@ -2,10 +2,8 @@ package com.bumptech.glide.tests;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.testing.EqualsTester;
-
 import com.bumptech.glide.load.Key;
-
+import com.google.common.testing.EqualsTester;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 

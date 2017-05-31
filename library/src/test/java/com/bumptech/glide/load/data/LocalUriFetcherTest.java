@@ -8,9 +8,10 @@ import static org.mockito.Mockito.verify;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
-
 import com.bumptech.glide.Priority;
-
+import java.io.Closeable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,10 +20,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import java.io.Closeable;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
@@ -64,7 +61,7 @@ public class LocalUriFetcherTest {
     final Closeable closeable = mock(Closeable.class);
 
     public TestLocalUriFetcher(Context context, Uri uri) {
-      super(context, uri);
+      super(context.getContentResolver(), uri);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
-import android.annotation.TargetApi;
+import static com.bumptech.glide.gifdecoder.GifDecoder.TOTAL_ITERATION_COUNT_FOREVER;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -11,14 +12,13 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
+import android.support.annotation.VisibleForTesting;
 import android.view.Gravity;
-
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
-
 import java.nio.ByteBuffer;
 
 /**
@@ -58,11 +58,11 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    */
   private boolean isVisible = true;
   /**
-   * The number of times we've looped over all the frames in the gif.
+   * The number of times we've looped over all the frames in the GIF.
    */
   private int loopCount;
   /**
-   * The number of times to loop through the gif animation.
+   * The number of times to loop through the GIF animation.
    */
   private int maxLoopCount = LOOP_FOREVER;
 
@@ -87,25 +87,33 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    *                            height of the view or
    *                            {@link com.bumptech.glide.request.target.Target}
    *                            this drawable is being loaded into).
-   * @param gifDecoder          The decoder to use to decode gif data.
-   * @param firstFrame          The decoded and transformed first frame of this gif.
+   * @param gifDecoder          The decoder to use to decode GIF data.
+   * @param firstFrame          The decoded and transformed first frame of this GIF.
    * @see #setFrameTransformation(com.bumptech.glide.load.Transformation, android.graphics.Bitmap)
    */
   public GifDrawable(Context context, GifDecoder gifDecoder, BitmapPool bitmapPool,
       Transformation<Bitmap> frameTransformation, int targetFrameWidth, int targetFrameHeight,
       Bitmap firstFrame) {
-    this(new GifState(context, bitmapPool,
-        new GifFrameLoader(context, gifDecoder, targetFrameWidth, targetFrameHeight,
-            frameTransformation, firstFrame)));
+    this(
+        new GifState(
+            bitmapPool,
+            new GifFrameLoader(
+                // TODO(b/27524013): Factor out this call to Glide.get()
+                Glide.get(context),
+                gifDecoder,
+                targetFrameWidth,
+                targetFrameHeight,
+                frameTransformation,
+                firstFrame)));
   }
 
   GifDrawable(GifState state) {
     this.state = Preconditions.checkNotNull(state);
   }
 
-  // Visible for testing.
-  GifDrawable(Context context, GifFrameLoader frameLoader, BitmapPool bitmapPool, Paint paint) {
-    this(new GifState(context, bitmapPool, frameLoader));
+  @VisibleForTesting
+  GifDrawable(GifFrameLoader frameLoader, BitmapPool bitmapPool, Paint paint) {
+    this(new GifState(bitmapPool, frameLoader));
     this.paint = paint;
   }
 
@@ -134,8 +142,25 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     return state.frameLoader.getFrameCount();
   }
 
+  /**
+   * Returns the current frame index in the range 0..{@link #getFrameCount()} - 1, or -1 if no frame
+   * is displayed.
+   */
+  public int getFrameIndex() {
+    return state.frameLoader.getCurrentIndex();
+  }
+
   private void resetLoopCount() {
     loopCount = 0;
+  }
+
+  /**
+   * Starts the animation from the first frame. Can only be called while animation is not running.
+   */
+  public void startFromFirstFrame() {
+    Preconditions.checkArgument(!isRunning, "You cannot restart a currently running animation.");
+    state.frameLoader.setNextStartFromFirstFrame();
+    start();
   }
 
   @Override
@@ -154,6 +179,8 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   }
 
   private void startRunning() {
+    Preconditions.checkArgument(!isRecycled, "You cannot start a recycled Drawable. Ensure that"
+        + "you clear any references to the Drawable when clearing the corresponding request.");
     // If we have only a single frame, we don't want to decode it endlessly.
     if (state.frameLoader.getFrameCount() == 1) {
       invalidateSelf();
@@ -171,6 +198,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
   @Override
   public boolean setVisible(boolean visible, boolean restart) {
+    Preconditions.checkArgument(!isRecycled, "Cannot change the visibility of a recycled resource."
+        + " Ensure that you unset the Drawable from your View before changing the View's"
+        + " visibility.");
     isVisible = visible;
     if (!visible) {
       stopRunning();
@@ -252,10 +282,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     return PixelFormat.TRANSPARENT;
   }
 
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   @Override
-  public void onFrameReady(int frameIndex) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB && getCallback() == null) {
+  public void onFrameReady() {
+    if (getCallback() == null) {
       stop();
       invalidateSelf();
       return;
@@ -263,7 +292,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
     invalidateSelf();
 
-    if (frameIndex == state.frameLoader.getFrameCount() - 1) {
+    if (getFrameIndex() == getFrameCount() - 1) {
       loopCount++;
     }
 
@@ -297,7 +326,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     }
 
     if (loopCount == LOOP_INTRINSIC) {
-      maxLoopCount = state.frameLoader.getLoopCount();
+      int intrinsicCount = state.frameLoader.getLoopCount();
+      maxLoopCount =
+          (intrinsicCount == TOTAL_ITERATION_COUNT_FOREVER) ? LOOP_FOREVER : intrinsicCount;
     } else {
       maxLoopCount = loopCount;
     }
@@ -305,13 +336,11 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
   static class GifState extends ConstantState {
     static final int GRAVITY = Gravity.FILL;
-    final Context context;
     final BitmapPool bitmapPool;
     final GifFrameLoader frameLoader;
 
-    public GifState(Context context, BitmapPool bitmapPool, GifFrameLoader frameLoader) {
+    public GifState(BitmapPool bitmapPool, GifFrameLoader frameLoader) {
       this.bitmapPool = bitmapPool;
-      this.context = context.getApplicationContext();
       this.frameLoader = frameLoader;
     }
 

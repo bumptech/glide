@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -26,10 +27,10 @@ interface DataFetcherGenerator {
      * @param sourceKey The id of the loaded data.
      * @param data The loaded data, or null if the load failed.
      * @param fetcher The data fetcher we attempted to load from.
-     * @param dataSource The data souce we were loading from.
+     * @param dataSource The data source we were loading from.
      * @param attemptedKey The key we were loading data from (may be an alternate).
      */
-    void onDataFetcherReady(Key sourceKey, Object data, DataFetcher<?> fetcher,
+    void onDataFetcherReady(Key sourceKey, @Nullable Object data, DataFetcher<?> fetcher,
         DataSource dataSource, Key attemptedKey);
 
     /**

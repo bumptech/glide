@@ -11,11 +11,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.net.Uri;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +42,7 @@ public class ResourceLoaderTest {
     MockitoAnnotations.initMocks(this);
     options = new Options();
 
-    loader = new ResourceLoader<>(RuntimeEnvironment.application, uriLoader);
+    loader = new ResourceLoader<>(RuntimeEnvironment.application.getResources(), uriLoader);
   }
 
   @Test

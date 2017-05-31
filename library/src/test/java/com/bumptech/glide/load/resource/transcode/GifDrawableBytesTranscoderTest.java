@@ -1,18 +1,17 @@
 package com.bumptech.glide.load.resource.transcode;
 
+import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-
+import java.nio.ByteBuffer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import java.nio.ByteBuffer;
 
 @RunWith(JUnit4.class)
 public class GifDrawableBytesTranscoderTest {
@@ -20,11 +19,10 @@ public class GifDrawableBytesTranscoderTest {
   private GifDrawable gifDrawable;
   private Resource<GifDrawable> resource;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
     gifDrawable = mock(GifDrawable.class);
-    resource = mock(Resource.class);
+    resource = mockResource();
     when(resource.get()).thenReturn(gifDrawable);
     transcoder = new GifDrawableBytesTranscoder();
   }

@@ -21,7 +21,6 @@ public enum DataSource {
    * Indicates data was retrieved from modified content in the on device cache.
    */
   RESOURCE_DISK_CACHE,
-
   /**
    * Indicates data was retrieved from the in memory cache.
    */

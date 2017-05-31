@@ -1,7 +1,6 @@
 package com.bumptech.glide.util;
 
 import android.text.TextUtils;
-
 import java.util.Collection;
 
 /**

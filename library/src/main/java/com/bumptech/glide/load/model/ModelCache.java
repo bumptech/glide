@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.Nullable;
 import com.bumptech.glide.util.LruCache;
 import com.bumptech.glide.util.Util;
-
 import java.util.Queue;
 
 /**
@@ -40,6 +40,7 @@ public class ModelCache<A, B> {
    * @param height The height in pixels of the view the image is being loaded into.
    * @return The cached result, or null.
    */
+  @Nullable
   public B get(A model, int width, int height) {
     ModelKey<A> key = ModelKey.get(model, width, height);
     B result = cache.get(key);
@@ -107,7 +108,7 @@ public class ModelCache<A, B> {
     @Override
     public boolean equals(Object o) {
       if (o instanceof ModelKey) {
-        ModelKey other = (ModelKey) o;
+        @SuppressWarnings("unchecked") ModelKey<A> other = (ModelKey<A>) o;
         return width == other.width && height == other.height && model.equals(other.model);
       }
       return false;
