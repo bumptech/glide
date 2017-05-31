@@ -377,9 +377,14 @@ public final class SingleRequest<R> implements Request,
       return;
     }
 
-    Drawable error = model == null ? getFallbackDrawable() : getErrorDrawable();
+    Drawable error = null;
+    if (model == null) {
+      error = getFallbackDrawable();
+    }
+    // Either the model isn't null, or there was no fallback drawable set. Either way we should show
+    // the error Drawable.
     if (error == null) {
-      error = getPlaceholderDrawable();
+      error = getErrorDrawable();
     }
     target.onLoadFailed(error);
   }
@@ -537,8 +542,8 @@ public final class SingleRequest<R> implements Request,
     loadStatus = null;
     status = Status.FAILED;
     //TODO: what if this is a thumbnail request?
-    if (requestListener == null || !requestListener.onLoadFailed(e, model, target,
-        isFirstReadyResource())) {
+    if (requestListener == null
+        || !requestListener.onLoadFailed(e, model, target, isFirstReadyResource())) {
       setErrorPlaceholder();
     }
   }

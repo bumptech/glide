@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
+import static com.bumptech.glide.request.RequestOptions.errorOf;
 import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.anyInt;
@@ -486,7 +487,7 @@ public class GlideTest {
     Drawable drawable = new ColorDrawable(Color.RED);
     requestManager
         .load(null)
-        .apply(placeholderOf(drawable))
+        .apply(errorOf(drawable))
         .into(target);
 
     verify(target).onLoadFailed(eq(drawable));

@@ -354,7 +354,7 @@ public class SingleRequestTest {
 
     MockTarget target = new MockTarget();
 
-    harness.placeholderDrawable = placeholder;
+    harness.errorDrawable = placeholder;
     harness.target = target;
     harness.model = null;
     SingleRequest<List> request = harness.getRequest();
