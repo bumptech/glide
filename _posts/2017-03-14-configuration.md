@@ -61,7 +61,8 @@ annotationProcessor 'com.github.bumptech.glide:compiler:1.0.0-SNAPSHOT'
 
 Finally, you should keep AppGlideModule implementations in your ``proguard.cfg``:
 ```
--keep public class * extends com.bumptech.glide.AppGlideModule
+-keep public class * extends com.bumptech.glide.module.AppGlideModule
+-keep class com.bumptech.glide.GeneratedAppGlideModuleImpl
 ```
 
 ### Application Options
