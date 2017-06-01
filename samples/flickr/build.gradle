@@ -1,4 +1,15 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.jakewharton.hugo:hugo-plugin:1.2.1'
+    }
+}
+
 apply plugin: 'com.android.application'
+apply plugin: 'com.jakewharton.hugo'
 
 dependencies {
     compile project(':library')
@@ -6,7 +17,7 @@ dependencies {
         transitive = false
     }
     annotationProcessor project(':annotation:compiler')
-
+    compile "com.facebook.conceal:conceal:${CONCEAL_VERSION}"
     compile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
     compile "com.android.support:appcompat-v7:${SUPPORT_V7_VERSION}"
     compile "com.mcxiaoke.volley:library:${VOLLEY_VERSION}"
