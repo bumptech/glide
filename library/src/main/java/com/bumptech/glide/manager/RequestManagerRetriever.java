@@ -186,7 +186,8 @@ public class RequestManagerRetriever implements Handler.Callback {
       return;
     }
     for (Fragment fragment : topLevelFragments) {
-      if (fragment.getView() == null) {
+      // getFragment()s in the support FragmentManager may contain null values, see #1991.
+      if (fragment == null || fragment.getView() == null) {
         continue;
       }
       result.put(fragment.getView(), fragment);
