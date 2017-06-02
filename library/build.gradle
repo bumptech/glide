@@ -66,6 +66,9 @@ android {
 }
 
 afterEvaluate {
+    if (tasks.findByName("assembleDebug") == null) {
+        return
+    }
     task findbugs(type: FindBugs, dependsOn: assembleDebug) {
 
         description 'Run findbugs'
@@ -111,9 +114,9 @@ afterEvaluate {
 
     check.dependsOn('pmd')
 
-   task jacocoTestReport(type: JacocoReport, dependsOn: testDebugUnitTest) {
-       def coverageSourceDirs = ['src/main/java']
-       group = "Reporting"
+    task jacocoTestReport(type: JacocoReport, dependsOn: testDebugUnitTest) {
+        def coverageSourceDirs = ['src/main/java']
+        group = "Reporting"
         description = "Generate Jacoco coverage reports"
 
         classDirectories = fileTree(
