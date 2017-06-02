@@ -3,6 +3,7 @@ package com.bumptech.glide.integration.okhttp;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.HttpException;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
@@ -57,10 +58,10 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
         if (response.isSuccessful()) {
           long contentLength = responseBody.contentLength();
           stream = ContentLengthInputStream.obtain(responseBody.byteStream(), contentLength);
-        } else if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "OkHttp got error response: " + response.code() + ", " + response.message());
+          callback.onDataReady(stream);
+        } else {
+          callback.onLoadFailed(new HttpException(response.message(), response.code()));
         }
-        callback.onDataReady(stream);
       }
     });
   }
