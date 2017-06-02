@@ -188,7 +188,7 @@ public final class Downsampler {
       DecodeFormat decodeFormat, int requestedWidth, int requestedHeight,
       boolean fixBitmapToRequestedDimensions, DecodeCallbacks callbacks) throws IOException {
 
-    int[] sourceDimensions = getDimensions(is, options, callbacks);
+    int[] sourceDimensions = getDimensions(is, options, callbacks, bitmapPool);
     int sourceWidth = sourceDimensions[0];
     int sourceHeight = sourceDimensions[1];
     String sourceMimeType = options.outMimeType;
@@ -240,7 +240,7 @@ public final class Downsampler {
         setInBitmap(options, bitmapPool, expectedWidth, expectedHeight);
       }
     }
-    Bitmap downsampled = decodeStream(is, options, callbacks);
+    Bitmap downsampled = decodeStream(is, options, callbacks, bitmapPool);
     callbacks.onDecodeComplete(bitmapPool, downsampled);
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -394,15 +394,15 @@ public final class Downsampler {
    * @return an array containing the dimensions of the image in the form {width, height}.
    */
   private static int[] getDimensions(InputStream is, BitmapFactory.Options options,
-      DecodeCallbacks decodeCallbacks) throws IOException {
+      DecodeCallbacks decodeCallbacks, BitmapPool bitmapPool) throws IOException {
     options.inJustDecodeBounds = true;
-    decodeStream(is, options, decodeCallbacks);
+    decodeStream(is, options, decodeCallbacks, bitmapPool);
     options.inJustDecodeBounds = false;
     return new int[] { options.outWidth, options.outHeight };
   }
 
   private static Bitmap decodeStream(InputStream is, BitmapFactory.Options options,
-      DecodeCallbacks callbacks) throws IOException {
+      DecodeCallbacks callbacks, BitmapPool bitmapPool) throws IOException {
     if (options.inJustDecodeBounds) {
       is.mark(MARK_POSITION);
     } else {
@@ -423,7 +423,23 @@ public final class Downsampler {
     try {
       result = BitmapFactory.decodeStream(is, null, options);
     } catch (IllegalArgumentException e) {
-      throw newIoExceptionForInBitmapAssertion(e, sourceWidth, sourceHeight, outMimeType, options);
+      IOException bitmapAssertionException =
+          newIoExceptionForInBitmapAssertion(e, sourceWidth, sourceHeight, outMimeType, options);
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to decode with inBitmap, trying again without Bitmap re-use",
+            bitmapAssertionException);
+      }
+      if (options.inBitmap != null) {
+        try {
+          is.reset();
+          bitmapPool.put(options.inBitmap);
+          options.inBitmap = null;
+          return decodeStream(is, options, callbacks, bitmapPool);
+        } catch (IOException resetException) {
+          throw bitmapAssertionException;
+        }
+      }
+      throw bitmapAssertionException;
     } finally {
       TransformationUtils.getBitmapDrawableLock().unlock();
     }
