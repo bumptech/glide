@@ -10,7 +10,9 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 
 /**
- * A simple model loader for fetching media over http/https using OkHttp.
+ * <p>A simple model loader for fetching media over http/https using OkHttp.</p>
+ * <p>Use {@link Factory#setInternalClient(Call.Factory)} to set the {@link OkHttpClient}
+ * instance.</p>
  */
 public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
@@ -38,7 +40,11 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     private static volatile Call.Factory internalClient;
     private Call.Factory client;
 
-    private static Call.Factory getInternalClient() {
+    public static void setInternalClient(Call.Factory okHttpClient) {
+      internalClient = okHttpClient;
+    }
+
+    public static Call.Factory getInternalClient() {
       if (internalClient == null) {
         synchronized (Factory.class) {
           if (internalClient == null) {
