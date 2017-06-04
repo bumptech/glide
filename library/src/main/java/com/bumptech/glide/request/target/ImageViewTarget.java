@@ -30,7 +30,8 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
   @Override
   @Nullable
   public Drawable getCurrentDrawable() {
-    return view.getDrawable();
+    ImageView view = viewReference.get();
+    return view != null ? view.getDrawable() : null;
   }
 
   /**
@@ -41,7 +42,10 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
    */
   @Override
   public void setDrawable(Drawable drawable) {
-    view.setImageDrawable(drawable);
+    ImageView view = viewReference.get();
+    if (view != null) {
+      view.setImageDrawable(drawable);
+    }
   }
 
   /**

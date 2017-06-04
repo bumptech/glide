@@ -15,6 +15,7 @@ public class BitmapThumbnailImageViewTarget extends ThumbnailImageViewTarget<Bit
 
   @Override
   protected Drawable getDrawable(Bitmap resource) {
-    return new BitmapDrawable(view.getResources(), resource);
+    ImageView view = viewReference.get();
+    return view != null ? new BitmapDrawable(view.getResources(), resource) : null;
   }
 }

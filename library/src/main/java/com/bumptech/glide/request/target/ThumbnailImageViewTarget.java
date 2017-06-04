@@ -28,6 +28,11 @@ public abstract class ThumbnailImageViewTarget<T> extends ImageViewTarget<T> {
 
   @Override
   protected void setResource(@Nullable T resource) {
+    ImageView view = viewReference.get();
+    if (view == null) {
+      return;
+    }
+
     ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
     Drawable result = getDrawable(resource);
     if (layoutParams != null && layoutParams.width > 0 && layoutParams.height > 0) {

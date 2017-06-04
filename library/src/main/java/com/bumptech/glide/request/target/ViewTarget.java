@@ -39,11 +39,11 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   private static boolean isTagUsedAtLeastOnce = false;
   @Nullable private static Integer tagId = null;
 
-  protected final T view;
+  protected final WeakReference<T> viewReference;
   private final SizeDeterminer sizeDeterminer;
 
   public ViewTarget(T view) {
-    this.view = Preconditions.checkNotNull(view);
+    this.viewReference = new WeakReference<T>(Preconditions.checkNotNull(view));
     sizeDeterminer = new SizeDeterminer(view);
   }
 
@@ -51,7 +51,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * Returns the wrapped {@link android.view.View}.
    */
   public T getView() {
-    return view;
+    return viewReference.get();
   }
 
   /**
@@ -118,10 +118,20 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
   @Override
   public String toString() {
-    return "Target for: " + view;
+    View view = viewReference.get();
+    if (view == null) {
+      return "Target for an already destroyed view.";
+    } else {
+      return "Target for: " + view;
+    }
   }
 
   private void setTag(@Nullable Object tag) {
+    View view = viewReference.get();
+    if (view == null) {
+      return;
+    }
+
     if (tagId == null) {
       isTagUsedAtLeastOnce = true;
       view.setTag(tag);
@@ -132,6 +142,10 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
   @Nullable
   private Object getTag() {
+    View view = viewReference.get();
+    if (view == null) {
+      return null;
+    }
     if (tagId == null) {
       return view.getTag();
     } else {
