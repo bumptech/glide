@@ -32,8 +32,8 @@ Or:
 
 ```java
 GlideApp.with(fragment)
-  .placeholder(new ColorDrawable(Color.BLACK))
   .load(url)
+  .placeholder(new ColorDrawable(Color.BLACK))
   .into(view);
 ```
 
