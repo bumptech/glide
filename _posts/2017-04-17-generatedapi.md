@@ -39,9 +39,9 @@ The API is generated in the same package as the [``AppGlideModule``][4] implemen
 
 ```java
 GlideApp.with(fragment)
+   .load(myUrl)
    .placeholder(R.drawable.placeholder)
    .fitCenter()
-   .load(myUrl)
    .into(imageView);
 ```
 
