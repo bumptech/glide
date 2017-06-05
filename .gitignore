@@ -8,7 +8,7 @@ proguard-project.txt
 **/.gradle
 **/.settings
 **/build
-
+.idea
 # gh-pages
 doc/**
 _site/*
