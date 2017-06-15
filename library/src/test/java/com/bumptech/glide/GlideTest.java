@@ -524,6 +524,18 @@ public class GlideTest {
   }
 
   @Test
+  public void testNullModelResolvesToUsePlaceholder() {
+    Drawable placeholder = new ColorDrawable(Color.GREEN);
+
+    requestManager
+        .load(null)
+        .apply(placeholderOf(placeholder))
+        .into(target);
+
+    verify(target).onLoadFailed(eq(placeholder));
+  }
+
+  @Test
   public void testByteData() {
     byte[] data = new byte[] { 1, 2, 3, 4, 5, 6 };
     requestManager.load(data).into(target);

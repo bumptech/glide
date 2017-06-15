@@ -381,10 +381,13 @@ public final class SingleRequest<R> implements Request,
     if (model == null) {
       error = getFallbackDrawable();
     }
-    // Either the model isn't null, or there was no fallback drawable set. Either way we should show
-    // the error Drawable.
+    // Either the model isn't null, or there was no fallback drawable set.
     if (error == null) {
       error = getErrorDrawable();
+    }
+    // The model isn't null, no fallback drawable was set or no error drawable was set.
+    if (error == null) {
+      error = getPlaceholderDrawable();
     }
     target.onLoadFailed(error);
   }
