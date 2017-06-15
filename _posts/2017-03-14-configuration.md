@@ -31,7 +31,7 @@ public final class OkHttpLibraryGlideModule extends LibraryGlideModule {
 
 Using the [``@GlideModule``][5] annotation requires a dependency on Glide's annotations:
 ```groovy
-annotationProcessor 'com.github.bumptech.glide:annotation:1.0.0-SNAPSHOT'
+annotationProcessor 'com.github.bumptech.glide:annotation:4.0.0-RC0'
 ```
 
 #### Applications
@@ -55,8 +55,8 @@ public class FlickrGlideModule extends AppGlideModule {
 
 Including Glide's annotation processor requires dependencies on Glide's annotations and the annotation processor:
 ```groovy
-annotationProcessor 'com.github.bumptech.glide:annotation:1.0.0-SNAPSHOT'
-annotationProcessor 'com.github.bumptech.glide:compiler:1.0.0-SNAPSHOT'
+annotationProcessor 'com.github.bumptech.glide:annotation:4.0.0-RC0'
+annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC0'
 ```
 
 Finally, you should keep AppGlideModule implementations in your ``proguard.cfg``:
