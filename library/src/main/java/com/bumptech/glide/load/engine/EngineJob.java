@@ -148,14 +148,9 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
     isCancelled = true;
     decodeJob.cancel();
-    boolean isPendingJobRemoved = diskCacheExecutor.remove(decodeJob)
-        || sourceExecutor.remove(decodeJob)
-        || sourceUnlimitedExecutor.remove(decodeJob);
+    // TODO: Consider trying to remove jobs that have never been run before from executor queues.
+    // Removing jobs that have run before can break things. See #1996.
     listener.onEngineJobCancelled(this, key);
-
-    if (isPendingJobRemoved) {
-      release(true /*isRemovedFromQueue*/);
-    }
   }
 
   // Exposed for testing.
@@ -239,11 +234,9 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
   @Override
   public void reschedule(DecodeJob<?> job) {
-    if (isCancelled) {
-      MAIN_THREAD_HANDLER.obtainMessage(MSG_CANCELLED, this).sendToTarget();
-    } else {
-      getActiveSourceExecutor().execute(job);
-    }
+    // Even if the job is cancelled here, it still needs to be scheduled so that it can clean itself
+    // up.
+    getActiveSourceExecutor().execute(job);
   }
 
   @Synthetic
