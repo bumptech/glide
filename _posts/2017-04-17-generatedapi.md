@@ -21,22 +21,38 @@ Although both of these tasks can be accomplished by hand by writing custom subcl
 
 ### Getting Started
 
-To trigger the API generation, include a [``AppGlideModule``][4] implementation in your application:
+To use the generated API, you need to perform two steps:
 
-```java
-package com.example.myapp;
+1. Add a dependency on Glide's annotation processor:
 
-import com.bumptech.glide.annotation.GlideModule;
-import com.bumptech.glide.module.AppGlideModule;
+   ```groovy
+   repositories {
+     mavenCentral()
+   }
+   
+   compile 'com.github.bumptech.glide:compiler:4.0.0-RC0'
+   ```
+   
+   See the [download and setup page][12] for more detail.
 
-@GlideModule
-public final class MyAppGlideModule extends AppGlideModule {}
-```
+2. Include a [``AppGlideModule``][4] implementation in your application:
+ 
+   ```java
+   package com.example.myapp;
+   
+   import com.bumptech.glide.annotation.GlideModule;
+   import com.bumptech.glide.module.AppGlideModule;
+   
+   @GlideModule
+   public final class MyAppGlideModule extends AppGlideModule {}
+   ```
+        
+    [``AppGlideModule``][4] implementations must always be annotated with [``@GlideModule``][5]. If the annotation is not present, the module will not be discovered and you will see a warning in your logs with the ``Glide`` log tag that indicates that the module couldn't be found.
 
-Note that [``AppGlideModule``][4] implementations must always be annotated with [``@GlideModule``][5]. If the annotation is not present, the module will not be discovered and you will see a warning in your logs with the ``Glide`` log tag that indicates that the module couldn't be found.
-
+### Using the generated API
+ 
 The API is generated in the same package as the [``AppGlideModule``][4] implementation provided by the application and is named ``GlideApp`` by default. Applications can use the API by starting all loads with ``GlideApp.with()`` instead of ``Glide.with()``:
-
+ 
 ```java
 GlideApp.with(fragment)
    .load(myUrl)
@@ -44,9 +60,9 @@ GlideApp.with(fragment)
    .fitCenter()
    .into(imageView);
 ```
-
-Note that unlike ``Glide.with()`` options like ``fitCenter()`` and ``placeholder()`` are available directly on the builder and don't need to be passed in as a separate [``RequestOptions``][3] object.
-
+ 
+Unlike ``Glide.with()`` options like ``fitCenter()`` and ``placeholder()`` are available directly on the builder and don't need to be passed in as a separate [``RequestOptions``][3] object.
+    
 ### GlideExtension
 
 Glide's generated API can be extended by both Applications and Libraries. Extensions use annotated static methods to add new options, modifying existing options, or add additional types.
@@ -186,3 +202,4 @@ Methods annotated with ``GlideType`` must take a [``RequestBuilder<T>``][2] as t
 [9]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html
 [10]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/Option.html
 [11]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html
+[12]: {{ site.url }}/glide/doc/download-setup.html
