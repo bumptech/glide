@@ -76,6 +76,14 @@ final class GlideGenerator {
   private static final String REQUEST_MANAGER_QUALIFIED_NAME =
       "com.bumptech.glide.RequestManager";
 
+  private static final String VISIBLE_FOR_TESTING_QUALIFIED_NAME =
+      "android.support.annotation.VisibleForTesting";
+
+  private static final String SUPPRESS_LINT_PACKAGE_NAME =
+      "android.annotation";
+  private static final String SUPPRESS_LINT_CLASS_NAME =
+      "SuppressLint";
+
   private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
   private final TypeElement glideType;
@@ -147,9 +155,22 @@ final class GlideGenerator {
                   }
             }));
 
-
+    TypeElement visibleForTestingType =
+        processingEnv
+            .getElementUtils()
+            .getTypeElement(VISIBLE_FOR_TESTING_QUALIFIED_NAME);
     for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
       builder.addAnnotation(AnnotationSpec.get(mirror));
+
+      // Suppress a lint warning if we're overriding a VisibleForTesting method.
+      // See #1977.
+      if (mirror.getAnnotationType().asElement().equals(visibleForTestingType)) {
+        builder.addAnnotation(
+            AnnotationSpec.builder(
+                ClassName.get(SUPPRESS_LINT_PACKAGE_NAME, SUPPRESS_LINT_CLASS_NAME))
+                .addMember("value", "$S", "VisibleForTests")
+                .build());
+      }
     }
 
     boolean returnsValue = element != null;
