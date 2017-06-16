@@ -122,19 +122,35 @@ afterEvaluate { project ->
             it.buildType.name.equalsIgnoreCase('release')
         }
 
-        task androidJavadocs(type: Javadoc, dependsOn: compileReleaseJavaWithJavac) {
+        def getAndroidCompileSdkVersion = project.android.compileSdkVersion
+
+        def getAndroidSdkDirectory = project.android.sdkDirectory
+
+        def getAndroidJar = "${getAndroidSdkDirectory}/platforms/${getAndroidCompileSdkVersion}/android.jar"
+
+        def getSupportJar = "${getAndroidSdkDirectory}/extras/android/support/v4/android-support-v4.jar"
+
+        task androidJavadocs(type: Javadoc, dependsOn: assembleRelease) {
             source = releaseVariants.collect { it.javaCompile.source }
-            classpath = files(releaseVariants.collect { files(it.javaCompile.classpath.files,
-                    project.android.bootClasspath) })
+            classpath = files(releaseVariants.collect {
+                files(it.javaCompile.classpath.files, getAndroidJar, getSupportJar)
+            })
+            classpath += files("${project.projectDir}/build/intermediates/classes/release")
 
             options {
-                links('http://docs.oracle.com/javase/7/docs/api/')
-                linksOffline('http://d.android.com/reference', "${android.sdkDirectory}/docs/reference")
+                links("http://docs.oracle.com/javase/7/docs/api/")
+                linksOffline("http://d.android.com/reference",
+                    "${getAndroidSdkDirectory}/docs/reference")
             }
 
             exclude '**/BuildConfig.java'
             exclude '**/R.java'
         }
+
+        def cleanJavadocTask = task("cleanJavadocTask", type: Delete) {
+            delete androidJavadocs.destinationDir
+        } as Task
+        project.clean.dependsOn(cleanJavadocTask)
 
         task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
             classifier = 'javadoc'
