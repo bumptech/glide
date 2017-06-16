@@ -108,7 +108,7 @@ final class RequestManagerGenerator {
             AnnotationSpec.builder(SuppressWarnings.class)
                 .addMember("value", "$S", "deprecation")
                 .build())
-         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+         .addModifiers(Modifier.PUBLIC)
          .addMethod(generateAsMethod(generatedCodePackageName, requestBuilder))
          .addMethod(generateCallSuperConstructor())
          .addMethods(generateAdditionalRequestManagerMethods(glideExtensions))
