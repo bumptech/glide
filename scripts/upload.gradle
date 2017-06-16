@@ -152,6 +152,10 @@ afterEvaluate { project ->
             from compileReleaseJavaWithJavac.destinationDir
             exclude '**/R.class'
             exclude '**/BuildConfig.class'
+            exclude '**/R$attr.class'
+            exclude '**/R$dimen.class'
+            exclude '**/R$id.class'
+            exclude '**/R$styleable.class'
             baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
         }
 
