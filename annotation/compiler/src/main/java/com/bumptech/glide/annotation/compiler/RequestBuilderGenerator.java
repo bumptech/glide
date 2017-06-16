@@ -162,7 +162,7 @@ final class RequestBuilderGenerator {
                 .addMember("value", "$S", "unused")
                 .addMember("value", "$S", "deprecation")
                 .build())
-        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+        .addModifiers(Modifier.PUBLIC)
         .addTypeVariable(transcodeTypeName)
         .superclass(requestBuilderOfTranscodeType)
         .addMethods(generateConstructors())
