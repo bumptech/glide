@@ -231,17 +231,6 @@ public class RequestOptions implements Cloneable {
 
   /**
    * Returns a {@link RequestOptions} object with {@link #transform(Transformation)} set.
-   *
-   * @deprecated Use {@link #bitmapTransform(Transformation)}.
-   */
-  @Deprecated
-  public static RequestOptions bitmapTransform(
-      Context context, @NonNull Transformation<Bitmap> transformation) {
-    return bitmapTransform(transformation);
-  }
-
-  /**
-   * Returns a {@link RequestOptions} object with {@link #transform(Transformation)} set.
    */
   public static RequestOptions bitmapTransform(@NonNull Transformation<Bitmap> transformation) {
     return new RequestOptions().transform(transformation);
