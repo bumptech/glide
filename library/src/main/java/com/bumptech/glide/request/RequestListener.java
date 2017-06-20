@@ -1,5 +1,6 @@
 package com.bumptech.glide.request;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -13,9 +14,10 @@ import com.bumptech.glide.request.target.Target;
 public interface RequestListener<R> {
 
   /**
-   * Called when an exception occurs during a load. Will only be called if we currently want to
-   * display an image for the given model in the given target. It is recommended to create a single
-   * instance per activity/fragment rather than instantiate a new object for each call to {@code
+   * Called when an exception occurs during a load, immediately before
+   * {@link Target#onLoadFailed(Drawable)}. Will only be called if we currently want to display an
+   * image for the given model in the given target. It is recommended to create a single instance
+   * per activity/fragment rather than instantiate a new object for each call to {@code
    * Glide.load()} to avoid object churn.
    *
    * <p> It is safe to reload this or a different model or change what is displayed in the target at
@@ -31,7 +33,7 @@ public interface RequestListener<R> {
    * </p>
    *
    * <p> Note - if you want to reload this or any other model after an exception, you will need to
-   * include all relevant builder calls (like centerCrop, placeholder etc). </p>
+   * include all relevant builder calls (like centerCrop, placeholder etc).
    *
    * @param e               The maybe {@code null} exception containing information about why the
    *                        request failed.
@@ -45,7 +47,7 @@ public interface RequestListener<R> {
       boolean isFirstResource);
 
   /**
-   * Called when a load completes successfully, immediately after {@link
+   * Called when a load completes successfully, immediately before {@link
    * Target#onResourceReady(Object, com.bumptech.glide.request.transition.Transition)}.
    *
    * @param resource          The resource that was loaded for the target.
