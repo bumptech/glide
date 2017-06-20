@@ -53,7 +53,7 @@ public class RequestManagerFragment extends Fragment {
         this.requestManager = requestManager;
     }
 
-    ActivityFragmentLifecycle getLifecycle() {
+    ActivityFragmentLifecycle getGlideLifecycle() {
         return lifecycle;
     }
 
