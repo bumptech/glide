@@ -13,6 +13,8 @@ import com.bumptech.glide.load.engine.Resource;
  * obfuscation) is an easy way to implement
  * {@link #updateDiskCacheKey(java.security.MessageDigest)}} correctly.
  *
+ * <p>Implementations <em>must</em> implement {@link #equals(Object)} and {@link #hashCode()}.
+ *
  * @param <T> The type of the resource being transformed.
  */
 public interface Transformation<T> extends Key {
@@ -52,4 +54,18 @@ public interface Transformation<T> extends Key {
    * @return The transformed resource.
    */
   Resource<T> transform(Context context, Resource<T> resource, int outWidth, int outHeight);
+
+  /**
+   * For caching to work correctly, implementations <em>must</em> implement this method and
+   * {@link #hashCode()}.
+   */
+  @Override
+  boolean equals(Object o);
+
+  /**
+   * For caching to work correctly, implementations <em>must</em> implement this method and
+   * {@link #equals(Object)}.
+   */
+  @Override
+  int hashCode();
 }
