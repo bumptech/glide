@@ -212,7 +212,7 @@ public class RequestManagerFragmentTest {
 
     @Override
     public ActivityFragmentLifecycle getFragmentLifecycle() {
-      return fragment.getLifecycle();
+      return fragment.getGlideLifecycle();
     }
 
     @Override
@@ -270,7 +270,7 @@ public class RequestManagerFragmentTest {
 
     @Override
     public ActivityFragmentLifecycle getFragmentLifecycle() {
-      return supportFragment.getLifecycle();
+      return supportFragment.getGlideLifecycle();
     }
 
     @Override
