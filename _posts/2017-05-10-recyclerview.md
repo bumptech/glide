@@ -15,7 +15,7 @@ The RecyclerView library adds a class that will automatically load images just a
 
 **Gradle Dependency:**
 ```groovy
-compile ("com.github.bumptech.glide:recyclerview-integration:4.0.0-RC0") {
+compile ("com.github.bumptech.glide:recyclerview-integration:4.0.0-RC1") {
   // Excludes the support library because it's already included by Glide.
   transitive = false
 }
