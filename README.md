@@ -28,9 +28,9 @@ repositories {
 }
 
 dependencies {
-  compile 'com.github.bumptech.glide:glide:4.0.0-RC0'
+  compile 'com.github.bumptech.glide:glide:4.0.0-RC1'
   compile 'com.android.support:support-v4:25.3.1'
-  annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC0'
+  annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
 }
 ```
 
@@ -40,7 +40,7 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.0.0-RC0</version>
+  <version>4.0.0-RC1</version>
 </dependency>
 <dependency>
   <groupId>com.google.android</groupId>
@@ -50,7 +50,7 @@ Or Maven:
 <dependency>
   <groupdId>com.github.bumptech.glide</groupId>
   <artifactId>compiler</artifactId>
-  <version>4.0.0-RC0</version>
+  <version>4.0.0-RC1</version>
   <optional>true</optional>
 </dependency>
 ```
