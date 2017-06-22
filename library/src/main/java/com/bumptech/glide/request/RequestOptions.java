@@ -742,23 +742,6 @@ public class RequestOptions implements Cloneable {
    * Applies {@link CenterCrop} to all default types and
    * throws an exception if asked to transform an unknown type.
    *
-   * <p>this will override previous calls to {@link #dontTransform()}.
-   *
-   * @param context any {@link Context}.
-   * @see #transform(Class, Transformation)
-   * @see #optionalCenterCrop()
-   *
-   * @deprecated Use {@link #centerCrop()}.
-   */
-  @Deprecated
-  public RequestOptions centerCrop(@SuppressWarnings("unused") Context context) {
-    return centerCrop();
-  }
-
-  /**
-   * Applies {@link CenterCrop} to all default types and
-   * throws an exception if asked to transform an unknown type.
-   *
    * <p>this will override previous calls to {@link #dontTransform()} ()}.
    *
    * @see #transform(Class, Transformation)
