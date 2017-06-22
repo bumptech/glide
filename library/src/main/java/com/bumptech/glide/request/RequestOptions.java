@@ -783,23 +783,6 @@ public class RequestOptions implements Cloneable {
    *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
-   * @param context Any {@link Context}.
-   * @see #optionalTransform(Class, Transformation)
-   * @see #centerInside()
-   *
-   * @deprecated Use {@link #optionalCenterInside()}
-   */
-  @Deprecated
-  public RequestOptions optionalCenterInside(@SuppressWarnings("unused") Context context) {
-    return optionalCenterInside();
-  }
-
-  /**
-   * Applies {@link com.bumptech.glide.load.resource.bitmap.CenterInside} to all default types, and
-   * ignores unknown types.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()}.
-   *
    * @see #optionalTransform(Class, Transformation)
    * @see #centerInside()
    */
