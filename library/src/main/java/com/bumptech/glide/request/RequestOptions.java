@@ -1,6 +1,5 @@
 package com.bumptech.glide.request;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -821,23 +820,6 @@ public class RequestOptions implements Cloneable {
    *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
-   * @param context Any {@link Context}.
-   * @see #transform(Class, Transformation)
-   * @see #optionalCenterCrop()
-   *
-   * @deprecated Use {@link #circleCrop()}.
-   */
-  @Deprecated
-  public RequestOptions circleCrop(@SuppressWarnings("unused") Context context) {
-    return circleCrop();
-  }
-
-  /**
-   * Applies {@link CircleCrop} to all default types and throws an exception if asked to transform
-   * an unknown type.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()}.
-   *
    * @see #transform(Class, Transformation)
    * @see #optionalCenterCrop()
    */
@@ -892,26 +874,6 @@ public class RequestOptions implements Cloneable {
     isTransformationRequired = true;
     fields |= TRANSFORMATION_REQUIRED;
     return selfOrThrowIfLocked();
-  }
-
-  /**
-   * Applies the given {@link Transformation} for
-   * {@link Bitmap Bitmaps} to the default types ({@link Bitmap},
-   * {@link android.graphics.drawable.BitmapDrawable}, and
-   * {@link com.bumptech.glide.load.resource.gif.GifDrawable}) and ignores unknown types.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()}.
-   *
-   * @param context        Any {@link Context}.
-   * @param transformation Any {@link Transformation} for
-   *                       {@link Bitmap}s.
-   * @see #transform(Class, Transformation)
-   *
-   * @deprecated Use {@link #optionalTransform(Transformation)}
-   */
-  @Deprecated
-  public RequestOptions optionalTransform(Context context, Transformation<Bitmap> transformation) {
-    return optionalTransform(transformation);
   }
 
   /**
