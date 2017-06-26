@@ -92,7 +92,9 @@ To define a group of options, you might write:
 public class MyAppExtension {
   // Size of mini thumb in pixels.
   private static final int MINI_THUMB_SIZE = 100;
-   
+
+  private MyAppExtension() { } // utility class
+
   @GlideOption
   public static void miniThumb(RequestOptions options) {
     options
