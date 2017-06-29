@@ -25,7 +25,7 @@ Transformations are applied using the [RequestOptions][9] class:
 
 ```java
 RequestOptions options = new RequestOptions();
-options.centerCrop(context);
+options.centerCrop();
 
 Glide.with(fragment)
     .load(url)
@@ -40,8 +40,17 @@ import static com.bumptech.glide.request.RequestOptions.fitCenterTransform;
 
 Glide.with(fragment)
     .load(url)
-    .apply(fitCenterTransform(context))
+    .apply(fitCenterTransform())
     .into(imageView);
+```
+
+If you're using the [generated API][16] the transformation methods are inlined, so it's even easier:
+
+```java
+Glide.with(fragment)
+  .load(url)
+  .fitCenter()
+  .into(imageView);
 ```
 
 For more information on using RequestOptions, see the [Options][3] wiki page.
