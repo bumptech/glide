@@ -12,6 +12,18 @@ disqus: 1
 ### About
 [``Transitions``][1] in Glide allow you to define how Glide should transition from a placeholder to a newly loaded image or from a thumbnail to a full size image. Transitions act within the context of a single request, not across multiple requests. As a result, [``Transitions``][1] do **NOT** allow you to define an animation (like a cross fade) from one request to another request. 
 
+### Default behavior
+Images can be loaded from one of four places in Glide:
+
+1. Glide's in memory cache
+2. Glide's disk cache
+3. A source File or Uri available locally on the device
+4. A source Url or Uri available only remotely.
+
+Glide's default transitions do not run if data is loaded from Glide's in memory cache. However, Glide's default transitions do run if data is loaded from Glide's disk cache, a local source File or Uri or a remote source Url or Uri. 
+
+To change the default behavior of transitions, see the [custom transitions][20] section below.
+
 ### Specifying Transitions
 For an overview and code sample, see the [Options documentation][18].
 
@@ -34,6 +46,18 @@ Unfortunately althoug disabling cross fades is typically a better default, it ca
 
 Instead, the easiest way to cross fade across two different images loaded in two separate requests is to use [``ViewSwitcher``][2] containing two [``ImageViews``][3]. Load the first image into the result of [``getNextView()``][4]. Then load the second image into the next result of [``getNextView()``][4] and use a [``RequestListener``][5] to call [``showNext()``][6] when the second image load finishes. For better control, you can also follow the strategy outlined in the [developer documentation][7]. As with the [``ViewSwitcher``][2], only start the cross fade after the second image load finishes.
 
+### Custom Transitions
+To define a custom transition:
+
+1. Implement [``TransitionFactory``][21].
+2. Apply your custom ``TransitionFactory`` to loads with [``DrawableTransitionOptions#with``][22].
+
+
+To change the default behavior of your transition so that you can control whether or not it's applied when your image is loaded from the memory cache, disk cache or from source, 
+you can inspect the [``DataSource``][23] passed in to the [``build()``][24] method in your [``TransitionFactory``][21],  
+
+For an example, see [``DrawableCrossFadeFactory``][25].
+
 [1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/transition/Transition.html
 [2]: https://developer.android.com/reference/android/widget/ViewSwitcher.html
 [3]: https://developer.android.com/reference/android/widget/ImageView.html
@@ -53,3 +77,9 @@ Instead, the easiest way to cross fade across two different images loaded in two
 [17]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
 [18]: /glide/doc/options.html#transitionoptions
 [19]: /glide/doc/targets.html#targets-and-automatic-cancellation
+[20]: {{ site.url }}/glide/transitions#custom-transitions
+[21]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/transition/TransitionFactory.html
+[22]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html#with-com.bumptech.glide.request.transition.TransitionFactory-
+[23]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/DataSource.html
+[24]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/transition/TransitionFactory.html#build-com.bumptech.glide.load.DataSource-boolean-
+[25]: https://github.com/bumptech/glide/blob/8f22bd9b82349bf748e335b4a31e70c9383fb15a/library/src/main/java/com/bumptech/glide/request/transition/DrawableCrossFadeFactory.java#L35 
