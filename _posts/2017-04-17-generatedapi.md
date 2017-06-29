@@ -30,7 +30,7 @@ To use the generated API, you need to perform two steps:
      mavenCentral()
    }
    
-   compile 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+   annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
    ```
    
    See the [download and setup page][12] for more detail.
