@@ -46,6 +46,22 @@ Glide.with(fragment)
 
 For more information on using RequestOptions, see the [Options][3] wiki page.
 
+### Applying Multiple Transformations.
+By default, each subsequent call to [``transform()``][17] or any specific transform method (``fitCenter()``, ``centerCrop()``, ``bitmapTransform()`` etc) will replace the previous transformation.
+
+To instead apply multiple transformations to a single load, use the [``MultiTransformation``][18] class.
+
+With the [generated API][16]:
+
+```java
+Glide.with(fragment)
+  .load(url)
+  .transform(new MultiTransformation(new FitCenter(), new YourCustomTransformation())
+  .into(imageView);
+```
+
+The order in which you pass transformations to [``MultiTransformation``][18]'s constructor determines the order in which the transformations are applied.
+
 ### Automatic Transformations for ImageViews
 When you start a load into an [ImageView][7] in Glide, Glide may automatically apply either [FitCenter][2] or [CenterCrop][4], depending on the [ScaleType][8] of the view. If the scale type is ``CENTER_CROP``, Glide will automatically apply the ``CenterCrop`` transformation. If the scale type is ``FIT_CENTER`` or ``CENTER_INSIDE``, Glide will automatically apply the ``FitCenter`` transformation.
 
@@ -73,3 +89,6 @@ Glide can apply ``Bitmap`` ``Transformations`` to ``BitmapDrawable``, ``GifDrawa
 [13]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/gif/GifDrawable.html
 [14]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#transform-java.lang.Class-com.bumptech.glide.load.Transformation-
 [15]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html
+[16]: {{ site.url }}/glide/doc/generatedapi.html
+[17]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#transform-java.lang.Class-com.bumptech.glide.load.Transformation-
+[18]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/MultiTransformation.html
