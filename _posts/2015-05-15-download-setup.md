@@ -6,6 +6,8 @@ date: 2015-05-15 21:08:05
 order: 1
 disqus: 1
 ---
+* TOC
+{:toc}
 
 ### Download
 
@@ -72,8 +74,21 @@ Glide's build configuration requires features that [Jack][3] does not currently 
 #### Java 8
 There is not yet (as of 6/2017) a stable release of the Android tool chain that will allow you to use Glide with Java 8 features. If you'd like to use Java 8 and are ok with less stability, there is at least an alpha version of the android gradle plugin that supports Java 8. The alpha version of the plugin has not yet been tested with Glide. See Android's [Java 8 support page][5] for more details.
 
+#### Kotlin
+
+If you use Glide's annotations on classes implemented in Kotlin, you need to include a ``kapt`` dependency on Glide's annotation processor instead of a ``annotationProcessor`` dependency:
+
+```groovy
+dependencies {
+  kapt 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+}
+```
+
+See the [generated API][6] page for details.
+
 [1]: https://github.com/bumptech/glide/releases/download/v3.6.0/glide-3.6.0.jar
 [2]: http://developer.android.com/tools/support-library/features.html#v4
 [3]: https://source.android.com/source/jack
 [4]: https://android-developers.googleblog.com/2017/03/future-of-java-8-language-feature.html
 [5]: https://developer.android.com/studio/write/java8-support.html
+[6]: {{ site.url }}/glide/doc/generatedapi.html#kotlin

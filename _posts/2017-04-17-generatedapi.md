@@ -21,6 +21,8 @@ Although both of these tasks can be accomplished by hand by writing custom subcl
 
 ### Getting Started
 
+#### Java
+
 To use the generated API, you need to perform two steps:
 
 1. Add a dependency on Glide's annotation processor:
@@ -30,7 +32,9 @@ To use the generated API, you need to perform two steps:
      mavenCentral()
    }
    
-   annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+   dependencies {
+     annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+   }
    ```
    
    See the [download and setup page][12] for more detail.
@@ -48,6 +52,21 @@ To use the generated API, you need to perform two steps:
    ```
         
     [``AppGlideModule``][4] implementations must always be annotated with [``@GlideModule``][5]. If the annotation is not present, the module will not be discovered and you will see a warning in your logs with the ``Glide`` log tag that indicates that the module couldn't be found.
+
+#### Kotlin
+
+If you're using Kotlin you can:
+
+1. Implement all of Glide's annotated classes ([``AppGlideModule``][4], [``LibraryGlideModule``][13], and [``GlideExtension``][6]) in Java as shown above.
+2. Implement the annotated classes in Kotlin, but add a ``kapt`` dependency instead of an ``annotationProcessor`` dependency on Glide's annotation processor:
+
+   ```groovy
+   dependencies {
+     kapt 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+   }
+   ```
+
+   To use ``kapt``, see the [official documentation][14].
 
 ### Using the generated API
  
@@ -205,3 +224,5 @@ Methods annotated with ``GlideType`` must take a [``RequestBuilder<T>``][2] as t
 [10]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/Option.html
 [11]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html
 [12]: {{ site.url }}/glide/doc/download-setup.html
+[13]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
+[14]: https://kotlinlang.org/docs/reference/kapt.html
