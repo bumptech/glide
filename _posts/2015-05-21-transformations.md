@@ -49,7 +49,7 @@ Glide.with(fragment)
 If you're using the [generated API][16] the transformation methods are inlined, so it's even easier:
 
 ```java
-Glide.with(fragment)
+GlideApp.with(fragment)
   .load(url)
   .fitCenter()
   .into(imageView);
