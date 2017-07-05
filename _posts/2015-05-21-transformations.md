@@ -75,6 +75,9 @@ The order in which you pass transformations to [``MultiTransformation``][18]'s c
 
 ### Special Behavior in Glide
 
+#### Re-using Transformations
+``Transformations`` are meant to be stateless. As a result, it should always be safe to re-use a ``Transformation`` insance for multiple loads. It's usually good practice to create a ``Transformation`` once and then pass it in to multiple loads.
+
 #### Automatic Transformations for ImageViews
 When you start a load into an [ImageView][7] in Glide, Glide may automatically apply either [FitCenter][2] or [CenterCrop][4], depending on the [ScaleType][8] of the view. If the scale type is ``CENTER_CROP``, Glide will automatically apply the ``CenterCrop`` transformation. If the scale type is ``FIT_CENTER`` or ``CENTER_INSIDE``, Glide will automatically apply the ``FitCenter`` transformation.
 
