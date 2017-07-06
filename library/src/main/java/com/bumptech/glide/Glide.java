@@ -167,10 +167,11 @@ public class Glide {
                     for (GlideModule module : modules) {
                         module.applyOptions(applicationContext, builder);
                     }
-                    glide = builder.createGlide();
+                    Glide glide = builder.createGlide();
                     for (GlideModule module : modules) {
                         module.registerComponents(applicationContext, glide);
                     }
+                    Glide.glide = glide;
                 }
             }
         }
