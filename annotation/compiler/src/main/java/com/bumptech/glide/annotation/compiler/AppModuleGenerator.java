@@ -181,6 +181,7 @@ final class AppModuleGenerator {
             .addModifiers(Modifier.PUBLIC)
             .addAnnotation(Override.class)
             .addParameter(ClassName.get("android.content", "Context"), "context")
+            .addParameter(ClassName.get("com.bumptech.glide", "Glide"), "glide")
             .addParameter(ClassName.get("com.bumptech.glide", "Registry"), "registry");
 
     for (String glideModule : libraryGlideModuleClassNames) {
@@ -189,10 +190,10 @@ final class AppModuleGenerator {
       }
       ClassName moduleClassName = ClassName.bestGuess(glideModule);
       registerComponents.addStatement(
-          "new $T().registerComponents(context, registry)", moduleClassName);
+          "new $T().registerComponents(context, glide, registry)", moduleClassName);
     }
     // Order matters here. The AppGlideModule must be called last.
-    registerComponents.addStatement("appGlideModule.registerComponents(context, registry)");
+    registerComponents.addStatement("appGlideModule.registerComponents(context, glide, registry)");
     return registerComponents.build();
   }
 

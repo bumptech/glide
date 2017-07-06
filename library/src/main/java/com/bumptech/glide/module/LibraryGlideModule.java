@@ -1,6 +1,7 @@
 package com.bumptech.glide.module;
 
 import android.content.Context;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.Registry;
 
 /**
@@ -16,7 +17,7 @@ import com.bumptech.glide.Registry;
  */
 public abstract class LibraryGlideModule implements RegistersComponents {
   @Override
-  public void registerComponents(Context context, Registry registry) {
+  public void registerComponents(Context context, Glide glide, Registry registry) {
     // Default empty impl.
   }
 }

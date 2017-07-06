@@ -675,7 +675,7 @@ public class GlideTest {
     }
 
     @Override
-    public void registerComponents(Context context, Registry registry) {
+    public void registerComponents(Context context, Glide glide, Registry registry) {
       registerMockModelLoader(GlideUrl.class, InputStream.class,
           new ByteArrayInputStream(new byte[0]), registry);
       registerMockModelLoader(File.class, InputStream.class,

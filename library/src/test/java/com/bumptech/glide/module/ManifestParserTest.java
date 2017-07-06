@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 import java.util.List;
@@ -119,7 +120,7 @@ public class ManifestParserTest {
     }
 
     @Override
-    public void registerComponents(Context context, Registry registry) {
+    public void registerComponents(Context context, Glide glide, Registry registry) {
     }
 
     @Override
@@ -140,7 +141,7 @@ public class ManifestParserTest {
     }
 
     @Override
-    public void registerComponents(Context context, Registry registry) {
+    public void registerComponents(Context context, Glide glide, Registry registry) {
     }
 
     @Override

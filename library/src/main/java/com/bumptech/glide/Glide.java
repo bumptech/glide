@@ -214,10 +214,10 @@ public class Glide implements ComponentCallbacks2 {
     }
     glide = builder.build(applicationContext);
     for (GlideModule module : manifestModules) {
-      module.registerComponents(applicationContext, glide.registry);
+      module.registerComponents(applicationContext, glide, glide.registry);
     }
     if (annotationGeneratedModule != null) {
-      annotationGeneratedModule.registerComponents(applicationContext, glide.registry);
+      annotationGeneratedModule.registerComponents(applicationContext, glide, glide.registry);
     }
   }
 
