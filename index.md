@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Jekyll Docs Template"
+title: "Fast and efficient image loading for Android"
 ---
 
 ### About Glide
