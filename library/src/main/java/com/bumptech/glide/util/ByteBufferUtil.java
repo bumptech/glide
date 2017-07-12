@@ -31,6 +31,11 @@ public final class ByteBufferUtil {
       if (fileLength > Integer.MAX_VALUE) {
         throw new IOException("File too large to map into memory");
       }
+      // See b/67710449.
+      if (fileLength == 0) {
+        throw new IOException("File unsuitable for memory mapping");
+      }
+
       raf = new RandomAccessFile(file, "r");
       channel = raf.getChannel();
       return channel.map(FileChannel.MapMode.READ_ONLY, 0, fileLength).load();
