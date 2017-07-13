@@ -165,8 +165,45 @@ public class YourAppGlideModule extends AppGlideModule {
 }
 ```
 
+### Registering Components
 
-### Key components
+Both Applications and Libraries can register a number of components that extend Glides functionality. Available components include:
+
+1. [``ModelLoader``][23]s to load custom Models (Urls, Uris, arbitrary POJOs) and Data (InputStreams, FileDescriptors).
+2. [``ResourceDecoder``][24]s to decode new Resources (Drawables, Bitmaps) or new types of Data (InputStreams, FileDescriptors).
+3. [``Encoder``][25]s to write Data (InputStreams, FileDesciptors) to Glide's disk cache.
+4. [``ResourceTranscoder``][26]s to convert Resources (BitmapResource) into other types of Resources (DrawableResource).
+5. [``ResourceEncoder``][27]s to write Resources (BitmapResource, DrawableResource) to Glide's disk cache.
+
+Components are registered using the [``Registry``][28] class. For example, to add a ``ModelLoader`` that can obtain an InputStream for a custom Model object:
+
+```java
+@GlideModule
+public class YourAppGlideModule extends AppGlideModule {
+  @Override
+  public void registerComponents(Context context, Registry registry) {
+    registry.append(Photo.class, InputStream.class, new CustomModelLoader.Factory());
+  }
+}
+```
+
+Any number of components can registered in a single ``GlideModule``. [``ModelLoader``][23]s and [``ResourceDecoder``][24]s can have multiple implementations with the same type arguments. 
+
+
+The set of registered components, including both those registered by default in Glide and those registered in Modules are used to define a set of load paths. Each load path is a step by step progression from the the Model provided to [``load()``][29] to the Resource type specified by [``as()``][30]. A load path consists (roughly) of the following steps:
+
+1. Model -> Data (handled by ``ModelLoader``s)
+2. Data -> Resource (handled by ``ResourceDecoder``s)
+3. Resource -> Transcoded Resource (optional, handled by ``ResourceTranscoder``s).
+
+``Encoder``s can write Data to Glide's disk cache cache before step 2.
+``ResourceEncoder``s can write Resource's to Glide's disk cache before step 3. 
+
+When a request is started, Glide will attempt all available paths from the Model to the requested Resource type. A request will succeed if any load path succeeds. A request will fail only if all available load paths fail.  
+
+The ``prepend()``, ``append()``, and ``replace()`` methods in [``Registry``][28] can be used to set the order in which Glide will attempt each ``ModelLoader`` and ``ResourceDecoder``. Requests can be made somewhat more efficient by making sure the ``ModelLoader``s and ``ResourceDecoder``s that handle the most common types are registered first. Ordering components can also allow you to register components that handle specific subsets of models or data (ie only certain types of Uris, or only certain image formats) while also having an appended catch-all component to handle the rest.
+
+### Module classes and annotations.
 Glide v4 relies on two classes, [``AppGlideModule``][1] and [``LibraryGlideModule``][2], to configure the Glide singleton. Both classes are allowed to register additional components, like [``ModelLoaders``][3], [``ResourceDecoders``][4] etc. Only the [``AppGlideModules``][1] are allowed to configure application specific settings, like cache implementations and sizes. 
 
 #### AppGlideModule
@@ -236,6 +273,14 @@ public final class MyAppGlideModule extends AppGlideModule {
 [17]: https://developer.android.com/reference/android/content/Context.html#getCacheDir()
 [18]: {{ site.url}}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.Factory.html
 [19]: https://developer.android.com/reference/android/os/StrictMode.html
-[20]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/annotation/Excludes.html
-[21]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/module/GlideModule.html
-[22]: http://bumptech.github.io/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html#isManifestParsingEnabled--
+[20]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/Excludes.html
+[21]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/GlideModule.html
+[22]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html#isManifestParsingEnabled--
+[23]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoaderFactory.html
+[24]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/ResourceDecoder.html
+[25]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/Encoder.html
+[26]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/transcode/ResourceTranscoder.html
+[27]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/ResourceEncoder.html
+[28]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/Registry.html
+[29]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#load-java.lang.Object-
+[30]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html#as-java.lang.Class-
