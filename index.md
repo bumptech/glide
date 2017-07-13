@@ -43,6 +43,11 @@ Glide takes a number of steps to ensure image loading is both as fast and as smo
 
 Start by vising the [Download and Setup][1] page to learn how to integrate Glide in to your app. Then take a look at the [Getting Started][2] page to learn the basics. For more help and examples, continue on through the rest of the Documentation section, or take a look at one of our many [sample apps][3].
 
+### Requirements
+
+Glide v4 requires Android [Ice Cream Sandwich][4] (API level 14) or higher.
+
 [1]: doc/download-setup.html
 [2]: doc/getting-started.html
 [3]: ref/samples.html
+[4]: https://developer.android.com/about/versions/android-4.0-highlights.html
