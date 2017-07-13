@@ -16,7 +16,7 @@ interface RegistersComponents {
    * <p> This method will be called once and only once per implementation. </p>
    *
    * @param context  An Application {@link android.content.Context}.
-   * @param glide The Glide singleton that is in the process of being initialized. 
+   * @param glide The Glide singleton that is in the process of being initialized.
    * @param registry An {@link com.bumptech.glide.Registry} to use to register components.
    */
   void registerComponents(Context context, Glide glide, Registry registry);

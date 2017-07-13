@@ -152,20 +152,24 @@ public class Glide implements ComponentCallbacks2 {
     if (glide == null) {
       synchronized (Glide.class) {
         if (glide == null) {
-          // In the thread running initGlide(), one or more classes may call Glide.get(context).
-          // Without this check, those calls could trigger infinite recursion.
-          if (isInitializing) {
-            throw new IllegalStateException("You cannot call Glide.get() in registerComponents(),"
-                + " use the provided Glide instance instead");
-          }
-          isInitializing = true;
-          initGlide(context);
-          isInitializing = false;
+          checkAndInitializeGlide(context);
         }
       }
     }
 
     return glide;
+  }
+
+  private static void checkAndInitializeGlide(Context context) {
+    // In the thread running initGlide(), one or more classes may call Glide.get(context).
+    // Without this check, those calls could trigger infinite recursion.
+    if (isInitializing) {
+      throw new IllegalStateException("You cannot call Glide.get() in registerComponents(),"
+          + " use the provided Glide instance instead");
+    }
+    isInitializing = true;
+    initializeGlide(context);
+    isInitializing = false;
   }
 
   @VisibleForTesting
@@ -179,7 +183,7 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @SuppressWarnings("deprecation")
-  private static void initGlide(Context context) {
+  private static void initializeGlide(Context context) {
     Context applicationContext = context.getApplicationContext();
 
     GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
