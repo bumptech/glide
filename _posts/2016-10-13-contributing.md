@@ -50,6 +50,31 @@ For example, to run the Flickr demo:
 
 ``./gradlew :samples:flickr:run``
 
+#### Code Style
+
+Glide uses [Google's Java style guide][3].
+
+To configure Android Studio to use Google's style automatically, use the following steps:
+
+1. Open [https://raw.githubusercontent.com/google/styleguide/gh-pages/intellij-java-google-style.xml][4]
+2. Save intellij-java-google-style.xml as a file to your computer
+3. Open Android Studio
+4. Open Preferences...
+5. Open Editor > Code Style
+6. Next to 'Schema' click 'Manage'
+7. Click Import...
+8. Highlight 'Intellij IDEA code style XML' and click 'Ok'
+9. Browse to the location you downloaded intellij-java-google-style.xml in step 2, select the file, and click 'Ok'
+10. Click 'Ok' (you can optionally update the name from GoogleStyle here)
+11. In the Code Style Schemes dialog, highlight the style you just created and click 'Copy to project'
+12. Click ok to exit preferences.
+
+To reformat a file after adding the style guide to Android Studio, open the 'Code' menu, then click 'Reformat Code'.
+
+All new code should follow the given style guide and there's some automated enforcement of the style guide in Glide's test suite. Pull requests to fix style issues in Glide's existing code are welcome as well. However, it's generally best to keep changes that fix style guide issues in existing code and changes that add new code separate. Two pull requests are completely fine if you want to fix some style issues and contribute some new functionality or bug fixes. 
+
+When in doubt, send us a single pull request and we will work with you.
+
 ### Documentation
 
 #### Obtaining and uploading changes
@@ -96,3 +121,5 @@ Finally you can view a version of the site with your local changes: ``http://127
 
 [1]: https://github.com/bumptech/glide
 [2]: https://help.github.com/articles/creating-a-pull-request/
+[3]: https://google.github.io/styleguide/javaguide.html
+[4]: https://raw.githubusercontent.com/google/styleguide/gh-pages/intellij-java-google-style.xml
