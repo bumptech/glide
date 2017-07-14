@@ -130,7 +130,7 @@ public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     int diskCacheSizeBytes = 1024 * 1024 * 100; // 100 MB
-    builder.setDiskCache(new InternalDiskCacheFactory(context), diskCacheSizeBytes);
+    builder.setDiskCache(new InternalDiskCacheFactory(context, diskCacheSizeBytes));
   }
 }
 ```
@@ -142,8 +142,8 @@ public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     int diskCacheSizeBytes = 1024 * 1024 * 100; // 100 MB
-    builder.setDiskCache(new InternalDiskCacheFactory(context), "cacheFolderName", 
-        diskCacheSizeBytes);
+    builder.setDiskCache(
+        new InternalDiskCacheFactory(context, "cacheFolderName", diskCacheSizeBytes));
   }
 }
 ```
