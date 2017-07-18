@@ -13,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -78,9 +79,9 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
-import org.robolectric.res.builder.RobolectricPackageManager;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowBitmap;
+import org.robolectric.shadows.ShadowPackageManager;
 
 /**
  * Tests for the {@link Glide} interface and singleton.
@@ -101,7 +102,7 @@ public class GlideTest {
   public void setUp() throws Exception {
     Glide.tearDown();
 
-    RobolectricPackageManager pm = RuntimeEnvironment.getRobolectricPackageManager();
+    ShadowPackageManager pm = shadowOf(RuntimeEnvironment.application.getPackageManager());
     ApplicationInfo info =
         pm.getApplicationInfo(RuntimeEnvironment.application.getPackageName(), 0);
     info.metaData = new Bundle();
