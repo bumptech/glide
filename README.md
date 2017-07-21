@@ -48,7 +48,7 @@ Or Maven:
   <version>r7</version>
 </dependency>
 <dependency>
-  <groupdId>com.github.bumptech.glide</groupId>
+  <groupId>com.github.bumptech.glide</groupId>
   <artifactId>compiler</artifactId>
   <version>4.0.0-RC1</version>
   <optional>true</optional>
