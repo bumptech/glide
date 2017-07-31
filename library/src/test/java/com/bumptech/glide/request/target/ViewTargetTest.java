@@ -380,14 +380,14 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void getSize_withValidWidthAndHeight_notLaidOut_doesNotCallSizeReady() {
+  public void getSize_withValidWidthAndHeight_notLaidOut_notLayoutRequested_callsSizeReady() {
     shadowView
         .setWidth(100)
         .setHeight(100)
         .setIsLaidOut(false);
     target.getSize(cb);
 
-    verify(cb, never()).onSizeReady(anyInt(), anyInt());
+    verify(cb).onSizeReady(100, 100);
   }
 
   @Test
@@ -403,7 +403,7 @@ public class ViewTargetTest {
   }
 
   @Test
-  public void getSize_withLayoutParams_zeroWidthHeight_notLaidOut_doesNotCallSizeReady() {
+  public void getSize_withLayoutParams_emptyParams_notLaidOutOrLayoutRequested_callsSizeReady() {
     shadowView
         .setLayoutParams(new LayoutParams(0, 0))
         .setWidth(100)
@@ -411,7 +411,7 @@ public class ViewTargetTest {
         .setIsLaidOut(false);
     target.getSize(cb);
 
-    verify(cb, never()).onSizeReady(anyInt(), anyInt());
+    verify(cb).onSizeReady(100, 100);
   }
 
   @Test

@@ -1,7 +1,6 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
@@ -251,9 +250,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
         return true;
       }
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-        return view.isLaidOut();
-      }
+      // Avoid using isLaidOut because it appears to be false after a View is re-attached to a
+      // RecyclerView if the View's size before and after the attach are the same. See #1981.
       return !view.isLayoutRequested();
     }
 
