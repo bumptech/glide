@@ -33,7 +33,7 @@ To use the generated API, you need to perform two steps:
    }
    
    dependencies {
-     annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+     annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0'
    }
    ```
    
@@ -62,7 +62,7 @@ If you're using Kotlin you can:
 
    ```groovy
    dependencies {
-     kapt 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+     kapt 'com.github.bumptech.glide:compiler:4.0.0'
    }
    ```
 

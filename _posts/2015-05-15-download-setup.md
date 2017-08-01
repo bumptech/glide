@@ -27,8 +27,8 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.bumptech.glide:glide:4.0.0-RC1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+    compile 'com.github.bumptech.glide:glide:4.0.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0'
     compile 'com.android.support:support-v4:25.3.1'
 }
 ```
@@ -80,7 +80,7 @@ If you use Glide's annotations on classes implemented in Kotlin, you need to inc
 
 ```groovy
 dependencies {
-  kapt 'com.github.bumptech.glide:compiler:4.0.0-RC1'
+  kapt 'com.github.bumptech.glide:compiler:4.0.0'
 }
 ```
 
