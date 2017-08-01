@@ -75,7 +75,7 @@ Depending on your ProGuard (DexGuard) config and usage, you may need to include 
 
 How do I use Glide?
 -------------------
-Checkout the [documentation][20] for pages on a variety of topics, and see the [javadocs][3].
+Check out the [documentation][20] for pages on a variety of topics, and see the [javadocs][3].
 
 For Glide v3, see the [wiki][2].
 
@@ -145,7 +145,7 @@ variable is pointing at the SDK or add a `local.properties` file in the root pro
 
 Samples
 -------
-Follow the steps in the [Build](#build) section to setup the project and then:
+Follow the steps in the [Build](#build) section to set up the project and then:
 
 ```shell
 ./gradlew :samples:flickr:run
