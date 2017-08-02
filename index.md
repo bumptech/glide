@@ -36,7 +36,7 @@ For users to have a great experience with an app, images must not only appear qu
 Glide takes a number of steps to ensure image loading is both as fast and as smooth as possible on Android:
 
 * Smart and automatic downsampling and caching minimize storage overhead and decode times.
-* Aggressive re-use of resources like byte arrys and Bitmaps minimizes expensive garbage collections and heap fragmentation.
+* Aggressive re-use of resources like byte arrays and Bitmaps minimizes expensive garbage collections and heap fragmentation.
 * Deep lifecycle integration ensures that only requests for active Fragments and Activities are prioritized and that Applications release resources when neccessary to avoid being killed when backgrounded.
 
 ### Getting Started
