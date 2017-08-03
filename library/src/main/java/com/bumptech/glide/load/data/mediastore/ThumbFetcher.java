@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
@@ -96,11 +97,13 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
     // Do nothing.
   }
 
+  @NonNull
   @Override
   public Class<InputStream> getDataClass() {
     return InputStream.class;
   }
 
+  @NonNull
   @Override
   public DataSource getDataSource() {
     return DataSource.LOCAL;

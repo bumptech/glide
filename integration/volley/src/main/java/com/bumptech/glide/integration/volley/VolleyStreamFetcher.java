@@ -1,5 +1,6 @@
 package com.bumptech.glide.integration.volley;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -67,11 +68,13 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     }
   }
 
+  @NonNull
   @Override
   public Class<InputStream> getDataClass() {
     return InputStream.class;
   }
 
+  @NonNull
   @Override
   public DataSource getDataSource() {
     return DataSource.REMOTE;

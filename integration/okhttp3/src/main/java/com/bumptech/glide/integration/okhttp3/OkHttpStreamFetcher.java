@@ -1,5 +1,6 @@
 package com.bumptech.glide.integration.okhttp3;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -87,11 +88,13 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     }
   }
 
+  @NonNull
   @Override
   public Class<InputStream> getDataClass() {
     return InputStream.class;
   }
 
+  @NonNull
   @Override
   public DataSource getDataSource() {
     return DataSource.REMOTE;

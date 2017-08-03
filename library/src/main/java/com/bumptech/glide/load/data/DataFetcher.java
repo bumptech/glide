@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -91,10 +92,12 @@ public interface DataFetcher<T> {
   /**
    * Returns the class of the data this fetcher will attempt to obtain.
    */
+  @NonNull
   Class<T> getDataClass();
 
   /**
    * Returns the {@link com.bumptech.glide.load.DataSource} this fetcher will return data from.
    */
+  @NonNull
   DataSource getDataSource();
 }
