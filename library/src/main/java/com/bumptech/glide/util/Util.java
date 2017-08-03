@@ -4,9 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Looper;
-
 import com.bumptech.glide.request.target.Target;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,8 +18,6 @@ public final class Util {
   private static final char[] HEX_CHAR_ARRAY = "0123456789abcdef".toCharArray();
   // 32 bytes from sha-256 -> 64 hex chars.
   private static final char[] SHA_256_CHARS = new char[64];
-  // 20 bytes from sha-1 -> 40 chars.
-  private static final char[] SHA_1_CHARS = new char[40];
 
   private Util() {
     // Utility class.
@@ -36,18 +32,10 @@ public final class Util {
     }
   }
 
-  /**
-   * Returns the hex string of the given byte array representing a SHA1 hash.
-   */
-  public static String sha1BytesToHex(byte[] bytes) {
-    synchronized (SHA_1_CHARS) {
-      return bytesToHex(bytes, SHA_1_CHARS);
-    }
-  }
-
   // Taken from:
   // http://stackoverflow.com/questions/9655181/convert-from-byte-array-to-hex-string-in-java
   // /9655275#9655275
+  @SuppressWarnings("PMD.UseVarargs")
   private static String bytesToHex(byte[] bytes, char[] hexChars) {
     int v;
     for (int j = 0; j < bytes.length; j++) {
@@ -102,7 +90,7 @@ public final class Util {
   }
 
   private static int getBytesPerPixel(Bitmap.Config config) {
-    // A bitmap by decoding a gif has null "config" in certain environments.
+    // A bitmap by decoding a GIF has null "config" in certain environments.
     if (config == null) {
       config = Bitmap.Config.ARGB_8888;
     }
@@ -119,6 +107,7 @@ public final class Util {
       case ARGB_8888:
       default:
         bytesPerPixel = 4;
+        break;
     }
     return bytesPerPixel;
   }
@@ -149,7 +138,7 @@ public final class Util {
    */
   public static void assertBackgroundThread() {
     if (!isOnBackgroundThread()) {
-      throw new IllegalArgumentException("YOu must call this method on a background thread");
+      throw new IllegalArgumentException("You must call this method on a background thread");
     }
   }
 
@@ -161,7 +150,7 @@ public final class Util {
   }
 
   /**
-   * Returns {@code true} if called on the main thread, {@code false} otherwise.
+   * Returns {@code true} if called on a background thread, {@code false} otherwise.
    */
   public static boolean isOnBackgroundThread() {
     return !isOnMainThread();
@@ -181,12 +170,21 @@ public final class Util {
    * <p> See #303 and #375. </p>
    */
   public static <T> List<T> getSnapshot(Collection<T> other) {
-      // toArray creates a new ArrayList internally and this way we can guarantee entries will not
-      // be null. See #322.
-      List<T> result = new ArrayList<T>(other.size());
-      for (T item : other) {
-          result.add(item);
-      }
-      return result;
+    // toArray creates a new ArrayList internally and this way we can guarantee entries will not
+    // be null. See #322.
+    List<T> result = new ArrayList<T>(other.size());
+    for (T item : other) {
+      result.add(item);
+    }
+    return result;
+  }
+
+  /**
+   * Null-safe equivalent of {@code a.equals(b)}.
+   *
+   * @see java.util.Objects#equals
+   */
+  public static boolean bothNullOrEqual(Object a, Object b) {
+    return a == null ? b == null : a.equals(b);
   }
 }

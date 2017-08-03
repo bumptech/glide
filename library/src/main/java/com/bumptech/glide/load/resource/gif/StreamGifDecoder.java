@@ -1,20 +1,19 @@
 package com.bumptech.glide.load.resource.gif;
 
 import android.util.Log;
-
-import com.bumptech.glide.Logs;
+import com.bumptech.glide.load.ImageHeaderParser;
+import com.bumptech.glide.load.ImageHeaderParser.ImageType;
+import com.bumptech.glide.load.ImageHeaderParserUtils;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.engine.bitmap_recycle.ByteArrayPool;
-import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser;
-import com.bumptech.glide.load.resource.bitmap.ImageHeaderParser.ImageType;
-
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 /**
  * A relatively inefficient decoder for {@link com.bumptech.glide.load.resource.gif.GifDrawable}
@@ -22,6 +21,7 @@ import java.nio.ByteBuffer;
  * the buffer to a wrapped decoder.
  */
 public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawable> {
+  private static final String TAG = "StreamGifDecoder";
   /**
    * If set to {@code true}, disables this decoder
    * ({@link #handles(InputStream, Options)} will return {@code false}). Defaults to
@@ -30,11 +30,13 @@ public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawabl
   public static final Option<Boolean> DISABLE_ANIMATION = Option.memory(
       "com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder.DisableAnimation", false);
 
+  private final List<ImageHeaderParser> parsers;
   private final ResourceDecoder<ByteBuffer, GifDrawable> byteBufferDecoder;
-  private final ByteArrayPool byteArrayPool;
+  private final ArrayPool byteArrayPool;
 
-  public StreamGifDecoder(ResourceDecoder<ByteBuffer, GifDrawable> byteBufferDecoder,
-      ByteArrayPool byteArrayPool) {
+  public StreamGifDecoder(List<ImageHeaderParser> parsers, ResourceDecoder<ByteBuffer,
+      GifDrawable> byteBufferDecoder, ArrayPool byteArrayPool) {
+    this.parsers = parsers;
     this.byteBufferDecoder = byteBufferDecoder;
     this.byteArrayPool = byteArrayPool;
   }
@@ -42,7 +44,7 @@ public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawabl
   @Override
   public boolean handles(InputStream source, Options options) throws IOException {
     return !options.get(DISABLE_ANIMATION)
-        && new ImageHeaderParser(source, byteArrayPool).getType() == ImageType.GIF;
+        && ImageHeaderParserUtils.getType(parsers, source, byteArrayPool) == ImageType.GIF;
   }
 
   @Override
@@ -67,8 +69,8 @@ public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawabl
       }
       buffer.flush();
     } catch (IOException e) {
-      if (Logs.isEnabled(Log.WARN)) {
-        Logs.log(Log.WARN, "Error reading data from stream", e);
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Error reading data from stream", e);
       }
       return null;
     }

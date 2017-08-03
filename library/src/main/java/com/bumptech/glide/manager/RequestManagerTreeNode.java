@@ -1,7 +1,6 @@
 package com.bumptech.glide.manager;
 
 import com.bumptech.glide.RequestManager;
-
 import java.util.Set;
 
 /**
@@ -10,9 +9,9 @@ import java.util.Set;
  * provide access to any other RequestManagers hierarchically.
  */
 public interface RequestManagerTreeNode {
-    /**
-     * Returns all descendant {@link RequestManager}s relative to the context of the current
-     * {@link RequestManager}.
-     */
-    Set<RequestManager> getDescendants();
+  /**
+   * Returns all descendant {@link RequestManager}s relative to the context of the current
+   * {@link RequestManager}.
+   */
+  Set<RequestManager> getDescendants();
 }

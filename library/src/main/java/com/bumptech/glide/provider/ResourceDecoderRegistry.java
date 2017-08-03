@@ -1,13 +1,13 @@
 package com.bumptech.glide.provider;
 
 import com.bumptech.glide.load.ResourceDecoder;
-
+import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Contains an ordered list of {@link ResourceDecoder}s capable of decoding arbitrary data types
- * into arbitrary resource types from highest priority decoders to loweset priority decoders.
+ * into arbitrary resource types from highest priority decoders to lowest priority decoders.
  */
 @SuppressWarnings("rawtypes")
 public class ResourceDecoderRegistry {
@@ -51,8 +51,8 @@ public class ResourceDecoderRegistry {
 
   private static class Entry<T, R> {
     private final Class<T> dataClass;
-    private final Class<R> resourceClass;
-    private final ResourceDecoder<T, R> decoder;
+    @Synthetic final Class<R> resourceClass;
+    @Synthetic final ResourceDecoder<T, R> decoder;
 
     public Entry(Class<T> dataClass, Class<R> resourceClass, ResourceDecoder<T, R> decoder) {
       this.dataClass = dataClass;

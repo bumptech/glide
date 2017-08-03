@@ -1,7 +1,8 @@
 package com.bumptech.glide.provider;
 
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.ResourceEncoder;
-
+import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class ResourceEncoderRegistry {
   }
 
   @SuppressWarnings("unchecked")
+  @Nullable
   public synchronized <Z> ResourceEncoder<Z> get(Class<Z> resourceClass) {
     int size = encoders.size();
     for (int i = 0; i < size; i++) {
@@ -32,14 +34,15 @@ public class ResourceEncoderRegistry {
 
   private static final class Entry<T> {
     private final Class<T> resourceClass;
-    private final ResourceEncoder<T> encoder;
+    @Synthetic final ResourceEncoder<T> encoder;
 
     Entry(Class<T> resourceClass, ResourceEncoder<T> encoder) {
       this.resourceClass = resourceClass;
       this.encoder = encoder;
     }
 
-    private boolean handles(Class<?> resourceClass) {
+    @Synthetic
+    boolean handles(Class<?> resourceClass) {
       return this.resourceClass.isAssignableFrom(resourceClass);
     }
   }

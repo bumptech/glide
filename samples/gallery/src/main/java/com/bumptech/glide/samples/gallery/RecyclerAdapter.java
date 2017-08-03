@@ -1,9 +1,7 @@
 package com.bumptech.glide.samples.gallery;
 
-import static com.bumptech.glide.request.RequestOptions.fitCenterTransform;
-import static com.bumptech.glide.request.RequestOptions.signatureOf;
-
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.Display;
@@ -13,46 +11,39 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.ImageView;
-
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.signature.MediaStoreSignature;
-
 import java.util.Collections;
 import java.util.List;
 
 /**
  * Displays {@link com.bumptech.glide.samples.gallery.MediaStoreData} in a recycler view.
  */
-class RecyclerAdapter extends RecyclerView.Adapter
+class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolder>
     implements ListPreloader.PreloadSizeProvider<MediaStoreData>,
     ListPreloader.PreloadModelProvider<MediaStoreData> {
 
   private final List<MediaStoreData> data;
   private final int screenWidth;
-  private final RequestBuilder<Drawable> requestBuilder;
+  private final GlideRequest<Drawable> requestBuilder;
 
   private int[] actualDimensions;
 
-  RecyclerAdapter(Context context, List<MediaStoreData> data, RequestManager requestManager) {
+  RecyclerAdapter(Context context, List<MediaStoreData> data, GlideRequests glideRequests) {
     this.data = data;
-    requestBuilder = requestManager
-        .asDrawable()
-        .apply(fitCenterTransform(context));
+    requestBuilder = glideRequests.asDrawable().fitCenter();
 
     setHasStableIds(true);
 
-    WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-    Display display = wm.getDefaultDisplay();
-    screenWidth = display.getWidth();
+    screenWidth = getScreenWidth(context);
   }
 
   @Override
-  public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-    final View view = LayoutInflater.from(viewGroup.getContext())
-        .inflate(R.layout.recycler_item, viewGroup, false);
+  public ListViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
+    final View view = inflater.inflate(R.layout.recycler_item, viewGroup, false);
     view.getLayoutParams().width = screenWidth;
 
     if (actualDimensions == null) {
@@ -72,19 +63,17 @@ class RecyclerAdapter extends RecyclerView.Adapter
   }
 
   @Override
-  public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+  public void onBindViewHolder(ListViewHolder viewHolder, int position) {
     MediaStoreData current = data.get(position);
-
-    final ListViewHolder vh = (ListViewHolder) viewHolder;
 
     Key signature =
         new MediaStoreSignature(current.mimeType, current.dateModified, current.orientation);
 
     requestBuilder
         .clone()
-        .apply(signatureOf(signature))
+        .signature(signature)
         .load(current.uri)
-        .into(vh.image);
+        .into(viewHolder.image);
   }
 
   @Override
@@ -108,12 +97,12 @@ class RecyclerAdapter extends RecyclerView.Adapter
   }
 
   @Override
-  public RequestBuilder getPreloadRequestBuilder(MediaStoreData item) {
+  public RequestBuilder<Drawable> getPreloadRequestBuilder(MediaStoreData item) {
     MediaStoreSignature signature =
         new MediaStoreSignature(item.mimeType, item.dateModified, item.orientation);
     return requestBuilder
         .clone()
-        .apply(signatureOf(signature))
+        .signature(signature)
         .load(item.uri);
   }
 
@@ -122,9 +111,19 @@ class RecyclerAdapter extends RecyclerView.Adapter
     return actualDimensions;
   }
 
+  // Display#getSize(Point)
+  @SuppressWarnings("deprecation")
+  private static int getScreenWidth(Context context) {
+    WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+    Display display = wm.getDefaultDisplay();
+    Point size = new Point();
+    display.getSize(size);
+    return size.x;
+  }
+
   /**
-   * ViewHolder containing views to display individual {@link com.bumptech.glide.samples
-   * .gallery.MediaStoreData}.
+   * ViewHolder containing views to display individual {@link
+   * com.bumptech.glide.samples.gallery.MediaStoreData}.
    */
   public static final class ListViewHolder extends RecyclerView.ViewHolder {
 

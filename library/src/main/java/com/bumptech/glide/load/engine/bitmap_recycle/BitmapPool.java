@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 
 /**
  * An interface for a pool that allows users to reuse {@link android.graphics.Bitmap} objects.
@@ -13,8 +14,8 @@ public interface BitmapPool {
   int getMaxSize();
 
   /**
-   * Multiplies the initial size of the pool by the given multipler to dynamically and synchronously
-   * allow users to adjust the size of the pool.
+   * Multiplies the initial size of the pool by the given multiplier to dynamically and
+   * synchronously allow users to adjust the size of the pool.
    *
    * <p> If the current total size of the pool is larger than the max size after the given
    * multiplier is applied, {@link Bitmap}s should be evicted until the pool is smaller than the new
@@ -25,27 +26,23 @@ public interface BitmapPool {
   void setSizeMultiplier(float sizeMultiplier);
 
   /**
-   * Adds the given {@link android.graphics.Bitmap} and returns {@code true} if the {@link
-   * android.graphics.Bitmap} was eligible to be added and {@code false} otherwise.
+   * Adds the given {@link android.graphics.Bitmap} if it is eligible to be re-used and the pool
+   * can fit it, or calls {@link Bitmap#recycle()} on the Bitmap and discards it.
    *
-   * <p> Note - If the {@link android.graphics.Bitmap} is rejected (this method returns false) then
-   * it is the caller's responsibility to call {@link android.graphics.Bitmap#recycle()}. </p>
-   *
-   * <p> Note - This method will return {@code true} if the given {@link android.graphics.Bitmap} is
-   * synchronously evicted after being accepted. The only time this method will return {@code false}
-   * is if the {@link android.graphics.Bitmap} is not eligible to be added to the pool (either it is
-   * not mutable or it is larger than the max pool size). </p>
+   * <p> Callers must <em>not</em> continue to use the Bitmap after calling this method. </p>
    *
    * @param bitmap The {@link android.graphics.Bitmap} to attempt to add.
    * @see android.graphics.Bitmap#isMutable()
    * @see android.graphics.Bitmap#recycle()
    */
-  boolean put(Bitmap bitmap);
+  void put(Bitmap bitmap);
 
   /**
    * Returns a {@link android.graphics.Bitmap} of exactly the given width, height, and
-   * configuration, and containing only transparent pixels or null if no such {@link
-   * android.graphics.Bitmap} could be obtained from the pool.
+   * configuration, and containing only transparent pixels.
+   *
+   * <p> If no Bitmap with the requested attributes is present in the pool, a new one will be
+   * allocated. </p>
    *
    * <p> Because this method erases all pixels in the {@link Bitmap}, this method is slightly slower
    * than {@link #getDirty(int, int, android.graphics.Bitmap.Config)}. If the {@link
@@ -68,12 +65,15 @@ public interface BitmapPool {
    *               android.graphics.Bitmap}.
    * @see #getDirty(int, int, android.graphics.Bitmap.Config)
    */
+  @NonNull
   Bitmap get(int width, int height, Bitmap.Config config);
 
   /**
    * Identical to {@link #get(int, int, android.graphics.Bitmap.Config)} except that any returned
-   * non-null {@link android.graphics.Bitmap} may <em>not</em> have been erased and may contain
-   * random data.
+   * {@link android.graphics.Bitmap} may <em>not</em> have been erased and may contain random data.
+   *
+   * <p>If no Bitmap with the requested attributes is present in the pool, a new one will be
+   * allocated. </p>
    *
    * <p> Although this method is slightly more efficient than {@link #get(int, int,
    * android.graphics.Bitmap.Config)} it should be used with caution and only when the caller is
@@ -89,6 +89,7 @@ public interface BitmapPool {
    * could be obtained from the pool.
    * @see #get(int, int, android.graphics.Bitmap.Config)
    */
+  @NonNull
   Bitmap getDirty(int width, int height, Bitmap.Config config);
 
   /**

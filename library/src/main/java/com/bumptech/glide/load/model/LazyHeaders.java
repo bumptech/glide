@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,14 +43,21 @@ public final class LazyHeaders implements Headers {
     for (Map.Entry<String, List<LazyHeaderFactory>> entry : headers.entrySet()) {
       StringBuilder sb = new StringBuilder();
       List<LazyHeaderFactory> factories = entry.getValue();
-      for (int i = 0; i < factories.size(); i++) {
+      int size = factories.size();
+      for (int i = 0; i < size; i++) {
         LazyHeaderFactory factory = factories.get(i);
-        sb.append(factory.buildHeader());
-        if (i != factories.size() - 1) {
-          sb.append(',');
+        String header = factory.buildHeader();
+        if (!TextUtils.isEmpty(header)) {
+          sb.append(header);
+          if (i != factories.size() - 1) {
+            sb.append(',');
+          }
         }
       }
-      combinedHeaders.put(entry.getKey(), sb.toString());
+      String values = sb.toString();
+      if (!TextUtils.isEmpty(values)) {
+        combinedHeaders.put(entry.getKey(), sb.toString());
+      }
     }
 
     return combinedHeaders;
@@ -77,21 +85,49 @@ public final class LazyHeaders implements Headers {
   }
 
   /**
-   * Builder class for {@link LazyHeaders}.
+   * Adds an {@link LazyHeaderFactory} that will be used to construct a value for the given
+   * key* lazily on a background thread.
    *
    * <p> This class is not thread safe. </p>
+   *
+   * <p> This class may include default values for User-Agent and Accept-Encoding headers. These
+   * will be replaced by calls to either {@link #setHeader(String, LazyHeaderFactory)} or
+   * {@link #addHeader(String, String)}, even though {@link #addHeader(String, LazyHeaderFactory)}
+   * would usually append an additional value. </p>
    */
+   // PMD doesn't like the necessary static block to initialize DEFAULT_HEADERS.
+  @SuppressWarnings("PMD.FieldDeclarationsShouldBeAtStartOfClass")
   public static final class Builder {
-    private boolean copyOnModify;
-    private Map<String, List<LazyHeaderFactory>> headers = new HashMap<>();
+    private static final String USER_AGENT_HEADER = "User-Agent";
+    private static final String DEFAULT_USER_AGENT = System.getProperty("http.agent");
+    private static final Map<String, List<LazyHeaderFactory>> DEFAULT_HEADERS;
+
+    // Set Accept-Encoding header to do our best to avoid gzip since it's both inefficient for
+    // images and also makes it more difficult for us to detect and prevent partial content
+    // rendering. See #440.
+    static {
+      Map<String, List<LazyHeaderFactory>> temp
+          = new HashMap<>(2);
+      if (!TextUtils.isEmpty(DEFAULT_USER_AGENT)) {
+        temp.put(USER_AGENT_HEADER,
+            Collections.<LazyHeaderFactory>singletonList(
+                new StringHeaderFactory(DEFAULT_USER_AGENT)));
+      }
+      DEFAULT_HEADERS = Collections.unmodifiableMap(temp);
+    }
+
+    private boolean copyOnModify = true;
+    private Map<String, List<LazyHeaderFactory>> headers = DEFAULT_HEADERS;
+    private boolean isUserAgentDefault = true;
 
     /**
      * Adds a value for the given header and returns this builder.
      *
-     * <p> Use {@link #addHeader(String, LazyHeaderFactory)} if obtaining the value requires
-     * I/O (ie an oauth token). </p>
+     * <p> Use {@link #addHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
+     * (i.e. an OAuth token). </p>
      *
      * @see #addHeader(String, LazyHeaderFactory)
+
      */
     public Builder addHeader(String key, String value) {
       return addHeader(key, new StringHeaderFactory(value));
@@ -99,27 +135,74 @@ public final class LazyHeaders implements Headers {
 
     /**
      * Adds an {@link LazyHeaderFactory} that will be used to construct a value for the given
-     * key* lazily on a background thread.
+     * key lazily on a background thread.
      *
-     * <p> Headers may have multiple values whose order is defined by the order in which this
-     * method is called. </p>
+     * <p> Headers may have multiple values whose order is defined by the order in which
+     * this method is called. </p>
      *
-     * <p> This class does not prevent you from adding the same value to a given key multiple times
-     * </p>
+     * <p> This class does not prevent you from adding the same value to a given key multiple
+     * times </p>
      */
     public Builder addHeader(String key, LazyHeaderFactory factory) {
-      if (copyOnModify) {
-        copyOnModify = false;
-        headers = copyHeaders();
+      if (isUserAgentDefault && USER_AGENT_HEADER.equalsIgnoreCase(key)) {
+        return setHeader(key, factory);
       }
 
+      copyIfNecessary();
+      getFactories(key).add(factory);
+      return this;
+    }
+
+    /**
+     * Replaces all existing {@link LazyHeaderFactory LazyHeaderFactorys} for the given key
+     * with the given {@link LazyHeaderFactory}.
+     *
+     * <p> If the given value is {@code null}, the header at the given key will be removed. </p>
+     *
+     * <p> Use {@link #setHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
+     * (i.e. an OAuth token). </p>
+     */
+    public Builder setHeader(String key, String value) {
+      return setHeader(key, value == null ? null : new StringHeaderFactory(value));
+    }
+
+    /**
+     * Replaces all existing {@link LazyHeaderFactory LazyHeaderFactorys} for the given key
+     * with the given {@link LazyHeaderFactory}.
+     *
+     * <p> If the given value is {@code null}, the header at the given key will be removed. </p>
+     */
+    public Builder setHeader(String key, LazyHeaderFactory factory) {
+      copyIfNecessary();
+      if (factory == null) {
+        headers.remove(key);
+      } else {
+        List<LazyHeaderFactory> factories = getFactories(key);
+        factories.clear();
+        factories.add(factory);
+      }
+
+      if (isUserAgentDefault && USER_AGENT_HEADER.equalsIgnoreCase(key)) {
+        isUserAgentDefault = false;
+      }
+
+      return this;
+    }
+
+    private List<LazyHeaderFactory> getFactories(String key) {
       List<LazyHeaderFactory> factories = headers.get(key);
       if (factories == null) {
         factories = new ArrayList<>();
         headers.put(key, factories);
       }
-      factories.add(factory);
-      return this;
+      return factories;
+    }
+
+    private void copyIfNecessary() {
+      if (copyOnModify) {
+        copyOnModify = false;
+        headers = copyHeaders();
+      }
     }
 
     /**

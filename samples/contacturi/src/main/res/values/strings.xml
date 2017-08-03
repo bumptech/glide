@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ContactUri Sample</string>
+    <string name="pick_contact">Pick Contact</string>
+    <string name="image_contact">Image based on contact Uri, best size on latest Android</string>
+    <string name="image_lookup">Image based on lookup Uri, same as contact Uri</string>
+    <string name="image_photo">Image based on photo Uri, thumbnail sized, usually 96x96px</string>
+    <string name="image_display_photo">Image based on display photo Uri, possibly 512x512px</string>
+</resources>

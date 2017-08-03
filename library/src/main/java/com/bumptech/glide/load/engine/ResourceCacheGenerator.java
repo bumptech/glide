@@ -4,9 +4,8 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
-
+import com.bumptech.glide.load.model.ModelLoader.LoadData;
 import java.io.File;
 import java.util.List;
 
@@ -17,36 +16,33 @@ import java.util.List;
 class ResourceCacheGenerator implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object> {
 
-  private final int width;
-  private final int height;
-  private final DiskCache diskCache;
-  private final RequestContext<?, ?> requestContext;
   private final FetcherReadyCallback cb;
+  private final DecodeHelper<?> helper;
 
   private int sourceIdIndex = 0;
   private int resourceClassIndex = -1;
   private Key sourceKey;
   private List<ModelLoader<File, ?>> modelLoaders;
   private int modelLoaderIndex;
-  private volatile DataFetcher<?> fetcher;
+  private volatile LoadData<?> loadData;
   // PMD is wrong here, this File must be an instance variable because it may be used across
   // multiple calls to startNext.
   @SuppressWarnings("PMD.SingularField")
   private File cacheFile;
+  private ResourceCacheKey currentKey;
 
-  public ResourceCacheGenerator(int width, int height, DiskCache diskCache,
-      RequestContext<?, ?> requestContext, FetcherReadyCallback cb) {
-    this.width = width;
-    this.height = height;
-    this.diskCache = diskCache;
-    this.requestContext = requestContext;
+  public ResourceCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
+    this.helper = helper;
     this.cb = cb;
   }
 
   @Override
   public boolean startNext() {
-    List<Key> sourceIds = requestContext.getCacheKeys();
-    List<Class<?>> resourceClasses = requestContext.getRegisteredResourceClasses();
+    List<Key> sourceIds = helper.getCacheKeys();
+    if (sourceIds.isEmpty()) {
+      return false;
+    }
+    List<Class<?>> resourceClasses = helper.getRegisteredResourceClasses();
     while (modelLoaders == null || !hasNextModelLoader()) {
       resourceClassIndex++;
       if (resourceClassIndex >= resourceClasses.size()) {
@@ -59,29 +55,32 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
 
       Key sourceId = sourceIds.get(sourceIdIndex);
       Class<?> resourceClass = resourceClasses.get(resourceClassIndex);
-      Transformation<?> transformation = requestContext.getTransformation(resourceClass);
+      Transformation<?> transformation = helper.getTransformation(resourceClass);
 
-      Key key = new ResourceCacheKey(sourceId, requestContext.getSignature(), width, height,
-          transformation, resourceClass, requestContext.getOptions());
-      cacheFile = diskCache.get(key);
+      currentKey = new ResourceCacheKey(sourceId, helper.getSignature(), helper.getWidth(),
+          helper.getHeight(), transformation, resourceClass, helper.getOptions());
+      cacheFile = helper.getDiskCache().get(currentKey);
       if (cacheFile != null) {
         this.sourceKey = sourceId;
-        modelLoaders = requestContext.getModelLoaders(cacheFile);
+        modelLoaders = helper.getModelLoaders(cacheFile);
         modelLoaderIndex = 0;
       }
     }
 
-    fetcher = null;
-    while (fetcher == null && hasNextModelLoader()) {
+    loadData = null;
+    boolean started = false;
+    while (!started && hasNextModelLoader()) {
       ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
-      fetcher =
-          modelLoader.buildLoadData(cacheFile, width, height, requestContext.getOptions()).fetcher;
-      if (fetcher != null) {
-        fetcher.loadData(requestContext.getPriority(), this);
+      loadData =
+          modelLoader.buildLoadData(cacheFile, helper.getWidth(), helper.getHeight(),
+              helper.getOptions());
+      if (loadData != null && helper.hasLoadPath(loadData.fetcher.getDataClass())) {
+        started = true;
+        loadData.fetcher.loadData(helper.getPriority(), this);
       }
     }
 
-    return fetcher != null;
+    return started;
   }
 
   private boolean hasNextModelLoader() {
@@ -90,14 +89,20 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public void cancel() {
-    DataFetcher<?> local = fetcher;
+    LoadData<?> local = loadData;
     if (local != null) {
-      local.cancel();
+      local.fetcher.cancel();
     }
   }
 
   @Override
   public void onDataReady(Object data) {
-    cb.onDataFetcherReady(sourceKey, data, fetcher, DataSource.RESOURCE_DISK_CACHE);
+    cb.onDataFetcherReady(sourceKey, data, loadData.fetcher, DataSource.RESOURCE_DISK_CACHE,
+        currentKey);
+  }
+
+  @Override
+  public void onLoadFailed(Exception e) {
+    cb.onDataFetcherFailed(currentKey, e, loadData.fetcher, DataSource.RESOURCE_DISK_CACHE);
   }
 }

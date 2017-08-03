@@ -1,15 +1,12 @@
 package com.bumptech.glide.samples.giphy;
 
-import android.content.Context;
 import android.text.TextUtils;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.load.model.stream.BaseGlideUrlLoader;
-
 import java.io.InputStream;
 
 /**
@@ -31,8 +28,7 @@ public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
 
 
     @Override
-    public ModelLoader<Api.GifResult, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<Api.GifResult, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new GiphyModelLoader(multiFactory.build(GlideUrl.class, InputStream.class));
     }
 
@@ -48,9 +44,9 @@ public class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
 
   @Override
   protected String getUrl(Api.GifResult model, int width, int height, Options options) {
-    Api.GifImage fixedHeight = model.images.fixed_height_downsampled;
+    Api.GifImage fixedHeight = model.images.fixed_height;
     int fixedHeightDifference = getDifference(fixedHeight, width, height);
-    Api.GifImage fixedWidth = model.images.fixed_width_downsampled;
+    Api.GifImage fixedWidth = model.images.fixed_width;
     int fixedWidthDifference = getDifference(fixedWidth, width, height);
     if (fixedHeightDifference < fixedWidthDifference && !TextUtils.isEmpty(fixedHeight.url)) {
       return fixedHeight.url;

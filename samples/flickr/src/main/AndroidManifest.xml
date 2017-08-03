@@ -6,13 +6,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-    <uses-sdk android:minSdkVersion="10"
-      android:targetSdkVersion="19" />
-
-
     <application
         android:label="@string/app_name"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@android:drawable/sym_def_app_icon"
         android:allowBackup="false"
         android:theme="@style/Theme.AppCompat">
 
@@ -28,10 +24,5 @@
         </activity>
 
         <activity android:name=".FullscreenActivity"/>
-
-        <meta-data
-            android:name="com.bumptech.glide.samples.flickr.FlickrGlideModule"
-            android:value="GlideModule"/>
     </application>
-
 </manifest>

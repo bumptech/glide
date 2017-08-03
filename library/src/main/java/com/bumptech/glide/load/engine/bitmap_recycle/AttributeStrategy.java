@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
-
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 
 /**
@@ -54,7 +54,8 @@ class AttributeStrategy implements LruPoolStrategy {
     return getBitmapString(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
   }
 
-  private static String getBitmapString(int width, int height, Bitmap.Config config) {
+  @Synthetic
+  static String getBitmapString(int width, int height, Bitmap.Config config) {
     return "[" + width + "x" + height + "], " + config;
   }
 

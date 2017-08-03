@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Key;
-
 import java.io.File;
 
 /**
@@ -13,10 +13,16 @@ public interface DiskCache {
    * An interface for lazily creating a disk cache.
    */
   interface Factory {
-    /**
-     * Returns a new disk cache, or {@code null} if no disk cache could be created.
-     */
-    DiskCache build();
+
+      /** 250 MB of cache. */
+      int DEFAULT_DISK_CACHE_SIZE = 250 * 1024 * 1024;
+      String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
+
+      /**
+       * Returns a new disk cache, or {@code null} if no disk cache could be created.
+       */
+      @Nullable
+      DiskCache build();
   }
 
   /**
@@ -41,6 +47,7 @@ public interface DiskCache {
    * @param key The key in the cache.
    * @return An InputStream representing the data at key at the time get is called.
    */
+  @Nullable
   File get(Key key);
 
   /**

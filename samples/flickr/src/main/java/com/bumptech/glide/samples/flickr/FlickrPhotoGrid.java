@@ -1,35 +1,32 @@
 package com.bumptech.glide.samples.flickr;
 
-import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
-import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
-import static com.bumptech.glide.request.RequestOptions.priorityOf;
+import static com.bumptech.glide.GenericTransitionOptions.withNoTransition;
 
 import android.content.Intent;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.util.FixedPreloadSizeProvider;
-
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * A fragment that shows square image thumbnails whose size is determined by the framgent's
+ * A fragment that shows square image thumbnails whose size is determined by the fragment's
  * arguments in a grid pattern.
  */
 public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
@@ -42,11 +39,12 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
   private PhotoAdapter adapter;
   private List<Photo> currentPhotos;
   private int photoSize;
-  private GridView grid;
+  private RecyclerView grid;
   private boolean thumbnail;
-  private RequestBuilder<Drawable> fullRequest;
-  private RequestBuilder<Drawable> thumbnailRequest;
-  private RequestBuilder<Drawable> preloadRequest;
+  private GlideRequest<Drawable> fullRequest;
+  private GlideRequest<Drawable> thumbnailRequest;
+  private GlideRequest<Drawable> preloadRequest;
+  private GridLayoutManager layoutManager;
 
   public static FlickrPhotoGrid newInstance(int size, int preloadCount, boolean thumbnail) {
     FlickrPhotoGrid photoGrid = new FlickrPhotoGrid();
@@ -65,33 +63,55 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     photoSize = args.getInt(IMAGE_SIZE_KEY);
     thumbnail = args.getBoolean(THUMBNAIL_KEY);
 
-    fullRequest = Glide.with(this)
+    fullRequest = GlideApp.with(this)
         .asDrawable()
-        .transition(withCrossFade(R.anim.fade_in, 150))
-        .apply(centerCropTransform(getActivity()));
+        .centerCrop()
+        .transition(withNoTransition());
 
-    thumbnailRequest = Glide.with(this)
+    thumbnailRequest = GlideApp.with(this)
         .asDrawable()
-        .transition(withCrossFade(R.anim.fade_in, 150))
-        .apply(diskCacheStrategyOf(DiskCacheStrategy.DATA)
-            .centerCrop(getActivity())
-            .override(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE));
+        .diskCacheStrategy(DiskCacheStrategy.DATA)
+        .centerCrop()
+        .override(Api.SQUARE_THUMB_SIZE)
+        .transition(withNoTransition());
 
     preloadRequest =
-        thumbnail ? thumbnailRequest.clone().apply(priorityOf(Priority.HIGH)) : fullRequest;
+        thumbnail ? thumbnailRequest.clone().priority(Priority.HIGH) : fullRequest;
 
     final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
 
-    grid = (GridView) result.findViewById(R.id.images);
-    grid.setColumnWidth(photoSize);
+    final int gridMargin = getResources().getDimensionPixelOffset(R.dimen.grid_margin);
+    int spanCount = getResources().getDisplayMetrics().widthPixels / (photoSize + (2 * gridMargin));
+    grid = (RecyclerView) result.findViewById(R.id.flickr_photo_grid);
+    layoutManager = new GridLayoutManager(getActivity(), spanCount);
+    grid.setLayoutManager(layoutManager);
+
+    grid.addItemDecoration(new RecyclerView.ItemDecoration() {
+      @Override
+      public void getItemOffsets(Rect outRect, View view, RecyclerView parent,
+          RecyclerView.State state) {
+        outRect.set(gridMargin, gridMargin, gridMargin, gridMargin);
+      }
+    });
+    grid.setRecyclerListener(new RecyclerView.RecyclerListener() {
+      @Override
+      public void onViewRecycled(RecyclerView.ViewHolder holder) {
+        PhotoViewHolder photoViewHolder = (PhotoViewHolder) holder;
+        GlideApp.with(FlickrPhotoGrid.this).clear(photoViewHolder.imageView);
+      }
+    });
+
+    int heightCount = getResources().getDisplayMetrics().heightPixels / photoSize;
+    grid.getRecycledViewPool().setMaxRecycledViews(0, spanCount * heightCount * 2);
+    grid.setItemViewCacheSize(0);
     adapter = new PhotoAdapter();
     grid.setAdapter(adapter);
 
-    final FixedPreloadSizeProvider<Photo> preloadSizeProvider =
-        new FixedPreloadSizeProvider<Photo>(photoSize, photoSize);
-    final ListPreloader<Photo> preloader = new ListPreloader<Photo>(Glide.with(this), adapter,
+    FixedPreloadSizeProvider<Photo> preloadSizeProvider =
+        new FixedPreloadSizeProvider<>(photoSize, photoSize);
+    RecyclerViewPreloader<Photo> preloader = new RecyclerViewPreloader<>(Glide.with(this), adapter,
         preloadSizeProvider, args.getInt(PRELOAD_KEY));
-    grid.setOnScrollListener(preloader);
+    grid.addOnScrollListener(preloader);
 
     if (currentPhotos != null) {
       adapter.setPhotos(currentPhotos);
@@ -99,7 +119,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
     if (savedInstanceState != null) {
       int index = savedInstanceState.getInt(STATE_POSITION_INDEX);
-      grid.setSelection(index);
+      grid.scrollToPosition(index);
     }
 
     return result;
@@ -109,7 +129,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
   public void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     if (grid != null) {
-      int index = grid.getFirstVisiblePosition();
+      int index = layoutManager.findFirstVisibleItemPosition();
       outState.putInt(STATE_POSITION_INDEX, index);
     }
   }
@@ -122,10 +142,10 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     }
   }
 
-  private class PhotoAdapter extends BaseAdapter implements
+  private class PhotoAdapter extends RecyclerView.Adapter<PhotoViewHolder> implements
       ListPreloader.PreloadModelProvider<Photo> {
-    private List<Photo> photos = new ArrayList<Photo>(0);
     private final LayoutInflater inflater;
+    private List<Photo> photos = Collections.emptyList();
 
     public PhotoAdapter() {
       this.inflater = LayoutInflater.from(getActivity());
@@ -137,46 +157,44 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     }
 
     @Override
-    public int getCount() {
-      return photos.size();
-    }
-
-    @Override
-    public Object getItem(int i) {
-      return photos.get(i);
-    }
-
-    @Override
-    public long getItemId(int i) {
+    public int getItemViewType(int position) {
       return 0;
     }
 
     @Override
-    public View getView(int position, View view, ViewGroup container) {
+    public PhotoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+      View view = inflater.inflate(R.layout.flickr_photo_grid_item, parent, false);
+      ViewGroup.LayoutParams params = view.getLayoutParams();
+      params.width = photoSize;
+      params.height = photoSize;
+      return new PhotoViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(PhotoViewHolder holder, int position) {
       final Photo current = photos.get(position);
-      final ImageView imageView;
-      if (view == null) {
-        imageView = (ImageView) inflater.inflate(R.layout.flickr_photo_grid_item, container, false);
-        ViewGroup.LayoutParams params = imageView.getLayoutParams();
-        params.width = photoSize;
-        params.height = photoSize;
-      } else {
-        imageView = (ImageView) view;
-      }
 
       fullRequest.load(current)
           .thumbnail(thumbnail ? thumbnailRequest.load(current) : null)
-          .into(imageView);
+          .into(holder.imageView);
 
-      imageView.setOnClickListener(new View.OnClickListener() {
+      holder.imageView.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View view) {
           Intent intent = FullscreenActivity.getIntent(getActivity(), current);
           startActivity(intent);
         }
       });
+    }
 
-      return imageView;
+    @Override
+    public long getItemId(int i) {
+      return RecyclerView.NO_ID;
+    }
+
+    @Override
+    public int getItemCount() {
+      return photos.size();
     }
 
     @Override
@@ -185,8 +203,17 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     }
 
     @Override
-    public RequestBuilder getPreloadRequestBuilder(Photo item) {
+    public RequestBuilder<Drawable> getPreloadRequestBuilder(Photo item) {
       return preloadRequest.load(item);
+    }
+  }
+
+  private static class PhotoViewHolder extends RecyclerView.ViewHolder {
+    private final ImageView imageView;
+
+    public PhotoViewHolder(View itemView) {
+      super(itemView);
+      imageView = (ImageView) itemView;
     }
   }
 }

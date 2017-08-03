@@ -1,24 +1,25 @@
 package com.bumptech.glide.samples.giphy;
 
 import android.content.Context;
-
-import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.Registry;
-import com.bumptech.glide.module.GlideModule;
-
+import com.bumptech.glide.annotation.GlideModule;
+import com.bumptech.glide.module.AppGlideModule;
 import java.io.InputStream;
 
 /**
- * {@link com.bumptech.glide.module.GlideModule} implementation for the Giphy sample app.
+ * Configures Glide for the Giphy sample app.
  */
-public class GiphyGlideModule implements GlideModule {
+@GlideModule
+public class GiphyGlideModule extends AppGlideModule {
   @Override
-  public void applyOptions(Context context, GlideBuilder builder) {
-    // Do nothing.
+  public void registerComponents(Context context, Glide glide, Registry registry) {
+    registry.append(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
   }
 
+  // Disable manifest parsing to avoid adding similar modules twice.
   @Override
-  public void registerComponents(Context context, Registry registry) {
-    registry.append(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
+  public boolean isManifestParsingEnabled() {
+    return false;
   }
 }

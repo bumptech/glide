@@ -1,10 +1,8 @@
 package com.bumptech.glide.load.resource.transcode;
 
 import android.graphics.Bitmap;
-
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.bytes.BytesResource;
-
 import java.io.ByteArrayOutputStream;
 
 /**

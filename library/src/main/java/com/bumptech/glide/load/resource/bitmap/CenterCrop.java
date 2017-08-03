@@ -2,9 +2,8 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-
 import java.security.MessageDigest;
 
 /**
@@ -18,25 +17,26 @@ public class CenterCrop extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.CenterCrop";
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
-  public CenterCrop(Context context) {
-    super(context);
+  public CenterCrop() {
+    // Intentionally empty.
   }
 
-  public CenterCrop(BitmapPool bitmapPool) {
-    super(bitmapPool);
+  @Deprecated
+  public CenterCrop(@SuppressWarnings("unused") Context context) {
+    this();
+  }
+
+  @Deprecated
+  public CenterCrop(@SuppressWarnings("unused") BitmapPool bitmapPool) {
+    this();
   }
 
   // Bitmap doesn't implement equals, so == and .equals are equivalent here.
   @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
-  protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-    final Bitmap toReuse = pool.get(outWidth, outHeight,
-        toTransform.getConfig() != null ? toTransform.getConfig() : Bitmap.Config.ARGB_8888);
-    Bitmap transformed = TransformationUtils.centerCrop(toReuse, toTransform, outWidth, outHeight);
-    if (toReuse != null && toReuse != transformed && !pool.put(toReuse)) {
-      toReuse.recycle();
-    }
-    return transformed;
+  protected Bitmap transform(
+      @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+    return TransformationUtils.centerCrop(pool, toTransform, outWidth, outHeight);
   }
 
   @Override

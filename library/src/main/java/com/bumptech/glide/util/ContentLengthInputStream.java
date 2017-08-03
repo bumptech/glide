@@ -2,7 +2,6 @@ package com.bumptech.glide.util;
 
 import android.text.TextUtils;
 import android.util.Log;
-
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,11 +14,15 @@ public final class ContentLengthInputStream extends FilterInputStream {
   private static final String TAG = "ContentLengthStream";
   private static final int UNKNOWN = -1;
 
-  private final int contentLength;
+  private final long contentLength;
   private int readSoFar;
 
   public static InputStream obtain(InputStream other, String contentLengthHeader) {
-    return new ContentLengthInputStream(other, parseContentLength(contentLengthHeader));
+    return obtain(other, parseContentLength(contentLengthHeader));
+  }
+
+  public static InputStream obtain(InputStream other, long contentLength) {
+    return new ContentLengthInputStream(other, contentLength);
   }
 
   private static int parseContentLength(String contentLengthHeader) {
@@ -36,19 +39,21 @@ public final class ContentLengthInputStream extends FilterInputStream {
     return result;
   }
 
-  ContentLengthInputStream(InputStream in, int contentLength) {
+  ContentLengthInputStream(InputStream in, long contentLength) {
     super(in);
     this.contentLength = contentLength;
   }
 
   @Override
   public synchronized int available() throws IOException {
-    return Math.max(contentLength - readSoFar, in.available());
+    return (int) Math.max(contentLength - readSoFar, in.available());
  }
 
   @Override
   public synchronized int read() throws IOException {
-    return checkReadSoFarOrThrow(super.read());
+    int value = super.read();
+    checkReadSoFarOrThrow(value >= 0 ? 1 : -1);
+    return value;
   }
 
   @Override

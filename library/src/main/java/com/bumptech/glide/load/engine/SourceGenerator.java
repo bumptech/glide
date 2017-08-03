@@ -1,19 +1,14 @@
 package com.bumptech.glide.load.engine;
 
 import android.util.Log;
-
-import com.bumptech.glide.Logs;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoader.LoadData;
 import com.bumptech.glide.util.LogTime;
-
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Generates {@link com.bumptech.glide.load.data.DataFetcher DataFetchers} from original source data
@@ -23,68 +18,66 @@ import java.util.List;
  * <p> Depending on the disk cache strategy, source data may first be written to disk and then
  * loaded from the cache file rather than returned directly. </p>
  */
-class SourceGenerator<Model> implements DataFetcherGenerator,
+class SourceGenerator implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object>,
     DataFetcherGenerator.FetcherReadyCallback {
+  private static final String TAG = "SourceGenerator";
 
-  private final int width;
-  private final int height;
-  private final RequestContext<Model, ?> requestContext;
-  private final DiskCache diskCache;
+  private final DecodeHelper<?> helper;
   private final FetcherReadyCallback cb;
-  private final List<LoadData<?>> loadDataList;
 
   private int loadDataListIndex;
   private DataCacheGenerator sourceCacheGenerator;
   private Object dataToCache;
   private volatile ModelLoader.LoadData<?> loadData;
+  private DataCacheKey originalKey;
 
-  public SourceGenerator(int width, int height, RequestContext<Model, ?> requestContext,
-      DiskCache diskCache, FetcherReadyCallback cb) {
-    this.width = width;
-    this.height = height;
-    this.requestContext = requestContext;
-    this.diskCache = diskCache;
+  public SourceGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
+    this.helper = helper;
     this.cb = cb;
-
-    loadDataList = requestContext.getLoadData();
   }
 
   @Override
   public boolean startNext() {
     if (dataToCache != null) {
-      cacheData();
+      Object data = dataToCache;
       dataToCache = null;
+      cacheData(data);
     }
+
     if (sourceCacheGenerator != null && sourceCacheGenerator.startNext()) {
       return true;
     }
     sourceCacheGenerator = null;
 
     loadData = null;
-    while (loadData == null && hasNextModelLoader()) {
-      loadData = loadDataList.get(loadDataListIndex++);
-      if (loadData != null) {
-        loadData.fetcher.loadData(requestContext.getPriority(), this);
+    boolean started = false;
+    while (!started && hasNextModelLoader()) {
+      loadData = helper.getLoadData().get(loadDataListIndex++);
+      if (loadData != null
+          && (helper.getDiskCacheStrategy().isDataCacheable(loadData.fetcher.getDataSource())
+          || helper.hasLoadPath(loadData.fetcher.getDataClass()))) {
+        started = true;
+        loadData.fetcher.loadData(helper.getPriority(), this);
       }
     }
-    return loadData != null;
+    return started;
   }
 
   private boolean hasNextModelLoader() {
-    return loadDataListIndex < loadDataList.size();
+    return loadDataListIndex < helper.getLoadData().size();
   }
 
-  private void cacheData() {
+  private void cacheData(Object dataToCache) {
     long startTime = LogTime.getLogTime();
     try {
-      Encoder<Object> encoder = requestContext.getSourceEncoder(dataToCache);
+      Encoder<Object> encoder = helper.getSourceEncoder(dataToCache);
       DataCacheWriter<Object> writer =
-          new DataCacheWriter<>(encoder, dataToCache, requestContext.getOptions());
-      Key originalKey = new DataCacheKey(loadData.sourceKey, requestContext.getSignature());
-      diskCache.put(originalKey, writer);
-      if (Logs.isEnabled(Log.VERBOSE)) {
-        Logs.log(Log.VERBOSE, "Finished encoding source to cache"
+          new DataCacheWriter<>(encoder, dataToCache, helper.getOptions());
+      originalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
+      helper.getDiskCache().put(originalKey, writer);
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Finished encoding source to cache"
             + ", key: " + originalKey
             + ", data: " + dataToCache
             + ", encoder: " + encoder
@@ -95,8 +88,7 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
     }
 
     sourceCacheGenerator =
-        new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), width, height,
-            diskCache, requestContext, this);
+        new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), helper, this);
   }
 
   @Override
@@ -109,7 +101,7 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
-    DiskCacheStrategy diskCacheStrategy = requestContext.getDiskCacheStrategy();
+    DiskCacheStrategy diskCacheStrategy = helper.getDiskCacheStrategy();
     if (data != null && diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) {
       dataToCache = data;
       // We might be being called back on someone else's thread. Before doing anything, we should
@@ -117,8 +109,13 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
       cb.reschedule();
     } else {
       cb.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher,
-          loadData.fetcher.getDataSource());
+          loadData.fetcher.getDataSource(), originalKey);
     }
+  }
+
+  @Override
+  public void onLoadFailed(Exception e) {
+    cb.onDataFetcherFailed(originalKey, e, loadData.fetcher, loadData.fetcher.getDataSource());
   }
 
   @Override
@@ -131,9 +128,15 @@ class SourceGenerator<Model> implements DataFetcherGenerator,
   // Called from source cache generator.
   @Override
   public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher<?> fetcher,
-      DataSource dataSource) {
+      DataSource dataSource, Key attemptedKey) {
     // This data fetcher will be loading from a File and provide the wrong data source, so override
     // with the data source of the original fetcher
-    cb.onDataFetcherReady(sourceKey, data, fetcher, loadData.fetcher.getDataSource());
+    cb.onDataFetcherReady(sourceKey, data, fetcher, loadData.fetcher.getDataSource(), sourceKey);
+  }
+
+  @Override
+  public void onDataFetcherFailed(Key sourceKey, Exception e, DataFetcher<?> fetcher,
+      DataSource dataSource) {
+    cb.onDataFetcherFailed(sourceKey, e, fetcher, loadData.fetcher.getDataSource());
   }
 }

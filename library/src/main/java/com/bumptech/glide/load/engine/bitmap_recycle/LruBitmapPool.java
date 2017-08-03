@@ -5,8 +5,10 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
-
+import com.bumptech.glide.util.Synthetic;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -76,7 +78,7 @@ public class LruBitmapPool implements BitmapPool {
   }
 
   @Override
-  public synchronized boolean put(Bitmap bitmap) {
+  public synchronized void put(Bitmap bitmap) {
     if (bitmap == null) {
       throw new NullPointerException("Bitmap must not be null");
     }
@@ -86,12 +88,13 @@ public class LruBitmapPool implements BitmapPool {
     if (!bitmap.isMutable() || strategy.getSize(bitmap) > maxSize
         || !allowedConfigs.contains(bitmap.getConfig())) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
-        Log.v(TAG,
-            "Reject bitmap from pool" + ", bitmap: " + strategy.logBitmap(bitmap) + ", is mutable: "
-                + bitmap.isMutable() + ", is allowed config: " + allowedConfigs
-                .contains(bitmap.getConfig()));
+        Log.v(TAG, "Reject bitmap from pool"
+                + ", bitmap: " + strategy.logBitmap(bitmap)
+                + ", is mutable: " + bitmap.isMutable()
+                + ", is allowed config: " + allowedConfigs.contains(bitmap.getConfig()));
       }
-      return false;
+      bitmap.recycle();
+      return;
     }
 
     final int size = strategy.getSize(bitmap);
@@ -107,7 +110,6 @@ public class LruBitmapPool implements BitmapPool {
     dump();
 
     evict();
-    return true;
   }
 
   private void evict() {
@@ -115,21 +117,33 @@ public class LruBitmapPool implements BitmapPool {
   }
 
   @Override
-  public synchronized Bitmap get(int width, int height, Bitmap.Config config) {
-    Bitmap result = getDirty(width, height, config);
+  @NonNull
+  public Bitmap get(int width, int height, Bitmap.Config config) {
+    Bitmap result = getDirtyOrNull(width, height, config);
     if (result != null) {
       // Bitmaps in the pool contain random data that in some cases must be cleared for an image
       // to be rendered correctly. we shouldn't force all consumers to independently erase the
       // contents individually, so we do so here. See issue #131.
       result.eraseColor(Color.TRANSPARENT);
+    } else {
+      result = Bitmap.createBitmap(width, height, config);
     }
 
     return result;
   }
 
-  @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+  @NonNull
   @Override
-  public synchronized Bitmap getDirty(int width, int height, Bitmap.Config config) {
+  public Bitmap getDirty(int width, int height, Bitmap.Config config) {
+    Bitmap result = getDirtyOrNull(width, height, config);
+    if (result == null) {
+      result = Bitmap.createBitmap(width, height, config);
+    }
+    return result;
+  }
+
+  @Nullable
+  private synchronized Bitmap getDirtyOrNull(int width, int height, Bitmap.Config config) {
     // Config will be null for non public config types, which can lead to transformations naively
     // passing in null as the requested config here. See issue #194.
     final Bitmap result = strategy.get(width, height, config != null ? config : DEFAULT_CONFIG);
@@ -142,9 +156,7 @@ public class LruBitmapPool implements BitmapPool {
       hits++;
       currentSize -= strategy.getSize(result);
       tracker.remove(result);
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-        result.setHasAlpha(true);
-      }
+      normalize(result);
     }
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       Log.v(TAG, "Get bitmap=" + strategy.logBitmap(width, height, config));
@@ -154,20 +166,37 @@ public class LruBitmapPool implements BitmapPool {
     return result;
   }
 
+  // Setting these two values provides Bitmaps that are essentially equivalent to those returned
+  // from Bitmap.createBitmap.
+  private static void normalize(Bitmap bitmap) {
+    bitmap.setHasAlpha(true);
+    maybeSetPreMultiplied(bitmap);
+  }
+
+  @TargetApi(Build.VERSION_CODES.KITKAT)
+  private static void maybeSetPreMultiplied(Bitmap bitmap) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      bitmap.setPremultiplied(true);
+    }
+  }
+
   @Override
   public void clearMemory() {
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+      Log.d(TAG, "clearMemory");
+    }
     trimToSize(0);
   }
 
   @SuppressLint("InlinedApi")
   @Override
   public void trimMemory(int level) {
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "trimMemory, level=" + level);
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+      Log.d(TAG, "trimMemory, level=" + level);
     }
-    if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
+    if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
       clearMemory();
-    } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
+    } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
       trimToSize(maxSize / 2);
     }
   }
@@ -256,6 +285,10 @@ public class LruBitmapPool implements BitmapPool {
   }
 
   private static class NullBitmapTracker implements BitmapTracker {
+
+    @Synthetic
+    NullBitmapTracker() { }
+
     @Override
     public void add(Bitmap bitmap) {
       // Do nothing.

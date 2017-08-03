@@ -1,7 +1,7 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.engine.Resource;
-
 import java.io.IOException;
 
 /**
@@ -19,7 +19,7 @@ public interface ResourceDecoder<T, Z> {
    * <p> Decoders should make a best effort attempt to quickly determine if they are likely to be
    * able to decode data, but should not attempt to completely read the given data. A typical
    * implementation would check the file headers verify they match content the decoder expects to
-   * handle (ie a GIF decoder should verify that the image contains the GIF header block. </p>
+   * handle (i.e. a GIF decoder should verify that the image contains the GIF header block. </p>
    *
    * <p> Decoders that return {@code true} from {@link #handles(Object, Options)} may still
    * return {@code null} from {@link #decode(Object, int, int, Options)} if the data is
@@ -54,5 +54,6 @@ public interface ResourceDecoder<T, Z> {
    *                expected type.
    * @throws IOException
    */
+  @Nullable
   Resource<Z> decode(T source, int width, int height, Options options) throws IOException;
 }

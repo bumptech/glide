@@ -1,0 +1,3 @@
+apply plugin: 'java'
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

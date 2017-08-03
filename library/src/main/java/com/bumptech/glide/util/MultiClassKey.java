@@ -3,6 +3,7 @@ package com.bumptech.glide.util;
 /**
  * A key of two {@link Class}es to be used in hashed collections.
  */
+@SuppressWarnings({"PMD.ConstructorCallsOverridableMethod"})
 public class MultiClassKey {
   private Class<?> first;
   private Class<?> second;
@@ -35,6 +36,7 @@ public class MultiClassKey {
     return "MultiClassKey{" + "first=" + first + ", second=" + second + '}';
   }
 
+  @SuppressWarnings({"PMD.SimplifyBooleanReturns", "RedundantIfStatement"})
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -52,10 +54,7 @@ public class MultiClassKey {
     if (!second.equals(that.second)) {
       return false;
     }
-    if (third == null && that.third != null) {
-      return false;
-    }
-    if (third != null && !third.equals(that.third)) {
+    if (!Util.bothNullOrEqual(third, that.third)) {
       return false;
     }
 

@@ -1,10 +1,7 @@
 package com.bumptech.glide.load.model;
 
-import android.content.Context;
 import android.net.Uri;
-
 import com.bumptech.glide.load.Options;
-
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,8 +47,7 @@ public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
   public static class StreamFactory implements ModelLoaderFactory<Uri, InputStream> {
 
     @Override
-    public ModelLoader<Uri, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new UrlUriLoader<>(multiFactory.build(GlideUrl.class, InputStream.class));
     }
 

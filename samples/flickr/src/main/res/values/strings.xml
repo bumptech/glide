@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Glide Flickr Demo</string>
-    <string name="search">Search</string>
-    <string name="searching_for">Searching for \"%s\" on Flickr</string>
-    <string name="search_failed">Search for \"%s\" failed, check your network connection and try again</string>
-    <string name="small">Small</string>
-    <string name="medium">Medium</string>
-    <string name="list">List</string>
-    <string name="image_description">An image from the list of results for a search query</string>
+  <string name="app_name">Glide Flickr Demo</string>
+  <string name="search">Search</string>
+  <string name="searching_for">Searching for \"%s\" on Flickr</string>
+  <string name="search_failed">Search for \"%s\" failed, check your network connection and try again</string>
+  <string name="small">Small</string>
+  <string name="medium">Medium</string>
+  <string name="list">List</string>
+  <string name="image_description">An image from the list of results for a search query</string>
+  <string name="fullscreen_description">Full screen view of an image</string>
 </resources>

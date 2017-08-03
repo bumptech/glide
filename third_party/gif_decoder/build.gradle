@@ -1,21 +1,24 @@
 apply plugin: 'com.android.library'
-apply plugin: 'robolectric'
 
 dependencies {
-    androidTestCompile project(':testutil')
-    androidTestCompile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
-    androidTestCompile "com.google.truth:truth:${TRUTH_VERSION}"
-    androidTestCompile "junit:junit:${JUNIT_VERSION}"
-    androidTestCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
-    androidTestCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    compile "com.android.support:support-annotations:${SUPPORT_V4_VERSION}"
+
+    testCompile project(':testutil')
+    testCompile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
+    testCompile "com.google.truth:truth:${TRUTH_VERSION}"
+    testCompile "junit:junit:${JUNIT_VERSION}"
+    testCompile "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
 }
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
-    buildToolsVersion BUILD_TOOLS_VERSION
+    buildToolsVersion BUILD_TOOLS_VERSION as String
 
     defaultConfig {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
     }
 }
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

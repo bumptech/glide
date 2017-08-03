@@ -15,7 +15,7 @@ public final class MediaStoreUtil {
     // Utility class.
   }
 
-  private static boolean isMediaStoreUri(Uri uri) {
+  public static boolean isMediaStoreUri(Uri uri) {
     return uri != null && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())
         && MediaStore.AUTHORITY.equals(uri.getAuthority());
   }

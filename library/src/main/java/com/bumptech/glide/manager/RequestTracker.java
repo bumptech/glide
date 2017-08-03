@@ -2,7 +2,6 @@ package com.bumptech.glide.manager;
 
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Util;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,8 +25,7 @@ public class RequestTracker {
       Collections.newSetFromMap(new WeakHashMap<Request, Boolean>());
   // A set of requests that have not completed and are queued to be run again. We use this list to
   // maintain hard references to these requests to ensure that they are not garbage collected
-  // before
-  // they start running or while they are paused. See #346.
+  // before they start running or while they are paused. See #346.
   @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
   private final List<Request> pendingRequests = new ArrayList<>();
   private boolean isPaused;
@@ -54,8 +52,12 @@ public class RequestTracker {
    * request was removed or {@code false} if the request was not found.
    */
   public boolean clearRemoveAndRecycle(Request request) {
-    boolean isOwnedByUs =
-        request != null && (requests.remove(request) || pendingRequests.remove(request));
+    if (request == null) {
+      return false;
+    }
+    boolean isOwnedByUs = requests.remove(request);
+    // Avoid short circuiting.
+    isOwnedByUs = pendingRequests.remove(request) || isOwnedByUs;
     if (isOwnedByUs) {
       request.clear();
       request.recycle();
@@ -123,5 +125,10 @@ public class RequestTracker {
         }
       }
     }
+  }
+
+  @Override
+  public String toString() {
+    return super.toString() + "{numRequests=" + requests.size() + ", isPaused=" + isPaused + "}";
   }
 }

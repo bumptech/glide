@@ -3,9 +3,7 @@ package com.bumptech.glide.signature;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-
 import com.bumptech.glide.load.Key;
-
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -55,7 +53,7 @@ public final class ApplicationVersionSignature {
     } else {
       versionCode = UUID.randomUUID().toString();
     }
-    return new StringSignature(versionCode);
+    return new ObjectKey(versionCode);
   }
 
   private ApplicationVersionSignature() {

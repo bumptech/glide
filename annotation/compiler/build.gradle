@@ -1,0 +1,17 @@
+import org.gradle.internal.jvm.Jvm
+
+apply plugin: 'java'
+
+dependencies {
+    compile 'com.squareup:javapoet:1.8.0'
+    compile 'com.google.auto.service:auto-service:1.0-rc3'
+    compile 'com.google.code.findbugs:jsr305:3.0.1'
+    compile project(':annotation')
+    // This is to support com.sun.tootls.javac.util.List, currently used in RootModuleGenerator.
+    compile files(Jvm.current().getToolsJar())
+
+    testCompile "junit:junit:${JUNIT_VERSION}"
+    testCompile 'com.google.testing.compile:compile-testing:0.10'
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

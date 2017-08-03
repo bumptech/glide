@@ -2,11 +2,10 @@ package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-
+import android.support.annotation.Nullable;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;
-
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -22,13 +21,27 @@ import java.util.concurrent.TimeoutException;
  *
  * <pre>
  *     {@code
- *      RequestFutureTarget target = Glide.load("")...
- *     Object resource = target.get();
- *     // Do something with resource, and when finished:
- *     target.cancel(false);
+ *      FutureTarget<File> target = null;
+ *      RequestManager requestManager = Glide.with(context);
+ *      try {
+ *        target = requestManager
+ *           .downloadOnly()
+ *           .load(model)
+ *           .submit();
+ *        File downloadedFile = target.get();
+ *        // ... do something with the file (usually throws IOException)
+ *      } catch (ExecutionException | InterruptedException | IOException e) {
+ *        // ... bug reporting or recovery
+ *      } finally {
+ *        // make sure to cancel pending operations and free resources
+ *        if (target != null) {
+ *          target.cancel(true); // mayInterruptIfRunning
+ *        }
+ *      }
  *     }
  *     </pre>
- * The {@link #cancel(boolean)} call will make sure any resources used are recycled.
+ * The {@link #cancel(boolean)} call will cancel pending operations and
+ * make sure that any resources used are recycled.
  * </p>
  *
  * @param <R> The type of the resource that will be loaded.
@@ -44,8 +57,8 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   private final boolean assertBackgroundThread;
   private final Waiter waiter;
 
-  private R resource;
-  private Request request;
+  @Nullable private R resource;
+  @Nullable private Request request;
   private boolean isCancelled;
   private boolean resultReceived;
   private boolean loadFailed;
@@ -67,18 +80,16 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   }
 
   @Override
-  public synchronized boolean cancel(boolean b) {
-    if (isCancelled) {
-      return true;
+  public synchronized boolean cancel(boolean mayInterruptIfRunning) {
+    if (isDone()) {
+      return false;
     }
-
-    final boolean result = !isDone();
-    if (result) {
-      isCancelled = true;
-      waiter.notifyAll(this);
+    isCancelled = true;
+    waiter.notifyAll(this);
+    if (mayInterruptIfRunning) {
+      clearOnMainThread();
     }
-    clearOnMainThread();
-    return result;
+    return true;
   }
 
   @Override
@@ -114,15 +125,21 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     cb.onSizeReady(width, height);
   }
 
+  @Override
+  public void removeCallback(SizeReadyCallback cb) {
+    // Do nothing because we do not retain references to SizeReadyCallbacks.
+  }
+
   /**
    * {@inheritDoc}
    */
   @Override
-  public void setRequest(Request request) {
+  public void setRequest(@Nullable Request request) {
     this.request = request;
   }
 
   @Override
+  @Nullable
   public Request getRequest() {
     return request;
   }
@@ -165,7 +182,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
 
   private synchronized R doGet(Long timeoutMillis)
       throws ExecutionException, InterruptedException, TimeoutException {
-    if (assertBackgroundThread) {
+    if (assertBackgroundThread && !isDone()) {
       Util.assertBackgroundThread();
     }
 

@@ -1,23 +1,13 @@
 package com.bumptech.glide.samples.flickr.api;
 
 import android.content.Context;
-import android.text.TextUtils;
-import android.util.Log;
 import android.util.SparseArray;
-
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.util.LruCache;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -38,6 +28,8 @@ public class Api {
   private static final int MAX_URLS_TO_CACHE = 2000;
   private static final LruCache<UrlCacheKey, String> CACHED_URLS =
       new LruCache<>(MAX_URLS_TO_CACHE);
+  private static final int MAX_ITEMS_PER_PAGE = 300;
+  private static final String PER_PAGE = "&per_page=" + MAX_ITEMS_PER_PAGE;
 
   private static final SparseArray<String> EDGE_TO_SIZE_KEY = new SparseArray<String>() {
     {
@@ -51,7 +43,8 @@ public class Api {
     }
   };
   private static final List<Integer> SORTED_SIZE_KEYS =
-      new ArrayList<Integer>(EDGE_TO_SIZE_KEY.size());
+      new ArrayList<>(EDGE_TO_SIZE_KEY.size());
+
 
   static {
     for (int i = 0; i < EDGE_TO_SIZE_KEY.size(); i++) {
@@ -114,10 +107,6 @@ public class Api {
     return String.format(SIGNED_API_URL, method);
   }
 
-  private static String getSearchUrl(String text) {
-    return getUrlForMethod("flickr.photos.search") + "&text=" + text + "&per_page=300";
-  }
-
   private static String getPhotoUrl(Photo photo, String sizeKey) {
     UrlCacheKey entry = new UrlCacheKey(photo, sizeKey);
     String result = CACHED_URLS.get(entry);
@@ -128,25 +117,33 @@ public class Api {
     return result;
   }
 
+  static String getSearchUrl(String text) {
+    return getUrlForMethod("flickr.photos.search") + "&text=" + text + PER_PAGE;
+  }
+
+  static String getRecentUrl() {
+    return getUrlForMethod("flickr.photos.getRecent" + PER_PAGE);
+  }
+
   /**
    * An interface for listening for search results from the Flickr API.
    */
-  public interface SearchListener {
+  public interface QueryListener {
     /**
      * Called when a search completes successfully.
      *
-     * @param searchString The term that was searched for.
-     * @param photos       A list of images that were found for the given search term.
+     * @param query  The query used to obtain the results.
+     * @param photos A list of images that were found for the given search term.
      */
-    public void onSearchCompleted(String searchString, List<Photo> photos);
+    void onSearchCompleted(Query query, List<Photo> photos);
 
     /**
      * Called when a search fails.
      *
-     * @param searchString The term that was searched for.
-     * @param e            The exception that caused the search to fail.
+     * @param query The query we attempted to obtain results for.
+     * @param e     The exception that caused the search to fail.
      */
-    public void onSearchFailed(String searchString, Exception e);
+    void onSearchFailed(Query query, Exception e);
   }
 
   public static Api get(Context context) {
@@ -157,75 +154,56 @@ public class Api {
   }
 
   private final RequestQueue requestQueue;
-  private final Set<SearchListener> searchListeners = new HashSet<SearchListener>();
-  private SearchResult lastSearchResult;
+  private final Set<QueryListener> queryListeners = new HashSet<QueryListener>();
+  private QueryResult lastQueryResult;
 
   protected Api(Context context) {
     this.requestQueue = Volley.newRequestQueue(context.getApplicationContext());
+    QueryListener queryListener = new QueryListener() {
+      @Override
+      public void onSearchCompleted(Query query, List<Photo> photos) {
+        lastQueryResult = new QueryResult(query, photos);
+      }
+
+      @Override
+      public void onSearchFailed(Query query, Exception e) {
+        lastQueryResult = null;
+      }
+    };
+    queryListeners.add(queryListener);
   }
 
-  public void registerSearchListener(SearchListener searchListener) {
-    searchListeners.add(searchListener);
+  public void registerSearchListener(QueryListener queryListener) {
+    queryListeners.add(queryListener);
   }
 
-  public void unregisterSearchListener(SearchListener searchListener) {
-    searchListeners.remove(searchListener);
+  public void unregisterSearchListener(QueryListener queryListener) {
+    queryListeners.remove(queryListener);
   }
 
-  public void search(final String text) {
-    if (lastSearchResult != null && TextUtils.equals(lastSearchResult.searchString, text)) {
-      for (SearchListener listener : searchListeners) {
-        listener.onSearchCompleted(lastSearchResult.searchString, lastSearchResult.results);
+  public void query(Query query) {
+    if (lastQueryResult != null && lastQueryResult.query.equals(query)) {
+      for (QueryListener listener : queryListeners) {
+        listener.onSearchCompleted(lastQueryResult.query, lastQueryResult.results);
       }
       return;
     }
 
-    StringRequest request =
-        new StringRequest(Request.Method.GET, getSearchUrl(text), new Response.Listener<String>() {
-          @Override
-          public void onResponse(String response) {
-            try {
-              // Cut out initial flickJsonApi(
-              JSONObject searchResults =
-                  new JSONObject(response.substring(14, response.length() - 1));
-              JSONArray photos = searchResults.getJSONObject("photos").getJSONArray("photo");
-              List<Photo> results = new ArrayList<Photo>(photos.length());
-              for (int i = 0; i < photos.length(); i++) {
-                results.add(new Photo(photos.getJSONObject(i)));
-              }
-              lastSearchResult = new SearchResult(text, results);
-              for (SearchListener listener : searchListeners) {
-                listener.onSearchCompleted(text, results);
-              }
-            } catch (JSONException e) {
-              for (SearchListener listener : searchListeners) {
-                listener.onSearchFailed(text, e);
-              }
-              if (Log.isLoggable(TAG, Log.ERROR)) {
-                Log.e(TAG, "Search failed response=" + response, e);
-              }
-            }
-          }
-        }, new Response.ErrorListener() {
-          @Override
-          public void onErrorResponse(VolleyError error) {
-            for (SearchListener listener : searchListeners) {
-              listener.onSearchFailed(text, error);
-            }
-          }
-        });
+    FlickrQueryResponseListener responseListener
+        = new FlickrQueryResponseListener(new PhotoJsonStringParser(), query, queryListeners);
+    StringRequest request = new StringRequest(Request.Method.GET, query.getUrl(),
+        responseListener, responseListener);
     request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 3,
         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
     requestQueue.add(request);
   }
 
-  private static class SearchResult {
-    private final String searchString;
+  private static class QueryResult {
+    private final Query query;
     private final List<Photo> results;
 
-    public SearchResult(String searchString, List<Photo> results) {
-
-      this.searchString = searchString;
+    public QueryResult(Query query, List<Photo> results) {
+      this.query = query;
       this.results = results;
     }
   }

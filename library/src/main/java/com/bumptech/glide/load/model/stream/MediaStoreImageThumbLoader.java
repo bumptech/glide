@@ -2,7 +2,6 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import com.bumptech.glide.load.data.mediastore.ThumbFetcher;
@@ -10,7 +9,6 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.signature.ObjectKey;
-
 import java.io.InputStream;
 
 /**
@@ -43,9 +41,14 @@ public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream>
    */
   public static class Factory implements ModelLoaderFactory<Uri, InputStream> {
 
+    private final Context context;
+
+    public Factory(Context context) {
+      this.context = context;
+    }
+
     @Override
-    public ModelLoader<Uri, InputStream> build(Context context,
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new MediaStoreImageThumbLoader(context);
     }
 

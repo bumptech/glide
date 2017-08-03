@@ -1,15 +1,12 @@
 package com.bumptech.glide;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.annotation.Nullable;
 import android.widget.AbsListView;
-
 import com.bumptech.glide.request.target.BaseTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
-
 import java.util.List;
 import java.util.Queue;
 
@@ -30,7 +27,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
 
   private final int maxPreload;
   private final PreloadTargetQueue preloadTargetQueue;
-  private RequestManager requestManager;
+  private final RequestManager requestManager;
   private final PreloadModelProvider<T> preloadModelProvider;
   private final PreloadSizeProvider<T> preloadDimensionProvider;
 
@@ -88,42 +85,8 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      *
      * @param item A model
      */
+    @Nullable
     int[] getPreloadSize(T item, int adapterPosition, int perItemPosition);
-  }
-
-  /**
-   * Helper constructor that accepts an {@link Activity}.
-   */
-  public ListPreloader(Activity activity, PreloadModelProvider<T> preloadModelProvider,
-      PreloadSizeProvider<T> preloadDimensionProvider, int maxPreload) {
-    this(Glide.with(activity), preloadModelProvider, preloadDimensionProvider, maxPreload);
-  }
-
-  /**
-   * Helper constructor that accepts an {@link FragmentActivity}.
-   */
-  public ListPreloader(FragmentActivity fragmentActivity,
-      PreloadModelProvider<T> preloadModelProvider, PreloadSizeProvider<T> preloadDimensionProvider,
-      int maxPreload) {
-    this(Glide.with(fragmentActivity), preloadModelProvider, preloadDimensionProvider, maxPreload);
-  }
-
-  /**
-   * Helper constructor that accepts an {@link Fragment}.
-   */
-  public ListPreloader(Fragment fragment,
-      PreloadModelProvider<T> preloadModelProvider, PreloadSizeProvider<T> preloadDimensionProvider,
-      int maxPreload) {
-    this(Glide.with(fragment), preloadModelProvider, preloadDimensionProvider, maxPreload);
-  }
-
-  /**
-   * Helper constructor that accepts an {@link android.support.v4.app.Fragment}.
-   */
-  public ListPreloader(android.support.v4.app.Fragment fragment,
-      PreloadModelProvider<T> preloadModelProvider, PreloadSizeProvider<T> preloadDimensionProvider,
-      int maxPreload) {
-    this(Glide.with(fragment), preloadModelProvider, preloadDimensionProvider, maxPreload);
   }
 
   /**
@@ -215,7 +178,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   private void preloadItem(T item, int position, int i) {
     final int[] dimensions = this.preloadDimensionProvider.getPreloadSize(item, position, i);
     if (dimensions != null) {
-      RequestBuilder preloadRequestBuilder =
+      RequestBuilder<Object> preloadRequestBuilder =
           this.preloadModelProvider.getPreloadRequestBuilder(item);
       preloadRequestBuilder.into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
     }
@@ -248,8 +211,11 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   }
 
   private static class PreloadTarget extends BaseTarget<Object> {
-    private int photoHeight;
-    private int photoWidth;
+    @Synthetic int photoHeight;
+    @Synthetic int photoWidth;
+
+    @Synthetic
+    PreloadTarget() { }
 
     @Override
     public void onResourceReady(Object resource, Transition<? super Object> transition) {
@@ -259,6 +225,11 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     @Override
     public void getSize(SizeReadyCallback cb) {
       cb.onSizeReady(photoWidth, photoHeight);
+    }
+
+    @Override
+    public void removeCallback(SizeReadyCallback cb) {
+      // Do nothing because we don't retain references to SizeReadyCallbacks.
     }
   }
 }

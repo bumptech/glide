@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.bumptech.svgsample.app">
+    package="com.bumptech.glide.samples.svg" >
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@android:drawable/sym_def_app_icon"
         android:label="@string/app_name">
-        <meta-data
-            android:name="com.bumptech.svgsample.app.SvgModule"
-            android:value="GlideModule"/>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
