@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -78,11 +79,13 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
       // Do nothing.
     }
 
+    @NonNull
     @Override
     public Class<ByteBuffer> getDataClass() {
       return ByteBuffer.class;
     }
 
+    @NonNull
     @Override
     public DataSource getDataSource() {
       return DataSource.LOCAL;

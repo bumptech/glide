@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.NonNull;
 import android.util.Base64;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -90,11 +91,13 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
       // Do nothing.
     }
 
+    @NonNull
     @Override
     public Class<Data> getDataClass() {
       return reader.getDataClass();
     }
 
+    @NonNull
     @Override
     public DataSource getDataSource() {
       return DataSource.LOCAL;

@@ -3,6 +3,7 @@ apply plugin: 'com.android.library'
 dependencies {
     compile project(':library')
     compile "com.android.volley:volley:${VOLLEY_VERSION}"
+    compile "com.android.support:support-annotations:{$SUPPORT_V4_VERSION}"
     annotationProcessor project(':annotation:compiler')
 
     testCompile project(":testutil")

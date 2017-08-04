@@ -1,5 +1,6 @@
 package com.bumptech.glide.integration.okhttp;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -89,11 +90,13 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     // TODO: call cancel on the client when this method is called on a background thread. See #257
   }
 
+  @NonNull
   @Override
   public Class<InputStream> getDataClass() {
     return InputStream.class;
   }
 
+  @NonNull
   @Override
   public DataSource getDataSource() {
     return DataSource.REMOTE;

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data;
 
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import com.bumptech.glide.Priority;
@@ -154,11 +155,13 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     isCancelled = true;
   }
 
+  @NonNull
   @Override
   public Class<InputStream> getDataClass() {
     return InputStream.class;
   }
 
+  @NonNull
   @Override
   public DataSource getDataSource() {
     return DataSource.REMOTE;

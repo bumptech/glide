@@ -8,6 +8,8 @@ import static org.mockito.Mockito.verify;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+
 import com.bumptech.glide.Priority;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
@@ -75,6 +77,7 @@ public class LocalUriFetcherTest {
       data.close();
     }
 
+    @NonNull
     @Override
     public Class<Closeable> getDataClass() {
       return Closeable.class;

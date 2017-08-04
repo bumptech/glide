@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.NonNull;
+
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
@@ -48,12 +50,14 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
       // Do nothing.
     }
 
+    @NonNull
     @SuppressWarnings("unchecked")
     @Override
     public Class<Model> getDataClass() {
       return (Class<Model>) resource.getClass();
     }
 
+    @NonNull
     @Override
     public DataSource getDataSource() {
       return DataSource.LOCAL;

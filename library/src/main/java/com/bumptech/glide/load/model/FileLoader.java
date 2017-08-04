@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -89,11 +90,13 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
       // Do nothing.
     }
 
+    @NonNull
     @Override
     public Class<Data> getDataClass() {
       return opener.getDataClass();
     }
 
+    @NonNull
     @Override
     public DataSource getDataSource() {
       return DataSource.LOCAL;
