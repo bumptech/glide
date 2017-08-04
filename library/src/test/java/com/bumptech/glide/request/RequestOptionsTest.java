@@ -3,7 +3,12 @@ package com.bumptech.glide.request;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.Bitmap;
+
+import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,7 +80,7 @@ public class RequestOptionsTest {
     assertThat(options.getTransformations()).isEmpty();
   }
 
-@Test
+  @Test
   public void testApplyingTransformation_overridesDontTransform() {
     options.dontTransform();
     options.transform(transformation);
@@ -131,5 +136,14 @@ public class RequestOptionsTest {
     assertThat(options.isTransformationAllowed()).isTrue();
     assertThat(options.isTransformationRequired()).isTrue();
     assertThat(options.getTransformations()).containsEntry(Bitmap.class, transformation);
+  }
+
+  @Test
+  public void testApplyMultiTransform() {
+    options.transforms(new CircleCrop(), new CenterCrop());
+    assertThat(options.isTransformationRequired()).isTrue();
+    assertThat(options.getTransformations()).containsKey(Bitmap.class);
+    assertThat(options.getTransformations().get(Bitmap.class))
+      .isInstanceOf(MultiTransformation.class);
   }
 }

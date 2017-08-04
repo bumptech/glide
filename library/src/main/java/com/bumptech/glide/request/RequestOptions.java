@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
@@ -871,6 +872,30 @@ public class RequestOptions implements Cloneable {
     }
 
     optionalTransform(transformation);
+    isTransformationRequired = true;
+    fields |= TRANSFORMATION_REQUIRED;
+    return selfOrThrowIfLocked();
+  }
+
+  /**
+   * Applies the given {@link Transformation}s in the given order for
+   * {@link Bitmap Bitmaps} to the default types ({@link Bitmap},
+   * {@link android.graphics.drawable.BitmapDrawable}, and
+   * {@link com.bumptech.glide.load.resource.gif.GifDrawable})
+   * and throws an exception if asked to transform an unknown type.
+   * <p>
+   * <p>This will override previous calls to {@link #dontTransform()}.
+   *
+   * @param transformations One or more {@link Transformation}s for {@link Bitmap}s.
+   * @see #optionalTransform(Transformation)
+   * @see #optionalTransform(Class, Transformation)
+   */
+  public RequestOptions transforms(@NonNull Transformation<Bitmap>... transformations) {
+    if (isAutoCloneEnabled) {
+      return clone().transforms(transformations);
+    }
+
+    optionalTransform(new MultiTransformation<>(transformations));
     isTransformationRequired = true;
     fields |= TRANSFORMATION_REQUIRED;
     return selfOrThrowIfLocked();
