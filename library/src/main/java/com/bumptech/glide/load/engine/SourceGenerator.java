@@ -101,6 +101,9 @@ class SourceGenerator implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
+    if (loadData == null || loadData.fetcher == null) {
+      return;
+    }
     DiskCacheStrategy diskCacheStrategy = helper.getDiskCacheStrategy();
     if (data != null && diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) {
       dataToCache = data;
@@ -115,7 +118,10 @@ class SourceGenerator implements DataFetcherGenerator,
 
   @Override
   public void onLoadFailed(Exception e) {
-    cb.onDataFetcherFailed(originalKey, e, loadData.fetcher, loadData.fetcher.getDataSource());
+    if (loadData != null && loadData.fetcher != null) {
+      cb.onDataFetcherFailed(originalKey, e, loadData.fetcher,
+          loadData.fetcher.getDataSource());
+    }
   }
 
   @Override
