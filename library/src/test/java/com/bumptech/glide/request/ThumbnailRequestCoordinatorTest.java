@@ -330,4 +330,25 @@ public class ThumbnailRequestCoordinatorTest {
 
     verify(parent, never()).onRequestSuccess(any(Request.class));
   }
+
+  @Test
+  public void testIsEquivalentTo() {
+    ThumbnailRequestCoordinator first = new ThumbnailRequestCoordinator();
+    when(full.isEquivalentTo(full)).thenReturn(true);
+    when(thumb.isEquivalentTo(thumb)).thenReturn(true);
+    first.setRequests(full, thumb);
+    assertTrue(first.isEquivalentTo(first));
+
+    ThumbnailRequestCoordinator second = new ThumbnailRequestCoordinator();
+    second.setRequests(full, full);
+    assertTrue(second.isEquivalentTo(second));
+    assertFalse(second.isEquivalentTo(first));
+    assertFalse(first.isEquivalentTo(second));
+
+    ThumbnailRequestCoordinator third = new ThumbnailRequestCoordinator();
+    third.setRequests(thumb, thumb);
+    assertTrue(third.isEquivalentTo(third));
+    assertFalse(third.isEquivalentTo(first));
+    assertFalse(first.isEquivalentTo(third));
+  }
 }

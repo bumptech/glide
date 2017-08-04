@@ -50,7 +50,7 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 @SuppressWarnings("rawtypes")
 public class SingleRequestTest {
-  private RequestHarness harness;
+  private RequestHarness harness = new RequestHarness();
 
   /**
    * {@link Number} and {@link List} are arbitrarily chosen types to test some type safety as well.
@@ -77,6 +77,7 @@ public class SingleRequestTest {
     Key signature = mock(Key.class);
     Priority priority = Priority.HIGH;
     boolean useUnlimitedSourceGeneratorsPool = false;
+    Class<List> transcodeClass = List.class;
 
     Map<Class<?>, Transformation<?>>  transformations = new HashMap<>();
 
@@ -96,8 +97,9 @@ public class SingleRequestTest {
         .signature(signature)
         .useUnlimitedSourceGeneratorsPool(useUnlimitedSourceGeneratorsPool);
       return SingleRequest
-          .obtain(glideContext, model, List.class, requestOptions, overrideWidth, overrideHeight,
-              priority, target, requestListener, requestCoordinator, engine, factory);
+          .obtain(glideContext, model, transcodeClass, requestOptions, overrideWidth,
+              overrideHeight, priority, target, requestListener, requestCoordinator, engine,
+              factory);
     }
   }
 
@@ -747,6 +749,48 @@ public class SingleRequestTest {
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
             any(Options.class), anyBoolean(), eq(Boolean.FALSE), anyBoolean(),
             any(ResourceCallback.class));
+  }
+
+  @Test
+  public void testIsEquivalentTo() {
+    SingleRequest<List> originalRequest1 = harness.getRequest();
+    SingleRequest<List> originalRequest2 = harness.getRequest();
+    assertTrue(originalRequest1.isEquivalentTo(originalRequest2));
+
+    harness = new RequestHarness();
+    harness.overrideWidth = harness.overrideWidth * 2;
+    SingleRequest<List> widthRequest = harness.getRequest();
+    assertTrue(widthRequest.isEquivalentTo(widthRequest));
+    assertFalse(widthRequest.isEquivalentTo(originalRequest1));
+    assertFalse(originalRequest1.isEquivalentTo(widthRequest));
+
+    harness = new RequestHarness();
+    harness.overrideHeight = harness.overrideHeight * 2;
+    SingleRequest<List> heightRequest = harness.getRequest();
+    assertTrue(heightRequest.isEquivalentTo(heightRequest));
+    assertFalse(heightRequest.isEquivalentTo(originalRequest1));
+    assertFalse(originalRequest1.isEquivalentTo(heightRequest));
+
+    harness = new RequestHarness();
+    harness.model = 12345679;
+    SingleRequest<List> modelRequest = harness.getRequest();
+    assertTrue(modelRequest.isEquivalentTo(modelRequest));
+    assertFalse(modelRequest.isEquivalentTo(originalRequest1));
+    assertFalse(originalRequest1.isEquivalentTo(modelRequest));
+
+    harness = new RequestHarness();
+    harness.errorDrawable = new ColorDrawable(Color.GRAY);
+    SingleRequest<List> errorRequest = harness.getRequest();
+    assertTrue(errorRequest.isEquivalentTo(errorRequest));
+    assertFalse(errorRequest.isEquivalentTo(originalRequest1));
+    assertFalse(originalRequest1.isEquivalentTo(errorRequest));
+
+    harness = new RequestHarness();
+    harness.priority = Priority.LOW;
+    SingleRequest<List> priorityRequest = harness.getRequest();
+    assertTrue(priorityRequest.isEquivalentTo(priorityRequest));
+    assertFalse(priorityRequest.isEquivalentTo(originalRequest1));
+    assertFalse(originalRequest1.isEquivalentTo(priorityRequest));
   }
 
   // TODO do we want to move these to Util?

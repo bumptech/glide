@@ -80,7 +80,7 @@ public final class SingleRequest<R> implements Request,
     PAUSED,
   }
 
-  private final String tag = String.valueOf(hashCode());
+  private final String tag = String.valueOf(super.hashCode());
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
 
   private RequestCoordinator requestCoordinator;
@@ -549,6 +549,20 @@ public final class SingleRequest<R> implements Request,
         || !requestListener.onLoadFailed(e, model, target, isFirstReadyResource())) {
       setErrorPlaceholder();
     }
+  }
+
+  @Override
+  public boolean isEquivalentTo(Request o) {
+    if (o instanceof SingleRequest) {
+      SingleRequest that = (SingleRequest) o;
+      return overrideWidth == that.overrideWidth
+          && overrideHeight == that.overrideHeight
+          && model.equals(that.model)
+          && transcodeClass.equals(that.transcodeClass)
+          && requestOptions.equals(that.requestOptions)
+          && priority == that.priority;
+    }
+    return false;
   }
 
   private void logV(String message) {

@@ -1095,6 +1095,62 @@ public class RequestOptions implements Cloneable {
     return selfOrThrowIfLocked();
   }
 
+
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof RequestOptions) {
+      RequestOptions other = (RequestOptions) o;
+      return Float.compare(other.sizeMultiplier, sizeMultiplier) == 0
+          && errorId == other.errorId
+          && Util.bothNullOrEqual(errorPlaceholder, other.errorPlaceholder)
+          && placeholderId == other.placeholderId
+          && Util.bothNullOrEqual(placeholderDrawable, other.placeholderDrawable)
+          && fallbackId == other.fallbackId
+          && Util.bothNullOrEqual(fallbackDrawable, other.fallbackDrawable)
+          && isCacheable == other.isCacheable
+          && overrideHeight == other.overrideHeight
+          && overrideWidth == other.overrideWidth
+          && isTransformationRequired == other.isTransformationRequired
+          && isTransformationAllowed == other.isTransformationAllowed
+          && useUnlimitedSourceGeneratorsPool == other.useUnlimitedSourceGeneratorsPool
+          && onlyRetrieveFromCache == other.onlyRetrieveFromCache
+          && diskCacheStrategy.equals(other.diskCacheStrategy)
+          && priority == other.priority
+          && options.equals(other.options)
+          && transformations.equals(other.transformations)
+          && resourceClass.equals(other.resourceClass)
+          && Util.bothNullOrEqual(signature, other.signature)
+          && Util.bothNullOrEqual(theme, other.theme);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    int hashCode = Util.hashCode(sizeMultiplier);
+    hashCode = Util.hashCode(errorId, hashCode);
+    hashCode = Util.hashCode(errorPlaceholder, hashCode);
+    hashCode = Util.hashCode(placeholderId, hashCode);
+    hashCode = Util.hashCode(placeholderDrawable, hashCode);
+    hashCode = Util.hashCode(fallbackId, hashCode);
+    hashCode = Util.hashCode(fallbackDrawable, hashCode);
+    hashCode = Util.hashCode(isCacheable, hashCode);
+    hashCode = Util.hashCode(overrideHeight, hashCode);
+    hashCode = Util.hashCode(overrideWidth, hashCode);
+    hashCode = Util.hashCode(isTransformationRequired, hashCode);
+    hashCode = Util.hashCode(isTransformationAllowed, hashCode);
+    hashCode = Util.hashCode(useUnlimitedSourceGeneratorsPool, hashCode);
+    hashCode = Util.hashCode(onlyRetrieveFromCache, hashCode);
+    hashCode = Util.hashCode(diskCacheStrategy, hashCode);
+    hashCode = Util.hashCode(priority, hashCode);
+    hashCode = Util.hashCode(options, hashCode);
+    hashCode = Util.hashCode(transformations, hashCode);
+    hashCode = Util.hashCode(resourceClass, hashCode);
+    hashCode = Util.hashCode(signature, hashCode);
+    hashCode = Util.hashCode(theme, hashCode);
+    return hashCode;
+  }
+
   /**
    * Throws if any further mutations are attempted.
    *

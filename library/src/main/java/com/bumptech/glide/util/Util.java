@@ -15,6 +15,8 @@ import java.util.Queue;
  * A collection of assorted utility classes.
  */
 public final class Util {
+  private static final int HASH_MULTIPLIER = 31;
+  private static final int HASH_ACCUMULATOR = 17;
   private static final char[] HEX_CHAR_ARRAY = "0123456789abcdef".toCharArray();
   // 32 bytes from sha-256 -> 64 hex chars.
   private static final char[] SHA_256_CHARS = new char[64];
@@ -187,4 +189,33 @@ public final class Util {
   public static boolean bothNullOrEqual(Object a, Object b) {
     return a == null ? b == null : a.equals(b);
   }
+
+  public static int hashCode(int value) {
+    return hashCode(value, HASH_ACCUMULATOR);
+  }
+
+  public static int hashCode(int value, int accumulator) {
+    return accumulator * HASH_MULTIPLIER + value;
+  }
+
+  public static int hashCode(float value) {
+    return hashCode(value, HASH_ACCUMULATOR);
+  }
+
+  public static int hashCode(float value, int accumulator) {
+    return hashCode(Float.floatToIntBits(value), accumulator);
+  }
+
+  public static int hashCode(Object object, int accumulator) {
+    return hashCode(object == null ? 0 : object.hashCode(), accumulator);
+  }
+
+  public static int hashCode(boolean value, int accumulator) {
+    return hashCode(value ? 1 : 0, accumulator);
+  }
+
+  public static int hashCode(boolean value) {
+    return hashCode(value, HASH_ACCUMULATOR);
+  }
+
 }

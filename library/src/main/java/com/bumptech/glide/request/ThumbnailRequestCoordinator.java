@@ -159,4 +159,14 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     full.recycle();
     thumb.recycle();
   }
+
+  @Override
+  public boolean isEquivalentTo(Request o) {
+    if (o instanceof ThumbnailRequestCoordinator) {
+      ThumbnailRequestCoordinator that = (ThumbnailRequestCoordinator) o;
+      return (full == null ? that.full == null : full.isEquivalentTo(that.full))
+          && (thumb == null ? that.thumb == null : thumb.isEquivalentTo(that.thumb));
+    }
+    return false;
+  }
 }
