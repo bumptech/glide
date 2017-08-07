@@ -232,6 +232,7 @@ public class Glide implements ComponentCallbacks2 {
     if (annotationGeneratedModule != null) {
       annotationGeneratedModule.registerComponents(applicationContext, glide, glide.registry);
     }
+    context.getApplicationContext().registerComponentCallbacks(glide);
     Glide.glide = glide;
   }
 
@@ -370,8 +371,9 @@ public class Glide implements ComponentCallbacks2 {
         .register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
 
     ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
-    glideContext = new GlideContext(context, registry, imageViewTargetFactory,
-        defaultRequestOptions, engine, this, logLevel);
+    glideContext =
+        new GlideContext(
+            context, registry, imageViewTargetFactory, defaultRequestOptions, engine, logLevel);
   }
 
   /**
@@ -466,6 +468,7 @@ public class Glide implements ComponentCallbacks2 {
    * @see android.content.ComponentCallbacks2#onTrimMemory(int)
    */
   public void trimMemory(int level) {
+    Log.d("TEST", "trimMemory: " + level);
     // Engine asserts this anyway when removing resources, fail faster and consistently
     Util.assertMainThread();
     // memory cache needs to be trimmed before bitmap pool to trim re-pooled Bitmaps too. See #687.
@@ -669,6 +672,7 @@ public class Glide implements ComponentCallbacks2 {
 
   @Override
   public void onLowMemory() {
+    Log.d("TEST", "onLowMemory");
     clearMemory();
   }
 }
