@@ -59,35 +59,53 @@ public class RequestOptions implements Cloneable {
   private static final int USE_UNLIMITED_SOURCE_GENERATORS_POOL = 1 << 18;
   private static final int ONLY_RETRIEVE_FROM_CACHE = 1 << 19;
 
+  @Nullable
   private static RequestOptions skipMemoryCacheTrueOptions;
+  @Nullable
   private static RequestOptions skipMemoryCacheFalseOptions;
+  @Nullable
   private static RequestOptions fitCenterOptions;
+  @Nullable
   private static RequestOptions centerInsideOptions;
+  @Nullable
   private static RequestOptions centerCropOptions;
+  @Nullable
   private static RequestOptions circleCropOptions;
+  @Nullable
   private static RequestOptions noTransformOptions;
+  @Nullable
   private static RequestOptions noAnimationOptions;
 
   private int fields;
   private float sizeMultiplier = 1f;
+  @NonNull
   private DiskCacheStrategy diskCacheStrategy = DiskCacheStrategy.AUTOMATIC;
+  @NonNull
   private Priority priority = Priority.NORMAL;
+  @Nullable
   private Drawable errorPlaceholder;
   private int errorId;
+  @Nullable
   private Drawable placeholderDrawable;
   private int placeholderId;
   private boolean isCacheable = true;
   private int overrideHeight = RequestOptions.UNSET;
   private int overrideWidth = RequestOptions.UNSET;
+  @NonNull
   private Key signature = EmptySignature.obtain();
   private boolean isTransformationRequired;
   private boolean isTransformationAllowed = true;
+  @Nullable
   private Drawable fallbackDrawable;
   private int fallbackId;
+  @NonNull
   private Options options = new Options();
+  @NonNull
   private Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
+  @NonNull
   private Class<?> resourceClass = Object.class;
   private boolean isLocked;
+  @Nullable
   private Resources.Theme theme;
   private boolean isAutoCloneEnabled;
   private boolean useUnlimitedSourceGeneratorsPool;
@@ -96,6 +114,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #sizeMultiplier(float)} set.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions sizeMultiplierOf(float sizeMultiplier) {
     return new RequestOptions().sizeMultiplier(sizeMultiplier);
   }
@@ -110,6 +129,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #priority(Priority)}} set.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions priorityOf(@NonNull Priority priority) {
     return new RequestOptions().priority(priority);
   }
@@ -162,6 +182,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #override(int, int)}} set.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions overrideOf(int width, int height) {
     return new RequestOptions().override(width, height);
   }
@@ -170,6 +191,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} with {@link #override(int, int)} set where both the width and
    * height are the given size.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions overrideOf(int size) {
     return overrideOf(size, size);
   }
@@ -196,6 +218,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #centerInside()} set.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions centerInsideTransform() {
     if (centerInsideOptions == null) {
       centerInsideOptions = new RequestOptions()
@@ -208,6 +231,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #centerCrop()} set.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions centerCropTransform() {
     if (centerCropOptions == null) {
       centerCropOptions = new RequestOptions()
@@ -220,6 +244,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop()} set.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions circleCropTransform() {
     if (circleCropOptions == null) {
       circleCropOptions = new RequestOptions()
@@ -232,6 +257,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #transform(Transformation)} set.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions bitmapTransform(@NonNull Transformation<Bitmap> transformation) {
     return new RequestOptions().transform(transformation);
   }
@@ -239,6 +265,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #dontTransform()} set.
    */
+  @SuppressWarnings("WeakerAccess")
   public static RequestOptions noTransformation() {
     if (noTransformOptions == null) {
       noTransformOptions = new RequestOptions()
@@ -266,6 +293,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #format(DecodeFormat)} set.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions formatOf(@NonNull DecodeFormat format) {
     return new RequestOptions().format(format);
   }
@@ -273,6 +301,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #frame(long)} set.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions frameOf(long frameTimeMicros) {
     return new RequestOptions().frame(frameTimeMicros);
   }
@@ -280,6 +309,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #downsample(DownsampleStrategy)} set.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions downsampleOf(@NonNull DownsampleStrategy strategy) {
     return new RequestOptions().downsample(strategy);
   }
@@ -288,6 +318,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link com.bumptech.glide.request.RequestOptions} with {@link
    * #encodeQuality(int)} called with the given quality.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions encodeQualityOf(int quality) {
     return new RequestOptions().encodeQuality(quality);
   }
@@ -296,6 +327,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link com.bumptech.glide.request.RequestOptions} with {@link
    * #encodeFormat(android.graphics.Bitmap.CompressFormat)} called with the given format.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions encodeFormatOf(@NonNull Bitmap.CompressFormat format) {
     return new RequestOptions().encodeFormat(format);
   }
@@ -304,6 +336,7 @@ public class RequestOptions implements Cloneable {
    * Returns a new {@link com.bumptech.glide.request.RequestOptions} with {@link #dontAnimate()}
    * called.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   public static RequestOptions noAnimation() {
     if (noAnimationOptions == null) {
       noAnimationOptions = new RequestOptions()
@@ -638,7 +671,7 @@ public class RequestOptions implements Cloneable {
       result.transformations.putAll(transformations);
       result.isLocked = false;
       result.isAutoCloneEnabled = false;
-      return (RequestOptions) result;
+      return result;
     } catch (CloneNotSupportedException e) {
       throw new RuntimeException(e);
     }
@@ -890,6 +923,7 @@ public class RequestOptions implements Cloneable {
    * @see #optionalTransform(Transformation)
    * @see #optionalTransform(Class, Transformation)
    */
+  @SuppressWarnings("unchecked")
   public RequestOptions transforms(@NonNull Transformation<Bitmap>... transformations) {
     if (isAutoCloneEnabled) {
       return clone().transforms(transformations);
@@ -909,8 +943,7 @@ public class RequestOptions implements Cloneable {
    *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
-   * @param transformation Any {@link Transformation} for
-   *                       {@link Bitmap}s.
+   * @param transformation Any {@link Transformation} for {@link Bitmap}s.
    * @see #transform(Transformation)
    * @see #transform(Class, Transformation)
    */
@@ -1160,7 +1193,7 @@ public class RequestOptions implements Cloneable {
   public RequestOptions lock() {
     isLocked = true;
     // This is the only place we should not check locked.
-    return (RequestOptions) this;
+    return this;
   }
 
   /**
@@ -1185,61 +1218,78 @@ public class RequestOptions implements Cloneable {
     if (isLocked) {
       throw new IllegalStateException("You cannot modify locked RequestOptions, consider clone()");
     }
-    return (RequestOptions) this;
+    return this;
   }
 
+  @NonNull
   public final Map<Class<?>, Transformation<?>> getTransformations() {
     return transformations;
   }
 
+  @SuppressWarnings("WeakerAccess")
   public final boolean isTransformationRequired() {
     return isTransformationRequired;
   }
 
+  @NonNull
   public final Options getOptions() {
     return options;
   }
 
+  @NonNull
   public final Class<?> getResourceClass() {
     return resourceClass;
   }
 
+  @NonNull
   public final DiskCacheStrategy getDiskCacheStrategy() {
     return diskCacheStrategy;
   }
 
+  @Nullable
+  @SuppressWarnings("WeakerAccess")
   public final Drawable getErrorPlaceholder() {
     return errorPlaceholder;
   }
 
+  @SuppressWarnings("WeakerAccess")
   public final int getErrorId() {
     return errorId;
   }
 
+  @SuppressWarnings("WeakerAccess")
   public final int getPlaceholderId() {
     return placeholderId;
   }
 
+  @Nullable
+  @SuppressWarnings("WeakerAccess")
   public final Drawable getPlaceholderDrawable() {
     return placeholderDrawable;
   }
 
+  @SuppressWarnings("WeakerAccess")
   public final int getFallbackId() {
     return fallbackId;
   }
 
+  @Nullable
+  @SuppressWarnings("WeakerAccess")
   public final Drawable getFallbackDrawable() {
     return fallbackDrawable;
   }
 
+  @Nullable
   public final Resources.Theme getTheme() {
     return theme;
   }
 
+  @SuppressWarnings("WeakerAccess")
   public final boolean isMemoryCacheable() {
     return isCacheable;
   }
 
+  @NonNull
   public final Key getSignature() {
     return signature;
   }
@@ -1248,6 +1298,7 @@ public class RequestOptions implements Cloneable {
     return isSet(PRIORITY);
   }
 
+  @NonNull
   public final Priority getPriority() {
     return priority;
   }

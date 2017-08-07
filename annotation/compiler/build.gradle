@@ -3,7 +3,7 @@ import org.gradle.internal.jvm.Jvm
 apply plugin: 'java'
 
 dependencies {
-    compile 'com.squareup:javapoet:1.8.0'
+    compile 'com.squareup:javapoet:1.9.0'
     compile 'com.google.auto.service:auto-service:1.0-rc3'
     compile 'com.google.code.findbugs:jsr305:3.0.1'
     compile project(':annotation')
