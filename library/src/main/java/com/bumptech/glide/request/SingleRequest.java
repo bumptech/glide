@@ -3,6 +3,7 @@ package com.bumptech.glide.request;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.Nullable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.util.Pools;
 import android.support.v7.content.res.AppCompatResources;
@@ -85,6 +86,7 @@ public final class SingleRequest<R> implements Request,
 
   private RequestCoordinator requestCoordinator;
   private GlideContext glideContext;
+  @Nullable
   private Object model;
   private Class<R> transcodeClass;
   private RequestOptions requestOptions;
@@ -557,7 +559,7 @@ public final class SingleRequest<R> implements Request,
       SingleRequest that = (SingleRequest) o;
       return overrideWidth == that.overrideWidth
           && overrideHeight == that.overrideHeight
-          && model.equals(that.model)
+          && Util.bothNullOrEqual(model, that.model)
           && transcodeClass.equals(that.transcodeClass)
           && requestOptions.equals(that.requestOptions)
           && priority == that.priority;

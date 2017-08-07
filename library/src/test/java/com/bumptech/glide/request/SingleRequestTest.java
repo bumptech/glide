@@ -779,6 +779,13 @@ public class SingleRequestTest {
     assertFalse(originalRequest1.isEquivalentTo(modelRequest));
 
     harness = new RequestHarness();
+    harness.model = null;
+    SingleRequest<List> nullModelRequest = harness.getRequest();
+    assertTrue(nullModelRequest.isEquivalentTo(nullModelRequest));
+    assertFalse(nullModelRequest.isEquivalentTo(originalRequest1));
+    assertFalse(originalRequest1.isEquivalentTo(nullModelRequest));
+
+    harness = new RequestHarness();
     harness.errorDrawable = new ColorDrawable(Color.GRAY);
     SingleRequest<List> errorRequest = harness.getRequest();
     assertTrue(errorRequest.isEquivalentTo(errorRequest));
