@@ -223,7 +223,7 @@ Applications may depend on multiple libraries, each of which may contain one or 
 For example if you depend on a library that has a [``LibraryGlideModule``][2] that you'd like to avoid, say ``com.example.unwanted.GlideModule``:
 
 ```java
-@Excludes("com.example.unwanted.GlideModule")
+@Excludes(com.example.unwanted.GlideModule.class)
 @GlideModule
 public final class MyAppGlideModule extends AppGlideModule { }
 ```
@@ -231,7 +231,7 @@ public final class MyAppGlideModule extends AppGlideModule { }
 You can also excludes multiple modules:
 
 ```java
-@Excludes({"com.example.unwanted.GlideModule", "com.example.conflicing.GlideModule"})
+@Excludes({com.example.unwanted.GlideModule.class, com.example.conflicing.GlideModule.class})
 @GlideModule
 public final class MyAppGlideModule extends AppGlideModule { }
 ```
