@@ -237,7 +237,7 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @Nullable
-  @SuppressWarnings({"unchecked", "deprecation"})
+  @SuppressWarnings({"unchecked", "deprecation", "TryWithIdenticalCatches"})
   private static GeneratedAppGlideModule getAnnotationGeneratedGlideModules() {
     GeneratedAppGlideModule result = null;
     try {
@@ -256,6 +256,7 @@ public class Glide implements ComponentCallbacks2 {
       throw new IllegalStateException("GeneratedAppGlideModuleImpl is implemented incorrectly."
           + " If you've manually implemented this class, remove your implementation. The Annotation"
           + " processor will generate a correct implementation.", e);
+      // These exceptions can't be squashed across all versions of Android.
     } catch (IllegalAccessException e) {
       throw new IllegalStateException("GeneratedAppGlideModuleImpl is implemented incorrectly."
           + " If you've manually implemented this class, remove your implementation. The Annotation"
@@ -483,6 +484,7 @@ public class Glide implements ComponentCallbacks2 {
    *     This method should always be called on a background thread, since it is a blocking call.
    * </p>
    */
+  @SuppressWarnings("unused") // Public API
   public void clearDiskCache() {
     Util.assertBackgroundThread();
     engine.clearDiskCache();
