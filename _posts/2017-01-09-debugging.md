@@ -18,7 +18,7 @@ The highest level and easiest to understand logs are logged with the ``Glide`` t
 You can also control the verbosity of the Glide log tag programmatically using [``setLogLevel(int)``][1]. ``setLogLevel`` allows you to enable more verbose logs in developer builds but not release builds, for example.
 
 #### Unexpected cache misses
-The ``Engine`` tag provides details on how a request will be fulfilled and includes the full in memory cache key used to store the corresponding resource. If you're trying to debug why images you have in memory in one place aren't being used in another place, the ``Engine`` tag lets you compare the cache keys directly to see the differences.
+The [``Engine``][9] log tag provides details on how a request will be fulfilled and includes the full in memory cache key used to store the corresponding resource. If you're trying to debug why images you have in memory in one place aren't being used in another place, the ``Engine`` tag lets you compare the cache keys directly to see the differences.
 
 For each started request, the ``Engine`` tag will log that the request will be completed from cache, active resources, an existing load, or a new load. Cache means that the resource wasn't in use, but was available in the in memory cache. Active resources means that the resource was actively being used by another ``Target``, typically in a ``View``. An existing load means that the resource wasn't available in memory, but another ``Target`` had previously requested the same resource and the load is already in progress. Finally a new load means that the resource was neither in memory nor already being loaded so our request triggered a new load.
 
@@ -70,3 +70,4 @@ To save object allocations, you can re-use the same ``RequestListener`` for mult
 [6]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#override-int-int-
 [7]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
 [8]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#listener-com.bumptech.glide.request.RequestListener-
+[9]: https://github.com/bumptech/glide/blob/6b137c2b1d4b2ab187ea2aa56834dea039daa090/library/src/main/java/com/bumptech/glide/load/engine/Engine.java#L33
