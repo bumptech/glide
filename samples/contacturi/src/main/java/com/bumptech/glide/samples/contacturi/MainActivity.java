@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
     imageViewLookup = (ImageView) findViewById(R.id.image_lookup);
     imageViewPhoto = (ImageView) findViewById(R.id.image_photo);
     imageViewDisplayPhoto = (ImageView) findViewById(R.id.image_display_photo);
-    numberEntry = (EditText)findViewById(R.id.number_entry);
+    numberEntry = (EditText) findViewById(R.id.number_entry);
     if (ContextCompat.checkSelfPermission(this.getApplication(),
         Manifest.permission.READ_CONTACTS)
         != PackageManager.PERMISSION_GRANTED) {
@@ -71,7 +71,8 @@ public class MainActivity extends Activity {
     findViewById(R.id.button_find).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(numberEntry.getText().toString()));
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                                       Uri.encode(numberEntry.getText().toString()));
         GlideRequests glideRequests = GlideApp.with(MainActivity.this);
         RequestOptions originalSize = new RequestOptions().override(Target.SIZE_ORIGINAL);
 
