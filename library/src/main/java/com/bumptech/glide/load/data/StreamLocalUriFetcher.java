@@ -34,6 +34,11 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
    */
   private static final int ID_CONTACTS_PHOTO = 4;
   /**
+   * Uri for optimized search of phones by number
+   * (e.g. content://com.android.contacts/phone_lookup/232323232
+   */
+  private static final int ID_LOOKUP_BY_PHONE = 5;
+  /**
    * Match the incoming Uri for special cases which we can handle nicely.
    */
   private static final UriMatcher URI_MATCHER;
@@ -45,6 +50,7 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
     URI_MATCHER.addURI(ContactsContract.AUTHORITY, "contacts/#/photo", ID_CONTACTS_THUMBNAIL);
     URI_MATCHER.addURI(ContactsContract.AUTHORITY, "contacts/#", ID_CONTACTS_CONTACT);
     URI_MATCHER.addURI(ContactsContract.AUTHORITY, "contacts/#/display_photo", ID_CONTACTS_PHOTO);
+    URI_MATCHER.addURI(ContactsContract.AUTHORITY, "phone_lookup/*", ID_LOOKUP_BY_PHONE);
   }
 
   public StreamLocalUriFetcher(ContentResolver resolver, Uri uri) {
@@ -68,12 +74,14 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
       case ID_CONTACTS_CONTACT:
         return openContactPhotoInputStream(contentResolver, uri);
       case ID_CONTACTS_LOOKUP:
+      case ID_LOOKUP_BY_PHONE:
         // If it was a Lookup uri then resolve it first, then continue loading the contact uri.
         uri = ContactsContract.Contacts.lookupContact(contentResolver, uri);
         if (uri == null) {
           throw new FileNotFoundException("Contact cannot be found");
         }
         return openContactPhotoInputStream(contentResolver, uri);
+        //ContactsContract.PhoneLookup.
       case ID_CONTACTS_THUMBNAIL:
       case ID_CONTACTS_PHOTO:
       case UriMatcher.NO_MATCH:

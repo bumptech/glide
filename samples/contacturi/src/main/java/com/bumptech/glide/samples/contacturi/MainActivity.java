@@ -3,15 +3,21 @@ package com.bumptech.glide.samples.contacturi;
 import static android.os.Build.VERSION;
 import static android.os.Build.VERSION_CODES;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -25,11 +31,13 @@ import com.bumptech.glide.request.target.Target;
  */
 public class MainActivity extends Activity {
   private static final int REQUEST_CONTACT = 1;
+  private static final int READ_CONTACTS = 0;
 
   private ImageView imageViewContact;
   private ImageView imageViewLookup;
   private ImageView imageViewPhoto;
   private ImageView imageViewDisplayPhoto;
+  private EditText numberEntry;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +48,34 @@ public class MainActivity extends Activity {
     imageViewLookup = (ImageView) findViewById(R.id.image_lookup);
     imageViewPhoto = (ImageView) findViewById(R.id.image_photo);
     imageViewDisplayPhoto = (ImageView) findViewById(R.id.image_display_photo);
+    numberEntry = (EditText)findViewById(R.id.number_entry);
+    if (ContextCompat.checkSelfPermission(this.getApplication(),
+        Manifest.permission.READ_CONTACTS)
+        != PackageManager.PERMISSION_GRANTED) {
+
+        // No explanation needed, we can request the permission.
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.READ_CONTACTS},
+                READ_CONTACTS);
+    }
+
 
     findViewById(R.id.button_pick_contact).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         Intent intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
         startActivityForResult(intent, REQUEST_CONTACT);
+      }
+    });
+
+    findViewById(R.id.button_find).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(numberEntry.getText().toString()));
+        GlideRequests glideRequests = GlideApp.with(MainActivity.this);
+        RequestOptions originalSize = new RequestOptions().override(Target.SIZE_ORIGINAL);
+
+        glideRequests.load(uri).apply(originalSize).into(imageViewLookup);
       }
     });
   }
