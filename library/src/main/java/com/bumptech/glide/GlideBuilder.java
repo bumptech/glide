@@ -1,7 +1,9 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
@@ -20,11 +22,13 @@ import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory;
 import com.bumptech.glide.request.RequestOptions;
+import java.util.Map;
 
 /**
  * A builder class for setting default structural classes for Glide to use.
  */
 public final class GlideBuilder {
+  private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions = new ArrayMap<>();
   private Engine engine;
   private BitmapPool bitmapPool;
   private ArrayPool arrayPool;
@@ -154,6 +158,28 @@ public final class GlideBuilder {
    */
   public GlideBuilder setDefaultRequestOptions(RequestOptions requestOptions) {
     this.defaultRequestOptions = requestOptions;
+    return this;
+  }
+
+  /**
+   * Sets the default {@link TransitionOptions} to use when starting a request that will load a
+   * resource with the given {@link Class}.
+   *
+   * <p>It's preferable but not required for the requested resource class to match the resource
+   * class applied here as long as the resource class applied here is assignable from the requested
+   * resource class. For example you can set a default transition for
+   * {@link android.graphics.drawable.Drawable} and that default transition will be used if you
+   * subsequently start requests for specific {@link android.graphics.drawable.Drawable} types like
+   * {@link com.bumptech.glide.load.resource.gif.GifDrawable} or
+   * {@link android.graphics.drawable.BitmapDrawable}. Specific types are always preferred so if you
+   * register a default transition for both {@link android.graphics.drawable.Drawable} and
+   * {@link android.graphics.drawable.BitmapDrawable} and then start a request for
+   * {@link android.graphics.drawable.BitmapDrawable}s, the transition you registered for
+   * {@link android.graphics.drawable.BitmapDrawable}s will be used.
+   */
+  public <T> GlideBuilder setDefaultTransitionOptions(
+      @NonNull Class<T> clazz, @Nullable TransitionOptions<?, T> options) {
+    defaultTransitionOptions.put(clazz, options);
     return this;
   }
 
@@ -314,6 +340,7 @@ public final class GlideBuilder {
         requestManagerRetriever,
         connectivityMonitorFactory,
         logLevel,
-        defaultRequestOptions.lock());
+        defaultRequestOptions.lock(),
+        defaultTransitionOptions);
   }
 }

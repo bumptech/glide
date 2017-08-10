@@ -32,8 +32,6 @@ import java.util.UUID;
  * {@link com.bumptech.glide.request.target.Target}.
  */
 public class RequestBuilder<TranscodeType> implements Cloneable {
-  private static final TransitionOptions<?, ?> DEFAULT_ANIMATION_OPTIONS =
-      new GenericTransitionOptions<Object>();
   // Used in generated subclasses
   protected static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
       new RequestOptions().diskCacheStrategy(DiskCacheStrategy.DATA).priority(Priority.LOW)
@@ -46,9 +44,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private final Glide glide;
 
   @NonNull protected RequestOptions requestOptions;
+
+  @NonNull
   @SuppressWarnings("unchecked")
-  private TransitionOptions<?, ? super TranscodeType> transitionOptions =
-      (TransitionOptions<?, ? super TranscodeType>) DEFAULT_ANIMATION_OPTIONS;
+  private TransitionOptions<?, ? super TranscodeType> transitionOptions;
 
   @Nullable private Object model;
   // model may occasionally be null, so to enforce that load() was called, put a boolean rather
@@ -56,6 +55,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   @Nullable private RequestListener<TranscodeType> requestListener;
   @Nullable private RequestBuilder<TranscodeType> thumbnailBuilder;
   @Nullable private Float thumbSizeMultiplier;
+  private boolean isDefaultTransitionOptionsSet = true;
   private boolean isModelSet;
   private boolean isThumbnailBuilt;
 
@@ -66,6 +66,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     this.context = glide.getGlideContext();
     this.transcodeClass = transcodeClass;
     this.defaultRequestOptions = requestManager.getDefaultRequestOptions();
+    this.transitionOptions = requestManager.getDefaultTransitionOptions(transcodeClass);
     this.requestOptions = defaultRequestOptions;
   }
 
@@ -106,6 +107,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   public RequestBuilder<TranscodeType> transition(
       @NonNull TransitionOptions<?, ? super TranscodeType> transitionOptions) {
     this.transitionOptions = Preconditions.checkNotNull(transitionOptions);
+    isDefaultTransitionOptionsSet = false;
     return this;
   }
 
@@ -589,7 +591,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
 
       TransitionOptions<?, ? super TranscodeType> thumbTransitionOptions =
           thumbnailBuilder.transitionOptions;
-      if (DEFAULT_ANIMATION_OPTIONS.equals(thumbTransitionOptions)) {
+
+      // Apply our transition by default to thumbnail requests but avoid overriding custom options
+      // that may have been applied on the thumbnail request explicitly.
+      if (thumbnailBuilder.isDefaultTransitionOptionsSet) {
         thumbTransitionOptions = transitionOptions;
       }
 

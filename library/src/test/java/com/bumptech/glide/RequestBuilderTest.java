@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
@@ -115,7 +116,9 @@ public class RequestBuilderTest {
         .thenReturn(mock(Target.class));
     when(glideContext.getDefaultRequestOptions()).thenReturn(new RequestOptions());
     when(requestManager.getDefaultRequestOptions())
-        .thenReturn((RequestOptions) new RequestOptions());
+        .thenReturn(new RequestOptions());
+    when(requestManager.getDefaultTransitionOptions(any(Class.class)))
+        .thenReturn(new GenericTransitionOptions<>());
     return new RequestBuilder<>(glide, requestManager, Object.class)
         .load((Object) null);
   }

@@ -13,7 +13,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
@@ -294,8 +293,7 @@ public class RequestManager implements LifecycleListener {
    * @return A new request builder for loading a {@link android.graphics.Bitmap}
    */
   public RequestBuilder<Bitmap> asBitmap() {
-    return as(Bitmap.class).transition(new GenericTransitionOptions<Bitmap>())
-            .apply(DECODE_TYPE_BITMAP);
+    return as(Bitmap.class).apply(DECODE_TYPE_BITMAP);
   }
 
   /**
@@ -312,7 +310,7 @@ public class RequestManager implements LifecycleListener {
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
    */
   public RequestBuilder<GifDrawable> asGif() {
-    return as(GifDrawable.class).transition(new DrawableTransitionOptions()).apply(DECODE_TYPE_GIF);
+    return as(GifDrawable.class).apply(DECODE_TYPE_GIF);
   }
 
   /**
@@ -326,7 +324,7 @@ public class RequestManager implements LifecycleListener {
    * @return A new request builder for loading a {@link Drawable}.
    */
   public RequestBuilder<Drawable> asDrawable() {
-    return as(Drawable.class).transition(new DrawableTransitionOptions());
+    return as(Drawable.class);
   }
 
   /**
@@ -458,6 +456,11 @@ public class RequestManager implements LifecycleListener {
 
   RequestOptions getDefaultRequestOptions() {
     return requestOptions;
+  }
+
+  @NonNull
+  <T> TransitionOptions<?, T> getDefaultTransitionOptions(Class<T> transcodeClass) {
+    return glide.getGlideContext().getDefaultTransitionOptions(transcodeClass);
   }
 
   @Override

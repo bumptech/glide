@@ -80,6 +80,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -275,7 +276,8 @@ public class Glide implements ComponentCallbacks2 {
       RequestManagerRetriever requestManagerRetriever,
       ConnectivityMonitorFactory connectivityMonitorFactory,
       int logLevel,
-      RequestOptions defaultRequestOptions) {
+      RequestOptions defaultRequestOptions,
+      Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
@@ -374,7 +376,8 @@ public class Glide implements ComponentCallbacks2 {
     ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     glideContext =
         new GlideContext(
-            context, registry, imageViewTargetFactory, defaultRequestOptions, engine, logLevel);
+            context, registry, imageViewTargetFactory, defaultRequestOptions,
+            defaultTransitionOptions, engine, logLevel);
   }
 
   /**

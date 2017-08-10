@@ -1,7 +1,5 @@
 package com.bumptech.glide.samples.flickr;
 
-import static com.bumptech.glide.GenericTransitionOptions.withNoTransition;
-
 import android.content.Intent;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -65,15 +63,13 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
     fullRequest = GlideApp.with(this)
         .asDrawable()
-        .centerCrop()
-        .transition(withNoTransition());
+        .centerCrop();
 
     thumbnailRequest = GlideApp.with(this)
         .asDrawable()
         .diskCacheStrategy(DiskCacheStrategy.DATA)
         .centerCrop()
-        .override(Api.SQUARE_THUMB_SIZE)
-        .transition(withNoTransition());
+        .override(Api.SQUARE_THUMB_SIZE);
 
     preloadRequest =
         thumbnail ? thumbnailRequest.clone().priority(Priority.HIGH) : fullRequest;
