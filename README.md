@@ -114,8 +114,7 @@ Simple use cases with Glide's [generated API][21] will look something like this:
 
 Status
 ------
-[*Version 3* on the `3.0` branch][14] is a stable public release used in multiple open source projects at Google including in the Android Camera
-app and in the 2014 Google IO app. *Version 4* is currently under development on the `master` branch.
+Version 4 is now released and stable. Updates are currently released at least monthly with new features and bug fixes.
 
 Comments/bugs/questions/pull requests are always welcome! Please read [CONTRIBUTING.md][5] on how to report issues.
 
