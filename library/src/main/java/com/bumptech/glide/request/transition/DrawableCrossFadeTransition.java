@@ -1,5 +1,7 @@
 package com.bumptech.glide.request.transition;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 
@@ -11,17 +13,10 @@ import android.graphics.drawable.TransitionDrawable;
  * android.graphics.drawable.TransitionDrawable}.
  */
 public class DrawableCrossFadeTransition implements Transition<Drawable> {
-  private final Transition<Drawable> defaultAnimation;
   private final int duration;
   private final boolean isCrossFadeEnabled;
 
   /**
-   * Constructor that takes a default animation and a duration in milliseconds that the cross fade
-   * animation should last.
-   *
-   * @param defaultAnimation The {@link Transition} to use if there is no previous
-   *                         {@link Drawable} (either a placeholder or previous resource) to
-   *                         transition from.
    * @param duration The duration that the cross fade animation should run if there is something to
    *                 cross fade from when a new {@link android.graphics.drawable.Drawable} is put.
    * @param isCrossFadeEnabled If {@code true}, animates the previous resource's alpha to 0 while
@@ -30,9 +25,8 @@ public class DrawableCrossFadeTransition implements Transition<Drawable> {
    *                         alpha at 100. See
    *                         {@link TransitionDrawable#setCrossFadeEnabled(boolean)}.
    */
-  public DrawableCrossFadeTransition(Transition<Drawable> defaultAnimation, int duration,
+  public DrawableCrossFadeTransition(int duration,
       boolean isCrossFadeEnabled) {
-    this.defaultAnimation = defaultAnimation;
     this.duration = duration;
     this.isCrossFadeEnabled = isCrossFadeEnabled;
   }
@@ -51,16 +45,14 @@ public class DrawableCrossFadeTransition implements Transition<Drawable> {
   @Override
   public boolean transition(Drawable current, ViewAdapter adapter) {
     Drawable previous = adapter.getCurrentDrawable();
-    if (previous != null) {
-      TransitionDrawable transitionDrawable =
-          new TransitionDrawable(new Drawable[] { previous, current });
-      transitionDrawable.setCrossFadeEnabled(isCrossFadeEnabled);
-      transitionDrawable.startTransition(duration);
-      adapter.setDrawable(transitionDrawable);
-      return true;
-    } else {
-      defaultAnimation.transition(current, adapter);
-      return false;
+    if (previous == null) {
+      previous = new ColorDrawable(Color.TRANSPARENT);
     }
+    TransitionDrawable transitionDrawable =
+        new TransitionDrawable(new Drawable[] { previous, current });
+    transitionDrawable.setCrossFadeEnabled(isCrossFadeEnabled);
+    transitionDrawable.startTransition(duration);
+    adapter.setDrawable(transitionDrawable);
+    return true;
   }
 }

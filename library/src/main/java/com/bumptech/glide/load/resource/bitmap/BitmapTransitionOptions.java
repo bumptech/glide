@@ -34,15 +34,6 @@ public final class BitmapTransitionOptions extends
   /**
    * Returns a {@link BitmapTransitionOptions} object that enables a cross fade animation.
    *
-   * @see #crossFade(int, int)
-   */
-  public static BitmapTransitionOptions withCrossFade(int animationId, int duration) {
-    return new BitmapTransitionOptions().crossFade(animationId, duration);
-  }
-
-  /**
-   * Returns a {@link BitmapTransitionOptions} object that enables a cross fade animation.
-   *
    * @see #crossFade(DrawableCrossFadeFactory)
    */
   public static BitmapTransitionOptions withCrossFade(
@@ -99,22 +90,6 @@ public final class BitmapTransitionOptions extends
    */
   public BitmapTransitionOptions crossFade(int duration) {
     return crossFade(new DrawableCrossFadeFactory.Builder(duration));
-  }
-
-  /**
-   * Enables a cross fade animation between both the placeholder and the first resource and between
-   * subsequent resources (if thumbnails are used).
-   *
-   * @param animationId The id of the animation to use if no placeholder or previous resource is
-   *     set, see {@code DrawableCrossFadeFactory.Builder#setDefaultAnimationId(int)}.
-   * @param duration The duration of the cross fade, see
-   *     {@code DrawableCrossFadeFactory.Builder(int)}.
-   * @see com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder
-   */
-  public BitmapTransitionOptions crossFade(int animationId, int duration) {
-    return crossFade(
-        new DrawableCrossFadeFactory.Builder(duration)
-            .setDefaultAnimationId(animationId));
   }
 
   /**

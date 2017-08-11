@@ -1,9 +1,6 @@
 package com.bumptech.glide.request.transition;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import com.bumptech.glide.load.DataSource;
 
 /**
@@ -17,66 +14,26 @@ import com.bumptech.glide.load.DataSource;
  * the memory cache this factory produces an {@link NoTransition}.
  */
 public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
-  private final ViewAnimationFactory<Drawable> viewAnimationFactory;
   private final int duration;
   private final boolean isCrossFadeEnabled;
-  private DrawableCrossFadeTransition firstResourceTransition;
-  private DrawableCrossFadeTransition secondResourceTransition;
+  private DrawableCrossFadeTransition resourceTransition;
 
-  protected DrawableCrossFadeFactory(ViewAnimationFactory<Drawable> viewAnimationFactory,
-      int duration, boolean isCrossFadeEnabled) {
-    this.viewAnimationFactory = viewAnimationFactory;
+  protected DrawableCrossFadeFactory(int duration, boolean isCrossFadeEnabled) {
     this.duration = duration;
     this.isCrossFadeEnabled = isCrossFadeEnabled;
   }
 
   @Override
   public Transition<Drawable> build(DataSource dataSource, boolean isFirstResource) {
-    if (dataSource == DataSource.MEMORY_CACHE) {
-      return NoTransition.get();
-    } else if (isFirstResource) {
-      return getFirstResourceTransition(dataSource);
-    } else {
-      return getSecondResourceTransition(dataSource);
-    }
+    return dataSource == DataSource.MEMORY_CACHE
+        ? NoTransition.<Drawable>get() : getResourceTransition();
   }
 
-  private Transition<Drawable> getFirstResourceTransition(DataSource dataSource) {
-      if (firstResourceTransition == null) {
-        firstResourceTransition = buildTransition(dataSource, true /*isFirstResource*/);
+  private Transition<Drawable> getResourceTransition() {
+      if (resourceTransition == null) {
+        resourceTransition = new DrawableCrossFadeTransition(duration, isCrossFadeEnabled);
       }
-      return firstResourceTransition;
-  }
-
-  private Transition<Drawable> getSecondResourceTransition(DataSource dataSource) {
-      if (secondResourceTransition == null) {
-        secondResourceTransition = buildTransition(dataSource, false /*isFirstResource*/);
-      }
-      return secondResourceTransition;
-  }
-
-  private DrawableCrossFadeTransition buildTransition(DataSource dataSource,
-      boolean isFirstResource) {
-    Transition<Drawable> defaultAnimation =
-        viewAnimationFactory.build(dataSource, isFirstResource);
-    return new DrawableCrossFadeTransition(defaultAnimation, duration, isCrossFadeEnabled);
-  }
-
-  private static final class DefaultViewTransitionAnimationFactory implements
-      ViewTransition.ViewTransitionAnimationFactory {
-
-    private final int durationMillis;
-
-    DefaultViewTransitionAnimationFactory(int durationMillis) {
-      this.durationMillis = durationMillis;
-    }
-
-    @Override
-    public Animation build(Context context) {
-      AlphaAnimation animation = new AlphaAnimation(0f, 1f);
-      animation.setDuration(durationMillis);
-      return animation;
-    }
+      return resourceTransition;
   }
 
   /**
@@ -85,7 +42,6 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
   public static class Builder {
     private static final int DEFAULT_DURATION_MS = 300;
     private int durationMillis;
-    private ViewAnimationFactory<Drawable> factory;
     private boolean isCrossFadeEnabled;
 
     public Builder() {
@@ -93,16 +49,10 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
     }
 
     /**
-     * @param durationMillis The duration of both the default animation when no previous Drawable
-     *     is present and the cross fade animation when a previous Drawable is present. This value
-     *     will not be used by the default animation if {@link #setDefaultAnimationId(int)},
-     *     {@link #setDefaultAnimation(Animation)}, or
-     *     {@link #setDefaultAnimationFactory(ViewAnimationFactory)} is called.
+     * @param durationMillis The duration of the cross fade animation in milliseconds.
      */
     public Builder(int durationMillis) {
       this.durationMillis = durationMillis;
-      factory = new ViewAnimationFactory<>(
-          new DefaultViewTransitionAnimationFactory(durationMillis));
     }
 
     /**
@@ -122,38 +72,8 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
       return this;
     }
 
-    /**
-     * Sets the resource id of the {@link Animation} to use when no previous {@link Drawable} is
-     * available to animate from.
-     *
-     * <p>Defaults to a simple fade in.
-     */
-    public Builder setDefaultAnimationId(int animationId) {
-      return setDefaultAnimationFactory(new ViewAnimationFactory<Drawable>(animationId));
-    }
-
-    /**
-     * Sets the {@link Animation} to use when no previous {@link Drawable} is available to animate
-     * from.
-     *
-     * <p>It is not safe to use the same {@link Animation} object for multiple animations
-     * simultaneously. Always pass in a new instance to this method.
-     */
-    public Builder setDefaultAnimation(Animation animation) {
-      return setDefaultAnimationFactory(new ViewAnimationFactory<Drawable>(animation));
-    }
-
-    /**
-     * Sets the {@link ViewAnimationFactory} to use to generate animations to animate when no
-     * previous {@link Drawable} is available to animate from.
-     */
-    public Builder setDefaultAnimationFactory(ViewAnimationFactory<Drawable> factory) {
-      this.factory = factory;
-      return this;
-    }
-
     public DrawableCrossFadeFactory build() {
-      return new DrawableCrossFadeFactory(factory, durationMillis, isCrossFadeEnabled);
+      return new DrawableCrossFadeFactory(durationMillis, isCrossFadeEnabled);
     }
   }
 }

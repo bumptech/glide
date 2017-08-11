@@ -2,7 +2,6 @@ package com.bumptech.glide.request.transition;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.mockito.Mockito.mock;
 
 import android.graphics.drawable.Drawable;
 import com.bumptech.glide.load.DataSource;
@@ -21,9 +20,7 @@ public class DrawableCrossFadeFactoryTest {
   @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
-    ViewAnimationFactory<Drawable> viewAnimationFactory = mock(ViewAnimationFactory.class);
-    factory = new DrawableCrossFadeFactory(viewAnimationFactory, 100 /*duration*/,
-        false /*isCrossFadeEnabled*/);
+    factory = new DrawableCrossFadeFactory(100 /*duration*/, false /*isCrossFadeEnabled*/);
   }
 
   @Test
