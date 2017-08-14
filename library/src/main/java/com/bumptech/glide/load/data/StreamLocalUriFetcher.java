@@ -81,7 +81,6 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
           throw new FileNotFoundException("Contact cannot be found");
         }
         return openContactPhotoInputStream(contentResolver, uri);
-        //ContactsContract.PhoneLookup.
       case ID_CONTACTS_THUMBNAIL:
       case ID_CONTACTS_PHOTO:
       case UriMatcher.NO_MATCH:

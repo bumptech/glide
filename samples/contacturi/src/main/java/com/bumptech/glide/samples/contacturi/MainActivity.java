@@ -49,16 +49,15 @@ public class MainActivity extends Activity {
     imageViewPhoto = (ImageView) findViewById(R.id.image_photo);
     imageViewDisplayPhoto = (ImageView) findViewById(R.id.image_display_photo);
     numberEntry = (EditText) findViewById(R.id.number_entry);
-    if (ContextCompat.checkSelfPermission(this.getApplication(),
-        Manifest.permission.READ_CONTACTS)
-        != PackageManager.PERMISSION_GRANTED) {
-
-        // No explanation needed, we can request the permission.
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.READ_CONTACTS},
-                READ_CONTACTS);
+    // Make sure that user gives application required permissions
+    if (ContextCompat.checkSelfPermission(
+    getApplication(),
+    Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+      // No explanation needed, we can request the permission.
+      ActivityCompat.requestPermissions(this,
+      new String[]{Manifest.permission.READ_CONTACTS},
+      READ_CONTACTS);
     }
-
 
     findViewById(R.id.button_pick_contact).setOnClickListener(new View.OnClickListener() {
       @Override
@@ -73,11 +72,11 @@ public class MainActivity extends Activity {
       public void onClick(View v) {
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
                                        Uri.encode(numberEntry.getText().toString()));
-        GlideRequests glideRequests = GlideApp.with(MainActivity.this);
-        RequestOptions originalSize = new RequestOptions().override(Target.SIZE_ORIGINAL);
-
-        glideRequests.load(uri).apply(originalSize).into(imageViewLookup);
-      }
+        GlideApp.with(MainActivity.this)
+                .load(uri)
+                .override(Target.SIZE_ORIGINAL)
+                .into(imageViewLookup);
+        }
     });
   }
 
