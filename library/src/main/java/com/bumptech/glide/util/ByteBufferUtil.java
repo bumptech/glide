@@ -26,9 +26,14 @@ public final class ByteBufferUtil {
     RandomAccessFile raf = null;
     FileChannel channel = null;
     try {
+      long fileLength = file.length();
+      // See #2240.
+      if (fileLength > Integer.MAX_VALUE) {
+        throw new IOException("File too large to map into memory");
+      }
       raf = new RandomAccessFile(file, "r");
       channel = raf.getChannel();
-      return channel.map(FileChannel.MapMode.READ_ONLY, 0, file.length()).load();
+      return channel.map(FileChannel.MapMode.READ_ONLY, 0, fileLength).load();
     } finally {
       if (channel != null) {
         try {
