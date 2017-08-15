@@ -103,6 +103,10 @@ Glide.with(fragment)
     .transition(withCrossFade(R.anim.fade_in, 300));
 ```
 
+#### Default transition
+
+Unlike Glide v3, Glide v4 does **NOT** apply a cross fade or any other transition by default to requests. Transitions must be applied manually.
+
 ### Generated API
 
 To make it even easier to use Glide v4, Glide now also offers a generated API for Applications. Applications can access the generated API by including an appropriately annotated [``AppGlideModule``][[2] implementation. See the [Generated API][11] page for details on how this works.

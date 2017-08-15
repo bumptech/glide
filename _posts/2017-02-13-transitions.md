@@ -12,7 +12,13 @@ disqus: 1
 ### About
 [``Transitions``][1] in Glide allow you to define how Glide should transition from a placeholder to a newly loaded image or from a thumbnail to a full size image. Transitions act within the context of a single request, not across multiple requests. As a result, [``Transitions``][1] do **NOT** allow you to define an animation (like a cross fade) from one request to another request. 
 
-### Default behavior
+
+### Default transition
+Unlike Glide v3, Glide v4 does **NOT** apply a cross fade or any other transition by default. Transitions must be applied manually per request.
+
+### Standard behavior
+Glide provides a number of transitions that users can manually apply per request. Glide's built in transitions behave in a consistent manner and will avoid running in certain circumstances depending on where images are loaded from.
+
 Images can be loaded from one of four places in Glide:
 
 1. Glide's in memory cache
@@ -20,9 +26,9 @@ Images can be loaded from one of four places in Glide:
 3. A source File or Uri available locally on the device
 4. A source Url or Uri available only remotely.
 
-Glide's default transitions do not run if data is loaded from Glide's in memory cache. However, Glide's default transitions do run if data is loaded from Glide's disk cache, a local source File or Uri or a remote source Url or Uri. 
+Glide's built in transitions do not run if data is loaded from Glide's in memory cache. However, Glide's built in transitions do run if data is loaded from Glide's disk cache, a local source File or Uri or a remote source Url or Uri. 
 
-To change the default behavior of transitions, see the [custom transitions][20] section below.
+To change this behavior and write your own custom transition, see the [custom transitions][20] section below.
 
 ### Specifying Transitions
 For an overview and code sample, see the [Options documentation][18].
