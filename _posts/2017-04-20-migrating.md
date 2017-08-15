@@ -109,7 +109,7 @@ Unlike Glide v3, Glide v4 does **NOT** apply a cross fade or any other transitio
 
 ### Generated API
 
-To make it even easier to use Glide v4, Glide now also offers a generated API for Applications. Applications can access the generated API by including an appropriately annotated [``AppGlideModule``][[2] implementation. See the [Generated API][11] page for details on how this works.
+To make it even easier to use Glide v4, Glide now also offers a generated API for Applications. Applications can access the generated API by including an appropriately annotated [``AppGlideModule``][2] implementation. See the [Generated API][11] page for details on how this works.
 
 The generated API adds a ``GlideApp`` class, that provides access to ``RequestBuilder`` and ``RequestOptions`` subclasses. The ``RequestOptions`` subclass contains all methods in ``RequestOptions`` and any methods defined in [``GlideExtensions``][12]. The ``RequestBuilder`` subclass provides access to all methods in the generated ``RequestOptions`` subclass without having to use ``apply``:
 
