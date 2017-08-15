@@ -6,4 +6,6 @@
     <string name="image_lookup">Image based on lookup Uri, same as contact Uri</string>
     <string name="image_photo">Image based on photo Uri, thumbnail sized, usually 96x96px</string>
     <string name="image_display_photo">Image based on display photo Uri, possibly 512x512px</string>
+    <string name="hint_number_entry">Find by phone number</string>
+    <string name="button_search_phone">Find</string>
 </resources>
