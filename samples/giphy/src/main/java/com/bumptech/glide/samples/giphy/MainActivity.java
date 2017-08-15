@@ -12,7 +12,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
@@ -34,7 +33,7 @@ public class MainActivity extends Activity implements Api.Monitor {
 
     ImageView giphyLogoView = (ImageView) findViewById(R.id.giphy_logo_view);
 
-    Glide.with(this)
+    GlideApp.with(this)
         .load(R.raw.large_giphy_logo)
         .into(giphyLogoView);
 
@@ -42,14 +41,15 @@ public class MainActivity extends Activity implements Api.Monitor {
     LinearLayoutManager layoutManager = new LinearLayoutManager(this);
     gifList.setLayoutManager(layoutManager);
 
-    RequestBuilder<Drawable> gifItemRequest = Glide.with(this).asDrawable();
+    RequestBuilder<Drawable> gifItemRequest = GlideApp.with(this)
+        .asDrawable();
 
     ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider =
         new ViewPreloadSizeProvider<>();
     adapter = new GifAdapter(this, gifItemRequest, preloadSizeProvider);
     gifList.setAdapter(adapter);
     RecyclerViewPreloader<Api.GifResult> preloader =
-        new RecyclerViewPreloader<>(Glide.with(this), adapter, preloadSizeProvider, 4);
+        new RecyclerViewPreloader<>(GlideApp.with(this), adapter, preloadSizeProvider, 4);
     gifList.addOnScrollListener(preloader);
   }
 
@@ -83,14 +83,14 @@ public class MainActivity extends Activity implements Api.Monitor {
 
     private Api.GifResult[] results = EMPTY_RESULTS;
 
-    public GifAdapter(Activity activity, RequestBuilder<Drawable> requestBuilder,
+    GifAdapter(Activity activity, RequestBuilder<Drawable> requestBuilder,
         ViewPreloadSizeProvider<Api.GifResult> preloadSizeProvider) {
       this.activity = activity;
       this.requestBuilder = requestBuilder;
       this.preloadSizeProvider = preloadSizeProvider;
     }
 
-    public void setResults(Api.GifResult[] results) {
+    void setResults(Api.GifResult[] results) {
       if (results != null) {
         this.results = results;
       } else {
@@ -151,7 +151,7 @@ public class MainActivity extends Activity implements Api.Monitor {
   private static class GifViewHolder extends RecyclerView.ViewHolder {
     private final ImageView gifView;
 
-    public GifViewHolder(View itemView) {
+    GifViewHolder(View itemView) {
       super(itemView);
       gifView = (ImageView) itemView.findViewById(R.id.gif_view);
     }
