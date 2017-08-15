@@ -53,6 +53,7 @@ public final class ByteBufferUtil {
   }
 
   public static void toFile(ByteBuffer buffer, File file) throws IOException {
+    buffer.position(0);
     RandomAccessFile raf = null;
     FileChannel channel = null;
     try {
