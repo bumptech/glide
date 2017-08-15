@@ -51,8 +51,8 @@ public class MainActivity extends Activity {
     numberEntry = (EditText) findViewById(R.id.number_entry);
     // Make sure that user gives application required permissions
     if (ContextCompat.checkSelfPermission(
-    getApplication(),
-    Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        getApplication(),
+        Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
       // No explanation needed, we can request the permission.
       ActivityCompat.requestPermissions(this,
       new String[]{Manifest.permission.READ_CONTACTS},
