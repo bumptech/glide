@@ -32,15 +32,6 @@ public class CircleCrop extends BitmapTransformation {
     this();
   }
 
-  /**
-   * @deprecated Use {@link #CircleCrop()}
-   * @param bitmapPool Ignored.
-   */
-  @Deprecated
-  public CircleCrop(@SuppressWarnings("unused") BitmapPool bitmapPool) {
-    this();
-  }
-
   // Bitmap doesn't implement equals, so == and .equals are equivalent here.
   @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
