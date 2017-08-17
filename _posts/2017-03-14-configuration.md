@@ -23,7 +23,7 @@ An example [``LibraryGlideModule``][2] from Glide's [OkHttp integration library]
 @GlideModule
 public final class OkHttpLibraryGlideModule extends LibraryGlideModule {
   @Override
-  public void registerComponents(Context context, Registry registry) {
+  public void registerComponents(Context context, Glide glide, Registry registry) {
     registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory());
   }
 }
@@ -47,7 +47,7 @@ An example [``AppGlideModule``][1] from Glide's [Flickr sample app][8] looks lik
 @GlideModule
 public class FlickrGlideModule extends AppGlideModule {
   @Override
-  public void registerComponents(Context context, Registry registry) {
+  public void registerComponents(Context context, Glide glide, Registry registry) {
     registry.append(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
   }
 }
@@ -181,7 +181,7 @@ Components are registered using the [``Registry``][28] class. For example, to ad
 @GlideModule
 public class YourAppGlideModule extends AppGlideModule {
   @Override
-  public void registerComponents(Context context, Registry registry) {
+  public void registerComponents(Context context, Glide glide, Registry registry) {
     registry.append(Photo.class, InputStream.class, new CustomModelLoader.Factory());
   }
 }

@@ -238,8 +238,8 @@ public class GiphyGlideModule implements GlideModule {
   }
 
   @Override
-  public void registerComponents(Context context, Registry registry) {
-    registry.append(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
+  public void registerComponents(Context context, Glide glide) {
+    glide.register(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
   }
 }
 ```
@@ -255,7 +255,7 @@ public class GiphyGlideModule extends AppGlideModule {
   }
 
   @Override
-  public void registerComponents(Context context, Registry registry) {
+  public void registerComponents(Context context, Glide glide, Registry registry) {
     registry.append(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
   }
 }
@@ -279,8 +279,8 @@ public class VolleyGlideModule implements GlideModule {
   }
 
   @Override
-  public void registerComponents(Context context, Registry registry) {
-    registry.replace(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(context));
+  public void registerComponents(Context context, Glide glide) {
+    glide.register(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(context));
   }
 }
 ```
@@ -291,7 +291,7 @@ Can be converted to a ``LibraryGlideModule`` in v4:
 @GlideModule
 public class VolleyLibraryGlideModule extends LibraryGlideModule {
   @Override
-  public void registerComponents(Context context, Registry registry) {
+  public void registerComponents(Context context, Glide glide, Registry registry) {
     registry.replace(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(context));
   }
 }
