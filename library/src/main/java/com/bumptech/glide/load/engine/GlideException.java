@@ -88,7 +88,6 @@ public final class GlideException extends Exception {
    * complete stack traces.
    */
   public void logRootCauses(String tag) {
-    Log.e(tag, getClass() + ": " + getMessage());
     List<Exception> causes = getRootCauses();
     for (int i = 0, size = causes.size(); i < size; i++) {
       Log.i(tag, "Root cause (" + (i + 1) + " of " + size + ")", causes.get(i));
