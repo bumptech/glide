@@ -28,7 +28,8 @@ public final class MemorySizeCalculator {
     int getHeightPixels();
   }
 
-  private MemorySizeCalculator(MemorySizeCalculator.Builder builder) {
+  // Package private to avoid PMD warning.
+  MemorySizeCalculator(MemorySizeCalculator.Builder builder) {
     this.context = builder.context;
 
     arrayPoolSize =
@@ -39,10 +40,9 @@ public final class MemorySizeCalculator {
         getMaxSize(
             builder.activityManager, builder.maxSizeMultiplier, builder.lowMemoryMaxSizeMultiplier);
 
-    int screenSize =
-        builder.screenDimensions.getWidthPixels() *
-            builder.screenDimensions.getHeightPixels() *
-            BYTES_PER_ARGB_8888_PIXEL;
+    int widthPixels = builder.screenDimensions.getWidthPixels();
+    int heightPixels = builder.screenDimensions.getHeightPixels();
+    int screenSize = widthPixels * heightPixels * BYTES_PER_ARGB_8888_PIXEL;
 
     int targetBitmapPoolSize = Math.round(screenSize * builder.bitmapPoolScreens);
 
