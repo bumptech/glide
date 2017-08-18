@@ -1,10 +1,10 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile "com.android.support:support-annotations:${SUPPORT_V4_VERSION}"
+    compile "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
 
     testCompile project(':testutil')
-    testCompile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
+    testCompile "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
     testCompile "com.google.truth:truth:${TRUTH_VERSION}"
     testCompile "junit:junit:${JUNIT_VERSION}"
     testCompile "org.mockito:mockito-core:${MOCKITO_VERSION}"
