@@ -217,6 +217,24 @@ public final class SingleRequest<R> implements Request,
       return;
     }
 
+    if (status == Status.RUNNING) {
+      throw new IllegalArgumentException("Cannot restart a running request");
+    }
+
+    // If we're restarted after we're complete (usually via something like a notifyDataSetChanged
+    // that starts an identical request into the same Target or View), we can simply use the
+    // resource and size we retrieved the last time around and skip obtaining a new size, starting a
+    // new load etc. This does mean that users who want to restart a load because they expect that
+    // the view size has changed will need to explicitly clear the View or Target before starting
+    // the new load.
+    if (status == Status.COMPLETE) {
+      onResourceReady(resource, DataSource.MEMORY_CACHE);
+      return;
+    }
+
+    // Restarts for requests that are neither complete nor running can be treated as new requests
+    // and can run again from the beginning.
+
     status = Status.WAITING_FOR_SIZE;
     if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
       onSizeReady(overrideWidth, overrideHeight);
