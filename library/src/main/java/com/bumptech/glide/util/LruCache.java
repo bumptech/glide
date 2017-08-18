@@ -58,7 +58,7 @@ public class LruCache<T, Y> {
   /**
    * Returns the number of entries stored in cache.
    */
-  protected int getCount() {
+  protected synchronized int getCount() {
     return cache.size();
   }
 
