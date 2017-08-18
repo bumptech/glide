@@ -28,30 +28,32 @@ public final class MemorySizeCalculator {
     int getHeightPixels();
   }
 
-  MemorySizeCalculator(Context context, ActivityManager activityManager,
-      ScreenDimensions screenDimensions, float memoryCacheScreens, float bitmapPoolScreens,
-      int targetArrayPoolSize, float maxSizeMultiplier, float lowMemoryMaxSizeMultiplier) {
-    this.context = context;
+  private MemorySizeCalculator(MemorySizeCalculator.Builder builder) {
+    this.context = builder.context;
     arrayPoolSize =
-        isLowMemoryDevice(activityManager)
-            ? targetArrayPoolSize / LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR
-            : targetArrayPoolSize;
-    final int maxSize = getMaxSize(activityManager, maxSizeMultiplier, lowMemoryMaxSizeMultiplier);
+        isLowMemoryDevice(builder.activityManager)
+            ? builder.arrayPoolSizeBytes / LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR
+            : builder.arrayPoolSizeBytes;
+    int maxSize =
+        getMaxSize(
+            builder.activityManager, builder.maxSizeMultiplier, builder.lowMemoryMaxSizeMultiplier);
 
-    final int screenSize = screenDimensions.getWidthPixels() * screenDimensions.getHeightPixels()
-        * BYTES_PER_ARGB_8888_PIXEL;
+    int screenSize =
+        builder.screenDimensions.getWidthPixels() *
+            builder.screenDimensions.getHeightPixels() *
+            BYTES_PER_ARGB_8888_PIXEL;
 
-    int targetPoolSize = Math.round(screenSize * bitmapPoolScreens);
-    int targetMemoryCacheSize = Math.round(screenSize * memoryCacheScreens);
+    int targetPoolSize = Math.round(screenSize * builder.bitmapPoolScreens);
+    int targetMemoryCacheSize = Math.round(screenSize * builder.memoryCacheScreens);
     int availableSize = maxSize - arrayPoolSize;
 
     if (targetMemoryCacheSize + targetPoolSize <= availableSize) {
       memoryCacheSize = targetMemoryCacheSize;
       bitmapPoolSize = targetPoolSize;
     } else {
-      float part = availableSize / (bitmapPoolScreens + memoryCacheScreens);
-      memoryCacheSize = Math.round(part * memoryCacheScreens);
-      bitmapPoolSize = Math.round(part * bitmapPoolScreens);
+      float part = availableSize / (builder.bitmapPoolScreens + builder.memoryCacheScreens);
+      memoryCacheSize = Math.round(part * builder.memoryCacheScreens);
+      bitmapPoolSize = Math.round(part * builder.bitmapPoolScreens);
     }
 
     if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -69,9 +71,9 @@ public final class MemorySizeCalculator {
               + ", max size: "
               + toMb(maxSize)
               + ", memoryClass: "
-              + activityManager.getMemoryClass()
+              + builder.activityManager.getMemoryClass()
               + ", isLowMemoryDevice: "
-              + isLowMemoryDevice(activityManager));
+              + isLowMemoryDevice(builder.activityManager));
     }
   }
 
@@ -230,10 +232,8 @@ public final class MemorySizeCalculator {
     }
 
     public MemorySizeCalculator build() {
-      return new MemorySizeCalculator(context, activityManager, screenDimensions,
-          memoryCacheScreens, bitmapPoolScreens, arrayPoolSizeBytes, maxSizeMultiplier,
-          lowMemoryMaxSizeMultiplier);
-      }
+      return new MemorySizeCalculator(this);
+    }
   }
 
   private static final class DisplayMetricsScreenDimensions implements ScreenDimensions {
