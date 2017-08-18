@@ -9,6 +9,7 @@ import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -308,7 +309,11 @@ public final class GlideBuilder {
 
     if (bitmapPool == null) {
       int size = memorySizeCalculator.getBitmapPoolSize();
-      bitmapPool = new LruBitmapPool(size);
+      if (size > 0) {
+        bitmapPool = new LruBitmapPool(size);
+      } else {
+        bitmapPool = new BitmapPoolAdapter();
+      }
     }
 
     if (arrayPool == null) {

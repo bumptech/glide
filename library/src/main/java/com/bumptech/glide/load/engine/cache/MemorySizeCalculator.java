@@ -30,6 +30,7 @@ public final class MemorySizeCalculator {
 
   private MemorySizeCalculator(MemorySizeCalculator.Builder builder) {
     this.context = builder.context;
+
     arrayPoolSize =
         isLowMemoryDevice(builder.activityManager)
             ? builder.arrayPoolSizeBytes / LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR
@@ -43,13 +44,14 @@ public final class MemorySizeCalculator {
             builder.screenDimensions.getHeightPixels() *
             BYTES_PER_ARGB_8888_PIXEL;
 
-    int targetPoolSize = Math.round(screenSize * builder.bitmapPoolScreens);
+    int targetBitmapPoolSize = Math.round(screenSize * builder.bitmapPoolScreens);
+
     int targetMemoryCacheSize = Math.round(screenSize * builder.memoryCacheScreens);
     int availableSize = maxSize - arrayPoolSize;
 
-    if (targetMemoryCacheSize + targetPoolSize <= availableSize) {
+    if (targetMemoryCacheSize + targetBitmapPoolSize <= availableSize) {
       memoryCacheSize = targetMemoryCacheSize;
-      bitmapPoolSize = targetPoolSize;
+      bitmapPoolSize = targetBitmapPoolSize;
     } else {
       float part = availableSize / (builder.bitmapPoolScreens + builder.memoryCacheScreens);
       memoryCacheSize = Math.round(part * builder.memoryCacheScreens);
@@ -67,7 +69,7 @@ public final class MemorySizeCalculator {
               + ", byte array size: "
               + toMb(arrayPoolSize)
               + ", memory class limited? "
-              + (targetMemoryCacheSize + targetPoolSize > maxSize)
+              + (targetMemoryCacheSize + targetBitmapPoolSize > maxSize)
               + ", max size: "
               + toMb(maxSize)
               + ", memoryClass: "
@@ -127,7 +129,15 @@ public final class MemorySizeCalculator {
   public static final class Builder {
     // Visible for testing.
     static final int MEMORY_CACHE_TARGET_SCREENS = 2;
-    static final int BITMAP_POOL_TARGET_SCREENS = 4;
+
+    /**
+     * On Android O+, we use {@link android.graphics.Bitmap.Config#HARDWARE} for all reasonably
+     * sized images unless we're creating thumbnails for the first time. As a result, the Bitmap
+     * pool is much less important on O than it was on previous versions.
+     */
+    static final int BITMAP_POOL_TARGET_SCREENS =
+        Build.VERSION.SDK_INT > Build.VERSION_CODES.O ? 4 : 1;
+
     static final float MAX_SIZE_MULTIPLIER = 0.4f;
     static final float LOW_MEMORY_MAX_SIZE_MULTIPLIER = 0.33f;
     // 4MB.
@@ -151,6 +161,14 @@ public final class MemorySizeCalculator {
           (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
       screenDimensions =
           new DisplayMetricsScreenDimensions(context.getResources().getDisplayMetrics());
+
+      // On Android O+ Bitmaps are allocated natively, ART is much more efficient at managing
+      // garbage and we rely heavily on HARDWARE Bitmaps, making Bitmap re-use much less important.
+      // We prefer to preserve RAM on these devices and take the small performance hit of not
+      // re-using Bitmaps and textures when loading very small images or generating thumbnails.
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isLowMemoryDevice(activityManager)) {
+        bitmapPoolScreens = 0;
+      }
     }
 
     /**
