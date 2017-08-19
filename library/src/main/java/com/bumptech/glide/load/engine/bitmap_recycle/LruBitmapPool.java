@@ -249,14 +249,8 @@ public class LruBitmapPool implements BitmapPool {
   private static Set<Bitmap.Config> getDefaultAllowedConfigs() {
     Set<Bitmap.Config> configs = new HashSet<>();
     configs.addAll(Arrays.asList(Bitmap.Config.values()));
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      // GIFs, among other types, end up with a native Bitmap config that doesn't map to a java
-      // config and is treated as null in java code. On KitKat+ these Bitmaps can be reconfigured
-      // and are suitable for re-use.
+    if (Build.VERSION.SDK_INT >= 19) {
       configs.add(null);
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      configs.remove(Bitmap.Config.HARDWARE);
     }
     return Collections.unmodifiableSet(configs);
   }

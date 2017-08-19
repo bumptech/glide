@@ -2,7 +2,6 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -35,7 +34,7 @@ import java.util.Set;
  * Downsamples, decodes, and rotates images according to their exif orientation.
  */
 public final class Downsampler {
-  static final String TAG = "Downsampler";
+  private static final String TAG = "Downsampler";
   /**
    * Indicates the {@link com.bumptech.glide.load.DecodeFormat} that will be used in conjunction
    * with the image format to determine the {@link android.graphics.Bitmap.Config} to provide to
@@ -51,6 +50,7 @@ public final class Downsampler {
   public static final Option<DownsampleStrategy> DOWNSAMPLE_STRATEGY =
       Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy",
           DownsampleStrategy.AT_LEAST);
+
   /**
    * Ensure that the size of the bitmap is fixed to the requested width and height of the
    * resource from the caller.  The final resource dimensions may differ from the requested
@@ -103,7 +103,6 @@ public final class Downsampler {
   private final DisplayMetrics displayMetrics;
   private final ArrayPool byteArrayPool;
   private final List<ImageHeaderParser> parsers;
-  private final HardwareConfigState hardwareConfigState = HardwareConfigState.getInstance();
 
   public Downsampler(List<ImageHeaderParser> parsers, DisplayMetrics displayMetrics,
       BitmapPool bitmapPool, ArrayPool byteArrayPool) {
@@ -197,13 +196,16 @@ public final class Downsampler {
     int orientation = ImageHeaderParserUtils.getOrientation(parsers, is, byteArrayPool);
     int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
 
+    options.inPreferredConfig = getConfig(is, decodeFormat);
+    if (options.inPreferredConfig != Bitmap.Config.ARGB_8888) {
+      options.inDither = true;
+    }
 
     int targetWidth = requestedWidth == Target.SIZE_ORIGINAL ? sourceWidth : requestedWidth;
     int targetHeight = requestedHeight == Target.SIZE_ORIGINAL ? sourceHeight : requestedHeight;
 
     calculateScaling(downsampleStrategy, degreesToRotate, sourceWidth, sourceHeight, targetWidth,
         targetHeight, options);
-    calculateConfig(is, decodeFormat, options, targetWidth, targetHeight);
 
     boolean isKitKatOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
     // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
@@ -363,24 +365,11 @@ public final class Downsampler {
     return false;
   }
 
-  private void calculateConfig(
-      InputStream is,
-      DecodeFormat format,
-      BitmapFactory.Options optionsWithScaling,
-      int targetWidth,
-      int targetHeight)
-      throws IOException {
-
-    if (hardwareConfigState.setHardwareConfigIfAllowed(
-        targetWidth, targetHeight, optionsWithScaling)) {
-      return;
-    }
-
+  private Bitmap.Config getConfig(InputStream is, DecodeFormat format) throws IOException {
     // Changing configs can cause skewing on 4.1, see issue #128.
     if (format == DecodeFormat.PREFER_ARGB_8888
         || Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
-      optionsWithScaling.inPreferredConfig = Bitmap.Config.ARGB_8888;
-      return;
+      return Bitmap.Config.ARGB_8888;
     }
 
     boolean hasAlpha = false;
@@ -393,13 +382,7 @@ public final class Downsampler {
       }
     }
 
-    optionsWithScaling.inPreferredConfig =
-        hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
-    if (optionsWithScaling.inPreferredConfig == Config.RGB_565
-        || optionsWithScaling.inPreferredConfig == Config.ARGB_4444
-        || optionsWithScaling.inPreferredConfig == Config.ALPHA_8) {
-      optionsWithScaling.inDither = true;
-    }
+    return hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
   }
 
   /**
@@ -520,12 +503,6 @@ public final class Downsampler {
   @TargetApi(Build.VERSION_CODES.O)
   private static void setInBitmap(BitmapFactory.Options options, BitmapPool bitmapPool, int width,
       int height) {
-    // Avoid short circuiting, it appears to break on some devices.
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      if (options.inPreferredConfig == Config.HARDWARE) {
-        return;
-      }
-    }
     // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
     options.inBitmap = bitmapPool.getDirty(width, height, options.inPreferredConfig);
   }
