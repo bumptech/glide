@@ -378,6 +378,7 @@ public final class Downsampler {
 
     // Changing configs can cause skewing on 4.1, see issue #128.
     if (format == DecodeFormat.PREFER_ARGB_8888
+        || format == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE
         || Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
       optionsWithScaling.inPreferredConfig = Bitmap.Config.ARGB_8888;
       return;

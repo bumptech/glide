@@ -39,7 +39,9 @@ public final class BitmapPreFiller {
     for (int i = 0; i < bitmapAttributeBuilders.length; i++) {
       PreFillType.Builder builder = bitmapAttributeBuilders[i];
       if (builder.getConfig() == null) {
-        builder.setConfig(defaultFormat == DecodeFormat.PREFER_ARGB_8888
+        builder.setConfig(
+            defaultFormat == DecodeFormat.PREFER_ARGB_8888
+                || defaultFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE
             ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
       }
       bitmapAttributes[i] = builder.build();
