@@ -10,10 +10,22 @@ disqus: 1
 {:toc}
 
 ### Local Logs
-If you have access to the device, you can look for a few log lines using ``adb logcat`` or your IDE. You can enable logging for any tag mentioned here using ``adb shell setprop log.tag.<tag_name> <VERBOSE|DEBUG>``. VERBOSE logs tend to be more verbose but contain more useful information. Depending on the tag, you can try both VERBOSE and DEBUG to see which provides the best level of information.
+If you have access to the device, you can look for a few log lines using ``adb logcat`` or your IDE. You can enable logging for any tag mentioned here using:
+
+```
+adb shell setprop log.tag.<tag_name> <VERBOSE|DEBUG>
+```
+
+VERBOSE logs tend to be more verbose but contain more useful information. Depending on the tag, you can try both VERBOSE and DEBUG to see which provides the best level of information.
 
 #### Request errors
-The highest level and easiest to understand logs are logged with the ``Glide`` tag. The Glide tag will log both successful and failed requests and differing levels of detail depending on the log level. VERBOSE should be used to log successful requests. DEBUG can be used to log detailed error messages.
+The highest level and easiest to understand logs are logged with the ``Glide`` tag:
+
+```
+adb shell setprop log.tag.Glide DEBUG
+```
+
+The Glide tag will log both successful and failed requests and differing levels of detail depending on the log level. VERBOSE should be used to log successful requests. DEBUG can be used to log detailed error messages.
 
 You can also control the verbosity of the Glide log tag programmatically using [``setLogLevel(int)``][1]. ``setLogLevel`` allows you to enable more verbose logs in developer builds but not release builds, for example.
 
@@ -61,6 +73,29 @@ Glide.with(fragment)
 
 To save object allocations, you can re-use the same ``RequestListener`` for multiple loads.
 
+### Out of memory errors
+Almost all OOM errors are due to issues with the hosting application and not with Glide.
+
+There are two common causes of OOMs in applications:
+
+1. Excessively large allocations
+2. Memory leaks (memory that is allocated but never released)
+
+#### Excessively large allocations.
+If opening a single page or loading a single image causes an OOM, your applications is probably loading an unnecessarily large image.
+
+The amount of memory required to display an image in a Bitmap is width * height * bytes per pixel. The number of bytes per pixel depends on the ``Bitmap.Config`` used to display the image, but typically four bytes per pixel are required for ``ARGB_8888`` Bitmaps. As a result, even a 080p image requires 8mb of ram. The larger the image, the more ram required, so a 12 megapixel image requires a fairly massive 48mb.
+
+Glide will downsample images automatically based on the size provided by the ``Target``, ``ImageView`` or ``override()`` request option provided. If you're seeing excessively large allocations in Glide, usually that means that the size of your ``Target`` or ``override()`` is too large or you're using ``Target.SIZE_ORIGINAL`` in conjunction with a large image.
+
+To fix excessively large allocations, avoid ``Target.SIZE_ORIGINAL`` and ensure that the size of your ``ImageViewss`` or that you provide to Glide via ``override()`` are reasonable.
+
+#### Memory leaks.
+If repeating the same set of steps in your application over and over again gradually increases your applications' memory usage and eventually leads to an OOM, you probably have a memory leak.
+
+The [Android documentation][10] has a lot of good information on tracking and debugging memory usage. To investigate memory leaks, you're almost certainly going to want to [capture a heap dump][11] and look for Fragments, Activities or other objects that are retained after they're no longer used.
+
+To fix memory leaks, remove references to the destroyed ``Fragment`` or ``Activity`` at the appropriate point in the lifecycle to avoid retaining excessive objects. Use the heap dump to help find other ways your application retains memory and remove unnecessary references as you find them. It's often helpful to start by listing the shortest paths excluding weak references to all Bitmap objects (using [MAT][12] or another memory analyzer) and then looking for reference chains that seem suspicious. You can also check to make sure that you have no more than once instance of each ``Activity`` and only the expected number of instances of each ``Fragment`` by searching for them in your memory analyzer.
 
 [1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/GlideBuilder.html#setLogLevel-int-
 [2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#into-android.widget.ImageView-
@@ -71,3 +106,6 @@ To save object allocations, you can re-use the same ``RequestListener`` for mult
 [7]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
 [8]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#listener-com.bumptech.glide.request.RequestListener-
 [9]: https://github.com/bumptech/glide/blob/6b137c2b1d4b2ab187ea2aa56834dea039daa090/library/src/main/java/com/bumptech/glide/load/engine/Engine.java#L33
+[10]: https://developer.android.com/studio/profile/investigate-ram.html
+[11]: https://developer.android.com/studio/profile/investigate-ram.html#HeapDump
+[12]: http://www.eclipse.org/mat/
