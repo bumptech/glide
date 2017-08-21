@@ -267,6 +267,7 @@ public class BitmapPreFillerTest {
 
     InOrder order = inOrder(builder);
     order.verify(builder).setConfig(DecodeFormat.DEFAULT == DecodeFormat.PREFER_ARGB_8888
+        || DecodeFormat.DEFAULT == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE
         ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
     order.verify(builder).build();
   }
