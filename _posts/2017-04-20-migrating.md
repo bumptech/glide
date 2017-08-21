@@ -357,7 +357,7 @@ public final class MyModelLoader implements ModelLoader<File, InputStream> {
 }
 ```
 
-Note that the model is passed in to the ``LoadData`` to act as part of the cache key, in addition to the ``DataFetcher``. This pattern provides more control over the disk cache key in some specialized circumstances. Most implementations can just pass their model directly into ``LoadData`` as is done above.
+Note that the model is passed in to the ``LoadData`` to act as part of the cache key, in addition to the ``DataFetcher``. This pattern provides more control over the disk cache key in some specialized circumstances. Most implementations can just pass their model directly into ``LoadData`` as is done above. For this to work correctly your model needs to correctly implements ``hashCode()`` and ``equals()``
 
 If you'd only like to use your ModelLoader for some models you can use the ``handles()`` method to inspect the model before you try to load it. If you return ``false`` from ``handles()`` your ``ModelLoader`` will not be to load the given model, even if the types of your ``ModelLoader`` (``File`` and ``InputStream`` in this example) match.
 
