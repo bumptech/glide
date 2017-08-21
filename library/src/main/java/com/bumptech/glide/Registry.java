@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import android.support.v4.util.Pools.Pool;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ImageHeaderParser;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.data.DataRewinder;
@@ -27,7 +28,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Manages component registration.
+ * Manages component registration to extend or replace Glide's default loading, decoding, and
+ * encoding logic.
  */
 public class Registry {
   private final ModelLoaderRegistry modelLoaderRegistry;
@@ -53,60 +55,154 @@ public class Registry {
     this.imageHeaderParserRegistry = new ImageHeaderParserRegistry();
   }
 
+  /**
+   * Registers the given {@link Encoder} for the given data class (InputStream, FileDescriptor etc).
+   *
+   * <p>The {@link Encoder} will be used both for the exact data class and any subtypes. For
+   * example, registering an {@link Encoder} for {@link java.io.InputStream} will result in the
+   * {@link Encoder} being used for
+   * {@link android.content.res.AssetFileDescriptor.AutoCloseInputStream},
+   * {@link java.io.FileInputStream} and any other subclass.
+   *
+   * <p>If multiple {@link Encoder}s are registered for the same type or super type, the
+   * {@link Encoder} that is registered first will be used. As a result, it's not currently possible
+   * to replace Glide's default {@link Encoder}s.
+   */
   public <Data> Registry register(Class<Data> dataClass, Encoder<Data> encoder) {
     encoderRegistry.add(dataClass, encoder);
     return this;
   }
 
-  public <Data, TResource> Registry append(Class<Data> dataClass, Class<TResource> resourceClass,
+  /**
+   * Appends the given {@link ResourceDecoder} onto the list of available {@link ResourceDecoder}s
+   * allowing it to be used if all earlier and default {@link ResourceDecoder}s for the given types
+   * fail (or if none are present).
+   *
+   * <p>If you're attempting to replace an existing {@link ResourceDecoder} or would like to ensure
+   * that your {@link ResourceDecoder} gets the chance to run before an existing
+   * {@link ResourceDecoder}, use {@link #prepend(Class, Class, ResourceDecoder)}. This method is
+   * best for new types of resources and data or as a way to add an additional fallback decoder
+   * for an existing type of data.
+   *
+   * @see #prepend(Class, Class, ResourceDecoder)
+   *
+   * @param dataClass The data that will be decoded from
+   * ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
+   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
+   * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
+   * @param decoder The {@link ResourceDecoder} to register.
+   */
+  public <Data, TResource> Registry append(
+      Class<Data> dataClass,
+      Class<TResource> resourceClass,
       ResourceDecoder<Data, TResource> decoder) {
     decoderRegistry.append(decoder, dataClass, resourceClass);
     return this;
   }
 
-  public <Data, TResource> Registry prepend(Class<Data> dataClass, Class<TResource> resourceClass,
+  /**
+   * Prepends the given {@link ResourceDecoder} into the list of available {@link ResourceDecoder}s
+   * so that it is attempted before all later and default {@link ResourceDecoder}s for the given
+   * types.
+   *
+   * <p>This method allows you to replace the default {@link ResourceDecoder} because it ensures
+   * the registered {@link ResourceDecoder} will run first. You can use the
+   * {@link ResourceDecoder#handles(Object, Options)} to fall back to the default
+   * {@link ResourceDecoder}s if you only want to change the default functionality for certain
+   * types of data.
+   *
+   * @see #append(Class, Class, ResourceDecoder)
+   *
+   * @param dataClass The data that will be decoded from
+   * ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
+   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
+   * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
+   * @param decoder The {@link ResourceDecoder} to register.
+   */
+  public <Data, TResource> Registry prepend(
+      Class<Data> dataClass,
+      Class<TResource> resourceClass,
       ResourceDecoder<Data, TResource> decoder) {
     decoderRegistry.prepend(decoder, dataClass, resourceClass);
     return this;
   }
 
+  /**
+   * Registers the given {@link ResourceEncoder} for the given resource class
+   * ({@link android.graphics.Bitmap}, {@link com.bumptech.glide.load.resource.gif.GifDrawable}
+   * etc).
+   *
+   * <p>The {@link ResourceEncoder} will be used both for the exact resource class and any subtypes.
+   * For example, registering an {@link ResourceEncoder} for
+   * {@link android.graphics.drawable.Drawable} (not recommended) will result in the
+   * {@link ResourceEncoder} being used for {@link android.graphics.drawable.BitmapDrawable} and
+   * {@link com.bumptech.glide.load.resource.gif.GifDrawable} and any other subclass.
+   *
+   * <p>If multiple {@link ResourceEncoder}s are registered for the same type or super type, the
+   * {@link ResourceEncoder} that is registered first will be used. As a result, it's not currently
+   * possible to replace Glide's default {@link ResourceEncoder}s.
+   */
   public <TResource> Registry register(Class<TResource> resourceClass,
       ResourceEncoder<TResource> encoder) {
     resourceEncoderRegistry.add(resourceClass, encoder);
     return this;
   }
 
+  /**
+   * Registers a new {@link com.bumptech.glide.load.data.DataRewinder.Factory} to handle a
+   * non-default data type that can be rewind to allow for efficient reads of file headers.
+   */
   public Registry register(DataRewinder.Factory factory) {
     dataRewinderRegistry.register(factory);
     return this;
   }
 
+  /**
+   * Registers the given {@link ResourceTranscoder} to convert from the given resource {@link Class}
+   * to the given transcode {@link Class}.
+   *
+   * @param resourceClass The class that will be transcoded from (e.g.
+   * {@link android.graphics.Bitmap}).
+   * @param transcodeClass The class that will be transcoded to (e.g.
+   * {@link android.graphics.drawable.BitmapDrawable}).
+   * @param transcoder The {@link ResourceTranscoder} to register.
+   */
   public <TResource, Transcode> Registry register(Class<TResource> resourceClass,
       Class<Transcode> transcodeClass, ResourceTranscoder<TResource, Transcode> transcoder) {
     transcoderRegistry.register(resourceClass, transcodeClass, transcoder);
     return this;
   }
 
+  /**
+   * Registers a new {@link ImageHeaderParser} that can obtain some basic metadata from an image
+   * header (orientation, type etc).
+   */
   public Registry register(ImageHeaderParser parser) {
     imageHeaderParserRegistry.add(parser);
     return this;
   }
 
   /**
-   * Use the given factory to build a {@link com.bumptech.glide.load.model.ModelLoader} for models
-   * of the given class. Generally the best use of this method is to replace one of the default
-   * factories or add an implementation for other similar low level models. Any factory replaced by
-   * the given factory will have its {@link ModelLoaderFactory#teardown()}} method called.
+   * Appends a new {@link ModelLoaderFactory} onto the end of the existing set so that the
+   * constructed {@link ModelLoader} will be tried after all default and previously registered
+   * {@link ModelLoader}s for the given model and data classes.
    *
-   * <p> Note - If a factory already exists for the given class, it will be replaced. If that
-   * factory is not being used for any other model class, {@link ModelLoaderFactory#teardown()} will
-   * be called. </p>
+   * <p>If you're attempting to replace an existing {@link ModelLoader}, use
+   * {@link #prepend(Class, Class, ModelLoaderFactory)}. This method is best for new types of models
+   * and/or data or as a way to add an additional fallback loader for an existing type of
+   * model/data.
    *
-   * <p> Note - The factory must not be an anonymous inner class of an Activity or another object
-   * that cannot be retained statically. </p>
+   * <p>If multiple {@link ModelLoaderFactory}s are registered for the same model and/or data
+   * classes, the {@link ModelLoader}s they produce will be attempted in the order the
+   * {@link ModelLoaderFactory}s were registered. Only if all {@link ModelLoader}s fail will the
+   * entire request fail.
    *
-   * @param modelClass The model class.
-   * @param dataClass  the data class.
+   * @see #prepend(Class, Class, ModelLoaderFactory)
+   * @see #replace(Class, Class, ModelLoaderFactory)
+   *
+   * @param modelClass The model class (e.g. URL, file path).
+   * @param dataClass  the data class (e.g. {@link java.io.InputStream},
+   * {@link java.io.FileDescriptor}).
    */
   public <Model, Data> Registry append(Class<Model> modelClass, Class<Data> dataClass,
       ModelLoaderFactory<Model, Data> factory) {
@@ -114,12 +210,58 @@ public class Registry {
     return this;
   }
 
+  /**
+   * Prepends a new {@link ModelLoaderFactory} onto the beginning of the existing set so that the
+   * constructed {@link ModelLoader} will be tried before all default and previously registered
+   * {@link ModelLoader}s for the given model and data classes.
+   *
+   * <p>If you're attempting to add additional functionality or add a backup that should run only
+   * after the default {@link ModelLoader}s run, use
+   * {@link #append(Class, Class, ModelLoaderFactory)}. This method is best for adding an additional
+   * case to Glide's existing functionality that should run first. This method will still run
+   * Glide's default {@link ModelLoader}s if the prepended {@link ModelLoader}s fail.
+   *
+   * <p>If multiple {@link ModelLoaderFactory}s are registered for the same model and/or data
+   * classes, the {@link ModelLoader}s they produce will be attempted in the order the
+   * {@link ModelLoaderFactory}s were registered. Only if all {@link ModelLoader}s fail will the
+   * entire request fail.
+   *
+   * @see #append(Class, Class, ModelLoaderFactory)
+   * @see #replace(Class, Class, ModelLoaderFactory)
+   *
+   * @param modelClass The model class (e.g. URL, file path).
+   * @param dataClass  the data class (e.g. {@link java.io.InputStream},
+   * {@link java.io.FileDescriptor}).
+   */
   public <Model, Data> Registry prepend(Class<Model> modelClass, Class<Data> dataClass,
       ModelLoaderFactory<Model, Data> factory) {
     modelLoaderRegistry.prepend(modelClass, dataClass, factory);
     return this;
   }
 
+  /**
+   * Removes all default and previously registered {@link ModelLoaderFactory}s for the given data
+   * and model class and replaces all of them with the single {@link ModelLoader} provided.
+   *
+   * <p>If you're attempting to add additional functionality or add a backup that should run only
+   * after the default {@link ModelLoader}s run, use
+   * {@link #append(Class, Class, ModelLoaderFactory)}. This method should be used only when you
+   * want to ensure that Glide's default {@link ModelLoader}s do not run.
+   *
+   * <p>One good use case for this method is when you want to replace Glide's default networking
+   * library with your OkHttp, Volley, or your own implementation. Using
+   * {@link #prepend(Class, Class, ModelLoaderFactory)} or
+   * {@link #append(Class, Class, ModelLoaderFactory)} may still allow Glide's default networking
+   * library to run in some cases. Using this method will ensure that only your networking library
+   * will run and that the request will fail otherwise.
+   *
+   * @see #prepend(Class, Class, ModelLoaderFactory)
+   * @see #append(Class, Class, ModelLoaderFactory)
+   *
+   * @param modelClass The model class (e.g. URL, file path).
+   * @param dataClass  the data class (e.g. {@link java.io.InputStream},
+   * {@link java.io.FileDescriptor}).
+   */
   public <Model, Data> Registry replace(Class<Model> modelClass, Class<Data> dataClass,
       ModelLoaderFactory<Model, Data> factory) {
     modelLoaderRegistry.replace(modelClass, dataClass, factory);
