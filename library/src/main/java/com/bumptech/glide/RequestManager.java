@@ -105,11 +105,11 @@ public class RequestManager implements LifecycleListener {
   }
 
   protected void setRequestOptions(@NonNull RequestOptions toSet) {
-    this.requestOptions = toSet.clone().autoClone();
+    requestOptions = toSet.clone().autoClone();
   }
 
   private void updateRequestOptions(RequestOptions toUpdate) {
-    this.requestOptions.apply(toUpdate);
+    requestOptions = requestOptions.apply(toUpdate);
   }
 
   /**
