@@ -144,6 +144,14 @@ public class LruBitmapPool implements BitmapPool {
 
   @Nullable
   private synchronized Bitmap getDirtyOrNull(int width, int height, Bitmap.Config config) {
+    // Avoid short circuiting on sdk int since it breaks on some versions of Android.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      if (config == Bitmap.Config.HARDWARE) {
+        throw new IllegalArgumentException("Cannot create a mutable Bitmap with config: " + config
+            + ". Consider setting Downsampler#ALLOW_HARDWARE_CONFIG to false in your RequestOptions"
+            + " and/or in GlideBuilder.setDefaultRequestOptions");
+      }
+    }
     // Config will be null for non public config types, which can lead to transformations naively
     // passing in null as the requested config here. See issue #194.
     final Bitmap result = strategy.get(width, height, config != null ? config : DEFAULT_CONFIG);
