@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine;
 
-import android.graphics.Bitmap;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Registry;
@@ -131,10 +130,6 @@ final class DecodeHelper<Transcode> {
 
   <Data> LoadPath<Data, ?, Transcode> getLoadPath(Class<Data> dataClass) {
     return glideContext.getRegistry().getLoadPath(dataClass, resourceClass, transcodeClass);
-  }
-
-  boolean isBitmapTransformationSet() {
-    return transformations.get(Bitmap.class) != null;
   }
 
   @SuppressWarnings("unchecked")

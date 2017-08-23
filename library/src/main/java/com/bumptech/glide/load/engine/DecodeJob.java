@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine;
 
-import android.os.Build;
 import android.support.v4.os.TraceCompat;
 import android.support.v4.util.Pools;
 import android.util.Log;
@@ -16,7 +15,6 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
-import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.pool.FactoryPools.Poolable;
@@ -452,31 +450,12 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     return runLoadPath(data, dataSource, path);
   }
 
-  private Options getOptionsWithHardwareConfig(DataSource dataSource) {
-    Options options = this.options;
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-      return options;
-    }
-
-    if (options.get(Downsampler.ALLOW_HARDWARE_CONFIG) != null) {
-      return options;
-    }
-
-    if (dataSource == DataSource.RESOURCE_DISK_CACHE
-        || !decodeHelper.isBitmapTransformationSet()) {
-      options = new Options();
-      options.putAll(this.options);
-      options.set(Downsampler.ALLOW_HARDWARE_CONFIG, true);
-    }
-    return options;
-  }
-
   private <Data, ResourceType> Resource<R> runLoadPath(Data data, DataSource dataSource,
       LoadPath<Data, ResourceType, R> path) throws GlideException {
-    Options options = getOptionsWithHardwareConfig(dataSource);
     DataRewinder<Data> rewinder = glideContext.getRegistry().getRewinder(data);
     try {
-      return path.load(rewinder, options, width, height, new DecodeCallback<>(dataSource));
+      return path.load(rewinder, options, width, height,
+          new DecodeCallback<ResourceType>(dataSource));
     } finally {
       rewinder.cleanup();
     }

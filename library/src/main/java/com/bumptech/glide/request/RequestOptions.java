@@ -4,7 +4,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.Priority;
@@ -821,85 +820,55 @@ public class RequestOptions implements Cloneable {
   }
 
   /**
+   * Applies {@link com.bumptech.glide.load.resource.bitmap.FitCenter} to all default types, and
+   * ignores unknown types.
    *
-   * Applies {@link FitCenter} and/or {@link DownsampleStrategy#FIT_CENTER} depending on the
-   * android version to all default types and ignores unknown types.
-   *
-   * <p>On Android devices with KitKat or greater, this method only applies a transformation for
-   * {@link GifDrawable}s and uses {@link DownsampleStrategy#FIT_CENTER} only for {@link Bitmap}s.
-   * If you want to customize your {@link DownsampleStrategy} or want to ensure that the
-   * {@link FitCenter} transformation is used, use {@link #transform(Transformation)} or
-   * {@link #downsample(DownsampleStrategy)} directly.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()} and previous calls to
-   * {@link #downsample(DownsampleStrategy)}.
+   * <p>This will override previous calls to {@link #dontTransform()}.
    *
    * @see #optionalTransform(Class, Transformation)
    * @see #fitCenter()
    */
   public RequestOptions optionalFitCenter() {
-    return optionalScaleOnlyTransform(DownsampleStrategy.FIT_CENTER, new FitCenter());
+    return optionalTransform(DownsampleStrategy.FIT_CENTER, new FitCenter());
   }
 
   /**
-   * Applies {@link FitCenter} and/or {@link DownsampleStrategy#FIT_CENTER} depending on the
-   * android version to all default types and throws an exception if asked to transform an unknown
-   * type.
+   * Applies {@link FitCenter} to all default types and
+   * throws an exception if asked to transform an unknown type.
    *
-   * <p>On Android devices with KitKat or greater, this method only applies a transformation for
-   * {@link GifDrawable}s and uses {@link DownsampleStrategy#FIT_CENTER} only for {@link Bitmap}s.
-   * If you want to customize your {@link DownsampleStrategy} or want to ensure that the
-   * {@link FitCenter} transformation is used, use {@link #transform(Transformation)} or
-   * {@link #downsample(DownsampleStrategy)} directly.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()} and previous calls to
-   * {@link #downsample(DownsampleStrategy)}.
+   * <p>This will override previous calls to {@link #dontTransform()}.
    *
    * @see #transform(Class, Transformation)
    * @see #optionalFitCenter()
    */
   public RequestOptions fitCenter() {
-    return scaleOnlyTransform(DownsampleStrategy.FIT_CENTER, new FitCenter());
+    return transform(DownsampleStrategy.FIT_CENTER, new FitCenter());
   }
 
   /**
-   * Applies {@link com.bumptech.glide.load.resource.bitmap.CenterInside} and/or
-   * {@link DownsampleStrategy#CENTER_INSIDE} to all default types, and ignores unknown types.
+   * Applies {@link com.bumptech.glide.load.resource.bitmap.CenterInside} to all default types, and
+   * ignores unknown types.
    *
-   * <p>On Android devices with KitKat or greater, this method only applies a transformation for
-   * {@link GifDrawable}s and uses {@link DownsampleStrategy#CENTER_INSIDE} only for
-   * {@link Bitmap}s. If you want to customize your {@link DownsampleStrategy} or want to ensure
-   * that the {@link CenterInside} transformation is used, use {@link #transform(Transformation)} or
-   * {@link #downsample(DownsampleStrategy)} directly.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()} and previous calls to
-   * {@link #downsample(DownsampleStrategy)}.
+   * <p>This will override previous calls to {@link #dontTransform()}.
    *
    * @see #optionalTransform(Class, Transformation)
    * @see #centerInside()
    */
   public RequestOptions optionalCenterInside() {
-    return optionalScaleOnlyTransform(DownsampleStrategy.CENTER_INSIDE, new CenterInside());
+    return optionalTransform(DownsampleStrategy.CENTER_INSIDE, new CenterInside());
   }
 
   /**
-   * Applies {@link CenterInside} and/or {@link DownsampleStrategy#CENTER_INSIDE} to all default
-   * types and throws an exception if asked to transform an unknown type.
+   * Applies {@link CenterInside} to all default types and
+   * throws an exception if asked to transform an unknown type.
    *
-   * <p>On Android devices with KitKat or greater, this method only applies a transformation for
-   * {@link GifDrawable}s and uses {@link DownsampleStrategy#CENTER_INSIDE} only for
-   * {@link Bitmap}s. If you want to customize your {@link DownsampleStrategy} or want to ensure
-   * that the {@link CenterInside} transformation is used, use {@link #transform(Transformation)} or
-   * {@link #downsample(DownsampleStrategy)} directly.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()} and previous calls to
-   * {@link #downsample(DownsampleStrategy)}.
+   * <p>This will override previous calls to {@link #dontTransform()}.
    *
    * @see #transform(Class, Transformation)
    * @see #optionalCenterInside()
    */
   public RequestOptions centerInside() {
-    return scaleOnlyTransform(DownsampleStrategy.CENTER_INSIDE, new CenterInside());
+    return transform(DownsampleStrategy.CENTER_INSIDE, new CenterInside());
   }
 
   /**
@@ -952,51 +921,6 @@ public class RequestOptions implements Cloneable {
   }
 
   /**
-   * On KitKat+ we can apply arbitrary non power of two scaling factors using Downsampler alone,
-   * eliminating the need for transformations that scale and maintain aspect ratios.
-   */
-  private static boolean isDownsampleScalingSupported() {
-    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-  }
-
-  private RequestOptions scaleOnlyTransform(
-      DownsampleStrategy strategy, Transformation<Bitmap> transformation) {
-    return scaleOnlyTransform(strategy, transformation, true /*isTransformationRequired*/);
-  }
-
-  private RequestOptions optionalScaleOnlyTransform(
-      DownsampleStrategy strategy, Transformation<Bitmap> transformation) {
-    return scaleOnlyTransform(strategy, transformation, false /*isTransformationRequired*/);
-  }
-
-  private RequestOptions scaleOnlyTransform(
-      DownsampleStrategy strategy,
-      Transformation<Bitmap> transformation,
-      boolean isTransformationRequired) {
-    if (!isDownsampleScalingSupported()) {
-      return isTransformationRequired
-          ? transform(strategy, transformation) : optionalTransform(strategy, transformation);
-    }
-    // Avoid applying an unnecessary Bitmap Transformation if it can be done just with the
-    // downsampler.
-    RequestOptions result =
-        downsample(strategy)
-            // Clear out any previous Bitmap transformations to match the behavior of other
-            // transformation methods that do apply a Bitmap transformation when called.
-            .dontTransform();
-
-    if (isTransformationRequired) {
-      result =
-          result.transform(GifDrawable.class, new GifDrawableTransformation(transformation));
-    } else {
-      result =
-          result.optionalTransform(
-              GifDrawable.class, new GifDrawableTransformation(transformation));
-    }
-    return result;
-  }
-
-  /**
    * Applies the given {@link Transformation} for
    * {@link Bitmap Bitmaps} to the default types ({@link Bitmap},
    * {@link android.graphics.drawable.BitmapDrawable}, and
@@ -1005,7 +929,8 @@ public class RequestOptions implements Cloneable {
    *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
-   * @param transformation Any {@link Transformation} for {@link Bitmap}s.
+   * @param transformation Any {@link Transformation} for
+   *                       {@link Bitmap}s.
    * @see #optionalTransform(Transformation)
    * @see #optionalTransform(Class, Transformation)
    */
@@ -1026,7 +951,7 @@ public class RequestOptions implements Cloneable {
    * {@link android.graphics.drawable.BitmapDrawable}, and
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable})
    * and throws an exception if asked to transform an unknown type.
-   *
+   * <p>
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
    * @param transformations One or more {@link Transformation}s for {@link Bitmap}s.
