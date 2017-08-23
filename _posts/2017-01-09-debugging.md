@@ -88,7 +88,7 @@ The amount of memory required to display an image in a Bitmap is width * height 
 
 Glide will downsample images automatically based on the size provided by the ``Target``, ``ImageView`` or ``override()`` request option provided. If you're seeing excessively large allocations in Glide, usually that means that the size of your ``Target`` or ``override()`` is too large or you're using ``Target.SIZE_ORIGINAL`` in conjunction with a large image.
 
-To fix excessively large allocations, avoid ``Target.SIZE_ORIGINAL`` and ensure that the size of your ``ImageViewss`` or that you provide to Glide via ``override()`` are reasonable.
+To fix excessively large allocations, avoid ``Target.SIZE_ORIGINAL`` and ensure that the size of your ``ImageViews`` or that you provide to Glide via ``override()`` are reasonable.
 
 #### Memory leaks.
 If repeating the same set of steps in your application over and over again gradually increases your applications' memory usage and eventually leads to an OOM, you probably have a memory leak.

@@ -90,7 +90,7 @@ The [``GlideExtension``][6] annotation identifies a class that extends Glide's A
 
 Classes annotated with [``GlideExtension``][6] are expected to be utility classes. They should have a private and empty constructor. Classes annotated with GlideExtension should also be final and contain only static methods. Annotated classes may contain static variables and may reference other classes or objects.
 
-An application may implement as many [``GlideExtension``][6] annotated classes as they'd like. Libraries can also implement an arbitrary number of [``GlideExtension``][6] annotated classes. When a [``AppGlideModule``][4] is found, all available [``GlideExtensions``][6] will be merged to create a single API with all available extensions. Conflicts will result in compliation errors in Glide's annotation processor.
+An application may implement as many [``GlideExtension``][6] annotated classes as they'd like. Libraries can also implement an arbitrary number of [``GlideExtension``][6] annotated classes. When a [``AppGlideModule``][4] is found, all available [``GlideExtensions``][6] will be merged to create a single API with all available extensions. Conflicts will result in compilation errors in Glide's annotation processor.
 
 GlideExtension annotated classes can define two types of extension methods:
 
