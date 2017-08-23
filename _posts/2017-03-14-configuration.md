@@ -171,25 +171,38 @@ Both Applications and Libraries can register a number of components that extend 
 
 1. [``ModelLoader``][23]s to load custom Models (Urls, Uris, arbitrary POJOs) and Data (InputStreams, FileDescriptors).
 2. [``ResourceDecoder``][24]s to decode new Resources (Drawables, Bitmaps) or new types of Data (InputStreams, FileDescriptors).
-3. [``Encoder``][25]s to write Data (InputStreams, FileDesciptors) to Glide's disk cache.
+3. [``Encoder``][25]s to write Data (InputStreams, FileDescriptors) to Glide's disk cache.
 4. [``ResourceTranscoder``][26]s to convert Resources (BitmapResource) into other types of Resources (DrawableResource).
 5. [``ResourceEncoder``][27]s to write Resources (BitmapResource, DrawableResource) to Glide's disk cache.
 
-Components are registered using the [``Registry``][28] class. For example, to add a ``ModelLoader`` that can obtain an InputStream for a custom Model object:
+Components are registered using the [``Registry``][28] class in the [``registerComponents()``][31] method of ``AppGlideModules`` and ``LibraryGlideModules``:
 
 ```java
 @GlideModule
 public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void registerComponents(Context context, Glide glide, Registry registry) {
-    registry.append(Photo.class, InputStream.class, new CustomModelLoader.Factory());
+    registry.append(...);
   }
 }
 ```
 
-Any number of components can registered in a single ``GlideModule``. [``ModelLoader``][23]s and [``ResourceDecoder``][24]s can have multiple implementations with the same type arguments. 
+or:
+
+```java
+@GlideModule
+public class YourLibraryGlideModule extends LibraryGlideModule {
+  @Override
+  public void registerComponents(Context context, Glide glide, Registry registry) {
+    registry.append(...);
+  }
+}
+```
+
+Any number of components can registered in a single ``GlideModule``. Certain types, including [``ModelLoader``][23]s and [``ResourceDecoder``][24]s can have multiple implementations with the same type arguments. 
 
 
+#### Anatomy of a load
 The set of registered components, including both those registered by default in Glide and those registered in Modules are used to define a set of load paths. Each load path is a step by step progression from the the Model provided to [``load()``][29] to the Resource type specified by [``as()``][30]. A load path consists (roughly) of the following steps:
 
 1. Model -> Data (handled by ``ModelLoader``s)
@@ -201,7 +214,60 @@ The set of registered components, including both those registered by default in 
 
 When a request is started, Glide will attempt all available paths from the Model to the requested Resource type. A request will succeed if any load path succeeds. A request will fail only if all available load paths fail.  
 
-The ``prepend()``, ``append()``, and ``replace()`` methods in [``Registry``][28] can be used to set the order in which Glide will attempt each ``ModelLoader`` and ``ResourceDecoder``. Requests can be made somewhat more efficient by making sure the ``ModelLoader``s and ``ResourceDecoder``s that handle the most common types are registered first. Ordering components can also allow you to register components that handle specific subsets of models or data (ie only certain types of Uris, or only certain image formats) while also having an appended catch-all component to handle the rest.
+#### Ordering Components
+
+The ``prepend()``, ``append()``, and ``replace()`` methods in [``Registry``][28] can be used to set the order in which Glide will attempt each ``ModelLoader`` and ``ResourceDecoder``.  Ordering components allows you to register components that handle specific subsets of models or data (IE only certain types of Uris, or only certain image formats) while also having an appended catch-all component to handle the rest. 
+
+##### prepend()
+To handle subsets of existing data where you do want to fall back to Glide's default behavior if your ``ModelLoader`` or ``ResourceDecoder`` fails, using ``prepend()``. ``prepend()`` will make sure that your ``ModelLoader`` or ``ResourceDecoder`` is called before all other previously registered components and can run first. If your ``ModelLoader`` or ``ResourceDecoder`` returns ``false`` from its ``handles()`` method or fails, all other ``ModelLoader``s or ``ResourceDecoders`` will be called in the order they're registered, one at a time, providing a fallback. 
+
+##### append()
+To handle new types of data or to add a fallback to Glide's default behavior, using ``append()``. ``append()`` will make sure that your ``ModelLoader`` or ``ResourceDecoder`` is called only after Glide's defaults are attempted. If you're trying to handle subtypes that Glide's default components handle (like a specific Uri authority or subclass), you may need to use ``prepend()`` to make sure Glide's default component doesn't load the resource before your custom component. 
+
+##### replace()
+To completely replace Glide's default behavior and ensure that it doesn't run, use ``replace()``. ``replace()`` removes all ``ModelLoaders`` that handle the given model and data classes and then adds your ``ModelLoader`` instead. ``replace()`` is useful in particular for swapping out Glide's networking logic with a library like OkHttp or Volley, where you want to make sure that only OkHttp or Volley are used.
+
+#### Adding a ModelLoader
+For example, to add a ``ModelLoader`` that can obtain an InputStream for a new custom Model object:
+
+```java
+@GlideModule
+public class YourAppGlideModule extends AppGlideModule {
+  @Override
+  public void registerComponents(Context context, Glide glide, Registry registry) {
+    registry.append(Photo.class, InputStream.class, new CustomModelLoader.Factory());
+  }
+}
+```
+
+``append()`` can be used safely here because Photo.class is a custom model object specific to your application, so you know that there is no default behavior in Glide that you need to replace.
+
+In contrast, to add handling for a new type of String url in a [``BaseGlideUrlLoader``][32], you should use ``prepend()`` so that your ``ModelLoader`` gets to run before Glide's default ``ModelLoaders`` for ``Strings``:
+
+```java
+@GlideModule
+public class YourAppGlideModule extends AppGlideModule {
+  @Override
+  public void registerComponents(Context context, Glide glide, Registry registry) {
+    registry.prepend(String.class, InputStream.class, new CustomUrlModelLoader.Factory());
+  }
+}
+```
+
+Finally to completely remove and replace Glide's default handling of a certain type, like a networking library, you should use ``replace()``:
+
+```java
+@GlideModule
+public class YourAppGlideModule extends AppGlideModule {
+  @Override
+  public void registerComponents(Context context, Glide glide, Registry registry) {
+    registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory());
+  }
+}
+```
+
+
+
 
 ### Module classes and annotations.
 Glide v4 relies on two classes, [``AppGlideModule``][1] and [``LibraryGlideModule``][2], to configure the Glide singleton. Both classes are allowed to register additional components, like [``ModelLoaders``][3], [``ResourceDecoders``][4] etc. Only the [``AppGlideModules``][1] are allowed to configure application specific settings, like cache implementations and sizes. 
@@ -242,7 +308,7 @@ public final class MyAppGlideModule extends AppGlideModule { }
 ### Manifest Parsing
 To maintain backward compatibility with Glide v3's [``GlideModules``][21], Glide still parses ``AndroidManifest.xml`` files from both the application and any included libraries and will include any legacy [``GlideModules``][21] listed in the manifest. Although this functionality will be removed in a future version, we've retained the behavior for now to ease the transition.
 
-If you've already migrated to the Glide v4 [``AppGlideModule``][1] and [``LibraryGlideModule``][2], you can disable manifest parsing entirely. Doing so can improve the initial startup time of Glide and avoid some potential problems with trying to parse metadata. To disable manifest parsing, override the [``isManifestParsingEnabled()``][22] method in your [``AppGlideModule``][1] implemenation:
+If you've already migrated to the Glide v4 [``AppGlideModule``][1] and [``LibraryGlideModule``][2], you can disable manifest parsing entirely. Doing so can improve the initial startup time of Glide and avoid some potential problems with trying to parse metadata. To disable manifest parsing, override the [``isManifestParsingEnabled()``][22] method in your [``AppGlideModule``][1] implementation:
 
 ```java
 @GlideModule
@@ -284,3 +350,5 @@ public final class MyAppGlideModule extends AppGlideModule {
 [28]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/Registry.html
 [29]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#load-java.lang.Object-
 [30]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html#as-java.lang.Class-
+[31]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html#registerComponents-android.content.Context-com.bumptech.glide.Glide-com.bumptech.glide.Registry-
+[32]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/stream/BaseGlideUrlLoader.html
