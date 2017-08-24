@@ -111,6 +111,7 @@ public class RequestOptions implements Cloneable {
   private boolean isAutoCloneEnabled;
   private boolean useUnlimitedSourceGeneratorsPool;
   private boolean onlyRetrieveFromCache;
+  private boolean isScaleOnlyOrNoTransform = true;
 
   /**
    * Returns a {@link RequestOptions} object with {@link #sizeMultiplier(float)} set.
@@ -820,55 +821,61 @@ public class RequestOptions implements Cloneable {
   }
 
   /**
-   * Applies {@link com.bumptech.glide.load.resource.bitmap.FitCenter} to all default types, and
-   * ignores unknown types.
    *
-   * <p>This will override previous calls to {@link #dontTransform()}.
+   * Applies {@link FitCenter} and to all default types, {@link DownsampleStrategy#FIT_CENTER} to
+   * image types, and ignores unknown types.
+   *
+   * <p>This will override previous calls to {@link #dontTransform()} and previous calls to
+   * {@link #downsample(DownsampleStrategy)}.
    *
    * @see #optionalTransform(Class, Transformation)
    * @see #fitCenter()
    */
   public RequestOptions optionalFitCenter() {
-    return optionalTransform(DownsampleStrategy.FIT_CENTER, new FitCenter());
+    return optionalScaleOnlyTransform(DownsampleStrategy.FIT_CENTER, new FitCenter());
   }
 
   /**
-   * Applies {@link FitCenter} to all default types and
-   * throws an exception if asked to transform an unknown type.
+   * Applies {@link FitCenter} and to all default types, {@link DownsampleStrategy#FIT_CENTER} to
+   * image types, and throws an exception if asked to transform an unknown
+   * type.
    *
-   * <p>This will override previous calls to {@link #dontTransform()}.
+   * <p>This will override previous calls to {@link #dontTransform()} and previous calls to
+   * {@link #downsample(DownsampleStrategy)}.
    *
    * @see #transform(Class, Transformation)
    * @see #optionalFitCenter()
    */
   public RequestOptions fitCenter() {
-    return transform(DownsampleStrategy.FIT_CENTER, new FitCenter());
+    return scaleOnlyTransform(DownsampleStrategy.FIT_CENTER, new FitCenter());
   }
 
   /**
-   * Applies {@link com.bumptech.glide.load.resource.bitmap.CenterInside} to all default types, and
-   * ignores unknown types.
+   * Applies {@link com.bumptech.glide.load.resource.bitmap.CenterInside} to all default types,
+   * {@link DownsampleStrategy#CENTER_INSIDE} to image types, and ignores unknown types.
    *
-   * <p>This will override previous calls to {@link #dontTransform()}.
+   * <p>This will override previous calls to {@link #dontTransform()} and previous calls to
+   * {@link #downsample(DownsampleStrategy)}.
    *
    * @see #optionalTransform(Class, Transformation)
    * @see #centerInside()
    */
   public RequestOptions optionalCenterInside() {
-    return optionalTransform(DownsampleStrategy.CENTER_INSIDE, new CenterInside());
+    return optionalScaleOnlyTransform(DownsampleStrategy.CENTER_INSIDE, new CenterInside());
   }
 
   /**
-   * Applies {@link CenterInside} to all default types and
-   * throws an exception if asked to transform an unknown type.
+   * Applies {@link CenterInside} to all default types, {@link DownsampleStrategy#CENTER_INSIDE} to
+   * image types and throws an exception if asked to transform an unknown type.
    *
-   * <p>This will override previous calls to {@link #dontTransform()}.
+   * <p>This will override previous calls to {@link #dontTransform()} and previous calls to
+   * {@link #downsample(DownsampleStrategy)}.
    *
    * @see #transform(Class, Transformation)
    * @see #optionalCenterInside()
    */
   public RequestOptions centerInside() {
-    return transform(DownsampleStrategy.CENTER_INSIDE, new CenterInside());
+    return scaleOnlyTransform(DownsampleStrategy.CENTER_INSIDE, new CenterInside());
   }
 
   /**
@@ -920,6 +927,26 @@ public class RequestOptions implements Cloneable {
     return transform(transformation);
   }
 
+  private RequestOptions scaleOnlyTransform(
+      DownsampleStrategy strategy, Transformation<Bitmap> transformation) {
+    return scaleOnlyTransform(strategy, transformation, true /*isTransformationRequired*/);
+  }
+
+  private RequestOptions optionalScaleOnlyTransform(
+      DownsampleStrategy strategy, Transformation<Bitmap> transformation) {
+    return scaleOnlyTransform(strategy, transformation, false /*isTransformationRequired*/);
+  }
+
+  private RequestOptions scaleOnlyTransform(
+      DownsampleStrategy strategy,
+      Transformation<Bitmap> transformation,
+      boolean isTransformationRequired) {
+    RequestOptions result = isTransformationRequired
+          ? transform(strategy, transformation) : optionalTransform(strategy, transformation);
+    result.isScaleOnlyOrNoTransform = true;
+    return result;
+  }
+
   /**
    * Applies the given {@link Transformation} for
    * {@link Bitmap Bitmaps} to the default types ({@link Bitmap},
@@ -929,8 +956,7 @@ public class RequestOptions implements Cloneable {
    *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
-   * @param transformation Any {@link Transformation} for
-   *                       {@link Bitmap}s.
+   * @param transformation Any {@link Transformation} for {@link Bitmap}s.
    * @see #optionalTransform(Transformation)
    * @see #optionalTransform(Class, Transformation)
    */
@@ -951,7 +977,7 @@ public class RequestOptions implements Cloneable {
    * {@link android.graphics.drawable.BitmapDrawable}, and
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable})
    * and throws an exception if asked to transform an unknown type.
-   * <p>
+   *
    * <p>This will override previous calls to {@link #dontTransform()}.
    *
    * @param transformations One or more {@link Transformation}s for {@link Bitmap}s.
@@ -1024,6 +1050,9 @@ public class RequestOptions implements Cloneable {
     fields |= TRANSFORMATION;
     isTransformationAllowed = true;
     fields |= TRANSFORMATION_ALLOWED;
+    // Always set to false here. Known scale only transformations will call this method and then
+    // set isScaleOnlyOrNoTransform to true immediately after.
+    isScaleOnlyOrNoTransform = false;
     return selfOrThrowIfLocked();
   }
 
@@ -1065,6 +1094,7 @@ public class RequestOptions implements Cloneable {
     fields &= ~TRANSFORMATION_REQUIRED;
     isTransformationAllowed = false;
     fields |= TRANSFORMATION_ALLOWED;
+    isScaleOnlyOrNoTransform = true;
     return selfOrThrowIfLocked();
   }
 
@@ -1144,6 +1174,7 @@ public class RequestOptions implements Cloneable {
     }
     if (isSet(other.fields, TRANSFORMATION)) {
       transformations.putAll(other.transformations);
+      isScaleOnlyOrNoTransform = other.isScaleOnlyOrNoTransform;
     }
     if (isSet(other.fields, ONLY_RETRIEVE_FROM_CACHE)) {
       onlyRetrieveFromCache = other.onlyRetrieveFromCache;
@@ -1155,6 +1186,7 @@ public class RequestOptions implements Cloneable {
       fields &= ~TRANSFORMATION;
       isTransformationRequired = false;
       fields &= ~TRANSFORMATION_REQUIRED;
+      isScaleOnlyOrNoTransform = true;
     }
 
     fields |= other.fields;
@@ -1352,6 +1384,10 @@ public class RequestOptions implements Cloneable {
 
   public final float getSizeMultiplier() {
     return sizeMultiplier;
+  }
+
+  public boolean isScaleOnlyOrNoTransform() {
+    return isScaleOnlyOrNoTransform;
   }
 
   private boolean isSet(int flag) {

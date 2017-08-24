@@ -50,13 +50,6 @@ final class HardwareConfigState {
    */
   private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS = 700;
 
-  /**
-   * The minimum size that will trigger downsampling in {@link BitmapFactory}.
-   *
-   * <p>From {@link android.graphics.BitmapFactory.Options#inSampleSize}.
-   */
-  private static final int MINIMUM_SAMPLE_SIZE = 2;
-
   private volatile int decodesSinceLastFdCheck;
   private volatile boolean isHardwareConfigAllowed = true;
 
@@ -81,18 +74,19 @@ final class HardwareConfigState {
       int targetWidth,
       int targetHeight,
       BitmapFactory.Options optionsWithScaling,
-      DecodeFormat decodeFormat) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+      DecodeFormat decodeFormat,
+      boolean isHardwareConfigAllowed) {
+    if (!isHardwareConfigAllowed
+        || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
         || decodeFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE) {
       return false;
     }
 
-    boolean result = !optionsWithScaling.inScaled
-        && optionsWithScaling.inSampleSize < MINIMUM_SAMPLE_SIZE
-        && targetWidth >= MIN_HARDWARE_DIMENSION
-        && targetHeight >= MIN_HARDWARE_DIMENSION
-        // Make sure to call isFdSizeBelowHardwareLimit last because it has side affects.
-        && isFdSizeBelowHardwareLimit();
+    boolean result =
+        targetWidth >= MIN_HARDWARE_DIMENSION
+            && targetHeight >= MIN_HARDWARE_DIMENSION
+            // Make sure to call isFdSizeBelowHardwareLimit last because it has side affects.
+            && isFdSizeBelowHardwareLimit();
 
     if (result) {
       optionsWithScaling.inPreferredConfig = Bitmap.Config.HARDWARE;

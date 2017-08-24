@@ -37,6 +37,7 @@ final class DecodeHelper<Transcode> {
   private Priority priority;
   private DiskCacheStrategy diskCacheStrategy;
   private boolean isTransformationRequired;
+  private boolean isScaleOnlyOrNoTransform;
 
   @SuppressWarnings("unchecked")
   <R> DecodeHelper<R> init(
@@ -52,6 +53,7 @@ final class DecodeHelper<Transcode> {
       Options options,
       Map<Class<?>, Transformation<?>> transformations,
       boolean isTransformationRequired,
+      boolean isScaleOnlyOrNoTransform,
       DecodeJob.DiskCacheProvider diskCacheProvider) {
     this.glideContext = glideContext;
     this.model = model;
@@ -66,6 +68,7 @@ final class DecodeHelper<Transcode> {
     this.options = options;
     this.transformations = transformations;
     this.isTransformationRequired = isTransformationRequired;
+    this.isScaleOnlyOrNoTransform = isScaleOnlyOrNoTransform;
 
     return (DecodeHelper<R>) this;
   }
@@ -130,6 +133,10 @@ final class DecodeHelper<Transcode> {
 
   <Data> LoadPath<Data, ?, Transcode> getLoadPath(Class<Data> dataClass) {
     return glideContext.getRegistry().getLoadPath(dataClass, resourceClass, transcodeClass);
+  }
+
+  boolean isScaleOnlyOrNoTransform() {
+    return isScaleOnlyOrNoTransform;
   }
 
   @SuppressWarnings("unchecked")

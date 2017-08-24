@@ -15,6 +15,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.util.Util;
 import com.google.common.testing.EqualsTester;
@@ -41,6 +42,106 @@ public class RequestOptionsTest {
     options = new RequestOptions();
 
     app = RuntimeEnvironment.application;
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_byDefault_isTrue() {
+    assertThat(options.isScaleOnlyOrNoTransform()).isTrue();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withFitCenter_isTrue() {
+    options.fitCenter();
+    assertThat(options.isScaleOnlyOrNoTransform()).isTrue();
+    options.optionalFitCenter();
+    assertThat(options.isScaleOnlyOrNoTransform()).isTrue();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withCenterInside_isTrue() {
+    options.centerInside();
+    assertThat(options.isScaleOnlyOrNoTransform()).isTrue();
+    options.optionalCenterInside();
+    assertThat(options.isScaleOnlyOrNoTransform()).isTrue();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withCenterCrop_isFalse() {
+    options.centerCrop();
+    assertThat(options.isScaleOnlyOrNoTransform()).isFalse();
+    options.optionalCenterCrop();
+    assertThat(options.isScaleOnlyOrNoTransform()).isFalse();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withCircleCrop_isFalse() {
+    options.circleCrop();
+    assertThat(options.isScaleOnlyOrNoTransform()).isFalse();
+    options.circleCrop();
+    assertThat(options.isScaleOnlyOrNoTransform()).isFalse();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withBitmapTransformation_isFalse() {
+    options.transform(transformation);
+    assertThat(options.isScaleOnlyOrNoTransform()).isFalse();
+    options.optionalTransform(transformation);
+    assertThat(options.isScaleOnlyOrNoTransform()).isFalse();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withCustomTransformation_isFalse() {
+    options.transform(Bitmap.class, transformation);
+    assertThat(options.isScaleOnlyOrNoTransform()).isFalse();
+    options.optionalTransform(Bitmap.class, transformation);
+    assertThat(options.isScaleOnlyOrNoTransform()).isFalse();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withDownsampleStrategy_isTrue() {
+    options.downsample(DownsampleStrategy.CENTER_OUTSIDE);
+    assertThat(options.isScaleOnlyOrNoTransform()).isTrue();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withNonScaleAndThenDontTransform_isTrue() {
+    options.circleCrop().dontTransform();
+    assertThat(options.isScaleOnlyOrNoTransform()).isTrue();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withNonScaleAndAppliedDontTransform_isTrue() {
+    options.circleCrop();
+    options.apply(new RequestOptions().dontTransform());
+    assertThat(options.isScaleOnlyOrNoTransform()).isTrue();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withDontTransformAndAppliedNonScaleTransform_isFalse() {
+    options.fitCenter();
+    options.apply(new RequestOptions().circleCrop());
+    assertThat(options.isScaleOnlyOrNoTransform()).isFalse();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withNonScaleOnly_andAppliedWithScaleOnly_isTrue() {
+    options.circleCrop();
+    options.apply(new RequestOptions().fitCenter());
+    assertThat(options.isScaleOnlyOrNoTransform()).isTrue();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withScaleOnlyAndAppliedWithoutTransform_isTrue() {
+    options.fitCenter();
+    options.apply(new RequestOptions().dontAnimate());
+    assertThat(options.isScaleOnlyOrNoTransform()).isTrue();
+  }
+
+  @Test
+  public void isScaleOnlyOrNoTransform_withNonScaleOnlyAndAppliedWithoutTransform_isFalse() {
+    options.circleCrop();
+    options.apply(new RequestOptions().dontAnimate());
+    assertThat(options.isScaleOnlyOrNoTransform()).isFalse();
   }
 
   @Test

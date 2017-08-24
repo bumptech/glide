@@ -484,6 +484,7 @@ public class EngineTest {
     boolean isMemoryCacheable = true;
     boolean useUnlimitedSourceGeneratorPool = false;
     boolean onlyRetrieveFromCache = false;
+    boolean isScaleOnlyOrNoTransform = true;
 
     public EngineTestHarness() {
       when(keyFactory.buildKey(eq(model), eq(signature), anyInt(), anyInt(), eq(transformations),
@@ -513,6 +514,7 @@ public class EngineTest {
           DiskCacheStrategy.ALL,
           transformations,
           false /*isTransformationRequired*/,
+          true,
           options,
           isMemoryCacheable,
           useUnlimitedSourceGeneratorPool,

@@ -279,7 +279,7 @@ public class SingleRequestTest {
     verify(harness.engine, times(1))
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), eq(100), eq(100),
             eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
-            eq(harness.transformations), anyBoolean(), any(Options.class),
+            eq(harness.transformations), anyBoolean(), anyBoolean(), any(Options.class),
             anyBoolean(), anyBoolean(), anyBoolean(), any(ResourceCallback.class));
   }
 
@@ -298,7 +298,7 @@ public class SingleRequestTest {
     when(harness.engine
        .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(), anyInt(),
           eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
-          eq(harness.transformations), anyBoolean(), any(Options.class),
+          eq(harness.transformations), anyBoolean(), anyBoolean(), any(Options.class),
           anyBoolean(), anyBoolean(), anyBoolean(), any(ResourceCallback.class)))
         .thenReturn(loadStatus);
 
@@ -543,7 +543,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), anyBoolean(), anyBoolean(),
+            anyBoolean(), any(Options.class), anyBoolean(), anyBoolean(), anyBoolean(),
             any(ResourceCallback.class)))
         .thenAnswer(new Answer<Object>() {
           @Override
@@ -658,7 +658,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), anyBoolean(), anyBoolean(),
+            anyBoolean(), any(Options.class), anyBoolean(), anyBoolean(), anyBoolean(),
             any(ResourceCallback.class));
   }
 
@@ -680,7 +680,7 @@ public class SingleRequestTest {
     when(harness.engine
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), eq(100), eq(100),
             eq(Object.class), eq(List.class), any(Priority.class), any(DiskCacheStrategy.class),
-            eq(harness.transformations), anyBoolean(), any(Options.class),
+            eq(harness.transformations), anyBoolean(), anyBoolean(), any(Options.class),
             anyBoolean(), anyBoolean(), anyBoolean(), any(ResourceCallback.class)))
         .thenAnswer(new CallResourceCallback(harness.resource));
     SingleRequest<List> request = harness.getRequest();
@@ -710,7 +710,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), anyBoolean(), anyBoolean(),
+            anyBoolean(), any(Options.class), anyBoolean(), anyBoolean(), anyBoolean(),
             any(ResourceCallback.class));
   }
 
@@ -729,7 +729,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), eq(Boolean.TRUE), anyBoolean(),
+            anyBoolean(), any(Options.class), anyBoolean(), eq(Boolean.TRUE), anyBoolean(),
             any(ResourceCallback.class));
   }
 
@@ -747,7 +747,7 @@ public class SingleRequestTest {
         .load(eq(harness.glideContext), eq(harness.model), eq(harness.signature), anyInt(),
             anyInt(), eq(Object.class), eq(List.class), any(Priority.class),
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
-            any(Options.class), anyBoolean(), eq(Boolean.FALSE), anyBoolean(),
+            anyBoolean(), any(Options.class), anyBoolean(), eq(Boolean.FALSE), anyBoolean(),
             any(ResourceCallback.class));
   }
 
