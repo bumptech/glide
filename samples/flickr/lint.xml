@@ -3,4 +3,5 @@
     <!-- Not supported by all build systems -->
     <issue id="GradleOverrides" severity="ignore" />
     <issue id="IconMissingDensityFolder" severity="ignore"/>
+    <issue id="GoogleAppIndexingWarning" severity="ignore"/>
 </lint>
