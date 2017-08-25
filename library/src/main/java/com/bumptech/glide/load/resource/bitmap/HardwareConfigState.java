@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -70,6 +71,7 @@ final class HardwareConfigState {
     // Singleton constructor.
   }
 
+  @TargetApi(Build.VERSION_CODES.O)
   boolean setHardwareConfigIfAllowed(
       int targetWidth,
       int targetHeight,

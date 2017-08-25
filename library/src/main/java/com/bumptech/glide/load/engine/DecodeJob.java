@@ -478,7 +478,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     Options options = getOptionsWithHardwareConfig(dataSource);
     DataRewinder<Data> rewinder = glideContext.getRegistry().getRewinder(data);
     try {
-      return path.load(rewinder, options, width, height, new DecodeCallback<>(dataSource));
+      // ResourceType in DecodeCallback below is required for compilation to work with gradle.
+      return path.load(
+          rewinder, options, width, height, new DecodeCallback<ResourceType>(dataSource));
     } finally {
       rewinder.cleanup();
     }

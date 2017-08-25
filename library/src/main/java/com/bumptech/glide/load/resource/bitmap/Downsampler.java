@@ -194,8 +194,8 @@ public final class Downsampler {
     DecodeFormat decodeFormat = options.get(DECODE_FORMAT);
     DownsampleStrategy downsampleStrategy = options.get(DOWNSAMPLE_STRATEGY);
     boolean fixBitmapToRequestedDimensions = options.get(FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS);
-    boolean isHardwareConfigAllowed = options.get(ALLOW_HARDWARE_CONFIG) != null
-        ? options.get(ALLOW_HARDWARE_CONFIG) : false;
+    boolean isHardwareConfigAllowed =
+      options.get(ALLOW_HARDWARE_CONFIG) != null && options.get(ALLOW_HARDWARE_CONFIG);
     if (decodeFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE) {
       isHardwareConfigAllowed = false;
     }
