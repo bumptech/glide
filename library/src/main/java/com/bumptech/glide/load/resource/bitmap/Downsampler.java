@@ -224,13 +224,21 @@ public final class Downsampler {
 
     int orientation = ImageHeaderParserUtils.getOrientation(parsers, is, byteArrayPool);
     int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
+    boolean isExifOrientationRequired = TransformationUtils.isExifOrientationRequired(orientation);
 
     int targetWidth = requestedWidth == Target.SIZE_ORIGINAL ? sourceWidth : requestedWidth;
     int targetHeight = requestedHeight == Target.SIZE_ORIGINAL ? sourceHeight : requestedHeight;
 
     calculateScaling(downsampleStrategy, degreesToRotate, sourceWidth, sourceHeight, targetWidth,
         targetHeight, options);
-    calculateConfig(is, decodeFormat, isHardwareConfigAllowed, options, targetWidth, targetHeight);
+    calculateConfig(
+        is,
+        decodeFormat,
+        isHardwareConfigAllowed,
+        isExifOrientationRequired,
+        options,
+        targetWidth,
+        targetHeight);
 
     boolean isKitKatOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
     // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
@@ -289,7 +297,8 @@ public final class Downsampler {
   }
 
   // Visible for testing.
-  static void calculateScaling(DownsampleStrategy downsampleStrategy, int degreesToRotate,
+  static void calculateScaling(DownsampleStrategy downsampleStrategy,
+      int degreesToRotate,
       int sourceWidth, int sourceHeight, int targetWidth, int targetHeight,
       BitmapFactory.Options options) {
     // We can't downsample source content if we can't determine its dimensions.
@@ -394,13 +403,19 @@ public final class Downsampler {
       InputStream is,
       DecodeFormat format,
       boolean isHardwareConfigAllowed,
+      boolean isExifOrientationRequired,
       BitmapFactory.Options optionsWithScaling,
       int targetWidth,
       int targetHeight)
       throws IOException {
 
     if (hardwareConfigState.setHardwareConfigIfAllowed(
-        targetWidth, targetHeight, optionsWithScaling, format, isHardwareConfigAllowed)) {
+        targetWidth,
+        targetHeight,
+        optionsWithScaling,
+        format,
+        isHardwareConfigAllowed,
+        isExifOrientationRequired)) {
       return;
     }
 

@@ -75,10 +75,12 @@ final class HardwareConfigState {
       int targetHeight,
       BitmapFactory.Options optionsWithScaling,
       DecodeFormat decodeFormat,
-      boolean isHardwareConfigAllowed) {
+      boolean isHardwareConfigAllowed,
+      boolean isExifOrientationRequired) {
     if (!isHardwareConfigAllowed
         || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
-        || decodeFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE) {
+        || decodeFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE
+        || isExifOrientationRequired) {
       return false;
     }
 

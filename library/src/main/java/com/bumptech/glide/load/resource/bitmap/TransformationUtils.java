@@ -264,11 +264,12 @@ public final class TransformationUtils {
    */
   public static Bitmap rotateImageExif(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap,
       int exifOrientation) {
-    final Matrix matrix = new Matrix();
-    initializeMatrixForRotation(exifOrientation, matrix);
-    if (matrix.isIdentity()) {
+    if (!isExifOrientationRequired(exifOrientation)) {
       return inBitmap;
     }
+
+    final Matrix matrix = new Matrix();
+    initializeMatrixForRotation(exifOrientation, matrix);
 
     // From Bitmap.createBitmap.
     final RectF newRect = new RectF(0, 0, inBitmap.getWidth(), inBitmap.getHeight());
@@ -284,6 +285,25 @@ public final class TransformationUtils {
 
     applyMatrix(inBitmap, result, matrix);
     return result;
+  }
+
+  /**
+   * Returns {@code true} if the given exif orientation indicates that a transformation is necessary
+   * and {@code false} otherwise.
+   */
+  public static boolean isExifOrientationRequired(int exifOrientation) {
+    switch (exifOrientation) {
+      case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+      case ExifInterface.ORIENTATION_ROTATE_180:
+      case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+      case ExifInterface.ORIENTATION_TRANSPOSE:
+      case ExifInterface.ORIENTATION_ROTATE_90:
+      case ExifInterface.ORIENTATION_TRANSVERSE:
+      case ExifInterface.ORIENTATION_ROTATE_270:
+        return true;
+      default:
+        return false;
+    }
   }
 
   /**
