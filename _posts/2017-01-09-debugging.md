@@ -30,6 +30,8 @@ The Glide tag will log both successful and failed requests and differing levels 
 You can also control the verbosity of the Glide log tag programmatically using [``setLogLevel(int)``][1]. ``setLogLevel`` allows you to enable more verbose logs in developer builds but not release builds, for example.
 
 #### Unexpected cache misses
+For details on how Glide's caching works, see [the Caching page][13].
+
 The [``Engine``][9] log tag provides details on how a request will be fulfilled and includes the full in memory cache key used to store the corresponding resource. If you're trying to debug why images you have in memory in one place aren't being used in another place, the ``Engine`` tag lets you compare the cache keys directly to see the differences.
 
 For each started request, the ``Engine`` tag will log that the request will be completed from cache, active resources, an existing load, or a new load. Cache means that the resource wasn't in use, but was available in the in memory cache. Active resources means that the resource was actively being used by another ``Target``, typically in a ``View``. An existing load means that the resource wasn't available in memory, but another ``Target`` had previously requested the same resource and the load is already in progress. Finally a new load means that the resource was neither in memory nor already being loaded so our request triggered a new load.
@@ -109,3 +111,4 @@ To fix memory leaks, remove references to the destroyed ``Fragment`` or ``Activi
 [10]: https://developer.android.com/studio/profile/investigate-ram.html
 [11]: https://developer.android.com/studio/profile/investigate-ram.html#HeapDump
 [12]: http://www.eclipse.org/mat/
+[13]: {{ site.url }}/glide/doc/caching.html
