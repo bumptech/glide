@@ -32,6 +32,7 @@ class GifFrameLoader {
   private final GifDecoder gifDecoder;
   private final Handler handler;
   private final List<FrameCallback> callbacks = new ArrayList<>();
+  private final List<FrameCallback>  unsbscribeRequestedFrameCallbacks = new ArrayList<>();
   @Synthetic final RequestManager requestManager;
   private final BitmapPool bitmapPool;
 
@@ -103,6 +104,7 @@ class GifFrameLoader {
   }
 
   void subscribe(FrameCallback frameCallback) {
+    unsubscribeRegisteredCallback();
     if (isCleared) {
       throw new IllegalStateException("Cannot subscribe to a cleared frame loader");
     }
@@ -117,9 +119,20 @@ class GifFrameLoader {
   }
 
   void unsubscribe(FrameCallback frameCallback) {
-    callbacks.remove(frameCallback);
-    if (callbacks.isEmpty()) {
-      stop();
+    if (unsbscribeRequestedFrameCallbacks.contains(frameCallback)) {
+      return;
+    }
+    unsbscribeRequestedFrameCallbacks.add(frameCallback);
+  }
+
+  private void unsubscribeRegisteredCallback() {
+    for (int i = unsbscribeRequestedFrameCallbacks.size() - 1; i >= 0; i--) {
+      FrameCallback cb = unsbscribeRequestedFrameCallbacks.get(i);
+      unsbscribeRequestedFrameCallbacks.remove(cb);
+      callbacks.remove(cb);
+      if (callbacks.isEmpty()) {
+        stop();
+      }
     }
   }
 
@@ -244,6 +257,7 @@ class GifFrameLoader {
     }
 
     isLoadPending = false;
+    unsubscribeRegisteredCallback();
     loadNextFrame();
   }
 
