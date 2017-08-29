@@ -1288,6 +1288,10 @@ public class RequestOptions implements Cloneable {
     return this;
   }
 
+  protected boolean isAutoCloneEnabled() {
+    return isAutoCloneEnabled;
+  }
+
   @NonNull
   public final Map<Class<?>, Transformation<?>> getTransformations() {
     return transformations;

@@ -231,21 +231,28 @@ final class RequestOptionsGenerator {
     List<? extends VariableElement> parameters =
         element.getParameters().subList(1, element.getParameters().size());
 
+    // Generates the String and list of arguments to pass in when calling this method or super.
+    // IE centerCrop(context) creates methodLiterals="%L" and methodArgs=[centerCrop, context].
+    List<Object> methodArgs = new ArrayList<>();
+    methodArgs.add(element.getSimpleName().toString());
+    String methodLiterals = "";
+    if (!parameters.isEmpty()) {
+      for (VariableElement variable : parameters) {
+        methodLiterals += "$L, ";
+        methodArgs.add(variable.getSimpleName().toString());
+      }
+      methodLiterals = methodLiterals.substring(0, methodLiterals.length() - 2);
+    }
+
+    builder.beginControlFlow("if (isAutoCloneEnabled())")
+        .addStatement(
+            "return clone().$N(" + methodLiterals + ")", methodArgs.toArray(new Object[0]))
+        .endControlFlow();
+
     // Add the correct super() call.
     if (overrideType == OVERRIDE_EXTEND) {
-      String callSuper = "super.$L(";
-      List<Object> args = new ArrayList<>();
-      args.add(element.getSimpleName().toString());
-      if (!parameters.isEmpty()) {
-        for (VariableElement variable : parameters) {
-          callSuper += "$L, ";
-          args.add(variable.getSimpleName().toString());
-        }
-        callSuper = callSuper.substring(0, callSuper.length() - 2);
-      }
-      callSuper += ")";
-
-      builder.addStatement(callSuper, args.toArray(new Object[0]))
+      String callSuper = "super.$L(" + methodLiterals + ")";
+      builder.addStatement(callSuper, methodArgs.toArray(new Object[0]))
           .addJavadoc(processorUtil.generateSeeMethodJavadoc(
               requestOptionsName, methodName, parameters))
           .addAnnotation(Override.class);
