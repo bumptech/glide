@@ -769,6 +769,27 @@ public class RequestOptions implements Cloneable {
   }
 
   /**
+   * Disables the use of {@link android.graphics.Bitmap.Config#HARDWARE} in {@link Downsampler} to
+   * avoid errors caused by inspecting Bitmap pixels, drawing with hardware support disabled,
+   * drawing to {@link android.graphics.Canvas}s backed by {@link Bitmap}s etc.
+   *
+   * <p>It's almost never safe to set {@link Downsampler#ALLOW_HARDWARE_CONFIG} to {@code true} so
+   * we only provide a way to disable hardware configs entirely. If no option is set for
+   * {@link Downsampler#ALLOW_HARDWARE_CONFIG}, Glide will set the value per request based on
+   * whether or not a {@link Transformation} is applied and if one is, the type of
+   * {@link Transformation} applied. Built in transformations like {@link FitCenter} and
+   * {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy.CenterOutside} can safely use
+   * {@link android.graphics.Bitmap.Config#HARDWARE} because they can be entirely replaced by
+   * scaling within {@link Downsampler}. {@link Transformation}s like {@link #circleCrop()} that
+   * can't be replicated by {@link Downsampler} cannot use {@link Bitmap.Config#HARDWARE} because
+   * {@link android.graphics.Bitmap.Config#HARDWARE} cannot be drawn to
+   * {@link android.graphics.Canvas}s, which is required by most {@link Transformation}s.
+   */
+  public RequestOptions disallowHardwareConfig() {
+    return set(Downsampler.ALLOW_HARDWARE_CONFIG, false);
+  }
+
+  /**
    * Sets the {@link DownsampleStrategy} to use when decoding {@link Bitmap Bitmaps} using
    * {@link Downsampler}.
    *
