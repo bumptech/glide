@@ -68,7 +68,7 @@ public void onBindViewHolder(ViewHolder holder, int position) {
 You don't need to null check your urls either, Glide will either clear out the view or set whatever [placeholder Drawable][2] or [fallback Drawable][3] you've specified if the url is null.
 
 
-Glide's single requirement is that any re-usable ``View`` [``Target``][5] that you may have started a load into at a previous position either has a new loaded started into it or is explicitly cleared via the [``clear()``][4] API.
+Glide's sole requirement is that any re-usable ``View`` or [``Target``][5] that you may have started a load into at a previous position either has a new loaded started into it or is explicitly cleared via the [``clear()``][4] API.
 
 ```java
 @Override
@@ -85,7 +85,7 @@ public void onBindViewHolder(ViewHolder holder, int position) {
 }
 ```
 
-By calling [``clear()``][4] or ``into(View)`` on the ``View``, you're cancelling the load and guaranteeing that Glide will not change the contents of the view after the call completes. If you forget to call [``clear()``][4] and don't start a new load, the load you started into the same View for a previous position may complete after you set your special ``Drawable`` and change the contents of the ``View`` to an old image. 
+By calling [``clear()``][4] or ``into(View)`` on the ``View``, you're cancelling the load and guaranteeing that Glide will not change the contents of the view after the call completes. If you forget to call [``clear()``][4] and don't start a new load, the load you started into the same View for a previous position may complete after you set your special ``Drawable`` and change the contents of the ``View`` to an old image.
 
 Although the examples we've shown here are for RecyclerView, the same principles apply to ListView as well.
 
