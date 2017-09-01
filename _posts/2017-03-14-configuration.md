@@ -165,6 +165,36 @@ public class YourAppGlideModule extends AppGlideModule {
 }
 ```
 
+#### Default Request Options
+Although [``RequestOptions``][33] are typically specified per request, you can also apply a default set of [``RequestOptions``][33] that will be applied to every load you start in your application by using an [``AppGlideModule``][1]:
+
+```java
+@GlideModule
+public class YourAppGlideModule extends AppGlideModule {
+  @Override
+  public void applyOptions(Context context, GlideBuilder builder) {
+    builder.setDefaultRequestOptions(
+        new RequestOptions()
+          .format(DecodeFormat.RGB_565)
+          .disallowHardwareBitmaps());
+  }
+}
+```
+
+Options applied with ``setDefaultRequestOptions`` in ``GlideBuilder`` are applied as soon as you create a new request. As a result, options applied to any individual request will override any conflicting options that are set in the ``GlideBuilder``.
+
+[``RequestManagers``][34] similarly allow you to set default [``RequestOptions``][33] for all loads started with that particular [``RequestManager``][34]. Since each ``Activity`` and ``Fragment`` gets its own [``RequestManager``][34], you can use [``RequestManager's``][34] [``applyDefaultRequestOptions``][35] method to set default [``RequestOptions``][33] that apply only to a particular ``Activity`` or ``Fragment``:
+
+```java
+Glide.with(fragment)
+  .applyDefaultRequestOptions(
+      new RequestOptions()
+          .format(DecodeFormat.RGB_565)
+          .disallowHardwareBitmaps());
+```
+
+[``RequestManager``][34] also has a [``setDefaultRequestOptions``][36] that will completely replace any default [``RequestOptions``][33] previously set either via the ``GlideBuilder`` in an [``AppGlideModule``][1] or via the [``RequestManager``][34]. Use caution with [``setDefaultRequestOptions``][36] because it's easy to accidentally override important defaults you've set elsewhere. Typically [``applyDefaultRequstOptions``][35] is safer and more intuitive to use.
+
 ### Registering Components
 
 Both Applications and Libraries can register a number of components that extend Glides functionality. Available components include:
@@ -352,3 +382,7 @@ public final class MyAppGlideModule extends AppGlideModule {
 [30]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html#as-java.lang.Class-
 [31]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html#registerComponents-android.content.Context-com.bumptech.glide.Glide-com.bumptech.glide.Registry-
 [32]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/stream/BaseGlideUrlLoader.html
+[33]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/request/RequestOptions.html
+[34]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/RequestManager.html
+[35]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/RequestManager.html#applyDefaultRequestOptions-com.bumptech.glide.request.RequestOptions-
+[36]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/RequestManager.html#setDefaultRequestOptions-com.bumptech.glide.request.RequestOptions-
