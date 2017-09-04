@@ -5,8 +5,9 @@ dependencies {
     compile(project(':integration:recyclerview')) {
         transitive = false
     }
-    compile 'com.google.code.gson:gson:2.7'
+    compile 'com.google.code.gson:gson:2.8.0'
     compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+    compile "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
     annotationProcessor project(':annotation:compiler')
 }
 

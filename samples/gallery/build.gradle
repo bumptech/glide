@@ -6,6 +6,7 @@ dependencies {
         transitive = false
     }
     compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+    compile "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
     annotationProcessor project(':annotation:compiler')
 }
 

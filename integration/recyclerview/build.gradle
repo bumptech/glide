@@ -3,6 +3,7 @@ apply plugin: 'com.android.library'
 dependencies {
     compile project(':library')
     provided "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+    provided "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
 }
 
 android {
