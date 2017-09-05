@@ -136,7 +136,7 @@ public final class MemorySizeCalculator {
      * pool is much less important on O than it was on previous versions.
      */
     static final int BITMAP_POOL_TARGET_SCREENS =
-        Build.VERSION.SDK_INT > Build.VERSION_CODES.O ? 4 : 1;
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? 4 : 1;
 
     static final float MAX_SIZE_MULTIPLIER = 0.4f;
     static final float LOW_MEMORY_MAX_SIZE_MULTIPLIER = 0.33f;
