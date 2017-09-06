@@ -127,11 +127,10 @@ public final class TransformationUtils {
     final float heightPercentage = height / (float) inBitmap.getHeight();
     final float minPercentage = Math.min(widthPercentage, heightPercentage);
 
-    // take the floor of the target width/height, not round. If the matrix
-    // passed into drawBitmap rounds differently, we want to slightly
-    // overdraw, not underdraw, to avoid artifacts from bitmap reuse.
-    final int targetWidth = (int) (minPercentage * inBitmap.getWidth());
-    final int targetHeight = (int) (minPercentage * inBitmap.getHeight());
+    // Round here in case we've decoded exactly the image we want, but take the floor below to
+    // avoid a line of garbage or blank pixels in images.
+    int targetWidth = Math.round(minPercentage * inBitmap.getWidth());
+    int targetHeight = Math.round(minPercentage * inBitmap.getHeight());
 
     if (inBitmap.getWidth() == targetWidth && inBitmap.getHeight() == targetHeight) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -139,6 +138,12 @@ public final class TransformationUtils {
       }
       return inBitmap;
     }
+
+    // Take the floor of the target width/height, not round. If the matrix
+    // passed into drawBitmap rounds differently, we want to slightly
+    // overdraw, not underdraw, to avoid artifacts from bitmap reuse.
+    targetWidth = (int) (minPercentage * inBitmap.getWidth());
+    targetHeight = (int) (minPercentage * inBitmap.getHeight());
 
     Bitmap.Config config = getSafeConfig(inBitmap);
     Bitmap toReuse = pool.get(targetWidth, targetHeight, config);
