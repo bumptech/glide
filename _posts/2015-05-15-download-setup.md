@@ -27,8 +27,8 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.bumptech.glide:glide:4.0.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0'
+    compile 'com.github.bumptech.glide:glide:4.1.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
     compile 'com.android.support:support-v4:25.3.1'
 }
 ```
@@ -41,7 +41,7 @@ If you use Maven you can add a dependency on Glide as well. Again, you will also
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.0.0</version>
+  <version>4.1.1</version>
   <type>aar</type>
 </dependency>
 <dependency>
@@ -80,7 +80,7 @@ If you use Glide's annotations on classes implemented in Kotlin, you need to inc
 
 ```groovy
 dependencies {
-  kapt 'com.github.bumptech.glide:compiler:4.0.0'
+  kapt 'com.github.bumptech.glide:compiler:4.1.1'
 }
 ```
 
