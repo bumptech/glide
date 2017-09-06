@@ -154,7 +154,7 @@ public GlideOptions miniThumb(int size) {
 }
 ```
 
-You can then call your custom type by using the generated ``GlideApp`` class:
+You can then call your custom method by using the generated ``GlideApp`` class:
 
 ```java
 GlideApp.with(fragment)
@@ -200,7 +200,7 @@ public class GlideRequests extends RequesetManager {
 }
 ```
 
-You can then use the generated ``GlideApp`` class to call your custom method:
+You can then use the generated ``GlideApp`` class to call your custom type:
 
 ```java
 GlideApp.with(fragment)
