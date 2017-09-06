@@ -65,7 +65,7 @@ To instead apply multiple transformations to a single load, use the [``MultiTran
 With the [generated API][16]:
 
 ```java
-Glide.with(fragment)
+GlideApp.with(fragment)
   .load(url)
   .transform(new MultiTransformation(new FitCenter(), new YourCustomTransformation())
   .into(imageView);
@@ -74,7 +74,7 @@ Glide.with(fragment)
 Or with the shortcut method and the [generated API][16]:
 
 ```java
-Glide.with(fragment)
+GlideApp.with(fragment)
   .load(url)
   .transforms(new FitCenter(), new YourCustomTransformation())
   .into(imageView);
