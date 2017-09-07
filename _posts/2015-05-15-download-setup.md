@@ -24,12 +24,12 @@ If you use Gradle you can add a dependency on Glide using either Maven Central o
 ```groovy
 repositories {
   mavenCentral()
+  maven { url 'https://maven.google.com' }
 }
 
 dependencies {
     compile 'com.github.bumptech.glide:glide:4.1.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
-    compile 'com.android.support:support-v4:25.3.1'
 }
 ```
 
@@ -48,6 +48,12 @@ If you use Maven you can add a dependency on Glide as well. Again, you will also
   <groupId>com.google.android</groupId>
   <artifactId>support-v4</artifactId>
   <version>r7</version>
+</dependency>
+<dependency>
+  <groupId>com.github.bumptech.glide</groupId>
+  <artifactId>compiler</artifactId>
+  <version>4.1.1</version>
+  <optional>true</optional>
 </dependency>
 ```
 
