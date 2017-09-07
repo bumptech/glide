@@ -25,6 +25,7 @@ Or use Gradle:
 ```gradle
 repositories {
   mavenCentral() // jcenter() works as well because it pulls from Maven Central
+  maven { url 'https://maven.google.com' }
 }
 
 dependencies {
