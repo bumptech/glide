@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Contains an unordered list of {@link ResourceEncoder}s capable of encoding arbitrary resource
+ * Contains an ordered list of {@link ResourceEncoder}s capable of encoding arbitrary resource
  * types.
  */
 public class ResourceEncoderRegistry {

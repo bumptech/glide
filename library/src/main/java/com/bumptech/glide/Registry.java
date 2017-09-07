@@ -24,7 +24,6 @@ import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import com.bumptech.glide.util.pool.FactoryPools;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,8 +66,7 @@ public class Registry {
    * {@link java.io.FileInputStream} and any other subclass.
    *
    * <p>If multiple {@link Encoder}s are registered for the same type or super type, the
-   * {@link Encoder} that is registered first will be used. As a result, it's not currently possible
-   * to replace Glide's default {@link Encoder}s.
+   * {@link Encoder} that is registered first will be used.
    */
   public <Data> Registry register(Class<Data> dataClass, Encoder<Data> encoder) {
     encoderRegistry.append(dataClass, encoder);
@@ -81,10 +79,8 @@ public class Registry {
    * data class.
    *
    * <p>This method allows you to replace the default {@link Encoder} because it ensures
-   * the registered {@link Encoder} will run first. You can return false in
-   * {@link Encoder#encode(Object, File, Options)} to fall back to the default
-   * {@link Encoder}s if you only want to change the default functionality for certain
-   * data class.
+   * the registered {@link Encoder} will run first. If multiple {@link Encoder}s are registered for
+   * the same type or super type, the {@link Encoder} that is registered first will be used.
    */
   public <Data> Registry prepend(Class<Data> dataClass, Encoder<Data> encoder) {
     encoderRegistry.prepend(dataClass, encoder);
@@ -157,8 +153,7 @@ public class Registry {
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable} and any other subclass.
    *
    * <p>If multiple {@link ResourceEncoder}s are registered for the same type or super type, the
-   * {@link ResourceEncoder} that is registered first will be used. As a result, it's not currently
-   * possible to replace Glide's default {@link ResourceEncoder}s.
+   * {@link ResourceEncoder} that is registered first will be used.
    */
   public <TResource> Registry register(Class<TResource> resourceClass,
       ResourceEncoder<TResource> encoder) {
@@ -175,10 +170,9 @@ public class Registry {
    * data type.
    *
    * <p>This method allows you to replace the default {@link ResourceEncoder} because it ensures
-   * the registered {@link ResourceEncoder} will run first. You can return false in
-   * {@link ResourceEncoder#encode(Object, File, Options)} to fall back to the default
-   * {@link ResourceEncoder}s if you only want to change the default functionality for certain
-   * types of data.
+   * the registered {@link ResourceEncoder} will run first. If multiple {@link ResourceEncoder}s are
+   * registered for the same type or super type, the {@link ResourceEncoder} that is registered
+   * first will be used.
    */
   public <TResource> Registry prepend(Class<TResource> resourceClass,
                                        ResourceEncoder<TResource> encoder) {
