@@ -112,6 +112,11 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
         throw new HttpException("Received empty or null redirect url");
       }
       URL redirectUrl = new URL(url, redirectUrlString);
+      // Closing the stream specifically is required to avoid leaking ResponseBodys in addition
+      // to disconnecting the url connection below. See #2352.
+      urlConnection.getInputStream().close();
+      urlConnection.disconnect();
+      urlConnection = null;
       return loadDataWithRedirects(redirectUrl, redirects + 1, url, headers);
     } else if (statusCode == -1) {
       throw new HttpException(statusCode);
