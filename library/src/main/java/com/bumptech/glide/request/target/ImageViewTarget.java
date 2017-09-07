@@ -45,9 +45,11 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implem
      */
     @Override
     public void onLoadStarted(Drawable placeholder) {
+        if (placeholder == null && view.getDrawable() != null) {
+            return;
+        }
         view.setImageDrawable(placeholder);
     }
-
     /**
      * Sets the given {@link android.graphics.drawable.Drawable} on the view using
      * {@link android.widget.ImageView#setImageDrawable(android.graphics.drawable.Drawable)}.
