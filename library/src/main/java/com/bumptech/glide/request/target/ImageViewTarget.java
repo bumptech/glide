@@ -45,7 +45,7 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implem
      */
     @Override
     public void onLoadStarted(Drawable placeholder) {
-        if(placeholder != null){
+        if(placeholder != null && view.getDrawable() != null){
         view.setImageDrawable(placeholder);
         }
     }
