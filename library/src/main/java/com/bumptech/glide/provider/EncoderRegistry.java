@@ -24,8 +24,12 @@ public class EncoderRegistry {
     return null;
   }
 
-  public synchronized <T> void add(Class<T> dataClass, Encoder<T> encoder) {
+  public synchronized <T> void append(Class<T> dataClass, Encoder<T> encoder) {
     encoders.add(new Entry<>(dataClass, encoder));
+  }
+
+  public synchronized <T> void prepend(Class<T> dataClass, Encoder<T> encoder) {
+    encoders.add(0, new Entry<>(dataClass, encoder));
   }
 
   private static final class Entry<T> {
