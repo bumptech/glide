@@ -24,13 +24,12 @@ Or use Gradle:
 
 ```gradle
 repositories {
-  mavenCentral() // jcenter() works as well because it pulls from Maven Central
+  mavenCentral()
   maven { url 'https://maven.google.com' }
 }
 
 dependencies {
   compile 'com.github.bumptech.glide:glide:4.1.1'
-  compile 'com.android.support:support-v4:25.3.1'
   annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
 }
 ```
