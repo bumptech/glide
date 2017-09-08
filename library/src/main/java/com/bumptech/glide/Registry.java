@@ -23,6 +23,7 @@ import com.bumptech.glide.provider.ModelToResourceClassCache;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import com.bumptech.glide.util.pool.FactoryPools;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,11 +66,24 @@ public class Registry {
    * {@link java.io.FileInputStream} and any other subclass.
    *
    * <p>If multiple {@link Encoder}s are registered for the same type or super type, the
-   * {@link Encoder} that is registered first will be used. As a result, it's not currently possible
-   * to replace Glide's default {@link Encoder}s.
+   * {@link Encoder} that is registered first will be used.
    */
   public <Data> Registry register(Class<Data> dataClass, Encoder<Data> encoder) {
-    encoderRegistry.add(dataClass, encoder);
+    encoderRegistry.append(dataClass, encoder);
+    return this;
+  }
+
+  /**
+   * Prepends the given {@link Encoder} into the list of available {@link Encoder}s
+   * so that it is attempted before all later and default {@link Encoder}s for the given
+   * data class.
+   *
+   * <p>This method allows you to replace the default {@link Encoder} because it ensures
+   * the registered {@link Encoder} will run first. If multiple {@link Encoder}s are registered for
+   * the same type or super type, the {@link Encoder} that is registered first will be used.
+   */
+  public <Data> Registry prepend(Class<Data> dataClass, Encoder<Data> encoder) {
+    encoderRegistry.prepend(dataClass, encoder);
     return this;
   }
 
@@ -139,12 +153,30 @@ public class Registry {
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable} and any other subclass.
    *
    * <p>If multiple {@link ResourceEncoder}s are registered for the same type or super type, the
-   * {@link ResourceEncoder} that is registered first will be used. As a result, it's not currently
-   * possible to replace Glide's default {@link ResourceEncoder}s.
+   * {@link ResourceEncoder} that is registered first will be used.
    */
   public <TResource> Registry register(Class<TResource> resourceClass,
       ResourceEncoder<TResource> encoder) {
-    resourceEncoderRegistry.add(resourceClass, encoder);
+    resourceEncoderRegistry.append(resourceClass, encoder);
+    return this;
+  }
+
+  /**
+   * Registers a new {@link com.bumptech.glide.load.data.DataRewinder.Factory} to handle a
+   * non-default data type that can be rewind to allow for efficient reads of file headers.
+   *
+   * Prepends the given {@link ResourceEncoder} into the list of available {@link ResourceEncoder}s
+   * so that it is attempted before all later and default {@link ResourceEncoder}s for the given
+   * data type.
+   *
+   * <p>This method allows you to replace the default {@link ResourceEncoder} because it ensures
+   * the registered {@link ResourceEncoder} will run first. If multiple {@link ResourceEncoder}s are
+   * registered for the same type or super type, the {@link ResourceEncoder} that is registered
+   * first will be used.
+   */
+  public <TResource> Registry prepend(Class<TResource> resourceClass,
+                                       ResourceEncoder<TResource> encoder) {
+    resourceEncoderRegistry.prepend(resourceClass, encoder);
     return this;
   }
 
