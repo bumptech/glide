@@ -172,7 +172,7 @@ public final class TransformationUtils {
    * height is larger than the given dimensions
    */
   public static Bitmap centerInside(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
-                                 int height) {
+      int height) {
     if (inBitmap.getWidth() <= width && inBitmap.getHeight() <= height) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "requested target size larger or equal to input, returning input");
@@ -368,7 +368,7 @@ public final class TransformationUtils {
 
     Bitmap argbBitmap = pool.get(maybeAlphaSafe.getWidth(), maybeAlphaSafe.getHeight(),
         Bitmap.Config.ARGB_8888);
-    new Canvas(argbBitmap).drawBitmap(maybeAlphaSafe, 0 /*left*/, 0 /*top*/, null /*pain*/);
+    new Canvas(argbBitmap).drawBitmap(maybeAlphaSafe, 0 /*left*/, 0 /*top*/, null /*paint*/);
 
     // We now own this Bitmap. It's our responsibility to replace it in the pool outside this method
     // when we're finished with it.
