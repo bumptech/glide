@@ -18,6 +18,7 @@ import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.util.LogTime;
+import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.pool.FactoryPools.Poolable;
 import com.bumptech.glide.util.pool.StateVerifier;
@@ -218,6 +219,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     // swallows all otherwise fatal exceptions, this will at least make it obvious to developers
     // that something is failing.
     TraceCompat.beginSection("DecodeJob#run");
+    // Methods in the try statement can invalidate currentFetcher, so set a local variable here to
+    // ensure that the fetcher is cleaned up either way.
+    DataFetcher<?> localFetcher = currentFetcher;
     try {
       if (isCancelled) {
         notifyFailed();
@@ -238,8 +242,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         throw e;
       }
     } finally {
-      if (currentFetcher != null) {
-        currentFetcher.cleanup();
+      Preconditions.checkArgument(
+          localFetcher == null || currentFetcher == null || localFetcher.equals(currentFetcher),
+          "Fetchers don't match!, old: " + localFetcher + " new: " + currentFetcher);
+      if (localFetcher != null) {
+        localFetcher.cleanup();
       }
       TraceCompat.endSection();
     }
