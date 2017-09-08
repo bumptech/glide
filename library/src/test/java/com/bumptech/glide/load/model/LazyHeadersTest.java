@@ -35,6 +35,43 @@ public class LazyHeadersTest {
     }
   }
 
+  // Tests for #2331.
+  @Test
+  public void getSanitizedUserAgent_withInvalidAgent_returnsAgentWithInvalidCharactersRemoved() {
+    String invalidUserAgent =
+        "Dalvik/2.1.0 (Linux; U; Android 5.0; P98 4G八核版(A8H8) Build/LRX21M)";
+    String validUserAgent = "Dalvik/2.1.0 (Linux; U; Android 5.0; P98 4G???(A8H8) Build/LRX21M)";
+    System.setProperty(DEFAULT_USER_AGENT_PROPERTY, invalidUserAgent);
+    assertThat(LazyHeaders.Builder.getSanitizedUserAgent()).isEqualTo(validUserAgent);
+  }
+
+  @Test
+  public void getSanitizedUserAgent_withValidAgent_returnsUnmodifiedAgent() {
+    String validUserAgent = "Dalvik/2.1.0 (Linux; U; Android 5.0; P98 4G(A8H8) Build/LRX21M)";
+    System.setProperty(DEFAULT_USER_AGENT_PROPERTY, validUserAgent);
+    assertThat(LazyHeaders.Builder.getSanitizedUserAgent()).isEqualTo(validUserAgent);
+  }
+
+  @Test
+  public void getSanitizedUserAgent_withMissingAgent_returnsNull() {
+    System.clearProperty(DEFAULT_USER_AGENT_PROPERTY);
+    assertThat(LazyHeaders.Builder.getSanitizedUserAgent()).isNull();
+  }
+
+  @Test
+  public void getSanitizedUserAgent_withEmptyStringAgent_returnsEmptyString() {
+    String userAgent = "";
+    System.setProperty(DEFAULT_USER_AGENT_PROPERTY, userAgent);
+    assertThat(LazyHeaders.Builder.getSanitizedUserAgent()).isEqualTo(userAgent);
+  }
+
+  @Test
+  public void getSanitizedUserAgent_withWhitespace_returnsWhitespaceString() {
+    String userAgent = "  \t";
+    System.setProperty(DEFAULT_USER_AGENT_PROPERTY, userAgent);
+    assertThat(LazyHeaders.Builder.getSanitizedUserAgent()).isEqualTo(userAgent);
+  }
+
   @Test
   public void testIncludesEagerHeaders() {
     Map<String, String> headers = new Builder()

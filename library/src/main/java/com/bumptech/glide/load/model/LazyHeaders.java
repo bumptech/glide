@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,7 +100,7 @@ public final class LazyHeaders implements Headers {
   @SuppressWarnings("PMD.FieldDeclarationsShouldBeAtStartOfClass")
   public static final class Builder {
     private static final String USER_AGENT_HEADER = "User-Agent";
-    private static final String DEFAULT_USER_AGENT = System.getProperty("http.agent");
+    private static final String DEFAULT_USER_AGENT = getSanitizedUserAgent();
     private static final Map<String, List<LazyHeaderFactory>> DEFAULT_HEADERS;
 
     // Set Accept-Encoding header to do our best to avoid gzip since it's both inefficient for
@@ -220,6 +221,31 @@ public final class LazyHeaders implements Headers {
         result.put(entry.getKey(), new ArrayList<>(entry.getValue()));
       }
       return result;
+    }
+
+    /**
+     * Ensures that the default header will pass OkHttp3's checks for header values.
+     *
+     * <p>See #2331.
+     */
+    @VisibleForTesting
+    static String getSanitizedUserAgent() {
+      String defaultUserAgent = System.getProperty("http.agent");
+      if (TextUtils.isEmpty(defaultUserAgent)) {
+        return defaultUserAgent;
+      }
+
+      int length = defaultUserAgent.length();
+      StringBuilder sb = new StringBuilder(defaultUserAgent.length());
+      for (int i = 0; i < length; i++) {
+        char c = defaultUserAgent.charAt(i);
+        if ((c > '\u001f' || c == '\t') && c < '\u007f') {
+          sb.append(c);
+        } else {
+          sb.append('?');
+        }
+      }
+      return sb.toString();
     }
   }
 
