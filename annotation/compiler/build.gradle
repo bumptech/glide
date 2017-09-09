@@ -2,9 +2,19 @@ import org.gradle.internal.jvm.Jvm
 
 apply plugin: 'java'
 
+configurations {
+    // adapted from https://android.googlesource.com/platform/frameworks/testing/+/976c423/espresso/espresso-lib/build.gradle
+    // compileOnly dependencies will be repackaged, see rules in jarjar ant task below
+    jarjar 
+}
+
 dependencies {
-    compile 'com.squareup:javapoet:1.9.0'
-    compile 'com.google.auto.service:auto-service:1.0-rc3'
+    // from https://code.google.com/archive/p/jarjar/downloads
+    jarjar files('libs/jarjar-1.4.jar')
+
+    compileOnly 'com.squareup:javapoet:1.9.0'
+    compileOnly 'com.google.auto.service:auto-service:1.0-rc3'
+
     compile 'com.google.code.findbugs:jsr305:3.0.1'
     compile project(':annotation')
     // This is to support com.sun.tootls.javac.util.List, currently used in RootModuleGenerator.
@@ -12,6 +22,43 @@ dependencies {
 
     testCompile "junit:junit:${JUNIT_VERSION}"
     testCompile 'com.google.testing.compile:compile-testing:0.10'
+}
+
+afterEvaluate {
+    // Inject a jarjar task after jar into the assemble chain.
+    // afterEvaluate is needed to get the resolved version name for the jar artifact.
+    tasks.create(name: 'jarjar', dependsOn: [tasks.jar, configurations.compileOnly]) {
+        tasks.assemble.dependsOn it
+
+        def originalClassesJar = tasks.jar.archivePath
+        // Change original JAR output to somewhere else known and use it as input (this modifies "archivePath").
+        tasks.jar.destinationDir = file("${project.buildDir}/jarjar")
+        logger.debug("Redirected\n${originalClassesJar}\nto\n${tasks.jar.archivePath}")
+
+        // Set up inputs and outputs to only rebuild when necessary (code change, dependency change).
+        inputs.file tasks.jar.archivePath
+        inputs.files configurations.compileOnly
+        outputs.file originalClassesJar
+
+        doLast {
+            ant {
+                taskdef name: 'jarjar',
+                        classname: 'com.tonicsystems.jarjar.JarJarTask',
+                        classpath: configurations.jarjar.asPath
+                // Generate the original JAR output where it was originally expected.
+                jarjar(jarfile: originalClassesJar) {
+                    configurations.compileOnly.resolve().each {
+                        zipfileset(src: it.absolutePath, excludes: 'META-INF/maven/**')
+                    }
+                    zipfileset(src: tasks.jar.archivePath)
+                    rule pattern: 'com.squareup.javapoet.**',
+                         result: 'com.bumptech.glide.repackaged.@0'
+                    rule pattern: 'com.google.**',
+                         result: 'com.bumptech.glide.repackaged.@0'
+                }
+            }
+        }
+    }
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"
