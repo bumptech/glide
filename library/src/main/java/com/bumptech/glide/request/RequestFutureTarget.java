@@ -99,7 +99,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
 
   @Override
   public synchronized boolean isDone() {
-    return isCancelled || resultReceived;
+    return isCancelled || resultReceived || loadFailed;
   }
 
   @Override
