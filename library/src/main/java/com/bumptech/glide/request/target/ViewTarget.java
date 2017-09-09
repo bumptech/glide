@@ -247,22 +247,44 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       cbs.clear();
     }
 
-    private boolean isViewStateAndSizeValid(int width, int height) {
-      return isViewStateValid() && isSizeValid(width) && isSizeValid(height);
+    private boolean isViewStateAndSizeValid(int currentWidth, int currentHeight) {
+      LayoutParams params = view.getLayoutParams();
+
+      int paramWidth;
+      int paramHeight;
+      if (params == null) {
+        paramWidth = 0;
+        paramHeight = 0;
+      } else {
+        paramWidth = params.width;
+        paramHeight = params.height;
+      }
+      return isDimensionValid(paramWidth, currentWidth)
+          && isDimensionValid(paramHeight, currentHeight);
     }
 
-    private boolean isViewStateValid() {
-      // We consider the view state as valid if the view has
-      // non-null layout params and a non-zero layout width and height.
-      if (view.getLayoutParams() != null
-          && view.getLayoutParams().width > 0
-          && view.getLayoutParams().height > 0) {
+    private boolean isDimensionValid(int layoutParam, int dimen) {
+      // If the layout parameter is a fixed size and the padding adjusted parameter (dimen in this
+      // case) is valid, we can trust that the size won't change due to a layout pass.
+      if (layoutParam > 0 && dimen > 0) {
         return true;
       }
 
-      // Avoid using isLaidOut because it appears to be false after a View is re-attached to a
-      // RecyclerView if the View's size before and after the attach are the same. See #1981.
-      return !view.isLayoutRequested();
+      // SIZE_ORIGINAL is not dependent on a layout pass.
+      if (dimen == Target.SIZE_ORIGINAL) {
+        return true;
+      }
+
+      // TODO: Is this correct? The view's parent could change size after a layout.
+      // We're making an assumption that MATCH_PARENT won't change after it has been set once, so
+      // future layout passes typically won't change it. This probably will break in some cases.
+      if (layoutParam == LayoutParams.MATCH_PARENT && dimen > 0) {
+        return true;
+      }
+
+      // We can trust a non-zero dimension if no layout pass is pending, otherwise we're going to
+      // have to wait for a layout pass.
+      return dimen > 0 && !view.isLayoutRequested();
     }
 
     private int getTargetHeight() {
@@ -281,25 +303,15 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
     private int getTargetDimen(int viewSize, int paramSize, int paddingSize) {
       int adjustedViewSize = viewSize - paddingSize;
-      if (isSizeValid(adjustedViewSize)) {
-        return adjustedViewSize;
-      }
-
-      if (paramSize == PENDING_SIZE) {
-        return PENDING_SIZE;
-      }
-
       if (paramSize == LayoutParams.WRAP_CONTENT) {
         return SIZE_ORIGINAL;
       } else if (paramSize > 0) {
         return paramSize - paddingSize;
+      } else if (adjustedViewSize > 0) {
+        return adjustedViewSize;
       } else {
         return PENDING_SIZE;
       }
-    }
-
-    private boolean isSizeValid(int size) {
-      return size > 0 || size == SIZE_ORIGINAL;
     }
 
     private static class SizeDeterminerLayoutListener implements ViewTreeObserver
