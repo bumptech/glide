@@ -1,7 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
 import com.bumptech.glide.annotation.GlideExtension;
-import com.squareup.javapoet.TypeSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.TypeSpec;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;

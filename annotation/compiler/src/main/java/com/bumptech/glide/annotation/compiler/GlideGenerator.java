@@ -1,14 +1,14 @@
 package com.bumptech.glide.annotation.compiler;
 
 import com.bumptech.glide.annotation.GlideExtension;
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeSpec;
+import com.bumptech.glide.repackaged.com.google.common.base.Function;
+import com.bumptech.glide.repackaged.com.google.common.base.Preconditions;
+import com.bumptech.glide.repackaged.com.google.common.collect.Lists;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.AnnotationSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.ClassName;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.MethodSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.ParameterSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.ProcessingEnvironment;

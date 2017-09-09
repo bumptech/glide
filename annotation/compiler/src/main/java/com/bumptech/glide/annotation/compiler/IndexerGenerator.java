@@ -2,9 +2,9 @@ package com.bumptech.glide.annotation.compiler;
 
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideModule;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.AnnotationSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.ClassName;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.TypeSpec;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
