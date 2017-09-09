@@ -59,7 +59,10 @@ afterEvaluate {
                 // Generate the original JAR output where it was originally expected.
                 jarjar(jarfile: repackagedClassesJar) {
                     configurations.compileOnly.resolve().each {
-                        zipfileset(src: it.absolutePath, excludes: 'META-INF/maven/**')
+                        zipfileset(src: it.absolutePath, excludes: [
+                            'META-INF/maven/**',
+                            'META-INF/services/javax.annotation.processing.Processor'
+                        ].join(','))
                     }
                     zipfileset(src: tasks.jar.archivePath)
                     def repackageIntoGlide = 'com.bumptech.glide.repackaged.@0'
