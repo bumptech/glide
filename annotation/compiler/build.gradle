@@ -1,4 +1,6 @@
 import org.gradle.internal.jvm.Jvm
+import java.nio.file.Files
+import static java.nio.file.StandardCopyOption.*
 
 apply plugin: 'java'
 
@@ -25,38 +27,67 @@ dependencies {
 }
 
 afterEvaluate {
+    // generate file names for each step
+    def resultingClassesJar = tasks.jar.archivePath
+    def originalClassifier = tasks.jar.classifier
+    tasks.jar.classifier = 'compiled'
+    def compiledClassesJar = tasks.jar.archivePath
+    tasks.jar.classifier = 'repackaged'
+    def repackagedClassesJar = tasks.jar.archivePath
+    tasks.jar.classifier = 'proguarded'
+    def proguardedClassesJar = tasks.jar.archivePath
+    tasks.jar.classifier = originalClassifier
+
+    tasks.jar.doLast {
+        Files.copy(resultingClassesJar.toPath(), compiledClassesJar.toPath(), REPLACE_EXISTING)
+    }
     // Inject a jarjar task after jar into the assemble chain.
     // afterEvaluate is needed to get the resolved version name for the jar artifact.
-    tasks.create(name: 'jarjar', dependsOn: [tasks.jar, configurations.compileOnly]) {
+    task jarjar(dependsOn: [tasks.jar, configurations.compileOnly]) {
         tasks.assemble.dependsOn it
 
-        def originalClassesJar = tasks.jar.archivePath
-        // Change original JAR output to somewhere else known and use it as input (this modifies "archivePath").
-        tasks.jar.destinationDir = file("${project.buildDir}/jarjar")
-        logger.debug("Redirected\n${originalClassesJar}\nto\n${tasks.jar.archivePath}")
-
         // Set up inputs and outputs to only rebuild when necessary (code change, dependency change).
-        inputs.file tasks.jar.archivePath
+        inputs.file compiledClassesJar
         inputs.files configurations.compileOnly
-        outputs.file originalClassesJar
+        outputs.file repackagedClassesJar
 
-        doLast {
+        doFirst {
             ant {
                 taskdef name: 'jarjar',
                         classname: 'com.tonicsystems.jarjar.JarJarTask',
                         classpath: configurations.jarjar.asPath
                 // Generate the original JAR output where it was originally expected.
-                jarjar(jarfile: originalClassesJar) {
+                jarjar(jarfile: repackagedClassesJar) {
                     configurations.compileOnly.resolve().each {
                         zipfileset(src: it.absolutePath, excludes: 'META-INF/maven/**')
                     }
                     zipfileset(src: tasks.jar.archivePath)
-                    rule pattern: 'com.squareup.javapoet.**',
-                         result: 'com.bumptech.glide.repackaged.@0'
-                    rule pattern: 'com.google.**',
-                         result: 'com.bumptech.glide.repackaged.@0'
+                    def repackageIntoGlide = 'com.bumptech.glide.repackaged.@0'
+                    rule result: repackageIntoGlide, pattern: 'com.squareup.javapoet.**'
+                    rule result: repackageIntoGlide, pattern: 'com.google.auto.**'
+                    rule result: repackageIntoGlide, pattern: 'com.google.common.**'
+                    rule result: repackageIntoGlide, pattern: 'com.google.thirdparty.publicsuffix.**'
                 }
             }
+        }
+
+        doLast {
+            Files.copy(repackagedClassesJar.toPath(), resultingClassesJar.toPath(), REPLACE_EXISTING)
+        }
+    }
+
+    task proguard(type: proguard.gradle.ProGuardTask, dependsOn: tasks.jarjar) {
+        tasks.assemble.dependsOn it
+        configuration 'proguard.pro'
+
+        injars repackagedClassesJar
+        outjars proguardedClassesJar
+
+        libraryjars files(configurations.compile.collect())
+        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+
+        doLast {
+            Files.copy(proguardedClassesJar.toPath(), resultingClassesJar.toPath(), REPLACE_EXISTING)
         }
     }
 }
