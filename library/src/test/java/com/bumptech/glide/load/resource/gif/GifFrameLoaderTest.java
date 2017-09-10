@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.gif;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -223,7 +224,7 @@ public class GifFrameLoaderTest {
     loader.onFrameReady(previous);
     loader.onFrameReady(current);
 
-    verify(previousRequest, never()).clear();
+    verify(previousRequest, never()).clear(anyBoolean());
   }
 
   @Test

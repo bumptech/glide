@@ -66,11 +66,17 @@ public interface Target<R> extends LifecycleListener {
   void onResourceReady(R resource, Transition<? super R> transition);
 
   /**
-   * A lifecycle callback that is called when a load is cancelled and its resources are freed.
+   * A lifecycle callback that may be called when a load is cancelled and its resources are freed.
    *
    * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
    * Transition)} is no longer displayed before redrawing the container (usually a View) or
    * changing its visibility.
+   *
+   * <p>If a new load is started into the same or an equivalent {@link Target}, this method may not
+   * be called for the load load to avoid unnecessarily setting a placeholder twice (once for the
+   * cleared load and once for the new load). Setting a placeholder unnecessarily triggers
+   * invalidation and layout calls in View {@link Target}s that can be both expensive and force the
+   * new request to wait for layout to finish before starting the new request.
    *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */

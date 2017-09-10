@@ -74,7 +74,7 @@ public class RequestBuilderTest {
 
     getNullModelRequest().into(target);
 
-    verify(requestManager).clear(eq(target));
+    verify(requestManager).clear(eq(target), eq(false));
   }
 
   @Test(expected = NullPointerException.class)

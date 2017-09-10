@@ -257,7 +257,7 @@ public final class SingleRequest<R> implements Request,
    *
    * <p> Cancelled requests can be restarted with a subsequent call to {@link #begin()}. </p>
    *
-   * @see #clear()
+   * @see #clear(boolean)
    */
   void cancel() {
     stateVerifier.throwIfRecycled();
@@ -278,7 +278,7 @@ public final class SingleRequest<R> implements Request,
    * @see #cancel()
    */
   @Override
-  public void clear() {
+  public void clear(boolean setPlaceholder) {
     Util.assertMainThread();
     if (status == Status.CLEARED) {
       return;
@@ -288,7 +288,7 @@ public final class SingleRequest<R> implements Request,
     if (resource != null) {
       releaseResource(resource);
     }
-    if (canNotifyStatusChanged()) {
+    if (setPlaceholder && canNotifyStatusChanged()) {
       target.onLoadCleared(getPlaceholderDrawable());
     }
     // Must be after cancel().
@@ -302,7 +302,7 @@ public final class SingleRequest<R> implements Request,
 
   @Override
   public void pause() {
-    clear();
+    clear(true /*setPlaceholder*/);
     status = Status.PAUSED;
   }
 

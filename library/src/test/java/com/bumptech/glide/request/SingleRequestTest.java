@@ -158,7 +158,7 @@ public class SingleRequestTest {
     SingleRequest<List> request = harness.getRequest();
 
     request.onResourceReady(null, DataSource.DATA_DISK_CACHE);
-    request.clear();
+    request.clear(true /*setPlaceholder*/);
 
     assertFalse(request.isFailed());
   }
@@ -212,7 +212,7 @@ public class SingleRequestTest {
   public void testIsNotCompleteAfterClear() {
     SingleRequest<List> request = harness.getRequest();
     request.onResourceReady(harness.resource, DataSource.REMOTE);
-    request.clear();
+    request.clear(true /*setPlaceholder*/);
 
     assertFalse(request.isComplete());
   }
@@ -220,7 +220,7 @@ public class SingleRequestTest {
   @Test
   public void testIsCancelledAfterClear() {
     SingleRequest<List> request = harness.getRequest();
-    request.clear();
+    request.clear(true /*setPlaceholder*/);
 
     assertTrue(request.isCancelled());
   }
@@ -228,8 +228,8 @@ public class SingleRequestTest {
   @Test
   public void testDoesNotNotifyTargetTwiceIfClearedTwiceInARow() {
     SingleRequest<List> request = harness.getRequest();
-    request.clear();
-    request.clear();
+    request.clear(true /*setPlaceholder*/);
+    request.clear(true /*setPlaceholder*/);
 
     verify(harness.target, times(1)).onLoadCleared(any(Drawable.class));
   }
@@ -316,7 +316,7 @@ public class SingleRequestTest {
     SingleRequest<List> request = harness.getRequest();
 
     request.onResourceReady(harness.resource, DataSource.REMOTE);
-    request.clear();
+    request.clear(true /*setPlaceholder*/);
 
     verify(harness.engine).release(eq(harness.resource));
   }
@@ -437,7 +437,7 @@ public class SingleRequestTest {
   public void testIsNotRunningAfterClear() {
     SingleRequest<List> request = harness.getRequest();
     request.begin();
-    request.clear();
+    request.clear(true /*setPlaceholder*/);
 
     assertFalse(request.isRunning());
   }
@@ -749,6 +749,18 @@ public class SingleRequestTest {
             any(DiskCacheStrategy.class), eq(harness.transformations), anyBoolean(),
             anyBoolean(), any(Options.class), anyBoolean(), eq(Boolean.FALSE), anyBoolean(),
             any(ResourceCallback.class));
+  }
+
+  @Test
+  public void clear_withSetPlaceholderFalse_doesNotSetPlaceholder() {
+    harness.getRequest().clear(false /*setPlaceholder*/);
+    verify(harness.target, never()).onLoadCleared(any(Drawable.class));
+  }
+
+  @Test
+  public void clear_withSetPlaceholderTrue_setsPlaceholder() {
+    harness.getRequest().clear(true /*setPlaceholder*/);
+    verify(harness.target).onLoadCleared(any(Drawable.class));
   }
 
   @Test

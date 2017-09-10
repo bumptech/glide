@@ -11,7 +11,7 @@ public interface Request {
   void begin();
 
   /**
-   * Identical to {@link #clear()} except that the request may later be restarted.
+   * Identical to {@link #clear(boolean)} except that the request may later be restarted.
    */
   void pause();
 
@@ -19,8 +19,11 @@ public interface Request {
    * Prevents any bitmaps being loaded from previous requests, releases any resources held by this
    * request, displays the current placeholder if one was provided, and marks the request as having
    * been cancelled.
+   *
+   * @param setPlaceholder {@code true} if the request should set a placeholder on its
+   * {@link com.bumptech.glide.request.target.Target} after cancelling the request.
    */
-  void clear();
+  void clear(boolean setPlaceholder);
 
   /**
    * Returns true if this request is paused and may be restarted.
