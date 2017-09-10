@@ -51,7 +51,7 @@ public class RequestTracker {
    * Stops tracking the given request, clears, and recycles it, and returns {@code true} if the
    * request was removed or {@code false} if the request was not found.
    */
-  public boolean clearRemoveAndRecycle(Request request) {
+  public boolean clearRemoveAndRecycle(Request request, boolean setPlaceholder) {
     if (request == null) {
       return false;
     }
@@ -59,7 +59,7 @@ public class RequestTracker {
     // Avoid short circuiting.
     isOwnedByUs = pendingRequests.remove(request) || isOwnedByUs;
     if (isOwnedByUs) {
-      request.clear();
+      request.clear(setPlaceholder);
       request.recycle();
     }
     return isOwnedByUs;
@@ -105,7 +105,7 @@ public class RequestTracker {
    */
   public void clearRequests() {
     for (Request request : Util.getSnapshot(requests)) {
-      clearRemoveAndRecycle(request);
+      clearRemoveAndRecycle(request, true /*setPlaceholder*/);
     }
     pendingRequests.clear();
   }

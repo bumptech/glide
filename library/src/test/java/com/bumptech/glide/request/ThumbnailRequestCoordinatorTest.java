@@ -3,6 +3,7 @@ package com.bumptech.glide.request;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
@@ -90,7 +91,7 @@ public class ThumbnailRequestCoordinatorTest {
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
-        coordinator.clear();
+        coordinator.clear(true /*setPlaceholder*/);
 
         return null;
       }
@@ -103,10 +104,10 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void testCallsClearOnRequestsWhenCleared() {
-    coordinator.clear();
+    coordinator.clear(true /*setPlaceholder*/);
     InOrder order = inOrder(thumb, full);
-    order.verify(thumb).clear();
-    order.verify(full).clear();
+    order.verify(thumb).clear(true);
+    order.verify(full).clear(true);
   }
 
   @Test
@@ -290,7 +291,7 @@ public class ThumbnailRequestCoordinatorTest {
   @Test
   public void testClearsThumbRequestOnFullRequestComplete_withNullParent() {
     coordinator.onRequestSuccess(full);
-    verify(thumb).clear();
+    verify(thumb).clear(false);
   }
 
   @Test
@@ -306,20 +307,20 @@ public class ThumbnailRequestCoordinatorTest {
     coordinator = new ThumbnailRequestCoordinator(parent);
     coordinator.setRequests(full, thumb);
     coordinator.onRequestSuccess(full);
-    verify(thumb).clear();
+    verify(thumb).clear(false);
   }
 
   @Test
   public void testDoesNotClearThumbOnThumbRequestComplete() {
     coordinator.onRequestSuccess(thumb);
-    verify(thumb, never()).clear();
+    verify(thumb, never()).clear(anyBoolean());
   }
 
   @Test
   public void testDoesNotClearThumbOnFullComplete_whenThumbIsComplete() {
       when(thumb.isComplete()).thenReturn(true);
       coordinator.onRequestSuccess(full);
-      verify(thumb, never()).clear();
+      verify(thumb, never()).clear(anyBoolean());
   }
 
   @Test

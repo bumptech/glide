@@ -73,7 +73,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     // as a layer in a cross fade for example. The only way we know the thumb is not being
     // displayed and is therefore safe to clear is if the thumb request has not yet completed.
     if (!thumb.isComplete()) {
-      thumb.clear();
+      thumb.clear(false /*setPlaceholder*/);
     }
   }
 
@@ -102,14 +102,11 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     thumb.pause();
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
-  public void clear() {
+  public void clear(boolean setPlaceholder) {
     isRunning = false;
-    thumb.clear();
-    full.clear();
+    thumb.clear(setPlaceholder);
+    full.clear(setPlaceholder);
   }
 
   @Override
