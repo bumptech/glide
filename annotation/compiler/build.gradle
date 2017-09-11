@@ -1,10 +1,31 @@
 import org.gradle.internal.jvm.Jvm
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.anarres.jarjar:jarjar-gradle:1.0.0'
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'org.anarres.jarjar'
 
 dependencies {
-    compile 'com.squareup:javapoet:1.9.0'
-    compile 'com.google.auto.service:auto-service:1.0-rc3'
+    compile jarjar.repackage {
+        from 'com.squareup:javapoet:1.9.0'
+
+        classRename 'com.squareup.javapoet.**', 'com.bumptech.glide.repackaged.@0'
+    }
+    compile jarjar.repackage {
+        from 'com.google.auto.service:auto-service:1.0-rc3'
+
+        classRename 'com.google.common.**', 'com.bumptech.glide.repackaged.@0'
+        classRename 'com.google.auto.**', 'com.bumptech.glide.repackaged.@0'
+        classRename 'com.google.publicsuffix.**', 'com.bumptech.glide.repackaged.@0'
+    }
+
     compile 'com.google.code.findbugs:jsr305:3.0.1'
     compile project(':annotation')
     // This is to support com.sun.tootls.javac.util.List, currently used in RootModuleGenerator.

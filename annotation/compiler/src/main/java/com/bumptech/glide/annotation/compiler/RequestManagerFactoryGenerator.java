@@ -1,8 +1,8 @@
 package com.bumptech.glide.annotation.compiler;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.ClassName;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.MethodSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.TypeSpec;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;

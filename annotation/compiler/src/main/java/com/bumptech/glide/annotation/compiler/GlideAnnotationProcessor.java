@@ -1,7 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
 import com.bumptech.glide.annotation.GlideType;
-import com.google.auto.service.AutoService;
+import com.bumptech.glide.repackaged.com.google.auto.service.AutoService;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;

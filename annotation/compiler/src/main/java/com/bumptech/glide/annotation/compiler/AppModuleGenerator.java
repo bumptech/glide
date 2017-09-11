@@ -1,14 +1,14 @@
 package com.bumptech.glide.annotation.compiler;
 
 import com.bumptech.glide.annotation.Excludes;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeSpec.Builder;
-import com.squareup.javapoet.WildcardTypeName;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.AnnotationSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.ClassName;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.MethodSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.ParameterizedTypeName;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.TypeName;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.TypeSpec;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.TypeSpec.Builder;
+import com.bumptech.glide.repackaged.com.squareup.javapoet.WildcardTypeName;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
