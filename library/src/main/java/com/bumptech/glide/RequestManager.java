@@ -410,12 +410,16 @@ public class RequestManager implements LifecycleListener {
    * @param target The Target to cancel loads for.
    */
   public void clear(@Nullable final Target<?> target) {
+    clear(target, true /*setPlaceholder*/);
+  }
+
+  void clear(@Nullable final Target<?> target, boolean setPlaceholder) {
     if (target == null) {
       return;
     }
 
     if (Util.isOnMainThread()) {
-      untrackOrDelegate(target);
+      untrackOrDelegate(target, setPlaceholder);
     } else {
       mainHandler.post(new Runnable() {
         @Override
@@ -426,21 +430,21 @@ public class RequestManager implements LifecycleListener {
     }
   }
 
-  private void untrackOrDelegate(Target<?> target) {
-    boolean isOwnedByUs = untrack(target);
+  private void untrackOrDelegate(Target<?> target, boolean setPlaceholder) {
+    boolean isOwnedByUs = untrack(target, setPlaceholder);
     if (!isOwnedByUs) {
-      glide.removeFromManagers(target);
+      glide.removeFromManagers(target, setPlaceholder);
     }
   }
 
-  boolean untrack(Target<?> target) {
+  boolean untrack(Target<?> target, boolean setPlaceholder) {
     Request request = target.getRequest();
     // If the Target doesn't have a request, it's already been cleared.
     if (request == null) {
       return true;
     }
 
-    if (requestTracker.clearRemoveAndRecycle(request)) {
+    if (requestTracker.clearRemoveAndRecycle(request, setPlaceholder)) {
       targetTracker.untrack(target);
       target.setRequest(null);
       return true;

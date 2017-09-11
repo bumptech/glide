@@ -3,6 +3,7 @@ package com.bumptech.glide.manager;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -34,22 +35,22 @@ public class RequestTrackerTest {
 
     tracker.clearRequests();
 
-    verify(request).clear();
+    verify(request).clear(true);
     verify(request).recycle();
   }
 
   @Test
   public void testClearRemoveAndRecycle_withNullRequest_doesNothingAndReturnsFalse() {
-    assertThat(tracker.clearRemoveAndRecycle(null)).isFalse();
+    assertThat(tracker.clearRemoveAndRecycle(null, true /*setPlaceholder*/)).isFalse();
   }
 
   @Test
   public void testClearRemoveAndRecycle_withUnTrackedRequest_doesNothingAndReturnsFalse() {
     Request request = mock(Request.class);
 
-    assertThat(tracker.clearRemoveAndRecycle(request)).isFalse();
+    assertThat(tracker.clearRemoveAndRecycle(request, true /*setPlaceholder*/)).isFalse();
 
-    verify(request, never()).clear();
+    verify(request, never()).clear(anyBoolean());
     verify(request, never()).recycle();
   }
 
@@ -58,8 +59,8 @@ public class RequestTrackerTest {
     Request request = mock(Request.class);
     tracker.addRequest(request);
 
-    assertThat(tracker.clearRemoveAndRecycle(request)).isTrue();
-    verify(request).clear();
+    assertThat(tracker.clearRemoveAndRecycle(request, true /*setPlaceholder*/)).isTrue();
+    verify(request).clear(true);
     verify(request).recycle();
   }
 
@@ -67,10 +68,10 @@ public class RequestTrackerTest {
   public void testClearRemoveAndRecycle_withAlreadyRemovedRequest_doesNothingAndReturnsFalse() {
     Request request = mock(Request.class);
     tracker.addRequest(request);
-    tracker.clearRemoveAndRecycle(request);
-    assertThat(tracker.clearRemoveAndRecycle(request)).isFalse();
+    tracker.clearRemoveAndRecycle(request, true /*setPlaceholder*/);
+    assertThat(tracker.clearRemoveAndRecycle(request, true /*setPlaceholder*/)).isFalse();
 
-    verify(request, times(1)).clear();
+    verify(request, times(1)).clear(true);
     verify(request, times(1)).recycle();
   }
 
@@ -78,11 +79,11 @@ public class RequestTrackerTest {
   public void testCanAddAndRemoveRequest() {
     Request request = mock(Request.class);
     tracker.addRequest(request);
-    tracker.clearRemoveAndRecycle(request);
+    tracker.clearRemoveAndRecycle(request, true /*setPlaceholder*/);
 
     tracker.clearRequests();
 
-    verify(request, times(1)).clear();
+    verify(request, times(1)).clear(true);
   }
 
   @Test
@@ -94,8 +95,8 @@ public class RequestTrackerTest {
 
     tracker.clearRequests();
 
-    verify(first).clear();
-    verify(second).clear();
+    verify(first).clear(true);
+    verify(second).clear(true);
   }
 
   @Test
@@ -117,7 +118,7 @@ public class RequestTrackerTest {
     when(request.isComplete()).thenReturn(true);
     tracker.pauseRequests();
 
-    verify(request, never()).clear();
+    verify(request, never()).clear(anyBoolean());
   }
 
   @Test
@@ -155,7 +156,7 @@ public class RequestTrackerTest {
 
     tracker.pauseRequests();
 
-    verify(request, never()).clear();
+    verify(request, never()).clear(anyBoolean());
   }
 
   @Test
@@ -235,7 +236,7 @@ public class RequestTrackerTest {
     Request first = mock(Request.class);
     Request second = mock(Request.class);
 
-    doAnswer(new ClearAndRemoveRequest(second)).when(first).clear();
+    doAnswer(new ClearAndRemoveRequest(second)).when(first).clear(anyBoolean());
 
     tracker.addRequest(mock(Request.class));
     tracker.addRequest(first);
@@ -350,7 +351,7 @@ public class RequestTrackerTest {
 
     @Override
     public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-      tracker.clearRemoveAndRecycle(toRemove);
+      tracker.clearRemoveAndRecycle(toRemove, true /*setPlaceholder*/);
       return null;
     }
   }

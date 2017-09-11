@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -101,7 +102,7 @@ public class RequestFutureTargetTest {
   public void testClearsRequestOnRun() {
     future.run();
 
-    verify(request).clear();
+    verify(request).clear(true);
   }
 
   @Test
@@ -109,7 +110,7 @@ public class RequestFutureTargetTest {
     future.onResourceReady(new Object(), null);
     future.cancel(true);
 
-    verify(request, never()).clear();
+    verify(request, never()).clear(anyBoolean());
   }
 
   @Test

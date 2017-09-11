@@ -635,10 +635,10 @@ public class Glide implements ComponentCallbacks2 {
     return registry;
   }
 
-  void removeFromManagers(Target<?> target) {
+  void removeFromManagers(Target<?> target, boolean setPlaceholder) {
     synchronized (managers) {
       for (RequestManager requestManager : managers) {
-        if (requestManager.untrack(target)) {
+        if (requestManager.untrack(target, setPlaceholder)) {
           return;
         }
       }

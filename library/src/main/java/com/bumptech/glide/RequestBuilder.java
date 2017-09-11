@@ -371,7 +371,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       return target;
     }
 
-    requestManager.clear(target);
+    // Avoid setting the placeholder here because it's redundant (the new load will set one) and
+    // doing so invalidates the view and triggers requestLayout() which can make our new request
+    // unnecessarily wait for a layout past, resulting in flashing.
+    requestManager.clear(target, false /*setPlaceholder*/);
     target.setRequest(request);
     requestManager.track(target, request);
 

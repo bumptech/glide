@@ -219,7 +219,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   @Override
   public void run() {
     if (request != null) {
-      request.clear();
+      request.clear(true /*setPlaceholder*/);
       request = null;
     }
   }
