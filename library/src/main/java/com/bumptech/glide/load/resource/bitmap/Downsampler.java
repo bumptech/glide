@@ -10,6 +10,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ImageHeaderParser;
+import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.ImageHeaderParserUtils;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
@@ -121,6 +122,9 @@ public final class Downsampler {
   // 5MB. This is the max image header size we can handle, we preallocate a much smaller buffer
   // but will resize up to this amount if necessary.
   private static final int MARK_POSITION = 5 * 1024 * 1024;
+  // Defines the level of precision we get when using inDensity/inTargetDensity to calculate an
+  // arbitrary float scale factor.
+  private static final int DENSITY_PRECISION_MULTIPLIER = 1000000000;
 
   private final BitmapPool bitmapPool;
   private final DisplayMetrics displayMetrics;
@@ -231,8 +235,20 @@ public final class Downsampler {
     int targetWidth = requestedWidth == Target.SIZE_ORIGINAL ? sourceWidth : requestedWidth;
     int targetHeight = requestedHeight == Target.SIZE_ORIGINAL ? sourceHeight : requestedHeight;
 
-    calculateScaling(downsampleStrategy, degreesToRotate, sourceWidth, sourceHeight, targetWidth,
-        targetHeight, options);
+    ImageType imageType = ImageHeaderParserUtils.getType(parsers, is, byteArrayPool);
+
+    calculateScaling(
+        imageType,
+        is,
+        callbacks,
+        bitmapPool,
+        downsampleStrategy,
+        degreesToRotate,
+        sourceWidth,
+        sourceHeight,
+        targetWidth,
+        targetHeight,
+        options);
     calculateConfig(
         is,
         decodeFormat,
@@ -244,8 +260,7 @@ public final class Downsampler {
 
     boolean isKitKatOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
     // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
-    if ((options.inSampleSize == 1 || isKitKatOrGreater)
-        && shouldUsePool(is)) {
+    if ((options.inSampleSize == 1 || isKitKatOrGreater) && shouldUsePool(imageType)) {
       int expectedWidth;
       int expectedHeight;
       if (fixBitmapToRequestedDimensions && isKitKatOrGreater) {
@@ -299,10 +314,18 @@ public final class Downsampler {
   }
 
   // Visible for testing.
-  static void calculateScaling(DownsampleStrategy downsampleStrategy,
+  static void calculateScaling(
+      ImageType imageType,
+      InputStream is,
+      DecodeCallbacks decodeCallbacks,
+      BitmapPool bitmapPool,
+      DownsampleStrategy downsampleStrategy,
       int degreesToRotate,
-      int sourceWidth, int sourceHeight, int targetWidth, int targetHeight,
-      BitmapFactory.Options options) {
+      int sourceWidth,
+      int sourceHeight,
+      int targetWidth,
+      int targetHeight,
+      BitmapFactory.Options options) throws IOException {
     // We can't downsample source content if we can't determine its dimensions.
     if (sourceWidth <= 0 || sourceHeight <= 0) {
       return;
@@ -323,7 +346,9 @@ public final class Downsampler {
 
     if (exactScaleFactor <= 0f) {
       throw new IllegalArgumentException("Cannot scale with factor: " + exactScaleFactor
-          + " from: " + downsampleStrategy);
+          + " from: " + downsampleStrategy
+          + ", source: [" + sourceWidth + "x" + sourceHeight + "]"
+          + ", target: [" + targetWidth + "x" + targetHeight + "]");
     }
     SampleSizeRounding rounding = downsampleStrategy.getSampleSizeRounding(sourceWidth,
         sourceHeight, targetWidth, targetHeight);
@@ -331,8 +356,8 @@ public final class Downsampler {
       throw new IllegalArgumentException("Cannot round with null rounding");
     }
 
-    int outWidth = (int) (exactScaleFactor * sourceWidth + 0.5f);
-    int outHeight = (int) (exactScaleFactor * sourceHeight + 0.5f);
+    int outWidth = round(exactScaleFactor * sourceWidth);
+    int outHeight = round(exactScaleFactor * sourceHeight);
 
     int widthScaleFactor = sourceWidth / outWidth;
     int heightScaleFactor = sourceHeight / outHeight;
@@ -354,14 +379,53 @@ public final class Downsampler {
       }
     }
 
-    float adjustedScaleFactor = powerOfTwoSampleSize * exactScaleFactor;
-
+    // Here we mimic framework logic for determining how inSampleSize division is rounded on various
+    // versions of Android. The logic here has been tested on emulators for Android versions 15-26.
+    // PNG - Always uses floor
+    // JPEG - Always uses ceiling
+    // Webp - Prior to N, always uses floor. At and after N, always uses round.
     options.inSampleSize = powerOfTwoSampleSize;
+    final int powerOfTwoWidth;
+    final int powerOfTwoHeight;
+    // Jpeg rounds with ceiling on all API verisons.
+    if (imageType == ImageType.JPEG) {
+      powerOfTwoWidth = (int) Math.ceil(sourceWidth / (float) powerOfTwoSampleSize);
+      powerOfTwoHeight = (int) Math.ceil(sourceHeight / (float) powerOfTwoSampleSize);
+    } else if (imageType == ImageType.PNG || imageType == ImageType.PNG_A) {
+      powerOfTwoWidth = (int) Math.floor(sourceWidth / (float) powerOfTwoSampleSize);
+      powerOfTwoHeight = (int) Math.floor(sourceHeight / (float) powerOfTwoSampleSize);
+    } else if (imageType == ImageType.WEBP || imageType == ImageType.WEBP_A) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        powerOfTwoWidth = Math.round(sourceWidth / (float) powerOfTwoSampleSize);
+        powerOfTwoHeight = Math.round(sourceHeight / (float) powerOfTwoSampleSize);
+      } else {
+        powerOfTwoWidth = (int) Math.floor(sourceWidth / (float) powerOfTwoSampleSize);
+        powerOfTwoHeight = (int) Math.floor(sourceHeight / (float) powerOfTwoSampleSize);
+      }
+    } else if (
+        sourceWidth % powerOfTwoSampleSize != 0 || sourceHeight % powerOfTwoSampleSize != 0) {
+      // If we're not confident the image is in one of our types, fall back to checking the
+      // dimensions again. inJustDecodeBounds decodes do obey inSampleSize.
+      int[] dimensions = getDimensions(is, options, decodeCallbacks, bitmapPool);
+      // Power of two downsampling in BitmapFactory uses a variety of random factors to determine
+      // rounding that we can't reliably replicate for all image formats. Use ceiling here to make
+      // sure that we at least provide a Bitmap that's large enough to fit the content we're going
+      // to load.
+      powerOfTwoWidth = dimensions[0];
+      powerOfTwoHeight = dimensions[1];
+    } else {
+      powerOfTwoWidth = sourceWidth / powerOfTwoSampleSize;
+      powerOfTwoHeight = sourceHeight / powerOfTwoSampleSize;
+    }
+
+    double adjustedScaleFactor = downsampleStrategy.getScaleFactor(
+        powerOfTwoWidth, powerOfTwoHeight, targetWidth, targetHeight);
+
     // Density scaling is only supported if inBitmap is null prior to KitKat. Avoid setting
     // densities here so we calculate the final Bitmap size correctly.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      options.inTargetDensity = (int) (1000 * adjustedScaleFactor + 0.5f);
-      options.inDensity = 1000;
+      options.inTargetDensity = adjustTargetDensityForError(adjustedScaleFactor);
+      options.inDensity = DENSITY_PRECISION_MULTIPLIER;
     }
     if (isScaling(options)) {
       options.inScaled = true;
@@ -373,6 +437,7 @@ public final class Downsampler {
       Log.v(TAG, "Calculate scaling"
           + ", source: [" + sourceWidth + "x" + sourceHeight + "]"
           + ", target: [" + targetWidth + "x" + targetHeight + "]"
+          + ", power of two scaled: [" + powerOfTwoWidth + "x" + powerOfTwoHeight + "]"
           + ", exact scale factor: " + exactScaleFactor
           + ", power of 2 sample size: " + powerOfTwoSampleSize
           + ", adjusted scale factor: " + adjustedScaleFactor
@@ -381,24 +446,34 @@ public final class Downsampler {
     }
   }
 
-  private boolean shouldUsePool(InputStream is) throws IOException {
+  /**
+   * BitmapFactory calculates the density scale factor as a float. This introduces some non-trivial
+   * error. This method attempts to account for that error by adjusting the inTargetDensity so that
+   * the final scale factor is as close to our target as possible.
+   */
+  private static int adjustTargetDensityForError(double adjustedScaleFactor) {
+    int targetDensity = round(DENSITY_PRECISION_MULTIPLIER * adjustedScaleFactor);
+    float scaleFactorWithError = targetDensity / (float) DENSITY_PRECISION_MULTIPLIER;
+    double difference = adjustedScaleFactor / scaleFactorWithError;
+    return round(difference * targetDensity);
+  }
+
+  // This is weird, but it matches the logic in a bunch of Android views/framework classes for
+  // rounding.
+  private static int round(double value) {
+    return (int) (value + 0.5d);
+  }
+
+  private boolean shouldUsePool(ImageType imageType) throws IOException {
     // On KitKat+, any bitmap (of a given config) can be used to decode any other bitmap
     // (with the same config).
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       return true;
     }
 
-    try {
-      ImageHeaderParser.ImageType type = ImageHeaderParserUtils.getType(parsers, is, byteArrayPool);
-      // We cannot reuse bitmaps when decoding images that are not PNG or JPG prior to KitKat.
-      // See: https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
-      return TYPES_THAT_USE_POOL_PRE_KITKAT.contains(type);
-    } catch (IOException e) {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Cannot determine the image type from header", e);
-      }
-    }
-    return false;
+    // We cannot reuse bitmaps when decoding images that are not PNG or JPG prior to KitKat.
+    // See: https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
+    return TYPES_THAT_USE_POOL_PRE_KITKAT.contains(imageType);
   }
 
   private void calculateConfig(
