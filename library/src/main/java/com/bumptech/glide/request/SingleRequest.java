@@ -578,7 +578,7 @@ public final class SingleRequest<R> implements Request,
       SingleRequest that = (SingleRequest) o;
       return overrideWidth == that.overrideWidth
           && overrideHeight == that.overrideHeight
-          && Util.bothNullOrEqual(model, that.model)
+          && Util.bothModelsNullEquivalentOrEquals(model, that.model)
           && transcodeClass.equals(that.transcodeClass)
           && requestOptions.equals(that.requestOptions)
           && priority == that.priority;
