@@ -128,7 +128,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
     @Override
     public void onDataReady(Data data) {
-      if (data != null) {
+      if (data != null && callback != null) {
         callback.onDataReady(data);
       } else {
         startNextOrFail();
@@ -137,7 +137,9 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
     @Override
     public void onLoadFailed(Exception e) {
-      exceptions.add(e);
+      if (exceptions != null) {
+        exceptions.add(e);
+      }
       startNextOrFail();
     }
 
