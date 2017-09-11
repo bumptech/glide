@@ -1,0 +1,81 @@
+version = VERSION_NAME
+group = GROUP
+
+afterEvaluate { project ->
+
+    def isAndroidProject = project.plugins.hasPlugin('com.android.application') || project.plugins.hasPlugin('com.android.library')
+
+    if (isAndroidProject) {
+        def releaseVariants = project.android.libraryVariants.findAll {
+            it.buildType.name.equalsIgnoreCase('release')
+        }
+
+        def getAndroidSdkDirectory = project.android.sdkDirectory
+
+        def getAndroidJar = "${getAndroidSdkDirectory}/platforms/${project.android.compileSdkVersion}/android.jar"
+
+        task androidJavadocs(type: Javadoc, dependsOn: assembleRelease) {
+            source = releaseVariants.collect { it.javaCompile.source }
+            classpath = files(
+                    getAndroidJar,
+                    releaseVariants.collect { it.javaCompile.classpath.files },
+                    project.file("build/intermediates/classes/release")
+            )
+
+            options {
+                links("http://docs.oracle.com/javase/7/docs/api/")
+                linksOffline("http://d.android.com/reference",
+                    "${getAndroidSdkDirectory}/docs/reference")
+            }
+
+            exclude '**/BuildConfig.java'
+            exclude '**/R.java'
+        }
+
+        def cleanJavadocTask = task("cleanJavadocTask", type: Delete) {
+            delete androidJavadocs.destinationDir
+        } as Task
+        project.clean.dependsOn(cleanJavadocTask)
+
+        project.archivesBaseName = "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
+
+        task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+            classifier = 'javadoc'
+            from androidJavadocs.destinationDir
+        }
+
+        task androidSourcesJar(type: Jar) {
+            classifier = 'sources'
+            from project.android.sourceSets.main.java.source
+        }
+
+        task androidLibraryJar(type: Jar, dependsOn: compileReleaseJavaWithJavac /* == variant.javaCompile */) {
+            from compileReleaseJavaWithJavac.destinationDir
+            exclude '**/R.class'
+            exclude '**/BuildConfig.class'
+            exclude '**/R$*.class'
+        }
+
+        artifacts {
+            archives androidLibraryJar
+            archives androidSourcesJar
+            archives androidJavadocsJar
+        }
+    } else if (project.plugins.hasPlugin('java')) {
+        task sourcesJar(type: Jar, dependsOn: classes) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        task javadocsJar(type: Jar, dependsOn: javadoc) {
+            classifier = 'javadoc'
+            from javadoc.destinationDir
+        }
+
+        artifacts {
+            archives sourcesJar
+            archives javadocsJar
+        }
+    }
+}
+

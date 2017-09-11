@@ -1,0 +1,116 @@
+/*
+ * Copyright 2013 Chris Banes
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
+ * Based on: https://github.com/mcxiaoke/gradle-mvn-push/blob/master/gradle-mvn-push.gradle.
+ * Local test with (..._REPOSITORY_URL properties must be full paths):
+ * gradlew clean buildArchives uploadArchives --stacktrace --info -PSNAPSHOT_REPOSITORY_URL=file://p:\projects\contrib\github-glide\repo-snapshot -PRELEASE_REPOSITORY_URL=file://p:\projects\contrib\github-glide\repo-release
+ * For faster runs add: -x check
+ */
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+def isReleaseBuild() {
+    return VERSION_NAME.contains("SNAPSHOT") == false
+}
+
+def getReleaseRepositoryUrl() {
+    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
+            : 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+}
+
+def getSnapshotRepositoryUrl() {
+    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
+            : 'https://oss.sonatype.org/content/repositories/snapshots/'
+}
+
+def getRepositoryUsername() {
+    return hasProperty('USERNAME') ? USERNAME : (hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : '')
+}
+
+def getRepositoryPassword() {
+    return hasProperty('PASSWORD') ? PASSWORD : (hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : '')
+}
+
+afterEvaluate { project ->
+    // To avoid uploading the default empty jar artifact in the project root directory, we use a custom
+    // configuration to specify which artifacts we want to upload.
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                // allow uploading through FTP protocol with the following command:
+                // gradle uploadArchives -PSNAPSHOT_REPOSITORY_URL=ftp://host/repo/path -PUSERNAME=uname -PPASSWORD=passwd
+                configuration = configurations.create('deployerJars')
+                configuration.dependencies.add dependencies.create('org.apache.maven.wagon:wagon-ftp:2.2')
+
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                pom.groupId = GROUP
+                pom.artifactId = POM_ARTIFACT_ID
+                pom.version = VERSION_NAME
+
+                repository(url: getReleaseRepositoryUrl()) {
+                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+                }
+                snapshotRepository(url: getSnapshotRepositoryUrl()) {
+                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+                }
+
+                pom.project {
+                    name = POM_NAME
+                    packaging = POM_PACKAGING
+                    description = POM_DESCRIPTION
+                    url = POM_URL
+
+                    scm {
+                        url POM_SCM_URL
+                        connection POM_SCM_CONNECTION
+                        developerConnection POM_SCM_DEV_CONNECTION
+                    }
+
+                    licenses {
+                        license {
+                            name = 'Simplified BSD License'
+                            url = 'http://www.opensource.org/licenses/bsd-license'
+                            distribution = 'repo'
+                        }
+                        license {
+                            name = 'The Apache Software License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution = 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = POM_DEVELOPER_ID
+                            name = POM_DEVELOPER_NAME
+                            email = POM_DEVELOPER_EMAIL
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    signing {
+        required { isReleaseBuild() && gradle.taskGraph.hasTask('uploadArchives') }
+        sign configurations.archives
+    }
+
+    logger.info("Published artifacts in ${configurations.archives}:")
+    configurations.archives.artifacts.files.files.each { logger.info("\t$it"); }
+}

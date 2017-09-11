@@ -1,0 +1,74 @@
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: "com.jfrog.bintray"
+
+afterEvaluate { project ->
+    // To avoid uploading the default empty jar artifact in the project root directory, we use a custom
+    // configuration to specify which artifacts we want to upload.
+    project.archivesBaseName = "${POM_ARTIFACT_ID}"
+    install {
+        repositories.mavenInstaller {
+            pom.project {
+                name = POM_NAME
+                packaging = POM_PACKAGING
+                description = POM_DESCRIPTION
+                url = POM_URL
+
+                groupId = GROUP
+                artifactId = POM_ARTIFACT_ID
+                version = VERSION_NAME
+
+                scm {
+                    url POM_SCM_URL
+                    connection POM_SCM_CONNECTION
+                    developerConnection POM_SCM_DEV_CONNECTION
+                }
+
+                licenses {
+                    license {
+                        name = 'Simplified BSD License'
+                        url = 'http://www.opensource.org/licenses/bsd-license'
+                        distribution = 'repo'
+                    }
+                    license {
+                        name = 'The Apache Software License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution = 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = POM_DEVELOPER_ID
+                        name = POM_DEVELOPER_NAME
+                        email = POM_DEVELOPER_EMAIL
+                    }
+                }
+            }
+        }
+    }
+
+    bintray {
+        user = BINTRAY_USER
+        key = BINTRAY_API_KEY
+        configurations = ['archives']
+        pkg {
+            repo = 'maven'
+            name = "com.github.bumptech.glide:glide"
+            desc = POM_DESCRIPTION
+            websiteUrl = "https://bumptech.github.io/glide/"
+            vcsUrl = "https://github.com/bumptech/glide.git"
+            issueTrackerUrl = "https://github.com/bumptech/glide/issues"
+            licenses = ["Apache-2.0", "BSD"]
+            publish = false
+            githubRepo = 'bumptech/glide'
+            version {
+                name = VERSION_NAME
+                vcsTag = "v${VERSION_NAME}"
+                gpg {
+                    sign = true
+                    passphrase = GPG_PASSPHRASE
+                }
+            }
+        }
+    }
+}
