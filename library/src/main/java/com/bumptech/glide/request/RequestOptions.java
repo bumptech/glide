@@ -122,7 +122,7 @@ public class RequestOptions implements Cloneable {
   }
 
   /**
-   * Returns a {@link RequestOptions} object with {@link #sizeMultiplier(float)} set.
+   * Returns a {@link RequestOptions} object with {@link #diskCacheStrategy(DiskCacheStrategy)} set.
    */
   public static RequestOptions diskCacheStrategyOf(@NonNull DiskCacheStrategy diskCacheStrategy) {
     return new RequestOptions().diskCacheStrategy(diskCacheStrategy);
