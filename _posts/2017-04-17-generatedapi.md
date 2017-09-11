@@ -11,13 +11,13 @@ disqus: 1
 
 ### About
 
-Glide v4 uses an [annotation processor][1] to generate an API that allows applications to access all options in [``RequestBuilder``][2], [``RequestOptions``][3] and any included integration libraries in a single fluent API. 
+Glide v4 uses an [annotation processor][1] to generate an API that allows applications to access all options in [``RequestBuilder``][2], [``RequestOptions``][3] and any included integration libraries in a single fluent API.
 
 The generated API serves two purposes:
 1. Integration libraries can extend Glide's API with custom options.
 2. Applications can extend Glide's API by adding methods that bundle commonly used options.
 
-Although both of these tasks can be accomplished by hand by writing custom subclasses of [``RequestOptions``][3], doing so is challenging and produces a less fluent API. 
+Although both of these tasks can be accomplished by hand by writing custom subclasses of [``RequestOptions``][3], doing so is challenging and produces a less fluent API.
 
 ### Getting Started
 
@@ -31,26 +31,28 @@ To use the generated API, you need to perform two steps:
    repositories {
      mavenCentral()
    }
-   
+
    dependencies {
      annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
    }
    ```
-   
+
    See the [download and setup page][12] for more detail.
 
 2. Include a [``AppGlideModule``][4] implementation in your application:
- 
+
    ```java
    package com.example.myapp;
-   
+
    import com.bumptech.glide.annotation.GlideModule;
    import com.bumptech.glide.module.AppGlideModule;
-   
+
    @GlideModule
    public final class MyAppGlideModule extends AppGlideModule {}
    ```
-        
+
+You're not required to implement any of the methods in ``AppGlideModule`` for the API to be generated. You can leave the class blank as long as it extends ``AppGlideModule`` and is annotated with ``@GlideModule``.
+
     [``AppGlideModule``][4] implementations must always be annotated with [``@GlideModule``][5]. If the annotation is not present, the module will not be discovered and you will see a warning in your logs with the ``Glide`` log tag that indicates that the module couldn't be found.
 
 #### Kotlin
