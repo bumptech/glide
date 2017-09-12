@@ -75,7 +75,43 @@ Glide.with(fragment)
     .load(url)
     .into(bitmapView);
 ```
-    
+
+### Transformations
+[``Transformations``][28] in Glide v4 now replace any previously set transformations. If you want to apply more than one [``Transformation``][28] in Glide v4, use the [``transforms()``][29] method:
+
+```java
+Glide.with(fragment)
+  .load(url)
+  .apply(new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(20)))
+  .into(target);
+```
+
+Or with the [generated API][24]:
+
+```java
+GlideApp.with(fragment)
+  .load(url)
+  .transforms(new CenterCrop(), new RoundedCorners(20))
+  .into(target);
+```
+
+### DecodeFormat
+
+In Glide v3, the default [``DecodeFormat``][30] was [``DecodeFormat.PREFER_RGB_565``][31], which used [``Bitmap.Config.RGB_565``][32] unless the image contained or might have contained transparent pixels. ``RGB_565`` uses half the memory of [``Bitmap.Config.ARGB_8888``][33] for a given image size, but it has noticeable quality issues for certain images, including banding and tinting. To avoid the quality issues with ``RGB_565``, Glide defaults to ``ARGB_8888``. As a result, image quality is higher, but memory usage my increase.
+
+To change Glide's default [``DecodeFormat``][30] back to [``DecodeFormat.PREFER_RGB_565``][31] in Glide v4, apply the ``RequestOption`` in an [``AppGlideModule``][2]:
+
+```java
+@GlideModule
+public final class YourAppGlideModule extends GlideModule {
+  @Override
+  public void applyOptions(Context context, GlideBuilder builder) {
+    builder.setDefaultRequestOptions(new RequestOptions().format(DecodeFormat.PREFER_RGB_565));
+  }
+}
+```
+
+For more on using [``AppGlideModuless``][2], see the [configuration page][4]. Note that you will have to make sure to add a dependency on Glide's annotation processor to ensure that Glide picks up your [``AppGlideModule``][2] implementation. For more information on how to set up the library, see the [download and setup page][34].
 
 ### TransitionOptions
 
@@ -414,3 +450,10 @@ To make sure you only use your ``ModelLoader`` for certain models, implement ``h
 [25]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#load-java.lang.Object-
 [26]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
 [27]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.LoadData.html
+[28]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/load/Transformation.html
+[29]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/request/RequestOptions.html#transforms-com.bumptech.glide.load.Transformation...-
+[30]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/load/DecodeFormat.html
+[31]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/load/DecodeFormat.html#PREFER_RGB_565
+[32]: https://developer.android.com/reference/android/graphics/Bitmap.Config.html#RGB_565
+[33]: https://developer.android.com/reference/android/graphics/Bitmap.Config.html#ARGB_8888
+[34]: download-setup.html
