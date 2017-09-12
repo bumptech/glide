@@ -101,16 +101,10 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
 
   @Override
   public boolean handles(ParcelFileDescriptor data, Options options) {
-    MediaMetadataRetriever retriever = factory.build();
-    try {
-      retriever.setDataSource(data.getFileDescriptor());
-      return true;
-    } catch (RuntimeException e) {
-      // Throws a generic runtime exception when given invalid data.
-      return false;
-    } finally {
-      retriever.release();
-    }
+    // Calling setDataSource is expensive so avoid doing so unless we're actually called.
+    // For non-videos this isn't any cheaper, but for videos it safes the redundant call and
+    // 50-100ms.
+    return true;
   }
 
   @Override
@@ -134,6 +128,9 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
       } else {
         result = mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
       }
+    } catch (RuntimeException e) {
+      // MediaMetadataRetriever APIs throw generic runtime exceptions when given invalid data.
+      throw new IOException(e);
     } finally {
       mediaMetadataRetriever.release();
     }
