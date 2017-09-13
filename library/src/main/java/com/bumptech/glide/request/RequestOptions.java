@@ -1005,7 +1005,7 @@ public class RequestOptions implements Cloneable {
    * @see #optionalTransform(Transformation)
    * @see #optionalTransform(Class, Transformation)
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "varargs"})
   public RequestOptions transforms(@NonNull Transformation<Bitmap>... transformations) {
     if (isAutoCloneEnabled) {
       return clone().transforms(transformations);

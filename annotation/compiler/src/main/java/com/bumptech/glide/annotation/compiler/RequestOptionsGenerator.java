@@ -190,8 +190,9 @@ final class RequestOptionsGenerator {
   }
 
   private MethodSpec generateRequestOptionOverride(ExecutableElement methodToOverride) {
-    return MethodSpec.overriding(methodToOverride)
+    MethodSpec.Builder result = MethodSpec.overriding(methodToOverride)
         .returns(glideOptionsName)
+        .addModifiers(Modifier.FINAL)
         .addCode(CodeBlock.builder()
             .add("return ($T) super.$N(", glideOptionsName, methodToOverride.getSimpleName())
             .add(FluentIterable.from(methodToOverride.getParameters())
@@ -203,8 +204,15 @@ final class RequestOptionsGenerator {
                 })
                 .join(Joiner.on(", ")))
             .add(");\n")
-            .build())
-        .build();
+            .build());
+
+    if (methodToOverride.getSimpleName().toString().equals("transforms")) {
+      result.addAnnotation(
+          AnnotationSpec.builder(SafeVarargs.class)
+              .build());
+    }
+
+    return result.build();
   }
 
   private List<MethodAndStaticVar> generateMethodsForRequestOptionsExtension(

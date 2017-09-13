@@ -287,7 +287,18 @@ final class RequestBuilderGenerator {
     return MethodSpec.methodBuilder(requestOptionMethod.name)
         .addJavadoc(
             processorUtil.generateSeeMethodJavadoc(requestOptionsClassName, requestOptionMethod))
-        .addModifiers(Modifier.PUBLIC)
+        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+        .varargs(requestOptionMethod.varargs)
+        .addAnnotations(
+            FluentIterable.from(requestOptionMethod.annotations)
+                .filter(new Predicate<AnnotationSpec>() {
+                  @Override
+                  public boolean apply(AnnotationSpec input) {
+                    return !input.type.equals(TypeName.get(Override.class));
+                  }
+                })
+                .toList()
+        )
         .addTypeVariables(requestOptionMethod.typeVariables)
         .addParameters(requestOptionMethod.parameters)
         .returns(generatedRequestBuilderOfTranscodeType)
