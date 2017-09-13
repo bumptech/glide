@@ -16,9 +16,12 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -544,7 +547,7 @@ public class GifDrawableTest {
 
   @Test
   public void testSetColorFilterSetsColorFilterOnPaint() {
-    ColorFilter colorFilter = new ColorFilter();
+    ColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, Mode.ADD);
     drawable.setColorFilter(colorFilter);
     verify(paint).setColorFilter(eq(colorFilter));
   }

@@ -198,6 +198,7 @@ public class StandardGifDecoder implements GifDecoder {
     framePointer = INITIAL_FRAME_POINTER;
   }
 
+  @Deprecated
   @Override
   public int getLoopCount() {
     if (header.loopCount == GifHeader.NETSCAPE_LOOP_COUNT_DOES_NOT_EXIST) {

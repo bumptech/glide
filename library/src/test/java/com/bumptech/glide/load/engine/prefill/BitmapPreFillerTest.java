@@ -258,6 +258,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testSetsConfigOnBuildersToDefaultIfNotSet() {
     PreFillType.Builder builder = mock(PreFillType.Builder.class);
     when(builder.build())

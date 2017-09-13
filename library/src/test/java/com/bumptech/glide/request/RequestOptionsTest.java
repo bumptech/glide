@@ -253,6 +253,7 @@ public class RequestOptionsTest {
   }
 
   @Test
+  @SuppressWarnings({"unchecked", "varargs"})
   public void testApplyMultiTransform() {
     options.transforms(new CircleCrop(), new CenterCrop());
     assertThat(options.isTransformationRequired()).isTrue();

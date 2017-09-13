@@ -186,7 +186,7 @@ public final class Downsampler {
    * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is
    * not null.
    */
-  @SuppressWarnings("resource")
+  @SuppressWarnings({"resource", "deprecation"})
   public Resource<Bitmap> decode(InputStream is, int requestedWidth, int requestedHeight,
       Options options, DecodeCallbacks callbacks) throws IOException {
     Preconditions.checkArgument(is.markSupported(), "You must provide an InputStream that supports"
@@ -476,6 +476,7 @@ public final class Downsampler {
     return TYPES_THAT_USE_POOL_PRE_KITKAT.contains(imageType);
   }
 
+  @SuppressWarnings("deprecation")
   private void calculateConfig(
       InputStream is,
       DecodeFormat format,
@@ -672,6 +673,7 @@ public final class Downsampler {
     }
   }
 
+  @SuppressWarnings("deprecation")
   private static void resetOptions(BitmapFactory.Options decodeBitmapOptions) {
     decodeBitmapOptions.inTempStorage = null;
     decodeBitmapOptions.inDither = false;

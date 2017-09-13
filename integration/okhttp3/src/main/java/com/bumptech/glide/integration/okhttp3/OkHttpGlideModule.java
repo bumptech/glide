@@ -5,7 +5,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.module.GlideModule;
 import java.io.InputStream;
 
 /**
@@ -21,7 +20,7 @@ import java.io.InputStream;
  * annotations.
  */
 @Deprecated
-public class OkHttpGlideModule implements GlideModule {
+public class OkHttpGlideModule implements com.bumptech.glide.module.GlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
     // Do nothing.
