@@ -349,14 +349,18 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @see RequestManager#clear(Target)
    */
   public <Y extends Target<TranscodeType>> Y into(@NonNull Y target) {
+    return into(target, getMutableOptions());
+  }
+
+  private <Y extends Target<TranscodeType>> Y into(@NonNull Y target, RequestOptions options) {
     Util.assertMainThread();
     Preconditions.checkNotNull(target);
     if (!isModelSet) {
       throw new IllegalArgumentException("You must call #load() before calling #into()");
     }
 
-    requestOptions.lock();
-    Request request = buildRequest(target);
+    options = options.autoClone();
+    Request request = buildRequest(target, options);
 
     Request previous = target.getRequest();
     if (request.isEquivalentTo(previous)) {
@@ -378,6 +382,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     return target;
   }
 
+
   /**
    * Sets the {@link ImageView} the resource will be loaded into, cancels any existing loads into
    * the view, and frees any resources Glide may have previously loaded into the view so they may be
@@ -393,26 +398,27 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     Util.assertMainThread();
     Preconditions.checkNotNull(view);
 
+    RequestOptions requestOptions = this.requestOptions;
     if (!requestOptions.isTransformationSet()
         && requestOptions.isTransformationAllowed()
         && view.getScaleType() != null) {
-      if (requestOptions.isLocked()) {
-        requestOptions = requestOptions.clone();
-      }
+      // Clone in this method so that if we use this RequestBuilder to load into a View and then
+      // into a different target, we don't retain the transformation applied based on the previous
+      // View's scale type.
       switch (view.getScaleType()) {
         case CENTER_CROP:
-          requestOptions.optionalCenterCrop();
+          requestOptions.clone().optionalCenterCrop();
           break;
         case CENTER_INSIDE:
-          requestOptions.optionalCenterInside();
+          requestOptions.clone().optionalCenterInside();
           break;
         case FIT_CENTER:
         case FIT_START:
         case FIT_END:
-          requestOptions.optionalFitCenter();
+          requestOptions.clone().optionalFitCenter();
           break;
         case FIT_XY:
-          requestOptions.optionalCenterInside();
+          requestOptions.clone().optionalCenterInside();
           break;
         case CENTER:
         case MATRIX:
@@ -421,7 +427,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       }
     }
 
-    return into(context.buildImageViewTarget(view, transcodeClass));
+    return into(context.buildImageViewTarget(view, transcodeClass), requestOptions);
   }
 
   /**
@@ -578,15 +584,15 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
     }
   }
 
-  private Request buildRequest(Target<TranscodeType> target) {
+  private Request buildRequest(Target<TranscodeType> target, RequestOptions requestOptions) {
     return buildRequestRecursive(target, null, transitionOptions, requestOptions.getPriority(),
-        requestOptions.getOverrideWidth(), requestOptions.getOverrideHeight());
+        requestOptions.getOverrideWidth(), requestOptions.getOverrideHeight(), requestOptions);
   }
 
   private Request buildRequestRecursive(Target<TranscodeType> target,
       @Nullable ThumbnailRequestCoordinator parentCoordinator,
       TransitionOptions<?, ? super TranscodeType> transitionOptions,
-      Priority priority, int overrideWidth, int overrideHeight) {
+      Priority priority, int overrideWidth, int overrideHeight, RequestOptions requestOptions) {
     if (thumbnailBuilder != null) {
       // Recursive case: contains a potentially recursive thumbnail request builder.
       if (isThumbnailBuilt) {
@@ -619,8 +625,15 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
           transitionOptions, priority, overrideWidth, overrideHeight);
       isThumbnailBuilt = true;
       // Recursively generate thumbnail requests.
-      Request thumbRequest = thumbnailBuilder.buildRequestRecursive(target, coordinator,
-          thumbTransitionOptions, thumbPriority, thumbOverrideWidth, thumbOverrideHeight);
+      Request thumbRequest =
+          thumbnailBuilder.buildRequestRecursive(
+              target,
+              coordinator,
+              thumbTransitionOptions,
+              thumbPriority,
+              thumbOverrideWidth,
+              thumbOverrideHeight,
+              requestOptions);
       isThumbnailBuilt = false;
       coordinator.setRequests(fullRequest, thumbRequest);
       return coordinator;
@@ -648,8 +661,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       RequestOptions requestOptions, RequestCoordinator requestCoordinator,
       TransitionOptions<?, ? super TranscodeType> transitionOptions, Priority priority,
       int overrideWidth, int overrideHeight) {
-    requestOptions.lock();
-
     return SingleRequest.obtain(
         context,
         model,
