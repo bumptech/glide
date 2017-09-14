@@ -21,9 +21,15 @@ Although both of these tasks can be accomplished by hand by writing custom subcl
 
 ### Getting Started
 
+#### Availability
+
+The generated API is only available for applications for now. Limiting the generated API to applications allows us to have a single implementation of the API, instead of N implementations, one per library and the application. As a result, it's much simpler to manage imports and ensure that all call paths within a particular application have the correct options applied. This restriction may be lifted (experimentally or otherwise) in a future version. 
+
+For now the API is only generated when a properly annotated ``AppGlideModule`` is found. There can only be one ``AppGlideModule`` per application. As a result it's not possible to generate the API for a library without precluding any application that uses the library from using the generated API. 
+
 #### Java
 
-To use the generated API, you need to perform two steps:
+To use the generated API in your application, you need to perform two steps:
 
 1. Add a dependency on Glide's annotation processor:
 
