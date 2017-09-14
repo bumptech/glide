@@ -138,6 +138,7 @@ final class RequestOptionsGenerator {
         .addJavadoc(generateClassJavadoc(glideExtensionClassNames))
         .addModifiers(Modifier.FINAL)
         .addModifiers(Modifier.PUBLIC)
+        .addSuperinterface(Cloneable.class)
         .superclass(requestOptionsName);
 
     for (MethodAndStaticVar methodAndStaticVar : allMethodsAndStaticVars) {

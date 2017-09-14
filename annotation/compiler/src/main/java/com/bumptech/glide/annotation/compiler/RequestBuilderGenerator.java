@@ -165,6 +165,7 @@ final class RequestBuilderGenerator {
         .addModifiers(Modifier.PUBLIC)
         .addTypeVariable(transcodeTypeName)
         .superclass(requestBuilderOfTranscodeType)
+        .addSuperinterface(Cloneable.class)
         .addMethods(generateConstructors())
         .addMethod(generateDownloadOnlyRequestMethod())
         .addMethods(generateGeneratedRequestOptionsEquivalents(generatedOptions))
