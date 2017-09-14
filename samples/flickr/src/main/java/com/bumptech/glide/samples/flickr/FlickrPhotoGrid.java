@@ -16,7 +16,6 @@ import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.util.FixedPreloadSizeProvider;
@@ -67,7 +66,6 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
     thumbnailRequest = GlideApp.with(this)
         .asDrawable()
-        .diskCacheStrategy(DiskCacheStrategy.DATA)
         .centerCrop()
         .override(Api.SQUARE_THUMB_SIZE);
 
