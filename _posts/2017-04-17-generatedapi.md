@@ -53,7 +53,7 @@ To use the generated API, you need to perform two steps:
 
 You're not required to implement any of the methods in ``AppGlideModule`` for the API to be generated. You can leave the class blank as long as it extends ``AppGlideModule`` and is annotated with ``@GlideModule``.
 
-    [``AppGlideModule``][4] implementations must always be annotated with [``@GlideModule``][5]. If the annotation is not present, the module will not be discovered and you will see a warning in your logs with the ``Glide`` log tag that indicates that the module couldn't be found.
+[``AppGlideModule``][4] implementations must always be annotated with [``@GlideModule``][5]. If the annotation is not present, the module will not be discovered and you will see a warning in your logs with the ``Glide`` log tag that indicates that the module couldn't be found.
 
 #### Kotlin
 
