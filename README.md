@@ -121,7 +121,9 @@ Comments/bugs/questions/pull requests are always welcome! Please read [CONTRIBUT
 Compatibility
 -------------
 
- * **Android SDK**: Glide requires a minimum API level of 14.  
+ * **Minimum Android SDK**: Glide requires a minimum API level of 14.
+ * **Compile Android SDK**: Glide requires you to compile against API 26.
+
  If you need to support older versions, consider staying on [Glide v3][14], which works on API 10, but not actively maintained.
  * **OkHttp 2.x**: there are optional dependencies available called `okhttp-integration`, see [Integration Libraries][12] wiki page.
  * **OkHttp 3.x**: there are optional dependencies available called `okhttp3-integration`, see [Integration Libraries][12] wiki page.
