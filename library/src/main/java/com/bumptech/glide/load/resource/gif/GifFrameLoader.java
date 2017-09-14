@@ -19,14 +19,13 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 class GifFrameLoader {
   private final GifDecoder gifDecoder;
@@ -206,7 +205,7 @@ class GifFrameLoader {
 
     gifDecoder.advance();
     next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
-    requestBuilder.clone().apply(signatureOf(new FrameSignature())).load(gifDecoder).into(next);
+    requestBuilder.clone().apply(signatureOf(getFrameSignature())).load(gifDecoder).into(next);
   }
 
   private void recycleFirstFrame() {
@@ -303,36 +302,9 @@ class GifFrameLoader {
                 .override(width, height));
   }
 
-  // Visible for testing.
-  static class FrameSignature implements Key {
-    private final UUID uuid;
-
-    public FrameSignature() {
-      this(UUID.randomUUID());
-    }
-
-    // VisibleForTesting.
-    FrameSignature(UUID uuid) {
-      this.uuid = uuid;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (o instanceof FrameSignature) {
-        FrameSignature other = (FrameSignature) o;
-        return other.uuid.equals(uuid);
-      }
-      return false;
-    }
-
-    @Override
-    public int hashCode() {
-      return uuid.hashCode();
-    }
-
-    @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest) {
-      throw new UnsupportedOperationException("Not implemented");
-    }
+  static Key getFrameSignature() {
+    // Some devices seem to have crypto bugs that throw exceptions when you create a new UUID.
+    // See #1510.
+    return new ObjectKey(Math.random());
   }
 }

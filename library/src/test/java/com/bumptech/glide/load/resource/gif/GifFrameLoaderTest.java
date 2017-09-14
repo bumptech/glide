@@ -29,9 +29,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.Util.ReturnsSelfAnswer;
 import com.bumptech.glide.util.Util;
-import com.google.common.testing.EqualsTester;
 import java.nio.ByteBuffer;
-import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -269,14 +267,6 @@ public class GifFrameLoaderTest {
     loader.onFrameReady(delayTarget);
 
     assertNull(loader.getCurrentFrame());
-  }
-
-  @Test
-  public void testFrameSignatureEquality() {
-    UUID first = UUID.randomUUID();
-    new EqualsTester().addEqualityGroup(new GifFrameLoader.FrameSignature(first),
-        new GifFrameLoader.FrameSignature(first))
-        .addEqualityGroup(new GifFrameLoader.FrameSignature()).testEquals();
   }
 
   @SuppressWarnings("unchecked")
