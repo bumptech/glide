@@ -3,6 +3,7 @@ package com.bumptech.glide.samples.gallery;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -91,11 +92,13 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
     return 0;
   }
 
+  @NonNull
   @Override
   public List<MediaStoreData> getPreloadItems(int position) {
     return Collections.singletonList(data.get(position));
   }
 
+  @NonNull
   @Override
   public RequestBuilder<Drawable> getPreloadRequestBuilder(MediaStoreData item) {
     MediaStoreSignature signature =

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class ListPreloaderTest {
     final AtomicInteger calledCount = new AtomicInteger();
 
     ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         called.set(true);
@@ -75,11 +77,13 @@ public class ListPreloaderTest {
         return new int[] { 10, 10 };
       }
 
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         return objects.subList(position - 11, position + 1 - 11);
       }
 
+      @NonNull
       @Override
       @SuppressWarnings("unchecked")
       public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
@@ -98,6 +102,7 @@ public class ListPreloaderTest {
     final AtomicBoolean called = new AtomicBoolean(false);
     final AtomicInteger calledCount = new AtomicInteger();
     ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         // Ignore the preload caused from us starting at the end
@@ -133,6 +138,7 @@ public class ListPreloaderTest {
         return new int[] { 10, 10 };
       }
 
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         if (position == 40) {
@@ -141,6 +147,7 @@ public class ListPreloaderTest {
         return objects.subList(position, position + 1);
       }
 
+      @NonNull
       @Override
       @SuppressWarnings("unchecked")
       public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
@@ -160,6 +167,7 @@ public class ListPreloaderTest {
     final AtomicBoolean called = new AtomicBoolean(false);
     final AtomicInteger calledCount = new AtomicInteger();
     ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         called.set(true);
@@ -179,6 +187,7 @@ public class ListPreloaderTest {
     final AtomicBoolean called = new AtomicBoolean(false);
     final AtomicInteger calledCount = new AtomicInteger();
     ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         if (position >= 17) {
@@ -202,6 +211,7 @@ public class ListPreloaderTest {
   public void testDontPreloadItemsRepeatedlyWhileIncreasing() {
     final AtomicInteger called = new AtomicInteger();
     ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         final int current = called.getAndIncrement();
@@ -222,6 +232,7 @@ public class ListPreloaderTest {
   public void testDontPreloadItemsRepeatedlyWhileDecreasing() {
     final AtomicInteger called = new AtomicInteger();
     ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         if (position >= 20) {
@@ -249,6 +260,7 @@ public class ListPreloaderTest {
     ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
       private int expectedPosition = (1 + 10) * 2;
 
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         return objects;
@@ -262,6 +274,7 @@ public class ListPreloaderTest {
         return itemPosition == 0 ? new int[] { 10, 11 } : new int[] { 20, 21 };
       }
 
+      @NonNull
       @Override
       public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
         return request;
@@ -285,6 +298,7 @@ public class ListPreloaderTest {
     ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
       private int expectedPosition = objects.size() * 2 - 1;
 
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         return objects;
@@ -298,6 +312,7 @@ public class ListPreloaderTest {
         return itemPosition == 0 ? new int[] { 10, 11 } : new int[] { 20, 21 };
       }
 
+      @NonNull
       @Override
       public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
         return request;
@@ -334,11 +349,13 @@ public class ListPreloaderTest {
     objects.add(new Object());
     final HashSet<Object> loadedObjects = new HashSet<>();
     ListPreloaderAdapter preloaderAdapter = new ListPreloaderAdapter() {
+      @NonNull
       @Override
       public List<Object> getPreloadItems(int position) {
         return objects.subList(position - 11, position - 10);
       }
 
+      @NonNull
       @Override
       public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
         loadedObjects.add(item);
@@ -358,6 +375,7 @@ public class ListPreloaderTest {
     public ListPreloaderAdapter() {
     }
 
+    @NonNull
     @Override
     public List<Object> getPreloadItems(int position) {
       ArrayList<Object> result = new ArrayList<>(1);
@@ -365,6 +383,7 @@ public class ListPreloaderTest {
       return result;
     }
 
+    @NonNull
     @Override
     @SuppressWarnings("unchecked")
     public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {

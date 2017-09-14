@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -137,11 +138,13 @@ public class MainActivity extends Activity implements Api.Monitor {
       return results.length;
     }
 
+    @NonNull
     @Override
     public List<Api.GifResult> getPreloadItems(int position) {
       return Collections.singletonList(results[position]);
     }
 
+    @NonNull
     @Override
     public RequestBuilder<Drawable> getPreloadRequestBuilder(Api.GifResult item) {
       return requestBuilder.load(item);

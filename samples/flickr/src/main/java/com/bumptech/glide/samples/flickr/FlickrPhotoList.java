@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -165,11 +166,13 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
       return photos.size();
     }
 
+    @NonNull
     @Override
     public List<Photo> getPreloadItems(int position) {
       return photos.subList(position, position + 1);
     }
 
+    @NonNull
     @Override
     public RequestBuilder<Drawable> getPreloadRequestBuilder(Photo item) {
       return fullRequest.thumbnail(thumbRequest.load(item)).load(item);

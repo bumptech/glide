@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.AbsListView;
 import com.bumptech.glide.request.target.BaseTarget;
@@ -24,7 +25,6 @@ import java.util.Queue;
  * @param <T> The type of the model being displayed in the list.
  */
 public class ListPreloader<T> implements AbsListView.OnScrollListener {
-
   private final int maxPreload;
   private final PreloadTargetQueue preloadTargetQueue;
   private final RequestManager requestManager;
@@ -47,24 +47,44 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   public interface PreloadModelProvider<U> {
 
     /**
-     * Returns a non null list of all models that need to be loaded for the list to display adapter
-     * items in positions between {@code start} and {@code end}.
+     * Returns a {@link List} of models that need to be loaded for the list to display adapter items
+     * in positions between {@code start} and {@code end}.
      *
-     * <p> A list of any size can be returned so there can be multiple models per adapter position.
-     * </p>
+     * <p>A list of any size can be returned so there can be multiple models per adapter position.
+     *
+     * <p>Every model returned by this method is expected to produce a valid {@link RequestBuilder}
+     * in {@link #getPreloadRequestBuilder(Object)}. If that's not possible for any set of models,
+     * avoid including them in the {@link List} returned by this method.
+     *
+     * <p>Although it's acceptable for the returned {@link List} to contain {@code null} models,
+     * it's best to filter them from the list instead of adding {@code null} to avoid unnecessary
+     * logic and expanding the size of the {@link List}
      *
      * @param position The adapter position.
      */
+    @NonNull
     List<U> getPreloadItems(int position);
 
     /**
-     * Returns a non null {@link RequestBuilder} for a given item. Must exactly match the request
-     * used to load the resource in the list.
+     * Returns a {@link RequestBuilder} for a given item on which
+     * {@link RequestBuilder#load(Object)}} has been called or {@code null} if no valid load can be
+     * started.
      *
-     * <p> The target and context will be provided by the preloader. </p>
+     * <p>For the preloader to be effective, the {@link RequestBuilder} returned here must use
+     * exactly the same size and set of options as the {@link RequestBuilder} used when the ``View``
+     * is bound. You may need to specify a size in both places to ensure that the width and height
+     * match exactly. If so, you can use
+     * {@link com.bumptech.glide.request.RequestOptions#override(int, int)} to do so.
+     *
+     * <p>The target and context will be provided by the preloader.
+     *
+     * <p>If {@link RequestBuilder#load(Object)} is not called by this method, the preloader will
+     * trigger a {@link RuntimeException}. If you don't want to load a particular item or position,
+     * filter it from the list returned by {@link #getPreloadItems(int)}.
      *
      * @param item The model to load.
      */
+    @Nullable
     RequestBuilder getPreloadRequestBuilder(U item);
   }
 
@@ -80,8 +100,9 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      * Returns the size of the view in the list where the resources will be displayed in pixels in
      * the format [x, y], or {@code null} if no size is currently available.
      *
-     * <p> Note - The dimensions returned here must precisely match those of the view in the list.
-     * </p>
+     * <p>Note - The dimensions returned here must precisely match those of the view in the list.
+     *
+     * <p>If this method returns {@code null}, then no request will be started for the given item.
      *
      * @param item A model
      */
@@ -175,13 +196,22 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   }
 
   @SuppressWarnings("unchecked")
-  private void preloadItem(T item, int position, int i) {
-    final int[] dimensions = this.preloadDimensionProvider.getPreloadSize(item, position, i);
-    if (dimensions != null) {
-      RequestBuilder<Object> preloadRequestBuilder =
-          this.preloadModelProvider.getPreloadRequestBuilder(item);
-      preloadRequestBuilder.into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
+  private void preloadItem(@Nullable T item, int position, int perItemPosition) {
+    if (item == null) {
+      return;
     }
+    int[] dimensions =
+        preloadDimensionProvider.getPreloadSize(item, position, perItemPosition);
+    if (dimensions == null) {
+      return;
+    }
+    RequestBuilder<Object> preloadRequestBuilder =
+        preloadModelProvider.getPreloadRequestBuilder(item);
+    if (preloadRequestBuilder == null) {
+      return;
+    }
+
+    preloadRequestBuilder.into(preloadTargetQueue.next(dimensions[0], dimensions[1]));
   }
 
   private void cancelAll() {
@@ -193,7 +223,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   private static final class PreloadTargetQueue {
     private final Queue<PreloadTarget> queue;
 
-    public PreloadTargetQueue(int size) {
+    PreloadTargetQueue(int size) {
       queue = Util.createQueue(size);
 
       for (int i = 0; i < size; i++) {
@@ -210,7 +240,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     }
   }
 
-  private static class PreloadTarget extends BaseTarget<Object> {
+  private static final class PreloadTarget extends BaseTarget<Object> {
     @Synthetic int photoHeight;
     @Synthetic int photoWidth;
 
