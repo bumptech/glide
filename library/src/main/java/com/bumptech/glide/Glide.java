@@ -302,37 +302,39 @@ public class Glide implements ComponentCallbacks2 {
         .append(ByteBuffer.class, new ByteBufferEncoder())
         .append(InputStream.class, new StreamEncoder(arrayPool))
         /* Bitmaps */
-        .append(ByteBuffer.class, Bitmap.class,
+        .append(Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class,
             new ByteBufferBitmapDecoder(downsampler))
-        .append(InputStream.class, Bitmap.class,
+        .append(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class,
             new StreamBitmapDecoder(downsampler, arrayPool))
-        .append(ParcelFileDescriptor.class, Bitmap.class, new VideoBitmapDecoder(bitmapPool))
+        .append(Registry.BUCKET_BITMAP, ParcelFileDescriptor.class, Bitmap.class,
+            new VideoBitmapDecoder(bitmapPool))
         .append(Bitmap.class, new BitmapEncoder())
         /* GlideBitmapDrawables */
-        .append(ByteBuffer.class, BitmapDrawable.class,
+        .append(Registry.BUCKET_BITMAP_DRAWABLE, ByteBuffer.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, bitmapPool,
                 new ByteBufferBitmapDecoder(downsampler)))
-        .append(InputStream.class, BitmapDrawable.class,
+        .append(Registry.BUCKET_BITMAP_DRAWABLE, InputStream.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, bitmapPool,
                 new StreamBitmapDecoder(downsampler, arrayPool)))
-        .append(ParcelFileDescriptor.class, BitmapDrawable.class,
+        .append(Registry.BUCKET_BITMAP_DRAWABLE, ParcelFileDescriptor.class, BitmapDrawable.class,
             new BitmapDrawableDecoder<>(resources, bitmapPool, new VideoBitmapDecoder(bitmapPool)))
         .append(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, new BitmapEncoder()))
         /* GIFs */
-        .prepend(InputStream.class, GifDrawable.class,
+        .append(Registry.BUCKET_GIF, InputStream.class, GifDrawable.class,
             new StreamGifDecoder(registry.getImageHeaderParsers(), byteBufferGifDecoder, arrayPool))
-        .prepend(ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
+        .append(Registry.BUCKET_GIF, ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
         .append(GifDrawable.class, new GifDrawableEncoder())
         /* GIF Frames */
-        .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>())
-        .append(GifDecoder.class, Bitmap.class, new GifFrameResourceDecoder(bitmapPool))
+        .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<>())
+        .append(Registry.BUCKET_BITMAP, GifDecoder.class, Bitmap.class,
+            new GifFrameResourceDecoder(bitmapPool))
         /* Files */
         .register(new ByteBufferRewinder.Factory())
         .append(File.class, ByteBuffer.class, new ByteBufferFileLoader.Factory())
         .append(File.class, InputStream.class, new FileLoader.StreamFactory())
         .append(File.class, File.class, new FileDecoder())
         .append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory())
-        .append(File.class, File.class, new UnitModelLoader.Factory<File>())
+        .append(File.class, File.class, new UnitModelLoader.Factory<>())
         /* Models */
         .register(new InputStreamRewinder.Factory(arrayPool))
         .append(int.class, InputStream.class, new ResourceLoader.StreamFactory(resources))

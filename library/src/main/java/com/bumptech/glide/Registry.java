@@ -25,6 +25,7 @@ import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import com.bumptech.glide.util.pool.FactoryPools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,6 +34,12 @@ import java.util.List;
  * encoding logic.
  */
 public class Registry {
+  public static final String BUCKET_GIF = "Gif";
+  public static final String BUCKET_BITMAP = "Bitmap";
+  public static final String BUCKET_BITMAP_DRAWABLE = "BitmapDrawable";
+  private static final String BUCKET_PREPEND_ALL = "legacy_prepend_all";
+  private static final String BUCKET_APPEND_ALL = "legacy_append";
+
   private final ModelLoaderRegistry modelLoaderRegistry;
   private final EncoderRegistry encoderRegistry;
   private final ResourceDecoderRegistry decoderRegistry;
@@ -54,6 +61,8 @@ public class Registry {
     this.dataRewinderRegistry = new DataRewinderRegistry();
     this.transcoderRegistry = new TranscoderRegistry();
     this.imageHeaderParserRegistry = new ImageHeaderParserRegistry();
+    setResourceDecoderBucketPriorityList(
+        Arrays.asList(BUCKET_GIF, BUCKET_BITMAP, BUCKET_BITMAP_DRAWABLE));
   }
 
   /**
@@ -113,9 +122,9 @@ public class Registry {
   }
 
   /**
-   * Appends the given {@link ResourceDecoder} onto the list of available {@link ResourceDecoder}s
-   * allowing it to be used if all earlier and default {@link ResourceDecoder}s for the given types
-   * fail (or if none are present).
+   * Appends the given {@link ResourceDecoder} onto the list of all available
+   * {@link ResourceDecoder}s allowing it to be used if all earlier and default
+   * {@link ResourceDecoder}s for the given types fail (or there are none).
    *
    * <p>If you're attempting to replace an existing {@link ResourceDecoder} or would like to ensure
    * that your {@link ResourceDecoder} gets the chance to run before an existing
@@ -123,6 +132,7 @@ public class Registry {
    * best for new types of resources and data or as a way to add an additional fallback decoder
    * for an existing type of data.
    *
+   * @see #append(String, Class, Class, ResourceDecoder)
    * @see #prepend(Class, Class, ResourceDecoder)
    *
    * @param dataClass The data that will be decoded from
@@ -135,14 +145,44 @@ public class Registry {
       Class<Data> dataClass,
       Class<TResource> resourceClass,
       ResourceDecoder<Data, TResource> decoder) {
-    decoderRegistry.append(decoder, dataClass, resourceClass);
+    append(BUCKET_APPEND_ALL, dataClass, resourceClass, decoder);
     return this;
   }
 
   /**
-   * Prepends the given {@link ResourceDecoder} into the list of available {@link ResourceDecoder}s
-   * so that it is attempted before all later and default {@link ResourceDecoder}s for the given
-   * types.
+   * Appends the given {@link ResourceDecoder} onto the list of available {@link ResourceDecoder}s
+   * in this bucket, allowing it to be used if all earlier and default {@link ResourceDecoder}s for
+   * the given types in this bucket fail (or there are none).
+   *
+   * <p>If you're attempting to replace an existing {@link ResourceDecoder} or would like to ensure
+   * that your {@link ResourceDecoder} gets the chance to run before an existing
+   * {@link ResourceDecoder}, use {@link #prepend(Class, Class, ResourceDecoder)}. This method is
+   * best for new types of resources and data or as a way to add an additional fallback decoder
+   * for an existing type of data.
+   *
+   * @see #prepend(String, Class, Class, ResourceDecoder)
+   * @see #setResourceDecoderBucketPriorityList(List)
+   *
+   * @param bucket The bucket identifier to add this decoder to.
+   * @param dataClass The data that will be decoded from
+   * ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
+   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
+   * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
+   * @param decoder The {@link ResourceDecoder} to register.
+   */
+  public <Data, TResource> Registry append(
+      String bucket,
+      Class<Data> dataClass,
+      Class<TResource> resourceClass,
+      ResourceDecoder<Data, TResource> decoder) {
+    decoderRegistry.append(bucket, decoder, dataClass, resourceClass);
+    return this;
+  }
+
+  /**
+   * Prepends the given {@link ResourceDecoder} into the list of all available
+   * {@link ResourceDecoder}s so that it is attempted before all later and default
+   * {@link ResourceDecoder}s for the given types.
    *
    * <p>This method allows you to replace the default {@link ResourceDecoder} because it ensures
    * the registered {@link ResourceDecoder} will run first. You can use the
@@ -150,6 +190,7 @@ public class Registry {
    * {@link ResourceDecoder}s if you only want to change the default functionality for certain
    * types of data.
    *
+   * @see #prepend(String, Class, Class, ResourceDecoder)
    * @see #append(Class, Class, ResourceDecoder)
    *
    * @param dataClass The data that will be decoded from
@@ -162,7 +203,60 @@ public class Registry {
       Class<Data> dataClass,
       Class<TResource> resourceClass,
       ResourceDecoder<Data, TResource> decoder) {
-    decoderRegistry.prepend(decoder, dataClass, resourceClass);
+    prepend(BUCKET_PREPEND_ALL, dataClass, resourceClass, decoder);
+    return this;
+  }
+
+  /**
+   * Prepends the given {@link ResourceDecoder} into the list of available {@link ResourceDecoder}s
+   * in the same bucket so that it is attempted before all later and default
+   * {@link ResourceDecoder}s for the given types in that bucket.
+   *
+   * <p>This method allows you to replace the default {@link ResourceDecoder} for this bucket
+   * because it ensures the registered {@link ResourceDecoder} will run first. You can use the
+   * {@link ResourceDecoder#handles(Object, Options)} to fall back to the default
+   * {@link ResourceDecoder}s if you only want to change the default functionality for certain
+   * types of data.
+   *
+   * @see #append(String, Class, Class, ResourceDecoder)
+   * @see #setResourceDecoderBucketPriorityList(List)
+   *
+   * @param bucket The bucket identifier to add this decoder to.
+   * @param dataClass The data that will be decoded from
+   * ({@link java.io.InputStream}, {@link java.io.FileDescriptor} etc).
+   * @param resourceClass The resource that will be decoded to ({@link android.graphics.Bitmap},
+   * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
+   * @param decoder The {@link ResourceDecoder} to register.
+   */
+  public <Data, TResource> Registry prepend(
+      String bucket,
+      Class<Data> dataClass,
+      Class<TResource> resourceClass,
+      ResourceDecoder<Data, TResource> decoder) {
+    decoderRegistry.prepend(bucket, decoder, dataClass, resourceClass);
+    return this;
+  }
+
+  /**
+   * Overrides the default ordering of resource decoder buckets. You may also add custom buckets
+   * which are identified as a unique string. Glide will attempt to decode using decoders in the
+   * highest priority bucket before moving on to the next one.
+   *
+   * <p>The default order is [{@link #BUCKET_GIF}, {@link #BUCKET_BITMAP},
+   * {@link #BUCKET_BITMAP_DRAWABLE}].
+   *
+   * <p>When registering decoders, you can use these buckets to specify the ordering relative only
+   * to other decoders in that bucket.
+   * @see #append(String, Class, Class, ResourceDecoder)
+   * @see #prepend(String, Class, Class, ResourceDecoder)
+   *
+   * @param buckets The list of bucket identifiers in order from highest priority to least priority.
+   */
+  public Registry setResourceDecoderBucketPriorityList(List<String> buckets) {
+    List<String> modifiedBuckets = new ArrayList<>(buckets);
+    modifiedBuckets.add(0, BUCKET_PREPEND_ALL);
+    modifiedBuckets.add(BUCKET_APPEND_ALL);
+    decoderRegistry.setBucketPriorityList(modifiedBuckets);
     return this;
   }
 
