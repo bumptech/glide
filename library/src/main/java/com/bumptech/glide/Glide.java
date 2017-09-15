@@ -325,7 +325,8 @@ public class Glide implements ComponentCallbacks2 {
         .append(Registry.BUCKET_GIF, ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
         .append(GifDrawable.class, new GifDrawableEncoder())
         /* GIF Frames */
-        .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<>())
+        // Compilation with Gradle requires the type to be specified for UnitModelLoader here.
+        .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>())
         .append(Registry.BUCKET_BITMAP, GifDecoder.class, Bitmap.class,
             new GifFrameResourceDecoder(bitmapPool))
         /* Files */
@@ -334,7 +335,8 @@ public class Glide implements ComponentCallbacks2 {
         .append(File.class, InputStream.class, new FileLoader.StreamFactory())
         .append(File.class, File.class, new FileDecoder())
         .append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory())
-        .append(File.class, File.class, new UnitModelLoader.Factory<>())
+        // Compilation with Gradle requires the type to be specified for UnitModelLoader here.
+        .append(File.class, File.class, new UnitModelLoader.Factory<File>())
         /* Models */
         .register(new InputStreamRewinder.Factory(arrayPool))
         .append(int.class, InputStream.class, new ResourceLoader.StreamFactory(resources))
