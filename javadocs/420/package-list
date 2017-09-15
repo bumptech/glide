@@ -7,6 +7,7 @@ com.bumptech.glide.gifencoder
 com.bumptech.glide.integration.gifencoder
 com.bumptech.glide.integration.okhttp
 com.bumptech.glide.integration.okhttp3
+com.bumptech.glide.integration.recyclerview
 com.bumptech.glide.integration.volley
 com.bumptech.glide.load
 com.bumptech.glide.load.data
