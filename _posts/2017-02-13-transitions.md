@@ -64,28 +64,28 @@ you can inspect the [``DataSource``][23] passed in to the [``build()``][24] meth
 
 For an example, see [``DrawableCrossFadeFactory``][25].
 
-[1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/transition/Transition.html
+[1]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/transition/Transition.html
 [2]: https://developer.android.com/reference/android/widget/ViewSwitcher.html
 [3]: https://developer.android.com/reference/android/widget/ImageView.html
 [4]: https://developer.android.com/reference/android/widget/ViewSwitcher.html#getNextView()
-[5]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
+[5]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestListener.html
 [6]: https://developer.android.com/reference/android/widget/ViewAnimator.html#showNext()
 [7]: https://developer.android.com/training/animation/crossfade.html
 [8]: https://developer.android.com/reference/android/graphics/drawable/TransitionDrawable.html
 [9]: https://developer.android.com/reference/android/graphics/drawable/TransitionDrawable.html#setCrossFadeEnabled(boolean)
-[10]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/transition/DrawableCrossFadeFactory.html
-[11]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html#transition-com.bumptech.glide.request.transition.TransitionFactory-
-[12]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html
-[13]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#transition-com.bumptech.glide.TransitionOptions-
-[14]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
-[15]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
-[16]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html
-[17]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
+[10]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/transition/DrawableCrossFadeFactory.html
+[11]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/TransitionOptions.html#transition-com.bumptech.glide.request.transition.TransitionFactory-
+[12]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/TransitionOptions.html
+[13]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#transition-com.bumptech.glide.TransitionOptions-
+[14]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html
+[15]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
+[16]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html
+[17]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
 [18]: /glide/doc/options.html#transitionoptions
 [19]: /glide/doc/targets.html#targets-and-automatic-cancellation
-[20]: {{ site.url }}/glide/transitions#custom-transitions
-[21]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/transition/TransitionFactory.html
-[22]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html#with-com.bumptech.glide.request.transition.TransitionFactory-
-[23]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/DataSource.html
-[24]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/transition/TransitionFactory.html#build-com.bumptech.glide.load.DataSource-boolean-
+[20]: {{ site.baseurl }}/transitions#custom-transitions
+[21]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/transition/TransitionFactory.html
+[22]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html#with-com.bumptech.glide.request.transition.TransitionFactory-
+[23]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/DataSource.html
+[24]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/transition/TransitionFactory.html#build-com.bumptech.glide.load.DataSource-boolean-
 [25]: https://github.com/bumptech/glide/blob/8f22bd9b82349bf748e335b4a31e70c9383fb15a/library/src/main/java/com/bumptech/glide/request/transition/DrawableCrossFadeFactory.java#L35 

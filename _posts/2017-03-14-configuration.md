@@ -350,39 +350,39 @@ public final class MyAppGlideModule extends AppGlideModule {
 }
 ```
 
-[1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
-[2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
-[3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
-[4]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/ResourceDecoder.html
-[5]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/GlideModule.html
-[6]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/compiler/GlideAnnotationProcessor.html
+[1]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
+[2]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
+[3]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
+[4]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/ResourceDecoder.html
+[5]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/annotation/GlideModule.html
+[6]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/annotation/compiler/GlideAnnotationProcessor.html
 [7]: https://github.com/bumptech/glide/blob/master/integration/okhttp3/src/main/java/com/bumptech/glide/integration/okhttp3/OkHttpLibraryGlideModule.java
 [8]: https://github.com/bumptech/glide/blob/master/samples/flickr/src/main/java/com/bumptech/glide/samples/flickr/FlickrGlideModule.java
-[9]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/MemoryCache.html
-[10]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/LruResourceCache.html
-[11]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/MemorySizeCalculator.html
-[12]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html#applyOptions-android.content.Context-com.bumptech.glide.GlideBuilder-
-[13]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskLruCacheWrapper.html
-[14]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.html
-[15]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.Factory.html#DEFAULT_DISK_CACHE_SIZE
-[16]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.Factory.html#DEFAULT_DISK_CACHE_DIR
+[9]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/engine/cache/MemoryCache.html
+[10]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/engine/cache/LruResourceCache.html
+[11]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/engine/cache/MemorySizeCalculator.html
+[12]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/AppGlideModule.html#applyOptions-android.content.Context-com.bumptech.glide.GlideBuilder-
+[13]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/engine/cache/DiskLruCacheWrapper.html
+[14]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.html
+[15]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.Factory.html#DEFAULT_DISK_CACHE_SIZE
+[16]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.Factory.html#DEFAULT_DISK_CACHE_DIR
 [17]: https://developer.android.com/reference/android/content/Context.html#getCacheDir()
 [18]: {{ site.url}}/glide/javadocs/400/com/bumptech/glide/load/engine/cache/DiskCache.Factory.html
 [19]: https://developer.android.com/reference/android/os/StrictMode.html
-[20]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/Excludes.html
-[21]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/GlideModule.html
-[22]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html#isManifestParsingEnabled--
-[23]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoaderFactory.html
-[24]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/ResourceDecoder.html
-[25]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/Encoder.html
-[26]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/transcode/ResourceTranscoder.html
-[27]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/ResourceEncoder.html
-[28]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/Registry.html
-[29]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#load-java.lang.Object-
-[30]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html#as-java.lang.Class-
-[31]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html#registerComponents-android.content.Context-com.bumptech.glide.Glide-com.bumptech.glide.Registry-
-[32]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/stream/BaseGlideUrlLoader.html
-[33]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/request/RequestOptions.html
-[34]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/RequestManager.html
-[35]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/RequestManager.html#applyDefaultRequestOptions-com.bumptech.glide.request.RequestOptions-
-[36]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/RequestManager.html#setDefaultRequestOptions-com.bumptech.glide.request.RequestOptions-
+[20]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/annotation/Excludes.html
+[21]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/GlideModule.html
+[22]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/AppGlideModule.html#isManifestParsingEnabled--
+[23]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/model/ModelLoaderFactory.html
+[24]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/ResourceDecoder.html
+[25]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/Encoder.html
+[26]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/resource/transcode/ResourceTranscoder.html
+[27]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/ResourceEncoder.html
+[28]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/Registry.html
+[29]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#load-java.lang.Object-
+[30]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestManager.html#as-java.lang.Class-
+[31]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html#registerComponents-android.content.Context-com.bumptech.glide.Glide-com.bumptech.glide.Registry-
+[32]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/model/stream/BaseGlideUrlLoader.html
+[33]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/request/RequestOptions.html
+[34]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/RequestManager.html
+[35]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/RequestManager.html#applyDefaultRequestOptions-com.bumptech.glide.request.RequestOptions-
+[36]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/RequestManager.html#setDefaultRequestOptions-com.bumptech.glide.request.RequestOptions-

@@ -423,37 +423,37 @@ The [``using()``][23] API was removed in Glide 4 to encourage users to [register
 
 To make sure you only use your ``ModelLoader`` for certain models, implement ``handles()`` as shown above to inspect each model and return true only if your ``ModelLoader`` should be used.
 
-[1]: {{ site.url }}/glide/javadocs/360/com/bumptech/glide/module/GlideModule.html
-[2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
-[3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
+[1]: {{ site.baseurl }}/javadocs/360/com/bumptech/glide/module/GlideModule.html
+[2]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
+[3]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
 [4]: configuration.html
-[5]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
-[6]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#thumbnail-com.bumptech.glide.RequestBuilder-
-[7]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#listener-com.bumptech.glide.request.RequestListener-
-[8]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#into-Y-
-[9]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#preload-int-int-
-[10]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html
+[5]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html
+[6]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#thumbnail-com.bumptech.glide.RequestBuilder-
+[7]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#listener-com.bumptech.glide.request.RequestListener-
+[8]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#into-Y-
+[9]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#preload-int-int-
+[10]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html
 [11]: generatedapi.html
-[12]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
-[13]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
-[14]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
-[15]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html
-[16]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
-[17]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/TransitionOptions.html#dontTransition--
+[12]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
+[13]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
+[14]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/GenericTransitionOptions.html
+[15]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions.html
+[16]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions.html
+[17]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/TransitionOptions.html#dontTransition--
 [18]: https://developer.android.com/reference/android/graphics/drawable/Drawable.html
 [19]: https://developer.android.com/reference/android/graphics/drawable/BitmapDrawable.html
 [20]: https://developer.android.com/reference/android/graphics/drawable/Animatable.html
-[21]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
-[22]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html
-[23]: {{ site.url }}/glide/javadocs/380/com/bumptech/glide/RequestManager.html#using(com.bumptech.glide.load.model.stream.StreamByteArrayLoader)
-[24]: {{ site.url }}/glide/doc/generatedapi.html
-[25]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#load-java.lang.Object-
-[26]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
-[27]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/model/ModelLoader.LoadData.html
-[28]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/load/Transformation.html
-[29]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/request/RequestOptions.html#transforms-com.bumptech.glide.load.Transformation...-
-[30]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/load/DecodeFormat.html
-[31]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/load/DecodeFormat.html#PREFER_RGB_565
+[21]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestListener.html
+[22]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestManager.html
+[23]: {{ site.baseurl }}/javadocs/380/com/bumptech/glide/RequestManager.html#using(com.bumptech.glide.load.model.stream.StreamByteArrayLoader)
+[24]: {{ site.baseurl }}/doc/generatedapi.html
+[25]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#load-java.lang.Object-
+[26]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/model/ModelLoader.html
+[27]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/model/ModelLoader.LoadData.html
+[28]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/load/Transformation.html
+[29]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/request/RequestOptions.html#transforms-com.bumptech.glide.load.Transformation...-
+[30]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/load/DecodeFormat.html
+[31]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/load/DecodeFormat.html#PREFER_RGB_565
 [32]: https://developer.android.com/reference/android/graphics/Bitmap.Config.html#RGB_565
 [33]: https://developer.android.com/reference/android/graphics/Bitmap.Config.html#ARGB_8888
 [34]: download-setup.html
