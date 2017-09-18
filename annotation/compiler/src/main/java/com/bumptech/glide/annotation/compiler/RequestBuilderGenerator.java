@@ -285,17 +285,20 @@ final class RequestBuilderGenerator {
         .add(");\n")
         .build();
 
-    return MethodSpec.methodBuilder(requestOptionMethod.name)
+    MethodSpec.Builder result = MethodSpec.methodBuilder(requestOptionMethod.name)
         .addJavadoc(
             processorUtil.generateSeeMethodJavadoc(requestOptionsClassName, requestOptionMethod))
-        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+        .addModifiers(Modifier.PUBLIC)
         .varargs(requestOptionMethod.varargs)
         .addAnnotations(
             FluentIterable.from(requestOptionMethod.annotations)
                 .filter(new Predicate<AnnotationSpec>() {
                   @Override
                   public boolean apply(AnnotationSpec input) {
-                    return !input.type.equals(TypeName.get(Override.class));
+                    return !input.type.equals(TypeName.get(Override.class))
+                        // SafeVarargs can only be applied to final methods. GlideRequest is
+                        // non-final to allow for mocking.
+                        && !input.type.equals(TypeName.get(SafeVarargs.class));
                   }
                 })
                 .toList()
@@ -313,8 +316,18 @@ final class RequestBuilderGenerator {
             requestOptionsClassName))
         .addCode(callRequestOptionsMethod)
         .endControlFlow()
-        .addStatement("return this")
-        .build();
+        .addStatement("return this");
+
+    if (requestOptionMethod.annotations.contains(
+        AnnotationSpec.builder(SafeVarargs.class).build())) {
+      result.addAnnotation(
+          AnnotationSpec.builder(SuppressWarnings.class)
+              .addMember("value", "$S", "unchecked")
+              .addMember("value", "$S", "varargs")
+              .build());
+    }
+
+    return result.build();
   }
 
   private List<MethodSpec> generateConstructors() {
