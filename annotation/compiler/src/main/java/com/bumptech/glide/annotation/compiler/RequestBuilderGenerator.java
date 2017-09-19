@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -102,6 +103,8 @@ final class RequestBuilderGenerator {
   /** A set of method names to avoid overriding from RequestOptions. */
   private static final ImmutableSet<String> EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS =
       ImmutableSet.of("clone", "apply", "autoLock", "lock", "autoClone");
+  private static final ClassName CHECK_RESULT_CLASS_NAME =
+      ClassName.get("android.support.annotation", "CheckResult");
 
   private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
@@ -204,7 +207,7 @@ final class RequestBuilderGenerator {
     ParameterizedTypeName generatedRequestBuilderOfType =
         ParameterizedTypeName.get(generatedRequestBuilderClassName, ClassName.get(typeArgument));
 
-    return MethodSpec.overriding(methodToOverride)
+    MethodSpec.Builder builder = MethodSpec.overriding(methodToOverride)
         .returns(generatedRequestBuilderOfType)
         .addCode(CodeBlock.builder()
             .add("return ($T) super.$N(",
@@ -218,8 +221,13 @@ final class RequestBuilderGenerator {
                 })
                 .join(Joiner.on(", ")))
             .add(");\n")
-            .build())
-        .build();
+            .build());
+
+    for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
+      builder.addAnnotation(AnnotationSpec.get(mirror));
+    }
+
+    return builder.build();
   }
 
   /**
@@ -298,7 +306,10 @@ final class RequestBuilderGenerator {
                     return !input.type.equals(TypeName.get(Override.class))
                         // SafeVarargs can only be applied to final methods. GlideRequest is
                         // non-final to allow for mocking.
-                        && !input.type.equals(TypeName.get(SafeVarargs.class));
+                        && !input.type.equals(TypeName.get(SafeVarargs.class))
+                        // @CheckResult isn't applicable for RequestBuilder because there is no
+                        // autoClone() in RequestBuilder.
+                        && !input.type.equals(CHECK_RESULT_CLASS_NAME);
                   }
                 })
                 .toList()
@@ -366,6 +377,7 @@ final class RequestBuilderGenerator {
         = ParameterizedTypeName.get(generatedRequestBuilderClassName, ClassName.get(File.class));
     return MethodSpec.methodBuilder("getDownloadOnlyRequest")
         .addAnnotation(Override.class)
+        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
         .returns(generatedRequestBuilderOfFile)
         .addModifiers(Modifier.PROTECTED)
         .addStatement("return new $T<>($T.class, $N).apply($N)",
