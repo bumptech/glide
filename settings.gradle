@@ -1,5 +1,5 @@
 exec {
-    commandLine "git", "submodule", "update", "--init", "--recursive"
+    commandLine "/usr/local/bin/git", "submodule", "update", "--init", "--recursive"
 }
 include ':library'
 include ':annotation'

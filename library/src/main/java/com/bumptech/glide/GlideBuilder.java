@@ -18,6 +18,7 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
@@ -36,6 +37,7 @@ public final class GlideBuilder {
   private MemoryCache memoryCache;
   private GlideExecutor sourceExecutor;
   private GlideExecutor diskCacheExecutor;
+  private UncaughtThrowableStrategy uncaughtThrowableStrategy;
   private DiskCache.Factory diskCacheFactory;
   private MemorySizeCalculator memorySizeCalculator;
   private ConnectivityMonitorFactory connectivityMonitorFactory;
@@ -245,6 +247,18 @@ public final class GlideBuilder {
   }
 
   /**
+   * Sets the {@link
+   * UncaughtThrowableStrategy} to use to
+   *                                  handle uncaught exceptions.
+   *
+   * @param uncaughtThrowableStrategy The strategy to use.
+   * @return This builder.
+   */
+  public void setUncaughtThrowableStrategy(UncaughtThrowableStrategy uncaughtThrowableStrategy) {
+    this.uncaughtThrowableStrategy = uncaughtThrowableStrategy;
+  }
+
+  /**
    * Sets a log level constant from those in {@link Log} to indicate the desired log verbosity.
    *
    * <p>The level must be one of {@link Log#VERBOSE}, {@link Log#DEBUG}, {@link Log#INFO},
@@ -292,10 +306,16 @@ public final class GlideBuilder {
 
   public Glide build(Context context) {
     if (sourceExecutor == null) {
+      if (uncaughtThrowableStrategy != null) {
+        sourceExecutor = GlideExecutor.newSourceExecutor(uncaughtThrowableStrategy);
+      }
       sourceExecutor = GlideExecutor.newSourceExecutor();
     }
 
     if (diskCacheExecutor == null) {
+      if (uncaughtThrowableStrategy != null) {
+        diskCacheExecutor = GlideExecutor.newDiskCacheExecutor(uncaughtThrowableStrategy);
+      }
       diskCacheExecutor = GlideExecutor.newDiskCacheExecutor();
     }
 
