@@ -66,7 +66,9 @@ public class DecodePath<DataType, ResourceType, Transcode> {
           data = rewinder.rewindAndGet();
           result = decoder.decode(data, width, height, options);
         }
-      } catch (IOException e) {
+        // Some decoders throw unexpectedly. If they do, we shouldn't fail the entire load path, but
+        // instead log and continue. See #2406 for an example.
+      } catch (IOException | RuntimeException e) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
           Log.v(TAG, "Failed to decode data for " + decoder, e);
         }
