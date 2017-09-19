@@ -17,6 +17,11 @@ navigation: 2
 # URL to source code, used in _includes/footer.html
 codeurl: 'https://github.com/bumptech/glide'
 
+# URL to documentation for other language(s), used in _includes/header.html
+otherlang: [
+  ['中文版', 'https://muyangmin.github.io/glide-docs-cn']
+]
+
 # Default categories (in order) to appear in the navigation
 sections: [
     ['doc', 'Documentation'],

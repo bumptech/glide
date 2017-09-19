@@ -1,4 +1,10 @@
 <h4><a class=brand href="{{ site.baseurl }}/">{{ site.title }}</a>
     {% if site.subtitle %}<small>{{ site.subtitle }}</small>{% endif %}
+
+    {% if site.otherlang %}
+        {% for language in site.otherlang %}
+        &nbsp;&nbsp;<small><a href="{{ language[1] }}">{{ language[0] }}</a></small>
+        {% endfor %}
+    {% endif %}
 </h4>
 
