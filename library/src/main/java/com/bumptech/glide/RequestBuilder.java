@@ -407,18 +407,18 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       // View's scale type.
       switch (view.getScaleType()) {
         case CENTER_CROP:
-          requestOptions.clone().optionalCenterCrop();
+          requestOptions = requestOptions.clone().optionalCenterCrop();
           break;
         case CENTER_INSIDE:
-          requestOptions.clone().optionalCenterInside();
+          requestOptions = requestOptions.clone().optionalCenterInside();
           break;
         case FIT_CENTER:
         case FIT_START:
         case FIT_END:
-          requestOptions.clone().optionalFitCenter();
+          requestOptions = requestOptions.clone().optionalFitCenter();
           break;
         case FIT_XY:
-          requestOptions.clone().optionalCenterInside();
+          requestOptions = requestOptions.clone().optionalCenterInside();
           break;
         case CENTER:
         case MATRIX:
