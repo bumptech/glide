@@ -1,6 +1,5 @@
 import org.gradle.internal.jvm.Jvm
-import java.nio.file.Files
-import static java.nio.file.StandardCopyOption.*
+import proguard.gradle.ProGuardTask
 
 apply plugin: 'java'
 
@@ -23,73 +22,59 @@ dependencies {
     compile files(Jvm.current().getToolsJar())
 }
 
-afterEvaluate {
-    // generate file names for each step
-    def resultingClassesJar = tasks.jar.archivePath
-    def originalClassifier = tasks.jar.classifier
-    tasks.jar.classifier = 'compiled'
-    def compiledClassesJar = tasks.jar.archivePath
-    tasks.jar.classifier = 'repackaged'
-    def repackagedClassesJar = tasks.jar.archivePath
-    tasks.jar.classifier = 'proguarded'
-    def proguardedClassesJar = tasks.jar.archivePath
-    tasks.jar.classifier = originalClassifier
+def repackagedJar = file("$buildDir/intermediates/repackaged.jar")
+def proguardedJar = file("$buildDir/intermediates/proguarded.jar")
 
-    tasks.jar.doLast {
-        Files.copy(resultingClassesJar.toPath(), compiledClassesJar.toPath(), REPLACE_EXISTING)
-    }
-    // Inject a jarjar task after jar into the assemble chain.
-    // afterEvaluate is needed to get the resolved version name for the jar artifact.
-    task jarjar(dependsOn: [tasks.jar, configurations.compileOnly]) {
-        tasks.assemble.dependsOn it
+task compiledJar(type: Jar, dependsOn: classes) {
+    from sourceSets.main.output
+}
 
-        // Set up inputs and outputs to only rebuild when necessary (code change, dependency change).
-        inputs.file compiledClassesJar
-        inputs.files configurations.compileOnly
-        outputs.file repackagedClassesJar
+// Repackage compileOnly dependencies to avoid namespace collisions.
+task jarjar(dependsOn: [tasks.compiledJar, configurations.compileOnly]) {
+    // Set up inputs and outputs to only rebuild when necessary (code change, dependency change).
+    inputs.file compiledJar
+    inputs.files configurations.compileOnly
+    outputs.file repackagedJar
 
-        doFirst {
-            ant {
-                taskdef name: 'jarjar',
-                        classname: 'com.tonicsystems.jarjar.JarJarTask',
-                        classpath: configurations.jarjar.asPath
-                // Generate the original JAR output where it was originally expected.
-                jarjar(jarfile: repackagedClassesJar) {
-                    configurations.compileOnly.resolve().each {
-                        zipfileset(src: it.absolutePath, excludes: [
-                            'META-INF/maven/**',
-                            'META-INF/services/javax.annotation.processing.Processor'
-                        ].join(','))
-                    }
-                    zipfileset(src: tasks.jar.archivePath)
-                    def repackageIntoGlide = 'com.bumptech.glide.repackaged.@0'
-                    rule result: repackageIntoGlide, pattern: 'com.squareup.javapoet.**'
-                    rule result: repackageIntoGlide, pattern: 'com.google.auto.**'
-                    rule result: repackageIntoGlide, pattern: 'com.google.common.**'
-                    rule result: repackageIntoGlide, pattern: 'com.google.thirdparty.publicsuffix.**'
+    doFirst {
+        ant {
+            taskdef name: 'jarjar',
+                    classname: 'com.tonicsystems.jarjar.JarJarTask',
+                    classpath: configurations.jarjar.asPath
+
+            jarjar(jarfile: repackagedJar) {
+                configurations.compileOnly.resolve().each {
+                    zipfileset(src: it.absolutePath, excludes: [
+                        'META-INF/maven/**',
+                        'META-INF/services/javax.annotation.processing.Processor'
+                    ].join(','))
                 }
+                zipfileset(src: tasks.jar.archivePath)
+                def repackageIntoGlide = 'com.bumptech.glide.repackaged.@0'
+                rule result: repackageIntoGlide, pattern: 'com.squareup.javapoet.**'
+                rule result: repackageIntoGlide, pattern: 'com.google.auto.**'
+                rule result: repackageIntoGlide, pattern: 'com.google.common.**'
+                rule result: repackageIntoGlide, pattern: 'com.google.thirdparty.publicsuffix.**'
             }
         }
-
-        doLast {
-            Files.copy(repackagedClassesJar.toPath(), resultingClassesJar.toPath(), REPLACE_EXISTING)
-        }
     }
+}
 
-    task proguard(type: proguard.gradle.ProGuardTask, dependsOn: tasks.jarjar) {
-        tasks.assemble.dependsOn it
-        configuration 'proguard.pro'
+// Proguard repackaged dependencies to reduce the binary size.
+task proguard(type: ProGuardTask, dependsOn: tasks.jarjar) {
+    configuration 'proguard.pro'
 
-        injars repackagedClassesJar
-        outjars proguardedClassesJar
+    injars repackagedJar
+    outjars proguardedJar
 
-        libraryjars files(configurations.compile.collect())
-        libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+    libraryjars files(configurations.compile.collect())
+    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+}
 
-        doLast {
-            Files.copy(proguardedClassesJar.toPath(), resultingClassesJar.toPath(), REPLACE_EXISTING)
-        }
-    }
+// Create the standard jar artifact based on our repackaged and proguarded jar.
+jar {
+    dependsOn proguard
+    from zipTree(proguardedJar)
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"
