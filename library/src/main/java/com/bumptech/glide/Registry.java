@@ -23,7 +23,6 @@ import com.bumptech.glide.provider.ModelToResourceClassCache;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import com.bumptech.glide.util.pool.FactoryPools;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Looper;
-
 import com.bumptech.glide.load.model.Model;
 import com.bumptech.glide.request.target.Target;
 import java.util.ArrayDeque;
