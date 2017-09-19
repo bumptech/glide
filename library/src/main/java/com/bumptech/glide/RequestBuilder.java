@@ -633,7 +633,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
               thumbPriority,
               thumbOverrideWidth,
               thumbOverrideHeight,
-              requestOptions);
+              thumbnailBuilder.requestOptions);
       isThumbnailBuilt = false;
       coordinator.setRequests(fullRequest, thumbRequest);
       return coordinator;
