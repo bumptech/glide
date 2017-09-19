@@ -247,13 +247,13 @@ Glide's [sample apps][11] contain a couple of example usages of [``RecyclerViewP
 * [https://github.com/bumptech/glide/tree/master/integration/recyclerview][1]
 
 [1]: https://github.com/bumptech/glide/tree/master/integration/recyclerview
-[2]: {{ site.url }}/glide/javadocs/420/com/bumptech/glide/integration/recyclerview/RecyclerViewPreloader.html
-[3]: {{ site.url }}/glide/javadocs/420/com/bumptech/glide/ListPreloader.PreloadSizeProvider.html
-[4]: {{ site.url }}/glide/javadocs/420/com/bumptech/glide/util/ViewPreloadSizeProvider.html
-[5]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/util/FixedPreloadSizeProvider.html
-[6]: {{ site.url }}/glide/javadocs/410/com/bumptech/glide/ListPreloader.PreloadModelProvider.html
+[2]: {{ site.baseurl }}/javadocs/420/com/bumptech/glide/integration/recyclerview/RecyclerViewPreloader.html
+[3]: {{ site.baseurl }}/javadocs/420/com/bumptech/glide/ListPreloader.PreloadSizeProvider.html
+[4]: {{ site.baseurl }}/javadocs/420/com/bumptech/glide/util/ViewPreloadSizeProvider.html
+[5]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/util/FixedPreloadSizeProvider.html
+[6]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/ListPreloader.PreloadModelProvider.html
 [7]: /glide/doc/debugging.html#unexpected-cache-misses
-[8]: {{ site.url }}/glide/javadocs/420/com/bumptech/glide/integration/recyclerview/RecyclerToListViewScrollListener.html
+[8]: {{ site.baseurl }}/javadocs/420/com/bumptech/glide/integration/recyclerview/RecyclerToListViewScrollListener.html
 [9]: https://developer.android.com/reference/android/support/v7/widget/LinearLayoutManager.html
 [10]: https://developer.android.com/reference/android/support/v7/widget/RecyclerView.OnScrollListener.html
 [11]: /glide/ref/samples.html

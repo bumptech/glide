@@ -221,16 +221,16 @@ Methods annotated with ``GlideType`` must take a [``RequestBuilder<T>``][2] as t
 
 
 [1]: https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html
-[2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html
-[3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html
-[4]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
-[5]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/GlideModule.html
-[6]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
-[7]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/GlideOption.html
-[8]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/annotation/GlideType.html
-[9]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html
-[10]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/load/Option.html
-[11]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html
-[12]: {{ site.url }}/glide/doc/download-setup.html
-[13]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
+[2]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html
+[3]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html
+[4]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
+[5]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/annotation/GlideModule.html
+[6]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/annotation/GlideExtension.html
+[7]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/annotation/GlideOption.html
+[8]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/annotation/GlideType.html
+[9]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html
+[10]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/Option.html
+[11]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestManager.html
+[12]: {{ site.baseurl }}/doc/download-setup.html
+[13]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
 [14]: https://kotlinlang.org/docs/reference/kapt.html

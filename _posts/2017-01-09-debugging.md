@@ -99,16 +99,16 @@ The [Android documentation][10] has a lot of good information on tracking and de
 
 To fix memory leaks, remove references to the destroyed ``Fragment`` or ``Activity`` at the appropriate point in the lifecycle to avoid retaining excessive objects. Use the heap dump to help find other ways your application retains memory and remove unnecessary references as you find them. It's often helpful to start by listing the shortest paths excluding weak references to all Bitmap objects (using [MAT][12] or another memory analyzer) and then looking for reference chains that seem suspicious. You can also check to make sure that you have no more than once instance of each ``Activity`` and only the expected number of instances of each ``Fragment`` by searching for them in your memory analyzer.
 
-[1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/GlideBuilder.html#setLogLevel-int-
-[2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#into-android.widget.ImageView-
-[3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#submit-int-int-
-[4]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/target/Target.html#getSize-com.bumptech.glide.request.target.SizeReadyCallback-
-[5]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/target/ViewTarget.html
-[6]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#override-int-int-
-[7]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestListener.html
-[8]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestBuilder.html#listener-com.bumptech.glide.request.RequestListener-
+[1]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/GlideBuilder.html#setLogLevel-int-
+[2]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#into-android.widget.ImageView-
+[3]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#submit-int-int-
+[4]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/target/Target.html#getSize-com.bumptech.glide.request.target.SizeReadyCallback-
+[5]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/target/ViewTarget.html
+[6]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html#override-int-int-
+[7]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestListener.html
+[8]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#listener-com.bumptech.glide.request.RequestListener-
 [9]: https://github.com/bumptech/glide/blob/6b137c2b1d4b2ab187ea2aa56834dea039daa090/library/src/main/java/com/bumptech/glide/load/engine/Engine.java#L33
 [10]: https://developer.android.com/studio/profile/investigate-ram.html
 [11]: https://developer.android.com/studio/profile/investigate-ram.html#HeapDump
 [12]: http://www.eclipse.org/mat/
-[13]: {{ site.url }}/glide/doc/caching.html
+[13]: {{ site.baseurl }}/doc/caching.html

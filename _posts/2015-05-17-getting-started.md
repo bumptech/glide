@@ -89,10 +89,10 @@ By calling [``clear()``][4] or ``into(View)`` on the ``View``, you're cancelling
 
 Although the examples we've shown here are for RecyclerView, the same principles apply to ListView as well.
 
-[1]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/Glide.html#with-android.app.Fragment-
-[2]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#placeholder-int-
-[3]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/RequestOptions.html#fallback-int-
-[4]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/RequestManager.html#clear-com.bumptech.glide.request.target.Target-
-[5]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/request/target/Target.html
-[6]: {{ site.url }}/glide/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
-[7]: {{ site.url }}/glide/doc/generatedapi.html
+[1]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/Glide.html#with-android.app.Fragment-
+[2]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html#placeholder-int-
+[3]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html#fallback-int-
+[4]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestManager.html#clear-com.bumptech.glide.request.target.Target-
+[5]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/target/Target.html
+[6]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/AppGlideModule.html
+[7]: {{ site.baseurl }}/doc/generatedapi.html
