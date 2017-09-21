@@ -42,7 +42,7 @@ public class DecodePath<DataType, ResourceType, Transcode> {
       Options options, DecodeCallback<ResourceType> callback) throws GlideException {
     Resource<ResourceType> decoded = decodeResource(rewinder, width, height, options);
     Resource<ResourceType> transformed = callback.onResourceDecoded(decoded);
-    return transcoder.transcode(transformed);
+    return transcoder.transcode(transformed, options);
   }
 
   private Resource<ResourceType> decodeResource(DataRewinder<DataType> rewinder, int width,

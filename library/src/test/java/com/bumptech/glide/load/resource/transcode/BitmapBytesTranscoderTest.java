@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,6 +60,7 @@ public class BitmapBytesTranscoderTest {
     final String description = "TestDescription";
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ALPHA_8);
     Resource<Bitmap> bitmapResource = mockResource();
+    Options options = new Options();
 
     public BitmapBytesTranscoderHarness() {
       when(bitmapResource.get()).thenReturn(bitmap);
@@ -67,7 +69,7 @@ public class BitmapBytesTranscoderTest {
 
     public String getTranscodedDescription() {
       BitmapBytesTranscoder transcoder = new BitmapBytesTranscoder(compressFormat, quality);
-      Resource<byte[]> bytesResource = transcoder.transcode(bitmapResource);
+      Resource<byte[]> bytesResource = transcoder.transcode(bitmapResource, options);
 
       return new String(bytesResource.get());
     }

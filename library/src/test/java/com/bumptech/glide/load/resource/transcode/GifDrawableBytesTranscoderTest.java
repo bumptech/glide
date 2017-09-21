@@ -5,6 +5,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import java.nio.ByteBuffer;
@@ -33,7 +34,7 @@ public class GifDrawableBytesTranscoderTest {
       ByteBuffer expected = ByteBuffer.wrap(fakeData.getBytes());
       when(gifDrawable.getBuffer()).thenReturn(expected);
 
-      Resource<byte[]> transcoded = transcoder.transcode(resource);
+      Resource<byte[]> transcoded = transcoder.transcode(resource, new Options());
 
       assertArrayEquals(expected.array(), transcoded.get());
     }

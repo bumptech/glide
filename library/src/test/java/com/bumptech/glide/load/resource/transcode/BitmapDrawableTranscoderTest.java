@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import org.junit.Before;
@@ -33,7 +34,7 @@ public class BitmapDrawableTranscoderTest {
     Resource<Bitmap> resource = mockResource();
     when(resource.get()).thenReturn(expected);
 
-    Resource<BitmapDrawable> transcoded = transcoder.transcode(resource);
+    Resource<BitmapDrawable> transcoded = transcoder.transcode(resource, new Options());
 
     assertEquals(expected, transcoded.get().getBitmap());
   }
