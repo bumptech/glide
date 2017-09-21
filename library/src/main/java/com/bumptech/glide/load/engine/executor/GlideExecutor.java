@@ -311,22 +311,22 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    * A strategy for handling unexpected and uncaught {@link Throwable}s thrown by futures run on the
    * pool.
    */
-  public abstract static class UncaughtThrowableStrategy {
+  public interface UncaughtThrowableStrategy {
     /**
      * Silently catches and ignores the uncaught {@link Throwable}s.
      */
-    public static final UncaughtThrowableStrategy IGNORE = new UncaughtThrowableStrategy() {
+    UncaughtThrowableStrategy IGNORE = new UncaughtThrowableStrategy() {
       @Override
-      protected void handle(Throwable t) {
+      public void handle(Throwable t) {
         //ignore
       }
     };
     /**
      * Logs the uncaught {@link Throwable}s using {@link #TAG} and {@link Log}.
      */
-    public static final UncaughtThrowableStrategy LOG = new UncaughtThrowableStrategy() {
+    UncaughtThrowableStrategy LOG = new UncaughtThrowableStrategy() {
       @Override
-      protected void handle(Throwable t) {
+      public void handle(Throwable t) {
         if (t != null && Log.isLoggable(TAG, Log.ERROR)) {
           Log.e(TAG, "Request threw uncaught throwable", t);
         }
@@ -335,9 +335,9 @@ public final class GlideExecutor extends ThreadPoolExecutor {
     /**
      * Rethrows the uncaught {@link Throwable}s to crash the app.
      */
-    public static final UncaughtThrowableStrategy THROW = new UncaughtThrowableStrategy() {
+    UncaughtThrowableStrategy THROW = new UncaughtThrowableStrategy() {
       @Override
-      protected void handle(Throwable t) {
+      public void handle(Throwable t) {
         if (t != null) {
           throw new RuntimeException("Request threw uncaught throwable", t);
         }
@@ -345,9 +345,9 @@ public final class GlideExecutor extends ThreadPoolExecutor {
     };
 
     /** The default strategy, currently {@link #LOG}. */
-    public static final UncaughtThrowableStrategy DEFAULT = LOG;
+    UncaughtThrowableStrategy DEFAULT = LOG;
 
-    protected abstract void handle(Throwable t);
+    void handle(Throwable t);
   }
 
   /**
