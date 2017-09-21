@@ -10,7 +10,6 @@ import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -90,8 +89,7 @@ public class FlickrSearchActivity extends AppCompatActivity
     MenuInflater menuInflater = getMenuInflater();
     menuInflater.inflate(R.menu.search_activity, menu);
 
-    searchView =
-        (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
+    searchView = (SearchView) menu.findItem(R.id.search).getActionView();
     searchView.setSubmitButtonEnabled(true);
     searchView.setIconified(false);
     searchView.setOnQueryTextListener(this);
