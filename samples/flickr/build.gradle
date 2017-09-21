@@ -8,7 +8,7 @@ dependencies {
     annotationProcessor project(':annotation:compiler')
 
     compile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
-    compile "com.mcxiaoke.volley:library:${VOLLEY_VERSION}"
+    compile "com.android.volley:volley:${VOLLEY_VERSION}"
     compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
 }
 
