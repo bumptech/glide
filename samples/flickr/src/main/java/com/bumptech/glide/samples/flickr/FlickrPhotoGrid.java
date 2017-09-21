@@ -201,7 +201,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     @NonNull
     @Override
     public RequestBuilder<Drawable> getPreloadRequestBuilder(Photo item) {
-      return fullRequest.clone().thumbnail(thumbnailRequest.clone().load(item)).load(item);
+      return preloadRequest.load(item);
     }
   }
 
