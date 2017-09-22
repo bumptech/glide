@@ -201,9 +201,15 @@ When loading a bitmap, if an exception happens (e.g. `OutOfMemoryException`), gl
 The default strategy is to log the exception in the device logcat. The strategy is customizable since glide 4.2.0. It can be passed to a disk executor and/or a resize executor:
 
 ```java
-final UncaughtThrowableStrategy crashReportingUncaughtThrowableStrategy = new ...
-builder.setDiskCacheExecutor(newDiskCacheExecutor(crashReportingUncaughtThrowableStrategy));
-builder.setResizeExecutor(newSourceExecutor(crashReportingUncaughtThrowableStrategy));
+@GlideModule
+public class YourAppGlideModule extends AppGlideModule {
+  @Override
+  public void applyOptions(Context context, GlideBuilder builder) {
+    final UncaughtThrowableStrategy myUncaughtThrowableStrategy = new ...
+    builder.setDiskCacheExecutor(newDiskCacheExecutor(myUncaughtThrowableStrategy));
+    builder.setResizeExecutor(newSourceExecutor(myUncaughtThrowableStrategy));
+  }
+}
 ```
 
 ### Registering Components
