@@ -1,11 +1,16 @@
 package com.bumptech.glide.request.target;
 
+import android.content.Context;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
@@ -42,8 +47,12 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   private final SizeDeterminer sizeDeterminer;
 
   public ViewTarget(T view) {
+    this(view, false /*waitForLayout*/);
+  }
+
+  public ViewTarget(T view, boolean waitForLayout) {
     this.view = Preconditions.checkNotNull(view);
-    sizeDeterminer = new SizeDeterminer(view);
+    sizeDeterminer = new SizeDeterminer(view, waitForLayout);
   }
 
   /**
@@ -164,16 +173,35 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       ViewTarget.tagId = tagId;
   }
 
-  private static class SizeDeterminer {
+  @VisibleForTesting
+  static final class SizeDeterminer {
     // Some negative sizes (Target.SIZE_ORIGINAL) are valid, 0 is never valid.
     private static final int PENDING_SIZE = 0;
+    @VisibleForTesting
+    @Nullable
+    static Integer maxDisplayLength;
     private final View view;
+    private final boolean waitForLayout;
     private final List<SizeReadyCallback> cbs = new ArrayList<>();
 
     @Nullable private SizeDeterminerLayoutListener layoutListener;
 
-    SizeDeterminer(View view) {
+    SizeDeterminer(View view, boolean waitForLayout) {
       this.view = view;
+      this.waitForLayout = waitForLayout;
+    }
+
+    // Use the maximum to avoid depending on the device's current orientation.
+    private static int getMaxDisplayLength(Context context) {
+      if (maxDisplayLength == null) {
+        WindowManager windowManager =
+            (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = windowManager.getDefaultDisplay();
+        Point displayDimensions = new Point();
+        display.getSize(displayDimensions);
+        maxDisplayLength = Math.max(displayDimensions.x, displayDimensions.y);
+      }
+      return maxDisplayLength;
     }
 
     private void notifyCbs(int width, int height) {
@@ -247,44 +275,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       cbs.clear();
     }
 
-    private boolean isViewStateAndSizeValid(int currentWidth, int currentHeight) {
-      LayoutParams params = view.getLayoutParams();
-
-      int paramWidth;
-      int paramHeight;
-      if (params == null) {
-        paramWidth = 0;
-        paramHeight = 0;
-      } else {
-        paramWidth = params.width;
-        paramHeight = params.height;
-      }
-      return isDimensionValid(paramWidth, currentWidth)
-          && isDimensionValid(paramHeight, currentHeight);
-    }
-
-    private boolean isDimensionValid(int layoutParam, int dimen) {
-      // If the layout parameter is a fixed size and the padding adjusted parameter (dimen in this
-      // case) is valid, we can trust that the size won't change due to a layout pass.
-      if (layoutParam > 0 && dimen > 0) {
-        return true;
-      }
-
-      // SIZE_ORIGINAL is not dependent on a layout pass.
-      if (dimen == Target.SIZE_ORIGINAL) {
-        return true;
-      }
-
-      // TODO: Is this correct? The view's parent could change size after a layout.
-      // We're making an assumption that MATCH_PARENT won't change after it has been set once, so
-      // future layout passes typically won't change it. This probably will break in some cases.
-      if (layoutParam == LayoutParams.MATCH_PARENT && dimen > 0) {
-        return true;
-      }
-
-      // We can trust a non-zero dimension if no layout pass is pending, otherwise we're going to
-      // have to wait for a layout pass.
-      return dimen > 0 && !view.isLayoutRequested();
+    private boolean isViewStateAndSizeValid(int width, int height) {
+      return isDimensionValid(width) && isDimensionValid(height);
     }
 
     private int getTargetHeight() {
@@ -302,20 +294,62 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     }
 
     private int getTargetDimen(int viewSize, int paramSize, int paddingSize) {
-      int adjustedViewSize = viewSize - paddingSize;
-      if (paramSize == LayoutParams.WRAP_CONTENT) {
-        return SIZE_ORIGINAL;
-      } else if (paramSize > 0) {
-        return paramSize - paddingSize;
-      } else if (adjustedViewSize > 0) {
-        return adjustedViewSize;
-      } else {
+      if (waitForLayout && view.isLayoutRequested()) {
         return PENDING_SIZE;
       }
+
+      // We consider the View state as valid if the View has non-null layout params and a non-zero
+      // layout params width and height. This is imperfect. We're making an assumption that View
+      // parents will obey their child's layout parameters, which isn't always the case.
+      int adjustedParamSize = paramSize - paddingSize;
+      if (adjustedParamSize > 0) {
+        return adjustedParamSize;
+      }
+
+      // We also consider the View state valid if the View has a non-zero width and height. This
+      // means that the View has gone through at least one layout pass. It does not mean the Views
+      // width and height are from the current layout pass. For example, if a View is re-used in
+      // RecyclerView or ListView, this width/height may be from an old position. In some cases
+      // the dimensions of the View at the old position may be different than the dimensions of the
+      // View in the new position because the LayoutManager/ViewParent can arbitrarily decide to
+      // change them. Nevertheless, in most cases this should be a reasonable choice.
+      int adjustedViewSize = viewSize - paddingSize;
+      if (adjustedViewSize > 0) {
+        return adjustedViewSize;
+      }
+
+      // Finally we consider the view valid if the layout parameter size is set to wrap_content.
+      // It's difficult for Glide to figure out what to do here. Although Target.SIZE_ORIGINAL is a
+      // coherent choice, it's extremely dangerous and therefore a bad default. If users want the
+      // original image, they can always use .override(Target.SIZE_ORIGINAL). Since wrap_content
+      // may never resolve to a real size unless we load something, we aim for a square whose length
+      // is the largest screen size. That way we're loading something and that something has some
+      // hope of being downsampled to a size that the device can support. We also log a warning that
+      // tries to explain what Glide is doing and why some alternatives are preferable.
+      if (paramSize == LayoutParams.WRAP_CONTENT) {
+        if (Log.isLoggable(TAG, Log.INFO)) {
+          Log.i(TAG, "Glide treats LayoutParams.WRAP_CONTENT as a request for an image the size of"
+              + " this device's screen dimensions. If you want to load the original image and are"
+              + " ok with the corresponding memory cost and OOMs (depending on the input size), use"
+              + " .override(Target.SIZE_ORIGINAL). Otherwise, use LayoutParams.MATCH_PARENT, set"
+              + " layout_width and layout_height to fixed dimension, or use .override() with fixed"
+              + " dimensions.");
+        }
+        return getMaxDisplayLength(view.getContext());
+      }
+
+      // If the layout parameters are < padding, the view size is < padding, or the layout
+      // parameters are set to match_parent or wrap_content and no layout has occurred, we should
+      // wait for layout and repeat.
+      return PENDING_SIZE;
     }
 
-    private static class SizeDeterminerLayoutListener implements ViewTreeObserver
-        .OnPreDrawListener {
+    private boolean isDimensionValid(int size) {
+      return size > 0 || size == SIZE_ORIGINAL;
+    }
+
+    private static final class SizeDeterminerLayoutListener
+        implements ViewTreeObserver.OnPreDrawListener {
       private final WeakReference<SizeDeterminer> sizeDeterminerRef;
 
       SizeDeterminerLayoutListener(SizeDeterminer sizeDeterminer) {

@@ -2,6 +2,6 @@
 <com.bumptech.glide.samples.flickr.SquareImageView
        xmlns:android="http://schemas.android.com/apk/res/android"
        android:scaleType="centerCrop"
-       android:layout_width="fill_parent"
-       android:layout_height="fill_parent"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
        android:contentDescription="@string/image_description"/>
