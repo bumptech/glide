@@ -127,7 +127,7 @@ public class GlideTest {
 
     Lifecycle lifecycle = mock(Lifecycle.class);
     RequestManagerTreeNode treeNode = mock(RequestManagerTreeNode.class);
-    requestManager = new RequestManager(Glide.get(getContext()), lifecycle, treeNode);
+    requestManager = new RequestManager(Glide.get(getContext()), lifecycle, treeNode, getContext());
     requestManager.resumeRequests();
   }
 

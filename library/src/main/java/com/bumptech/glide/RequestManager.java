@@ -51,6 +51,7 @@ public class RequestManager implements LifecycleListener {
           .skipMemoryCache(true);
 
   protected final Glide glide;
+  protected final Context context;
   @Synthetic final Lifecycle lifecycle;
   private final RequestTracker requestTracker;
   private final RequestManagerTreeNode treeNode;
@@ -67,8 +68,15 @@ public class RequestManager implements LifecycleListener {
   @NonNull
   private RequestOptions requestOptions;
 
-  public RequestManager(Glide glide, Lifecycle lifecycle, RequestManagerTreeNode treeNode) {
-    this(glide, lifecycle, treeNode, new RequestTracker(), glide.getConnectivityMonitorFactory());
+  public RequestManager(
+      Glide glide, Lifecycle lifecycle, RequestManagerTreeNode treeNode, Context context) {
+    this(
+        glide,
+        lifecycle,
+        treeNode,
+        new RequestTracker(),
+        glide.getConnectivityMonitorFactory(),
+        context);
   }
 
   // Our usage is safe here.
@@ -78,16 +86,18 @@ public class RequestManager implements LifecycleListener {
       Lifecycle lifecycle,
       RequestManagerTreeNode treeNode,
       RequestTracker requestTracker,
-      ConnectivityMonitorFactory factory) {
+      ConnectivityMonitorFactory factory,
+      Context context) {
     this.glide = glide;
     this.lifecycle = lifecycle;
     this.treeNode = treeNode;
     this.requestTracker = requestTracker;
-
-    final Context context = glide.getGlideContext().getBaseContext();
+    this.context = context;
 
     connectivityMonitor =
-        factory.build(context, new RequestManagerConnectivityListener(requestTracker));
+        factory.build(
+            context.getApplicationContext(),
+            new RequestManagerConnectivityListener(requestTracker));
 
     // If we're the application level request manager, we may be created on a background thread.
     // In that case we cannot risk synchronously pausing or resuming requests, so we hack around the
@@ -393,7 +403,7 @@ public class RequestManager implements LifecycleListener {
    */
   @CheckResult
   public <ResourceType> RequestBuilder<ResourceType> as(Class<ResourceType> resourceClass) {
-    return new RequestBuilder<>(glide, this, resourceClass);
+    return new RequestBuilder<>(glide, this, resourceClass, context);
   }
 
   /**

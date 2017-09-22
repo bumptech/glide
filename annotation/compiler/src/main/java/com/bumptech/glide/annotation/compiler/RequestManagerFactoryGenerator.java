@@ -39,6 +39,8 @@ final class RequestManagerFactoryGenerator {
       "com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory";
   private static final String REQUEST_MANAGER_QUALIFIED_NAME =
       "com.bumptech.glide.RequestManager";
+  private static final ClassName CONTEXT_CLASS_NAME =
+      ClassName.get("android.content", "Context");
 
   static final String GENERATED_REQUEST_MANAGER_FACTORY_PACKAGE_NAME =
       "com.bumptech.glide";
@@ -79,8 +81,9 @@ final class RequestManagerFactoryGenerator {
                 .addParameter(ClassName.get(glideType), "glide")
                 .addParameter(ClassName.get(lifecycleType), "lifecycle")
                 .addParameter(ClassName.get(requestManagerTreeNodeType), "treeNode")
+                .addParameter(CONTEXT_CLASS_NAME, "context")
                 .addStatement(
-                    "return new $T(glide, lifecycle, treeNode)",
+                    "return new $T(glide, lifecycle, treeNode, context)",
                     ClassName.get(generatedCodePackageName, generatedRequestManagerSpec.name))
                 .build()
         )

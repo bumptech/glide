@@ -359,6 +359,7 @@ final class RequestBuilderGenerator {
         .addStatement("super($N, $N)", "transcodeClass", "other")
         .build();
 
+    ClassName context = ClassName.get("android.content", "Context");
     ClassName glide = ClassName.get("com.bumptech.glide", "Glide");
     ClassName requestManager = ClassName.get("com.bumptech.glide", "RequestManager");
     MethodSpec secondConstructor =
@@ -366,7 +367,9 @@ final class RequestBuilderGenerator {
             .addParameter(glide, "glide")
             .addParameter(requestManager, "requestManager")
             .addParameter(classOfTranscodeType, "transcodeClass")
-            .addStatement("super($N, $N ,$N)", "glide", "requestManager", "transcodeClass")
+            .addParameter(context, "context")
+            .addStatement(
+                "super($N, $N ,$N, $N)", "glide", "requestManager", "transcodeClass", "context")
             .build();
     return ImmutableList.of(firstConstructor, secondConstructor);
   }

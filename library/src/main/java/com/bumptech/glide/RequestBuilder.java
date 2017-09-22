@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 
+import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.CheckResult;
 import android.support.annotation.DrawableRes;
@@ -41,11 +42,12 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       new RequestOptions().diskCacheStrategy(DiskCacheStrategy.DATA).priority(Priority.LOW)
           .skipMemoryCache(true);
 
-  private final GlideContext context;
+  private final Context context;
   private final RequestManager requestManager;
   private final Class<TranscodeType> transcodeClass;
   private final RequestOptions defaultRequestOptions;
   private final Glide glide;
+  private final GlideContext glideContext;
 
   @NonNull protected RequestOptions requestOptions;
 
@@ -65,18 +67,19 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   private boolean isThumbnailBuilt;
 
   protected RequestBuilder(Glide glide, RequestManager requestManager,
-      Class<TranscodeType> transcodeClass) {
+      Class<TranscodeType> transcodeClass, Context context) {
     this.glide = glide;
     this.requestManager = requestManager;
-    this.context = glide.getGlideContext();
     this.transcodeClass = transcodeClass;
     this.defaultRequestOptions = requestManager.getDefaultRequestOptions();
+    this.context = context;
     this.transitionOptions = requestManager.getDefaultTransitionOptions(transcodeClass);
     this.requestOptions = defaultRequestOptions;
+    this.glideContext = glide.getGlideContext();
   }
 
   protected RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
-    this(other.glide, other.requestManager, transcodeClass);
+    this(other.glide, other.requestManager, transcodeClass, other.context);
     model = other.model;
     isModelSet = other.isModelSet;
     requestOptions = other.requestOptions;
@@ -554,7 +557,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       }
     }
 
-    return into(context.buildImageViewTarget(view, transcodeClass), requestOptions);
+    return into(glideContext.buildImageViewTarget(view, transcodeClass), requestOptions);
   }
 
   /**
@@ -607,10 +610,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    */
   public FutureTarget<TranscodeType> submit(int width, int height) {
     final RequestFutureTarget<TranscodeType> target =
-        new RequestFutureTarget<>(context.getMainHandler(), width, height);
+        new RequestFutureTarget<>(glideContext.getMainHandler(), width, height);
 
     if (Util.isOnBackgroundThread()) {
-      context.getMainHandler().post(new Runnable() {
+      glideContext.getMainHandler().post(new Runnable() {
         @Override
         public void run() {
           if (!target.isCancelled()) {
@@ -839,6 +842,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       int overrideWidth, int overrideHeight) {
     return SingleRequest.obtain(
         context,
+        glideContext,
         model,
         transcodeClass,
         requestOptions,
@@ -848,7 +852,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
         target,
         requestListener,
         requestCoordinator,
-        context.getEngine(),
+        glideContext.getEngine(),
         transitionOptions.getTransitionFactory());
   }
 }

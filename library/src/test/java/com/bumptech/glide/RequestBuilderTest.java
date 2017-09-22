@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Application;
 import android.widget.ImageView;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
@@ -30,11 +31,13 @@ public class RequestBuilderTest {
   @Mock GlideContext glideContext;
   @Mock RequestManager requestManager;
   private Glide glide;
+  private Application context;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
     glide = Glide.get(RuntimeEnvironment.application);
+    context = RuntimeEnvironment.application;
   }
 
   @After
@@ -44,7 +47,7 @@ public class RequestBuilderTest {
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfContextIsNull() {
-    new RequestBuilder<>(null /*context*/, requestManager, Object.class);
+    new RequestBuilder<>(null /*context*/, requestManager, Object.class, context);
   }
 
   @Test(expected = NullPointerException.class)
@@ -119,7 +122,7 @@ public class RequestBuilderTest {
         .thenReturn(new RequestOptions());
     when(requestManager.getDefaultTransitionOptions(any(Class.class)))
         .thenReturn(new GenericTransitionOptions<>());
-    return new RequestBuilder<>(glide, requestManager, Object.class)
+    return new RequestBuilder<>(glide, requestManager, Object.class, context)
         .load((Object) null);
   }
 }

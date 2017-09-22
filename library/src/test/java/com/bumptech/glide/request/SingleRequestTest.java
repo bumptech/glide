@@ -97,7 +97,7 @@ public class SingleRequestTest {
         .signature(signature)
         .useUnlimitedSourceGeneratorsPool(useUnlimitedSourceGeneratorsPool);
       return SingleRequest
-          .obtain(glideContext, model, transcodeClass, requestOptions, overrideWidth,
+          .obtain(glideContext, glideContext, model, transcodeClass, requestOptions, overrideWidth,
               overrideHeight, priority, target, requestListener, requestCoordinator, engine,
               factory);
     }

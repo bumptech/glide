@@ -653,6 +653,16 @@ public class RequestOptions implements Cloneable {
    * for resource ids provided via {@link #error(int)}, {@link #placeholder(int)}, and
    * {@link #fallback(Drawable)}.
    *
+   * <p>The theme is <em>NOT</em> applied in the decoder that will attempt to decode a given
+   * resource id model on Glide's background threads. The theme is used exclusively on the main
+   * thread to obtain placeholder/error/fallback drawables to avoid leaking Activities.
+   *
+   * <p>If the {@link android.content.Context} of the {@link android.app.Fragment} or
+   * {@link android.app.Activity} used to start this load has a different
+   * {@link android.content.res.Resources.Theme}, the {@link android.content.res.Resources.Theme}
+   * provided here will override the {@link android.content.res.Resources.Theme} of the
+   * {@link android.content.Context}.
+   *
    * @param theme The theme to use when loading Drawables.
    * @return this request builder.
    */

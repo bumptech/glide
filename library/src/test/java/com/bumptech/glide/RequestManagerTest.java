@@ -44,6 +44,7 @@ public class RequestManagerTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
+    Context context = RuntimeEnvironment.application;
     connectivityMonitor = mock(ConnectivityMonitor.class);
     ConnectivityMonitorFactory factory = mock(ConnectivityMonitorFactory.class);
     when(factory.build(isA(Context.class), isA(ConnectivityMonitor.ConnectivityListener.class)))
@@ -61,7 +62,8 @@ public class RequestManagerTest {
             lifecycle,
             treeNode,
             requestTracker,
-            factory);
+            factory,
+            context);
   }
 
   @Test
