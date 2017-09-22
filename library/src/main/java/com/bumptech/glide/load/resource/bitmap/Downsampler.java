@@ -119,9 +119,9 @@ public final class Downsampler {
           )
       );
   private static final Queue<BitmapFactory.Options> OPTIONS_QUEUE = Util.createQueue(0);
-  // 5MB. This is the max image header size we can handle, we preallocate a much smaller buffer
+  // 10MB. This is the max image header size we can handle, we preallocate a much smaller buffer
   // but will resize up to this amount if necessary.
-  private static final int MARK_POSITION = 5 * 1024 * 1024;
+  private static final int MARK_POSITION = 10 * 1024 * 1024;
   // Defines the level of precision we get when using inDensity/inTargetDensity to calculate an
   // arbitrary float scale factor.
   private static final int DENSITY_PRECISION_MULTIPLIER = 1000000000;
