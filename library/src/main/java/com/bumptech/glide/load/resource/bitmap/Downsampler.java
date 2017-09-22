@@ -393,12 +393,20 @@ public final class Downsampler {
     // JPEG - Always uses ceiling
     // Webp - Prior to N, always uses floor. At and after N, always uses round.
     options.inSampleSize = powerOfTwoSampleSize;
-    final int powerOfTwoWidth;
-    final int powerOfTwoHeight;
-    // Jpeg rounds with ceiling on all API verisons.
+    int powerOfTwoWidth;
+    int powerOfTwoHeight;
     if (imageType == ImageType.JPEG) {
-      powerOfTwoWidth = (int) Math.ceil(sourceWidth / (float) powerOfTwoSampleSize);
-      powerOfTwoHeight = (int) Math.ceil(sourceHeight / (float) powerOfTwoSampleSize);
+      // libjpegturbo can downsample up to a sample size of 8. libjpegturbo uses ceiling to round.
+      // After libjpegturbo's native rounding, skia does a secondary scale using floor
+      // (integer division). Here we replicate that logic.
+      int nativeScaling = Math.min(powerOfTwoSampleSize, 8);
+      powerOfTwoWidth = (int) Math.ceil(sourceWidth / (float) nativeScaling);
+      powerOfTwoHeight = (int) Math.ceil(sourceHeight / (float) nativeScaling);
+      int secondaryScaling = powerOfTwoSampleSize / 8;
+      if (secondaryScaling > 0) {
+        powerOfTwoWidth = powerOfTwoWidth / secondaryScaling;
+        powerOfTwoHeight = powerOfTwoHeight / secondaryScaling;
+      }
     } else if (imageType == ImageType.PNG || imageType == ImageType.PNG_A) {
       powerOfTwoWidth = (int) Math.floor(sourceWidth / (float) powerOfTwoSampleSize);
       powerOfTwoHeight = (int) Math.floor(sourceHeight / (float) powerOfTwoSampleSize);
