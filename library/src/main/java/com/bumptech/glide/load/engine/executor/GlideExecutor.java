@@ -72,6 +72,24 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   }
 
   /**
+   * Returns a new fixed thread pool with the default thread count returned from
+   * {@link #calculateBestThreadCount()}, the {@link #DEFAULT_DISK_CACHE_EXECUTOR_NAME} thread name
+   * prefix, and a custom
+   * {@link com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy}
+   * uncaught throwable strategy.
+   *
+   * <p>Disk cache executors do not allow network operations on their threads.
+   * @param uncaughtThrowableStrategy The {@link
+   * com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy} to use to
+   *                                  handle uncaught exceptions.
+   */
+  public static GlideExecutor newDiskCacheExecutor(
+          UncaughtThrowableStrategy uncaughtThrowableStrategy) {
+    return newDiskCacheExecutor(DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
+                                DEFAULT_DISK_CACHE_EXECUTOR_NAME, uncaughtThrowableStrategy);
+  }
+
+  /**
    * Returns a new fixed thread pool with the given thread count, thread name prefix,
    * and {@link com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy}.
    *
@@ -101,6 +119,25 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   public static GlideExecutor newSourceExecutor() {
     return newSourceExecutor(calculateBestThreadCount(), DEFAULT_SOURCE_EXECUTOR_NAME,
         UncaughtThrowableStrategy.DEFAULT);
+  }
+
+  /**
+   * Returns a new fixed thread pool with the default thread count returned from
+   * {@link #calculateBestThreadCount()}, the {@link #DEFAULT_SOURCE_EXECUTOR_NAME} thread name
+   * prefix, and a custom
+   * {@link com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy}
+   * uncaught throwable strategy.
+   *
+   * <p>Source executors allow network operations on their threads.
+   *
+   * @param uncaughtThrowableStrategy The {@link
+   * com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy} to use to
+   *                                  handle uncaught exceptions.
+   */
+  public static GlideExecutor newSourceExecutor(
+          UncaughtThrowableStrategy uncaughtThrowableStrategy) {
+    return newDiskCacheExecutor(DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
+                                DEFAULT_DISK_CACHE_EXECUTOR_NAME, uncaughtThrowableStrategy);
   }
 
   /**
@@ -274,29 +311,33 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    * A strategy for handling unexpected and uncaught {@link Throwable}s thrown by futures run on the
    * pool.
    */
-  public enum UncaughtThrowableStrategy {
+  public interface UncaughtThrowableStrategy {
     /**
      * Silently catches and ignores the uncaught {@link Throwable}s.
      */
-    IGNORE,
+    UncaughtThrowableStrategy IGNORE = new UncaughtThrowableStrategy() {
+      @Override
+      public void handle(Throwable t) {
+        //ignore
+      }
+    };
     /**
      * Logs the uncaught {@link Throwable}s using {@link #TAG} and {@link Log}.
      */
-    LOG {
+    UncaughtThrowableStrategy LOG = new UncaughtThrowableStrategy() {
       @Override
-      protected void handle(Throwable t) {
+      public void handle(Throwable t) {
         if (t != null && Log.isLoggable(TAG, Log.ERROR)) {
           Log.e(TAG, "Request threw uncaught throwable", t);
         }
       }
-    },
+    };
     /**
      * Rethrows the uncaught {@link Throwable}s to crash the app.
      */
-    THROW {
+    UncaughtThrowableStrategy THROW = new UncaughtThrowableStrategy() {
       @Override
-      protected void handle(Throwable t) {
-        super.handle(t);
+      public void handle(Throwable t) {
         if (t != null) {
           throw new RuntimeException("Request threw uncaught throwable", t);
         }
@@ -304,11 +345,9 @@ public final class GlideExecutor extends ThreadPoolExecutor {
     };
 
     /** The default strategy, currently {@link #LOG}. */
-    public static final UncaughtThrowableStrategy DEFAULT = LOG;
+    UncaughtThrowableStrategy DEFAULT = LOG;
 
-    protected void handle(Throwable t) {
-      // Ignore.
-    }
+    void handle(Throwable t);
   }
 
   /**
