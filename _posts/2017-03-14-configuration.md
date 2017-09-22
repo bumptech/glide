@@ -195,6 +195,17 @@ Glide.with(fragment)
 
 [``RequestManager``][34] also has a [``setDefaultRequestOptions``][36] that will completely replace any default [``RequestOptions``][33] previously set either via the ``GlideBuilder`` in an [``AppGlideModule``][1] or via the [``RequestManager``][34]. Use caution with [``setDefaultRequestOptions``][36] because it's easy to accidentally override important defaults you've set elsewhere. Typically [``applyDefaultRequstOptions``][35] is safer and more intuitive to use.
 
+### UncaughtThrowableStrategy
+
+When loading a bitmap, if an exception happens (e.g. `OutOfMemoryException`), glide will use a `GlideExecutor.UncaughtThrowableStrategy`. 
+The default strategy is to log the exception in the device logcat. The strategy is customizable since glide 4.2.0. It can used when creating disk and/or resize executors:
+
+```java
+final UncaughtThrowableStrategy crashReportingUncaughtThrowableStrategy = new ...
+builder.setDiskCacheExecutor(newDiskCacheExecutor(crashReportingUncaughtThrowableStrategy));
+builder.setResizeExecutor(newSourceExecutor(crashReportingUncaughtThrowableStrategy));
+```
+
 ### Registering Components
 
 Both Applications and Libraries can register a number of components that extend Glides functionality. Available components include:
