@@ -1,5 +1,9 @@
 package com.bumptech.glide.request.target;
 
+import android.os.Handler;
+import android.os.Handler.Callback;
+import android.os.Looper;
+import android.os.Message;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.transition.Transition;
 
@@ -10,6 +14,17 @@ import com.bumptech.glide.request.transition.Transition;
  * @param <Z> The type of resource that will be loaded into memory.
  */
 public final class PreloadTarget<Z> extends SimpleTarget<Z> {
+  private static final int MESSAGE_CLEAR = 1;
+  private static final Handler HANDLER = new Handler(Looper.getMainLooper(), new Callback() {
+    @Override
+    public boolean handleMessage(Message message) {
+      if (message.what == MESSAGE_CLEAR) {
+        ((PreloadTarget<?>) message.obj).clear();
+        return true;
+      }
+      return false;
+    }
+  });
 
   private final RequestManager requestManager;
 
@@ -31,6 +46,10 @@ public final class PreloadTarget<Z> extends SimpleTarget<Z> {
 
   @Override
   public void onResourceReady(Z resource, Transition<? super Z> transition) {
+    HANDLER.obtainMessage(MESSAGE_CLEAR, this).sendToTarget();
+  }
+
+  private void clear() {
     requestManager.clear(this);
   }
 }

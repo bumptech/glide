@@ -45,6 +45,7 @@ public final class SingleRequest<R> implements Request,
           return new SingleRequest<Object>();
         }
       });
+  private boolean isCallingCallbacks;
 
   private enum Status {
     /**
@@ -182,6 +183,7 @@ public final class SingleRequest<R> implements Request,
 
   @Override
   public void recycle() {
+    assertNotCallingCallbacks();
     glideContext = null;
     model = null;
     transcodeClass = null;
@@ -203,6 +205,7 @@ public final class SingleRequest<R> implements Request,
 
   @Override
   public void begin() {
+    assertNotCallingCallbacks();
     stateVerifier.throwIfRecycled();
     startTime = LogTime.getLogTime();
     if (model == null) {
@@ -260,12 +263,22 @@ public final class SingleRequest<R> implements Request,
    * @see #clear()
    */
   void cancel() {
+    assertNotCallingCallbacks();
     stateVerifier.throwIfRecycled();
     target.removeCallback(this);
     status = Status.CANCELLED;
     if (loadStatus != null) {
       loadStatus.cancel();
       loadStatus = null;
+    }
+  }
+
+  // Avoids difficult to understand errors like #2413.
+  private void assertNotCallingCallbacks() {
+    if (isCallingCallbacks) {
+      throw new IllegalStateException("You can't start or clear loads in RequestListener or"
+          + " Target callbacks. If you must do so, consider posting your into() or clear() calls"
+          + " to the main thread using a Handler instead.");
     }
   }
 
@@ -280,6 +293,7 @@ public final class SingleRequest<R> implements Request,
   @Override
   public void clear() {
     Util.assertMainThread();
+    assertNotCallingCallbacks();
     if (status == Status.CLEARED) {
       return;
     }
@@ -535,11 +549,16 @@ public final class SingleRequest<R> implements Request,
           + LogTime.getElapsedMillis(startTime) + " ms");
     }
 
-    if (requestListener == null
-        || !requestListener.onResourceReady(result, model, target, dataSource, isFirstResource)) {
-      Transition<? super R> animation =
-          animationFactory.build(dataSource, isFirstResource);
-      target.onResourceReady(result, animation);
+    isCallingCallbacks = true;
+    try {
+      if (requestListener == null
+          || !requestListener.onResourceReady(result, model, target, dataSource, isFirstResource)) {
+        Transition<? super R> animation =
+            animationFactory.build(dataSource, isFirstResource);
+        target.onResourceReady(result, animation);
+      }
+    } finally {
+      isCallingCallbacks = false;
     }
 
     notifyLoadSuccess();
@@ -565,10 +584,16 @@ public final class SingleRequest<R> implements Request,
 
     loadStatus = null;
     status = Status.FAILED;
-    //TODO: what if this is a thumbnail request?
-    if (requestListener == null
-        || !requestListener.onLoadFailed(e, model, target, isFirstReadyResource())) {
-      setErrorPlaceholder();
+
+    isCallingCallbacks = true;
+    try {
+      //TODO: what if this is a thumbnail request?
+      if (requestListener == null
+          || !requestListener.onLoadFailed(e, model, target, isFirstReadyResource())) {
+        setErrorPlaceholder();
+      }
+    } finally {
+      isCallingCallbacks = false;
     }
   }
 
