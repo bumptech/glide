@@ -70,8 +70,8 @@ afterEvaluate {
         description 'Run findbugs'
         group 'verification'
 
-        classes = fileTree('build/intermediates/classes/debug/')
-        source = fileTree('src/main/java')
+        classes = fileTree("${project.buildDir}/intermediates/classes/debug/")
+        source android.sourceSets.main.java.srcDirs
         classpath = project.configurations.compile
 
         effort = 'max'
@@ -100,7 +100,7 @@ afterEvaluate {
         // defaults which override rules in the ruleset file...
         ruleSets = []
         ruleSetFiles = files('pmd-ruleset.xml')
-        source = fileTree('src/main/java')
+        source android.sourceSets.main.java.srcDirs
 
         reports {
             xml.enabled = false
@@ -114,17 +114,17 @@ afterEvaluate {
         toolVersion JACOCO_VERSION
     }
     coveralls {
-        jacocoReportPath = 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
+        jacocoReportPath = "${project.buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
     }
 
     tasks.create("jacocoTestReport", JacocoReport) {
         dependsOn tasks.testDebugUnitTest
-        def coverageSourceDirs = ['src/main/java']
+        def coverageSourceDirs = android.sourceSets.main.java.srcDirs
         group = "Reporting"
         description = "Generate Jacoco coverage reports"
 
         classDirectories = fileTree(
-                dir: 'build/intermediates/classes/debug',
+                dir: "${project.buildDir}/intermediates/classes/debug",
                 excludes: ['**/R.class',
                            '**/R$*.class',
                            '**/BuildConfig.*',
@@ -136,7 +136,7 @@ afterEvaluate {
 
         additionalSourceDirs = files(coverageSourceDirs)
         sourceDirectories = files(coverageSourceDirs)
-        executionData = files('build/jacoco/testDebug.exec')
+        executionData = files("${project.buildDir}/jacoco/testDebug.exec")
 
         reports {
             xml.enabled = true
