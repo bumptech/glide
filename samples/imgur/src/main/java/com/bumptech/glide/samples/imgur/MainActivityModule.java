@@ -1,17 +1,10 @@
 package com.bumptech.glide.samples.imgur;
 
-import android.app.Activity;
-import dagger.Binds;
 import dagger.Module;
-import dagger.android.ActivityKey;
-import dagger.android.AndroidInjector;
-import dagger.multibindings.IntoMap;
+import dagger.android.ContributesAndroidInjector;
 
-@Module(subcomponents = MainActivitySubcomponent.class)
+@Module
 abstract class MainActivityModule {
-  @Binds
-  @IntoMap
-  @ActivityKey(MainActivity.class)
-  abstract AndroidInjector.Factory<? extends Activity> bindYourActivityInjectorFactory(
-      MainActivitySubcomponent.Builder builder);
+  @ContributesAndroidInjector
+  abstract MainActivity contributeMainActivityInjector();
 }
