@@ -15,7 +15,9 @@
     </module>
 
     <!-- Ensure trailling newline for compatibility -->
-    <module name="NewlineAtEndOfFile" />
+    <module name="NewlineAtEndOfFile">
+        <property name="lineSeparator" value="lf"/>
+    </module>
 
     <!-- Space after 'for' and 'if' -->
     <module name="RegexpSingleline">
