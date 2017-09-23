@@ -31,12 +31,8 @@ dependencies {
     annotationProcessor project(':annotation:compiler')
 
     compile "com.google.dagger:dagger:${DAGGER_VERSION}"
-    annotationProcessor("com.google.dagger:dagger-compiler:${DAGGER_VERSION}", {
-        exclude group: 'com.google.code.findbugs', module: "jsr305"
-    })
-    compile("com.google.dagger:dagger-android:${DAGGER_VERSION}", {
-        exclude group: 'com.google.code.findbugs', module: "jsr305"
-    })
+    annotationProcessor "com.google.dagger:dagger-compiler:${DAGGER_VERSION}"
+    compile "com.google.dagger:dagger-android:${DAGGER_VERSION}"
 
     compile "com.squareup.okhttp3:okhttp:${OK_HTTP_VERSION}"
     compile 'com.squareup.retrofit2:retrofit:2.2.0'
