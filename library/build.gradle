@@ -21,12 +21,12 @@ dependencies {
     testCompile "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
 }
 
-android.testOptions.unitTests.all {
+android.testOptions.unitTests.all { Test testTask ->
     // configure max heap size of the test JVM
-    maxHeapSize = TEST_JVM_MEMORY_SIZE as String
+    testTask.maxHeapSize = TEST_JVM_MEMORY_SIZE as String
     if (JavaVersion.current() <= JavaVersion.VERSION_1_7) {
         // Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=2048m; support was removed in 8.0
-        jvmArgs "-XX:MaxPermSize=${TEST_JVM_MEMORY_SIZE}"
+        testTask.jvmArgs "-XX:MaxPermSize=${TEST_JVM_MEMORY_SIZE}"
     }
 }
 

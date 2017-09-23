@@ -27,12 +27,12 @@ static def getJavaPathsForJavadoc() {
 }
 
 (getAndroidPathsForJavadoc() + getAndroidPathsForJar() +
-        getJavaPathsForJar() + getJavaPathsForJavadoc()).forEach {
+        getJavaPathsForJar() + getJavaPathsForJavadoc()).each {
     evaluationDependsOn(it)
 }
 
 def asProjects(paths) {
-    paths.collect { project(it) }
+    paths.collect { String path -> project(path) }
 }
 
 def getAndroidSdkDirectory() {
@@ -104,7 +104,7 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 ['release', 'debug'].each { variantName ->
 
     task("${variantName}SourceJar", type: Jar) {
-      from getSourceFilesForVariantJar(variantName)
+        from getSourceFilesForVariantJar(variantName)
     }
 
     def javadocTask = task("${variantName}Javadoc", type: Javadoc) {
