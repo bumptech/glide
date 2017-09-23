@@ -64,7 +64,8 @@ afterEvaluate {
         toolVersion FINDBUGS_VERSION
     }
 
-    task findbugs(type: FindBugs, dependsOn: assembleDebug) {
+    tasks.create('findbugs', FindBugs) {
+        dependsOn tasks.assembleDebug
 
         description 'Run findbugs'
         group 'verification'
@@ -89,7 +90,7 @@ afterEvaluate {
         toolVersion PMD_VERSION
     }
 
-    task pmd(type: Pmd) {
+    tasks.create('pmd', Pmd) {
         targetJdk = TargetJdk.VERSION_1_7
 
         description 'Run pmd'
@@ -116,7 +117,8 @@ afterEvaluate {
         jacocoReportPath = 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
     }
 
-    task jacocoTestReport(type: JacocoReport, dependsOn: testDebugUnitTest) {
+    tasks.create("jacocoTestReport", JacocoReport) {
+        dependsOn tasks.testDebugUnitTest
         def coverageSourceDirs = ['src/main/java']
         group = "Reporting"
         description = "Generate Jacoco coverage reports"
