@@ -1,27 +1,14 @@
 package com.bumptech.glide.samples.imgur;
 
-import android.app.Activity;
-import android.app.Application;
-import dagger.android.DispatchingAndroidInjector;
-import dagger.android.HasActivityInjector;
-import javax.inject.Inject;
+import dagger.android.AndroidInjector;
+import dagger.android.support.DaggerApplication;
 
 /**
  * Runs Dagger injection in the Imgur sample.
  */
-public final class ImgurApplication extends Application
-    implements HasActivityInjector {
-  @Inject DispatchingAndroidInjector<Activity> dispatchingActivityInjector;
-
+public final class ImgurApplication extends DaggerApplication {
   @Override
-  public void onCreate() {
-    super.onCreate();
-    DaggerImgurApplicationComponent.create()
-        .inject(this);
-  }
-
-  @Override
-  public DispatchingAndroidInjector<Activity> activityInjector() {
-    return dispatchingActivityInjector;
+  protected AndroidInjector<? extends DaggerApplication> applicationInjector() {
+    return DaggerImgurApplicationComponent.create();
   }
 }
