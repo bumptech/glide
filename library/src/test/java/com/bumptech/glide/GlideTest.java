@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
 import static com.bumptech.glide.request.RequestOptions.errorOf;
 import static com.bumptech.glide.request.RequestOptions.placeholderOf;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -142,12 +143,58 @@ public class GlideTest {
 
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide =
-        new GlideBuilder().setMemoryCache(memoryCache).setBitmapPool(bitmapPool)
+        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
             .build(getContext());
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
     verify(bitmapPool).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
+  }
+
+  @Test
+  public void testCanIncreaseMemoryCategory() {
+    MemoryCache memoryCache = mock(MemoryCache.class);
+    BitmapPool bitmapPool = mock(BitmapPool.class);
+
+    MemoryCategory memoryCategory = MemoryCategory.NORMAL;
+    Glide glide =
+        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
+            .build(getContext());
+    glide.setMemoryCategory(memoryCategory);
+
+    verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
+    verify(bitmapPool).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
+
+    MemoryCategory newMemoryCategory = MemoryCategory.HIGH;
+    MemoryCategory oldMemoryCategory = glide.setMemoryCategory(newMemoryCategory);
+
+    assertEquals(memoryCategory, oldMemoryCategory);
+
+    verify(memoryCache).setSizeMultiplier(eq(newMemoryCategory.getMultiplier()));
+    verify(bitmapPool).setSizeMultiplier(eq(newMemoryCategory.getMultiplier()));
+  }
+
+  @Test
+  public void testCanDecreaseMemoryCategory() {
+    MemoryCache memoryCache = mock(MemoryCache.class);
+    BitmapPool bitmapPool = mock(BitmapPool.class);
+
+    MemoryCategory memoryCategory = MemoryCategory.NORMAL;
+    Glide glide =
+        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
+            .build(getContext());
+    glide.setMemoryCategory(memoryCategory);
+
+    verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
+    verify(bitmapPool).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
+
+    MemoryCategory newMemoryCategory = MemoryCategory.LOW;
+    MemoryCategory oldMemoryCategory = glide.setMemoryCategory(newMemoryCategory);
+
+    assertEquals(memoryCategory, oldMemoryCategory);
+
+    verify(memoryCache).setSizeMultiplier(eq(newMemoryCategory.getMultiplier()));
+    verify(bitmapPool).setSizeMultiplier(eq(newMemoryCategory.getMultiplier()));
   }
 
   @Test
