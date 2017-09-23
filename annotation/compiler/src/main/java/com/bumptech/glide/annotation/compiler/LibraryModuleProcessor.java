@@ -11,7 +11,7 @@ import javax.lang.model.element.TypeElement;
 
 /**
  * Generates Indexer classes annotated with {@link Index} for all
- * {@link LibraryGlideModule}s.
+ * {@code LibraryGlideModule}s.
  */
 final class LibraryModuleProcessor {
   private ProcessorUtil processorUtil;
