@@ -5,16 +5,6 @@ apply plugin: 'pmd'
 apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
 
-findbugs {
-    toolVersion = FINDBUGS_VERSION
-}
-jacoco {
-    toolVersion = JACOCO_VERSION
-}
-coveralls {
-    jacocoReportPath = 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
-}
-
 dependencies {
     compile project(':third_party:gif_decoder')
     compile project(':third_party:disklrucache')
@@ -70,6 +60,10 @@ afterEvaluate {
         return
     }
 
+    findbugs {
+        toolVersion FINDBUGS_VERSION
+    }
+
     task findbugs(type: FindBugs, dependsOn: assembleDebug) {
 
         description 'Run findbugs'
@@ -92,7 +86,7 @@ afterEvaluate {
     check.dependsOn('findbugs')
 
     pmd {
-        toolVersion '5.4.0'
+        toolVersion PMD_VERSION
     }
 
     task pmd(type: Pmd) {
@@ -114,6 +108,13 @@ afterEvaluate {
     }
 
     check.dependsOn('pmd')
+
+    jacoco {
+        toolVersion JACOCO_VERSION
+    }
+    coveralls {
+        jacocoReportPath = 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
+    }
 
     task jacocoTestReport(type: JacocoReport, dependsOn: testDebugUnitTest) {
         def coverageSourceDirs = ['src/main/java']
