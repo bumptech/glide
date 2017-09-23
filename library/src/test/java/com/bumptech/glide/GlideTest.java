@@ -48,7 +48,6 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
-import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.SizeReadyCallback;
@@ -661,7 +660,7 @@ public class GlideTest {
     }
   }
 
-  public static class SetupModule implements GlideModule {
+  public static class SetupModule implements com.bumptech.glide.module.GlideModule {
 
     @Override
     public void applyOptions(Context context, GlideBuilder builder) {
