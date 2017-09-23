@@ -73,6 +73,7 @@ afterEvaluate {
         classes = fileTree("${project.buildDir}/intermediates/classes/debug/")
         source android.sourceSets.main.java.srcDirs
         classpath = project.configurations.compile
+        classpath += files(android.bootClasspath)
 
         effort = 'max'
 
