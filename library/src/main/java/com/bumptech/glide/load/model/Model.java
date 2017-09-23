@@ -9,7 +9,7 @@ public interface Model {
      * Returns {@code true} if this model produces the same image using the same mechanism
      * (server, authentication, source etc) as the given model.
      * <p>
-     * Models must also implement {@link #equals(Object other)} and {@link #hashCode()}
+     * Models must also override {@link Object#equals(Object other)} and {@link Object#hashCode()}
      * to ensure that caching functions correctly.
      * If this object returns {@code true} from this method for a given Model,
      * it must also be equal to and have the same hash code as the given model.
