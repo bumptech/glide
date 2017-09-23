@@ -306,10 +306,7 @@ final class RequestBuilderGenerator {
                     return !input.type.equals(TypeName.get(Override.class))
                         // SafeVarargs can only be applied to final methods. GlideRequest is
                         // non-final to allow for mocking.
-                        && !input.type.equals(TypeName.get(SafeVarargs.class))
-                        // @CheckResult isn't applicable for RequestBuilder because there is no
-                        // autoClone() in RequestBuilder.
-                        && !input.type.equals(CHECK_RESULT_CLASS_NAME);
+                        && !input.type.equals(TypeName.get(SafeVarargs.class));
                   }
                 })
                 .toList()

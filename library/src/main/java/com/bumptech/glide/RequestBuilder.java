@@ -85,6 +85,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @see RequestOptions#apply(RequestOptions)
    * @return This request builder.
    */
+  @CheckResult
   public RequestBuilder<TranscodeType> apply(@NonNull RequestOptions requestOptions) {
     Preconditions.checkNotNull(requestOptions);
     this.requestOptions = getMutableOptions().apply(requestOptions);
@@ -105,6 +106,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * @return This request builder.
    */
+  @CheckResult
   public RequestBuilder<TranscodeType> transition(
       @NonNull TransitionOptions<?, ? super TranscodeType> transitionOptions) {
     this.transitionOptions = Preconditions.checkNotNull(transitionOptions);
@@ -120,6 +122,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param requestListener The request listener to use.
    * @return This request builder.
    */
+  @CheckResult
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> listener(
       @Nullable RequestListener<TranscodeType> requestListener) {
@@ -141,6 +144,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * <p> Recursive calls to thumbnail are supported. </p>
    */
+  @CheckResult
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> thumbnail(
       @Nullable RequestBuilder<TranscodeType> thumbnailRequest) {
@@ -173,6 +177,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *                       the thumbnail.
    * @return This request builder.
    */
+  @CheckResult
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> thumbnail(float sizeMultiplier) {
     if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
@@ -192,6 +197,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param model The model to load data for, or null.
    * @return This request builder.
    */
+  @CheckResult
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> load(@Nullable Object model) {
     return loadGeneric(model);
@@ -222,6 +228,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param string A file path, or a uri or url handled by
    * {@link com.bumptech.glide.load.model.UriLoader}.
    */
+  @CheckResult
   public RequestBuilder<TranscodeType> load(@Nullable String string) {
     return loadGeneric(string);
   }
@@ -244,6 +251,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param uri The Uri representing the image. Must be of a type handled by
    * {@link com.bumptech.glide.load.model.UriLoader}.
    */
+  @CheckResult
   public RequestBuilder<TranscodeType> load(@Nullable Uri uri) {
     return loadGeneric(uri);
   }
@@ -266,6 +274,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * @param file The File containing the image
    */
+  @CheckResult
   public RequestBuilder<TranscodeType> load(@Nullable File file) {
     return loadGeneric(file);
   }
@@ -289,6 +298,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @see #load(Integer)
    * @see com.bumptech.glide.signature.ApplicationVersionSignature
    */
+  @CheckResult
   public RequestBuilder<TranscodeType> load(@Nullable Integer resourceId) {
     return loadGeneric(resourceId).apply(signatureOf(ApplicationVersionSignature.obtain(context)));
   }
@@ -303,6 +313,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * {@link #load(android.net.Uri)} or {@link #load(String)}.
    */
   @Deprecated
+  @CheckResult
   public RequestBuilder<TranscodeType> load(@Nullable URL url) {
     return loadGeneric(url);
   }
@@ -316,6 +327,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @param model the data to load.
    * @see #load(Object)
    */
+  @CheckResult
   public RequestBuilder<TranscodeType> load(@Nullable byte[] model) {
     return loadGeneric(model).apply(signatureOf(new ObjectKey(UUID.randomUUID().toString()))
         .diskCacheStrategy(DiskCacheStrategy.NONE).skipMemoryCache(true /*skipMemoryCache*/));
