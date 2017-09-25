@@ -87,7 +87,7 @@ Simple use cases with Glide's [generated API][21] will look something like this:
   ...
   ImageView imageView = (ImageView) findViewById(R.id.my_image_view);
 
-  GlideApp.with(this).load("http://goo.gl/gEgYUd").into(imageView);
+  Glide.with(this).load("http://goo.gl/gEgYUd").into(imageView);
 }
 
 // For a simple image list:
@@ -101,10 +101,10 @@ Simple use cases with Glide's [generated API][21] will look something like this:
 
   String url = myUrls.get(position);
 
-  GlideApp
+  Glide
     .with(myFragment)
     .load(url)
-    .centerCrop()
+    .apply(centerCropTransform())
     .placeholder(R.drawable.loading_spinner)
     .into(myImageView);
 
