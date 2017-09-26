@@ -162,11 +162,12 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
 
     // Support Fragments.
+    // Although the user might have non-support Fragments attached to FragmentActivity, searching
+    // for non-support Fragments is so expensive pre O and that should be rare enough that we
+    // prefer to just fall back to the Activity directly.
     if (activity instanceof FragmentActivity) {
       Fragment fragment = findSupportFragment(view, (FragmentActivity) activity);
-      if (fragment != null) {
-        return get(fragment);
-      }
+      return fragment != null ? get(fragment) : get(activity);
     }
 
     // Standard Fragments.

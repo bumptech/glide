@@ -622,12 +622,17 @@ public class Glide implements ComponentCallbacks2 {
    * <p>This method will not work if the View is not attached. Prefer the Activity and Fragment
    * variants unless you're loading in a View subclass.
    *
-   * <p>This method may be inefficient for large hierarchies. Consider memoizing the result after
-   * the View is attached.
+   * <p>This method may be inefficient aways and is definitely inefficient for large hierarchies.
+   * Consider memoizing the result after the View is attached or again, prefer the Activity and
+   * Fragment variants whenever possible.
    *
    * <p>When used in Applications that use the non-support {@link android.app.Fragment} classes,
    * calling this method will produce noisy logs from {@link android.app.FragmentManager}. Consider
    * avoiding entirely or using the {@link Fragment}s from the support library instead.
+   *
+   * <p>If the support {@link FragmentActivity} class is used, this method will only attempt to
+   * discover support {@link Fragment}s. Any non-support {@link android.app.Fragment}s attached
+   * to the {@link FragmentActivity} will be ignored.
    *
    * @param view The view to search for a containing Fragment or Activity from.
    * @return A RequestManager that can be used to start a load.
