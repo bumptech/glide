@@ -307,16 +307,19 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     }
 
     private int getTargetDimen(int viewSize, int paramSize, int paddingSize) {
-      if (waitForLayout && view.isLayoutRequested()) {
-        return PENDING_SIZE;
-      }
-
       // We consider the View state as valid if the View has non-null layout params and a non-zero
       // layout params width and height. This is imperfect. We're making an assumption that View
       // parents will obey their child's layout parameters, which isn't always the case.
       int adjustedParamSize = paramSize - paddingSize;
       if (adjustedParamSize > 0) {
         return adjustedParamSize;
+      }
+
+      // Since we always prefer layout parameters with fixed sizes, even if waitForLayout is true,
+      // we might as well ignore it and just return the layout parameters above if we have them.
+      // Otherwise we should wait for a layout pass before checking the View's dimensions.
+      if (waitForLayout && view.isLayoutRequested()) {
+        return PENDING_SIZE;
       }
 
       // We also consider the View state valid if the View has a non-zero width and height. This
