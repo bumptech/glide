@@ -46,10 +46,23 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   protected final T view;
   private final SizeDeterminer sizeDeterminer;
 
+  /**
+   * Constructor that defaults {@code waitForLayout} to {@code false}.
+   */
   public ViewTarget(T view) {
     this(view, false /*waitForLayout*/);
   }
 
+  /**
+   * @param waitForLayout If set to {@code true}, Glide will always wait for any pending layout pass
+   * before checking for the size a View. If set to {@code false} Glide will only wait for a pending
+   * layout pass if it's unable to resolve the size from layout parameters or an existing View size.
+   * Because setting this parameter to {@code true} forces Glide to wait for the layout pass to
+   * occur before starting the load, setting this parameter to {@code true} can cause flashing in
+   * some cases and should be used sparingly. If layout parameters are set to fixed sizes, they will
+   * still be used instead of the View's dimensions even if this parameter is set to {@code true}.
+   * This parameter is a fallback only.
+   */
   public ViewTarget(T view, boolean waitForLayout) {
     this.view = Preconditions.checkNotNull(view);
     sizeDeterminer = new SizeDeterminer(view, waitForLayout);
@@ -320,13 +333,16 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
       // Finally we consider the view valid if the layout parameter size is set to wrap_content.
       // It's difficult for Glide to figure out what to do here. Although Target.SIZE_ORIGINAL is a
-      // coherent choice, it's extremely dangerous and therefore a bad default. If users want the
-      // original image, they can always use .override(Target.SIZE_ORIGINAL). Since wrap_content
+      // coherent choice, it's extremely dangerous because original images may be much too large to
+      // fit in memory or so large that only a couple can fit in memory, causing OOMs. If users want
+      // the original image, they can always use .override(Target.SIZE_ORIGINAL). Since wrap_content
       // may never resolve to a real size unless we load something, we aim for a square whose length
       // is the largest screen size. That way we're loading something and that something has some
       // hope of being downsampled to a size that the device can support. We also log a warning that
       // tries to explain what Glide is doing and why some alternatives are preferable.
-      if (paramSize == LayoutParams.WRAP_CONTENT) {
+      // Since WRAP_CONTENT is sometimes used as a default layout parameter, we always wait for
+      // layout to complete before using this fallback parameter (ConstraintLayout among others).
+      if (!view.isLayoutRequested() && paramSize == LayoutParams.WRAP_CONTENT) {
         if (Log.isLoggable(TAG, Log.INFO)) {
           Log.i(TAG, "Glide treats LayoutParams.WRAP_CONTENT as a request for an image the size of"
               + " this device's screen dimensions. If you want to load the original image and are"
