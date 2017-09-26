@@ -26,6 +26,10 @@ public abstract class ThumbnailImageViewTarget<T> extends ImageViewTarget<T> {
     super(view);
   }
 
+  public ThumbnailImageViewTarget(ImageView view, boolean waitForLayout) {
+    super(view, waitForLayout);
+  }
+
   @Override
   protected void setResource(@Nullable T resource) {
     ViewGroup.LayoutParams layoutParams = view.getLayoutParams();

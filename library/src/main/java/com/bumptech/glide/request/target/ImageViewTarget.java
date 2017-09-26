@@ -23,6 +23,10 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
     super(view);
   }
 
+  public ImageViewTarget(ImageView view, boolean waitForLayout) {
+    super(view, waitForLayout);
+  }
+
   /**
    * Returns the current {@link android.graphics.drawable.Drawable} being displayed in the view
    * using {@link android.widget.ImageView#getDrawable()}.

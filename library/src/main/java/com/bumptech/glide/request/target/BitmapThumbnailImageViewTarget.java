@@ -13,6 +13,10 @@ public class BitmapThumbnailImageViewTarget extends ThumbnailImageViewTarget<Bit
     super(view);
   }
 
+  public BitmapThumbnailImageViewTarget(ImageView view, boolean waitForLayout) {
+    super(view, waitForLayout);
+  }
+
   @Override
   protected Drawable getDrawable(Bitmap resource) {
     return new BitmapDrawable(view.getResources(), resource);

@@ -13,6 +13,10 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
     super(view);
   }
 
+  public DrawableImageViewTarget(ImageView view, boolean waitForLayout) {
+    super(view, waitForLayout);
+  }
+
   @Override
   protected void setResource(@Nullable Drawable resource) {
     view.setImageDrawable(resource);

@@ -12,6 +12,10 @@ public class BitmapImageViewTarget extends ImageViewTarget<Bitmap> {
     super(view);
   }
 
+  public BitmapImageViewTarget(ImageView view, boolean waitForLayout) {
+    super(view, waitForLayout);
+  }
+
   /**
    * Sets the {@link android.graphics.Bitmap} on the view using {@link
    * android.widget.ImageView#setImageBitmap(android.graphics.Bitmap)}.

@@ -11,6 +11,10 @@ public class DrawableThumbnailImageViewTarget extends ThumbnailImageViewTarget<D
     super(view);
   }
 
+  public DrawableThumbnailImageViewTarget(ImageView view, boolean waitForLayout) {
+    super(view, waitForLayout);
+  }
+
   @Override
   protected Drawable getDrawable(Drawable resource) {
     return resource;
