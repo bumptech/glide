@@ -86,7 +86,7 @@ There are two common causes of OOMs in applications:
 #### Excessively large allocations.
 If opening a single page or loading a single image causes an OOM, your applications is probably loading an unnecessarily large image.
 
-The amount of memory required to display an image in a Bitmap is width * height * bytes per pixel. The number of bytes per pixel depends on the ``Bitmap.Config`` used to display the image, but typically four bytes per pixel are required for ``ARGB_8888`` Bitmaps. As a result, even a 080p image requires 8mb of ram. The larger the image, the more ram required, so a 12 megapixel image requires a fairly massive 48mb.
+The amount of memory required to display an image in a Bitmap is width * height * bytes per pixel. The number of bytes per pixel depends on the ``Bitmap.Config`` used to display the image, but typically four bytes per pixel are required for ``ARGB_8888`` Bitmaps. As a result, even a 1080p image requires 8mb of ram. The larger the image, the more ram required, so a 12 megapixel image requires a fairly massive 48mb.
 
 Glide will downsample images automatically based on the size provided by the ``Target``, ``ImageView`` or ``override()`` request option provided. If you're seeing excessively large allocations in Glide, usually that means that the size of your ``Target`` or ``override()`` is too large or you're using ``Target.SIZE_ORIGINAL`` in conjunction with a large image.
 

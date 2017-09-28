@@ -97,7 +97,7 @@ GlideApp.with(fragment)
 
 ### DecodeFormat
 
-In Glide v3, the default [``DecodeFormat``][30] was [``DecodeFormat.PREFER_RGB_565``][31], which used [``Bitmap.Config.RGB_565``][32] unless the image contained or might have contained transparent pixels. ``RGB_565`` uses half the memory of [``Bitmap.Config.ARGB_8888``][33] for a given image size, but it has noticeable quality issues for certain images, including banding and tinting. To avoid the quality issues with ``RGB_565``, Glide defaults to ``ARGB_8888``. As a result, image quality is higher, but memory usage my increase.
+In Glide v3, the default [``DecodeFormat``][30] was [``DecodeFormat.PREFER_RGB_565``][31], which used [``Bitmap.Config.RGB_565``][32] unless the image contained or might have contained transparent pixels. ``RGB_565`` uses half the memory of [``Bitmap.Config.ARGB_8888``][33] for a given image size, but it has noticeable quality issues for certain images, including banding and tinting. To avoid the quality issues with ``RGB_565``, Glide defaults to ``ARGB_8888``. As a result, image quality is higher, but memory usage may increase.
 
 To change Glide's default [``DecodeFormat``][30] back to [``DecodeFormat.PREFER_RGB_565``][31] in Glide v4, apply the ``RequestOption`` in an [``AppGlideModule``][2]:
 
@@ -111,7 +111,7 @@ public final class YourAppGlideModule extends GlideModule {
 }
 ```
 
-For more on using [``AppGlideModuless``][2], see the [configuration page][4]. Note that you will have to make sure to add a dependency on Glide's annotation processor to ensure that Glide picks up your [``AppGlideModule``][2] implementation. For more information on how to set up the library, see the [download and setup page][34].
+For more on using [``AppGlideModules``][2], see the [configuration page][4]. Note that you will have to make sure to add a dependency on Glide's annotation processor to ensure that Glide picks up your [``AppGlideModule``][2] implementation. For more information on how to set up the library, see the [download and setup page][34].
 
 ### TransitionOptions
 
