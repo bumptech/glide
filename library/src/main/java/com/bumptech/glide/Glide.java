@@ -249,7 +249,7 @@ public class Glide implements ComponentCallbacks2 {
     } catch (ClassNotFoundException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Failed to find GeneratedAppGlideModule. You should include an"
-            + " annotationProcessor compile dependency on com.github.bumptech.glide:glide:compiler"
+            + " annotationProcessor compile dependency on com.github.bumptech.glide:compiler"
             + " in your application and a @GlideModule annotated AppGlideModule implementation or"
             + " LibraryGlideModules will be silently ignored");
       }
