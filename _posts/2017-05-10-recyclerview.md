@@ -70,7 +70,7 @@ PreloadSizeProvider sizeProvider =
 
 The next step is to implement your [``PreloadModelProvider``][6]. The [``PreloadModelProvider``][6] performs two actions. First it collects and returns a list of ``Models`` (the items you pass in to Glide's ``load(Object)`` method, like URLs or file paths) for a given position. Second it takes a ``Model`` and produces a Glide ``RequestBuilder`` that will be used to preload the given ``Model`` into memory.
 
-For example, let's say that we have a ``RecyclerView`` that contains a list of image urls where each position in the ``RecyclerView`` displays a single URL. Then, let's say that you load your images in your ``RecyclerView.Adapter``'s ``onBindViewHolderMethod`` like this:
+For example, let's say that we have a ``RecyclerView`` that contains a list of image urls where each position in the ``RecyclerView`` displays a single URL. Then, let's say that you load your images in your ``RecyclerView.Adapter``'s ``onBindViewHolder`` method like this:
 
 
 ```java
@@ -142,7 +142,7 @@ RecyclerViewPreloader<Photo> preloader =
         Glide.with(this), modelProvider, sizeProvider, 10 /*maxPreload*/);
 ```
 
-Using 10 for maxPreload is just a placeholder, for a detailed discussion on how to pick a unmber, see the section immediately below this one.
+Using 10 for maxPreload is just a placeholder, for a detailed discussion on how to pick a number, see the section immediately below this one.
 
 ##### maxPreload
 
