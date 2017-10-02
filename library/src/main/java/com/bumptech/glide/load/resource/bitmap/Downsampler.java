@@ -53,7 +53,7 @@ public final class Downsampler {
    */
   public static final Option<DownsampleStrategy> DOWNSAMPLE_STRATEGY =
       Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy",
-          DownsampleStrategy.AT_LEAST);
+          DownsampleStrategy.DEFAULT);
   /**
    * Ensure that the size of the bitmap is fixed to the requested width and height of the
    * resource from the caller.  The final resource dimensions may differ from the requested
