@@ -94,6 +94,11 @@ dependencies {
   kapt 'com.github.bumptech.glide:compiler:4.1.1'
 }
 ```
+Note that you must also include the ``kotlin-kapt`` plugin in your ``build.gradle`` file:
+
+```groovy
+apply plugin: 'kotlin-kapt'
+```
 
 See the [generated API][6] page for details.
 
