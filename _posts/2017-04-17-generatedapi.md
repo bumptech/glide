@@ -39,7 +39,7 @@ To use the generated API in your application, you need to perform two steps:
    }
 
    dependencies {
-     annotationProcessor 'com.github.bumptech.glide:compiler:4.1.1'
+     annotationProcessor 'com.github.bumptech.glide:compiler:4.2.0'
    }
    ```
 
@@ -70,7 +70,7 @@ If you're using Kotlin you can:
 
    ```groovy
    dependencies {
-     kapt 'com.github.bumptech.glide:compiler:4.1.1'
+     kapt 'com.github.bumptech.glide:compiler:4.2.0'
    }
    ```
 
