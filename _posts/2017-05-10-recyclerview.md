@@ -158,7 +158,7 @@ The final step, once you have your [``RecyclerViewPreloader``][2] is to add it a
 
 ```java
 RecyclerView myRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-myRecyclerView.addOnScrolLListener(preloader);
+myRecyclerView.addOnScrollListener(preloader);
 ```
 
 Adding the [``RecyclerViewPreloader``][2] as a scroll listener allows the [``RecyclerViewPreloader``][2] to automatically load images ahead of the direction the user is scrolling in and detect changes of direction or velocity.
@@ -191,7 +191,7 @@ public final class ImagesFragment extends Fragment {
             Glide.with(this), modelProvider, sizeProvider, 10 /*maxPreload*/);
 
     RecyclerView myRecyclerView = (RecyclerView) result.findViewById(R.id.recycler_view);
-    myRecyclerView.addOnScrolLListener(preloader);
+    myRecyclerView.addOnScrollListener(preloader);
    
     // Finish setting up your RecyclerView etc.
     myRecylerView.setLayoutManager(...);
@@ -231,7 +231,7 @@ Glide's [sample apps][11] contain a couple of example usages of [``RecyclerViewP
 
 1. [FlickrPhotoGrid][12], uses a [``FixedPreloadSizeProvider``][5] to preload in the flickr sample's two smaller photo grid views.
 2. [FlickrPhotoList][13] uses a [``ViewPreloadSizeProvider``][4] to preload in the flickr sample's larger list view.
-3. [MainActivity][14] in the Giphy sample uses a [``ViewPreloadSizeProvider``][4] to preload gifs while scrolling.
+3. [MainActivity][14] in the Giphy sample uses a [``ViewPreloadSizeProvider``][4] to preload GIFs while scrolling.
 4. [HorizontalGalleryFragment][15] in the Gallery sample uses a custom ``PreloadSizeProvider`` to preload local images while scrolling horizontally.
 
 ### Tips and tricks

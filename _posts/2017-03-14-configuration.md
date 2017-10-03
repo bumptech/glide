@@ -193,7 +193,7 @@ Glide.with(fragment)
           .disallowHardwareBitmaps());
 ```
 
-[``RequestManager``][34] also has a [``setDefaultRequestOptions``][36] that will completely replace any default [``RequestOptions``][33] previously set either via the ``GlideBuilder`` in an [``AppGlideModule``][1] or via the [``RequestManager``][34]. Use caution with [``setDefaultRequestOptions``][36] because it's easy to accidentally override important defaults you've set elsewhere. Typically [``applyDefaultRequstOptions``][35] is safer and more intuitive to use.
+[``RequestManager``][34] also has a [``setDefaultRequestOptions``][36] that will completely replace any default [``RequestOptions``][33] previously set either via the ``GlideBuilder`` in an [``AppGlideModule``][1] or via the [``RequestManager``][34]. Use caution with [``setDefaultRequestOptions``][36] because it's easy to accidentally override important defaults you've set elsewhere. Typically [``applyDefaultRequestOptions``][35] is safer and more intuitive to use.
 
 #### UncaughtThrowableStrategy
 
