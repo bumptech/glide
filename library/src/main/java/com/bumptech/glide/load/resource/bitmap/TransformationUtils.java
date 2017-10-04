@@ -38,8 +38,16 @@ public final class TransformationUtils {
   // See #738.
   private static final List<String> MODELS_REQUIRING_BITMAP_LOCK =
       Arrays.asList(
+          // Moto X gen 2
+          "XT1085",
+          "XT1092",
+          "XT1093",
+          "XT1094",
+          "XT1095",
+          "XT1096",
           "XT1097",
-          "XT1085");
+          "XT1098"
+          );
   /**
    * https://github.com/bumptech/glide/issues/738 On some devices (Moto X with android 5.1) bitmap
    * drawing is not thread safe.
