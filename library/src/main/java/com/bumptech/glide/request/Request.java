@@ -62,10 +62,10 @@ public interface Request {
    * Returns {@code true} if this {@link Request} is equivalent to the given {@link Request} (has
    * all of the same options and sizes).
    *
-   * <p>This method is identical to {@link #equals(Object)} except that it's specific to
-   * {@link Request} subclasses. We do not use {@link #equals(Object)} directly because we track
-   * {@link Request}s in collections like {@link java.util.Set} and it's perfectly legitimate to
-   * have two different {@link Request} objects for two different
+   * <p>This method is identical to {@link Object#equals(Object)} except that it's specific to
+   * {@link Request} subclasses. We do not use {@link Object#equals(Object)} directly because we
+   * track {@link Request}s in collections like {@link java.util.Set} and it's perfectly legitimate
+   * to have two different {@link Request} objects for two different
    * {@link com.bumptech.glide.request.target.Target}s (for example). Using a similar but different
    * method let's us selectively compare {@link Request} objects to each other when it's useful in
    * specific scenarios.

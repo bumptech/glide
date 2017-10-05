@@ -23,7 +23,7 @@ import javax.lang.model.util.Elements;
  * Generates a Glide look-alike that acts as the entry point to the generated API
  * (GlideApp.with(...)).
  *
- * <p>>Generated {@link com.bumptech.glide.Glide} look-alikes look like this (note that the name
+ * <p>>Generated {@code com.bumptech.glide.Glide} look-alikes look like this (note that the name
  * is configurable in {@link com.bumptech.glide.annotation.GlideModule}):
  * <pre>
  * <code>

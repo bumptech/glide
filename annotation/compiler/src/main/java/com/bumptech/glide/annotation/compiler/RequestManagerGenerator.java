@@ -30,10 +30,10 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
 /**
- * Generates an implementation of {@link com.bumptech.glide.RequestManager} that contains generated
+ * Generates an implementation of {@code com.bumptech.glide.RequestManager} that contains generated
  * methods from {@link GlideExtension}s and {@link GlideType}.
  *
- * <p>Generated {@link com.bumptech.glide.RequestManager} implementations look like this:
+ * <p>Generated {@code com.bumptech.glide.RequestManager} implementations look like this:
  * <pre>
  * <code>
  * public final class GeneratedRequestManager extends RequestManager {

@@ -33,8 +33,8 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 /**
- * Generates a {@link com.bumptech.glide.RequestBuilder} subclass containing all methods from
- * the base class, all methods from {@link com.bumptech.glide.request.RequestOptions} and all
+ * Generates a {@code com.bumptech.glide.RequestBuilder} subclass containing all methods from
+ * the base class, all methods from {@code com.bumptech.glide.request.RequestOptions} and all
  * non-override {@link GlideOption} annotated methods in {@link GlideExtension} annotated
  * classes.
  *
@@ -177,8 +177,8 @@ final class RequestBuilderGenerator {
   }
 
   /**
-   * Generates overrides of all methods in {@link com.bumptech.glide.RequestBuilder} that return
-   * {@link com.bumptech.glide.RequestBuilder} so that they return our generated subclass instead.
+   * Generates overrides of all methods in {@code com.bumptech.glide.RequestBuilder} that return
+   * {@code com.bumptech.glide.RequestBuilder} so that they return our generated subclass instead.
    */
   private List<MethodSpec> generateRequestBuilderOverrides() {
     TypeMirror rawRequestBuilderType =
@@ -194,8 +194,8 @@ final class RequestBuilderGenerator {
   }
 
   /**
-   * Generates an override of a particular method in {@link com.bumptech.glide.RequestBuilder} that
-   * returns {@link com.bumptech.glide.RequestBuilder} so that it returns our generated subclass
+   * Generates an override of a particular method in {@code com.bumptech.glide.RequestBuilder} that
+   * returns {@code com.bumptech.glide.RequestBuilder} so that it returns our generated subclass
    * instead.
    */
   private MethodSpec generateRequestBuilderOverride(ExecutableElement methodToOverride) {
@@ -234,7 +234,7 @@ final class RequestBuilderGenerator {
    * Generates methods with equivalent names and arguments to methods annotated with
    * {@link GlideOption} in
    * {@link com.bumptech.glide.annotation.GlideExtension}s that return our generated
-   * {@link com.bumptech.glide.RequestBuilder} subclass.
+   * {@code com.bumptech.glide.RequestBuilder} subclass.
    */
   private List<MethodSpec> generateGeneratedRequestOptionsEquivalents(
       @Nullable final TypeSpec generatedOptions) {
@@ -260,10 +260,10 @@ final class RequestBuilderGenerator {
 
   /**
    * Returns {@code true} if the given {@link MethodSpec} is a useful method to have in our
-   * {@link com.bumptech.glide.RequestBuilder} subclass.
+   * {@code com.bumptech.glide.RequestBuilder} subclass.
    *
    * <p>Only newly generated methods will be included in the generated
-   * {@link com.bumptech.glide.request.BaseRequestBuilder} subclass, so we only have to filter out
+   * {@code com.bumptech.glide.request.BaseRequestBuilder} subclass, so we only have to filter out
    * methods that override other methods to avoid duplicates.
    */
   private boolean isUsefulGeneratedRequestOption(MethodSpec requestOptionMethod) {
@@ -277,7 +277,7 @@ final class RequestBuilderGenerator {
 
    /**
    * Generates a particular method with  an equivalent name and arguments to the given method
-   * from the generated {@link com.bumptech.glide.request.BaseRequestBuilder} subclass.
+   * from the generated {@code com.bumptech.glide.request.BaseRequestBuilder} subclass.
    */
   private MethodSpec generateGeneratedRequestOptionEquivalent(MethodSpec requestOptionMethod) {
     CodeBlock callRequestOptionsMethod = CodeBlock.builder()
@@ -369,7 +369,7 @@ final class RequestBuilderGenerator {
   }
 
   /**
-   * Overrides the protected downloadOnly method in {@link com.bumptech.glide.RequestBuilder} to
+   * Overrides the protected downloadOnly method in {@code com.bumptech.glide.RequestBuilder} to
    * return our generated subclass instead.
    */
   private MethodSpec generateDownloadOnlyRequestMethod() {

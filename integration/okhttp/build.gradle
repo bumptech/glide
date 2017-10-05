@@ -5,7 +5,7 @@ dependencies {
     annotationProcessor project(':annotation:compiler')
 
     compile "com.squareup.okhttp:okhttp:2.7.1"
-    compile "com.android.support:support-annotations:{$ANDROID_SUPPORT_VERSION}"
+    compile "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
 }
 
 android {

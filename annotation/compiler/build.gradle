@@ -22,10 +22,13 @@ dependencies {
     compile files(Jvm.current().getToolsJar())
 }
 
-def repackagedJar = file("$buildDir/intermediates/repackaged.jar")
-def proguardedJar = file("$buildDir/intermediates/proguarded.jar")
+def packagingFolder = file("${buildDir}/intermediates")
+def repackagedJar = file("${packagingFolder}/repackaged.jar")
+def proguardedJar = file("${packagingFolder}/proguarded.jar")
 
 task compiledJar(type: Jar, dependsOn: classes) {
+    destinationDir = packagingFolder
+    archiveName = 'compiled.jar'
     from sourceSets.main.output
 }
 
@@ -49,7 +52,7 @@ task jarjar(dependsOn: [tasks.compiledJar, configurations.compileOnly]) {
                         'META-INF/services/javax.annotation.processing.Processor'
                     ].join(','))
                 }
-                zipfileset(src: tasks.jar.archivePath)
+                zipfileset(src: tasks.compiledJar.archivePath)
                 def repackageIntoGlide = 'com.bumptech.glide.repackaged.@0'
                 rule result: repackageIntoGlide, pattern: 'com.squareup.javapoet.**'
                 rule result: repackageIntoGlide, pattern: 'com.google.auto.**'
@@ -71,7 +74,7 @@ task proguard(type: ProGuardTask, dependsOn: tasks.jarjar) {
     libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
 }
 
-// Create the standard jar artifact based on our repackaged and proguarded jar.
+// Create the standard jar artifact based on our compiled, repackaged and proguarded jar.
 jar {
     dependsOn proguard
     from zipTree(proguardedJar)
