@@ -6,7 +6,8 @@ import java.io.File;
 
 /**
  * Creates an {@link com.bumptech.glide.disklrucache.DiskLruCache} based disk cache in the external
- * disk cache directory.
+ * disk cache directory, which falls back to the internal disk cache if no external storage is
+ * available. If ever fell back to the internal disk cache, will use that one from that moment on.
  *
  * <p><b>Images can be read by everyone when using external disk cache.</b>
  */
@@ -22,16 +23,34 @@ public final class ExternalPreferredCacheDiskCacheFactory extends DiskLruCacheFa
   }
 
   public ExternalPreferredCacheDiskCacheFactory(final Context context, final String diskCacheName,
-                                                int diskCacheSize) {
+                                                final int diskCacheSize) {
     super(new CacheDirectoryGetter() {
-      @Override
-      public File getCacheDirectory() {
-        File cacheDirectory = context.getExternalCacheDir();
-        if (cacheDirectory == null) {
-          cacheDirectory = context.getCacheDir();
-        }
+      private File getInternalCacheDirectory() {
+        File cacheDirectory = context.getCacheDir();
         if (cacheDirectory == null) {
           return null;
+        }
+        if (diskCacheName != null) {
+          return new File(cacheDirectory, diskCacheName);
+        }
+        return cacheDirectory;
+      }
+
+      @Override
+      public File getCacheDirectory() {
+        File internalCacheDirectory = getInternalCacheDirectory();
+
+        // Already used internal cache, so keep using that one,
+        // thus avoiding using both external and internal with transient errors.
+        if ((null != internalCacheDirectory) && internalCacheDirectory.exists()) {
+          return internalCacheDirectory;
+        }
+
+        File cacheDirectory = context.getExternalCacheDir();
+
+        // Shared storage is not available.
+        if (cacheDirectory == null) {
+          return internalCacheDirectory;
         }
         if (diskCacheName != null) {
           return new File(cacheDirectory, diskCacheName);
