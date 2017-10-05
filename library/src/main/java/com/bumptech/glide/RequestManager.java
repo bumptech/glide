@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -292,6 +293,7 @@ public class RequestManager implements LifecycleListener {
    *
    * @return A new request builder for loading a {@link android.graphics.Bitmap}
    */
+  @CheckResult
   public RequestBuilder<Bitmap> asBitmap() {
     return as(Bitmap.class).apply(DECODE_TYPE_BITMAP);
   }
@@ -309,6 +311,7 @@ public class RequestManager implements LifecycleListener {
    * @return A new request builder for loading a
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
    */
+  @CheckResult
   public RequestBuilder<GifDrawable> asGif() {
     return as(GifDrawable.class).apply(DECODE_TYPE_GIF);
   }
@@ -323,6 +326,7 @@ public class RequestManager implements LifecycleListener {
    *
    * @return A new request builder for loading a {@link Drawable}.
    */
+  @CheckResult
   public RequestBuilder<Drawable> asDrawable() {
     return as(Drawable.class);
   }
@@ -333,6 +337,7 @@ public class RequestManager implements LifecycleListener {
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
+  @CheckResult
   public RequestBuilder<Drawable> load(@Nullable Object model) {
     return asDrawable().load(model);
   }
@@ -348,6 +353,7 @@ public class RequestManager implements LifecycleListener {
    *
    * @return A new request builder for downloading content to cache and returning the cache File.
    */
+  @CheckResult
   public RequestBuilder<File> downloadOnly() {
     return as(File.class).apply(DOWNLOAD_ONLY_OPTIONS);
   }
@@ -358,6 +364,7 @@ public class RequestManager implements LifecycleListener {
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
+  @CheckResult
   public RequestBuilder<File> download(@Nullable Object model) {
     return downloadOnly().load(model);
   }
@@ -371,6 +378,7 @@ public class RequestManager implements LifecycleListener {
    *
    * @return A new request builder for obtaining File paths to content.
    */
+  @CheckResult
   public RequestBuilder<File> asFile() {
     return as(File.class).apply(skipMemoryCacheOf(true));
   }
@@ -383,6 +391,7 @@ public class RequestManager implements LifecycleListener {
    * @param resourceClass The resource to decode.
    * @return A new request builder for loading the given resource class.
    */
+  @CheckResult
   public <ResourceType> RequestBuilder<ResourceType> as(Class<ResourceType> resourceClass) {
     return new RequestBuilder<>(glide, this, resourceClass);
   }

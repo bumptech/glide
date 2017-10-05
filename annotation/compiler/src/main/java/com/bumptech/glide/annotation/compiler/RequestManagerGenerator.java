@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -59,6 +60,8 @@ final class RequestManagerGenerator {
       "com.bumptech.glide.manager.Lifecycle";
   private static final String REQUEST_MANAGER_TREE_NODE_QUALIFIED_NAME =
       "com.bumptech.glide.manager.RequestManagerTreeNode";
+  private static final ClassName CHECK_RESULT_CLASS_NAME =
+      ClassName.get("android.support.annotation", "CheckResult");
 
   private static final String GENERATED_REQUEST_MANAGER_SIMPLE_NAME =
       "GlideRequests";
@@ -147,6 +150,7 @@ final class RequestManagerGenerator {
         .addAnnotation(Override.class)
         .addTypeVariable(TypeVariableName.get("ResourceType"))
         .addParameter(classOfResouceType, "resourceClass")
+        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
         .returns(requestBuilderOfResourceType)
         .addStatement("return new $T<>(glide, this, resourceClass)",
             this.generatedRequestBuilderClassName)
@@ -159,10 +163,6 @@ final class RequestManagerGenerator {
     // assignable to the raw RequestBuilder.
     TypeMirror rawRequestBuilder = processingEnv.getTypeUtils()
         .erasure(requestBuilderType.asType());
-
-    final TypeElement classType =
-        processingEnv.getElementUtils().getTypeElement(Class.class.getCanonicalName());
-    final TypeMirror rawClassType = processingEnv.getTypeUtils().erasure(classType.asType());
 
     return FluentIterable.from(
         processorUtil.findInstanceMethodsReturning(requestManagerType, rawRequestBuilder))
@@ -195,7 +195,7 @@ final class RequestManagerGenerator {
     ParameterizedTypeName generatedRequestBuilderOfType =
         ParameterizedTypeName.get(generatedRequestBuilderClassName, ClassName.get(typeArgument));
 
-    return MethodSpec.overriding(methodToOverride)
+    MethodSpec.Builder builder = MethodSpec.overriding(methodToOverride)
         .returns(generatedRequestBuilderOfType)
         .addCode(CodeBlock.builder()
             .add("return ($T) super.$N(",
@@ -209,8 +209,12 @@ final class RequestManagerGenerator {
                 })
                 .join(Joiner.on(", ")))
             .add(");\n")
-            .build())
-        .build();
+            .build());
+
+    for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
+      builder.addAnnotation(AnnotationSpec.get(mirror));
+    }
+    return builder.build();
   }
 
   private List<MethodSpec> generateAdditionalRequestManagerMethods(
