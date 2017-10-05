@@ -9,17 +9,27 @@ import java.io.File;
  *
  * <p><b>Images can be read by everyone when using external disk cache.</b>
  */
+@Deprecated
 public final class ExternalCacheDiskCacheFactory extends DiskLruCacheFactory {
 
+  /**
+   * @deprecated Use {@link #ExternalPreferredCacheDiskCacheFactory(Context)}.
+   */
   public ExternalCacheDiskCacheFactory(Context context) {
     this(context, DiskCache.Factory.DEFAULT_DISK_CACHE_DIR,
         DiskCache.Factory.DEFAULT_DISK_CACHE_SIZE);
   }
 
+  /**
+   * @deprecated Use {@link #ExternalPreferredCacheDiskCacheFactory(Context, int)}.
+   */
   public ExternalCacheDiskCacheFactory(Context context, int diskCacheSize) {
     this(context, DiskCache.Factory.DEFAULT_DISK_CACHE_DIR, diskCacheSize);
   }
 
+  /**
+   * @deprecated Use {@link #ExternalPreferredCacheDiskCacheFactory(Context, int, String)}.
+   */
   public ExternalCacheDiskCacheFactory(final Context context, final String diskCacheName,
       int diskCacheSize) {
     super(new CacheDirectoryGetter() {
