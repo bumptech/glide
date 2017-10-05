@@ -57,7 +57,7 @@ public class MarkEnforcingInputStream extends FilterInputStream {
   public long skip(long byteCount) throws IOException {
     long toSkip = getBytesToRead(byteCount);
     if (toSkip == END_OF_STREAM) {
-      return END_OF_STREAM;
+      return 0;
     }
 
     long read = super.skip(toSkip);

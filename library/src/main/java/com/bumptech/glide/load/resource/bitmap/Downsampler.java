@@ -271,7 +271,8 @@ public final class Downsampler {
     if ((options.inSampleSize == 1 || isKitKatOrGreater) && shouldUsePool(imageType)) {
       int expectedWidth;
       int expectedHeight;
-      if (fixBitmapToRequestedDimensions && isKitKatOrGreater) {
+      if (sourceWidth >= 0 && sourceHeight >= 0
+          && fixBitmapToRequestedDimensions && isKitKatOrGreater) {
         expectedWidth = targetWidth;
         expectedHeight = targetHeight;
       } else {
@@ -336,6 +337,10 @@ public final class Downsampler {
       BitmapFactory.Options options) throws IOException {
     // We can't downsample source content if we can't determine its dimensions.
     if (sourceWidth <= 0 || sourceHeight <= 0) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Unable to determine dimensions for: " + imageType
+            + " with target [" + targetWidth + "x" + targetHeight + "]");
+      }
       return;
     }
 

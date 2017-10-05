@@ -135,7 +135,7 @@ public class MarkEnforcingInputStreamTest {
     is.mark(MARK_LIMIT);
 
     assertEquals(MARK_LIMIT, is.skip(DATA_SIZE));
-    assertEquals(-1, is.skip(1));
+    assertEquals(0, is.skip(1));
   }
 
   @Test
