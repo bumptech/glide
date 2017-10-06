@@ -73,6 +73,11 @@ If you're using Kotlin you can:
      kapt 'com.github.bumptech.glide:compiler:4.2.0'
    }
    ```
+  Note that you must also include the ``kotlin-kapt`` plugin in your ``build.gradle`` file:
+
+   ```groovy
+   apply plugin: 'kotlin-kapt'
+   ```
 
    To use ``kapt``, see the [official documentation][14].
 
