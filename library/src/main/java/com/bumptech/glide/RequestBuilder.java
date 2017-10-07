@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.ErrorRequestCoordinator;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestCoordinator;
@@ -55,6 +56,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   // than relying on model not to be null.
   @Nullable private RequestListener<TranscodeType> requestListener;
   @Nullable private RequestBuilder<TranscodeType> thumbnailBuilder;
+  @Nullable private RequestBuilder<TranscodeType> errorBuilder;
   @Nullable private Float thumbSizeMultiplier;
   private boolean isDefaultTransitionOptionsSet = true;
   private boolean isModelSet;
@@ -115,7 +117,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   }
 
   /**
-   * Sets a RequestBuilder listener to monitor the resource load. It's best to create a single
+   * Sets a {@link RequestListener} to monitor the resource load. It's best to create a single
    * instance of an exception handler per type of request (usually activity/fragment) rather than
    * pass one in per request to avoid some redundant object allocation.
    *
@@ -128,6 +130,34 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       @Nullable RequestListener<TranscodeType> requestListener) {
     this.requestListener = requestListener;
 
+    return this;
+  }
+
+  /**
+   * Sets a {@link RequestBuilder} that is built and run iff the load started by this
+   * {@link RequestBuilder} fails.
+   *
+   * <p>If this {@link RequestBuilder} uses a thumbnail that succeeds the given error
+   * {@link RequestBuilder} will be started anyway if the non-thumbnail request fails.
+   *
+   * <p>Recursive calls to {@link #error(RequestBuilder)} as well as calls to
+   * {@link #thumbnail(float)} and {@link #thumbnail(RequestBuilder)} are supported for the given
+   * error {@link RequestBuilder}.
+   *
+   * <p>Unlike {@link #thumbnail(RequestBuilder)} and {@link #thumbnail(float)}, no options from
+   * this primary {@link RequestBuilder} are propagated to the given error {@link RequestBuilder}.
+   * Options like priority, override widths and heights and transitions must be applied
+   * independently to the error builder.
+   *
+   * <p>The given {@link RequestBuilder} will start and potentially override a fallback drawable
+   * if it's set on this {@link RequestBuilder} via
+   * {@link RequestOptions#fallback(android.graphics.drawable.Drawable)} or
+   * {@link RequestOptions#fallback(int)}.
+   *
+   * @return This {@link RequestBuilder}.
+   */
+  public RequestBuilder<TranscodeType> error(@Nullable RequestBuilder<TranscodeType> errorBuilder) {
+    this.errorBuilder = errorBuilder;
     return this;
   }
 
@@ -607,9 +637,55 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   }
 
   private Request buildRequestRecursive(Target<TranscodeType> target,
-      @Nullable ThumbnailRequestCoordinator parentCoordinator,
+      @Nullable RequestCoordinator parentCoordinator,
       TransitionOptions<?, ? super TranscodeType> transitionOptions,
       Priority priority, int overrideWidth, int overrideHeight, RequestOptions requestOptions) {
+
+    // Build the ErrorRequestCoordinator first if necessary so we can update parentCoordinator.
+    ErrorRequestCoordinator errorRequestCoordinator = null;
+    if (errorBuilder != null) {
+      errorRequestCoordinator = new ErrorRequestCoordinator(parentCoordinator);
+      parentCoordinator = errorRequestCoordinator;
+    }
+
+    Request mainRequest =
+        buildThumbnailRequestRecursive(
+            target,
+            parentCoordinator,
+            transitionOptions,
+            priority,
+            overrideWidth,
+            overrideHeight,
+            requestOptions);
+
+    if (errorRequestCoordinator == null) {
+      return mainRequest;
+    }
+
+    int errorOverrideWidth = errorBuilder.requestOptions.getOverrideWidth();
+    int errorOverrideHeight = errorBuilder.requestOptions.getOverrideHeight();
+    if (Util.isValidDimensions(overrideWidth, overrideHeight)
+        && !errorBuilder.requestOptions.isValidOverride()) {
+      errorOverrideWidth = requestOptions.getOverrideWidth();
+      errorOverrideHeight = requestOptions.getOverrideHeight();
+    }
+
+    Request errorRequest = errorBuilder.buildRequestRecursive(
+        target,
+        errorRequestCoordinator,
+        errorBuilder.transitionOptions,
+        errorBuilder.requestOptions.getPriority(),
+        errorOverrideWidth,
+        errorOverrideHeight,
+        errorBuilder.requestOptions);
+    errorRequestCoordinator.setRequests(mainRequest, errorRequest);
+    return errorRequestCoordinator;
+  }
+
+  private Request buildThumbnailRequestRecursive(Target<TranscodeType> target,
+        @Nullable RequestCoordinator parentCoordinator,
+        TransitionOptions<?, ? super TranscodeType> transitionOptions,
+        Priority priority, int overrideWidth, int overrideHeight, RequestOptions requestOptions) {
     if (thumbnailBuilder != null) {
       // Recursive case: contains a potentially recursive thumbnail request builder.
       if (isThumbnailBuilt) {

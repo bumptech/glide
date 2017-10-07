@@ -77,6 +77,17 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     }
   }
 
+  @Override
+  public void onRequestFailed(Request request) {
+    if (!request.equals(full)) {
+      return;
+    }
+
+    if (coordinator != null) {
+      coordinator.onRequestFailed(this);
+    }
+  }
+
   private boolean parentIsAnyResourceSet() {
     return coordinator != null && coordinator.isAnyResourceSet();
   }
@@ -102,9 +113,6 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     thumb.pause();
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public void clear() {
     isRunning = false;
@@ -151,9 +159,6 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     return full.isFailed();
   }
 
-  /**
-   * {@inheritDoc}.
-   */
   @Override
   public void recycle() {
     full.recycle();
