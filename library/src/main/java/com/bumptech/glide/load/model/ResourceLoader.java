@@ -27,7 +27,6 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
 
   @Override
   public LoadData<Data> buildLoadData(Integer model, int width, int height, Options options) {
-
     Uri uri = getResourceUri(model);
     return uri == null ? null : uriLoader.buildLoadData(uri, width, height, options);
   }
@@ -91,6 +90,28 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
     public ModelLoader<Integer, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
       return new ResourceLoader<>(
           resources, multiFactory.build(Uri.class, ParcelFileDescriptor.class));
+    }
+
+    @Override
+    public void teardown() {
+      // Do nothing.
+    }
+  }
+
+  /**
+   * Factory for loading resource {@link Uri}s from Android resource ids.
+   */
+  public static class UriFactory implements ModelLoaderFactory<Integer, Uri> {
+
+    private final Resources resources;
+
+    public UriFactory(Resources resources) {
+      this.resources = resources;
+    }
+
+    @Override
+    public ModelLoader<Integer, Uri> build(MultiModelLoaderFactory multiFactory) {
+      return new ResourceLoader<>(resources, new UnitModelLoader<Uri>());
     }
 
     @Override

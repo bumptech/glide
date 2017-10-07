@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
@@ -54,6 +55,7 @@ import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
+import com.bumptech.glide.load.resource.drawable.ResourceDrawableDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
 import com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -329,6 +331,8 @@ public class Glide implements ComponentCallbacks2 {
         .append(GifDecoder.class, GifDecoder.class, new UnitModelLoader.Factory<GifDecoder>())
         .append(Registry.BUCKET_BITMAP, GifDecoder.class, Bitmap.class,
             new GifFrameResourceDecoder(bitmapPool))
+        /* Drawables */
+        .append(Uri.class, Drawable.class, new ResourceDrawableDecoder(context))
         /* Files */
         .register(new ByteBufferRewinder.Factory())
         .append(File.class, ByteBuffer.class, new ByteBufferFileLoader.Factory())
@@ -349,6 +353,8 @@ public class Glide implements ComponentCallbacks2 {
                 Integer.class,
                 ParcelFileDescriptor.class,
                 new ResourceLoader.FileDescriptorFactory(resources))
+        .append(Integer.class, Uri.class, new ResourceLoader.UriFactory(resources))
+        .append(int.class, Uri.class, new ResourceLoader.UriFactory(resources))
         .append(String.class, InputStream.class, new DataUrlLoader.StreamFactory())
         .append(String.class, InputStream.class, new StringLoader.StreamFactory())
         .append(String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory())
@@ -362,8 +368,8 @@ public class Glide implements ComponentCallbacks2 {
         .append(Uri.class, InputStream.class, new MediaStoreVideoThumbLoader.Factory(context))
         .append(
             Uri.class,
-             InputStream.class,
-             new UriLoader.StreamFactory(context.getContentResolver()))
+            InputStream.class,
+            new UriLoader.StreamFactory(context.getContentResolver()))
         .append(Uri.class, ParcelFileDescriptor.class,
              new UriLoader.FileDescriptorFactory(context.getContentResolver()))
         .append(Uri.class, InputStream.class, new UrlUriLoader.StreamFactory())
