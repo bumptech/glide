@@ -74,10 +74,17 @@ task proguard(type: ProGuardTask, dependsOn: tasks.jarjar) {
     libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
 }
 
-// Create the standard jar artifact based on our compiled, repackaged and proguarded jar.
+// Replace the contents of the standard jar task with those from our our compiled, repackaged and
+// proguarded jar. Replacing the task itself is possible and looks simpler, but requires
+// reconstructing the task dependency chain and is more complex in practice.
 jar {
     dependsOn proguard
     from zipTree(proguardedJar)
+    exclude { entry ->
+        sourceSets.main.output.files*.absolutePath.any {
+            entry.file.absolutePath.startsWith it
+        }
+    }
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"

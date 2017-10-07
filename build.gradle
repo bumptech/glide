@@ -26,6 +26,11 @@ subprojects {
         sourceCompatibility = 1.7
         targetCompatibility = 1.7
     }
+
+    // Avoid issues like #2452.
+    tasks.withType(Jar) {
+        duplicatesStrategy = DuplicatesStrategy.FAIL
+    }
 }
 
 subprojects { project ->
