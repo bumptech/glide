@@ -197,7 +197,7 @@ Glide.with(fragment)
 
 #### UncaughtThrowableStrategy
 
-When loading a bitmap, if an exception happens (e.g. `OutOfMemoryException`), glide will use a `GlideExecutor.UncaughtThrowableStrategy`. 
+When loading a bitmap, if an exception happens (e.g. `OutOfMemoryException`), Glide will use a `GlideExecutor.UncaughtThrowableStrategy`. 
 The default strategy is to log the exception in the device logcat. The strategy is customizable since glide 4.2.0. It can be passed to a disk executor and/or a resize executor:
 
 ```java
@@ -208,6 +208,20 @@ public class YourAppGlideModule extends AppGlideModule {
     final UncaughtThrowableStrategy myUncaughtThrowableStrategy = new ...
     builder.setDiskCacheExecutor(newDiskCacheExecutor(myUncaughtThrowableStrategy));
     builder.setResizeExecutor(newSourceExecutor(myUncaughtThrowableStrategy));
+  }
+}
+```
+
+#### Log level
+
+For a subset of well formatted logs, including lines logged when a request fails, you can use [``setLogLevel``][37] with one of the values from Android's [``Log``][38] class. Generally speaking ``log.VERBOSE`` will make logs noisier and ``Log.ERROR`` will make logs quieter, but see [the javadoc][37] for details.
+
+```java
+@GlideModule
+public class YourAppGlideModule extends AppGlideModule {
+  @Override
+  public void applyOptions(Context context, GlideBuilder builder) {
+    builder.setLogLevel(Log.DEBUG);
   }
 }
 ```
@@ -403,3 +417,5 @@ public final class MyAppGlideModule extends AppGlideModule {
 [34]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/RequestManager.html
 [35]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/RequestManager.html#applyDefaultRequestOptions-com.bumptech.glide.request.RequestOptions-
 [36]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/RequestManager.html#setDefaultRequestOptions-com.bumptech.glide.request.RequestOptions-
+[37]: {{ site.baseurl }}/javadocs/420/com/bumptech/glide/GlideBuilder.html#setLogLevel-int-
+[38]: https://developer.android.com/reference/android/util/Log.html
