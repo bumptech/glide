@@ -7,6 +7,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
@@ -14,6 +15,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Type.ClassType;
 import java.lang.annotation.Annotation;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,8 +38,10 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
@@ -231,6 +236,71 @@ final class ProcessorUtil {
 
   void infoLog(String toLog) {
     processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "[" + round + "] " + toLog);
+  }
+
+  static MethodSpec.Builder overriding(ExecutableElement method) {
+    String methodName = method.getSimpleName().toString();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder(methodName)
+        .addAnnotation(Override.class);
+
+    Set<Modifier> modifiers = method.getModifiers();
+    modifiers = new LinkedHashSet<>(modifiers);
+    modifiers.remove(Modifier.ABSTRACT);
+    Modifier defaultModifier = null;
+    // Modifier.DEFAULT doesn't exist until Java 8.
+    try {
+      defaultModifier = Modifier.valueOf("DEFAULT");
+    } catch (IllegalArgumentException e) {
+      // Ignored.
+    }
+    modifiers.remove(defaultModifier);
+
+    builder = builder.addModifiers(modifiers);
+
+    for (TypeParameterElement typeParameterElement : method.getTypeParameters()) {
+      TypeVariable var = (TypeVariable) typeParameterElement.asType();
+      builder = builder.addTypeVariable(TypeVariableName.get(var));
+    }
+
+    builder = builder.returns(TypeName.get(method.getReturnType()))
+        .addParameters(getParameters(method))
+        .varargs(method.isVarArgs());
+
+    for (TypeMirror thrownType : method.getThrownTypes()) {
+      builder = builder.addException(TypeName.get(thrownType));
+    }
+
+    return builder;
+  }
+
+  static List<ParameterSpec> getParameters(ExecutableElement method) {
+    return getParameters(method.getParameters());
+  }
+
+  static List<ParameterSpec> getParameters(List<? extends VariableElement> parameters) {
+    List<ParameterSpec> result = new ArrayList<>();
+    for (VariableElement parameter : parameters) {
+      result.add(getParameter(parameter));
+    }
+    return result;
+  }
+
+  private static ParameterSpec getParameter(VariableElement method) {
+    TypeName type = TypeName.get(method.asType());
+    String name = method.getSimpleName().toString();
+    return ParameterSpec.builder(type, name)
+        .addModifiers(method.getModifiers())
+        .addAnnotations(getAnnotations(method))
+        .build();
+  }
+
+  private static List<AnnotationSpec> getAnnotations(VariableElement element) {
+    List<AnnotationSpec> result = new ArrayList<>();
+    for (AnnotationMirror mirror : element.getAnnotationMirrors()) {
+      result.add(AnnotationSpec.get(mirror));
+    }
+    return result;
   }
 
   List<ExecutableElement> findInstanceMethodsReturning(TypeElement clazz, TypeMirror returnType) {

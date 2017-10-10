@@ -195,7 +195,7 @@ final class RequestManagerGenerator {
     ParameterizedTypeName generatedRequestBuilderOfType =
         ParameterizedTypeName.get(generatedRequestBuilderClassName, ClassName.get(typeArgument));
 
-    MethodSpec.Builder builder = MethodSpec.overriding(methodToOverride)
+    MethodSpec.Builder builder = ProcessorUtil.overriding(methodToOverride)
         .returns(generatedRequestBuilderOfType)
         .addCode(CodeBlock.builder()
             .add("return ($T) super.$N(",

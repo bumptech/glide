@@ -194,7 +194,7 @@ final class RequestOptionsGenerator {
   }
 
   private MethodSpec generateRequestOptionOverride(ExecutableElement methodToOverride) {
-    MethodSpec.Builder result = MethodSpec.overriding(methodToOverride)
+    MethodSpec.Builder result = ProcessorUtil.overriding(methodToOverride)
         .returns(glideOptionsName)
         .addModifiers(Modifier.FINAL)
         .addCode(CodeBlock.builder()
@@ -274,9 +274,7 @@ final class RequestOptionsGenerator {
           .addAnnotation(Override.class);
     }
 
-    for (VariableElement variable : parameters) {
-      builder.addParameter(getParameterSpec(variable));
-    }
+    builder.addParameters(ProcessorUtil.getParameters(parameters));
 
     // Adds: <AnnotatedClass>.<thisMethodName>(RequestOptions<?>, <arg1>, <arg2>, <argN>);
     List<Object> args = new ArrayList<>();
@@ -368,8 +366,8 @@ final class RequestOptionsGenerator {
     List<? extends VariableElement> parameters = staticMethod.getParameters();
     String createNewOptionAndCall = "new $T().$N(";
     if (!parameters.isEmpty()) {
+      methodSpecBuilder.addParameters(ProcessorUtil.getParameters(staticMethod));
       for (VariableElement parameter : parameters) {
-        methodSpecBuilder.addParameter(getParameterSpec(parameter));
         createNewOptionAndCall += parameter.getSimpleName().toString();
         // use the Application Context to avoid memory leaks.
         if (memoize && isAndroidContext(parameter)) {
@@ -462,8 +460,8 @@ final class RequestOptionsGenerator {
 
     String createNewOptionAndCall = "new $T().$L(";
     if (!parameters.isEmpty()) {
+      methodSpecBuilder.addParameters(ProcessorUtil.getParameters(parameters));
       for (VariableElement parameter : parameters) {
-        methodSpecBuilder.addParameter(getParameterSpec(parameter));
         createNewOptionAndCall += parameter.getSimpleName().toString();
         // use the Application Context to avoid memory leaks.
         if (memoize && isAndroidContext(parameter)) {
@@ -536,11 +534,6 @@ final class RequestOptionsGenerator {
       }
     }
     return false;
-  }
-
-  private static ParameterSpec getParameterSpec(VariableElement variable) {
-    return ParameterSpec.builder(
-        TypeName.get(variable.asType()), variable.getSimpleName().toString()).build();
   }
 
   private static List<String> getComparableParameterNames(
