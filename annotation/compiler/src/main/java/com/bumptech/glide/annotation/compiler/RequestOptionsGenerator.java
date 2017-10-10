@@ -241,6 +241,7 @@ final class RequestOptionsGenerator {
     MethodSpec.Builder builder = MethodSpec.methodBuilder(methodName)
         .addModifiers(Modifier.PUBLIC)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(element))
+        .varargs(element.isVarArgs())
         .returns(glideOptionsName);
 
     // The 0th element is expected to be a RequestOptions object.
@@ -444,6 +445,7 @@ final class RequestOptionsGenerator {
     MethodSpec.Builder methodSpecBuilder = MethodSpec.methodBuilder(staticMethodName)
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(instanceMethod))
+        .varargs(instanceMethod.isVarArgs())
         .returns(glideOptionsName);
 
     List<? extends VariableElement> parameters = instanceMethod.getParameters();
