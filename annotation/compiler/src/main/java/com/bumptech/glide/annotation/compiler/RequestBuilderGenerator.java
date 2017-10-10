@@ -224,7 +224,13 @@ final class RequestBuilderGenerator {
             .build());
 
     for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
-      builder.addAnnotation(AnnotationSpec.get(mirror));
+      builder = builder.addAnnotation(AnnotationSpec.get(mirror));
+    }
+
+    if (methodToOverride.isVarArgs()) {
+      builder = builder
+          .addModifiers(Modifier.FINAL)
+          .addAnnotation(SafeVarargs.class);
     }
 
     return builder.build();

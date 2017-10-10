@@ -169,11 +169,16 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * requests will actually finish. However, if the thumb request completes after the full request,
    * the thumb resource will never replace the full resource.
    *
+   * <p>Recursive calls to thumbnail are supported.
+   *
+   * <p>Overrides any previous calls to {@link #thumbnail(RequestBuilder)},
+   * {@link #thumbnail(float)} and {@link #thumbnail(RequestBuilder[])}.
+   *
+   * @see #thumbnail(float)
+   * @see #thumbnail(RequestBuilder[])
+   *
    * @param thumbnailRequest The request to use to load the thumbnail.
    * @return This request builder.
-   * @see #thumbnail(float)
-   *
-   * <p> Recursive calls to thumbnail are supported. </p>
    */
   @CheckResult
   @SuppressWarnings("unchecked")
@@ -185,24 +190,91 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   }
 
   /**
+   * Recursively applies {@link #thumbnail(RequestBuilder)} so that the {@link RequestBuilder}s are
+   * loaded as thumbnails in the given priority order.
+   *
+   * <p>{@link #thumbnail(RequestBuilder)} is applied in the order given so that the
+   * {@link RequestBuilder} at position 0 has the {@link RequestBuilder} at position 1 applied
+   * as using its thumbnail method, the {@link RequestBuilder} at position 1 has the
+   * {@link RequestBuilder} at position 2 applied using its thumbnail method and so on.
+   *
+   * <p>Calling this method with an {@code null} array of {@link RequestBuilder} thumbnails or
+   * an empty array of {@link RequestBuilder} thumbnails is equivalent to calling
+   * {@link #thumbnail(RequestBuilder)} with {@code null}.
+   *
+   * <p>Any individual {@link RequestBuilder} in the array of thumbnails provided here may be
+   * {@code null}. {@code null} {@link RequestBuilder}s are ignored and excluded from the recursive
+   * chain.
+   *
+   * <p>The {@link RequestBuilder} objects provided here may be mutated and have any previous
+   * calls to their {@link #thumbnail(RequestBuilder[])} or {@link #thumbnail(RequestBuilder)}
+   * methods overridden.
+   *
+   * <p>Overrides any previous calls to {@link #thumbnail(RequestBuilder)},
+   * {@link #thumbnail(float)} and {@link #thumbnail(RequestBuilder[])}.
+   *
+   * @see #thumbnail(float)
+   * @see #thumbnail(RequestBuilder)
+   *
+   * @return This request builder.
+   */
+  @SuppressWarnings({"CheckResult", "unchecked"})
+  @CheckResult
+  public RequestBuilder<TranscodeType> thumbnail(
+      @Nullable RequestBuilder<TranscodeType> /*@Nullable*/ ... thumbnails) {
+    if (thumbnails == null || thumbnails.length == 0) {
+      return thumbnail((RequestBuilder<TranscodeType>) null);
+    }
+
+    RequestBuilder<TranscodeType> previous = null;
+
+    // Start with the lowest priority thumbnail so that we can safely handle mutations if
+    // autoClone() is enabled by assigning the result of calling thumbnail() during the iteration.
+    // Starting with the highest priority thumbnail would prevent us from assigning the result of
+    // thumbnail because the mutated request wouldn't be used in the next iteration.
+    for (int i = thumbnails.length - 1; i >= 0; i--) {
+      RequestBuilder<TranscodeType> current = thumbnails[i];
+      // Ignore null thumbnails.
+      if (current == null) {
+        continue;
+      }
+
+      if (previous == null) {
+        // If we don't yet have our first non-null request, set it and continue.
+        previous = current;
+      } else {
+        // Otherwise make our next lowest priority request the thumbnail of our current request.
+        previous = current.thumbnail(previous);
+      }
+    }
+    return thumbnail(previous);
+  }
+
+  /**
    * Loads a resource in an identical manner to this request except with the dimensions of the
    * target multiplied by the given size multiplier. If the thumbnail load completes before the full
    * size load, the thumbnail will be shown. If the thumbnail load completes after the full size
    * load, the thumbnail will not be shown.
    *
-   * <p> Note - The thumbnail resource will be smaller than the size requested so the target (or
+   * <p>Note - The thumbnail resource will be smaller than the size requested so the target (or
    * {@link ImageView}) must be able to scale the thumbnail appropriately. See
-   * {@link android.widget.ImageView.ScaleType}. </p>
+   * {@link android.widget.ImageView.ScaleType}.
    *
-   * <p> Almost all options will be copied from the original load, including the {@link
+   * <p>Almost all options will be copied from the original load, including the {@link
    * com.bumptech.glide.load.model.ModelLoader}, {@link com.bumptech.glide.load.ResourceDecoder},
    * and {@link com.bumptech.glide.load.Transformation}s. However,
    * {@link com.bumptech.glide.request.RequestOptions#placeholder(int)} and
    * {@link com.bumptech.glide.request.RequestOptions#error(int)}, and
    * {@link #listener(RequestListener)} will only be used on the full size load and will not be
-   * copied for the thumbnail load. </p>
+   * copied for the thumbnail load.
    *
-   * <p> Recursive calls to thumbnail are supported. </p>
+   * <p>Recursive calls to thumbnail are supported.
+   *
+   * <p>Overrides any previous calls to {@link #thumbnail(RequestBuilder[])},
+   * {@link #thumbnail(float)} and {@link #thumbnail(RequestBuilder)}.
+   *
+   * @see #thumbnail(RequestBuilder)
+   * @see #thumbnail(RequestBuilder[])
    *
    * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading
    *                       the thumbnail.
