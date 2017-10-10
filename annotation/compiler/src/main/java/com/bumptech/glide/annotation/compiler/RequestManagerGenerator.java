@@ -3,14 +3,12 @@ package com.bumptech.glide.annotation.compiler;
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideType;
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -25,7 +23,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -114,8 +111,9 @@ final class RequestManagerGenerator {
          .addModifiers(Modifier.PUBLIC)
          .addMethod(generateAsMethod(generatedCodePackageName, requestBuilder))
          .addMethod(generateCallSuperConstructor())
-         .addMethods(generateAdditionalRequestManagerMethods(glideExtensions))
-         .addMethods(generateRequestManagerMethodOverrides())
+         .addMethods(generateExtensionRequestManagerMethods(glideExtensions))
+         .addMethods(generateRequestManagerRequestManagerMethodOverrides(generatedCodePackageName))
+         .addMethods(generateRequestManagerRequestBuilderMethodOverrides())
          .addMethods(
              FluentIterable.from(
                  Collections.singletonList(
@@ -157,7 +155,33 @@ final class RequestManagerGenerator {
         .build();
   }
 
-  private List<MethodSpec> generateRequestManagerMethodOverrides() {
+  /** Generates the list of overrides of methods that return {@code RequestManager}. */
+  private List<MethodSpec> generateRequestManagerRequestManagerMethodOverrides(
+      final String generatedPackageName) {
+    return FluentIterable.from(
+        processorUtil.findInstanceMethodsReturning(requestManagerType, requestManagerType))
+        .transform(new Function<ExecutableElement, MethodSpec>() {
+          @Nullable
+          @Override
+          public MethodSpec apply(@Nullable ExecutableElement input) {
+            return generateRequestManagerRequestManagerMethodOverride(generatedPackageName, input);
+          }
+        })
+        .toList();
+  }
+
+  private MethodSpec generateRequestManagerRequestManagerMethodOverride(
+      String generatedPackageName, ExecutableElement method) {
+    ClassName generatedRequestManagerName =
+        ClassName.get(generatedPackageName, GENERATED_REQUEST_MANAGER_SIMPLE_NAME);
+    return ProcessorUtil.overriding(method)
+        .returns(generatedRequestManagerName)
+        .addCode(ProcessorUtil.generateCastingSuperCall(generatedRequestManagerName, method))
+        .build();
+  }
+
+  /** Generates the list of overrides of methods that return {@code RequestBuilder}. */
+  private List<MethodSpec> generateRequestManagerRequestBuilderMethodOverrides() {
     // Without the erasure, this is a RequestBuilder<Y>. A RequestBuilder<X> is not assignable to a
     // RequestBuilder<Y>. After type erasure this is a RequestBuilder. A RequestBuilder<X> is
     // assignable to the raw RequestBuilder.
@@ -176,7 +200,7 @@ final class RequestManagerGenerator {
         .transform(new Function<ExecutableElement, MethodSpec>() {
           @Override
           public MethodSpec apply(ExecutableElement input) {
-            return generateRequestManagerMethodOverride(input);
+            return generateRequestManagerRequestBuilderMethodOverride(input);
           }
         })
         .toList();
@@ -186,7 +210,8 @@ final class RequestManagerGenerator {
    * Generates overrides of existing RequestManager methods so that they return our generated
    * RequestBuilder subtype.
    */
-  private MethodSpec generateRequestManagerMethodOverride(ExecutableElement methodToOverride) {
+  private MethodSpec generateRequestManagerRequestBuilderMethodOverride(
+      ExecutableElement methodToOverride) {
      // We've already verified that this method returns a RequestBuilder and RequestBuilders have
     // exactly one type argument, so this is safe unless those assumptions change.
     TypeMirror typeArgument =
@@ -197,19 +222,9 @@ final class RequestManagerGenerator {
 
     MethodSpec.Builder builder = ProcessorUtil.overriding(methodToOverride)
         .returns(generatedRequestBuilderOfType)
-        .addCode(CodeBlock.builder()
-            .add("return ($T) super.$N(",
-                generatedRequestBuilderOfType, methodToOverride.getSimpleName())
-            .add(FluentIterable.from(methodToOverride.getParameters())
-                .transform(new Function<VariableElement, String>() {
-                  @Override
-                  public String apply(VariableElement input) {
-                    return input.getSimpleName().toString();
-                  }
-                })
-                .join(Joiner.on(", ")))
-            .add(");\n")
-            .build());
+        .addCode(
+            ProcessorUtil.generateCastingSuperCall(
+                generatedRequestBuilderOfType, methodToOverride));
 
     for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
       builder.addAnnotation(AnnotationSpec.get(mirror));
@@ -217,7 +232,7 @@ final class RequestManagerGenerator {
     return builder.build();
   }
 
-  private List<MethodSpec> generateAdditionalRequestManagerMethods(
+  private List<MethodSpec> generateExtensionRequestManagerMethods(
       Set<String> glideExtensions) {
     List<ExecutableElement> requestManagerExtensionMethods =
         processorUtil.findAnnotatedElementsInClasses(glideExtensions, GlideType.class);
@@ -252,7 +267,7 @@ final class RequestManagerGenerator {
   }
 
   /**
-   * The {@link com.bumptech.glide.request.RequestOptions} subclass should always be our
+   * The {@code RequestOptions} subclass should always be our
    * generated subclass type to avoid inadvertent errors where a different subclass is applied that
    * accidentally wipes out some logic in overidden methods in our generated subclass.
    */

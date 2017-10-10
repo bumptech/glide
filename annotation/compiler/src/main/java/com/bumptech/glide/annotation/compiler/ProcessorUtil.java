@@ -4,6 +4,7 @@ import static com.bumptech.glide.annotation.compiler.GlideAnnotationProcessor.DE
 
 import com.bumptech.glide.annotation.GlideExtension;
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
@@ -236,6 +237,23 @@ final class ProcessorUtil {
 
   void infoLog(String toLog) {
     processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "[" + round + "] " + toLog);
+  }
+
+  static CodeBlock generateCastingSuperCall(TypeName toReturn, ExecutableElement method) {
+    return CodeBlock.builder()
+        .add("return ($T) super.$N(", toReturn, method.getSimpleName())
+        .add(
+            FluentIterable.from(method.getParameters())
+                .transform(new Function<VariableElement, String>() {
+                  @Nullable
+                  @Override
+                  public String apply(VariableElement input) {
+                    return input.getSimpleName().toString();
+                  }
+                })
+                .join(Joiner.on(",")))
+        .add(");\n")
+        .build();
   }
 
   static MethodSpec.Builder overriding(ExecutableElement method) {
