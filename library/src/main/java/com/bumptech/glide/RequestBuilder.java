@@ -4,6 +4,7 @@ import static com.bumptech.glide.request.RequestOptions.signatureOf;
 
 import android.net.Uri;
 import android.support.annotation.CheckResult;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.ImageView;
@@ -310,12 +311,12 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   }
 
   /**
-   * Returns a request builder to load the given resource id. Returns a request builder that uses
-   * the {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered or
+   * Returns a request builder that uses the
+   * {@link com.bumptech.glide.load.model.ModelLoaderFactory} currently registered or
    * {@link Integer} to load the image represented by the given {@link Integer} resource id.
    * Defaults to {@link com.bumptech.glide.load.model.ResourceLoader} to load resource id models.
    *
-   * <p> By default this method adds a version code based signature to the cache key used to cache
+   * <p>By default this method adds a version code based signature to the cache key used to cache
    * this resource in Glide. This signature is sufficient to guarantee that end users will see the
    * most up to date versions of your Drawables, but during development if you do not increment your
    * version code before each install and you replace a Drawable with different data without
@@ -323,13 +324,19 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} via
    * {@link RequestOptions#diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy)}
    * during development, and re-enabling the default
-   * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE} for release builds. </p>
+   * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE} for release builds.
+   *
+   * <p>This method will load non-{@link android.graphics.Bitmap} resources like
+   * {@link android.graphics.drawable.VectorDrawable}s, but most common options including
+   * default {@link com.bumptech.glide.load.Transformation}s will not <em>NOT</em> work on
+   * non-{@link android.graphics.Bitmap} resources. As a result, functionality for
+   * non-{@link android.graphics.Bitmap} resources may be limited.
    *
    * @see #load(Integer)
    * @see com.bumptech.glide.signature.ApplicationVersionSignature
    */
   @CheckResult
-  public RequestBuilder<TranscodeType> load(@Nullable Integer resourceId) {
+  public RequestBuilder<TranscodeType> load(@DrawableRes @Nullable Integer resourceId) {
     return loadGeneric(resourceId).apply(signatureOf(ApplicationVersionSignature.obtain(context)));
   }
 
