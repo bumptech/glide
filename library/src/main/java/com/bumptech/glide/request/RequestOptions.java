@@ -660,9 +660,7 @@ public class RequestOptions implements Cloneable {
    * @return This request builder.
    */
   @CheckResult
-  public RequestOptions override(
-      @IntRange(from = 0) int width,
-      @IntRange(from = 0) int height) {
+  public RequestOptions override(int width, int height) {
     if (isAutoCloneEnabled) {
       return clone().override(width, height);
     }
@@ -683,7 +681,7 @@ public class RequestOptions implements Cloneable {
    * @return This request builder.
    */
   @CheckResult
-  public RequestOptions override(@IntRange(from = 0) int size) {
+  public RequestOptions override(int size) {
     return override(size, size);
   }
 
