@@ -439,6 +439,7 @@ public final class SingleRequest<R> implements Request,
         requestOptions.getOptions(),
         requestOptions.isMemoryCacheable(),
         requestOptions.getUseUnlimitedSourceGeneratorsPool(),
+        requestOptions.getUseAnimationPool(),
         requestOptions.getOnlyRetrieveFromCache(),
         this);
     if (Log.isLoggable(TAG, Log.VERBOSE)) {

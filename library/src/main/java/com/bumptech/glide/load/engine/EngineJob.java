@@ -39,10 +39,12 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private final GlideExecutor diskCacheExecutor;
   private final GlideExecutor sourceExecutor;
   private final GlideExecutor sourceUnlimitedExecutor;
+  private final GlideExecutor animationExecutor;
 
   private Key key;
   private boolean isCacheable;
   private boolean useUnlimitedSourceGeneratorPool;
+  private boolean isAnimation;
   private Resource<?> resource;
   private DataSource dataSource;
   private boolean hasResource;
@@ -57,31 +59,51 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   // Checked primarily on the main thread, but also on other threads in reschedule.
   private volatile boolean isCancelled;
 
-  EngineJob(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
+  EngineJob(
+      GlideExecutor diskCacheExecutor,
+      GlideExecutor sourceExecutor,
       GlideExecutor sourceUnlimitedExecutor,
-      EngineJobListener listener, Pools.Pool<EngineJob<?>> pool) {
-    this(diskCacheExecutor, sourceExecutor, sourceUnlimitedExecutor, listener, pool,
+      GlideExecutor animationExecutor,
+      EngineJobListener listener,
+      Pools.Pool<EngineJob<?>> pool) {
+    this(
+        diskCacheExecutor,
+        sourceExecutor,
+        sourceUnlimitedExecutor,
+        animationExecutor,
+        listener,
+        pool,
         DEFAULT_FACTORY);
   }
 
   // Visible for testing.
-  EngineJob(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
+  EngineJob(
+      GlideExecutor diskCacheExecutor,
+      GlideExecutor sourceExecutor,
       GlideExecutor sourceUnlimitedExecutor,
-      EngineJobListener listener, Pools.Pool<EngineJob<?>> pool,
+      GlideExecutor animationExecutor,
+      EngineJobListener listener,
+      Pools.Pool<EngineJob<?>> pool,
       EngineResourceFactory engineResourceFactory) {
     this.diskCacheExecutor = diskCacheExecutor;
     this.sourceExecutor = sourceExecutor;
     this.sourceUnlimitedExecutor = sourceUnlimitedExecutor;
+    this.animationExecutor = animationExecutor;
     this.listener = listener;
     this.pool = pool;
     this.engineResourceFactory = engineResourceFactory;
   }
 
   // Visible for testing.
-  EngineJob<R> init(Key key, boolean isCacheable, boolean useUnlimitedSourceGeneratorPool) {
+  EngineJob<R> init(
+      Key key,
+      boolean isCacheable,
+      boolean useUnlimitedSourceGeneratorPool,
+      boolean isAnimation) {
     this.key = key;
     this.isCacheable = isCacheable;
     this.useUnlimitedSourceGeneratorPool = useUnlimitedSourceGeneratorPool;
+    this.isAnimation = isAnimation;
     return this;
   }
 
@@ -119,6 +141,9 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   }
 
   private GlideExecutor getActiveSourceExecutor() {
+    if (isAnimation) {
+      return animationExecutor;
+    }
     return useUnlimitedSourceGeneratorPool ? sourceUnlimitedExecutor : sourceExecutor;
   }
 

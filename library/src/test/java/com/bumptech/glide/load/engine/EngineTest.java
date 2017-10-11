@@ -422,7 +422,8 @@ public class EngineTest {
     verify(harness.engineJobFactory).build(
         eq(harness.cacheKey),
         eq(true) /*isMemoryCacheable*/,
-        eq(false) /*useUnlimitedSourceGeneratorPool*/);
+        eq(false) /*useUnlimitedSourceGeneratorPool*/,
+        /*isAnimation=*/ eq(false));
   }
 
   @Test
@@ -433,7 +434,8 @@ public class EngineTest {
     verify(harness.engineJobFactory).build(
         eq(harness.cacheKey),
         eq(true) /*isMemoryCacheable*/,
-        eq(true) /*useUnlimitedSourceGeneratorPool*/);
+        eq(true) /*useUnlimitedSourceGeneratorPool*/,
+        /*isAnimation=*/ eq(false));
   }
 
   @Test
@@ -492,16 +494,24 @@ public class EngineTest {
 
       job = mock(EngineJob.class);
 
-      engine = new Engine(cache, mock(DiskCache.Factory.class),
-          GlideExecutor.newDiskCacheExecutor(),
-          MockGlideExecutor.newMainThreadExecutor(),
-          MockGlideExecutor.newMainThreadUnlimitedExecutor(),
-          jobs, keyFactory, activeResources,
-          engineJobFactory, decodeJobFactory, resourceRecycler);
+      engine =
+          new Engine(
+              cache,
+              mock(DiskCache.Factory.class),
+              GlideExecutor.newDiskCacheExecutor(),
+              MockGlideExecutor.newMainThreadExecutor(),
+              MockGlideExecutor.newMainThreadUnlimitedExecutor(),
+              MockGlideExecutor.newMainThreadUnlimitedExecutor(),
+              jobs,
+              keyFactory,
+              activeResources,
+              engineJobFactory,
+              decodeJobFactory,
+              resourceRecycler);
     }
 
     public Engine.LoadStatus doLoad() {
-      when(engineJobFactory.build(eq(cacheKey), anyBoolean(), anyBoolean()))
+      when(engineJobFactory.build(eq(cacheKey), anyBoolean(), anyBoolean(), anyBoolean()))
           .thenReturn((EngineJob<Object>) job);
       return engine.load(glideContext,
           model,
@@ -514,10 +524,11 @@ public class EngineTest {
           DiskCacheStrategy.ALL,
           transformations,
           false /*isTransformationRequired*/,
-          true,
+          isScaleOnlyOrNoTransform,
           options,
           isMemoryCacheable,
           useUnlimitedSourceGeneratorPool,
+          /*useAnimationPool=*/ false,
           onlyRetrieveFromCache,
           cb);
     }

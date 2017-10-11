@@ -44,6 +44,9 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   private static final String CPU_LOCATION = "/sys/devices/system/cpu/";
   // Don't use more than four threads when automatically determining thread count..
   private static final int MAXIMUM_AUTOMATIC_THREAD_COUNT = 4;
+  // May be accessed on other threads, but this is an optimization only so it's ok if we set its
+  // value more than once.
+  private static volatile int bestThreadCount;
   private final boolean executeSynchronously;
 
   /**
@@ -52,10 +55,11 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    */
   private static final String SOURCE_UNLIMITED_EXECUTOR_NAME = "source-unlimited";
   /**
-   * The default keep alive time for threads in source unlimited executor pool in milliseconds.
+   * The default keep alive time for threads in our cached thread pools in milliseconds.
    */
-  private static final long SOURCE_UNLIMITED_EXECUTOR_KEEP_ALIVE_TIME_MS =
-      TimeUnit.SECONDS.toMillis(10);
+  private static final long KEEP_ALIVE_TIME_MS = TimeUnit.SECONDS.toMillis(10);
+
+  private static final String ANIMATION_EXECUTOR_NAME = "animation";
 
   /**
    * Returns a new fixed thread pool with the default thread count returned from
@@ -160,7 +164,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
 
   /**
    * Returns a new unlimited thread pool with zero core thread count to make sure no threads are
-   * created by default, {@link #SOURCE_UNLIMITED_EXECUTOR_KEEP_ALIVE_TIME_MS} keep alive
+   * created by default, {@link #KEEP_ALIVE_TIME_MS} keep alive
    * time, the {@link #SOURCE_UNLIMITED_EXECUTOR_NAME} thread name prefix, the
    * {@link com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy#DEFAULT}
    * uncaught throwable strategy, and the {@link SynchronousQueue} since using default unbounded
@@ -175,12 +179,31 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   public static GlideExecutor newUnlimitedSourceExecutor() {
     return new GlideExecutor(0 /* corePoolSize */,
         Integer.MAX_VALUE /* maximumPoolSize */,
-        SOURCE_UNLIMITED_EXECUTOR_KEEP_ALIVE_TIME_MS,
+        KEEP_ALIVE_TIME_MS,
         SOURCE_UNLIMITED_EXECUTOR_NAME,
         UncaughtThrowableStrategy.DEFAULT,
         false /*preventNetworkOperations*/,
         false /*executeSynchronously*/,
         new SynchronousQueue<Runnable>());
+  }
+
+  public static GlideExecutor newAnimationExecutor() {
+    int bestThreadCount = calculateBestThreadCount();
+    // We don't want to add a ton of threads running animations in parallel with our source and
+    // disk cache executors. Doing so adds unnecessary CPU load and can also dramatically increase
+    // our maximum memory usage. Typically one thread is sufficient here, but for higher end devices
+    // with more cores, two threads can provide better performance if lots of GIFs are showing at
+    // once.
+    int maximumPoolSize = bestThreadCount >= 4 ? 2 : 1;
+    return new GlideExecutor(
+        /*corePoolSize=*/ 0,
+        maximumPoolSize,
+        KEEP_ALIVE_TIME_MS,
+        ANIMATION_EXECUTOR_NAME,
+        UncaughtThrowableStrategy.DEFAULT,
+        /*preventNetworkOperations=*/ true,
+        /*executeSynchronously=*/ false,
+        new PriorityBlockingQueue<Runnable>());
   }
 
   // Visible for testing.
@@ -280,31 +303,35 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    * http://goo.gl/8H670N.
    */
   public static int calculateBestThreadCount() {
-    // We override the current ThreadPolicy to allow disk reads.
-    // This shouldn't actually do disk-IO and accesses a device file.
-    // See: https://github.com/bumptech/glide/issues/1170
-    ThreadPolicy originalPolicy = StrictMode.allowThreadDiskReads();
-    File[] cpus = null;
-    try {
-      File cpuInfo = new File(CPU_LOCATION);
-      final Pattern cpuNamePattern = Pattern.compile(CPU_NAME_REGEX);
-      cpus = cpuInfo.listFiles(new FilenameFilter() {
-        @Override
-        public boolean accept(File file, String s) {
-          return cpuNamePattern.matcher(s).matches();
+    if (bestThreadCount == 0) {
+      // We override the current ThreadPolicy to allow disk reads.
+      // This shouldn't actually do disk-IO and accesses a device file.
+      // See: https://github.com/bumptech/glide/issues/1170
+      ThreadPolicy originalPolicy = StrictMode.allowThreadDiskReads();
+      File[] cpus = null;
+      try {
+        File cpuInfo = new File(CPU_LOCATION);
+        final Pattern cpuNamePattern = Pattern.compile(CPU_NAME_REGEX);
+        cpus = cpuInfo.listFiles(new FilenameFilter() {
+          @Override
+          public boolean accept(File file, String s) {
+            return cpuNamePattern.matcher(s).matches();
+          }
+        });
+      } catch (Throwable t) {
+        if (Log.isLoggable(TAG, Log.ERROR)) {
+          Log.e(TAG, "Failed to calculate accurate cpu count", t);
         }
-      });
-    } catch (Throwable t) {
-      if (Log.isLoggable(TAG, Log.ERROR)) {
-        Log.e(TAG, "Failed to calculate accurate cpu count", t);
+      } finally {
+        StrictMode.setThreadPolicy(originalPolicy);
       }
-    } finally {
-      StrictMode.setThreadPolicy(originalPolicy);
-    }
 
-    int cpuCount = cpus != null ? cpus.length : 0;
-    int availableProcessors = Math.max(1, Runtime.getRuntime().availableProcessors());
-    return Math.min(MAXIMUM_AUTOMATIC_THREAD_COUNT, Math.max(availableProcessors, cpuCount));
+      int cpuCount = cpus != null ? cpus.length : 0;
+      int availableProcessors = Math.max(1, Runtime.getRuntime().availableProcessors());
+      bestThreadCount =
+          Math.min(MAXIMUM_AUTOMATIC_THREAD_COUNT, Math.max(availableProcessors, cpuCount));
+    }
+    return bestThreadCount;
   }
 
   /**

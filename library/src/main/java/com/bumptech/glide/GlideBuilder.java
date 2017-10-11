@@ -329,8 +329,14 @@ public final class GlideBuilder {
     }
 
     if (engine == null) {
-      engine = new Engine(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor,
-          GlideExecutor.newUnlimitedSourceExecutor());
+      engine =
+          new Engine(
+              memoryCache,
+              diskCacheFactory,
+              diskCacheExecutor,
+              sourceExecutor,
+              GlideExecutor.newUnlimitedSourceExecutor(),
+              GlideExecutor.newAnimationExecutor());
     }
 
     RequestManagerRetriever requestManagerRetriever = new RequestManagerRetriever(

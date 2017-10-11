@@ -205,7 +205,7 @@ class GifFrameLoader {
 
     gifDecoder.advance();
     next = new DelayTarget(handler, gifDecoder.getCurrentFrameIndex(), targetTime);
-    requestBuilder.clone().apply(signatureOf(getFrameSignature())).load(gifDecoder).into(next);
+    requestBuilder.apply(signatureOf(getFrameSignature())).load(gifDecoder).into(next);
   }
 
   private void recycleFirstFrame() {
@@ -298,11 +298,12 @@ class GifFrameLoader {
         .asBitmap()
         .apply(
             diskCacheStrategyOf(DiskCacheStrategy.NONE)
+                .useAnimationPool(true)
                 .skipMemoryCache(true)
                 .override(width, height));
   }
 
-  static Key getFrameSignature() {
+  private static Key getFrameSignature() {
     // Some devices seem to have crypto bugs that throw exceptions when you create a new UUID.
     // See #1510.
     return new ObjectKey(Math.random());

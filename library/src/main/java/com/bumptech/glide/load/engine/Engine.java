@@ -66,9 +66,21 @@ public class Engine implements EngineJobListener,
       DiskCache.Factory diskCacheFactory,
       GlideExecutor diskCacheExecutor,
       GlideExecutor sourceExecutor,
-      GlideExecutor sourceUnlimitedExecutor) {
-    this(memoryCache, diskCacheFactory, diskCacheExecutor, sourceExecutor, sourceUnlimitedExecutor,
-        null, null, null, null, null, null);
+      GlideExecutor sourceUnlimitedExecutor,
+      GlideExecutor animationExecutor) {
+    this(
+        memoryCache,
+        diskCacheFactory,
+        diskCacheExecutor,
+        sourceExecutor,
+        sourceUnlimitedExecutor,
+        animationExecutor,
+        /*jobs=*/ null,
+        /*keyFactory=*/ null,
+        /*activeResources=*/ null,
+        /*engineJobFactory=*/ null,
+        /*decodeJobFactory=*/ null,
+        /*resourceRecycler=*/ null);
   }
 
   // Visible for testing.
@@ -77,6 +89,7 @@ public class Engine implements EngineJobListener,
       GlideExecutor diskCacheExecutor,
       GlideExecutor sourceExecutor,
       GlideExecutor sourceUnlimitedExecutor,
+      GlideExecutor animationExecutor,
       Map<Key, EngineJob<?>> jobs,
       EngineKeyFactory keyFactory,
       Map<Key, WeakReference<EngineResource<?>>> activeResources,
@@ -102,8 +115,9 @@ public class Engine implements EngineJobListener,
     this.jobs = jobs;
 
     if (engineJobFactory == null) {
-      engineJobFactory = new EngineJobFactory(diskCacheExecutor, sourceExecutor,
-          sourceUnlimitedExecutor, this);
+      engineJobFactory =
+          new EngineJobFactory(
+              diskCacheExecutor, sourceExecutor, sourceUnlimitedExecutor, animationExecutor, this);
     }
     this.engineJobFactory = engineJobFactory;
 
@@ -155,6 +169,7 @@ public class Engine implements EngineJobListener,
       Options options,
       boolean isMemoryCacheable,
       boolean useUnlimitedSourceExecutorPool,
+      boolean useAnimationPool,
       boolean onlyRetrieveFromCache,
       ResourceCallback cb) {
     Util.assertMainThread();
@@ -191,7 +206,7 @@ public class Engine implements EngineJobListener,
     }
 
     EngineJob<R> engineJob = engineJobFactory.build(key, isMemoryCacheable,
-        useUnlimitedSourceExecutorPool);
+        useUnlimitedSourceExecutorPool, useAnimationPool);
     DecodeJob<R> decodeJob = decodeJobFactory.build(
         glideContext,
         model,
@@ -453,29 +468,40 @@ public class Engine implements EngineJobListener,
     @Synthetic final GlideExecutor diskCacheExecutor;
     @Synthetic final GlideExecutor sourceExecutor;
     @Synthetic final GlideExecutor sourceUnlimitedExecutor;
+    @Synthetic final GlideExecutor animationExecutor;
     @Synthetic final EngineJobListener listener;
     @Synthetic final Pools.Pool<EngineJob<?>> pool = FactoryPools.simple(JOB_POOL_SIZE,
         new FactoryPools.Factory<EngineJob<?>>() {
           @Override
           public EngineJob<?> create() {
-            return new EngineJob<Object>(diskCacheExecutor, sourceExecutor, sourceUnlimitedExecutor,
-                listener, pool);
+            return new EngineJob<Object>(
+                diskCacheExecutor,
+                sourceExecutor,
+                sourceUnlimitedExecutor,
+                animationExecutor,
+                listener,
+                pool);
           }
         });
 
-    EngineJobFactory(GlideExecutor diskCacheExecutor, GlideExecutor sourceExecutor,
-        GlideExecutor sourceUnlimitedExecutor, EngineJobListener listener) {
+    EngineJobFactory(
+        GlideExecutor diskCacheExecutor,
+        GlideExecutor sourceExecutor,
+        GlideExecutor sourceUnlimitedExecutor,
+        GlideExecutor animationExecutor,
+        EngineJobListener listener) {
       this.diskCacheExecutor = diskCacheExecutor;
       this.sourceExecutor = sourceExecutor;
       this.sourceUnlimitedExecutor = sourceUnlimitedExecutor;
+      this.animationExecutor = animationExecutor;
       this.listener = listener;
     }
 
     @SuppressWarnings("unchecked")
     <R> EngineJob<R> build(Key key, boolean isMemoryCacheable,
-        boolean useUnlimitedSourceGeneratorPool) {
+        boolean useUnlimitedSourceGeneratorPool, boolean isAnimation) {
       EngineJob<R> result = (EngineJob<R>) pool.acquire();
-      return result.init(key, isMemoryCacheable, useUnlimitedSourceGeneratorPool);
+      return result.init(key, isMemoryCacheable, useUnlimitedSourceGeneratorPool, isAnimation);
     }
   }
 }

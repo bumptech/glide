@@ -131,7 +131,7 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
     // Although functionally equivalent to 0 for BitmapFactory, 1 is a safer default for our code
     // than 0.
     int sampleSize = Math.max(1, powerOfTwoSampleSize);
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+    if (Log.isLoggable(TAG, Log.VERBOSE) && sampleSize > 1) {
       Log.v(TAG, "Downsampling GIF"
           + ", sampleSize: " + sampleSize
           + ", target dimens: [" + targetWidth + "x" + targetHeight + "]"
