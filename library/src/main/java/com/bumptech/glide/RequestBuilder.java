@@ -7,6 +7,7 @@ import android.support.annotation.CheckResult;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RawRes;
 import android.widget.ImageView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.ErrorRequestCoordinator;
@@ -408,7 +409,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @see com.bumptech.glide.signature.ApplicationVersionSignature
    */
   @CheckResult
-  public RequestBuilder<TranscodeType> load(@DrawableRes @Nullable Integer resourceId) {
+  public RequestBuilder<TranscodeType> load(@RawRes @DrawableRes @Nullable Integer resourceId) {
     return loadGeneric(resourceId).apply(signatureOf(ApplicationVersionSignature.obtain(context)));
   }
 
