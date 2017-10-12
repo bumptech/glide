@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Util;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
@@ -51,18 +52,22 @@ public final class RoundedCorners extends BitmapTransformation {
   @Override
   protected Bitmap transform(
       @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
-    return TransformationUtils.roundedCorners(pool, toTransform, outWidth, outHeight,
-        roundingRadius);
+    return TransformationUtils.roundedCorners(pool, toTransform, roundingRadius);
   }
 
   @Override
   public boolean equals(Object o) {
-    return (o instanceof RoundedCorners) && ((RoundedCorners) o).roundingRadius == roundingRadius;
+    if (o instanceof RoundedCorners) {
+      RoundedCorners other = (RoundedCorners) o;
+      return roundingRadius == other.roundingRadius;
+    }
+    return false;
   }
 
   @Override
   public int hashCode() {
-    return ID.hashCode() + roundingRadius;
+    return Util.hashCode(ID.hashCode(),
+        Util.hashCode(roundingRadius));
   }
 
   @Override

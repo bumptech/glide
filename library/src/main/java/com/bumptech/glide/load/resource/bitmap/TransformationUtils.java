@@ -14,6 +14,7 @@ import android.media.ExifInterface;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
@@ -397,16 +398,41 @@ public final class TransformationUtils {
    * @param roundingRadius the corner radius to be applied (in device-specific pixels).
    * @return a {@link Bitmap} similar to inBitmap but with rounded corners.
    * @throws IllegalArgumentException if roundingRadius, width or height is 0 or less.
+   *
+   * @deprecated Width and height are unused and ignored. Use
+   * {@link #roundedCorners(BitmapPool, Bitmap, int)} instead.
    */
-  public static Bitmap roundedCorners(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap,
-      int width, int height, int roundingRadius) {
-    Preconditions.checkArgument(width > 0, "width must be greater than 0.");
-    Preconditions.checkArgument(height > 0, "height must be greater than 0.");
+  @Deprecated
+  public static Bitmap roundedCorners(
+      @NonNull BitmapPool pool,
+      @NonNull Bitmap inBitmap,
+      @SuppressWarnings("unused") int width,
+      @SuppressWarnings("unused") int height,
+      int roundingRadius) {
+    return roundedCorners(pool, inBitmap, roundingRadius);
+  }
+
+  /**
+   * Creates a bitmap from a source bitmap and rounds the corners.
+   *
+   * <p>This method does <em>NOT</em> resize the given {@link Bitmap}, it only rounds it's corners.
+   * To both resize and round the corners of an image, consider
+   * {@link com.bumptech.glide.request.RequestOptions#transforms(Transformation[])} and/or
+   * {@link com.bumptech.glide.load.MultiTransformation}.
+   *
+   * @param inBitmap the source bitmap to use as a basis for the created bitmap.
+   * @param roundingRadius the corner radius to be applied (in device-specific pixels).
+   * @return a {@link Bitmap} similar to inBitmap but with rounded corners.
+   * @throws IllegalArgumentException if roundingRadius, width or height is 0 or less.
+   */
+  public static Bitmap roundedCorners(
+      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int roundingRadius) {
     Preconditions.checkArgument(roundingRadius > 0, "roundingRadius must be greater than 0.");
 
     // Alpha is required for this transformation.
     Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
-    Bitmap result = pool.get(width, height, Bitmap.Config.ARGB_8888);
+    Bitmap result =
+        pool.get(toTransform.getWidth(), toTransform.getHeight(), Bitmap.Config.ARGB_8888);
 
     result.setHasAlpha(true);
 
