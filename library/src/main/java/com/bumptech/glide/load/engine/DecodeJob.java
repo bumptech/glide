@@ -18,7 +18,6 @@ import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.util.LogTime;
-import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.pool.FactoryPools.Poolable;
 import com.bumptech.glide.util.pool.StateVerifier;
@@ -242,9 +241,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         throw e;
       }
     } finally {
-      Preconditions.checkArgument(
-          localFetcher == null || currentFetcher == null || localFetcher.equals(currentFetcher),
-          "Fetchers don't match!, old: " + localFetcher + " new: " + currentFetcher);
+      // Keeping track of the fetcher here and calling cleanup is excessively paranoid, we call
+      // close in all cases anyway.
       if (localFetcher != null) {
         localFetcher.cleanup();
       }
