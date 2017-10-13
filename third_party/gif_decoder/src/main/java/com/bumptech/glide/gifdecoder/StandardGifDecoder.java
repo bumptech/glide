@@ -29,7 +29,9 @@ import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_PREVIOUS;
 import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_UNSPECIFIED;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.support.annotation.ColorInt;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import java.io.ByteArrayOutputStream;
@@ -121,6 +123,8 @@ public class StandardGifDecoder implements GifDecoder {
   private int downsampledHeight;
   private int downsampledWidth;
   private boolean isFirstFrameTransparent;
+  @NonNull
+  private Bitmap.Config bitmapConfig = Config.ARGB_8888;
 
   public StandardGifDecoder(
       GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData) {
@@ -394,6 +398,16 @@ public class StandardGifDecoder implements GifDecoder {
     }
 
     return status;
+  }
+
+  @Override
+  public void setDefaultBitmapFormat(Bitmap.Config config) {
+    if (config != Bitmap.Config.ARGB_8888 && config != Bitmap.Config.RGB_565) {
+      throw new IllegalArgumentException("Unsupported format: " + config
+          + ", must be one of " + Bitmap.Config.ARGB_8888 + " or " + Bitmap.Config.RGB_565);
+    }
+
+    bitmapConfig = config;
   }
 
   /**
@@ -779,7 +793,7 @@ public class StandardGifDecoder implements GifDecoder {
 
   private Bitmap getNextBitmap() {
     Bitmap.Config config = isFirstFrameTransparent
-        ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
+        ? Bitmap.Config.ARGB_8888 : bitmapConfig;
     Bitmap result = bitmapProvider.obtain(downsampledWidth, downsampledHeight, config);
     result.setHasAlpha(true);
     return result;

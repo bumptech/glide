@@ -53,13 +53,13 @@ public class StreamGifDecoderTest {
 
   @Test
   public void testHandlesStreamIfContainsGifHeaderAndDisabledIsFalse() throws IOException {
-    options.set(StreamGifDecoder.DISABLE_ANIMATION, false);
+    options.set(GifOptions.DISABLE_ANIMATION, false);
     assertThat(decoder.handles(new ByteArrayInputStream(GIF_HEADER), options)).isTrue();
   }
 
   @Test
   public void testDoesNotHandleStreamIfDisabled() throws IOException {
-    options.set(StreamGifDecoder.DISABLE_ANIMATION, true);
+    options.set(GifOptions.DISABLE_ANIMATION, true);
     assertThat(decoder.handles(new ByteArrayInputStream(GIF_HEADER), options)).isFalse();
   }
 }

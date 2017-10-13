@@ -28,10 +28,9 @@ import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
-import com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
-import com.bumptech.glide.load.resource.gif.StreamGifDecoder;
+import com.bumptech.glide.load.resource.gif.GifOptions;
 import com.bumptech.glide.signature.EmptySignature;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
@@ -838,7 +837,7 @@ public class RequestOptions implements Cloneable {
 
   /**
    * Sets the {@link DecodeFormat} to use when decoding {@link Bitmap} objects using
-   * {@link Downsampler}.
+   * {@link Downsampler} and Glide's default GIF decoders.
    *
    * <p>{@link DecodeFormat} is a request, not a requirement. It's possible the resource will be
    * decoded using a decoder that cannot control the format
@@ -846,14 +845,23 @@ public class RequestOptions implements Cloneable {
    * ignore the requested format if it can't display the image (i.e. RGB_565 is requested, but the
    * image has alpha).
    *
-   * <p>This is a component option specific to {@link Downsampler}. If the defautlt Bitmap decoder
-   * is replaced or skipped because of your configuration, this option may be ignored.
+   * <p>This is a component option specific to {@link Downsampler} and Glide's GIF decoders. If the
+   * default Bitmap decoders are replaced or skipped because of your configuration, this option may
+   * be ignored.
+   *
+   * <p>To set only the format used when decoding {@link Bitmap}s, use
+   * {@link #option(Option, Object)} and {@link Downsampler#DECODE_FORMAT}. To set only the format
+   * used when decoding GIF frames, use {@link #option(Option, Object)} and
+   * {@link GifOptions#DECODE_FORMAT}.
    *
    * @see Downsampler#DECODE_FORMAT
+   * @see GifOptions#DECODE_FORMAT
    */
   @CheckResult
   public RequestOptions format(@NonNull DecodeFormat format) {
-    return set(Downsampler.DECODE_FORMAT, Preconditions.checkNotNull(format));
+    Preconditions.checkNotNull(format);
+    return set(Downsampler.DECODE_FORMAT, format)
+        .set(GifOptions.DECODE_FORMAT, format);
   }
 
   /**
@@ -1248,8 +1256,8 @@ public class RequestOptions implements Cloneable {
       return clone().dontAnimate();
     }
 
-    set(ByteBufferGifDecoder.DISABLE_ANIMATION, true);
-    set(StreamGifDecoder.DISABLE_ANIMATION, true);
+    set(GifOptions.DISABLE_ANIMATION, true);
+    set(GifOptions.DISABLE_ANIMATION, true);
     return selfOrThrowIfLocked();
   }
 

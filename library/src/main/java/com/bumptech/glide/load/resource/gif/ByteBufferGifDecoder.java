@@ -11,7 +11,6 @@ import com.bumptech.glide.gifdecoder.StandardGifDecoder;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.ImageHeaderParserUtils;
-import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.Transformation;
@@ -32,15 +31,6 @@ import java.util.Queue;
 public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDrawable> {
   private static final String TAG = "BufferGifDecoder";
   private static final GifDecoderFactory GIF_DECODER_FACTORY = new GifDecoderFactory();
-
-  /**
-   *  If set to {@code true}, disables this decoder
-   *  ({@link #handles(ByteBuffer, Options)} will return {@code false}). Defaults to
-   * {@code false}.
-   */
-  public static final Option<Boolean> DISABLE_ANIMATION = Option.memory(
-      "com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder.DisableAnimation", false);
-
   private static final GifHeaderParserPool PARSER_POOL = new GifHeaderParserPool();
 
   private final Context context;
@@ -79,7 +69,7 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
 
   @Override
   public boolean handles(ByteBuffer source, Options options) throws IOException {
-    return !options.get(DISABLE_ANIMATION)
+    return !options.get(GifOptions.DISABLE_ANIMATION)
         && ImageHeaderParserUtils.getType(parsers, source) == ImageType.GIF;
   }
 
@@ -101,7 +91,6 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
       // If we couldn't decode the GIF, we will end up with a frame count of 0.
       return null;
     }
-
 
     int sampleSize = getSampleSize(header, width, height);
     GifDecoder gifDecoder = gifDecoderFactory.build(provider, header, byteBuffer, sampleSize);
