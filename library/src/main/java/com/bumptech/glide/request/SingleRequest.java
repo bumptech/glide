@@ -591,7 +591,11 @@ public final class SingleRequest<R> implements Request,
           && Util.bothModelsNullEquivalentOrEquals(model, that.model)
           && transcodeClass.equals(that.transcodeClass)
           && requestOptions.equals(that.requestOptions)
-          && priority == that.priority;
+          && priority == that.priority
+          // We do not want to require that RequestListeners implement equals/hashcode, so we don't
+          // compare them using equals(). We can however, at least assert that the request listener
+          // is either present or not present in both requests.
+          && requestListener != null ? that.requestListener != null : that.requestListener == null;
     }
     return false;
   }

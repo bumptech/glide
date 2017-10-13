@@ -494,6 +494,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
       // restart the request, giving it another chance to complete. If the request is already
       // running, we can let it continue running without interruption.
       if (!Preconditions.checkNotNull(previous).isRunning()) {
+        // Use the previous request rather than the new one to allow for optimizations like skipping
+        // setting placeholders, tracking and untracking Targets, and obtaining View dimensions that
+        // are done in the individual Request.
         previous.begin();
       }
       return target;
