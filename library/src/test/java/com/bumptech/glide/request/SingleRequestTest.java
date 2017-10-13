@@ -292,8 +292,8 @@ public class SingleRequestTest {
             anyBoolean(),
             any(Options.class),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
+            /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class));
   }
@@ -715,7 +715,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool*/ anyBoolean(),
+            /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class));
   }
