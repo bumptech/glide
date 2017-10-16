@@ -674,7 +674,7 @@ public class Glide implements ComponentCallbacks2 {
   void unregisterRequestManager(RequestManager requestManager) {
     synchronized (managers) {
       if (!managers.contains(requestManager)) {
-        throw new IllegalStateException("Cannot register not yet registered manager");
+        throw new IllegalStateException("Cannot unregister not yet registered manager");
       }
       managers.remove(requestManager);
     }
