@@ -1252,13 +1252,7 @@ public class RequestOptions implements Cloneable {
   @SuppressWarnings("CheckResult")
   @CheckResult
   public RequestOptions dontAnimate() {
-    if (isAutoCloneEnabled) {
-      return clone().dontAnimate();
-    }
-
-    set(GifOptions.DISABLE_ANIMATION, true);
-    set(GifOptions.DISABLE_ANIMATION, true);
-    return selfOrThrowIfLocked();
+    return set(GifOptions.DISABLE_ANIMATION, true);
   }
 
   @CheckResult
