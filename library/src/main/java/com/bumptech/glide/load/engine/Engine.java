@@ -499,9 +499,9 @@ public class Engine implements EngineJobListener,
 
     @SuppressWarnings("unchecked")
     <R> EngineJob<R> build(Key key, boolean isMemoryCacheable,
-        boolean useUnlimitedSourceGeneratorPool, boolean isAnimation) {
+        boolean useUnlimitedSourceGeneratorPool, boolean useAnimationPool) {
       EngineJob<R> result = (EngineJob<R>) pool.acquire();
-      return result.init(key, isMemoryCacheable, useUnlimitedSourceGeneratorPool, isAnimation);
+      return result.init(key, isMemoryCacheable, useUnlimitedSourceGeneratorPool, useAnimationPool);
     }
   }
 }

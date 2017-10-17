@@ -423,7 +423,7 @@ public class EngineTest {
         eq(harness.cacheKey),
         eq(true) /*isMemoryCacheable*/,
         eq(false) /*useUnlimitedSourceGeneratorPool*/,
-        /*isAnimation=*/ eq(false));
+        /*useAnimationPool=*/ eq(false));
   }
 
   @Test
@@ -435,7 +435,7 @@ public class EngineTest {
         eq(harness.cacheKey),
         eq(true) /*isMemoryCacheable*/,
         eq(true) /*useUnlimitedSourceGeneratorPool*/,
-        /*isAnimation=*/ eq(false));
+        /*useAnimationPool=*/ eq(false));
   }
 
   @Test

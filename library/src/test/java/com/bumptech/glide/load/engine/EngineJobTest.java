@@ -459,7 +459,7 @@ public class EngineJobTest {
     EngineJobListener listener = mock(EngineJobListener.class);
     boolean isCacheable = true;
     boolean useUnlimitedSourceGeneratorPool = false;
-    boolean isAnimation = false;
+    boolean useAnimationPool = false;
     int numCbs = 10;
     List<ResourceCallback> cbs = new ArrayList<>();
     EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
@@ -482,7 +482,7 @@ public class EngineJobTest {
               animationService,
               listener,
               pool,
-              factory).init(key, isCacheable, useUnlimitedSourceGeneratorPool, isAnimation);
+              factory).init(key, isCacheable, useUnlimitedSourceGeneratorPool, useAnimationPool);
       for (int i = 0; i < numCbs; i++) {
         cbs.add(mock(ResourceCallback.class));
       }
@@ -507,7 +507,7 @@ public class EngineJobTest {
     GlideExecutor animationService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
     boolean isCacheable = true;
     boolean useUnlimitedSourceGeneratorPool = false;
-    boolean isAnimation = false;
+    boolean useAnimationPool = false;
     DecodeJob<Object> decodeJob = mock(DecodeJob.class);
     Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
     DataSource dataSource = DataSource.DATA_DISK_CACHE;
@@ -523,7 +523,7 @@ public class EngineJobTest {
               listener,
               pool,
               factory)
-              .init(key, isCacheable, useUnlimitedSourceGeneratorPool, isAnimation);
+              .init(key, isCacheable, useUnlimitedSourceGeneratorPool, useAnimationPool);
       result.addCallback(cb);
       return result;
     }
