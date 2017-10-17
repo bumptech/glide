@@ -141,10 +141,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   }
 
   private GlideExecutor getActiveSourceExecutor() {
-    if (useAnimationPool) {
-      return animationExecutor;
-    }
-    return useUnlimitedSourceGeneratorPool ? sourceUnlimitedExecutor : sourceExecutor;
+    return useUnlimitedSourceGeneratorPool
+        ? sourceUnlimitedExecutor : (useAnimationPool ? animationExecutor : sourceExecutor);
   }
 
   // We cannot remove callbacks while notifying our list of callbacks directly because doing so

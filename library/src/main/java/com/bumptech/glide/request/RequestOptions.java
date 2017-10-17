@@ -426,6 +426,10 @@ public class RequestOptions implements Cloneable {
    * of Glide's threads as part of another request. Using this method in other scenarios can lead
    * to excessive memory usage and OOMs and/or a significant decrease in performance across an
    * application.
+   *
+   * <p>If both {@link #useUnlimitedSourceGeneratorsPool(boolean)} and
+   * {@link #useAnimationPool(boolean)} are set, {@link #useUnlimitedSourceGeneratorsPool(boolean)}
+   * will be preferred and {@link #useAnimationPool(boolean)} will be ignored.
    */
   @CheckResult
   public RequestOptions useUnlimitedSourceGeneratorsPool(boolean flag) {
@@ -447,6 +451,10 @@ public class RequestOptions implements Cloneable {
    * may load remote data. The animation executor has fewer threads available to it than Glide's
    * normal executors and is only useful as a way of avoiding blocking on longer and more expensive
    * reads for critical requests like those in an animating GIF.
+   *
+   * <p>If both {@link #useUnlimitedSourceGeneratorsPool(boolean)} and
+   * {@link #useAnimationPool(boolean)} are set, {@link #useUnlimitedSourceGeneratorsPool(boolean)}
+   * will be preferred and {@link #useAnimationPool(boolean)} will be ignored.
    */
   @CheckResult
   public RequestOptions useAnimationPool(boolean flag) {
