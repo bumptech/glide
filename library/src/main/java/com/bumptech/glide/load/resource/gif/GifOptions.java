@@ -16,7 +16,7 @@ public final class GifOptions {
    * decoding frames of GIFs.
    */
   public static final Option<DecodeFormat> DECODE_FORMAT = Option.memory(
-      "com.bumptech.glide.load.resource.gif.DecodeFormat", DecodeFormat.DEFAULT);
+      "com.bumptech.glide.load.resource.gif.GifOptions.DecodeFormat", DecodeFormat.DEFAULT);
 
   /**
    * If set to {@code true}, disables the GIF {@link com.bumptech.glide.load.ResourceDecoder}s
@@ -24,7 +24,7 @@ public final class GifOptions {
    * {@code false}.
    */
   public static final Option<Boolean> DISABLE_ANIMATION = Option.memory(
-      "com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder.DisableAnimation", false);
+      "com.bumptech.glide.load.resource.gif.GifOptions.DisableAnimation", false);
 
   private GifOptions() {
     // Utility class.
