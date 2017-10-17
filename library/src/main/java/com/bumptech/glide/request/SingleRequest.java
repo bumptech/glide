@@ -595,7 +595,8 @@ public final class SingleRequest<R> implements Request,
           // We do not want to require that RequestListeners implement equals/hashcode, so we don't
           // compare them using equals(). We can however, at least assert that the request listener
           // is either present or not present in both requests.
-          && requestListener != null ? that.requestListener != null : that.requestListener == null;
+          && (requestListener != null
+          ? that.requestListener != null : that.requestListener == null);
     }
     return false;
   }
