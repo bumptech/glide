@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -34,6 +35,9 @@ import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.request.transition.TransitionFactory;
+import com.bumptech.glide.signature.ObjectKey;
+import com.google.common.base.Equivalence;
+import com.google.common.testing.EquivalenceTester;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -832,56 +836,53 @@ public class SingleRequestTest {
   }
 
   @Test
+  // Varargs
+  @SuppressWarnings("unchecked")
   public void testIsEquivalentTo() {
-    SingleRequest<List> originalRequest1 = builder.build();
-    SingleRequest<List> originalRequest2 = builder.build();
-    assertTrue(originalRequest1.isEquivalentTo(originalRequest2));
+    EquivalenceTester<SingleRequestBuilder> tester = EquivalenceTester
+        .of(new Equivalence<SingleRequestBuilder>() {
+          @Override
+          protected boolean doEquivalent(
+              @NonNull SingleRequestBuilder a, @NonNull SingleRequestBuilder b) {
+            return a.build().isEquivalentTo(b.build()) && b.build().isEquivalentTo(a.build());
+          }
 
-    builder = new SingleRequestBuilder();
-    builder.overrideWidth = builder.overrideWidth * 2;
-    SingleRequest<List> widthRequest = builder.build();
-    assertTrue(widthRequest.isEquivalentTo(widthRequest));
-    assertFalse(widthRequest.isEquivalentTo(originalRequest1));
-    assertFalse(originalRequest1.isEquivalentTo(widthRequest));
-
-    builder = new SingleRequestBuilder();
-    builder.overrideHeight = builder.overrideHeight * 2;
-    SingleRequest<List> heightRequest = builder.build();
-    assertTrue(heightRequest.isEquivalentTo(heightRequest));
-    assertFalse(heightRequest.isEquivalentTo(originalRequest1));
-    assertFalse(originalRequest1.isEquivalentTo(heightRequest));
-
-    builder = new SingleRequestBuilder();
-    builder.model = 12345679;
-    SingleRequest<List> modelRequest = builder.build();
-    assertTrue(modelRequest.isEquivalentTo(modelRequest));
-    assertFalse(modelRequest.isEquivalentTo(originalRequest1));
-    assertFalse(originalRequest1.isEquivalentTo(modelRequest));
-
-    builder = new SingleRequestBuilder();
-    builder.model = null;
-    SingleRequest<List> nullModelRequest = builder.build();
-    assertTrue(nullModelRequest.isEquivalentTo(nullModelRequest));
-    assertFalse(nullModelRequest.isEquivalentTo(originalRequest1));
-    assertFalse(originalRequest1.isEquivalentTo(nullModelRequest));
-
-    builder = new SingleRequestBuilder();
-    builder.errorDrawable = new ColorDrawable(Color.GRAY);
-    SingleRequest<List> errorRequest = builder.build();
-    assertTrue(errorRequest.isEquivalentTo(errorRequest));
-    assertFalse(errorRequest.isEquivalentTo(originalRequest1));
-    assertFalse(originalRequest1.isEquivalentTo(errorRequest));
-
-    builder = new SingleRequestBuilder();
-    builder.priority = Priority.LOW;
-    SingleRequest<List> priorityRequest = builder.build();
-    assertTrue(priorityRequest.isEquivalentTo(priorityRequest));
-    assertFalse(priorityRequest.isEquivalentTo(originalRequest1));
-    assertFalse(originalRequest1.isEquivalentTo(priorityRequest));
+          @Override
+          protected int doHash(@NonNull SingleRequestBuilder listSingleRequest) {
+            return 0;
+          }
+        });
+    tester
+        .addEquivalenceGroup(
+            new SingleRequestBuilder(),
+            new SingleRequestBuilder(),
+            // Non-null request listeners are treated as equivalent, even if they're not equal.
+            new SingleRequestBuilder().setRequestListener(mock(RequestListener.class)))
+        .addEquivalenceGroup(
+            new SingleRequestBuilder().setRequestListener(null),
+            new SingleRequestBuilder().setRequestListener(null))
+        .addEquivalenceGroup(
+            new SingleRequestBuilder().setOverrideHeight(500),
+            new SingleRequestBuilder().setOverrideHeight(500))
+        .addEquivalenceGroup(
+            new SingleRequestBuilder().setOverrideWidth(500),
+            new SingleRequestBuilder().setOverrideWidth(500))
+        .addEquivalenceGroup(
+            new SingleRequestBuilder().setModel(12345),
+            new SingleRequestBuilder().setModel(12345))
+        .addEquivalenceGroup(
+            new SingleRequestBuilder().setModel(null),
+            new SingleRequestBuilder().setModel(null))
+        .addEquivalenceGroup(
+            new SingleRequestBuilder().setErrorDrawable(new ColorDrawable(Color.GRAY)),
+            new SingleRequestBuilder().setErrorDrawable(new ColorDrawable(Color.GRAY)))
+        .addEquivalenceGroup(
+            new SingleRequestBuilder().setPriority(Priority.LOW),
+            new SingleRequestBuilder().setPriority(Priority.LOW))
+        .test();
   }
 
-  static class SingleRequestBuilder {
-
+  static final class SingleRequestBuilder {
     private Engine engine = mock(Engine.class);
     private Number model = 123456;
     @SuppressWarnings("unchecked")
@@ -899,7 +900,7 @@ public class SingleRequestTest {
     private int overrideHeight = -1;
     private List<?> result = new ArrayList<>();
     private GlideContext glideContext = mock(GlideContext.class);
-    private Key signature = mock(Key.class);
+    private Key signature = new ObjectKey(12345);
     private Priority priority = Priority.HIGH;
     private boolean useUnlimitedSourceGeneratorsPool = false;
     private Class<List> transcodeClass = List.class;
