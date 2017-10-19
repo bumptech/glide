@@ -20,8 +20,18 @@ public final class DrawableDecoderCompat {
   }
 
   /**
+   * @see #getDrawable(Context, int, Theme)
+   */
+  public static Drawable getDrawable(Context context, @DrawableRes int id) {
+    return getDrawable(context, id, /*theme=*/ null);
+  }
+
+  /**
    * Loads a Drawable using {@link AppCompatResources} if available and {@link ResourcesCompat}
    * otherwise, depending on whether or not the v7 support library is included in the application.
+   *
+   * @param theme Used instead of the {@link Theme} returned from the given {@link Context} if
+   * non-null when loading the {@link Drawable}.
    */
   public static Drawable getDrawable(Context context, @DrawableRes int id, @Nullable Theme theme) {
     try {

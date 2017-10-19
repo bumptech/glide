@@ -378,6 +378,7 @@ public class Glide implements ComponentCallbacks2 {
         .append(GlideUrl.class, InputStream.class, new HttpGlideUrlLoader.Factory())
         .append(byte[].class, ByteBuffer.class, new ByteArrayLoader.ByteBufferFactory())
         .append(byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory())
+        .append(Uri.class, Uri.class, new UnitModelLoader.Factory<Uri>())
         /* Transcoders */
         .register(Bitmap.class, BitmapDrawable.class,
             new BitmapDrawableTranscoder(resources, bitmapPool))
