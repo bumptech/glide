@@ -19,6 +19,11 @@ dependencies {
     testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
     testCompile "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
     testCompile "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
+    androidTestCompile "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'com.android.support.test:rules:0.5'
+    androidTestCompile "com.google.truth:truth:${TRUTH_VERSION}"
+    androidTestCompile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
 }
 
 android.testOptions.unitTests.all { Test testTask ->
@@ -37,10 +42,9 @@ android {
     defaultConfig {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-
         versionName VERSION_NAME as String
-
         consumerProguardFiles 'proguard-rules.txt'
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
