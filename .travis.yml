@@ -1,24 +1,37 @@
 language: android
+sudo: required
+dist: trusty
+
 android:
   components:
   - tools
   - platform-tools
+  - tools
   - build-tools-26.0.1
   - android-26
+  - android-22
+  - sys-img-armeabi-v7a-android-22
 
-  licenses:
+licenses:
   - 'android-sdk-license.*'
 
 jdk:
   - oraclejdk8
 
-sudo: false
+env: 
+  matrix:
+    - COMPONENT=unit
+    - COMPONENT=instrumentation
+    - COMPONENT=samples
 
-script: 'travis_retry ./gradlew build --parallel'
+before_script:
+  - ./scripts/travis_before_script.sh
+
+script: 
+  - ./scripts/travis_script.sh
 
 after_success:
-- scripts/travis-sonatype-publish.sh
-- ./gradlew jacocoTestReport coveralls
+  - ./scripts/travis_after_success.sh
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
