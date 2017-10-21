@@ -9,10 +9,6 @@ android:
   - tools
   - build-tools-26.0.1
   - android-26
-  - android-22
-  - android-16
-  - sys-img-armeabi-v7a-android-22
-  - sys-img-armeabi-v7a-android-16
 
 licenses:
   - 'android-sdk-license.*'
