@@ -1,59 +1,79 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.test.AndroidTestCase;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
-import org.mockito.Mockito;
+import com.bumptech.glide.test.ResourceIds;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Emulator tests for Glide transformation utilities.
  */
-public class TransformationUtilsTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class TransformationUtilsTest {
   private BitmapPool bitmapPool;
+  private Context context;
 
-  @Override
+  @Before
   public void setUp() throws Exception {
     bitmapPool = new BitmapPoolAdapter();
+    context = InstrumentationRegistry.getContext();
+    // TODO: Add Android API specific resources that work > API 16.
+    assumeTrue(Build.VERSION.SDK_INT <= VERSION_CODES.JELLY_BEAN);
   }
 
+  @Test
   public void testRoundedCorners() {
     int width = 20;
     int height = 30;
     Bitmap blueRect = createRect(Color.BLUE, width, height, Bitmap.Config.ARGB_8888);
     Bitmap roundedBlueRect =
-        TransformationUtils.roundedCorners(bitmapPool, blueRect, width, height, 5);
-    assertBitmapMatches("blue_rect_rounded", roundedBlueRect);
+        TransformationUtils.roundedCorners(bitmapPool, blueRect, 5);
+    assertBitmapMatches(ResourceIds.raw.blue_rect_rounded, roundedBlueRect);
   }
 
+  @Test
   public void testRoundedCorners_usePool() {
     int width = 20;
     int height = 30;
 
     Bitmap blueRect = createRect(Color.BLUE, width, height, Bitmap.Config.ARGB_8888);
     Bitmap redRect = createRect(Color.RED, width, height, Bitmap.Config.ARGB_8888);
-    BitmapPool mockBitmapPool = Mockito.mock(BitmapPool.class);
-    when(mockBitmapPool.get(width, height, Bitmap.Config.ARGB_8888)).thenReturn(redRect);
+    BitmapPool mockBitmapPool = mock(BitmapPool.class);
+    when(mockBitmapPool.get(width, height, Config.ARGB_8888)).thenReturn(redRect);
 
     Bitmap roundedBlueRect =
-        TransformationUtils.roundedCorners(mockBitmapPool, blueRect, width, height, 5);
-    assertBitmapMatches("blue_rect_rounded", roundedBlueRect);
-    assertSame("Did not reuse provided Bitmap.", redRect, roundedBlueRect);
+        TransformationUtils.roundedCorners(mockBitmapPool, blueRect, 5);
+    assertBitmapMatches(ResourceIds.raw.blue_rect_rounded, roundedBlueRect);
+    assertThat(roundedBlueRect).isEqualTo(redRect);
   }
 
+  @Test
   public void testRoundedCorners_overRounded() {
     int width = 40;
     int height = 20;
     Bitmap blueRect = createRect(Color.BLUE, width, height, Bitmap.Config.RGB_565);
     Bitmap roundedBlueRect =
-        TransformationUtils.roundedCorners(bitmapPool, blueRect, width, height, 20);
-    assertBitmapMatches("blue_rect_over_rounded", roundedBlueRect);
+        TransformationUtils.roundedCorners(bitmapPool, blueRect, 20);
+    assertBitmapMatches(ResourceIds.raw.blue_rect_over_rounded, roundedBlueRect);
   }
 
   private Bitmap createRect(int color, int width, int height, Bitmap.Config config) {
@@ -63,12 +83,12 @@ public class TransformationUtilsTest extends AndroidTestCase {
     return result;
   }
 
-  private void assertBitmapMatches(String resourceName, Bitmap actual) {
-    Resources res = getContext().getResources();
-    int resId = res.getIdentifier(resourceName, "drawable", "com.bumptech.glide");
-    assertTrue("Cannot find drawable for resource name: " + resourceName, resId > 0);
-
-    Bitmap expected = BitmapFactory.decodeResource(res, resId);
+  private void assertBitmapMatches(int resId, Bitmap actual) {
+    Resources res = context.getResources();
+    // Avoid default density scaling when decoding the expected Bitmap.
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inScaled = false;
+    Bitmap expected = BitmapFactory.decodeResource(res, resId, options);
     assertPixelDataMatches(expected, actual);
   }
 

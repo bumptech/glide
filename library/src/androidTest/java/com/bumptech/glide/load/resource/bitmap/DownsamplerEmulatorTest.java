@@ -400,7 +400,8 @@ public class DownsamplerEmulatorTest {
   }
 
   private static Downsampler buildDownsampler() {
-    List<ImageHeaderParser> parsers = Collections.singletonList(new DefaultImageHeaderParser());
+    List<ImageHeaderParser> parsers =
+        Collections.<ImageHeaderParser>singletonList(new DefaultImageHeaderParser());
     DisplayMetrics displayMetrics = new DisplayMetrics();
     // XHDPI.
     displayMetrics.densityDpi = 320;

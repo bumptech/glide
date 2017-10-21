@@ -1,4 +1,4 @@
-package com.bumptech.glide.test;
+package com.bumptech.glide;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -15,8 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import com.bumptech.glide.Glide;
-import com.google.common.collect.ImmutableList;
+import com.bumptech.glide.test.ResourceIds;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,11 +26,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class TestNonBitmapResources {
-  private static final ImmutableList<String> PACKAGES = ImmutableList.of(
-      "com.android.gallery3d",
-      "com.android.contacts");
-
+public class NonBitmapDrawableResourcesTest {
   private Context context;
 
   @Before
@@ -69,7 +64,7 @@ public class TestNonBitmapResources {
   public void load_withBitmapAliasResourceId_asDrawable_producesNonNullDrawable()
       throws ExecutionException, InterruptedException {
     Drawable drawable = Glide.with(context)
-        .load(R.drawable.bitmap_alias)
+        .load(ResourceIds.drawable.bitmap_alias)
         .submit()
         .get();
     assertThat(drawable).isNotNull();
@@ -79,7 +74,7 @@ public class TestNonBitmapResources {
   public void load_withShapeDrawableResourceId_asDrawable_producesNonNullDrawable()
       throws ExecutionException, InterruptedException {
     Drawable drawable = Glide.with(context)
-        .load(R.drawable.shape_drawable)
+        .load(ResourceIds.drawable.shape_drawable)
         .submit()
         .get();
     assertThat(drawable).isNotNull();
@@ -89,7 +84,7 @@ public class TestNonBitmapResources {
   public void load_withStateListDrawableResourceId_asDrawable_producesNonNullDrawable()
       throws ExecutionException, InterruptedException {
     Drawable drawable = Glide.with(context)
-        .load(R.drawable.state_list_drawable)
+        .load(ResourceIds.drawable.state_list_drawable)
         .submit()
         .get();
     assertThat(drawable).isNotNull();
@@ -99,7 +94,7 @@ public class TestNonBitmapResources {
   public void load_withVectorDrawableResourceId_asDrawable_producesNonNullDrawable()
       throws ExecutionException, InterruptedException {
     Drawable drawable = Glide.with(context)
-        .load(R.drawable.vector_drawable)
+        .load(ResourceIds.drawable.vector_drawable)
         .submit()
         .get();
     assertThat(drawable).isNotNull();
@@ -109,7 +104,7 @@ public class TestNonBitmapResources {
   public void load_withNinePatchResourceId_asDrawable_producesNonNullDrawable()
       throws ExecutionException, InterruptedException {
     Drawable drawable = Glide.with(context)
-        .load(R.drawable.googlelogo_color_120x44dp)
+        .load(ResourceIds.drawable.googlelogo_color_120x44dp)
         .submit()
         .get();
 

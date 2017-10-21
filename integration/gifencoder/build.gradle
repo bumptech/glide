@@ -6,7 +6,7 @@ dependencies {
     testCompile project(":testutil")
     testCompile "com.google.truth:truth:${TRUTH_VERSION}"
     testCompile "junit:junit:${JUNIT_VERSION}"
-    testCompile "org.mockito:mockito-all:${MOCKITO_VERSION}"
+    testCompile "org.mockito:mockito-core:${MOCKITO_VERSION}"
     testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
     testCompile "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
 }

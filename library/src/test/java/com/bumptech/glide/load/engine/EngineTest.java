@@ -58,7 +58,7 @@ public class EngineTest {
   public void testNewRunnerIsCreatedAndPostedWithNoExistingLoad() {
     harness.doLoad();
 
-    verify(harness.job).start(any(DecodeJob.class));
+    verify(harness.job).start((DecodeJob) any());
   }
 
   @Test
@@ -93,7 +93,7 @@ public class EngineTest {
     harness.doLoad();
     harness.doLoad();
 
-    verify(harness.job, times(1)).start(any(DecodeJob.class));
+    verify(harness.job, times(1)).start((DecodeJob) any());
   }
 
   @Test
@@ -192,7 +192,7 @@ public class EngineTest {
     harness.doLoad();
 
     verify(harness.resource, never()).acquire();
-    verify(harness.job).start(any(DecodeJob.class));
+    verify(harness.job).start((DecodeJob) any());
   }
 
   @Test
@@ -211,7 +211,7 @@ public class EngineTest {
     harness.isMemoryCacheable = false;
     harness.doLoad();
 
-    verify(harness.job).start(any(DecodeJob.class));
+    verify(harness.job).start((DecodeJob) any());
   }
 
   @Test

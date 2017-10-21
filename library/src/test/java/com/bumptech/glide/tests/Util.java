@@ -46,7 +46,7 @@ public class Util {
   }
 
   public static Context anyContext() {
-    return any(Context.class);
+    return any();
   }
 
   /**

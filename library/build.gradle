@@ -19,6 +19,7 @@ dependencies {
     testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
     testCompile "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
     testCompile "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
+    androidTestCompile "org.mockito:mockito-android:${MOCKITO_ANDROID_VERSION}"
     androidTestCompile "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.android.support.test:rules:0.5'

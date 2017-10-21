@@ -70,6 +70,7 @@ public class ReEncodingGifResourceEncoderTest {
     Application context = RuntimeEnvironment.application;
 
     ReEncodingGifResourceEncoder.Factory factory = mock(ReEncodingGifResourceEncoder.Factory.class);
+    when(decoder.getNextFrame()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
     when(factory.buildDecoder(any(GifDecoder.BitmapProvider.class))).thenReturn(decoder);
     when(factory.buildParser()).thenReturn(parser);
     when(factory.buildEncoder()).thenReturn(gifEncoder);
