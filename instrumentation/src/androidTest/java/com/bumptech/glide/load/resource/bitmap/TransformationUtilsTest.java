@@ -35,7 +35,7 @@ public class TransformationUtilsTest {
   @Before
   public void setUp() throws Exception {
     bitmapPool = new BitmapPoolAdapter();
-    context = InstrumentationRegistry.getContext();
+    context = InstrumentationRegistry.getTargetContext();
     // TODO: Add Android API specific resources that work > API 16.
     assumeTrue(Build.VERSION.SDK_INT <= VERSION_CODES.JELLY_BEAN);
   }

@@ -7,5 +7,5 @@ set -e
 echo "Waiting for emulator..."
 android-wait-for-emulator
 
-./gradlew :library:connectedCheck
+./gradlew :instrumentation:connectedDebugAndroidTest
 

@@ -2,6 +2,7 @@ exec {
     commandLine "git", "submodule", "update", "--init", "--recursive"
 }
 include ':library'
+include ':instrumentation'
 include ':annotation'
 include ':annotation:compiler'
 include ':glide'

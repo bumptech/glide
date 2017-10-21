@@ -27,7 +27,7 @@ public final class ResourceIds {
   }
 
   private static int getResourceId(String type, String resourceName) {
-    Context context = InstrumentationRegistry.getContext();
+    Context context = InstrumentationRegistry.getTargetContext();
     Resources res = context.getResources();
     return res.getIdentifier(resourceName, type, context.getPackageName());
   }
