@@ -10,7 +10,9 @@ android:
   - build-tools-26.0.1
   - android-26
   - android-22
+  - android-16
   - sys-img-armeabi-v7a-android-22
+  - sys-img-armeabi-v7a-android-16
 
 licenses:
   - 'android-sdk-license.*'
@@ -18,16 +20,17 @@ licenses:
 jdk:
   - oraclejdk8
 
-env: 
+env:
   matrix:
     - COMPONENT=unit
-    - COMPONENT=instrumentation
+    - COMPONENT=instrumentation ANDROID_TARGET=16
+    - COMPONENT=instrumentation ANDROID_TARGET=22
     - COMPONENT=samples
 
 before_script:
   - ./scripts/travis_before_script.sh
 
-script: 
+script:
   - ./scripts/travis_script.sh
 
 after_success:
