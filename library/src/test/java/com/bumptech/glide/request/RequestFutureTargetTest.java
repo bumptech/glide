@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.os.Handler;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -61,7 +62,12 @@ public class RequestFutureTargetTest {
 
   @Test
   public void testReturnsTrueFromIsDoneIfDone() {
-    future.onResourceReady(new Object(), null);
+    future.onResourceReady(
+        /*resource=*/ new Object(),
+        /*model=*/ null,
+        /*target=*/future,
+        DataSource.DATA_DISK_CACHE,
+        true /*isFirstResource*/);
     assertTrue(future.isDone());
   }
 
@@ -106,7 +112,12 @@ public class RequestFutureTargetTest {
 
   @Test
   public void testDoesNotClearRequestIfCancelledAfterDone() {
-    future.onResourceReady(new Object(), null);
+    future.onResourceReady(
+        /*resource=*/ new Object(),
+        /*model=*/ null,
+        /*target=*/future,
+        DataSource.DATA_DISK_CACHE,
+        true /*isFirstResource*/);
     future.cancel(true);
 
     verify(request, never()).clear();
@@ -120,7 +131,12 @@ public class RequestFutureTargetTest {
 
   @Test
   public void testReturnsFalseFromIsCancelledIfCancelledAfterDone() {
-    future.onResourceReady(new Object(), null);
+    future.onResourceReady(
+        /*resource=*/ new Object(),
+        /*model=*/ null,
+        /*target=*/future,
+        DataSource.DATA_DISK_CACHE,
+        true /*isFirstResource*/);
     future.cancel(true);
 
     assertFalse(future.isCancelled());
@@ -134,7 +150,12 @@ public class RequestFutureTargetTest {
 
   @Test
   public void testReturnsFalseFromCancelIfDone() {
-    future.onResourceReady(new Object(), null);
+    future.onResourceReady(
+        /*resource=*/ new Object(),
+        /*model=*/ null,
+        /*target=*/future,
+        DataSource.DATA_DISK_CACHE,
+        true /*isFirstResource*/);
     assertFalse(future.cancel(true));
   }
 
@@ -142,7 +163,12 @@ public class RequestFutureTargetTest {
   public void testReturnsResourceOnGetIfAlreadyDone()
       throws ExecutionException, InterruptedException {
     Object expected = new Object();
-    future.onResourceReady(expected, null);
+    future.onResourceReady(
+        /*resource=*/ expected,
+        /*model=*/ null,
+        /*target=*/future,
+        DataSource.DATA_DISK_CACHE,
+        true /*isFirstResource*/);
 
     assertEquals(expected, future.get());
   }
@@ -151,7 +177,12 @@ public class RequestFutureTargetTest {
   public void testReturnsResourceOnGetWithTimeoutIfAlreadyDone()
       throws InterruptedException, ExecutionException, TimeoutException {
     Object expected = new Object();
-    future.onResourceReady(expected, null);
+    future.onResourceReady(
+        /*resource=*/ expected,
+        /*model=*/ null,
+        /*target=*/future,
+        DataSource.DATA_DISK_CACHE,
+        true /*isFirstResource*/);
 
     assertEquals(expected, future.get(100, TimeUnit.MILLISECONDS));
   }
@@ -173,21 +204,21 @@ public class RequestFutureTargetTest {
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGet()
       throws ExecutionException, InterruptedException {
-    future.onLoadFailed(null);
+    future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
     future.get();
   }
 
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionOnGetIfExceptionWithNullValueBeforeGet()
       throws ExecutionException, InterruptedException, TimeoutException {
-    future.onLoadFailed(null);
+    future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
     future.get(100, TimeUnit.MILLISECONDS);
   }
 
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout()
       throws ExecutionException, InterruptedException, TimeoutException {
-    future.onLoadFailed(null);
+    future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
     future.get(100, TimeUnit.MILLISECONDS);
   }
 
@@ -208,7 +239,12 @@ public class RequestFutureTargetTest {
   public void testGetSucceedsOnMainThreadIfDone()
       throws ExecutionException, InterruptedException {
     future = new RequestFutureTarget<>(handler, width, height, true, waiter);
-    future.onResourceReady(new Object(), null);
+    future.onResourceReady(
+        /*resource=*/ new Object(),
+        /*model=*/ null,
+        /*target=*/future,
+        DataSource.DATA_DISK_CACHE,
+        true /*isFirstResource*/);
     future.get();
   }
 
@@ -232,7 +268,7 @@ public class RequestFutureTargetTest {
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        future.onLoadFailed(null);
+        future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
         return null;
       }
     }).when(waiter).waitForTimeout(eq(future), anyLong());
@@ -266,13 +302,18 @@ public class RequestFutureTargetTest {
 
   @Test
   public void testNotifiesAllWhenLoadFails() {
-    future.onLoadFailed(null);
+    future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
     verify(waiter).notifyAll(eq(future));
   }
 
   @Test
   public void testNotifiesAllWhenResourceReady() {
-    future.onResourceReady(null, null);
+    future.onResourceReady(
+        /*resource=*/ new Object(),
+        /*model=*/ null,
+        /*target=*/future,
+        DataSource.DATA_DISK_CACHE,
+        true /*isFirstResource*/);
     verify(waiter).notifyAll(eq(future));
   }
 
@@ -297,7 +338,12 @@ public class RequestFutureTargetTest {
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        future.onResourceReady(expected, null);
+        future.onResourceReady(
+            /*resource=*/ expected,
+            /*model=*/ null,
+            /*target=*/future,
+            DataSource.DATA_DISK_CACHE,
+            true /*isFirstResource*/);
         return null;
       }
     }).when(waiter).waitForTimeout(eq(future), anyLong());

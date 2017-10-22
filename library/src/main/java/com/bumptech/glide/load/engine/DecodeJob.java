@@ -235,6 +235,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       }
       // When we're encoding we've already notified our callback and it isn't safe to do so again.
       if (stage != Stage.ENCODE) {
+        exceptions.add(e);
         notifyFailed();
       }
       if (!isCancelled) {

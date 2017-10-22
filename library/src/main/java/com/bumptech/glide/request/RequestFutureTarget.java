@@ -3,9 +3,14 @@ package com.bumptech.glide.request;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +52,7 @@ import java.util.concurrent.TimeoutException;
  * @param <R> The type of the resource that will be loaded.
  */
 public class RequestFutureTarget<R> implements FutureTarget<R>,
+    RequestListener<R>,
     Runnable {
   private static final Waiter DEFAULT_WAITER = new Waiter();
 
@@ -62,6 +68,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   private boolean isCancelled;
   private boolean resultReceived;
   private boolean loadFailed;
+  @Nullable private GlideException exception;
 
   /**
    * Constructor for a RequestFutureTarget. Should not be used directly.
@@ -162,8 +169,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    */
   @Override
   public synchronized void onLoadFailed(Drawable errorDrawable) {
-    loadFailed = true;
-    waiter.notifyAll(this);
+    // Ignored, synchronized for backwards compatibility.
   }
 
   /**
@@ -171,10 +177,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    */
   @Override
   public synchronized void onResourceReady(R resource, Transition<? super R> transition) {
-    // We might get a null result.
-    resultReceived = true;
-    this.resource = resource;
-    waiter.notifyAll(this);
+    // Ignored, synchronized for backwards compatibility.
   }
 
   private synchronized R doGet(Long timeoutMillis)
@@ -186,7 +189,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     if (isCancelled) {
       throw new CancellationException();
     } else if (loadFailed) {
-      throw new ExecutionException(new IllegalStateException("Load failed"));
+      throw new ExecutionException(exception);
     } else if (resultReceived) {
       return resource;
     }
@@ -200,7 +203,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     if (Thread.interrupted()) {
       throw new InterruptedException();
     } else if (loadFailed) {
-      throw new ExecutionException(new IllegalStateException("Load failed"));
+      throw new GlideExecutionException(exception);
     } else if (isCancelled) {
       throw new CancellationException();
     } else if (!resultReceived) {
@@ -240,6 +243,25 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     // Do nothing.
   }
 
+  @Override
+  public synchronized boolean onLoadFailed(
+      @Nullable GlideException e, Object model, Target<R> target, boolean isFirstResource) {
+    loadFailed = true;
+    exception = e;
+    waiter.notifyAll(this);
+    return false;
+  }
+
+  @Override
+  public synchronized boolean onResourceReady(
+      R resource, Object model, Target<R> target, DataSource dataSource, boolean isFirstResource) {
+    // We might get a null result.
+    resultReceived = true;
+    this.resource = resource;
+    waiter.notifyAll(this);
+    return false;
+  }
+
   // Visible for testing.
   static class Waiter {
 
@@ -249,6 +271,35 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
 
     public void notifyAll(Object toNotify) {
       toNotify.notifyAll();
+    }
+  }
+
+  private static class GlideExecutionException extends ExecutionException {
+
+    private final GlideException cause;
+
+    GlideExecutionException(GlideException cause) {
+      super();
+      this.cause = cause;
+    }
+
+    @Override
+    public void printStackTrace() {
+      printStackTrace(System.err);
+    }
+
+    @Override
+    public void printStackTrace(PrintStream s) {
+      super.printStackTrace(s);
+      s.print("Caused by: ");
+      cause.printStackTrace(s);
+    }
+
+    @Override
+    public void printStackTrace(PrintWriter s) {
+      super.printStackTrace(s);
+      s.print("Caused by: ");
+      cause.printStackTrace(s);
     }
   }
 }

@@ -1002,6 +1002,7 @@ public class SingleRequestTest {
           overrideHeight,
           priority,
           target,
+          /*targetListener=*/ null,
           requestListener,
           requestCoordinator,
           engine,
