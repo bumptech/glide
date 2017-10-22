@@ -2,7 +2,7 @@
 
 set -e
 
-./gradlew :library:assembleDebug :library:assembleDebugAndroidTest --parallel
+./gradlew :instrumentation:assembleDebug :instrumentation:assembleDebugAndroidTest --parallel
 
 echo "Waiting for emulator..."
 android-wait-for-emulator

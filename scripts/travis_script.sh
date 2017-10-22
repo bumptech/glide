@@ -8,6 +8,8 @@ elif [ "$COMPONENT" == "instrumentation" ]; then
   ./scripts/travis_instrumentation.sh
 elif [ "$COMPONENT" == "samples" ]; then
   ./scripts/travis_samples.sh
+elif [ "$COMPONENT" == "firebase" ]; then
+  ./scripts/travis_firebase.sh
 else
   echo "Unrecognized component: $COMPONENT"
   exit 1
