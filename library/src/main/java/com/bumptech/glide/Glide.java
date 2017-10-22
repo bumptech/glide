@@ -52,6 +52,7 @@ import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.ByteBufferBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
+import com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
@@ -333,6 +334,8 @@ public class Glide implements ComponentCallbacks2 {
             new GifFrameResourceDecoder(bitmapPool))
         /* Drawables */
         .append(Uri.class, Drawable.class, new ResourceDrawableDecoder(context))
+        .append(Uri.class, Bitmap.class,
+            new ResourceBitmapDecoder(new ResourceDrawableDecoder(context), bitmapPool))
         /* Files */
         .register(new ByteBufferRewinder.Factory())
         .append(File.class, ByteBuffer.class, new ByteBufferFileLoader.Factory())

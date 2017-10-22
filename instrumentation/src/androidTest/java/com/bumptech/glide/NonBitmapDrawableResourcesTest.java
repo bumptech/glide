@@ -22,12 +22,17 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class NonBitmapDrawableResourcesTest {
   private Context context;
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Before
   public void setUp() {
@@ -71,6 +76,17 @@ public class NonBitmapDrawableResourcesTest {
   }
 
   @Test
+  public void load_withBitmapAliasResourceId_asBitmap_producesNonNullBitmap()
+      throws ExecutionException, InterruptedException {
+    Bitmap bitmap = Glide.with(context)
+        .asBitmap()
+        .load(ResourceIds.drawable.bitmap_alias)
+        .submit()
+        .get();
+    assertThat(bitmap).isNotNull();
+  }
+
+  @Test
   public void load_withShapeDrawableResourceId_asDrawable_producesNonNullDrawable()
       throws ExecutionException, InterruptedException {
     Drawable drawable = Glide.with(context)
@@ -78,6 +94,30 @@ public class NonBitmapDrawableResourcesTest {
         .submit()
         .get();
     assertThat(drawable).isNotNull();
+  }
+
+  @Test
+  public void load_withShapeDrawableResourceId_asBitmap_withSizeOriginal_fails()
+      throws ExecutionException, InterruptedException {
+    expectedException.expect(ExecutionException.class);
+    Glide.with(context)
+        .asBitmap()
+        .load(ResourceIds.drawable.shape_drawable)
+        .submit()
+        .get();
+  }
+
+  @Test
+  public void load_withShapeDrawableResourceId_asBitmap_withValidSize_returnsNonNullBitmap()
+      throws ExecutionException, InterruptedException {
+    Bitmap bitmap = Glide.with(context)
+        .asBitmap()
+        .load(ResourceIds.drawable.shape_drawable)
+        .submit(100, 200)
+        .get();
+    assertThat(bitmap).isNotNull();
+    assertThat(bitmap.getWidth()).isEqualTo(100);
+    assertThat(bitmap.getHeight()).isEqualTo(200);
   }
 
   @Test
@@ -91,6 +131,17 @@ public class NonBitmapDrawableResourcesTest {
   }
 
   @Test
+  public void load_withStateListDrawableResourceId_asBitmap_producesNonNullBitmap()
+      throws ExecutionException, InterruptedException {
+    Bitmap bitmap = Glide.with(context)
+        .asBitmap()
+        .load(ResourceIds.drawable.state_list_drawable)
+        .submit()
+        .get();
+    assertThat(bitmap).isNotNull();
+  }
+
+  @Test
   public void load_withVectorDrawableResourceId_asDrawable_producesNonNullDrawable()
       throws ExecutionException, InterruptedException {
     Drawable drawable = Glide.with(context)
@@ -98,6 +149,17 @@ public class NonBitmapDrawableResourcesTest {
         .submit()
         .get();
     assertThat(drawable).isNotNull();
+  }
+
+  @Test
+  public void load_withVectorDrawableResourceId_asBitmap_producesNonNullBitmap()
+      throws ExecutionException, InterruptedException {
+    Bitmap bitmap = Glide.with(context)
+        .asBitmap()
+        .load(ResourceIds.drawable.vector_drawable)
+        .submit()
+        .get();
+    assertThat(bitmap).isNotNull();
   }
 
   @Test
@@ -109,6 +171,19 @@ public class NonBitmapDrawableResourcesTest {
         .get();
 
     assertThat(drawable).isNotNull();
+  }
+
+
+  @Test
+  public void load_withNinePatchResourceId_asBitmap_producesNonNullBitmap()
+      throws ExecutionException, InterruptedException {
+    Bitmap bitmap = Glide.with(context)
+        .asBitmap()
+        .load(ResourceIds.drawable.googlelogo_color_120x44dp)
+        .submit()
+        .get();
+
+    assertThat(bitmap).isNotNull();
   }
 
   @Test
@@ -128,6 +203,27 @@ public class NonBitmapDrawableResourcesTest {
           .submit()
           .get();
       assertThat(drawable).isNotNull();
+    }
+  }
+
+  @Test
+  public void load_withApplicationIconResourceIdUri_asBitmap_producesNonNullBitmap()
+      throws NameNotFoundException, ExecutionException, InterruptedException {
+    for (String packageName : getInstalledPackages()) {
+      int iconResourceId = getResourceId(packageName);
+
+      Uri uri = new Uri.Builder()
+          .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+          .authority(packageName)
+          .path(String.valueOf(iconResourceId))
+          .build();
+
+      Bitmap bitmap = Glide.with(context)
+          .asBitmap()
+          .load(uri)
+          .submit()
+          .get();
+      assertThat(bitmap).isNotNull();
     }
   }
 
@@ -152,6 +248,31 @@ public class NonBitmapDrawableResourcesTest {
           .submit()
           .get();
       assertThat(drawable).isNotNull();
+    }
+  }
+
+  @Test
+  public void load_withApplicationIconResourceNameUri_asBitmap_producesNonNullBitmap()
+      throws ExecutionException, InterruptedException, NameNotFoundException {
+    for (String packageName : getInstalledPackages()) {
+      int iconResourceId = getResourceId(packageName);
+
+      Context toUse = context.createPackageContext(packageName, /*flags=*/ 0);
+      Resources resources = toUse.getResources();
+      Uri uri = new Uri.Builder()
+          .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+          .authority(packageName)
+          .path(resources.getResourceTypeName(iconResourceId))
+          .path(resources.getResourceEntryName(iconResourceId))
+          .path(String.valueOf(iconResourceId))
+          .build();
+
+      Bitmap bitmap = Glide.with(context)
+          .asBitmap()
+          .load(uri)
+          .submit()
+          .get();
+      assertThat(bitmap).isNotNull();
     }
   }
 
