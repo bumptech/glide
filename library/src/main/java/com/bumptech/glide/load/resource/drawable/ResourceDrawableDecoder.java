@@ -3,14 +3,16 @@ package com.bumptech.glide.load.resource.drawable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapDrawableResource;
 import java.io.IOException;
 import java.util.List;
 
@@ -32,9 +34,11 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
   private static final int RESOURCE_ID_SEGMENT_INDEX = 0;
 
   private final Context context;
+  private final BitmapPool bitmapPool;
 
-  public ResourceDrawableDecoder(Context context) {
+  public ResourceDrawableDecoder(Context context, BitmapPool bitmapPool) {
     this.context = context.getApplicationContext();
+    this.bitmapPool = bitmapPool;
   }
 
   @Override
@@ -42,7 +46,7 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
     return source.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE);
   }
 
-  @Nullable
+  @NonNull
   @Override
   public Resource<Drawable> decode(Uri source, int width, int height, Options options)
       throws IOException {
@@ -52,6 +56,16 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
         ? context : getContextForPackage(source, packageName);
     // We can't get a theme from another application.
     Drawable drawable = DrawableDecoderCompat.getDrawable(toUse, resId);
+    return getDrawableResource(drawable);
+  }
+
+  @SuppressWarnings("unchecked")
+  private Resource<Drawable> getDrawableResource(Drawable drawable) {
+   if (drawable instanceof BitmapDrawable) {
+      BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+      return (Resource<Drawable>) (Resource<? extends Drawable>)
+          new BitmapDrawableResource(bitmapDrawable, bitmapPool);
+    }
     return new InternalDrawableResource(drawable);
   }
 

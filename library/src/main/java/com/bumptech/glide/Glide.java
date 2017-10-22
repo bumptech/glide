@@ -333,9 +333,10 @@ public class Glide implements ComponentCallbacks2 {
         .append(Registry.BUCKET_BITMAP, GifDecoder.class, Bitmap.class,
             new GifFrameResourceDecoder(bitmapPool))
         /* Drawables */
-        .append(Uri.class, Drawable.class, new ResourceDrawableDecoder(context))
+        .append(Uri.class, Drawable.class, new ResourceDrawableDecoder(context, bitmapPool))
         .append(Uri.class, Bitmap.class,
-            new ResourceBitmapDecoder(new ResourceDrawableDecoder(context), bitmapPool))
+            new ResourceBitmapDecoder(
+                new ResourceDrawableDecoder(context, bitmapPool), bitmapPool))
         /* Files */
         .register(new ByteBufferRewinder.Factory())
         .append(File.class, ByteBuffer.class, new ByteBufferFileLoader.Factory())

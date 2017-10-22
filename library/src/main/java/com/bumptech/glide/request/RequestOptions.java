@@ -19,13 +19,13 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.stream.HttpGlideUrlLoader;
-import com.bumptech.glide.load.resource.bitmap.BitmapDrawableTransformation;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.CenterInside;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
+import com.bumptech.glide.load.resource.bitmap.DrawableTransformation;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -1170,9 +1170,14 @@ public class RequestOptions implements Cloneable {
       return clone().optionalTransform(transformation);
     }
 
+    DrawableTransformation drawableTransformation = new DrawableTransformation(transformation);
     optionalTransform(Bitmap.class, transformation);
+    optionalTransform(Drawable.class, drawableTransformation);
     // TODO: remove BitmapDrawable decoder and this transformation.
-    optionalTransform(BitmapDrawable.class, new BitmapDrawableTransformation(transformation));
+    // Registering as BitmapDrawable is simply an optimization to avoid some iteration and
+    // isAssignableFrom checks when obtaining the transformation later on. It can be removed without
+    // affecting the functionality.
+    optionalTransform(BitmapDrawable.class, drawableTransformation.asBitmapDrawable());
     optionalTransform(GifDrawable.class, new GifDrawableTransformation(transformation));
     return selfOrThrowIfLocked();
   }

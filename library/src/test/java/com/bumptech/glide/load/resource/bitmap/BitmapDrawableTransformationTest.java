@@ -37,12 +37,12 @@ import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
+@SuppressWarnings("deprecation")
 public class BitmapDrawableTransformationTest {
 
   @Mock BitmapPool bitmapPool;
   @Mock Transformation<Bitmap> wrapped;
   @Mock Resource<BitmapDrawable> drawableResourceToTransform;
-  @Mock BitmapDrawable drawableToTransform;
 
   private BitmapDrawableTransformation transformation;
   private Bitmap bitmapToTransform;
@@ -52,11 +52,11 @@ public class BitmapDrawableTransformationTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
     bitmapToTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    BitmapDrawable drawableToTransform = new BitmapDrawable(bitmapToTransform);
 
     context = RuntimeEnvironment.application;
     Glide.init(new GlideBuilder().setBitmapPool(bitmapPool).build(context));
     when(drawableResourceToTransform.get()).thenReturn(drawableToTransform);
-    when(drawableToTransform.getBitmap()).thenReturn(bitmapToTransform);
     transformation = new BitmapDrawableTransformation(wrapped);
   }
 
