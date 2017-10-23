@@ -10,7 +10,6 @@ import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import java.io.IOException;
 import java.util.List;
 
@@ -32,11 +31,9 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
   private static final int RESOURCE_ID_SEGMENT_INDEX = 0;
 
   private final Context context;
-  private final BitmapPool bitmapPool;
 
-  public ResourceDrawableDecoder(Context context, BitmapPool bitmapPool) {
+  public ResourceDrawableDecoder(Context context) {
     this.context = context.getApplicationContext();
-    this.bitmapPool = bitmapPool;
   }
 
   @Override
@@ -54,7 +51,7 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
         ? context : getContextForPackage(source, packageName);
     // We can't get a theme from another application.
     Drawable drawable = DrawableDecoderCompat.getDrawable(toUse, resId);
-    return DrawableResourceImpl.newInstance(drawable, bitmapPool);
+    return NonOwnedDrawableResource.newInstance(drawable);
   }
 
   @NonNull

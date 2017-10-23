@@ -322,14 +322,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   /**
    * Returns a request builder to load the given {@link Bitmap}.
    *
-   * <p>{@link Bitmap}s provided to this method become owned by Glide. The {@link Bitmap} may be
-   * recycled or re-used at any time. If you do not own the Bitmap or you need to continue to use
-   * the {@link Bitmap} after passing it in to Glide, consider passing a copy of the {@link Bitmap}
-   * to Glide instead. It's almost always better to allow Glide to load {@link Bitmap}s than
+   * <p>It's almost always better to allow Glide to load {@link Bitmap}s than
    * pass {@link Bitmap}s into Glide. If you have a custom way to obtain {@link Bitmap}s that is
-   * not supported by Glide, consider registering a custom
+   * not supported by Glide by default, consider registering a custom
    * {@link com.bumptech.glide.load.model.ModelLoader} or
-   * {@link com.bumptech.glide.load.ResourceDecoder} instead.
+   * {@link com.bumptech.glide.load.ResourceDecoder} instead of using this method.
    *
    * <p>The {@link DiskCacheStrategy} is set to {@link DiskCacheStrategy#NONE}. Using other
    * strategies may result in undefined behavior.
@@ -348,13 +345,11 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
   /**
    * Returns a request builder to load the given {@link Drawable}.
    *
-   * <p>{@link Drawable}s provided to this method become owned by Glide. They or {@link Bitmap}s
-   * they contain may be recycled or re-used at any time. If you do not own the {@link Drawable},
-   * do not pass it in to Glide. It's almost always better to allow Glide to load {@link Bitmap}s
-   * than pass {@link Bitmap}s into Glide. If you have a custom way to obtain {@link Bitmap}s that
-   * is not supported by Glide, consider registering a custom
+   * <p>It's almost always better to allow Glide to load {@link Bitmap}s than to pass
+   * {@link Bitmap}s into Glide using this method . If you have a custom way to obtain
+   * {@link Bitmap}s that is not supported by Glide by default, consider registering a custom
    * {@link com.bumptech.glide.load.model.ModelLoader} or
-   * {@link com.bumptech.glide.load.ResourceDecoder} instead.
+   * {@link com.bumptech.glide.load.ResourceDecoder} instead of using this method.
    *
    * <p>The {@link DiskCacheStrategy} is set to {@link DiskCacheStrategy#NONE}. Using other
    * strategies may result in undefined behavior.

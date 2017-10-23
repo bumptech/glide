@@ -306,7 +306,7 @@ public class Glide implements ComponentCallbacks2 {
     ByteBufferBitmapDecoder byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
     StreamBitmapDecoder streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
     ResourceDrawableDecoder resourceDrawableDecoder =
-        new ResourceDrawableDecoder(context, bitmapPool);
+        new ResourceDrawableDecoder(context);
     ResourceLoader.StreamFactory resourceLoaderStreamFactory =
         new ResourceLoader.StreamFactory(resources);
     ResourceLoader.UriFactory resourceLoaderUriFactory =
@@ -324,7 +324,7 @@ public class Glide implements ComponentCallbacks2 {
         .append(
             Registry.BUCKET_BITMAP, ParcelFileDescriptor.class, Bitmap.class, videoBitmapDecoder)
         .append(
-            Registry.BUCKET_BITMAP, Bitmap.class, Bitmap.class, new UnitBitmapDecoder(bitmapPool))
+            Registry.BUCKET_BITMAP, Bitmap.class, Bitmap.class, new UnitBitmapDecoder())
         .append(Bitmap.class, Bitmap.class, UnitModelLoader.Factory.<Bitmap>getInstance())
         .append(Bitmap.class, bitmapEncoder)
         /* BitmapDrawables */
@@ -412,7 +412,7 @@ public class Glide implements ComponentCallbacks2 {
         .append(byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory())
         .append(Uri.class, Uri.class, UnitModelLoader.Factory.<Uri>getInstance())
         .append(Drawable.class, Drawable.class, UnitModelLoader.Factory.<Drawable>getInstance())
-        .append(Drawable.class, Drawable.class, new UnitDrawableDecoder(bitmapPool))
+        .append(Drawable.class, Drawable.class, new UnitDrawableDecoder())
         /* Transcoders */
         .register(
             Bitmap.class,
