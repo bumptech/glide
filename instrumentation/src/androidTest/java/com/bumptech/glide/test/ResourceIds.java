@@ -13,11 +13,6 @@ public final class ResourceIds {
     // Utility class.
   }
 
-  public interface raw {
-    int blue_rect_over_rounded = getResourceId("raw", "blue_rect_over_rounded");
-    int blue_rect_rounded = getResourceId("raw", "blue_rect_rounded");
-  }
-
   public interface drawable {
     int bitmap_alias = getResourceId("drawable", "bitmap_alias");
     int googlelogo_color_120x44dp= getResourceId("drawable", "googlelogo_color_120x44dp");

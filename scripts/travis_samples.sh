@@ -11,9 +11,15 @@ set -e
   --parallel &
 pid=$!
 
-./scripts/install_firebase.sh
+if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+  wait $pid
+  echo "Unable to run Firebase tests for pull requests, exiting"
+  exit 0
+else 
+  ./scripts/install_firebase.sh
+  wait $pid
+fi
 
-wait $pid
 
 declare -a samples=("flickr" 
                 "giphy" 

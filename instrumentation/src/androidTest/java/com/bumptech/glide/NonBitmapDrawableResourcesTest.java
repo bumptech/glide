@@ -19,33 +19,28 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.test.ResourceIds;
+import com.bumptech.glide.test.TearDownGlide;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class NonBitmapDrawableResourcesTest {
+  @Rule public TestName testName = new TestName();
+  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
+  @Rule public ExpectedException expectedException = ExpectedException.none();
   private Context context;
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Before
   public void setUp() {
     context = InstrumentationRegistry.getTargetContext();
-  }
-
-  @After
-  public void tearDown() {
-    Glide.get(context).clearDiskCache();
-    Glide.tearDown();
   }
 
   @Test

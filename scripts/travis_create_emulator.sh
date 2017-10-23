@@ -2,9 +2,10 @@
 
 set -e
 
-echo y | android --silent update sdk --no-ui --all --filter android-$ANDROID_TARGET
-echo y | android --silent update sdk --no-ui --all --filter sys-img-armeabi-v7a-android-$ANDROID_TARGET
-echo no | android create avd --force -n test -t android-$ANDROID_TARGET --abi armeabi-v7a
-QEMU_AUDIO_DRV=none emulator -engine classic -avd test -no-window &
+target="system-images;android-${ANDROID_TARGET};default;armeabi-v7a"
+echo y | sdkmanager --update
+echo y | sdkmanager --install $target
+avdmanager create avd --force -n test -k $target --device "Nexus 5X" -c 2000M 
+QEMU_AUDIO_DRV=none $ANDROID_HOME/emulator/emulator -avd test -no-window &
 
 exit 0

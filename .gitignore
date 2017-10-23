@@ -19,6 +19,9 @@ docs/**/*
 *.swp
 *.swo
 
+# sed
+*.bak
+
 # Intellij 
 *.ipr
 *.iml
