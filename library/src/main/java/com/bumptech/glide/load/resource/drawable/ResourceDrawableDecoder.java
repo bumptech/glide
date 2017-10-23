@@ -3,7 +3,6 @@ package com.bumptech.glide.load.resource.drawable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.DrawableRes;
@@ -12,7 +11,6 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapDrawableResource;
 import java.io.IOException;
 import java.util.List;
 
@@ -56,17 +54,7 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
         ? context : getContextForPackage(source, packageName);
     // We can't get a theme from another application.
     Drawable drawable = DrawableDecoderCompat.getDrawable(toUse, resId);
-    return getDrawableResource(drawable);
-  }
-
-  @SuppressWarnings("unchecked")
-  private Resource<Drawable> getDrawableResource(Drawable drawable) {
-   if (drawable instanceof BitmapDrawable) {
-      BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-      return (Resource<Drawable>) (Resource<? extends Drawable>)
-          new BitmapDrawableResource(bitmapDrawable, bitmapPool);
-    }
-    return new InternalDrawableResource(drawable);
+    return DrawableResourceImpl.newInstance(drawable, bitmapPool);
   }
 
   @NonNull
@@ -102,30 +90,5 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
        throw new IllegalArgumentException("Failed to obtain resource id for: " + source);
      }
      return result;
-  }
-
-  private static final class InternalDrawableResource extends DrawableResource<Drawable> {
-
-    InternalDrawableResource(Drawable drawable) {
-      super(drawable);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Class<Drawable> getResourceClass() {
-      return (Class<Drawable>) drawable.getClass();
-    }
-
-    @Override
-    public int getSize() {
-      // 4 bytes per pixel for ARGB_8888 Bitmaps is something of a reasonable approximation. If
-      // there are no intrinsic bounds, we can fall back just to 1.
-      return Math.max(1, drawable.getIntrinsicWidth() * drawable.getIntrinsicHeight() * 4);
-    }
-
-    @Override
-    public void recycle() {
-      // Do nothing.
-    }
   }
 }

@@ -54,9 +54,11 @@ import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
+import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
 import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
 import com.bumptech.glide.load.resource.drawable.ResourceDrawableDecoder;
+import com.bumptech.glide.load.resource.drawable.UnitDrawableDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
 import com.bumptech.glide.load.resource.gif.ByteBufferGifDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -321,6 +323,9 @@ public class Glide implements ComponentCallbacks2 {
         .append(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, streamBitmapDecoder)
         .append(
             Registry.BUCKET_BITMAP, ParcelFileDescriptor.class, Bitmap.class, videoBitmapDecoder)
+        .append(
+            Registry.BUCKET_BITMAP, Bitmap.class, Bitmap.class, new UnitBitmapDecoder(bitmapPool))
+        .append(Bitmap.class, Bitmap.class, UnitModelLoader.Factory.<Bitmap>getInstance())
         .append(Bitmap.class, bitmapEncoder)
         /* BitmapDrawables */
         .append(
@@ -406,6 +411,8 @@ public class Glide implements ComponentCallbacks2 {
         .append(byte[].class, ByteBuffer.class, new ByteArrayLoader.ByteBufferFactory())
         .append(byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory())
         .append(Uri.class, Uri.class, UnitModelLoader.Factory.<Uri>getInstance())
+        .append(Drawable.class, Drawable.class, UnitModelLoader.Factory.<Drawable>getInstance())
+        .append(Drawable.class, Drawable.class, new UnitDrawableDecoder(bitmapPool))
         /* Transcoders */
         .register(
             Bitmap.class,

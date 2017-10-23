@@ -3,8 +3,10 @@ package com.bumptech.glide;
 import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
 import static com.bumptech.glide.request.RequestOptions.errorOf;
 import static com.bumptech.glide.request.RequestOptions.placeholderOf;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -70,6 +72,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
@@ -552,6 +555,40 @@ public class GlideTest {
         .into(target);
 
     verify(target).onLoadFailed(eq(error));
+  }
+
+  @Test
+  public void testLoadBitmap_asBitmap() {
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    requestManager
+        .asBitmap()
+        .load(bitmap)
+        .into(target);
+
+    verify(target).onResourceReady(eq(bitmap), any(Transition.class));
+  }
+
+  @Test
+  public void testLoadBitmap_asDrawable() {
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    requestManager
+        .load(bitmap)
+        .into(target);
+
+    ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+    verify(target).onResourceReady(captor.capture(), any(Transition.class));
+    BitmapDrawable drawable = (BitmapDrawable) captor.getValue();
+    assertThat(drawable.getBitmap()).isEqualTo(bitmap);
+  }
+
+  @Test
+  public void testLoadDrawable() {
+    Drawable drawable = new ColorDrawable(Color.RED);
+    requestManager
+        .load(drawable)
+        .into(target);
+
+    verify(target).onResourceReady(eq(drawable), any(Transition.class));
   }
 
   @Test
