@@ -14,6 +14,21 @@ import com.bumptech.glide.signature.ObjectKey;
  * @param <Model> The type of model that will also be returned as decodable data.
  */
 public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
+  @SuppressWarnings("deprecation")
+  private static final UnitModelLoader<?> INSTANCE = new UnitModelLoader<>();
+
+  @SuppressWarnings("unchecked")
+  public static <T> UnitModelLoader<T> getInstance() {
+    return (UnitModelLoader<T>) INSTANCE;
+  }
+
+  /**
+   * @deprecated Use {@link #getInstance()} instead.
+   */
+  @Deprecated
+  public UnitModelLoader() {
+    // Intentionally empty.
+  }
 
   @Override
   public LoadData<Model> buildLoadData(Model model, int width, int height,
@@ -68,11 +83,26 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
    *
    * @param <Model> The type of model that will also be returned as decodable data.
    */
+  // PMD seems to be just wrong here, maybe confused by getInstance in UnitModelLoader.
+  @SuppressWarnings("PMD.SingleMethodSingleton")
   public static class Factory<Model> implements ModelLoaderFactory<Model, Model> {
+    @SuppressWarnings("deprecation")
+    private static final Factory<?> FACTORY = new Factory<>();
+
+    @SuppressWarnings("unchecked")
+    public static <T> Factory<T> getInstance() {
+      return (Factory<T>) FACTORY;
+    }
+
+    /** @deprecated Use {@link #getInstance()} instead. */
+    @Deprecated
+    public Factory() {
+      // Intentionally empty.
+    }
 
     @Override
     public ModelLoader<Model, Model> build(MultiModelLoaderFactory multiFactory) {
-      return new UnitModelLoader<>();
+      return UnitModelLoader.getInstance();
     }
 
     @Override

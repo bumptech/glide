@@ -111,7 +111,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
 
     @Override
     public ModelLoader<Integer, Uri> build(MultiModelLoaderFactory multiFactory) {
-      return new ResourceLoader<>(resources, new UnitModelLoader<Uri>());
+      return new ResourceLoader<>(resources, UnitModelLoader.<Uri>getInstance());
     }
 
     @Override
