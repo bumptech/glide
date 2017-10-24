@@ -48,11 +48,7 @@ public class ResourceBitmapDecoder implements ResourceDecoder<Uri, Bitmap> {
   public Resource<Bitmap> decode(Uri source, int width, int height, Options options)
       throws IOException {
     Resource<Drawable> drawableResource = drawableDecoder.decode(source, width, height, options);
-    Bitmap bitmap =
-        DrawableToBitmapConverter.convert(bitmapPool, drawableResource.get(), width, height);
-    if (bitmap == null) {
-      return null;
-    }
-    return new BitmapResource(bitmap, bitmapPool);
+    Drawable drawable = drawableResource.get();
+    return DrawableToBitmapConverter.convert(bitmapPool, drawable, width, height);
   }
 }

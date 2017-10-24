@@ -6,35 +6,34 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.request.target.Target;
 import java.util.concurrent.locks.Lock;
 
 final class DrawableToBitmapConverter {
+  private static final BitmapPool NO_BITMAP_POOL = new BitmapPoolAdapter();
   private DrawableToBitmapConverter() {
     // Utility class.
   }
 
-  static boolean willDraw(Drawable drawable) {
-    return !(drawable.getCurrent() instanceof BitmapDrawable);
-  }
-
   @Nullable
-  static Bitmap convert(BitmapPool bitmapPool, Drawable drawable, int width, int height) {
+  static Resource<Bitmap> convert(BitmapPool bitmapPool, Drawable drawable, int width, int height) {
     // Handle DrawableContainer or StateListDrawables that may contain one or more BitmapDrawables.
     drawable = drawable.getCurrent();
     Bitmap result = null;
+    boolean isRecycleable = false;
     if (drawable instanceof BitmapDrawable) {
       result = ((BitmapDrawable) drawable).getBitmap();
     } else if (!(drawable instanceof Animatable)) {
       result = drawToBitmap(bitmapPool, drawable, width, height);
+      // We created and drew to the Bitmap, so it's safe for us to recycle or re-use.
+      isRecycleable = true;
     }
 
-    if (result == null) {
-      return null;
-    }
-
-    return result;
+    BitmapPool toUse = isRecycleable ? bitmapPool : NO_BITMAP_POOL;
+    return BitmapResource.obtain(result, toUse);
   }
 
   private static Bitmap drawToBitmap(

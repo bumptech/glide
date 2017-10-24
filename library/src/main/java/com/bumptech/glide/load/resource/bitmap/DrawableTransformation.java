@@ -45,22 +45,17 @@ public class DrawableTransformation implements Transformation<Drawable> {
       int outHeight) {
     BitmapPool bitmapPool = Glide.get(context).getBitmapPool();
     Drawable drawable = resource.get();
-    Bitmap bitmap = DrawableToBitmapConverter.convert(bitmapPool, drawable, outWidth, outHeight);
-    if (bitmap == null) {
+    Resource<Bitmap> bitmapResourceToTransform =
+        DrawableToBitmapConverter.convert(bitmapPool, drawable, outWidth, outHeight);
+    if (bitmapResourceToTransform == null) {
       throw new IllegalArgumentException("Unable to convert " + drawable + " to a Bitmap");
     }
-    Resource<Bitmap> bitmapResourceToTransform = new BitmapResource(bitmap, bitmapPool);
     Resource<Bitmap> transformedBitmapResource =
         wrapped.transform(context, bitmapResourceToTransform, outWidth, outHeight);
 
     if (transformedBitmapResource.equals(bitmapResourceToTransform)) {
       transformedBitmapResource.recycle();
-      // If we extracted the Bitmap from a StateListDrawable, or a BitmapDrawable then we can't
-      // recycle it here. If on the other hand, we drew the Drawable to a Canvas, we can recycle
-      // the resulting unused Bitmap.
-      if (DrawableToBitmapConverter.willDraw(drawable)) {
-        bitmapResourceToTransform.recycle();
-      }
+      bitmapResourceToTransform.recycle();
       return resource;
     } else {
       return newDrawableResource(context, transformedBitmapResource.get());
