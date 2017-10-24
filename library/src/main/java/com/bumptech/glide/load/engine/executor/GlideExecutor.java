@@ -140,7 +140,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    */
   public static GlideExecutor newSourceExecutor(
           UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    return newDiskCacheExecutor(DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
+    return newSourceExecutor(DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
                                 DEFAULT_DISK_CACHE_EXECUTOR_NAME, uncaughtThrowableStrategy);
   }
 
