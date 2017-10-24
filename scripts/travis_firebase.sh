@@ -2,6 +2,11 @@
 
 set -e
 
+if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+  echo "Unable to run Firebase tests for pull requests, exiting"
+  exit 0
+fi
+
 ./gradlew :instrumentation:assembleDebug :instrumentation:assembleDebugAndroidTest --parallel &
 pid=$!
 
