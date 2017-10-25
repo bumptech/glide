@@ -53,6 +53,7 @@ import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
@@ -293,6 +294,46 @@ public class GlideTest {
     requestManager.as(byte[].class).apply(decodeTypeOf(Bitmap.class)).load(uri).into(target);
 
     verify(target).onResourceReady(isA(byte[].class), isA(Transition.class));
+  }
+
+  @Test
+  public void testLoadColorDrawable_withUnitBitmapTransformation_returnsColorDrawable() {
+    ColorDrawable colorDrawable = new ColorDrawable(Color.RED);
+    requestManager
+        .load(colorDrawable)
+        .apply(new RequestOptions()
+            .override(100, 100)
+            .centerCrop())
+        .into(target);
+
+    ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
+    verify(target).onResourceReady(argumentCaptor.capture(), isA(Transition.class));
+
+    Object result = argumentCaptor.getValue();
+
+    assertThat(result).isInstanceOf(ColorDrawable.class);
+    assertThat(((ColorDrawable) result).getColor()).isEqualTo(Color.RED);
+  }
+
+  @Test
+  public void testLoadColorDrawable_withNonUnitBitmapTransformation_returnsBitmapDrawable() {
+    ColorDrawable colorDrawable = new ColorDrawable(Color.RED);
+    requestManager
+        .load(colorDrawable)
+        .apply(new RequestOptions()
+            .override(100, 100)
+            .circleCrop())
+        .into(target);
+
+    ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
+    verify(target).onResourceReady(argumentCaptor.capture(), isA(Transition.class));
+
+    Object result = argumentCaptor.getValue();
+
+    assertThat(result).isInstanceOf(BitmapDrawable.class);
+    Bitmap bitmap = ((BitmapDrawable) result).getBitmap();
+    assertThat(bitmap.getWidth()).isEqualTo(100);
+    assertThat(bitmap.getHeight()).isEqualTo(100);
   }
 
   @Test

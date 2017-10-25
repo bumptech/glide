@@ -401,7 +401,7 @@ public class StandardGifDecoder implements GifDecoder {
   }
 
   @Override
-  public void setDefaultBitmapFormat(Bitmap.Config config) {
+  public void setDefaultBitmapConfig(Bitmap.Config config) {
     if (config != Bitmap.Config.ARGB_8888 && config != Bitmap.Config.RGB_565) {
       throw new IllegalArgumentException("Unsupported format: " + config
           + ", must be one of " + Bitmap.Config.ARGB_8888 + " or " + Bitmap.Config.RGB_565);

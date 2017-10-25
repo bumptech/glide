@@ -233,5 +233,5 @@ public interface GifDecoder {
    * {@link android.graphics.Bitmap.Config#ARGB_8888} will be used anyway to support the
    * transparency.
    */
-  void setDefaultBitmapFormat(Bitmap.Config format);
+  void setDefaultBitmapConfig(Bitmap.Config format);
 }

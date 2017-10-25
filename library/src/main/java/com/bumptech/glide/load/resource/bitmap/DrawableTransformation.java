@@ -30,9 +30,11 @@ import java.security.MessageDigest;
 public class DrawableTransformation implements Transformation<Drawable> {
 
   private final Transformation<Bitmap> wrapped;
+  private final boolean isRequired;
 
-  public DrawableTransformation(Transformation<Bitmap> wrapped) {
+  public DrawableTransformation(Transformation<Bitmap> wrapped, boolean isRequired) {
     this.wrapped = wrapped;
+    this.isRequired = isRequired;
   }
 
   @SuppressWarnings("unchecked")
@@ -48,7 +50,11 @@ public class DrawableTransformation implements Transformation<Drawable> {
     Resource<Bitmap> bitmapResourceToTransform =
         DrawableToBitmapConverter.convert(bitmapPool, drawable, outWidth, outHeight);
     if (bitmapResourceToTransform == null) {
-      throw new IllegalArgumentException("Unable to convert " + drawable + " to a Bitmap");
+      if (isRequired) {
+        throw new IllegalArgumentException("Unable to convert " + drawable + " to a Bitmap");
+      } else {
+        return resource;
+      }
     }
     Resource<Bitmap> transformedBitmapResource =
         wrapped.transform(context, bitmapResourceToTransform, outWidth, outHeight);

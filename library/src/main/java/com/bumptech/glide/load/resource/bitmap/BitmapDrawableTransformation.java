@@ -21,7 +21,8 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
   private final Transformation<Drawable> wrapped;
 
   public BitmapDrawableTransformation(Transformation<Bitmap> wrapped) {
-    this.wrapped = Preconditions.checkNotNull(new DrawableTransformation(wrapped));
+    this.wrapped =
+        Preconditions.checkNotNull(new DrawableTransformation(wrapped, /*isRequired=*/ false));
   }
 
   /**
