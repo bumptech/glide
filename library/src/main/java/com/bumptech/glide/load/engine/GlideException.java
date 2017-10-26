@@ -18,20 +18,20 @@ import java.util.List;
 public final class GlideException extends Exception {
   private static final StackTraceElement[] EMPTY_ELEMENTS = new StackTraceElement[0];
 
-  private final List<Exception> causes;
+  private final List<Throwable> causes;
   private Key key;
   private DataSource dataSource;
   private Class<?> dataClass;
 
   public GlideException(String message) {
-    this(message, Collections.<Exception>emptyList());
+    this(message, Collections.<Throwable>emptyList());
   }
 
-  public GlideException(String detailMessage, Exception cause) {
+  public GlideException(String detailMessage, Throwable cause) {
     this(detailMessage, Collections.singletonList(cause));
   }
 
-  public GlideException(String detailMessage, List<Exception> causes) {
+  public GlideException(String detailMessage, List<Throwable> causes) {
     super(detailMessage);
     setStackTrace(EMPTY_ELEMENTS);
     this.causes = causes;
@@ -62,7 +62,7 @@ public final class GlideException extends Exception {
    *
    * @see #getRootCauses()
    */
-  public List<Exception> getCauses() {
+  public List<Throwable> getCauses() {
     return causes;
   }
 
@@ -74,8 +74,8 @@ public final class GlideException extends Exception {
    * a given model using multiple different pathways, there may be multiple related or unrelated
    * reasons for a load to fail.
    */
-  public List<Exception> getRootCauses() {
-    List<Exception> rootCauses = new ArrayList<>();
+  public List<Throwable> getRootCauses() {
+    List<Throwable> rootCauses = new ArrayList<>();
     addRootCauses(this, rootCauses);
     return rootCauses;
   }
@@ -88,20 +88,20 @@ public final class GlideException extends Exception {
    * complete stack traces.
    */
   public void logRootCauses(String tag) {
-    List<Exception> causes = getRootCauses();
+    List<Throwable> causes = getRootCauses();
     for (int i = 0, size = causes.size(); i < size; i++) {
       Log.i(tag, "Root cause (" + (i + 1) + " of " + size + ")", causes.get(i));
     }
   }
 
-  private void addRootCauses(Exception exception, List<Exception> rootCauses) {
-    if (exception instanceof GlideException) {
-      GlideException glideException = (GlideException) exception;
-      for (Exception e : glideException.getCauses()) {
-        addRootCauses(e, rootCauses);
+  private void addRootCauses(Throwable throwable, List<Throwable> rootCauses) {
+    if (throwable instanceof GlideException) {
+      GlideException glideException = (GlideException) throwable;
+      for (Throwable t : glideException.getCauses()) {
+        addRootCauses(t, rootCauses);
       }
     } else {
-      rootCauses.add(exception);
+      rootCauses.add(throwable);
     }
   }
 
@@ -136,18 +136,18 @@ public final class GlideException extends Exception {
   // Appendable throws, PrintWriter, PrintStream, and IndentedAppendable do not, so this should
   // never happen.
   @SuppressWarnings("PMD.PreserveStackTrace")
-  private static void appendExceptionMessage(Exception e, Appendable appendable) {
+  private static void appendExceptionMessage(Throwable t, Appendable appendable) {
     try {
-      appendable.append(e.getClass().toString()).append(": ").append(e.getMessage()).append('\n');
+      appendable.append(t.getClass().toString()).append(": ").append(t.getMessage()).append('\n');
     } catch (IOException e1) {
-      throw new RuntimeException(e);
+      throw new RuntimeException(t);
     }
   }
 
   // Appendable throws, PrintWriter, PrintStream, and IndentedAppendable do not, so this should
   // never happen.
   @SuppressWarnings("PMD.PreserveStackTrace")
-  private static void appendCauses(List<Exception> causes, Appendable appendable) {
+  private static void appendCauses(List<Throwable> causes, Appendable appendable) {
     try {
       appendCausesWrapped(causes, appendable);
     } catch (IOException e) {
@@ -156,7 +156,7 @@ public final class GlideException extends Exception {
   }
 
   @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-  private static void appendCausesWrapped(List<Exception> causes, Appendable appendable)
+  private static void appendCausesWrapped(List<Throwable> causes, Appendable appendable)
       throws IOException {
     int size = causes.size();
     for (int i = 0; i < size; i++) {
@@ -166,7 +166,7 @@ public final class GlideException extends Exception {
           .append(String.valueOf(size))
           .append("): ");
 
-      Exception cause = causes.get(i);
+      Throwable cause = causes.get(i);
       if (cause instanceof GlideException) {
         GlideException glideCause = (GlideException) cause;
         glideCause.printStackTrace(appendable);

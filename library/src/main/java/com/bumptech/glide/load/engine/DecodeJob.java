@@ -41,7 +41,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private static final String TAG = "DecodeJob";
 
   @Synthetic final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
-  private final List<Exception> exceptions = new ArrayList<>();
+  private final List<Throwable> throwables = new ArrayList<>();
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
   private final DiskCacheProvider diskCacheProvider;
   private final Pools.Pool<DecodeJob<?>> pool;
@@ -187,7 +187,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     currentFetcher = null;
     startFetchTime = 0L;
     isCancelled = false;
-    exceptions.clear();
+    throwables.clear();
     pool.release(this);
   }
 
@@ -227,19 +227,25 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         return;
       }
       runWrapped();
-    } catch (RuntimeException e) {
+    } catch (Throwable t) {
+      // Catch Throwable and not Exception to handle OOMs. Throwables are swallowed by our
+      // usage of .submit() in GlideExecutor so we're not silently hiding crashes by doing this. We
+      // are however ensuring that our callbacks are always notified when a load fails. Without this
+      // notification, uncaught throwables never notify the corresponding callbacks, which can cause
+      // loads to silently hang forever, a case that's especially bad for users using Futures on
+      // background threads.
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "DecodeJob threw unexpectedly"
             + ", isCancelled: " + isCancelled
-            + ", stage: " + stage, e);
+            + ", stage: " + stage, t);
       }
       // When we're encoding we've already notified our callback and it isn't safe to do so again.
       if (stage != Stage.ENCODE) {
-        exceptions.add(e);
+        throwables.add(t);
         notifyFailed();
       }
       if (!isCancelled) {
-        throw e;
+        throw t;
       }
     } finally {
       // Keeping track of the fetcher here and calling cleanup is excessively paranoid, we call
@@ -309,7 +315,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private void notifyFailed() {
     setNotifiedOrThrow();
-    GlideException e = new GlideException("Failed to load resource", new ArrayList<>(exceptions));
+    GlideException e = new GlideException("Failed to load resource", new ArrayList<>(throwables));
     callback.onLoadFailed(e);
     onLoadFailed();
   }
@@ -379,7 +385,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     fetcher.cleanup();
     GlideException exception = new GlideException("Fetching data failed", e);
     exception.setLoggingDetails(attemptedKey, dataSource, fetcher.getDataClass());
-    exceptions.add(exception);
+    throwables.add(exception);
     if (Thread.currentThread() != currentThread) {
       runReason = RunReason.SWITCH_TO_SOURCE_SERVICE;
       callback.reschedule(this);
@@ -400,7 +406,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       resource = decodeFromData(currentFetcher, currentData, currentDataSource);
     } catch (GlideException e) {
       e.setLoggingDetails(currentAttemptingKey, currentDataSource);
-      exceptions.add(e);
+      throwables.add(e);
     }
     if (resource != null) {
       notifyEncodeAndRelease(resource, currentDataSource);

@@ -27,10 +27,10 @@ import java.util.List;
 class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
   private final List<ModelLoader<Model, Data>> modelLoaders;
-  private final Pool<List<Exception>> exceptionListPool;
+  private final Pool<List<Throwable>> exceptionListPool;
 
   MultiModelLoader(List<ModelLoader<Model, Data>> modelLoaders,
-      Pool<List<Exception>> exceptionListPool) {
+      Pool<List<Throwable>> exceptionListPool) {
     this.modelLoaders = modelLoaders;
     this.exceptionListPool = exceptionListPool;
   }
@@ -74,15 +74,15 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
   static class MultiFetcher<Data> implements DataFetcher<Data>, DataCallback<Data> {
 
     private final List<DataFetcher<Data>> fetchers;
-    private final Pool<List<Exception>> exceptionListPool;
+    private final Pool<List<Throwable>> throwableListPool;
     private int currentIndex;
     private Priority priority;
     private DataCallback<? super Data> callback;
     @Nullable
-    private List<Exception> exceptions;
+    private List<Throwable> exceptions;
 
-    MultiFetcher(List<DataFetcher<Data>> fetchers, Pool<List<Exception>> exceptionListPool) {
-      this.exceptionListPool = exceptionListPool;
+    MultiFetcher(List<DataFetcher<Data>> fetchers, Pool<List<Throwable>> throwableListPool) {
+      this.throwableListPool = throwableListPool;
       Preconditions.checkNotEmpty(fetchers);
       this.fetchers = fetchers;
       currentIndex = 0;
@@ -92,14 +92,14 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     public void loadData(Priority priority, DataCallback<? super Data> callback) {
       this.priority = priority;
       this.callback = callback;
-      exceptions = exceptionListPool.acquire();
+      exceptions = throwableListPool.acquire();
       fetchers.get(currentIndex).loadData(priority, this);
     }
 
     @Override
     public void cleanup() {
       if (exceptions != null) {
-        exceptionListPool.release(exceptions);
+        throwableListPool.release(exceptions);
       }
       exceptions = null;
       for (DataFetcher<Data> fetcher : fetchers) {

@@ -35,16 +35,16 @@ public class MultiModelLoaderFactoryTest {
 
   @Rule public ExpectedException exception = ExpectedException.none();
 
-  private Pool<List<Exception>> exceptionListPool;
+  private Pool<List<Throwable>> throwableListPool;
   private MultiModelLoaderFactory multiFactory;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    exceptionListPool = FactoryPools.threadSafeList();
+    throwableListPool = FactoryPools.threadSafeList();
 
-    multiFactory = new MultiModelLoaderFactory(exceptionListPool,
-        multiModelLoaderFactory);
+    multiFactory =
+        new MultiModelLoaderFactory(throwableListPool, multiModelLoaderFactory);
     when(firstFactory.build(eq(multiFactory))).thenReturn(firstModelLoader);
     when(secondFactory.build(eq(multiFactory))).thenReturn(secondModelLoader);
   }
@@ -268,7 +268,7 @@ public class MultiModelLoaderFactoryTest {
       Class<Y> dataClass) {
     ArgumentCaptor<List<ModelLoader<X, Y>>> captor = Util.cast(ArgumentCaptor.forClass(List.class));
     multiFactory.build(modelClass, dataClass);
-    verify(multiModelLoaderFactory).build(captor.capture(), eq(exceptionListPool));
+    verify(multiModelLoaderFactory).build(captor.capture(), eq(throwableListPool));
 
     List<ModelLoader<X, Y>> captured = captor.getValue();
     List<ModelLoader<X, Y>> result = new ArrayList<>(captured.size());

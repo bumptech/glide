@@ -21,13 +21,13 @@ import java.util.List;
  */
 public class LoadPath<Data, ResourceType, Transcode> {
   private final Class<Data> dataClass;
-  private final Pool<List<Exception>> listPool;
+  private final Pool<List<Throwable>> listPool;
   private final List<? extends DecodePath<Data, ResourceType, Transcode>> decodePaths;
   private final String failureMessage;
 
   public LoadPath(Class<Data> dataClass, Class<ResourceType> resourceClass,
       Class<Transcode> transcodeClass,
-      List<DecodePath<Data, ResourceType, Transcode>> decodePaths, Pool<List<Exception>> listPool) {
+      List<DecodePath<Data, ResourceType, Transcode>> decodePaths, Pool<List<Throwable>> listPool) {
     this.dataClass = dataClass;
     this.listPool = listPool;
     this.decodePaths = Preconditions.checkNotEmpty(decodePaths);
@@ -37,17 +37,17 @@ public class LoadPath<Data, ResourceType, Transcode> {
 
   public Resource<Transcode> load(DataRewinder<Data> rewinder, Options options, int width,
       int height, DecodePath.DecodeCallback<ResourceType> decodeCallback) throws GlideException {
-    List<Exception> exceptions = listPool.acquire();
+    List<Throwable> throwables = listPool.acquire();
     try {
-      return loadWithExceptionList(rewinder, options, width, height, decodeCallback, exceptions);
+      return loadWithExceptionList(rewinder, options, width, height, decodeCallback, throwables);
     } finally {
-      listPool.release(exceptions);
+      listPool.release(throwables);
     }
   }
 
   private Resource<Transcode> loadWithExceptionList(DataRewinder<Data> rewinder, Options options,
       int width, int height, DecodePath.DecodeCallback<ResourceType> decodeCallback,
-      List<Exception> exceptions) throws GlideException {
+      List<Throwable> exceptions) throws GlideException {
     int size = decodePaths.size();
     Resource<Transcode> result = null;
     for (int i = 0; i < size; i++) {

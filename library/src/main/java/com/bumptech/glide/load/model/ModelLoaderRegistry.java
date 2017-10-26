@@ -17,8 +17,8 @@ public class ModelLoaderRegistry {
   private final MultiModelLoaderFactory multiModelLoaderFactory;
   private final ModelLoaderCache cache = new ModelLoaderCache();
 
-  public ModelLoaderRegistry(Pool<List<Exception>> exceptionListPool) {
-    this(new MultiModelLoaderFactory(exceptionListPool));
+  public ModelLoaderRegistry(Pool<List<Throwable>> throwableListPool) {
+    this(new MultiModelLoaderFactory(throwableListPool));
   }
 
   // Visible for testing.

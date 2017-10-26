@@ -22,16 +22,16 @@ public class MultiModelLoaderFactory {
   private final List<Entry<?, ?>> entries = new ArrayList<>();
   private final Factory factory;
   private final Set<Entry<?, ?>> alreadyUsedEntries = new HashSet<>();
-  private final Pool<List<Exception>> exceptionListPool;
+  private final Pool<List<Throwable>> throwableListPool;
 
-  public MultiModelLoaderFactory(Pool<List<Exception>> exceptionListPool) {
-    this(exceptionListPool, DEFAULT_FACTORY);
+  public MultiModelLoaderFactory(Pool<List<Throwable>> throwableListPool) {
+    this(throwableListPool, DEFAULT_FACTORY);
   }
 
   // Visible for testing.
-  MultiModelLoaderFactory(Pool<List<Exception>> exceptionListPool,
+  MultiModelLoaderFactory(Pool<List<Throwable>> throwableListPool,
       Factory factory) {
-    this.exceptionListPool = exceptionListPool;
+    this.throwableListPool = throwableListPool;
     this.factory = factory;
   }
 
@@ -128,7 +128,7 @@ public class MultiModelLoaderFactory {
         }
       }
       if (loaders.size() > 1) {
-        return factory.build(loaders, exceptionListPool);
+        return factory.build(loaders, throwableListPool);
       } else if (loaders.size() == 1) {
         return loaders.get(0);
       } else {
@@ -185,8 +185,8 @@ public class MultiModelLoaderFactory {
 
   static class Factory {
     public <Model, Data> MultiModelLoader<Model, Data> build(
-        List<ModelLoader<Model, Data>> modelLoaders, Pool<List<Exception>> exceptionListPool) {
-      return new MultiModelLoader<>(modelLoaders, exceptionListPool);
+        List<ModelLoader<Model, Data>> modelLoaders, Pool<List<Throwable>> throwableListPool) {
+      return new MultiModelLoader<>(modelLoaders, throwableListPool);
     }
   }
 
