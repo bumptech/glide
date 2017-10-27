@@ -418,9 +418,17 @@ public class StandardGifDecoder implements GifDecoder {
     // Final location of blended pixels.
     final int[] dest = mainScratch;
 
-    // clear all pixels when meet first frame or dispose is 3 but previousImage is null
-    if (previousFrame == null || (previousFrame.dispose == DISPOSAL_PREVIOUS && previousImage == null)) {
+    // clear all pixels when meet first frame and drop prev image from last loop
+    if (previousFrame == null) {
       previousImage = null;
+      Arrays.fill(dest, COLOR_TRANSPARENT_BLACK);
+    }
+
+    // clear all pixels when dispose is 3 but previousImage is null.
+    // When DISPOSAL_PREVIOUS and previousImage didn't be set, new frame should draw on
+    // a empty image
+    if (previousFrame != null && previousFrame.dispose == DISPOSAL_PREVIOUS
+            && previousImage == null) {
       Arrays.fill(dest, COLOR_TRANSPARENT_BLACK);
     }
 
