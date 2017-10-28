@@ -38,7 +38,9 @@ do
     --app $sample_apk \
     --device model=Nexus6P,version=26,locale=en,orientation=portrait  \
     --project android-glide \
-    --no-auto-google-login &
+    --no-auto-google-login \
+    --timeout 2m \
+    &
   pids+=("$!")
 done
 
