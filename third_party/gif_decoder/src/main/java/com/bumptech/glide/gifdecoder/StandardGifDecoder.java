@@ -420,6 +420,9 @@ public class StandardGifDecoder implements GifDecoder {
 
     // clear all pixels when meet first frame and drop prev image from last loop
     if (previousFrame == null) {
+      if (previousImage != null) {
+        bitmapProvider.release(previousImage);
+      }
       previousImage = null;
       Arrays.fill(dest, COLOR_TRANSPARENT_BLACK);
     }
