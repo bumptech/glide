@@ -8,17 +8,12 @@
 # directory.
 #
 # Usage:
-#   ./scripts/split_by_sdk.sh <test_path> <test_name>
+#   ./scripts/split_by_sdk.sh [--abis x86,armeabi-v7a] [--apis 16,17] \
+#      [-v/--verbose] [--tests com.bumptech.glide.TestName1,com.bumptech.glide.TestName2]
 #
-# where test_path is the test file path:
-#   instrumentation/src/androidTest/java/com/bumptech/glide/Test.java
-# and test_name is the package qualified class name:
-#   com.bumptech.glide.Test
-# 
-# For example:
-#  ./scripts/split_by_sdk.sh \
-#    instrumentation/src/androidTest/java/com/bumptech/glide/FitCenterRegressionTest.java \
-#    com.bumptech.glide.FitCenterRegressionTest
+# apis: The Android SDK version(s) you want to run against.
+# abis: The Android CPU types you want to run against
+# v/verbose: Enable verbose logging.
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
