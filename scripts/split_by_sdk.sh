@@ -161,6 +161,7 @@ do
     done
     adb -s emulator-5554 emu kill
     sleep 1
+    kill -9 $pid
     pkill emulator64-crash-service
     pkill emulator-crash-service
     echo "Finished API ${api}" 1>&3 2>&4

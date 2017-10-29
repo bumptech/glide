@@ -23,9 +23,9 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SplitByCpu
-@SplitBySdk({24, 23, 21, 19, 18, 16})
+@SplitBySdk({26, 24, 23, 21, 18, 16})
 @RegressionTest
-public class FitCenterRegressionTest {
+public class CircleCropRegressionTest {
   @Rule public TestName testName = new TestName();
   @Rule public ExpectedException expectedException = ExpectedException.none();
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
@@ -41,23 +41,22 @@ public class FitCenterRegressionTest {
   }
 
   @Test
-  public void fitCenter_withSquareSmallerThanImage_returnsImageFitWithinSquare()
+  public void circleCrop_withSquareSmallerThanImage_returnsSquaredImage()
       throws ExecutionException, InterruptedException {
-
     Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)
                 .asBitmap()
                 .load(canonical.getBitmap())
-                .fitCenter()
+                .circleCrop()
                 .override(50));
 
     assertThat(result.getWidth()).isEqualTo(50);
-    assertThat(result.getHeight()).isEqualTo(37);
+    assertThat(result.getHeight()).isEqualTo(50);
   }
 
   @Test
-  public void fitCenter_withSquareLargerThanImage_returnsUpscaledSquare()
+  public void circleCrop_withSquareLargerThanImage_returnsUpscaledFitImage()
       throws ExecutionException, InterruptedException {
     float multiplier = 1.1f;
     int multipliedWidth = (int) (canonical.getWidth() * multiplier);
@@ -67,57 +66,40 @@ public class FitCenterRegressionTest {
             GlideApp.with(context)
               .asBitmap()
               .load(canonical.getBitmap())
-              .fitCenter()
+              .circleCrop()
               .override(multipliedWidth));
 
     assertThat(result.getWidth()).isEqualTo(multipliedWidth);
-    assertThat(result.getHeight()).isEqualTo(multipliedHeight);
+    assertThat(result.getHeight()).isEqualTo(multipliedWidth);
   }
 
   @Test
-  public void fitCenter_withNarrowRectangle_fitsWithinMaintainingAspectRatio()
+  public void circleCrop_withNarrowRectangle_cropsWithin()
       throws ExecutionException, InterruptedException {
     Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)
               .asBitmap()
               .load(canonical.getBitmap())
-              .fitCenter()
+              .circleCrop()
               .override(canonical.getWidth() / 10, canonical.getHeight()));
 
     assertThat(result.getWidth()).isEqualTo(canonical.getWidth() / 10);
-    assertThat(result.getHeight()).isEqualTo(canonical.getHeight() / 10);
+    assertThat(result.getHeight()).isEqualTo(canonical.getWidth() / 10);
   }
 
   @Test
-  public void fitCenter_withShortRectangle_fitsWithinMaintainingAspectRatio()
+  public void circleCrop_withShortRectangle_fitsWithinMaintainingAspectRatio()
       throws ExecutionException, InterruptedException {
      Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)
               .asBitmap()
               .load(canonical.getBitmap())
-              .fitCenter()
+              .circleCrop()
               .override(canonical.getWidth(), canonical.getHeight() / 2));
 
-    assertThat(result.getWidth()).isEqualTo(canonical.getWidth() / 2);
+    assertThat(result.getWidth()).isEqualTo(canonical.getHeight() / 2);
     assertThat(result.getHeight()).isEqualTo(canonical.getHeight() / 2);
-  }
-
-  @Test
-  public void fitCenter_withHugeRectangle_throwsOOM()
-      throws ExecutionException, InterruptedException {
-    float multiplier = Integer.MAX_VALUE / (canonical.getWidth() * canonical.getHeight() * 2);
-    int overrideWidth = (int) multiplier * canonical.getWidth();
-    int overrideHeight = (int) multiplier * canonical.getHeight();
-    expectedException.expect(ExecutionException.class);
-    GlideApp
-        .with(context)
-        .asBitmap()
-        .load(canonical.getBitmap())
-        .fitCenter()
-        .override(overrideWidth, overrideHeight)
-        .submit()
-        .get();
   }
 }

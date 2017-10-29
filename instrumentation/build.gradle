@@ -10,7 +10,9 @@ dependencies {
     // loading classes functions. It's not clear why androidTestCompile isn't sufficient, but for
     // whatever reason, compile is the only dependency that seems to work.
     compile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
-    androidTestCompile project(":annotation:compiler")
+    annotationProcessor project(":annotation:compiler")
+    compile project(":library")
+
     androidTestCompile project(':library')
     androidTestCompile "org.mockito:mockito-android:${MOCKITO_ANDROID_VERSION}"
     androidTestCompile "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
