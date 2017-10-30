@@ -43,6 +43,7 @@ class GifFrameLoader {
   private DelayTarget next;
   private Bitmap firstFrame;
   private Transformation<Bitmap> transformation;
+  private DelayTarget pendingTarget;
 
   public interface FrameCallback {
     void onFrameReady();
@@ -181,6 +182,10 @@ class GifFrameLoader {
       requestManager.clear(next);
       next = null;
     }
+    if (pendingTarget != null) {
+      requestManager.clear(pendingTarget);
+      pendingTarget = null;
+    }
     gifDecoder.clear();
     isCleared = true;
   }
@@ -194,8 +199,16 @@ class GifFrameLoader {
       return;
     }
     if (startFromFirstFrame) {
+      Preconditions.checkArgument(
+          pendingTarget == null, "Pending target must be null when starting from the first frame");
       gifDecoder.resetFrameIndex();
       startFromFirstFrame = false;
+    }
+    if (pendingTarget != null) {
+      DelayTarget temp = pendingTarget;
+      pendingTarget = null;
+      onFrameReady(temp);
+      return;
     }
     isLoadPending = true;
     // Get the delay before incrementing the pointer because the delay indicates the amount of time
@@ -218,12 +231,25 @@ class GifFrameLoader {
   void setNextStartFromFirstFrame() {
     Preconditions.checkArgument(!isRunning, "Can't restart a running animation");
     startFromFirstFrame = true;
+    if (pendingTarget != null) {
+      requestManager.clear(pendingTarget);
+      pendingTarget = null;
+    }
   }
 
   // Visible for testing.
   void onFrameReady(DelayTarget delayTarget) {
+    isLoadPending = false;
     if (isCleared) {
       handler.obtainMessage(FrameLoaderCallback.MSG_CLEAR, delayTarget).sendToTarget();
+      return;
+    }
+    // If we're not running, notifying here will recycle the frame that we might currently be
+    // showing, which breaks things (see #2526). We also can't discard this frame because we've
+    // already incremented the frame pointer and can't decode the same frame again. Instead we'll
+    // just hang on to this next frame until start() or clear() are called.
+    if (!isRunning) {
+      pendingTarget = delayTarget;
       return;
     }
 
@@ -242,7 +268,6 @@ class GifFrameLoader {
       }
     }
 
-    isLoadPending = false;
     loadNextFrame();
   }
 
