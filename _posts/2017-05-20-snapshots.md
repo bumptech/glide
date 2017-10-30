@@ -80,6 +80,41 @@ Then change your dependencies to the snapshot version:
 </dependency>
 ```
 
+### Fixing your snapshot dependency
+Depending on a ``-SNAPSHOT`` version of Glide can be risky in production applications because the code Gradle will fetch for that ``-SNAPSHOT`` version will vary depending on when you first build your project. If you add a snapshot dependency, test on your local machine, and then push that build configuration to a build server, the build server may end up building with a different version of Glide. Snapshot versions are updated after every successful push to GitHub and may change at any time.
+
+To fix your dependency, you can pick a specific version from sonatype and use that instead of depending on ``-SNAPSHOT``. For example, in Gradle:
+
+```gradle
+dependencies {
+  compile 'com.github.bumptech.glide:glide:4.3.0-20171024.022226-26'
+  compile 'com.github.bumptech.glide:okhttp-integration:4.3.0-20171024.022226-26'
+}
+```
+
+Or in Maven (untested):
+```xml
+<dependency>
+  <groupId>com.github.bumptech.glide</groupId>
+  <artifactId>glide</artifactId>
+  <version>4.3.0-20171024.022226-26</version>
+</dependency>
+<dependency>
+  <groupId>com.github.bumptech.glide</groupId>
+  <artifactId>okhttp-integration</artifactId>
+  <version>4.3.0-20171024.022226-26</version>
+</dependency>
+```
+
+The version, ``4.3.0-20171024.022226-26``, comes from the Sonatype repo. You can pick a specific version by:
+
+1. [Open Sonatype][3]
+2. Click on the package you want. Typically you can just use [glide][5].
+3. Click on the version of Glide that you want the snapshot of. For example, [4.3.0-SNAPSHOT][6].
+4. Copy and paste the version number from any of the listed artifacts. For example if you see ``glide-4.3.0-20171024.022211-26-javadoc.jar``, the version number is just ``4.3.0-20171024.022211-26``. Usually you will want the most recent artifact available. Check the date modified column to be sure, but typically more recent artifacts are shown at the bottom of the page.
+
+Although picking a specific snapshot version is a bit more work, it's typically a safer option if you're going to depend on the snapshot version of Glide in a prod version of your application or library.
+
 ### Building snapshots locally
 If you want to get the same files that would be released execute this command:
 ```shell
@@ -102,3 +137,5 @@ dependencies {
 [2]: https://oss.sonatype.org/content/repositories/snapshots/
 [3]: https://oss.sonatype.org/content/repositories/snapshots/com/github/bumptech/glide/
 [4]: http://stackoverflow.com/questions/7715321/how-to-download-snapshot-version-from-maven-snapshot-repository
+[5]: https://oss.sonatype.org/content/repositories/snapshots/com/github/bumptech/glide/glide/
+[6]: https://oss.sonatype.org/content/repositories/snapshots/com/github/bumptech/glide/glide/4.3.0-SNAPSHOT/
