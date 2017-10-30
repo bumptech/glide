@@ -81,6 +81,13 @@ If you're using Kotlin you can:
 
    To use ``kapt``, see the [official documentation][14].
 
+#### Android Studio
+
+For the most part Android Studio just works with annotation processors and the generated API. However, you may need to rebuild the project the first time you add your ``AppGlideModule`` or after some types of changes. If the API won't import or seems out of date, you can re-build by:
+
+1. Open the Build menu
+2. Click Rebuild Project.
+
 ### Using the generated API
  
 The API is generated in the same package as the [``AppGlideModule``][4] implementation provided by the application and is named ``GlideApp`` by default. Applications can use the API by starting all loads with ``GlideApp.with()`` instead of ``Glide.with()``:
