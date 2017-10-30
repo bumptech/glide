@@ -99,6 +99,48 @@ The [Android documentation][10] has a lot of good information on tracking and de
 
 To fix memory leaks, remove references to the destroyed ``Fragment`` or ``Activity`` at the appropriate point in the lifecycle to avoid retaining excessive objects. Use the heap dump to help find other ways your application retains memory and remove unnecessary references as you find them. It's often helpful to start by listing the shortest paths excluding weak references to all Bitmap objects (using [MAT][12] or another memory analyzer) and then looking for reference chains that seem suspicious. You can also check to make sure that you have no more than once instance of each ``Activity`` and only the expected number of instances of each ``Fragment`` by searching for them in your memory analyzer.
 
+### Other common issues
+
+#### "You can't start or clear loads in RequestListener or Target callbacks"
+If you attempt to start a new load in ``onResourceReady`` or ``onLoadFailed`` in a ``Target`` or ``RequestListener``, Glide will throw an exception. We throw this exception because it's challenging for us to handle the load being recycled while it's in the middle of notifying. 
+
+Fortunately this is easy to fix. Starting in Glide 4.3.0, you can simply use the [``.error()``][14] method. [``error()``][14] takes an arbitrary [``RequestBuilder``][15] that will start a new request only if the primary request fails:
+
+```java
+Glide.with(fragment)
+  .load(url)
+  .error(Glide.with(fragment)
+     .load(fallbackUrl))
+  .into(imageView);
+```
+
+Prior to Glide 4.3.0, you can also use an Android [``Handler``][16] to post a Runnable with your request:
+
+```java
+private final Handler handler = new Handler();
+...
+
+Glide.with(fragment)
+  .load(url)
+  .listener(new RequestListener<Drawable>() {
+      ...
+
+      @Override
+      public boolean onLoadFailed(@Nullable GlideException e, Object model, 
+          Target<Drawable> target, boolean isFirstResource) {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+              Glide.with(fragment)
+                .load(fallbackUrl)
+                .into(imageView);
+            }
+        });
+      }
+  )
+  .into(imageView);
+```
+          
 [1]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/GlideBuilder.html#setLogLevel-int-
 [2]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#into-android.widget.ImageView-
 [3]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#submit-int-int-
@@ -112,3 +154,6 @@ To fix memory leaks, remove references to the destroyed ``Fragment`` or ``Activi
 [11]: https://developer.android.com/studio/profile/investigate-ram.html#HeapDump
 [12]: http://www.eclipse.org/mat/
 [13]: {{ site.baseurl }}/doc/caching.html
+[14]: http://bumptech.github.io/glide/javadocs/430/com/bumptech/glide/RequestBuilder.html#error-com.bumptech.glide.RequestBuilder-
+[15]: http://bumptech.github.io/glide/javadocs/430/com/bumptech/glide/RequestBuilder.html
+[16]: https://developer.android.com/reference/android/os/Handler.html
