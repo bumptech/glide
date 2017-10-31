@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RawRes;
 import android.widget.ImageView;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.ErrorRequestCoordinator;
 import com.bumptech.glide.request.FutureTarget;
@@ -452,10 +453,17 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * {@link com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE} for release builds.
    *
    * <p>This method will load non-{@link android.graphics.Bitmap} resources like
-   * {@link android.graphics.drawable.VectorDrawable}s, but most common options including
-   * default {@link com.bumptech.glide.load.Transformation}s will not <em>NOT</em> work on
-   * non-{@link android.graphics.Bitmap} resources. As a result, functionality for
-   * non-{@link android.graphics.Bitmap} resources may be limited.
+   * {@link android.graphics.drawable.VectorDrawable}s. Although Glide makes a best effort to apply
+   * {@link com.bumptech.glide.load.Transformation}s to these {@link Drawable}s by either extracting
+   * the underlying {@link Bitmap} or by converting the {@link Drawable} to a {@link Bitmap}, Glide
+   * is still not able to transform all types of resources. Animated {@link Drawable}s cannot be
+   * transformed (other than {@link com.bumptech.glide.load.resource.gif.GifDrawable}). To avoid
+   * load failures if a {@link Drawable} can't be transformed, use the optional transformation
+   * methods like {@link RequestOptions#optionalTransform(Class, Transformation)}.
+   *
+   * <p>In some cases converting {@link Drawable}s to {@link Bitmap}s may be inefficient. Use this
+   * method, especially in conjunction with {@link com.bumptech.glide.load.Transformation}s with
+   * caution for non-{@link Bitmap} {@link Drawable}s.
    *
    * @see #load(Integer)
    * @see com.bumptech.glide.signature.ApplicationVersionSignature
