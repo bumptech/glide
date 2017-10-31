@@ -16,7 +16,7 @@ public class LruResourceCache extends LruCache<Key, Resource<?>> implements Memo
    *
    * @param size The maximum size in bytes the in memory cache can use.
    */
-  public LruResourceCache(int size) {
+  public LruResourceCache(long size) {
     super(size);
   }
 
