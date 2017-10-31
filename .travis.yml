@@ -28,6 +28,9 @@ env:
     - COMPONENT=instrumentation ANDROID_TARGET=22
     - COMPONENT=samples
 
+before_script:
+  - ./scripts/travis_before_script.sh
+
 script:
   - ./scripts/travis_script.sh
 
