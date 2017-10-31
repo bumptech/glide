@@ -197,8 +197,8 @@ Glide.with(fragment)
 
 #### UncaughtThrowableStrategy
 
-When loading a bitmap, if an exception happens (e.g. `OutOfMemoryException`), Glide will use a `GlideExecutor.UncaughtThrowableStrategy`. 
-The default strategy is to log the exception in the device logcat. The strategy is customizable since glide 4.2.0. It can be passed to a disk executor and/or a resize executor:
+When loading a bitmap, if an exception happens (e.g. `OutOfMemoryException`), Glide will use a `GlideExecutor.UncaughtThrowableStrategy`.
+The default strategy is to log the exception in the device logcat. The strategy is customizable since Glide 4.2.0. It can be passed to a disk executor and/or a resize executor:
 
 ```java
 @GlideModule
