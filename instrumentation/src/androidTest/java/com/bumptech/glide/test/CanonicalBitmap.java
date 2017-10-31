@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
-import com.bumptech.glide.instrumentation.R;
 import com.bumptech.glide.util.Preconditions;
 
 public final class CanonicalBitmap {
@@ -41,7 +40,8 @@ public final class CanonicalBitmap {
     Context context = InstrumentationRegistry.getTargetContext();
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inScaled = false;
-    Bitmap result = BitmapFactory.decodeResource(context.getResources(), R.raw.canonical, options);
+    int resourceId = ResourceIds.raw.canonical;
+    Bitmap result = BitmapFactory.decodeResource(context.getResources(), resourceId, options);
     if (scaleFactor != null) {
       result = Bitmap.createScaledBitmap(
           result,
