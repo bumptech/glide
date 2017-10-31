@@ -41,9 +41,9 @@ public class BitmapPreFillerTest {
   private final Bitmap.Config defaultBitmapConfig = PreFillType.DEFAULT_CONFIG;
   private final Bitmap defaultBitmap =
       Bitmap.createBitmap(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT, defaultBitmapConfig);
-  private final int defaultBitmapSize = Util.getBitmapByteSize(defaultBitmap);
-  private final int poolSize = BITMAPS_IN_CACHE * defaultBitmapSize;
-  private final int cacheSize = BITMAPS_IN_POOL * defaultBitmapSize;
+  private final long defaultBitmapSize = Util.getBitmapByteSize(defaultBitmap);
+  private final long poolSize = BITMAPS_IN_CACHE * defaultBitmapSize;
+  private final long cacheSize = BITMAPS_IN_POOL * defaultBitmapSize;
 
   @Mock BitmapPool pool;
   @Mock MemoryCache cache;
@@ -88,7 +88,7 @@ public class BitmapPreFillerTest {
     }
 
     int expectedSize = 0;
-    int maxSize = poolSize + cacheSize;
+    long maxSize = poolSize + cacheSize;
     for (PreFillType current : sizes) {
       int currentSize =
           Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
@@ -108,7 +108,7 @@ public class BitmapPreFillerTest {
         new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 2)
             .setConfig(defaultBitmapConfig).build() });
 
-    int byteSize = 0;
+    long byteSize = 0;
     while (!allocationOrder.isEmpty()) {
       PreFillType current = allocationOrder.remove();
       byteSize +=
@@ -128,7 +128,7 @@ public class BitmapPreFillerTest {
         new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT / 3)
             .setConfig(defaultBitmapConfig).setWeight(3).build() });
 
-    int byteSize = 0;
+    long byteSize = 0;
     while (!allocationOrder.isEmpty()) {
       PreFillType current = allocationOrder.remove();
       byteSize +=

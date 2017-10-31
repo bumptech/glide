@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
  */
 public class BitmapPoolAdapter implements BitmapPool {
   @Override
-  public int getMaxSize() {
+  public long getMaxSize() {
     return 0;
   }
 
