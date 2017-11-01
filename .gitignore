@@ -5,6 +5,7 @@ samples/
 *.DS_Store
 local.properties
 *.bak
+*.swo
 _site/*
 
 .gradle
