@@ -39,7 +39,7 @@ do
     --device model=Nexus6P,version=26,locale=en,orientation=portrait  \
     --project android-glide \
     --no-auto-google-login \
-    --timeout 2m \
+    --timeout 5m \
     &
   pids+=("$!")
 done
