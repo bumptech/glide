@@ -10,5 +10,5 @@ echo "Starting emulator for $COMPONENT tests"
 echo "Waiting for emulator..."
 android-wait-for-emulator
 
-./gradlew :instrumentation:connectedDebugAndroidTest
+for i in {1..3}; do ./gradlew :instrumentation:connectedDebugAndroidTest && break; done
 
