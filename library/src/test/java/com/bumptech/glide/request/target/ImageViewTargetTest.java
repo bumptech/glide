@@ -4,11 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Color;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
@@ -16,6 +18,7 @@ import com.bumptech.glide.request.transition.Transition;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InOrder;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -102,7 +105,23 @@ public class ImageViewTargetTest {
     verify(animation).transition(eq(placeholder), eq(target));
   }
 
-  private static class TestTarget extends ImageViewTarget<Drawable> {
+  @Test
+  public void onResourceReady_withAnimatableResource_startsAnimatableAfterSetResource() {
+    AnimatedDrawable drawable = mock(AnimatedDrawable.class);
+    ImageView view = mock(ImageView.class);
+    target = new TestTarget(view);
+    target.onResourceReady(drawable, /*transition=*/ null);
+
+    InOrder order = inOrder(view, drawable);
+    order.verify(view).setImageDrawable(drawable);
+    order.verify(drawable).start();
+  }
+
+  private abstract static class AnimatedDrawable extends Drawable implements Animatable {
+    // Intentionally empty.
+  }
+
+  private static final class TestTarget extends ImageViewTarget<Drawable> {
     public Drawable resource;
 
     public TestTarget(ImageView view) {
@@ -112,6 +131,7 @@ public class ImageViewTargetTest {
     @Override
     protected void setResource(Drawable resource) {
       this.resource = resource;
+      view.setImageDrawable(resource);
     }
   }
 }
