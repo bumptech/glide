@@ -11,12 +11,12 @@ public class MemoryCacheAdapter implements MemoryCache {
   private ResourceRemovedListener listener;
 
   @Override
-  public int getCurrentSize() {
+  public long getCurrentSize() {
     return 0;
   }
 
   @Override
-  public int getMaxSize() {
+  public long getMaxSize() {
     return 0;
   }
 

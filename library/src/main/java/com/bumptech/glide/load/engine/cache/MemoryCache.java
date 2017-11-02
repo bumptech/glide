@@ -18,12 +18,12 @@ public interface MemoryCache {
   /**
    * Returns the sum of the sizes of all the contents of the cache in bytes.
    */
-  int getCurrentSize();
+  long getCurrentSize();
 
   /**
    * Returns the current maximum size in bytes of the cache.
    */
-  int getMaxSize();
+  long getMaxSize();
 
   /**
    * Adjust the maximum size of the cache by multiplying the original size of the cache by the given

@@ -26,18 +26,18 @@ public class LruBitmapPool implements BitmapPool {
 
   private final LruPoolStrategy strategy;
   private final Set<Bitmap.Config> allowedConfigs;
-  private final int initialMaxSize;
+  private final long initialMaxSize;
   private final BitmapTracker tracker;
 
-  private int maxSize;
-  private int currentSize;
+  private long maxSize;
+  private long currentSize;
   private int hits;
   private int misses;
   private int puts;
   private int evictions;
 
   // Exposed for testing only.
-  LruBitmapPool(int maxSize, LruPoolStrategy strategy, Set<Bitmap.Config> allowedConfigs) {
+  LruBitmapPool(long maxSize, LruPoolStrategy strategy, Set<Bitmap.Config> allowedConfigs) {
     this.initialMaxSize = maxSize;
     this.maxSize = maxSize;
     this.strategy = strategy;
@@ -50,7 +50,7 @@ public class LruBitmapPool implements BitmapPool {
    *
    * @param maxSize The initial maximum size of the pool in bytes.
    */
-  public LruBitmapPool(int maxSize) {
+  public LruBitmapPool(long maxSize) {
     this(maxSize, getDefaultStrategy(), getDefaultAllowedConfigs());
   }
 
@@ -62,12 +62,12 @@ public class LruBitmapPool implements BitmapPool {
    *                       allowed to be put into the pool. Configs not in the allowed put will be
    *                       rejected.
    */
-  public LruBitmapPool(int maxSize, Set<Bitmap.Config> allowedConfigs) {
+  public LruBitmapPool(long maxSize, Set<Bitmap.Config> allowedConfigs) {
     this(maxSize, getDefaultStrategy(), allowedConfigs);
   }
 
   @Override
-  public int getMaxSize() {
+  public long getMaxSize() {
     return maxSize;
   }
 
@@ -216,7 +216,7 @@ public class LruBitmapPool implements BitmapPool {
     }
   }
 
-  private synchronized void trimToSize(int size) {
+  private synchronized void trimToSize(long size) {
     while (currentSize > size) {
       final Bitmap removed = strategy.removeLast();
       // TODO: This shouldn't ever happen, see #331.

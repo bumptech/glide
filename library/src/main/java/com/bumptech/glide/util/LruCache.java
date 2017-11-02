@@ -14,9 +14,9 @@ import java.util.Map;
  */
 public class LruCache<T, Y> {
   private final LinkedHashMap<T, Y> cache = new LinkedHashMap<>(100, 0.75f, true);
-  private final int initialMaxSize;
-  private int maxSize;
-  private int currentSize = 0;
+  private final long initialMaxSize;
+  private long maxSize;
+  private long currentSize = 0;
 
   /**
    * Constructor for LruCache.
@@ -24,7 +24,7 @@ public class LruCache<T, Y> {
    * @param size The maximum size of the cache, the units must match the units used in {@link
    *             #getSize(Object)}.
    */
-  public LruCache(int size) {
+  public LruCache(long size) {
     this.initialMaxSize = size;
     this.maxSize = size;
   }
@@ -75,14 +75,14 @@ public class LruCache<T, Y> {
   /**
    * Returns the current maximum size of the cache in bytes.
    */
-  public synchronized int getMaxSize() {
+  public synchronized long getMaxSize() {
     return maxSize;
   }
 
   /**
    * Returns the sum of the sizes of all items in the cache.
    */
-  public synchronized int getCurrentSize() {
+  public synchronized long getCurrentSize() {
     return currentSize;
   }
 
@@ -164,7 +164,7 @@ public class LruCache<T, Y> {
    *
    * @param size The size the cache should be less than.
    */
-  protected synchronized void trimToSize(int size) {
+  protected synchronized void trimToSize(long size) {
     Map.Entry<T, Y> last;
     while (currentSize > size) {
       last = cache.entrySet().iterator().next();

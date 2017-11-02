@@ -14,12 +14,12 @@ public final class InternalCacheDiskCacheFactory extends DiskLruCacheFactory {
         DiskCache.Factory.DEFAULT_DISK_CACHE_SIZE);
   }
 
-  public InternalCacheDiskCacheFactory(Context context, int diskCacheSize) {
+  public InternalCacheDiskCacheFactory(Context context, long diskCacheSize) {
     this(context, DiskCache.Factory.DEFAULT_DISK_CACHE_DIR, diskCacheSize);
   }
 
   public InternalCacheDiskCacheFactory(final Context context, final String diskCacheName,
-      int diskCacheSize) {
+                                       long diskCacheSize) {
     super(new CacheDirectoryGetter() {
       @Override
       public File getCacheDirectory() {

@@ -11,7 +11,7 @@ public interface BitmapPool {
   /**
    * Returns the current maximum size of the pool in bytes.
    */
-  int getMaxSize();
+  long getMaxSize();
 
   /**
    * Multiplies the initial size of the pool by the given multiplier to dynamically and
