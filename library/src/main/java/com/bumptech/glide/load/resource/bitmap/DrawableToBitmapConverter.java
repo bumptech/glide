@@ -15,7 +15,12 @@ import java.util.concurrent.locks.Lock;
 
 final class DrawableToBitmapConverter {
   private static final String TAG = "DrawableToBitmap";
-  private static final BitmapPool NO_BITMAP_POOL = new BitmapPoolAdapter();
+  private static final BitmapPool NO_RECYCLE_BITMAP_POOL = new BitmapPoolAdapter() {
+    @Override
+    public void put(Bitmap bitmap) {
+      // Avoid calling super to avoid recycling the given Bitmap.
+    }
+  };
   private DrawableToBitmapConverter() {
     // Utility class.
   }
@@ -34,7 +39,7 @@ final class DrawableToBitmapConverter {
       isRecycleable = true;
     }
 
-    BitmapPool toUse = isRecycleable ? bitmapPool : NO_BITMAP_POOL;
+    BitmapPool toUse = isRecycleable ? bitmapPool : NO_RECYCLE_BITMAP_POOL;
     return BitmapResource.obtain(result, toUse);
   }
 

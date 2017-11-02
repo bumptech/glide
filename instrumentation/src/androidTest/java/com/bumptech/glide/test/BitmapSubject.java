@@ -15,7 +15,7 @@ import com.google.common.truth.Truth;
 /**
  * Truth assertions for comparing {@link Bitmap}s.
  */
-final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
+public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
 
   private static final SubjectFactory<BitmapSubject, Bitmap> FACTORY =
       new SubjectFactory<BitmapSubject, Bitmap>() {
@@ -30,14 +30,14 @@ final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
     super(failureStrategy, subject);
   }
 
-  static BitmapSubject assertThat(Drawable drawable) {
+  public static BitmapSubject assertThat(Drawable drawable) {
     if (!(drawable instanceof BitmapDrawable)) {
       throw new IllegalArgumentException("Not a BitmapDrawable: " + drawable);
     }
     return assertThat(((BitmapDrawable) drawable).getBitmap());
   }
 
-  static BitmapSubject assertThat(Bitmap bitmap) {
+  public static BitmapSubject assertThat(Bitmap bitmap) {
     return Truth.assertAbout(FACTORY).that(bitmap);
   }
 
@@ -54,34 +54,40 @@ final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
         + ">";
   }
 
-  void sameAs(@DrawableRes int resourceId) {
+  public void sameAs(@DrawableRes int resourceId) {
     Context context = InstrumentationRegistry.getTargetContext();
     Drawable drawable =
         ResourcesCompat.getDrawable(context.getResources(), resourceId, context.getTheme());
     sameAs(drawable);
   }
 
-  void isMutable()  {
+  public void isMutable()  {
     if (!getSubject().isMutable()) {
       fail("is mutable");
     }
   }
 
-  void isImmutable() {
+  public void isImmutable() {
     if (getSubject().isMutable()) {
       fail("is immutable");
     }
   }
 
+  public void isNotRecycled() {
+    if (getSubject().isRecycled()) {
+      fail("is not recycled");
+    }
+  }
+
   @SuppressWarnings("unchecked")
-  void sameAs(Drawable other) {
+  public void sameAs(Drawable other) {
     if (!(other instanceof BitmapDrawable)) {
       fail("Not a BitmapDrawable");
     }
     sameAs(((BitmapDrawable) other).getBitmap());
   }
 
-  void sameAs(Bitmap other) {
+  public void sameAs(Bitmap other) {
     if (!getSubject().sameAs(other)) {
       fail("is the same as " + getDisplayString(other));
     }

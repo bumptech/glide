@@ -61,7 +61,6 @@ public class DrawableTransformation implements Transformation<Drawable> {
 
     if (transformedBitmapResource.equals(bitmapResourceToTransform)) {
       transformedBitmapResource.recycle();
-      bitmapResourceToTransform.recycle();
       return resource;
     } else {
       return newDrawableResource(context, transformedBitmapResource.get());

@@ -17,6 +17,8 @@ import android.support.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.test.BitmapSubject;
+import com.bumptech.glide.test.GlideApp;
 import java.util.concurrent.ExecutionException;
 import org.junit.After;
 import org.junit.Before;
@@ -124,5 +126,84 @@ public class DrawableTransformationTest {
             .centerCrop())
         .submit()
         .get();
+  }
+
+  @Test
+  public void load_withBitmapDrawable_andDoNothingTransformation_doesNotRecycleBitmap()
+      throws ExecutionException, InterruptedException {
+    Bitmap bitmap = Bitmap.createBitmap(100, 200, Config.ARGB_8888);
+    BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
+
+    Drawable result = GlideApp.with(context)
+        .load(drawable)
+        .fitCenter()
+        .override(bitmap.getWidth(), bitmap.getHeight())
+        .submit()
+        .get();
+
+    BitmapSubject.assertThat(result).isNotRecycled();
+  }
+
+  @Test
+  public void load_withBitmapDrawable_andFunctionalTransformation_doesNotRecycleBitmap()
+      throws ExecutionException, InterruptedException {
+      Bitmap bitmap = Bitmap.createBitmap(100, 200, Config.ARGB_8888);
+    BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
+
+    Drawable result = GlideApp.with(context)
+        .load(drawable)
+        .fitCenter()
+        .override(bitmap.getWidth() / 2, bitmap.getHeight() / 2)
+        .submit()
+        .get();
+
+    BitmapSubject.assertThat(result).isNotRecycled();
+  }
+
+  @Test
+  public void load_withColorDrawable_fixedSize_unitBitmapTransform_recyclesIntermediates()
+      throws ExecutionException, InterruptedException {
+    Drawable colorDrawable = new ColorDrawable(Color.RED);
+
+    int width = 100;
+    int height = 200;
+
+    GlideApp.with(context)
+        .load(colorDrawable)
+        .fitCenter()
+        .override(width, height)
+        .submit()
+        .get();
+
+    BitmapPool bitmapPool = Glide.get(context).getBitmapPool();
+    // Make sure we didn't put the same Bitmap twice.
+    Bitmap first = bitmapPool.get(width, height, Config.ARGB_8888);
+    Bitmap second = bitmapPool.get(width, height, Config.ARGB_8888);
+
+    assertThat(first).isNotSameAs(second);
+  }
+   @Test
+  public void load_withColorDrawable_fixedSize_functionalBitmapTransform_doesNotRecycleOutput()
+      throws ExecutionException, InterruptedException {
+    Drawable colorDrawable = new ColorDrawable(Color.RED);
+
+    int width = 100;
+    int height = 200;
+
+    Drawable result = GlideApp.with(context)
+        .load(colorDrawable)
+        .circleCrop()
+        .override(width, height)
+        .submit()
+        .get();
+
+     BitmapSubject.assertThat(result).isNotRecycled();
+
+    BitmapPool bitmapPool = Glide.get(context).getBitmapPool();
+    // Make sure we didn't put the same Bitmap twice.
+    Bitmap first = bitmapPool.get(width, height, Config.ARGB_8888);
+    Bitmap second = bitmapPool.get(width, height, Config.ARGB_8888);
+
+    assertThat(first).isNotSameAs(second);
   }
 }
