@@ -14,8 +14,12 @@ public class BitmapImageViewTarget extends ImageViewTarget<Bitmap> {
     super(view);
   }
 
+  /**
+   * @deprecated Use {@link #waitForLayout()} instead.
+   */
   // Public API.
-  @SuppressWarnings("unused")
+  @SuppressWarnings({"unused", "deprecation"})
+  @Deprecated
   public BitmapImageViewTarget(ImageView view, boolean waitForLayout) {
     super(view, waitForLayout);
   }

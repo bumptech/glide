@@ -13,8 +13,12 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
     super(view);
   }
 
+  /**
+   * @deprecated Use {@link #waitForLayout()} instead.
+   */
   // Public API.
-  @SuppressWarnings("unused")
+  @SuppressWarnings({"unused", "deprecation"})
+  @Deprecated
   public DrawableImageViewTarget(ImageView view, boolean waitForLayout) {
     super(view, waitForLayout);
   }

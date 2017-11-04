@@ -57,7 +57,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * Constructor that defaults {@code waitForLayout} to {@code false}.
    */
   public ViewTarget(T view) {
-    this(view, false /*waitForLayout*/);
+    this.view = Preconditions.checkNotNull(view);
+    sizeDeterminer = new SizeDeterminer(view);
   }
 
   /**
@@ -69,12 +70,17 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * some cases and should be used sparingly. If layout parameters are set to fixed sizes, they will
    * still be used instead of the View's dimensions even if this parameter is set to {@code true}.
    * This parameter is a fallback only.
+   *
+   * @deprecated Use {@link #waitForLayout()} instead.
    */
   // Public API.
   @SuppressWarnings("WeakerAccess")
+  @Deprecated
   public ViewTarget(T view, boolean waitForLayout) {
-    this.view = Preconditions.checkNotNull(view);
-    sizeDeterminer = new SizeDeterminer(view, waitForLayout);
+    this(view);
+    if (waitForLayout) {
+      waitForLayout();
+    }
   }
 
   /**
@@ -121,6 +127,30 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       }
     };
     maybeAddAttachStateListener();
+    return this;
+  }
+
+  /**
+   * Indicates that Glide should always wait for any pending layout pass before checking
+   * for the size an {@link View}.
+   *
+   * <p>By default, Glide will only wait for a pending layout pass if it's unable to resolve the
+   * size from the {@link LayoutParams} or valid non-zero values for {@link View#getWidth()} and
+   * {@link View#getHeight()}.
+   *
+   * <p>Because calling this method forces Glide to wait for the layout pass to occur before
+   * starting loads, setting this parameter to {@code true} can cause Glide to asynchronous load
+   * an image even if it's in the memory cache. The load will happen asynchronously because Glide
+   * has to wait for a layout pass to occur, which won't necessarily happen in the same frame as
+   * when the image is requested. As a result, using this method can resulting in flashing in some
+   * cases and should be used sparingly.
+   *
+   * <p>If the {@link LayoutParams} of the wrapped {@link View} are set to fixed sizes, they will
+   * still be used instead of the {@link View}'s dimensions even if this method is called. This
+   * parameter is a fallback only.
+   */
+  public final ViewTarget<T, Z> waitForLayout() {
+    sizeDeterminer.waitForLayout = true;
     return this;
   }
 
@@ -284,14 +314,13 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     @Nullable
     static Integer maxDisplayLength;
     private final View view;
-    private final boolean waitForLayout;
     private final List<SizeReadyCallback> cbs = new ArrayList<>();
+    private boolean waitForLayout;
 
     @Nullable private SizeDeterminerLayoutListener layoutListener;
 
-    SizeDeterminer(View view, boolean waitForLayout) {
+    SizeDeterminer(View view) {
       this.view = view;
-      this.waitForLayout = waitForLayout;
     }
 
     // Use the maximum to avoid depending on the device's current orientation.

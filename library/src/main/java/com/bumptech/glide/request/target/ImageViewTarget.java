@@ -25,6 +25,11 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
     super(view);
   }
 
+  /**
+   * @deprecated Use {@link #waitForLayout()} instead.
+   */
+  @SuppressWarnings({"deprecation"})
+  @Deprecated
   public ImageViewTarget(ImageView view, boolean waitForLayout) {
     super(view, waitForLayout);
   }
