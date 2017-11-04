@@ -300,7 +300,10 @@ final class RequestOptionsGenerator {
     builder.addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build());
 
     result.add(new MethodAndStaticVar(builder.build()));
-    result.add(generateStaticMethodEquivalentForExtensionMethod(element));
+    MethodAndStaticVar methodAndVar = generateStaticMethodEquivalentForExtensionMethod(element);
+    if (methodAndVar != null) {
+      result.add(methodAndVar);
+    }
 
     return result;
   }
@@ -425,11 +428,12 @@ final class RequestOptionsGenerator {
         .equals("android.content.Context"));
   }
 
+  @Nullable
   private MethodAndStaticVar generateStaticMethodEquivalentForExtensionMethod(
       ExecutableElement instanceMethod) {
     boolean skipStaticMethod = skipStaticMethod(instanceMethod);
     if (skipStaticMethod) {
-      return new MethodAndStaticVar();
+      return null;
     }
     String staticMethodName = getStaticMethodName(instanceMethod);
     String instanceMethodName = instanceMethod.getSimpleName().toString();
@@ -600,12 +604,12 @@ final class RequestOptionsGenerator {
   private static final class MethodSignature {
     private final TypeName returnType;
     private final List<TypeName> parameterTypes;
-    private final Set<Modifier> modifiers;
+    private final boolean isStatic;
     private final String name;
 
     MethodSignature(MethodSpec spec) {
       name = spec.name;
-      modifiers = spec.modifiers;
+      isStatic = spec.modifiers.contains(Modifier.STATIC);
       returnType = spec.returnType;
       parameterTypes =
           Lists.transform(spec.parameters, new Function<ParameterSpec, TypeName>() {
@@ -625,14 +629,14 @@ final class RequestOptionsGenerator {
         return name.equals(other.name)
             && returnType.equals(other.returnType)
             && parameterTypes.equals(other.parameterTypes)
-            && modifiers.equals(other.modifiers);
+            && isStatic == other.isStatic;
       }
       return false;
     }
 
     @Override
     public int hashCode() {
-      return Objects.hashCode(name, returnType, parameterTypes, modifiers);
+      return Objects.hashCode(name, returnType, parameterTypes, isStatic);
     }
   }
 }

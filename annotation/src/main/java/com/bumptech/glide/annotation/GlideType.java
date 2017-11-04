@@ -22,8 +22,11 @@ import java.lang.annotation.Target;
  * with {@link GlideExtension}.
  *
  * <p>Methods annotated with GlideType must have a single parameter. The type of the
- * single parameter must be {@code com.bumptech.glide.request.RequestOptions}, with a type
+ * single parameter must be {@code com.bumptech.glide.RequestBuilder}, with a type
  * matching the value of {@link #value()}.
+ *
+ * <p>Compilation will fail if a method annotated with this method is identical to a method in
+ * {@code com.bumptech.glide.RequestManager}
  */
 @Target(ElementType.METHOD)
 // Needs to be parsed from class files in JAR.
@@ -33,7 +36,8 @@ public @interface GlideType {
   /**
    * A Resource class name, like GifDrawable.class, Bitmap.class etc.
    *
-   * <p>Must match the type of the {@code com.bumptech.glide.request.RequestOptions} parameter.
+   * <p>Must match the type of the {@code com.bumptech.glide.RequestBuilder} parameter in the
+   * annotated method.
    */
   Class<?> value();
 }

@@ -6,6 +6,7 @@
 
 <suppressions>
     <suppress files=".*[/\\]library[/\\]src[/\\]test[/\\].*" checks="Javadoc.*"/>
+    <suppress files=".*[/\\]annotation[/\\]compiler[/\\]test[/\\]src[/\\]test[/\\]resources[/\\].*" checks=".*"/>
     <suppress files=".*[/\\]instrumentation[/\\]src[/\\].*" checks="Javadoc.*"/>
     <suppress files=".*[/\\]instrumentation[/\\]src[/\\]androidTest[/\\].*" checks="Javadoc.*"/>
     <suppress files=".*[/\\]instrumentation[/\\]src[/\\]androidTest[/\\].*[/\\]ResourceIds" checks=".*"/>

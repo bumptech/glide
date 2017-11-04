@@ -70,15 +70,15 @@ final class GlideExtensionValidator {
     validateStaticVoid(executableElement, GlideType.class);
     if (executableElement.getParameters().size() != 1) {
       throw new IllegalArgumentException("@GlideType methods must take a"
-          + " RequestOptions object as their first and only parameter, found multiple for: "
+          + " RequestBuilder object as their first and only parameter, but given multiple for: "
       + executableElement.getEnclosingElement() + "#" + executableElement);
     }
 
     VariableElement first = executableElement.getParameters().get(0);
-    TypeMirror expected = first.asType();
-    if (!expected.toString().startsWith("com.bumptech.glide.RequestBuilder")) {
+    TypeMirror argumentType = first.asType();
+    if (!argumentType.toString().startsWith("com.bumptech.glide.RequestBuilder")) {
       throw new IllegalArgumentException("@GlideType methods must take a"
-          + " RequestBuilder object as their first parameter, but given: " + expected);
+          + " RequestBuilder object as their first and only parameter, but given: " + argumentType);
     }
   }
 

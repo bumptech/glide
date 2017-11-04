@@ -155,16 +155,18 @@ final class GlideGenerator {
                   }
             }));
 
-    TypeElement visibleForTestingType =
+    String visibleForTestingTypeQualifiedName =
         processingEnv
             .getElementUtils()
-            .getTypeElement(VISIBLE_FOR_TESTING_QUALIFIED_NAME);
+            .getTypeElement(VISIBLE_FOR_TESTING_QUALIFIED_NAME)
+            .toString();
     for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
       builder.addAnnotation(AnnotationSpec.get(mirror));
 
       // Suppress a lint warning if we're overriding a VisibleForTesting method.
       // See #1977.
-      if (mirror.getAnnotationType().asElement().equals(visibleForTestingType)) {
+      String annotationQualfiedName = mirror.getAnnotationType().toString();
+      if (annotationQualfiedName.equals(visibleForTestingTypeQualifiedName)) {
         builder.addAnnotation(
             AnnotationSpec.builder(
                 ClassName.get(SUPPRESS_LINT_PACKAGE_NAME, SUPPRESS_LINT_CLASS_NAME))
