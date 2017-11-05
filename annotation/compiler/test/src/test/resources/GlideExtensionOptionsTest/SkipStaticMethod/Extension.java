@@ -12,7 +12,7 @@ public final class Extension {
   }
 
   @GlideOption(skipStaticMethod = true)
-  public static void test(RequestOptions requestOptions) {
-    requestOptions.centerCrop();
+  public static RequestOptions test(RequestOptions requestOptions) {
+    return requestOptions.centerCrop();
   }
 }

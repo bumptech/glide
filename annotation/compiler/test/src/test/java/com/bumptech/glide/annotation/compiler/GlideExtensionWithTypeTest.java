@@ -19,7 +19,6 @@ import org.junit.Test;
  * Verifies the output of the processor with a simple single extension type.
  */
 public class GlideExtensionWithTypeTest {
-  private static final String DIR_NAME = GlideExtensionWithTypeTest.class.getSimpleName();
   private Compilation compilation;
 
   @Before
@@ -86,7 +85,7 @@ public class GlideExtensionWithTypeTest {
         .isEqualTo(appResource("GeneratedRequestManagerFactory.java").getCharContent(true));
   }
 
-  private static JavaFileObject forResource(String name) {
-    return Util.forResource(DIR_NAME, name);
+  private JavaFileObject forResource(String name) {
+    return Util.forResource(getClass().getSimpleName(), name);
   }
 }

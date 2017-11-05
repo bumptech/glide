@@ -1,11 +1,8 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static com.bumptech.glide.annotation.compiler.test.Util.annotation;
 import static com.bumptech.glide.annotation.compiler.test.Util.appResource;
 import static com.bumptech.glide.annotation.compiler.test.Util.emptyAppModule;
-import static com.bumptech.glide.annotation.compiler.test.Util.emptyLibraryModule;
 import static com.bumptech.glide.annotation.compiler.test.Util.glide;
-import static com.bumptech.glide.annotation.compiler.test.Util.libraryResource;
 import static com.bumptech.glide.annotation.compiler.test.Util.subpackage;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
@@ -19,10 +16,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests adding both an empty {@link com.bumptech.glide.module.AppGlideModule} and an empty
- * {@link com.bumptech.glide.module.LibraryGlideModule} in a single project.
+ * Verifies the output of the processor with a simple single extension option in the legacy
+ * option style where extension methods always returned {@code null}.
  */
-public class EmptyAppAndLibraryGlideModulesTest {
+public class LegacyGlideExtensionWithOptionTest {
   private Compilation compilation;
 
   @Before
@@ -32,8 +29,14 @@ public class EmptyAppAndLibraryGlideModulesTest {
             .withProcessors(new GlideAnnotationProcessor())
             .compile(
                 emptyAppModule(),
-                emptyLibraryModule());
-    assertThat(compilation).succeededWithoutWarnings();
+                forResource("ExtensionWithOption.java"));
+    assertThat(compilation).succeeded();
+    //noinspection ResultOfMethodCallIgnored
+    assertThat(compilation).hadWarningContaining(
+        "The squareThumb method annotated with @GlideOption in the ExtensionWithOption"
+            + " @GlideExtension is using a legacy format. Support will be removed in a future"
+            + " version. Please change your method definition so that your @GlideModule annotated"
+            + " methods return RequestOptions objects instead of null.");
   }
 
   @Test
@@ -46,7 +49,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideOptions"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GlideOptions.java").getCharContent(true));
+        .isEqualTo(forResource("GlideOptions.java").getCharContent(true));
   }
 
   @Test
@@ -54,7 +57,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideRequest"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GlideRequest.java").getCharContent(true));
+        .isEqualTo(forResource("GlideRequest.java").getCharContent(true));
   }
 
   @Test
@@ -78,7 +81,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
     assertThat(compilation)
         .generatedSourceFile(glide("GeneratedAppGlideModuleImpl"))
         .contentsAsUtf8String()
-        .isEqualTo(forResource("GeneratedAppGlideModuleImpl.java").getCharContent(true));
+        .isEqualTo(appResource("GeneratedAppGlideModuleImpl.java").getCharContent(true));
   }
 
   @Test
@@ -87,16 +90,6 @@ public class EmptyAppAndLibraryGlideModulesTest {
         .generatedSourceFile(glide("GeneratedRequestManagerFactory"))
         .contentsAsUtf8String()
         .isEqualTo(appResource("GeneratedRequestManagerFactory.java").getCharContent(true));
-  }
-
-  @Test
-  public void compilation_generatesExpectedIndexer() throws IOException {
-    String expectedClassName =
-        "GlideIndexer_GlideModule_com_bumptech_glide_test_EmptyLibraryModule";
-    assertThat(compilation)
-        .generatedSourceFile(annotation(expectedClassName))
-        .contentsAsUtf8String()
-        .isEqualTo(libraryResource(expectedClassName + ".java").getCharContent(true));
   }
 
   private JavaFileObject forResource(String name) {

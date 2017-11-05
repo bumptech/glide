@@ -31,19 +31,17 @@ import java.lang.SuppressWarnings;
  */
 @SuppressWarnings("deprecation")
 public final class GlideOptions extends RequestOptions implements Cloneable {
-  private static GlideOptions fitCenterTransform1;
+  private static GlideOptions fitCenterTransform0;
 
-  private static GlideOptions centerInsideTransform2;
+  private static GlideOptions centerInsideTransform1;
 
-  private static GlideOptions centerCropTransform3;
+  private static GlideOptions centerCropTransform2;
 
-  private static GlideOptions circleCropTransform4;
+  private static GlideOptions circleCropTransform3;
 
-  private static GlideOptions noTransformation5;
+  private static GlideOptions noTransformation4;
 
-  private static GlideOptions noAnimation6;
-
-  private static GlideOptions testOf0;
+  private static GlideOptions noAnimation5;
 
   /**
    * @see RequestOptions#sizeMultiplierOf(float)
@@ -139,11 +137,11 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    */
   @CheckResult
   public static GlideOptions fitCenterTransform() {
-    if (GlideOptions.fitCenterTransform1 == null) {
-      GlideOptions.fitCenterTransform1 =
+    if (GlideOptions.fitCenterTransform0 == null) {
+      GlideOptions.fitCenterTransform0 =
           new GlideOptions().fitCenter().autoClone();
     }
-    return GlideOptions.fitCenterTransform1;
+    return GlideOptions.fitCenterTransform0;
   }
 
   /**
@@ -151,11 +149,11 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    */
   @CheckResult
   public static GlideOptions centerInsideTransform() {
-    if (GlideOptions.centerInsideTransform2 == null) {
-      GlideOptions.centerInsideTransform2 =
+    if (GlideOptions.centerInsideTransform1 == null) {
+      GlideOptions.centerInsideTransform1 =
           new GlideOptions().centerInside().autoClone();
     }
-    return GlideOptions.centerInsideTransform2;
+    return GlideOptions.centerInsideTransform1;
   }
 
   /**
@@ -163,11 +161,11 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    */
   @CheckResult
   public static GlideOptions centerCropTransform() {
-    if (GlideOptions.centerCropTransform3 == null) {
-      GlideOptions.centerCropTransform3 =
+    if (GlideOptions.centerCropTransform2 == null) {
+      GlideOptions.centerCropTransform2 =
           new GlideOptions().centerCrop().autoClone();
     }
-    return GlideOptions.centerCropTransform3;
+    return GlideOptions.centerCropTransform2;
   }
 
   /**
@@ -175,11 +173,11 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    */
   @CheckResult
   public static GlideOptions circleCropTransform() {
-    if (GlideOptions.circleCropTransform4 == null) {
-      GlideOptions.circleCropTransform4 =
+    if (GlideOptions.circleCropTransform3 == null) {
+      GlideOptions.circleCropTransform3 =
           new GlideOptions().circleCrop().autoClone();
     }
-    return GlideOptions.circleCropTransform4;
+    return GlideOptions.circleCropTransform3;
   }
 
   /**
@@ -195,11 +193,11 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    */
   @CheckResult
   public static GlideOptions noTransformation() {
-    if (GlideOptions.noTransformation5 == null) {
-      GlideOptions.noTransformation5 =
+    if (GlideOptions.noTransformation4 == null) {
+      GlideOptions.noTransformation4 =
           new GlideOptions().dontTransform().autoClone();
     }
-    return GlideOptions.noTransformation5;
+    return GlideOptions.noTransformation4;
   }
 
   /**
@@ -271,11 +269,11 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    */
   @CheckResult
   public static GlideOptions noAnimation() {
-    if (GlideOptions.noAnimation6 == null) {
-      GlideOptions.noAnimation6 =
+    if (GlideOptions.noAnimation5 == null) {
+      GlideOptions.noAnimation5 =
           new GlideOptions().dontAnimate().autoClone();
     }
-    return GlideOptions.noAnimation6;
+    return GlideOptions.noAnimation5;
   }
 
   @Override
@@ -448,12 +446,6 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
 
   @Override
   @CheckResult
-  public final GlideOptions centerCrop() {
-    return (GlideOptions) super.centerCrop();
-  }
-
-  @Override
-  @CheckResult
   public final GlideOptions optionalFitCenter() {
     return (GlideOptions) super.optionalFitCenter();
   }
@@ -549,22 +541,25 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
   }
 
   /**
-   * @see Extension#test(RequestOptions)
+   * @see Extension#centerCrop(RequestOptions)
+   * @see RequestOptions#centerCrop()
    */
+  @Override
   @CheckResult
-  public GlideOptions test() {
-    return (GlideOptions) Extension.test(this);
+  public GlideOptions centerCrop() {
+    if (isAutoCloneEnabled()) {
+      return clone().centerCrop();
+    }
+    super.centerCrop();
+    Extension.centerCrop(this);
+    return this;
   }
 
   /**
-   * @see Extension#test(RequestOptions)
+   * @see Extension#centerCrop(RequestOptions)
    */
   @CheckResult
-  public static GlideOptions testOf() {
-    if (GlideOptions.testOf0 == null) {
-      GlideOptions.testOf0 =
-          new GlideOptions().test().autoClone();
-    }
-    return GlideOptions.testOf0;
+  public static GlideOptions centerCropOf() {
+    return new GlideOptions().centerCrop();
   }
 }

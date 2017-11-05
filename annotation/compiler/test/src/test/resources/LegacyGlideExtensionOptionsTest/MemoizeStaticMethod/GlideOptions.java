@@ -553,7 +553,11 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    */
   @CheckResult
   public GlideOptions test() {
-    return (GlideOptions) Extension.test(this);
+    if (isAutoCloneEnabled()) {
+      return clone().test();
+    }
+    Extension.test(this);
+    return this;
   }
 
   /**

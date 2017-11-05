@@ -16,7 +16,6 @@ import org.junit.Test;
  * Tests adding a single {@link com.bumptech.glide.module.LibraryGlideModule} in a project.
  */
 public class EmptyLibraryGlideModuleTest {
-  private static final String DIR_NAME = "EmptyLibraryGlideModuleTest";
   private static final String MODULE_NAME = "EmptyLibraryModule.java";
   private Compilation compilation;
 
@@ -44,7 +43,7 @@ public class EmptyLibraryGlideModuleTest {
         .isEqualTo(forResource(expectedClassName + ".java").getCharContent(true));
   }
 
-  private static JavaFileObject forResource(String name) {
-    return Util.forResource(DIR_NAME, name);
+  private JavaFileObject forResource(String name) {
+    return Util.forResource(getClass().getSimpleName(), name);
   }
 }

@@ -12,7 +12,7 @@ public final class ExtensionWithOption {
   }
 
   @GlideOption
-  public static void squareThumb(RequestOptions requestOptions) {
-    requestOptions.centerCrop();
+  public static RequestOptions squareThumb(RequestOptions requestOptions) {
+    return requestOptions.centerCrop();
   }
 }

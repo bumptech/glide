@@ -547,12 +547,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
   @Override
   @CheckResult
   public GlideOptions centerCrop() {
-    if (isAutoCloneEnabled()) {
-      return clone().centerCrop();
-    }
-    super.centerCrop();
-    Extension.centerCrop(this);
-    return this;
+    return (GlideOptions) Extension.centerCrop(super.centerCrop());
   }
 
   /**

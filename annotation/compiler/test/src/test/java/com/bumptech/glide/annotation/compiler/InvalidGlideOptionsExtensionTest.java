@@ -99,7 +99,8 @@ public class InvalidGlideOptionsExtensionTest {
                 "  @GlideOption",
                 "  public static void doSomething(RequestOptions options) {}",
                 "}"));
-    assertThat(compilation).succeededWithoutWarnings();
+    assertThat(compilation).succeeded();
+    assertThat(compilation).hadWarningContaining("is using a legacy format.");
   }
 
   @Test
@@ -120,7 +121,8 @@ public class InvalidGlideOptionsExtensionTest {
                 "  @GlideOption",
                 "  public static void doSomething(RequestOptions options, Object arg2) {}",
                 "}"));
-    assertThat(compilation).succeededWithoutWarnings();
+    assertThat(compilation).succeeded();
+    assertThat(compilation).hadWarningContaining("is using a legacy format.");
   }
 
   @Test
@@ -183,7 +185,8 @@ public class InvalidGlideOptionsExtensionTest {
                 "  @GlideOption(override = GlideOption.OVERRIDE_EXTEND)",
                 "  public static void centerCrop(RequestOptions options) {}",
                 "}"));
-    assertThat(compilation).succeededWithoutWarnings();
+    assertThat(compilation).succeeded();
+    assertThat(compilation).hadWarningContaining("is using a legacy format.");
   }
 
   @Test
@@ -225,6 +228,53 @@ public class InvalidGlideOptionsExtensionTest {
                 "  @GlideOption(override = GlideOption.OVERRIDE_REPLACE)",
                 "  public static void centerCrop(RequestOptions options) {}",
                 "}"));
+    assertThat(compilation).succeeded();
+    assertThat(compilation).hadWarningContaining("is using a legacy format.");
+  }
+
+  @Test
+  public void compilation_withRequestOptionsReturnValue_succeeds() {
+     Compilation compilation = javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideOption;",
+                "import com.bumptech.glide.request.RequestOptions;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideOption",
+                "  public static RequestOptions doSomething(RequestOptions options) {",
+                "    return options;",
+                "  }",
+                "}"));
     assertThat(compilation).succeededWithoutWarnings();
+  }
+
+  @Test
+  public void compilation_withNonRequestOptionsReturnValue_fails() {
+    expectedException.expect(RuntimeException.class);
+    javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideOption;",
+                "import com.bumptech.glide.request.RequestOptions;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideOption",
+                "  public static Object doSomething(RequestOptions options) {",
+                "    return options;",
+                "  }",
+                "}"));
   }
 }

@@ -11,8 +11,8 @@ public final class Extension {
     // Utility class.
   }
 
-  @GlideOption(override = GlideOption.OVERRIDE_EXTEND)
-  public static RequestOptions centerCrop(RequestOptions requestOptions) {
-    return requestOptions.centerCrop();
+  @GlideOption(memoizeStaticMethod = true)
+  public static void test(RequestOptions requestOptions) {
+    requestOptions.centerCrop();
   }
 }

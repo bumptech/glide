@@ -16,7 +16,6 @@ import org.junit.rules.ExpectedException;
  */
 public class MultipleAppGlideModuleTest {
   @Rule public ExpectedException expectedException = ExpectedException.none();
-  private static final String DIR_NAME = MultipleAppGlideModuleTest.class.getSimpleName();
   private static final String FIRST_MODULE = "EmptyAppModule1.java";
   private static final String SECOND_MODULE = "EmptyAppModule2.java";
 
@@ -46,7 +45,7 @@ public class MultipleAppGlideModuleTest {
     assertThat(compilation).succeededWithoutWarnings();
   }
 
-  private static JavaFileObject forResource(String name) {
-    return Util.forResource(DIR_NAME, name);
+  private JavaFileObject forResource(String name) {
+    return Util.forResource(getClass().getSimpleName(), name);
   }
 }

@@ -16,7 +16,6 @@ import org.junit.Test;
  * Tests adding multiple {@link com.bumptech.glide.module.LibraryGlideModule}s in a project.
  */
 public class MultipleEmptyLibraryGlideModuleTest {
-  private static final String DIR_NAME = "MultipleEmptyLibraryGlideModuleTest";
   private Compilation compilation;
 
   @Before
@@ -46,7 +45,7 @@ public class MultipleEmptyLibraryGlideModuleTest {
         .isEqualTo(forResource(expectedClassName + ".java").getCharContent(true));
   }
 
-  private static JavaFileObject forResource(String name) {
-    return Util.forResource(DIR_NAME, name);
+  private JavaFileObject forResource(String name) {
+    return Util.forResource(getClass().getSimpleName(), name);
   }
 }

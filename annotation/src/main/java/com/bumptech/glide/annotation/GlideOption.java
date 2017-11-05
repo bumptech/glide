@@ -17,6 +17,54 @@ import java.lang.annotation.Target;
  *
  * <p>Methods with this annotation will only be found if they belong to classes annotated with
  * {@link GlideExtension}.
+ *
+ * <p>The preferred way of writing extension methods returns the provided
+ * {@code com.bumptech.glide.request.RequestOptions} object with one or more methods called on it.
+ * You must not return a newly instantiated {@code com.bumptech.glide.request.RequestOptions} object
+ * as doing so my cause a {@code ClassCastException} at runtime. Calling either
+ * {@code com.bumptech.glide.request.RequestOptions#autoClone()} or
+ * {@code com.bumptech.glide.request.RequestOptions#lock()} is safe, but unnecessary and should
+ * typically be avoided. The preferred style looks like:
+ *
+ * <pre>
+ * {@code
+ * @GlideExtenion
+ * public class MyExtension {
+ *   private MyExtension() {}
+ *
+ *   @GlideOption
+ *   public static RequestOptions myOption(RequestOptions options) {
+ *     return options
+ *         .optionOne()
+ *         .optionTwo();
+ *   }
+ * }
+ * }
+ * </pre>
+ *
+ * <p>The deprecated way of writing extension methods is simply a static void method. The
+ * {@code com.bumptech.glide.request.RequestOptions} object is cloned before it is passed to this
+ * method to avoid an option method returning a new instance, but using methods like
+ * {@code com.bumptech.glide.request.RequestOptions#clone()} or
+ * {@code com.bumptech.glide.request.RequestOptions#autoClone()} can result in options applied in
+ * the method being silently ignored. Prefer the new style whenever possible.
+ *
+ * <pre>
+ * {@code
+ * @GlideExtenion
+ * public class MyExtension {
+ *   private MyExtension() {}
+ *
+ *   // Deprecated! Use the new style of GlideOption extensions instead.
+ *   @GlideOption
+ *   public static void myOption(RequestOptions options) {
+ *     options
+ *         .optionOne()
+ *         .optionTwo();
+ *   }
+ * }
+ * }
+ * </pre>
  */
 @Target(ElementType.METHOD)
 // Needs to be parsed from class files in JAR.

@@ -5,14 +5,14 @@ import com.bumptech.glide.annotation.GlideOption;
 import com.bumptech.glide.request.RequestOptions;
 
 @GlideExtension
-public final class Extension {
+public final class ExtensionWithOption {
 
-  private Extension() {
+  private ExtensionWithOption() {
     // Utility class.
   }
 
-  @GlideOption(override = GlideOption.OVERRIDE_EXTEND)
-  public static RequestOptions centerCrop(RequestOptions requestOptions) {
-    return requestOptions.centerCrop();
+  @GlideOption
+  public static void squareThumb(RequestOptions requestOptions) {
+    requestOptions.centerCrop();
   }
 }

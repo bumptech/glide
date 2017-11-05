@@ -17,7 +17,6 @@ import org.junit.Test;
  * Tests adding a single {@link com.bumptech.glide.test.EmptyAppModule} in a project.
  */
 public class EmptyAppGlideModuleTest {
-  private static final String DIR_NAME = "EmptyAppGlideModuleTest";
   private static final String MODULE_NAME = "EmptyAppModule.java";
   private Compilation compilation;
 
@@ -83,8 +82,8 @@ public class EmptyAppGlideModuleTest {
         .isEqualTo(forResource("GeneratedRequestManagerFactory.java").getCharContent(true));
   }
 
-  private static JavaFileObject forResource(String name) {
-    return Util.forResource(DIR_NAME, name);
+  private JavaFileObject forResource(String name) {
+    return Util.forResource(getClass().getSimpleName(), name);
   }
 }
 

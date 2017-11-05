@@ -12,11 +12,12 @@ import javax.tools.JavaFileObject;
 import org.junit.Test;
 
 /**
- * Verifies only the output we expect to change based on the various configurations of GlideOptions.
+ * Verifies only the output we expect to change based on the various configurations of GlideOptions
+ * when GlideOptions are defined in the legacy format.
  *
  * <p>The output for all classes is tested in {@link LegacyGlideExtensionWithOptionTest}.
  */
-public class GlideExtensionOptionsTest {
+public class LegacyGlideExtensionOptionsTest {
   private static final String EXTENSION_NAME = "Extension.java";
 
   @Test
@@ -27,18 +28,6 @@ public class GlideExtensionOptionsTest {
   @Test
   public void compilation_withOverrideExtend_validRequest() throws IOException {
     runTest("OverrideExtend", Subject.GlideRequest);
-  }
-
-  @Test
-  public void compilation_withOverrideReplace_andMultipleArguments_validOptions()
-      throws IOException {
-    runTest("OverrideExtendMultipleArguments", Subject.GlideOptions);
-  }
-
-  @Test
-  public void compilation_withOverrideReplace_andMultipleArguments_validRequest()
-      throws IOException {
-    runTest("OverrideExtendMultipleArguments", Subject.GlideRequest);
   }
 
   @Test
@@ -97,7 +86,7 @@ public class GlideExtensionOptionsTest {
             .compile(
                 emptyAppModule(),
                 extension(subDir));
-    assertThat(compilation).succeededWithoutWarnings();
+    assertThat(compilation).succeeded();
 
     assertThat(compilation)
         .generatedSourceFile(subpackage(subject.name()))

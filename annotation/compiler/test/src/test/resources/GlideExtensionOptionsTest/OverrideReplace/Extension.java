@@ -12,7 +12,7 @@ public final class Extension {
   }
 
   @GlideOption(override = GlideOption.OVERRIDE_REPLACE)
-  public static void centerCrop(RequestOptions requestOptions) {
-    requestOptions.centerCrop();
+  public static RequestOptions centerCrop(RequestOptions requestOptions) {
+    return requestOptions.centerCrop();
   }
 }

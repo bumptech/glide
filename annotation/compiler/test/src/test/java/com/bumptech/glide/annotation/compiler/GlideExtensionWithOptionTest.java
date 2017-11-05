@@ -16,10 +16,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Verifies the output of the processor with a simple single extension option.
+ * Verifies the output of the processor with a simple single extension option in the new
+ * option style where extension methods always return values.
  */
 public class GlideExtensionWithOptionTest {
-  private static final String DIR_NAME = GlideExtensionWithOptionTest.class.getSimpleName();
   private Compilation compilation;
 
   @Before
@@ -86,7 +86,7 @@ public class GlideExtensionWithOptionTest {
         .isEqualTo(appResource("GeneratedRequestManagerFactory.java").getCharContent(true));
   }
 
-  private static JavaFileObject forResource(String name) {
-    return Util.forResource(DIR_NAME, name);
+  private JavaFileObject forResource(String name) {
+    return Util.forResource(getClass().getSimpleName(), name);
   }
 }
