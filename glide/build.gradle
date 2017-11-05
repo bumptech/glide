@@ -25,7 +25,7 @@ static def getAndroidPathsForJavadoc() {
 
 // The paths of Java projects that should be included only in Javadoc, not in the jar.
 static def getJavaPathsForJavadoc() {
-    [':annotation', ':annotation:compiler']
+    [':annotation']
 }
 
 (getAndroidPathsForJavadoc() + getAndroidPathsForJar() +
@@ -82,12 +82,12 @@ static def getAndroidLibraryVariants(projects, variantName) {
 }
 
 def getSourceFilesForVariantJar(variantName) {
-    getAndroidLibraryVariantsForJar(variantName).collect { it.javaCompile.source } +
+    getAndroidLibraryVariantsForJar(variantName).collect { it.getJavaCompiler().source } +
             getInternalJavaProjectsForJar().collect { it.sourceSets.main.allJava }
 }
 
 def getSourceFilesForVariantJavadoc(variantName) {
-    getAndroidLibraryVariantsForJavadoc(variantName).collect { it.javaCompile.source } +
+    getAndroidLibraryVariantsForJavadoc(variantName).collect { it.getJavaCompiler().source } +
             getInternalJavaProjectsForJavadoc().collect { it.sourceSets.main.allJava }
 }
 
@@ -99,7 +99,7 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 
 // Generate javadocs and sources containing batched documentation and sources for all internal
 // projects.
-['release', 'debug'].each { variantName ->
+['release'].each { variantName ->
 
     task("${variantName}SourceJar", type: Jar) {
         from getSourceFilesForVariantJar(variantName)
@@ -112,10 +112,10 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
         classpath = project.files(
                 getAndroidJar(),
                 getAndroidLibraryVariantsForJar(variantName).collect { LibraryVariant lib ->
-                    lib.javaCompile.classpath.files
+                    lib.getJavaCompiler().classpath.files
                 },
                 getAndroidLibraryVariantsForJavadoc(variantName).collect { LibraryVariant lib ->
-                    lib.javaCompile.classpath.files
+                    lib.getJavaCompiler().classpath.files
                 },
                 getInternalJavaProjectsForJavadoc().collect { Project project ->
                     project.sourceSets.main.compileClasspath.files
@@ -158,7 +158,7 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 jar {
     from files(
             getReleaseVariantAndroidProjectsForJar().collect { LibraryVariant variant ->
-                variant.javaCompile.destinationDir
+                variant.getJavaCompiler().destinationDir
             }
     )
     exclude "**/R.class"
@@ -166,15 +166,16 @@ jar {
     from files(getInternalJavaProjectsForJar().collect { it.sourceSets.main.output })
 }
 
-def getAllInternalProjectBuildDeps() {
-    getInternalAndroidProjectsForJar() + getInternalJavaProjectsForJar() +
-            getInternalJavaProjectsForJavadoc() + getInternalAndroidProjectsForJavadoc()
+(getInternalAndroidProjectsForJar() + getInternalAndroidProjectsForJavadoc()).each {
+    project ->
+        releaseJavadoc.dependsOn(project.tasks.compileDebugJavaWithJavac)
+        jar.dependsOn(project.tasks.compileDebugJavaWithJavac)
 }
 
-getAllInternalProjectBuildDeps().each { project ->
-    releaseJavadoc.dependsOn(project.tasks.assemble)
-    debugJavadoc.dependsOn(project.tasks.assemble)
-    jar.dependsOn(project.tasks.build)
+(getInternalJavaProjectsForJar() + getInternalJavaProjectsForJavadoc()).each {
+    project ->
+        releaseJavadoc.dependsOn(project.tasks.compileJava)
+        jar.dependsOn(project.tasks.compileJava)
 }
 
 artifacts {
