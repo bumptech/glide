@@ -5,8 +5,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,12 +25,13 @@ public class EngineResourceTest {
   private EngineResource<Object> engineResource;
   private EngineResource.ResourceListener listener;
   private Key cacheKey = mock(Key.class);
-  private Resource<Object> resource;
+  private Resource<Object> resource = mockResource();
 
   @Before
   public void setUp() {
     resource = mockResource();
-    engineResource = new EngineResource<>(resource, true /*isMemoryCacheable*/);
+    engineResource =
+        new EngineResource<>(resource, /*isMemoryCacheable=*/ true, /*isRecyclable=*/ true);
     listener = mock(EngineResource.ResourceListener.class);
     engineResource.setResourceListener(cacheKey, listener);
   }
@@ -140,14 +143,27 @@ public class EngineResourceTest {
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfWrappedResourceIsNull() {
-    new EngineResource<>(null, false);
+    new EngineResource<>(/*toWrap=*/ null, /*isCacheable=*/ false, /*isRecyclable=*/ true);
   }
 
   @Test
   public void testCanSetAndGetIsCacheable() {
-    engineResource = new EngineResource<>(mockResource(), true);
+    engineResource =
+        new EngineResource<>(mockResource(), /*isCacheable=*/ true, /*isRecyclable=*/ true);
     assertTrue(engineResource.isCacheable());
-    engineResource = new EngineResource<>(mockResource(), false);
+    engineResource =
+        new EngineResource<>(mockResource(), /*isCacheable=*/ false, /*isRecyclable=*/ true);
     assertFalse(engineResource.isCacheable());
+  }
+
+  @Test
+  public void release_whenNotRecycleable_doesNotRecycleResource() {
+    resource = mockResource();
+    engineResource = new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ false);
+    engineResource.setResourceListener(cacheKey, listener);
+    engineResource.recycle();
+
+    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    verify(resource, never()).recycle();
   }
 }

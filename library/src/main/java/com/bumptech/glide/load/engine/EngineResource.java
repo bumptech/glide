@@ -12,6 +12,7 @@ import com.bumptech.glide.util.Preconditions;
  */
 class EngineResource<Z> implements Resource<Z> {
   private final boolean isCacheable;
+  private final boolean isRecyclable;
   private ResourceListener listener;
   private Key key;
   private int acquired;
@@ -22,14 +23,19 @@ class EngineResource<Z> implements Resource<Z> {
     void onResourceReleased(Key key, EngineResource<?> resource);
   }
 
-  EngineResource(Resource<Z> toWrap, boolean isCacheable) {
+  EngineResource(Resource<Z> toWrap, boolean isCacheable, boolean isRecyclable) {
     resource = Preconditions.checkNotNull(toWrap);
     this.isCacheable = isCacheable;
+    this.isRecyclable = isRecyclable;
   }
 
   void setResourceListener(Key key, ResourceListener listener) {
     this.key = key;
     this.listener = listener;
+  }
+
+  Resource<Z> getResource() {
+    return resource;
   }
 
   boolean isCacheable() {
@@ -60,7 +66,9 @@ class EngineResource<Z> implements Resource<Z> {
       throw new IllegalStateException("Cannot recycle a resource that has already been recycled");
     }
     isRecycled = true;
-    resource.recycle();
+    if (isRecyclable) {
+      resource.recycle();
+    }
   }
 
   /**

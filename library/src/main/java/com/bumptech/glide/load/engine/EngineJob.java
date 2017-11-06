@@ -294,7 +294,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   // Visible for testing.
   static class EngineResourceFactory {
     public <R> EngineResource<R> build(Resource<R> resource, boolean isMemoryCacheable) {
-      return new EngineResource<>(resource, isMemoryCacheable);
+      return new EngineResource<>(resource, isMemoryCacheable, /*isRecyclable=*/ true);
     }
   }
 
