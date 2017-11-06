@@ -14,7 +14,5 @@ public final class ExtensionWithType {
   }
 
   @GlideType(Number.class)
-  public static RequestBuilder<Number> asNumber(RequestBuilder<Number> builder) {
-    return builder;
-  }
+  public static void asInteger(RequestBuilder<Number> builder) {}
 }

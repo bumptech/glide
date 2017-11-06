@@ -164,4 +164,139 @@ public class InvalidGlideTypeExtensionTest {
                 + " com.bumptech.glide.test.GlideRequests");
     compilation.generatedSourceFile(subpackage("GlideRequests"));
   }
+
+  @Test
+  public void compilation_withAnnotatedStaticMethod_returningRequestBuilder_succeeds() {
+     Compilation compilation =
+        javac()
+            .withProcessors(new GlideAnnotationProcessor())
+            .compile(
+                emptyAppModule(),
+                JavaFileObjects.forSourceLines(
+                    "Extension",
+                    "package com.bumptech.glide.test;",
+                    "import com.bumptech.glide.RequestBuilder;",
+                    "import com.bumptech.glide.annotation.GlideExtension;",
+                    "import com.bumptech.glide.annotation.GlideType;",
+                    "@GlideExtension",
+                    "public class Extension {",
+                    "  private Extension() {}",
+                    "  @GlideType(Number.class)",
+                    "  public static RequestBuilder<Number> asNumber(",
+                    "      RequestBuilder<Number> builder) {",
+                    "    return builder;",
+                    "  }",
+                    "}"));
+    assertThat(compilation).succeededWithoutWarnings();
+  }
+
+  @Test
+  public void compilation_withAnnotatedStaticMethod_returningNonRequestBuilder_fails() {
+    expectedException.expectMessage(
+        "@GlideType methods should return a RequestBuilder<java.lang.Number> object, but given:"
+            + " java.lang.Object. If you're using old style @GlideType methods, your method may"
+            + " have a void return type, but doing so is deprecated and support will be removed"
+            + " in a future version");
+    javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.RequestBuilder;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideType;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideType(Number.class)",
+                "  public static Object asNumber(",
+                "      RequestBuilder<Number> builder) {",
+                "    return new Object();",
+                "  }",
+                "}"));
+  }
+
+  @Test
+  public void compilation_withAnnotatedStaticMethod_returningBuilderWithIncorrectType_fails() {
+    expectedException.expectMessage(
+        "@GlideType methods should return a RequestBuilder<java.lang.Number> object, but given:"
+            + " com.bumptech.glide.RequestBuilder<java.lang.Object>. If you're using old style"
+            + " @GlideType methods, your method may have a void return type, but doing so is"
+            + " deprecated and support will be removed in a future version");
+    javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                 "Extension",
+                 "package com.bumptech.glide.test;",
+                 "import com.bumptech.glide.RequestBuilder;",
+                 "import com.bumptech.glide.annotation.GlideExtension;",
+                 "import com.bumptech.glide.annotation.GlideType;",
+                 "@GlideExtension",
+                 "public class Extension {",
+                 "  private Extension() {}",
+                 "  @GlideType(Number.class)",
+                 "  public static RequestBuilder<Object> asNumber(",
+                 "      RequestBuilder<Object> builder) {",
+                 "    return builder;",
+                 "  }",
+                 "}"));
+   }
+
+  @Test
+  public void compilation_withAnnotatedStaticMethod_returningBuilder_andMultipleParams_fails() {
+    expectedException.expectMessage(
+        "@GlideType methods must take a RequestBuilder object as their first and only parameter,"
+            + " but given multiple for:"
+            + " com.bumptech.glide.test.Extension#asNumber("
+            + "com.bumptech.glide.RequestBuilder<java.lang.Number>,java.lang.Object)");
+    javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                 "Extension",
+                 "package com.bumptech.glide.test;",
+                 "import com.bumptech.glide.RequestBuilder;",
+                 "import com.bumptech.glide.annotation.GlideExtension;",
+                 "import com.bumptech.glide.annotation.GlideType;",
+                 "@GlideExtension",
+                 "public class Extension {",
+                 "  private Extension() {}",
+                 "  @GlideType(Number.class)",
+                 "  public static RequestBuilder<Number> asNumber(",
+                 "      RequestBuilder<Number> builder, Object arg1) {",
+                 "    return builder;",
+                 "  }",
+                 "}"));
+  }
+
+  @Test
+  public void compilation_withAnnotatedStaticMethod_returningBuilder_nonBuilderParam_fails() {
+    expectedException.expectMessage(
+        "@GlideType methods must take a RequestBuilder object as their first and only parameter,"
+            + " but given: java.lang.Object");
+    javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                 "Extension",
+                 "package com.bumptech.glide.test;",
+                 "import com.bumptech.glide.RequestBuilder;",
+                 "import com.bumptech.glide.annotation.GlideExtension;",
+                 "import com.bumptech.glide.annotation.GlideType;",
+                 "@GlideExtension",
+                 "public class Extension {",
+                 "  private Extension() {}",
+                 "  @GlideType(Number.class)",
+                 "  public static RequestBuilder<Number> asNumber(",
+                 "      Object arg) {",
+                 "    return null;",
+                 "  }",
+                 "}"));
+   }
 }

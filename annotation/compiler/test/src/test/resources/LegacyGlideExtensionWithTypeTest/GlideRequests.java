@@ -39,10 +39,12 @@ public class GlideRequests extends RequestManager {
   }
 
   /**
-   * @see ExtensionWithType#asNumber(RequestBuilder)
+   * @see ExtensionWithType#asInteger(RequestBuilder)
    */
-  public GlideRequest<Number> asNumber() {
-    return (GlideRequest<Number>) ExtensionWithType.asNumber(this.as(Number.class));
+  public GlideRequest<Number> asInteger() {
+    GlideRequest<Number> requestBuilder = this.as(Number.class);
+    ExtensionWithType.asInteger(requestBuilder);
+    return requestBuilder;
   }
 
   @Override

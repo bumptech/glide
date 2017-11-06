@@ -24,6 +24,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
@@ -251,7 +252,16 @@ final class RequestManagerGenerator {
 
   // Generates methods added to RequestManager via GlideExtensions.
   private MethodSpec generateAdditionalRequestManagerMethod(ExecutableElement extensionMethod) {
-    String returnType = processorUtil.findClassValuesFromAnnotationOnClassAsNames(extensionMethod,
+    if (extensionMethod.getReturnType().getKind() == TypeKind.VOID) {
+      return generateAdditionalRequestManagerMethodLegacy(extensionMethod);
+    } else {
+      return generateAdditionalRequestManagerMethodNew(extensionMethod);
+    }
+  }
+
+  private MethodSpec generateAdditionalRequestManagerMethodLegacy(
+      ExecutableElement extensionMethod) {
+     String returnType = processorUtil.findClassValuesFromAnnotationOnClassAsNames(extensionMethod,
         GlideType.class).iterator().next();
     ClassName returnTypeClassName = ClassName.bestGuess(returnType);
     ParameterizedTypeName parameterizedTypeName =
@@ -266,6 +276,27 @@ final class RequestManagerGenerator {
         .addStatement("$T.$N(requestBuilder)",
             extensionMethod.getEnclosingElement(), extensionMethod.getSimpleName())
         .addStatement("return requestBuilder")
+        .build();
+  }
+
+  private MethodSpec generateAdditionalRequestManagerMethodNew(
+      ExecutableElement extensionMethod) {
+     String returnType = processorUtil.findClassValuesFromAnnotationOnClassAsNames(extensionMethod,
+        GlideType.class).iterator().next();
+    ClassName returnTypeClassName = ClassName.bestGuess(returnType);
+    ParameterizedTypeName parameterizedTypeName =
+        ParameterizedTypeName.get(generatedRequestBuilderClassName, returnTypeClassName);
+
+    return MethodSpec.methodBuilder(extensionMethod.getSimpleName().toString())
+        .addModifiers(Modifier.PUBLIC)
+        .returns(parameterizedTypeName)
+        .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
+        .addStatement(
+            "return ($T) $T.$N(this.as($T.class))",
+            parameterizedTypeName,
+            extensionMethod.getEnclosingElement(),
+            extensionMethod.getSimpleName(),
+            returnTypeClassName)
         .build();
   }
 

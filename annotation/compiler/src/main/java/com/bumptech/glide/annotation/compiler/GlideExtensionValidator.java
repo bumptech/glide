@@ -11,6 +11,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
@@ -39,30 +40,32 @@ final class GlideExtensionValidator {
     }
     for (Element element : typeElement.getEnclosedElements()) {
       if (element.getKind() == ElementKind.CONSTRUCTOR) {
-        if (!element.getModifiers().contains(Modifier.PRIVATE)) {
-          throw new IllegalArgumentException("RequestOptionsExtensions must be public, with private"
-              + " constructors and only static methods. Found a non-private constructor");
-        }
-        ExecutableElement executableElement = (ExecutableElement) element;
-        if (!executableElement.getParameters().isEmpty()) {
-          throw new IllegalArgumentException("RequestOptionsExtensions must be public, with private"
-              + " constructors and only static methods. Found parameters in the constructor");
-        }
-        continue;
-      }
-      if (element.getKind() == ElementKind.METHOD) {
+        validateExtensionConstructor(element);
+      } else if (element.getKind() == ElementKind.METHOD) {
         ExecutableElement executableElement = (ExecutableElement) element;
         if (executableElement.getAnnotation(GlideOption.class) != null) {
           validateGlideOption(executableElement);
         } else if (executableElement.getAnnotation(GlideType.class) != null) {
-          validateExtendsRequestManager(executableElement);
+          validateGlideType(executableElement);
         }
       }
     }
   }
 
+  private static void validateExtensionConstructor(Element element) {
+    if (!element.getModifiers().contains(Modifier.PRIVATE)) {
+      throw new IllegalArgumentException("RequestOptionsExtensions must be public, with private"
+          + " constructors and only static methods. Found a non-private constructor");
+    }
+    ExecutableElement executableElement = (ExecutableElement) element;
+    if (!executableElement.getParameters().isEmpty()) {
+      throw new IllegalArgumentException("RequestOptionsExtensions must be public, with private"
+          + " constructors and only static methods. Found parameters in the constructor");
+    }
+  }
+
   private void validateGlideOption(ExecutableElement executableElement) {
-    if (isVoid(executableElement)) {
+    if (returnsVoid(executableElement)) {
       validateDeprecatedGlideOption(executableElement);
     } else {
       validateNewGlideOption(executableElement);
@@ -158,9 +161,61 @@ final class GlideExtensionValidator {
     return result;
   }
 
+  private void validateGlideType(ExecutableElement executableElement) {
+    if (returnsVoid(executableElement)) {
+      validateDeprecatedGlideType(executableElement);
+    } else {
+      validateNewGlideType(executableElement);
+    }
+  }
 
-  private static void validateExtendsRequestManager(ExecutableElement executableElement) {
+  private void validateNewGlideType(ExecutableElement executableElement) {
+    TypeMirror returnType = executableElement.getReturnType();
+    if (!isRequestBuilder(returnType) || !typeMatchesExpected(returnType, executableElement)) {
+      String expectedClassName = getGlideTypeValue(executableElement);
+      throw new IllegalArgumentException("@GlideType methods should return a RequestBuilder<"
+          + expectedClassName + "> object, but given: " + returnType + ". If you're"
+          + " using old style @GlideType methods, your method may have a void return type, but"
+          + " doing so is deprecated and support will be removed in a future version");
+    }
+    validateGlideTypeParameters(executableElement);
+  }
+
+  private String getGlideTypeValue(ExecutableElement executableElement) {
+    return
+        processorUtil
+            .findClassValuesFromAnnotationOnClassAsNames(
+                executableElement, GlideType.class).iterator().next();
+  }
+
+  private boolean typeMatchesExpected(
+      TypeMirror returnType, ExecutableElement executableElement) {
+    if (!(returnType instanceof DeclaredType)) {
+      return false;
+    }
+    List<? extends TypeMirror> typeArguments = ((DeclaredType) returnType).getTypeArguments();
+    if (typeArguments.size() != 1) {
+      return false;
+    }
+    TypeMirror argument = typeArguments.get(0);
+    String expected = getGlideTypeValue(executableElement);
+    if (!argument.toString().equals(expected)) {
+      return false;
+    }
+    return true;
+  }
+
+  private boolean isRequestBuilder(TypeMirror typeMirror) {
+    TypeMirror toCompare = processingEnvironment.getTypeUtils().erasure(typeMirror);
+    return toCompare.toString().equals("com.bumptech.glide.RequestBuilder");
+  }
+
+  private static void validateDeprecatedGlideType(ExecutableElement executableElement) {
     validateStaticVoid(executableElement, GlideType.class);
+    validateGlideTypeParameters(executableElement);
+  }
+
+  private static void validateGlideTypeParameters(ExecutableElement executableElement) {
     if (executableElement.getParameters().size() != 1) {
       throw new IllegalArgumentException("@GlideType methods must take a"
           + " RequestBuilder object as their first and only parameter, but given multiple for: "
@@ -181,13 +236,13 @@ final class GlideExtensionValidator {
     }
   }
 
-  private static boolean isVoid(ExecutableElement executableElement) {
+  private static boolean returnsVoid(ExecutableElement executableElement) {
     TypeMirror returnType = executableElement.getReturnType();
     return returnType.getKind() == TypeKind.VOID;
   }
 
   private static void validateVoid(ExecutableElement executableElement, Class<?> clazz) {
-    if (!isVoid(executableElement)) {
+    if (!returnsVoid(executableElement)) {
       throw new IllegalArgumentException("@" + clazz.getSimpleName() + " methods must return void");
     }
   }
