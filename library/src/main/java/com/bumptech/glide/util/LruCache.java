@@ -1,6 +1,8 @@
 package com.bumptech.glide.util;
 
 import android.support.annotation.Nullable;
+
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -166,12 +168,14 @@ public class LruCache<T, Y> {
    */
   protected synchronized void trimToSize(long size) {
     Map.Entry<T, Y> last;
+    Iterator<Map.Entry<T, Y>> cacheIterator;
     while (currentSize > size) {
-      last = cache.entrySet().iterator().next();
+      cacheIterator  = cache.entrySet().iterator();
+      last = cacheIterator.next();
       final Y toRemove = last.getValue();
       currentSize -= getSize(toRemove);
       final T key = last.getKey();
-      cache.remove(key);
+      cacheIterator.remove();
       onItemEvicted(key, toRemove);
     }
   }
