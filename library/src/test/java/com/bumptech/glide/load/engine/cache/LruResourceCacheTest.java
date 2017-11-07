@@ -15,6 +15,7 @@ import android.content.ComponentCallbacks2;
 import android.os.Build;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.util.LruCache;
 import java.security.MessageDigest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -103,6 +104,38 @@ public class LruResourceCacheTest {
     assertFalse(resourceCache.contains(firstKey));
     assertTrue(resourceCache.contains(secondKey));
     assertTrue(resourceCache.contains(thirdKey));
+  }
+
+  @Test
+  public void testPreventEviction() {
+    final MemoryCache cache = new LruResourceCache(100);
+    final Resource<?> first = getResource(30);
+    final Key firstKey = new MockKey();
+    cache.put(firstKey, first);
+    Resource<?> second = getResource(30);
+    Key secondKey = new MockKey();
+    cache.put(secondKey, second);
+    Resource<?> third = getResource(30);
+    Key thirdKey = new MockKey();
+    cache.put(thirdKey, third);
+    cache.setResourceRemovedListener(new ResourceRemovedListener() {
+      @Override
+      public void onResourceRemoved(Resource<?> removed) {
+        if (removed == first) {
+          cache.put(firstKey, first);
+        }
+      }
+    });
+
+    // trims from 100 to 50, having 30+30+30 items, it should trim to 1 item
+    cache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
+
+    // and that 1 item must be first, because it's forced to return to cache in the listener
+    @SuppressWarnings("unchecked")
+    LruCache<Key, Resource<?>> lruCache = (LruCache<Key, Resource<?>>) cache;
+    assertTrue(lruCache.contains(firstKey));
+    assertFalse(lruCache.contains(secondKey));
+    assertFalse(lruCache.contains(thirdKey));
   }
 
   private Resource<?> getResource(int size) {
