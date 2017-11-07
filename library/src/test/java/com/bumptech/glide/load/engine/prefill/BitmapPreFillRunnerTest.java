@@ -195,7 +195,7 @@ public class BitmapPreFillRunnerTest {
   @Test
   public void testAddsBitmapsToMemoryCacheIfMemoryCacheHasEnoughSpaceRemaining() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    when(cache.getMaxSize()).thenReturn(Util.getBitmapByteSize(bitmap));
+    when(cache.getMaxSize()).thenReturn(Long.valueOf(Util.getBitmapByteSize(bitmap)));
 
     PreFillType size =
         new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight()).setConfig(bitmap.getConfig())
@@ -214,7 +214,7 @@ public class BitmapPreFillRunnerTest {
   @Test
   public void testAddsBitmapsToBitmapPoolIfMemoryCacheIsFull() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    when(cache.getMaxSize()).thenReturn(0);
+    when(cache.getMaxSize()).thenReturn(0L);
 
     PreFillType size =
         new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight()).setConfig(bitmap.getConfig())
@@ -233,7 +233,7 @@ public class BitmapPreFillRunnerTest {
   @Test
   public void testAddsBitmapsToPoolIfMemoryCacheIsNotFullButCannotFitBitmap() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    when(cache.getMaxSize()).thenReturn(Util.getBitmapByteSize(bitmap) / 2);
+    when(cache.getMaxSize()).thenReturn((long) Util.getBitmapByteSize(bitmap) / 2);
 
     PreFillType size =
         new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight()).setConfig(bitmap.getConfig())

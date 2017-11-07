@@ -23,7 +23,7 @@ public class ModelCache<A, B> {
     this(DEFAULT_SIZE);
   }
 
-  public ModelCache(int size) {
+  public ModelCache(long size) {
     cache = new LruCache<ModelKey<A>, B>(size) {
       @Override
       protected void onItemEvicted(ModelKey<A> key, B item) {

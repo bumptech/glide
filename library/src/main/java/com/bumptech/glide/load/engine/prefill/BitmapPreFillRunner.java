@@ -123,7 +123,7 @@ final class BitmapPreFillRunner implements Runnable {
     return clock.now() - startTimeMs >= MAX_DURATION_MS;
   }
 
-  private int getFreeMemoryCacheBytes() {
+  private long getFreeMemoryCacheBytes() {
     return memoryCache.getMaxSize() - memoryCache.getCurrentSize();
   }
 

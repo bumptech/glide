@@ -18,12 +18,12 @@ public final class ExternalPreferredCacheDiskCacheFactory extends DiskLruCacheFa
         DiskCache.Factory.DEFAULT_DISK_CACHE_SIZE);
   }
 
-  public ExternalPreferredCacheDiskCacheFactory(Context context, int diskCacheSize) {
+  public ExternalPreferredCacheDiskCacheFactory(Context context, long diskCacheSize) {
     this(context, DiskCache.Factory.DEFAULT_DISK_CACHE_DIR, diskCacheSize);
   }
 
   public ExternalPreferredCacheDiskCacheFactory(final Context context, final String diskCacheName,
-                                                final int diskCacheSize) {
+                                                final long diskCacheSize) {
     super(new CacheDirectoryGetter() {
       @Nullable
       private File getInternalCacheDirectory() {

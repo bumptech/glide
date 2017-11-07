@@ -7,10 +7,10 @@ import java.io.File;
  * disk cache directory.
  *
  * <p>If you need to make I/O access before returning the cache directory use the {@link
- * DiskLruCacheFactory#DiskLruCacheFactory(CacheDirectoryGetter, int)} constructor variant.
+ * DiskLruCacheFactory#DiskLruCacheFactory(CacheDirectoryGetter, long)} constructor variant.
  */
 public class DiskLruCacheFactory implements DiskCache.Factory {
-  private final int diskCacheSize;
+  private final long diskCacheSize;
   private final CacheDirectoryGetter cacheDirectoryGetter;
 
   /**
@@ -20,7 +20,7 @@ public class DiskLruCacheFactory implements DiskCache.Factory {
     File getCacheDirectory();
   }
 
-  public DiskLruCacheFactory(final String diskCacheFolder, int diskCacheSize) {
+  public DiskLruCacheFactory(final String diskCacheFolder, long diskCacheSize) {
     this(new CacheDirectoryGetter() {
       @Override
       public File getCacheDirectory() {
@@ -30,7 +30,7 @@ public class DiskLruCacheFactory implements DiskCache.Factory {
   }
 
   public DiskLruCacheFactory(final String diskCacheFolder, final String diskCacheName,
-      int diskCacheSize) {
+                             long diskCacheSize) {
     this(new CacheDirectoryGetter() {
       @Override
       public File getCacheDirectory() {
@@ -46,7 +46,7 @@ public class DiskLruCacheFactory implements DiskCache.Factory {
    * @param cacheDirectoryGetter Interface called out of UI thread to get the cache folder.
    * @param diskCacheSize        Desired max bytes size for the LRU disk cache.
    */
-  public DiskLruCacheFactory(CacheDirectoryGetter cacheDirectoryGetter, int diskCacheSize) {
+  public DiskLruCacheFactory(CacheDirectoryGetter cacheDirectoryGetter, long diskCacheSize) {
     this.diskCacheSize = diskCacheSize;
     this.cacheDirectoryGetter = cacheDirectoryGetter;
   }
