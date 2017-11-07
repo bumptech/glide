@@ -168,8 +168,9 @@ public class LruCache<T, Y> {
    */
   protected synchronized void trimToSize(int size) {
     Map.Entry<T, Y> last;
-    final Iterator<Map.Entry<T, Y>> cacheIterator = cache.entrySet().iterator();
-    while (currentSize > size && cacheIterator.hasNext()) {
+    Iterator<Map.Entry<T, Y>> cacheIterator;
+    while (currentSize > size) {
+      cacheIterator  = cache.entrySet().iterator();
       last = cacheIterator.next();
       final Y toRemove = last.getValue();
       currentSize -= getSize(toRemove);
