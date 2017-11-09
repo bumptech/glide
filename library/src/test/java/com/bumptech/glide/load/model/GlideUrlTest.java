@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -85,6 +86,16 @@ public class GlideUrlTest {
 
     GlideUrl glideUrlFromEscapedUrl = new GlideUrl(new URL(escaped));
     assertEquals(escaped, glideUrlFromEscapedUrl.toURL().toString());
+  }
+
+  @Test
+  public void issue_2583() throws MalformedURLException {
+    String original =
+        "http://api.met.no/weatherapi/weathericon/1.1/?symbol=9;content_type=image/png";
+
+    GlideUrl glideUrl = new GlideUrl(original);
+    assertThat(glideUrl.toURL().toString()).isEqualTo(original);
+    assertThat(glideUrl.toStringUrl()).isEqualTo(original);
   }
 
   @Test
