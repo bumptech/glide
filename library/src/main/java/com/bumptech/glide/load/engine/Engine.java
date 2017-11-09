@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pools;
 import android.util.Log;
 import com.bumptech.glide.GlideContext;
@@ -341,6 +342,11 @@ public class Engine implements EngineJobListener,
     diskCacheProvider.getDiskCache().clear();
   }
 
+  @VisibleForTesting
+  public void tearDown() {
+    engineJobFactory.tearDown();
+  }
+
   private ReferenceQueue<EngineResource<?>> getReferenceQueue() {
     if (resourceReferenceQueue == null) {
       resourceReferenceQueue = new ReferenceQueue<>();
@@ -495,6 +501,14 @@ public class Engine implements EngineJobListener,
       this.sourceUnlimitedExecutor = sourceUnlimitedExecutor;
       this.animationExecutor = animationExecutor;
       this.listener = listener;
+    }
+
+    @VisibleForTesting
+    void tearDown() {
+      diskCacheExecutor.shutdown();
+      sourceExecutor.shutdown();
+      sourceUnlimitedExecutor.shutdown();
+      animationExecutor.shutdown();
     }
 
     @SuppressWarnings("unchecked")

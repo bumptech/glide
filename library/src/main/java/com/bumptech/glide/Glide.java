@@ -184,6 +184,9 @@ public class Glide implements ComponentCallbacks2 {
 
   @VisibleForTesting
   public static synchronized void tearDown() {
+    if (glide != null) {
+      glide.engine.tearDown();
+    }
     glide = null;
   }
 
