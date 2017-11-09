@@ -1,0 +1,1 @@
+../_posts/2017-11-09-resourcereuse.md
