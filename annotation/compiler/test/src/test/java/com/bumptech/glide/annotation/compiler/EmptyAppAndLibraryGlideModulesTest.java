@@ -17,11 +17,14 @@ import java.io.IOException;
 import javax.tools.JavaFileObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests adding both an empty {@link com.bumptech.glide.module.AppGlideModule} and an empty
  * {@link com.bumptech.glide.module.LibraryGlideModule} in a single project.
  */
+@RunWith(JUnit4.class)
 public class EmptyAppAndLibraryGlideModulesTest {
   private Compilation compilation;
 

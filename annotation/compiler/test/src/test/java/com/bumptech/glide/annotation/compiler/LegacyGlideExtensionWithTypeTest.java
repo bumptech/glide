@@ -14,10 +14,13 @@ import java.io.IOException;
 import javax.tools.JavaFileObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Verifies the output of the processor with a simple single extension type.
  */
+@RunWith(JUnit4.class)
 public class LegacyGlideExtensionWithTypeTest {
   private Compilation compilation;
 

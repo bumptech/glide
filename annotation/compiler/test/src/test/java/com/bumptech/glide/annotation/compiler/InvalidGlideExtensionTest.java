@@ -9,12 +9,15 @@ import com.google.testing.compile.JavaFileObjects;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Checks assertions on {@link com.bumptech.glide.annotation.GlideExtension}s themselves.
  */
 // Avoid warnings when using ExpectedException.
 @SuppressWarnings("ResultOfMethodCallIgnored")
+@RunWith(JUnit4.class)
 public class InvalidGlideExtensionTest {
   @Rule public ExpectedException expectedException = ExpectedException.none();
 

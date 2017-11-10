@@ -11,10 +11,13 @@ import java.io.IOException;
 import javax.tools.JavaFileObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests adding multiple {@link com.bumptech.glide.module.LibraryGlideModule}s in a project.
  */
+@RunWith(JUnit4.class)
 public class MultipleEmptyLibraryGlideModuleTest {
   private Compilation compilation;
 

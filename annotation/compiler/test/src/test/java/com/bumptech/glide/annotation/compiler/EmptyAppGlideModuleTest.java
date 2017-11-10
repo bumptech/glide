@@ -12,10 +12,13 @@ import java.io.IOException;
 import javax.tools.JavaFileObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Tests adding a single {@link com.bumptech.glide.test.EmptyAppModule} in a project.
  */
+@RunWith(JUnit4.class)
 public class EmptyAppGlideModuleTest {
   private static final String MODULE_NAME = "EmptyAppModule.java";
   private Compilation compilation;

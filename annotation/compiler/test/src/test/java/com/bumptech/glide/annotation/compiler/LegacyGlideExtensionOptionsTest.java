@@ -10,6 +10,8 @@ import com.google.testing.compile.Compilation;
 import java.io.IOException;
 import javax.tools.JavaFileObject;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Verifies only the output we expect to change based on the various configurations of GlideOptions
@@ -17,6 +19,7 @@ import org.junit.Test;
  *
  * <p>The output for all classes is tested in {@link LegacyGlideExtensionWithOptionTest}.
  */
+@RunWith(JUnit4.class)
 public class LegacyGlideExtensionOptionsTest {
   private static final String EXTENSION_NAME = "Extension.java";
 

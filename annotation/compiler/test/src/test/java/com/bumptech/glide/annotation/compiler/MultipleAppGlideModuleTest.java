@@ -9,11 +9,14 @@ import javax.tools.JavaFileObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 /**
  * Ensures that adding more than one {@link com.bumptech.glide.module.AppGlideModule} to a project
  * will fail.
  */
+@RunWith(JUnit4.class)
 public class MultipleAppGlideModuleTest {
   @Rule public ExpectedException expectedException = ExpectedException.none();
   private static final String FIRST_MODULE = "EmptyAppModule1.java";
