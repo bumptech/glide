@@ -9,7 +9,9 @@ import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
 import java.io.File;
+import java.lang.Deprecated;
 import java.lang.String;
 
 /**
@@ -51,10 +53,20 @@ public final class GlideApp {
   /**
    * @see Glide#init(Glide)
    */
+  @Deprecated
   @VisibleForTesting
   @SuppressLint("VisibleForTests")
   public static void init(Glide glide) {
     Glide.init(glide);
+  }
+
+  /**
+   * @see Glide#init(Context, GlideBuilder)
+   */
+  @VisibleForTesting
+  @SuppressLint("VisibleForTests")
+  public static void init(Context context, GlideBuilder builder) {
+    Glide.init(context, builder);
   }
 
   /**

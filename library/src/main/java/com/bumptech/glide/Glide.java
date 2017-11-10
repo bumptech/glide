@@ -177,9 +177,21 @@ public class Glide implements ComponentCallbacks2 {
     isInitializing = false;
   }
 
+  /**
+   * @deprecated Use {@link #init(Context, GlideBuilder)} to get a singleton compatible with
+   * Glide's generated API.
+   *
+   * <p>This method will be removed in a future version of Glide.
+   */
   @VisibleForTesting
+  @Deprecated
   public static synchronized void init(Glide glide) {
     Glide.glide = glide;
+  }
+
+  @VisibleForTesting
+  public static synchronized void init(Context context, GlideBuilder builder) {
+    initializeGlide(context, builder);
   }
 
   @VisibleForTesting
@@ -190,10 +202,13 @@ public class Glide implements ComponentCallbacks2 {
     glide = null;
   }
 
-  @SuppressWarnings("deprecation")
   private static void initializeGlide(Context context) {
-    Context applicationContext = context.getApplicationContext();
+    initializeGlide(context, new GlideBuilder());
+  }
 
+  @SuppressWarnings("deprecation")
+  private static void initializeGlide(Context context, GlideBuilder builder) {
+    Context applicationContext = context.getApplicationContext();
     GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
     List<com.bumptech.glide.module.GlideModule> manifestModules = Collections.emptyList();
     if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
@@ -226,8 +241,7 @@ public class Glide implements ComponentCallbacks2 {
     RequestManagerRetriever.RequestManagerFactory factory =
         annotationGeneratedModule != null
             ? annotationGeneratedModule.getRequestManagerFactory() : null;
-    GlideBuilder builder = new GlideBuilder()
-        .setRequestManagerFactory(factory);
+    builder.setRequestManagerFactory(factory);
     for (com.bumptech.glide.module.GlideModule module : manifestModules) {
       module.applyOptions(applicationContext, builder);
     }
@@ -241,7 +255,7 @@ public class Glide implements ComponentCallbacks2 {
     if (annotationGeneratedModule != null) {
       annotationGeneratedModule.registerComponents(applicationContext, glide, glide.registry);
     }
-    context.getApplicationContext().registerComponentCallbacks(glide);
+    applicationContext.registerComponentCallbacks(glide);
     Glide.glide = glide;
   }
 
