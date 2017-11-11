@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile project(':library')
-    compile(project(':integration:recyclerview')) {
+    implementation project(':library')
+    implementation(project(':integration:recyclerview')) {
         transitive = false
     }
     annotationProcessor project(':annotation:compiler')
 
-    compile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
-    compile "com.android.volley:volley:${VOLLEY_VERSION}"
-    compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+    implementation "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    implementation "com.android.volley:volley:${VOLLEY_VERSION}"
+    implementation "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
 }
 
 android {

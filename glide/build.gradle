@@ -82,8 +82,11 @@ static def getAndroidLibraryVariants(projects, variantName) {
 }
 
 def getSourceFilesForVariantJar(variantName) {
-    getAndroidLibraryVariantsForJar(variantName).collect { it.getJavaCompiler().source } +
-            getInternalJavaProjectsForJar().collect { it.sourceSets.main.allJava }
+    getAndroidLibraryVariantsForJar(variantName).collect {
+        it.getJavaCompiler().source.findAll {
+            return !it.getName().equals("R.java") && !it.getName().equals("BuildConfig.java")
+        }
+    } + getInternalJavaProjectsForJar().collect { it.sourceSets.main.allJava }
 }
 
 def getSourceFilesForVariantJavadoc(variantName) {
@@ -161,15 +164,16 @@ jar {
                 variant.getJavaCompiler().destinationDir
             }
     )
+    from files(getInternalJavaProjectsForJar().collect { it.sourceSets.main.output })
     exclude "**/R.class"
     exclude "**/BuildConfig.class"
-    from files(getInternalJavaProjectsForJar().collect { it.sourceSets.main.output })
+    exclude "**/R\$*.class"
 }
 
 (getInternalAndroidProjectsForJar() + getInternalAndroidProjectsForJavadoc()).each {
     project ->
-        releaseJavadoc.dependsOn(project.tasks.compileDebugJavaWithJavac)
-        jar.dependsOn(project.tasks.compileDebugJavaWithJavac)
+        releaseJavadoc.dependsOn(project.tasks.compileReleaseSources)
+        jar.dependsOn(project.tasks.compileReleaseSources)
 }
 
 (getInternalJavaProjectsForJar() + getInternalJavaProjectsForJavadoc()).each {

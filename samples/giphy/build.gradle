@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile project(':library')
-    compile(project(':integration:recyclerview')) {
+    implementation project(':library')
+    implementation(project(':integration:recyclerview')) {
         transitive = false
     }
-    compile 'com.google.code.gson:gson:2.8.0'
-    compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
-    compile "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
+    implementation 'com.google.code.gson:gson:2.8.0'
+    implementation "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+    implementation "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
     annotationProcessor project(':annotation:compiler')
 }
 

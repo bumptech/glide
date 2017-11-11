@@ -7,19 +7,25 @@ apply plugin: 'com.android.application'
 
 dependencies {
     // Appcompat is required to ensure that Glide's runtime detection the v7 support Drawable
-    // loading classes functions. It's not clear why androidTestCompile isn't sufficient, but for
+    // loading classes functions. It's not clear why androidTestImplementation isn't sufficient, but for
     // whatever reason, compile is the only dependency that seems to work.
-    compile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    implementation ("com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}") {
+        exclude group: 'android.arch.core'
+    }
     annotationProcessor project(":annotation:compiler")
-    compile project(":library")
+    implementation project(":library")
 
-    androidTestCompile project(':library')
-    androidTestCompile "org.mockito:mockito-android:${MOCKITO_ANDROID_VERSION}"
-    androidTestCompile "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
-    androidTestCompile "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'com.android.support.test:rules:0.5'
-    androidTestCompile "com.google.truth:truth:${TRUTH_VERSION}"
+    androidTestImplementation project(':library')
+    androidTestImplementation "org.mockito:mockito-android:${MOCKITO_ANDROID_VERSION}"
+    androidTestImplementation "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
+    androidTestImplementation "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test:rules:1.0.1'
+    androidTestImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    // Not totally clear why this is required, but it seems to be missing when tests are run on
+    // 4.1.2 and 4.2.0 emulators.
+    androidTestImplementation 'com.google.code.findbugs:jsr305:3.0.2'
+
 }
 
 android {

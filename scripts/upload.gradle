@@ -130,10 +130,11 @@ afterEvaluate { project ->
             source = releaseVariants.collect { it.javaCompile.source }
             classpath = files(
                     getAndroidJar,
-                    releaseVariants.collect { it.javaCompile.classpath.files },
                     project.file("build/intermediates/classes/release")
             )
-
+            doFirst {
+                classpath += files(releaseVariants.collect { it.javaCompile.classpath.files })
+            }
             options {
                 links("http://docs.oracle.com/javase/7/docs/api/")
                 linksOffline("http://d.android.com/reference",

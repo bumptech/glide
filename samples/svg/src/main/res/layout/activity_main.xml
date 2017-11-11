@@ -16,7 +16,7 @@
         android:onClick="clearCache"
         android:clickable="true"
         android:text="@string/hello_world"
-        />
+        android:focusable="true"/>
 
     <Button
         android:id="@+id/button"

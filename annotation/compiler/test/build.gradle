@@ -11,19 +11,19 @@ sourceSets {
 // easier to parse as a separate module given the existing complexity here and in the compiler
 dependencies {
     // build.gradle file.
-    testCompile project(':glide')
-    testCompile project(':annotation:compiler')
-    testCompile 'com.squareup:javapoet:1.9.0'
-    testCompile 'com.google.auto.service:auto-service:1.0-rc3'
-    testCompile 'com.google.code.findbugs:jsr305:3.0.1'
-    testCompile 'com.google.testing.compile:compile-testing:0.10'
+    testImplementation project(':glide')
+    testImplementation project(':annotation:compiler')
+    testImplementation 'com.squareup:javapoet:1.9.0'
+    testImplementation 'com.google.auto.service:auto-service:1.0-rc3'
+    testImplementation 'com.google.code.findbugs:jsr305:3.0.1'
+    testImplementation 'com.google.testing.compile:compile-testing:0.10'
     // Use a stupidly old version of the Android classes jar. This works because we just need to get
     // our generated classes to compile and our generated classes tend to use simple and stable
     // Android APIs. If that changes, we'll need to find an alternative.
-    testCompile 'com.google.android:android:4.1.1.4'
+    testImplementation 'com.google.android:android:4.1.1.4'
     // Use a stupidly old version of v4 because it's a jar. The newer support v4 packages are aars,
     // which we can't depend on in a standard Java test. Since our usage of v4 is pretty simple,
     // hopefully this will continue to work going forward.
-    testCompile 'com.google.android:support-v4:r6'
-    testCompile "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
+    testImplementation 'com.google.android:support-v4:r6'
+    testImplementation "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
 }

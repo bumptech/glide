@@ -1,17 +1,17 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile project(':library')
-    compile "com.android.volley:volley:${VOLLEY_VERSION}"
-    compile "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
+    implementation project(':library')
+    api "com.android.volley:volley:${VOLLEY_VERSION}"
+    api "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
     annotationProcessor project(':annotation:compiler')
 
-    testCompile project(":testutil")
-    testCompile "com.google.truth:truth:${TRUTH_VERSION}"
-    testCompile "junit:junit:${JUNIT_VERSION}"
-    testCompile "org.mockito:mockito-core:${MOCKITO_VERSION}"
-    testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testCompile "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
+    testImplementation project(":testutil")
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation "junit:junit:${JUNIT_VERSION}"
+    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
 }
 
 android {

@@ -27,26 +27,28 @@ android {
 }
 
 dependencies {
-    compile project(':library')
+    implementation project(':library')
     annotationProcessor project(':annotation:compiler')
 
-    compile "com.google.dagger:dagger:${DAGGER_VERSION}"
+    implementation "com.google.dagger:dagger:${DAGGER_VERSION}"
     annotationProcessor "com.google.dagger:dagger-compiler:${DAGGER_VERSION}"
-    compile "com.google.dagger:dagger-android:${DAGGER_VERSION}"
-    compile "com.google.dagger:dagger-android-support:${DAGGER_VERSION}"
+    implementation "com.google.dagger:dagger-android:${DAGGER_VERSION}"
+    implementation ("com.google.dagger:dagger-android-support:${DAGGER_VERSION}") {
+        exclude group: "com.android.support"
+    }
     annotationProcessor "com.google.dagger:dagger-android-processor:${DAGGER_VERSION}"
 
-    compile "com.squareup.okhttp3:okhttp:${OK_HTTP_VERSION}"
-    compile 'com.squareup.retrofit2:retrofit:2.2.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.2.0'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.2.0'
+    implementation "com.squareup.okhttp3:okhttp:${OK_HTTP_VERSION}"
+    implementation 'com.squareup.retrofit2:retrofit:2.2.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.2.0'
 
-    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.2.9'
+    implementation 'io.reactivex:rxandroid:1.2.1'
+    implementation 'io.reactivex:rxjava:1.2.9'
 
-    compile "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
-    compile "com.android.support:cardview-v7:${ANDROID_SUPPORT_VERSION}"
-    compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+    implementation "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    implementation "com.android.support:cardview-v7:${ANDROID_SUPPORT_VERSION}"
+    implementation "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
 }
 
 task run(type: Exec, dependsOn: 'installDebug') {

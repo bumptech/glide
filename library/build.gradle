@@ -6,19 +6,19 @@ apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
 
 dependencies {
-    compile project(':third_party:gif_decoder')
-    compile project(':third_party:disklrucache')
-    compile project(':annotation')
-    provided "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
-    provided "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
-    testCompile project(':testutil')
-    testCompile 'com.google.guava:guava-testlib:18.0'
-    testCompile "com.google.truth:truth:${TRUTH_VERSION}"
-    testCompile "junit:junit:${JUNIT_VERSION}"
-    testCompile "org.mockito:mockito-core:${MOCKITO_VERSION}"
-    testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testCompile "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
-    testCompile "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
+    api project(':third_party:gif_decoder')
+    api project(':third_party:disklrucache')
+    api project(':annotation')
+    compileOnly "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
+    compileOnly "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    testImplementation project(':testutil')
+    testImplementation 'com.google.guava:guava-testlib:18.0'
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation "junit:junit:${JUNIT_VERSION}"
+    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
+    testImplementation "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
 }
 
 android.testOptions.unitTests.all { Test testTask ->

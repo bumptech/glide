@@ -15,14 +15,14 @@ if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
   wait $pid
   echo "Unable to run Firebase tests for pull requests, exiting"
   exit 0
-else 
+else
   ./scripts/install_firebase.sh
   wait $pid
 fi
 
 
-declare -a samples=("flickr" 
-                "giphy" 
+declare -a samples=("flickr"
+                "giphy"
                 "contacturi"
                 "gallery"
                 "imgur"
@@ -31,7 +31,7 @@ pids=()
 
 for sample in "${samples[@]}"
 do
-  sample_dir="samples/${sample}/build/outputs/apk/"
+  sample_dir="samples/${sample}/build/outputs/apk/debug"
   sample_apk="${sample_dir}/${sample}-debug.apk"
   ./google-cloud-sdk/bin/gcloud firebase test android run \
     --type robo \
@@ -48,6 +48,5 @@ for current in "${pids[@]}"
 do
   wait $current
 done
-       
 
 

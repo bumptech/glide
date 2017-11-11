@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 dependencies {
-    compile project(':library')
-    compile(project(':integration:recyclerview')) {
+    implementation project(':library')
+    implementation(project(':integration:recyclerview')) {
         transitive = false
     }
-    compile "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
-    compile "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
+    implementation "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+    implementation "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
     annotationProcessor project(':annotation:compiler')
 }
 

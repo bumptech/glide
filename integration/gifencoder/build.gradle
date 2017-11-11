@@ -1,14 +1,14 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile project(':library')
+    implementation project(':library')
 
-    testCompile project(":testutil")
-    testCompile "com.google.truth:truth:${TRUTH_VERSION}"
-    testCompile "junit:junit:${JUNIT_VERSION}"
-    testCompile "org.mockito:mockito-core:${MOCKITO_VERSION}"
-    testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testCompile "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
+    testImplementation project(":testutil")
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation "junit:junit:${JUNIT_VERSION}"
+    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    testImplementation "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
 }
 
 android {

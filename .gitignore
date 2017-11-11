@@ -8,6 +8,7 @@ proguard-project.txt
 **/.gradle
 **/.settings
 **/build
+**/jacoco.exec
 
 # gh-pages
 doc/**
