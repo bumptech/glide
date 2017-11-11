@@ -49,9 +49,7 @@ public class DrawableTransformationTest {
     transformation = new DrawableTransformation(bitmapTransformation, /*isRequired=*/ true);
     context = RuntimeEnvironment.application;
     bitmapPool = new BitmapPoolAdapter();
-    Glide.init(new GlideBuilder()
-        .setBitmapPool(bitmapPool)
-        .build(context));
+    Glide.init(context, new GlideBuilder().setBitmapPool(bitmapPool));
   }
 
   @After
@@ -102,7 +100,7 @@ public class DrawableTransformationTest {
   public void transform_withColorDrawable_andUnitBitmapTransformation_recycles() {
     bitmapPool = mock(BitmapPool.class);
     Glide.tearDown();
-    Glide.init(new GlideBuilder().setBitmapPool(bitmapPool).build(context));
+    Glide.init(context, new GlideBuilder().setBitmapPool(bitmapPool));
     when(
         bitmapTransformation
             .transform(

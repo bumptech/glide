@@ -112,33 +112,34 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
         source = getSourceFilesForVariantJar(variantName)
         source += getSourceFilesForVariantJavadoc(variantName)
 
-        classpath = project.files(
-                getAndroidJar(),
-                getAndroidLibraryVariantsForJar(variantName).collect { LibraryVariant lib ->
-                    lib.getJavaCompiler().classpath.files
-                },
-                getAndroidLibraryVariantsForJavadoc(variantName).collect { LibraryVariant lib ->
-                    lib.getJavaCompiler().classpath.files
-                },
-                getInternalJavaProjectsForJavadoc().collect { Project project ->
-                    project.sourceSets.main.compileClasspath.files
-                },
-                getInternalJavaProjectsForJar().collect { Project project ->
-                    project.sourceSets.main.compileClasspath.files
-                },
-                // Finds dependencies of Android packages that would otherwise be ignored (Volley in
-                // particular)
-                getInternalAndroidProjectsForJavadoc().collect { Project project ->
-                    project.file('build/intermediates/classes/release')
-                }
-        )
+        doFirst {
+            it.classpath =
+                    project.files(
+                            getAndroidJar(),
+                            getAndroidLibraryVariantsForJar(variantName).collect {
+                                LibraryVariant lib -> lib.getJavaCompiler().classpath.files
+                            },
+                            getAndroidLibraryVariantsForJavadoc(variantName).collect {
+                                LibraryVariant lib -> lib.getJavaCompiler().classpath.files
+                            },
+                            getInternalJavaProjectsForJavadoc().collect { Project project ->
+                                project.sourceSets.main.compileClasspath.files
+                            },
+                            getInternalJavaProjectsForJar().collect { Project project ->
+                                project.sourceSets.main.compileClasspath.files
+                            },
+                            // Finds dependencies of Android packages that would otherwise be
+                            // ignored (Volley in particular)
+                            getInternalAndroidProjectsForJavadoc().collect { Project project ->
+                                project.file('build/intermediates/classes/release')
+                            }
+            )
+        }
 
         options {
             links("http://docs.oracle.com/javase/7/docs/api/")
             links("https://square.github.io/okhttp/3.x/okhttp/")
             links("https://square.github.io/okhttp/2.x/okhttp/")
-            // TODO: Ideally this would point to something hosted by Android.
-            links("http://afzaln.com/volley/")
             linksOffline("http://d.android.com/reference",
                     "${getAndroidSdkDirectory()}/docs/reference")
         }

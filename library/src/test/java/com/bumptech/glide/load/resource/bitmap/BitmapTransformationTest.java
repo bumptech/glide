@@ -38,7 +38,7 @@ public class BitmapTransformationTest {
     MockitoAnnotations.initMocks(this);
     context = RuntimeEnvironment.application;
 
-    Glide.init(new GlideBuilder().setBitmapPool(bitmapPool).build(context));
+    Glide.init(context, new GlideBuilder().setBitmapPool(bitmapPool));
   }
 
   @After

@@ -38,7 +38,7 @@ public class CircleCropTest {
     when(bitmapPool.get(anyInt(), anyInt(), any(Bitmap.Config.class)))
         .thenAnswer(new Util.CreateBitmap());
     Context context = RuntimeEnvironment.application;
-    Glide.init(new GlideBuilder().setBitmapPool(bitmapPool).build(context));
+    Glide.init(context, new GlideBuilder().setBitmapPool(bitmapPool));
     circleCrop = new CircleCrop();
   }
 

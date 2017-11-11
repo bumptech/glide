@@ -57,7 +57,7 @@ public class CenterCropTest {
     when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class)))
         .thenAnswer(new Util.CreateBitmap());
     context = RuntimeEnvironment.application;
-    Glide.init(new GlideBuilder().setBitmapPool(pool).build(context));
+    Glide.init(context, new GlideBuilder().setBitmapPool(pool));
 
     centerCrop = new CenterCrop();
   }

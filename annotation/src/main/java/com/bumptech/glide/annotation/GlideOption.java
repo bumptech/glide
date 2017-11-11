@@ -28,11 +28,11 @@ import java.lang.annotation.Target;
  *
  * <pre>
  * {@code
- * @GlideExtenion
+ * {@link @}GlideExtension
  * public class MyExtension {
  *   private MyExtension() {}
  *
- *   @GlideOption
+ *   {@literal @}GlideOption
  *   public static RequestOptions myOption(RequestOptions options) {
  *     return options
  *         .optionOne()
@@ -51,12 +51,12 @@ import java.lang.annotation.Target;
  *
  * <pre>
  * {@code
- * @GlideExtenion
+ * {@literal @}GlideExtension
  * public class MyExtension {
  *   private MyExtension() {}
  *
  *   // Deprecated! Use the new style of GlideOption extensions instead.
- *   @GlideOption
+ *   {@literal @}GlideOption
  *   public static void myOption(RequestOptions options) {
  *     options
  *         .optionOne()

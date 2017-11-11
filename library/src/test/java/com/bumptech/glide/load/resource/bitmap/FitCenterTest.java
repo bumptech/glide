@@ -56,7 +56,7 @@ public class FitCenterTest {
 
     BitmapPool pool = new BitmapPoolAdapter();
     context = RuntimeEnvironment.application;
-    Glide.init(new GlideBuilder().setBitmapPool(pool).build(context));
+    Glide.init(context, new GlideBuilder().setBitmapPool(pool));
 
 
     fitCenter = new FitCenter();

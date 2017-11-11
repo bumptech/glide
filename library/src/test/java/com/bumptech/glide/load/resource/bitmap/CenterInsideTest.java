@@ -57,7 +57,7 @@ public class CenterInsideTest {
 
     context = RuntimeEnvironment.application;
     BitmapPool pool = new BitmapPoolAdapter();
-    Glide.init(new GlideBuilder().setBitmapPool(pool).build(context));
+    Glide.init(context, new GlideBuilder().setBitmapPool(pool));
 
     centerInside = new CenterInside();
   }

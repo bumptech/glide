@@ -72,6 +72,13 @@ afterEvaluate {
         source android.sourceSets.main.java.srcDirs
         classpath = project.configurations.compile
         classpath += files(android.bootClasspath)
+        doFirst {
+            it.classpath +=
+                    files(project.android.libraryVariants.collect {
+                        it.javaCompile.classpath.files
+                    })
+        }
+
 
         effort = 'max'
 

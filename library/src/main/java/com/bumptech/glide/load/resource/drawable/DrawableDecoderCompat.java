@@ -20,7 +20,7 @@ public final class DrawableDecoderCompat {
   }
 
   /**
-   * @see #getDrawable(Context, int, Theme)
+   * See {@code getDrawable(Context, int, Theme)}.
    */
   public static Drawable getDrawable(Context context, @DrawableRes int id) {
     return getDrawable(context, id, /*theme=*/ null);

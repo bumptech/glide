@@ -46,7 +46,7 @@ public class GifDrawableTransformationTest {
     MockitoAnnotations.initMocks(this);
     context = RuntimeEnvironment.application;
 
-    Glide.init(new GlideBuilder().setBitmapPool(bitmapPool).build(context));
+    Glide.init(context, new GlideBuilder().setBitmapPool(bitmapPool));
     transformation = new GifDrawableTransformation(wrapped);
   }
 
