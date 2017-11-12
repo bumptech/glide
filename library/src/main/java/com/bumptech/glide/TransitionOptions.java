@@ -53,6 +53,13 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
     return transition(new ViewPropertyAnimationFactory<TranscodeType>(animator));
   }
 
+  /**
+   * Uses the given {@link TransitionFactory} to build a
+   * {@link com.bumptech.glide.request.transition.Transition} for each request started with these
+   * {@code TransitionOptions}.
+   *
+   * @return This request builder.
+   */
   public final CHILD transition(TransitionFactory<? super TranscodeType> transitionFactory) {
     this.transitionFactory = Preconditions.checkNotNull(transitionFactory);
     return self();
