@@ -169,6 +169,7 @@ jar {
     exclude "**/R.class"
     exclude "**/BuildConfig.class"
     exclude "**/R\$*.class"
+    exclude "android/**"
 }
 
 (getInternalAndroidProjectsForJar() + getInternalAndroidProjectsForJavadoc()).each {
