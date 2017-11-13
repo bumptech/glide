@@ -40,7 +40,8 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class CachingTest {
   private static final int IMAGE_SIZE_PIXELS = 500;
-  private static final long TIMEOUT_MS = 500;
+  private static final long TIMEOUT_MS = 5000;
+  private static final TimeUnit TIMEOUT_UNIT = TimeUnit.MILLISECONDS;
   // Store at least 10 500x500 pixel Bitmaps with the ARGB_8888 config to be safe.
   private static final long CACHE_SIZE_BYTES =
       IMAGE_SIZE_PIXELS * IMAGE_SIZE_PIXELS * 4 * 10;
@@ -66,7 +67,7 @@ public class CachingTest {
         .load(ResourceIds.raw.canonical)
         .diskCacheStrategy(DiskCacheStrategy.DATA)
         .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
-    future.get();
+    future.get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
     GlideApp.with(context).clear(future);
 
     clearMemoryCacheOnMainThread();
@@ -76,7 +77,7 @@ public class CachingTest {
         .diskCacheStrategy(DiskCacheStrategy.DATA)
         .listener(requestListener)
         .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS)
-        .get();
+        .get(TIMEOUT_MS, TIMEOUT_UNIT);
 
     verify(requestListener)
         .onResourceReady(
@@ -96,7 +97,7 @@ public class CachingTest {
         .load(ResourceIds.raw.canonical)
         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
         .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS)
-        .get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        .get(TIMEOUT_MS, TIMEOUT_UNIT);
     // Force the collection of weak references now that the listener/request in the first load is no
     // longer referenced.
     Runtime.getRuntime().gc();
@@ -105,7 +106,7 @@ public class CachingTest {
         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
         .listener(requestListener)
         .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS)
-        .get(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        .get(TIMEOUT_MS, TIMEOUT_UNIT);
 
     verify(requestListener).onResourceReady(
         any(Drawable.class), any(), anyTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
@@ -121,7 +122,7 @@ public class CachingTest {
         .load(ResourceIds.raw.canonical)
         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
         .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS)
-        .get();
+        .get(TIMEOUT_MS, TIMEOUT_UNIT);
     // Force the collection of weak references now that the listener/request in the first load is no
     // longer referenced.
     Runtime.getRuntime().gc();
@@ -131,7 +132,7 @@ public class CachingTest {
         .load(ResourceIds.raw.canonical)
         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
         .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
-    future.get();
+    future.get(TIMEOUT_MS, TIMEOUT_UNIT);
     Glide.with(context).clear(future);
 
     clearMemoryCacheOnMainThread();
@@ -153,6 +154,6 @@ public class CachingTest {
         countDownLatch.countDown();
       }
     });
-    countDownLatch.await();
+    countDownLatch.await(TIMEOUT_MS, TIMEOUT_UNIT);
   }
 }
