@@ -140,6 +140,39 @@ public class CachingTest {
     BitmapSubject.assertThat(bitmap).isNotRecycled();
   }
 
+  @Test
+  public void clearDiskCache_doesNotPreventFutureLoads()
+      throws ExecutionException, InterruptedException, TimeoutException {
+    FutureTarget<Drawable> future = GlideApp.with(context)
+        .load(ResourceIds.raw.canonical)
+        .diskCacheStrategy(DiskCacheStrategy.DATA)
+        .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
+    future.get(TIMEOUT_MS, TIMEOUT_UNIT);
+    GlideApp.with(context).clear(future);
+
+    clearMemoryCacheOnMainThread();
+    GlideApp.get(context).clearDiskCache();
+
+    future = GlideApp.with(context)
+        .load(ResourceIds.raw.canonical)
+        .diskCacheStrategy(DiskCacheStrategy.DATA)
+        .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
+    future.get(TIMEOUT_MS, TIMEOUT_UNIT);
+
+    GlideApp.with(context).clear(future);
+    clearMemoryCacheOnMainThread();
+
+    GlideApp.with(context)
+        .load(ResourceIds.raw.canonical)
+        .listener(requestListener)
+        .diskCacheStrategy(DiskCacheStrategy.DATA)
+        .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS)
+        .get(TIMEOUT_MS, TIMEOUT_UNIT);
+
+    verify(requestListener).onResourceReady(
+        any(Drawable.class), any(), anyTarget(), eq(DataSource.DATA_DISK_CACHE), anyBoolean());
+  }
+
   @SuppressWarnings("unchecked")
   private static Target<Drawable> anyTarget() {
     return (Target<Drawable>) any(Target.class);
