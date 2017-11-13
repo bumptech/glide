@@ -17,7 +17,6 @@ public final class TearDownGlide implements TestRule {
     return new Statement() {
       @Override
       public void evaluate() throws Throwable {
-        tearDownGlide();
         base.evaluate();
         tearDownGlide();
       }

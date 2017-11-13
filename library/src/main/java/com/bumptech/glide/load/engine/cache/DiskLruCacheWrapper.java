@@ -38,7 +38,10 @@ public class DiskLruCacheWrapper implements DiskCache {
    * @param directory The directory for the disk cache
    * @param maxSize   The max size for the disk cache
    * @return The new disk cache with the given arguments, or the current cache if one already exists
+   *
+   * @deprecated Use {@link #create(File, long)} to create a new cache with the specified arguments.
    */
+  @Deprecated
   public static synchronized DiskCache get(File directory, long maxSize) {
     // TODO calling twice with different arguments makes it return the cache for the same
     // directory, it's public!
@@ -46,6 +49,17 @@ public class DiskLruCacheWrapper implements DiskCache {
       wrapper = new DiskLruCacheWrapper(directory, maxSize);
     }
     return wrapper;
+  }
+
+  /**
+   * Create a new DiskCache in the given directory with a specified max size.
+   *
+   * @param directory The directory for the disk cache
+   * @param maxSize   The max size for the disk cache
+   * @return The new disk cache with the given arguments
+   */
+  public static DiskCache create(File directory, long maxSize) {
+    return new DiskLruCacheWrapper(directory, maxSize);
   }
 
   protected DiskLruCacheWrapper(File directory, long maxSize) {

@@ -63,6 +63,6 @@ public class DiskLruCacheFactory implements DiskCache.Factory {
       return null;
     }
 
-    return DiskLruCacheWrapper.get(cacheDir, diskCacheSize);
+    return DiskLruCacheWrapper.create(cacheDir, diskCacheSize);
   }
 }
