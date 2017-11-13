@@ -39,8 +39,8 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testClearRemoveAndRecycle_withNullRequest_doesNothingAndReturnsFalse() {
-    assertThat(tracker.clearRemoveAndRecycle(null)).isFalse();
+  public void testClearRemoveAndRecycle_withNullRequest_doesNothingAndReturnsTrue() {
+    assertThat(tracker.clearRemoveAndRecycle(null)).isTrue();
   }
 
   @Test

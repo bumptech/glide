@@ -1,5 +1,6 @@
 package com.bumptech.glide.manager;
 
+import android.support.annotation.Nullable;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Util;
 import java.util.ArrayList;
@@ -49,11 +50,12 @@ public class RequestTracker {
 
   /**
    * Stops tracking the given request, clears, and recycles it, and returns {@code true} if the
-   * request was removed or {@code false} if the request was not found.
+   * request was removed or invalid or {@code false} if the request was not found.
    */
-  public boolean clearRemoveAndRecycle(Request request) {
+  public boolean clearRemoveAndRecycle(@Nullable Request request) {
     if (request == null) {
-      return false;
+      // Nothing to do for null requests.
+      return true;
     }
     boolean isOwnedByUs = requests.remove(request);
     // Avoid short circuiting.
