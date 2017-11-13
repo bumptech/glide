@@ -78,8 +78,17 @@ If you're using Kotlin you can:
    ```groovy
    apply plugin: 'kotlin-kapt'
    ```
+  In addition, if you have any other annotation processors, all of them must be converted from ``annotationProcessor`` to ``kapt``:
 
-   To use ``kapt``, see the [official documentation][14].
+   ```groovy
+   dependencies {
+     kapt "android.arch.lifecycle:compiler:1.0.0"
+     kapt 'com.github.bumptech.glide:compiler:4.3.1'
+   }
+   ```
+
+   For more details on ``kapt``, see the [official documentation][14].
+
 
 #### Android Studio
 
