@@ -16,11 +16,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -29,7 +27,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
@@ -74,6 +71,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
@@ -85,7 +84,6 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowBitmap;
-import org.robolectric.shadows.ShadowPackageManager;
 
 /**
  * Tests for the {@link Glide} interface and singleton.
@@ -95,31 +93,53 @@ import org.robolectric.shadows.ShadowPackageManager;
     GlideTest.ShadowFileDescriptorContentResolver.class,
     GlideTest.ShadowMediaMetadataRetriever.class, GlideShadowLooper.class,
     GlideTest.MutableShadowBitmap.class })
-@SuppressWarnings({"unchecked", "deprecation"})
+@SuppressWarnings("unchecked")
 public class GlideTest {
+
   @SuppressWarnings("rawtypes")
-  private Target target = null;
+  @Mock private Target target;
+  @Mock private DiskCache.Factory diskCacheFactory;
+  @Mock private DiskCache diskCache;
+  @Mock private MemoryCache memoryCache;
+  @Mock private Handler bgHandler;
+  @Mock private Lifecycle lifecycle;
+  @Mock private RequestManagerTreeNode treeNode;
+  @Mock private BitmapPool bitmapPool;
+
   private ImageView imageView;
   private RequestManager requestManager;
+  private Context context;
 
   @Before
   public void setUp() throws Exception {
-    Glide.tearDown();
+    MockitoAnnotations.initMocks(this);
+    context = RuntimeEnvironment.application;
 
-    ShadowPackageManager pm = shadowOf(RuntimeEnvironment.application.getPackageManager());
-    ApplicationInfo info =
-        pm.getApplicationInfo(RuntimeEnvironment.application.getPackageName(), 0);
-    info.metaData = new Bundle();
-    info.metaData.putString(SetupModule.class.getName(), "GlideModule");
+     // Run all tasks on the main thread so they complete synchronously.
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    when(diskCacheFactory.build()).thenReturn(diskCache);
+    Glide.init(
+        context,
+        new GlideBuilder()
+            .setMemoryCache(memoryCache)
+            .setDiskCache(diskCacheFactory)
+            .setResizeExecutor(executor)
+            .setDiskCacheExecutor(executor));
+    Registry registry = Glide.get(context).getRegistry();
+    registerMockModelLoader(
+        GlideUrl.class, InputStream.class, new ByteArrayInputStream(new byte[0]), registry);
+    registerMockModelLoader(
+        File.class, InputStream.class, new ByteArrayInputStream(new byte[0]), registry);
+    registerMockModelLoader(
+        File.class, ParcelFileDescriptor.class, mock(ParcelFileDescriptor.class), registry);
+    registerMockModelLoader(File.class, ByteBuffer.class, ByteBuffer.allocate(10), registry);
 
     // Ensure that target's size ready callback will be called synchronously.
-    target = mock(Target.class);
-    imageView = new ImageView(RuntimeEnvironment.application);
+    imageView = new ImageView(context);
     imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
     imageView.layout(0, 0, 100, 100);
     doAnswer(new CallSizeReady()).when(target).getSize(isA(SizeReadyCallback.class));
 
-    Handler bgHandler = mock(Handler.class);
     when(bgHandler.post(isA(Runnable.class))).thenAnswer(new Answer<Boolean>() {
       @Override
       public Boolean answer(InvocationOnMock invocation) throws Throwable {
@@ -129,9 +149,7 @@ public class GlideTest {
       }
     });
 
-    Lifecycle lifecycle = mock(Lifecycle.class);
-    RequestManagerTreeNode treeNode = mock(RequestManagerTreeNode.class);
-    requestManager = new RequestManager(Glide.get(getContext()), lifecycle, treeNode, getContext());
+    requestManager = new RequestManager(Glide.get(context), lifecycle, treeNode, context);
     requestManager.resumeRequests();
   }
 
@@ -142,13 +160,12 @@ public class GlideTest {
 
   @Test
   public void testCanSetMemoryCategory() {
-    MemoryCache memoryCache = mock(MemoryCache.class);
-    BitmapPool bitmapPool = mock(BitmapPool.class);
-
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
-            .build(getContext());
+        new GlideBuilder()
+            .setBitmapPool(bitmapPool)
+            .setMemoryCache(memoryCache)
+            .build(context);
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -157,13 +174,12 @@ public class GlideTest {
 
   @Test
   public void testCanIncreaseMemoryCategory() {
-    MemoryCache memoryCache = mock(MemoryCache.class);
-    BitmapPool bitmapPool = mock(BitmapPool.class);
-
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
-            .build(getContext());
+        new GlideBuilder()
+            .setBitmapPool(bitmapPool)
+            .setMemoryCache(memoryCache)
+            .build(context);
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -180,13 +196,12 @@ public class GlideTest {
 
   @Test
   public void testCanDecreaseMemoryCategory() {
-    MemoryCache memoryCache = mock(MemoryCache.class);
-    BitmapPool bitmapPool = mock(BitmapPool.class);
-
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
-            .build(getContext());
+        new GlideBuilder()
+            .setBitmapPool(bitmapPool)
+            .setMemoryCache(memoryCache)
+            .build(context);
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -203,12 +218,11 @@ public class GlideTest {
 
   @Test
   public void testClearMemory() {
-    BitmapPool bitmapPool = mock(BitmapPool.class);
-    MemoryCache memoryCache = mock(MemoryCache.class);
-
     Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
-            .build(getContext());
+        new GlideBuilder()
+            .setBitmapPool(bitmapPool)
+            .setMemoryCache(memoryCache)
+            .build(context);
 
     glide.clearMemory();
 
@@ -218,12 +232,11 @@ public class GlideTest {
 
   @Test
   public void testTrimMemory() {
-    BitmapPool bitmapPool = mock(BitmapPool.class);
-    MemoryCache memoryCache = mock(MemoryCache.class);
-
     Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache)
-            .build(getContext());
+        new GlideBuilder()
+            .setBitmapPool(bitmapPool)
+            .setMemoryCache(memoryCache)
+            .build(context);
 
     final int level = 123;
 
@@ -499,7 +512,7 @@ public class GlideTest {
   @Test
   public void testReceivesGif() throws IOException {
     String fakeUri = "content://fake";
-    InputStream testGifData = openResource("test.gif");
+    InputStream testGifData = openGif();
     mockUri(Uri.parse(fakeUri), testGifData);
 
     requestManager.asGif().load(fakeUri).into(target);
@@ -510,7 +523,7 @@ public class GlideTest {
   @Test
   public void testReceivesGifBytes() throws IOException {
     String fakeUri = "content://fake";
-    InputStream testGifData = openResource("test.gif");
+    InputStream testGifData = openGif();
     mockUri(Uri.parse(fakeUri), testGifData);
 
     requestManager.as(byte[].class).apply(decodeTypeOf(GifDrawable.class)).load(fakeUri)
@@ -700,24 +713,23 @@ public class GlideTest {
     ModelLoaderFactory<T, Z> failFactory = mock(ModelLoaderFactory.class);
     when(failFactory.build(isA(MultiModelLoaderFactory.class))).thenReturn(failLoader);
 
-    Glide.get(getContext()).getRegistry().prepend(failModel, failResource, failFactory);
+    Glide.get(context).getRegistry().prepend(failModel, failResource, failFactory);
   }
 
   private String mockUri(String uriString) {
     return mockUri(Uri.parse(uriString), null);
   }
 
-  private String mockUri(Uri uri) {
-    return mockUri(uri, null);
+  private void mockUri(Uri uri) {
+    mockUri(uri, null);
   }
 
   private String mockUri(Uri uri, InputStream is) {
     if (is == null) {
       is = new ByteArrayInputStream(new byte[0]);
     }
-    ContentResolver contentResolver = RuntimeEnvironment.application.getContentResolver();
-    ShadowFileDescriptorContentResolver shadowContentResolver =
-        (ShadowFileDescriptorContentResolver) Shadow.extract(contentResolver);
+    ContentResolver contentResolver = context.getContentResolver();
+    ShadowFileDescriptorContentResolver shadowContentResolver = Shadow.extract(contentResolver);
     shadowContentResolver.registerInputStream(uri, is);
 
     AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
@@ -728,17 +740,13 @@ public class GlideTest {
     return uri.toString();
   }
 
-  private Context getContext() {
-    return RuntimeEnvironment.application;
-  }
-
   @SuppressWarnings("unchecked")
   private <T> void registerMockStreamModelLoader(final Class<T> modelClass) {
     ModelLoader<T, InputStream> modelLoader = mockStreamModelLoader(modelClass);
     ModelLoaderFactory<T, InputStream> modelLoaderFactory = mock(ModelLoaderFactory.class);
     when(modelLoaderFactory.build(isA(MultiModelLoaderFactory.class))).thenReturn(modelLoader);
 
-    Glide.get(RuntimeEnvironment.application).getRegistry()
+    Glide.get(context).getRegistry()
         .prepend(modelClass, InputStream.class, modelLoaderFactory);
   }
 
@@ -760,19 +768,19 @@ public class GlideTest {
     return modelLoader;
   }
 
-  private InputStream openResource(String imageName) throws IOException {
-    return TestResourceUtil.openResource(getClass(), imageName);
+  private InputStream openGif() throws IOException {
+    return TestResourceUtil.openResource(getClass(), "test.gif");
   }
 
   private static class CallSizeReady implements Answer<Void> {
     private int width;
     private int height;
 
-    public CallSizeReady() {
+    CallSizeReady() {
       this(100, 100);
     }
 
-    public CallSizeReady(int width, int height) {
+    CallSizeReady(int width, int height) {
       this.width = width;
       this.height = height;
     }
@@ -785,53 +793,26 @@ public class GlideTest {
     }
   }
 
-  public static class SetupModule implements com.bumptech.glide.module.GlideModule {
-
-    @Override
-    public void applyOptions(Context context, GlideBuilder builder) {
-      // Run all tasks on the main thread so they complete synchronously.
-      GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
-
-      DiskCache.Factory diskCacheFactory = mock(DiskCache.Factory.class);
-      when(diskCacheFactory.build()).thenReturn(mock(DiskCache.class));
-
-      builder.setMemoryCache(mock(MemoryCache.class)).setDiskCache(diskCacheFactory)
-          .setResizeExecutor(executor).setDiskCacheExecutor(executor);
+  private static <X, Y> void registerMockModelLoader(Class<X> modelClass, Class<Y> dataClass,
+        Y loadedData, Registry registry) {
+    DataFetcher<Y> mockStreamFetcher = mock(DataFetcher.class);
+    when(mockStreamFetcher.getDataClass()).thenReturn(dataClass);
+    try {
+      doAnswer(new Util.CallDataReady<>(loadedData))
+          .when(mockStreamFetcher)
+          .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
+    ModelLoader<X, Y> mockUrlLoader = mock(ModelLoader.class);
+    when(mockUrlLoader.buildLoadData(isA(modelClass), anyInt(), anyInt(), isA(Options.class)))
+        .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), mockStreamFetcher));
+    when(mockUrlLoader.handles(isA(modelClass))).thenReturn(true);
+    ModelLoaderFactory<X, Y> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
+    when(mockUrlLoaderFactory.build(isA(MultiModelLoaderFactory.class)))
+        .thenReturn(mockUrlLoader);
 
-    @Override
-    public void registerComponents(Context context, Glide glide, Registry registry) {
-      registerMockModelLoader(GlideUrl.class, InputStream.class,
-          new ByteArrayInputStream(new byte[0]), registry);
-      registerMockModelLoader(File.class, InputStream.class,
-          new ByteArrayInputStream(new byte[0]), registry);
-      registerMockModelLoader(File.class, ParcelFileDescriptor.class,
-          mock(ParcelFileDescriptor.class), registry);
-      registerMockModelLoader(File.class, ByteBuffer.class,
-          ByteBuffer.allocate(10), registry);
-    }
-
-    private static <X, Y> void registerMockModelLoader(Class<X> modelClass, Class<Y> dataClass,
-          Y loadedData, Registry registry) {
-      DataFetcher<Y> mockStreamFetcher = mock(DataFetcher.class);
-      when(mockStreamFetcher.getDataClass()).thenReturn(dataClass);
-      try {
-        doAnswer(new Util.CallDataReady<>(loadedData))
-            .when(mockStreamFetcher)
-            .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-      ModelLoader<X, Y> mockUrlLoader = mock(ModelLoader.class);
-      when(mockUrlLoader.buildLoadData(isA(modelClass), anyInt(), anyInt(), isA(Options.class)))
-          .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), mockStreamFetcher));
-      when(mockUrlLoader.handles(isA(modelClass))).thenReturn(true);
-      ModelLoaderFactory<X, Y> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
-      when(mockUrlLoaderFactory.build(isA(MultiModelLoaderFactory.class)))
-          .thenReturn(mockUrlLoader);
-
-      registry.replace(modelClass, dataClass, mockUrlLoaderFactory);
-    }
+    registry.replace(modelClass, dataClass, mockUrlLoaderFactory);
   }
 
   // TODO: Extending ShadowContentResolver results in exceptions because of some state issues
@@ -850,11 +831,11 @@ public class GlideTest {
       URI_TO_FILE_DESCRIPTOR.clear();
     }
 
-    public void registerInputStream(Uri uri, InputStream inputStream) {
+    void registerInputStream(Uri uri, InputStream inputStream) {
       URI_TO_INPUT_STREAMS.put(uri, inputStream);
     }
 
-    public void registerAssetFileDescriptor(Uri uri, AssetFileDescriptor assetFileDescriptor) {
+    void registerAssetFileDescriptor(Uri uri, AssetFileDescriptor assetFileDescriptor) {
       URI_TO_FILE_DESCRIPTOR.put(uri, assetFileDescriptor);
     }
 
