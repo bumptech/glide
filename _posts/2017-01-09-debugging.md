@@ -61,7 +61,15 @@ Glide.with(fragment)
        @Override
        boolean onLoadFailed(@Nullable GlideException e, Object model,
            Target<R> target, boolean isFirstResource) {
-         // Log errors here.
+         // Log the GlideException here (locally or with a remote logging framework):
+         Log.e(TAG, "Load failed", e);
+
+         // You can also log the individual causes:
+         for (Throwable t : e.getRootCauses()) {
+           Log.e(TAG, "Caused by", t);
+         }
+         // Or, to log all root causes locally, you can use the built in helper method:
+         e.logRootCauses(TAG);
        }
 
        @Override
@@ -72,6 +80,21 @@ Glide.with(fragment)
     })
     .into(imageView);
 ```
+
+Note that each GlideException has multiple ``Throwable`` root causes. Each load in Glide may have an arbitrary number of ways the registered components (``ModelLoader``, ``ResourceDecoder``, ``Encoder`` etc) can be used to load the a given Resource (``Bitmap``, ``GifDrawable`` etc) from a given Model (URL, File etc). Each ``Throwable`` root cause describes the reason why a particular combination of Glide's components failed. Understanding why a particular request failed may require inspecting all root causes.
+
+However, you may also be able to find a single root cause that's more relevant than the others. For example if you're loading URLs and you're trying to find the specific HttpException that would indicate that your load failed due to a network error, you can iterate over all of the root causes and use ``instanceof`` to inspect the type:
+
+```java
+for (Throwable t : e.getRootCauses()) {
+  if (t instanceof HttpException) {
+    Log.e(TAG, "Request failed due to HttpException!", t);
+    break;
+  }
+}
+```
+
+You can use a similar process involving iteration and ``instanceof`` to try to detect other types of exceptions if you're interested in more than HTTP errors.
 
 To save object allocations, you can re-use the same ``RequestListener`` for multiple loads.
 
