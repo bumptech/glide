@@ -54,7 +54,7 @@ public class Engine implements EngineJobListener,
         animationExecutor,
         /*jobs=*/ null,
         /*keyFactory=*/ null,
-        /*activeEngineResources=*/ null,
+        /*activeResources=*/ null,
         /*engineJobFactory=*/ null,
         /*decodeJobFactory=*/ null,
         /*resourceRecycler=*/ null);

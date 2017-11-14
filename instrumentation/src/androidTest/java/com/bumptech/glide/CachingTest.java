@@ -1,8 +1,8 @@
 package com.bumptech.glide;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;

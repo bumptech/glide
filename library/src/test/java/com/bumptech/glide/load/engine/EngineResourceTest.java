@@ -31,7 +31,7 @@ public class EngineResourceTest {
   public void setUp() {
     resource = mockResource();
     engineResource =
-        new EngineResource<>(resource, /*isMemoryCacheable=*/ true, /*isRecyclable=*/ true);
+        new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     listener = mock(EngineResource.ResourceListener.class);
     engineResource.setResourceListener(cacheKey, listener);
   }
