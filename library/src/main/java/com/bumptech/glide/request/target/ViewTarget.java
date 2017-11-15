@@ -3,11 +3,13 @@ package com.bumptech.glide.request.target;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -45,6 +47,11 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
   protected final T view;
   private final SizeDeterminer sizeDeterminer;
+  @Nullable
+  private OnAttachStateChangeListener attachStateListener;
+  private boolean isClearedByUs;
+  private boolean isAttachStateListenerAdded;
+
 
   /**
    * Constructor that defaults {@code waitForLayout} to {@code false}.
@@ -71,6 +78,78 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   }
 
   /**
+   * Clears the {@link View}'s {@link Request} when the {@link View} is detached from its
+   * {@link android.view.Window} and restarts the {@link Request} when the {@link View} is
+   * re-attached from its {@link android.view.Window}.
+   *
+   * <p>This is an experimental API that may be removed in a future version.
+   *
+   * <p>Using this method can save memory by allowing Glide to more eagerly clear resources when
+   * transitioning screens or swapping adapters in scrolling views. However it also substantially
+   * increases the odds that images will not be in memory if users subsequently return to a screen
+   * where images were previously loaded. Whether or not this happens will depend on the number
+   * of images loaded in the new screen and the size of the memory cache. Increasing the size of
+   * the memory cache can improve this behavior but it largely negates the memory benefits of using
+   * this method.
+   *
+   * <p>Use this method with caution and measure your memory usage to ensure that it's actually
+   * improving your memory usage in the cases you care about.
+   */
+  // Public API.
+  @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"})
+  public final ViewTarget<T, Z> clearOnDetach() {
+    if (attachStateListener != null) {
+      return this;
+    }
+    attachStateListener = new OnAttachStateChangeListener() {
+      @Override
+      public void onViewAttachedToWindow(View v) {
+        Request request = getRequest();
+        if (request != null && request.isPaused()) {
+          request.begin();
+        }
+      }
+
+      @Override
+      public void onViewDetachedFromWindow(View v) {
+        Request request = getRequest();
+        if (request != null && !request.isCancelled() && !request.isPaused()) {
+          isClearedByUs = true;
+          request.pause();
+          isClearedByUs = false;
+        }
+      }
+    };
+    maybeAddAttachStateListener();
+    return this;
+  }
+
+  @CallSuper
+  @Override
+  public void onLoadStarted(@Nullable Drawable placeholder) {
+    super.onLoadStarted(placeholder);
+    maybeAddAttachStateListener();
+  }
+
+  private void maybeAddAttachStateListener() {
+    if (attachStateListener == null || isAttachStateListenerAdded) {
+      return;
+    }
+
+    view.addOnAttachStateChangeListener(attachStateListener);
+    isAttachStateListenerAdded = true;
+  }
+
+  private void maybeRemoveAttachStateListener() {
+    if (attachStateListener == null || !isAttachStateListenerAdded) {
+      return;
+    }
+
+    view.removeOnAttachStateChangeListener(attachStateListener);
+    isAttachStateListenerAdded = false;
+  }
+
+  /**
    * Returns the wrapped {@link android.view.View}.
    */
   public T getView() {
@@ -86,20 +165,27 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    *
    * @param cb {@inheritDoc}
    */
+  @CallSuper
   @Override
   public void getSize(SizeReadyCallback cb) {
     sizeDeterminer.getSize(cb);
   }
 
+  @CallSuper
   @Override
   public void removeCallback(SizeReadyCallback cb) {
     sizeDeterminer.removeCallback(cb);
   }
 
+  @CallSuper
   @Override
   public void onLoadCleared(Drawable placeholder) {
     super.onLoadCleared(placeholder);
     sizeDeterminer.clearCallbacksAndListener();
+
+    if (!isClearedByUs) {
+      maybeRemoveAttachStateListener();
+    }
   }
 
   /**
@@ -278,11 +364,11 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     }
 
     void clearCallbacksAndListener() {
-      // Keep a reference to the layout listener and remove it here
+      // Keep a reference to the layout attachStateListener and remove it here
       // rather than having the observer remove itself because the observer
-      // we add the listener to will be almost immediately merged into
+      // we add the attachStateListener to will be almost immediately merged into
       // another observer and will therefore never be alive. If we instead
-      // keep a reference to the listener and remove it here, we get the
+      // keep a reference to the attachStateListener and remove it here, we get the
       // current view tree observer and should succeed.
       ViewTreeObserver observer = view.getViewTreeObserver();
       if (observer.isAlive()) {
@@ -382,7 +468,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       @Override
       public boolean onPreDraw() {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-          Log.v(TAG, "OnGlobalLayoutListener called listener=" + this);
+          Log.v(TAG, "OnGlobalLayoutListener called attachStateListener=" + this);
         }
         SizeDeterminer sizeDeterminer = sizeDeterminerRef.get();
         if (sizeDeterminer != null) {

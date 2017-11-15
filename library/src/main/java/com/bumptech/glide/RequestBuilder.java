@@ -26,6 +26,7 @@ import com.bumptech.glide.request.SingleRequest;
 import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.target.PreloadTarget;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.signature.ApplicationVersionSignature;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.util.Preconditions;
@@ -590,7 +591,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * @return The
    * {@link com.bumptech.glide.request.target.Target} used to wrap the given {@link ImageView}.
    */
-  public Target<TranscodeType> into(ImageView view) {
+  public ViewTarget<ImageView, TranscodeType> into(ImageView view) {
     Util.assertMainThread();
     Preconditions.checkNotNull(view);
 

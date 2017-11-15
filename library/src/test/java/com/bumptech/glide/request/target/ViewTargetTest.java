@@ -12,19 +12,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.After;
 import org.junit.Before;
@@ -39,6 +43,7 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.RealObject;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowDisplay;
 import org.robolectric.shadows.ShadowView;
@@ -54,6 +59,7 @@ public class ViewTargetTest {
   @Mock private SizeReadyCallback cb;
   @Mock private Request request;
   private int sdkVersion;
+  private AttachStateTarget attachStateTarget;
 
   @Before
   public void setUp() {
@@ -61,6 +67,7 @@ public class ViewTargetTest {
     MockitoAnnotations.initMocks(this);
     view = new View(RuntimeEnvironment.application);
     target = new TestViewTarget(view);
+    attachStateTarget = new AttachStateTarget(view);
 
     shadowView = Shadow.extract(view);
     shadowObserver = Shadow.extract(view.getViewTreeObserver());
@@ -473,8 +480,167 @@ public class ViewTargetTest {
     }
   }
 
+  @Test
+  public void clearOnDetach_onDetach_withNullRequest_doesNothing() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.setRequest(null);
+    shadowView.callOnAttachedToWindow();
+  }
+
+  @Test
+  public void clearOnDetach_onDetach_withCancelledRequest_doesNotPauseRequest() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.setRequest(request);
+    when(request.isCancelled()).thenReturn(true);
+    shadowView.callOnDetachedFromWindow();
+
+    verify(request, never()).pause();
+    verify(request, never()).clear();
+  }
+
+  @Test
+  public void clearOnDetach_onDetach_withPausedRequest_doesNotPauseRequest() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.setRequest(request);
+    when(request.isPaused()).thenReturn(true);
+    shadowView.callOnDetachedFromWindow();
+
+    verify(request, never()).pause();
+    verify(request, never()).clear();
+  }
+
+  @Test
+  public void clearOnDetach_onDetach_withRunningRequest_pausesRequestOnce() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.setRequest(request);
+    shadowView.callOnDetachedFromWindow();
+
+    verify(request).pause();
+  }
+
+  @Test
+  public void clearOnDetach_onDetach_afterOnLoadCleared_removesListener() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.setRequest(request);
+    shadowView.callOnDetachedFromWindow();
+
+    verify(request, never()).pause();
+    verify(request, never()).clear();
+  }
+
+  @Test
+  public void clearOnDetach_moreThanOnce_registersObserverOnce() {
+    attachStateTarget
+        .clearOnDetach()
+        .clearOnDetach();
+
+    assertThat(shadowView.attachStateListeners).hasSize(1);
+  }
+
+  @Test
+  public void clearOnDetach_onDetach_afterMultipleClearOnDetaches_removesListener() {
+    attachStateTarget
+        .clearOnDetach()
+        .clearOnDetach()
+        .clearOnDetach();
+    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.setRequest(request);
+    shadowView.callOnDetachedFromWindow();
+
+    verify(request, never()).pause();
+    verify(request, never()).clear();
+  }
+
+  @Test
+  public void clearOnDetach_onDetach_afterLoadCleared_doesNotPauseRequest() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.setRequest(request);
+    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    shadowView.callOnDetachedFromWindow();
+
+    verify(request, never()).pause();
+  }
+
+  @Test
+  public void clearOnDetach_onAttach_withNullRequest_doesNothing() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.setRequest(null);
+    shadowView.callOnAttachedToWindow();
+  }
+
+  @Test
+  public void clearOnDetach_onAttach_withRunningRequest_doesNotBeginRequest() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.setRequest(request);
+    when(request.isPaused()).thenReturn(false);
+    shadowView.callOnAttachedToWindow();
+
+    verify(request, never()).begin();
+  }
+
+  @Test
+  public void clearOnDetach_onAttach_withPausedRequest_beginsRequest() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.setRequest(request);
+    when(request.isPaused()).thenReturn(true);
+    shadowView.callOnAttachedToWindow();
+
+    verify(request).begin();
+  }
+
+  @Test
+  public void clearOnDetach_afterLoadClearedAndRestarted_onAttach_beingsREquest() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.setRequest(request);
+    when(request.isPaused()).thenReturn(true);
+    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadStarted(/*placeholder=*/ null);
+    shadowView.callOnAttachedToWindow();
+
+    verify(request).begin();
+  }
+
+  @Test
+  public void clearOnDetach_onAttach_afterLoadCleared_doesNotBeingRequest() {
+    attachStateTarget.clearOnDetach();
+    attachStateTarget.setRequest(request);
+    when(request.isPaused()).thenReturn(true);
+    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    shadowView.callOnAttachedToWindow();
+
+    verify(request, never()).begin();
+  }
+
+  @Test
+  public void onLoadStarted_withoutClearOnDetach_doesNotAddListener() {
+    attachStateTarget.onLoadStarted(/*placeholder=*/ null);
+
+    assertThat(shadowView.attachStateListeners).isEmpty();
+  }
+
+  // containsExactly does not need its result checked.
+  @SuppressWarnings("ResultOfMethodCallIgnored")
+  @Test
+  public void onLoadCleared_withoutClearOnDetach_doesNotRemoveListeners() {
+    OnAttachStateChangeListener expected = new OnAttachStateChangeListener() {
+      @Override
+      public void onViewAttachedToWindow(View v) {
+      }
+
+      @Override
+      public void onViewDetachedFromWindow(View v) {
+      }
+    };
+    shadowView.addOnAttachStateChangeListener(expected);
+
+    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+
+    assertThat(shadowView.attachStateListeners).containsExactly(expected);
+  }
+
   @Implements(ViewTreeObserver.class)
-  public static class PreDrawShadowViewTreeObserver {
+  public static final class PreDrawShadowViewTreeObserver {
     private final CopyOnWriteArrayList<OnPreDrawListener> preDrawListeners =
         new CopyOnWriteArrayList<>();
     private boolean isAlive = true;
@@ -521,12 +687,14 @@ public class ViewTargetTest {
 
   @SuppressWarnings("UnusedReturnValue")
   @Implements(View.class)
-  public static class SizedShadowView extends ShadowView {
+  public static final class SizedShadowView extends ShadowView {
+    @RealObject private View view;
     private int width;
     private int height;
     private LayoutParams layoutParams;
     private boolean isLaidOut;
     private boolean isLayoutRequested;
+    private final Set<OnAttachStateChangeListener> attachStateListeners = new HashSet<>();
 
     public SizedShadowView setWidth(int width) {
       this.width = width;
@@ -536,6 +704,40 @@ public class ViewTargetTest {
     public SizedShadowView setHeight(int height) {
       this.height = height;
       return this;
+    }
+
+    @Implementation
+    public void addOnAttachStateChangeListener(OnAttachStateChangeListener listener) {
+      attachStateListeners.add(listener);
+    }
+
+    @Implementation
+    public void removeOnAttachStateChangeListener(OnAttachStateChangeListener listener) {
+      attachStateListeners.remove(listener);
+    }
+
+    @Implementation
+    public void onAttachedToWindow() {
+      for (OnAttachStateChangeListener listener : attachStateListeners) {
+        listener.onViewAttachedToWindow(view);
+      }
+    }
+
+    @Implementation
+    public void onDetachedFromWindow() {
+      for (OnAttachStateChangeListener listener : attachStateListeners) {
+        listener.onViewDetachedFromWindow(view);
+      }
+    }
+
+    @Override
+    public void callOnAttachedToWindow() {
+      super.callOnAttachedToWindow();
+    }
+
+    @Override
+    public void callOnDetachedFromWindow() {
+      super.callOnDetachedFromWindow();
     }
 
     @Implementation
@@ -581,7 +783,16 @@ public class ViewTargetTest {
     }
   }
 
-  private static class TestViewTarget extends ViewTarget<View, Object> {
+  private static final class AttachStateTarget extends ViewTarget<View, Object> {
+    AttachStateTarget(View view) {
+      super(view);
+    }
+
+    @Override
+    public void onResourceReady(Object resource, Transition<? super Object> transition) { }
+  }
+
+  private static final class TestViewTarget extends ViewTarget<View, Object> {
 
     TestViewTarget(View view) {
       super(view);

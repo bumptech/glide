@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.ViewTarget;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -69,7 +69,8 @@ public class GlideContext extends ContextWrapper {
     return (TransitionOptions<?, T>) result;
   }
 
-  public <X> Target<X> buildImageViewTarget(ImageView imageView, Class<X> transcodeClass) {
+  public <X> ViewTarget<ImageView, X> buildImageViewTarget(
+      ImageView imageView, Class<X> transcodeClass) {
     return imageViewTargetFactory.buildTarget(imageView, transcodeClass);
   }
 

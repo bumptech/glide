@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.tests.BackgroundUtil.BackgroundTester;
 import com.bumptech.glide.tests.TearDownGlide;
 import org.junit.Before;
@@ -113,7 +114,7 @@ public class RequestBuilderTest {
 
   private RequestBuilder<Object> getNullModelRequest() {
     when(glideContext.buildImageViewTarget(isA(ImageView.class), isA(Class.class)))
-        .thenReturn(mock(Target.class));
+        .thenReturn(mock(ViewTarget.class));
     when(glideContext.getDefaultRequestOptions()).thenReturn(new RequestOptions());
     when(requestManager.getDefaultRequestOptions())
         .thenReturn(new RequestOptions());
