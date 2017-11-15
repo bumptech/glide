@@ -447,8 +447,27 @@ public class RequestManager implements LifecycleListener {
 
   private void untrackOrDelegate(Target<?> target) {
     boolean isOwnedByUs = untrack(target);
-    if (!isOwnedByUs) {
-      glide.removeFromManagers(target);
+    // We'll end up here if the Target was cleared after the RequestManager that started the request
+    // is destroyed. That can happen for at least two reasons:
+    // 1. We call clear() on a background thread using something other than Application Context
+    // RequestManager.
+    // 2. The caller retains a reference to the RequestManager after the corresponding Activity or
+    // Fragment is destroyed, starts a load with it, and then clears that load with a different
+    // RequestManager. Callers seem especially likely to do this in retained Fragments (#2262).
+    //
+    // #1 is always an error. At best the caller is leaking memory briefly in something like an
+    // AsyncTask. At worst the caller is leaking an Activity or Fragment for a sustained period of
+    // time if they do something like reference the Activity RequestManager in a long lived
+    // background thread or task.
+    //
+    // #2 is always an error. Callers shouldn't be starting new loads using RequestManagers after
+    // the corresponding Activity or Fragment is destroyed because retaining any reference to the
+    // RequestManager leaks memory. It's possible that there's some brief period of time during or
+    // immediately after onDestroy where this is reasonable, but I can't think of why.
+    if (!isOwnedByUs && !glide.removeFromManagers(target) && target.getRequest() != null) {
+      Request request = target.getRequest();
+      target.setRequest(null);
+      request.clear();
     }
   }
 

@@ -53,8 +53,15 @@ public class RequestTracker {
    * request was removed or invalid or {@code false} if the request was not found.
    */
   public boolean clearRemoveAndRecycle(@Nullable Request request) {
-    if (request == null) {
-      // Nothing to do for null requests.
+    // It's safe for us to recycle because this is only called when the user is explicitly clearing
+    // a Target so we know that there are no remaining references to the Request.
+    return clearRemoveAndMaybeRecycle(request, /*isSafeToRecycle=*/ true);
+  }
+
+  private boolean clearRemoveAndMaybeRecycle(@Nullable Request request, boolean isSafeToRecycle) {
+     if (request == null) {
+       // If the Request is null, the request is already cleared and we don't need to search further
+       // for its owner.
       return true;
     }
     boolean isOwnedByUs = requests.remove(request);
@@ -62,7 +69,9 @@ public class RequestTracker {
     isOwnedByUs = pendingRequests.remove(request) || isOwnedByUs;
     if (isOwnedByUs) {
       request.clear();
-      request.recycle();
+      if (isSafeToRecycle) {
+        request.recycle();
+      }
     }
     return isOwnedByUs;
   }
@@ -107,7 +116,9 @@ public class RequestTracker {
    */
   public void clearRequests() {
     for (Request request : Util.getSnapshot(requests)) {
-      clearRemoveAndRecycle(request);
+      // It's unsafe to recycle the Request here because we don't know who might else have a
+      // reference to it.
+      clearRemoveAndMaybeRecycle(request, /*isSafeToRecycle=*/ false);
     }
     pendingRequests.clear();
   }

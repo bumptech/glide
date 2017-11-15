@@ -705,15 +705,16 @@ public class Glide implements ComponentCallbacks2 {
     return registry;
   }
 
-  void removeFromManagers(Target<?> target) {
+  boolean removeFromManagers(Target<?> target) {
     synchronized (managers) {
       for (RequestManager requestManager : managers) {
         if (requestManager.untrack(target)) {
-          return;
+          return true;
         }
       }
     }
-    throw new IllegalStateException("Failed to remove target from managers");
+
+    return false;
   }
 
   void registerRequestManager(RequestManager requestManager) {

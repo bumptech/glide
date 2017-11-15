@@ -28,6 +28,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,6 +92,11 @@ public class RequestManagerTest {
             requestTracker,
             factory,
             context);
+  }
+
+  @After
+  public void tearDown() {
+    Glide.tearDown();
   }
 
   @Test

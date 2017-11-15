@@ -51,6 +51,7 @@ import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
@@ -677,6 +678,23 @@ public class GlideTest {
   public void testByteData() {
     byte[] data = new byte[] { 1, 2, 3, 4, 5, 6 };
     requestManager.load(data).into(target);
+  }
+
+  @Test
+  public void removeFromManagers_afterRequestManagerRemoved_clearsRequest() {
+    target = requestManager.load(mockUri("content://uri")).into(new SimpleTarget<Drawable>() {
+      @Override
+      public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
+        // Do nothing.
+      }
+    });
+    Request request = target.getRequest();
+
+    requestManager.onDestroy();
+    requestManager.clear(target);
+
+    assertThat(target.getRequest()).isNull();
+    assertThat(request.isCancelled()).isTrue();
   }
 
   @Test

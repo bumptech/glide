@@ -307,6 +307,7 @@ public final class SingleRequest<R> implements Request,
   public void clear() {
     Util.assertMainThread();
     assertNotCallingCallbacks();
+    stateVerifier.throwIfRecycled();
     if (status == Status.CLEARED) {
       return;
     }
@@ -459,6 +460,13 @@ public final class SingleRequest<R> implements Request,
         requestOptions.getUseAnimationPool(),
         requestOptions.getOnlyRetrieveFromCache(),
         this);
+
+    // This is a hack that's only useful for testing right now where loads complete synchronously
+    // even though under any executor running on any thread but the main thread, the load would
+    // have completed asynchronously.
+    if (status != Status.RUNNING) {
+      loadStatus = null;
+    }
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));
     }

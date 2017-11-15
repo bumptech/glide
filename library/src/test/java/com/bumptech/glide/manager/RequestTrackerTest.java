@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -24,27 +25,40 @@ public class RequestTrackerTest {
 
   @Before
   public void setUp() {
+    MockitoAnnotations.initMocks(this);
     tracker = new RequestTracker();
   }
 
   @Test
-  public void testClearsAddedRequestsOnDestroy() {
+  public void clearRequests_doesNotRecycleRequests() {
     Request request = mock(Request.class);
     tracker.addRequest(request);
 
     tracker.clearRequests();
 
     verify(request).clear();
-    verify(request).recycle();
+    verify(request, never()).recycle();
   }
 
   @Test
-  public void testClearRemoveAndRecycle_withNullRequest_doesNothingAndReturnsTrue() {
+  public void clearRemoveAndRecycle_withRequestPreviouslyClearedInClearRequests_doesNothing() {
+    Request request = mock(Request.class);
+    tracker.addRequest(request);
+
+    tracker.clearRequests();
+    tracker.clearRemoveAndRecycle(request);
+
+    verify(request).clear();
+    verify(request, never()).recycle();
+  }
+
+  @Test
+  public void clearRemoveAndRecycle_withNullRequest_doesNothingAndReturnsTrue() {
     assertThat(tracker.clearRemoveAndRecycle(null)).isTrue();
   }
 
   @Test
-  public void testClearRemoveAndRecycle_withUnTrackedRequest_doesNothingAndReturnsFalse() {
+  public void clearRemoveAndRecycle_withUnTrackedRequest_doesNothingAndReturnsFalse() {
     Request request = mock(Request.class);
 
     assertThat(tracker.clearRemoveAndRecycle(request)).isFalse();
@@ -54,7 +68,7 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testClearRemoveAndRecycle_withTrackedRequest_clearsRecyclesAndReturnsTrue() {
+  public void clearRemoveAndRecycle_withTrackedRequest_clearsRecyclesAndReturnsTrue() {
     Request request = mock(Request.class);
     tracker.addRequest(request);
 
@@ -64,7 +78,7 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testClearRemoveAndRecycle_withAlreadyRemovedRequest_doesNothingAndReturnsFalse() {
+  public void clearRemoveAndRecycle_withAlreadyRemovedRequest_doesNothingAndReturnsFalse() {
     Request request = mock(Request.class);
     tracker.addRequest(request);
     tracker.clearRemoveAndRecycle(request);
