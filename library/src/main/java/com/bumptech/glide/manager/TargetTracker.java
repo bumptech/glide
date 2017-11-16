@@ -2,7 +2,6 @@ package com.bumptech.glide.manager;
 
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Util;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +45,7 @@ public final class TargetTracker implements LifecycleListener {
   }
 
   public List<Target<?>> getAll() {
-    return new ArrayList<>(targets);
+    return Util.getSnapshot(targets);
   }
 
   public void clear() {
