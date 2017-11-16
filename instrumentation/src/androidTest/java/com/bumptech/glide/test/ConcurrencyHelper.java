@@ -36,7 +36,7 @@ public class ConcurrencyHelper {
     }
   }
 
-  public <T, Y extends Future<T>> Y wait(Y  future) {
+  public <T, Y extends Future<T>> Y wait(Y future) {
     get(future);
     return future;
   }
@@ -113,6 +113,15 @@ public class ConcurrencyHelper {
         });
         latch.await(TIMEOUT_MS, TIMEOUT_UNIT);
         return target;
+      }
+    });
+  }
+
+  public void pokeMainThread() {
+    runOnMainThread(new Runnable() {
+      @Override
+      public void run() {
+        // Do nothing.
       }
     });
   }

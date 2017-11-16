@@ -186,11 +186,17 @@ public class Glide implements ComponentCallbacks2 {
   @VisibleForTesting
   @Deprecated
   public static synchronized void init(Glide glide) {
+    if (Glide.glide != null) {
+      tearDown();
+    }
     Glide.glide = glide;
   }
 
   @VisibleForTesting
   public static synchronized void init(Context context, GlideBuilder builder) {
+    if (Glide.glide != null) {
+      tearDown();
+    }
     initializeGlide(context, builder);
   }
 
