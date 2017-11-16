@@ -20,9 +20,11 @@ import android.support.v4.app.FragmentActivity;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -36,6 +38,8 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18, shadows = GlideShadowLooper.class)
 public class RequestManagerRetrieverTest {
+  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
+
   private static final String PARENT_TAG = "parent";
   private RetrieverHarness[] harnesses;
   private RequestManagerRetriever retriever;

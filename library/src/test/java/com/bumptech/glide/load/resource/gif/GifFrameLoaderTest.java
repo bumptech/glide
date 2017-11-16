@@ -27,11 +27,12 @@ import com.bumptech.glide.load.resource.gif.GifFrameLoader.FrameCallback;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util.ReturnsSelfAnswer;
 import com.bumptech.glide.util.Util;
 import java.nio.ByteBuffer;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -44,6 +45,7 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class GifFrameLoaderTest {
+  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
   @Mock GifFrameLoader.FrameCallback callback;
   @Mock GifDecoder gifDecoder;
@@ -68,11 +70,6 @@ public class GifFrameLoaderTest {
     requestBuilder = mock(RequestBuilder.class, new ReturnsSelfAnswer());
 
     loader = createGifFrameLoader(handler);
-  }
-
-  @After
-  public void tearDown() {
-    Glide.tearDown();
   }
 
   @NonNull

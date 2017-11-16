@@ -24,12 +24,13 @@ import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.tests.TearDownGlide;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -43,6 +44,8 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18, shadows = GlideShadowLooper.class)
 public class RequestManagerTest {
+  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
+
   @Mock private Lifecycle lifecycle = mock(Lifecycle.class);
   @Mock private RequestManagerTreeNode treeNode = mock(RequestManagerTreeNode.class);
 
@@ -92,11 +95,6 @@ public class RequestManagerTest {
             requestTracker,
             factory,
             context);
-  }
-
-  @After
-  public void tearDown() {
-    Glide.tearDown();
   }
 
   @Test

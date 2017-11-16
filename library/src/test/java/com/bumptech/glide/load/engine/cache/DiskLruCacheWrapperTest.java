@@ -9,6 +9,8 @@ import com.bumptech.glide.tests.Util;
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,13 +24,23 @@ public class DiskLruCacheWrapperTest {
   private DiskLruCacheWrapper cache;
   private byte[] data;
   private StringKey key;
+  private File dir;
 
   @Before
   public void setUp() {
-    File dir = RuntimeEnvironment.application.getCacheDir();
+    dir = RuntimeEnvironment.application.getCacheDir();
     cache = new DiskLruCacheWrapper(dir, 10 * 1024 * 1024);
     key = new StringKey("test" + Math.random());
     data = new byte[] { 1, 2, 3, 4, 5, 6 };
+  }
+
+  @After
+  public void tearDown() {
+    try {
+      FileUtils.deleteDirectory(dir);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Test

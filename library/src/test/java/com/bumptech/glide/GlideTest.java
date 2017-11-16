@@ -56,6 +56,7 @@ import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.testutil.TestResourceUtil;
 import java.io.ByteArrayInputStream;
@@ -67,8 +68,8 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -96,6 +97,8 @@ import org.robolectric.shadows.ShadowBitmap;
     GlideTest.MutableShadowBitmap.class })
 @SuppressWarnings("unchecked")
 public class GlideTest {
+
+  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
   @SuppressWarnings("rawtypes")
   @Mock private Target target;
@@ -152,11 +155,6 @@ public class GlideTest {
 
     requestManager = new RequestManager(Glide.get(context), lifecycle, treeNode, context);
     requestManager.resumeRequests();
-  }
-
-  @After
-  public void tearDown() {
-    Glide.tearDown();
   }
 
   @Test
