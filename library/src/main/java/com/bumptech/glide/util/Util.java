@@ -170,14 +170,19 @@ public final class Util {
    * Returns a copy of the given list that is safe to iterate over and perform actions that may
    * modify the original list.
    *
-   * <p> See #303 and #375. </p>
+   * <p>See #303, #375, #322, #2262.
    */
+  @SuppressWarnings("UseBulkOperation")
   public static <T> List<T> getSnapshot(Collection<T> other) {
-    // toArray creates a new ArrayList internally and this way we can guarantee entries will not
-    // be null. See #322.
-    List<T> result = new ArrayList<T>(other.size());
+    // toArray creates a new ArrayList internally and does not guarantee that the values it contains
+    // are non-null. Collections.addAll in ArrayList uses toArray internally and therefore also
+    // doesn't guarantee that entries are non-null. WeakHashMap's iterator does avoid returning null
+    // and is therefore safe to use. See #322, #2262.
+    List<T> result = new ArrayList<>(other.size());
     for (T item : other) {
-      result.add(item);
+      if (item != null) {
+        result.add(item);
+      }
     }
     return result;
   }
