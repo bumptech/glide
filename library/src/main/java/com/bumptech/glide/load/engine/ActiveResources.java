@@ -83,14 +83,14 @@ final class ActiveResources {
 
   private static class ResourceWeakReference extends WeakReference<EngineResource<?>> {
     @Synthetic final Key key;
-    @Synthetic final EngineResource<?> resource;
+    @Synthetic final Resource<?> resource;
     @Synthetic final boolean isCacheable;
 
     ResourceWeakReference(
         Key key, EngineResource<?> r, ReferenceQueue<? super EngineResource<?>> q) {
       super(r, q);
       this.key = Preconditions.checkNotNull(key);
-      this.resource = Preconditions.checkNotNull(r);
+      this.resource = Preconditions.checkNotNull(r.getResource());
       isCacheable = r.isCacheable();
     }
   }
