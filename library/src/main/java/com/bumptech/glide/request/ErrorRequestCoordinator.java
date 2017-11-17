@@ -1,5 +1,7 @@
 package com.bumptech.glide.request;
 
+import android.support.annotation.Nullable;
+
 /**
  * Runs a single primary {@link Request} until it completes and then a fallback error request only
  * if the single primary request fails.
@@ -7,11 +9,12 @@ package com.bumptech.glide.request;
 public final class ErrorRequestCoordinator implements RequestCoordinator,
     Request {
 
+  @Nullable
   private final RequestCoordinator coordinator;
   private Request primary;
   private Request error;
 
-  public ErrorRequestCoordinator(RequestCoordinator coordinator) {
+  public ErrorRequestCoordinator(@Nullable RequestCoordinator coordinator) {
     this.coordinator = coordinator;
   }
 
@@ -39,10 +42,9 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
 
   @Override
   public void clear() {
+    primary.clear();
     if (primary.isFailed()) {
       error.clear();
-    } else {
-      primary.clear();
     }
   }
 
@@ -139,7 +141,7 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
     }
 
     if (coordinator != null) {
-      coordinator.onRequestFailed(error);
+      coordinator.onRequestFailed(this);
     }
   }
 }
