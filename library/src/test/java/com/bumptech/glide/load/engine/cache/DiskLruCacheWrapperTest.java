@@ -9,7 +9,6 @@ import com.bumptech.glide.tests.Util;
 import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,9 +36,27 @@ public class DiskLruCacheWrapperTest {
   @After
   public void tearDown() {
     try {
-      FileUtils.deleteDirectory(dir);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+      cache.clear();
+    } finally {
+      deleteRecursive(dir);
+    }
+  }
+
+  private void deleteRecursive(File file) {
+    if (!file.isDirectory()) {
+      if (!file.delete()) {
+        throw new IllegalStateException("Failed to delete: " + file);
+      }
+      return;
+    }
+
+    File[] files = file.listFiles();
+    if (files == null) {
+      return;
+    }
+
+    for (File child : files) {
+      deleteRecursive(child);
     }
   }
 
