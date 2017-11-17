@@ -107,6 +107,15 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
     return parentCanNotifyStatusChanged() && isValidRequest(request);
   }
 
+  @Override
+  public boolean canNotifyCleared(Request request) {
+    return parentCanNotifyCleared() && isValidRequest(request);
+  }
+
+  private boolean parentCanNotifyCleared() {
+    return coordinator == null || coordinator.canNotifyCleared(this);
+  }
+
   private boolean parentCanNotifyStatusChanged() {
     return coordinator == null || coordinator.canNotifyStatusChanged(this);
   }

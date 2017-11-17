@@ -1,5 +1,7 @@
 package com.bumptech.glide;
 
+import static com.bumptech.glide.test.Matchers.anyDrawable;
+import static com.bumptech.glide.test.Matchers.anyTarget;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
@@ -17,7 +19,6 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCacheAdapter;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.BitmapSubject;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
@@ -78,7 +79,7 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            any(Drawable.class),
+            anyDrawable(),
             any(),
             anyTarget(),
             eq(DataSource.MEMORY_CACHE),
@@ -129,7 +130,7 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            any(Drawable.class),
+            anyDrawable(),
             any(),
             anyTarget(),
             not(eq(DataSource.MEMORY_CACHE)),
@@ -157,7 +158,7 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            any(Drawable.class),
+            anyDrawable(),
             any(),
             anyTarget(),
             eq(DataSource.DATA_DISK_CACHE),
@@ -187,8 +188,13 @@ public class CachingTest {
             .listener(requestListener)
             .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS));
 
-    verify(requestListener).onResourceReady(
-        any(Drawable.class), any(), anyTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+    verify(requestListener)
+        .onResourceReady(
+            anyDrawable(),
+            any(),
+            anyTarget(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -251,14 +257,15 @@ public class CachingTest {
             .diskCacheStrategy(DiskCacheStrategy.DATA)
             .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS));
 
-    verify(requestListener).onResourceReady(
-        any(Drawable.class), any(), anyTarget(), eq(DataSource.DATA_DISK_CACHE), anyBoolean());
+    verify(requestListener)
+        .onResourceReady(
+            anyDrawable(),
+            any(),
+            anyTarget(),
+            eq(DataSource.DATA_DISK_CACHE),
+            anyBoolean());
   }
 
-  @SuppressWarnings("unchecked")
-  private static Target<Drawable> anyTarget() {
-    return (Target<Drawable>) any(Target.class);
-  }
 
   private void clearMemoryCacheOnMainThread() throws InterruptedException {
     concurrency.runOnMainThread(new Runnable() {

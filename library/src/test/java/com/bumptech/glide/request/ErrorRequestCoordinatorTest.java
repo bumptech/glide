@@ -539,4 +539,82 @@ public class ErrorRequestCoordinatorTest {
     verify(parent, never()).onRequestFailed(any(Request.class));
   }
 
+  @Test
+  public void canNotifyCleared_primaryRequest_nullParent_returnsTrue() {
+    assertThat(coordinator.canNotifyCleared(primary)).isTrue();
+  }
+
+  @Test
+  public void canNotifyCleared_primaryRequest_parentCanNotNotify_returnsFalse() {
+    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator.setRequests(primary, error);
+
+    assertThat(coordinator.canNotifyCleared(primary)).isFalse();
+  }
+
+  @Test
+  public void canNotifyCleared_primaryRequest_parentCanNotify_returnsTrue() {
+    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator.setRequests(primary, error);
+    when(parent.canNotifyCleared(coordinator)).thenReturn(true);
+
+    assertThat(coordinator.canNotifyCleared(primary)).isTrue();
+  }
+
+  @Test
+  public void canNotifyCleared_primaryRequestFailed_parentCanNotify_returnsTrue() {
+    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator.setRequests(primary, error);
+    when(parent.canNotifyCleared(coordinator)).thenReturn(true);
+    when(primary.isFailed()).thenReturn(true);
+
+    assertThat(coordinator.canNotifyCleared(primary)).isTrue();
+  }
+
+  @Test
+  public void canNotifyCleared_primaryRequestFailed_parentCanNotNotify_returnsFalse() {
+    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator.setRequests(primary, error);
+    when(primary.isFailed()).thenReturn(false);
+
+    assertThat(coordinator.canNotifyCleared(primary)).isFalse();
+  }
+
+  @Test
+  public void canNotifyCleared_primaryRequestFailed_nullParent_returnsTrue() {
+    when(primary.isFailed()).thenReturn(true);
+
+    assertThat(coordinator.canNotifyCleared(primary)).isTrue();
+  }
+
+  @Test
+  public void canNotifyCleared_errorRequest_nullParent_returnsFalse() {
+    assertThat(coordinator.canNotifyCleared(error)).isFalse();
+  }
+
+  @Test
+  public void canNotifyCleared_errorRequest_primaryFailed_nullParent_returnsTrue() {
+    when(primary.isFailed()).thenReturn(true);
+    assertThat(coordinator.canNotifyCleared(error)).isTrue();
+  }
+
+  @Test
+  public void canNotifyCleared_errorRequest_primaryFailed_nonNullParentCanNotNotify_returnsFalse() {
+    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator.setRequests(primary, error);
+    when(parent.canNotifyCleared(coordinator)).thenReturn(false);
+    when(primary.isFailed()).thenReturn(true);
+
+    assertThat(coordinator.canNotifyCleared(error)).isFalse();
+  }
+
+  @Test
+  public void canNotifyCleared_errorRequest_primaryFailed_nonNullParentCanNotify_returnsTrue() {
+    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator.setRequests(primary, error);
+    when(parent.canNotifyCleared(coordinator)).thenReturn(true);
+    when(primary.isFailed()).thenReturn(true);
+
+    assertThat(coordinator.canNotifyCleared(error)).isTrue();
+  }
 }

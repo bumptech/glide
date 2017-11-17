@@ -52,6 +52,15 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     return parentCanNotifyStatusChanged() && request.equals(full) && !isAnyResourceSet();
   }
 
+  @Override
+  public boolean canNotifyCleared(Request request) {
+    return parentCanNotifyCleared() && request.equals(full);
+  }
+
+  private boolean parentCanNotifyCleared() {
+    return coordinator == null || coordinator.canNotifyCleared(this);
+  }
+
   private boolean parentCanNotifyStatusChanged() {
     return coordinator == null || coordinator.canNotifyStatusChanged(this);
   }

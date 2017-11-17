@@ -316,7 +316,7 @@ public final class SingleRequest<R> implements Request,
     if (resource != null) {
       releaseResource(resource);
     }
-    if (canNotifyStatusChanged()) {
+    if (canNotifyCleared()) {
       target.onLoadCleared(getPlaceholderDrawable());
     }
     // Must be after cancel().
@@ -478,6 +478,10 @@ public final class SingleRequest<R> implements Request,
 
   private boolean canSetResource() {
     return requestCoordinator == null || requestCoordinator.canSetImage(this);
+  }
+
+  private boolean canNotifyCleared() {
+    return requestCoordinator == null || requestCoordinator.canNotifyCleared(this);
   }
 
   private boolean canNotifyStatusChanged() {

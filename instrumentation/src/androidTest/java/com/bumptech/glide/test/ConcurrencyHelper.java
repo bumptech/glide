@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.test.InstrumentationRegistry;
 import android.widget.ImageView;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.Request;
@@ -12,6 +13,7 @@ import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.util.Preconditions;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -25,8 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ConcurrencyHelper {
   private final Handler handler = new Handler(Looper.getMainLooper());
-  private static final long TIMEOUT_MS = 5000;
-  private static final TimeUnit TIMEOUT_UNIT = TimeUnit.MILLISECONDS;
+  static final long TIMEOUT_MS = 5000;
+  static final TimeUnit TIMEOUT_UNIT = TimeUnit.MILLISECONDS;
 
   public <T> T get(Future<T> future) {
     try {
@@ -46,11 +48,27 @@ public class ConcurrencyHelper {
     return loadOnMainThread(builder, new DrawableImageViewTarget(imageView));
   }
 
-  public <T> Target<T> loadOnMainThread(final RequestBuilder<T> builder, final Target<T> target) {
-    return callOnMainThread(new Callable<Target<T>>() {
+  public void clearOnMainThread(final ImageView imageView) {
+    runOnMainThread(new Runnable() {
+      @Override
+      public void run() {
+        GlideApp.with(InstrumentationRegistry.getTargetContext())
+            .clear(imageView);
+      }
+    });
+  }
+
+  public Target<Drawable> loadUntilFirstFinish(
+      final RequestBuilder<Drawable> builder, ImageView imageView) {
+    return loadUntilFirstFinish(builder, new DrawableImageViewTarget(imageView));
+  }
+
+  public <T> Target<T> loadUntilFirstFinish(
+      final RequestBuilder<T> builder, final Target<T> target) {
+    final CountDownLatch latch = new CountDownLatch(1);
+    Target<T> result = callOnMainThread(new Callable<Target<T>>() {
       @Override
       public Target<T> call() throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
         builder.into(new Target<T>() {
           @Override
           public void onStart() {
@@ -102,7 +120,6 @@ public class ConcurrencyHelper {
           @Override
           public void setRequest(@Nullable Request request) {
             target.setRequest(request);
-
           }
 
           @Nullable
@@ -111,10 +128,86 @@ public class ConcurrencyHelper {
             return target.getRequest();
           }
         });
-        latch.await(TIMEOUT_MS, TIMEOUT_UNIT);
         return target;
       }
     });
+    waitOnLatch(latch);
+    return result;
+  }
+
+  public <T> Target<T> loadOnMainThread(final RequestBuilder<T> builder, final Target<T> target) {
+    final CountDownLatch latch = new CountDownLatch(1);
+    Target<T> result = callOnMainThread(new Callable<Target<T>>() {
+      @Override
+      public Target<T> call() throws Exception {
+        builder.into(new Target<T>() {
+          @Override
+          public void onStart() {
+            target.onStart();
+          }
+
+          @Override
+          public void onStop() {
+            target.onStop();
+          }
+
+          @Override
+          public void onDestroy() {
+            target.onDestroy();
+          }
+
+          @Override
+          public void onResourceReady(T resource, Transition<? super T> transition) {
+            target.onResourceReady(resource, transition);
+            if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
+              latch.countDown();
+            }
+          }
+
+          @Override
+          public void onLoadCleared(@Nullable Drawable placeholder) {
+            target.onLoadCleared(placeholder);
+          }
+
+          @Override
+          public void onLoadStarted(@Nullable Drawable placeholder) {
+            target.onLoadStarted(placeholder);
+          }
+
+          @Override
+          public void onLoadFailed(@Nullable Drawable errorDrawable) {
+            target.onLoadFailed(errorDrawable);
+            if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
+              latch.countDown();
+            }
+          }
+
+          @Override
+          public void getSize(SizeReadyCallback cb) {
+            target.getSize(cb);
+          }
+
+          @Override
+          public void removeCallback(SizeReadyCallback cb) {
+            target.removeCallback(cb);
+          }
+
+          @Override
+          public void setRequest(@Nullable Request request) {
+            target.setRequest(request);
+          }
+
+          @Nullable
+          @Override
+          public Request getRequest() {
+            return target.getRequest();
+          }
+        });
+        return target;
+      }
+    });
+    waitOnLatch(latch);
+    return result;
   }
 
   public void pokeMainThread() {
@@ -151,11 +244,17 @@ public class ConcurrencyHelper {
         latch.countDown();
       }
     });
+    waitOnLatch(latch);
+    return reference.get();
+  }
+
+  private static void waitOnLatch(CountDownLatch latch) {
     try {
-      latch.await(TIMEOUT_MS, TIMEOUT_UNIT);
+      if (!latch.await(TIMEOUT_MS, TIMEOUT_UNIT)) {
+        throw new RuntimeException("Timed out waiting for latch");
+      }
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
-    return reference.get();
   }
 }

@@ -1,12 +1,12 @@
 package com.bumptech.glide.request;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,21 +16,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 @RunWith(JUnit4.class)
 public class ThumbnailRequestCoordinatorTest {
-  private Request full;
-  private Request thumb;
+  @Mock private Request full;
+  @Mock private Request thumb;
+  @Mock private RequestCoordinator parent;
   private ThumbnailRequestCoordinator coordinator;
-  private RequestCoordinator parent;
 
   @Before
   public void setUp() {
-    full = mock(Request.class);
-    thumb = mock(Request.class);
-    parent = mock(RequestCoordinator.class);
+    MockitoAnnotations.initMocks(this);
     coordinator = new ThumbnailRequestCoordinator();
     coordinator.setRequests(full, thumb);
   }
@@ -317,9 +317,9 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void testDoesNotClearThumbOnFullComplete_whenThumbIsComplete() {
-      when(thumb.isComplete()).thenReturn(true);
-      coordinator.onRequestSuccess(full);
-      verify(thumb, never()).clear();
+    when(thumb.isComplete()).thenReturn(true);
+    coordinator.onRequestSuccess(full);
+    verify(thumb, never()).clear();
   }
 
   @Test
@@ -329,6 +329,32 @@ public class ThumbnailRequestCoordinatorTest {
     coordinator.onRequestSuccess(thumb);
 
     verify(parent, never()).onRequestSuccess(any(Request.class));
+  }
+
+  @Test
+  public void canNotifyCleared_withThumbRequest_returnsFalse() {
+    assertThat(coordinator.canNotifyCleared(thumb)).isFalse();
+  }
+
+  @Test
+  public void canNotifyCleared_withFullRequest_andNullParent_returnsTrue() {
+    assertThat(coordinator.canNotifyCleared(full)).isTrue();
+  }
+
+  @Test
+  public void canNotifyCleared_withFullRequest_nonNullParent_parentCanClear_returnsTrue() {
+    coordinator = new ThumbnailRequestCoordinator(parent);
+    coordinator.setRequests(full, thumb);
+    when(parent.canNotifyCleared(coordinator)).thenReturn(true);
+    assertThat(coordinator.canNotifyCleared(full)).isTrue();
+  }
+
+  @Test
+  public void canNotifyCleared_withFullRequest_nonNullParent_parentCanNotClear_returnsFalse() {
+    coordinator = new ThumbnailRequestCoordinator(parent);
+    coordinator.setRequests(full, thumb);
+    when(parent.canNotifyCleared(coordinator)).thenReturn(false);
+    assertThat(coordinator.canNotifyCleared(full)).isFalse();
   }
 
   @Test

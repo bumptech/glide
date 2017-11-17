@@ -180,12 +180,29 @@ public class SingleRequestTest {
   }
 
   @Test
+  public void clear_notifiesTarget() {
+    SingleRequest<List> request = builder.build();
+    request.clear();
+
+    verify(builder.target).onLoadCleared(any(Drawable.class));
+  }
+
+  @Test
   public void testDoesNotNotifyTargetTwiceIfClearedTwiceInARow() {
     SingleRequest<List> request = builder.build();
     request.clear();
     request.clear();
 
     verify(builder.target, times(1)).onLoadCleared(any(Drawable.class));
+  }
+
+  @Test
+  public void clear_doesNotNotifyTarget_ifRequestCoordinatorReturnsFalseForCanClear() {
+    when(builder.requestCoordinator.canNotifyCleared(any(Request.class))).thenReturn(false);
+    SingleRequest<List> request = builder.build();
+    request.clear();
+
+    verify(builder.target, never()).onLoadCleared(any(Drawable.class));
   }
 
   @Test
@@ -908,6 +925,7 @@ public class SingleRequestTest {
 
     SingleRequestBuilder() {
       when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
+      when(requestCoordinator.canNotifyCleared(any(Request.class))).thenReturn(true);
       when(requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(true);
       when(resource.get()).thenReturn(result);
     }
