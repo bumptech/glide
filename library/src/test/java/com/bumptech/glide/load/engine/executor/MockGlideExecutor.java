@@ -1,24 +1,109 @@
 package com.bumptech.glide.load.engine.executor;
 
+import android.os.StrictMode;
+import android.support.annotation.VisibleForTesting;
+import com.google.common.util.concurrent.ForwardingExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+
 /**
  * Creates mock {@link GlideExecutor}s.
  */
+@VisibleForTesting
 public final class MockGlideExecutor {
+  // Utility class.
+  private MockGlideExecutor() {}
 
-  private MockGlideExecutor() { }
-
-  public static GlideExecutor newMainThreadExecutor() {
-    return new GlideExecutor(1 /*poolSize*/, "mock-glide-executor",
-        GlideExecutor.UncaughtThrowableStrategy.THROW, false /*preventNetworkOperations*/,
-        true /*runAllOnMainThread*/);
+  public static GlideExecutor newTestExecutor(ExecutorService executorService) {
+    return new GlideExecutor(executorService);
   }
 
+  public static GlideExecutor newMainThreadExecutor() {
+    return newTestExecutor(new DirectExecutorService());
+  }
+
+  /**
+   * @deprecated Use {@link #newMainThreadExecutor} instead.
+   */
+  @Deprecated
   public static GlideExecutor newMainThreadUnlimitedExecutor() {
-    return new GlideExecutor(0 /* corePoolSize */,
-        Integer.MAX_VALUE /* maximumPoolSize */,
-        java.util.concurrent.TimeUnit.SECONDS.toMillis(10) /* keepAliveTimeInMs */,
-        "mock-unlimited-glide-executor",
-        GlideExecutor.UncaughtThrowableStrategy.THROW, false /*preventNetworkOperations*/,
-        true /*runAllOnMainThread*/);
+    return newMainThreadExecutor();
+  }
+
+  /**
+   * DirectExecutorService that enforces StrictMode and converts ExecutionExceptions into
+   * RuntimeExceptions.
+   */
+  private static final class DirectExecutorService extends ForwardingExecutorService {
+    private static final StrictMode.ThreadPolicy THREAD_POLICY =
+        new StrictMode.ThreadPolicy.Builder()
+            .detectNetwork()
+            .penaltyDeath()
+            .build();
+
+    private final ExecutorService delegate;
+
+    DirectExecutorService() {
+      delegate = MoreExecutors.newDirectExecutorService();
+    }
+
+    @Override
+    protected ExecutorService delegate() {
+      return delegate;
+    }
+
+    @Override
+    public <T> Future<T> submit(Runnable task, T result) {
+      return getUninterruptibly(super.submit(task, result));
+    }
+
+    @Override
+    public <T> Future<T> submit(Callable<T> task) {
+      return getUninterruptibly(super.submit(task));
+    }
+
+    @Override
+    public Future<?> submit(Runnable task) {
+      return getUninterruptibly(super.submit(task));
+    }
+
+    @Override
+    public void execute(Runnable command) {
+      delegate.execute(new Runnable() {
+        @Override
+        public void run() {
+          StrictMode.ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
+          StrictMode.setThreadPolicy(THREAD_POLICY);
+          try {
+            command.run();
+          } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+          }
+        }
+      });
+    }
+
+    private <T> Future<T> getUninterruptibly(Future<T> future) {
+      boolean interrupted = false;
+      try {
+        while (!future.isDone()) {
+          try {
+            future.get();
+          } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+          } catch (InterruptedException e) {
+            interrupted = true;
+          }
+        }
+      } finally {
+        if (interrupted) {
+          Thread.currentThread().interrupt();
+        }
+      }
+      return future;
+    }
   }
 }

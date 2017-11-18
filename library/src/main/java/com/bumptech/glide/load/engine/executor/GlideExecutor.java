@@ -6,34 +6,35 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.util.Synthetic;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.concurrent.BlockingQueue;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
+import java.util.concurrent.TimeoutException;
 
 /**
  * A prioritized {@link ThreadPoolExecutor} for running jobs in Glide.
  */
-public final class GlideExecutor extends ThreadPoolExecutor {
-
+public final class GlideExecutor implements ExecutorService {
   /**
    * The default thread name prefix for executors used to load/decode/transform data not found in
    * cache.
    */
   public static final String DEFAULT_SOURCE_EXECUTOR_NAME = "source";
+
   /**
    * The default thread name prefix for executors used to load/decode/transform data found in
    * Glide's cache.
    */
   public static final String DEFAULT_DISK_CACHE_EXECUTOR_NAME = "disk-cache";
+
   /**
    * The default thread count for executors used to load/decode/transform data found in Glide's
    * cache.
@@ -41,26 +42,28 @@ public final class GlideExecutor extends ThreadPoolExecutor {
   public static final int DEFAULT_DISK_CACHE_EXECUTOR_THREADS = 1;
 
   private static final String TAG = "GlideExecutor";
-  private static final String CPU_NAME_REGEX = "cpu[0-9]+";
-  private static final String CPU_LOCATION = "/sys/devices/system/cpu/";
-  // Don't use more than four threads when automatically determining thread count..
-  private static final int MAXIMUM_AUTOMATIC_THREAD_COUNT = 4;
-  // May be accessed on other threads, but this is an optimization only so it's ok if we set its
-  // value more than once.
-  private static volatile int bestThreadCount;
-  private final boolean executeSynchronously;
 
   /**
    * The default thread name prefix for executors from unlimited thread pool used to
    * load/decode/transform data not found in cache.
    */
   private static final String SOURCE_UNLIMITED_EXECUTOR_NAME = "source-unlimited";
+
+  private static final String ANIMATION_EXECUTOR_NAME = "animation";
+
   /**
    * The default keep alive time for threads in our cached thread pools in milliseconds.
    */
   private static final long KEEP_ALIVE_TIME_MS = TimeUnit.SECONDS.toMillis(10);
 
-  private static final String ANIMATION_EXECUTOR_NAME = "animation";
+  // Don't use more than four threads when automatically determining thread count..
+  private static final int MAXIMUM_AUTOMATIC_THREAD_COUNT = 4;
+
+  // May be accessed on other threads, but this is an optimization only so it's ok if we set its
+  // value more than once.
+  private static volatile int bestThreadCount;
+
+  private final ExecutorService delegate;
 
   /**
    * Returns a new fixed thread pool with the default thread count returned from
@@ -72,8 +75,10 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    * <p>Disk cache executors do not allow network operations on their threads.
    */
   public static GlideExecutor newDiskCacheExecutor() {
-    return newDiskCacheExecutor(DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
-        DEFAULT_DISK_CACHE_EXECUTOR_NAME, UncaughtThrowableStrategy.DEFAULT);
+    return newDiskCacheExecutor(
+        DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
+        DEFAULT_DISK_CACHE_EXECUTOR_NAME,
+        UncaughtThrowableStrategy.DEFAULT);
   }
 
   /**
@@ -90,8 +95,10 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    */
   public static GlideExecutor newDiskCacheExecutor(
           UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    return newDiskCacheExecutor(DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
-                                DEFAULT_DISK_CACHE_EXECUTOR_NAME, uncaughtThrowableStrategy);
+    return newDiskCacheExecutor(
+        DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
+        DEFAULT_DISK_CACHE_EXECUTOR_NAME,
+        uncaughtThrowableStrategy);
   }
 
   /**
@@ -108,8 +115,13 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    */
   public static GlideExecutor newDiskCacheExecutor(int threadCount, String name,
       UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    return new GlideExecutor(threadCount, name, uncaughtThrowableStrategy,
-        true /*preventNetworkOperations*/, false /*executeSynchronously*/);
+    return new GlideExecutor(new ThreadPoolExecutor(
+        threadCount /* corePoolSize */,
+        threadCount /* maximumPoolSize */,
+        0 /* keepAliveTime */,
+        TimeUnit.MILLISECONDS,
+        new PriorityBlockingQueue<Runnable>(),
+        new DefaultThreadFactory(name, uncaughtThrowableStrategy, true)));
   }
 
   /**
@@ -122,7 +134,9 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    * <p>Source executors allow network operations on their threads.
    */
   public static GlideExecutor newSourceExecutor() {
-    return newSourceExecutor(calculateBestThreadCount(), DEFAULT_SOURCE_EXECUTOR_NAME,
+    return newSourceExecutor(
+        calculateBestThreadCount(),
+        DEFAULT_SOURCE_EXECUTOR_NAME,
         UncaughtThrowableStrategy.DEFAULT);
   }
 
@@ -140,9 +154,11 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    *                                  handle uncaught exceptions.
    */
   public static GlideExecutor newSourceExecutor(
-          UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    return newSourceExecutor(DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
-                                DEFAULT_DISK_CACHE_EXECUTOR_NAME, uncaughtThrowableStrategy);
+      UncaughtThrowableStrategy uncaughtThrowableStrategy) {
+    return newSourceExecutor(
+        DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
+        DEFAULT_DISK_CACHE_EXECUTOR_NAME,
+        uncaughtThrowableStrategy);
   }
 
   /**
@@ -157,10 +173,15 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    * com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy} to use to
    *                                  handle uncaught exceptions.
    */
-  public static GlideExecutor newSourceExecutor(int threadCount, String name,
-      UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    return new GlideExecutor(threadCount, name, uncaughtThrowableStrategy,
-        false /*preventNetworkOperations*/, false /*executeSynchronously*/);
+  public static GlideExecutor newSourceExecutor(
+      int threadCount, String name, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
+    return new GlideExecutor(new ThreadPoolExecutor(
+        threadCount /* corePoolSize */,
+        threadCount /* maximumPoolSize */,
+        0 /* keepAliveTime */,
+        TimeUnit.MILLISECONDS,
+        new PriorityBlockingQueue<Runnable>(),
+        new DefaultThreadFactory(name, uncaughtThrowableStrategy, false)));
   }
 
   /**
@@ -178,14 +199,16 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    * <p>Source executors allow network operations on their threads.
    */
   public static GlideExecutor newUnlimitedSourceExecutor() {
-    return new GlideExecutor(0 /* corePoolSize */,
-        Integer.MAX_VALUE /* maximumPoolSize */,
+    return new GlideExecutor(new ThreadPoolExecutor(
+        0,
+        Integer.MAX_VALUE,
         KEEP_ALIVE_TIME_MS,
-        SOURCE_UNLIMITED_EXECUTOR_NAME,
-        UncaughtThrowableStrategy.DEFAULT,
-        false /*preventNetworkOperations*/,
-        false /*executeSynchronously*/,
-        new SynchronousQueue<Runnable>());
+        TimeUnit.MILLISECONDS,
+        new SynchronousQueue<Runnable>(),
+        new DefaultThreadFactory(
+            SOURCE_UNLIMITED_EXECUTOR_NAME,
+            UncaughtThrowableStrategy.DEFAULT,
+            false)));
   }
 
   public static GlideExecutor newAnimationExecutor() {
@@ -196,141 +219,116 @@ public final class GlideExecutor extends ThreadPoolExecutor {
     // with more cores, two threads can provide better performance if lots of GIFs are showing at
     // once.
     int maximumPoolSize = bestThreadCount >= 4 ? 2 : 1;
-    return new GlideExecutor(
-        /*corePoolSize=*/ 0,
+    return new GlideExecutor(new ThreadPoolExecutor(
+        0 /* corePoolSize */,
         maximumPoolSize,
         KEEP_ALIVE_TIME_MS,
-        ANIMATION_EXECUTOR_NAME,
-        UncaughtThrowableStrategy.DEFAULT,
-        /*preventNetworkOperations=*/ true,
-        /*executeSynchronously=*/ false,
-        new PriorityBlockingQueue<Runnable>());
+        TimeUnit.MILLISECONDS,
+        new PriorityBlockingQueue<Runnable>(),
+        new DefaultThreadFactory(
+            ANIMATION_EXECUTOR_NAME,
+            UncaughtThrowableStrategy.DEFAULT,
+            true)));
   }
 
   @VisibleForTesting
-  GlideExecutor(int poolSize, String name,
-      UncaughtThrowableStrategy uncaughtThrowableStrategy, boolean preventNetworkOperations,
-      boolean executeSynchronously) {
-    this(
-        poolSize /* corePoolSize */,
-        poolSize /* maximumPoolSize */,
-        0 /* keepAliveTimeInMs */,
-        name,
-        uncaughtThrowableStrategy,
-        preventNetworkOperations,
-        executeSynchronously);
-  }
-
-  GlideExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTimeInMs, String name,
-      UncaughtThrowableStrategy uncaughtThrowableStrategy, boolean preventNetworkOperations,
-      boolean executeSynchronously) {
-    this(
-        corePoolSize,
-        maximumPoolSize,
-        keepAliveTimeInMs,
-        name,
-        uncaughtThrowableStrategy,
-        preventNetworkOperations,
-        executeSynchronously,
-        new PriorityBlockingQueue<Runnable>());
-  }
-
-  GlideExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTimeInMs, String name,
-      UncaughtThrowableStrategy uncaughtThrowableStrategy, boolean preventNetworkOperations,
-      boolean executeSynchronously, BlockingQueue<Runnable> queue) {
-    super(
-        corePoolSize,
-        maximumPoolSize,
-        keepAliveTimeInMs,
-        TimeUnit.MILLISECONDS,
-        queue,
-        new DefaultThreadFactory(name, uncaughtThrowableStrategy, preventNetworkOperations));
-    this.executeSynchronously = executeSynchronously;
+  GlideExecutor(ExecutorService delegate) {
+    this.delegate = delegate;
   }
 
   @Override
   public void execute(Runnable command) {
-    if (executeSynchronously) {
-      command.run();
-    } else {
-      super.execute(command);
-    }
+    delegate.execute(command);
   }
 
   @NonNull
   @Override
   public Future<?> submit(Runnable task) {
-    return maybeWait(super.submit(task));
+    return delegate.submit(task);
   }
 
-  private <T> Future<T> maybeWait(Future<T> future) {
-    if (executeSynchronously) {
-      boolean interrupted = false;
-      try {
-        while (!future.isDone()) {
-          try {
-            future.get();
-          } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-          } catch (InterruptedException e) {
-            interrupted = true;
-          }
-        }
-      } finally {
-        if (interrupted) {
-          Thread.currentThread().interrupt();
-        }
-      }
-    }
-    return future;
+  @NonNull
+  @Override
+  public <T> List<Future<T>> invokeAll(@NonNull Collection<? extends Callable<T>> tasks)
+      throws InterruptedException {
+    return delegate.invokeAll(tasks);
+  }
+
+  @NonNull
+  @Override
+  public <T> List<Future<T>> invokeAll(
+      @NonNull Collection<? extends Callable<T>> tasks,
+      long timeout,
+      @NonNull TimeUnit unit) throws InterruptedException {
+    return delegate.invokeAll(tasks, timeout, unit);
+  }
+
+  @NonNull
+  @Override
+  public <T> T invokeAny(@NonNull Collection<? extends Callable<T>> tasks)
+      throws InterruptedException, ExecutionException {
+    return delegate.invokeAny(tasks);
+  }
+
+  @Override
+  public <T> T invokeAny(
+      @NonNull Collection<? extends Callable<T>> tasks,
+      long timeout,
+      @NonNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    return delegate.invokeAny(tasks, timeout, unit);
   }
 
   @NonNull
   @Override
   public <T> Future<T> submit(Runnable task, T result) {
-    return maybeWait(super.submit(task, result));
+    return delegate.submit(task, result);
   }
 
   @Override
   public <T> Future<T> submit(Callable<T> task) {
-    return maybeWait(super.submit(task));
+    return delegate.submit(task);
+  }
+
+  @Override
+  public void shutdown() {
+    delegate.shutdown();
+  }
+
+  @NonNull
+  @Override
+  public List<Runnable> shutdownNow() {
+    return delegate.shutdownNow();
+  }
+
+  @Override
+  public boolean isShutdown() {
+    return delegate.isShutdown();
+  }
+
+  @Override
+  public boolean isTerminated() {
+    return delegate.isTerminated();
+  }
+
+  @Override
+  public boolean awaitTermination(long timeout, @NonNull TimeUnit unit)
+      throws InterruptedException {
+    return delegate.awaitTermination(timeout, unit);
+  }
+
+  @Override
+  public String toString() {
+    return delegate.toString();
   }
 
   /**
    * Determines the number of cores available on the device.
-   *
-   * <p>{@link Runtime#availableProcessors()} returns the number of awake cores, which may not
-   * be the number of available cores depending on the device's current state. See
-   * http://goo.gl/8H670N.
    */
   public static int calculateBestThreadCount() {
     if (bestThreadCount == 0) {
-      // We override the current ThreadPolicy to allow disk reads.
-      // This shouldn't actually do disk-IO and accesses a device file.
-      // See: https://github.com/bumptech/glide/issues/1170
-      ThreadPolicy originalPolicy = StrictMode.allowThreadDiskReads();
-      File[] cpus = null;
-      try {
-        File cpuInfo = new File(CPU_LOCATION);
-        final Pattern cpuNamePattern = Pattern.compile(CPU_NAME_REGEX);
-        cpus = cpuInfo.listFiles(new FilenameFilter() {
-          @Override
-          public boolean accept(File file, String s) {
-            return cpuNamePattern.matcher(s).matches();
-          }
-        });
-      } catch (Throwable t) {
-        if (Log.isLoggable(TAG, Log.ERROR)) {
-          Log.e(TAG, "Failed to calculate accurate cpu count", t);
-        }
-      } finally {
-        StrictMode.setThreadPolicy(originalPolicy);
-      }
-
-      int cpuCount = cpus != null ? cpus.length : 0;
-      int availableProcessors = Math.max(1, Runtime.getRuntime().availableProcessors());
-      bestThreadCount =
-          Math.min(MAXIMUM_AUTOMATIC_THREAD_COUNT, Math.max(availableProcessors, cpuCount));
+      bestThreadCount = Math.min(
+          MAXIMUM_AUTOMATIC_THREAD_COUNT,
+          RuntimeCompat.availableProcessors());
     }
     return bestThreadCount;
   }
@@ -383,6 +381,9 @@ public final class GlideExecutor extends ThreadPoolExecutor {
    * android.os.Process#THREAD_PRIORITY_BACKGROUND}.
    */
   private static final class DefaultThreadFactory implements ThreadFactory {
+    private static final int DEFAULT_PRIORITY = android.os.Process.THREAD_PRIORITY_BACKGROUND
+        + android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
+
     private final String name;
     @Synthetic final UncaughtThrowableStrategy uncaughtThrowableStrategy;
     @Synthetic final boolean preventNetworkOperations;
@@ -400,9 +401,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
       final Thread result = new Thread(runnable, "glide-" + name + "-thread-" + threadNum) {
         @Override
         public void run() {
-          android.os.Process.setThreadPriority(
-              android.os.Process.THREAD_PRIORITY_BACKGROUND
-              + android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
+          android.os.Process.setThreadPriority(DEFAULT_PRIORITY);
           if (preventNetworkOperations) {
             StrictMode.setThreadPolicy(
                 new ThreadPolicy.Builder()
