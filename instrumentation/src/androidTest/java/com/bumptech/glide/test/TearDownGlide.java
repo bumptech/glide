@@ -1,7 +1,5 @@
 package com.bumptech.glide.test;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import com.bumptech.glide.Glide;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -17,15 +15,12 @@ public final class TearDownGlide implements TestRule {
     return new Statement() {
       @Override
       public void evaluate() throws Throwable {
-        base.evaluate();
-        tearDownGlide();
+        try {
+          base.evaluate();
+        } finally {
+          Glide.tearDown();
+        }
       }
     };
-  }
-
-  private void tearDownGlide() {
-    Context context = InstrumentationRegistry.getTargetContext();
-    Glide.get(context).clearDiskCache();
-    Glide.tearDown();
   }
 }

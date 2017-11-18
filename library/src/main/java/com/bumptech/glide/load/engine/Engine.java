@@ -21,6 +21,8 @@ import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Responsible for starting loads and managing active and cached resources.
@@ -315,8 +317,8 @@ public class Engine implements EngineJobListener,
   }
 
   @VisibleForTesting
-  public void tearDown() {
-    engineJobFactory.tearDown();
+  public void shutdown() {
+    engineJobFactory.shutdown();
   }
 
   /**
@@ -451,11 +453,11 @@ public class Engine implements EngineJobListener,
     }
 
     @VisibleForTesting
-    void tearDown() {
-      diskCacheExecutor.shutdown();
-      sourceExecutor.shutdown();
-      sourceUnlimitedExecutor.shutdown();
-      animationExecutor.shutdown();
+    void shutdown() {
+      shutdownAndAwaitTermination(diskCacheExecutor);
+      shutdownAndAwaitTermination(sourceExecutor);
+      shutdownAndAwaitTermination(sourceUnlimitedExecutor);
+      shutdownAndAwaitTermination(animationExecutor);
     }
 
     @SuppressWarnings("unchecked")
@@ -463,6 +465,21 @@ public class Engine implements EngineJobListener,
         boolean useUnlimitedSourceGeneratorPool, boolean useAnimationPool) {
       EngineJob<R> result = (EngineJob<R>) pool.acquire();
       return result.init(key, isMemoryCacheable, useUnlimitedSourceGeneratorPool, useAnimationPool);
+    }
+
+    private static void shutdownAndAwaitTermination(ExecutorService pool) {
+      long shutdownSeconds = 5;
+      pool.shutdown();
+      try {
+        if (!pool.awaitTermination(shutdownSeconds, TimeUnit.SECONDS)) {
+          pool.shutdownNow();
+          if (!pool.awaitTermination(shutdownSeconds, TimeUnit.SECONDS)) {
+            throw new RuntimeException("Failed to shutdown");
+          }
+        }
+      } catch (InterruptedException ie) {
+        throw new RuntimeException(ie);
+      }
     }
   }
 }

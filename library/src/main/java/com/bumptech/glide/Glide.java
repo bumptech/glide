@@ -203,7 +203,8 @@ public class Glide implements ComponentCallbacks2 {
   @VisibleForTesting
   public static synchronized void tearDown() {
     if (glide != null) {
-      glide.engine.tearDown();
+      glide.engine.shutdown();
+      glide.engine.clearDiskCache();
     }
     glide = null;
   }
@@ -563,7 +564,6 @@ public class Glide implements ComponentCallbacks2 {
     Util.assertBackgroundThread();
     engine.clearDiskCache();
   }
-
 
   /**
    * Internal method.
