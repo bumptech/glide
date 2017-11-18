@@ -22,10 +22,10 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 public class RequestManagerTest {
-  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
+  @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   @Mock private RequestManagerTreeNode treeNode;
 
-  private ConcurrencyHelper concurrency = new ConcurrencyHelper();
+  private final ConcurrencyHelper concurrency = new ConcurrencyHelper();
   private RequestManager requestManager;
   private Context context;
 

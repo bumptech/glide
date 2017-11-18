@@ -41,11 +41,11 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class BitmapPreFillRunnerTest {
-  @Mock BitmapPreFillRunner.Clock clock;
-  @Mock BitmapPool pool;
-  @Mock MemoryCache cache;
-  @Mock Handler mainHandler;
-  private List<Bitmap> addedBitmaps = new ArrayList<>();
+  @Mock private BitmapPreFillRunner.Clock clock;
+  @Mock private BitmapPool pool;
+  @Mock private MemoryCache cache;
+  @Mock private Handler mainHandler;
+  private final List<Bitmap> addedBitmaps = new ArrayList<>();
 
   @Before
   public void setUp() {
@@ -300,10 +300,10 @@ public class BitmapPreFillRunnerTest {
     // order.verify(pool, times(numBitmaps)).put(eq(bitmap));
   }
 
-  private static class AddBitmapPoolAnswer implements Answer<Void> {
-    private List<Bitmap> bitmaps;
+  private static final class AddBitmapPoolAnswer implements Answer<Void> {
+    private final List<Bitmap> bitmaps;
 
-    public AddBitmapPoolAnswer(List<Bitmap> bitmaps) {
+    AddBitmapPoolAnswer(List<Bitmap> bitmaps) {
       this.bitmaps = bitmaps;
     }
 
@@ -315,10 +315,10 @@ public class BitmapPreFillRunnerTest {
     }
   }
 
-  private static class AddBitmapCacheAnswer implements Answer<Resource<?>> {
-    private List<Bitmap> bitmaps;
+  private static final class AddBitmapCacheAnswer implements Answer<Resource<?>> {
+    private final List<Bitmap> bitmaps;
 
-    public AddBitmapCacheAnswer(List<Bitmap> bitmaps) {
+    AddBitmapCacheAnswer(List<Bitmap> bitmaps) {
       this.bitmaps = bitmaps;
     }
 

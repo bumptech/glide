@@ -28,13 +28,15 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
   private static final String BASE64_TAG = ";base64";
   private final DataDecoder<Data> dataDecoder;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public DataUrlLoader(DataDecoder<Data> dataDecoder) {
     this.dataDecoder = dataDecoder;
   }
 
   @Override
   public LoadData<Data> buildLoadData(String model, int width, int height, Options options) {
-    return new LoadData<>(new ObjectKey(model), new DataUriFetcher<Data>(model, dataDecoder));
+    return new LoadData<>(new ObjectKey(model), new DataUriFetcher<>(model, dataDecoder));
   }
 
   @Override
@@ -62,7 +64,7 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
     private final DataDecoder<Data> reader;
     private Data data;
 
-    public DataUriFetcher(String dataUri, DataDecoder<Data> reader) {
+    DataUriFetcher(String dataUri, DataDecoder<Data> reader) {
       this.dataUri = dataUri;
       this.reader = reader;
     }

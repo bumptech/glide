@@ -25,7 +25,9 @@ import java.io.InputStream;
 public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream> {
   private final Context context;
 
-  MediaStoreVideoThumbLoader(Context context) {
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  public MediaStoreVideoThumbLoader(Context context) {
     this.context = context.getApplicationContext();
   }
 
@@ -33,7 +35,6 @@ public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream>
   @Nullable
   public LoadData<InputStream> buildLoadData(Uri model, int width, int height, Options options) {
     if (MediaStoreUtil.isThumbnailSize(width, height) && isRequestingDefaultFrame(options)) {
-      // TODO(nnaze): Tighten down this call to just the dependencies neede by buildVideoFetcher
       return new LoadData<>(new ObjectKey(model), ThumbFetcher.buildVideoFetcher(context, model));
     } else {
       return null;

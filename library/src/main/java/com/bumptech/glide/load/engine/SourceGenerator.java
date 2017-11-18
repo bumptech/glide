@@ -32,7 +32,7 @@ class SourceGenerator implements DataFetcherGenerator,
   private volatile ModelLoader.LoadData<?> loadData;
   private DataCacheKey originalKey;
 
-  public SourceGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
+  SourceGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
     this.helper = helper;
     this.cb = cb;
   }

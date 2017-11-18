@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.support.v4.util.Pools;
+import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.pool.FactoryPools;
 import com.bumptech.glide.util.pool.StateVerifier;
@@ -28,11 +29,12 @@ final class LockedResource<Z> implements Resource<Z>,
 
   @SuppressWarnings("unchecked")
   static <Z> LockedResource<Z> obtain(Resource<Z> resource) {
-    LockedResource<Z> result = (LockedResource<Z>) POOL.acquire();
+    LockedResource<Z> result = Preconditions.checkNotNull((LockedResource<Z>) POOL.acquire());
     result.init(resource);
     return result;
   }
 
+  @SuppressWarnings("WeakerAccess")
   @Synthetic
   LockedResource() { }
 
@@ -47,7 +49,7 @@ final class LockedResource<Z> implements Resource<Z>,
     POOL.release(this);
   }
 
-  public synchronized void unlock() {
+  synchronized void unlock() {
     stateVerifier.throwIfRecycled();
 
     if (!isLocked) {

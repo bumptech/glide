@@ -27,8 +27,9 @@ apply plugin: 'signing'
 version = VERSION_NAME
 group = GROUP
 
+@SuppressWarnings("GrMethodMayBeStatic")
 def isReleaseBuild() {
-    return VERSION_NAME.contains("SNAPSHOT") == false
+    return !VERSION_NAME.contains("SNAPSHOT")
 }
 
 def getReleaseRepositoryUrl() {
@@ -192,5 +193,5 @@ afterEvaluate { project ->
         }
     }
     logger.info("Published artifacts in ${configurations.archives}:")
-    configurations.archives.artifacts.files.files.each { logger.info("\t$it"); }
+    configurations.archives.artifacts.files.files.each { logger.info("\t$it") }
 }

@@ -430,7 +430,7 @@ public class EngineTest {
   public void testThrowsIfLoadCalledOnBackgroundThread() throws InterruptedException {
     BackgroundUtil.testInBackground(new BackgroundUtil.BackgroundTester() {
       @Override
-      public void runTest() throws Exception {
+      public void runTest() {
         harness.doLoad();
       }
     });
@@ -481,7 +481,6 @@ public class EngineTest {
       }
     }).when(harness.job).start(any(DecodeJob.class));
     harness.doLoad();
-//    harness.activeResources.get(harness.cacheKey).enqueue();
     ArgumentCaptor<IdleHandler> captor = ArgumentCaptor.forClass(IdleHandler.class);
     verify(GlideShadowLooper.queue).addIdleHandler(captor.capture());
     captor.getValue().queueIdle();
@@ -490,34 +489,34 @@ public class EngineTest {
   }
 
   private static class EngineTestHarness {
-    EngineKey cacheKey = mock(EngineKey.class);
-    EngineKeyFactory keyFactory = mock(EngineKeyFactory.class);
+    final EngineKey cacheKey = mock(EngineKey.class);
+    final EngineKeyFactory keyFactory = mock(EngineKeyFactory.class);
     ResourceCallback cb = mock(ResourceCallback.class);
     @SuppressWarnings("rawtypes")
-    EngineResource resource = mock(EngineResource.class);
-    Map<Key, EngineJob<?>> jobs = new HashMap<>();
-    ActiveResources activeResources = new ActiveResources();
+    final EngineResource resource = mock(EngineResource.class);
+    final Map<Key, EngineJob<?>> jobs = new HashMap<>();
+    final ActiveResources activeResources = new ActiveResources();
 
-    int width = 100;
-    int height = 100;
+    final int width = 100;
+    final int height = 100;
 
-    Object model = new Object();
+    final Object model = new Object();
     MemoryCache cache = mock(MemoryCache.class);
-    EngineJob<?> job;
+    final EngineJob<?> job;
     private Engine engine;
-    Engine.EngineJobFactory engineJobFactory = mock(Engine.EngineJobFactory.class);
-    Engine.DecodeJobFactory decodeJobFactory = mock(Engine.DecodeJobFactory.class);
-    ResourceRecycler resourceRecycler = mock(ResourceRecycler.class);
-    Key signature = mock(Key.class);
-    Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
-    Options options = new Options();
-    GlideContext glideContext = mock(GlideContext.class);
+    final Engine.EngineJobFactory engineJobFactory = mock(Engine.EngineJobFactory.class);
+    final Engine.DecodeJobFactory decodeJobFactory = mock(Engine.DecodeJobFactory.class);
+    final ResourceRecycler resourceRecycler = mock(ResourceRecycler.class);
+    final Key signature = mock(Key.class);
+    final Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
+    final Options options = new Options();
+    final GlideContext glideContext = mock(GlideContext.class);
     boolean isMemoryCacheable = true;
     boolean useUnlimitedSourceGeneratorPool = false;
-    boolean onlyRetrieveFromCache = false;
-    boolean isScaleOnlyOrNoTransform = true;
+    final boolean onlyRetrieveFromCache = false;
+    final boolean isScaleOnlyOrNoTransform = true;
 
-    public EngineTestHarness() {
+    EngineTestHarness() {
       when(keyFactory.buildKey(eq(model), eq(signature), anyInt(), anyInt(), eq(transformations),
           eq(Object.class), eq(Object.class), eq(options))).thenReturn(cacheKey);
       when(resource.getResource()).thenReturn(mock(Resource.class));
@@ -526,7 +525,7 @@ public class EngineTest {
 
     }
 
-    public Engine.LoadStatus doLoad() {
+    Engine.LoadStatus doLoad() {
       when(engineJobFactory.build(eq(cacheKey), anyBoolean(), anyBoolean(), anyBoolean()))
           .thenReturn((EngineJob<Object>) job);
       return getEngine().load(glideContext,

@@ -74,7 +74,7 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
     private final RecyclableBufferedInputStream bufferedStream;
     private final ExceptionCatchingInputStream exceptionStream;
 
-    public UntrustedCallbacks(RecyclableBufferedInputStream bufferedStream,
+    UntrustedCallbacks(RecyclableBufferedInputStream bufferedStream,
         ExceptionCatchingInputStream exceptionStream) {
       this.bufferedStream = bufferedStream;
       this.exceptionStream = exceptionStream;

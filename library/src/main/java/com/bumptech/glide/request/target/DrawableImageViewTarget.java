@@ -13,6 +13,8 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
     super(view);
   }
 
+  // Public API.
+  @SuppressWarnings("unused")
   public DrawableImageViewTarget(ImageView view, boolean waitForLayout) {
     super(view, waitForLayout);
   }

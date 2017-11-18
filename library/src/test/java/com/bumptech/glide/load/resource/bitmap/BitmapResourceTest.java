@@ -69,8 +69,8 @@ public class BitmapResourceTest {
   }
 
   private static class BitmapResourceHarness {
-    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    BitmapPool bitmapPool = mock(BitmapPool.class);
-    BitmapResource resource = new BitmapResource(bitmap, bitmapPool);
+    final Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    final BitmapPool bitmapPool = mock(BitmapPool.class);
+    final BitmapResource resource = new BitmapResource(bitmap, bitmapPool);
   }
 }

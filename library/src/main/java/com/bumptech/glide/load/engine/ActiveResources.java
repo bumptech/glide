@@ -82,10 +82,12 @@ final class ActiveResources {
   }
 
   private static class ResourceWeakReference extends WeakReference<EngineResource<?>> {
-    @Synthetic final Key key;
-    @Synthetic final Resource<?> resource;
-    @Synthetic final boolean isCacheable;
+    @SuppressWarnings("WeakerAccess") @Synthetic final Key key;
+    @SuppressWarnings("WeakerAccess") @Synthetic final Resource<?> resource;
+    @SuppressWarnings("WeakerAccess") @Synthetic final boolean isCacheable;
 
+    @Synthetic
+    @SuppressWarnings("WeakerAccess")
     ResourceWeakReference(
         Key key, EngineResource<?> r, ReferenceQueue<? super EngineResource<?>> q) {
       super(r, q);

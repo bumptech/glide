@@ -20,6 +20,7 @@ import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.util.FixedPreloadSizeProvider;
+import com.bumptech.glide.util.Preconditions;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,9 +56,9 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
-      Bundle savedInstanceState) {
-    Bundle args = getArguments();
+  public View onCreateView(
+      @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    Bundle args = Preconditions.checkNotNull(getArguments());
     photoSize = args.getInt(IMAGE_SIZE_KEY);
     thumbnail = args.getBoolean(THUMBNAIL_KEY);
 
@@ -121,7 +122,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
   }
 
   @Override
-  public void onSaveInstanceState(Bundle outState) {
+  public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     if (grid != null) {
       int index = layoutManager.findFirstVisibleItemPosition();
@@ -142,11 +143,11 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     private final LayoutInflater inflater;
     private List<Photo> photos = Collections.emptyList();
 
-    public PhotoAdapter() {
+    PhotoAdapter() {
       this.inflater = LayoutInflater.from(getActivity());
     }
 
-    public void setPhotos(List<Photo> photos) {
+    void setPhotos(List<Photo> photos) {
       this.photos = photos;
       notifyDataSetChanged();
     }
@@ -205,10 +206,10 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     }
   }
 
-  private static class PhotoViewHolder extends RecyclerView.ViewHolder {
+  private static final class PhotoViewHolder extends RecyclerView.ViewHolder {
     private final ImageView imageView;
 
-    public PhotoViewHolder(View itemView) {
+    PhotoViewHolder(View itemView) {
       super(itemView);
       imageView = (ImageView) itemView;
     }

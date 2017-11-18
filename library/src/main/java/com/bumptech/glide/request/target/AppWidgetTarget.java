@@ -15,6 +15,8 @@ import com.bumptech.glide.util.Preconditions;
  * <p> Note - For cancellation to work correctly, you must pass in the same instance of this class
  * for every subsequent load. </p>
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public class AppWidgetTarget extends SimpleTarget<Bitmap> {
   private final int[] widgetIds;
   private final ComponentName componentName;

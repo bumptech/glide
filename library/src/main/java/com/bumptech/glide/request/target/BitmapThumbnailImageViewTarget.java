@@ -8,6 +8,8 @@ import android.widget.ImageView;
 /**
  * Efficiently displays multiple Bitmaps loaded serially into a single {@link android.view.View}.
  */
+// Public API.
+@SuppressWarnings("unused")
 public class BitmapThumbnailImageViewTarget extends ThumbnailImageViewTarget<Bitmap> {
   public BitmapThumbnailImageViewTarget(ImageView view) {
     super(view);

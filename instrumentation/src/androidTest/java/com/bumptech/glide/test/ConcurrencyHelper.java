@@ -43,9 +43,9 @@ public class ConcurrencyHelper {
     return future;
   }
 
-  public Target<Drawable> loadOnMainThread(
+  public void loadOnMainThread(
       final RequestBuilder<Drawable> builder, ImageView imageView) {
-    return loadOnMainThread(builder, new DrawableImageViewTarget(imageView));
+    loadOnMainThread(builder, new DrawableImageViewTarget(imageView));
   }
 
   public void clearOnMainThread(final ImageView imageView) {
@@ -58,15 +58,15 @@ public class ConcurrencyHelper {
     });
   }
 
-  public Target<Drawable> loadUntilFirstFinish(
+  public void loadUntilFirstFinish(
       final RequestBuilder<Drawable> builder, ImageView imageView) {
-    return loadUntilFirstFinish(builder, new DrawableImageViewTarget(imageView));
+    loadUntilFirstFinish(builder, new DrawableImageViewTarget(imageView));
   }
 
-  public <T> Target<T> loadUntilFirstFinish(
+  private <T> void loadUntilFirstFinish(
       final RequestBuilder<T> builder, final Target<T> target) {
     final CountDownLatch latch = new CountDownLatch(1);
-    Target<T> result = callOnMainThread(new Callable<Target<T>>() {
+    callOnMainThread(new Callable<Target<T>>() {
       @Override
       public Target<T> call() throws Exception {
         builder.into(new Target<T>() {
@@ -132,12 +132,11 @@ public class ConcurrencyHelper {
       }
     });
     waitOnLatch(latch);
-    return result;
   }
 
-  public <T> Target<T> loadOnMainThread(final RequestBuilder<T> builder, final Target<T> target) {
+  private <T> void loadOnMainThread(final RequestBuilder<T> builder, final Target<T> target) {
     final CountDownLatch latch = new CountDownLatch(1);
-    Target<T> result = callOnMainThread(new Callable<Target<T>>() {
+    callOnMainThread(new Callable<Target<T>>() {
       @Override
       public Target<T> call() throws Exception {
         builder.into(new Target<T>() {
@@ -207,7 +206,6 @@ public class ConcurrencyHelper {
       }
     });
     waitOnLatch(latch);
-    return result;
   }
 
   public void pokeMainThread() {
@@ -229,7 +227,7 @@ public class ConcurrencyHelper {
     });
   }
 
-  public <T> T callOnMainThread(final Callable<T> callable) {
+  private <T> void callOnMainThread(final Callable<T> callable) {
     final AtomicReference<T> reference = new AtomicReference<>();
     final CountDownLatch latch = new CountDownLatch(1);
     handler.post(new Runnable() {
@@ -245,7 +243,7 @@ public class ConcurrencyHelper {
       }
     });
     waitOnLatch(latch);
-    return reference.get();
+    reference.get();
   }
 
   private static void waitOnLatch(CountDownLatch latch) {

@@ -8,6 +8,8 @@ import com.bumptech.glide.samples.flickr.api.Api;
 /**
  * Extension methods for the Flickr sample's generated API.
  */
+// Required by Glide's annotation processor.
+@SuppressWarnings("WeakerAccess")
 @GlideExtension
 public final class FlickrGlideExtension {
 

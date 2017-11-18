@@ -142,7 +142,7 @@ public class ListPreloaderTest {
       @Override
       public List<Object> getPreloadItems(int position) {
         if (position == 40) {
-          return null;
+          return Collections.emptyList();
         }
         return objects.subList(position, position + 1);
       }
@@ -329,19 +329,22 @@ public class ListPreloaderTest {
     assertEquals(expected, allValues);
   }
 
-  private <R> List<Integer> getTargetsSizes(
-      RequestBuilder<R> requestBuilder, VerificationMode mode) {
+  private <Resource> List<Integer> getTargetsSizes(
+      RequestBuilder<Resource> requestBuilder, VerificationMode mode) {
     ArgumentCaptor<Integer> integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
-    ArgumentCaptor<Target<R>> targetArgumentCaptor = cast(ArgumentCaptor.forClass(Target.class));
+    ArgumentCaptor<Target<Resource>> targetArgumentCaptor =
+        cast(ArgumentCaptor.forClass(Target.class));
     SizeReadyCallback cb = mock(SizeReadyCallback.class);
     verify(requestBuilder, mode).into(targetArgumentCaptor.capture());
-    for (Target<R> target : targetArgumentCaptor.getAllValues()) {
+    for (Target<Resource> target : targetArgumentCaptor.getAllValues()) {
       target.getSize(cb);
     }
     verify(cb, mode).onSizeReady(integerArgumentCaptor.capture(), integerArgumentCaptor.capture());
     return integerArgumentCaptor.getAllValues();
   }
 
+  // It's safe to ignore the return value of containsAllIn.
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
   public void testItemsArePreloadedWithGlide() {
     final List<Object> objects = new ArrayList<>();

@@ -39,8 +39,8 @@ import org.robolectric.shadows.ShadowCanvas;
 @Config(manifest = Config.NONE, sdk = 18, shadows = { FitCenterTest.DrawNothingCanvas.class })
 public class FitCenterTest {
 
-  @Mock Resource<Bitmap> resource;
-  @Mock Transformation<Bitmap> transformation;
+  @Mock private Resource<Bitmap> resource;
+  @Mock private Transformation<Bitmap> transformation;
   private FitCenter fitCenter;
   private int bitmapWidth;
   private int bitmapHeight;

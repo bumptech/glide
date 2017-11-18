@@ -8,6 +8,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.util.ByteBufferUtil;
+import com.bumptech.glide.util.Synthetic;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -49,13 +50,15 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
 
     private final File file;
 
-    public ByteBufferFetcher(File file) {
+    @Synthetic
+    @SuppressWarnings("WeakerAccess")
+    ByteBufferFetcher(File file) {
       this.file = file;
     }
 
     @Override
     public void loadData(Priority priority, DataCallback<? super ByteBuffer> callback) {
-      ByteBuffer result = null;
+      ByteBuffer result;
       try {
         result = ByteBufferUtil.fromFile(file);
       } catch (IOException e) {

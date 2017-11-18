@@ -20,7 +20,7 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class ContentLengthInputStreamTest {
-  @Mock InputStream wrapped;
+  @Mock private InputStream wrapped;
 
   @Before
   public void setUp() {
@@ -95,6 +95,7 @@ public class ContentLengthInputStreamTest {
     when(wrapped.read()).thenReturn(-1);
 
     try {
+      //noinspection ResultOfMethodCallIgnored
       is.read();
       fail("Failed to throw expected exception");
     } catch (IOException e) {
@@ -110,6 +111,7 @@ public class ContentLengthInputStreamTest {
     when(wrapped.read(any(byte[].class), anyInt(), anyInt())).thenReturn(-1);
 
     try {
+      //noinspection ResultOfMethodCallIgnored
       is.read(new byte[10], 0, 0);
       fail("Failed to throw expected exception");
     } catch (IOException e) {
@@ -121,6 +123,7 @@ public class ContentLengthInputStreamTest {
   public void testRead_whenReturnsLessThanZeroWithInvalidLength_doesNotThrow() throws IOException {
     InputStream is = ContentLengthInputStream.obtain(wrapped, "invalid_length");
     when(wrapped.read()).thenReturn(-1);
+    //noinspection ResultOfMethodCallIgnored
     is.read();
   }
 
@@ -129,6 +132,7 @@ public class ContentLengthInputStreamTest {
       throws IOException {
     InputStream is = ContentLengthInputStream.obtain(wrapped, "invalid_length");
     when(wrapped.read(any(byte[].class), anyInt(), anyInt())).thenReturn(-1);
+    //noinspection ResultOfMethodCallIgnored
     is.read(new byte[10], 0, 0);
   }
 

@@ -25,8 +25,8 @@ import org.junit.runner.RunWith;
 @SplitByCpu
 @SplitBySdk({24, 21, 16})
 public class CenterCropRegressionTest {
-  @Rule public TestName testName = new TestName();
-  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
+  @Rule public final TestName testName = new TestName();
+  @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   private BitmapRegressionTester bitmapRegressionTester;
   private Context context;
   private CanonicalBitmap canonical;

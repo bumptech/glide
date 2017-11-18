@@ -104,32 +104,34 @@ public class BitmapEncoderTest {
   }
 
   private static class EncoderHarness {
-    Resource<Bitmap> resource = mockResource();
-    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    Options options = new Options();
-    File file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
+    final Resource<Bitmap> resource = mockResource();
+    final Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    final Options options = new Options();
+    final File file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
 
-    public EncoderHarness() {
+    EncoderHarness() {
       when(resource.get()).thenReturn(bitmap);
     }
 
-    public void setQuality(int quality) {
+    void setQuality(int quality) {
       options.set(BitmapEncoder.COMPRESSION_QUALITY, quality);
     }
 
-    public void setFormat(Bitmap.CompressFormat format) {
+    void setFormat(Bitmap.CompressFormat format) {
       options.set(BitmapEncoder.COMPRESSION_FORMAT, format);
     }
 
-    public String encode() throws IOException {
+    String encode() throws IOException {
       BitmapEncoder encoder = new BitmapEncoder();
       encoder.encode(resource, file, options);
       byte[] data = ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
       return new String(data);
     }
 
-    public void tearDown() {
-      file.delete();
+    void tearDown() {
+      if (file.exists() && !file.delete()) {
+        throw new IllegalStateException("Failed to delete: " + file);
+      }
     }
   }
 }

@@ -20,7 +20,7 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class DiskLruCacheWrapperTest {
-  private DiskLruCacheWrapper cache;
+  private DiskCache cache;
   private byte[] data;
   private StringKey key;
   private File dir;
@@ -28,7 +28,7 @@ public class DiskLruCacheWrapperTest {
   @Before
   public void setUp() {
     dir = RuntimeEnvironment.application.getCacheDir();
-    cache = new DiskLruCacheWrapper(dir, 10 * 1024 * 1024);
+    cache = DiskLruCacheWrapper.create(dir, 10 * 1024 * 1024);
     key = new StringKey("test" + Math.random());
     data = new byte[] { 1, 2, 3, 4, 5, 6 };
   }
@@ -138,10 +138,10 @@ public class DiskLruCacheWrapperTest {
     assertArrayEquals(data, received);
   }
 
-  private static class StringKey implements Key {
+  private static final class StringKey implements Key {
     private final String key;
 
-    public StringKey(String key) {
+    StringKey(String key) {
       this.key = key;
     }
 

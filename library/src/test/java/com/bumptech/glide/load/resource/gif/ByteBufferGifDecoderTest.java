@@ -36,17 +36,17 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18, shadows = GlideShadowLooper.class)
 public class ByteBufferGifDecoderTest {
   private static final byte[] GIF_HEADER = new byte[] { 0x47, 0x49, 0x46 };
-  static final int ARRAY_POOL_SIZE_BYTES = 4 * 1024 * 1024;
+  private static final int ARRAY_POOL_SIZE_BYTES = 4 * 1024 * 1024;
 
   private ByteBufferGifDecoder decoder;
   private GifHeader gifHeader;
   private Options options;
 
-  @Mock BitmapPool bitmapPool;
-  @Mock GifHeaderParser parser;
-  @Mock GifDecoder gifDecoder;
-  @Mock ByteBufferGifDecoder.GifHeaderParserPool parserPool;
-  @Mock ByteBufferGifDecoder.GifDecoderFactory decoderFactory;
+  @Mock private BitmapPool bitmapPool;
+  @Mock private GifHeaderParser parser;
+  @Mock private GifDecoder gifDecoder;
+  @Mock private ByteBufferGifDecoder.GifHeaderParserPool parserPool;
+  @Mock private ByteBufferGifDecoder.GifDecoderFactory decoderFactory;
 
   @Before
   public void setUp() {
@@ -60,7 +60,7 @@ public class ByteBufferGifDecoderTest {
         eq(gifHeader), isA(ByteBuffer.class), anyInt()))
         .thenReturn(gifDecoder);
 
-    List<ImageHeaderParser> parsers = new ArrayList<ImageHeaderParser>();
+    List<ImageHeaderParser> parsers = new ArrayList<>();
     parsers.add(new DefaultImageHeaderParser());
 
     options = new Options();

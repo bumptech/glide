@@ -16,6 +16,7 @@ import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.LogTime;
+import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
@@ -62,7 +63,7 @@ public class Engine implements EngineJobListener,
         /*resourceRecycler=*/ null);
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   Engine(MemoryCache cache,
       DiskCache.Factory diskCacheFactory,
       GlideExecutor diskCacheExecutor,
@@ -370,7 +371,7 @@ public class Engine implements EngineJobListener,
         new FactoryPools.Factory<DecodeJob<?>>() {
           @Override
           public DecodeJob<?> create() {
-            return new DecodeJob<Object>(diskCacheProvider, pool);
+            return new DecodeJob<>(diskCacheProvider, pool);
           }
         });
     private int creationOrder;
@@ -396,7 +397,7 @@ public class Engine implements EngineJobListener,
         boolean onlyRetrieveFromCache,
         Options options,
         DecodeJob.Callback<R> callback) {
-      DecodeJob<R> result = (DecodeJob<R>) pool.acquire();
+      DecodeJob<R> result = Preconditions.checkNotNull((DecodeJob<R>) pool.acquire());
       return result.init(
           glideContext,
           model,
@@ -429,7 +430,7 @@ public class Engine implements EngineJobListener,
         new FactoryPools.Factory<EngineJob<?>>() {
           @Override
           public EngineJob<?> create() {
-            return new EngineJob<Object>(
+            return new EngineJob<>(
                 diskCacheExecutor,
                 sourceExecutor,
                 sourceUnlimitedExecutor,
@@ -463,7 +464,7 @@ public class Engine implements EngineJobListener,
     @SuppressWarnings("unchecked")
     <R> EngineJob<R> build(Key key, boolean isMemoryCacheable,
         boolean useUnlimitedSourceGeneratorPool, boolean useAnimationPool) {
-      EngineJob<R> result = (EngineJob<R>) pool.acquire();
+      EngineJob<R> result = Preconditions.checkNotNull((EngineJob<R>) pool.acquire());
       return result.init(key, isMemoryCacheable, useUnlimitedSourceGeneratorPool, useAnimationPool);
     }
 

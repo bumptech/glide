@@ -336,12 +336,12 @@ public class RequestOptionsTest {
         .addEqualityGroup(
             new RequestOptions().priority(Priority.LOW))
         .addEqualityGroup(
-            new RequestOptions().set(Option.<Boolean>memory("test"), true),
-            new RequestOptions().set(Option.<Boolean>memory("test"), true))
+            new RequestOptions().set(Option.memory("test"), true),
+            new RequestOptions().set(Option.memory("test"), true))
         .addEqualityGroup(
-            new RequestOptions().set(Option.<Boolean>memory("test"), false))
+            new RequestOptions().set(Option.memory("test"), false))
         .addEqualityGroup(
-            new RequestOptions().set(Option.<Boolean>memory("test2"), true))
+            new RequestOptions().set(Option.memory("test2"), true))
         .addEqualityGroup(
             new RequestOptions().decode(Integer.class),
             new RequestOptions().decode(Integer.class))

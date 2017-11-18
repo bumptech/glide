@@ -20,6 +20,8 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   private final ModelLoader<Uri, Data> uriLoader;
   private final Resources resources;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public ResourceLoader(Resources resources, ModelLoader<Uri, Data> uriLoader) {
     this.resources = resources;
     this.uriLoader = uriLoader;

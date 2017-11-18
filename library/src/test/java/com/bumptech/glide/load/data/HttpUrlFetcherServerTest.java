@@ -41,7 +41,7 @@ public class HttpUrlFetcherServerTest {
   private static final String DEFAULT_PATH = "/fakepath";
   private static final int TIMEOUT_TIME_MS = 300;
 
-  @Mock DataFetcher.DataCallback<InputStream> callback;
+  @Mock private DataFetcher.DataCallback<InputStream> callback;
 
   private MockWebServer mockWebServer;
   private boolean defaultFollowRedirects;

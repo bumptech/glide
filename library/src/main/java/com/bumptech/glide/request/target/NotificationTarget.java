@@ -16,6 +16,8 @@ import com.bumptech.glide.util.Preconditions;
  * <p> Note - For cancellation to work correctly, you must pass in the same instance of this class
  * for every subsequent load. </p>
  */
+// Public API.
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class NotificationTarget extends SimpleTarget<Bitmap> {
   private final RemoteViews remoteViews;
   private final Context context;
@@ -98,7 +100,8 @@ public class NotificationTarget extends SimpleTarget<Bitmap> {
   private void update() {
     NotificationManager manager =
         (NotificationManager) this.context.getSystemService(Context.NOTIFICATION_SERVICE);
-    manager.notify(this.notificationTag, this.notificationId, this.notification);
+    Preconditions.checkNotNull(manager)
+        .notify(this.notificationTag, this.notificationId, this.notification);
   }
 
   @Override

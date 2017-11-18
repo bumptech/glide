@@ -149,6 +149,7 @@ public final class SingleRequest<R> implements Request,
     return request;
   }
 
+  @SuppressWarnings("WeakerAccess")
   @Synthetic
   SingleRequest() {
     // just create, instances are reused with recycle/init

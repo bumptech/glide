@@ -559,7 +559,8 @@ public class Glide implements ComponentCallbacks2 {
    *     This method should always be called on a background thread, since it is a blocking call.
    * </p>
    */
-  @SuppressWarnings("unused") // Public API
+  // Public API.
+  @SuppressWarnings({"unused", "WeakerAccess"})
   public void clearDiskCache() {
     Util.assertBackgroundThread();
     engine.clearDiskCache();

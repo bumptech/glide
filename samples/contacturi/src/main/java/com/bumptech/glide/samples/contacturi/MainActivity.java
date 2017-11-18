@@ -21,6 +21,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.Preconditions;
 
 /**
  * An activity that demonstrates loading photos using
@@ -83,7 +84,8 @@ public class MainActivity extends Activity {
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == REQUEST_CONTACT && resultCode == RESULT_OK) {
-      final Cursor cursor = getContentResolver().query(data.getData(), null, null, null, null);
+      Uri uri = Preconditions.checkNotNull(data.getData());
+      final Cursor cursor = getContentResolver().query(uri, null, null, null, null);
       try {
         if (cursor != null && cursor.moveToFirst()) {
           final long contactId = cursor.getLong(cursor.getColumnIndex(Contacts._ID));

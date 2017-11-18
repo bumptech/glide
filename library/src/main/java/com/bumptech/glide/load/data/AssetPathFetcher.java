@@ -19,6 +19,8 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
   private final AssetManager assetManager;
   private T data;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public AssetPathFetcher(AssetManager assetManager, String assetPath) {
     this.assetManager = assetManager;
     this.assetPath = assetPath;
@@ -74,7 +76,6 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
    * Closes the concrete data type if necessary.
    *
    * @param data The data to close.
-   * @throws IOException
    */
   protected abstract void close(T data) throws IOException;
 }

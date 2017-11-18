@@ -16,7 +16,7 @@ import java.util.TreeMap;
  */
 public final class LruArrayPool implements ArrayPool {
   // 4MB.
-  static final int DEFAULT_SIZE = 4 * 1024 * 1024;
+  private static final int DEFAULT_SIZE = 4 * 1024 * 1024;
 
   /**
    * The maximum number of times larger an int array may be to be than a requested size to eligible

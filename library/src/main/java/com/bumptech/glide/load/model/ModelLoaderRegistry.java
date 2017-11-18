@@ -12,6 +12,8 @@ import java.util.Map;
  * Maintains an ordered put of {@link ModelLoader}s and the model and data types they handle in
  * order from highest priority to lowest.
  */
+// Hides Model throughout.
+@SuppressWarnings("TypeParameterHidesVisibleType")
 public class ModelLoaderRegistry {
 
   private final MultiModelLoaderFactory multiModelLoaderFactory;
@@ -21,8 +23,7 @@ public class ModelLoaderRegistry {
     this(new MultiModelLoaderFactory(throwableListPool));
   }
 
-  // Visible for testing.
-  ModelLoaderRegistry(MultiModelLoaderFactory multiModelLoaderFactory) {
+  private ModelLoaderRegistry(MultiModelLoaderFactory multiModelLoaderFactory) {
     this.multiModelLoaderFactory = multiModelLoaderFactory;
   }
 

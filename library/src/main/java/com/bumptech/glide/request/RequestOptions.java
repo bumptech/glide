@@ -427,9 +427,8 @@ public class RequestOptions implements Cloneable {
    * to excessive memory usage and OOMs and/or a significant decrease in performance across an
    * application.
    *
-   * <p>If both {@link #useUnlimitedSourceGeneratorsPool(boolean)} and
-   * {@link #useAnimationPool(boolean)} are set, {@link #useUnlimitedSourceGeneratorsPool(boolean)}
-   * will be preferred and {@link #useAnimationPool(boolean)} will be ignored.
+   * <p>If both this method and {@link #useAnimationPool(boolean)} are set, this method will be
+   * preferred and {@link #useAnimationPool(boolean)} will be ignored.
    */
   @CheckResult
   public RequestOptions useUnlimitedSourceGeneratorsPool(boolean flag) {
@@ -452,9 +451,9 @@ public class RequestOptions implements Cloneable {
    * normal executors and is only useful as a way of avoiding blocking on longer and more expensive
    * reads for critical requests like those in an animating GIF.
    *
-   * <p>If both {@link #useUnlimitedSourceGeneratorsPool(boolean)} and
-   * {@link #useAnimationPool(boolean)} are set, {@link #useUnlimitedSourceGeneratorsPool(boolean)}
-   * will be preferred and {@link #useAnimationPool(boolean)} will be ignored.
+   * <p>If both {@link #useUnlimitedSourceGeneratorsPool(boolean)} and this method are set,
+   * {@link #useUnlimitedSourceGeneratorsPool(boolean)} will be preferred and this method will be
+   * ignored.
    */
   @CheckResult
   public RequestOptions useAnimationPool(boolean flag) {
@@ -1553,7 +1552,7 @@ public class RequestOptions implements Cloneable {
     return sizeMultiplier;
   }
 
-  public boolean isScaleOnlyOrNoTransform() {
+  boolean isScaleOnlyOrNoTransform() {
     return isScaleOnlyOrNoTransform;
   }
 

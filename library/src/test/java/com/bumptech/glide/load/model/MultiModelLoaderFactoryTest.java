@@ -23,17 +23,18 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+// containsExactly produces a spurious warning.
+@SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class MultiModelLoaderFactoryTest {
+  @Rule public final ExpectedException exception = ExpectedException.none();
 
-  @Mock ModelLoaderFactory<String, String> firstFactory;
-  @Mock ModelLoader<String, String> firstModelLoader;
-  @Mock MultiModelLoaderFactory.Factory multiModelLoaderFactory;
-  @Mock ModelLoaderFactory<String, String> secondFactory;
-  @Mock ModelLoader<String, String> secondModelLoader;
-
-  @Rule public ExpectedException exception = ExpectedException.none();
+  @Mock private ModelLoaderFactory<String, String> firstFactory;
+  @Mock private ModelLoader<String, String> firstModelLoader;
+  @Mock private MultiModelLoaderFactory.Factory multiModelLoaderFactory;
+  @Mock private ModelLoaderFactory<String, String> secondFactory;
+  @Mock private ModelLoader<String, String> secondModelLoader;
 
   private Pool<List<Throwable>> throwableListPool;
   private MultiModelLoaderFactory multiFactory;
@@ -272,9 +273,7 @@ public class MultiModelLoaderFactoryTest {
 
     List<ModelLoader<X, Y>> captured = captor.getValue();
     List<ModelLoader<X, Y>> result = new ArrayList<>(captured.size());
-    for (ModelLoader<X, Y> modelLoader : captured) {
-      result.add(modelLoader);
-    }
+    result.addAll(captured);
     return result;
   }
 

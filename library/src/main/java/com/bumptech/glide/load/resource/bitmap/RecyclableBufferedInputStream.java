@@ -17,6 +17,8 @@ package com.bumptech.glide.load.resource.bitmap;
  *  limitations under the License.
  */
 
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -67,7 +69,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
     this(in, byteArrayPool, ArrayPool.STANDARD_BUFFER_SIZE_BYTES);
   }
 
-  // Visible for testing
+  @VisibleForTesting
   RecyclableBufferedInputStream(InputStream in, ArrayPool byteArrayPool,
       int bufferSize) {
     super(in);
@@ -104,6 +106,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    * <p>Subsequent calls to {@link #mark(int)} will be obeyed and may cause the buffer size to
    * increase.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public synchronized void fixMarkLimit() {
     marklimit = buf.length;
   }
@@ -266,7 +270,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    *                                   occurs.
    */
   @Override
-  public synchronized int read(byte[] buffer, int offset, int byteCount) throws IOException {
+  public synchronized int read(@NonNull byte[] buffer, int offset, int byteCount)
+      throws IOException {
     // Use local ref since buf may be invalidated by an unsynchronized close()
     byte[] localBuf = buf;
     if (localBuf == null) {
@@ -356,7 +361,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    * Skips {@code byteCount} bytes in this stream. Subsequent calls to {@link #read} will not return
    * these bytes unless {@link #reset} is used.
    *
-   * @param byteCount the number of bytes to skip. {@link #skip} does nothing and returns 0 if
+   * @param byteCount the number of bytes to skip. This method does nothing and returns 0 if
    *                  {@code byteCount} is less than zero.
    * @return the number of bytes actually skipped.
    * @throws IOException if this stream is closed or another IOException occurs.
@@ -403,10 +408,10 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    * An exception thrown when a mark can no longer be obeyed because the underlying buffer size is
    * smaller than the amount of data read after the mark position.
    */
-  public static class InvalidMarkException extends IOException {
+  static class InvalidMarkException extends IOException {
     private static final long serialVersionUID = -4338378848813561757L;
 
-    public InvalidMarkException(String detailMessage) {
+    InvalidMarkException(String detailMessage) {
       super(detailMessage);
     }
   }

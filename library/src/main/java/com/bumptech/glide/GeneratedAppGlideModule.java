@@ -16,7 +16,6 @@ abstract class GeneratedAppGlideModule extends AppGlideModule {
   /**
    * This method can be removed when manifest parsing is no longer supported.
    */
-  @Deprecated
   @NonNull
   abstract Set<Class<?>> getExcludedModuleClasses();
 

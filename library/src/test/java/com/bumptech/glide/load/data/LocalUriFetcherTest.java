@@ -26,7 +26,7 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 public class LocalUriFetcherTest {
   private TestLocalUriFetcher fetcher;
-  @Mock DataFetcher.DataCallback<Closeable> callback;
+  @Mock private DataFetcher.DataCallback<Closeable> callback;
 
   @Before
   public void setUp() {
@@ -61,7 +61,7 @@ public class LocalUriFetcherTest {
   private static class TestLocalUriFetcher extends LocalUriFetcher<Closeable> {
     final Closeable closeable = mock(Closeable.class);
 
-    public TestLocalUriFetcher(Context context, Uri uri) {
+    TestLocalUriFetcher(Context context, Uri uri) {
       super(context.getContentResolver(), uri);
     }
 

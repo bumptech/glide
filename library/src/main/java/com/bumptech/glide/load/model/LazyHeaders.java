@@ -97,7 +97,7 @@ public final class LazyHeaders implements Headers {
    * would usually append an additional value. </p>
    */
    // PMD doesn't like the necessary static block to initialize DEFAULT_HEADERS.
-  @SuppressWarnings("PMD.FieldDeclarationsShouldBeAtStartOfClass")
+  @SuppressWarnings({"PMD.FieldDeclarationsShouldBeAtStartOfClass", "WeakerAccess"})
   public static final class Builder {
     private static final String USER_AGENT_HEADER = "User-Agent";
     private static final String DEFAULT_USER_AGENT = getSanitizedUserAgent();
@@ -163,6 +163,8 @@ public final class LazyHeaders implements Headers {
      * <p> Use {@link #setHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
      * (i.e. an OAuth token). </p>
      */
+    // Public API.
+    @SuppressWarnings("UnusedReturnValue")
     public Builder setHeader(String key, String value) {
       return setHeader(key, value == null ? null : new StringHeaderFactory(value));
     }

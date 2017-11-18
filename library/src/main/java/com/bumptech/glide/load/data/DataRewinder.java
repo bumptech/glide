@@ -34,7 +34,6 @@ public interface DataRewinder<T> {
    * returns the re-wound data (or a wrapper for the re-wound data).
    *
    * @return An object pointing to the wrapped data.
-   * @throws IOException
    */
   T rewindAndGet() throws IOException;
 

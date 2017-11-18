@@ -27,10 +27,6 @@ import org.robolectric.util.ReflectionHelpers;
 // FIXME move to testutil module
 public class Util {
 
-  public static String getExpectedClassId(Class<?> clazz) {
-    return clazz.getSimpleName() + "." + clazz.getPackage().getName();
-  }
-
   /**
    * Gives the proper generic type to the {@link ArgumentCaptor}.
    * Only useful when the captor's {@code T} is also a generic type.
@@ -107,7 +103,7 @@ public class Util {
   }
 
   public static class WriteDigest implements Answer<Void> {
-    private String toWrite;
+    private final String toWrite;
 
     public WriteDigest(String toWrite) {
       this.toWrite = toWrite;
@@ -133,9 +129,9 @@ public class Util {
     }
   }
 
-  public static class CallDataReady<T> implements Answer<Void> {
+  public static final class CallDataReady<T> implements Answer<Void> {
 
-    private T data;
+    private final T data;
 
     public CallDataReady(T data) {
       this.data = data;
@@ -151,7 +147,7 @@ public class Util {
     }
   }
 
-  public static class CreateBitmap implements Answer<Bitmap> {
+  public static final class CreateBitmap implements Answer<Bitmap> {
 
     @Override
     public Bitmap answer(InvocationOnMock invocation) throws Throwable {

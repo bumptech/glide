@@ -114,7 +114,7 @@ public class GifDrawableTest {
     layoutParams.type = LayoutParams.TYPE_SYSTEM_ALERT;
     final WindowManager windowManager =
         (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-    windowManager.addView(view, layoutParams);
+    Preconditions.checkNotNull(windowManager).addView(view, layoutParams);
   }
 
   private static void waitOrThrow(CountDownLatch latch) {

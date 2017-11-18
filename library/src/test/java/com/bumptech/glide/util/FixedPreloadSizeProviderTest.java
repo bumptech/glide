@@ -11,6 +11,8 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 public class FixedPreloadSizeProviderTest {
 
+  // containsExactly doesn't need a return value check.
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
   public void testReturnsGivenSize() {
     int width = 500;

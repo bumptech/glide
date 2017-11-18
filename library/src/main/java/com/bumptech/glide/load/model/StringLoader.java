@@ -17,6 +17,8 @@ import java.io.InputStream;
 public class StringLoader<Data> implements ModelLoader<String, Data> {
   private final ModelLoader<Uri, Data> uriLoader;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public StringLoader(ModelLoader<Uri, Data> uriLoader) {
     this.uriLoader = uriLoader;
   }

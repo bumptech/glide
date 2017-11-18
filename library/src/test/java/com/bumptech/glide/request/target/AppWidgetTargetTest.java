@@ -31,8 +31,7 @@ public class AppWidgetTargetTest {
 
   @Before
   public void setUp() {
-    shadowManager = (UpdateShadowAppWidgetManager) Shadow
-        .extract(AppWidgetManager.getInstance(RuntimeEnvironment.application));
+    shadowManager = Shadow.extract(AppWidgetManager.getInstance(RuntimeEnvironment.application));
     viewId = 1234;
     views = mock(RemoteViews.class);
   }
@@ -126,9 +125,9 @@ public class AppWidgetTargetTest {
 
   @Implements(AppWidgetManager.class)
   public static class UpdateShadowAppWidgetManager extends ShadowAppWidgetManager {
-    public int[] updatedWidgetIds;
-    public RemoteViews updatedRemoteViews;
-    public ComponentName updatedComponentName;
+    int[] updatedWidgetIds;
+    RemoteViews updatedRemoteViews;
+    ComponentName updatedComponentName;
 
     @Implementation
     public void updateAppWidget(int[] appWidgetIds, RemoteViews views) {

@@ -3,7 +3,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
  * Interface for handling operations on a primitive array type.
  * @param <T> Array type (e.g. byte[], int[])
  */
-public interface ArrayAdapterInterface<T> {
+interface ArrayAdapterInterface<T> {
 
   /**
    * TAG for logging.

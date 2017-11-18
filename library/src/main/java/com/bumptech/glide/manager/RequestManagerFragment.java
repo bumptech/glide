@@ -50,7 +50,7 @@ public class RequestManagerFragment extends Fragment {
    *
    * @param requestManager The request manager to use.
    */
-  public void setRequestManager(RequestManager requestManager) {
+  public void setRequestManager(@Nullable RequestManager requestManager) {
     this.requestManager = requestManager;
   }
 
@@ -86,7 +86,7 @@ public class RequestManagerFragment extends Fragment {
    * our parent is the fragment that we are annotating).
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-  public Set<RequestManagerFragment> getDescendantRequestManagerFragments() {
+  private Set<RequestManagerFragment> getDescendantRequestManagerFragments() {
     if (rootRequestManagerFragment == this) {
       return Collections.unmodifiableSet(childRequestManagerFragments);
     } else if (rootRequestManagerFragment == null
@@ -110,7 +110,7 @@ public class RequestManagerFragment extends Fragment {
    * Sets a hint for which fragment is our parent which allows the fragment to return correct
    * information about its parents before pending fragment transactions have been executed.
    */
-  void setParentFragmentHint(Fragment parentFragmentHint) {
+  void setParentFragmentHint(@Nullable Fragment parentFragmentHint) {
     this.parentFragmentHint = parentFragmentHint;
     if (parentFragmentHint != null && parentFragmentHint.getActivity() != null) {
       registerFragmentWithRoot(parentFragmentHint.getActivity());

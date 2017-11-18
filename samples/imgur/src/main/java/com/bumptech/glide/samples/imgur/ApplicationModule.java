@@ -8,7 +8,7 @@ import okhttp3.OkHttpClient;
  * The Application Dagger module for the Imgur sample.
  */
 @Module
-public class ApplicationModule {
+class ApplicationModule {
   @Provides
   OkHttpClient okHttpClient() {
     return new OkHttpClient();

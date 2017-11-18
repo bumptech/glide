@@ -19,10 +19,10 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class DataCacheKeyTest {
 
-  @Mock Key firstKey;
-  @Mock Key firstSignature;
-  @Mock Key secondKey;
-  @Mock Key secondSignature;
+  @Mock private Key firstKey;
+  @Mock private Key firstSignature;
+  @Mock private Key secondKey;
+  @Mock private Key secondSignature;
 
   @Before
   public void setUp() throws UnsupportedEncodingException {

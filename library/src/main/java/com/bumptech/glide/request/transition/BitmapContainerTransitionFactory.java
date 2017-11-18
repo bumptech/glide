@@ -17,6 +17,8 @@ import com.bumptech.glide.load.DataSource;
 public abstract class BitmapContainerTransitionFactory<R> implements TransitionFactory<R> {
   private final TransitionFactory<Drawable> realFactory;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public BitmapContainerTransitionFactory(TransitionFactory<Drawable> realFactory) {
     this.realFactory = realFactory;
   }
@@ -37,10 +39,10 @@ public abstract class BitmapContainerTransitionFactory<R> implements TransitionF
    */
   protected abstract Bitmap getBitmap(R current);
 
-  private class BitmapGlideAnimation implements Transition<R> {
+  private final class BitmapGlideAnimation implements Transition<R> {
     private final Transition<Drawable> transition;
 
-    public BitmapGlideAnimation(Transition<Drawable> transition) {
+    BitmapGlideAnimation(Transition<Drawable> transition) {
       this.transition = transition;
     }
 

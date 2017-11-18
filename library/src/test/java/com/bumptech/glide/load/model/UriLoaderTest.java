@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import android.net.Uri;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.util.Preconditions;
 import java.io.File;
 import java.io.IOException;
 import org.junit.Before;
@@ -27,8 +28,8 @@ public class UriLoaderTest {
   // Not a magic number, just arbitrary non zero.
   private static final int IMAGE_SIDE = 120;
 
-  @Mock DataFetcher<Object> localUriFetcher;
-  @Mock UriLoader.LocalUriFetcherFactory<Object> factory;
+  @Mock private DataFetcher<Object> localUriFetcher;
+  @Mock private UriLoader.LocalUriFetcherFactory<Object> factory;
   private UriLoader<Object> loader;
   private Options options;
 
@@ -46,8 +47,10 @@ public class UriLoaderTest {
     when(factory.build(eq(fileUri))).thenReturn(localUriFetcher);
 
     assertTrue(loader.handles(fileUri));
-    assertEquals(localUriFetcher,
-        loader.buildLoadData(fileUri, IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
+    assertEquals(
+        localUriFetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(fileUri, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test
@@ -56,8 +59,10 @@ public class UriLoaderTest {
     when(factory.build(eq(resourceUri))).thenReturn(localUriFetcher);
 
     assertTrue(loader.handles(resourceUri));
-    assertEquals(localUriFetcher,
-        loader.buildLoadData(resourceUri, IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
+    assertEquals(
+        localUriFetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(resourceUri, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test
@@ -66,7 +71,9 @@ public class UriLoaderTest {
     when(factory.build(eq(contentUri))).thenReturn(localUriFetcher);
 
     assertTrue(loader.handles(contentUri));
-    assertEquals(localUriFetcher, loader.buildLoadData(contentUri, IMAGE_SIDE, IMAGE_SIDE,
-        options).fetcher);
+    assertEquals(
+        localUriFetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(contentUri, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 }

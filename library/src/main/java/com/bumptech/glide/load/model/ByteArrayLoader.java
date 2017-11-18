@@ -20,6 +20,8 @@ import java.nio.ByteBuffer;
 public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
   private final Converter<Data> converter;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public ByteArrayLoader(Converter<Data> converter) {
     this.converter = converter;
   }
@@ -49,7 +51,7 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
     private final byte[] model;
     private final Converter<Data> converter;
 
-    public Fetcher(byte[] model, Converter<Data> converter) {
+    Fetcher(byte[] model, Converter<Data> converter) {
       this.model = model;
       this.converter = converter;
     }

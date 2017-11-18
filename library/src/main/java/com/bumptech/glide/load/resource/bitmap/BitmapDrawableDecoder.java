@@ -23,6 +23,8 @@ public class BitmapDrawableDecoder<DataType> implements ResourceDecoder<DataType
   private final Resources resources;
   private final BitmapPool bitmapPool;
 
+  // Public API.
+  @SuppressWarnings("unused")
   public BitmapDrawableDecoder(Context context, ResourceDecoder<DataType, Bitmap> decoder) {
     this(context.getResources(), Glide.get(context).getBitmapPool(), decoder);
   }

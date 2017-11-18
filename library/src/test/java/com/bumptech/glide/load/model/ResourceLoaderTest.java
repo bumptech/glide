@@ -14,6 +14,7 @@ import android.net.Uri;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.util.Preconditions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,9 +31,9 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 public class ResourceLoaderTest {
 
-  @Mock ModelLoader<Uri, Object> uriLoader;
-  @Mock DataFetcher<Object> fetcher;
-  @Mock Key key;
+  @Mock private ModelLoader<Uri, Object> uriLoader;
+  @Mock private DataFetcher<Object> fetcher;
+  @Mock private Key key;
   private Options options;
 
   private ResourceLoader<Object> loader;
@@ -53,7 +54,9 @@ public class ResourceLoaderTest {
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(id));
-    assertEquals(fetcher, loader.buildLoadData(id, 100, 100, new Options()).fetcher);
+    assertEquals(
+        fetcher,
+        Preconditions.checkNotNull(loader.buildLoadData(id, 100, 100, new Options())).fetcher);
   }
 
     @Test

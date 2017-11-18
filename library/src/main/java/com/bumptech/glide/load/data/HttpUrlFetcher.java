@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.data;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
 import com.bumptech.glide.Priority;
@@ -23,7 +24,7 @@ import java.util.Map;
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "HttpUrlFetcher";
   private static final int MAXIMUM_REDIRECTS = 5;
-  // Visible for testing.
+  @VisibleForTesting
   static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY =
       new DefaultHttpUrlConnectionFactory();
 
@@ -39,7 +40,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     this(glideUrl, timeout, DEFAULT_CONNECTION_FACTORY);
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   HttpUrlFetcher(GlideUrl glideUrl, int timeout, HttpUrlConnectionFactory connectionFactory) {
     this.glideUrl = glideUrl;
     this.timeout = timeout;

@@ -17,18 +17,18 @@ import java.util.List;
  * ExecutorService backing the Engine to download the image and resize it in memory before saving
  * the resized version directly to the disk cache.
  */
-public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
+public final class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
 
   /**
    * The default factory for {@link com.bumptech.glide.samples.flickr.FlickrModelLoader}s.
    */
   public static class Factory implements ModelLoaderFactory<Photo, InputStream> {
-    private final ModelCache<Photo, GlideUrl> modelCache = new ModelCache<Photo, GlideUrl>(500);
+    private final ModelCache<Photo, GlideUrl> modelCache = new ModelCache<>(500);
 
     @Override
     public ModelLoader<Photo, InputStream> build(MultiModelLoaderFactory multiFactory) {
-      return new FlickrModelLoader(multiFactory.build(GlideUrl.class, InputStream.class),
-          modelCache);
+      return new FlickrModelLoader(
+          multiFactory.build(GlideUrl.class, InputStream.class), modelCache);
     }
 
     @Override
@@ -36,8 +36,8 @@ public class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
     }
   }
 
-  public FlickrModelLoader(ModelLoader<GlideUrl, InputStream> urlLoader,
-      ModelCache<Photo, GlideUrl> modelCache) {
+  private FlickrModelLoader(
+      ModelLoader<GlideUrl, InputStream> urlLoader, ModelCache<Photo, GlideUrl> modelCache) {
     super(urlLoader, modelCache);
   }
 

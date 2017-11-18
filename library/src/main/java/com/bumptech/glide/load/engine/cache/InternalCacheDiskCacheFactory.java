@@ -7,6 +7,8 @@ import java.io.File;
  * Creates an {@link com.bumptech.glide.disklrucache.DiskLruCache} based disk cache in the internal
  * disk cache directory.
  */
+// Public API.
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class InternalCacheDiskCacheFactory extends DiskLruCacheFactory {
 
   public InternalCacheDiskCacheFactory(Context context) {

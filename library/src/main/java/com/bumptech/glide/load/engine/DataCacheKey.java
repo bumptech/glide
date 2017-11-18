@@ -11,12 +11,12 @@ final class DataCacheKey implements Key {
   private final Key sourceKey;
   private final Key signature;
 
-  public DataCacheKey(Key sourceKey, Key signature) {
+  DataCacheKey(Key sourceKey, Key signature) {
     this.sourceKey = sourceKey;
     this.signature = signature;
   }
 
-  public Key getSourceKey() {
+  Key getSourceKey() {
     return sourceKey;
   }
 

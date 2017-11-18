@@ -25,6 +25,8 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
   private final AssetManager assetManager;
   private final AssetFetcherFactory<Data> factory;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public AssetUriLoader(AssetManager assetManager, AssetFetcherFactory<Data> factory) {
     this.assetManager = assetManager;
     this.factory = factory;

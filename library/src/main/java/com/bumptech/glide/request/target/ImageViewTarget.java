@@ -13,6 +13,8 @@ import com.bumptech.glide.request.transition.Transition;
  * @param <Z> The type of resource that this target will display in the wrapped {@link
  *            android.widget.ImageView}.
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
     implements Transition.ViewAdapter {
 

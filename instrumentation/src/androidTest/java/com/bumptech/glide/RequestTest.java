@@ -37,7 +37,7 @@ import org.mockito.MockitoAnnotations;
 public class RequestTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
   @Mock private RequestListener<Drawable> requestListener;
-  private ConcurrencyHelper concurrency = new ConcurrencyHelper();
+  private final ConcurrencyHelper concurrency = new ConcurrencyHelper();
   private Context context;
   private ImageView imageView;
 

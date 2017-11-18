@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.util.Preconditions;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,8 +21,8 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class ByteArrayLoaderTest {
 
-  @Mock ByteArrayLoader.Converter<Object> converter;
-  @Mock DataFetcher.DataCallback<Object> callback;
+  @Mock private ByteArrayLoader.Converter<Object> converter;
+  @Mock private DataFetcher.DataCallback<Object> callback;
   private ByteArrayLoader<Object> loader;
   private Options options;
 
@@ -35,7 +36,8 @@ public class ByteArrayLoaderTest {
   @Test
   public void testCanHandleByteArray() {
     byte[] data = new byte[10];
-    DataFetcher<Object> fetcher = loader.buildLoadData(data, -1, -1, options).fetcher;
+    DataFetcher<Object> fetcher =
+        Preconditions.checkNotNull(loader.buildLoadData(data, -1, -1, options)).fetcher;
     assertNotNull(fetcher);
   }
 
@@ -45,14 +47,17 @@ public class ByteArrayLoaderTest {
     Object expected = new Object();
     when(converter.convert(eq(data))).thenReturn(expected);
 
-    loader.buildLoadData(data, 10, 10, options).fetcher.loadData(Priority.HIGH, callback);
+    Preconditions.checkNotNull(loader.buildLoadData(data, 10, 10, options)).fetcher
+        .loadData(Priority.HIGH, callback);
     verify(callback).onDataReady(eq(expected));
   }
 
   @Test
   public void testFetcherReturnsDataClassFromConverter() {
     when(converter.getDataClass()).thenReturn(Object.class);
-    assertEquals(Object.class,
-        loader.buildLoadData(new byte[10], 10, 10, options).fetcher.getDataClass());
+    assertEquals(
+        Object.class,
+        Preconditions.checkNotNull(loader.buildLoadData(new byte[10], 10, 10, options)).fetcher
+            .getDataClass());
   }
 }

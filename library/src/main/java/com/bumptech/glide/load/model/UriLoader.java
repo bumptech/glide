@@ -35,6 +35,8 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
 
   private final LocalUriFetcherFactory<Data> factory;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public UriLoader(LocalUriFetcherFactory<Data> factory) {
     this.factory = factory;
   }

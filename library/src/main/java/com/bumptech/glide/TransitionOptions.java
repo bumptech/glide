@@ -37,7 +37,7 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
    * @return This request builder.
    */
   public final CHILD transition(int viewAnimationId) {
-    return transition(new ViewAnimationFactory<TranscodeType>(viewAnimationId));
+    return transition(new ViewAnimationFactory<>(viewAnimationId));
   }
 
   /**
@@ -50,7 +50,7 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
    * @return This request builder.
    */
   public final CHILD transition(ViewPropertyTransition.Animator animator) {
-    return transition(new ViewPropertyAnimationFactory<TranscodeType>(animator));
+    return transition(new ViewPropertyAnimationFactory<>(animator));
   }
 
   /**

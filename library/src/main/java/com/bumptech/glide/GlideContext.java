@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 public class GlideContext extends ContextWrapper {
   @VisibleForTesting
   static final TransitionOptions<?, ?> DEFAULT_TRANSITION_OPTIONS =
-      new GenericTransitionOptions<Object>();
+      new GenericTransitionOptions<>();
   private final Handler mainHandler;
   private final Registry registry;
   private final ImageViewTargetFactory imageViewTargetFactory;

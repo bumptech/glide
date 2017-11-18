@@ -8,6 +8,8 @@ import com.bumptech.glide.load.resource.drawable.DrawableResource;
  */
 public class GifDrawableResource extends DrawableResource<GifDrawable>
     implements Initializable {
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public GifDrawableResource(GifDrawable drawable) {
     super(drawable);
   }

@@ -22,7 +22,9 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File>  {
 
   private final Context context;
 
-  MediaStoreFileLoader(Context context) {
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  public MediaStoreFileLoader(Context context) {
     this.context = context;
   }
 

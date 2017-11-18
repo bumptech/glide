@@ -7,6 +7,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.HttpUrlFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.util.Preconditions;
 import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,8 @@ public class HttpGlideUrlLoaderTest {
 
   @Test
   public void testReturnsValidFetcher() {
-    DataFetcher<InputStream> result = loader.buildLoadData(model, 100, 100, new Options()).fetcher;
+    DataFetcher<InputStream> result =
+        Preconditions.checkNotNull(loader.buildLoadData(model, 100, 100, new Options())).fetcher;
     assertThat(result).isInstanceOf(HttpUrlFetcher.class);
   }
 }

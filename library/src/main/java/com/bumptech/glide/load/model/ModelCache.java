@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.LruCache;
 import com.bumptech.glide.util.Util;
 import java.util.Queue;
@@ -19,6 +20,8 @@ public class ModelCache<A, B> {
 
   private final LruCache<ModelKey<A>, B> cache;
 
+  // Public API.
+  @SuppressWarnings("unused")
   public ModelCache() {
     this(DEFAULT_SIZE);
   }
@@ -68,7 +71,7 @@ public class ModelCache<A, B> {
     cache.clearMemory();
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static final class ModelKey<A> {
     private static final Queue<ModelKey<?>> KEY_QUEUE = Util.createQueue(0);
 

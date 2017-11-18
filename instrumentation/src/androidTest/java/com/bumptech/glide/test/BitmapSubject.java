@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.v4.content.res.ResourcesCompat;
 import com.google.common.truth.FailureStrategy;
@@ -15,12 +16,14 @@ import com.google.common.truth.Truth;
 /**
  * Truth assertions for comparing {@link Bitmap}s.
  */
+// Test APIs.
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
 
   private static final SubjectFactory<BitmapSubject, Bitmap> FACTORY =
       new SubjectFactory<BitmapSubject, Bitmap>() {
         @Override
-        public BitmapSubject getSubject(FailureStrategy fs, Bitmap that) {
+        public BitmapSubject getSubject(@NonNull FailureStrategy fs, @NonNull Bitmap that) {
           return new BitmapSubject(fs, that);
         }
       };
@@ -79,7 +82,7 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "ConstantConditions"})
   public void sameAs(Drawable other) {
     if (!(other instanceof BitmapDrawable)) {
       fail("Not a BitmapDrawable");

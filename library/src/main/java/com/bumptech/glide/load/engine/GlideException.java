@@ -15,6 +15,8 @@ import java.util.List;
 /**
  * An exception with zero or more causes indicating why a load in Glide failed.
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public final class GlideException extends Exception {
   private static final StackTraceElement[] EMPTY_ELEMENTS = new StackTraceElement[0];
 

@@ -26,7 +26,7 @@ public final class WaitModelLoader<Model, Data>
 
   private final ModelLoader<Model, Data> wrapped;
 
-  WaitModelLoader(ModelLoader<Model, Data> wrapped) {
+  private WaitModelLoader(ModelLoader<Model, Data> wrapped) {
     this.wrapped = wrapped;
   }
 
@@ -103,7 +103,7 @@ public final class WaitModelLoader<Model, Data>
   private static final class WaitFetcher<Data> implements DataFetcher<Data> {
 
     private final DataFetcher<Data> wrapped;
-    private CountDownLatch toWaitOn;
+    private final CountDownLatch toWaitOn;
 
     WaitFetcher(DataFetcher<Data> wrapped, CountDownLatch toWaitOn) {
       this.wrapped = wrapped;

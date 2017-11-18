@@ -8,6 +8,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.DecodeJob.DiskCacheProvider;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoader.LoadData;
@@ -41,7 +42,7 @@ final class DecodeHelper<Transcode> {
   private boolean isScaleOnlyOrNoTransform;
 
   @SuppressWarnings("unchecked")
-  <R> DecodeHelper<R> init(
+  <R> void init(
       GlideContext glideContext,
       Object model,
       Key signature,
@@ -55,7 +56,7 @@ final class DecodeHelper<Transcode> {
       Map<Class<?>, Transformation<?>> transformations,
       boolean isTransformationRequired,
       boolean isScaleOnlyOrNoTransform,
-      DecodeJob.DiskCacheProvider diskCacheProvider) {
+      DiskCacheProvider diskCacheProvider) {
     this.glideContext = glideContext;
     this.model = model;
     this.signature = signature;
@@ -71,11 +72,6 @@ final class DecodeHelper<Transcode> {
     this.isTransformationRequired = isTransformationRequired;
     this.isScaleOnlyOrNoTransform = isScaleOnlyOrNoTransform;
 
-    return (DecodeHelper<R>) this;
-  }
-
-  Object getModel() {
-    return model;
   }
 
   void clear() {

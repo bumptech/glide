@@ -9,6 +9,8 @@ import java.io.InputStream;
 /**
  * Shared utility classes for tests.
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public final class TestUtil {
   private TestUtil() {
     // Utility class.

@@ -59,6 +59,7 @@ import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.testutil.TestResourceUtil;
+import com.bumptech.glide.util.Preconditions;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -686,7 +687,7 @@ public class GlideTest {
         // Do nothing.
       }
     });
-    Request request = target.getRequest();
+    Request request = Preconditions.checkNotNull(target.getRequest());
 
     requestManager.onDestroy();
     requestManager.clear(target);
@@ -715,8 +716,7 @@ public class GlideTest {
   }
 
   @SuppressWarnings("unchecked")
-  private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource)
-      throws Exception {
+  private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource) {
     DataFetcher<Z> failFetcher = mock(DataFetcher.class);
     doAnswer(new Util.CallDataReady<>(null))
         .when(failFetcher)
@@ -784,13 +784,13 @@ public class GlideTest {
     return modelLoader;
   }
 
-  private InputStream openGif() throws IOException {
+  private InputStream openGif() {
     return TestResourceUtil.openResource(getClass(), "test.gif");
   }
 
   private static class CallSizeReady implements Answer<Void> {
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
 
     CallSizeReady() {
       this(100, 100);

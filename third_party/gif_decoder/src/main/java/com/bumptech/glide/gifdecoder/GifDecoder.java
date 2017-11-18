@@ -34,7 +34,7 @@ public interface GifDecoder {
    * An interface that can be used to provide reused {@link android.graphics.Bitmap}s to avoid GCs
    * from constantly allocating {@link android.graphics.Bitmap}s for every frame.
    */
-  public interface BitmapProvider {
+  interface BitmapProvider {
     /**
      * Returns an {@link Bitmap} with exactly the given dimensions and config.
      *

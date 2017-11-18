@@ -2,6 +2,8 @@ package com.bumptech.glide.load.resource.drawable;
 
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Drawable.ConstantState;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.engine.Initializable;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -28,11 +30,15 @@ public abstract class DrawableResource<T extends Drawable> implements Resource<T
   @SuppressWarnings("unchecked")
   @Override
   public final T get() {
+    @Nullable ConstantState state = drawable.getConstantState();
+    if (state == null) {
+      return drawable;
+    }
     // Drawables contain temporary state related to how they're being displayed
     // (alpha, color filter etc), so return a new copy each time.
     // If we ever return the original drawable, it's temporary state may be changed
     // and subsequent copies may end up with that temporary state. See #276.
-    return (T) drawable.getConstantState().newDrawable();
+    return (T) state.newDrawable();
   }
 
   @Override

@@ -34,14 +34,14 @@ public class EncoderRegistry {
 
   private static final class Entry<T> {
     private final Class<T> dataClass;
-    @Synthetic final Encoder<T> encoder;
+    @Synthetic @SuppressWarnings("WeakerAccess") final Encoder<T> encoder;
 
-    public Entry(Class<T> dataClass, Encoder<T> encoder) {
+    Entry(Class<T> dataClass, Encoder<T> encoder) {
       this.dataClass = dataClass;
       this.encoder = encoder;
     }
 
-    public boolean handles(Class<?> dataClass) {
+    boolean handles(Class<?> dataClass) {
       return this.dataClass.isAssignableFrom(dataClass);
     }
   }

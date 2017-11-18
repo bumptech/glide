@@ -16,12 +16,14 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.tests.Util;
+import com.bumptech.glide.util.Preconditions;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.After;
@@ -460,7 +462,8 @@ public class ViewTargetTest {
   private void setDisplayDimens(Integer width, Integer height) {
     WindowManager windowManager =
         (WindowManager) RuntimeEnvironment.application.getSystemService(Context.WINDOW_SERVICE);
-    ShadowDisplay shadowDisplay = Shadows.shadowOf(windowManager.getDefaultDisplay());
+    ShadowDisplay shadowDisplay =
+        Shadows.shadowOf(Preconditions.checkNotNull(windowManager).getDefaultDisplay());
     if (width != null) {
       shadowDisplay.setWidth(width);
     }
@@ -472,7 +475,8 @@ public class ViewTargetTest {
 
   @Implements(ViewTreeObserver.class)
   public static class PreDrawShadowViewTreeObserver {
-    private CopyOnWriteArrayList<OnPreDrawListener> preDrawListeners = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<OnPreDrawListener> preDrawListeners =
+        new CopyOnWriteArrayList<>();
     private boolean isAlive = true;
 
     @SuppressWarnings("unused")
@@ -500,21 +504,22 @@ public class ViewTargetTest {
       }
     }
 
-    public void setIsAlive(boolean isAlive) {
+    void setIsAlive(@SuppressWarnings("SameParameterValue") boolean isAlive) {
       this.isAlive = isAlive;
     }
 
-    public void fireOnPreDrawListeners() {
+    void fireOnPreDrawListeners() {
       for (OnPreDrawListener listener : preDrawListeners) {
         listener.onPreDraw();
       }
     }
 
-    public List<OnPreDrawListener> getPreDrawListeners() {
+    List<OnPreDrawListener> getPreDrawListeners() {
       return preDrawListeners;
     }
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   @Implements(View.class)
   public static class SizedShadowView extends ShadowView {
     private int width;
@@ -533,11 +538,13 @@ public class ViewTargetTest {
       return this;
     }
 
+    @Implementation
     public SizedShadowView setLayoutParams(LayoutParams layoutParams) {
       this.layoutParams = layoutParams;
       return this;
     }
 
+    @Implementation
     public SizedShadowView setIsLaidOut(boolean isLaidOut) {
       this.isLaidOut = isLaidOut;
       return this;
@@ -576,28 +583,28 @@ public class ViewTargetTest {
 
   private static class TestViewTarget extends ViewTarget<View, Object> {
 
-    public TestViewTarget(View view) {
+    TestViewTarget(View view) {
       super(view);
     }
 
     @Override
-    public void onLoadStarted(Drawable placeholder) {
-
-    }
-
-    @Override
-    public void onLoadFailed(Drawable errorDrawable) {
-
-    }
-
-    @Override
     public void onResourceReady(Object resource, Transition<? super Object> transition) {
-
+      // Avoid calling super.
     }
 
     @Override
     public void onLoadCleared(Drawable placeholder) {
+      // Avoid calling super.
+    }
 
+    @Override
+    public void onLoadStarted(@Nullable Drawable placeholder) {
+      // Avoid calling super.
+    }
+
+    @Override
+    public void onLoadFailed(@Nullable Drawable errorDrawable) {
+      // Avoid calling super.
     }
   }
 }

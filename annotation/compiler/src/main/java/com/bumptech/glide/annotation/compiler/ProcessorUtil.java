@@ -202,20 +202,20 @@ final class ProcessorUtil {
   private CodeBlock generateSeeMethodJavadocInternal(
       TypeName nameOfClassContainingMethod, String methodName,
       List<Object> safeParameterNames) {
-     String javadocString = "@see $T#$L(";
+    StringBuilder javadocString = new StringBuilder("@see $T#$L(");
     List<Object> javadocArgs = new ArrayList<>();
     javadocArgs.add(nameOfClassContainingMethod);
     javadocArgs.add(methodName);
 
     for (Object param : safeParameterNames) {
-      javadocString += "$T, ";
+      javadocString.append("$T, ");
       javadocArgs.add(param);
     }
     if (javadocArgs.size() > 2) {
-      javadocString = javadocString.substring(0, javadocString.length() - 2);
+      javadocString = new StringBuilder(javadocString.substring(0, javadocString.length() - 2));
     }
-    javadocString += ")\n";
-    return CodeBlock.of(javadocString, javadocArgs.toArray(new Object[0]));
+    javadocString.append(")\n");
+    return CodeBlock.of(javadocString.toString(), javadocArgs.toArray(new Object[0]));
   }
 
    /**
@@ -255,7 +255,6 @@ final class ProcessorUtil {
         .add(
             FluentIterable.from(method.getParameters())
                 .transform(new Function<VariableElement, String>() {
-                  @Nullable
                   @Override
                   public String apply(VariableElement input) {
                     return input.getSimpleName().toString();
@@ -436,10 +435,7 @@ final class ProcessorUtil {
         return false;
       }
       ExecutableElement method = (ExecutableElement) input;
-      if (returnType == null) {
-        return true;
-      }
-      return isReturnValueTypeMatching(method, returnType);
+      return returnType == null || isReturnValueTypeMatching(method, returnType);
     }
   }
 

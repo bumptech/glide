@@ -26,9 +26,9 @@ import org.junit.runner.RunWith;
 @SplitBySdk({26, 24, 23, 21, 18, 16})
 @RegressionTest
 public class CircleCropRegressionTest {
-  @Rule public TestName testName = new TestName();
-  @Rule public ExpectedException expectedException = ExpectedException.none();
-  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
+  @Rule public final TestName testName = new TestName();
+  @Rule public final ExpectedException expectedException = ExpectedException.none();
+  @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   private BitmapRegressionTester bitmapRegressionTester;
   private Context context;
   private CanonicalBitmap canonical;
@@ -60,7 +60,6 @@ public class CircleCropRegressionTest {
       throws ExecutionException, InterruptedException {
     float multiplier = 1.1f;
     int multipliedWidth = (int) (canonical.getWidth() * multiplier);
-    int multipliedHeight = (int) (canonical.getHeight() * multiplier);
     Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)

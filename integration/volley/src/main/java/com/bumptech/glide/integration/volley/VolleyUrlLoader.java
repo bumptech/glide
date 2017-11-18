@@ -18,10 +18,14 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   private final RequestQueue requestQueue;
   private final VolleyRequestFactory requestFactory;
 
+  // Public API.
+  @SuppressWarnings("unused")
   public VolleyUrlLoader(RequestQueue requestQueue) {
     this(requestQueue, VolleyStreamFetcher.DEFAULT_REQUEST_FACTORY);
   }
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public VolleyUrlLoader(RequestQueue requestQueue, VolleyRequestFactory requestFactory) {
     this.requestQueue = requestQueue;
     this.requestFactory = requestFactory;
@@ -41,6 +45,8 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   /**
    * The default factory for {@link VolleyUrlLoader}s.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
     private static volatile RequestQueue internalQueue;
 

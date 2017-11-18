@@ -23,7 +23,7 @@ import org.junit.runners.JUnit4;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(JUnit4.class)
 public class InvalidGlideTypeExtensionTest {
-  @Rule public ExpectedException expectedException = ExpectedException.none();
+  @Rule public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void compilation_withAnnotatedNonStaticMethod_fails() {

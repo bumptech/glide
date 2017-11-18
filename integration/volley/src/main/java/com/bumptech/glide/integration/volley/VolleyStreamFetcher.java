@@ -21,6 +21,8 @@ import java.util.Map;
 /**
  * A DataFetcher backed by volley for fetching images via http.
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "VolleyStreamFetcher";
   public static final VolleyRequestFactory DEFAULT_REQUEST_FACTORY = new VolleyRequestFactory() {
@@ -97,6 +99,8 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
    * Default {@link com.android.volley.Request} implementation for Glide that receives errors and
    * results on volley's background thread.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   public static class GlideRequest extends Request<byte[]> {
     private final DataCallback<? super InputStream> callback;
     private final Priority priority;

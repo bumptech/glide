@@ -58,16 +58,16 @@ public class BitmapBytesTranscoderTest {
     Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
     int quality = 100;
     final String description = "TestDescription";
-    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ALPHA_8);
-    Resource<Bitmap> bitmapResource = mockResource();
-    Options options = new Options();
+    final Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ALPHA_8);
+    final Resource<Bitmap> bitmapResource = mockResource();
+    final Options options = new Options();
 
-    public BitmapBytesTranscoderHarness() {
+    BitmapBytesTranscoderHarness() {
       when(bitmapResource.get()).thenReturn(bitmap);
       Shadows.shadowOf(bitmap).setDescription(description);
     }
 
-    public String getTranscodedDescription() {
+    String getTranscodedDescription() {
       BitmapBytesTranscoder transcoder = new BitmapBytesTranscoder(compressFormat, quality);
       Resource<byte[]> bytesResource = transcoder.transcode(bitmapResource, options);
 

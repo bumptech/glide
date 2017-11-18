@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -62,13 +63,15 @@ final class BitmapPreFillRunner implements Runnable {
   private long currentDelay = INITIAL_BACKOFF_MS;
   private boolean isCancelled;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public BitmapPreFillRunner(BitmapPool bitmapPool, MemoryCache memoryCache,
       PreFillQueue allocationOrder) {
     this(bitmapPool, memoryCache, allocationOrder, DEFAULT_CLOCK,
         new Handler(Looper.getMainLooper()));
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   BitmapPreFillRunner(BitmapPool bitmapPool, MemoryCache memoryCache, PreFillQueue allocationOrder,
       Clock clock, Handler handler) {
     this.bitmapPool = bitmapPool;
@@ -143,6 +146,7 @@ final class BitmapPreFillRunner implements Runnable {
   private static class UniqueKey implements Key {
 
     @Synthetic
+    @SuppressWarnings("WeakerAccess")
     UniqueKey() { }
 
     @Override
@@ -151,9 +155,9 @@ final class BitmapPreFillRunner implements Runnable {
     }
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class Clock {
-    public long now() {
+    long now() {
       return SystemClock.currentThreadTimeMillis();
     }
   }

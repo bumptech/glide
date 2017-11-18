@@ -25,8 +25,7 @@ import org.robolectric.annotation.Config;
 public class StreamGifDecoderTest {
   private static final byte[] GIF_HEADER = new byte[] { 0x47, 0x49, 0x46 };
 
-  @Mock
-  ResourceDecoder<ByteBuffer, GifDrawable> byteBufferDecoder;
+  @Mock private ResourceDecoder<ByteBuffer, GifDrawable> byteBufferDecoder;
   private StreamGifDecoder decoder;
   private Options options;
 
@@ -34,7 +33,7 @@ public class StreamGifDecoderTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    List<ImageHeaderParser> parsers = new ArrayList<ImageHeaderParser>();
+    List<ImageHeaderParser> parsers = new ArrayList<>();
     parsers.add(new DefaultImageHeaderParser());
 
     decoder = new StreamGifDecoder(parsers, byteBufferDecoder, new LruArrayPool());

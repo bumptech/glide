@@ -37,6 +37,8 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
    * @param view A not null View the size will be extracted from async using an {@link
    *             android.view.ViewTreeObserver .OnPreDrawListener}
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public ViewPreloadSizeProvider(View view) {
     this.viewTarget = new SizeViewTarget(view, this);
   }
@@ -73,7 +75,7 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
   }
 
   private static final class SizeViewTarget extends ViewTarget<View, Object> {
-    public SizeViewTarget(View view, SizeReadyCallback callback) {
+    SizeViewTarget(View view, SizeReadyCallback callback) {
       super(view);
       getSize(callback);
     }

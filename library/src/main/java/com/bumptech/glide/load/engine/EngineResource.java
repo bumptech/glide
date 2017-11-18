@@ -94,9 +94,9 @@ class EngineResource<Z> implements Resource<Z> {
    * Decrements the number of consumers using the wrapped resource. Must be called on the main
    * thread.
    *
-   * <p> This must only be called when a consumer that called the {@link #acquire()} method is now
-   * done with the resource. Generally external users should never callthis method, the framework
-   * will take care of this for you. </p>
+   * <p>This must only be called when a consumer that called the {@link #acquire()} method is now
+   * done with the resource. Generally external users should never call this method, the framework
+   * will take care of this for you.
    */
   void release() {
     if (acquired <= 0) {

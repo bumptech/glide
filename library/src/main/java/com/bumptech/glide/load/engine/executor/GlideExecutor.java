@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine.executor;
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.util.Synthetic;
 import java.io.File;
@@ -206,7 +207,7 @@ public final class GlideExecutor extends ThreadPoolExecutor {
         new PriorityBlockingQueue<Runnable>());
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   GlideExecutor(int poolSize, String name,
       UncaughtThrowableStrategy uncaughtThrowableStrategy, boolean preventNetworkOperations,
       boolean executeSynchronously) {

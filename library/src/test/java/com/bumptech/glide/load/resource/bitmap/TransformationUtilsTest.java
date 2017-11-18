@@ -36,7 +36,7 @@ import org.robolectric.shadows.ShadowBitmap;
     TransformationUtilsTest.AlphaShadowBitmap.class })
 public class TransformationUtilsTest {
 
-  @Mock BitmapPool bitmapPool;
+  @Mock private BitmapPool bitmapPool;
 
   @Before
   public void setUp() {

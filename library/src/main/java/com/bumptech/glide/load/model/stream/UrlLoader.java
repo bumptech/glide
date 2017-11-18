@@ -17,6 +17,8 @@ import java.net.URL;
 public class UrlLoader implements ModelLoader<URL, InputStream> {
   private final ModelLoader<GlideUrl, InputStream> glideUrlLoader;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public UrlLoader(ModelLoader<GlideUrl, InputStream> glideUrlLoader) {
     this.glideUrlLoader = glideUrlLoader;
   }

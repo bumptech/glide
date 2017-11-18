@@ -35,8 +35,8 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class GifDrawableTransformationTest {
-  @Mock Transformation<Bitmap> wrapped;
-  @Mock BitmapPool bitmapPool;
+  @Mock private Transformation<Bitmap> wrapped;
+  @Mock private BitmapPool bitmapPool;
 
   private GifDrawableTransformation transformation;
   private Context context;

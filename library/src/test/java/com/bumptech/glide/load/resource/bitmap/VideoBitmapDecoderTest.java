@@ -13,6 +13,7 @@ import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.util.Preconditions;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import org.junit.Before;
@@ -48,7 +49,8 @@ public class VideoBitmapDecoderTest {
 
     FileDescriptor toSet = FileDescriptor.in;
     when(resource.getFileDescriptor()).thenReturn(toSet);
-    Resource<Bitmap> result = decoder.decode(resource, 100, 100, options);
+    Resource<Bitmap> result =
+        Preconditions.checkNotNull(decoder.decode(resource, 100, 100, options));
 
     verify(retriever).setDataSource(eq(toSet));
     assertEquals(expected, result.get());

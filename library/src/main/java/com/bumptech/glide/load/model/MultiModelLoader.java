@@ -137,7 +137,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
     @Override
     public void onLoadFailed(Exception e) {
-      exceptions.add(e);
+      Preconditions.checkNotNull(exceptions).add(e);
       startNextOrFail();
     }
 
@@ -146,6 +146,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
         currentIndex++;
         loadData(priority, callback);
       } else {
+        Preconditions.checkNotNull(exceptions);
         callback.onLoadFailed(new GlideException("Fetch failed", new ArrayList<>(exceptions)));
       }
     }

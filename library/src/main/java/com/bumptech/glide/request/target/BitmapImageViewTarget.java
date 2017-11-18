@@ -8,10 +8,14 @@ import android.widget.ImageView;
  * android.graphics.Bitmap} in an {@link android.widget.ImageView}.
  */
 public class BitmapImageViewTarget extends ImageViewTarget<Bitmap> {
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public BitmapImageViewTarget(ImageView view) {
     super(view);
   }
 
+  // Public API.
+  @SuppressWarnings("unused")
   public BitmapImageViewTarget(ImageView view, boolean waitForLayout) {
     super(view, waitForLayout);
   }

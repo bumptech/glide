@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.os.TraceCompat;
 import android.support.v4.util.Pools;
 import android.util.Log;
@@ -40,22 +41,26 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     Poolable {
   private static final String TAG = "DecodeJob";
 
-  @Synthetic final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic
+  final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
   private final List<Throwable> throwables = new ArrayList<>();
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
   private final DiskCacheProvider diskCacheProvider;
   private final Pools.Pool<DecodeJob<?>> pool;
-  @Synthetic final DeferredEncodeManager<?> deferredEncodeManager = new DeferredEncodeManager<>();
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic
+  final DeferredEncodeManager<?> deferredEncodeManager = new DeferredEncodeManager<>();
   private final ReleaseManager releaseManager = new ReleaseManager();
 
   private GlideContext glideContext;
-  @Synthetic Key signature;
+  @SuppressWarnings("WeakerAccess") @Synthetic Key signature;
   private Priority priority;
   private EngineKey loadKey;
-  @Synthetic int width;
-  @Synthetic int height;
-  @Synthetic DiskCacheStrategy diskCacheStrategy;
-  @Synthetic Options options;
+  @SuppressWarnings("WeakerAccess") @Synthetic int width;
+  @SuppressWarnings("WeakerAccess") @Synthetic int height;
+  @SuppressWarnings("WeakerAccess") @Synthetic DiskCacheStrategy diskCacheStrategy;
+  @SuppressWarnings("WeakerAccess") @Synthetic Options options;
   private Callback<R> callback;
   private int order;
   private Stage stage;
@@ -64,7 +69,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private boolean onlyRetrieveFromCache;
 
   private Thread currentThread;
-  @Synthetic Key currentSourceKey;
+  @SuppressWarnings("WeakerAccess") @Synthetic Key currentSourceKey;
   private Key currentAttemptingKey;
   private Object currentData;
   private DataSource currentDataSource;
@@ -192,7 +197,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   @Override
-  public int compareTo(DecodeJob<?> other) {
+  public int compareTo(@NonNull DecodeJob<?> other) {
     int result = getPriority() - other.getPriority();
     if (result == 0) {
       result = order - other.order;

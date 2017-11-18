@@ -31,7 +31,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   private static final int MOTOROLA_TIFF_MAGIC_NUMBER = 0x4D4D;
   // "II".
   private static final int INTEL_TIFF_MAGIC_NUMBER = 0x4949;
-  static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
+  private static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
   static final byte[] JPEG_EXIF_SEGMENT_PREAMBLE_BYTES =
       JPEG_EXIF_SEGMENT_PREAMBLE.getBytes(Charset.forName("UTF-8"));
   private static final int SEGMENT_SOS = 0xDA;
@@ -137,7 +137,6 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
    *
    * @return The exif orientation if present or -1 if the header couldn't be parsed or doesn't
    * contain an orientation
-   * @throws IOException
    */
   private int getOrientation(Reader reader, ArrayPool byteArrayPool) throws IOException {
     final int magicNumber = reader.getUInt16();

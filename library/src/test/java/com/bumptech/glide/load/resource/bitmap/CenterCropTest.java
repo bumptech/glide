@@ -36,9 +36,9 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class CenterCropTest {
-  @Mock Resource<Bitmap> resource;
-  @Mock BitmapPool pool;
-  @Mock Transformation<Bitmap> transformation;
+  @Mock private Resource<Bitmap> resource;
+  @Mock private BitmapPool pool;
+  @Mock private Transformation<Bitmap> transformation;
 
   private CenterCrop centerCrop;
   private int bitmapWidth;

@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.util.Preconditions;
 import java.io.File;
 
 /**
@@ -53,7 +54,7 @@ public class MainActivity extends Activity {
     glideRequests.clear(imageViewRes);
     glideRequests.clear(imageViewNet);
     GlideApp.get(this).clearMemory();
-    File cacheDir = Glide.getPhotoCacheDir(this);
+    File cacheDir = Preconditions.checkNotNull(Glide.getPhotoCacheDir(this));
     if (cacheDir.isDirectory()) {
       for (File child : cacheDir.listFiles()) {
         if (!child.delete()) {

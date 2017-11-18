@@ -1,6 +1,7 @@
 package com.bumptech.glide.samples.gallery;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -27,8 +28,8 @@ public class HorizontalGalleryFragment extends Fragment
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
-      Bundle savedInstanceState) {
+  public View onCreateView(
+      @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View result = inflater.inflate(R.layout.recycler_view, container, false);
     recyclerView = (RecyclerView) result.findViewById(R.id.recycler_view);
     GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 1);

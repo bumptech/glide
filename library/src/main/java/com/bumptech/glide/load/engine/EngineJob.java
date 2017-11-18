@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pools;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
@@ -76,7 +77,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
         DEFAULT_FACTORY);
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   EngineJob(
       GlideExecutor diskCacheExecutor,
       GlideExecutor sourceExecutor,
@@ -94,7 +95,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     this.engineResourceFactory = engineResourceFactory;
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   EngineJob<R> init(
       Key key,
       boolean isCacheable,
@@ -115,7 +116,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     executor.execute(decodeJob);
   }
 
-  public void addCallback(ResourceCallback cb) {
+  void addCallback(ResourceCallback cb) {
     Util.assertMainThread();
     stateVerifier.throwIfRecycled();
     if (hasResource) {
@@ -291,7 +292,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     return stateVerifier;
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class EngineResourceFactory {
     public <R> EngineResource<R> build(Resource<R> resource, boolean isMemoryCacheable) {
       return new EngineResource<>(resource, isMemoryCacheable, /*isRecyclable=*/ true);
@@ -301,6 +302,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private static class MainThreadCallback implements Handler.Callback {
 
     @Synthetic
+    @SuppressWarnings("WeakerAccess")
     MainThreadCallback() { }
 
     @Override

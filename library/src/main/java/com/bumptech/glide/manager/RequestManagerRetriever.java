@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -32,7 +33,7 @@ import java.util.Map;
  * retrieving existing ones from activities and fragment.
  */
 public class RequestManagerRetriever implements Handler.Callback {
-  // Visible for testing.
+  @VisibleForTesting
   static final String FRAGMENT_TAG = "com.bumptech.glide.manager";
   private static final String TAG = "RMRetriever";
 
@@ -48,17 +49,17 @@ public class RequestManagerRetriever implements Handler.Callback {
    */
   private volatile RequestManager applicationManager;
 
-  // Visible for testing.
   /**
    * Pending adds for RequestManagerFragments.
    */
+  @VisibleForTesting
   final Map<android.app.FragmentManager, RequestManagerFragment> pendingRequestManagerFragments =
       new HashMap<>();
 
-  // Visible for testing.
   /**
    * Pending adds for SupportRequestManagerFragments.
    */
+  @VisibleForTesting
   final Map<FragmentManager, SupportRequestManagerFragment> pendingSupportRequestManagerFragments =
       new HashMap<>();
 
@@ -73,7 +74,6 @@ public class RequestManagerRetriever implements Handler.Callback {
   private final ArrayMap<View, android.app.Fragment> tempViewToFragment = new ArrayMap<>();
   private final Bundle tempBundle = new Bundle();
 
-  // Visible for testing.
   public RequestManagerRetriever(@Nullable RequestManagerFactory factory) {
     this.factory = factory != null ? factory : DEFAULT_FACTORY;
     handler = new Handler(Looper.getMainLooper(), this /* Callback */);

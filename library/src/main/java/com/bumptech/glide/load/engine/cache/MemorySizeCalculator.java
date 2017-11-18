@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine.cache;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.VisibleForTesting;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -14,9 +15,9 @@ import com.bumptech.glide.util.Preconditions;
  */
 public final class MemorySizeCalculator {
   private static final String TAG = "MemorySizeCalculator";
-  // Visible for testing.
+  @VisibleForTesting
   static final int BYTES_PER_ARGB_8888_PIXEL = 4;
-  static final int LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR = 2;
+  private static final int LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR = 2;
 
   private final int bitmapPoolSize;
   private final int memoryCacheSize;
@@ -115,6 +116,7 @@ public final class MemorySizeCalculator {
   private static boolean isLowMemoryDevice(ActivityManager activityManager) {
     // Explicitly check with an if statement, on some devices both parts of boolean expressions
     // can be evaluated even if we'd normally expect a short circuit.
+    //noinspection SimplifiableIfStatement
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       return activityManager.isLowRamDevice();
     } else {
@@ -126,8 +128,10 @@ public final class MemorySizeCalculator {
    * Constructs an {@link MemorySizeCalculator} with reasonable defaults that can be optionally
    * overridden.
    */
+  // Public API.
+  @SuppressWarnings({"WeakerAccess", "unused"})
   public static final class Builder {
-    // Visible for testing.
+    @VisibleForTesting
     static final int MEMORY_CACHE_TARGET_SCREENS = 2;
 
     /**
@@ -237,13 +241,13 @@ public final class MemorySizeCalculator {
       return this;
     }
 
-    // Visible for testing.
+    @VisibleForTesting
     Builder setActivityManager(ActivityManager activityManager) {
       this.activityManager = activityManager;
       return this;
     }
 
-    // Visible for testing.
+    @VisibleForTesting
     Builder setScreenDimensions(ScreenDimensions screenDimensions) {
       this.screenDimensions = screenDimensions;
       return this;
@@ -257,7 +261,7 @@ public final class MemorySizeCalculator {
   private static final class DisplayMetricsScreenDimensions implements ScreenDimensions {
     private final DisplayMetrics displayMetrics;
 
-    public DisplayMetricsScreenDimensions(DisplayMetrics displayMetrics) {
+    DisplayMetricsScreenDimensions(DisplayMetrics displayMetrics) {
       this.displayMetrics = displayMetrics;
     }
 

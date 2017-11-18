@@ -33,7 +33,7 @@ class GifFrameLoader {
   private final GifDecoder gifDecoder;
   private final Handler handler;
   private final List<FrameCallback> callbacks = new ArrayList<>();
-  @Synthetic final RequestManager requestManager;
+  @SuppressWarnings("WeakerAccess") @Synthetic final RequestManager requestManager;
   private final BitmapPool bitmapPool;
 
   private boolean isRunning = false;
@@ -53,7 +53,7 @@ class GifFrameLoader {
     void onFrameReady();
   }
 
-  public GifFrameLoader(
+  GifFrameLoader(
       Glide glide,
       GifDecoder gifDecoder,
       int width,
@@ -284,8 +284,8 @@ class GifFrameLoader {
   }
 
   private class FrameLoaderCallback implements Handler.Callback {
-    public static final int MSG_DELAY = 1;
-    public static final int MSG_CLEAR = 2;
+    static final int MSG_DELAY = 1;
+    static final int MSG_CLEAR = 2;
 
     @Synthetic
     FrameLoaderCallback() { }
@@ -304,7 +304,7 @@ class GifFrameLoader {
     }
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class DelayTarget extends SimpleTarget<Bitmap> {
     private final Handler handler;
     @Synthetic final int index;

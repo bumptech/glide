@@ -23,18 +23,17 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 public class FileDescriptorAssetPathFetcherTest {
 
-  @Mock AssetManager assetManager;
-  @Mock AssetFileDescriptor assetFileDescriptor;
-  @Mock DataFetcher.DataCallback<ParcelFileDescriptor> callback;
+  @Mock private AssetManager assetManager;
+  @Mock private AssetFileDescriptor assetFileDescriptor;
+  @Mock private DataFetcher.DataCallback<ParcelFileDescriptor> callback;
 
   private FileDescriptorAssetPathFetcher fetcher;
   private ParcelFileDescriptor expected;
-  private String assetPath;
 
   @Before
   public void setUp() throws IOException {
     MockitoAnnotations.initMocks(this);
-    assetPath = "/some/asset/path";
+    String assetPath = "/some/asset/path";
     fetcher = new FileDescriptorAssetPathFetcher(assetManager, assetPath);
     expected = mock(ParcelFileDescriptor.class);
     when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(expected);

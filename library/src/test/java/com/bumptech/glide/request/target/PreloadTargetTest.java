@@ -18,7 +18,7 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 public class PreloadTargetTest {
 
-  @Mock RequestManager requestManager;
+  @Mock private RequestManager requestManager;
 
   @Before
   public void setUp() {

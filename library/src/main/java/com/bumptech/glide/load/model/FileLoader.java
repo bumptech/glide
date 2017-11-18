@@ -25,6 +25,8 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
 
   private final FileOpener<Data> fileOpener;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public FileLoader(FileOpener<Data> fileOpener) {
     this.fileOpener = fileOpener;
   }
@@ -55,7 +57,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     private final FileOpener<Data> opener;
     private Data data;
 
-    public FileFetcher(File file, FileOpener<Data> opener) {
+    FileFetcher(File file, FileOpener<Data> opener) {
       this.file = file;
       this.opener = opener;
     }

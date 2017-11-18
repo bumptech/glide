@@ -20,6 +20,8 @@ import android.widget.ImageView;
  *
  * @param <T> The type of resource that will be displayed in the ImageView.
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public abstract class ThumbnailImageViewTarget<T> extends ImageViewTarget<T> {
 
   public ThumbnailImageViewTarget(ImageView view) {

@@ -10,6 +10,7 @@ import android.content.res.AssetManager;
 import android.net.Uri;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.util.Preconditions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,8 +25,8 @@ import org.robolectric.annotation.Config;
 public class AssetUriLoaderTest {
   private static final int IMAGE_SIDE = 10;
 
-  @Mock AssetUriLoader.AssetFetcherFactory<Object> factory;
-  @Mock DataFetcher<Object> fetcher;
+  @Mock private AssetUriLoader.AssetFetcherFactory<Object> factory;
+  @Mock private DataFetcher<Object> fetcher;
   private AssetUriLoader<Object> loader;
 
   @Before
@@ -39,7 +40,9 @@ public class AssetUriLoaderTest {
     Uri assetUri = Uri.parse("file:///android_asset/assetName");
     when(factory.buildFetcher(any(AssetManager.class), eq("assetName"))).thenReturn(fetcher);
     assertTrue(loader.handles(assetUri));
-    assertEquals(fetcher, loader.buildLoadData(assetUri, IMAGE_SIDE, IMAGE_SIDE,
-        new Options()).fetcher);
+    assertEquals(
+        fetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(assetUri, IMAGE_SIDE, IMAGE_SIDE, new Options())).fetcher);
   }
 }

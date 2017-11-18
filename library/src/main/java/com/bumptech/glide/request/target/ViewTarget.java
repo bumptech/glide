@@ -63,6 +63,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * still be used instead of the View's dimensions even if this parameter is set to {@code true}.
    * This parameter is a fallback only.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public ViewTarget(T view, boolean waitForLayout) {
     this.view = Preconditions.checkNotNull(view);
     sizeDeterminer = new SizeDeterminer(view, waitForLayout);
@@ -178,6 +180,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    *
    * @param tagId The android resource to use.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   public static void setTagId(int tagId) {
       if (ViewTarget.tagId != null || isTagUsedAtLeastOnce) {
           throw new IllegalArgumentException("You cannot set the tag id more than once or change"
@@ -209,7 +213,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       if (maxDisplayLength == null) {
         WindowManager windowManager =
             (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Display display = windowManager.getDefaultDisplay();
+        Display display = Preconditions.checkNotNull(windowManager).getDefaultDisplay();
         Point displayDimensions = new Point();
         display.getSize(displayDimensions);
         maxDisplayLength = Math.max(displayDimensions.x, displayDimensions.y);

@@ -35,9 +35,10 @@ public class NotificationTargetTest {
 
   @Before
   public void setUp() {
-    NotificationManager notificationManager = (NotificationManager) RuntimeEnvironment.application
-        .getSystemService(Context.NOTIFICATION_SERVICE);
-    shadowManager = (UpdateShadowNotificationManager) Shadow.extract(notificationManager);
+    NotificationManager notificationManager =
+        (NotificationManager)
+            RuntimeEnvironment.application.getSystemService(Context.NOTIFICATION_SERVICE);
+    shadowManager = Shadow.extract(notificationManager);
 
     remoteViews = mock(RemoteViews.class);
     viewId = 123;

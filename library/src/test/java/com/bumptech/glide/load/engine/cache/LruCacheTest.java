@@ -326,15 +326,15 @@ public class LruCacheTest {
   }
 
   private interface CacheListener {
-    public void onItemRemoved(Object item);
+    void onItemRemoved(Object item);
 
-    public int getSize(Object item);
+    int getSize(Object item);
   }
 
   private static class TestLruCache extends LruCache<String, Object> {
     private final CacheListener listener;
 
-    public TestLruCache(int size, CacheListener listener) {
+    TestLruCache(int size, CacheListener listener) {
       super(size);
       this.listener = listener;
     }

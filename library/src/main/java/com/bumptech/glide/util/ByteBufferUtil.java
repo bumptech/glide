@@ -1,5 +1,6 @@
 package com.bumptech.glide.util;
 
+import android.support.annotation.NonNull;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,8 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Utilities for interacting with {@link java.nio.ByteBuffer}s.
  */
+// Public API.
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class ByteBufferUtil {
   // 16 Kb
   private static final int BUFFER_SIZE = 16384;
@@ -132,7 +135,7 @@ public final class ByteBufferUtil {
       buffer = new byte[BUFFER_SIZE];
     }
 
-    int n = -1;
+    int n;
     while ((n = stream.read(buffer)) >= 0) {
       outStream.write(buffer, 0, n);
     }
@@ -157,7 +160,7 @@ public final class ByteBufferUtil {
     @Synthetic final int limit;
     @Synthetic final byte[] data;
 
-    public SafeArray(byte[] data, int offset, int limit) {
+    SafeArray(byte[] data, int offset, int limit) {
       this.data = data;
       this.offset = offset;
       this.limit = limit;
@@ -169,7 +172,7 @@ public final class ByteBufferUtil {
     private final ByteBuffer byteBuffer;
     private int markPos = UNSET;
 
-    public ByteBufferStream(ByteBuffer byteBuffer) {
+    ByteBufferStream(ByteBuffer byteBuffer) {
       this.byteBuffer = byteBuffer;
     }
 
@@ -187,7 +190,7 @@ public final class ByteBufferUtil {
     }
 
     @Override
-    public synchronized void mark(int readlimit) {
+    public synchronized void mark(int readLimit) {
       markPos = byteBuffer.position();
     }
 
@@ -197,7 +200,7 @@ public final class ByteBufferUtil {
     }
 
     @Override
-    public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+    public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
       if (!byteBuffer.hasRemaining()) {
         return -1;
       }

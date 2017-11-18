@@ -453,24 +453,24 @@ public class EngineJobTest {
 
   @SuppressWarnings("unchecked")
   private static class MultiCbHarness {
-    Key key = mock(Key.class);
-    Resource<Object> resource = mockResource();
-    EngineResource<Object> engineResource = mock(EngineResource.class);
-    EngineJobListener listener = mock(EngineJobListener.class);
-    boolean isCacheable = true;
-    boolean useUnlimitedSourceGeneratorPool = false;
-    boolean useAnimationPool = false;
-    int numCbs = 10;
-    List<ResourceCallback> cbs = new ArrayList<>();
-    EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
-    EngineJob<Object> job;
-    GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
-    GlideExecutor sourceService = MockGlideExecutor.newMainThreadExecutor();
-    GlideExecutor sourceUnlimitedService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
-    GlideExecutor animationService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
-    Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
-    DecodeJob<Object> decodeJob = mock(DecodeJob.class);
-    DataSource dataSource = DataSource.LOCAL;
+    final Key key = mock(Key.class);
+    final Resource<Object> resource = mockResource();
+    final EngineResource<Object> engineResource = mock(EngineResource.class);
+    final EngineJobListener listener = mock(EngineJobListener.class);
+    final boolean isCacheable = true;
+    final boolean useUnlimitedSourceGeneratorPool = false;
+    final boolean useAnimationPool = false;
+    final int numCbs = 10;
+    final List<ResourceCallback> cbs = new ArrayList<>();
+    final EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
+    final EngineJob<Object> job;
+    final GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
+    final GlideExecutor sourceService = MockGlideExecutor.newMainThreadExecutor();
+    final GlideExecutor sourceUnlimitedService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
+    final GlideExecutor animationService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
+    final Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
+    final DecodeJob<Object> decodeJob = mock(DecodeJob.class);
+    final DataSource dataSource = DataSource.LOCAL;
 
     public MultiCbHarness() {
       when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
@@ -494,25 +494,25 @@ public class EngineJobTest {
 
   @SuppressWarnings("unchecked")
   private static class EngineJobHarness {
-    EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
-    Key key = mock(Key.class);
-    Handler mainHandler = new Handler();
-    ResourceCallback cb = mock(ResourceCallback.class);
-    Resource<Object> resource = mockResource();
-    EngineResource<Object> engineResource = mock(EngineResource.class);
-    EngineJobListener listener = mock(EngineJobListener.class);
-    GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
-    GlideExecutor sourceService = MockGlideExecutor.newMainThreadExecutor();
-    GlideExecutor sourceUnlimitedService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
-    GlideExecutor animationService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
+    final EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
+    final Key key = mock(Key.class);
+    final Handler mainHandler = new Handler();
+    final ResourceCallback cb = mock(ResourceCallback.class);
+    final Resource<Object> resource = mockResource();
+    final EngineResource<Object> engineResource = mock(EngineResource.class);
+    final EngineJobListener listener = mock(EngineJobListener.class);
+    final GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
+    final GlideExecutor sourceService = MockGlideExecutor.newMainThreadExecutor();
+    final GlideExecutor sourceUnlimitedService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
+    final GlideExecutor animationService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
     boolean isCacheable = true;
     boolean useUnlimitedSourceGeneratorPool = false;
-    boolean useAnimationPool = false;
-    DecodeJob<Object> decodeJob = mock(DecodeJob.class);
-    Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
-    DataSource dataSource = DataSource.DATA_DISK_CACHE;
+    final boolean useAnimationPool = false;
+    final DecodeJob<Object> decodeJob = mock(DecodeJob.class);
+    final Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
+    final DataSource dataSource = DataSource.DATA_DISK_CACHE;
 
-    public EngineJob<Object> getJob() {
+    EngineJob<Object> getJob() {
       when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
       EngineJob<Object> result =
           new EngineJob<>(

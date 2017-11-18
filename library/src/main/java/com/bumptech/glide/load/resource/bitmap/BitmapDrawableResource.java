@@ -20,6 +20,8 @@ public class BitmapDrawableResource extends DrawableResource<BitmapDrawable>
     implements Initializable {
   private final BitmapPool bitmapPool;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public BitmapDrawableResource(BitmapDrawable drawable, BitmapPool bitmapPool) {
     super(drawable);
     this.bitmapPool = bitmapPool;

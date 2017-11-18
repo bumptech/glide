@@ -30,11 +30,11 @@ import org.robolectric.RuntimeEnvironment;
 @SuppressWarnings("unchecked")
 public class MultiTransformationTest {
 
-  @Mock Transformation<Object> first;
-  @Mock Transformation<Object> second;
-  @Mock Resource<Object> initial;
-  @Mock Resource<Object> firstTransformed;
-  @Mock Resource<Object> secondTransformed;
+  @Mock private Transformation<Object> first;
+  @Mock private Transformation<Object> second;
+  @Mock private Resource<Object> initial;
+  @Mock private Resource<Object> firstTransformed;
+  @Mock private Resource<Object> secondTransformed;
   private Application context;
 
   @Before

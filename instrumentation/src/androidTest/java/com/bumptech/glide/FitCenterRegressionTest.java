@@ -26,9 +26,9 @@ import org.junit.runner.RunWith;
 @SplitBySdk({24, 23, 21, 19, 18, 16})
 @RegressionTest
 public class FitCenterRegressionTest {
-  @Rule public TestName testName = new TestName();
-  @Rule public ExpectedException expectedException = ExpectedException.none();
-  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
+  @Rule public final TestName testName = new TestName();
+  @Rule public final ExpectedException expectedException = ExpectedException.none();
+  @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   private BitmapRegressionTester bitmapRegressionTester;
   private Context context;
   private CanonicalBitmap canonical;

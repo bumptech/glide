@@ -436,12 +436,12 @@ public class DownsamplerEmulatorTest {
       return this;
     }
 
-    Tester givenSquareImageWithDimensionOf(int dimension, Api... apis) throws IOException {
+    Tester givenSquareImageWithDimensionOf(int dimension, Api... apis) {
       return givenImageWithDimensionsOf(dimension, dimension, apis);
     }
 
     Tester givenImageWithDimensionsOf(
-        int sourceWidth, int sourceHeight, Api... apis) throws IOException {
+        int sourceWidth, int sourceHeight, Api... apis) {
       testCases.add(new TestCase(sourceWidth, sourceHeight, targetWidth, targetHeight, apis));
       return this;
     }
@@ -456,9 +456,9 @@ public class DownsamplerEmulatorTest {
         return;
       }
 
-      String failure = "Failing Tests:\n";
+      StringBuilder failure = new StringBuilder("Failing Tests:\n");
       for (String result : results) {
-        failure += result + "\n";
+        failure.append(result).append("\n");
       }
       fail(failure.substring(0, failure.length() - 1));
     }
@@ -492,7 +492,7 @@ public class DownsamplerEmulatorTest {
   static final class Api {
     private final int startVersion;
     private final int stopVersion;
-    private Formats[] formats;
+    private final Formats[] formats;
 
     static Builder apis(int min, int max) {
       return new Builder().min(min).max(max);

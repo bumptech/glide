@@ -41,6 +41,7 @@ public class DiskLruCacheWrapper implements DiskCache {
    *
    * @deprecated Use {@link #create(File, long)} to create a new cache with the specified arguments.
    */
+  @SuppressWarnings("deprecation")
   @Deprecated
   public static synchronized DiskCache get(File directory, long maxSize) {
     // TODO calling twice with different arguments makes it return the cache for the same
@@ -58,10 +59,17 @@ public class DiskLruCacheWrapper implements DiskCache {
    * @param maxSize   The max size for the disk cache
    * @return The new disk cache with the given arguments
    */
+  @SuppressWarnings("deprecation")
   public static DiskCache create(File directory, long maxSize) {
     return new DiskLruCacheWrapper(directory, maxSize);
   }
 
+  /**
+   * @deprecated Do not extend this class.
+   */
+  @Deprecated
+  // Deprecated public API.
+  @SuppressWarnings({"WeakerAccess", "DeprecatedIsStillUsed"})
   protected DiskLruCacheWrapper(File directory, long maxSize) {
     this.directory = directory;
     this.maxSize = maxSize;

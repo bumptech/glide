@@ -64,6 +64,8 @@ public final class Downsampler {
    * bitmap for a collection of requested resources so that the bitmap pool will not need to
    * allocate new bitmaps for images of different sizes.
    */
+  // Public API
+  @SuppressWarnings("WeakerAccess")
   public static final Option<Boolean> FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS =
       Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.FixBitmapSize", false);
 
@@ -137,12 +139,12 @@ public final class Downsampler {
     this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
   }
 
-  public boolean handles(InputStream is) {
+  public boolean handles(@SuppressWarnings("unused") InputStream is) {
     // We expect Downsampler to handle any available type Android supports.
     return true;
   }
 
-  public boolean handles(ByteBuffer byteBuffer) {
+  public boolean handles(@SuppressWarnings("unused") ByteBuffer byteBuffer) {
     // We expect downsampler to handle any available type Android supports.
     return true;
   }
@@ -319,8 +321,7 @@ public final class Downsampler {
     return rotated;
   }
 
-  // Visible for testing.
-  static void calculateScaling(
+  private static void calculateScaling(
       ImageType imageType,
       InputStream is,
       DecodeCallbacks decodeCallbacks,
@@ -489,7 +490,7 @@ public final class Downsampler {
     return (int) (value + 0.5d);
   }
 
-  private boolean shouldUsePool(ImageType imageType) throws IOException {
+  private boolean shouldUsePool(ImageType imageType) {
     // On KitKat+, any bitmap (of a given config) can be used to decode any other bitmap
     // (with the same config).
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -509,8 +510,7 @@ public final class Downsampler {
       boolean isExifOrientationRequired,
       BitmapFactory.Options optionsWithScaling,
       int targetWidth,
-      int targetHeight)
-      throws IOException {
+      int targetHeight) {
 
     if (hardwareConfigState.setHardwareConfigIfAllowed(
         targetWidth,
@@ -542,9 +542,7 @@ public final class Downsampler {
 
     optionsWithScaling.inPreferredConfig =
         hasAlpha ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
-    if (optionsWithScaling.inPreferredConfig == Config.RGB_565
-        || optionsWithScaling.inPreferredConfig == Config.ARGB_4444
-        || optionsWithScaling.inPreferredConfig == Config.ALPHA_8) {
+    if (optionsWithScaling.inPreferredConfig == Config.RGB_565) {
       optionsWithScaling.inDither = true;
     }
   }
@@ -574,7 +572,7 @@ public final class Downsampler {
       // size. To avoid unnecessary allocations reading image data, we fix the mark limit so that it
       // is no larger than our current buffer size here. We need to do so immediately before
       // decoding the full image to avoid having our mark limit overridden by other calls to
-      // markand reset. See issue #225.
+      // mark and reset. See issue #225.
       callbacks.onObtainBounds();
     }
     // BitmapFactory.Options out* variables are reset by most calls to decodeStream, successful or

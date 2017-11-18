@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.util.Preconditions;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,9 @@ public class GifFrameResourceDecoderTest {
     Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     when(gifDecoder.getNextFrame()).thenReturn(expected);
 
-    assertEquals(expected, resourceDecoder.decode(gifDecoder, 100, 100, options).get());
+    assertEquals(
+        expected,
+        Preconditions.checkNotNull(resourceDecoder.decode(gifDecoder, 100, 100, options)).get());
   }
 
   @Test

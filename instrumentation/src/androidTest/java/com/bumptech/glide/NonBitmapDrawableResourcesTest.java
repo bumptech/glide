@@ -33,9 +33,10 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class NonBitmapDrawableResourcesTest {
-  @Rule public TestName testName = new TestName();
-  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
-  @Rule public ExpectedException expectedException = ExpectedException.none();
+  @Rule public final TestName testName = new TestName();
+  @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
+  @Rule public final ExpectedException expectedException = ExpectedException.none();
+
   private Context context;
 
   @Before

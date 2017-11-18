@@ -11,6 +11,8 @@ import java.io.File;
  *
  * <p><b>Images can be read by everyone when using external disk cache.</b>
  */
+// Public API.
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class ExternalPreferredCacheDiskCacheFactory extends DiskLruCacheFactory {
 
   public ExternalPreferredCacheDiskCacheFactory(Context context) {

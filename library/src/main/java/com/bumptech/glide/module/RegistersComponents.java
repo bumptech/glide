@@ -7,6 +7,8 @@ import com.bumptech.glide.Registry;
 /**
  * An internal interface, to be removed when {@link GlideModule}s are removed.
  */
+// Used only in javadocs.
+@SuppressWarnings("deprecation")
 interface RegistersComponents {
 
   /**

@@ -20,8 +20,9 @@ public final class Api {
   private static volatile Api api = null;
   private static final String BETA_KEY = "dc6zaTOxFJmzC";
   private static final String BASE_URL = "https://api.giphy.com/";
-  private static final String SEARCH_PATH = "v1/gifs/search";
   private static final String TRENDING_PATH = "v1/gifs/trending";
+  private static final int LIMIT = 100;
+  private static final int OFFSET = 0;
   private final Handler bgHandler;
   private final Handler mainHandler;
   private final HashSet<Monitor> monitors = new HashSet<>();
@@ -30,13 +31,8 @@ public final class Api {
     return url + "&api_key=" + BETA_KEY;
   }
 
-  private static String getSearchUrl(String query, int limit, int offset) {
-    return signUrl(
-        BASE_URL + SEARCH_PATH + "?q=" + query + "&limit=" + limit + "&offset=" + offset);
-  }
-
-  private static String getTrendingUrl(int limit, int offset) {
-    return signUrl(BASE_URL + TRENDING_PATH + "?limit=" + limit + "&offset=" + offset);
+  private static String getTrendingUrl() {
+    return signUrl(BASE_URL + TRENDING_PATH + "?limit=" + LIMIT + "&offset=" + OFFSET);
   }
 
   /**
@@ -51,7 +47,7 @@ public final class Api {
     void onSearchComplete(SearchResult result);
   }
 
-  public static Api get() {
+  static Api get() {
     if (api == null) {
       synchronized (Api.class) {
         if (api == null) {
@@ -70,21 +66,16 @@ public final class Api {
     // Do nothing.
   }
 
-  public void addMonitor(Monitor monitor) {
+  void addMonitor(Monitor monitor) {
     monitors.add(monitor);
   }
 
-  public void removeMonitor(Monitor monitor) {
+  void removeMonitor(Monitor monitor) {
     monitors.remove(monitor);
   }
 
-  public void search(String searchTerm) {
-    String searchUrl = getSearchUrl(searchTerm, 100, 0);
-    query(searchUrl);
-  }
-
-  public void getTrending() {
-    String trendingUrl = getTrendingUrl(100, 0);
+  void getTrending() {
+    String trendingUrl = getTrendingUrl();
     query(trendingUrl);
   }
 
@@ -138,7 +129,7 @@ public final class Api {
   /**
    * A POJO mirroring the top level result JSON object returned from Giphy's api.
    */
-  public static class SearchResult {
+  public static final class SearchResult {
     public GifResult[] data;
 
     @Override
@@ -150,15 +141,13 @@ public final class Api {
   /**
    * A POJO mirroring an individual GIF image returned from Giphy's api.
    */
-  public static class GifResult {
+  public static final class GifResult {
     public String id;
-    // Page url not GIF url
-    public String url;
-    public GifUrlSet images;
+    GifUrlSet images;
 
     @Override
     public String toString() {
-      return "GifResult{" + "id='" + id + '\'' + ", url='" + url + '\'' + ", images=" + images
+      return "GifResult{" + "id='" + id + '\'' + ", images=" + images
           + '}';
     }
   }
@@ -167,10 +156,10 @@ public final class Api {
    * A POJO mirroring a JSON object with a put of urls of different sizes and dimensions returned
    * for a single image from Giphy's api.
    */
-  public static class GifUrlSet {
-    public GifImage original;
-    public GifImage fixed_width;
-    public GifImage fixed_height;
+  public static final class GifUrlSet {
+    GifImage original;
+    GifImage fixed_width;
+    GifImage fixed_height;
 
     @Override
     public String toString() {
@@ -184,17 +173,14 @@ public final class Api {
    * A POJO mirroring a JSON object for an image with one particular url, size and dimension
    * returned from Giphy's api.
    */
-  public static class GifImage {
-    public String url;
-    public int width;
-    public int height;
-    public int frames;
-    public int size;
+  public static final class GifImage {
+    String url;
+    int width;
+    int height;
 
     @Override
     public String toString() {
-      return "GifImage{" + "url='" + url + '\'' + ", width=" + width + ", height=" + height
-          + ", frames=" + frames + ", size=" + size + '}';
+      return "GifImage{" + "url='" + url + '\'' + ", width=" + width + ", height=" + height + '}';
     }
   }
 }

@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class ResourceEncoderRegistry {
   // TODO: this should probably be a put.
-  final List<Entry<?>> encoders = new ArrayList<>();
+  private final List<Entry<?>> encoders = new ArrayList<>();
 
   public synchronized <Z> void append(Class<Z> resourceClass, ResourceEncoder<Z> encoder) {
     encoders.add(new Entry<>(resourceClass, encoder));

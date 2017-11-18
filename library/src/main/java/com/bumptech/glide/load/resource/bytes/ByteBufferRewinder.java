@@ -10,6 +10,8 @@ import java.nio.ByteBuffer;
 public class ByteBufferRewinder implements DataRewinder<ByteBuffer> {
   private final ByteBuffer buffer;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public ByteBufferRewinder(ByteBuffer buffer) {
     this.buffer = buffer;
   }

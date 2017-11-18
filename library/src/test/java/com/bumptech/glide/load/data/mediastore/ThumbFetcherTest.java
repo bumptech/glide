@@ -22,9 +22,9 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 public class ThumbFetcherTest {
 
-  @Mock ThumbnailStreamOpener opener;
-  @Mock DataFetcher.DataCallback<InputStream> callback;
-  @Mock InputStream expected;
+  @Mock private ThumbnailStreamOpener opener;
+  @Mock private DataFetcher.DataCallback<InputStream> callback;
+  @Mock private InputStream expected;
 
   private ThumbFetcher fetcher;
   private Uri uri;

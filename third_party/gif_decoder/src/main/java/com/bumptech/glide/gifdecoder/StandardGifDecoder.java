@@ -32,7 +32,6 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -87,6 +86,8 @@ public class StandardGifDecoder implements GifDecoder {
   @ColorInt
   private final int[] pct = new int[256];
 
+  private final GifDecoder.BitmapProvider bitmapProvider;
+
   /** Raw GIF data from input source. */
   private ByteBuffer rawData;
 
@@ -98,7 +99,7 @@ public class StandardGifDecoder implements GifDecoder {
    * Temporary buffer for block reading.
    * Reads 16k chunks from the native buffer for processing, to greatly reduce JNI overhead.
    */
-  @Nullable private byte[] workBuffer;
+  private byte[] workBuffer;
   private int workBufferSize = 0;
   private int workBufferPosition = 0;
 
@@ -114,7 +115,6 @@ public class StandardGifDecoder implements GifDecoder {
 
   private int framePointer;
   private GifHeader header;
-  private GifDecoder.BitmapProvider bitmapProvider;
   private Bitmap previousImage;
   private boolean savePrevious;
   @GifDecodeStatus
@@ -126,6 +126,8 @@ public class StandardGifDecoder implements GifDecoder {
   @NonNull
   private Bitmap.Config bitmapConfig = Config.ARGB_8888;
 
+  // Public API.
+  @SuppressWarnings("unused")
   public StandardGifDecoder(
       GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData) {
     this(provider, gifHeader, rawData, 1 /*sampleSize*/);

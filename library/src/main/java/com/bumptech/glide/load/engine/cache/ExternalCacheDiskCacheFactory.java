@@ -11,6 +11,8 @@ import java.io.File;
  *
  * @deprecated use {@link ExternalPreferredCacheDiskCacheFactory} instead.
  */
+// Public API.
+@SuppressWarnings({"unused", "WeakerAccess"})
 @Deprecated
 public final class ExternalCacheDiskCacheFactory extends DiskLruCacheFactory {
 

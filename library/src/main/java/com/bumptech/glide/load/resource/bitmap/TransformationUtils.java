@@ -13,6 +13,7 @@ import android.graphics.Shader;
 import android.media.ExifInterface;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -28,6 +29,8 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * A class with methods to efficiently resize Bitmaps.
  */
+// Legacy Public APIs.
+@SuppressWarnings("WeakerAccess")
 public final class TransformationUtils {
   private static final String TAG = "TransformationUtils";
   public static final int PAINT_FLAGS = Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
@@ -480,7 +483,7 @@ public final class TransformationUtils {
     }
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static void initializeMatrixForRotation(int exifOrientation, Matrix matrix) {
     switch (exifOrientation) {
       case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:

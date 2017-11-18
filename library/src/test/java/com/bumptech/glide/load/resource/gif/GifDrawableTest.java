@@ -31,6 +31,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.gif.GifDrawableTest.BitmapTrackingShadowCanvas;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.Util;
+import com.bumptech.glide.util.Preconditions;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.After;
@@ -77,7 +78,7 @@ public class GifDrawableTest {
     frameWidth = 120;
     frameHeight = 450;
     firstFrame = Bitmap.createBitmap(frameWidth, frameHeight, Bitmap.Config.RGB_565);
-    drawable = new GifDrawable(frameLoader, bitmapPool, paint);
+    drawable = new GifDrawable(frameLoader, paint);
     when(frameLoader.getWidth()).thenReturn(frameWidth);
     when(frameLoader.getHeight()).thenReturn(frameHeight);
     when(frameLoader.getCurrentFrame()).thenReturn(firstFrame);
@@ -91,13 +92,14 @@ public class GifDrawableTest {
     Util.setSdkVersionInt(initialSdkVersion);
   }
 
+  // containsExactly doesn't need its return value checked.
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
   public void testShouldDrawFirstFrameBeforeAnyFrameRead() {
     Canvas canvas = new Canvas();
     drawable.draw(canvas);
 
-    BitmapTrackingShadowCanvas shadowCanvas =
-        (BitmapTrackingShadowCanvas) Shadow.extract(canvas);
+    BitmapTrackingShadowCanvas shadowCanvas = Shadow.extract(canvas);
     assertThat(shadowCanvas.getDrawnBitmaps()).containsExactly(firstFrame);
   }
 
@@ -335,10 +337,15 @@ public class GifDrawableTest {
   public void testReturnsNewDrawableFromConstantState() {
     Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     drawable =
-        new GifDrawable(RuntimeEnvironment.application, mock(GifDecoder.class), bitmapPool,
-            transformation, 100, 100, firstFrame);
+        new GifDrawable(
+            RuntimeEnvironment.application,
+            mock(GifDecoder.class),
+            transformation,
+            100,
+            100,
+            firstFrame);
 
-    assertNotNull(drawable.getConstantState().newDrawable());
+    assertNotNull(Preconditions.checkNotNull(drawable.getConstantState()).newDrawable());
     assertNotNull(
         drawable.getConstantState().newDrawable(RuntimeEnvironment.application.getResources()));
   }
@@ -523,8 +530,8 @@ public class GifDrawableTest {
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfConstructedWithNullFirstFrame() {
-    new GifDrawable(RuntimeEnvironment.application, mock(GifDecoder.class), bitmapPool,
-        transformation, 100, 100, null);
+    new GifDrawable(
+        RuntimeEnvironment.application, mock(GifDecoder.class), transformation, 100, 100, null);
   }
 
   @Test
@@ -587,7 +594,7 @@ public class GifDrawableTest {
    * Keeps track of the set of Bitmaps drawn to the canvas.
    */
   @Implements(Canvas.class)
-  public static class BitmapTrackingShadowCanvas extends ShadowCanvas {
+  public static final class BitmapTrackingShadowCanvas extends ShadowCanvas {
     private final Set<Bitmap> drawnBitmaps = new HashSet<>();
 
     @Implementation
@@ -595,7 +602,7 @@ public class GifDrawableTest {
       drawnBitmaps.add(bitmap);
     }
 
-    public Iterable<Bitmap> getDrawnBitmaps() {
+    private Iterable<Bitmap> getDrawnBitmaps() {
       return drawnBitmaps;
     }
   }

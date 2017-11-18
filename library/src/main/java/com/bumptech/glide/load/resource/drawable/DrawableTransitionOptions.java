@@ -8,6 +8,8 @@ import com.bumptech.glide.request.transition.TransitionFactory;
 /**
  * Contains {@link Drawable} specific animation options.
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public final class DrawableTransitionOptions extends
     TransitionOptions<DrawableTransitionOptions, Drawable> {
 

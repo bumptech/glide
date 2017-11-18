@@ -33,8 +33,8 @@ import org.junit.runner.RunWith;
 @SplitBySdk({26, 24, 23, 21, 19, 18, 16})
 @RegressionTest
 public class RoundedCornersRegressionTest {
-  @Rule public TestRule tearDownGlide = new TearDownGlide();
-  @Rule public TestName testName = new TestName();
+  @Rule public final TestRule tearDownGlide = new TearDownGlide();
+  @Rule public final TestName testName = new TestName();
 
   private Context context;
   private BitmapRegressionTester bitmapRegressionTester;

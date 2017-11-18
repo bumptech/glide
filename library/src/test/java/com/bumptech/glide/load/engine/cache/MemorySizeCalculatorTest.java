@@ -138,11 +138,10 @@ public class MemorySizeCalculatorTest {
 
   @Test
   public void testByteArrayPoolSize_withLowRamDevice_isHalfTheSpecifiedBytes() {
-    LowRamActivityManager activityManager =
-        (LowRamActivityManager) Shadow.extract(harness.activityManager);
+    LowRamActivityManager activityManager = Shadow.extract(harness.activityManager);
     Util.setSdkVersionInt(19);
     activityManager.setMemoryClass(getLargeEnoughMemoryClass());
-    activityManager.setIsLowRam(true);
+    activityManager.setIsLowRam();
 
     int byteArrayPoolSize = harness.getCalculator().getArrayPoolSizeInBytes();
     assertThat(byteArrayPoolSize).isEqualTo(harness.byteArrayPoolSizeBytes / 2);
@@ -159,18 +158,18 @@ public class MemorySizeCalculatorTest {
   }
 
   private static class MemorySizeHarness {
-    int pixelSize = 500;
-    int bytesPerPixel = MemorySizeCalculator.BYTES_PER_ARGB_8888_PIXEL;
+    final int pixelSize = 500;
+    final int bytesPerPixel = MemorySizeCalculator.BYTES_PER_ARGB_8888_PIXEL;
     float memoryCacheScreens = MemorySizeCalculator.Builder.MEMORY_CACHE_TARGET_SCREENS;
     float bitmapPoolScreens = MemorySizeCalculator.Builder.BITMAP_POOL_TARGET_SCREENS;
-    float sizeMultiplier = MemorySizeCalculator.Builder.MAX_SIZE_MULTIPLIER;
+    final float sizeMultiplier = MemorySizeCalculator.Builder.MAX_SIZE_MULTIPLIER;
     int byteArrayPoolSizeBytes = MemorySizeCalculator.Builder.ARRAY_POOL_SIZE_BYTES;
-    ActivityManager activityManager =
+    final ActivityManager activityManager =
         (ActivityManager) RuntimeEnvironment.application.getSystemService(Context.ACTIVITY_SERVICE);
-    MemorySizeCalculator.ScreenDimensions screenDimensions =
+    final MemorySizeCalculator.ScreenDimensions screenDimensions =
         mock(MemorySizeCalculator.ScreenDimensions.class);
 
-    public MemorySizeCalculator getCalculator() {
+    MemorySizeCalculator getCalculator() {
       when(screenDimensions.getWidthPixels()).thenReturn(pixelSize);
       when(screenDimensions.getHeightPixels()).thenReturn(pixelSize);
       return new MemorySizeCalculator.Builder(RuntimeEnvironment.application)
@@ -183,7 +182,7 @@ public class MemorySizeCalculatorTest {
           .build();
     }
 
-    public int getScreenSize() {
+    int getScreenSize() {
       return pixelSize * pixelSize * bytesPerPixel;
     }
   }
@@ -193,8 +192,8 @@ public class MemorySizeCalculatorTest {
 
     private boolean isLowRam;
 
-    void setIsLowRam(boolean isLowRam) {
-      this.isLowRam = isLowRam;
+    void setIsLowRam() {
+      this.isLowRam = true;
     }
 
     @Implementation

@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.util.HashMap;
@@ -160,7 +161,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
     return sb.append(")}").toString();
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class KeyPool extends BaseKeyPool<Key> {
 
     public Key get(int size, Bitmap.Config config) {
@@ -175,7 +176,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
     }
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static final class Key implements Poolable {
     private final KeyPool pool;
 
@@ -186,7 +187,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
       this.pool = pool;
     }
 
-    // Visible for testing.
+    @VisibleForTesting
     Key(KeyPool pool, int size, Bitmap.Config config) {
       this(pool);
       init(size, config);

@@ -86,7 +86,7 @@ public class GlideUrl implements Key {
     if (TextUtils.isEmpty(safeStringUrl)) {
       String unsafeStringUrl = stringUrl;
       if (TextUtils.isEmpty(unsafeStringUrl)) {
-        unsafeStringUrl = url.toString();
+        unsafeStringUrl = Preconditions.checkNotNull(url).toString();
       }
       safeStringUrl = Uri.encode(unsafeStringUrl, ALLOWED_URI_CHARS);
     }
@@ -103,13 +103,15 @@ public class GlideUrl implements Key {
   /**
    * Returns an inexpensive to calculate {@link String} suitable for use as a disk cache key.
    *
-   * <p> This method does not include headers. </p>
+   * <p>This method does not include headers.
    *
-   * <p> Unlike {@link #toStringUrl()}} and {@link #toURL()}, this method does not escape
-   * input. </p>
+   * <p>Unlike {@link #toStringUrl()}} and {@link #toURL()}, this method does not escape
+   * input.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public String getCacheKey() {
-    return stringUrl != null ? stringUrl : url.toString();
+    return stringUrl != null ? stringUrl : Preconditions.checkNotNull(url).toString();
   }
 
   @Override

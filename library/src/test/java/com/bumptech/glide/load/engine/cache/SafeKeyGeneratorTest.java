@@ -42,10 +42,10 @@ public class SafeKeyGeneratorTest {
     return String.valueOf(nextId++);
   }
 
-  private static class MockKey implements Key {
-    private String id;
+  private static final class MockKey implements Key {
+    private final String id;
 
-    public MockKey(String id) {
+    MockKey(String id) {
       this.id = id;
     }
 

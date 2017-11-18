@@ -21,6 +21,8 @@ public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
 
   private final ModelLoader<GlideUrl, InputStream> urlLoader;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public HttpUriLoader(ModelLoader<GlideUrl, InputStream> urlLoader) {
     this.urlLoader = urlLoader;
   }

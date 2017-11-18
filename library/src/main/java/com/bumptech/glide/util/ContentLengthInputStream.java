@@ -1,5 +1,6 @@
 package com.bumptech.glide.util;
 
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import java.io.FilterInputStream;
@@ -39,7 +40,7 @@ public final class ContentLengthInputStream extends FilterInputStream {
     return result;
   }
 
-  ContentLengthInputStream(InputStream in, long contentLength) {
+  private ContentLengthInputStream(InputStream in, long contentLength) {
     super(in);
     this.contentLength = contentLength;
   }
@@ -57,12 +58,13 @@ public final class ContentLengthInputStream extends FilterInputStream {
   }
 
   @Override
-  public int read(byte[] buffer) throws IOException {
+  public int read(@NonNull byte[] buffer) throws IOException {
     return read(buffer, 0 /*byteOffset*/, buffer.length /*byteCount*/);
   }
 
   @Override
-  public synchronized int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+  public synchronized int read(@NonNull byte[] buffer, int byteOffset, int byteCount)
+      throws IOException {
     return checkReadSoFarOrThrow(super.read(buffer, byteOffset, byteCount));
   }
 

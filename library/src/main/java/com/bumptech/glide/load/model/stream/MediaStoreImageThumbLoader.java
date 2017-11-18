@@ -16,8 +16,10 @@ import java.io.InputStream;
  * thumbnails for those {@link Uri}s in the media store.
  */
 public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream> {
-  public final Context context;
+  private final Context context;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public MediaStoreImageThumbLoader(Context context) {
     this.context = context.getApplicationContext();
   }

@@ -2,7 +2,9 @@ package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.target.SizeReadyCallback;
@@ -119,7 +121,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   }
 
   @Override
-  public R get(long time, TimeUnit timeUnit)
+  public R get(long time, @NonNull TimeUnit timeUnit)
       throws InterruptedException, ExecutionException, TimeoutException {
     return doGet(timeUnit.toMillis(time));
   }
@@ -262,14 +264,14 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     return false;
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class Waiter {
 
-    public void waitForTimeout(Object toWaitOn, long timeoutMillis) throws InterruptedException {
+    void waitForTimeout(Object toWaitOn, long timeoutMillis) throws InterruptedException {
       toWaitOn.wait(timeoutMillis);
     }
 
-    public void notifyAll(Object toNotify) {
+    void notifyAll(Object toNotify) {
       toNotify.notifyAll();
     }
   }

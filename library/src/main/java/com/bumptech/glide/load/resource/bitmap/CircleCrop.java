@@ -25,6 +25,7 @@ public class CircleCrop extends BitmapTransformation {
 
   /**
    * @deprecated Use {@link #CircleCrop()}.
+   * @param context Ignored.
    */
   @Deprecated
   public CircleCrop(@SuppressWarnings("unused") Context context) {
@@ -33,6 +34,7 @@ public class CircleCrop extends BitmapTransformation {
 
   /**
    * @deprecated Use {@link #CircleCrop()}
+   * @param bitmapPool Ignored.
    */
   @Deprecated
   public CircleCrop(@SuppressWarnings("unused") BitmapPool bitmapPool) {

@@ -15,6 +15,8 @@ import java.io.InputStream;
  * An {@link com.bumptech.glide.load.model.ModelLoader} for translating {@link
  * com.bumptech.glide.load.model.GlideUrl} (http/https URLS) into {@link java.io.InputStream} data.
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   /**
    * An integer option that is used to determine the maximum connect and read timeout durations (in
@@ -31,7 +33,7 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     this(null);
   }
 
-  public HttpGlideUrlLoader(ModelCache<GlideUrl, GlideUrl> modelCache) {
+  public HttpGlideUrlLoader(@Nullable ModelCache<GlideUrl, GlideUrl> modelCache) {
     this.modelCache = modelCache;
   }
 

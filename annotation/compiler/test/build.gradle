@@ -13,10 +13,10 @@ dependencies {
     // build.gradle file.
     testImplementation project(':glide')
     testImplementation project(':annotation:compiler')
-    testImplementation 'com.squareup:javapoet:1.9.0'
-    testImplementation 'com.google.auto.service:auto-service:1.0-rc3'
-    testImplementation 'com.google.code.findbugs:jsr305:3.0.1'
-    testImplementation 'com.google.testing.compile:compile-testing:0.10'
+    testImplementation "com.squareup:javapoet:${JAVAPOET_VERSION}"
+    testImplementation "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
+    testImplementation "com.google.code.findbugs:jsr305:${JSR_305_VERSION}"
+    testImplementation 'com.google.testing.compile:compile-testing:0.12'
     // Use a stupidly old version of the Android classes jar. This works because we just need to get
     // our generated classes to compile and our generated classes tend to use simple and stable
     // Android APIs. If that changes, we'll need to find an alternative.

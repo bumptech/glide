@@ -20,17 +20,16 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class StreamAssetPathFetcherTest {
-  @Mock AssetManager assetManager;
-  @Mock InputStream expected;
-  @Mock DataFetcher.DataCallback<InputStream> callback;
+  @Mock private AssetManager assetManager;
+  @Mock private InputStream expected;
+  @Mock private DataFetcher.DataCallback<InputStream> callback;
 
   private StreamAssetPathFetcher fetcher;
-  private String assetPath;
 
   @Before
   public void setUp() throws IOException {
     MockitoAnnotations.initMocks(this);
-    assetPath = "/some/asset/path";
+    String assetPath = "/some/asset/path";
     fetcher = new StreamAssetPathFetcher(assetManager, assetPath);
     when(assetManager.open(eq(assetPath))).thenReturn(expected);
   }

@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.resource.drawable;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,10 +56,17 @@ public class DrawableResourceTest {
     when(constantState.newDrawable()).thenReturn(expected);
     when(drawable.getConstantState()).thenReturn(constantState);
 
-    assertEquals(expected, resource.get());
+    assertThat(resource.get()).isEqualTo(expected);
 
     verify(drawable).getConstantState();
     verify(constantState).newDrawable();
+  }
+
+  @Test
+  public void get_withNullState_returnsOriginalDrawable() {
+    when(drawable.getConstantState()).thenReturn(null);
+
+    assertThat(resource.get()).isEqualTo(drawable);
   }
 
   @Test(expected = NullPointerException.class)
@@ -86,7 +94,7 @@ public class DrawableResourceTest {
    */
   private static class TestDrawable extends Drawable {
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
 
     }
 

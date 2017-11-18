@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
@@ -28,8 +29,6 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   private final ThumbnailStreamOpener opener;
   private InputStream inputStream;
 
-  // TODO(nnaze): These build methods do not need the full Glide or Context objects.
-
   public static ThumbFetcher buildImageFetcher(Context context, Uri uri) {
     return build(context, uri, new ImageThumbnailQuery(context.getContentResolver()));
   }
@@ -46,7 +45,7 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
     return new ThumbFetcher(uri, opener);
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   ThumbFetcher(Uri mediaStoreImageUri, ThumbnailStreamOpener opener) {
     this.mediaStoreImageUri = mediaStoreImageUri;
     this.opener = opener;

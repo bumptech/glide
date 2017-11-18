@@ -1,5 +1,6 @@
 package com.bumptech.glide.util.pool;
 
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pools.Pool;
 import android.support.v4.util.Pools.SimplePool;
 import android.support.v4.util.Pools.SynchronizedPool;
@@ -74,6 +75,8 @@ public final class FactoryPools {
    *
    * @param <T> The type of object that the {@link List Lists} will contain.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public static <T> Pool<List<T>> threadSafeList(int size) {
     return build(new SynchronizedPool<List<T>>(size), new Factory<List<T>>() {
       @Override
@@ -155,7 +158,7 @@ public final class FactoryPools {
     }
 
     @Override
-    public boolean release(T instance) {
+    public boolean release(@NonNull T instance) {
       if (instance instanceof Poolable) {
         ((Poolable) instance).getVerifier().setRecycled(true /*isRecycled*/);
       }

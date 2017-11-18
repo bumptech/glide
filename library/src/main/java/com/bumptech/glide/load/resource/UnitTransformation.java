@@ -6,12 +6,12 @@ import com.bumptech.glide.load.engine.Resource;
 import java.security.MessageDigest;
 
 /**
- * A noop Transformation that simply returns the given resource.
+ * A no-op Transformation that simply returns the given resource.
  *
  * @param <T> The type of the resource that will always be returned unmodified.
  */
 public final class UnitTransformation<T> implements Transformation<T> {
-  private static final Transformation<?> TRANSFORMATION = new UnitTransformation<Object>();
+  private static final Transformation<?> TRANSFORMATION = new UnitTransformation<>();
 
   /**
    * Returns a UnitTransformation for the given type.

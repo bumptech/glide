@@ -16,6 +16,8 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   private final Call.Factory client;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public OkHttpUrlLoader(Call.Factory client) {
     this.client = client;
   }
@@ -34,9 +36,11 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   /**
    * The default factory for {@link OkHttpUrlLoader}s.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
     private static volatile Call.Factory internalClient;
-    private Call.Factory client;
+    private final Call.Factory client;
 
     private static Call.Factory getInternalClient() {
       if (internalClient == null) {

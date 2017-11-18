@@ -30,6 +30,8 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
    *                by {@link ContentResolver#openInputStream(android.net.Uri)}
    * @see ContentResolver#openInputStream(android.net.Uri)
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public LocalUriFetcher(ContentResolver contentResolver, Uri uri) {
     this.contentResolver = contentResolver;
     this.uri = uri;

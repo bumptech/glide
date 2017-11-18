@@ -10,6 +10,8 @@ import com.bumptech.glide.request.transition.TransitionFactory;
 /**
  * Contains {@link Bitmap} specific animation options.
  */
+// Public API.
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class BitmapTransitionOptions extends
     TransitionOptions<BitmapTransitionOptions, Bitmap> {
 

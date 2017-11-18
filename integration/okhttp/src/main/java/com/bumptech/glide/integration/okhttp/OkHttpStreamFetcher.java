@@ -27,9 +27,11 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "OkHttpFetcher";
   private final OkHttpClient client;
   private final GlideUrl url;
-  @Synthetic InputStream stream;
-  @Synthetic ResponseBody responseBody;
+  @SuppressWarnings("WeakerAccess") @Synthetic InputStream stream;
+  @SuppressWarnings("WeakerAccess") @Synthetic ResponseBody responseBody;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public OkHttpStreamFetcher(OkHttpClient client, GlideUrl url) {
     this.client = client;
     this.url = url;

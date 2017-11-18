@@ -9,7 +9,8 @@ import com.bumptech.glide.request.transition.ViewPropertyTransition;
  *
  * @param <TranscodeType> The type of the resource that will be displayed.
  */
-@SuppressWarnings("PMD.UseUtilityClass")
+// Public API.
+@SuppressWarnings({"PMD.UseUtilityClass", "unused"})
 public final class GenericTransitionOptions<TranscodeType> extends
     TransitionOptions<GenericTransitionOptions<TranscodeType>, TranscodeType> {
   /**

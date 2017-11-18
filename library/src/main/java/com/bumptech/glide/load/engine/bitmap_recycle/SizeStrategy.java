@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.util.TreeMap;
@@ -106,7 +107,7 @@ class SizeStrategy implements LruPoolStrategy {
     return "[" + size + "]";
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class KeyPool extends BaseKeyPool<Key> {
 
     public Key get(int size) {
@@ -121,7 +122,7 @@ class SizeStrategy implements LruPoolStrategy {
     }
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static final class Key implements Poolable {
     private final KeyPool pool;
     @Synthetic int size;

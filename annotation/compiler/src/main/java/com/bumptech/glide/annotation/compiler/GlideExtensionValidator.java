@@ -199,10 +199,7 @@ final class GlideExtensionValidator {
     }
     TypeMirror argument = typeArguments.get(0);
     String expected = getGlideTypeValue(executableElement);
-    if (!argument.toString().equals(expected)) {
-      return false;
-    }
-    return true;
+    return argument.toString().equals(expected);
   }
 
   private boolean isRequestBuilder(TypeMirror typeMirror) {

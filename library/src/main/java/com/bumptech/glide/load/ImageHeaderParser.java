@@ -56,7 +56,6 @@ public interface ImageHeaderParser {
    *
    * @return The exif orientation if present or -1 if the header couldn't be parsed or doesn't
    * contain an orientation
-   * @throws IOException
    */
   int getOrientation(InputStream is, ArrayPool byteArrayPool) throws IOException;
   int getOrientation(ByteBuffer byteBuffer, ArrayPool byteArrayPool) throws IOException;

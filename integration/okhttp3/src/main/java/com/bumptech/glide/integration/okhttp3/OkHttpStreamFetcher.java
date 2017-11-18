@@ -9,6 +9,7 @@ import com.bumptech.glide.load.HttpException;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
+import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,11 +27,13 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream>,
   private static final String TAG = "OkHttpFetcher";
   private final Call.Factory client;
   private final GlideUrl url;
-  @Synthetic InputStream stream;
-  @Synthetic ResponseBody responseBody;
+  @SuppressWarnings("WeakerAccess") @Synthetic InputStream stream;
+  @SuppressWarnings("WeakerAccess") @Synthetic ResponseBody responseBody;
   private volatile Call call;
   private DataCallback<? super InputStream> callback;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public OkHttpStreamFetcher(Call.Factory client, GlideUrl url) {
     this.client = client;
     this.url = url;
@@ -65,7 +68,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream>,
   }
 
   @Override
-  public void onFailure(Call call, IOException e) {
+  public void onFailure(@NonNull Call call, @NonNull IOException e) {
     if (Log.isLoggable(TAG, Log.DEBUG)) {
       Log.d(TAG, "OkHttp failed to obtain result", e);
     }
@@ -74,10 +77,10 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream>,
   }
 
   @Override
-  public void onResponse(Call call, Response response) throws IOException {
+  public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
     responseBody = response.body();
     if (response.isSuccessful()) {
-      long contentLength = responseBody.contentLength();
+      long contentLength = Preconditions.checkNotNull(responseBody).contentLength();
       stream = ContentLengthInputStream.obtain(responseBody.byteStream(), contentLength);
       callback.onDataReady(stream);
     } else {

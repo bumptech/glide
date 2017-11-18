@@ -11,6 +11,8 @@ import android.widget.ListView;
  *
  * <p>Requires that the the recycler view be using a {@link LinearLayoutManager} subclass.
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public final class RecyclerToListViewScrollListener extends RecyclerView.OnScrollListener {
   public static final int UNKNOWN_SCROLL_STATE = Integer.MIN_VALUE;
   private final AbsListView.OnScrollListener scrollListener;

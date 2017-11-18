@@ -19,6 +19,8 @@ public class BitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, Bitm
   private final Resources resources;
   private final BitmapPool bitmapPool;
 
+  // Public API.
+  @SuppressWarnings("unused")
   public BitmapDrawableTranscoder(Context context) {
     this(context.getResources(), Glide.get(context).getBitmapPool());
   }

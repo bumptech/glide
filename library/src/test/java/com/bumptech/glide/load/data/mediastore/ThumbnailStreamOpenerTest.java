@@ -116,12 +116,12 @@ public class ThumbnailStreamOpenerTest {
   }
 
   private static class Harness {
-    MatrixCursor cursor = new MatrixCursor(new String[1]);
-    File file = new File("fake/uri");
-    Uri uri = Uri.fromFile(file);
-    ThumbnailQuery query = mock(ThumbnailQuery.class);
-    FileService service = mock(FileService.class);
-    ArrayPool byteArrayPool = new LruArrayPool();
+    final MatrixCursor cursor = new MatrixCursor(new String[1]);
+    final File file = new File("fake/uri");
+    final Uri uri = Uri.fromFile(file);
+    final ThumbnailQuery query = mock(ThumbnailQuery.class);
+    final FileService service = mock(FileService.class);
+    final ArrayPool byteArrayPool = new LruArrayPool();
 
     public Harness() {
       cursor.addRow(new String[] { file.getAbsolutePath() });
@@ -132,7 +132,7 @@ public class ThumbnailStreamOpenerTest {
     }
 
     public ThumbnailStreamOpener get() {
-      List<ImageHeaderParser> parsers = new ArrayList<ImageHeaderParser>();
+      List<ImageHeaderParser> parsers = new ArrayList<>();
       parsers.add(new DefaultImageHeaderParser());
       return new ThumbnailStreamOpener(
           parsers, service, query, byteArrayPool, getContentResolver());

@@ -22,6 +22,8 @@ public final class SquareImageView extends AppCompatImageView {
     super(context, attrs, defStyleAttr);
   }
 
+  // We want a square view.
+  @SuppressWarnings("SuspiciousNameCombination")
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, widthMeasureSpec);

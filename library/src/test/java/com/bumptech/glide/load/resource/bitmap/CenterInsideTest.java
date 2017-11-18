@@ -40,8 +40,8 @@ import org.robolectric.shadows.ShadowCanvas;
 @Config(manifest = Config.NONE, sdk = 18, shadows = { CenterInsideTest.DrawNothingCanvas.class })
 public class CenterInsideTest {
 
-  @Mock Resource<Bitmap> resource;
-  @Mock Transformation<Bitmap> transformation;
+  @Mock private Resource<Bitmap> resource;
+  @Mock private Transformation<Bitmap> transformation;
   private CenterInside centerInside;
   private int bitmapWidth;
   private int bitmapHeight;

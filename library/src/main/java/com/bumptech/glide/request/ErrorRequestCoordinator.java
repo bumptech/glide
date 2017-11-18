@@ -10,12 +10,12 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
     Request {
 
   @Nullable
-  private final RequestCoordinator coordinator;
+  private final RequestCoordinator parent;
   private Request primary;
   private Request error;
 
-  public ErrorRequestCoordinator(@Nullable RequestCoordinator coordinator) {
-    this.coordinator = coordinator;
+  public ErrorRequestCoordinator(@Nullable RequestCoordinator parent) {
+    this.parent = parent;
   }
 
   public void setRequests(Request primary, Request error) {
@@ -99,7 +99,7 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
   }
 
   private boolean parentCanSetImage() {
-    return coordinator == null || coordinator.canSetImage(this);
+    return parent == null || parent.canSetImage(this);
   }
 
   @Override
@@ -113,11 +113,11 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
   }
 
   private boolean parentCanNotifyCleared() {
-    return coordinator == null || coordinator.canNotifyCleared(this);
+    return parent == null || parent.canNotifyCleared(this);
   }
 
   private boolean parentCanNotifyStatusChanged() {
-    return coordinator == null || coordinator.canNotifyStatusChanged(this);
+    return parent == null || parent.canNotifyStatusChanged(this);
   }
 
   private boolean isValidRequest(Request request) {
@@ -130,13 +130,13 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
   }
 
   private boolean parentIsAnyResourceSet() {
-    return coordinator != null && coordinator.isAnyResourceSet();
+    return parent != null && parent.isAnyResourceSet();
   }
 
   @Override
   public void onRequestSuccess(Request request) {
-    if (coordinator != null) {
-      coordinator.onRequestSuccess(this);
+    if (parent != null) {
+      parent.onRequestSuccess(this);
     }
   }
 
@@ -149,8 +149,8 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
       return;
     }
 
-    if (coordinator != null) {
-      coordinator.onRequestFailed(this);
+    if (parent != null) {
+      parent.onRequestFailed(this);
     }
   }
 }

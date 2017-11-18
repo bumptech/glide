@@ -45,7 +45,7 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
 
     private final Model resource;
 
-    public UnitFetcher(Model resource) {
+    UnitFetcher(Model resource) {
       this.resource = resource;
     }
 

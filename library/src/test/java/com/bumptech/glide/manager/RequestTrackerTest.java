@@ -356,9 +356,9 @@ public class RequestTrackerTest {
 
   private class ClearAndRemoveRequest implements Answer<Void> {
 
-    private Request toRemove;
+    private final Request toRemove;
 
-    public ClearAndRemoveRequest(Request toRemove) {
+    ClearAndRemoveRequest(Request toRemove) {
       this.toRemove = toRemove;
     }
 

@@ -10,7 +10,7 @@ import rx.functions.Func2;
 /**
  * Observables for retrieving metadata from Imgur's API.
  */
-public final class ImgurObservables {
+final class ImgurObservables {
 
   private final ImgurService imgurService;
 
@@ -18,7 +18,7 @@ public final class ImgurObservables {
     this.imgurService = imgurService;
   }
 
-  public Observable<List<Image>> getHotViralImages(int maxPages) {
+  Observable<List<Image>> getHotViralImages(@SuppressWarnings("SameParameterValue") int maxPages) {
     return Observable.range(0, maxPages)
         .flatMap(new Func1<Integer, Observable<List<Image>>>() {
           @Override

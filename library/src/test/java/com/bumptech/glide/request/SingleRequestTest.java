@@ -912,16 +912,16 @@ public class SingleRequestTest {
     @SuppressWarnings("unchecked")
     private RequestListener<List> requestListener = mock(RequestListener.class);
     @SuppressWarnings("unchecked")
-    private TransitionFactory<List> transitionFactory = mock(TransitionFactory.class);
+    private final TransitionFactory<List> transitionFactory = mock(TransitionFactory.class);
     private int overrideWidth = -1;
     private int overrideHeight = -1;
     private List<?> result = new ArrayList<>();
-    private GlideContext glideContext = mock(GlideContext.class);
-    private Key signature = new ObjectKey(12345);
+    private final GlideContext glideContext = mock(GlideContext.class);
+    private final Key signature = new ObjectKey(12345);
     private Priority priority = Priority.HIGH;
     private boolean useUnlimitedSourceGeneratorsPool = false;
-    private Class<List> transcodeClass = List.class;
-    private Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
+    private final Class<List> transcodeClass = List.class;
+    private final Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
 
     SingleRequestBuilder() {
       when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
@@ -1050,7 +1050,7 @@ public class SingleRequestTest {
 
   private static class CallResourceCallback implements Answer {
 
-    private Resource resource;
+    private final Resource resource;
 
     CallResourceCallback(Resource resource) {
       this.resource = resource;
@@ -1069,8 +1069,8 @@ public class SingleRequestTest {
 
   private static class CallSizeReady implements Answer {
 
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
 
     CallSizeReady(int width, int height) {
       this.width = width;

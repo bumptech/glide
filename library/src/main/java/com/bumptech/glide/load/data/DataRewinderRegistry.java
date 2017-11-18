@@ -46,10 +46,10 @@ public class DataRewinderRegistry {
     return result.build(data);
   }
 
-  private static class DefaultRewinder implements DataRewinder<Object> {
+  private static final class DefaultRewinder implements DataRewinder<Object> {
     private final Object data;
 
-    public DefaultRewinder(Object data) {
+    DefaultRewinder(Object data) {
       this.data = data;
     }
 

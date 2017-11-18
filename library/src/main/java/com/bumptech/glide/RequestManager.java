@@ -65,7 +65,6 @@ public class RequestManager implements LifecycleListener {
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
   private final ConnectivityMonitor connectivityMonitor;
 
-  @NonNull
   private RequestOptions requestOptions;
 
   public RequestManager(
@@ -151,9 +150,8 @@ public class RequestManager implements LifecycleListener {
    * with the given {@link RequestOptions}.
    *
    * <p>The {@link RequestOptions} provided here replace those that have been previously provided
-   * via {@link GlideBuilder#setDefaultRequestOptions(RequestOptions)}, {@link
-   * #setDefaultRequestOptions(RequestOptions)} and {@link
-   * #applyDefaultRequestOptions(RequestOptions)}.
+   * via this method, {@link GlideBuilder#setDefaultRequestOptions(RequestOptions)}, and
+   * {@link #applyDefaultRequestOptions(RequestOptions)}.
    *
    * <p>Subsequent calls to {@link #applyDefaultRequestOptions(RequestOptions)} will not mutate
    * the {@link RequestOptions} provided here. Instead the manager will create a clone of these
@@ -226,6 +224,8 @@ public class RequestManager implements LifecycleListener {
    * <p>Note, on pre-Jelly Bean MR1 calling pause on a Fragment will not cause child fragments to
    * pause, in this case either call pause on the Activity or use a support Fragment.
    */
+  // Public API.
+  @SuppressWarnings({"WeakerAccess", "unused"})
   public void pauseRequestsRecursive() {
     Util.assertMainThread();
     pauseRequests();
@@ -250,6 +250,8 @@ public class RequestManager implements LifecycleListener {
    * descendant to this manager based on the Activity/Fragment hierarchy. The hierarchical semantics
    * are identical as for {@link #pauseRequestsRecursive()}.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   public void resumeRequestsRecursive() {
     Util.assertMainThread();
     resumeRequests();
@@ -510,7 +512,7 @@ public class RequestManager implements LifecycleListener {
       .ConnectivityListener {
     private final RequestTracker requestTracker;
 
-    public RequestManagerConnectivityListener(RequestTracker requestTracker) {
+    RequestManagerConnectivityListener(RequestTracker requestTracker) {
       this.requestTracker = requestTracker;
     }
 
@@ -524,7 +526,7 @@ public class RequestManager implements LifecycleListener {
 
   private static class ClearTarget extends ViewTarget<View, Object> {
 
-    public ClearTarget(View view) {
+    ClearTarget(View view) {
       super(view);
     }
 

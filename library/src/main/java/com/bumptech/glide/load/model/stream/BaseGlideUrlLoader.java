@@ -59,7 +59,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
     List<String> alternateUrls = getAlternateUrls(model, width, height, options);
     LoadData<InputStream> concreteLoaderData = concreteLoader.buildLoadData(result, width, height,
         options);
-    if (alternateUrls.isEmpty()) {
+    if (concreteLoaderData == null || alternateUrls.isEmpty()) {
       return concreteLoaderData;
     } else {
       return new LoadData<>(concreteLoaderData.sourceKey, getAlternateKeys(alternateUrls),
@@ -108,6 +108,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * @param width The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
+  // Public API.
+  @SuppressWarnings({"unused", "WeakerAccess"})
   @Nullable
   protected Headers getHeaders(Model model, int width, int height, Options options) {
     return Headers.DEFAULT;

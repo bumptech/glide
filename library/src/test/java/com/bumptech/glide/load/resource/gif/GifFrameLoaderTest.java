@@ -47,11 +47,11 @@ import org.robolectric.annotation.Config;
 public class GifFrameLoaderTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
-  @Mock GifFrameLoader.FrameCallback callback;
-  @Mock GifDecoder gifDecoder;
-  @Mock Handler handler;
-  @Mock Transformation<Bitmap> transformation;
-  @Mock RequestManager requestManager;
+  @Mock private GifFrameLoader.FrameCallback callback;
+  @Mock private GifDecoder gifDecoder;
+  @Mock private Handler handler;
+  @Mock private Transformation<Bitmap> transformation;
+  @Mock private RequestManager requestManager;
   private GifFrameLoader loader;
   private RequestBuilder<Bitmap> requestBuilder;
   private Bitmap firstFrame;

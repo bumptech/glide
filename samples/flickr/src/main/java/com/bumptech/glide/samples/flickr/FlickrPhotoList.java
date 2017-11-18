@@ -54,8 +54,8 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
-      Bundle savedInstanceState) {
+  public View onCreateView(
+      @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     final View result = inflater.inflate(R.layout.flickr_photo_list, container, false);
 
     list = (RecyclerView) result.findViewById(R.id.flickr_photo_list);
@@ -105,7 +105,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
   }
 
   @Override
-  public void onSaveInstanceState(Bundle outState) {
+  public void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     if (list != null) {
       int index = layoutManager.findFirstVisibleItemPosition();
@@ -116,16 +116,16 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     }
   }
 
-  private class FlickrPhotoListAdapter extends RecyclerView.Adapter<PhotoTitleViewHolder>
+  private final class FlickrPhotoListAdapter extends RecyclerView.Adapter<PhotoTitleViewHolder>
       implements ListPreloader.PreloadModelProvider<Photo> {
     private final LayoutInflater inflater;
     private List<Photo> photos = Collections.emptyList();
 
-    public FlickrPhotoListAdapter() {
+    FlickrPhotoListAdapter() {
       this.inflater = LayoutInflater.from(getActivity());
     }
 
-    public void setPhotos(List<Photo> photos) {
+    void setPhotos(List<Photo> photos) {
       this.photos = photos;
       notifyDataSetChanged();
     }
@@ -179,11 +179,11 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
     }
   }
 
-  private static class PhotoTitleViewHolder extends RecyclerView.ViewHolder {
+  private static final class PhotoTitleViewHolder extends RecyclerView.ViewHolder {
     private final TextView titleView;
     private final ImageView imageView;
 
-    public PhotoTitleViewHolder(View itemView) {
+    PhotoTitleViewHolder(View itemView) {
       super(itemView);
       imageView = (ImageView) itemView.findViewById(R.id.photo_view);
       titleView = (TextView) itemView.findViewById(R.id.title_view);

@@ -15,7 +15,7 @@ import java.util.List;
 class DataCacheGenerator implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object> {
 
-  private List<Key> cacheKeys;
+  private final List<Key> cacheKeys;
   private final DecodeHelper<?> helper;
   private final FetcherReadyCallback cb;
 

@@ -22,7 +22,8 @@ public class CenterInside extends BitmapTransformation {
   }
 
   /**
-   * Use {@link #CenterInside()}.
+   * @deprecated Use {@link #CenterInside()}.
+   * @param context Ignored.
    */
   @Deprecated
   public CenterInside(@SuppressWarnings("unused") Context context) {
@@ -30,7 +31,8 @@ public class CenterInside extends BitmapTransformation {
   }
 
   /**
-   * Use {@link #CenterInside()}.
+   * @deprecated Use {@link #CenterInside()}.
+   * @param bitmapPool Ignored.
    */
   @Deprecated
   public CenterInside(@SuppressWarnings("unused") BitmapPool bitmapPool) {

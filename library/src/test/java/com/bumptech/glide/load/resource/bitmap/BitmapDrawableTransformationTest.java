@@ -40,9 +40,9 @@ import org.robolectric.annotation.Config;
 @SuppressWarnings("deprecation")
 public class BitmapDrawableTransformationTest {
 
-  @Mock BitmapPool bitmapPool;
-  @Mock Transformation<Bitmap> wrapped;
-  @Mock Resource<BitmapDrawable> drawableResourceToTransform;
+  @Mock private BitmapPool bitmapPool;
+  @Mock private Transformation<Bitmap> wrapped;
+  @Mock private Resource<BitmapDrawable> drawableResourceToTransform;
 
   private BitmapDrawableTransformation transformation;
   private Bitmap bitmapToTransform;

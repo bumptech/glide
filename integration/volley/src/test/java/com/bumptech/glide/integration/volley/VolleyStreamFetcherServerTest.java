@@ -51,8 +51,7 @@ import org.robolectric.shadows.ShadowSystemClock;
 public class VolleyStreamFetcherServerTest {
   private static final String DEFAULT_PATH = "/fakepath";
 
-  @Mock VolleyRequestFactory requestFactory;
-  @Mock DataFetcher.DataCallback<InputStream> callback;
+  @Mock private DataFetcher.DataCallback<InputStream> callback;
 
   private MockWebServer mockWebServer;
   private RequestQueue requestQueue;

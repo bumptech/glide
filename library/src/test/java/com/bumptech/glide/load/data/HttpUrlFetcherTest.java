@@ -26,11 +26,11 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class HttpUrlFetcherTest {
-  @Mock HttpURLConnection urlConnection;
-  @Mock HttpUrlFetcher.HttpUrlConnectionFactory connectionFactory;
-  @Mock GlideUrl glideUrl;
-  @Mock InputStream stream;
-  @Mock DataFetcher.DataCallback<InputStream> callback;
+  @Mock private HttpURLConnection urlConnection;
+  @Mock private HttpUrlFetcher.HttpUrlConnectionFactory connectionFactory;
+  @Mock private GlideUrl glideUrl;
+  @Mock private InputStream stream;
+  @Mock private DataFetcher.DataCallback<InputStream> callback;
 
   private static final int TIMEOUT_MS = 100;
   private HttpUrlFetcher fetcher;

@@ -24,7 +24,7 @@ public class HttpUriLoaderTest {
   private static final int IMAGE_SIDE = 100;
   private static final Options OPTIONS = new Options();
 
-  @Mock ModelLoader<GlideUrl, InputStream> urlLoader;
+  @Mock private ModelLoader<GlideUrl, InputStream> urlLoader;
   private HttpUriLoader loader;
 
   @Before

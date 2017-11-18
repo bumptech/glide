@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,6 +15,8 @@ import com.bumptech.glide.load.Key;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -23,16 +24,15 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 public class EngineResourceTest {
   private EngineResource<Object> engineResource;
-  private EngineResource.ResourceListener listener;
-  private Key cacheKey = mock(Key.class);
-  private Resource<Object> resource = mockResource();
+  @Mock private EngineResource.ResourceListener listener;
+  @Mock private Key cacheKey;
+  @Mock private Resource<Object> resource;
 
   @Before
   public void setUp() {
-    resource = mockResource();
+    MockitoAnnotations.initMocks(this);
     engineResource =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
-    listener = mock(EngineResource.ResourceListener.class);
     engineResource.setResourceListener(cacheKey, listener);
   }
 

@@ -1,6 +1,7 @@
 package com.bumptech.glide.request;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 /**
  * A coordinator that coordinates two individual {@link Request}s that load a small thumbnail
@@ -8,17 +9,19 @@ import android.support.annotation.Nullable;
  */
 public class ThumbnailRequestCoordinator implements RequestCoordinator,
     Request {
+  @Nullable private final RequestCoordinator parent;
+
   private Request full;
   private Request thumb;
-  @Nullable private RequestCoordinator coordinator;
   private boolean isRunning;
 
-  public ThumbnailRequestCoordinator() {
-    this(null);
+  @VisibleForTesting
+  ThumbnailRequestCoordinator() {
+    this(/*parent=*/ null);
   }
 
-  public ThumbnailRequestCoordinator(RequestCoordinator coordinator) {
-    this.coordinator = coordinator;
+  public ThumbnailRequestCoordinator(@Nullable RequestCoordinator parent) {
+    this.parent = parent;
   }
 
   public void setRequests(Request full, Request thumb) {
@@ -38,7 +41,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   }
 
   private boolean parentCanSetImage() {
-    return coordinator == null || coordinator.canSetImage(this);
+    return parent == null || parent.canSetImage(this);
   }
 
   /**
@@ -58,11 +61,11 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   }
 
   private boolean parentCanNotifyCleared() {
-    return coordinator == null || coordinator.canNotifyCleared(this);
+    return parent == null || parent.canNotifyCleared(this);
   }
 
   private boolean parentCanNotifyStatusChanged() {
-    return coordinator == null || coordinator.canNotifyStatusChanged(this);
+    return parent == null || parent.canNotifyStatusChanged(this);
   }
 
   @Override
@@ -75,8 +78,8 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     if (request.equals(thumb)) {
       return;
     }
-    if (coordinator != null) {
-      coordinator.onRequestSuccess(this);
+    if (parent != null) {
+      parent.onRequestSuccess(this);
     }
     // Clearing the thumb is not necessarily safe if the thumb is being displayed in the Target,
     // as a layer in a cross fade for example. The only way we know the thumb is not being
@@ -92,13 +95,13 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
       return;
     }
 
-    if (coordinator != null) {
-      coordinator.onRequestFailed(this);
+    if (parent != null) {
+      parent.onRequestFailed(this);
     }
   }
 
   private boolean parentIsAnyResourceSet() {
-    return coordinator != null && coordinator.isAnyResourceSet();
+    return parent != null && parent.isAnyResourceSet();
   }
 
   /**

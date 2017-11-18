@@ -27,8 +27,7 @@ import org.robolectric.annotation.Config;
 public class ManifestParserTest {
   private static final String MODULE_VALUE = "GlideModule";
 
-  @Mock
-  Context context;
+  @Mock private Context context;
   private ManifestParser parser;
   private ApplicationInfo applicationInfo;
 
@@ -111,8 +110,7 @@ public class ManifestParserTest {
     applicationInfo.metaData.putString(key, MODULE_VALUE);
   }
 
-  public static class InvalidClass {
-  }
+  private static class InvalidClass { }
 
   public static class TestModule1 implements GlideModule {
     @Override

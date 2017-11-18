@@ -3,7 +3,7 @@ package com.bumptech.glide.request.target;
 import com.bumptech.glide.util.Util;
 
 /**
- * A simple {@link com.bumptech.glide.request.target.Target} base class with default (usually noop)
+ * A simple {@link com.bumptech.glide.request.target.Target} base class with default (usually no-op)
  * implementations of non essential methods that allows the caller to specify an exact width/height.
  * Typically use cases look something like this:
  * <pre>
@@ -33,6 +33,8 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
    * Constructor for the target that uses {@link Target#SIZE_ORIGINAL} as the target width and
    * height.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public SimpleTarget() {
     this(SIZE_ORIGINAL, SIZE_ORIGINAL);
   }
@@ -44,6 +46,8 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
    * @param width  The width in pixels of the desired resource.
    * @param height The height in pixels of the desired resource.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public SimpleTarget(int width, int height) {
     this.width = width;
     this.height = height;

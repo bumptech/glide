@@ -124,7 +124,7 @@ public class ImageViewTargetTest {
   private static final class TestTarget extends ImageViewTarget<Drawable> {
     public Drawable resource;
 
-    public TestTarget(ImageView view) {
+    TestTarget(ImageView view) {
       super(view);
     }
 

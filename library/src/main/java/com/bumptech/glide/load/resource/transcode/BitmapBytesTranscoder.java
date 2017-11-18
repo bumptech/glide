@@ -20,6 +20,8 @@ public class BitmapBytesTranscoder implements ResourceTranscoder<Bitmap, byte[]>
     this(Bitmap.CompressFormat.JPEG, 100);
   }
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public BitmapBytesTranscoder(Bitmap.CompressFormat compressFormat, int quality) {
     this.compressFormat = compressFormat;
     this.quality = quality;

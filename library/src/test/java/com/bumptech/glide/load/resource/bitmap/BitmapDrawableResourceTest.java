@@ -54,10 +54,10 @@ public class BitmapDrawableResourceTest {
   }
 
   private static class BitmapDrawableResourceHarness {
-    BitmapPool bitmapPool = mock(BitmapPool.class);
-    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    final BitmapPool bitmapPool = mock(BitmapPool.class);
+    final Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
-    public BitmapDrawableResource create() {
+    BitmapDrawableResource create() {
       return new BitmapDrawableResource(
           new BitmapDrawable(RuntimeEnvironment.application.getResources(), bitmap), bitmapPool);
     }

@@ -32,7 +32,12 @@ public class SimpleTargetTest {
 
   @Test
   public void testCanBeConstructedWithoutDimensions() {
-    getTarget();
+    new SimpleTarget<Object>() {
+      @Override
+      public void onResourceReady(Object resource, Transition<? super Object> transition) {
+        // Do nothing.
+      }
+    };
   }
 
   @Test
@@ -43,15 +48,6 @@ public class SimpleTargetTest {
   @Test
   public void testGetSizeDoesNotThrowWithSizeOriginal() {
     getTarget(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).getSize(mock(SizeReadyCallback.class));
-  }
-
-  private SimpleTarget<Object> getTarget() {
-    return new SimpleTarget<Object>() {
-      @Override
-      public void onResourceReady(Object resource, Transition<? super Object> transition) {
-        // Do nothing.
-      }
-    };
   }
 
   private SimpleTarget<Object> getTarget(int width, int height) {

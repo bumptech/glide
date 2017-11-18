@@ -40,6 +40,8 @@ import java.util.UUID;
  * @param <TranscodeType> The type of resource that will be delivered to the
  * {@link com.bumptech.glide.request.target.Target}.
  */
+// Public API.
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class RequestBuilder<TranscodeType> implements Cloneable {
   // Used in generated subclasses
   protected static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
@@ -149,9 +151,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * <p>If this {@link RequestBuilder} uses a thumbnail that succeeds the given error
    * {@link RequestBuilder} will be started anyway if the non-thumbnail request fails.
    *
-   * <p>Recursive calls to {@link #error(RequestBuilder)} as well as calls to
-   * {@link #thumbnail(float)} and {@link #thumbnail(RequestBuilder)} are supported for the given
-   * error {@link RequestBuilder}.
+   * <p>Recursive calls to this method as well as calls to {@link #thumbnail(float)} and
+   * {@link #thumbnail(RequestBuilder)} are supported for the given error {@link RequestBuilder}.
    *
    * <p>Unlike {@link #thumbnail(RequestBuilder)} and {@link #thumbnail(float)}, no options from
    * this primary {@link RequestBuilder} are propagated to the given error {@link RequestBuilder}.
@@ -179,8 +180,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * <p>Recursive calls to thumbnail are supported.
    *
-   * <p>Overrides any previous calls to {@link #thumbnail(RequestBuilder)},
-   * {@link #thumbnail(float)} and {@link #thumbnail(RequestBuilder[])}.
+   * <p>Overrides any previous calls to this method, {@link #thumbnail(float)} and
+   * {@link #thumbnail(RequestBuilder[])}.
    *
    * @see #thumbnail(float)
    * @see #thumbnail(RequestBuilder[])
@@ -215,11 +216,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    * chain.
    *
    * <p>The {@link RequestBuilder} objects provided here may be mutated and have any previous
-   * calls to their {@link #thumbnail(RequestBuilder[])} or {@link #thumbnail(RequestBuilder)}
-   * methods overridden.
+   * calls to this method or {@link #thumbnail(RequestBuilder)} methods overridden.
    *
    * <p>Overrides any previous calls to {@link #thumbnail(RequestBuilder)},
-   * {@link #thumbnail(float)} and {@link #thumbnail(RequestBuilder[])}.
+   * {@link #thumbnail(float)} and this method.
    *
    * @see #thumbnail(float)
    * @see #thumbnail(RequestBuilder)
@@ -278,8 +278,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable {
    *
    * <p>Recursive calls to thumbnail are supported.
    *
-   * <p>Overrides any previous calls to {@link #thumbnail(RequestBuilder[])},
-   * {@link #thumbnail(float)} and {@link #thumbnail(RequestBuilder)}.
+   * <p>Overrides any previous calls to this method, {@link #thumbnail(RequestBuilder[])},
+   *  and {@link #thumbnail(RequestBuilder)}.
    *
    * @see #thumbnail(RequestBuilder)
    * @see #thumbnail(RequestBuilder[])

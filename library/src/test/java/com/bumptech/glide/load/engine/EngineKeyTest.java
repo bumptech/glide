@@ -55,9 +55,15 @@ public class EngineKeyTest {
     }
 
     public EngineKey build() {
-      return new EngineKey(id, signature, width, height,
+      return new EngineKey(
+          id,
+          signature,
+          width,
+          height,
           Collections.<Class<?>, Transformation<?>>singletonMap(Object.class, transformation),
-          resourceClass, transcodeClass, options);
+          resourceClass,
+          transcodeClass,
+          options);
     }
   }
 
@@ -98,10 +104,10 @@ public class EngineKeyTest {
       throws UnsupportedEncodingException, NoSuchAlgorithmException {
     EngineKey first = harness.build();
     Key signature = mock(Key.class);
-    doAnswer(new Answer<Void>() {
+    doAnswer(new Answer() {
       @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        MessageDigest digest = (MessageDigest) invocationOnMock.getArguments()[0];
+      public Object answer(InvocationOnMock invocation) throws Throwable {
+        MessageDigest digest = (MessageDigest) invocation.getArguments()[0];
         digest.update("signature".getBytes("UTF-8"));
         return null;
       }

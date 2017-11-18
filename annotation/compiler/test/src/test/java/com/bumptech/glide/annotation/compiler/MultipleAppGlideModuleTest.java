@@ -18,7 +18,7 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class MultipleAppGlideModuleTest {
-  @Rule public ExpectedException expectedException = ExpectedException.none();
+  @Rule public final ExpectedException expectedException = ExpectedException.none();
   private static final String FIRST_MODULE = "EmptyAppModule1.java";
   private static final String SECOND_MODULE = "EmptyAppModule2.java";
 

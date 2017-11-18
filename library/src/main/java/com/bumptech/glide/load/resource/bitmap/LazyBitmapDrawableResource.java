@@ -15,7 +15,7 @@ import com.bumptech.glide.util.Util;
  * Lazily allocates a {@link android.graphics.drawable.BitmapDrawable} from a given
  * {@link android.graphics.Bitmap} on the first call to {@link #get()}.
  */
-public class LazyBitmapDrawableResource implements Resource<BitmapDrawable>,
+public final class LazyBitmapDrawableResource implements Resource<BitmapDrawable>,
     Initializable {
 
   private final Bitmap bitmap;
@@ -31,7 +31,7 @@ public class LazyBitmapDrawableResource implements Resource<BitmapDrawable>,
     return new LazyBitmapDrawableResource(resources, bitmapPool, bitmap);
   }
 
-  LazyBitmapDrawableResource(Resources resources, BitmapPool bitmapPool, Bitmap bitmap) {
+  private LazyBitmapDrawableResource(Resources resources, BitmapPool bitmapPool, Bitmap bitmap) {
     this.resources = Preconditions.checkNotNull(resources);
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
     this.bitmap = Preconditions.checkNotNull(bitmap);

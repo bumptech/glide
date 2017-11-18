@@ -32,6 +32,8 @@ import java.util.List;
  * Manages component registration to extend or replace Glide's default loading, decoding, and
  * encoding logic.
  */
+// Public API.
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class Registry {
   public static final String BUCKET_GIF = "Gif";
   public static final String BUCKET_BITMAP = "Bitmap";

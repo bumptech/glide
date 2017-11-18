@@ -52,15 +52,25 @@ import com.bumptech.glide.util.Util;
  */
 public abstract class BitmapTransformation implements Transformation<Bitmap> {
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public BitmapTransformation() {
     // Intentionally empty.
   }
 
+  /**
+   * @deprecated Use {@link #BitmapTransformation()}.
+   * @param context Ignored.
+   */
   @Deprecated
   public BitmapTransformation(@SuppressWarnings("unused") Context context) {
     this();
   }
 
+  /**
+   * @deprecated Use {@link #BitmapTransformation()}.
+   * @param bitmapPool Ignored.
+   */
   @Deprecated
   public BitmapTransformation(@SuppressWarnings("unused") BitmapPool bitmapPool) {
     this();

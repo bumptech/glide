@@ -27,7 +27,7 @@ final class ExtensionProcessor {
     extensionValidator = new GlideExtensionValidator(processingEnvironment, processorUtil);
   }
 
-  boolean processExtensions(Set<? extends TypeElement> set, RoundEnvironment env) {
+  boolean processExtensions(RoundEnvironment env) {
     List<TypeElement> elements = processorUtil.getElementsFor(GlideExtension.class, env);
     processorUtil.debugLog("Processing types : " + elements);
     for (TypeElement typeElement : elements) {

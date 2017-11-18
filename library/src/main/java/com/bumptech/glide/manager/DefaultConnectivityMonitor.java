@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 
 /**
@@ -14,9 +15,9 @@ import com.bumptech.glide.util.Synthetic;
  */
 class DefaultConnectivityMonitor implements ConnectivityMonitor {
   private final Context context;
-  @Synthetic final ConnectivityListener listener;
+  @SuppressWarnings("WeakerAccess") @Synthetic final ConnectivityListener listener;
 
-  @Synthetic boolean isConnected;
+  @SuppressWarnings("WeakerAccess") @Synthetic boolean isConnected;
   private boolean isRegistered;
 
   private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
@@ -30,6 +31,8 @@ class DefaultConnectivityMonitor implements ConnectivityMonitor {
     }
   };
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public DefaultConnectivityMonitor(Context context, ConnectivityListener listener) {
     this.context = context.getApplicationContext();
     this.listener = listener;
@@ -55,13 +58,15 @@ class DefaultConnectivityMonitor implements ConnectivityMonitor {
     isRegistered = false;
   }
 
+  @SuppressWarnings("WeakerAccess")
   @Synthetic
   // Permissions are checked in the factory instead.
   @SuppressLint("MissingPermission")
   boolean isConnected(Context context) {
     ConnectivityManager connectivityManager =
         (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-    NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+    NetworkInfo networkInfo =
+        Preconditions.checkNotNull(connectivityManager).getActiveNetworkInfo();
     return networkInfo != null && networkInfo.isConnected();
   }
 

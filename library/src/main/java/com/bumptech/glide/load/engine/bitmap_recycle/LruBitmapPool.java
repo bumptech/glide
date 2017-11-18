@@ -62,6 +62,8 @@ public class LruBitmapPool implements BitmapPool {
    *                       allowed to be put into the pool. Configs not in the allowed put will be
    *                       rejected.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   public LruBitmapPool(long maxSize, Set<Bitmap.Config> allowedConfigs) {
     this(maxSize, getDefaultStrategy(), allowedConfigs);
   }
@@ -306,7 +308,7 @@ public class LruBitmapPool implements BitmapPool {
     }
   }
 
-  private static class NullBitmapTracker implements BitmapTracker {
+  private static final class NullBitmapTracker implements BitmapTracker {
 
     @Synthetic
     NullBitmapTracker() { }

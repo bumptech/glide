@@ -19,6 +19,8 @@ public class ViewPropertyTransition<R> implements Transition<R> {
    *
    * @param animator The animator to use.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public ViewPropertyTransition(Animator animator) {
     this.animator = animator;
   }

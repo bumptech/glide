@@ -2,6 +2,7 @@ package com.bumptech.glide.load.data;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;
+import com.bumptech.glide.util.Synthetic;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -15,6 +16,7 @@ public final class InputStreamRewinder implements DataRewinder<InputStream> {
 
   private final RecyclableBufferedInputStream bufferedStream;
 
+  @Synthetic
   InputStreamRewinder(InputStream is, ArrayPool byteArrayPool) {
     bufferedStream = new RecyclableBufferedInputStream(is, byteArrayPool);
     bufferedStream.mark(MARK_LIMIT);

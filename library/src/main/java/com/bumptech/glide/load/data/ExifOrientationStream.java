@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data;
 
+import android.support.annotation.NonNull;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,46 +16,46 @@ public final class ExifOrientationStream extends FilterInputStream {
   /** Allow two bytes for the file format. */
   private static final int SEGMENT_START_POSITION = 2;
   private static final byte[] EXIF_SEGMENT = new byte[] {
-      /** segment start id. */
+      /* segment start id. */
       (byte) 0xFF,
-      /** segment type. */
+      /* segment type. */
       (byte) 0xE1,
-      /** segmentLength. */
+      /* segmentLength. */
       0x00,
       (byte) 0x1C,
-      /** exif identifier. */
+      /* exif identifier. */
       0x45,
       0x78,
       0x69,
       0x66,
       0x00,
       0x00,
-      /** motorola byte order (big endian). */
+      /* motorola byte order (big endian). */
       (byte) 0x4D,
       (byte) 0x4D,
-      /** filler? */
+      /* filler? */
       0x00,
       0x00,
-      /** first id offset. */
+      /* first id offset. */
       0x00,
       0x00,
       0x00,
       0x08,
-      /** tagCount. */
+      /* tagCount. */
       0x00,
       0x01,
-      /** exif tag type. */
+      /* exif tag type. */
       0x01,
       0x12,
-      /** 2 byte format. */
+      /* 2 byte format. */
       0x00,
       0x02,
-      /** component count. */
+      /* component count. */
       0x00,
       0x00,
       0x00,
       0x01,
-      /** 2 byte orientation value, the first byte of which is always 0. */
+      /* 2 byte orientation value, the first byte of which is always 0. */
       0x00,
   };
   private static final int SEGMENT_LENGTH = EXIF_SEGMENT.length;
@@ -76,7 +77,7 @@ public final class ExifOrientationStream extends FilterInputStream {
   }
 
   @Override
-  public void mark(int readlimit) {
+  public void mark(int readLimit) {
     throw new UnsupportedOperationException();
   }
 
@@ -97,7 +98,7 @@ public final class ExifOrientationStream extends FilterInputStream {
   }
 
   @Override
-  public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+  public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
     int read;
     if (position > ORIENTATION_POSITION) {
       read = super.read(buffer, byteOffset, byteCount);

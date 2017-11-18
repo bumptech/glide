@@ -120,7 +120,7 @@ public class ResourceCacheKeyTest {
     int height = 100;
     Transformation<?> transformation = mock(Transformation.class);
     Class<?> resourceClass = Object.class;
-    Options options = new Options();
+    final Options options = new Options();
 
     Factory() {
       doAnswer(new Util.WriteDigest("transformation")).when(transformation)

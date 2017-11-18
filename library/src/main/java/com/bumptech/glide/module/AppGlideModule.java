@@ -20,6 +20,8 @@ import com.bumptech.glide.GlideBuilder;
  * annotation processor, {@link AppGlideModule} implementations should override
  * {@link #isManifestParsingEnabled()} and return {@code false}.
  */
+// Used only in javadoc.
+@SuppressWarnings("deprecation")
 public abstract class AppGlideModule extends LibraryGlideModule implements AppliesOptions {
   /**
    * Returns {@code true} if Glide should check the AndroidManifest for {@link GlideModule}s.

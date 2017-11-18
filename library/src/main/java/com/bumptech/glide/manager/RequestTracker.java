@@ -1,6 +1,7 @@
 package com.bumptech.glide.manager;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Util;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class RequestTracker {
     }
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   void addRequest(Request request) {
     requests.add(request);
   }

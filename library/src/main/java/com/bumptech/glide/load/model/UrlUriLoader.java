@@ -25,6 +25,8 @@ public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
   );
   private final ModelLoader<GlideUrl, Data> urlLoader;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public UrlUriLoader(ModelLoader<GlideUrl, Data> urlLoader) {
     this.urlLoader = urlLoader;
   }

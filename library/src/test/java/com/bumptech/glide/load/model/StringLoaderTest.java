@@ -13,6 +13,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.tests.Util;
+import com.bumptech.glide.util.Preconditions;
 import java.io.File;
 import java.io.IOException;
 import org.junit.Before;
@@ -33,9 +34,9 @@ public class StringLoaderTest {
   // Not a magic number, just an arbitrary non zero value.
   private static final int IMAGE_SIDE = 100;
 
-  @Mock ModelLoader<Uri, Object> uriLoader;
-  @Mock DataFetcher<Object> fetcher;
-  @Mock Key key;
+  @Mock private ModelLoader<Uri, Object> uriLoader;
+  @Mock private DataFetcher<Object> fetcher;
+  @Mock private Key key;
 
   private StringLoader<Object> loader;
   private Options options;
@@ -60,8 +61,10 @@ public class StringLoaderTest {
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(f.getAbsolutePath()));
-    assertEquals(fetcher,
-        loader.buildLoadData(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
+    assertEquals(
+        fetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test
@@ -76,7 +79,10 @@ public class StringLoaderTest {
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(testPath));
-    assertEquals(fetcher, loader.buildLoadData(testPath, IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
+    assertEquals(
+        fetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(testPath, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test
@@ -88,8 +94,10 @@ public class StringLoaderTest {
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(f.getAbsolutePath()));
-    assertEquals(fetcher,
-        loader.buildLoadData(expected.toString(), IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
+    assertEquals(
+        fetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(expected.toString(), IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test
@@ -100,8 +108,10 @@ public class StringLoaderTest {
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(resourceUri.toString()));
-    assertEquals(fetcher,
-        loader.buildLoadData(resourceUri.toString(), IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
+    assertEquals(
+        fetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(resourceUri.toString(), IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test
@@ -113,7 +123,10 @@ public class StringLoaderTest {
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(url));
-    assertEquals(fetcher, loader.buildLoadData(url, IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
+    assertEquals(
+        fetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(url, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test
@@ -125,7 +138,10 @@ public class StringLoaderTest {
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(url));
-    assertEquals(fetcher, loader.buildLoadData(url, IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
+    assertEquals(
+        fetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(url, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test
@@ -137,7 +153,10 @@ public class StringLoaderTest {
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
     assertTrue(loader.handles(content));
-    assertEquals(fetcher, loader.buildLoadData(content, IMAGE_SIDE, IMAGE_SIDE, options).fetcher);
+    assertEquals(
+        fetcher,
+        Preconditions.checkNotNull(
+            loader.buildLoadData(content, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test

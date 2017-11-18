@@ -81,7 +81,7 @@ public final class Option<T> {
     return new Option<>(key, defaultValue, cacheKeyUpdater);
   }
 
-  Option(String key, T defaultValue, CacheKeyUpdater<T> cacheKeyUpdater) {
+  private Option(String key, T defaultValue, CacheKeyUpdater<T> cacheKeyUpdater) {
     this.key = Preconditions.checkNotEmpty(key);
     this.defaultValue = defaultValue;
     this.cacheKeyUpdater = Preconditions.checkNotNull(cacheKeyUpdater);
@@ -90,6 +90,8 @@ public final class Option<T> {
   /**
    * Returns a reasonable default to use if no other value is set, or {@code null}.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   @Nullable
   public T getDefaultValue() {
     return defaultValue;

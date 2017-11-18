@@ -30,7 +30,9 @@ public class StreamEncoderTest {
 
   @After
   public void tearDown() {
-    file.delete();
+    if (!file.delete()) {
+      throw new IllegalStateException("Failed to delete: " + file);
+    }
   }
 
   @Test

@@ -129,7 +129,7 @@ public class RequestManagerFragmentTest {
   }
 
   private interface TestCase {
-    public void runTest(Harness harness);
+    void runTest(Harness harness);
   }
 
   private interface Harness {
@@ -145,7 +145,7 @@ public class RequestManagerFragmentTest {
 
     void onLowMemory();
 
-    void onTrimMemory(int level);
+    void onTrimMemory(@SuppressWarnings("SameParameterValue") int level);
   }
 
   private static class RequestManagerHarness implements Harness {

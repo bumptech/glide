@@ -64,6 +64,8 @@ public interface DiskCache {
    *
    * @param key The key to remove.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   void delete(Key key);
 
   /**

@@ -161,7 +161,7 @@ public class RequestManagerTest {
   public void testThrowsIfResumeCalledOnBackgroundThread() throws InterruptedException {
     testInBackground(new BackgroundUtil.BackgroundTester() {
       @Override
-      public void runTest() throws Exception {
+      public void runTest() {
         manager.resumeRequests();
       }
     });
@@ -171,7 +171,7 @@ public class RequestManagerTest {
   public void testThrowsIfPauseCalledOnBackgroundThread() throws InterruptedException {
     testInBackground(new BackgroundUtil.BackgroundTester() {
       @Override
-      public void runTest() throws Exception {
+      public void runTest() {
         manager.pauseRequests();
       }
     });

@@ -39,7 +39,7 @@ public final class BitmapRegressionTester {
   private static final String GENERATED_FILES_DIR = "test_files";
   private static final String SEPARATOR = "_";
 
-  private Class<?> testClass;
+  private final Class<?> testClass;
   private final TestName testName;
   private final Context context = InstrumentationRegistry.getTargetContext();
 

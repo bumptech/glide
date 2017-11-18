@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 
@@ -54,14 +55,15 @@ class AttributeStrategy implements LruPoolStrategy {
     return getBitmapString(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
   }
 
+  @SuppressWarnings("WeakerAccess")
   @Synthetic
   static String getBitmapString(int width, int height, Bitmap.Config config) {
     return "[" + width + "x" + height + "], " + config;
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class KeyPool extends BaseKeyPool<Key> {
-    public Key get(int width, int height, Bitmap.Config config) {
+    Key get(int width, int height, Bitmap.Config config) {
       Key result = get();
       result.init(width, height, config);
       return result;
@@ -73,7 +75,7 @@ class AttributeStrategy implements LruPoolStrategy {
     }
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class Key implements Poolable {
     private final KeyPool pool;
     private int width;

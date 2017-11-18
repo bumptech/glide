@@ -21,11 +21,19 @@ public class CenterCrop extends BitmapTransformation {
     // Intentionally empty.
   }
 
+  /**
+   * @deprecated Use {@link #CenterCrop()}.
+   * @param context Ignored.
+   */
   @Deprecated
   public CenterCrop(@SuppressWarnings("unused") Context context) {
     this();
   }
 
+  /**
+   * @deprecated Use {@link #CenterCrop()}.
+   * @param bitmapPool Ignored.
+   */
   @Deprecated
   public CenterCrop(@SuppressWarnings("unused") BitmapPool bitmapPool) {
     this();

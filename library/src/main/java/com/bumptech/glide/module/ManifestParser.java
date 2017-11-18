@@ -10,6 +10,8 @@ import java.util.List;
 /**
  * Parses {@link com.bumptech.glide.module.GlideModule} references out of the AndroidManifest file.
  */
+// Used only in javadoc.
+@SuppressWarnings("deprecation")
 public final class ManifestParser {
   private static final String TAG = "ManifestParser";
   private static final String GLIDE_MODULE_VALUE = "GlideModule";

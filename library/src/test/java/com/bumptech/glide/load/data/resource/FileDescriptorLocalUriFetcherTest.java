@@ -30,7 +30,8 @@ import org.robolectric.shadow.api.Shadow;
 @Config(manifest = Config.NONE, sdk = 18, shadows = { ContentResolverShadow.class })
 public class FileDescriptorLocalUriFetcherTest {
 
-  @Mock DataFetcher.DataCallback<ParcelFileDescriptor> callback;
+  @Mock
+  private DataFetcher.DataCallback<ParcelFileDescriptor> callback;
 
   @Before
   public void setUp() {
@@ -43,7 +44,7 @@ public class FileDescriptorLocalUriFetcherTest {
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();
-    ContentResolverShadow shadow = (ContentResolverShadow) Shadow.extract(contentResolver);
+    ContentResolverShadow shadow = Shadow.extract(contentResolver);
 
     AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
     ParcelFileDescriptor parcelFileDescriptor = mock(ParcelFileDescriptor.class);
@@ -62,7 +63,7 @@ public class FileDescriptorLocalUriFetcherTest {
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();
-    ContentResolverShadow shadow = (ContentResolverShadow) Shadow.extract(contentResolver);
+    ContentResolverShadow shadow = Shadow.extract(contentResolver);
     shadow.registerFileDescriptor(uri, null /*fileDescriptor*/);
 
     FileDescriptorLocalUriFetcher fetcher =

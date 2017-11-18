@@ -10,6 +10,8 @@ import java.io.IOException;
  * users may attempt to retry or otherwise uniformly handle certain types of errors regardless of
  * the underlying http library.
  */
+// Public API.
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class HttpException extends IOException {
   public static final int UNKNOWN = -1;
   private final int statusCode;

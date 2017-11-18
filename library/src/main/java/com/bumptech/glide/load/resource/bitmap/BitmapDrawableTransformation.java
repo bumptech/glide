@@ -20,6 +20,8 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
 
   private final Transformation<Drawable> wrapped;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public BitmapDrawableTransformation(Transformation<Bitmap> wrapped) {
     this.wrapped =
         Preconditions.checkNotNull(new DrawableTransformation(wrapped, /*isRequired=*/ false));
@@ -72,6 +74,7 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
     return (Resource<Drawable>) (Resource<? extends Drawable>) toConvert;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public boolean equals(Object o) {
     if (o instanceof BitmapDrawableTransformation) {

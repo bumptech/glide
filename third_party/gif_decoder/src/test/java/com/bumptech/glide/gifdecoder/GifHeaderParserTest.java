@@ -122,7 +122,7 @@ public class GifHeaderParserTest {
     final int lzwMinCodeSize = 2;
     ByteBuffer buffer = ByteBuffer.allocate(
         GifBytesTestUtil.HEADER_LENGTH + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
-            .getImageDataSize(lzwMinCodeSize)).order(ByteOrder.LITTLE_ENDIAN);
+            .getImageDataSize()).order(ByteOrder.LITTLE_ENDIAN);
     GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
     GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0);
     GifBytesTestUtil.writeFakeImageData(buffer, lzwMinCodeSize);
@@ -140,7 +140,7 @@ public class GifHeaderParserTest {
     ByteBuffer buffer = ByteBuffer.allocate(
         GifBytesTestUtil.HEADER_LENGTH + GifBytesTestUtil.GRAPHICS_CONTROL_EXTENSION_LENGTH
             + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
-            .getImageDataSize(lzwMinCodeSize)).order(ByteOrder.LITTLE_ENDIAN);
+            .getImageDataSize()).order(ByteOrder.LITTLE_ENDIAN);
     GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
     GifBytesTestUtil.writeGraphicsControlExtension(buffer, frameDelay);
     GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0);
@@ -204,7 +204,7 @@ public class GifHeaderParserTest {
     final int lzwMinCodeSize = 2;
     ByteBuffer buffer = ByteBuffer.allocate(
         GifBytesTestUtil.HEADER_LENGTH + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
-            .getImageDataSize(lzwMinCodeSize)).order(ByteOrder.LITTLE_ENDIAN);
+            .getImageDataSize()).order(ByteOrder.LITTLE_ENDIAN);
     GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
     GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0);
     GifBytesTestUtil.writeFakeImageData(buffer, lzwMinCodeSize);
@@ -224,7 +224,7 @@ public class GifHeaderParserTest {
     final int numColors = 4;
     ByteBuffer buffer = ByteBuffer.allocate(
         GifBytesTestUtil.HEADER_LENGTH + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
-            .getImageDataSize(lzwMinCodeSize) + GifBytesTestUtil.getColorTableLength(numColors))
+            .getImageDataSize() + GifBytesTestUtil.getColorTableLength(numColors))
         .order(ByteOrder.LITTLE_ENDIAN);
     GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
     GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, true /*hasLct*/, numColors);
@@ -248,7 +248,7 @@ public class GifHeaderParserTest {
     final int expectedFrames = 3;
 
     final int frameSize = GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
-        .getImageDataSize(lzwMinCodeSize);
+        .getImageDataSize();
     ByteBuffer buffer =
         ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH + expectedFrames * frameSize)
             .order(ByteOrder.LITTLE_ENDIAN);
@@ -272,7 +272,7 @@ public class GifHeaderParserTest {
 
     final int frameSize =
         GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
-            + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize);
+            + GifBytesTestUtil.getImageDataSize();
     ByteBuffer buffer =
         ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH + numFrames * frameSize)
             .order(ByteOrder.LITTLE_ENDIAN);
@@ -293,7 +293,7 @@ public class GifHeaderParserTest {
 
     final int frameSize =
         GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
-            + GifBytesTestUtil.getImageDataSize(lzwMinCodeSize);
+            + GifBytesTestUtil.getImageDataSize();
 
     ByteBuffer buffer =
         ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH + frameSize)

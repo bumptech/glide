@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -351,7 +352,7 @@ public class DefaultImageHeaderParserTest {
   private static class SometimesZeroSkipInputStream extends FilterInputStream {
     boolean returnZeroFlag = true;
 
-    protected SometimesZeroSkipInputStream(InputStream in) {
+    SometimesZeroSkipInputStream(InputStream in) {
         super(in);
     }
 
@@ -370,7 +371,7 @@ public class DefaultImageHeaderParserTest {
 
   private static class PartialSkipInputStream extends FilterInputStream {
 
-    protected PartialSkipInputStream(InputStream in) {
+    PartialSkipInputStream(InputStream in) {
         super(in);
     }
 
@@ -386,12 +387,12 @@ public class DefaultImageHeaderParserTest {
 
   private static class PartialReadInputStream extends FilterInputStream {
 
-    protected PartialReadInputStream(InputStream in) {
+    PartialReadInputStream(InputStream in) {
         super(in);
     }
 
     @Override
-    public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+    public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
         int toActuallyRead = byteCount / 2;
         if (byteCount == 1) {
             toActuallyRead = 1;

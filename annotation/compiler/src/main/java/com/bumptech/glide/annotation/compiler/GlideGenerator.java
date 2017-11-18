@@ -180,20 +180,20 @@ final class GlideGenerator {
       builder.returns(ClassName.get(element));
     }
 
-    String code = returnsValue ? "return " : "";
-    code += "$T.$N(";
+    StringBuilder code = new StringBuilder(returnsValue ? "return " : "");
+    code.append("$T.$N(");
     List<Object> args = new ArrayList<>();
     args.add(ClassName.get(glideType));
     args.add(methodToOverride.getSimpleName());
     if (!parameters.isEmpty()) {
       for (VariableElement param : parameters) {
-        code += "$L, ";
+        code.append("$L, ");
         args.add(param.getSimpleName());
       }
-      code = code.substring(0, code.length() - 2);
+      code = new StringBuilder(code.substring(0, code.length() - 2));
     }
-    code += ")";
-    builder.addStatement(code, args.toArray(new Object[0]));
+    code.append(")");
+    builder.addStatement(code.toString(), args.toArray(new Object[0]));
     return builder.build();
   }
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
@@ -60,6 +61,8 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
    *
    * @see MediaMetadataRetriever#getFrameAtTime(long, int)
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public static final Option<Integer> FRAME_OPTION = Option.disk(
       "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.FrameOption",
       null /*defaultValue*/,
@@ -85,6 +88,8 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
   private final BitmapPool bitmapPool;
   private final MediaMetadataRetrieverFactory factory;
 
+  // Public API.
+  @SuppressWarnings("unused")
   public VideoBitmapDecoder(Context context) {
     this(Glide.get(context).getBitmapPool());
   }
@@ -93,7 +98,7 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
     this(bitmapPool, DEFAULT_FACTORY);
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   VideoBitmapDecoder(BitmapPool bitmapPool, MediaMetadataRetrieverFactory factory) {
     this.bitmapPool = bitmapPool;
     this.factory = factory;
@@ -138,7 +143,7 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
     return BitmapResource.obtain(result, bitmapPool);
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class MediaMetadataRetrieverFactory {
     public MediaMetadataRetriever build() {
       return new MediaMetadataRetriever();

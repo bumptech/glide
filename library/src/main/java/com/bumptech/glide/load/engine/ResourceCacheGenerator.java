@@ -31,7 +31,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   private File cacheFile;
   private ResourceCacheKey currentKey;
 
-  public ResourceCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
+  ResourceCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
     this.helper = helper;
     this.cb = cb;
   }

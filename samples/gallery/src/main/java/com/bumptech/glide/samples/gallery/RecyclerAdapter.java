@@ -16,6 +16,7 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.signature.MediaStoreSignature;
+import com.bumptech.glide.util.Preconditions;
 import java.util.Collections;
 import java.util.List;
 
@@ -118,7 +119,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
   @SuppressWarnings("deprecation")
   private static int getScreenWidth(Context context) {
     WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-    Display display = wm.getDefaultDisplay();
+    Display display = Preconditions.checkNotNull(wm).getDefaultDisplay();
     Point size = new Point();
     display.getSize(size);
     return size.x;
@@ -128,11 +129,11 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
    * ViewHolder containing views to display individual {@link
    * com.bumptech.glide.samples.gallery.MediaStoreData}.
    */
-  public static final class ListViewHolder extends RecyclerView.ViewHolder {
+  static final class ListViewHolder extends RecyclerView.ViewHolder {
 
     private final ImageView image;
 
-    public ListViewHolder(View itemView) {
+    ListViewHolder(View itemView) {
       super(itemView);
       image = (ImageView) itemView.findViewById(R.id.image);
     }

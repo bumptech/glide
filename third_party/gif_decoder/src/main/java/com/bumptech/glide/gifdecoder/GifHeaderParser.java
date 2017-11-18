@@ -17,7 +17,7 @@ import java.util.Arrays;
  * @see <a href="https://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF 89a Specification</a>
  */
 public class GifHeaderParser {
-  public static final String TAG = "GifHeaderParser";
+  private static final String TAG = "GifHeaderParser";
 
   private static final int MASK_INT_LOWEST_BYTE = 0x000000FF;
 
@@ -35,7 +35,6 @@ public class GifHeaderParser {
 
   // Graphic Control Extension packed field masks
 
-  private static final int GCE_MASK_RESERVED_BITS = 0b11100000;
   /**
    * Mask (bits 4-2) to extract Disposal Method of the current frame.
    *
@@ -46,7 +45,6 @@ public class GifHeaderParser {
    * Shift so the Disposal Method extracted from the packed value is on the least significant bit.
    */
   private static final int GCE_DISPOSAL_METHOD_SHIFT = 2;
-  private static final int GCE_MASK_USER_INPUT_FLAG = 0b00000010;
   /**
    * Mask (bit 0) to extract Transparent Color Flag of the current frame.
    * <p><b>GIF89a</b>: <i>Indicates whether a transparency index is given
@@ -76,8 +74,6 @@ public class GifHeaderParser {
    * </ul>
    */
   private static final int DESCRIPTOR_MASK_INTERLACE_FLAG = 0b01000000;
-  private static final int DESCRIPTOR_MASK_SORT_FLAG = 0b00100000;
-  private static final int DESCRIPTOR_MASK_RESERVED = 0b00011000;
   /**
    * Mask (bits 2-0) to extract Size of the Local Color Table of the current image.
    * <p><b>GIF89a</b>: <i>If the Local Color Table Flag is set to 1, the value in this
@@ -100,8 +96,6 @@ public class GifHeaderParser {
    * </ul>
    */
   private static final int LSD_MASK_GCT_FLAG = 0b10000000;
-  private static final int LSD_MASK_COLOR_RESOLUTION = 0b01110000;
-  private static final int LSD_MASK_SORT_FLAG = 0b00001000;
   /**
    * Mask (bits 2-0) to extract Size of the Global Color Table of the current image.
    * <p><b>GIF89a</b>: <i>If the Global Color Table Flag is set to 1, the value in this
@@ -225,11 +219,11 @@ public class GifHeaderParser {
               break;
             case LABEL_APPLICATION_EXTENSION:
               readBlock();
-              String app = "";
+              StringBuilder app = new StringBuilder();
               for (int i = 0; i < 11; i++) {
-                app += (char) block[i];
+                app.append((char) block[i]);
               }
-              if (app.equals("NETSCAPE2.0")) {
+              if (app.toString().equals("NETSCAPE2.0")) {
                 readNetscapeExt();
               } else {
                 // Don't care.
@@ -366,11 +360,11 @@ public class GifHeaderParser {
    * Reads GIF file header information.
    */
   private void readHeader() {
-    String id = "";
+    StringBuilder id = new StringBuilder();
     for (int i = 0; i < 6; i++) {
-      id += (char) read();
+      id.append((char) read());
     }
-    if (!id.startsWith("GIF")) {
+    if (!id.toString().startsWith("GIF")) {
       header.status = STATUS_FORMAT_ERROR;
       return;
     }
@@ -467,10 +461,8 @@ public class GifHeaderParser {
 
   /**
    * Reads next variable length block from input.
-   *
-   * @return number of bytes stored in "buffer"
    */
-  private int readBlock() {
+  private void readBlock() {
     blockSize = read();
     int n = 0;
     if (blockSize > 0) {
@@ -490,7 +482,6 @@ public class GifHeaderParser {
         header.status = STATUS_FORMAT_ERROR;
       }
     }
-    return n;
   }
 
   /**

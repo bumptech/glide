@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -33,7 +34,7 @@ class Issue117Activity extends FragmentActivity {
 
   private static class Issue117Adapter extends FragmentPagerAdapter {
 
-    public Issue117Adapter(FragmentManager fm) {
+    Issue117Adapter(FragmentManager fm) {
       super(fm);
     }
 
@@ -50,8 +51,8 @@ class Issue117Activity extends FragmentActivity {
 
   public static class Issue117Fragment extends Fragment {
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-        Bundle savedInstanceState) {
+    public View onCreateView(
+        @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
       return new Issue117ImageView(getActivity());
     }
   }

@@ -1,5 +1,6 @@
 package com.bumptech.glide.util;
 
+import android.support.annotation.NonNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Queue;
@@ -57,8 +58,8 @@ public class ExceptionCatchingInputStream extends InputStream {
   }
 
   @Override
-  public void mark(int readlimit) {
-    wrapped.mark(readlimit);
+  public void mark(int readLimit) {
+    wrapped.mark(readLimit);
   }
 
   @Override
@@ -67,7 +68,7 @@ public class ExceptionCatchingInputStream extends InputStream {
   }
 
   @Override
-  public int read(byte[] buffer) throws IOException {
+  public int read(@NonNull byte[] buffer) throws IOException {
     int read;
     try {
       read = wrapped.read(buffer);
@@ -79,7 +80,7 @@ public class ExceptionCatchingInputStream extends InputStream {
   }
 
   @Override
-  public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+  public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
     int read;
     try {
       read = wrapped.read(buffer, byteOffset, byteCount);

@@ -3,6 +3,7 @@ package com.bumptech.glide.signature;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.load.Key;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +35,7 @@ public final class ApplicationVersionSignature {
     return result;
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static void reset() {
     PACKAGE_NAME_TO_KEY.clear();
   }

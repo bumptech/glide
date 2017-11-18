@@ -21,7 +21,7 @@ public class ExifTest {
 
   private ArrayPool byteArrayPool;
 
-  private InputStream open(String imageName) throws IOException {
+  private InputStream open(String imageName) {
     return TestResourceUtil.openResource(getClass(), "exif-orientation-examples/" + imageName);
   }
 
