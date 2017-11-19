@@ -66,6 +66,84 @@ If you use Maven you can add a dependency on Glide as well. Again, you will also
 
 Depending on your build configuration you may also need to do some additional setup.
 
+#### Permissions
+Glide does not require any permissions out of the box assuming all of the data you're accessing is stored in your application. That said, most applications either load images on the device (in DCIM, Pictures or elsewhere on the SD card) or load images from the internet. As a result, you'll want to include one or more of the permissions listed below, depending on your use cases.
+
+##### Internet
+However if you're planning on loading images from urls or over a network connection, you should add the ``INTERNET`` and ``ACCESS_NETWORK_STATE`` permissions to your ``AndroidManifest.xml``:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="your.package.name"
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!--
+    Allows Glide to monitor connectivity status and restart failed requests if users go from a
+    a disconnected to a connected network state.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <application>
+      ...
+    </application>
+</manifest>
+```
+
+``ACCESS_NETWORK_STATE`` isn't technically required to allow Glide to load urls, but it helps Glide handle flaky network connections and airplane mode. See the Connectivity Monitoring section below for more details
+
+##### Connectivity Monitoring
+If you're loading images from urls, Glide can automatically help you deal with flaky network connections by monitoring users' connectivity status and restarting failed requests when users are reconnected. If Glide detects that your application has the ``ACCESS_NETWORK_STATE``, Glide will automatically monitor connectivity status and no further changes are needed. 
+
+You can verify that Glide is monitoring network status by checking the ``ConnectivityMonitor`` log tag:
+
+```
+adb shell setprop log.tag.ConnectivityMonitor DEBUG
+```
+
+After doing so, if you've successfully added the ``ACCESS_NETWORK_STATE`` permission, you will see logs in logcat like:
+
+```
+11-18 18:51:23.673 D/ConnectivityMonitor(16236): ACCESS_NETWORK_STATE permission granted, registering connectivity monitor
+11-18 18:48:55.135 V/ConnectivityMonitor(15773): connectivity changed: false
+11-18 18:49:00.701 V/ConnectivityMonitor(15773): connectivity changed: true
+```
+
+If the permission is missing, you'll see an error instead:
+
+```
+11-18 18:51:23.673 D/ConnectivityMonitor(16236): ACCESS_NETWORK_STATE permission missing, cannot register connectivity monitor
+```
+
+##### Local Storage
+To load images from local folders like DCIM or Pictures, you'll need to add the ``READ_EXTERNAL_STORAGE`` permission:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="your.package.name"
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <application>
+      ...
+    </application>
+</manifest>
+```
+
+To use [``ExternalPreferredCacheDiskCacheFactory``][7] to store Glide's cache on the public sdcard, you'll need to use the 
+``WRITE_EXTERNAL_STORAGE`` permission instead:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="your.package.name"
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application>
+      ...
+    </application>
+</manifest>
+```
+
 #### Proguard
 
 If you use proguard, you may need to add the following lines to your ``proguard.cfg``:
@@ -83,7 +161,7 @@ If you use proguard, you may need to add the following lines to your ``proguard.
 Glide's build configuration requires features that [Jack][3] does not currently support. Jack was recently [deprecated][4] and it's unlikely that the features Glide requires will ever be added. If you'd like to compile with Java 8, see below.
 
 #### Java 8
-Starting with Android Studio 3.0 and version 3.0 of the Android Gradle plugin, you can compile your project and Glide with Java 8. For details, see the [Use Java 8 Language Features][7] on the Android Developers website. 
+Starting with Android Studio 3.0 and version 3.0 of the Android Gradle plugin, you can compile your project and Glide with Java 8. For details, see the [Use Java 8 Language Features][5] on the Android Developers website. 
 
 Glide itself does not use or require you to use Java 8 to compile or use Glide in your project. Glide will eventually require Java 8 to compile, but we will do our best to allow time for developers to update their applications first, so it's likely that Java 8 won't be a requirement for months or years (as of 11/2017).
 
@@ -110,4 +188,4 @@ See the [generated API][6] page for details.
 [4]: https://android-developers.googleblog.com/2017/03/future-of-java-8-language-feature.html
 [5]: https://developer.android.com/studio/write/java8-support.html
 [6]: {{ site.baseurl }}/doc/generatedapi.html#kotlin
-[7]: https://developer.android.com/studio/write/java8-support.html
+[7]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/load/engine/cache/ExternalPreferredCacheDiskCacheFactory.html
