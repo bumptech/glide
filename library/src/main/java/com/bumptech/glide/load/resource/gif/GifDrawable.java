@@ -327,9 +327,18 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     return PixelFormat.TRANSPARENT;
   }
 
+  // See #1087.
+  private Callback findCallback() {
+    Callback callback = getCallback();
+    while (callback instanceof Drawable) {
+      callback = ((Drawable) callback).getCallback();
+    }
+    return callback;
+  }
+
   @Override
   public void onFrameReady() {
-    if (getCallback() == null) {
+    if (findCallback() == null) {
       stop();
       invalidateSelf();
       return;

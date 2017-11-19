@@ -14,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -24,10 +25,11 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
+import android.view.View;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.gif.GifDrawableTest.BitmapTrackingShadowCanvas;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.Util;
@@ -59,10 +61,10 @@ public class GifDrawableTest {
   private int initialSdkVersion;
 
   @Mock private Drawable.Callback cb;
-  @Mock private BitmapPool bitmapPool;
   @Mock private GifFrameLoader frameLoader;
   @Mock private Paint paint;
   @Mock private Transformation<Bitmap> transformation;
+  private Application context;
 
   private static Paint isAPaint() {
     return isA(Paint.class);
@@ -75,6 +77,7 @@ public class GifDrawableTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
+    context = RuntimeEnvironment.application;
     frameWidth = 120;
     frameHeight = 450;
     firstFrame = Bitmap.createBitmap(frameWidth, frameHeight, Bitmap.Config.RGB_565);
@@ -572,6 +575,30 @@ public class GifDrawableTest {
   @Test(expected = NullPointerException.class)
   public void testThrowsIfCreatedWithNullState() {
     new GifDrawable(null);
+  }
+
+  @Test
+  public void onFrameReady_whenAttachedToDrawableCallbackButNotViewCallback_stops() {
+    TransitionDrawable topLevel = new TransitionDrawable(new Drawable[] { drawable });
+    drawable.setCallback(topLevel);
+    topLevel.setCallback(null);
+
+    drawable.start();
+    drawable.onFrameReady();
+
+    assertThat(drawable.isRunning()).isFalse();
+  }
+
+  @Test
+  public void onFrameReady_whenAttachedtoDrawableCallbackWithViewCallbackParent_doesNotStop() {
+      TransitionDrawable topLevel = new TransitionDrawable(new Drawable[] { drawable });
+    drawable.setCallback(topLevel);
+    topLevel.setCallback(new View(context));
+
+    drawable.start();
+    drawable.onFrameReady();
+
+    assertThat(drawable.isRunning()).isTrue();
   }
 
   private void verifyRanLoops(int loopCount, int frameCount) {
