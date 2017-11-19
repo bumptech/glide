@@ -1,6 +1,5 @@
 com.bumptech.glide
 com.bumptech.glide.annotation
-com.bumptech.glide.annotation.compiler
 com.bumptech.glide.disklrucache
 com.bumptech.glide.gifdecoder
 com.bumptech.glide.gifencoder
