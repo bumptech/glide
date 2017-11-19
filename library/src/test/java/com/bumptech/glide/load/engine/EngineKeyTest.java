@@ -1,159 +1,177 @@
 package com.bumptech.glide.load.engine;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Option;
+import com.bumptech.glide.load.Option.CacheKeyUpdater;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.tests.KeyAssertions;
-import com.bumptech.glide.tests.Util;
-import java.io.UnsupportedEncodingException;
+import com.bumptech.glide.signature.ObjectKey;
+import com.google.common.testing.EqualsTester;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-/**
- * Tests if {@link EngineKey} {@link Object#hashCode() hashCode} and {@link Object#equals(Object)
- * equals} and SHA-1 disk cache key are different on any difference in ID or existence of a certain
- * workflow part. Also checking whether the equals method is symmetric.
- */
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class EngineKeyTest {
-  private Harness harness;
+  @Rule public final ExpectedException expectedException = ExpectedException.none();
+  @Mock private Transformation<Object> transformation;
 
   @Before
   public void setUp() {
-    harness = new Harness();
-  }
-
-  private static class Harness {
-    String id = "testId";
-    int width = 1;
-    int height = 2;
-    Class<?> resourceClass = Object.class;
-    Class<?> transcodeClass = Integer.class;
-    Key signature = mock(Key.class);
-    @SuppressWarnings("unchecked")
-    Transformation<Object> transformation = mock(Transformation.class);
-    Options options = new Options();
-
-    public Harness() {
-      doAnswer(new Util.WriteDigest("transformation")).when(transformation)
-          .updateDiskCacheKey(any(MessageDigest.class));
-    }
-
-    public EngineKey build() {
-      return new EngineKey(
-          id,
-          signature,
-          width,
-          height,
-          Collections.<Class<?>, Transformation<?>>singletonMap(Object.class, transformation),
-          resourceClass,
-          transcodeClass,
-          options);
-    }
+    MockitoAnnotations.initMocks(this);
   }
 
   @Test
-  public void testIsIdenticalWithSameArguments() {
-    assertEquals(harness.build(), harness.build());
+  public void updateDiskCacheKey_throwsException() throws NoSuchAlgorithmException {
+    // If this test fails, update testEqualsAndHashcode to use KeyTester including regression tests.
+    EngineKey key = new EngineKey(
+        "id",
+        new ObjectKey("signature"),
+        100,
+        100,
+        Collections.<Class<?>, Transformation<?>>emptyMap(),
+        Object.class,
+        Object.class,
+        new Options());
+    expectedException.expect(UnsupportedOperationException.class);
+    key.updateDiskCacheKey(MessageDigest.getInstance("SHA-1"));
   }
 
   @Test
-  public void testDiffersIfIdDiffers() throws Exception {
-    EngineKey first = harness.build();
-    harness.id = harness.id + "2";
-    EngineKey second = harness.build();
+  public void testEqualsAndHashCode() {
+    Options memoryOptions = new Options();
+    memoryOptions.set(Option.memory("key", new Object()), new Object());
 
-    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-  }
-
-  @Test
-  public void testDiffersIfHeightDiffers() throws Exception {
-    EngineKey first = harness.build();
-    harness.height += 1;
-    EngineKey second = harness.build();
-
-    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-  }
-
-  @Test
-  public void testDiffersIfWidthDiffers() throws Exception {
-    EngineKey first = harness.build();
-    harness.width += 1;
-    EngineKey second = harness.build();
-
-    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-  }
-
-  @Test
-  public void testDiffersIfSignatureDiffers()
-      throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    EngineKey first = harness.build();
-    Key signature = mock(Key.class);
-    doAnswer(new Answer() {
+    Options diskOptions = new Options();
+    diskOptions.set(Option.disk("key", new CacheKeyUpdater<String>() {
       @Override
-      public Object answer(InvocationOnMock invocation) throws Throwable {
-        MessageDigest digest = (MessageDigest) invocation.getArguments()[0];
-        digest.update("signature".getBytes("UTF-8"));
-        return null;
+      public void update(byte[] keyBytes, String value, MessageDigest messageDigest) {
+        messageDigest.update(keyBytes);
+        messageDigest.update(value.getBytes(Key.CHARSET));
+
       }
-    }).when(signature).updateDiskCacheKey(any(MessageDigest.class));
-    harness.signature = signature;
-    EngineKey second = harness.build();
+    }), "value");
 
-    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-  }
-
-  @Test
-  public void testDiffersIfResourceClassDiffers()
-      throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    EngineKey first = harness.build();
-    harness.resourceClass = Long.class;
-    EngineKey second = harness.build();
-    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-  }
-
-  @Test
-  public void testDiffersIfTranscodeClassDiffers()
-      throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    EngineKey first = harness.build();
-    harness.transcodeClass = Long.class;
-    EngineKey second = harness.build();
-    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-  }
-
-  @Test
-  public void testDiffersIfTransformationsDiffer() throws NoSuchAlgorithmException {
-    EngineKey first = harness.build();
-
-    @SuppressWarnings("unchecked") Transformation<Object> other = mock(Transformation.class);
-    doAnswer(new Util.WriteDigest("other")).when(other)
-        .updateDiskCacheKey(any(MessageDigest.class));
-    harness.transformation = other;
-    EngineKey second = harness.build();
-    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
-  }
-
-  @Test
-  public void testDiffersIfOptionsDiffer() throws NoSuchAlgorithmException {
-    EngineKey first = harness.build();
-    harness.options = new Options();
-    harness.options.set(Option.memory("fakeKey"), "someValue");
-    EngineKey second = harness.build();
-    KeyAssertions.assertDifferent(first, second, false /*checkDiskCacheKey*/);
+    new EqualsTester()
+        .addEqualityGroup(
+            new EngineKey(
+                "id",
+                new ObjectKey("signature"),
+                100,
+                100,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Object.class,
+                Object.class,
+                new Options()),
+            new EngineKey(
+                "id",
+                new ObjectKey("signature"),
+                100,
+                100,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Object.class,
+                Object.class,
+                new Options()))
+        .addEqualityGroup(
+            new EngineKey(
+                "otherId",
+                new ObjectKey("signature"),
+                100,
+                100,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Object.class,
+                Object.class,
+                new Options()))
+        .addEqualityGroup(
+            new EngineKey(
+                "id",
+                new ObjectKey("otherSignature"),
+                100,
+                100,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Object.class,
+                Object.class,
+                new Options()))
+        .addEqualityGroup(
+            new EngineKey(
+                "id",
+                new ObjectKey("signature"),
+                200,
+                100,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Object.class,
+                Object.class,
+                new Options()))
+        .addEqualityGroup(
+            new EngineKey(
+                "id",
+                new ObjectKey("signature"),
+                100,
+                200,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Object.class,
+                Object.class,
+                new Options()))
+        .addEqualityGroup(
+            new EngineKey(
+                "id",
+                new ObjectKey("signature"),
+                100,
+                100,
+                Collections.<Class<?>, Transformation<?>>singletonMap(Object.class, transformation),
+                Object.class,
+                Object.class,
+                new Options()))
+        .addEqualityGroup(
+            new EngineKey(
+                "id",
+                new ObjectKey("signature"),
+                100,
+                100,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Integer.class,
+                Object.class,
+                new Options()))
+        .addEqualityGroup(
+            new EngineKey(
+                "id",
+                new ObjectKey("signature"),
+                100,
+                100,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Object.class,
+                Integer.class,
+                new Options()))
+        .addEqualityGroup(
+            new EngineKey(
+                "id",
+                new ObjectKey("signature"),
+                100,
+                100,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Object.class,
+                Object.class,
+                memoryOptions))
+        .addEqualityGroup(
+            new EngineKey(
+                "id",
+                new ObjectKey("signature"),
+                100,
+                100,
+                Collections.<Class<?>, Transformation<?>>emptyMap(),
+                Object.class,
+                Object.class,
+                diskOptions))
+        .testEquals();
   }
 }

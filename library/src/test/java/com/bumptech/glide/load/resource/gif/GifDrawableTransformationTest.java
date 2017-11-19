@@ -18,12 +18,13 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.UnitTransformation;
-import com.bumptech.glide.tests.KeyAssertions;
+import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -35,6 +36,7 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class GifDrawableTransformationTest {
+  @Rule public final KeyTester keyTester = new KeyTester();
   @Mock private Transformation<Bitmap> wrapped;
   @Mock private BitmapPool bitmapPool;
 
@@ -86,11 +88,19 @@ public class GifDrawableTransformationTest {
   public void testEquals() throws NoSuchAlgorithmException {
     doAnswer(new Util.WriteDigest("first")).when(wrapped)
         .updateDiskCacheKey(isA(MessageDigest.class));
-    KeyAssertions.assertSame(transformation, new GifDrawableTransformation(wrapped));
-
     @SuppressWarnings("unchecked") Transformation<Bitmap> other = mock(Transformation.class);
     doAnswer(new Util.WriteDigest("other")).when(other)
         .updateDiskCacheKey(isA(MessageDigest.class));
-    KeyAssertions.assertDifferent(transformation, new GifDrawableTransformation(other));
+    keyTester
+        .addEquivalenceGroup(
+            transformation,
+            new GifDrawableTransformation(wrapped),
+            new GifDrawableTransformation(wrapped))
+        .addEquivalenceGroup(wrapped)
+        .addEquivalenceGroup(new GifDrawableTransformation(other))
+        .addRegressionTest(
+            new GifDrawableTransformation(wrapped),
+            "a7937b64b8caa58f03721bb6bacf5c78cb235febe0e70b1b84cd99541461a08e")
+        .test();
   }
 }

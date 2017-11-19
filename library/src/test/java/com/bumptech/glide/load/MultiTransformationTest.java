@@ -14,11 +14,12 @@ import static org.mockito.Mockito.when;
 
 import android.app.Application;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.tests.KeyAssertions;
+import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -29,6 +30,7 @@ import org.robolectric.RuntimeEnvironment;
 @RunWith(JUnit4.class)
 @SuppressWarnings("unchecked")
 public class MultiTransformationTest {
+  @Rule public final KeyTester keyTester = new KeyTester();
 
   @Mock private Transformation<Object> first;
   @Mock private Transformation<Object> second;
@@ -42,6 +44,11 @@ public class MultiTransformationTest {
     MockitoAnnotations.initMocks(this);
 
     context = RuntimeEnvironment.application;
+
+    doAnswer(new Util.WriteDigest("first")).when(first)
+        .updateDiskCacheKey(any(MessageDigest.class));
+    doAnswer(new Util.WriteDigest("second")).when(second)
+        .updateDiskCacheKey(any(MessageDigest.class));
   }
 
   @Test
@@ -123,13 +130,20 @@ public class MultiTransformationTest {
 
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
-    doAnswer(new Util.WriteDigest("first")).when(first)
-        .updateDiskCacheKey(any(MessageDigest.class));
-    KeyAssertions.assertSame(new MultiTransformation<>(first), new MultiTransformation<>(first));
+    keyTester
+        .addEquivalenceGroup(
+            new MultiTransformation<>(first),
+            new MultiTransformation<>(first))
+        .addEquivalenceGroup(new MultiTransformation<>(second))
+        .addEquivalenceGroup(new MultiTransformation<>(first, second))
+        .addEquivalenceGroup(new MultiTransformation<>(second, first))
+        .addRegressionTest(
+            new MultiTransformation<>(first),
+            "a7937b64b8caa58f03721bb6bacf5c78cb235febe0e70b1b84cd99541461a08e")
+        .addRegressionTest(
+            new MultiTransformation<>(first, second),
+            "da83f63e1a473003712c18f5afc5a79044221943d1083c7c5a7ac7236d85e8d2")
+        .test();
 
-    doAnswer(new Util.WriteDigest("second")).when(second)
-        .updateDiskCacheKey(any(MessageDigest.class));
-    KeyAssertions.assertDifferent(
-        new MultiTransformation<>(first), new MultiTransformation<>(second));
   }
 }

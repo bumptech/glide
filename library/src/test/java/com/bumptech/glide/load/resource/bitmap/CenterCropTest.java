@@ -18,12 +18,13 @@ import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.tests.KeyAssertions;
+import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -36,6 +37,7 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class CenterCropTest {
+  @Rule public final KeyTester keyTester = new KeyTester();
   @Mock private Resource<Bitmap> resource;
   @Mock private BitmapPool pool;
   @Mock private Transformation<Bitmap> transformation;
@@ -147,10 +149,16 @@ public class CenterCropTest {
 
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
-    KeyAssertions.assertSame(centerCrop, new CenterCrop());
-
     doAnswer(new Util.WriteDigest("other")).when(transformation)
         .updateDiskCacheKey(any(MessageDigest.class));
-    KeyAssertions.assertDifferent(centerCrop, transformation);
+    keyTester
+        .addEquivalenceGroup(
+            new CenterCrop(),
+            new CenterCrop())
+        .addEquivalenceGroup(
+            transformation)
+        .addRegressionTest(
+            new CenterCrop(), "68bd5819c42b37efbe7124bb851443a6388ee3e2e9034213da6eaa15381d3457")
+        .test();
   }
 }

@@ -18,12 +18,13 @@ import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.tests.KeyAssertions;
+import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -39,6 +40,7 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 @SuppressWarnings("deprecation")
 public class BitmapDrawableTransformationTest {
+  @Rule public final KeyTester keyTester = new KeyTester();
 
   @Mock private BitmapPool bitmapPool;
   @Mock private Transformation<Bitmap> wrapped;
@@ -124,11 +126,18 @@ public class BitmapDrawableTransformationTest {
   public void testEquals() throws NoSuchAlgorithmException {
     doAnswer(new Util.WriteDigest("wrapped")).when(wrapped)
         .updateDiskCacheKey(any(MessageDigest.class));
-    KeyAssertions.assertSame(transformation, new BitmapDrawableTransformation(wrapped));
-
     @SuppressWarnings("unchecked") Transformation<Bitmap> other = mock(Transformation.class);
     doAnswer(new Util.WriteDigest("other")).when(other)
         .updateDiskCacheKey(any(MessageDigest.class));
-    KeyAssertions.assertDifferent(transformation, new BitmapDrawableTransformation(other));
+
+    keyTester
+        .addEquivalenceGroup(
+            transformation,
+            new BitmapDrawableTransformation(wrapped))
+        .addEquivalenceGroup(new BitmapDrawableTransformation(other))
+        .addEquivalenceGroup(wrapped)
+        .addRegressionTest(
+            transformation, "adbf45b08ad6468aa147e5b2a23758ef56ab631a2b70ad52501ca358441a34f3")
+        .test();
   }
 }

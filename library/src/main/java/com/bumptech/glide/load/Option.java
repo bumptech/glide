@@ -149,6 +149,18 @@ public final class Option<T> {
     /**
      * Updates the given {@link MessageDigest} with the bytes of the given key (to avoid incidental
      * value collisions when values are not particularly unique) and value.
+     *
+     * <p>If your {@link Option} shouldn't affect the disk cache key, you should not implement this
+     * class and use {@link Option#memory(String)} or {@link Option#memory(String, Object)} instead.
+     *
+     * @param keyBytes The bytes of the {@link String} used as the key for this particular
+     * {@link Option}. Should be added to the {@code messageDigest} using
+     * {@link MessageDigest#update(byte[])} by all implementations if the digest is updated with
+     * the given {@code value} parameter.
+     *
+     * @param value The value of of this particular option. Typically you should convert the value
+     * to a byte array using some stable mechanism and then call
+     * {@link MessageDigest#update(byte[])} to update the given digest.
      */
     void update(byte[] keyBytes, T value, MessageDigest messageDigest);
   }

@@ -2,134 +2,169 @@ package com.bumptech.glide.load.engine;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Option;
+import com.bumptech.glide.load.Option.CacheKeyUpdater;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.signature.ObjectKey;
-import com.bumptech.glide.tests.KeyAssertions;
+import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-@RunWith(JUnit4.class)
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE)
 public class ResourceCacheKeyTest {
+  @Rule public final KeyTester keyTester = new KeyTester();
 
-  private Factory factory;
+  @Mock private Transformation<Object> transformation1;
+  @Mock private Transformation<Object> transformation2;
 
   @Before
   public void setUp() {
-    factory = new Factory();
+    MockitoAnnotations.initMocks(this);
+
+    doAnswer(new Util.WriteDigest("transformation1")).when(transformation1)
+        .updateDiskCacheKey(any(MessageDigest.class));
+    doAnswer(new Util.WriteDigest("transformation1")).when(transformation2)
+        .updateDiskCacheKey(any(MessageDigest.class));
   }
 
   @Test
-  public void testIdenticalWithSameArguments()
-      throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    KeyAssertions.assertSame(factory.build(), factory.build());
-  }
+  public void testEqualsAndHashCode() throws NoSuchAlgorithmException {
+    Options memoryOptions = new Options();
+    memoryOptions.set(Option.memory("key", new Object()), new Object());
 
-  @Test
-  public void testDifferIfSourceKeyDiffers()
-      throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    mutateAndAssertDifferent(new FactoryMutation() {
+    Options diskOptions = new Options();
+    diskOptions.set(Option.disk("key", new CacheKeyUpdater<String>() {
       @Override
-      public void mutate(Factory factory) {
-        factory.sourceKey = new ObjectKey("secondKey");
+      public void update(byte[] keyBytes, String value, MessageDigest messageDigest) {
+        messageDigest.update(keyBytes);
+        messageDigest.update(value.getBytes(Key.CHARSET));
+
       }
-    });
-  }
+    }), "value");
 
-  @Test
-  public void testDiffersIfSignatureDiffers() {
-    mutateAndAssertDifferent(new FactoryMutation() {
-      @Override
-      public void mutate(Factory factory) {
-        factory.signature = new ObjectKey("secondSignature");
-      }
-    });
-  }
-
-  @Test
-  public void testDiffersIfWidthDiffers() {
-    mutateAndAssertDifferent(new FactoryMutation() {
-      @Override
-      public void mutate(Factory factory) {
-        factory.width = factory.width * 2;
-      }
-    });
-  }
-
-  @Test
-  public void testDiffersIfHeightDiffers() {
-    mutateAndAssertDifferent(new FactoryMutation() {
-      @Override
-      public void mutate(Factory factory) {
-        factory.height = factory.height * 2;
-      }
-    });
-  }
-
-  @Test
-  public void tesDiffersIfTransformationDiffers() {
-    mutateAndAssertDifferent(new FactoryMutation() {
-      @Override
-      public void mutate(Factory factory) {
-        factory.transformation = mock(Transformation.class);
-        doAnswer(new Util.WriteDigest("otherTransformation")).when(factory.transformation)
-            .updateDiskCacheKey(any(MessageDigest.class));
-      }
-    });
-  }
-
-  @Test
-  public void testDiffersIfResourceDiffers() {
-    mutateAndAssertDifferent(new FactoryMutation() {
-      @Override
-      public void mutate(Factory factory) {
-        factory.resourceClass = Integer.class;
-      }
-    });
-  }
-
-  interface FactoryMutation {
-    void mutate(Factory factory);
-  }
-
-  private void mutateAndAssertDifferent(FactoryMutation mutation) {
-    ResourceCacheKey original = factory.build();
-    mutation.mutate(factory);
-    ResourceCacheKey mutated = factory.build();
-
-    try {
-      KeyAssertions.assertDifferent(original, mutated);
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  static class Factory {
-    Key sourceKey = new ObjectKey("sourceKey");
-    Key signature = new ObjectKey("signature");
-    int width = 100;
-    int height = 100;
-    Transformation<?> transformation = mock(Transformation.class);
-    Class<?> resourceClass = Object.class;
-    final Options options = new Options();
-
-    Factory() {
-      doAnswer(new Util.WriteDigest("transformation")).when(transformation)
-          .updateDiskCacheKey(any(MessageDigest.class));
-    }
-
-    ResourceCacheKey build() {
-      return new ResourceCacheKey(sourceKey, signature, width, height, transformation,
-          resourceClass, options);
-    }
+    keyTester
+        .addEquivalenceGroup(
+            new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("signature"),
+                100,
+                100,
+                transformation1,
+                Object.class,
+                new Options()),
+            new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("signature"),
+                100,
+                100,
+                transformation1,
+                Object.class,
+                new Options()))
+        .addEquivalenceGroup(
+            new ResourceCacheKey(
+                new ObjectKey("otherSource"),
+                new ObjectKey("signature"),
+                100,
+                100,
+                transformation1,
+                Object.class,
+                new Options()))
+        .addEquivalenceGroup(
+              new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("otherSignature"),
+                100,
+                100,
+                transformation1,
+                Object.class,
+                new Options()))
+        .addEquivalenceGroup(
+            new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("signature"),
+                200,
+                100,
+                transformation1,
+                Object.class,
+                new Options()))
+        .addEquivalenceGroup(
+            new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("signature"),
+                100,
+                200,
+                transformation1,
+                Object.class,
+                new Options()))
+        .addEquivalenceGroup(
+            new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("signature"),
+                100,
+                100,
+                transformation2,
+                Object.class,
+                new Options()))
+        .addEquivalenceGroup(
+            new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("signature"),
+                100,
+                100,
+                transformation1,
+                Integer.class,
+                new Options()))
+        .addEquivalenceGroup(
+            new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("signature"),
+                100,
+                100,
+                transformation1,
+                Object.class,
+                memoryOptions))
+        .addEquivalenceGroup(
+                new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("signature"),
+                100,
+                100,
+                transformation1,
+                Object.class,
+                diskOptions))
+        .addRegressionTest(
+              new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("signature"),
+                100,
+                100,
+                transformation1,
+                Object.class,
+                new Options()),
+            "04d632bfe8e588544909fc44edb7328fa28bea6831b96927ade22b44818654e2")
+        .addRegressionTest(
+            new ResourceCacheKey(
+                new ObjectKey("source"),
+                new ObjectKey("signature"),
+                100,
+                100,
+                transformation1,
+                Object.class,
+                diskOptions),
+            "781ff8cd30aaaf248134580004ea6d63a1b87ae20ea0f769caf379d7d84986d0")
+        .test();
   }
 }

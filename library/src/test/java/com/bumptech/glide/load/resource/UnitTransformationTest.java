@@ -9,11 +9,12 @@ import static org.mockito.Mockito.mock;
 import android.app.Application;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.tests.KeyAssertions;
+import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -21,6 +22,7 @@ import org.robolectric.RuntimeEnvironment;
 
 @RunWith(JUnit4.class)
 public class UnitTransformationTest {
+  @Rule public final KeyTester keyTester = new KeyTester();
 
   private Application app;
 
@@ -37,12 +39,19 @@ public class UnitTransformationTest {
   }
 
   @Test
-  public void testEquals() throws NoSuchAlgorithmException {
-    KeyAssertions.assertSame(UnitTransformation.get(), UnitTransformation.get());
-
+  public void testEqualsHashCodeDigest() throws NoSuchAlgorithmException {
     @SuppressWarnings("unchecked") Transformation<Object> other = mock(Transformation.class);
     doAnswer(new Util.WriteDigest("other")).when(other)
         .updateDiskCacheKey(any(MessageDigest.class));
-    KeyAssertions.assertDifferent(UnitTransformation.get(), other);
+
+    keyTester
+        .addEquivalenceGroup(
+            UnitTransformation.get(),
+            UnitTransformation.get())
+        .addEquivalenceGroup(other)
+        .addRegressionTest(
+            UnitTransformation.get(),
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+        .test();
   }
 }
