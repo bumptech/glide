@@ -80,10 +80,12 @@ If you use proguard, you may need to add the following lines to your ``proguard.
 ```
 
 #### Jack
-Glide's build configuration requires features that [Jack][3] does not currently support. Jack was recently [deprecated][4] and it's unlikely that the features Glide requires will ever be added.
+Glide's build configuration requires features that [Jack][3] does not currently support. Jack was recently [deprecated][4] and it's unlikely that the features Glide requires will ever be added. If you'd like to compile with Java 8, see below.
 
 #### Java 8
-There is not yet (as of 6/2017) a stable release of the Android tool chain that will allow you to use Glide with Java 8 features. If you'd like to use Java 8 and are ok with less stability, there is at least an alpha version of the android gradle plugin that supports Java 8. The alpha version of the plugin has not yet been tested with Glide. See Android's [Java 8 support page][5] for more details.
+Starting with Android Studio 3.0 and version 3.0 of the Android Gradle plugin, you can compile your project and Glide with Java 8. For details, see the [Use Java 8 Language Features][7] on the Android Developers website. 
+
+Glide itself does not use or require you to use Java 8 to compile or use Glide in your project. Glide will eventually require Java 8 to compile, but we will do our best to allow time for developers to update their applications first, so it's likely that Java 8 won't be a requirement for months or years (as of 11/2017).
 
 #### Kotlin
 
@@ -108,3 +110,4 @@ See the [generated API][6] page for details.
 [4]: https://android-developers.googleblog.com/2017/03/future-of-java-8-language-feature.html
 [5]: https://developer.android.com/studio/write/java8-support.html
 [6]: {{ site.baseurl }}/doc/generatedapi.html#kotlin
+[7]: https://developer.android.com/studio/write/java8-support.html
