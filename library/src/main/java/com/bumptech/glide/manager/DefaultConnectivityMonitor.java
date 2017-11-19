@@ -14,7 +14,7 @@ import com.bumptech.glide.util.Synthetic;
 /**
  * Uses {@link android.net.ConnectivityManager} to identify connectivity changes.
  */
-class DefaultConnectivityMonitor implements ConnectivityMonitor {
+final class DefaultConnectivityMonitor implements ConnectivityMonitor {
   private static final String TAG = "ConnectivityMonitor";
   private final Context context;
   @SuppressWarnings("WeakerAccess") @Synthetic final ConnectivityListener listener;
@@ -28,14 +28,16 @@ class DefaultConnectivityMonitor implements ConnectivityMonitor {
       boolean wasConnected = isConnected;
       isConnected = isConnected(context);
       if (wasConnected != isConnected) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "connectivity changed, isConnected: " + isConnected);
+        }
+
         listener.onConnectivityChanged(isConnected);
       }
     }
   };
 
-  // Public API.
-  @SuppressWarnings("WeakerAccess")
-  public DefaultConnectivityMonitor(Context context, ConnectivityListener listener) {
+  DefaultConnectivityMonitor(Context context, ConnectivityListener listener) {
     this.context = context.getApplicationContext();
     this.listener = listener;
   }
