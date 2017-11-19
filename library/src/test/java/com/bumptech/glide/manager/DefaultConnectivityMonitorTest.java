@@ -3,7 +3,6 @@ package com.bumptech.glide.manager;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -12,28 +11,36 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import com.bumptech.glide.manager.DefaultConnectivityMonitorTest.PermissionConnectivityManager;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.Implementation;
+import org.robolectric.annotation.Implements;
+import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowConnectivityManager;
 import org.robolectric.shadows.ShadowNetworkInfo;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(manifest = Config.NONE, sdk = 18, shadows = PermissionConnectivityManager.class)
 public class DefaultConnectivityMonitorTest {
-  private ConnectivityMonitor.ConnectivityListener listener;
+  @Mock private ConnectivityMonitor.ConnectivityListener listener;
   private DefaultConnectivityMonitor monitor;
+  private ConnectivityHarness harness;
+
 
   @Before
   public void setUp() {
-    listener = mock(ConnectivityMonitor.ConnectivityListener.class);
+    MockitoAnnotations.initMocks(this);
     monitor = new DefaultConnectivityMonitor(RuntimeEnvironment.application, listener);
+    harness = new ConnectivityHarness();
   }
 
   @Test
@@ -69,7 +76,6 @@ public class DefaultConnectivityMonitorTest {
 
   @Test
   public void testDoesNotNotifyListenerIfConnectedAndBecomesConnected() {
-    ConnectivityHarness harness = new ConnectivityHarness();
     harness.connect();
 
     monitor.onStart();
@@ -80,7 +86,6 @@ public class DefaultConnectivityMonitorTest {
 
   @Test
   public void testNotifiesListenerIfConnectedAndBecomesDisconnected() {
-    ConnectivityHarness harness = new ConnectivityHarness();
     harness.connect();
 
     monitor.onStart();
@@ -92,7 +97,6 @@ public class DefaultConnectivityMonitorTest {
 
   @Test
   public void testNotifiesListenerIfDisconnectedAndBecomesConnected() {
-    ConnectivityHarness harness = new ConnectivityHarness();
     harness.disconnect();
 
     monitor.onStart();
@@ -104,12 +108,54 @@ public class DefaultConnectivityMonitorTest {
 
   @Test
   public void testDoesNotNotifyListenerWhenNotRegistered() {
-    ConnectivityHarness harness = new ConnectivityHarness();
     harness.disconnect();
 
     monitor.onStart();
     monitor.onStop();
     harness.connect();
+    harness.broadcast();
+
+    verify(listener, never()).onConnectivityChanged(anyBoolean());
+  }
+
+  @Test
+  public void register_withMissingPermission_doesNotThrow() {
+    harness.shadowConnectivityManager.isNetworkPermissionGranted = false;
+
+    monitor.onStart();
+  }
+
+  @Test
+  public void register_withMissingPermission_doesNotRegisterReceiver() {
+    harness.shadowConnectivityManager.isNetworkPermissionGranted = false;
+
+    monitor.onStart();
+
+    assertThat(getConnectivityReceivers()).isEmpty();
+  }
+
+  @Test
+  public void onReceive_withMissingPermission_doesNotThrow() {
+    monitor.onStart();
+    harness.shadowConnectivityManager.isNetworkPermissionGranted = false;
+    harness.broadcast();
+  }
+
+  @Test
+  public void onReceive_withMissingPermission_previouslyDisconnected_notifiesListenersConnected() {
+    harness.disconnect();
+    monitor.onStart();
+    harness.shadowConnectivityManager.isNetworkPermissionGranted = false;
+    harness.broadcast();
+
+    verify(listener).onConnectivityChanged(true);
+  }
+
+  @Test
+  public void onReceive_withMissingPermission_previouslyConnected_doesNotNotifyListeners() {
+    harness.connect();
+    monitor.onStart();
+    harness.shadowConnectivityManager.isNetworkPermissionGranted = false;
     harness.broadcast();
 
     verify(listener, never()).onConnectivityChanged(anyBoolean());
@@ -121,27 +167,40 @@ public class DefaultConnectivityMonitorTest {
   }
 
   private static class ConnectivityHarness {
-    private final ShadowConnectivityManager shadowConnectivityManager;
+    private final PermissionConnectivityManager shadowConnectivityManager;
 
     public ConnectivityHarness() {
       ConnectivityManager connectivityManager = (ConnectivityManager) RuntimeEnvironment.application
           .getSystemService(Context.CONNECTIVITY_SERVICE);
-      shadowConnectivityManager = Shadows.shadowOf(connectivityManager);
+      shadowConnectivityManager = Shadow.extract(connectivityManager);
     }
 
-    public void disconnect() {
+    void disconnect() {
       shadowConnectivityManager.setActiveNetworkInfo(null);
     }
 
-    public void connect() {
+    void connect() {
       NetworkInfo networkInfo =
           ShadowNetworkInfo.newInstance(NetworkInfo.DetailedState.CONNECTED, 0, 0, true, true);
       shadowConnectivityManager.setActiveNetworkInfo(networkInfo);
     }
 
-    public void broadcast() {
+    void broadcast() {
       Intent connected = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
       ShadowApplication.getInstance().sendBroadcast(connected);
+    }
+  }
+
+  @Implements(ConnectivityManager.class)
+  public static final class PermissionConnectivityManager extends ShadowConnectivityManager {
+    private boolean isNetworkPermissionGranted = true;
+
+    @Implementation
+    public NetworkInfo getActiveNetworkInfo() {
+      if (!isNetworkPermissionGranted) {
+        throw new SecurityException();
+      }
+      return super.getActiveNetworkInfo();
     }
   }
 }

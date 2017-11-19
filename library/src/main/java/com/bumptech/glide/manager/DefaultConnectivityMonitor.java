@@ -26,7 +26,16 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
     @Override
     public void onReceive(Context context, Intent intent) {
       boolean wasConnected = isConnected;
-      isConnected = isConnected(context);
+      try {
+        isConnected = isConnected(context);
+      } catch (SecurityException e) {
+        // See #1405.
+        if (Log.isLoggable(TAG, Log.WARN)) {
+          Log.w(TAG, "Failed to determine connectivity status when connectivity changed", e);
+        }
+        // Default to true;
+        isConnected = true;
+      }
       if (wasConnected != isConnected) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "connectivity changed, isConnected: " + isConnected);
@@ -47,8 +56,9 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
       return;
     }
 
-    isConnected = isConnected(context);
     try {
+      // See #1405
+      isConnected = isConnected(context);
       context.registerReceiver(connectivityReceiver,
           new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
       isRegistered = true;
