@@ -6,6 +6,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +20,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -27,12 +30,15 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 public class ImageViewTargetTest {
 
+  @Mock private AnimatedDrawable animatedDrawable;
   private ImageView view;
   private TestTarget target;
   private ColorDrawable drawable;
 
   @Before
   public void setUp() {
+    MockitoAnnotations.initMocks(this);
+
     view = new ImageView(RuntimeEnvironment.application);
     target = new TestTarget(view);
     drawable = new ColorDrawable(Color.RED);
@@ -115,6 +121,17 @@ public class ImageViewTargetTest {
     InOrder order = inOrder(view, drawable);
     order.verify(view).setImageDrawable(drawable);
     order.verify(drawable).start();
+  }
+
+  @Test
+  public void onLoadCleared_withAnimatableDrawable_stopsDrawable() {
+    target.onResourceReady(animatedDrawable, /*transition=*/ null);
+    verify(animatedDrawable).start();
+    verify(animatedDrawable, never()).stop();
+
+    target.onLoadCleared(/*placeholder=*/ null);
+
+    verify(animatedDrawable).stop();
   }
 
   private abstract static class AnimatedDrawable extends Drawable implements Animatable {

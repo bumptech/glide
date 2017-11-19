@@ -85,6 +85,9 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
   @Override
   public void onLoadCleared(@Nullable Drawable placeholder) {
     super.onLoadCleared(placeholder);
+    if (animatable != null) {
+      animatable.stop();
+    }
     setResourceInternal(null);
     setDrawable(placeholder);
   }
