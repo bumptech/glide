@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.widget.ImageView;
 import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.ViewTarget;
@@ -26,6 +27,7 @@ public class GlideContext extends ContextWrapper {
   static final TransitionOptions<?, ?> DEFAULT_TRANSITION_OPTIONS =
       new GenericTransitionOptions<>();
   private final Handler mainHandler;
+  private final ArrayPool arrayPool;
   private final Registry registry;
   private final ImageViewTargetFactory imageViewTargetFactory;
   private final RequestOptions defaultRequestOptions;
@@ -33,11 +35,17 @@ public class GlideContext extends ContextWrapper {
   private final Engine engine;
   private final int logLevel;
 
-  public GlideContext(Context context, Registry registry,
-      ImageViewTargetFactory imageViewTargetFactory, RequestOptions defaultRequestOptions,
-      Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions, Engine engine,
+  public GlideContext(
+      Context context,
+      ArrayPool arrayPool,
+      Registry registry,
+      ImageViewTargetFactory imageViewTargetFactory,
+      RequestOptions defaultRequestOptions,
+      Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
+      Engine engine,
       int logLevel) {
     super(context.getApplicationContext());
+    this.arrayPool = arrayPool;
     this.registry = registry;
     this.imageViewTargetFactory = imageViewTargetFactory;
     this.defaultRequestOptions = defaultRequestOptions;
@@ -88,5 +96,9 @@ public class GlideContext extends ContextWrapper {
 
   public int getLogLevel() {
     return logLevel;
+  }
+
+  public ArrayPool getArrayPool() {
+    return arrayPool;
   }
 }

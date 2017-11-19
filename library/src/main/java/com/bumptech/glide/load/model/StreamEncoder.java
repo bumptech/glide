@@ -47,7 +47,7 @@ public class StreamEncoder implements Encoder<InputStream> {
           // Do nothing.
         }
       }
-      byteArrayPool.put(buffer, byte[].class);
+      byteArrayPool.put(buffer);
     }
     return success;
   }

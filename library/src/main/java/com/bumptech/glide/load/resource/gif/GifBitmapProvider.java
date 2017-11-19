@@ -60,7 +60,7 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
     if (arrayPool == null) {
       return;
     }
-    arrayPool.put(bytes, byte[].class);
+    arrayPool.put(bytes);
   }
 
   @Override
@@ -77,6 +77,6 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
     if (arrayPool == null) {
       return;
     }
-    arrayPool.put(array, int[].class);
+    arrayPool.put(array);
   }
 }

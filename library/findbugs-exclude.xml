@@ -42,4 +42,10 @@
       <Bug pattern="DMI_HARDCODED_ABSOLUTE_FILENAME" />
     </Match>
 
+    <!-- Re-using the byte array saves allocations, there's no serious risk of mutations. -->
+    <Match>
+      <Class name="com.bumptech.glide.util.FixedPreloadSizeProvider" />
+      <Bug pattern="EI_EXPOSE_REP" />
+    </Match>
+
 </FindBugsFilter>

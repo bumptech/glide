@@ -1,7 +1,6 @@
 package com.bumptech.glide.util;
 
 import com.bumptech.glide.ListPreloader;
-import java.util.Arrays;
 
 /**
  * A {@link com.bumptech.glide.ListPreloader.PreloadSizeProvider} with a fixed width and height.
@@ -24,6 +23,6 @@ public class FixedPreloadSizeProvider<T> implements ListPreloader.PreloadSizePro
 
   @Override
   public int[] getPreloadSize(T item, int adapterPosition, int itemPosition) {
-    return Arrays.copyOf(this.size, this.size.length);
+    return size;
   }
 }

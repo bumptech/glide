@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestOptions;
@@ -33,9 +34,15 @@ public final class GlideContextTest {
     Application app = RuntimeEnvironment.application;
 
     transitionOptions = new HashMap<>();
-    context = new GlideContext(app, new Registry(),
-        new ImageViewTargetFactory(), new RequestOptions(),
-        transitionOptions, mock(Engine.class), Log.DEBUG);
+    context = new GlideContext(
+        app,
+        new LruArrayPool(),
+        new Registry(),
+        new ImageViewTargetFactory(),
+        new RequestOptions(),
+        transitionOptions,
+        mock(Engine.class),
+        Log.DEBUG);
   }
 
   @Test

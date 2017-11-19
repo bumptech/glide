@@ -72,11 +72,11 @@ public class ExifTest {
   @Test
   public void testHandlesInexactSizesInByteArrayPools() {
     for (int i = 1; i <= 8; i++) {
-      byteArrayPool.put(new byte[ArrayPool.STANDARD_BUFFER_SIZE_BYTES], byte[].class);
+      byteArrayPool.put(new byte[ArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
       assertOrientation("Portrait", i);
     }
     for (int i = 1; i <= 8; i++) {
-      byteArrayPool.put(new byte[ArrayPool.STANDARD_BUFFER_SIZE_BYTES], byte[].class);
+      byteArrayPool.put(new byte[ArrayPool.STANDARD_BUFFER_SIZE_BYTES]);
       assertOrientation("Landscape", i);
     }
   }

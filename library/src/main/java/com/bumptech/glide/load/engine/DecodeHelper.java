@@ -9,6 +9,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DecodeJob.DiskCacheProvider;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoader.LoadData;
@@ -117,6 +118,10 @@ final class DecodeHelper<Transcode> {
 
   int getHeight() {
     return height;
+  }
+
+  ArrayPool getArrayPool() {
+    return glideContext.getArrayPool();
   }
 
   List<Class<?>> getRegisteredResourceClasses() {

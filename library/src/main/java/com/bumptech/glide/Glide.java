@@ -447,8 +447,14 @@ public class Glide implements ComponentCallbacks2 {
     ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     glideContext =
         new GlideContext(
-            context, registry, imageViewTargetFactory, defaultRequestOptions,
-            defaultTransitionOptions, engine, logLevel);
+            context,
+            arrayPool,
+            registry,
+            imageViewTargetFactory,
+            defaultRequestOptions,
+            defaultTransitionOptions,
+            engine,
+            logLevel);
   }
 
   /**

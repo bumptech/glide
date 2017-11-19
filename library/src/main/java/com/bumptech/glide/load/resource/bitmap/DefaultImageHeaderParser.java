@@ -159,7 +159,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       try {
         return parseExifSegment(reader, exifData, exifSegmentLength);
       } finally {
-        byteArrayPool.put(exifData, byte[].class);
+        byteArrayPool.put(exifData);
       }
     }
   }

@@ -57,8 +57,16 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
       Class<?> resourceClass = resourceClasses.get(resourceClassIndex);
       Transformation<?> transformation = helper.getTransformation(resourceClass);
 
-      currentKey = new ResourceCacheKey(sourceId, helper.getSignature(), helper.getWidth(),
-          helper.getHeight(), transformation, resourceClass, helper.getOptions());
+      currentKey =
+          new ResourceCacheKey(
+              helper.getArrayPool(),
+              sourceId,
+              helper.getSignature(),
+              helper.getWidth(),
+              helper.getHeight(),
+              transformation,
+              resourceClass,
+              helper.getOptions());
       cacheFile = helper.getDiskCache().get(currentKey);
       if (cacheFile != null) {
         this.sourceKey = sourceId;

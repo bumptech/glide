@@ -211,7 +211,7 @@ public final class Downsampler {
       return BitmapResource.obtain(result, bitmapPool);
     } finally {
       releaseOptions(bitmapFactoryOptions);
-      byteArrayPool.put(bytesForOptions, byte[].class);
+      byteArrayPool.put(bytesForOptions);
     }
   }
 

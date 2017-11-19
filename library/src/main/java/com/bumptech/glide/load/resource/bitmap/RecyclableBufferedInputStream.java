@@ -114,7 +114,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
 
   public synchronized void release() {
     if (buf != null) {
-      byteArrayPool.put(buf, byte[].class);
+      byteArrayPool.put(buf);
       buf = null;
     }
   }
@@ -128,7 +128,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
   @Override
   public void close() throws IOException {
     if (buf != null) {
-      byteArrayPool.put(buf, byte[].class);
+      byteArrayPool.put(buf);
       buf = null;
     }
     InputStream localIn = in;
@@ -170,7 +170,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
       // Reassign buf, which will invalidate any local references
       // FIXME: what if buf was null?
       localBuf = buf = newbuf;
-      byteArrayPool.put(oldbuf, byte[].class);
+      byteArrayPool.put(oldbuf);
     } else if (markpos > 0) {
       System.arraycopy(localBuf, markpos, localBuf, 0, localBuf.length - markpos);
     }

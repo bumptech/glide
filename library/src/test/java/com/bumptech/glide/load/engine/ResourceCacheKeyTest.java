@@ -8,11 +8,13 @@ import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Option.CacheKeyUpdater;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,11 +31,13 @@ public class ResourceCacheKeyTest {
 
   @Mock private Transformation<Object> transformation1;
   @Mock private Transformation<Object> transformation2;
+  private LruArrayPool arrayPool;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
+    arrayPool = new LruArrayPool();
     doAnswer(new Util.WriteDigest("transformation1")).when(transformation1)
         .updateDiskCacheKey(any(MessageDigest.class));
     doAnswer(new Util.WriteDigest("transformation1")).when(transformation2)
@@ -55,9 +59,17 @@ public class ResourceCacheKeyTest {
       }
     }), "value");
 
+
+    for (int i = 0; i < 20; i++) {
+      byte[] array = new byte[9];
+      Arrays.fill(array, (byte) 2);
+      arrayPool.put(array);
+    }
+
     keyTester
         .addEquivalenceGroup(
             new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("signature"),
                 100,
@@ -66,6 +78,7 @@ public class ResourceCacheKeyTest {
                 Object.class,
                 new Options()),
             new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("signature"),
                 100,
@@ -75,6 +88,7 @@ public class ResourceCacheKeyTest {
                 new Options()))
         .addEquivalenceGroup(
             new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("otherSource"),
                 new ObjectKey("signature"),
                 100,
@@ -83,7 +97,8 @@ public class ResourceCacheKeyTest {
                 Object.class,
                 new Options()))
         .addEquivalenceGroup(
-              new ResourceCacheKey(
+            new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("otherSignature"),
                 100,
@@ -93,6 +108,7 @@ public class ResourceCacheKeyTest {
                 new Options()))
         .addEquivalenceGroup(
             new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("signature"),
                 200,
@@ -102,6 +118,7 @@ public class ResourceCacheKeyTest {
                 new Options()))
         .addEquivalenceGroup(
             new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("signature"),
                 100,
@@ -111,6 +128,7 @@ public class ResourceCacheKeyTest {
                 new Options()))
         .addEquivalenceGroup(
             new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("signature"),
                 100,
@@ -120,6 +138,7 @@ public class ResourceCacheKeyTest {
                 new Options()))
         .addEquivalenceGroup(
             new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("signature"),
                 100,
@@ -129,6 +148,7 @@ public class ResourceCacheKeyTest {
                 new Options()))
         .addEquivalenceGroup(
             new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("signature"),
                 100,
@@ -137,7 +157,8 @@ public class ResourceCacheKeyTest {
                 Object.class,
                 memoryOptions))
         .addEquivalenceGroup(
-                new ResourceCacheKey(
+            new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("signature"),
                 100,
@@ -146,7 +167,8 @@ public class ResourceCacheKeyTest {
                 Object.class,
                 diskOptions))
         .addRegressionTest(
-              new ResourceCacheKey(
+            new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("signature"),
                 100,
@@ -157,6 +179,7 @@ public class ResourceCacheKeyTest {
             "04d632bfe8e588544909fc44edb7328fa28bea6831b96927ade22b44818654e2")
         .addRegressionTest(
             new ResourceCacheKey(
+                arrayPool,
                 new ObjectKey("source"),
                 new ObjectKey("signature"),
                 100,

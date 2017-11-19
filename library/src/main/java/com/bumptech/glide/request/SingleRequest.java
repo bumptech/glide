@@ -47,6 +47,9 @@ public final class SingleRequest<R> implements Request,
       });
   private boolean isCallingCallbacks;
 
+  private static final boolean IS_VERBOSE_LOGGABLE =
+      Log.isLoggable(TAG, Log.VERBOSE);
+
   private enum Status {
     /**
      * Created but not yet running.
@@ -82,7 +85,8 @@ public final class SingleRequest<R> implements Request,
     PAUSED,
   }
 
-  private final String tag = String.valueOf(super.hashCode());
+  @Nullable
+  private final String tag = IS_VERBOSE_LOGGABLE ? String.valueOf(super.hashCode()) : null;
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
 
   @Nullable
@@ -262,7 +266,7 @@ public final class SingleRequest<R> implements Request,
         && canNotifyStatusChanged()) {
       target.onLoadStarted(getPlaceholderDrawable());
     }
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+    if (IS_VERBOSE_LOGGABLE) {
       logV("finished run method in " + LogTime.getElapsedMillis(startTime));
     }
   }
@@ -427,7 +431,7 @@ public final class SingleRequest<R> implements Request,
   @Override
   public void onSizeReady(int width, int height) {
     stateVerifier.throwIfRecycled();
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+    if (IS_VERBOSE_LOGGABLE) {
       logV("Got onSizeReady in " + LogTime.getElapsedMillis(startTime));
     }
     if (status != Status.WAITING_FOR_SIZE) {
@@ -439,7 +443,7 @@ public final class SingleRequest<R> implements Request,
     this.width = maybeApplySizeMultiplier(width, sizeMultiplier);
     this.height = maybeApplySizeMultiplier(height, sizeMultiplier);
 
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+    if (IS_VERBOSE_LOGGABLE) {
       logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
     }
     loadStatus = engine.load(
@@ -468,7 +472,7 @@ public final class SingleRequest<R> implements Request,
     if (status != Status.RUNNING) {
       loadStatus = null;
     }
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+    if (IS_VERBOSE_LOGGABLE) {
       logV("finished onSizeReady in " + LogTime.getElapsedMillis(startTime));
     }
   }

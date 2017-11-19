@@ -3,7 +3,6 @@ package com.bumptech.glide.load;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.SimpleArrayMap;
 import java.security.MessageDigest;
-import java.util.Map;
 
 /**
  * A set of {@link Option Options} to apply to in memory and disk cache keys.
@@ -41,8 +40,10 @@ public final class Options implements Key {
 
   @Override
   public void updateDiskCacheKey(MessageDigest messageDigest) {
-    for (Map.Entry<Option<?>, Object> entry : values.entrySet()) {
-      updateDiskCacheKey(entry.getKey(), entry.getValue(), messageDigest);
+    for (int i = 0; i < values.size(); i++) {
+      Option<?> key = values.keyAt(i);
+      Object value = values.valueAt(i);
+      updateDiskCacheKey(key, value, messageDigest);
     }
   }
 
