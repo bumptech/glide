@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 
@@ -14,6 +15,7 @@ import com.bumptech.glide.util.Synthetic;
  * Uses {@link android.net.ConnectivityManager} to identify connectivity changes.
  */
 class DefaultConnectivityMonitor implements ConnectivityMonitor {
+  private static final String TAG = "ConnectivityMonitor";
   private final Context context;
   @SuppressWarnings("WeakerAccess") @Synthetic final ConnectivityListener listener;
 
@@ -44,9 +46,16 @@ class DefaultConnectivityMonitor implements ConnectivityMonitor {
     }
 
     isConnected = isConnected(context);
-    context.registerReceiver(connectivityReceiver,
-        new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-    isRegistered = true;
+    try {
+      context.registerReceiver(connectivityReceiver,
+          new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+      isRegistered = true;
+    } catch (SecurityException e) {
+      // See #1417.
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Failed to register", e);
+      }
+    }
   }
 
   private void unregister() {
