@@ -221,6 +221,10 @@ public final class GlideExecutor implements ExecutorService {
             false)));
   }
 
+  /**
+   * Returns a new cached thread pool that defaults to either one or two threads depending on the
+   * number of available cores to use when loading frames of animations.
+   */
   public static GlideExecutor newAnimationExecutor() {
     int bestThreadCount = calculateBestThreadCount();
     // We don't want to add a ton of threads running animations in parallel with our source and
@@ -229,16 +233,28 @@ public final class GlideExecutor implements ExecutorService {
     // with more cores, two threads can provide better performance if lots of GIFs are showing at
     // once.
     int maximumPoolSize = bestThreadCount >= 4 ? 2 : 1;
-    return new GlideExecutor(
+
+    return newAnimationExecutor(maximumPoolSize, UncaughtThrowableStrategy.DEFAULT);
+  }
+
+  /**
+   * Returns a new cached thread pool with the given thread count and
+   * {@link UncaughtThrowableStrategy} to use when loading frames of animations.
+   */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  public static GlideExecutor newAnimationExecutor(
+      int threadCount, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
+     return new GlideExecutor(
         new ThreadPoolExecutor(
             0 /* corePoolSize */,
-            maximumPoolSize,
+            threadCount,
             KEEP_ALIVE_TIME_MS,
             TimeUnit.MILLISECONDS,
             new PriorityBlockingQueue<Runnable>(),
             new DefaultThreadFactory(
                 ANIMATION_EXECUTOR_NAME,
-                UncaughtThrowableStrategy.DEFAULT,
+                uncaughtThrowableStrategy,
                 true)));
   }
 

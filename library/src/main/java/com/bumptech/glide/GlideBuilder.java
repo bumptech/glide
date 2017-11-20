@@ -45,6 +45,7 @@ public final class GlideBuilder {
   private RequestOptions defaultRequestOptions = new RequestOptions();
   @Nullable
   private RequestManagerFactory requestManagerFactory;
+  private GlideExecutor animationExecutor;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -116,36 +117,81 @@ public final class GlideBuilder {
   }
 
   /**
-   * Sets the {@link java.util.concurrent.ExecutorService} implementation to use when retrieving
+   * Sets the {@link GlideExecutor} to use when retrieving
    * {@link com.bumptech.glide.load.engine.Resource}s that are not already in the cache.
    *
-   * <p> Any implementation must order requests based on their {@link com.bumptech.glide.Priority}
-   * for thumbnail requests to work properly.
+   * <p>The thread count defaults to the number of cores available on the device, with a maximum of
+   * 4.
+   *
+   * <p>Use the {@link GlideExecutor#newSourceExecutor()} methods if you'd like to specify options
+   * for the source executor.
+   *
+   * @param service The ExecutorService to use.
+   * @return This builder.
+   * @see #setDiskCacheExecutor(GlideExecutor)
+   * @see GlideExecutor
+   *
+   * @deprecated Use {@link #setSourceExecutor(GlideExecutor)}
+   */
+  @Deprecated
+  public GlideBuilder setResizeExecutor(GlideExecutor service) {
+    return setSourceExecutor(service);
+  }
+
+  /**
+   * Sets the {@link GlideExecutor} to use when retrieving
+   * {@link com.bumptech.glide.load.engine.Resource}s that are not already in the cache.
+   *
+   * <p>The thread count defaults to the number of cores available on the device, with a maximum of
+   * 4.
+   *
+   * <p>Use the {@link GlideExecutor#newSourceExecutor()} methods if you'd like to specify options
+   * for the source executor.
    *
    * @param service The ExecutorService to use.
    * @return This builder.
    * @see #setDiskCacheExecutor(GlideExecutor)
    * @see GlideExecutor
    */
-  public GlideBuilder setResizeExecutor(GlideExecutor service) {
+  public GlideBuilder setSourceExecutor(GlideExecutor service) {
     this.sourceExecutor = service;
     return this;
   }
 
   /**
-   * Sets the {@link java.util.concurrent.ExecutorService} implementation to use when retrieving
-   * {@link com.bumptech.glide.load.engine.Resource}s that are currently in cache.
+   * Sets the {@link GlideExecutor} to use when retrieving
+   * {@link com.bumptech.glide.load.engine.Resource}s that are currently in Glide's disk caches.
    *
-   * <p> Any implementation must order requests based on their {@link com.bumptech.glide.Priority}
-   * for thumbnail requests to work properly.
+   * <p>Defaults to a single thread which is usually the best combination of memory usage,
+   * jank, and performance, even on high end devices.
    *
-   * @param service The ExecutorService to use.
+   * <p>Use the {@link GlideExecutor#newDiskCacheExecutor()} if you'd like to specify options
+   * for the disk cache executor.
+   *
+   * @param service The {@link GlideExecutor} to use.
    * @return This builder.
-   * @see #setResizeExecutor(GlideExecutor)
+   * @see #setSourceExecutor(GlideExecutor)
    * @see GlideExecutor
    */
   public GlideBuilder setDiskCacheExecutor(GlideExecutor service) {
     this.diskCacheExecutor = service;
+    return this;
+  }
+
+  /**
+   * Sets the {@link GlideExecutor} to use when loading frames of animated images and particularly
+   * of {@link com.bumptech.glide.load.resource.gif.GifDrawable}s.
+   *
+   * <p>Defaults to one or two threads, depending on the number of cores available.
+   *
+   * <p>Use the {@link GlideExecutor#newAnimationExecutor()} methods  if you'd like to specify
+   * options for the animation executor.
+   *
+   * @param service The {@link GlideExecutor} to use.
+   * @return This builder.
+   */
+  public GlideBuilder setAnimationExecutor(GlideExecutor service) {
+    this.animationExecutor = service;
     return this;
   }
 
@@ -297,6 +343,10 @@ public final class GlideBuilder {
 
     if (diskCacheExecutor == null) {
       diskCacheExecutor = GlideExecutor.newDiskCacheExecutor();
+    }
+
+    if (animationExecutor == null) {
+      animationExecutor = GlideExecutor.newAnimationExecutor();
     }
 
     if (memorySizeCalculator == null) {
