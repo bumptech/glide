@@ -16,7 +16,9 @@ final class RuntimeCompat {
   private static final String CPU_NAME_REGEX = "cpu[0-9]+";
   private static final String CPU_LOCATION = "/sys/devices/system/cpu/";
 
-  private RuntimeCompat() {}
+  private RuntimeCompat() {
+    // Utility class.
+  }
 
   /**
    * Determines the number of cores available on the device.
@@ -38,6 +40,7 @@ final class RuntimeCompat {
    *
    * @return the maximum number of processors available to the VM; never smaller than one
    */
+  @SuppressWarnings("PMD")
   private static int getCoreCountPre17() {
     // We override the current ThreadPolicy to allow disk reads.
     // This shouldn't actually do disk-IO and accesses a device file.

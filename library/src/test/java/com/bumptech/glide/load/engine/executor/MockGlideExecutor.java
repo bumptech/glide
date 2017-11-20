@@ -14,8 +14,9 @@ import java.util.concurrent.Future;
  */
 @VisibleForTesting
 public final class MockGlideExecutor {
-  // Utility class.
-  private MockGlideExecutor() {}
+  private MockGlideExecutor() {
+    // Utility class.
+  }
 
   public static GlideExecutor newTestExecutor(ExecutorService executorService) {
     return new GlideExecutor(executorService);
@@ -71,7 +72,7 @@ public final class MockGlideExecutor {
     }
 
     @Override
-    public void execute(Runnable command) {
+    public void execute(final Runnable command) {
       delegate.execute(new Runnable() {
         @Override
         public void run() {
