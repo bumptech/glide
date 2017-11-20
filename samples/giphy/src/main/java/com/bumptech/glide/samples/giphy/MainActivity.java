@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.RecyclerListener;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -53,6 +55,15 @@ public class MainActivity extends Activity implements Api.Monitor {
     RecyclerViewPreloader<Api.GifResult> preloader =
         new RecyclerViewPreloader<>(GlideApp.with(this), adapter, preloadSizeProvider, 4);
     gifList.addOnScrollListener(preloader);
+    gifList.setRecyclerListener(new RecyclerListener() {
+      @Override
+      public void onViewRecycled(ViewHolder holder) {
+        // This is an optimization to reduce the memory usage of RecyclerView's recycled view pool
+        // and good practice when using Glide with RecyclerView.
+        GifViewHolder gifViewHolder = (GifViewHolder) holder;
+        GlideApp.with(MainActivity.this).clear(gifViewHolder.gifView);
+      }
+    });
   }
 
   @Override
@@ -124,7 +135,9 @@ public class MainActivity extends Activity implements Api.Monitor {
         }
       });
 
-      requestBuilder.load(result).into(holder.gifView);
+      // clearOnDetach let's us stop animating GifDrawables that RecyclerView hasn't yet recycled
+      // but that are currently off screen.
+      requestBuilder.load(result).into(holder.gifView).clearOnDetach();
 
       preloadSizeProvider.setView(holder.gifView);
     }
