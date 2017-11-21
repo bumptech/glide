@@ -320,6 +320,7 @@ public class Engine implements EngineJobListener,
   @VisibleForTesting
   public void shutdown() {
     engineJobFactory.shutdown();
+    diskCacheProvider.clearDiskCacheIfCreated();
   }
 
   /**
@@ -346,6 +347,14 @@ public class Engine implements EngineJobListener,
 
     LazyDiskCacheProvider(DiskCache.Factory factory) {
       this.factory = factory;
+    }
+
+    @VisibleForTesting
+    synchronized void clearDiskCacheIfCreated() {
+      if (diskCache == null) {
+        return;
+      }
+      diskCache.clear();
     }
 
     @Override

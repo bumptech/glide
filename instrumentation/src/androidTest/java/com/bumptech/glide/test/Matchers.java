@@ -1,6 +1,6 @@
 package com.bumptech.glide.test;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.any;
 
 import android.graphics.drawable.Drawable;
 import com.bumptech.glide.request.target.Target;

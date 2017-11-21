@@ -204,7 +204,6 @@ public class Glide implements ComponentCallbacks2 {
   public static synchronized void tearDown() {
     if (glide != null) {
       glide.engine.shutdown();
-      glide.engine.clearDiskCache();
     }
     glide = null;
   }

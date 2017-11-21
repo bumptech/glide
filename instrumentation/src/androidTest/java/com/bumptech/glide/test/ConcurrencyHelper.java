@@ -1,12 +1,12 @@
 package com.bumptech.glide.test;
 
-
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
 import android.widget.ImageView;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
@@ -52,7 +52,7 @@ public class ConcurrencyHelper {
     runOnMainThread(new Runnable() {
       @Override
       public void run() {
-        GlideApp.with(InstrumentationRegistry.getTargetContext())
+        Glide.with(InstrumentationRegistry.getTargetContext())
             .clear(imageView);
       }
     });
