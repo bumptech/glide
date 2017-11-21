@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine.executor;
 
 import android.os.StrictMode;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import com.google.common.util.concurrent.ForwardingExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -18,6 +19,8 @@ public final class MockGlideExecutor {
     // Utility class.
   }
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public static GlideExecutor newTestExecutor(ExecutorService executorService) {
     return new GlideExecutor(executorService);
   }
@@ -56,23 +59,26 @@ public final class MockGlideExecutor {
       return delegate;
     }
 
+    @NonNull
     @Override
-    public <T> Future<T> submit(Runnable task, T result) {
+    public <T> Future<T> submit(@NonNull Runnable task, @NonNull T result) {
       return getUninterruptibly(super.submit(task, result));
     }
 
+    @NonNull
     @Override
-    public <T> Future<T> submit(Callable<T> task) {
+    public <T> Future<T> submit(@NonNull Callable<T> task) {
+      return getUninterruptibly(super.submit(task));
+    }
+
+    @NonNull
+    @Override
+    public Future<?> submit(@NonNull Runnable task) {
       return getUninterruptibly(super.submit(task));
     }
 
     @Override
-    public Future<?> submit(Runnable task) {
-      return getUninterruptibly(super.submit(task));
-    }
-
-    @Override
-    public void execute(final Runnable command) {
+    public void execute(@NonNull final Runnable command) {
       delegate.execute(new Runnable() {
         @Override
         public void run() {

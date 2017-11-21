@@ -466,8 +466,8 @@ public class EngineJobTest {
     final EngineJob<Object> job;
     final GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
     final GlideExecutor sourceService = MockGlideExecutor.newMainThreadExecutor();
-    final GlideExecutor sourceUnlimitedService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
-    final GlideExecutor animationService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
+    final GlideExecutor sourceUnlimitedService = MockGlideExecutor.newMainThreadExecutor();
+    final GlideExecutor animationService = MockGlideExecutor.newMainThreadExecutor();
     final Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
     final DecodeJob<Object> decodeJob = mock(DecodeJob.class);
     final DataSource dataSource = DataSource.LOCAL;
@@ -503,8 +503,8 @@ public class EngineJobTest {
     final EngineJobListener listener = mock(EngineJobListener.class);
     final GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
     final GlideExecutor sourceService = MockGlideExecutor.newMainThreadExecutor();
-    final GlideExecutor sourceUnlimitedService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
-    final GlideExecutor animationService = MockGlideExecutor.newMainThreadUnlimitedExecutor();
+    final GlideExecutor sourceUnlimitedService = MockGlideExecutor.newMainThreadExecutor();
+    final GlideExecutor animationService = MockGlideExecutor.newMainThreadExecutor();
     boolean isCacheable = true;
     boolean useUnlimitedSourceGeneratorPool = false;
     final boolean useAnimationPool = false;
