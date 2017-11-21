@@ -27,19 +27,19 @@ public final class GlideExecutor implements ExecutorService {
    * The default thread name prefix for executors used to load/decode/transform data not found in
    * cache.
    */
-  public static final String DEFAULT_SOURCE_EXECUTOR_NAME = "source";
+  private static final String DEFAULT_SOURCE_EXECUTOR_NAME = "source";
 
   /**
    * The default thread name prefix for executors used to load/decode/transform data found in
    * Glide's cache.
    */
-  public static final String DEFAULT_DISK_CACHE_EXECUTOR_NAME = "disk-cache";
+  private static final String DEFAULT_DISK_CACHE_EXECUTOR_NAME = "disk-cache";
 
   /**
    * The default thread count for executors used to load/decode/transform data found in Glide's
    * cache.
    */
-  public static final int DEFAULT_DISK_CACHE_EXECUTOR_THREADS = 1;
+  private static final int DEFAULT_DISK_CACHE_EXECUTOR_THREADS = 1;
 
   private static final String TAG = "GlideExecutor";
 
@@ -93,6 +93,8 @@ public final class GlideExecutor implements ExecutorService {
    * com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy} to use to
    *                                  handle uncaught exceptions.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   public static GlideExecutor newDiskCacheExecutor(
           UncaughtThrowableStrategy uncaughtThrowableStrategy) {
     return newDiskCacheExecutor(
@@ -113,15 +115,18 @@ public final class GlideExecutor implements ExecutorService {
    * com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy} to use to
    *                                  handle uncaught exceptions.
    */
-  public static GlideExecutor newDiskCacheExecutor(int threadCount, String name,
-      UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    return new GlideExecutor(new ThreadPoolExecutor(
-        threadCount /* corePoolSize */,
-        threadCount /* maximumPoolSize */,
-        0 /* keepAliveTime */,
-        TimeUnit.MILLISECONDS,
-        new PriorityBlockingQueue<Runnable>(),
-        new DefaultThreadFactory(name, uncaughtThrowableStrategy, true)));
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  public static GlideExecutor newDiskCacheExecutor(
+      int threadCount, String name, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
+    return new GlideExecutor(
+        new ThreadPoolExecutor(
+            threadCount /* corePoolSize */,
+            threadCount /* maximumPoolSize */,
+            0 /* keepAliveTime */,
+            TimeUnit.MILLISECONDS,
+            new PriorityBlockingQueue<Runnable>(),
+            new DefaultThreadFactory(name, uncaughtThrowableStrategy, true)));
   }
 
   /**
@@ -153,11 +158,13 @@ public final class GlideExecutor implements ExecutorService {
    * com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy} to use to
    *                                  handle uncaught exceptions.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   public static GlideExecutor newSourceExecutor(
       UncaughtThrowableStrategy uncaughtThrowableStrategy) {
     return newSourceExecutor(
-        DEFAULT_DISK_CACHE_EXECUTOR_THREADS,
-        DEFAULT_DISK_CACHE_EXECUTOR_NAME,
+        calculateBestThreadCount(),
+        DEFAULT_SOURCE_EXECUTOR_NAME,
         uncaughtThrowableStrategy);
   }
 
@@ -173,15 +180,18 @@ public final class GlideExecutor implements ExecutorService {
    * com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy} to use to
    *                                  handle uncaught exceptions.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public static GlideExecutor newSourceExecutor(
       int threadCount, String name, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    return new GlideExecutor(new ThreadPoolExecutor(
-        threadCount /* corePoolSize */,
-        threadCount /* maximumPoolSize */,
-        0 /* keepAliveTime */,
-        TimeUnit.MILLISECONDS,
-        new PriorityBlockingQueue<Runnable>(),
-        new DefaultThreadFactory(name, uncaughtThrowableStrategy, false)));
+    return new GlideExecutor(
+        new ThreadPoolExecutor(
+            threadCount /* corePoolSize */,
+            threadCount /* maximumPoolSize */,
+            0 /* keepAliveTime */,
+            TimeUnit.MILLISECONDS,
+            new PriorityBlockingQueue<Runnable>(),
+            new DefaultThreadFactory(name, uncaughtThrowableStrategy, false)));
   }
 
   /**
@@ -219,16 +229,17 @@ public final class GlideExecutor implements ExecutorService {
     // with more cores, two threads can provide better performance if lots of GIFs are showing at
     // once.
     int maximumPoolSize = bestThreadCount >= 4 ? 2 : 1;
-    return new GlideExecutor(new ThreadPoolExecutor(
-        0 /* corePoolSize */,
-        maximumPoolSize,
-        KEEP_ALIVE_TIME_MS,
-        TimeUnit.MILLISECONDS,
-        new PriorityBlockingQueue<Runnable>(),
-        new DefaultThreadFactory(
-            ANIMATION_EXECUTOR_NAME,
-            UncaughtThrowableStrategy.DEFAULT,
-            true)));
+    return new GlideExecutor(
+        new ThreadPoolExecutor(
+            0 /* corePoolSize */,
+            maximumPoolSize,
+            KEEP_ALIVE_TIME_MS,
+            TimeUnit.MILLISECONDS,
+            new PriorityBlockingQueue<Runnable>(),
+            new DefaultThreadFactory(
+                ANIMATION_EXECUTOR_NAME,
+                UncaughtThrowableStrategy.DEFAULT,
+                true)));
   }
 
   @VisibleForTesting
@@ -237,13 +248,13 @@ public final class GlideExecutor implements ExecutorService {
   }
 
   @Override
-  public void execute(Runnable command) {
+  public void execute(@NonNull Runnable command) {
     delegate.execute(command);
   }
 
   @NonNull
   @Override
-  public Future<?> submit(Runnable task) {
+  public Future<?> submit(@NonNull Runnable task) {
     return delegate.submit(task);
   }
 
@@ -280,12 +291,12 @@ public final class GlideExecutor implements ExecutorService {
 
   @NonNull
   @Override
-  public <T> Future<T> submit(Runnable task, T result) {
+  public <T> Future<T> submit(@NonNull Runnable task, T result) {
     return delegate.submit(task, result);
   }
 
   @Override
-  public <T> Future<T> submit(Callable<T> task) {
+  public <T> Future<T> submit(@NonNull Callable<T> task) {
     return delegate.submit(task);
   }
 
@@ -324,11 +335,12 @@ public final class GlideExecutor implements ExecutorService {
   /**
    * Determines the number of cores available on the device.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public static int calculateBestThreadCount() {
     if (bestThreadCount == 0) {
-      bestThreadCount = Math.min(
-          MAXIMUM_AUTOMATIC_THREAD_COUNT,
-          RuntimeCompat.availableProcessors());
+      bestThreadCount =
+          Math.min(MAXIMUM_AUTOMATIC_THREAD_COUNT, RuntimeCompat.availableProcessors());
     }
     return bestThreadCount;
   }
@@ -341,6 +353,8 @@ public final class GlideExecutor implements ExecutorService {
     /**
      * Silently catches and ignores the uncaught {@link Throwable}s.
      */
+    // Public API.
+    @SuppressWarnings("unused")
     UncaughtThrowableStrategy IGNORE = new UncaughtThrowableStrategy() {
       @Override
       public void handle(Throwable t) {
@@ -361,6 +375,8 @@ public final class GlideExecutor implements ExecutorService {
     /**
      * Rethrows the uncaught {@link Throwable}s to crash the app.
      */
+    // Public API.
+    @SuppressWarnings("unused")
     UncaughtThrowableStrategy THROW = new UncaughtThrowableStrategy() {
       @Override
       public void handle(Throwable t) {
