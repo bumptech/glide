@@ -487,6 +487,12 @@ public class StandardGifDecoder implements GifDecoder {
     int inc = 8;
     int iline = 0;
     boolean isFirstFrame = framePointer == 0;
+    int sampleSize = this.sampleSize;
+    int downsampledWidth = this.downsampledWidth;
+    int downsampledHeight = this.downsampledHeight;
+    byte[] mainPixels = this.mainPixels;
+    int[] act = this.act;
+    boolean isFirstFrameTransparent = false;
     for (int i = 0; i < downsampledIH; i++) {
       int line = i;
       if (currentFrame.interlace) {
@@ -538,7 +544,7 @@ public class StandardGifDecoder implements GifDecoder {
           }
           if (averageColor != COLOR_TRANSPARENT_BLACK) {
             dest[dx] = averageColor;
-          } else if (!isFirstFrameTransparent && isFirstFrame) {
+          } else if (isFirstFrame && !isFirstFrameTransparent) {
             isFirstFrameTransparent = true;
           }
           sx += sampleSize;
@@ -546,6 +552,8 @@ public class StandardGifDecoder implements GifDecoder {
         }
       }
     }
+
+    this.isFirstFrameTransparent = isFirstFrameTransparent;
 
     // Copy pixels into previous image
     if (savePrevious && (currentFrame.dispose == DISPOSAL_UNSPECIFIED
@@ -629,15 +637,19 @@ public class StandardGifDecoder implements GifDecoder {
       // Allocate new pixel array.
       mainPixels = bitmapProvider.obtainByteArray(npix);
     }
+    byte[] mainPixels = this.mainPixels;
     if (prefix == null) {
       prefix = new short[MAX_STACK_SIZE];
     }
+    short[] prefix = this.prefix;
     if (suffix == null) {
       suffix = new byte[MAX_STACK_SIZE];
     }
+    byte[] suffix = this.suffix;
     if (pixelStack == null) {
       pixelStack = new byte[MAX_STACK_SIZE + 1];
     }
+    byte[] pixelStack = this.pixelStack;
 
     // Initialize GIF data stream decoder.
     dataSize = readByte();
@@ -653,6 +665,7 @@ public class StandardGifDecoder implements GifDecoder {
       suffix[code] = (byte) code;
     }
 
+    byte[] block = this.block;
     // Decode GIF pixel stream.
     datum = bits = count = first = top = pi = bi = 0;
     for (i = 0; i < npix; ) {
@@ -665,6 +678,7 @@ public class StandardGifDecoder implements GifDecoder {
           break;
         }
         bi = 0;
+        block = this.block;
       }
 
       datum += (((int) block[bi]) & MASK_INT_LOWEST_BYTE) << bits;
