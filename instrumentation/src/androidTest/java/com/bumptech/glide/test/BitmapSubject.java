@@ -22,7 +22,8 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
   private static final Subject.Factory<BitmapSubject, Bitmap> FACTORY =
       new Subject.Factory<BitmapSubject, Bitmap>() {
         @Override
-        public BitmapSubject createSubject(@NonNull FailureMetadata metadata, @NonNull Bitmap actual) {
+        public BitmapSubject createSubject(
+            @NonNull FailureMetadata metadata, @NonNull Bitmap actual) {
           return new BitmapSubject(metadata, actual);
         }
       };
