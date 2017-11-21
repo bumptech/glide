@@ -750,9 +750,7 @@ public class StandardGifDecoder implements GifDecoder {
     }
 
     // Clear missing pixels.
-    for (i = pi; i < npix; i++) {
-      mainPixels[i] = COLOR_TRANSPARENT_BLACK;
-    }
+    Arrays.fill(mainPixels, pi, npix, (byte) COLOR_TRANSPARENT_BLACK);
   }
 
   /**
