@@ -95,15 +95,6 @@ public class StandardGifDecoder implements GifDecoder {
   /** Raw data read working array. */
   private byte[] block;
 
-  private static final int WORK_BUFFER_SIZE = 16 * 1024;
-  /**
-   * Temporary buffer for block reading.
-   * Reads 16k chunks from the native buffer for processing, to greatly reduce JNI overhead.
-   */
-  private byte[] workBuffer;
-  private int workBufferSize;
-  private int workBufferPosition;
-
   private GifHeaderParser parser;
 
   // LZW decoder working arrays.
@@ -258,9 +249,6 @@ public class StandardGifDecoder implements GifDecoder {
     if (block == null) {
       block = bitmapProvider.obtainByteArray(255);
     }
-    if (workBuffer == null) {
-      workBuffer = bitmapProvider.obtainByteArray(WORK_BUFFER_SIZE);
-    }
 
     GifFrame currentFrame = header.frames.get(framePointer);
     GifFrame previousFrame = null;
@@ -343,9 +331,6 @@ public class StandardGifDecoder implements GifDecoder {
     isFirstFrameTransparent = null;
     if (block != null) {
       bitmapProvider.release(block);
-    }
-    if (workBuffer != null) {
-      bitmapProvider.release(workBuffer);
     }
   }
 
@@ -711,8 +696,6 @@ public class StandardGifDecoder implements GifDecoder {
    * Decodes LZW image data into pixel array. Adapted from John Cristy's BitmapMagick.
    */
   private void decodeBitmapData(GifFrame frame) {
-    workBufferSize = 0;
-    workBufferPosition = 0;
     if (frame != null) {
       // Jump to the frame start position.
       rawData.position(frame.bufferFrameStart);
@@ -841,23 +824,10 @@ public class StandardGifDecoder implements GifDecoder {
   }
 
   /**
-   * Reads the next chunk for the intermediate work buffer.
-   */
-  private void readChunkIfNeeded() {
-    if (workBufferSize > workBufferPosition) {
-      return;
-    }
-    workBufferPosition = 0;
-    workBufferSize = Math.min(rawData.remaining(), WORK_BUFFER_SIZE);
-    rawData.get(workBuffer, 0, workBufferSize);
-  }
-
-  /**
    * Reads a single byte from the input stream.
    */
   private int readByte() {
-    readChunkIfNeeded();
-    return workBuffer[workBufferPosition++] & MASK_INT_LOWEST_BYTE;
+    return rawData.get() & MASK_INT_LOWEST_BYTE;
   }
 
   /**
@@ -870,22 +840,7 @@ public class StandardGifDecoder implements GifDecoder {
     if (blockSize <= 0) {
       return blockSize;
     }
-    final int remaining = workBufferSize - workBufferPosition;
-    if (remaining >= blockSize) {
-      // Block can be read from the current work buffer.
-      System.arraycopy(workBuffer, workBufferPosition, block, 0, blockSize);
-      workBufferPosition += blockSize;
-    } else if (rawData.remaining() + remaining >= blockSize) {
-      // Block can be read in two passes.
-      System.arraycopy(workBuffer, workBufferPosition, block, 0, remaining);
-      workBufferPosition = workBufferSize;
-      readChunkIfNeeded();
-      final int secondHalfRemaining = blockSize - remaining;
-      System.arraycopy(workBuffer, 0, block, remaining, secondHalfRemaining);
-      workBufferPosition += secondHalfRemaining;
-    } else {
-      status = STATUS_FORMAT_ERROR;
-    }
+    rawData.get(block, 0, Math.min(blockSize, rawData.remaining()));
     return blockSize;
   }
 
