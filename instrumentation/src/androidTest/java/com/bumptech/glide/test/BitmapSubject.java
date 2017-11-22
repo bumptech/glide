@@ -44,8 +44,8 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
   }
 
   @Override
-  protected String getDisplaySubject() {
-    return getDisplayString(getSubject());
+  protected String actualCustomStringRepresentation() {
+    return getDisplayString(actual());
   }
 
   private static String getDisplayString(Bitmap bitmap) {
@@ -64,19 +64,19 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
   }
 
   public void isMutable()  {
-    if (!getSubject().isMutable()) {
+    if (!actual().isMutable()) {
       fail("is mutable");
     }
   }
 
   public void isImmutable() {
-    if (getSubject().isMutable()) {
+    if (actual().isMutable()) {
       fail("is immutable");
     }
   }
 
   public void isNotRecycled() {
-    if (getSubject().isRecycled()) {
+    if (actual().isRecycled()) {
       fail("is not recycled");
     }
   }
@@ -90,7 +90,7 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
   }
 
   public void sameAs(Bitmap other) {
-    if (!getSubject().sameAs(other)) {
+    if (!actual().sameAs(other)) {
       fail("is the same as " + getDisplayString(other));
     }
   }
