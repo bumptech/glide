@@ -504,7 +504,7 @@ public class StandardGifDecoder implements GifDecoder {
     int width = this.downsampledWidth;
     byte[] mainPixels = this.mainPixels;
     int[] act = this.act;
-    @Nullable Boolean isFirstFrameTransparent = this.isFirstFrameTransparent;
+    byte transparentColorIndex = -1;
     for (int i = 0; i < downsampledIH; i++) {
       int line = i + downsampledIY;
       int k = line * width;
@@ -518,34 +518,25 @@ public class StandardGifDecoder implements GifDecoder {
       }
       // Start of line in source.
       int sx = i * currentFrame.iw;
-      int averageColor;
-      if (isFirstFrameTransparent == null && isFirstFrame) {
-        while (dx < dlim) {
-          int currentColorIndex = ((int) mainPixels[sx]) & MASK_INT_LOWEST_BYTE;
-          averageColor = act[currentColorIndex];
-          if (averageColor != COLOR_TRANSPARENT_BLACK) {
-            dest[dx] = averageColor;
-          } else if (isFirstFrameTransparent == null) {
-            isFirstFrameTransparent = true;
+
+      while (dx < dlim) {
+        byte byteCurrentColorIndex = mainPixels[sx];
+        int currentColorIndex = ((int) byteCurrentColorIndex) & MASK_INT_LOWEST_BYTE;
+        if (currentColorIndex != transparentColorIndex) {
+          int color = act[currentColorIndex];
+          if (color != COLOR_TRANSPARENT_BLACK) {
+            dest[dx] = color;
+          } else {
+            transparentColorIndex = byteCurrentColorIndex;
           }
-          ++sx;
-          ++dx;
         }
-      } else {
-        while (dx < dlim) {
-          int currentColorIndex = ((int) mainPixels[sx]) & MASK_INT_LOWEST_BYTE;
-          averageColor = act[currentColorIndex];
-          if (averageColor != COLOR_TRANSPARENT_BLACK) {
-            dest[dx] = averageColor;
-          }
-          ++sx;
-          ++dx;
-        }
+        ++sx;
+        ++dx;
       }
     }
 
-    this.isFirstFrameTransparent = isFirstFrameTransparent == null
-        ? false : isFirstFrameTransparent;
+    isFirstFrameTransparent =
+        isFirstFrameTransparent == null && isFirstFrame && transparentColorIndex != -1;
   }
 
   private void copyCopyIntoScratchRobust(GifFrame currentFrame) {
