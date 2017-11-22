@@ -1,6 +1,7 @@
 package com.bumptech.glide.tests;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assert_;
 import static org.junit.Assert.fail;
 
 import android.support.annotation.CheckResult;
@@ -19,6 +20,8 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 public final class KeyTester implements TestRule {
+  private static final String EMPTY_DIGEST_STRING =
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
   // Use LinkedHashMap to keep iteration based on insertion order.
   private final Map<Key, String> regressionTests = new LinkedHashMap<>();
   private final Sha256 sha256 = new Sha256();
@@ -58,6 +61,20 @@ public final class KeyTester implements TestRule {
   @CheckResult
   public KeyTester addRegressionTest(Key key, String expectedDigest) {
     assertUsedAsRule();
+    if (EMPTY_DIGEST_STRING.equals(expectedDigest)) {
+      throw new IllegalArgumentException("Expected digest is empty, if this is intended use "
+          + "addEmptyDigestRegressionTest instead");
+    }
+    return addRegressionTestInternal(key, expectedDigest);
+  }
+
+  @CheckResult
+  public KeyTester addEmptyDigestRegressionTest(Key key) {
+    assertUsedAsRule();
+    return addRegressionTestInternal(key, EMPTY_DIGEST_STRING);
+  }
+
+  private KeyTester addRegressionTestInternal(Key key, String expectedDigest) {
     isUsedWithoutCallingTest = true;
     String oldValue = regressionTests.put(key, expectedDigest);
     if (oldValue != null) {
@@ -73,8 +90,13 @@ public final class KeyTester implements TestRule {
     tester.test();
 
     assertThat(regressionTests).isNotEmpty();
+    int i = 1;
     for (Entry<Key, String> entry : regressionTests.entrySet()) {
-      assertThat(sha256.getStringDigest(entry.getKey())).isEqualTo(entry.getValue());
+      assert_()
+          .withMessage(
+              "Unexpected digest for regression test [" + i + "]: with key: " + entry.getKey())
+          .that(sha256.getStringDigest(entry.getKey())).isEqualTo(entry.getValue());
+      i++;
     }
   }
 

@@ -22,8 +22,12 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.load.resource.SimpleResource;
+import com.bumptech.glide.tests.KeyTester;
+import com.bumptech.glide.tests.Util;
+import java.security.MessageDigest;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -37,9 +41,9 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class DrawableTransformationTest {
-
-  private BitmapPool bitmapPool;
+  @Rule public final KeyTester keyTester = new KeyTester();
   @Mock private Transformation<Bitmap> bitmapTransformation;
+  private BitmapPool bitmapPool;
   private DrawableTransformation transformation;
   private Context context;
 
@@ -133,6 +137,33 @@ public class DrawableTransformationTest {
     transformation.transform(context, input, /*outWidth=*/ 100, /*outHeight=*/ 200);
 
     verify(bitmapPool).put(isA(Bitmap.class));
+  }
+
+  @Test
+  public void testEquals() {
+    BitmapTransformation otherBitmapTransformation = mock(BitmapTransformation.class);
+    doAnswer(new Util.WriteDigest("bitmapTransformation"))
+        .when(bitmapTransformation).updateDiskCacheKey(any(MessageDigest.class));
+    doAnswer(new Util.WriteDigest("otherBitmapTransformation"))
+        .when(otherBitmapTransformation).updateDiskCacheKey(any(MessageDigest.class));
+
+    keyTester
+        .addEquivalenceGroup(
+            transformation,
+            new DrawableTransformation(bitmapTransformation, /*isRequired=*/ true),
+            new DrawableTransformation(bitmapTransformation, /*isRequired=*/ false))
+        .addEquivalenceGroup(bitmapTransformation)
+        .addEquivalenceGroup(otherBitmapTransformation)
+        .addEquivalenceGroup(
+            new DrawableTransformation(otherBitmapTransformation, /*isRequired=*/ true),
+            new DrawableTransformation(otherBitmapTransformation, /*isRequired=*/ false))
+        .addRegressionTest(
+            new DrawableTransformation(bitmapTransformation, /*isRequired=*/ true),
+            "eddf60c557a6315a489b8a3a19b12439a90381256289fbe9a503afa726230bd9")
+        .addRegressionTest(
+            new DrawableTransformation(otherBitmapTransformation, /*isRequired=*/ false),
+            "40931536ed0ec97c39d4be10c44f5b69a86030ec575317f5a0f17e15a0ea9be8")
+        .test();
   }
 
   @SuppressWarnings("unchecked")

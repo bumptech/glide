@@ -4,11 +4,10 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import com.bumptech.glide.load.Key;
+import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.tests.Util;
 import java.io.File;
 import java.io.IOException;
-import java.security.MessageDigest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,14 +21,14 @@ import org.robolectric.annotation.Config;
 public class DiskLruCacheWrapperTest {
   private DiskCache cache;
   private byte[] data;
-  private StringKey key;
+  private ObjectKey key;
   private File dir;
 
   @Before
   public void setUp() {
     dir = RuntimeEnvironment.application.getCacheDir();
     cache = DiskLruCacheWrapper.create(dir, 10 * 1024 * 1024);
-    key = new StringKey("test" + Math.random());
+    key = new ObjectKey("test" + Math.random());
     data = new byte[] { 1, 2, 3, 4, 5, 6 };
   }
 
@@ -136,18 +135,5 @@ public class DiskLruCacheWrapperTest {
     byte[] received = Util.readFile(cache.get(key), data.length);
 
     assertArrayEquals(data, received);
-  }
-
-  private static final class StringKey implements Key {
-    private final String key;
-
-    StringKey(String key) {
-      this.key = key;
-    }
-
-    @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest) {
-      messageDigest.update(key.getBytes());
-    }
   }
 }

@@ -17,9 +17,9 @@ public class OptionsTest {
 
   @Test
   public void testEquals() {
-    Option<Object> firstOption = Option.memory("firstKey");
+    Option<Object> firstMemoryOption = Option.memory("firstKey");
     Object firstValue = new Object();
-    Option<Object> secondOption = Option.memory("secondKey");
+    Option<Object> secondMemoryOption = Option.memory("secondKey");
     Object secondValue = new Object();
 
     CacheKeyUpdater<Integer> updater = new CacheKeyUpdater<Integer>() {
@@ -36,19 +36,19 @@ public class OptionsTest {
     keyTester
         .addEquivalenceGroup(new Options(), new Options())
         .addEquivalenceGroup(
-            new Options().set(firstOption, firstValue),
-            new Options().set(firstOption, firstValue))
+            new Options().set(firstMemoryOption, firstValue),
+            new Options().set(firstMemoryOption, firstValue))
         .addEquivalenceGroup(
-            new Options().set(secondOption, secondValue),
-            new Options().set(secondOption, secondValue))
+            new Options().set(secondMemoryOption, secondValue),
+            new Options().set(secondMemoryOption, secondValue))
         .addEquivalenceGroup(
-            new Options().set(firstOption, firstValue).set(secondOption, secondValue),
-            new Options().set(firstOption, firstValue).set(secondOption, secondValue),
-            new Options().set(secondOption, secondValue).set(firstOption, firstValue))
+            new Options().set(firstMemoryOption, firstValue).set(secondMemoryOption, secondValue),
+            new Options().set(firstMemoryOption, firstValue).set(secondMemoryOption, secondValue),
+            new Options().set(secondMemoryOption, secondValue).set(firstMemoryOption, firstValue))
         .addEquivalenceGroup(
-            new Options().set(firstOption, secondValue))
+            new Options().set(firstMemoryOption, secondValue))
         .addEquivalenceGroup(
-            new Options().set(secondOption, firstValue))
+            new Options().set(secondMemoryOption, firstValue))
         .addEquivalenceGroup(
             new Options().set(firstDiskOption, 1),
             new Options().set(firstDiskOption, 1))
@@ -62,12 +62,9 @@ public class OptionsTest {
         .addEquivalenceGroup(
             new Options().set(firstDiskOption, 1).set(secondDiskOption, 2),
             new Options().set(secondDiskOption, 2).set(firstDiskOption, 1))
-        .addRegressionTest(
-            new Options().set(firstOption, firstValue),
-            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
-        .addRegressionTest(
-            new Options().set(firstOption, firstValue).set(secondOption, secondValue),
-            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+        .addEmptyDigestRegressionTest(new Options().set(firstMemoryOption, firstValue))
+        .addEmptyDigestRegressionTest(
+            new Options().set(firstMemoryOption, firstValue).set(secondMemoryOption, secondValue))
         .addRegressionTest(
             new Options().set(firstDiskOption, 123),
             "3c87124d1a765dc3d566f947d536ef140a4aca645c0947f702356714855b4a8e")
@@ -76,5 +73,4 @@ public class OptionsTest {
             "6697f654686c9a925905db3840e9c99944642c2b91d6200360d77639c1754d51")
         .test();
   }
-
 }

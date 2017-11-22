@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -13,10 +14,13 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -28,6 +32,7 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
 public class CircleCropTest {
+  @Rule public final KeyTester keyTester = new KeyTester();
   @Mock private BitmapPool bitmapPool;
 
   private CircleCrop circleCrop;
@@ -83,6 +88,16 @@ public class CircleCropTest {
     Bitmap expected = createBitmapWithRedCircle(40, 80);
 
     assertSamePixels(expected, result);
+  }
+
+  @Test
+  public void testEquals() {
+    keyTester
+        .addEquivalenceGroup(circleCrop, new CircleCrop())
+        .addEquivalenceGroup(mock(Transformation.class))
+        .addRegressionTest(
+            new CircleCrop(), "1442365bcc658f89310e39844ef4be58f4b16e52c283254e5a458020f56acb90")
+        .test();
   }
 
   private void assertSamePixels(Bitmap expected, Bitmap actual) {
