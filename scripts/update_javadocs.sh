@@ -43,6 +43,10 @@ GIT_COMMIT_SHA="$(git rev-parse HEAD)"
 ./gradlew clean releaseJavadocJar javadoc
 rm -rf $TEMP_DIR
 cp -r glide/build/docs/javadoc $TEMP_DIR
+
+# Add the favicon to the javadocs pages.
+find $TEMP_DIR -name '*.html' -exec sed -i '' -e 's#<head>#<head><link rel="apple-touch-icon" sizes="180x180" href="/glide/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/glide/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/glide/favicon-16x16.png"><link rel="manifest" href="/glide/manifest.json">#' {} \;
+
 git checkout gh-pages
 rm -rf "${JAVADOC_GH_PAGES_DIR}/${1}"
 cp -r $TEMP_DIR $JAVADOC_GH_PAGES_DIR/$1
