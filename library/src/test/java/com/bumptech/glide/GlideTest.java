@@ -128,7 +128,7 @@ public class GlideTest {
         new GlideBuilder()
             .setMemoryCache(memoryCache)
             .setDiskCache(diskCacheFactory)
-            .setResizeExecutor(executor)
+            .setSourceExecutor(executor)
             .setDiskCacheExecutor(executor));
     Registry registry = Glide.get(context).getRegistry();
     registerMockModelLoader(
