@@ -32,14 +32,11 @@ public final class KeyTester implements TestRule {
 
       @Override
       public void evaluate() throws Throwable {
-        try {
           isUsedAsRule = true;
           base.evaluate();
-        } finally {
           if (isUsedWithoutCallingTest) {
             fail("You used KeyTester but failed to call test()!");
           }
-        }
       }
     };
   }
