@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -41,6 +42,26 @@ public class ConcurrencyHelper {
   public <T, Y extends Future<T>> Y wait(Y future) {
     get(future);
     return future;
+  }
+
+  public void loadOnOtherThread(final Runnable runnable) {
+    final AtomicBoolean isDone = new AtomicBoolean();
+    Thread thread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        runnable.run();
+        isDone.set(true);
+      }
+    });
+    thread.start();
+    try {
+      thread.join(TIMEOUT_MS, /*nanos=*/0);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+    if (!isDone.get()) {
+      throw new IllegalStateException("Failed to finish job in available time");
+    }
   }
 
   public void loadOnMainThread(

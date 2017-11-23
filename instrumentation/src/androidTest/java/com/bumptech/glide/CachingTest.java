@@ -91,17 +91,22 @@ public class CachingTest {
     Glide.init(
         context, new GlideBuilder().setMemoryCache(new MemoryCacheAdapter()));
 
-    FutureTarget<Drawable> first =
-        GlideApp.with(context)
-            .load(raw.canonical)
-            .submit();
-    concurrency.get(first);
+    // Allow the request to be run and GCed without being cleared.
+    concurrency.loadOnOtherThread(new Runnable() {
+      @Override
+      public void run() {
+        FutureTarget<Drawable> first =
+            GlideApp.with(context)
+                .load(raw.canonical)
+                .submit();
+        concurrency.get(first);
+      }
+    });
 
-    // Allow first to be GCed and removed from active resources.
-    //noinspection UnusedAssignment
-    first = null;
+    // Wait for the weak reference to be cleared and the request to be removed from active
+    // resources.
     // De-flake by allowing multiple tries
-    for (int j = 0; j < 10; j++) {
+    for (int j = 0; j < 100; j++) {
       Runtime.getRuntime().gc();
       concurrency.pokeMainThread();
       try {
