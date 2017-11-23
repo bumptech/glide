@@ -120,8 +120,7 @@ Includes methods like:
 crossFade()
 animate()
 ```
-
-Options that control transitions from placeholders to images and/or between thumbnails and the full image have been moved into [``TransitionOptions``][13].
+Options that control cross fades and other transitions from placeholders to images and/or between thumbnails and the full image have been moved into [``TransitionOptions``][13].
 
 To apply transitions (formerly animations), use one of the transition options that matches the type of resource you're requesting:
 
@@ -139,9 +138,30 @@ Glide.with(fragment)
     .transition(withCrossFade(R.anim.fade_in, 300));
 ```
 
-#### Default transition
-
+#### Cross fades.
 Unlike Glide v3, Glide v4 does **NOT** apply a cross fade or any other transition by default to requests. Transitions must be applied manually.
+
+To apply a cross fade transition to a particular load, you can use:
+
+```java
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+
+Glide.with(fragment)
+  .load(url)
+  .transition(withCrossFade())
+  .into(imageView);
+```
+
+Or:
+
+```java
+Glide.with(fragment)
+  .load(url)
+  .transition(
+      new DrawableTransitionOptions
+        .crossFade())
+  .into(imageView);
+```
 
 ### Generated API
 
