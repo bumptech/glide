@@ -22,10 +22,16 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
-subprojects {
+subprojects { project ->
     tasks.withType(JavaCompile) {
         sourceCompatibility = 1.7
         targetCompatibility = 1.7
+
+        options.bootClasspath = "${System.getProperty('java.home')}/lib/rt.jar"
+        // gifencoder is a legacy project that has a ton of warnings that is basically never modified.
+        if ("gifencoder" != project.getName()) {
+          options.compilerArgs << "-Xlint:all" << "-Werror" << "-Xlint:-processing" << "-Xlint:-options"
+        }
     }
 
     // Avoid issues like #2452.
@@ -70,16 +76,11 @@ subprojects { project ->
             check.dependsOn('checkstyle')
         }
     }
-
-    gradle.projectsEvaluated {
-        tasks.withType(JavaCompile) {
-            options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
-        }
-    }
 }
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.1'
+    //noinspection UnnecessaryQualifiedReference
     distributionType = Wrapper.DistributionType.ALL
 }
 

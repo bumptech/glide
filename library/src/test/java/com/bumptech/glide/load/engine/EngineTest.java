@@ -439,7 +439,7 @@ public class EngineTest {
   @Test
   public void load_afterResourceIsLoadedInActiveResources_returnsFromMemoryCache() {
     when(harness.resource.isCacheable()).thenReturn(true);
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Object>() {
       @Override
       public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
         harness.getEngine().onEngineJobComplete(harness.cacheKey, harness.resource);
@@ -455,7 +455,7 @@ public class EngineTest {
   public void load_afterResourceIsLoadedAndReleased_returnsFromMemoryCache() {
     harness.cache = new LruResourceCache(100);
     when(harness.resource.isCacheable()).thenReturn(true);
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Object>() {
       @Override
       public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
         harness.getEngine().onEngineJobComplete(harness.cacheKey, harness.resource);
@@ -473,7 +473,7 @@ public class EngineTest {
     when(harness.resource.getResource()).thenReturn(mock(Resource.class));
     when(harness.resource.isCacheable()).thenReturn(true);
     harness.cache = new LruResourceCache(100);
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Object>() {
       @Override
       public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
         harness.getEngine().onEngineJobComplete(harness.cacheKey, harness.resource);

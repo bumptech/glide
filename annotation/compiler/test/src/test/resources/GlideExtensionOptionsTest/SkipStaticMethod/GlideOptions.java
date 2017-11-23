@@ -494,6 +494,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
 
   @Override
   @SafeVarargs
+  @SuppressWarnings("varargs")
   @CheckResult
   public final GlideOptions transforms(@NonNull Transformation<Bitmap>... arg0) {
     return (GlideOptions) super.transforms(arg0);

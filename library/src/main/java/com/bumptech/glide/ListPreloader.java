@@ -85,7 +85,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      * @param item The model to load.
      */
     @Nullable
-    RequestBuilder getPreloadRequestBuilder(U item);
+    RequestBuilder<?> getPreloadRequestBuilder(U item);
   }
 
   /**
@@ -206,7 +206,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
       return;
     }
     RequestBuilder<Object> preloadRequestBuilder =
-        preloadModelProvider.getPreloadRequestBuilder(item);
+        (RequestBuilder<Object>) preloadModelProvider.getPreloadRequestBuilder(item);
     if (preloadRequestBuilder == null) {
       return;
     }

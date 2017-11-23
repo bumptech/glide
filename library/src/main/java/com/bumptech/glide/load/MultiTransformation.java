@@ -15,6 +15,7 @@ public class MultiTransformation<T> implements Transformation<T> {
   private final Collection<? extends Transformation<T>> transformations;
 
   @SafeVarargs
+  @SuppressWarnings("varargs")
   public MultiTransformation(Transformation<T>... transformations) {
     if (transformations.length < 1) {
       throw new IllegalArgumentException(

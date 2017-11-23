@@ -639,6 +639,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   @Override
   @CheckResult
   @SafeVarargs
+  @SuppressWarnings("varargs")
   public final GlideRequest<TranscodeType> thumbnail(@Nullable RequestBuilder<TranscodeType>... arg0) {
     return (GlideRequest<TranscodeType>) super.thumbnail(arg0);
   }

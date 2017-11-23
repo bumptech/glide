@@ -65,13 +65,14 @@ public class FlickrSearchActivity extends AppCompatActivity
     LIST
   }
 
-  private static final Map<Page, Integer> PAGE_TO_TITLE = new HashMap<Page, Integer>() {
-    {
-      put(Page.SMALL, R.string.small);
-      put(Page.MEDIUM, R.string.medium);
-      put(Page.LIST, R.string.list);
-    }
-  };
+  private static final Map<Page, Integer> PAGE_TO_TITLE;
+  static {
+    Map<Page, Integer> temp = new HashMap<>();
+    temp.put(Page.SMALL, R.string.small);
+    temp.put(Page.MEDIUM, R.string.medium);
+    temp.put(Page.LIST, R.string.list);
+    PAGE_TO_TITLE = Collections.unmodifiableMap(temp);
+  }
 
   @Override
   public void onAttachFragment(Fragment fragment) {

@@ -623,7 +623,7 @@ public final class SingleRequest<R> implements Request,
   @Override
   public boolean isEquivalentTo(Request o) {
     if (o instanceof SingleRequest) {
-      SingleRequest that = (SingleRequest) o;
+      SingleRequest<?> that = (SingleRequest<?>) o;
       return overrideWidth == that.overrideWidth
           && overrideHeight == that.overrideHeight
           && Util.bothModelsNullEquivalentOrEquals(model, that.model)

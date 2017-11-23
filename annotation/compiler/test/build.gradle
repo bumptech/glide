@@ -16,7 +16,11 @@ dependencies {
     testImplementation "com.squareup:javapoet:${JAVAPOET_VERSION}"
     testImplementation "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
     testImplementation "com.google.code.findbugs:jsr305:${JSR_305_VERSION}"
-    testImplementation 'com.google.testing.compile:compile-testing:0.12'
+    // Using 0.10 of compile-testing is required for Android Studio to function, but not for the
+    // gradle build. Not yet clear why, but it looks like some kind of version conflict between
+    // javapoet, guava and/or truth.
+    //noinspection GradleDependency
+    testImplementation 'com.google.testing.compile:compile-testing:0.10'
     // Use a stupidly old version of the Android classes jar. This works because we just need to get
     // our generated classes to compile and our generated classes tend to use simple and stable
     // Android APIs. If that changes, we'll need to find an alternative.

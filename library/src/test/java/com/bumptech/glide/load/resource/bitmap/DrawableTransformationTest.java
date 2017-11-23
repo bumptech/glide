@@ -114,7 +114,7 @@ public class DrawableTransformationTest {
     ColorDrawable colorDrawable = new ColorDrawable(Color.RED);
     final Resource<Drawable> input = new SimpleResource<Drawable>(colorDrawable);
 
-    doAnswer(new Answer() {
+    doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
         Bitmap bitmap = (Bitmap) invocationOnMock.getArguments()[0];

@@ -277,6 +277,8 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   }
 
   private static class GlideExecutionException extends ExecutionException {
+    private static final long serialVersionUID = 1L;
+
 
     private final GlideException cause;
 

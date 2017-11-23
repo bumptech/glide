@@ -211,9 +211,12 @@ final class RequestOptionsGenerator {
             .build());
 
     if (methodToOverride.getSimpleName().toString().equals("transforms")) {
-      result.addAnnotation(
-          AnnotationSpec.builder(SafeVarargs.class)
-              .build());
+      result
+          .addAnnotation(SafeVarargs.class)
+          .addAnnotation(
+              AnnotationSpec.builder(SuppressWarnings.class)
+                  .addMember("value", "$S", "varargs")
+                  .build());
     }
 
     for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {

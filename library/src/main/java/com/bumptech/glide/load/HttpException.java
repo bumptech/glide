@@ -13,6 +13,8 @@ import java.io.IOException;
 // Public API.
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class HttpException extends IOException {
+  private static final long serialVersionUID = 1L;
+
   public static final int UNKNOWN = -1;
   private final int statusCode;
 

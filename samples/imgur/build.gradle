@@ -49,6 +49,10 @@ dependencies {
     implementation "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
     implementation "com.android.support:cardview-v7:${ANDROID_SUPPORT_VERSION}"
     implementation "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+
+    // Fixes a compilation warning related to dagger, see
+    // https://github.com/google/guava/issues/2721.
+    compileOnly "com.google.errorprone:error_prone_annotations:2.0.19"
 }
 
 task run(type: Exec, dependsOn: 'installDebug') {

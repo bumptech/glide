@@ -21,7 +21,9 @@ import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 import java.io.File;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -230,7 +232,11 @@ final class RequestBuilderGenerator {
     if (methodToOverride.isVarArgs()) {
       builder = builder
           .addModifiers(Modifier.FINAL)
-          .addAnnotation(SafeVarargs.class);
+          .addAnnotation(SafeVarargs.class)
+          .addAnnotation(
+              AnnotationSpec.builder(SuppressWarnings.class)
+                  .addMember("value", "$S", "varargs")
+                  .build());
     }
 
     return builder.build();
@@ -312,7 +318,9 @@ final class RequestBuilderGenerator {
                     return !input.type.equals(TypeName.get(Override.class))
                         // SafeVarargs can only be applied to final methods. GlideRequest is
                         // non-final to allow for mocking.
-                        && !input.type.equals(TypeName.get(SafeVarargs.class));
+                        && !input.type.equals(TypeName.get(SafeVarargs.class))
+                        // We need to combine warnings below.
+                        && !input.type.equals(TypeName.get(SuppressWarnings.class));
                   }
                 })
                 .toList()
@@ -332,16 +340,48 @@ final class RequestBuilderGenerator {
         .endControlFlow()
         .addStatement("return this");
 
+    AnnotationSpec suppressWarnings = buildSuppressWarnings(requestOptionMethod);
+    if (suppressWarnings != null) {
+      result.addAnnotation(suppressWarnings);
+    }
+    return result.build();
+  }
+
+  @Nullable
+  private AnnotationSpec buildSuppressWarnings(MethodSpec requestOptionMethod) {
+    Set<String> suppressions = new HashSet<>();
     if (requestOptionMethod.annotations.contains(
-        AnnotationSpec.builder(SafeVarargs.class).build())) {
-      result.addAnnotation(
-          AnnotationSpec.builder(SuppressWarnings.class)
-              .addMember("value", "$S", "unchecked")
-              .addMember("value", "$S", "varargs")
-              .build());
+        AnnotationSpec.builder(SuppressWarnings.class).build())) {
+      for (AnnotationSpec annotation : requestOptionMethod.annotations) {
+        if (annotation.type.equals(TypeName.get(SuppressWarnings.class))) {
+          List<CodeBlock> codeBlocks = annotation.members.get("value");
+          suppressions.addAll(FluentIterable.from(codeBlocks).transform(
+              new Function<CodeBlock, String>() {
+                @Override
+                public String apply(CodeBlock input) {
+                  return input.toString();
+                }
+              }).toSet());
+        }
+      }
     }
 
-    return result.build();
+    if (requestOptionMethod.annotations.contains(
+        AnnotationSpec.builder(SafeVarargs.class).build())) {
+      suppressions.add("unchecked");
+      suppressions.add("varargs");
+    }
+
+    if (suppressions.isEmpty()) {
+      return null;
+    }
+
+    AnnotationSpec.Builder builder = AnnotationSpec.builder(SuppressWarnings.class);
+    for (String suppression : suppressions) {
+      builder.addMember("value", "$S", suppression);
+    }
+
+    return builder.build();
   }
 
   private List<MethodSpec> generateConstructors() {

@@ -68,7 +68,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
   @Override
   public String toString() {
     return "MultiModelLoader{" + "modelLoaders=" + Arrays
-        .toString(modelLoaders.toArray(new ModelLoader[modelLoaders.size()])) + '}';
+        .toString(modelLoaders.toArray(new ModelLoader<?, ?>[modelLoaders.size()])) + '}';
   }
 
   static class MultiFetcher<Data> implements DataFetcher<Data>, DataCallback<Data> {

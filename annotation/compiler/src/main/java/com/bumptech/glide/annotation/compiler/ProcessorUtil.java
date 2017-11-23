@@ -389,7 +389,7 @@ final class ProcessorUtil {
     }
     Object value = excludedModuleAnnotationValue.getValue();
     if (value instanceof List) {
-      List values = (List) value;
+      List<?> values = (List<?>) value;
       Set<String> result = new HashSet<>(values.size());
       for (Object current : values) {
         Attribute.Class currentClass = (Attribute.Class) current;

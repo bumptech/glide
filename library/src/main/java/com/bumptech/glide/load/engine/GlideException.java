@@ -18,6 +18,8 @@ import java.util.List;
 // Public API.
 @SuppressWarnings("WeakerAccess")
 public final class GlideException extends Exception {
+  private static final long serialVersionUID = 1L;
+
   private static final StackTraceElement[] EMPTY_ELEMENTS = new StackTraceElement[0];
 
   private final List<Throwable> causes;
