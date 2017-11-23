@@ -46,6 +46,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private boolean isCacheable;
   private boolean useUnlimitedSourceGeneratorPool;
   private boolean useAnimationPool;
+  private boolean onlyRetrieveFromCache;
   private Resource<?> resource;
   private DataSource dataSource;
   private boolean hasResource;
@@ -100,11 +101,13 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
       Key key,
       boolean isCacheable,
       boolean useUnlimitedSourceGeneratorPool,
-      boolean useAnimationPool) {
+      boolean useAnimationPool,
+      boolean onlyRetrieveFromCache) {
     this.key = key;
     this.isCacheable = isCacheable;
     this.useUnlimitedSourceGeneratorPool = useUnlimitedSourceGeneratorPool;
     this.useAnimationPool = useAnimationPool;
+    this.onlyRetrieveFromCache = onlyRetrieveFromCache;
     return this;
   }
 
@@ -128,7 +131,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     }
   }
 
-  public void removeCallback(ResourceCallback cb) {
+  void removeCallback(ResourceCallback cb) {
     Util.assertMainThread();
     stateVerifier.throwIfRecycled();
     if (hasResource || hasLoadFailed) {
@@ -139,6 +142,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
         cancel();
       }
     }
+  }
+
+  boolean onlyRetrieveFromCache() {
+    return onlyRetrieveFromCache;
   }
 
   private GlideExecutor getActiveSourceExecutor() {
@@ -200,7 +207,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     // Hold on to resource for duration of request so we don't recycle it in the middle of
     // notifying if it synchronously released by one of the callbacks.
     engineResource.acquire();
-    listener.onEngineJobComplete(key, engineResource);
+    listener.onEngineJobComplete(this, key, engineResource);
 
     int size = cbs.size();
     for (int i = 0; i < size; i++) {
@@ -278,7 +285,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     }
     hasLoadFailed = true;
 
-    listener.onEngineJobComplete(key, null);
+    listener.onEngineJobComplete(this, key, null);
 
     for (ResourceCallback cb : cbs) {
       if (!isInIgnoredCallbacks(cb)) {

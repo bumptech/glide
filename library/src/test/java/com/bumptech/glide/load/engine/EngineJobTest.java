@@ -64,7 +64,8 @@ public class EngineJobTest {
 
     ShadowLooper.runUiThreadTasks();
 
-    verify(harness.listener).onEngineJobComplete(eq(harness.key), eq(harness.engineResource));
+    verify(harness.listener)
+        .onEngineJobComplete(eq(job), eq(harness.key), eq(harness.engineResource));
   }
 
   @Test
@@ -107,7 +108,8 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.onLoadFailed(new GlideException("test"));
     ShadowLooper.runUiThreadTasks();
-    verify(harness.listener).onEngineJobComplete(eq(harness.key), isNull(EngineResource.class));
+    verify(harness.listener)
+        .onEngineJobComplete(eq(job), eq(harness.key), isNull(EngineResource.class));
   }
 
   @Test
@@ -220,7 +222,8 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.onLoadFailed(new GlideException("test"));
 
-    verify(harness.listener).onEngineJobComplete(eq(harness.key), isNull(EngineResource.class));
+    verify(harness.listener)
+        .onEngineJobComplete(eq(job), eq(harness.key), isNull(EngineResource.class));
     verify(harness.listener, never()).onEngineJobCancelled(any(EngineJob.class), any(Key.class));
   }
 
@@ -460,6 +463,7 @@ public class EngineJobTest {
     final boolean isCacheable = true;
     final boolean useUnlimitedSourceGeneratorPool = false;
     final boolean useAnimationPool = false;
+    final boolean onlyRetrieveFromCache = false;
     final int numCbs = 10;
     final List<ResourceCallback> cbs = new ArrayList<>();
     final EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
@@ -482,7 +486,13 @@ public class EngineJobTest {
               animationService,
               listener,
               pool,
-              factory).init(key, isCacheable, useUnlimitedSourceGeneratorPool, useAnimationPool);
+              factory);
+      job.init(
+          key,
+          isCacheable,
+          useUnlimitedSourceGeneratorPool,
+          useAnimationPool,
+          onlyRetrieveFromCache);
       for (int i = 0; i < numCbs; i++) {
         cbs.add(mock(ResourceCallback.class));
       }
@@ -508,6 +518,7 @@ public class EngineJobTest {
     boolean isCacheable = true;
     boolean useUnlimitedSourceGeneratorPool = false;
     final boolean useAnimationPool = false;
+    final boolean onlyRetrieveFromCache = false;
     final DecodeJob<Object> decodeJob = mock(DecodeJob.class);
     final Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
     final DataSource dataSource = DataSource.DATA_DISK_CACHE;
@@ -522,8 +533,13 @@ public class EngineJobTest {
               animationService,
               listener,
               pool,
-              factory)
-              .init(key, isCacheable, useUnlimitedSourceGeneratorPool, useAnimationPool);
+              factory);
+      result.init(
+          key,
+          isCacheable,
+          useUnlimitedSourceGeneratorPool,
+          useAnimationPool,
+          onlyRetrieveFromCache);
       result.addCallback(cb);
       return result;
     }

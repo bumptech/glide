@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import static com.bumptech.glide.test.Matchers.anyDrawable;
 import static com.bumptech.glide.test.Matchers.anyTarget;
+import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
@@ -11,6 +12,8 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
@@ -25,7 +28,11 @@ import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.test.ResourceIds.raw;
 import com.bumptech.glide.test.TearDownGlide;
+import com.bumptech.glide.test.WaitModelLoader;
+import com.bumptech.glide.test.WaitModelLoader.WaitModel;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.Before;
 import org.junit.Rule;
@@ -271,6 +278,63 @@ public class CachingTest {
             anyBoolean());
   }
 
+  // Tests #2428.
+  @Test
+  public void onlyRetrieveFromCache_withPreviousRequestLoadingFromSource_doesNotBlock() {
+    final WaitModel<Integer> waitModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
+
+    GlideApp.with(context)
+        .load(waitModel)
+        .submit();
+
+    FutureTarget<Drawable> onlyFromCacheFuture = GlideApp.with(context)
+        .load(waitModel)
+        .onlyRetrieveFromCache(true)
+        .submit();
+    try {
+      onlyFromCacheFuture.get(1000, TimeUnit.MILLISECONDS);
+      throw new IllegalStateException();
+    } catch (InterruptedException | TimeoutException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      // Expected.
+    }
+    waitModel.countDown();
+  }
+
+  // Tests #2428.
+  @Test
+  public void submit_withRequestLoadingWithOnlyRetrieveFromCache_andNotInCache_doesNotFail() {
+    // Block the main thread so that we know that both requests will be queued but not started at
+    // the same time.
+    final CountDownLatch blockMainThread = new CountDownLatch(1);
+    new Handler(Looper.getMainLooper()).post(new Runnable() {
+      @Override
+      public void run() {
+         try {
+          blockMainThread.await();
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
+
+    // Queue the retrieve from cache request first.
+    GlideApp.with(context)
+        .load(ResourceIds.raw.canonical)
+        .onlyRetrieveFromCache(true)
+        .submit();
+
+    // Then queue the normal request.
+    FutureTarget<Drawable> expectedFuture =
+        GlideApp.with(context).load(ResourceIds.raw.canonical).submit();
+
+    // Run the requests.
+    blockMainThread.countDown();
+
+    // Verify that the request that didn't have retrieve from cache succeeds
+    assertThat(concurrency.get(expectedFuture)).isNotNull();
+  }
 
   private void clearMemoryCacheOnMainThread() throws InterruptedException {
     concurrency.runOnMainThread(new Runnable() {

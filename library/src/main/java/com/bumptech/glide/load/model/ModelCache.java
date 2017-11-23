@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.LruCache;
@@ -29,7 +30,7 @@ public class ModelCache<A, B> {
   public ModelCache(long size) {
     cache = new LruCache<ModelKey<A>, B>(size) {
       @Override
-      protected void onItemEvicted(ModelKey<A> key, B item) {
+      protected void onItemEvicted(@NonNull ModelKey<A> key, @Nullable B item) {
         key.release();
       }
     };

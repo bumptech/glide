@@ -1,5 +1,6 @@
 package com.bumptech.glide.util;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -69,7 +70,7 @@ public class LruCache<T, Y> {
    * @param key  The key of the evicted item.
    * @param item The evicted item.
    */
-  protected void onItemEvicted(T key, Y item) {
+  protected void onItemEvicted(@NonNull T key, @Nullable Y item) {
     // optional override
   }
 
@@ -111,31 +112,34 @@ public class LruCache<T, Y> {
    * Adds the given item to the cache with the given key and returns any previous entry for the
    * given key that may have already been in the cache.
    *
-   * <p> If the size of the item is larger than the total cache size, the item will not be added to
+   * <p>If the size of the item is larger than the total cache size, the item will not be added to
    * the cache and instead {@link #onItemEvicted(Object, Object)} will be called synchronously with
-   * the given key and item. </p>
+   * the given key and item.
    *
    * @param key  The key to add the item at.
    * @param item The item to add.
    */
-  public synchronized Y put(T key, Y item) {
+  public synchronized Y put(T key, @Nullable Y item) {
     final int itemSize = getSize(item);
     if (itemSize >= maxSize) {
       onItemEvicted(key, item);
       return null;
     }
 
-    final Y result = cache.put(key, item);
+    @Nullable final Y old = cache.put(key, item);
     if (item != null) {
       currentSize += getSize(item);
     }
-    if (result != null) {
-      // TODO: should we call onItemEvicted here?
-      currentSize -= getSize(result);
+    if (old != null) {
+      currentSize -= getSize(old);
+
+      if (!old.equals(item)) {
+        onItemEvicted(key, old);
+      }
     }
     evict();
 
-    return result;
+    return old;
   }
 
   /**

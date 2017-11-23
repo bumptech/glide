@@ -21,9 +21,15 @@ class EngineKey implements Key {
   private final Options options;
   private int hashCode;
 
-  EngineKey(Object model, Key signature, int width, int height,
-      Map<Class<?>, Transformation<?>> transformations, Class<?> resourceClass,
-      Class<?> transcodeClass, Options options) {
+  EngineKey(
+      Object model,
+      Key signature,
+      int width,
+      int height,
+      Map<Class<?>, Transformation<?>> transformations,
+      Class<?> resourceClass,
+      Class<?> transcodeClass,
+      Options options) {
     this.model = Preconditions.checkNotNull(model);
     this.signature = Preconditions.checkNotNull(signature, "Signature must not be null");
     this.width = width;

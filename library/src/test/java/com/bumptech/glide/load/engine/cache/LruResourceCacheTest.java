@@ -1,18 +1,22 @@
 package com.bumptech.glide.load.engine.cache;
 
 import static com.bumptech.glide.load.engine.cache.MemoryCache.ResourceRemovedListener;
+import static com.bumptech.glide.tests.Util.anyResource;
 import static com.bumptech.glide.tests.Util.mockResource;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
 import android.content.ComponentCallbacks2;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.LruCache;
@@ -24,19 +28,54 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class LruResourceCacheTest {
-  private static class TrimClearMemoryCacheHarness {
-    final LruResourceCache resourceCache = new LruResourceCache(100);
-    final Resource<?> first = mockResource();
-    final Resource<?> second = mockResource();
-    final ResourceRemovedListener listener = mock(ResourceRemovedListener.class);
 
-    public TrimClearMemoryCacheHarness() {
-      when(first.getSize()).thenReturn(50);
-      when(second.getSize()).thenReturn(50);
-      resourceCache.put(new MockKey(), first);
-      resourceCache.put(new MockKey(), second);
-      resourceCache.setResourceRemovedListener(listener);
-    }
+  @Test
+  public void put_withExistingItem_updatesSizeCorrectly() {
+    PutWithExistingEntryHarness harness = new PutWithExistingEntryHarness();
+    harness.cache.put(harness.key, harness.first);
+    harness.cache.put(harness.key, harness.second);
+
+    assertThat(harness.cache.getCurrentSize()).isEqualTo(harness.second.getSize());
+  }
+
+  @Test
+  public void put_withExistingItem_evictsExistingItem() {
+    PutWithExistingEntryHarness harness = new PutWithExistingEntryHarness();
+    harness.cache.put(harness.key, harness.first);
+    harness.cache.put(harness.key, harness.second);
+
+    verify(harness.listener).onResourceRemoved(harness.first);
+  }
+
+  @Test
+  public void get_afterPutWithExistingItem_returnsNewItem() {
+    PutWithExistingEntryHarness harness = new PutWithExistingEntryHarness();
+    harness.cache.put(harness.key, harness.first);
+    harness.cache.put(harness.key, harness.second);
+
+    assertThat(harness.cache.get(harness.key)).isEqualTo(harness.second);
+  }
+
+  @Test
+  public void onItemEvicted_withNullValue_doesNotNotifyListener() {
+    PutWithExistingEntryHarness harness = new PutWithExistingEntryHarness();
+    harness.cache.onItemEvicted(new MockKey(), null);
+    verify(harness.listener, never()).onResourceRemoved(anyResource());
+  }
+
+  @Test
+  public void clearMemory_afterPutWithExistingItem_evictsOnlyNewItem() {
+    PutWithExistingEntryHarness harness = new PutWithExistingEntryHarness();
+    harness.cache.put(harness.key, harness.first);
+    harness.cache.put(harness.key, harness.second);
+
+    verify(harness.listener).onResourceRemoved(harness.first);
+    verify(harness.listener, never()).onResourceRemoved(harness.second);
+
+    harness.cache.clearMemory();
+
+    verify(harness.listener, times(1)).onResourceRemoved(harness.first);
+    verify(harness.listener).onResourceRemoved(harness.second);
   }
 
   @Test
@@ -119,7 +158,7 @@ public class LruResourceCacheTest {
     cache.put(thirdKey, third);
     cache.setResourceRemovedListener(new ResourceRemovedListener() {
       @Override
-      public void onResourceRemoved(Resource<?> removed) {
+      public void onResourceRemoved(@NonNull Resource<?> removed) {
         if (removed == first) {
           cache.put(firstKey, first);
         }
@@ -147,6 +186,35 @@ public class LruResourceCacheTest {
     @Override
     public void updateDiskCacheKey(MessageDigest messageDigest) {
       messageDigest.update(toString().getBytes(CHARSET));
+    }
+  }
+
+  private static class PutWithExistingEntryHarness {
+    final LruResourceCache cache = new LruResourceCache(100);
+    final Resource<?> first = mockResource();
+    final Resource<?> second = mockResource();
+    final ResourceRemovedListener listener = mock(ResourceRemovedListener.class);
+    final Key key = new MockKey();
+
+    PutWithExistingEntryHarness() {
+      when(first.getSize()).thenReturn(50);
+      when(second.getSize()).thenReturn(50);
+      cache.setResourceRemovedListener(listener);
+    }
+  }
+
+  private static class TrimClearMemoryCacheHarness {
+    final LruResourceCache resourceCache = new LruResourceCache(100);
+    final Resource<?> first = mockResource();
+    final Resource<?> second = mockResource();
+    final ResourceRemovedListener listener = mock(ResourceRemovedListener.class);
+
+    TrimClearMemoryCacheHarness() {
+      when(first.getSize()).thenReturn(50);
+      when(second.getSize()).thenReturn(50);
+      resourceCache.put(new MockKey(), first);
+      resourceCache.put(new MockKey(), second);
+      resourceCache.setResourceRemovedListener(listener);
     }
   }
 }

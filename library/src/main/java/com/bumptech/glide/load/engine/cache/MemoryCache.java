@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.cache;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
@@ -12,7 +13,7 @@ public interface MemoryCache {
    * An interface that will be called whenever a bitmap is removed from the cache.
    */
   interface ResourceRemovedListener {
-    void onResourceRemoved(Resource<?> removed);
+    void onResourceRemoved(@NonNull Resource<?> removed);
   }
 
   /**

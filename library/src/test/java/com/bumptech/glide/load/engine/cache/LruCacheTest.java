@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -13,6 +14,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.util.LruCache;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,14 +63,15 @@ public class LruCacheTest {
   @Test
   public void testReplacingNonNullItemWithNullItemDecreasesSize() {
     String key = getKey();
-    cache.put(key, new Object());
+    Object initialValue = new Object();
+    cache.put(key, initialValue);
     cache.put(key, null);
 
     for (int i = 0; i < SIZE; i++) {
       cache.put(getKey(), new Object());
     }
 
-    verify(listener, never()).onItemRemoved(anyObject());
+    verify(listener).onItemRemoved(initialValue);
   }
 
   @Test
@@ -86,14 +90,16 @@ public class LruCacheTest {
   @Test
   public void testReplacingNonNullItemWithNonNullItemUpdatesSize() {
     String key = getKey();
-    cache.put(key, new Object());
+    Object initialValue = new Object();
+    cache.put(key, initialValue);
     cache.put(key, new Object());
 
-    for (int i = 0; i < SIZE; i++) {
+    for (int i = 0; i < SIZE - 1; i++) {
       cache.put(getKey(), new Object());
     }
 
-    verify(listener).onItemRemoved(anyObject());
+    verify(listener).onItemRemoved(initialValue);
+    verify(listener, never()).onItemRemoved(not(eq(initialValue)));
   }
 
   @Test
@@ -192,6 +198,34 @@ public class LruCacheTest {
   }
 
   @Test
+  public void put_withSameValueTwice_doesNotEvictItems() {
+    String key = getKey();
+    Object value = new Object();
+    cache.put(key, value);
+    cache.put(key, value);
+
+    verify(listener, never()).onItemRemoved(anyObject());
+  }
+
+  @Test
+  public void put_withExistingNullValue_doesNotNotifyListener() {
+    String key = getKey();
+    cache.put(key, /*value=*/ null);
+    cache.put(key, new Object());
+
+    verify(listener, never()).onItemRemoved(anyObject());
+  }
+
+  @Test
+  public void put_withNullValue_withSizeGreaterThanMaximum_notifiesListener() {
+    String key = getKey();
+    when(listener.getSize(null)).thenReturn((int) (cache.getMaxSize() * 2));
+    cache.put(key, null);
+
+    verify(listener).onItemRemoved(anyObject());
+  }
+
+  @Test
   public void testCanIncreaseSizeDynamically() {
     int sizeMultiplier = 2;
     cache.setSizeMultiplier(sizeMultiplier);
@@ -259,7 +293,7 @@ public class LruCacheTest {
     Object value = new Object();
     cache.put(key, value);
     for (int i = 0; i < SIZE - 1; i++) {
-      cache.put(key, value);
+      cache.put(getKey(), value);
     }
     cache.remove(key);
     cache.put(key, value);
@@ -340,7 +374,7 @@ public class LruCacheTest {
     }
 
     @Override
-    protected void onItemEvicted(String key, Object item) {
+    protected void onItemEvicted(@NonNull String key, @Nullable Object item) {
       listener.onItemRemoved(item);
     }
 
