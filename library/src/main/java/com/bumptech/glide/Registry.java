@@ -438,8 +438,10 @@ public class Registry {
    * @param dataClass  the data class (e.g. {@link java.io.InputStream},
    * {@link java.io.FileDescriptor}).
    */
-  public <Model, Data> Registry replace(Class<Model> modelClass, Class<Data> dataClass,
-      ModelLoaderFactory<Model, Data> factory) {
+  public <Model, Data> Registry replace(
+      Class<Model> modelClass,
+      Class<Data> dataClass,
+      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
     modelLoaderRegistry.replace(modelClass, dataClass, factory);
     return this;
   }

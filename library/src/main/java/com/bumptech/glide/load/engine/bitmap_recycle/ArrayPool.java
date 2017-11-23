@@ -16,7 +16,7 @@ public interface ArrayPool {
    * <p>Arrays may be ignored, for example if the array is larger than the maximum size of the
    * pool.
    *
-   * @deprecated Use {@link #put(Object)Class}
+   * @deprecated Use {@link #put(Object)}
    */
   @Deprecated
   <T> void put(T array, Class<T> arrayClass);

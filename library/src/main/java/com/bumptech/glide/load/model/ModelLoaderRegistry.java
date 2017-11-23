@@ -27,14 +27,18 @@ public class ModelLoaderRegistry {
     this.multiModelLoaderFactory = multiModelLoaderFactory;
   }
 
-  public synchronized <Model, Data> void append(Class<Model> modelClass, Class<Data> dataClass,
-      ModelLoaderFactory<Model, Data> factory) {
+  public synchronized <Model, Data> void append(
+      Class<Model> modelClass,
+      Class<Data> dataClass,
+      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
     multiModelLoaderFactory.append(modelClass, dataClass, factory);
     cache.clear();
   }
 
-  public synchronized <Model, Data> void prepend(Class<Model> modelClass, Class<Data> dataClass,
-      ModelLoaderFactory<Model, Data> factory) {
+  public synchronized <Model, Data> void prepend(
+      Class<Model> modelClass,
+      Class<Data> dataClass,
+      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
     multiModelLoaderFactory.prepend(modelClass, dataClass, factory);
     cache.clear();
   }
@@ -44,14 +48,17 @@ public class ModelLoaderRegistry {
     cache.clear();
   }
 
-  public synchronized <Model, Data> void replace(Class<Model> modelClass, Class<Data> dataClass,
-      ModelLoaderFactory<Model, Data> factory) {
+  public synchronized <Model, Data> void replace(
+      Class<Model> modelClass,
+      Class<Data> dataClass,
+      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
     tearDown(multiModelLoaderFactory.replace(modelClass, dataClass, factory));
     cache.clear();
   }
 
-  private <Model, Data> void tearDown(List<ModelLoaderFactory<Model, Data>> factories) {
-    for (ModelLoaderFactory<?, ?> factory : factories) {
+  private <Model, Data> void tearDown(
+      List<ModelLoaderFactory<? extends Model, ? extends Data>> factories) {
+    for (ModelLoaderFactory<? extends Model, ? extends Data> factory : factories) {
       factory.teardown();
     }
   }

@@ -28,15 +28,38 @@ subprojects { project ->
         targetCompatibility = 1.7
 
         options.bootClasspath = "${System.getProperty('java.home')}/lib/rt.jar"
-        // gifencoder is a legacy project that has a ton of warnings that is basically never modified.
+        // gifencoder is a legacy project that has a ton of warnings and is basically never
+        // modified, so we're not going to worry about cleaning it up.
         if ("gifencoder" != project.getName()) {
-          options.compilerArgs << "-Xlint:all" << "-Werror" << "-Xlint:-processing" << "-Xlint:-options"
+          options.compilerArgs \
+                << "-Xlint:all" << "-Werror" \
+                /*
+                 * Java expects every annotation to have a processor, but we use
+                 * javax.annotation.Nullable, which doesn't have one.
+                 */ \
+                << "-Xlint:-processing" \
+                /*
+                 * See https://github.com/google/dagger/issues/945
+                 * and https://bugs.openjdk.java.net/browse/JDK-8190452
+                 */ \
+                << "-Xlint:-classfile"
         }
     }
 
     // Avoid issues like #2452.
     tasks.withType(Jar) {
         duplicatesStrategy = DuplicatesStrategy.FAIL
+    }
+
+    project.afterEvaluate {
+        if (project.hasProperty("android")) {
+            android {
+                lintOptions {
+                    warningsAsErrors true
+                    quiet true
+                }
+            }
+        }
     }
 }
 

@@ -38,32 +38,43 @@ public class MultiModelLoaderFactory {
     this.factory = factory;
   }
 
-  synchronized <Model, Data> void append(Class<Model> modelClass, Class<Data> dataClass,
-      ModelLoaderFactory<Model, Data> factory) {
-    add(modelClass, dataClass, factory, true /*append*/);
+  synchronized <Model, Data> void append(
+      Class<Model> modelClass,
+      Class<Data> dataClass,
+      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
+    add(modelClass, dataClass, factory, /*append=*/ true);
   }
 
-  synchronized <Model, Data> void prepend(Class<Model> modelClass, Class<Data> dataClass,
-      ModelLoaderFactory<Model, Data> factory) {
-    add(modelClass, dataClass, factory, false /*append*/);
+  synchronized <Model, Data> void prepend(
+      Class<Model> modelClass,
+      Class<Data> dataClass,
+      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
+    add(modelClass, dataClass, factory, /*append=*/ false);
   }
 
-  private <Model, Data> void add(Class<Model> modelClass, Class<Data> dataClass,
-      ModelLoaderFactory<Model, Data> factory, boolean append) {
+  private <Model, Data> void add(
+      Class<Model> modelClass,
+      Class<Data> dataClass,
+      ModelLoaderFactory<? extends Model, ? extends Data> factory,
+      boolean append) {
     Entry<Model, Data> entry = new Entry<>(modelClass, dataClass, factory);
     entries.add(append ? entries.size() : 0, entry);
   }
 
-  synchronized <Model, Data> List<ModelLoaderFactory<Model, Data>> replace(Class<Model> modelClass,
-      Class<Data> dataClass, ModelLoaderFactory<Model, Data> factory) {
-    List<ModelLoaderFactory<Model, Data>> removed = remove(modelClass, dataClass);
+  synchronized <Model, Data> List<ModelLoaderFactory<? extends Model, ? extends Data>> replace(
+      Class<Model> modelClass,
+      Class<Data> dataClass,
+      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
+    List<ModelLoaderFactory<? extends Model, ? extends Data>> removed =
+        remove(modelClass, dataClass);
     append(modelClass, dataClass, factory);
     return removed;
   }
 
-  synchronized <Model, Data> List<ModelLoaderFactory<Model, Data>> remove(Class<Model> modelClass,
+  synchronized <Model, Data> List<ModelLoaderFactory<? extends Model, ? extends Data>> remove(
+      Class<Model> modelClass,
       Class<Data> dataClass) {
-    List<ModelLoaderFactory<Model, Data>> factories = new ArrayList<>();
+    List<ModelLoaderFactory<? extends Model, ? extends Data>> factories = new ArrayList<>();
     for (Iterator<Entry<?, ?>> iterator = entries.iterator(); iterator.hasNext(); ) {
       Entry<?, ?> entry = iterator.next();
       if (entry.handles(modelClass, dataClass)) {
@@ -168,10 +179,12 @@ public class MultiModelLoaderFactory {
   private static class Entry<Model, Data> {
     private final Class<Model> modelClass;
     @Synthetic final Class<Data> dataClass;
-    @Synthetic final ModelLoaderFactory<Model, Data> factory;
+    @Synthetic final ModelLoaderFactory<? extends Model, ? extends Data> factory;
 
-    public Entry(Class<Model> modelClass, Class<Data> dataClass,
-        ModelLoaderFactory<Model, Data> factory) {
+    public Entry(
+        Class<Model> modelClass,
+        Class<Data> dataClass,
+        ModelLoaderFactory<? extends Model, ? extends Data> factory) {
       this.modelClass = modelClass;
       this.dataClass = dataClass;
       this.factory = factory;

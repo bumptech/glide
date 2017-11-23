@@ -105,7 +105,7 @@ public class MultiModelLoaderFactoryTest {
     multiFactory.append(String.class, String.class, firstOtherFactory);
     multiFactory.append(String.class, String.class, secondOtherFactory);
 
-    List<ModelLoaderFactory<String, String>> removed =
+    List<ModelLoaderFactory<? extends String, ? extends String>> removed =
         multiFactory.replace(String.class, String.class, firstFactory);
     assertThat(removed).containsExactly(firstOtherFactory, secondOtherFactory);
   }
@@ -127,7 +127,7 @@ public class MultiModelLoaderFactoryTest {
     multiFactory.append(String.class, String.class, other);
     multiFactory.append(String.class, String.class, firstFactory);
 
-    List<ModelLoaderFactory<String, String>> removed =
+    List<ModelLoaderFactory<? extends String, ? extends String>> removed =
         multiFactory.remove(String.class, String.class);
     assertThat(removed).containsExactly(firstFactory, other);
   }
