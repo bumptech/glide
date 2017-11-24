@@ -52,7 +52,7 @@ public final class ExternalPreferredCacheDiskCacheFactory extends DiskLruCacheFa
         File cacheDirectory = context.getExternalCacheDir();
 
         // Shared storage is not available.
-        if (cacheDirectory == null) {
+        if ((cacheDirectory == null) || (!cacheDirectory.canWrite())){
           return internalCacheDirectory;
         }
         if (diskCacheName != null) {
