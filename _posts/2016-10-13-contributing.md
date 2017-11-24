@@ -25,6 +25,12 @@ To make contributions to Glide's source:
    cd glide
    ```
 
+3. Open Glide in Android Studio (directions are for Android Studio 3.0+)
+   1. Open Android Studio
+   2. Click on 'Import project'
+   3. Browse to the directory where you cloned Glide earlier.
+   4. Click on 'settings.gradle'
+   5. Click on 'Open'
 3. Make your contributions.
 4. Commit your changes:
 
