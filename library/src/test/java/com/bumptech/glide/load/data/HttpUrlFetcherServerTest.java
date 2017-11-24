@@ -72,6 +72,7 @@ public class HttpUrlFetcherServerTest {
     fetcher.loadData(Priority.HIGH, callback);
     verify(callback).onDataReady(streamCaptor.capture());
     TestUtil.assertStreamOf(expected, streamCaptor.getValue());
+    assertThat(mockWebServer.takeRequest().getMethod()).isEqualTo("GET");
   }
 
   @Test
@@ -83,6 +84,8 @@ public class HttpUrlFetcherServerTest {
     getFetcher().loadData(Priority.LOW, callback);
     verify(callback).onDataReady(streamCaptor.capture());
     TestUtil.assertStreamOf(expected, streamCaptor.getValue());
+    assertThat(mockWebServer.takeRequest().getMethod()).isEqualTo("GET");
+    assertThat(mockWebServer.takeRequest().getMethod()).isEqualTo("GET");
   }
 
   @Test
@@ -94,6 +97,8 @@ public class HttpUrlFetcherServerTest {
     getFetcher().loadData(Priority.LOW, callback);
     verify(callback).onDataReady(streamCaptor.capture());
     TestUtil.assertStreamOf(expected, streamCaptor.getValue());
+    assertThat(mockWebServer.takeRequest().getMethod()).isEqualTo("GET");
+    assertThat(mockWebServer.takeRequest().getMethod()).isEqualTo("GET");
   }
 
   @Test
@@ -106,9 +111,11 @@ public class HttpUrlFetcherServerTest {
     verify(callback).onDataReady(streamCaptor.capture());
     TestUtil.assertStreamOf(expected, streamCaptor.getValue());
 
-    mockWebServer.takeRequest();
+    RecordedRequest first = mockWebServer.takeRequest();
+    assertThat(first.getMethod()).isEqualTo("GET");
     RecordedRequest second = mockWebServer.takeRequest();
     assertThat(second.getPath()).endsWith("/redirect");
+    assertThat(second.getMethod()).isEqualTo("GET");
   }
 
   @Test
@@ -126,9 +133,13 @@ public class HttpUrlFetcherServerTest {
     verify(callback).onDataReady(streamCaptor.capture());
     TestUtil.assertStreamOf(expected, streamCaptor.getValue());
 
-    assertThat(mockWebServer.takeRequest().getPath()).contains(DEFAULT_PATH);
+    RecordedRequest request = mockWebServer.takeRequest();
+    assertThat(request.getPath()).contains(DEFAULT_PATH);
+    assertThat(request.getMethod()).isEqualTo("GET");
     for (int i = 0; i < numRedirects; i++) {
-      assertThat(mockWebServer.takeRequest().getPath()).contains(redirectBase + i);
+      RecordedRequest current = mockWebServer.takeRequest();
+      assertThat(current.getPath()).contains(redirectBase + i);
+      assertThat(current.getMethod()).isEqualTo("GET");
     }
   }
 
