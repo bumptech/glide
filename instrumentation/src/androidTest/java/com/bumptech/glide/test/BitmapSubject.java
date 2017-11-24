@@ -94,4 +94,10 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
       fail("is the same as " + getDisplayString(other));
     }
   }
+
+  public void isNotSameAs(Bitmap other) {
+    if (actual().sameAs(other)) {
+      fail("is not the same as " + getDisplayString(other));
+    }
+  }
 }
