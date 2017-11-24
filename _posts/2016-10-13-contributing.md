@@ -13,14 +13,34 @@ order: 2
 
 Contributions to Glide's source are welcome!
 
-#### Obtaining and uploading changes.
+#### Contribution workflow.
 
 To make contributions to Glide's source:
 
-1. Clone [Glide repo][1] from GitHub.
-2. Create a new branch to make your changes: ``git checkout -b <branch_name>``.
+1. [Fork][Github Fork] the [Glide repo][1] on GitHub.
+2. [Clone][Github Clone] the [Glide repo][1] from GitHub on to your computer:
+
+   ```sh
+   git clone https://github.com/<your_username>/glide.git
+   cd glide
+   ```
+
 3. Make your contributions.
-4. Send a [pull request][2] on GitHub.
+4. Commit your changes:
+
+   ```sh
+   git add . 
+   git commit -m "Describe your change here."
+   ```
+
+4. Push your changes to your fork of Glide:
+
+   ```sh
+   git push origin master
+   ```
+  
+5. Open your fork of Glide on GitHub (`https://github.com/<your_username>/glide`)
+6. Open a [pull request][2] from your fork to the main Glide repo on GitHub.
 
 
 #### Building the project.
@@ -34,13 +54,30 @@ To build the project, you typically need to run a single gradle command from the
 
 ##### Tests
 
-All of Glide's tests, including unit tests and code analysis, are run when you build the project.
+Glide has two types of tests, unit tests that run on your local machine, and instrumentation tests that run on an emulator or device.
 
-You can run just the tests using: ``./gradlew test``.
+###### Unit tests
+Glide's unit tests are run as part of Glide's build, so you can just use:
+
+ ``./gradlew build``
+
+For a faster development cycle, you can also just run the unit tests for the main library with:
+
+``./gradlew :library:testDebugUnitTest``
+
+###### Instrumentation tests.
+
+To run Glide's instrumentation tests, you need to either plug in a real device, or add an emulator using Android Studio. It's now quite easy to add an emulator in Android Studio and x86 emulators are quite fast to boot and run. As a result, I'd generally recommend running Glide's instrumentation tests on an emulator.
+
+To run Glide's instrumentation tests:
+1. [Setup an emulator in Android Studio][Android Studio emulator] (I usually use x86 and API 26)
+2. Run:
+
+    ``./gradlew :instrumentation:connectedDebugAndroidTest``
 
 ##### Sample projects
 
-Glide's test are not completely comprehensive and do not effectively test for performance regressions. To verify your changes work and do not negatively affect performance (or improve performance!), it's also a good idea to try running one or more of Glide's sample projects.
+Glide's tests are not completely comprehensive. To verify your changes work and do not negatively affect performance, it's also a good idea to try running one or more of Glide's sample projects.
 
 Glide's sample projects are located in samples/. Sample projects can be built and installed onto a device or emulator using gradle:
 
@@ -81,10 +118,36 @@ When in doubt, send us a single pull request and we will work with you.
 
 To make contributions to this documentation site:
 
-1. Clone the [Glide repo][1].
-2. Checkout the gh-pages branch: ``git checkout -t bump/gh-pages``.
+1. [Fork][Github Fork] the [Glide repo][1] on GitHub.
+2. [Clone][Github Clone] the [Glide repo][1] from GitHub on to your computer:
+
+   ```sh
+   git clone https://github.com/<your_username>/glide.git
+   cd glide
+   ```
+
+2. Checkout the gh-pages branch: 
+
+   ```sh
+   git checkout -t origin/gh-pages
+   ```
+
 3. Make your contributions.
-4. Send a [pull request][2] on GitHub.
+4. Commit your changes:
+
+   ```sh
+   git add . 
+   git commit -m "Describe your change here."
+   ```
+
+4. Push your changes to your fork of Glide:
+
+   ```sh
+   git push origin gh-pages 
+   ```
+  
+5. Open your fork of Glide on GitHub (`https://github.com/<your_username>/glide`)
+6. Open a [pull request][2] from your fork to the main Glide repo on GitHub with the ``gh-pages`` branch.
 
 #### Modifying existing pages
 
@@ -123,3 +186,6 @@ Finally you can view a version of the site with your local changes: ``http://127
 [2]: https://help.github.com/articles/creating-a-pull-request/
 [3]: https://google.github.io/styleguide/javaguide.html
 [4]: https://raw.githubusercontent.com/google/styleguide/gh-pages/intellij-java-google-style.xml
+[Github Clone]: https://help.github.com/articles/cloning-a-repository/
+[Github Fork]: https://help.github.com/articles/fork-a-repo/
+[Android Studio Emulator]: https://developer.android.com/studio/run/managing-avds.html#createavd
