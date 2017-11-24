@@ -200,7 +200,7 @@ This is not an official Google product.
 
 [1]: https://github.com/bumptech/glide/releases
 [2]: https://github.com/bumptech/glide/wiki
-[3]: http://bumptech.github.io/glide/ref/javadocs.html
+[3]: https://bumptech.github.io/glide/ref/javadocs.html
 [4]: https://www.jetbrains.com/idea/download/
 [5]: https://github.com/bumptech/glide/blob/master/CONTRIBUTING.md
 [6]: https://groups.google.com/forum/#!forum/glidelibrary
@@ -217,6 +217,6 @@ This is not an official Google product.
 [17]: https://github.com/bumptech/glide/wiki/Snapshots
 [18]: https://github.com/bumptech/glide/issues?q=is%3Aissue+CircleImageView+OR+CircularImageView+OR+RoundedImageView
 [19]: https://github.com/wasabeef/glide-transformations
-[20]: http://bumptech.github.io/glide/
-[21]: http://bumptech.github.io/glide/doc/generatedapi.html
+[20]: https://bumptech.github.io/glide/
+[21]: https://bumptech.github.io/glide/doc/generatedapi.html
 [22]: https://muyangmin.github.io/glide-docs-cn/
