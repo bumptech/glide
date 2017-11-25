@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 public class NonBitmapDrawableResourcesTest {
@@ -41,6 +42,7 @@ public class NonBitmapDrawableResourcesTest {
 
   @Before
   public void setUp() {
+    MockitoAnnotations.initMocks(this);
     context = InstrumentationRegistry.getTargetContext();
   }
 

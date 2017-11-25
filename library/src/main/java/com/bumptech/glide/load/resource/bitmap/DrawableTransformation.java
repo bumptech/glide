@@ -63,15 +63,15 @@ public class DrawableTransformation implements Transformation<Drawable> {
       transformedBitmapResource.recycle();
       return resource;
     } else {
-      return newDrawableResource(context, transformedBitmapResource.get());
+      return newDrawableResource(context, transformedBitmapResource);
     }
   }
 
   @SuppressWarnings("unchecked")
   private Resource<Drawable> newDrawableResource(
-      Context context, Bitmap transformed) {
+      Context context, Resource<Bitmap> transformed) {
     Resource<? extends Drawable> result =
-        LazyBitmapDrawableResource.obtain(context, transformed);
+        LazyBitmapDrawableResource.obtain(context.getResources(), transformed);
     return (Resource<Drawable>) result;
   }
 

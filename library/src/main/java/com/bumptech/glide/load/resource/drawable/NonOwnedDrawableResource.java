@@ -10,7 +10,7 @@ import com.bumptech.glide.load.engine.Resource;
 final class NonOwnedDrawableResource extends DrawableResource<Drawable> {
 
   @SuppressWarnings("unchecked")
-  public static Resource<Drawable> newInstance(Drawable drawable) {
+  static Resource<Drawable> newInstance(Drawable drawable) {
     return new NonOwnedDrawableResource(drawable);
   }
 

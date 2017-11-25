@@ -355,17 +355,17 @@ public class Glide implements ComponentCallbacks2 {
             Registry.BUCKET_BITMAP_DRAWABLE,
             ByteBuffer.class,
             BitmapDrawable.class,
-            new BitmapDrawableDecoder<>(resources, bitmapPool, byteBufferBitmapDecoder))
+            new BitmapDrawableDecoder<>(resources, byteBufferBitmapDecoder))
         .append(
             Registry.BUCKET_BITMAP_DRAWABLE,
             InputStream.class,
             BitmapDrawable.class,
-            new BitmapDrawableDecoder<>(resources, bitmapPool, streamBitmapDecoder))
+            new BitmapDrawableDecoder<>(resources, streamBitmapDecoder))
         .append(
             Registry.BUCKET_BITMAP_DRAWABLE,
             ParcelFileDescriptor.class,
             BitmapDrawable.class,
-            new BitmapDrawableDecoder<>(resources, bitmapPool, videoBitmapDecoder))
+            new BitmapDrawableDecoder<>(resources, videoBitmapDecoder))
         .append(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, bitmapEncoder))
         /* GIFs */
         .append(
@@ -440,7 +440,7 @@ public class Glide implements ComponentCallbacks2 {
         .register(
             Bitmap.class,
             BitmapDrawable.class,
-            new BitmapDrawableTranscoder(resources, bitmapPool))
+            new BitmapDrawableTranscoder(resources))
         .register(Bitmap.class, byte[].class, new BitmapBytesTranscoder())
         .register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
 

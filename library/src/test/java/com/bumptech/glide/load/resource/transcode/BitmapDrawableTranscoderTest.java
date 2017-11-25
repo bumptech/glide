@@ -2,14 +2,12 @@ package com.bumptech.glide.load.resource.transcode;
 
 import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,8 +22,7 @@ public class BitmapDrawableTranscoderTest {
 
   @Before
   public void setUp() {
-    transcoder = new BitmapDrawableTranscoder(RuntimeEnvironment.application.getResources(),
-        mock(BitmapPool.class));
+    transcoder = new BitmapDrawableTranscoder(RuntimeEnvironment.application.getResources());
   }
 
   @Test
