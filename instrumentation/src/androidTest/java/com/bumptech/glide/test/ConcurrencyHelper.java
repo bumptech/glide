@@ -21,7 +21,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Helper for running sections of code on the main thread in emulator tests.
@@ -249,14 +248,12 @@ public class ConcurrencyHelper {
   }
 
   private <T> void callOnMainThread(final Callable<T> callable) {
-    final AtomicReference<T> reference = new AtomicReference<>();
     final CountDownLatch latch = new CountDownLatch(1);
     handler.post(new Runnable() {
       @Override
       public void run() {
         try {
-          T result = callable.call();
-          reference.set(result);
+          callable.call();
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
@@ -264,7 +261,6 @@ public class ConcurrencyHelper {
       }
     });
     waitOnLatch(latch);
-    reference.get();
   }
 
   private static void waitOnLatch(CountDownLatch latch) {

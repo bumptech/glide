@@ -98,6 +98,8 @@ import org.robolectric.shadows.ShadowBitmap;
     GlideTest.MutableShadowBitmap.class })
 @SuppressWarnings("unchecked")
 public class GlideTest {
+  // Fixes method overload confusion.
+  private static final Object NULL = null;
 
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
@@ -276,6 +278,7 @@ public class GlideTest {
     assertNotNull(imageView.getDrawable());
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testUrlDefaultLoader() throws MalformedURLException {
     URL url = new URL("http://www.google.com");
@@ -573,24 +576,24 @@ public class GlideTest {
 
   @Test
   public void testNullModelInGenericImageLoadDoesNotThrow() {
-    requestManager.load(null).into(target);
+    requestManager.load(NULL).into(target);
   }
 
   @Test
   public void testNullModelInGenericVideoLoadDoesNotThrow() {
-    requestManager.load(null).into(target);
+    requestManager.load(NULL).into(target);
   }
 
   @Test
   public void testNullModelInGenericLoadDoesNotThrow() {
-    requestManager.load(null).into(target);
+    requestManager.load(NULL).into(target);
   }
 
   @Test
   public void testNullModelDoesNotThrow() {
     Drawable drawable = new ColorDrawable(Color.RED);
     requestManager
-        .load(null)
+        .load(NULL)
         .apply(errorOf(drawable))
         .into(target);
 
@@ -603,7 +606,7 @@ public class GlideTest {
     Drawable error = new ColorDrawable(Color.RED);
 
     requestManager
-        .load(null)
+        .load(NULL)
         .apply(placeholderOf(placeholder)
             .error(error))
         .into(target);
@@ -652,7 +655,7 @@ public class GlideTest {
     Drawable fallback = new ColorDrawable(Color.BLUE);
 
     requestManager
-        .load(null)
+        .load(NULL)
         .apply(placeholderOf(placeholder)
             .error(error)
             .fallback(fallback))
@@ -666,7 +669,7 @@ public class GlideTest {
     Drawable placeholder = new ColorDrawable(Color.GREEN);
 
     requestManager
-        .load(null)
+        .load(NULL)
         .apply(placeholderOf(placeholder))
         .into(target);
 

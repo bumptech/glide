@@ -7,6 +7,7 @@ import static com.bumptech.glide.request.RequestOptions.skipMemoryCacheOf;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.CheckResult;
@@ -30,6 +31,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.io.File;
+import java.net.URL;
 
 /**
  * A class for managing and starting requests for Glide. Can use activity, fragment and connectivity
@@ -43,7 +45,8 @@ import java.io.File;
  * @see Glide#with(android.support.v4.app.Fragment)
  * @see Glide#with(Context)
  */
-public class RequestManager implements LifecycleListener {
+public class RequestManager implements LifecycleListener,
+    ModelTypes<RequestBuilder<Drawable>> {
   private static final RequestOptions DECODE_TYPE_BITMAP = decodeTypeOf(Bitmap.class).lock();
   private static final RequestOptions DECODE_TYPE_GIF = decodeTypeOf(GifDrawable.class).lock();
   private static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
@@ -344,12 +347,105 @@ public class RequestManager implements LifecycleListener {
   }
 
   /**
+   * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(Bitmap)}.
+   *
+   * @return A new request builder for loading a {@link Drawable} using the given model.
+   */
+  @CheckResult
+  @Override
+  public RequestBuilder<Drawable> load(@Nullable Bitmap bitmap) {
+    return asDrawable().load(bitmap);
+  }
+
+  /**
+   * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(Drawable)}.
+   *
+   * @return A new request builder for loading a {@link Drawable} using the given model.
+   */
+  @CheckResult
+  @Override
+  public RequestBuilder<Drawable> load(@Nullable Drawable drawable) {
+    return asDrawable().load(drawable);
+  }
+
+  /**
+   * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(String)}.
+   *
+   * @return A new request builder for loading a {@link Drawable} using the given model.
+   */
+  @CheckResult
+  @Override
+  public RequestBuilder<Drawable> load(@Nullable String string) {
+    return asDrawable().load(string);
+  }
+
+  /**
+   * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(Uri)}.
+   *
+   * @return A new request builder for loading a {@link Drawable} using the given model.
+   */
+  @CheckResult
+  @Override
+  public RequestBuilder<Drawable> load(@Nullable Uri uri) {
+    return asDrawable().load(uri);
+  }
+
+  /**
+   * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(File)}.
+   *
+   * @return A new request builder for loading a {@link Drawable} using the given model.
+   */
+  @CheckResult
+  @Override
+  public RequestBuilder<Drawable> load(@Nullable File file) {
+    return asDrawable().load(file);
+  }
+
+  /**
+   * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(Integer)}.
+   *
+   * @return A new request builder for loading a {@link Drawable} using the given model.
+   */
+  @SuppressWarnings("deprecation")
+  @CheckResult
+  @Override
+  public RequestBuilder<Drawable> load(@Nullable Integer resourceId) {
+    return asDrawable().load(resourceId);
+  }
+
+  /**
+   * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(URL).
+   *
+   * @return A new request builder for loading a {@link Drawable} using the given model.
+   */
+  @SuppressWarnings("deprecation")
+  @CheckResult
+  @Override
+  @Deprecated
+  public RequestBuilder<Drawable> load(@Nullable URL url) {
+    return asDrawable().load(url);
+  }
+
+
+  /**
+   * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(byte[])}.
+   *
+   * @return A new request builder for loading a {@link Drawable} using the given model.
+   */
+  @CheckResult
+  @Override
+  public RequestBuilder<Drawable> load(@Nullable byte[] model) {
+    return asDrawable().load(model);
+  }
+
+  /**
    * A helper method equivalent to calling {@link #asDrawable()} and then {@link
    * RequestBuilder#load(Object)} with the given model.
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
   @CheckResult
+  @Override
   public RequestBuilder<Drawable> load(@Nullable Object model) {
     return asDrawable().load(model);
   }

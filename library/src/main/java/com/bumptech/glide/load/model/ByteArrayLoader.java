@@ -5,7 +5,7 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.signature.EmptySignature;
+import com.bumptech.glide.signature.ObjectKey;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -27,10 +27,9 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(byte[] model, int width, int height,
-      Options options) {
-    // TODO: compare the actual bytes?
-    return new LoadData<>(EmptySignature.obtain(), new Fetcher<>(model, converter));
+  public LoadData<Data> buildLoadData(
+      byte[] model, int width, int height, Options options) {
+    return new LoadData<>(new ObjectKey(model), new Fetcher<>(model, converter));
   }
 
   @Override
