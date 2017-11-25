@@ -1455,6 +1455,14 @@ public class RequestOptions implements Cloneable {
     return isAutoCloneEnabled;
   }
 
+  public final boolean isDiskCacheStrategySet() {
+    return isSet(DISK_CACHE_STRATEGY);
+  }
+
+  public final boolean isSkipMemoryCacheSet() {
+    return isSet(IS_CACHEABLE);
+  }
+
   @NonNull
   public final Map<Class<?>, Transformation<?>> getTransformations() {
     return transformations;

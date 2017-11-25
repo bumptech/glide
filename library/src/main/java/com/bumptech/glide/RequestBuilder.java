@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
+import static com.bumptech.glide.request.RequestOptions.skipMemoryCacheOf;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -502,10 +503,14 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable byte[] model) {
-    return
-        loadGeneric(model)
-            .apply(diskCacheStrategyOf(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true /*skipMemoryCache*/));
+    RequestBuilder<TranscodeType> result = loadGeneric(model);
+    if (!result.requestOptions.isDiskCacheStrategySet()) {
+        result = result.apply(diskCacheStrategyOf(DiskCacheStrategy.NONE));
+    }
+    if (!result.requestOptions.isSkipMemoryCacheSet()) {
+      result = result.apply(skipMemoryCacheOf(true /*skipMemoryCache*/));
+    }
+    return result;
   }
 
   /**

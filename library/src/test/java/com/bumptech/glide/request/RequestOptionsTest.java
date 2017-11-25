@@ -263,6 +263,38 @@ public class RequestOptionsTest {
   }
 
   @Test
+  public void isSkipMemoryCacheSet_withoutSkipMemoryCache_isFalse() {
+    assertThat(options.isSkipMemoryCacheSet()).isFalse();
+  }
+
+  @Test
+  public void isSkipMemoryCacheSet_withSkipMemoryCacheTrue_isTrue() {
+    assertThat(options.skipMemoryCache(true).isSkipMemoryCacheSet()).isTrue();
+  }
+
+  @Test
+  public void isSkipMemoryCacheSet_withSkipMemoryCacheFalse_isTrue() {
+    assertThat(options.skipMemoryCache(false).isSkipMemoryCacheSet()).isTrue();
+  }
+
+  @Test
+  public void isDiskCacheStrategySet_withoutDiskCacheStrategy_isFalse() {
+    assertThat(options.isDiskCacheStrategySet()).isFalse();
+  }
+
+  @Test
+  public void isDiskCacheStrategySet_withDiskCacheStrategyDefault_isTrue() {
+    assertThat(options.diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).isDiskCacheStrategySet())
+        .isTrue();
+  }
+
+  @Test
+  public void isDiskCacheStrategySet_withDiskCacheStrategyNonDefault_isTrue() {
+    assertThat(options.diskCacheStrategy(DiskCacheStrategy.ALL).isDiskCacheStrategySet())
+        .isTrue();
+  }
+
+  @Test
   public void testEqualsHashCode() {
     Drawable first = new ColorDrawable(Color.RED);
     Drawable second = new GradientDrawable();

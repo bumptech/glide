@@ -388,6 +388,66 @@ public class LoadBytesTest {
         anyDrawable(), any(), anyTarget(), eq(DataSource.LOCAL), anyBoolean());
   }
 
+  @Test
+  public void loadFromBuilder_withDiskCacheStrategySetBeforeLoad_doesNotOverrideDiskCacheStrategy()
+      throws IOException {
+    byte[] data = getCanonicalBytes();
+    concurrency.wait(
+        GlideApp.with(context)
+            .asDrawable()
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .load(data)
+            .submit());
+
+    concurrency.runOnMainThread(new Runnable() {
+      @Override
+      public void run() {
+        GlideApp.get(context).clearMemory();
+      }
+    });
+
+    concurrency.wait(
+        GlideApp.with(context)
+            .asDrawable()
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .listener(requestListener)
+            .load(data)
+            .submit());
+
+    verify(requestListener).onResourceReady(
+        anyDrawable(), any(), anyTarget(), eq(DataSource.RESOURCE_DISK_CACHE), anyBoolean());
+  }
+
+  @Test
+  public void loadFromBuilder_withSkipMemoryCacheSetBeforeLoad_doesNotOverrideSkipMemoryCache()
+      throws IOException {
+    byte[] data = getCanonicalBytes();
+    concurrency.wait(
+        GlideApp.with(context)
+            .asDrawable()
+            .skipMemoryCache(false)
+            .load(data)
+            .submit());
+
+    concurrency.runOnMainThread(new Runnable() {
+      @Override
+      public void run() {
+        GlideApp.get(context).clearMemory();
+      }
+    });
+
+    concurrency.wait(
+        GlideApp.with(context)
+            .asDrawable()
+            .skipMemoryCache(false)
+            .listener(requestListener)
+            .load(data)
+            .submit());
+
+    verify(requestListener).onResourceReady(
+        anyDrawable(), any(), anyTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+  }
+
   private Bitmap copyFromImageViewDrawable(ImageView imageView) {
     if (imageView.getDrawable() == null) {
       fail("Drawable unexpectedly null");
