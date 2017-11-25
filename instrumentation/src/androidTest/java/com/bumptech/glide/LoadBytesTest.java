@@ -2,7 +2,7 @@ package com.bumptech.glide;
 
 import static com.bumptech.glide.test.GlideOptions.skipMemoryCacheOf;
 import static com.bumptech.glide.test.Matchers.anyDrawable;
-import static com.bumptech.glide.test.Matchers.anyTarget;
+import static com.bumptech.glide.test.Matchers.anyDrawableTarget;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
@@ -158,7 +158,7 @@ public class LoadBytesTest {
         imageView);
 
     verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+        anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
   }
 
   @Test
@@ -183,7 +183,7 @@ public class LoadBytesTest {
         imageView);
 
     verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+        anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
   }
 
   @Test
@@ -211,8 +211,13 @@ public class LoadBytesTest {
             .listener(requestListener)
             .submit());
 
-    verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.RESOURCE_DISK_CACHE), anyBoolean());
+    verify(requestListener)
+        .onResourceReady(
+            anyDrawable(),
+            any(),
+            anyDrawableTarget(),
+            eq(DataSource.RESOURCE_DISK_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -242,8 +247,13 @@ public class LoadBytesTest {
             .listener(requestListener)
             .submit());
 
-    verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.RESOURCE_DISK_CACHE), anyBoolean());
+    verify(requestListener)
+        .onResourceReady(
+            anyDrawable(),
+            any(),
+            anyDrawableTarget(),
+            eq(DataSource.RESOURCE_DISK_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -265,7 +275,7 @@ public class LoadBytesTest {
             .submit());
 
     verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+        anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
   }
 
   @Test
@@ -289,7 +299,7 @@ public class LoadBytesTest {
             .submit());
 
     verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+        anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
   }
 
   @Test
@@ -308,7 +318,7 @@ public class LoadBytesTest {
             .submit());
 
     verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.LOCAL), anyBoolean());
+        anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
   }
 
   @Test
@@ -329,7 +339,7 @@ public class LoadBytesTest {
             .submit());
 
     verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.LOCAL), anyBoolean());
+        anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
   }
 
   @Test
@@ -356,7 +366,7 @@ public class LoadBytesTest {
             .submit());
 
     verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.LOCAL), anyBoolean());
+        anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
   }
 
   @Test
@@ -385,7 +395,7 @@ public class LoadBytesTest {
             .submit());
 
     verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.LOCAL), anyBoolean());
+        anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
   }
 
   @Test
@@ -414,8 +424,13 @@ public class LoadBytesTest {
             .load(data)
             .submit());
 
-    verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.RESOURCE_DISK_CACHE), anyBoolean());
+    verify(requestListener)
+        .onResourceReady(
+            anyDrawable(),
+            any(),
+            anyDrawableTarget(),
+            eq(DataSource.RESOURCE_DISK_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -445,7 +460,7 @@ public class LoadBytesTest {
             .submit());
 
     verify(requestListener).onResourceReady(
-        anyDrawable(), any(), anyTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+        anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
   }
 
   private Bitmap copyFromImageViewDrawable(ImageView imageView) {

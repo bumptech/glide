@@ -1,7 +1,7 @@
 package com.bumptech.glide;
 
 import static com.bumptech.glide.test.Matchers.anyDrawable;
-import static com.bumptech.glide.test.Matchers.anyTarget;
+import static com.bumptech.glide.test.Matchers.anyDrawableTarget;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
@@ -196,14 +196,14 @@ public class RequestTest {
         .onResourceReady(
             anyDrawable(),
             any(),
-            anyTarget(),
+            anyDrawableTarget(),
             eq(DataSource.DATA_DISK_CACHE),
             anyBoolean());
     verify(requestListener, never())
         .onResourceReady(
             anyDrawable(),
             any(),
-            anyTarget(),
+            anyDrawableTarget(),
             eq(DataSource.RESOURCE_DISK_CACHE),
             anyBoolean());
     assertThat(imageView.getDrawable()).isNull();
@@ -234,14 +234,14 @@ public class RequestTest {
         .onResourceReady(
             anyDrawable(),
             any(),
-            anyTarget(),
+            anyDrawableTarget(),
             eq(DataSource.DATA_DISK_CACHE),
             anyBoolean());
     verify(requestListener, never())
         .onResourceReady(
             anyDrawable(),
             any(),
-            anyTarget(),
+            anyDrawableTarget(),
             eq(DataSource.RESOURCE_DISK_CACHE),
             anyBoolean());
 

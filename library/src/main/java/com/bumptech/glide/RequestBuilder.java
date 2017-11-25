@@ -327,8 +327,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * {@link com.bumptech.glide.load.model.ModelLoader} or
    * {@link com.bumptech.glide.load.ResourceDecoder} instead of using this method.
    *
-   * <p>The {@link DiskCacheStrategy} is set to {@link DiskCacheStrategy#NONE}. Using other
-   * strategies may result in undefined behavior.
+   * <p>The {@link DiskCacheStrategy} is set to {@link DiskCacheStrategy#NONE}. Previous calls to
+   * {@link #apply(RequestOptions)} or previously applied {@link DiskCacheStrategy}s will be
+   * overridden by this method. Applying an {@link DiskCacheStrategy} other than
+   * {@link DiskCacheStrategy#NONE} after calling this method may result in undefined behavior.
    *
    * <p>In memory caching relies on Object equality. The contents of the {@link Bitmap}s are not
    * compared.
@@ -351,8 +353,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * {@link com.bumptech.glide.load.model.ModelLoader} or
    * {@link com.bumptech.glide.load.ResourceDecoder} instead of using this method.
    *
-   * <p>The {@link DiskCacheStrategy} is set to {@link DiskCacheStrategy#NONE}. Using other
-   * strategies may result in undefined behavior.
+   * <p>The {@link DiskCacheStrategy} is set to {@link DiskCacheStrategy#NONE}. Previous calls to
+   * {@link #apply(RequestOptions)} or previously applied {@link DiskCacheStrategy}s will be
+   * overridden by this method. Applying an {@link DiskCacheStrategy} other than
+   * {@link DiskCacheStrategy#NONE} after calling this method may result in undefined behavior.
    *
    * <p>In memory caching relies on Object equality. The contents of the {@link Drawable}s are not
    * compared.
