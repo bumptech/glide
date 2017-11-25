@@ -107,11 +107,7 @@ public final class WaitModelLoader<Model, Data>
 
     @Override
     public void loadData(Priority priority, DataCallback<? super Data> callback) {
-      try {
-        toWaitOn.await(ConcurrencyHelper.TIMEOUT_MS, ConcurrencyHelper.TIMEOUT_UNIT);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
+      ConcurrencyHelper.waitOnLatch(toWaitOn);
       wrapped.loadData(priority, callback);
     }
 
