@@ -230,7 +230,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   @SuppressWarnings({"CheckResult", "unchecked"})
   @CheckResult
   public RequestBuilder<TranscodeType> thumbnail(
-      @Nullable RequestBuilder<TranscodeType> /*@Nullable*/ ... thumbnails) {
+      @Nullable RequestBuilder<TranscodeType>... thumbnails) {
     if (thumbnails == null || thumbnails.length == 0) {
       return thumbnail((RequestBuilder<TranscodeType>) null);
     }

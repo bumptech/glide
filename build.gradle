@@ -77,7 +77,7 @@ subprojects { project ->
     apply plugin: 'checkstyle'
 
     checkstyle {
-        toolVersion = '6.12.1'
+        toolVersion = '8.4'
     }
 
     checkstyle {
