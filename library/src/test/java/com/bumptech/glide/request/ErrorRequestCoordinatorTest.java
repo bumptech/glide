@@ -24,7 +24,7 @@ public class ErrorRequestCoordinatorTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    coordinator = new ErrorRequestCoordinator(/*coordinator=*/ null);
+    coordinator = new ErrorRequestCoordinator(/*parent=*/ null);
     coordinator.setRequests(primary, error);
   }
 
@@ -248,7 +248,7 @@ public class ErrorRequestCoordinatorTest {
   public void isEquivalentTo() {
     assertThat(coordinator.isEquivalentTo(primary)).isFalse();
 
-    ErrorRequestCoordinator other = new ErrorRequestCoordinator(/*coordinator=*/ null);
+    ErrorRequestCoordinator other = new ErrorRequestCoordinator(/*parent=*/ null);
     assertThat(coordinator.isEquivalentTo(other)).isFalse();
 
     other.setRequests(primary, primary);
