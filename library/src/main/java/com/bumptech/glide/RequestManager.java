@@ -414,7 +414,7 @@ public class RequestManager implements LifecycleListener,
   }
 
   /**
-   * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(URL).
+   * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(URL)}.
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
