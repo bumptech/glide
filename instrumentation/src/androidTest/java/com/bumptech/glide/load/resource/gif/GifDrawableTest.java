@@ -103,6 +103,9 @@ public class GifDrawableTest {
 
     GifDrawable drawableFromView = (GifDrawable) imageView.getDrawable();
     assertThat(drawableFromView.isRunning()).isTrue();
+
+    gifDrawable.stop();
+    drawableFromView.stop();
   }
 
   // LayoutParams.TYPE_SYSTEM_ALERT.
