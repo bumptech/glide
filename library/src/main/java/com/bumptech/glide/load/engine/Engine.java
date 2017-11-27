@@ -116,19 +116,26 @@ public class Engine implements EngineJobListener,
   }
 
   /**
-   * Starts a load for the given arguments. Must be called on the main thread.
+   * Starts a load for the given arguments.
    *
-   * <p> The flow for any request is as follows: <ul> <li>Check the memory cache and provide the
-   * cached resource if present</li> <li>Check the current put of actively used resources and return
-   * the active resource if present</li> <li>Check the current put of in progress loads and add the
-   * cb to the in progress load if present</li> <li>Start a new load</li> </ul> </p>
+   * <p>Must be called on the main thread.
    *
-   * <p> Active resources are those that have been provided to at least one request and have not yet
+   * <p>The flow for any request is as follows:
+   * <ul>
+   *   <li>Check the current set of actively used resources, return the active resource if
+   *   present, and move any newly inactive resources into the memory cache.</li>
+   *   <li>Check the memory cache and provide the cached resource if present.</li>
+   *   <li>Check the current set of in progress loads and add the cb to the in progress load if
+   *   one is present.</li>
+   *   <li>Start a new load.</li>
+   * </ul>
+   *
+   * <p>Active resources are those that have been provided to at least one request and have not yet
    * been released. Once all consumers of a resource have released that resource, the resource then
    * goes to cache. If the resource is ever returned to a new consumer from cache, it is re-added to
    * the active resources. If the resource is evicted from the cache, its resources are recycled and
    * re-used if possible and the resource is discarded. There is no strict requirement that
-   * consumers release their resources so active resources are held weakly. </p>
+   * consumers release their resources so active resources are held weakly.
    *
    * @param width  The target width in pixels of the desired resource.
    * @param height The target height in pixels of the desired resource.
