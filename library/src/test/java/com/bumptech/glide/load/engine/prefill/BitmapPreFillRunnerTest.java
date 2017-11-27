@@ -16,10 +16,13 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
+import android.util.Log;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.engine.cache.MemoryCacheAdapter;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.tests.Util.CreateBitmap;
 import com.bumptech.glide.util.Util;
@@ -37,6 +40,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLog;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
@@ -298,6 +302,24 @@ public class BitmapPreFillRunnerTest {
         eq(bitmap.getConfig()));
     // TODO(b/20335397): This code was relying on Bitmap equality which Robolectric removed
     // order.verify(pool, times(numBitmaps)).put(eq(bitmap));
+  }
+
+  @Test
+  public void allocate_whenBitmapPoolIsAtCapacity_doesNotLogWithRecycledBitmap() {
+    ShadowLog.setLoggable(BitmapPreFillRunner.TAG, Log.VERBOSE);
+
+    int dimensions = 10;
+    Bitmap.Config config = Bitmap.Config.ARGB_8888;
+    int bitmapByteSize = Util.getBitmapByteSize(dimensions, dimensions, config);
+    PreFillType preFillType = new PreFillType.Builder(dimensions).setConfig(config).build();
+    Map<PreFillType, Integer> allocationOrder = new HashMap<>();
+    allocationOrder.put(preFillType, 1);
+    PreFillQueue queue = new PreFillQueue(allocationOrder);
+    BitmapPreFillRunner runner =
+        new BitmapPreFillRunner(
+            new LruBitmapPool(bitmapByteSize - 1), new MemoryCacheAdapter(), queue);
+
+    runner.allocate();
   }
 
   private static final class AddBitmapPoolAnswer implements Answer<Void> {
