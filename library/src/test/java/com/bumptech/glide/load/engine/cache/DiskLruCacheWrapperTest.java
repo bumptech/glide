@@ -3,7 +3,9 @@ package com.bumptech.glide.load.engine.cache;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
+import com.bumptech.glide.load.Key;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.tests.Util;
 import java.io.File;
@@ -41,21 +43,17 @@ public class DiskLruCacheWrapperTest {
     }
   }
 
-  private void deleteRecursive(File file) {
-    if (!file.isDirectory()) {
-      if (!file.delete()) {
-        throw new IllegalStateException("Failed to delete: " + file);
+  private static void deleteRecursive(File file) {
+    if (file.isDirectory()) {
+      File[] files = file.listFiles();
+      if (files != null) {
+        for (File f : files) {
+          deleteRecursive(f);
+        }
       }
-      return;
     }
-
-    File[] files = file.listFiles();
-    if (files == null) {
-      return;
-    }
-
-    for (File child : files) {
-      deleteRecursive(child);
+    if (!file.delete() && file.exists()) {
+      throw new RuntimeException("Failed to delete: " + file);
     }
   }
 
@@ -135,5 +133,25 @@ public class DiskLruCacheWrapperTest {
     byte[] received = Util.readFile(cache.get(key), data.length);
 
     assertArrayEquals(data, received);
+  }
+
+  // Tests #2465.
+  @Test
+  public void clearDiskCache_afterOpeningDiskCache_andDeleteDirectoryOutsideGlide_doesNotThrow() {
+    DiskCache cache = DiskLruCacheWrapper.create(dir, 1024 * 1024);
+    cache.get(mock(Key.class));
+    deleteRecursive(dir);
+    cache.clear();
+  }
+
+  // Tests #2465.
+  @Test
+  public void get_afterDeleteDirectoryOutsideGlideAndClose_doesNotThrow() {
+    DiskCache cache = DiskLruCacheWrapper.create(dir, 1024 * 1024);
+    cache.get(mock(Key.class));
+    deleteRecursive(dir);
+    cache.clear();
+
+    cache.get(mock(Key.class));
   }
 }

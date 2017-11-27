@@ -163,11 +163,15 @@ public class DiskLruCacheWrapper implements DiskCache {
   public synchronized void clear() {
     try {
       getDiskCache().delete();
-      resetDiskCache();
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Unable to clear disk cache", e);
+        Log.w(TAG, "Unable to clear disk cache or disk cache cleared externally", e);
       }
+    } finally {
+      // Delete can close the cache but still throw. If we don't null out the disk cache here, every
+      // subsequent request will try to act on a closed disk cache and fail. By nulling out the disk
+      // cache we at least allow for attempts to open the cache in the future. See #2465.
+      resetDiskCache();
     }
   }
 
