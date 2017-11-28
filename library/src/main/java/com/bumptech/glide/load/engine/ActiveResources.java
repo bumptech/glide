@@ -4,6 +4,7 @@ import android.os.Looper;
 import android.os.MessageQueue;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
 import com.bumptech.glide.util.Preconditions;
@@ -14,7 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 final class ActiveResources {
-  private final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
+  @VisibleForTesting
+  final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
   // Lazily instantiate to avoid exceptions if Glide is initialized on a background thread. See
   // #295.
   @Nullable
@@ -26,11 +28,19 @@ final class ActiveResources {
   }
 
   void activate(Key key, EngineResource<?> resource) {
-    activeEngineResources.put(key, new ResourceWeakReference(key, resource, getReferenceQueue()));
+    ResourceWeakReference removed =
+        activeEngineResources.put(
+            key, new ResourceWeakReference(key, resource, getReferenceQueue()));
+    if (removed != null) {
+      removed.reset();
+    }
   }
 
   void deactivate(Key key) {
-    activeEngineResources.remove(key);
+    ResourceWeakReference removed = activeEngineResources.remove(key);
+    if (removed != null) {
+      removed.reset();
+    }
   }
 
   @Nullable
@@ -50,7 +60,7 @@ final class ActiveResources {
   private void cleanupActiveReference(@NonNull ResourceWeakReference ref) {
     activeEngineResources.remove(ref.key);
 
-    if (!ref.isCacheable) {
+    if (!ref.isCacheable || ref.resource == null) {
       return;
     }
     EngineResource<?> newResource =
@@ -81,19 +91,29 @@ final class ActiveResources {
     }
   }
 
-  private static class ResourceWeakReference extends WeakReference<EngineResource<?>> {
+  @VisibleForTesting
+  static final class ResourceWeakReference extends WeakReference<EngineResource<?>> {
     @SuppressWarnings("WeakerAccess") @Synthetic final Key key;
-    @SuppressWarnings("WeakerAccess") @Synthetic final Resource<?> resource;
     @SuppressWarnings("WeakerAccess") @Synthetic final boolean isCacheable;
+
+    @Nullable @SuppressWarnings("WeakerAccess") @Synthetic Resource<?> resource;
 
     @Synthetic
     @SuppressWarnings("WeakerAccess")
     ResourceWeakReference(
-        Key key, EngineResource<?> r, ReferenceQueue<? super EngineResource<?>> q) {
-      super(r, q);
+        @NonNull Key key,
+        @NonNull EngineResource<?> referent,
+        @NonNull ReferenceQueue<? super EngineResource<?>> queue) {
+      super(referent, queue);
       this.key = Preconditions.checkNotNull(key);
-      this.resource = Preconditions.checkNotNull(r.getResource());
-      isCacheable = r.isCacheable();
+      this.resource =
+          referent.isCacheable() ? Preconditions.checkNotNull(referent.getResource()) : null;
+      isCacheable = referent.isCacheable();
+    }
+
+    void reset() {
+      resource = null;
+      clear();
     }
   }
 }
