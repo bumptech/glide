@@ -8,7 +8,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
-import com.bumptech.glide.request.FutureTarget;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.test.ResourceIds.raw;
@@ -82,7 +82,7 @@ public class RequestManagerTest {
       }
     });
 
-    final FutureTarget<Drawable> target =
+    final Target<Drawable> target =
         concurrency.wait(requestManager.load(raw.canonical).submit());
 
     concurrency.runOnMainThread(new Runnable() {

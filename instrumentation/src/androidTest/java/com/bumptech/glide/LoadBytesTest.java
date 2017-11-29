@@ -25,8 +25,8 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
-import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.BitmapSubject;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
@@ -190,7 +190,7 @@ public class LoadBytesTest {
   public void loadFromRequestManager_withSameByteArray_validDiskCacheStrategy_returnsFromDiskCache()
       throws IOException {
     byte[] data = getCanonicalBytes();
-    FutureTarget<Drawable> target = concurrency.wait(
+    Target<Drawable> target = concurrency.wait(
         GlideApp.with(context)
             .load(data)
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
@@ -224,7 +224,7 @@ public class LoadBytesTest {
   public void loadFromRequestBuilder_withSameByteArray_validDiskCacheStrategy_returnsFromDiskCache()
       throws IOException {
     byte[] data = getCanonicalBytes();
-    FutureTarget<Drawable> target = concurrency.wait(
+    Target<Drawable> target = concurrency.wait(
         GlideApp.with(context)
             .asDrawable()
             .load(data)
@@ -260,7 +260,7 @@ public class LoadBytesTest {
   public void loadFromRequestManager_withSameByteArray_memoryCacheEnabled_returnsFromCache()
       throws IOException {
     byte[] data = getCanonicalBytes();
-    FutureTarget<Drawable> target = concurrency.wait(
+    Target<Drawable> target = concurrency.wait(
         GlideApp.with(context)
             .load(data)
             .skipMemoryCache(false)
@@ -282,7 +282,7 @@ public class LoadBytesTest {
   public void loadFromRequestBuilder_withSameByteArray_memoryCacheEnabled_returnsFromCache()
       throws IOException {
     byte[] data = getCanonicalBytes();
-    FutureTarget<Drawable> target = concurrency.wait(
+    Target<Drawable> target = concurrency.wait(
         GlideApp.with(context)
             .asDrawable()
             .load(data)
@@ -305,7 +305,7 @@ public class LoadBytesTest {
   @Test
   public void loadFromRequestManager_withSameByteArray_returnsFromLocal() throws IOException {
     byte[] data = getCanonicalBytes();
-    FutureTarget<Drawable> target = concurrency.wait(
+    Target<Drawable> target = concurrency.wait(
         GlideApp.with(context)
             .load(data)
             .submit());
@@ -324,7 +324,7 @@ public class LoadBytesTest {
   @Test
   public void loadFromRequestBuilder_withSameByteArray_returnsFromLocal() throws IOException {
     byte[] data = getCanonicalBytes();
-    FutureTarget<Drawable> target = concurrency.wait(
+    Target<Drawable> target = concurrency.wait(
         GlideApp.with(context)
             .asDrawable()
             .load(data)
@@ -346,7 +346,7 @@ public class LoadBytesTest {
   public void loadFromRequestManager_withSameByteArrayAndMissingFromMemory_returnsFromLocal()
        throws IOException {
     byte[] data = getCanonicalBytes();
-    FutureTarget<Drawable> target = concurrency.wait(
+    Target<Drawable> target = concurrency.wait(
         GlideApp.with(context)
             .load(data)
             .submit());
@@ -373,7 +373,7 @@ public class LoadBytesTest {
   public void loadFromRequestBuilder_withSameByteArrayAndMissingFromMemory_returnsFromLocal()
        throws IOException {
     byte[] data = getCanonicalBytes();
-    FutureTarget<Drawable> target = concurrency.wait(
+    Target<Drawable> target = concurrency.wait(
         GlideApp.with(context)
             .asDrawable()
             .load(data)

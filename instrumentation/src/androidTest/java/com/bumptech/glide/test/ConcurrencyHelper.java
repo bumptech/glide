@@ -9,6 +9,7 @@ import android.support.test.InstrumentationRegistry;
 import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
@@ -50,7 +51,7 @@ public class ConcurrencyHelper {
     return reference.get();
   }
 
-  public <T, Y extends Future<T>> Y wait(Y future) {
+  public <T> Target<T> wait(FutureTarget<T> future) {
     get(future);
     return future;
   }

@@ -20,6 +20,7 @@ import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
 import com.squareup.javapoet.WildcardTypeName;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -375,9 +376,13 @@ final class RequestBuilderGenerator {
     if (suppressions.isEmpty()) {
       return null;
     }
+    // Enforce ordering across compilers (Internal and External compilers end up disagreeing on the
+    // order produced by the Set additions above.)
+    ArrayList<String> suppressionsList = new ArrayList<>(suppressions);
+    Collections.sort(suppressionsList);
 
     AnnotationSpec.Builder builder = AnnotationSpec.builder(SuppressWarnings.class);
-    for (String suppression : suppressions) {
+    for (String suppression : suppressionsList) {
       builder.addMember("value", "$S", suppression);
     }
 

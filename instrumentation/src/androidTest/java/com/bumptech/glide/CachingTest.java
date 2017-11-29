@@ -3,6 +3,8 @@ package com.bumptech.glide;
 import static com.bumptech.glide.test.Matchers.anyDrawable;
 import static com.bumptech.glide.test.Matchers.anyDrawableTarget;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
@@ -22,6 +24,7 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCacheAdapter;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.BitmapSubject;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
@@ -32,11 +35,13 @@ import com.bumptech.glide.test.WaitModelLoader;
 import com.bumptech.glide.test.WaitModelLoader.WaitModel;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -120,7 +125,7 @@ public class CachingTest {
         // Loading again here won't shuffle our resource around because it only changes our
         // reference count from 1 to 2 and back. The reference we're waiting for will only be
         // decremented when the target is GCed.
-        FutureTarget<Drawable> target =
+        Target<Drawable> target =
             concurrency.wait(
                 GlideApp.with(context)
                     .load(ResourceIds.raw.canonical)
@@ -283,7 +288,7 @@ public class CachingTest {
   public void onlyRetrieveFromCache_withPreviousRequestLoadingFromSource_doesNotBlock() {
     final WaitModel<Integer> waitModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
 
-    GlideApp.with(context)
+    FutureTarget<Drawable> loadFromSourceFuture = GlideApp.with(context)
         .load(waitModel)
         .submit();
 
@@ -293,13 +298,15 @@ public class CachingTest {
         .submit();
     try {
       onlyFromCacheFuture.get(1000, TimeUnit.MILLISECONDS);
-      throw new IllegalStateException();
+      fail("Expected only from cache Future to time out");
     } catch (InterruptedException | TimeoutException e) {
       throw new RuntimeException(e);
     } catch (ExecutionException e) {
       // Expected.
     }
     waitModel.countDown();
+
+    assertThat(concurrency.get(loadFromSourceFuture)).isNotNull();
   }
 
   // Tests #2428.
@@ -320,7 +327,7 @@ public class CachingTest {
     });
 
     // Queue the retrieve from cache request first.
-    GlideApp.with(context)
+    final Future<Drawable> firstQueuedFuture = GlideApp.with(context)
         .load(ResourceIds.raw.canonical)
         .onlyRetrieveFromCache(true)
         .submit();
@@ -334,6 +341,13 @@ public class CachingTest {
 
     // Verify that the request that didn't have retrieve from cache succeeds
     assertThat(concurrency.get(expectedFuture)).isNotNull();
+    // The first request only from cache should fail because the item is not in cache.
+    assertThrows(RuntimeException.class, new ThrowingRunnable() {
+      @Override
+      public void run() throws Throwable {
+        concurrency.get(firstQueuedFuture);
+      }
+    });
   }
 
   private void clearMemoryCacheOnMainThread() throws InterruptedException {
