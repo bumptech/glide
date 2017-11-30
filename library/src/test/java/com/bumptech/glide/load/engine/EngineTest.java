@@ -655,7 +655,7 @@ public class EngineTest {
     final EngineResource resource = mock(EngineResource.class);
     final Jobs jobs = new Jobs();
     final ActiveResources activeResources =
-        new ActiveResources(/*isResourceRetentionAllowed=*/ true);
+        new ActiveResources(/*isActiveResourceRetentionAllowed=*/ true);
 
     final int width = 100;
     final int height = 100;

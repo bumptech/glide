@@ -342,8 +342,9 @@ public final class GlideBuilder {
    * Glide can return the underlying resource to it's memory cache so that subsequent requests will
    * not unexpectedly re-load the resource from disk or source. As a side affect, it will take
    * the system slightly longer to garbage collect the underlying resource because the weak
-   * reference has to be cleared and processed first. As a result, setting this method to
-   * {@code true} may transiently increase the memory usage of an application.
+   * reference has to be cleared and processed before the hard reference is removed. As a result,
+   * setting this method to {@code true} may transiently increase the memory usage of an
+   * application.
    *
    * <p>Setting this method to {@code false} will allow the platform to garbage collect resources
    * more quickly, but will lead to unexpected memory cache misses if callers load resources into

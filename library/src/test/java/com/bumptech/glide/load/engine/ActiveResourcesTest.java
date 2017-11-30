@@ -34,7 +34,7 @@ public class ActiveResourcesTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    resources = new ActiveResources(/*isResourceRetentionAllowed=*/ true);
+    resources = new ActiveResources(/*isActiveResourceRetentionAllowed=*/ true);
     resources.setListener(listener);
 
     reset(GlideShadowLooper.queue);
@@ -317,7 +317,7 @@ public class ActiveResourcesTest {
 
   @Test
   public void get_withActiveClearedKey_cacheableResource_retentionDisabled_doesNotCallListener() {
-    resources = new ActiveResources(/*isResourceRetentionAllowed=*/ false);
+    resources = new ActiveResources(/*isActiveResourceRetentionAllowed=*/ false);
     EngineResource<Object> engineResource =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     resources.activate(key, engineResource);
@@ -329,7 +329,7 @@ public class ActiveResourcesTest {
 
   @Test
   public void get_withQueuedReference_retentionDisabled_returnsResource() {
-    resources = new ActiveResources(/*isResourceRetentionAllowed=*/ false);
+    resources = new ActiveResources(/*isActiveResourceRetentionAllowed=*/ false);
     EngineResource<Object> engineResource =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     resources.activate(key, engineResource);
@@ -342,7 +342,7 @@ public class ActiveResourcesTest {
 
   @Test
   public void queueIdle_withQueuedReferenceRetrievedFromGet_retentionDisabled_doesNotNotify() {
-    resources = new ActiveResources(/*isResourceRetentionAllowed=*/ false);
+    resources = new ActiveResources(/*isActiveResourceRetentionAllowed=*/ false);
     EngineResource<Object> engineResource =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     resources.activate(key, engineResource);
