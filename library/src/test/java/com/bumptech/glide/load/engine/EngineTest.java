@@ -14,12 +14,10 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.os.MessageQueue.IdleHandler;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -39,7 +37,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
@@ -467,28 +464,6 @@ public class EngineTest {
     }).when(harness.job).start(any(DecodeJob.class));
     harness.doLoad();
     harness.getEngine().onResourceReleased(harness.cacheKey, harness.resource);
-    harness.doLoad();
-    verify(harness.cb).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE));
-  }
-
-  @Test
-  public void load_afterResourceIsGcedFromActive_returnsFromMemoryCache() {
-    // clear previous calls to addIdleHandler
-    reset(GlideShadowLooper.queue);
-    when(harness.resource.getResource()).thenReturn(mock(Resource.class));
-    when(harness.resource.isCacheable()).thenReturn(true);
-    harness.cache = new LruResourceCache(100);
-    doAnswer(new Answer<Object>() {
-      @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        harness.callOnEngineJobComplete();
-        return null;
-      }
-    }).when(harness.job).start(any(DecodeJob.class));
-    harness.doLoad();
-    ArgumentCaptor<IdleHandler> captor = ArgumentCaptor.forClass(IdleHandler.class);
-    verify(GlideShadowLooper.queue).addIdleHandler(captor.capture());
-    captor.getValue().queueIdle();
     harness.doLoad();
     verify(harness.cb).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE));
   }

@@ -7,11 +7,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
-import android.os.MessageQueue.IdleHandler;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.engine.ActiveResources.DequeuedResourceCallback;
 import com.bumptech.glide.load.engine.ActiveResources.ResourceWeakReference;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import java.util.concurrent.CountDownLatch;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLooper;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = GlideShadowLooper.class)
@@ -38,6 +41,11 @@ public class ActiveResourcesTest {
     resources.setListener(listener);
 
     reset(GlideShadowLooper.queue);
+  }
+
+  @After
+  public void tearDown() {
+    resources.shutdown();
   }
 
   @Test
@@ -142,9 +150,7 @@ public class ActiveResourcesTest {
     ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
     resources.deactivate(key);
 
-    weakRef.enqueue();
-
-    triggerQueueIdle();
+    enqueueAndWaitForRef(weakRef);
 
     verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
   }
@@ -156,9 +162,7 @@ public class ActiveResourcesTest {
     resources.activate(key, engineResource);
 
     ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
-    weakRef.enqueue();
-
-    triggerQueueIdle();
+    enqueueAndWaitForRef(weakRef);
 
     ArgumentCaptor<EngineResource<?>> captor = getEngineResourceCaptor();
 
@@ -180,22 +184,20 @@ public class ActiveResourcesTest {
 
     ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
     weakRef.enqueue();
-
-    triggerQueueIdle();
+    enqueueAndWaitForRef(weakRef);
 
     verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
   }
 
   @Test
-  public void queueIdle_withCacheableResourceInActive_removesResourceFromActive() {
+  public void queueIdle_withCacheableResourceInActive_removesResourceFromActive()
+      throws InterruptedException {
     EngineResource<Object> engineResource =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     resources.activate(key, engineResource);
 
     ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
-    weakRef.enqueue();
-
-    triggerQueueIdle();
+    enqueueAndWaitForRef(weakRef);
 
     assertThat(resources.get(key)).isNull();
   }
@@ -207,9 +209,7 @@ public class ActiveResourcesTest {
     resources.activate(key, engineResource);
 
     ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
-    weakRef.enqueue();
-
-    triggerQueueIdle();
+    enqueueAndWaitForRef(weakRef);
 
     assertThat(resources.get(key)).isNull();
   }
@@ -245,11 +245,10 @@ public class ActiveResourcesTest {
     resources.activate(key, engineResource);
 
     ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
-    weakRef.enqueue();
 
     resources.get(key);
 
-    triggerQueueIdle();
+    enqueueAndWaitForRef(weakRef);
 
     ArgumentCaptor<EngineResource<?>> captor = getEngineResourceCaptor();
     verify(listener).onResourceReleased(eq(key), captor.capture());
@@ -263,11 +262,12 @@ public class ActiveResourcesTest {
     resources.activate(key, engineResource);
 
     ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
+    CountDownLatch latch = getLatchForClearedRef();
     weakRef.enqueue();
 
     resources.get(key);
 
-    triggerQueueIdle();
+    waitForLatch(latch);
 
     verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
   }
@@ -279,11 +279,12 @@ public class ActiveResourcesTest {
     resources.activate(key, engineResource);
 
     ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
+    CountDownLatch latch = getLatchForClearedRef();
     weakRef.enqueue();
 
     resources.deactivate(key);
 
-    triggerQueueIdle();
+    waitForLatch(latch);
 
     verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
   }
@@ -295,13 +296,14 @@ public class ActiveResourcesTest {
     resources.activate(key, first);
 
     ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
+    CountDownLatch latch = getLatchForClearedRef();
     weakRef.enqueue();
 
     EngineResource<Object> second =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     resources.activate(key, second);
 
-    triggerQueueIdle();
+    waitForLatch(latch);
 
     verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
   }
@@ -348,19 +350,40 @@ public class ActiveResourcesTest {
     resources.activate(key, engineResource);
 
     ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
+    CountDownLatch latch = getLatchForClearedRef();
     weakRef.enqueue();
 
     resources.get(key);
 
-    triggerQueueIdle();
+    waitForLatch(latch);
 
     verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
   }
 
-  private void triggerQueueIdle() {
-    ArgumentCaptor<IdleHandler> captor = ArgumentCaptor.forClass(IdleHandler.class);
-    verify(GlideShadowLooper.queue).addIdleHandler(captor.capture());
-    captor.getValue().queueIdle();
+  private void enqueueAndWaitForRef(ResourceWeakReference ref) {
+    CountDownLatch latch = getLatchForClearedRef();
+    ref.enqueue();
+    waitForLatch(latch);
+  }
+
+  private void waitForLatch(CountDownLatch latch) {
+     try {
+      latch.await();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+    ShadowLooper.getShadowMainLooper().runToEndOfTasks();
+  }
+
+  private CountDownLatch getLatchForClearedRef() {
+    final CountDownLatch toWait = new CountDownLatch(1);
+    resources.setEnqueuedResourceCallback(new DequeuedResourceCallback() {
+      @Override
+      public void onResourceDequeued() {
+        toWait.countDown();
+      }
+    });
+    return toWait;
   }
 
   @SuppressWarnings("unchecked")

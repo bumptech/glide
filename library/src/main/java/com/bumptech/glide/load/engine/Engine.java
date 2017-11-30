@@ -338,6 +338,7 @@ public class Engine implements EngineJobListener,
   public void shutdown() {
     engineJobFactory.shutdown();
     diskCacheProvider.clearDiskCacheIfCreated();
+    activeResources.shutdown();
   }
 
   /**
