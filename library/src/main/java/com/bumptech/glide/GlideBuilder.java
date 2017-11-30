@@ -46,6 +46,7 @@ public final class GlideBuilder {
   @Nullable
   private RequestManagerFactory requestManagerFactory;
   private GlideExecutor animationExecutor;
+  private boolean isActiveResourceRetentionAllowed = true;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -326,6 +327,44 @@ public final class GlideBuilder {
     return this;
   }
 
+  /**
+   * If set to {@code true}, allows Glide to re-capture resources that are loaded into
+   * {@link com.bumptech.glide.request.target.Target}s which are subsequently de-referenced and
+   * garbage collected without being cleared.
+   *
+   * <p>Glide's resource re-use system is permissive, which means that's acceptable for callers to
+   * load resources into {@link com.bumptech.glide.request.target.Target}s and then never clear the
+   * {@link com.bumptech.glide.request.target.Target}. To do so, Glide uses
+   * {@link java.lang.ref.WeakReference}s to track resources that belong to
+   * {@link com.bumptech.glide.request.target.Target}s that haven't yet been cleared. Setting
+   * this method to {@code true} allows Glide to also maintain a hard reference to the underlying
+   * resource so that if the {@link com.bumptech.glide.request.target.Target} is garbage collected,
+   * Glide can return the underlying resource to it's memory cache so that subsequent requests will
+   * not unexpectedly re-load the resource from disk or source. As a side affect, it will take
+   * the system slightly longer to garbage collect the underlying resource because the weak
+   * reference has to be cleared and processed first. As a result, setting this method to
+   * {@code true} may transiently increase the memory usage of an application.
+   *
+   * <p>Setting this method to {@code false} will allow the platform to garbage collect resources
+   * more quickly, but will lead to unexpected memory cache misses if callers load resources into
+   * {@link com.bumptech.glide.request.target.Target}s but never clear them.
+   *
+   * <p>Regardless of what value this method is set to, it's always good practice to clear
+   * {@link com.bumptech.glide.request.target.Target}s when you're done with the corresponding
+   * resource. Clearing {@link com.bumptech.glide.request.target.Target}s allows Glide to maximize
+   * resource re-use, minimize memory overhead and minimize unexpected behavior resulting from
+   * edge cases.
+   *
+   * <p>Defaults to {@code true}.
+   *
+   * @return This builder.
+   */
+  public GlideBuilder setIsActiveResourceRetentionAllowed(
+      boolean isActiveResourceRetentionAllowed) {
+    this.isActiveResourceRetentionAllowed = isActiveResourceRetentionAllowed;
+    return this;
+  }
+
   void setRequestManagerFactory(@Nullable RequestManagerFactory factory) {
     this.requestManagerFactory = factory;
   }
@@ -386,7 +425,8 @@ public final class GlideBuilder {
               diskCacheExecutor,
               sourceExecutor,
               GlideExecutor.newUnlimitedSourceExecutor(),
-              GlideExecutor.newAnimationExecutor());
+              GlideExecutor.newAnimationExecutor(),
+              isActiveResourceRetentionAllowed);
     }
 
     RequestManagerRetriever requestManagerRetriever =

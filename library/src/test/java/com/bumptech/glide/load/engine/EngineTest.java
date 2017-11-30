@@ -654,7 +654,8 @@ public class EngineTest {
     @SuppressWarnings("rawtypes")
     final EngineResource resource = mock(EngineResource.class);
     final Jobs jobs = new Jobs();
-    final ActiveResources activeResources = new ActiveResources();
+    final ActiveResources activeResources =
+        new ActiveResources(/*isResourceRetentionAllowed=*/ true);
 
     final int width = 100;
     final int height = 100;
@@ -729,7 +730,8 @@ public class EngineTest {
                 activeResources,
                 engineJobFactory,
                 decodeJobFactory,
-                resourceRecycler);
+                resourceRecycler,
+                /*isActiveResourceRetentionAllowed=*/ true);
       }
       return engine;
     }

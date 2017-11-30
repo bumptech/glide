@@ -34,7 +34,7 @@ public class ActiveResourcesTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    resources = new ActiveResources();
+    resources = new ActiveResources(/*isResourceRetentionAllowed=*/ true);
     resources.setListener(listener);
 
     reset(GlideShadowLooper.queue);
@@ -173,7 +173,7 @@ public class ActiveResourcesTest {
   }
 
   @Test
-  public void queueIdle_withNotCacheableResourceInActive_callListener() {
+  public void queueIdle_withNotCacheableResourceInActive_doesNotCallListener() {
     EngineResource<Object> engineResource =
         new EngineResource<>(resource, /*isCacheable=*/ false, /*isRecyclable=*/ true);
     resources.activate(key, engineResource);
@@ -289,7 +289,7 @@ public class ActiveResourcesTest {
   }
 
   @Test
-  public void queueIdle_afterReferenceQueuedThenReactived_doesNotNotifyListner() {
+  public void queueIdle_afterReferenceQueuedThenReactivated_doesNotNotifyListener() {
     EngineResource<Object> first =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     resources.activate(key, first);
@@ -313,6 +313,48 @@ public class ActiveResourcesTest {
     resources.activate(key, engineResource);
 
     assertThat(resources.activeEngineResources.get(key).resource).isNull();
+  }
+
+  @Test
+  public void get_withActiveClearedKey_cacheableResource_retentionDisabled_doesNotCallListener() {
+    resources = new ActiveResources(/*isResourceRetentionAllowed=*/ false);
+    EngineResource<Object> engineResource =
+        new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
+    resources.activate(key, engineResource);
+    resources.activeEngineResources.get(key).clear();
+    resources.get(key);
+
+    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+  }
+
+  @Test
+  public void get_withQueuedReference_retentionDisabled_returnsResource() {
+    resources = new ActiveResources(/*isResourceRetentionAllowed=*/ false);
+    EngineResource<Object> engineResource =
+        new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
+    resources.activate(key, engineResource);
+
+    ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
+    weakRef.enqueue();
+
+    assertThat(resources.get(key)).isEqualTo(engineResource);
+  }
+
+  @Test
+  public void queueIdle_withQueuedReferenceRetrievedFromGet_retentionDisabled_doesNotNotify() {
+    resources = new ActiveResources(/*isResourceRetentionAllowed=*/ false);
+    EngineResource<Object> engineResource =
+        new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
+    resources.activate(key, engineResource);
+
+    ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
+    weakRef.enqueue();
+
+    resources.get(key);
+
+    triggerQueueIdle();
+
+    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
   }
 
   private void triggerQueueIdle() {

@@ -42,12 +42,14 @@ public class Engine implements EngineJobListener,
   private final DecodeJobFactory decodeJobFactory;
   private final ActiveResources activeResources;
 
-  public Engine(MemoryCache memoryCache,
+  public Engine(
+      MemoryCache memoryCache,
       DiskCache.Factory diskCacheFactory,
       GlideExecutor diskCacheExecutor,
       GlideExecutor sourceExecutor,
       GlideExecutor sourceUnlimitedExecutor,
-      GlideExecutor animationExecutor) {
+      GlideExecutor animationExecutor,
+      boolean isActiveResourceRetentionAllowed) {
     this(
         memoryCache,
         diskCacheFactory,
@@ -60,7 +62,8 @@ public class Engine implements EngineJobListener,
         /*activeResources=*/ null,
         /*engineJobFactory=*/ null,
         /*decodeJobFactory=*/ null,
-        /*resourceRecycler=*/ null);
+        /*resourceRecycler=*/ null,
+        isActiveResourceRetentionAllowed);
   }
 
   @VisibleForTesting
@@ -75,12 +78,13 @@ public class Engine implements EngineJobListener,
       ActiveResources activeResources,
       EngineJobFactory engineJobFactory,
       DecodeJobFactory decodeJobFactory,
-      ResourceRecycler resourceRecycler) {
+      ResourceRecycler resourceRecycler,
+      boolean isActiveResourceRetentionAllowed) {
     this.cache = cache;
     this.diskCacheProvider = new LazyDiskCacheProvider(diskCacheFactory);
 
     if (activeResources == null) {
-      activeResources = new ActiveResources();
+      activeResources = new ActiveResources(isActiveResourceRetentionAllowed);
     }
     this.activeResources = activeResources;
     activeResources.setListener(this);
