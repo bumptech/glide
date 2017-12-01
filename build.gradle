@@ -1,7 +1,7 @@
 buildscript {
     repositories {
-        jcenter()
         google()
+        jcenter()
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
@@ -65,19 +65,17 @@ subprojects { project ->
 
 subprojects { project ->
     repositories {
+        google()
         jcenter()
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
-        maven {
-            url "https://maven.google.com"
         }
     }
 
     apply plugin: 'checkstyle'
 
     checkstyle {
-        toolVersion = '8.4'
+        toolVersion = '8.5'
     }
 
     checkstyle {
@@ -99,11 +97,5 @@ subprojects { project ->
             check.dependsOn('checkstyle')
         }
     }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.1'
-    //noinspection UnnecessaryQualifiedReference
-    distributionType = Wrapper.DistributionType.ALL
 }
 

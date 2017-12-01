@@ -4,11 +4,9 @@ dist: trusty
 
 android:
   components:
-  - tools
-  - platform-tools
-  - tools
-  - build-tools-26.0.2
-  - android-26
+    # https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943
+    - tools
+    - tools
 
 licenses:
   - 'android-sdk-license.*'

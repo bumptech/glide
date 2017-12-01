@@ -13,7 +13,6 @@ dependencies {
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
-    buildToolsVersion BUILD_TOOLS_VERSION as String
 
     sourceSets {
         main {
