@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
@@ -76,9 +77,10 @@ public abstract class BitmapTransformation implements Transformation<Bitmap> {
     this();
   }
 
+  @NonNull
   @Override
   public final Resource<Bitmap> transform(
-      Context context, Resource<Bitmap> resource, int outWidth, int outHeight) {
+      @NonNull Context context, @NonNull Resource<Bitmap> resource, int outWidth, int outHeight) {
     if (!Util.isValidDimensions(outWidth, outHeight)) {
       throw new IllegalArgumentException(
           "Cannot apply transformation on width: " + outWidth + " or height: " + outHeight

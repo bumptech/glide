@@ -1,8 +1,10 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.support.v4.os.TraceCompat;
 import android.util.Log;
+
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
@@ -10,6 +12,7 @@ import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,7 +53,7 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
   private static final String TAG = "BitmapEncoder";
 
   @Override
-  public boolean encode(Resource<Bitmap> resource, File file, Options options) {
+  public boolean encode(@NonNull Resource<Bitmap> resource, @NonNull File file, @NonNull Options options) {
     final Bitmap bitmap = resource.get();
     Bitmap.CompressFormat format = getFormat(bitmap, options);
     TraceCompat.beginSection(
@@ -104,7 +107,7 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
   }
 
   @Override
-  public EncodeStrategy getEncodeStrategy(Options options) {
+  public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
     return EncodeStrategy.TRANSFORMED;
   }
 }

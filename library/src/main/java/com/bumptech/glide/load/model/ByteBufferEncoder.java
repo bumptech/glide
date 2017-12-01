@@ -1,9 +1,12 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
+
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.util.ByteBufferUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -15,7 +18,7 @@ public class ByteBufferEncoder implements Encoder<ByteBuffer> {
   private static final String TAG = "ByteBufferEncoder";
 
   @Override
-  public boolean encode(ByteBuffer data, File file, Options options) {
+  public boolean encode(@NonNull ByteBuffer data, @NonNull File file, @NonNull Options options) {
     boolean success = false;
     try {
       ByteBufferUtil.toFile(data, file);

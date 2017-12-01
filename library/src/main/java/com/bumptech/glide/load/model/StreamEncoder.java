@@ -1,9 +1,12 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
+
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -23,7 +26,7 @@ public class StreamEncoder implements Encoder<InputStream> {
   }
 
   @Override
-  public boolean encode(InputStream data, File file, Options options) {
+  public boolean encode(@NonNull InputStream data, @NonNull File file, @NonNull Options options) {
     byte[] buffer = byteArrayPool.get(ArrayPool.STANDARD_BUFFER_SIZE_BYTES, byte[].class);
     boolean success = false;
     OutputStream os = null;

@@ -2,8 +2,10 @@ package com.bumptech.glide.integration.gifencoder;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
@@ -22,6 +24,7 @@ import com.bumptech.glide.load.resource.gif.GifBitmapProvider;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.util.ByteBufferUtil;
 import com.bumptech.glide.util.LogTime;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -68,7 +71,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
 
   // Public API.
   @SuppressWarnings("unused")
-  public ReEncodingGifResourceEncoder(Context context, BitmapPool bitmapPool) {
+  public ReEncodingGifResourceEncoder(@NonNull Context context, @NonNull BitmapPool bitmapPool) {
     this(context, bitmapPool, FACTORY);
   }
 
@@ -81,14 +84,14 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
   }
 
   @Override
-  public EncodeStrategy getEncodeStrategy(Options options) {
+  public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
     Boolean encodeTransformation = options.get(ENCODE_TRANSFORMATION);
     return encodeTransformation != null && encodeTransformation
         ? EncodeStrategy.TRANSFORMED : EncodeStrategy.SOURCE;
   }
 
   @Override
-  public boolean encode(Resource<GifDrawable> resource, File file, Options options) {
+  public boolean encode(@NonNull Resource<GifDrawable> resource, @NonNull File file, @NonNull Options options) {
     GifDrawable drawable = resource.get();
     Transformation<Bitmap> transformation = drawable.getFrameTransformation();
     boolean isTransformed = !(transformation instanceof UnitTransformation);
