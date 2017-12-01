@@ -73,7 +73,7 @@ public class ListPreloaderTest {
       private int expectedPosition;
 
       @Override
-      public int[] getPreloadSize(Object item, int adapterPosition, int itemPosition) {
+      public int[] getPreloadSize(@NonNull Object item, int adapterPosition, int itemPosition) {
         return new int[] { 10, 10 };
       }
 
@@ -134,7 +134,7 @@ public class ListPreloaderTest {
       private int expectedPosition = toPreload - 1;
 
       @Override
-      public int[] getPreloadSize(Object item, int adapterPosition, int itemPosition) {
+      public int[] getPreloadSize(@NonNull Object item, int adapterPosition, int itemPosition) {
         return new int[] { 10, 10 };
       }
 
@@ -267,7 +267,7 @@ public class ListPreloaderTest {
       }
 
       @Override
-      public int[] getPreloadSize(Object item, int adapterPosition, int itemPosition) {
+      public int[] getPreloadSize(@NonNull Object item, int adapterPosition, int itemPosition) {
         assertEquals(expectedPosition / 2, adapterPosition);
         assertEquals(expectedPosition % 2, itemPosition);
         expectedPosition++;
@@ -305,7 +305,7 @@ public class ListPreloaderTest {
       }
 
       @Override
-      public int[] getPreloadSize(Object item, int adapterPosition, int itemPosition) {
+      public int[] getPreloadSize(@NonNull Object item, int adapterPosition, int itemPosition) {
         assertEquals(expectedPosition / 2, adapterPosition);
         assertEquals(expectedPosition % 2, itemPosition);
         expectedPosition--;
@@ -394,7 +394,7 @@ public class ListPreloaderTest {
     }
 
     @Override
-    public int[] getPreloadSize(Object item, int adapterPosition, int itemPosition) {
+    public int[] getPreloadSize(@NonNull Object item, int adapterPosition, int itemPosition) {
       return new int[] { 100, 100 };
     }
   }

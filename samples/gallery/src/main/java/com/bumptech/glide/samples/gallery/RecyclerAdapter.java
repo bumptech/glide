@@ -111,7 +111,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
   }
 
   @Override
-  public int[] getPreloadSize(MediaStoreData item, int adapterPosition, int perItemPosition) {
+  public int[] getPreloadSize(@NonNull MediaStoreData item, int adapterPosition, int perItemPosition) {
     return actualDimensions;
   }
 
