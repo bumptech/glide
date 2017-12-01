@@ -5,14 +5,15 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.drawable.ResourceDrawableDecoder;
 import com.bumptech.glide.request.target.Target;
-import java.io.IOException;
 
 /**
  * Decodes {@link Bitmap}s from resource ids.
@@ -39,14 +40,13 @@ public class ResourceBitmapDecoder implements ResourceDecoder<Uri, Bitmap> {
   }
 
   @Override
-  public boolean handles(Uri source, Options options) throws IOException {
+  public boolean handles(@NonNull Uri source, @NonNull Options options) {
     return ContentResolver.SCHEME_ANDROID_RESOURCE.equals(source.getScheme());
   }
 
   @Nullable
   @Override
-  public Resource<Bitmap> decode(Uri source, int width, int height, Options options)
-      throws IOException {
+  public Resource<Bitmap> decode(@NonNull Uri source, int width, int height, @NonNull Options options) {
     Resource<Drawable> drawableResource = drawableDecoder.decode(source, width, height, options);
     Drawable drawable = drawableResource.get();
     return DrawableToBitmapConverter.convert(bitmapPool, drawable, width, height);

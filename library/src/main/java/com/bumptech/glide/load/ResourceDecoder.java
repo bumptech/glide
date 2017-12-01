@@ -1,7 +1,10 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.bumptech.glide.load.engine.Resource;
+
 import java.io.IOException;
 
 /**
@@ -24,7 +27,7 @@ public interface ResourceDecoder<T, Z> {
    * <p>Decoders that return {@code true} from {@code handles} may still return {@code null} from
    * {@link #decode(Object, int, int, Options)} if the data is partial or formatted incorrectly.
    */
-  boolean handles(T source, Options options) throws IOException;
+  boolean handles(@NonNull T source, @NonNull Options options) throws IOException;
 
   /**
    * Returns a decoded resource from the given data or null if no resource could be decoded.
@@ -51,5 +54,5 @@ public interface ResourceDecoder<T, Z> {
    *                expected type.
    */
   @Nullable
-  Resource<Z> decode(T source, int width, int height, Options options) throws IOException;
+  Resource<Z> decode(@NonNull T source, int width, int height, @NonNull Options options) throws IOException;
 }

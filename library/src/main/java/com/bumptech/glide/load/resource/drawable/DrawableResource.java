@@ -3,7 +3,9 @@ package com.bumptech.glide.load.resource.drawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Drawable.ConstantState;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.bumptech.glide.load.engine.Initializable;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -27,6 +29,7 @@ public abstract class DrawableResource<T extends Drawable> implements Resource<T
     this.drawable = Preconditions.checkNotNull(drawable);
   }
 
+  @NonNull
   @SuppressWarnings("unchecked")
   @Override
   public final T get() {

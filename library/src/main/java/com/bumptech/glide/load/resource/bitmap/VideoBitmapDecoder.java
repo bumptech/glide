@@ -4,13 +4,16 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -105,7 +108,7 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
   }
 
   @Override
-  public boolean handles(ParcelFileDescriptor data, Options options) {
+  public boolean handles(@NonNull ParcelFileDescriptor data, @NonNull Options options) {
     // Calling setDataSource is expensive so avoid doing so unless we're actually called.
     // For non-videos this isn't any cheaper, but for videos it safes the redundant call and
     // 50-100ms.
@@ -113,8 +116,8 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
   }
 
   @Override
-  public Resource<Bitmap> decode(ParcelFileDescriptor resource, int outWidth, int outHeight,
-      Options options) throws IOException {
+  public Resource<Bitmap> decode(@NonNull ParcelFileDescriptor resource, int outWidth, int outHeight,
+      @NonNull Options options) throws IOException {
     long frameTimeMicros = options.get(TARGET_FRAME);
     if (frameTimeMicros < 0 && frameTimeMicros != DEFAULT_FRAME) {
       throw new IllegalArgumentException(

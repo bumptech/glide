@@ -1,6 +1,8 @@
 package com.bumptech.glide.load.resource.drawable;
 
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+
 import com.bumptech.glide.load.engine.Resource;
 
 /**
@@ -18,6 +20,7 @@ final class NonOwnedDrawableResource extends DrawableResource<Drawable> {
     super(drawable);
   }
 
+  @NonNull
   @SuppressWarnings("unchecked")
   @Override
   public Class<Drawable> getResourceClass() {

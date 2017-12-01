@@ -1,10 +1,13 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.ByteBufferUtil;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -20,12 +23,12 @@ public class ByteBufferBitmapDecoder implements ResourceDecoder<ByteBuffer, Bitm
   }
 
   @Override
-  public boolean handles(ByteBuffer source, Options options) throws IOException {
+  public boolean handles(@NonNull ByteBuffer source, @NonNull Options options) {
     return downsampler.handles(source);
   }
 
   @Override
-  public Resource<Bitmap> decode(ByteBuffer source, int width, int height, Options options)
+  public Resource<Bitmap> decode(@NonNull ByteBuffer source, int width, int height, @NonNull Options options)
       throws IOException {
     InputStream is = ByteBufferUtil.toStream(source);
     return downsampler.decode(is, width, height, options);

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.Initializable;
 import com.bumptech.glide.load.engine.Resource;
@@ -61,11 +62,13 @@ public final class LazyBitmapDrawableResource implements Resource<BitmapDrawable
     this.bitmapResource = Preconditions.checkNotNull(bitmapResource);
   }
 
+  @NonNull
   @Override
   public Class<BitmapDrawable> getResourceClass() {
     return BitmapDrawable.class;
   }
 
+  @NonNull
   @Override
   public BitmapDrawable get() {
     return new BitmapDrawable(resources, bitmapResource.get());

@@ -4,6 +4,7 @@ package com.bumptech.glide.load.resource.gif;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -42,10 +43,11 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
   }
 
   @Override
-  public void release(Bitmap bitmap) {
+  public void release(@NonNull Bitmap bitmap) {
     bitmapPool.put(bitmap);
   }
 
+  @NonNull
   @Override
   public byte[] obtainByteArray(int size) {
     if (arrayPool == null) {
@@ -56,13 +58,14 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
 
   @SuppressWarnings("PMD.UseVarargs")
   @Override
-  public void release(byte[] bytes) {
+  public void release(@NonNull byte[] bytes) {
     if (arrayPool == null) {
       return;
     }
     arrayPool.put(bytes);
   }
 
+  @NonNull
   @Override
   public int[] obtainIntArray(int size) {
     if (arrayPool == null) {
@@ -73,7 +76,7 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
 
   @SuppressWarnings("PMD.UseVarargs")
   @Override
-  public void release(int[] array) {
+  public void release(@NonNull int[] array) {
     if (arrayPool == null) {
       return;
     }

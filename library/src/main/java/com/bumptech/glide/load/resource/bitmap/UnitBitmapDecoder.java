@@ -1,11 +1,12 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.Util;
-import java.io.IOException;
 
 /**
  * Passes through a (hopefully) non-owned {@link Bitmap} as a {@link Bitmap} based {@link Resource}
@@ -14,13 +15,12 @@ import java.io.IOException;
 public final class UnitBitmapDecoder implements ResourceDecoder<Bitmap, Bitmap> {
 
   @Override
-  public boolean handles(Bitmap source, Options options) throws IOException {
+  public boolean handles(@NonNull Bitmap source, @NonNull Options options) {
     return true;
   }
 
   @Override
-  public Resource<Bitmap> decode(Bitmap source, int width, int height, Options options)
-      throws IOException {
+  public Resource<Bitmap> decode(@NonNull Bitmap source, int width, int height, @NonNull Options options) {
     return new NonOwnedBitmapResource(source);
   }
 
@@ -32,11 +32,13 @@ public final class UnitBitmapDecoder implements ResourceDecoder<Bitmap, Bitmap> 
       this.bitmap = bitmap;
     }
 
+    @NonNull
     @Override
     public Class<Bitmap> getResourceClass() {
       return Bitmap.class;
     }
 
+    @NonNull
     @Override
     public Bitmap get() {
       return bitmap;

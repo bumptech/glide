@@ -1,6 +1,8 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pools;
+
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.pool.FactoryPools;
@@ -61,11 +63,13 @@ final class LockedResource<Z> implements Resource<Z>,
     }
   }
 
+  @NonNull
   @Override
   public Class<Z> getResourceClass() {
     return toWrap.getResourceClass();
   }
 
+  @NonNull
   @Override
   public Z get() {
     return toWrap.get();

@@ -7,9 +7,9 @@ import static org.robolectric.Shadows.shadowOf;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+
 import com.bumptech.glide.testutil.TestUtil;
-import java.io.IOException;
-import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +19,9 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowBitmap;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}.
@@ -197,27 +200,29 @@ public class GifDecoderTest {
     }
 
     @Override
-    public void release(Bitmap bitmap) {
+    public void release(@NonNull Bitmap bitmap) {
       // Do nothing.
     }
 
+    @NonNull
     @Override
     public byte[] obtainByteArray(int size) {
       return new byte[size];
     }
 
     @Override
-    public void release(byte[] bytes) {
+    public void release(@NonNull byte[] bytes) {
       // Do nothing.
     }
 
+    @NonNull
     @Override
     public int[] obtainIntArray(int size) {
       return new int[size];
     }
 
     @Override
-    public void release(int[] array) {
+    public void release(@NonNull int[] array) {
       // Do Nothing
     }
 

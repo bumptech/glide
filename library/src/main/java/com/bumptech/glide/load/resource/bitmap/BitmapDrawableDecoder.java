@@ -5,11 +5,13 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
+
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
+
 import java.io.IOException;
 
 /**
@@ -47,12 +49,12 @@ public class BitmapDrawableDecoder<DataType> implements ResourceDecoder<DataType
   }
 
   @Override
-  public boolean handles(DataType source, Options options) throws IOException {
+  public boolean handles(@NonNull DataType source, @NonNull Options options) throws IOException {
     return decoder.handles(source, options);
   }
 
   @Override
-  public Resource<BitmapDrawable> decode(DataType source, int width, int height, Options options)
+  public Resource<BitmapDrawable> decode(@NonNull DataType source, int width, int height, @NonNull Options options)
       throws IOException {
     Resource<Bitmap> bitmapResource = decoder.decode(source, width, height, options);
     return LazyBitmapDrawableResource.obtain(resources, bitmapResource);

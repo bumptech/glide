@@ -3,6 +3,8 @@ package com.bumptech.glide.gifdecoder;
 import android.graphics.Bitmap;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -44,40 +46,43 @@ public interface GifDecoder {
      *               android.graphics.Bitmap}.
      */
     @NonNull
-    Bitmap obtain(int width, int height, Bitmap.Config config);
+    Bitmap obtain(int width, int height, @NonNull Bitmap.Config config);
 
     /**
      * Releases the given Bitmap back to the pool.
      */
-    void release(Bitmap bitmap);
+    void release(@NonNull Bitmap bitmap);
 
     /**
      * Returns a byte array used for decoding and generating the frame bitmap.
      *
      * @param size the size of the byte array to obtain
      */
+    @NonNull
     byte[] obtainByteArray(int size);
 
     /**
      * Releases the given byte array back to the pool.
      */
-    void release(byte[] bytes);
+    void release(@NonNull byte[] bytes);
 
     /**
      * Returns an int array used for decoding/generating the frame bitmaps.
      */
+    @NonNull
     int[] obtainIntArray(int size);
 
     /**
      * Release the given array back to the pool.
      */
-    void release(int[] array);
+    void release(@NonNull int[] array);
   }
 
   int getWidth();
 
   int getHeight();
 
+  @NonNull
   ByteBuffer getData();
 
   /**
@@ -189,6 +194,7 @@ public interface GifDecoder {
    *
    * @return Bitmap representation of frame.
    */
+  @Nullable
   Bitmap getNextFrame();
 
   /**
@@ -198,15 +204,15 @@ public interface GifDecoder {
    * @return read status code (0 = no errors).
    */
   @GifDecodeStatus
-  int read(InputStream is, int contentLength);
+  int read(@Nullable InputStream is, int contentLength);
 
   void clear();
 
-  void setData(GifHeader header, byte[] data);
+  void setData(@NonNull GifHeader header, @NonNull byte[] data);
 
-  void setData(GifHeader header, ByteBuffer buffer);
+  void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer);
 
-  void setData(GifHeader header, ByteBuffer buffer, int sampleSize);
+  void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer, int sampleSize);
 
   /**
    * Reads GIF image from byte array.
@@ -215,7 +221,7 @@ public interface GifDecoder {
    * @return read status code (0 = no errors).
    */
   @GifDecodeStatus
-  int read(byte[] data);
+  int read(@Nullable byte[] data);
 
 
   /**
@@ -233,5 +239,5 @@ public interface GifDecoder {
    * {@link android.graphics.Bitmap.Config#ARGB_8888} will be used anyway to support the
    * transparency.
    */
-  void setDefaultBitmapConfig(Bitmap.Config format);
+  void setDefaultBitmapConfig(@NonNull Bitmap.Config format);
 }

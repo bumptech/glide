@@ -7,10 +7,11 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
-import java.io.IOException;
+
 import java.util.List;
 
 /**
@@ -37,14 +38,13 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
   }
 
   @Override
-  public boolean handles(Uri source, Options options) throws IOException {
+  public boolean handles(@NonNull Uri source, @NonNull Options options) {
     return source.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE);
   }
 
   @NonNull
   @Override
-  public Resource<Drawable> decode(Uri source, int width, int height, Options options)
-      throws IOException {
+  public Resource<Drawable> decode(@NonNull Uri source, int width, int height, @NonNull Options options) {
     @DrawableRes int resId = loadResourceIdFromUri(source);
     String packageName = source.getAuthority();
     Context toUse = packageName.equals(context.getPackageName())
