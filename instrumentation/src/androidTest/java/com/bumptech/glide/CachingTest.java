@@ -118,6 +118,7 @@ public class CachingTest {
     // Wait for the weak reference to be cleared and the request to be removed from active
     // resources.
     // De-flake by allowing multiple tries
+    boolean isWeakRefCleared = false;
     for (int j = 0; j < 100; j++) {
       Runtime.getRuntime().gc();
       concurrency.pokeMainThread();
@@ -135,8 +136,13 @@ public class CachingTest {
         GlideApp.with(context).clear(target);
       } catch (RuntimeException e) {
         // The item has been cleared from active resources.
+        isWeakRefCleared = true;
         break;
       }
+    }
+
+    if (!isWeakRefCleared) {
+      fail("Failed to clear weak ref.");
     }
 
     concurrency.get(
