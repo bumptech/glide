@@ -205,12 +205,37 @@ public class RequestManager implements LifecycleListener,
   /**
    * Cancels any in progress loads, but does not clear resources of completed loads.
    *
+   * <p>Note #{@link #resumeRequests()} must be called for any requests made before or while the
+   * manager is paused to complete. RequestManagers attached to Fragments and Activities
+   * automatically resume onStart().
+   *
    * @see #isPaused()
    * @see #resumeRequests()
    */
   public void pauseRequests() {
     Util.assertMainThread();
     requestTracker.pauseRequests();
+  }
+
+  /**
+   * Cancels any in progress loads and clears resources of completed loads.
+   *
+   * <p>Note #{@link #resumeRequests()} must be called for any requests made before or while the
+   * manager is paused to complete. RequestManagers attached to Fragments and Activities
+   * automatically resume onStart().
+   *
+   * <p>This will release the memory used by completed bitmaps but leaves them in any configured
+   * caches. When an #{@link android.app.Activity} receives #{@link
+   * android.app.Activity#onTrimMemory(int)} at a level of #{@link
+   * android.content.ComponentCallbacks2#TRIM_MEMORY_BACKGROUND} this is desirable in order to keep
+   * your process alive longer.
+   *
+   * @see #isPaused()
+   * @see #resumeRequests()
+   */
+  public void pauseAllRequests() {
+    Util.assertMainThread();
+    requestTracker.pauseAllRequests();
   }
 
   /**
