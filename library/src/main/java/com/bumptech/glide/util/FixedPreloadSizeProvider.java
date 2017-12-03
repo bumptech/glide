@@ -2,7 +2,6 @@ package com.bumptech.glide.util;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.ListPreloader;
 
 /**

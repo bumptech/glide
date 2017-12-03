@@ -12,14 +12,12 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.ImageView;
-
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.signature.MediaStoreSignature;
 import com.bumptech.glide.util.Preconditions;
-
 import java.util.Collections;
 import java.util.List;
 
