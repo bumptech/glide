@@ -25,11 +25,11 @@ Or use Gradle:
 ```gradle
 repositories {
   mavenCentral()
-  maven { url 'https://maven.google.com' }
+  google()
 }
 
 dependencies {
-  compile 'com.github.bumptech.glide:glide:4.3.1'
+  implementation 'com.github.bumptech.glide:glide:4.3.1'
   annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
 }
 ```

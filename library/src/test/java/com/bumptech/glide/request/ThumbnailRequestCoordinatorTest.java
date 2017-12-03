@@ -86,6 +86,33 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
+  public void begin_whenFullIsComplete_startsFull() {
+    when(full.isComplete()).thenReturn(true);
+
+    coordinator.begin();
+
+    verify(full).begin();
+  }
+
+  @Test
+  public void begin_whenFullIsComplete_doesNotBeginThumb() {
+    when(full.isComplete()).thenReturn(true);
+
+    coordinator.begin();
+
+    verify(thumb, never()).begin();
+  }
+
+  @Test
+  public void begin_whenFullIsComplete_doesNotSetRunning() {
+    when(full.isComplete()).thenReturn(true);
+
+    coordinator.begin();
+
+    assertThat(coordinator.isRunning()).isFalse();
+  }
+
+  @Test
   public void testDoesNotStartFullIfClearedByThumb() {
     doAnswer(new Answer<Void>() {
       @Override
