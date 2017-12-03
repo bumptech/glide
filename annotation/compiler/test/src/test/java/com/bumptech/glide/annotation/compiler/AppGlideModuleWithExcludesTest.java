@@ -16,6 +16,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+/**
+ * Tests AppGlideModules that use the @Excludes annotation with a single excluded Module class.
+ */
 @RunWith(JUnit4.class)
 public class AppGlideModuleWithExcludesTest {
   private Compilation compilation;
