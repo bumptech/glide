@@ -15,10 +15,12 @@
  *
  *
  * Based on: https://github.com/mcxiaoke/gradle-mvn-push/blob/master/gradle-mvn-push.gradle.
- * Local test with (..._REPOSITORY_URL properties must be full paths):
- * gradlew clean buildArchives uploadArchives --stacktrace --info -PSNAPSHOT_REPOSITORY_URL=file://p:\projects\contrib\github-glide\repo-snapshot -PRELEASE_REPOSITORY_URL=file://p:\projects\contrib\github-glide\repo-release
- * For faster runs add: -x check
- * 
+ *
+ * To install in a local maven repo:
+ * 1. In the project you want to test (not Glide), add mavenLocal() to the repositories list.
+ * 2. In Glide, run: ./gradlew uploadArchives -PLOCAL
+ *
+ * For faster runs add: -x check when building Glide.
  */
 
 apply plugin: 'maven'
@@ -27,18 +29,24 @@ apply plugin: 'signing'
 version = VERSION_NAME
 group = GROUP
 
+static def localMavenRepo() {
+    'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+}
+
 @SuppressWarnings("GrMethodMayBeStatic")
 def isReleaseBuild() {
     return !VERSION_NAME.contains("SNAPSHOT")
 }
 
 def getReleaseRepositoryUrl() {
-    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
+    return hasProperty('LOCAL') ? localMavenRepo()
+            : hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
             : 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
 }
 
 def getSnapshotRepositoryUrl() {
-    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
+    return hasProperty('LOCAL') ? localMavenRepo()
+            : hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
             : 'https://oss.sonatype.org/content/repositories/snapshots/'
 }
 
