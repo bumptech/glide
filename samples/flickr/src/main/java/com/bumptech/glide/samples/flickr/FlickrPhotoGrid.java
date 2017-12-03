@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.Priority;
@@ -21,6 +23,7 @@ import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.bumptech.glide.util.Preconditions;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -78,7 +81,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
     final int gridMargin = getResources().getDimensionPixelOffset(R.dimen.grid_margin);
     int spanCount = getResources().getDisplayMetrics().widthPixels / (photoSize + (2 * gridMargin));
-    grid = (RecyclerView) result.findViewById(R.id.flickr_photo_grid);
+    grid = result.findViewById(R.id.flickr_photo_grid);
     layoutManager = new GridLayoutManager(getActivity(), spanCount);
     grid.setLayoutManager(layoutManager);
 
@@ -199,9 +202,9 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
       return photos.subList(position, position + 1);
     }
 
-    @NonNull
+    @Nullable
     @Override
-    public RequestBuilder<Drawable> getPreloadRequestBuilder(Photo item) {
+    public RequestBuilder<Drawable> getPreloadRequestBuilder(@NonNull Photo item) {
       return preloadRequest.load(item);
     }
   }

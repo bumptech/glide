@@ -9,15 +9,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +24,14 @@ import org.mockito.verification.VerificationMode;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class ListPreloaderTest {
@@ -36,7 +40,7 @@ public class ListPreloaderTest {
   @Mock private RequestManager requestManager;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
   }
 
@@ -83,10 +87,10 @@ public class ListPreloaderTest {
         return objects.subList(position - 11, position + 1 - 11);
       }
 
-      @NonNull
+      @Nullable
       @Override
       @SuppressWarnings("unchecked")
-      public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
+      public RequestBuilder<Object> getPreloadRequestBuilder(@NonNull Object item) {
         assertEquals(objects.get(expectedPosition), item);
         expectedPosition++;
         return mock(RequestBuilder.class);
@@ -147,10 +151,10 @@ public class ListPreloaderTest {
         return objects.subList(position, position + 1);
       }
 
-      @NonNull
+      @Nullable
       @Override
       @SuppressWarnings("unchecked")
-      public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
+      public RequestBuilder<Object> getPreloadRequestBuilder(@NonNull Object item) {
         assertEquals(objects.get(expectedPosition), item);
         expectedPosition--;
         return mock(RequestBuilder.class);
@@ -253,7 +257,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testMultipleItemsForPositionIncreasing() throws NoSuchFieldException {
+  public void testMultipleItemsForPositionIncreasing() {
     final List<Object> objects = new ArrayList<>();
     objects.add(new Object());
     objects.add(new Object());
@@ -274,9 +278,9 @@ public class ListPreloaderTest {
         return itemPosition == 0 ? new int[] { 10, 11 } : new int[] { 20, 21 };
       }
 
-      @NonNull
+      @Nullable
       @Override
-      public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
+      public RequestBuilder<Object> getPreloadRequestBuilder(@NonNull Object item) {
         return request;
       }
     };
@@ -291,7 +295,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testMultipleItemsForPositionDecreasing() throws NoSuchFieldException {
+  public void testMultipleItemsForPositionDecreasing() {
     final List<Object> objects = new ArrayList<>();
     objects.add(new Object());
     objects.add(new Object());
@@ -312,9 +316,9 @@ public class ListPreloaderTest {
         return itemPosition == 0 ? new int[] { 10, 11 } : new int[] { 20, 21 };
       }
 
-      @NonNull
+      @Nullable
       @Override
-      public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
+      public RequestBuilder<Object> getPreloadRequestBuilder(@NonNull Object item) {
         return request;
       }
     };
@@ -358,9 +362,9 @@ public class ListPreloaderTest {
         return objects.subList(position - 11, position - 10);
       }
 
-      @NonNull
+      @Nullable
       @Override
-      public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
+      public RequestBuilder<Object> getPreloadRequestBuilder(@NonNull Object item) {
         loadedObjects.add(item);
         return super.getPreloadRequestBuilder(item);
       }
@@ -386,13 +390,14 @@ public class ListPreloaderTest {
       return result;
     }
 
-    @NonNull
+    @Nullable
     @Override
     @SuppressWarnings("unchecked")
-    public RequestBuilder<Object> getPreloadRequestBuilder(Object item) {
+    public RequestBuilder<Object> getPreloadRequestBuilder(@NonNull Object item) {
       return mock(RequestBuilder.class);
     }
 
+    @Nullable
     @Override
     public int[] getPreloadSize(@NonNull Object item, int adapterPosition, int itemPosition) {
       return new int[] { 100, 100 };

@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
@@ -23,6 +25,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -58,7 +61,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
       @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     final View result = inflater.inflate(R.layout.flickr_photo_list, container, false);
 
-    list = (RecyclerView) result.findViewById(R.id.flickr_photo_list);
+    list = result.findViewById(R.id.flickr_photo_list);
     layoutManager = new LinearLayoutManager(getActivity());
     list.setLayoutManager(layoutManager);
     adapter = new FlickrPhotoListAdapter();
@@ -172,9 +175,9 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
       return photos.subList(position, position + 1);
     }
 
-    @NonNull
+    @Nullable
     @Override
-    public RequestBuilder<Drawable> getPreloadRequestBuilder(Photo item) {
+    public RequestBuilder<Drawable> getPreloadRequestBuilder(@NonNull Photo item) {
       return fullRequest.thumbnail(thumbRequest.load(item)).load(item);
     }
   }
@@ -185,8 +188,8 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
 
     PhotoTitleViewHolder(View itemView) {
       super(itemView);
-      imageView = (ImageView) itemView.findViewById(R.id.photo_view);
-      titleView = (TextView) itemView.findViewById(R.id.title_view);
+      imageView = itemView.findViewById(R.id.photo_view);
+      titleView = itemView.findViewById(R.id.title_view);
     }
   }
 }

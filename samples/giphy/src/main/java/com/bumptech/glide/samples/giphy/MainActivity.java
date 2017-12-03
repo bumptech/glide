@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.RecyclerListener;
@@ -15,11 +16,13 @@ import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -35,13 +38,13 @@ public class MainActivity extends Activity implements Api.Monitor {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    ImageView giphyLogoView = (ImageView) findViewById(R.id.giphy_logo_view);
+    ImageView giphyLogoView = findViewById(R.id.giphy_logo_view);
 
     GlideApp.with(this)
         .load(R.raw.large_giphy_logo)
         .into(giphyLogoView);
 
-    RecyclerView gifList = (RecyclerView) findViewById(R.id.gif_list);
+    RecyclerView gifList = findViewById(R.id.gif_list);
     LinearLayoutManager layoutManager = new LinearLayoutManager(this);
     gifList.setLayoutManager(layoutManager);
 
@@ -158,9 +161,9 @@ public class MainActivity extends Activity implements Api.Monitor {
       return Collections.singletonList(results[position]);
     }
 
-    @NonNull
+    @Nullable
     @Override
-    public RequestBuilder<Drawable> getPreloadRequestBuilder(Api.GifResult item) {
+    public RequestBuilder<Drawable> getPreloadRequestBuilder(@NonNull Api.GifResult item) {
       return requestBuilder.load(item);
     }
   }
@@ -170,7 +173,7 @@ public class MainActivity extends Activity implements Api.Monitor {
 
     GifViewHolder(View itemView) {
       super(itemView);
-      gifView = (ImageView) itemView.findViewById(R.id.gif_view);
+      gifView = itemView.findViewById(R.id.gif_view);
     }
   }
 }
