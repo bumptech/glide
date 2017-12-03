@@ -1,11 +1,11 @@
 package com.bumptech.glide.samples.gallery;
 
 import android.Manifest.permission;
-import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -34,7 +34,7 @@ public class MainActivity extends FragmentActivity {
     }
   }
 
-  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+  @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
   private void requestStoragePermission() {
      ActivityCompat.requestPermissions(this,
         new String[]{permission.READ_EXTERNAL_STORAGE},

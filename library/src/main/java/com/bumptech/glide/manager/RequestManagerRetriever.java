@@ -317,7 +317,6 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
-  @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   RequestManagerFragment getRequestManagerFragment(
       final android.app.FragmentManager fm, android.app.Fragment parentHint) {
     RequestManagerFragment current = (RequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
