@@ -121,13 +121,13 @@ Comments/bugs/questions/pull requests are always welcome! Please read [CONTRIBUT
 Compatibility
 -------------
 
- * **Minimum Android SDK**: Glide requires a minimum API level of 14.
- * **Compile Android SDK**: Glide requires you to compile against API 26.
+ * **Minimum Android SDK**: Glide v4 requires a minimum API level of 14.
+ * **Compile Android SDK**: Glide v4 requires you to compile against API 26 or later.
 
- If you need to support older versions, consider staying on [Glide v3][14], which works on API 10, but not actively maintained.
- * **OkHttp 2.x**: there are optional dependencies available called `okhttp-integration`, see [Integration Libraries][12] wiki page.
- * **OkHttp 3.x**: there are optional dependencies available called `okhttp3-integration`, see [Integration Libraries][12] wiki page.
- * **Volley**: there are optional dependencies available called `volley-integration`, see [Integration Libraries][12] wiki page.
+ If you need to support older versions of Android, consider staying on [Glide v3][14], which works on API 10, but is not actively maintained.
+
+ * **OkHttp 3.x**: There is an optional dependency available called `okhttp3-integration`, see the [docs page][23].
+ * **Volley**: There is an optional dependency available called `volley-integration`, see the [docs page][24].
  * **Round Pictures**: `CircleImageView`/`CircularImageView`/`RoundedImageView` are known to have [issues][18] with `TransitionDrawable` (`.crossFade()` with `.thumbnail()` or `.placeholder()`) and animated GIFs, use a [`BitmapTransformation`][19] (`.circleCrop()` will be available in v4) or `.dontAnimate()` to fix the issue.
  * **Huge Images** (maps, comic strips): Glide can load huge images by downsampling them, but does not support zooming and panning `ImageView`s as they require special resource optimizations (such as tiling) to work without `OutOfMemoryError`s.
 
@@ -220,3 +220,5 @@ This is not an official Google product.
 [20]: https://bumptech.github.io/glide/
 [21]: https://bumptech.github.io/glide/doc/generatedapi.html
 [22]: https://muyangmin.github.io/glide-docs-cn/
+[23]: http://bumptech.github.io/glide/int/okhttp3.html
+[24]: http://bumptech.github.io/glide/int/volley.html
