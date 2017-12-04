@@ -116,9 +116,29 @@ The version, ``4.3.0-20171024.022226-26``, comes from the Sonatype repo. You can
 Although picking a specific snapshot version is a bit more work, it's typically a safer option if you're going to depend on the snapshot version of Glide in a prod version of your application or library.
 
 ### Building snapshots locally
-If you want to get the same files that would be released execute this command:
+Maven allows you to install artifacts in specific Maven repositories and depend on those artifcats in other projects. Often this is a simple way to test changes in Glide in third party projects. There are two places that you 
+
+#### Installing in the default local Maven repo
+If you simply want to test that some changes you've made in Glide work with your project (or build your project against a specific version or commit of Glide), you can install Glide in the default local maven repository.
+
+To do so, add the following to the ``repositories`` section of your ``build.gradle`` file: 
+
+```groovy
+repositories {
+  mavenLocal()
+}
+```
+
+Then build glide with ``-PLOCAL``:
 ```shell
-gradlew clean buildArchives uploadArchives --stacktrace --info -PSNAPSHOT_REPOSITORY_URL=file://p:\path\to\repo -PRELEASE_REPOSITORY_URL=file://p:\path\to\repo
+./gradlew uploadArchives --parallel -PLOCAL
+```
+
+#### Installing in a specific local or remote Maven repo
+If you  need to specify a specific local or remote Maven repo to install Glide to, you can do so with the following command:
+
+```shell
+./gradlew uploadArchives --stacktrace --info -PSNAPSHOT_REPOSITORY_URL=file://p:\path\to\repo -PRELEASE_REPOSITORY_URL=file://p:\path\to\repo
 ```
 This will create a m2 repository folder that you can consume with Gradle in a project to test your change:
 ```gradle
