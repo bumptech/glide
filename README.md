@@ -55,11 +55,11 @@ Or Maven:
 </dependency>
 ```
 
-For info on using the bleeding edge, see the [Snapshots][17] wiki page.
+For info on using the bleeding edge, see the [Snapshots][17] docs page.
 
 ProGuard
 --------
-Depending on your ProGuard (DexGuard) config and usage, you may need to include the following lines in your proguard.cfg (see [Configuration wiki](https://github.com/bumptech/glide/wiki/Configuration#keeping-a-glidemodule) for more details):
+Depending on your ProGuard (DexGuard) config and usage, you may need to include the following lines in your proguard.cfg (see the [Download and Setup docs page][25] for more details):
 
 ```pro
 -keep public class * implements com.bumptech.glide.module.GlideModule
@@ -136,9 +136,8 @@ Build
 Building Glide with gradle is fairly straight forward:
 
 ```shell
-git clone git@github.com:bumptech/glide.git # use https://github.com/bumptech/glide.git if "Permission Denied"
+git clone https://github.com/bumptech/glide.git 
 cd glide
-git submodule init && git submodule update
 ./gradlew jar
 ```
 
@@ -160,14 +159,16 @@ You may also find precompiled APKs on the [releases page][1].
 Development
 -----------
 Follow the steps in the [Build](#build) section to setup the project and then edit the files however you wish.
-[Intellij IDEA 14][4] cleanly imports both Glide's source and tests and is the recommended way to work with Glide.
+[Android Studio][26] cleanly imports both Glide's source and tests and is the recommended way to work with Glide.
 
-To open the project in IntelliJ IDEA:
+To open the project in Android Studio:
 
 1. Go to *File* menu or the *Welcome Screen*
 2. Click on *Open...*
 3. Navigate to Glide's root directory.
-4. Select `build.gradle`
+4. Select `setting.gradle`
+
+For more details, see the [Contributing docs page][27].
 
 Getting Help
 ------------
@@ -214,7 +215,7 @@ This is not an official Google product.
 [14]: https://github.com/bumptech/glide/tree/3.0
 [15]: https://github.com/bumptech/glide/tree/master
 [16]: https://github.com/bumptech/glide/blob/master/LICENSE
-[17]: https://github.com/bumptech/glide/wiki/Snapshots
+[17]: http://bumptech.github.io/glide/dev/snapshots.html
 [18]: https://github.com/bumptech/glide/issues?q=is%3Aissue+CircleImageView+OR+CircularImageView+OR+RoundedImageView
 [19]: https://github.com/wasabeef/glide-transformations
 [20]: https://bumptech.github.io/glide/
@@ -222,3 +223,6 @@ This is not an official Google product.
 [22]: https://muyangmin.github.io/glide-docs-cn/
 [23]: http://bumptech.github.io/glide/int/okhttp3.html
 [24]: http://bumptech.github.io/glide/int/volley.html
+[25]: http://bumptech.github.io/glide/doc/download-setup.html#proguard
+[26]: https://developer.android.com/studio/index.html
+[27]: http://bumptech.github.io/glide/dev/contributing.html
