@@ -9,8 +9,11 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeSpec.Builder;
 import com.squareup.javapoet.WildcardTypeName;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -82,15 +85,22 @@ final class AppModuleGenerator {
 
   TypeSpec generate(TypeElement appGlideModule, Set<String> libraryGlideModuleClassNames) {
     ClassName appGlideModuleClassName = ClassName.get(appGlideModule);
-    Set<String> excludedGlideModuleClassNames =
+    List<String> excludedGlideModuleClassNames =
         getExcludedGlideModuleClassNames(appGlideModule);
+
+    List<String> orderedLibraryGlideModuleClassNames =
+        new ArrayList<>(libraryGlideModuleClassNames);
+    Collections.sort(orderedLibraryGlideModuleClassNames);
 
     MethodSpec constructor =
         generateConstructor(
-            appGlideModuleClassName, libraryGlideModuleClassNames, excludedGlideModuleClassNames);
+            appGlideModuleClassName,
+            orderedLibraryGlideModuleClassNames,
+            excludedGlideModuleClassNames);
 
     MethodSpec registerComponents =
-        generateRegisterComponents(libraryGlideModuleClassNames, excludedGlideModuleClassNames);
+        generateRegisterComponents(
+            orderedLibraryGlideModuleClassNames, excludedGlideModuleClassNames);
 
     MethodSpec getExcludedModuleClasses =
         generateGetExcludedModuleClasses(excludedGlideModuleClassNames);
@@ -143,7 +153,7 @@ final class AppModuleGenerator {
   }
 
   // TODO: When we drop support for parsing GlideModules from AndroidManifests, remove this method.
-  private MethodSpec generateGetExcludedModuleClasses(Set<String> excludedClassNames) {
+  private MethodSpec generateGetExcludedModuleClasses(Collection<String> excludedClassNames) {
     TypeName wildCardOfObject = WildcardTypeName.subtypeOf(Object.class);
     ParameterizedTypeName classOfWildcardOfObjet =
         ParameterizedTypeName.get(ClassName.get(Class.class), wildCardOfObject);
@@ -174,8 +184,9 @@ final class AppModuleGenerator {
     return builder.build();
   }
 
-  private MethodSpec generateRegisterComponents(Set<String> libraryGlideModuleClassNames,
-      Set<String> excludedGlideModuleClassNames) {
+  private MethodSpec generateRegisterComponents(
+      Collection<String> libraryGlideModuleClassNames,
+      Collection<String> excludedGlideModuleClassNames) {
     MethodSpec.Builder registerComponents =
         MethodSpec.methodBuilder("registerComponents")
             .addModifiers(Modifier.PUBLIC)
@@ -198,7 +209,8 @@ final class AppModuleGenerator {
   }
 
   private MethodSpec generateConstructor(ClassName appGlideModule,
-      Set<String> libraryGlideModuleClassNames, Set<String> excludedGlideModuleClassNames) {
+      Collection<String> libraryGlideModuleClassNames,
+      Collection<String> excludedGlideModuleClassNames) {
     MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder();
     constructorBuilder.addStatement("appGlideModule = new $T()", appGlideModule);
 
@@ -224,8 +236,11 @@ final class AppModuleGenerator {
     return constructorBuilder.build();
   }
 
-  private Set<String> getExcludedGlideModuleClassNames(TypeElement appGlideModule) {
-    return processorUtil.findClassValuesFromAnnotationOnClassAsNames(
+  private List<String> getExcludedGlideModuleClassNames(TypeElement appGlideModule) {
+    Set<String> names = processorUtil.findClassValuesFromAnnotationOnClassAsNames(
         appGlideModule, Excludes.class);
+    List<String> result = new ArrayList<>(names);
+    Collections.sort(result);
+    return result;
   }
 }
