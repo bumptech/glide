@@ -1,5 +1,7 @@
 package com.bumptech.glide.util;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import java.util.Collection;
 
@@ -12,31 +14,35 @@ public final class Preconditions {
     // Utility class.
   }
 
-  public static void checkArgument(boolean expression, String message) {
+  public static void checkArgument(boolean expression, @NonNull String message) {
     if (!expression) {
       throw new IllegalArgumentException(message);
     }
   }
 
-  public static <T> T checkNotNull(T arg) {
+  @NonNull
+  public static <T> T checkNotNull(@Nullable T arg) {
     return checkNotNull(arg, "Argument must not be null");
   }
 
-  public static <T> T checkNotNull(T arg, String message) {
+  @NonNull
+  public static <T> T checkNotNull(@Nullable T arg, @NonNull String message) {
     if (arg == null) {
       throw new NullPointerException(message);
     }
     return arg;
   }
 
-  public static String checkNotEmpty(String string) {
+  @NonNull
+  public static String checkNotEmpty(@Nullable String string) {
     if (TextUtils.isEmpty(string)) {
       throw new IllegalArgumentException("Must not be null or empty");
     }
     return string;
   }
 
-  public static <T extends Collection<Y>, Y> T checkNotEmpty(T collection) {
+  @NonNull
+  public static <T extends Collection<Y>, Y> T checkNotEmpty(@NonNull T collection) {
     if (collection.isEmpty()) {
       throw new IllegalArgumentException("Must not be empty.");
     }

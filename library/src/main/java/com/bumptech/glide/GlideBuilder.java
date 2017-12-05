@@ -55,7 +55,8 @@ public final class GlideBuilder {
    * @param bitmapPool The pool to use.
    * @return This builder.
    */
-  public GlideBuilder setBitmapPool(BitmapPool bitmapPool) {
+  @NonNull
+  public GlideBuilder setBitmapPool(@Nullable BitmapPool bitmapPool) {
     this.bitmapPool = bitmapPool;
     return this;
   }
@@ -67,7 +68,8 @@ public final class GlideBuilder {
    * @param arrayPool The pool to use.
    * @return This builder.
    */
-  public GlideBuilder setArrayPool(ArrayPool arrayPool) {
+  @NonNull
+  public GlideBuilder setArrayPool(@Nullable ArrayPool arrayPool) {
     this.arrayPool = arrayPool;
     return this;
   }
@@ -79,7 +81,8 @@ public final class GlideBuilder {
    * @param memoryCache The cache to use.
    * @return This builder.
    */
-  public GlideBuilder setMemoryCache(MemoryCache memoryCache) {
+  @NonNull
+  public GlideBuilder setMemoryCache(@Nullable MemoryCache memoryCache) {
     this.memoryCache = memoryCache;
     return this;
   }
@@ -112,7 +115,8 @@ public final class GlideBuilder {
    * @param diskCacheFactory The disk cache factory to use.
    * @return This builder.
    */
-  public GlideBuilder setDiskCache(DiskCache.Factory diskCacheFactory) {
+  @NonNull
+  public GlideBuilder setDiskCache(@Nullable DiskCache.Factory diskCacheFactory) {
     this.diskCacheFactory = diskCacheFactory;
     return this;
   }
@@ -135,7 +139,7 @@ public final class GlideBuilder {
    * @deprecated Use {@link #setSourceExecutor(GlideExecutor)}
    */
   @Deprecated
-  public GlideBuilder setResizeExecutor(GlideExecutor service) {
+  public GlideBuilder setResizeExecutor(@Nullable GlideExecutor service) {
     return setSourceExecutor(service);
   }
 
@@ -154,7 +158,8 @@ public final class GlideBuilder {
    * @see #setDiskCacheExecutor(GlideExecutor)
    * @see GlideExecutor
    */
-  public GlideBuilder setSourceExecutor(GlideExecutor service) {
+  @NonNull
+  public GlideBuilder setSourceExecutor(@Nullable GlideExecutor service) {
     this.sourceExecutor = service;
     return this;
   }
@@ -174,7 +179,8 @@ public final class GlideBuilder {
    * @see #setSourceExecutor(GlideExecutor)
    * @see GlideExecutor
    */
-  public GlideBuilder setDiskCacheExecutor(GlideExecutor service) {
+  @NonNull
+  public GlideBuilder setDiskCacheExecutor(@Nullable GlideExecutor service) {
     this.diskCacheExecutor = service;
     return this;
   }
@@ -191,7 +197,8 @@ public final class GlideBuilder {
    * @param service The {@link GlideExecutor} to use.
    * @return This builder.
    */
-  public GlideBuilder setAnimationExecutor(GlideExecutor service) {
+  @NonNull
+  public GlideBuilder setAnimationExecutor(@Nullable GlideExecutor service) {
     this.animationExecutor = service;
     return this;
   }
@@ -206,7 +213,8 @@ public final class GlideBuilder {
    * @param requestOptions The options to use by default.
    * @return This builder.
    */
-  public GlideBuilder setDefaultRequestOptions(RequestOptions requestOptions) {
+  @NonNull
+  public GlideBuilder setDefaultRequestOptions(@Nullable RequestOptions requestOptions) {
     this.defaultRequestOptions = requestOptions;
     return this;
   }
@@ -227,6 +235,7 @@ public final class GlideBuilder {
    * {@link android.graphics.drawable.BitmapDrawable}s, the transition you registered for
    * {@link android.graphics.drawable.BitmapDrawable}s will be used.
    */
+  @NonNull
   public <T> GlideBuilder setDefaultTransitionOptions(
       @NonNull Class<T> clazz, @Nullable TransitionOptions<?, T> options) {
     defaultTransitionOptions.put(clazz, options);
@@ -261,7 +270,8 @@ public final class GlideBuilder {
    * @param builder The builder to use (will not be modified).
    * @return This builder.
    */
-  public GlideBuilder setMemorySizeCalculator(MemorySizeCalculator.Builder builder) {
+  @NonNull
+  public GlideBuilder setMemorySizeCalculator(@NonNull MemorySizeCalculator.Builder builder) {
     return setMemorySizeCalculator(builder.build());
   }
 
@@ -275,7 +285,8 @@ public final class GlideBuilder {
    * @param calculator The calculator to use.
    * @return This builder.
    */
-  public GlideBuilder setMemorySizeCalculator(MemorySizeCalculator calculator) {
+  @NonNull
+  public GlideBuilder setMemorySizeCalculator(@Nullable MemorySizeCalculator calculator) {
     this.memorySizeCalculator = calculator;
     return this;
   }
@@ -288,7 +299,8 @@ public final class GlideBuilder {
    * @param factory The factory to use
    * @return This builder.
    */
-  public GlideBuilder setConnectivityMonitorFactory(ConnectivityMonitorFactory factory) {
+  @NonNull
+  public GlideBuilder setConnectivityMonitorFactory(@Nullable ConnectivityMonitorFactory factory) {
     this.connectivityMonitorFactory = factory;
     return this;
   }
@@ -318,6 +330,7 @@ public final class GlideBuilder {
    * @param logLevel The log level to use from {@link Log}.
    * @return This builder.
    */
+  @NonNull
   public GlideBuilder setLogLevel(int logLevel) {
     if (logLevel < Log.VERBOSE || logLevel > Log.ERROR) {
       throw new IllegalArgumentException("Log level must be one of Log.VERBOSE, Log.DEBUG,"
@@ -360,6 +373,7 @@ public final class GlideBuilder {
    *
    * @return This builder.
    */
+  @NonNull
   public GlideBuilder setIsActiveResourceRetentionAllowed(
       boolean isActiveResourceRetentionAllowed) {
     this.isActiveResourceRetentionAllowed = isActiveResourceRetentionAllowed;
@@ -376,7 +390,8 @@ public final class GlideBuilder {
     return this;
   }
 
-  public Glide build(Context context) {
+  @NonNull
+  public Glide build(@NonNull Context context) {
     if (sourceExecutor == null) {
       sourceExecutor = GlideExecutor.newSourceExecutor();
     }

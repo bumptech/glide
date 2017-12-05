@@ -99,6 +99,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @see RequestOptions#apply(RequestOptions)
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestBuilder<TranscodeType> apply(@NonNull RequestOptions requestOptions) {
     Preconditions.checkNotNull(requestOptions);
@@ -106,6 +107,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     return this;
   }
 
+  @NonNull
   protected RequestOptions getMutableOptions() {
     return defaultRequestOptions == this.requestOptions
         ? this.requestOptions.clone() : this.requestOptions;
@@ -120,6 +122,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    *
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestBuilder<TranscodeType> transition(
       @NonNull TransitionOptions<?, ? super TranscodeType> transitionOptions) {
@@ -136,6 +139,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @param requestListener The request listener to use.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> listener(
@@ -167,6 +171,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    *
    * @return This {@link RequestBuilder}.
    */
+  @NonNull
   public RequestBuilder<TranscodeType> error(@Nullable RequestBuilder<TranscodeType> errorBuilder) {
     this.errorBuilder = errorBuilder;
     return this;
@@ -190,6 +195,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @param thumbnailRequest The request to use to load the thumbnail.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> thumbnail(
@@ -228,6 +234,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @return This request builder.
    */
   @SuppressWarnings({"CheckResult", "unchecked"})
+  @NonNull
   @CheckResult
   public RequestBuilder<TranscodeType> thumbnail(
       @Nullable RequestBuilder<TranscodeType>... thumbnails) {
@@ -289,6 +296,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    *                       the thumbnail.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> thumbnail(float sizeMultiplier) {
@@ -306,6 +314,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @param model The model to load data for, or null.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   @SuppressWarnings("unchecked")
   @Override
@@ -313,6 +322,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     return loadGeneric(model);
   }
 
+  @NonNull
   private RequestBuilder<TranscodeType> loadGeneric(@Nullable Object model) {
     this.model = model;
     isModelSet = true;
@@ -337,6 +347,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    *
    * @see #load(Object)
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable Bitmap bitmap) {
@@ -363,6 +374,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    *
    * @see #load(Object)
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable Drawable drawable) {
@@ -389,6 +401,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @param string A file path, or a uri or url handled by
    * {@link com.bumptech.glide.load.model.UriLoader}.
    */
+  @NonNull
   @Override
   @CheckResult
   public RequestBuilder<TranscodeType> load(@Nullable String string) {
@@ -413,6 +426,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @param uri The Uri representing the image. Must be of a type handled by
    * {@link com.bumptech.glide.load.model.UriLoader}.
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable Uri uri) {
@@ -436,6 +450,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    *
    * @param file The File containing the image
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable File file) {
@@ -474,6 +489,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @see #load(Integer)
    * @see com.bumptech.glide.signature.ApplicationVersionSignature
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@RawRes @DrawableRes @Nullable Integer resourceId) {
@@ -504,6 +520,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @param model the data to load.
    * @see #load(Object)
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable byte[] model) {
@@ -546,10 +563,12 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @return The given target.
    * @see RequestManager#clear(Target)
    */
+  @NonNull
   public <Y extends Target<TranscodeType>> Y into(@NonNull Y target) {
     return into(target, /*targetListener=*/ null);
   }
 
+  @NonNull
   private <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
       @Nullable RequestListener<TranscodeType> targetListener) {
@@ -559,7 +578,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   private <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
       @Nullable RequestListener<TranscodeType> targetListener,
-      RequestOptions options) {
+      @NonNull RequestOptions options) {
     Util.assertMainThread();
     Preconditions.checkNotNull(target);
     if (!isModelSet) {
@@ -604,7 +623,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @return The
    * {@link com.bumptech.glide.request.target.Target} used to wrap the given {@link ImageView}.
    */
-  public ViewTarget<ImageView, TranscodeType> into(ImageView view) {
+  @NonNull
+  public ViewTarget<ImageView, TranscodeType> into(@NonNull ImageView view) {
     Util.assertMainThread();
     Preconditions.checkNotNull(view);
 
@@ -675,6 +695,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @see #submit(int, int)
    * @see #into(Target)
    */
+  @NonNull
   public FutureTarget<TranscodeType> submit() {
     return submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
   }
@@ -691,6 +712,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    *               {@link com.bumptech.glide.request.RequestOptions#override(int, int)}} if
    *               previously called).
    */
+  @NonNull
   public FutureTarget<TranscodeType> submit(int width, int height) {
     final RequestFutureTarget<TranscodeType> target =
         new RequestFutureTarget<>(glideContext.getMainHandler(), width, height);
@@ -729,6 +751,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * {@link RequestManager#clear(Target)}.
    * @see com.bumptech.glide.ListPreloader
    */
+  @NonNull
   public Target<TranscodeType> preload(int width, int height) {
     final PreloadTarget<TranscodeType> target = PreloadTarget.obtain(requestManager, width, height);
     return into(target);
@@ -743,6 +766,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * {@link RequestManager#clear(Target)}
    * @see #preload(int, int)
    */
+  @NonNull
   public Target<TranscodeType> preload() {
     return preload(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL);
   }
@@ -759,7 +783,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    */
   @Deprecated
   @CheckResult
-  public <Y extends Target<File>> Y downloadOnly(Y target) {
+  public <Y extends Target<File>> Y downloadOnly(@NonNull Y target) {
     return getDownloadOnlyRequest().into(target);
   }
 
@@ -781,12 +805,14 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     return getDownloadOnlyRequest().submit(width, height);
   }
 
+  @NonNull
   @CheckResult
   protected RequestBuilder<File> getDownloadOnlyRequest() {
     return new RequestBuilder<>(File.class, this).apply(DOWNLOAD_ONLY_OPTIONS);
   }
 
-  private Priority getThumbnailPriority(Priority current) {
+  @NonNull
+  private Priority getThumbnailPriority(@NonNull Priority current) {
     switch (current) {
       case LOW:
         return Priority.NORMAL;

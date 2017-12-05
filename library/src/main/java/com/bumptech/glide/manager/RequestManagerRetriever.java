@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
@@ -79,7 +80,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     handler = new Handler(Looper.getMainLooper(), this /* Callback */);
   }
 
-  private RequestManager getApplicationManager(Context context) {
+  private RequestManager getApplicationManager(@NonNull Context context) {
     // Either an application context or we're on a background thread.
     if (applicationManager == null) {
       synchronized (this) {
@@ -104,7 +105,8 @@ public class RequestManagerRetriever implements Handler.Callback {
     return applicationManager;
   }
 
-  public RequestManager get(Context context) {
+  @NonNull
+  public RequestManager get(@NonNull Context context) {
     if (context == null) {
       throw new IllegalArgumentException("You cannot start a load on a null Context");
     } else if (Util.isOnMainThread() && !(context instanceof Application)) {
@@ -120,7 +122,8 @@ public class RequestManagerRetriever implements Handler.Callback {
     return getApplicationManager(context);
   }
 
-  public RequestManager get(FragmentActivity activity) {
+  @NonNull
+  public RequestManager get(@NonNull FragmentActivity activity) {
     if (Util.isOnBackgroundThread()) {
       return get(activity.getApplicationContext());
     } else {
@@ -130,7 +133,8 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
-  public RequestManager get(Fragment fragment) {
+  @NonNull
+  public RequestManager get(@NonNull Fragment fragment) {
     Preconditions.checkNotNull(fragment.getActivity(),
           "You cannot start a load on a fragment before it is attached or after it is destroyed");
     if (Util.isOnBackgroundThread()) {
@@ -141,7 +145,8 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
-  public RequestManager get(Activity activity) {
+  @NonNull
+  public RequestManager get(@NonNull Activity activity) {
     if (Util.isOnBackgroundThread()) {
       return get(activity.getApplicationContext());
     } else {
@@ -151,7 +156,8 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
-  public RequestManager get(View view) {
+  @NonNull
+  public RequestManager get(@NonNull View view) {
     if (Util.isOnBackgroundThread()) {
       return get(view.getContext().getApplicationContext());
     }
@@ -184,7 +190,7 @@ public class RequestManagerRetriever implements Handler.Callback {
 
   private static void findAllSupportFragmentsWithViews(
       @Nullable Collection<Fragment> topLevelFragments,
-      Map<View, Fragment> result) {
+      @NonNull Map<View, Fragment> result) {
     if (topLevelFragments == null) {
       return;
     }
@@ -199,7 +205,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   }
 
   @Nullable
-  private Fragment findSupportFragment(View target, FragmentActivity activity) {
+  private Fragment findSupportFragment(@NonNull View target, @NonNull FragmentActivity activity) {
     tempViewToSupportFragment.clear();
     findAllSupportFragmentsWithViews(
         activity.getSupportFragmentManager().getFragments(), tempViewToSupportFragment);
@@ -223,7 +229,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   }
 
   @Nullable
-  private android.app.Fragment findFragment(View target, Activity activity) {
+  private android.app.Fragment findFragment(@NonNull View target, @NonNull Activity activity) {
     tempViewToFragment.clear();
     findAllFragmentsWithViews(activity.getFragmentManager(), tempViewToFragment);
 
@@ -231,7 +237,7 @@ public class RequestManagerRetriever implements Handler.Callback {
 
     View activityRoot = activity.findViewById(android.R.id.content);
     View current = target;
-     while (!current.equals(activityRoot)) {
+    while (!current.equals(activityRoot)) {
       result = tempViewToFragment.get(current);
       if (result != null) {
         break;
@@ -250,7 +256,8 @@ public class RequestManagerRetriever implements Handler.Callback {
   // non-support Fragments.
   @TargetApi(Build.VERSION_CODES.O)
   private void findAllFragmentsWithViews(
-      android.app.FragmentManager fragmentManager, ArrayMap<View, android.app.Fragment> result) {
+      @NonNull android.app.FragmentManager fragmentManager,
+      @NonNull ArrayMap<View, android.app.Fragment> result) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       for (android.app.Fragment fragment : fragmentManager.getFragments()) {
         if (fragment.getView() != null) {
@@ -264,7 +271,8 @@ public class RequestManagerRetriever implements Handler.Callback {
   }
 
   private void findAllFragmentsWithViewsPreO(
-      android.app.FragmentManager fragmentManager, ArrayMap<View, android.app.Fragment> result) {
+      @NonNull android.app.FragmentManager fragmentManager,
+      @NonNull ArrayMap<View, android.app.Fragment> result) {
     int index = 0;
     while (true) {
       tempBundle.putInt(FRAGMENT_INDEX_KEY, index++);
@@ -286,7 +294,8 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
-  private Activity findActivity(Context context) {
+  @Nullable
+  private Activity findActivity(@NonNull Context context) {
     if (context instanceof Activity) {
       return (Activity) context;
     } else if (context instanceof ContextWrapper) {
@@ -297,14 +306,15 @@ public class RequestManagerRetriever implements Handler.Callback {
   }
 
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-  private static void assertNotDestroyed(Activity activity) {
+  private static void assertNotDestroyed(@NonNull Activity activity) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && activity.isDestroyed()) {
       throw new IllegalArgumentException("You cannot start a load for a destroyed activity");
     }
   }
 
+  @NonNull
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-  public RequestManager get(android.app.Fragment fragment) {
+  public RequestManager get(@NonNull android.app.Fragment fragment) {
     if (fragment.getActivity() == null) {
       throw new IllegalArgumentException(
           "You cannot start a load on a fragment before it is attached");
@@ -319,7 +329,7 @@ public class RequestManagerRetriever implements Handler.Callback {
 
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   RequestManagerFragment getRequestManagerFragment(
-      final android.app.FragmentManager fm, android.app.Fragment parentHint) {
+      @NonNull final android.app.FragmentManager fm, @Nullable android.app.Fragment parentHint) {
     RequestManagerFragment current = (RequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
     if (current == null) {
       current = pendingRequestManagerFragments.get(fm);
@@ -334,8 +344,10 @@ public class RequestManagerRetriever implements Handler.Callback {
     return current;
   }
 
-  private RequestManager fragmentGet(Context context, android.app.FragmentManager fm,
-      android.app.Fragment parentHint) {
+  @NonNull
+  private RequestManager fragmentGet(@NonNull Context context,
+      @NonNull android.app.FragmentManager fm,
+      @Nullable android.app.Fragment parentHint) {
     RequestManagerFragment current = getRequestManagerFragment(fm, parentHint);
     RequestManager requestManager = current.getRequestManager();
     if (requestManager == null) {
@@ -350,7 +362,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   }
 
   SupportRequestManagerFragment getSupportRequestManagerFragment(
-      final FragmentManager fm, Fragment parentHint) {
+      @NonNull final FragmentManager fm, @Nullable Fragment parentHint) {
     SupportRequestManagerFragment current =
         (SupportRequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
     if (current == null) {
@@ -366,8 +378,9 @@ public class RequestManagerRetriever implements Handler.Callback {
     return current;
   }
 
-  private RequestManager supportFragmentGet(Context context, FragmentManager fm,
-      Fragment parentHint) {
+  @NonNull
+  private RequestManager supportFragmentGet(@NonNull Context context, @NonNull FragmentManager fm,
+      @Nullable Fragment parentHint) {
     SupportRequestManagerFragment current = getSupportRequestManagerFragment(fm, parentHint);
     RequestManager requestManager = current.getRequestManager();
     if (requestManager == null) {
@@ -411,17 +424,19 @@ public class RequestManagerRetriever implements Handler.Callback {
    * Used internally to create {@link RequestManager}s.
    */
   public interface RequestManagerFactory {
+    @NonNull
     RequestManager build(
-        Glide glide,
-        Lifecycle lifecycle,
-        RequestManagerTreeNode requestManagerTreeNode,
-        Context context);
+        @NonNull Glide glide,
+        @NonNull Lifecycle lifecycle,
+        @NonNull RequestManagerTreeNode requestManagerTreeNode,
+        @NonNull Context context);
   }
 
   private static final RequestManagerFactory DEFAULT_FACTORY = new RequestManagerFactory() {
+    @NonNull
     @Override
-    public RequestManager build(Glide glide, Lifecycle lifecycle,
-        RequestManagerTreeNode requestManagerTreeNode, Context context) {
+    public RequestManager build(@NonNull Glide glide, @NonNull Lifecycle lifecycle,
+        @NonNull RequestManagerTreeNode requestManagerTreeNode, @NonNull Context context) {
       return new RequestManager(glide, lifecycle, requestManagerTreeNode, context);
     }
   };

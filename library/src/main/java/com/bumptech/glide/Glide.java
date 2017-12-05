@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
@@ -119,7 +120,7 @@ public class Glide implements ComponentCallbacks2 {
    * @see #getPhotoCacheDir(android.content.Context, String)
    */
   @Nullable
-  public static File getPhotoCacheDir(Context context) {
+  public static File getPhotoCacheDir(@NonNull Context context) {
     return getPhotoCacheDir(context, DEFAULT_DISK_CACHE_DIR);
   }
 
@@ -132,7 +133,7 @@ public class Glide implements ComponentCallbacks2 {
    * @see #getPhotoCacheDir(android.content.Context)
    */
   @Nullable
-  public static File getPhotoCacheDir(Context context, String cacheName) {
+  public static File getPhotoCacheDir(@NonNull Context context, @NonNull String cacheName) {
     File cacheDir = context.getCacheDir();
     if (cacheDir != null) {
       File result = new File(cacheDir, cacheName);
@@ -153,7 +154,8 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @return the singleton
    */
-  public static Glide get(Context context) {
+  @NonNull
+  public static Glide get(@NonNull Context context) {
     if (glide == null) {
       synchronized (Glide.class) {
         if (glide == null) {
@@ -165,7 +167,7 @@ public class Glide implements ComponentCallbacks2 {
     return glide;
   }
 
-  private static void checkAndInitializeGlide(Context context) {
+  private static void checkAndInitializeGlide(@NonNull Context context) {
     // In the thread running initGlide(), one or more classes may call Glide.get(context).
     // Without this check, those calls could trigger infinite recursion.
     if (isInitializing) {
@@ -193,7 +195,7 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @VisibleForTesting
-  public static synchronized void init(Context context, GlideBuilder builder) {
+  public static synchronized void init(@NonNull Context context, @NonNull GlideBuilder builder) {
     if (Glide.glide != null) {
       tearDown();
     }
@@ -208,12 +210,12 @@ public class Glide implements ComponentCallbacks2 {
     glide = null;
   }
 
-  private static void initializeGlide(Context context) {
+  private static void initializeGlide(@NonNull Context context) {
     initializeGlide(context, new GlideBuilder());
   }
 
   @SuppressWarnings("deprecation")
-  private static void initializeGlide(Context context, GlideBuilder builder) {
+  private static void initializeGlide(@NonNull Context context, @NonNull GlideBuilder builder) {
     Context applicationContext = context.getApplicationContext();
     GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
     List<com.bumptech.glide.module.GlideModule> manifestModules = Collections.emptyList();
@@ -296,16 +298,16 @@ public class Glide implements ComponentCallbacks2 {
 
   @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   Glide(
-      Context context,
-      Engine engine,
-      MemoryCache memoryCache,
-      BitmapPool bitmapPool,
-      ArrayPool arrayPool,
-      RequestManagerRetriever requestManagerRetriever,
-      ConnectivityMonitorFactory connectivityMonitorFactory,
+      @NonNull Context context,
+      @NonNull Engine engine,
+      @NonNull MemoryCache memoryCache,
+      @NonNull BitmapPool bitmapPool,
+      @NonNull ArrayPool arrayPool,
+      @NonNull RequestManagerRetriever requestManagerRetriever,
+      @NonNull ConnectivityMonitorFactory connectivityMonitorFactory,
       int logLevel,
-      RequestOptions defaultRequestOptions,
-      Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions) {
+      @NonNull RequestOptions defaultRequestOptions,
+      @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
@@ -476,10 +478,12 @@ public class Glide implements ComponentCallbacks2 {
    * {@link com.bumptech.glide.load.Transformation}s. Use outside of these classes is not generally
    * recommended. </p>
    */
+  @NonNull
   public BitmapPool getBitmapPool() {
     return bitmapPool;
   }
 
+  @NonNull
   public ArrayPool getArrayPool() {
     return arrayPool;
   }
@@ -487,6 +491,7 @@ public class Glide implements ComponentCallbacks2 {
   /**
    * @return The context associated with this instance.
    */
+  @NonNull
   public Context getContext() {
     return glideContext.getBaseContext();
   }
@@ -495,6 +500,7 @@ public class Glide implements ComponentCallbacks2 {
     return connectivityMonitorFactory;
   }
 
+  @NonNull
   GlideContext getGlideContext() {
     return glideContext;
   }
@@ -524,7 +530,7 @@ public class Glide implements ComponentCallbacks2 {
    * {@link com.bumptech.glide.load.engine.prefill.PreFillType.Builder Builders} representing
    * individual sizes and configurations of {@link android.graphics.Bitmap}s to be pre-filled.
    */
-  public void preFillBitmapPool(PreFillType.Builder... bitmapAttributeBuilders) {
+  public void preFillBitmapPool(@NonNull PreFillType.Builder... bitmapAttributeBuilders) {
     bitmapPreFiller.preFill(bitmapAttributeBuilders);
   }
 
@@ -574,6 +580,7 @@ public class Glide implements ComponentCallbacks2 {
   /**
    * Internal method.
    */
+  @NonNull
   public RequestManagerRetriever getRequestManagerRetriever() {
     return requestManagerRetriever;
   }
@@ -590,7 +597,8 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @return the previous MemoryCategory used by Glide.
    */
-  public MemoryCategory setMemoryCategory(MemoryCategory memoryCategory) {
+  @NonNull
+  public MemoryCategory setMemoryCategory(@NonNull MemoryCategory memoryCategory) {
     // Engine asserts this anyway when removing resources, fail faster and consistently
     Util.assertMainThread();
     // memory cache needs to be trimmed before bitmap pool to trim re-pooled Bitmaps too. See #687.
@@ -601,6 +609,7 @@ public class Glide implements ComponentCallbacks2 {
     return oldCategory;
   }
 
+  @NonNull
   private static RequestManagerRetriever getRetriever(@Nullable Context context) {
     // Context could be null for other reasons (ie the user passes in null), but in practice it will
     // only occur due to errors with the Fragment lifecycle.
@@ -634,7 +643,8 @@ public class Glide implements ComponentCallbacks2 {
    * @see #with(android.support.v4.app.Fragment)
    * @see #with(android.support.v4.app.FragmentActivity)
    */
-  public static RequestManager with(Context context) {
+  @NonNull
+  public static RequestManager with(@NonNull Context context) {
     return getRetriever(context).get(context);
   }
 
@@ -645,7 +655,8 @@ public class Glide implements ComponentCallbacks2 {
    * @param activity The activity to use.
    * @return A RequestManager for the given activity that can be used to start a load.
    */
-  public static RequestManager with(Activity activity) {
+  @NonNull
+  public static RequestManager with(@NonNull Activity activity) {
     return getRetriever(activity).get(activity);
   }
 
@@ -657,7 +668,8 @@ public class Glide implements ComponentCallbacks2 {
    * @param activity The activity to use.
    * @return A RequestManager for the given FragmentActivity that can be used to start a load.
    */
-  public static RequestManager with(FragmentActivity activity) {
+  @NonNull
+  public static RequestManager with(@NonNull FragmentActivity activity) {
     return getRetriever(activity).get(activity);
   }
 
@@ -668,7 +680,8 @@ public class Glide implements ComponentCallbacks2 {
    * @param fragment The fragment to use.
    * @return A RequestManager for the given Fragment that can be used to start a load.
    */
-  public static RequestManager with(android.app.Fragment fragment) {
+  @NonNull
+  public static RequestManager with(@NonNull android.app.Fragment fragment) {
     return getRetriever(fragment.getActivity()).get(fragment);
   }
 
@@ -680,7 +693,8 @@ public class Glide implements ComponentCallbacks2 {
    * @param fragment The fragment to use.
    * @return A RequestManager for the given Fragment that can be used to start a load.
    */
-  public static RequestManager with(Fragment fragment) {
+  @NonNull
+  public static RequestManager with(@NonNull Fragment fragment) {
     return getRetriever(fragment.getActivity()).get(fragment);
   }
 
@@ -709,15 +723,17 @@ public class Glide implements ComponentCallbacks2 {
    * @param view The view to search for a containing Fragment or Activity from.
    * @return A RequestManager that can be used to start a load.
    */
-  public static RequestManager with(View view) {
+  @NonNull
+  public static RequestManager with(@NonNull View view) {
     return getRetriever(view.getContext()).get(view);
   }
 
+  @NonNull
   public Registry getRegistry() {
     return registry;
   }
 
-  boolean removeFromManagers(Target<?> target) {
+  boolean removeFromManagers(@NonNull Target<?> target) {
     synchronized (managers) {
       for (RequestManager requestManager : managers) {
         if (requestManager.untrack(target)) {
