@@ -78,7 +78,8 @@ public interface ModelLoader<Model, Data> {
    *               the resource should be loaded at its original height.
    */
   @Nullable
-  LoadData<Data> buildLoadData(@NonNull Model model, int width, int height, @NonNull Options options);
+  LoadData<Data> buildLoadData(@NonNull Model model, int width, int height,
+      @NonNull Options options);
 
   /**
    * Returns true if the given model is a of a recognized type that this loader can probably load.

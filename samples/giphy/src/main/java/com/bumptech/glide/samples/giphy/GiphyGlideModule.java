@@ -14,7 +14,8 @@ import java.io.InputStream;
 @GlideModule
 public class GiphyGlideModule extends AppGlideModule {
   @Override
-  public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
+  public void registerComponents(@NonNull Context context, @NonNull Glide glide,
+      @NonNull Registry registry) {
     registry.append(Api.GifResult.class, InputStream.class, new GiphyModelLoader.Factory());
   }
 

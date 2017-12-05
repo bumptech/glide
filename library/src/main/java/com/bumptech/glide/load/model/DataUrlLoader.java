@@ -35,7 +35,8 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(@NonNull String model, int width, int height, @NonNull Options options) {
+  public LoadData<Data> buildLoadData(@NonNull String model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(model), new DataUriFetcher<>(model, dataDecoder));
   }
 

@@ -33,7 +33,8 @@ public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(@NonNull Uri uri, int width, int height, @NonNull Options options) {
+  public LoadData<Data> buildLoadData(@NonNull Uri uri, int width, int height,
+      @NonNull Options options) {
     GlideUrl glideUrl = new GlideUrl(uri.toString());
     return urlLoader.buildLoadData(glideUrl, width, height, options);
   }

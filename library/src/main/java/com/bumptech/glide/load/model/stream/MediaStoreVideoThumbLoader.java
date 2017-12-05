@@ -34,7 +34,8 @@ public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream>
 
   @Override
   @Nullable
-  public LoadData<InputStream> buildLoadData(@NonNull Uri model, int width, int height, @NonNull Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull Uri model, int width, int height,
+      @NonNull Options options) {
     if (MediaStoreUtil.isThumbnailSize(width, height) && isRequestingDefaultFrame(options)) {
       return new LoadData<>(new ObjectKey(model), ThumbFetcher.buildVideoFetcher(context, model));
     } else {

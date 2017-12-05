@@ -22,5 +22,6 @@ interface RegistersComponents {
    * @param glide The Glide singleton that is in the process of being initialized.
    * @param registry An {@link com.bumptech.glide.Registry} to use to register components.
    */
-  void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry);
+  void registerComponents(@NonNull Context context, @NonNull Glide glide,
+      @NonNull Registry registry);
 }

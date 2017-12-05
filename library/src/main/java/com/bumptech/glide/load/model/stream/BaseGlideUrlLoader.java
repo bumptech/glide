@@ -36,7 +36,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
 
   @Override
   @Nullable
-  public LoadData<InputStream> buildLoadData(@NonNull Model model, int width, int height, @NonNull Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull Model model, int width, int height,
+      @NonNull Options options) {
     GlideUrl result = null;
     if (modelCache != null) {
       result = modelCache.get(model, width, height);

@@ -29,7 +29,8 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(@NonNull Integer model, int width, int height, @NonNull Options options) {
+  public LoadData<Data> buildLoadData(@NonNull Integer model, int width, int height,
+      @NonNull Options options) {
     Uri uri = getResourceUri(model);
     return uri == null ? null : uriLoader.buildLoadData(uri, width, height, options);
   }

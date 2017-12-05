@@ -16,7 +16,8 @@ import java.io.InputStream;
 @GlideModule
 public class SvgModule extends AppGlideModule {
   @Override
-  public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
+  public void registerComponents(@NonNull Context context, @NonNull Glide glide,
+      @NonNull Registry registry) {
     registry.register(SVG.class, PictureDrawable.class, new SvgDrawableTranscoder())
         .append(InputStream.class, SVG.class, new SvgDecoder());
   }

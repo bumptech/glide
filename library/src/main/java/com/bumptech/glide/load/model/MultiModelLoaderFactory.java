@@ -214,7 +214,8 @@ public class MultiModelLoaderFactory {
 
     @Nullable
     @Override
-    public LoadData<Object> buildLoadData(@NonNull Object o, int width, int height, @NonNull Options options) {
+    public LoadData<Object> buildLoadData(@NonNull Object o, int width, int height,
+        @NonNull Options options) {
       return null;
     }
 

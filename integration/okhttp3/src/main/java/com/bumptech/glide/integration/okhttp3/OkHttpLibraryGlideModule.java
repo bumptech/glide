@@ -20,7 +20,8 @@ import java.io.InputStream;
 @GlideModule
 public final class OkHttpLibraryGlideModule extends LibraryGlideModule {
   @Override
-  public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
+  public void registerComponents(@NonNull Context context, @NonNull Glide glide,
+      @NonNull Registry registry) {
     registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory());
   }
 }

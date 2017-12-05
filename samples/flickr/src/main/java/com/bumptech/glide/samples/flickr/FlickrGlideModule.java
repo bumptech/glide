@@ -25,7 +25,8 @@ public class FlickrGlideModule extends AppGlideModule {
   }
 
   @Override
-  public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
+  public void registerComponents(@NonNull Context context, @NonNull Glide glide,
+      @NonNull Registry registry) {
     registry.append(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
   }
 

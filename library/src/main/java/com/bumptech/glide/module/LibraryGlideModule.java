@@ -18,7 +18,8 @@ import com.bumptech.glide.Registry;
  */
 public abstract class LibraryGlideModule implements RegistersComponents {
   @Override
-  public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
+  public void registerComponents(@NonNull Context context, @NonNull Glide glide,
+      @NonNull Registry registry) {
     // Default empty impl.
   }
 }

@@ -25,7 +25,8 @@ public class UrlLoader implements ModelLoader<URL, InputStream> {
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(@NonNull URL model, int width, int height, @NonNull Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull URL model, int width, int height,
+      @NonNull Options options) {
     return glideUrlLoader.buildLoadData(new GlideUrl(model), width, height, options);
   }
 
