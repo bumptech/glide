@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pools.Pool;
@@ -213,12 +214,12 @@ public class MultiModelLoaderFactory {
 
     @Nullable
     @Override
-    public LoadData<Object> buildLoadData(Object o, int width, int height, Options options) {
+    public LoadData<Object> buildLoadData(@NonNull Object o, int width, int height, @NonNull Options options) {
       return null;
     }
 
     @Override
-    public boolean handles(Object o) {
+    public boolean handles(@NonNull Object o) {
       return false;
     }
   }

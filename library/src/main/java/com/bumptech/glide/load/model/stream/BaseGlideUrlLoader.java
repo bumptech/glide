@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model.stream;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import com.bumptech.glide.load.Key;
@@ -35,7 +36,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
 
   @Override
   @Nullable
-  public LoadData<InputStream> buildLoadData(Model model, int width, int height, Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull Model model, int width, int height, @NonNull Options options) {
     GlideUrl result = null;
     if (modelCache != null) {
       result = modelCache.get(model, width, height);

@@ -1,6 +1,7 @@
 package com.bumptech.glide.integration.volley;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
@@ -27,7 +28,7 @@ public class VolleyGlideModule implements com.bumptech.glide.module.GlideModule 
   }
 
   @Override
-  public void registerComponents(Context context, Glide glide, Registry registry) {
+  public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
     registry.replace(GlideUrl.class, InputStream.class, new VolleyUrlLoader.Factory(context));
   }
 }

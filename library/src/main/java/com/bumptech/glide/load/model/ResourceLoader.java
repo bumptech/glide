@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import com.bumptech.glide.load.Options;
@@ -28,7 +29,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(Integer model, int width, int height, Options options) {
+  public LoadData<Data> buildLoadData(@NonNull Integer model, int width, int height, @NonNull Options options) {
     Uri uri = getResourceUri(model);
     return uri == null ? null : uriLoader.buildLoadData(uri, width, height, options);
   }
@@ -49,7 +50,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   }
 
   @Override
-  public boolean handles(Integer model) {
+  public boolean handles(@NonNull Integer model) {
     // TODO: check that this is in fact a resource id.
     return true;
   }

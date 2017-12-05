@@ -1,5 +1,6 @@
 package com.bumptech.glide.samples.flickr;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelCache;
@@ -42,7 +43,7 @@ public final class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
   }
 
   @Override
-  public boolean handles(Photo model) {
+  public boolean handles(@NonNull Photo model) {
     return true;
   }
 
