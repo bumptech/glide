@@ -70,12 +70,16 @@ Glide.with(fragment)
          }
          // Or, to log all root causes locally, you can use the built in helper method:
          e.logRootCauses(TAG);
+
+         return false; // Allow calling onLoadFailed on the Target.
        }
 
        @Override
        boolean onResourceReady(R resource, Object model, Target<R> target,
            DataSource dataSource, boolean isFirstResource) {
          // Log successes here or use DataSource to keep track of cache hits and misses.
+
+         return false; // Allow calling onResourceReady on the Target.
        }
     })
     .into(imageView);
