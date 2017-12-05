@@ -543,7 +543,8 @@ public class RequestManager implements LifecycleListener,
    */
   @NonNull
   @CheckResult
-  public <ResourceType> RequestBuilder<ResourceType> as(@NonNull Class<ResourceType> resourceClass) {
+  public <ResourceType> RequestBuilder<ResourceType> as(
+      @NonNull Class<ResourceType> resourceClass) {
     return new RequestBuilder<>(glide, this, resourceClass, context);
   }
 

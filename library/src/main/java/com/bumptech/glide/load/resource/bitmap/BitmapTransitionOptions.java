@@ -108,7 +108,8 @@ public final class BitmapTransitionOptions extends
    * subsequent resources (if thumbnails are used).
    */
   @NonNull
-  public BitmapTransitionOptions crossFade(@NonNull DrawableCrossFadeFactory drawableCrossFadeFactory) {
+  public BitmapTransitionOptions crossFade(
+      @NonNull DrawableCrossFadeFactory drawableCrossFadeFactory) {
     return transitionUsing(drawableCrossFadeFactory);
   }
 
