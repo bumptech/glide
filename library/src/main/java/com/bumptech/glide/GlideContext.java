@@ -1,9 +1,7 @@
 package com.bumptech.glide;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -21,7 +19,6 @@ import java.util.Map.Entry;
  * Global context for all loads in Glide containing and exposing the various registries and classes
  * required to load resources.
  */
-@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class GlideContext extends ContextWrapper {
   @VisibleForTesting
   static final TransitionOptions<?, ?> DEFAULT_TRANSITION_OPTIONS =

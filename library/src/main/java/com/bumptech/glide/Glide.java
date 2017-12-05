@@ -1,6 +1,5 @@
 package com.bumptech.glide;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -10,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -92,7 +90,6 @@ import java.util.Set;
  * {@link RequestBuilder} and maintaining an {@link Engine}, {@link BitmapPool},
  * {@link com.bumptech.glide.load.engine.cache.DiskCache} and {@link MemoryCache}.
  */
-@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class Glide implements ComponentCallbacks2 {
   private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
   private static final String TAG = "Glide";
@@ -294,7 +291,6 @@ public class Glide implements ComponentCallbacks2 {
     return result;
   }
 
-  @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   Glide(
       Context context,
       Engine engine,
