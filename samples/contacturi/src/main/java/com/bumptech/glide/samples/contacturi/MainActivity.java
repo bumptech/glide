@@ -1,8 +1,5 @@
 package com.bumptech.glide.samples.contacturi;
 
-import static android.os.Build.VERSION;
-import static android.os.Build.VERSION_CODES;
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.ContentUris;
