@@ -19,7 +19,7 @@ public interface RequestListener<R> {
    * {@link Target#onLoadFailed(Drawable)}. Will only be called if we currently want to display an
    * image for the given model in the given target. It is recommended to create a single instance
    * per activity/fragment rather than instantiate a new object for each call to {@code
-   * Glide.load()} to avoid object churn.
+   * Glide.with(fragment/activity).load()} to avoid object churn.
    *
    * <p>It is not safe to reload this or a different model in this callback. If you need to do so
    * use {@link com.bumptech.glide.RequestBuilder#error(RequestBuilder)} instead.
