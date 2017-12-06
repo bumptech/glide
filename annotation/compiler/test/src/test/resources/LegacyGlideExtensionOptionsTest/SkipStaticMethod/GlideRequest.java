@@ -621,35 +621,41 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> apply(@NonNull RequestOptions arg0) {
     return (GlideRequest<TranscodeType>) super.apply(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> transition(@NonNull TransitionOptions<?, ? super TranscodeType> arg0) {
     return (GlideRequest<TranscodeType>) super.transition(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> listener(@Nullable RequestListener<TranscodeType> arg0) {
     return (GlideRequest<TranscodeType>) super.listener(arg0);
   }
 
   @Override
+  @NonNull
   public GlideRequest<TranscodeType> error(@Nullable RequestBuilder<TranscodeType> arg0) {
     return (GlideRequest<TranscodeType>) super.error(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> thumbnail(@Nullable RequestBuilder<TranscodeType> arg0) {
     return (GlideRequest<TranscodeType>) super.thumbnail(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   @SafeVarargs
   @SuppressWarnings("varargs")
@@ -658,48 +664,56 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> thumbnail(float sizeMultiplier) {
     return (GlideRequest<TranscodeType>) super.thumbnail(sizeMultiplier);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> load(@Nullable Object arg0) {
     return (GlideRequest<TranscodeType>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> load(@Nullable Bitmap arg0) {
     return (GlideRequest<TranscodeType>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> load(@Nullable Drawable arg0) {
     return (GlideRequest<TranscodeType>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> load(@Nullable String arg0) {
     return (GlideRequest<TranscodeType>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> load(@Nullable Uri arg0) {
     return (GlideRequest<TranscodeType>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> load(@Nullable File arg0) {
     return (GlideRequest<TranscodeType>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> load(@RawRes @DrawableRes @Nullable Integer arg0) {
     return (GlideRequest<TranscodeType>) super.load(arg0);
@@ -713,6 +727,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> load(@Nullable byte[] arg0) {
     return (GlideRequest<TranscodeType>) super.load(arg0);

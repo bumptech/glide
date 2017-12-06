@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.FragmentActivity;
@@ -31,23 +32,24 @@ public final class GlideApp {
    * @see Glide#getPhotoCacheDir(Context)
    */
   @Nullable
-  public static File getPhotoCacheDir(Context context) {
-    return Glide.getPhotoCacheDir(context);
+  public static File getPhotoCacheDir(Context arg0) {
+    return Glide.getPhotoCacheDir(arg0);
   }
 
   /**
    * @see Glide#getPhotoCacheDir(Context, String)
    */
   @Nullable
-  public static File getPhotoCacheDir(Context context, String cacheName) {
-    return Glide.getPhotoCacheDir(context, cacheName);
+  public static File getPhotoCacheDir(Context arg0, String arg1) {
+    return Glide.getPhotoCacheDir(arg0, arg1);
   }
 
   /**
    * @see Glide#get(Context)
    */
-  public static Glide get(Context context) {
-    return Glide.get(context);
+  @NonNull
+  public static Glide get(Context arg0) {
+    return Glide.get(arg0);
   }
 
   /**
@@ -65,8 +67,8 @@ public final class GlideApp {
    */
   @VisibleForTesting
   @SuppressLint("VisibleForTests")
-  public static void init(Context context, GlideBuilder builder) {
-    Glide.init(context, builder);
+  public static void init(Context arg0, GlideBuilder arg1) {
+    Glide.init(arg0, arg1);
   }
 
   /**
@@ -81,42 +83,42 @@ public final class GlideApp {
   /**
    * @see Glide#with(Context)
    */
-  public static GlideRequests with(Context context) {
-    return (GlideRequests) Glide.with(context);
+  public static GlideRequests with(Context arg0) {
+    return (GlideRequests) Glide.with(arg0);
   }
 
   /**
    * @see Glide#with(Activity)
    */
-  public static GlideRequests with(Activity activity) {
-    return (GlideRequests) Glide.with(activity);
+  public static GlideRequests with(Activity arg0) {
+    return (GlideRequests) Glide.with(arg0);
   }
 
   /**
    * @see Glide#with(FragmentActivity)
    */
-  public static GlideRequests with(FragmentActivity activity) {
-    return (GlideRequests) Glide.with(activity);
+  public static GlideRequests with(FragmentActivity arg0) {
+    return (GlideRequests) Glide.with(arg0);
   }
 
   /**
    * @see Glide#with(Fragment)
    */
-  public static GlideRequests with(Fragment fragment) {
-    return (GlideRequests) Glide.with(fragment);
+  public static GlideRequests with(Fragment arg0) {
+    return (GlideRequests) Glide.with(arg0);
   }
 
   /**
    * @see Glide#with(Fragment)
    */
-  public static GlideRequests with(android.support.v4.app.Fragment fragment) {
-    return (GlideRequests) Glide.with(fragment);
+  public static GlideRequests with(android.support.v4.app.Fragment arg0) {
+    return (GlideRequests) Glide.with(arg0);
   }
 
   /**
    * @see Glide#with(View)
    */
-  public static GlideRequests with(View view) {
-    return (GlideRequests) Glide.with(view);
+  public static GlideRequests with(View arg0) {
+    return (GlideRequests) Glide.with(arg0);
   }
 }
