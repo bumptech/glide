@@ -77,7 +77,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream>,
   }
 
   @Override
-  public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+  public void onResponse(@NonNull Call call, @NonNull Response response) {
     responseBody = response.body();
     if (response.isSuccessful()) {
       long contentLength = Preconditions.checkNotNull(responseBody).contentLength();

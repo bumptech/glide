@@ -1,6 +1,7 @@
 package com.bumptech.glide.integration.volley;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.load.Options;
@@ -32,13 +33,13 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   }
 
   @Override
-  public boolean handles(GlideUrl url) {
+  public boolean handles(@NonNull GlideUrl url) {
     return true;
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(GlideUrl url, int width, int height,
-      Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull GlideUrl url, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(url, new VolleyStreamFetcher(requestQueue, url, requestFactory));
   }
 

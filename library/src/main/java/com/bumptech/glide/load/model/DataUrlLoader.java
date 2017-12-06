@@ -35,12 +35,13 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(String model, int width, int height, Options options) {
+  public LoadData<Data> buildLoadData(@NonNull String model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(model), new DataUriFetcher<>(model, dataDecoder));
   }
 
   @Override
-  public boolean handles(String url) {
+  public boolean handles(@NonNull String url) {
     return url.startsWith(DATA_SCHEME_IMAGE);
   }
 
