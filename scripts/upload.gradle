@@ -82,9 +82,12 @@ afterEvaluate { project ->
                     authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
                 }
 
+                pom.whenConfigured { pom ->
+                    pom.packaging = POM_PACKAGING
+                }
+
                 pom.project {
                     name = POM_NAME
-                    packaging = POM_PACKAGING
                     description = POM_DESCRIPTION
                     url = POM_URL
 
