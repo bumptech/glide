@@ -30,15 +30,6 @@ public class CenterCrop extends BitmapTransformation {
     this();
   }
 
-  /**
-   * @deprecated Use {@link #CenterCrop()}.
-   * @param bitmapPool Ignored.
-   */
-  @Deprecated
-  public CenterCrop(@SuppressWarnings("unused") BitmapPool bitmapPool) {
-    this();
-  }
-
   // Bitmap doesn't implement equals, so == and .equals are equivalent here.
   @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
