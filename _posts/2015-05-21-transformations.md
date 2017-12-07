@@ -82,6 +82,93 @@ GlideApp.with(fragment)
 
 The order in which you pass transformations to [``MultiTransformation``][18]'s constructor determines the order in which the transformations are applied.
 
+### Custom transformations.
+
+Although Glide provides a variety of built in [``Transformation``][1] implementations, you may also implement your own custom [``Transformation``][2]s if you need additional functionality.
+
+#### BitmapTransformation
+
+If you only need to transform ``Bitmap``s, it's best to start by subclassing [``BitmapTransformation``][20]. ``BitmapTransformation`` takes care of a few of the basic things for you, including extracting recycling the original Bitmap if your ``Transformation`` returns a new modified Bitmap.
+
+A simple implementation might look something like this:
+
+```java
+public class FillSpace extends BitmapTransformation {
+    private static final String ID = "com.bumptech.glide.transformations.FillSpace";
+    private static final String ID_BYTES = ID.getBytes(STRING_CHARSET_NAME);
+
+    {@literal @Override}
+    public Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+        if (toTransform.getWidth() == outWidth && toTransform.getHeight() == outHeight) {
+            return toTransform;
+        }
+
+        return Bitmap.createScaledBitmap(toTransform, outWidth, outHeight, /*filter=*/ true);
+    }
+
+    {@literal @Override}
+    public void equals(Object o) {
+      return o instanceof FillSpace;
+    }
+
+    {@literal @Override}
+    public int hashCode() {
+      return ID.hashCode();
+    }
+
+    {@literal @Override}
+    public void updateDiskCacheKey(MessageDigest messageDigest)
+        throws UnsupportedEncodingException {
+      messageDigest.update(ID_BYTES);
+    }
+}
+```
+
+Although your ``Transformation`` will almost certainly do something more sophisticated than our example, it should contain the same basic elements and method overrides.
+
+#### Required methods
+
+In particular, note that there are three methods that you **must** implement for any ``Transformation`` subclass, including ``BitmapTransformation`` in order for disk and memory caching to work correctly:
+
+1. ``equals()``
+2. ``hashCode()``
+3. ``updateDiskCacheKey``
+
+If your [``Transformation``][1] takes no arguments, it's often easy to just use a ``static`` ``final`` ``String`` containing the fully qualified package name as an id that can form the basis of ``hashCode()`` and can be used to update the ``MessageDigest`` passed to ``updateDiskCacheKey()``. If your [``Transformation``][1] does take arguments that affect the way the ``Bitmap`` is transformed, they must be included in these three methods as well.
+
+For example, Glide's [``RoundedCorners``][21] ``Transformation`` accepts an ``int`` that determines the radius of the rounded corners. Its implementations of ``equals()``, ``hashCode()`` and ``updateDiskCacheKey`` looks like this:
+
+```java
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof RoundedCorners) {
+      RoundedCorners other = (RoundedCorners) o;
+      return roundingRadius == other.roundingRadius;
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Util.hashCode(ID.hashCode(),
+        Util.hashCode(roundingRadius));
+  }
+
+  @Override
+  public void updateDiskCacheKey(MessageDigest messageDigest) {
+    messageDigest.update(ID_BYTES);
+
+    byte[] radiusData = ByteBuffer.allocate(4).putInt(roundingRadius).array();
+    messageDigest.update(radiusData);
+  }
+```
+
+The original ``String`` id remains as well, but the ``roundingRadius`` is included in all three methods as well. The ``updateDiskCacheKey`` method here also demonstrates how you can use ``ByteBuffer`` to including primitive arguments in your ``updateDiskCacheKey`` implementation.
+
+#### Don't forget equals()/hashCode()!
+
+It's worth re-iterating one more time that it's essential that you implement ``equals()`` and ``hashCode()`` for memory caching to work correctly. Unfortunately ``BitmapTransformation`` and ``Transformation`` implementations will compile if those methods are not overridden, but that doesn't mean they work correctly. We're exploring options for making using the default ``equals()`` and ``hashCodeMethods`` a compile time error in future versions of Glide.
+
 ### Special Behavior in Glide
 
 #### Re-using Transformations
@@ -117,3 +204,5 @@ Glide can apply ``Bitmap`` ``Transformations`` to ``BitmapDrawable``, ``GifDrawa
 [17]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html#transform-java.lang.Class-com.bumptech.glide.load.Transformation-
 [18]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/MultiTransformation.html
 [19]: {{ site.baseurl }}/javadocs/410/com/bumptech/glide/request/RequestOptions.html#transforms-com.bumptech.glide.load.Transformation...-
+[20]: {{ site.baseurl }}/javadocs/440/com/bumptech/glide/load/resource/bitmap/BitmapTransformation.html
+[21]: {{ site.baseurl }}/javadocs/440/com/bumptech/glide/load/resource/bitmap/RoundedCorners.html
