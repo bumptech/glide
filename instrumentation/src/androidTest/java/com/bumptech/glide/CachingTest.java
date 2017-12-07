@@ -46,7 +46,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -395,7 +394,7 @@ public class CachingTest {
     verify(requestListener)
         .onResourceReady(
             anyDrawable(),
-            ArgumentMatchers.any(),
+            any(),
             anyDrawableTarget(),
             eq(DataSource.MEMORY_CACHE),
             anyBoolean());
@@ -433,7 +432,7 @@ public class CachingTest {
     verify(requestListener)
         .onResourceReady(
             anyDrawable(),
-            ArgumentMatchers.any(),
+            any(),
             anyDrawableTarget(),
             not(eq(DataSource.MEMORY_CACHE)),
             anyBoolean());
