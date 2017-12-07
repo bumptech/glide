@@ -9,6 +9,7 @@ import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -18,6 +19,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.ImageView;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
@@ -43,6 +46,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -354,6 +358,85 @@ public class CachingTest {
         concurrency.get(firstQueuedFuture);
       }
     });
+  }
+
+
+  @Test
+  public void loadIntoView_withoutSkipMemoryCache_loadsFromMemoryCacheIfPresent() {
+    final ImageView imageView = new ImageView(context);
+    imageView.setLayoutParams(new LayoutParams(100, 100));
+
+    concurrency.loadOnMainThread(
+        GlideApp.with(context)
+            .load(ResourceIds.raw.canonical)
+            .listener(requestListener)
+            .dontTransform(),
+        imageView);
+
+    // Casting avoids a varags array warning.
+    reset((RequestListener) requestListener);
+
+    // Run on the main thread, since this is already cached, we shouldn't need to try to wait. If we
+    // do end up re-using the old Target, our wait will always timeout anyway if we use
+    // loadOnMainThread. If the load doesn't complete in time, it will be caught by the listener
+    // below, which expects to be called synchronously.
+    concurrency.runOnMainThread(
+        new Runnable() {
+          @Override
+          public void run() {
+            GlideApp.with(context)
+                .load(ResourceIds.raw.canonical)
+                .listener(requestListener)
+                .dontTransform()
+                .into(imageView);
+          }
+        });
+
+    verify(requestListener)
+        .onResourceReady(
+            anyDrawable(),
+            ArgumentMatchers.any(),
+            anyDrawableTarget(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
+  }
+
+  @Test
+  public void loadIntoView_withSkipMemoryCache_doesNotLoadFromMemoryCacheIfPresent() {
+    final ImageView imageView = new ImageView(context);
+    imageView.setLayoutParams(new LayoutParams(100, 100));
+
+    concurrency.loadOnMainThread(
+        GlideApp.with(context)
+            .load(ResourceIds.raw.canonical)
+            .listener(requestListener)
+            .dontTransform()
+            .skipMemoryCache(true),
+        imageView);
+
+    // Casting avoids a varags array warning.
+    reset((RequestListener) requestListener);
+
+    // If this test fails due to a timeout, it's because we re-used the Target from the previous
+    // request, which breaks the logic in loadOnMainThread that expects a new Target's
+    // onResourceReady callback to be called. This can be confirmed by changing this to
+    // runOnMainThread and verifying that the RequestListener assertion below fails because
+    // the DataSource was from the memory cache.
+    concurrency.loadOnMainThread(
+        GlideApp.with(context)
+            .load(ResourceIds.raw.canonical)
+            .listener(requestListener)
+            .dontTransform()
+            .skipMemoryCache(true),
+        imageView);
+
+    verify(requestListener)
+        .onResourceReady(
+            anyDrawable(),
+            ArgumentMatchers.any(),
+            anyDrawableTarget(),
+            not(eq(DataSource.MEMORY_CACHE)),
+            anyBoolean());
   }
 
   private void clearMemoryCacheOnMainThread() throws InterruptedException {
