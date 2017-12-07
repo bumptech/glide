@@ -27,14 +27,6 @@ public class FitCenter extends BitmapTransformation {
     this();
   }
 
-  /**
-   * @deprecated Use {@link #FitCenter()}.
-   */
-  @Deprecated
-  public FitCenter(@SuppressWarnings("unused") BitmapPool bitmapPool) {
-    this();
-  }
-
   @Override
   protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth,
       int outHeight) {
