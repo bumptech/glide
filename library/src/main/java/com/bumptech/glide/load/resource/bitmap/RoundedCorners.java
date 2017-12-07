@@ -34,17 +34,6 @@ public final class RoundedCorners extends BitmapTransformation {
    * @deprecated Use {@link #RoundedCorners(int)}
    */
   @Deprecated
-  public RoundedCorners(@SuppressWarnings("unused") BitmapPool bitmapPool, int roundingRadius) {
-    this(roundingRadius);
-  }
-
-  /**
-   * @param roundingRadius the corner radius (in device-specific pixels).
-   * @throws IllegalArgumentException if rounding radius is 0 or less.
-   *
-   * @deprecated Use {@link #RoundedCorners(int)}
-   */
-  @Deprecated
   public RoundedCorners(@SuppressWarnings("unused") Context context, int roundingRadius) {
     this(roundingRadius);
   }
