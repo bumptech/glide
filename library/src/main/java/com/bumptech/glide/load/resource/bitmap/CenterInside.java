@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -19,24 +18,6 @@ public class CenterInside extends BitmapTransformation {
 
   public CenterInside() {
     // Intentionally empty.
-  }
-
-  /**
-   * @deprecated Use {@link #CenterInside()}.
-   * @param context Ignored.
-   */
-  @Deprecated
-  public CenterInside(@SuppressWarnings("unused") Context context) {
-    this();
-  }
-
-  /**
-   * @deprecated Use {@link #CenterInside()}.
-   * @param bitmapPool Ignored.
-   */
-  @Deprecated
-  public CenterInside(@SuppressWarnings("unused") BitmapPool bitmapPool) {
-    this();
   }
 
   @Override
