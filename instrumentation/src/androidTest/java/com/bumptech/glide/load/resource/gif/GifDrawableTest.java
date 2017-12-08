@@ -44,16 +44,120 @@ public class GifDrawableTest {
 
   @Before
   public void setUp() {
-    // Required for us to add a View to a Window.
-    assumeTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.M);
-
     context = getTargetContext();
     mainHandler = new Handler(Looper.getMainLooper());
   }
 
   @Test
+  public void loadGif_withInterlacedTransparentGif_sizeOriginal_succeeds()
+      throws ExecutionException, InterruptedException {
+    GifDrawable gifDrawable =
+        GlideApp.with(context)
+            .asGif()
+            .load(ResourceIds.raw.interlaced_transparent_gif)
+            .submit()
+            .get();
+    assertThat(gifDrawable).isNotNull();
+    gifDrawable.stop();
+  }
+
+  @Test
+  public void loadGif_withInterlacedTransparentGif_downsampled_succeeds()
+      throws ExecutionException, InterruptedException {
+    GifDrawable gifDrawable =
+        GlideApp.with(context)
+            .asGif()
+            .load(ResourceIds.raw.interlaced_transparent_gif)
+            .submit(10, 10)
+            .get();
+    assertThat(gifDrawable).isNotNull();
+    gifDrawable.stop();
+  }
+
+  @Test
+  public void loadGif_withTransparentGif_sizeOriginal_succeeds()
+      throws ExecutionException, InterruptedException {
+    GifDrawable gifDrawable =
+        GlideApp.with(context)
+            .asGif()
+            .load(ResourceIds.raw.transparent_gif)
+            .submit()
+            .get();
+    assertThat(gifDrawable).isNotNull();
+    gifDrawable.stop();
+  }
+
+  @Test
+  public void loadGif_withTransparentGif_downsampled_succeeds()
+      throws ExecutionException, InterruptedException {
+    GifDrawable gifDrawable =
+        GlideApp.with(context)
+            .asGif()
+            .load(ResourceIds.raw.transparent_gif)
+            .submit(10, 10)
+            .get();
+    assertThat(gifDrawable).isNotNull();
+    gifDrawable.stop();
+  }
+
+  @Test
+  public void loadGif_withOpaqueGif_sizeOriginal_succeeds()
+      throws ExecutionException, InterruptedException {
+    GifDrawable gifDrawable =
+        GlideApp.with(context)
+            .asGif()
+            .load(ResourceIds.raw.opaque_gif)
+            .submit()
+            .get();
+    assertThat(gifDrawable).isNotNull();
+    gifDrawable.stop();
+  }
+
+  @Test
+  public void loadGif_withOpaqueGif_downsampled_succeeds()
+      throws ExecutionException, InterruptedException {
+    GifDrawable gifDrawable =
+        GlideApp.with(context)
+            .asGif()
+            .load(ResourceIds.raw.opaque_gif)
+            .submit(10, 10)
+            .get();
+    assertThat(gifDrawable).isNotNull();
+    gifDrawable.stop();
+  }
+
+  @Test
+  public void loadGif_withOpaqueInterlacedGif_sizeOriginal_succeeds()
+      throws ExecutionException, InterruptedException {
+    GifDrawable gifDrawable =
+        GlideApp.with(context)
+            .asGif()
+            .load(ResourceIds.raw.opaque_interlaced_gif)
+            .submit()
+            .get();
+    assertThat(gifDrawable).isNotNull();
+    gifDrawable.stop();
+  }
+
+  @Test
+  public void loadGif_withOpaqueInterlacedGif_downsampled_succeeds()
+      throws ExecutionException, InterruptedException {
+    GifDrawable gifDrawable =
+        GlideApp.with(context)
+            .asGif()
+            .load(ResourceIds.raw.opaque_interlaced_gif)
+            .submit(10, 10)
+            .get();
+    assertThat(gifDrawable).isNotNull();
+    gifDrawable.stop();
+  }
+
+  @Test
   public void loadGif_intoImageView_afterStop_restartsGif()
       throws ExecutionException, InterruptedException {
+    // Required for us to add a View to a Window.
+    assumeTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.M);
+
     // Mimic the state the Drawable can get into if it was loaded into a View previously and stopped
     // so that it ended up with a pending frame that finished after the stop call.
     final GifDrawable gifDrawable = GlideApp.with(context)
