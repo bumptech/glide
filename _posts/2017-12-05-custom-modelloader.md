@@ -174,7 +174,7 @@ public class Base64DataFetcher implements DataFetcher<ByteBuffer> {
 Although there are a number of methods here, most of them are actually pretty easy to implement.
 
 #### getDataClass
-``getDataClass()`` is trivial, we're loading ``ByteBuffers``:
+``getDataClass()`` is trivial, we're loading ``ByteBuffer``:
 
 ```java
   @NonNull
@@ -474,7 +474,7 @@ public class MyAppGlideModule extends AppGlideModule {
 
 And that's it! 
 
-Now we can just take any data uri with a base54 encoded image and load it with Glide and it just works:
+Now we can just take any data uri with a base64 encoded image and load it with Glide and it just works:
 
 ```java
 String dataUri = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYA..."
@@ -693,7 +693,7 @@ Using ``LazyHeaderFactory`` will avoid running expensive calls until the HTTP re
 
 ## Credits
 
-Thanks to jasonch@ for Glide's [data uri ModelLoader implementation][27].
+Thanks to @jasonch for Glide's [data uri ModelLoader implementation][27].
 
 [1]: {{ site.baseurl }}/javadocs/440/com/bumptech/glide/load/model/ModelLoader.html
 [2]: {{ site.baseurl }}/javadocs/440/com/bumptech/glide/load/data/DataFetcher.html
