@@ -3,14 +3,15 @@ package com.bumptech.glide.load.resource.gif;
 import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 
+import android.Manifest.permission;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import android.view.WindowManager;
@@ -37,8 +38,18 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class GifDrawableTest {
-  @Rule public TestName testName = new TestName();
-  @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
+  @Rule public final TestName testName = new TestName();
+  @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
+  @Rule public final GrantPermissionRule grantPermissionRule;
+
+  {
+    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+      grantPermissionRule = GrantPermissionRule.grant(permission.SYSTEM_ALERT_WINDOW);
+    } else {
+      grantPermissionRule = GrantPermissionRule.grant();
+    }
+  }
+
   private Context context;
   private Handler mainHandler;
 
@@ -155,9 +166,6 @@ public class GifDrawableTest {
   @Test
   public void loadGif_intoImageView_afterStop_restartsGif()
       throws ExecutionException, InterruptedException {
-    // Required for us to add a View to a Window.
-    assumeTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.M);
-
     // Mimic the state the Drawable can get into if it was loaded into a View previously and stopped
     // so that it ended up with a pending frame that finished after the stop call.
     final GifDrawable gifDrawable = GlideApp.with(context)
@@ -212,13 +220,16 @@ public class GifDrawableTest {
     drawableFromView.stop();
   }
 
-  // LayoutParams.TYPE_SYSTEM_ALERT.
   @SuppressWarnings("deprecation")
   private void addViewToWindow(View view) {
     final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
     layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
     layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-    layoutParams.type = LayoutParams.TYPE_SYSTEM_ALERT;
+    layoutParams.type =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+            ? LayoutParams.TYPE_APPLICATION_OVERLAY
+            : Build.VERSION.SDK_INT == Build.VERSION_CODES.M
+                ? LayoutParams.TYPE_TOAST : LayoutParams.TYPE_SYSTEM_ALERT;
     final WindowManager windowManager =
         (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     Preconditions.checkNotNull(windowManager).addView(view, layoutParams);
