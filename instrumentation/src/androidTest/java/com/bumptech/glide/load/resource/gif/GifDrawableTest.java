@@ -69,7 +69,6 @@ public class GifDrawableTest {
             .submit()
             .get();
     assertThat(gifDrawable).isNotNull();
-    gifDrawable.stop();
   }
 
   @Test
@@ -82,7 +81,6 @@ public class GifDrawableTest {
             .submit(10, 10)
             .get();
     assertThat(gifDrawable).isNotNull();
-    gifDrawable.stop();
   }
 
   @Test
@@ -95,7 +93,6 @@ public class GifDrawableTest {
             .submit()
             .get();
     assertThat(gifDrawable).isNotNull();
-    gifDrawable.stop();
   }
 
   @Test
@@ -108,7 +105,6 @@ public class GifDrawableTest {
             .submit(10, 10)
             .get();
     assertThat(gifDrawable).isNotNull();
-    gifDrawable.stop();
   }
 
   @Test
@@ -121,7 +117,6 @@ public class GifDrawableTest {
             .submit()
             .get();
     assertThat(gifDrawable).isNotNull();
-    gifDrawable.stop();
   }
 
   @Test
@@ -134,7 +129,6 @@ public class GifDrawableTest {
             .submit(10, 10)
             .get();
     assertThat(gifDrawable).isNotNull();
-    gifDrawable.stop();
   }
 
   @Test
@@ -147,7 +141,6 @@ public class GifDrawableTest {
             .submit()
             .get();
     assertThat(gifDrawable).isNotNull();
-    gifDrawable.stop();
   }
 
   @Test
@@ -160,7 +153,6 @@ public class GifDrawableTest {
             .submit(10, 10)
             .get();
     assertThat(gifDrawable).isNotNull();
-    gifDrawable.stop();
   }
 
   @Test
@@ -216,8 +208,8 @@ public class GifDrawableTest {
     GifDrawable drawableFromView = (GifDrawable) imageView.getDrawable();
     assertThat(drawableFromView.isRunning()).isTrue();
 
-    gifDrawable.stop();
     drawableFromView.stop();
+    gifDrawable.stop();
   }
 
   @SuppressWarnings("deprecation")

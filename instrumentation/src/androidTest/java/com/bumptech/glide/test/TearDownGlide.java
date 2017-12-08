@@ -1,6 +1,8 @@
 package com.bumptech.glide.test;
 
+import android.support.test.InstrumentationRegistry;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -18,6 +20,15 @@ public final class TearDownGlide implements TestRule {
         try {
           base.evaluate();
         } finally {
+          new ConcurrencyHelper().runOnMainThread(new Runnable() {
+            @Override
+            public void run() {
+              RequestManager requestManager =
+                  Glide.with(InstrumentationRegistry.getTargetContext());
+              requestManager.onStop();
+              requestManager.onDestroy();
+            }
+          });
           Glide.tearDown();
         }
       }

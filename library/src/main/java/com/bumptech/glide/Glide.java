@@ -200,6 +200,9 @@ public class Glide implements ComponentCallbacks2 {
   @VisibleForTesting
   public static synchronized void tearDown() {
     if (glide != null) {
+      glide.getContext()
+          .getApplicationContext()
+          .unregisterComponentCallbacks(glide);
       glide.engine.shutdown();
     }
     glide = null;
