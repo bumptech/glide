@@ -693,7 +693,7 @@ Using ``LazyHeaderFactory`` will avoid running expensive calls until the HTTP re
 
 ## Credits
 
-Thanks to @jasonch for Glide's [data uri ModelLoader implementation][27].
+Thanks to jasonch@ for Glide's [data uri ModelLoader implementation][27].
 
 [1]: {{ site.baseurl }}/javadocs/440/com/bumptech/glide/load/model/ModelLoader.html
 [2]: {{ site.baseurl }}/javadocs/440/com/bumptech/glide/load/data/DataFetcher.html
