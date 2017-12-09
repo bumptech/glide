@@ -99,7 +99,7 @@
 
         <!-- ArgumentMatchers isn't available internally, the same methods are available on org.mockito.Mockito. -->
         <module name="IllegalImport">
-            <property name="illegalClasses" value="org\.mockito\.ArgumentMatchers\..*" />
+            <property name="illegalClasses" value="org\.mockito\.ArgumentMatchers.*" />
             <property name="regexp" value="true" />
             <message key="import.illegal" value="Import from illegal class - {0}. Use org.mockito.Mockito to statically import matcher methods." />
         </module>
