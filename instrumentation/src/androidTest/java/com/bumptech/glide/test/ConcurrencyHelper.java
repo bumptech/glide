@@ -276,7 +276,7 @@ public class ConcurrencyHelper {
     waitOnLatch(latch);
   }
 
-  static void waitOnLatch(final CountDownLatch latch) {
+  public static void waitOnLatch(final CountDownLatch latch) {
     wait(new Waiter() {
       @Override
       public boolean await(long timeout, TimeUnit timeUnit) throws InterruptedException {

@@ -1,35 +1,27 @@
 package com.bumptech.glide.load.resource.gif;
 
-import static android.support.test.InstrumentationRegistry.getTargetContext;
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
 
 import android.Manifest.permission;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.annotation.Nullable;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.GrantPermissionRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.gif.GifDrawable.GifState;
 import com.bumptech.glide.load.resource.gif.GifFrameLoader.OnEveryFrameListener;
-import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.test.TearDownGlide;
 import com.bumptech.glide.util.Preconditions;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,6 +33,7 @@ public class GifDrawableTest {
   @Rule public final TestName testName = new TestName();
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   @Rule public final GrantPermissionRule grantPermissionRule;
+  private final ConcurrencyHelper concurrencyHelper = new ConcurrencyHelper();
 
   {
     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
@@ -51,23 +44,21 @@ public class GifDrawableTest {
   }
 
   private Context context;
-  private Handler mainHandler;
 
   @Before
   public void setUp() {
-    context = getTargetContext();
-    mainHandler = new Handler(Looper.getMainLooper());
+    context = InstrumentationRegistry.getTargetContext();
   }
 
   @Test
   public void loadGif_withInterlacedTransparentGif_sizeOriginal_succeeds()
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
-        GlideApp.with(context)
-            .asGif()
-            .load(ResourceIds.raw.interlaced_transparent_gif)
-            .submit()
-            .get();
+        concurrencyHelper.get(
+            GlideApp.with(context)
+                .asGif()
+                .load(ResourceIds.raw.interlaced_transparent_gif)
+                .submit());
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -75,11 +66,11 @@ public class GifDrawableTest {
   public void loadGif_withInterlacedTransparentGif_downsampled_succeeds()
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
-        GlideApp.with(context)
-            .asGif()
-            .load(ResourceIds.raw.interlaced_transparent_gif)
-            .submit(10, 10)
-            .get();
+        concurrencyHelper.get(
+            GlideApp.with(context)
+                .asGif()
+                .load(ResourceIds.raw.interlaced_transparent_gif)
+                .submit(10, 10));
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -87,11 +78,11 @@ public class GifDrawableTest {
   public void loadGif_withTransparentGif_sizeOriginal_succeeds()
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
-        GlideApp.with(context)
-            .asGif()
-            .load(ResourceIds.raw.transparent_gif)
-            .submit()
-            .get();
+        concurrencyHelper.get(
+            GlideApp.with(context)
+                .asGif()
+                .load(ResourceIds.raw.transparent_gif)
+                .submit());
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -99,11 +90,11 @@ public class GifDrawableTest {
   public void loadGif_withTransparentGif_downsampled_succeeds()
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
-        GlideApp.with(context)
-            .asGif()
-            .load(ResourceIds.raw.transparent_gif)
-            .submit(10, 10)
-            .get();
+        concurrencyHelper.get(
+            GlideApp.with(context)
+                .asGif()
+                .load(ResourceIds.raw.transparent_gif)
+                .submit(10, 10));
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -111,11 +102,11 @@ public class GifDrawableTest {
   public void loadGif_withOpaqueGif_sizeOriginal_succeeds()
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
-        GlideApp.with(context)
-            .asGif()
-            .load(ResourceIds.raw.opaque_gif)
-            .submit()
-            .get();
+        concurrencyHelper.get(
+            GlideApp.with(context)
+                .asGif()
+                .load(ResourceIds.raw.opaque_gif)
+                .submit());
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -123,11 +114,11 @@ public class GifDrawableTest {
   public void loadGif_withOpaqueGif_downsampled_succeeds()
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
-        GlideApp.with(context)
-            .asGif()
-            .load(ResourceIds.raw.opaque_gif)
-            .submit(10, 10)
-            .get();
+        concurrencyHelper.get(
+            GlideApp.with(context)
+                .asGif()
+                .load(ResourceIds.raw.opaque_gif)
+                .submit(10, 10));
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -135,11 +126,11 @@ public class GifDrawableTest {
   public void loadGif_withOpaqueInterlacedGif_sizeOriginal_succeeds()
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
-        GlideApp.with(context)
-            .asGif()
-            .load(ResourceIds.raw.opaque_interlaced_gif)
-            .submit()
-            .get();
+        concurrencyHelper.get(
+            GlideApp.with(context)
+                .asGif()
+              .load(ResourceIds.raw.opaque_interlaced_gif)
+              .submit());
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -147,11 +138,11 @@ public class GifDrawableTest {
   public void loadGif_withOpaqueInterlacedGif_downsampled_succeeds()
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
-        GlideApp.with(context)
-            .asGif()
-            .load(ResourceIds.raw.opaque_interlaced_gif)
-            .submit(10, 10)
-            .get();
+        concurrencyHelper.get(
+            GlideApp.with(context)
+                .asGif()
+                .load(ResourceIds.raw.opaque_interlaced_gif)
+                .submit(10, 10));
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -160,14 +151,16 @@ public class GifDrawableTest {
       throws ExecutionException, InterruptedException {
     // Mimic the state the Drawable can get into if it was loaded into a View previously and stopped
     // so that it ended up with a pending frame that finished after the stop call.
-    final GifDrawable gifDrawable = GlideApp.with(context)
-        .asGif()
-        .load(ResourceIds.raw.dl_world_anim)
-        .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-        .get();
+    final GifDrawable gifDrawable =
+        concurrencyHelper.get(
+            GlideApp.with(context)
+                .asGif()
+                .load(ResourceIds.raw.dl_world_anim)
+                .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL));
+
     final CountDownLatch waitForGifFrame = new CountDownLatch(1);
     // Starting/Stopping loads in GIFs must happen on the main thread.
-    mainHandler.post(
+    concurrencyHelper.runOnMainThread(
         new Runnable() {
           @Override
           public void run() {
@@ -184,26 +177,24 @@ public class GifDrawableTest {
             gifDrawable.stop();
           }
         });
-    waitOrThrow(waitForGifFrame);
+    ConcurrencyHelper.waitOnLatch(waitForGifFrame);
 
     // Load the Drawable with the pending frame into a new View and make sure it ends up in the
     // running state.
     final ImageView imageView = new ImageView(context);
-    final WaitForLoad<Drawable> waitForLoad = new WaitForLoad<>();
-    // Starting loads into Views must happen on the main thread.
-    mainHandler
-        .post(new Runnable() {
+    concurrencyHelper.runOnMainThread(
+        new Runnable() {
           @Override
           public void run() {
             addViewToWindow(imageView);
-            GlideApp.with(context)
-                .load(gifDrawable)
-                .listener(waitForLoad)
-                .override(Target.SIZE_ORIGINAL)
-                .into(imageView);
           }
         });
-    waitForLoad.await();
+
+    concurrencyHelper.loadOnMainThread(
+        GlideApp.with(context)
+            .load(gifDrawable)
+            .override(Target.SIZE_ORIGINAL),
+        imageView);
 
     GifDrawable drawableFromView = (GifDrawable) imageView.getDrawable();
     assertThat(drawableFromView.isRunning()).isTrue();
@@ -214,7 +205,7 @@ public class GifDrawableTest {
 
   @SuppressWarnings("deprecation")
   private void addViewToWindow(View view) {
-    final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+    WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
     layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
     layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
     layoutParams.type =
@@ -222,46 +213,8 @@ public class GifDrawableTest {
             ? LayoutParams.TYPE_APPLICATION_OVERLAY
             : Build.VERSION.SDK_INT == Build.VERSION_CODES.M
                 ? LayoutParams.TYPE_TOAST : LayoutParams.TYPE_SYSTEM_ALERT;
-    final WindowManager windowManager =
+    WindowManager windowManager =
         (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     Preconditions.checkNotNull(windowManager).addView(view, layoutParams);
-  }
-
-  private static void waitOrThrow(CountDownLatch latch) {
-    try {
-      if (!latch.await(5, TimeUnit.SECONDS)) {
-        fail("Failed to reach expected condition in the alloted time.");
-      }
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private final class WaitForLoad<T> implements RequestListener<T> {
-    private final CountDownLatch countDownLatch = new CountDownLatch(1);
-
-    void await() {
-      waitOrThrow(countDownLatch);
-    }
-
-    @Override
-    public boolean onLoadFailed(@Nullable GlideException e, Object model,
-        Target<T> target,
-        boolean isFirstResource) {
-      throw new RuntimeException(e);
-    }
-
-    @Override
-    public boolean onResourceReady(T resource, Object model, Target<T> target,
-        DataSource dataSource,
-        boolean isFirstResource) {
-      mainHandler.post(new Runnable() {
-        @Override
-        public void run() {
-          countDownLatch.countDown();
-        }
-      });
-      return false;
-    }
   }
 }
