@@ -9,8 +9,6 @@ order: 1
 * TOC
 {:toc}
 
-Although Glide provides out of the box support for most common types of models (URLs, Uris, file paths etc), you may occasionally run into a type that Glide doesn't support. You may also run in to cases where you want to customize or tweak Glide's default behavior. You may even want to integrate a new way of fetching images or a new networking library beyond those available in Glide's [integration libraries][3].
-
 ## About Snapshots
 For users who don't want to wait for the next version of Glide and are willing to live on the bleeding edge, we deploy snapshot versions of the library to [Sonatype's snapshot repo][2].
 
