@@ -2,6 +2,7 @@ package com.bumptech.glide.provider;
 
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
+import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.DecodePath;
 import com.bumptech.glide.load.engine.LoadPath;
 import com.bumptech.glide.load.resource.transcode.UnitTranscoder;
@@ -20,11 +21,11 @@ public class LoadPathCache {
           Object.class,
           Object.class,
           Collections.singletonList(
-              new DecodePath<>(
+              new DecodePath<Object, Object, Object>(
                   Object.class,
                   Object.class,
                   Object.class,
-                  Collections.emptyList(),
+                  Collections.<ResourceDecoder<Object, Object>>emptyList(),
                   new UnitTranscoder<>(),
                   /*listPool=*/ null)),
           /*listPool=*/ null);
