@@ -12,28 +12,6 @@ disqus: 1
 ### Setup
 For Glide's configuration to work properly, libraries and applications need to perform a certain set of steps. Note that libraries that do not wish to register additional components are not required to do this.
 
-#### Libraries
-Libraries must:
-1. Add one or more [``LibraryGlideModule``][2] implementations.
-2. Add the [``@GlideModule``][5] annotation to every [``LibraryGlideModule``][2] implementation
-3. Add a dependency on Glide's annotation processor.
-
-An example [``LibraryGlideModule``][2] from Glide's [OkHttp integration library][7] looks like this:
-```java
-@GlideModule
-public final class OkHttpLibraryGlideModule extends LibraryGlideModule {
-  @Override
-  public void registerComponents(Context context, Glide glide, Registry registry) {
-    registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory());
-  }
-}
-```
-
-Using the [``@GlideModule``][5] annotation requires a dependency on Glide's annotations:
-```groovy
-compile 'com.github.bumptech.glide:annotations:4.4.0'
-```
-
 #### Applications
 Applications must:
 1. Add exactly one [``AppGlideModule``][1] implementation
@@ -64,6 +42,38 @@ Finally, you should keep AppGlideModule implementations in your ``proguard.cfg``
 -keep public class * extends com.bumptech.glide.module.AppGlideModule
 -keep class com.bumptech.glide.GeneratedAppGlideModuleImpl
 ```
+
+#### Libraries
+Libraries that do not register custom components do not need to perform any configuration steps and can skip the sections on this page entirely.
+
+Libraries that do need to register a custom component, like a ``ModelLoader``, can do the following: 
+
+1. Add one or more [``LibraryGlideModule``][2] implementations that register the new components.
+2. Add the [``@GlideModule``][5] annotation to every [``LibraryGlideModule``][2] implementation
+3. Add a dependency on Glide's annotation processor.
+
+An example [``LibraryGlideModule``][2] from Glide's [OkHttp integration library][7] looks like this:
+```java
+@GlideModule
+public final class OkHttpLibraryGlideModule extends LibraryGlideModule {
+  @Override
+  public void registerComponents(Context context, Glide glide, Registry registry) {
+    registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory());
+  }
+}
+```
+
+Using the [``@GlideModule``][5] annotation requires a dependency on Glide's annotations:
+```groovy
+compile 'com.github.bumptech.glide:annotations:4.4.0'
+```
+
+##### Avoid AppGlideModule in libraries
+Libraries must **not** include ``AppGlideModule`` implementations. Doing so will prevent any applications that depend on the library from managing their dependencies or configuring options like Glide's cache sizes and locations. 
+
+In addition, if two libraries include ``AppGlideModule``s, applications will be unable to compile if they depend on both and will be forced to pick one or other other. 
+
+This does mean that libraries won't be able to use Glide's generated API, but loads with ``RequestOptions`` will still work just fine (see the [options page][42] for examples).
 
 ### Application Options
 Glide allows applications to use [``AppGlideModule``][1] implementations to completely control Glide's memory and disk cache usage. Glide tries to provide reasonable defaults for most applications, but for some applications, it will be necessary to customize these values. Be sure to measure the results of any changes to avoid performance regressions.
@@ -465,3 +475,4 @@ public final class MyAppGlideModule extends AppGlideModule {
 [39]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/load/engine/bitmap_recycle/LruBitmapPool.html
 [40]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/load/engine/bitmap_recycle/BitmapPool.html
 [41]: https://developer.android.com/reference/android/app/ActivityManager.html#isLowRamDevice()
+[42]: {{ site.baseurl }}/doc/options.html

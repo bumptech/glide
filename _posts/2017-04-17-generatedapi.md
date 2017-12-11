@@ -61,6 +61,8 @@ You're not required to implement any of the methods in ``AppGlideModule`` for th
 
 [``AppGlideModule``][4] implementations must always be annotated with [``@GlideModule``][5]. If the annotation is not present, the module will not be discovered and you will see a warning in your logs with the ``Glide`` log tag that indicates that the module couldn't be found.
 
+**Note:** Libraries should **not** include [``AppGlideModule``][4] implementations. See the [configuration][15] page for details.
+
 #### Kotlin
 
 If you're using Kotlin you can:
@@ -255,3 +257,4 @@ Methods annotated with ``GlideType`` must take a [``RequestBuilder<T>``][2] as t
 [12]: {{ site.baseurl }}/doc/download-setup.html
 [13]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
 [14]: https://kotlinlang.org/docs/reference/kapt.html
+[15]: {{ site.baseurl }}/doc/configuration.html#avoid-appglidemodule-in-libraries
