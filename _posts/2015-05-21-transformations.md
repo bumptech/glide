@@ -167,7 +167,7 @@ The original ``String`` id remains as well, but the ``roundingRadius`` is includ
 
 #### Don't forget equals()/hashCode()!
 
-It's worth re-iterating one more time that it's essential that you implement ``equals()`` and ``hashCode()`` for memory caching to work correctly. Unfortunately ``BitmapTransformation`` and ``Transformation`` implementations will compile if those methods are not overridden, but that doesn't mean they work correctly. We're exploring options for making using the default ``equals()`` and ``hashCodeMethods`` a compile time error in future versions of Glide.
+It's worth re-iterating one more time that it's essential that you implement ``equals()`` and ``hashCode()`` for memory caching to work correctly. Unfortunately ``BitmapTransformation`` and ``Transformation`` implementations will compile if those methods are not overridden, but that doesn't mean they work correctly. We're exploring options for making using the default ``equals()`` and ``hashCode`` methods a compile time error in future versions of Glide.
 
 ### Special Behavior in Glide
 
