@@ -12,6 +12,7 @@ import android.view.View;
 public class ViewPropertyTransition<R> implements Transition<R> {
 
   private final Animator animator;
+  private ViewAdapter viewAdapter;
 
   /**
    * Constructor for a view property animation that takes an {@link ViewPropertyTransition.Animator}
@@ -38,9 +39,21 @@ public class ViewPropertyTransition<R> implements Transition<R> {
   public boolean transition(R current, ViewAdapter adapter) {
     final View view = adapter.getView();
     if (view != null) {
+      viewAdapter = adapter;
       animator.animate(adapter.getView());
     }
     return false;
+  }
+
+  @Override
+  public void cancel() {
+    if (viewAdapter != null) {
+      final View view = viewAdapter.getView();
+      if (view != null) {
+        animator.cancel(view);
+      }
+      viewAdapter = null;
+    }
   }
 
   /**
@@ -54,5 +67,13 @@ public class ViewPropertyTransition<R> implements Transition<R> {
      * @param view The view to transition.
      */
     void animate(View view);
+
+    /**
+     * Cancel an animation on the given {@link android.view.View}. This can be called even after
+     * proper animation ending.
+     *
+     * @param view The view to cancel transition.
+     */
+    void cancel(View view);
   }
 }

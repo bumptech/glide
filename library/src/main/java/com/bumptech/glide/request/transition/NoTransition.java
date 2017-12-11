@@ -46,4 +46,9 @@ public class NoTransition<R> implements Transition<R> {
   public boolean transition(Object current, ViewAdapter adapter) {
     return false;
   }
+
+  @Override
+  public void cancel() {
+    // Nothing to cancel
+  }
 }

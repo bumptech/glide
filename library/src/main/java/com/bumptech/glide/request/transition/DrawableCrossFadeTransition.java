@@ -15,6 +15,7 @@ import android.graphics.drawable.TransitionDrawable;
 public class DrawableCrossFadeTransition implements Transition<Drawable> {
   private final int duration;
   private final boolean isCrossFadeEnabled;
+  private ViewAdapter viewAdapter;
 
   /**
    * @param duration The duration that the cross fade animation should run if there is something to
@@ -50,11 +51,23 @@ public class DrawableCrossFadeTransition implements Transition<Drawable> {
     if (previous == null) {
       previous = new ColorDrawable(Color.TRANSPARENT);
     }
+    viewAdapter = adapter;
     TransitionDrawable transitionDrawable =
         new TransitionDrawable(new Drawable[] {previous, current});
     transitionDrawable.setCrossFadeEnabled(isCrossFadeEnabled);
     transitionDrawable.startTransition(duration);
     adapter.setDrawable(transitionDrawable);
     return true;
+  }
+
+  @Override
+  public void cancel() {
+    if (viewAdapter != null) {
+      TransitionDrawable transitionDrawable = (TransitionDrawable) viewAdapter.getCurrentDrawable();
+      if (transitionDrawable != null) {
+        transitionDrawable.resetTransition();
+        viewAdapter.setDrawable(transitionDrawable.getDrawable(1));
+      }
+    }
   }
 }

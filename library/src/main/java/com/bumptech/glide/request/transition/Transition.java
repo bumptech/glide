@@ -52,4 +52,11 @@ public interface Transition<R> {
    *     false if the caller needs to manually put the current resource on the view.
    */
   boolean transition(R current, ViewAdapter adapter);
+
+  /**
+   * Called by Glide when the target is cleared or about to be replaced. The call can occurs after
+   * the transition natural ending. Allows cancelling no more needed animations that could prevent
+   * recyclerview proper recycling.
+   */
+  void cancel();
 }

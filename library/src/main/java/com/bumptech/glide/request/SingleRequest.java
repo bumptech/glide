@@ -101,6 +101,7 @@ public final class SingleRequest<R>
   private Drawable fallbackDrawable;
   private int width;
   private int height;
+  private Transition<? super R> transition;
   @Nullable private RuntimeException requestOrigin;
 
   public static <R> SingleRequest<R> obtain(
@@ -196,6 +197,7 @@ public final class SingleRequest<R>
   @Override
   public synchronized void recycle() {
     assertNotCallingCallbacks();
+    transition = null;
     context = null;
     glideContext = null;
     model = null;
@@ -312,6 +314,9 @@ public final class SingleRequest<R>
     stateVerifier.throwIfRecycled();
     if (status == Status.CLEARED) {
       return;
+    }
+    if (transition != null) {
+      transition.cancel();
     }
     cancel();
     // Resource must be released before canNotifyStatusChanged is called.
@@ -593,8 +598,8 @@ public final class SingleRequest<R>
               && targetListener.onResourceReady(result, model, target, dataSource, isFirstResource);
 
       if (!anyListenerHandledUpdatingTarget) {
-        Transition<? super R> animation = animationFactory.build(dataSource, isFirstResource);
-        target.onResourceReady(result, animation);
+        transition = animationFactory.build(dataSource, isFirstResource);
+        target.onResourceReady(result, transition);
       }
     } finally {
       isCallingCallbacks = false;
