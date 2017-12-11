@@ -16,10 +16,6 @@ public class CenterInside extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.CenterInside";
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
-  public CenterInside() {
-    // Intentionally empty.
-  }
-
   @Override
   protected Bitmap transform(
       @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
