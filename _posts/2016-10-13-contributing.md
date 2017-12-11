@@ -71,6 +71,12 @@ For a faster development cycle, you can also just run the unit tests for the mai
 
 ``./gradlew :library:testDebugUnitTest``
 
+To test annotation processor changes run:
+
+``./gradlew :annotation:compiler:test:test``
+
+_Note:_ if you are using a Windows machine, you'll need to hardcode [this line](https://github.com/bumptech/glide/blob/b18a63f6952c947bda71c61a267dac5985210150/annotation/compiler/test/src/test/java/com/bumptech/glide/annotation/compiler/test/Util.java#L36) to use a `/` instead of the multi-platform file seperator.
+
 ###### Instrumentation tests.
 
 To run Glide's instrumentation tests, you need to either plug in a real device, or add an emulator using Android Studio. It's now quite easy to add an emulator in Android Studio and x86 emulators are quite fast to boot and run. As a result, I'd generally recommend running Glide's instrumentation tests on an emulator.
