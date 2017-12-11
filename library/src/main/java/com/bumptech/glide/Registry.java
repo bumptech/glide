@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import android.support.annotation.Nullable;
 import android.support.v4.util.Pools.Pool;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ImageHeaderParser;
@@ -446,11 +447,14 @@ public class Registry {
     return this;
   }
 
+  @Nullable
   public <Data, TResource, Transcode> LoadPath<Data, TResource, Transcode> getLoadPath(
       Class<Data> dataClass, Class<TResource> resourceClass, Class<Transcode> transcodeClass) {
     LoadPath<Data, TResource, Transcode> result =
         loadPathCache.get(dataClass, resourceClass, transcodeClass);
-    if (result == null && !loadPathCache.contains(dataClass, resourceClass, transcodeClass)) {
+    if (loadPathCache.isEmptyLoadPath(result)) {
+      return null;
+    } else if (result == null) {
       List<DecodePath<Data, TResource, Transcode>> decodePaths =
           getDecodePaths(dataClass, resourceClass, transcodeClass);
       // It's possible there is no way to decode or transcode to the desired types from a given
