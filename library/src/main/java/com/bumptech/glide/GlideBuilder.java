@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
@@ -23,6 +24,7 @@ import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import java.util.Map;
 
 /**
@@ -46,7 +48,7 @@ public final class GlideBuilder {
   @Nullable
   private RequestManagerFactory requestManagerFactory;
   private GlideExecutor animationExecutor;
-  private boolean isActiveResourceRetentionAllowed = true;
+  private boolean isActiveResourceRetentionAllowed;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -345,6 +347,8 @@ public final class GlideBuilder {
    * {@link com.bumptech.glide.request.target.Target}s which are subsequently de-referenced and
    * garbage collected without being cleared.
    *
+   * <p>Defaults to {@code false}.
+   *
    * <p>Glide's resource re-use system is permissive, which means that's acceptable for callers to
    * load resources into {@link com.bumptech.glide.request.target.Target}s and then never clear the
    * {@link com.bumptech.glide.request.target.Target}. To do so, Glide uses
@@ -359,17 +363,25 @@ public final class GlideBuilder {
    * setting this method to {@code true} may transiently increase the memory usage of an
    * application.
    *
-   * <p>Setting this method to {@code false} will allow the platform to garbage collect resources
-   * more quickly, but will lead to unexpected memory cache misses if callers load resources into
-   * {@link com.bumptech.glide.request.target.Target}s but never clear them.
+   * <p>Leaving this method at the default {@code false} value will allow the platform to garbage
+   * collect resources more quickly, but will lead to unexpected memory cache misses if callers load
+   * resources into {@link com.bumptech.glide.request.target.Target}s but never clear them.
+   *
+   * <p>If you set this method to {@code true} you <em>must not</em> call
+   * {@link Bitmap#recycle()} or mutate any Bitmaps returned by Glide. If this method is set to
+   * {@code false}, recycling or mutating Bitmaps is inefficient but safe as long as you do not
+   * clear the corresponding {@link com.bumptech.glide.request.target.Target} used to load the
+   * {@link Bitmap}. However, if you set this method to {@code true} and recycle or mutate any
+   * returned {@link Bitmap}s or other mutable resources, Glide may recover those resources and
+   * attempt to use them later on, resulting in crashes, graphical corruption or undefined behavior.
    *
    * <p>Regardless of what value this method is set to, it's always good practice to clear
    * {@link com.bumptech.glide.request.target.Target}s when you're done with the corresponding
    * resource. Clearing {@link com.bumptech.glide.request.target.Target}s allows Glide to maximize
    * resource re-use, minimize memory overhead and minimize unexpected behavior resulting from
-   * edge cases.
-   *
-   * <p>Defaults to {@code true}.
+   * edge cases. If you use {@link RequestManager#clear(Target)}, calling {@link Bitmap#recycle()}
+   * or mutating {@link Bitmap}s is not only unsafe, it's also totally unnecessary and should be
+   * avoided. In all cases, prefer {@link RequestManager#clear(Target)} to {@link Bitmap#recycle()}.
    *
    * @return This builder.
    */
