@@ -619,7 +619,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   // equivalent. See #2663 for additional context.
   private boolean isSkipMemoryCacheWithCompletePreviousRequest(
       RequestOptions options, Request previous) {
-    return options.isSkipMemoryCacheSet() && previous.isComplete();
+    return !options.isMemoryCacheable() && previous.isComplete();
   }
 
   /**

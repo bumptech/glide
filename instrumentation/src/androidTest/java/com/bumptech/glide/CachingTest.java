@@ -359,7 +359,6 @@ public class CachingTest {
     });
   }
 
-
   @Test
   public void loadIntoView_withoutSkipMemoryCache_loadsFromMemoryCacheIfPresent() {
     final ImageView imageView = new ImageView(context);
@@ -373,6 +372,7 @@ public class CachingTest {
         imageView);
 
     // Casting avoids a varags array warning.
+    //noinspection rawtypes
     reset((RequestListener) requestListener);
 
     // Run on the main thread, since this is already cached, we shouldn't need to try to wait. If we
@@ -401,6 +401,49 @@ public class CachingTest {
   }
 
   @Test
+  public void loadIntoView_withSkipMemoryCacheFalse_loadsFromMemoryCacheIfPresent() {
+    final ImageView imageView = new ImageView(context);
+    imageView.setLayoutParams(new LayoutParams(100, 100));
+
+    concurrency.loadOnMainThread(
+        GlideApp.with(context)
+            .load(ResourceIds.raw.canonical)
+            .listener(requestListener)
+            .skipMemoryCache(false)
+            .dontTransform(),
+        imageView);
+
+    // Casting avoids a varags array warning.
+    //noinspection rawtypes
+    reset((RequestListener) requestListener);
+
+    // Run on the main thread, since this is already cached, we shouldn't need to try to wait. If we
+    // do end up re-using the old Target, our wait will always timeout anyway if we use
+    // loadOnMainThread. If the load doesn't complete in time, it will be caught by the listener
+    // below, which expects to be called synchronously.
+    concurrency.runOnMainThread(
+        new Runnable() {
+          @Override
+          public void run() {
+            GlideApp.with(context)
+                .load(ResourceIds.raw.canonical)
+                .listener(requestListener)
+                .skipMemoryCache(false)
+                .dontTransform()
+                .into(imageView);
+          }
+        });
+
+    verify(requestListener)
+        .onResourceReady(
+            anyDrawable(),
+            any(),
+            anyDrawableTarget(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
+  }
+
+  @Test
   public void loadIntoView_withSkipMemoryCache_doesNotLoadFromMemoryCacheIfPresent() {
     final ImageView imageView = new ImageView(context);
     imageView.setLayoutParams(new LayoutParams(100, 100));
@@ -414,6 +457,7 @@ public class CachingTest {
         imageView);
 
     // Casting avoids a varags array warning.
+    //noinspection rawtypes
     reset((RequestListener) requestListener);
 
     // If this test fails due to a timeout, it's because we re-used the Target from the previous
