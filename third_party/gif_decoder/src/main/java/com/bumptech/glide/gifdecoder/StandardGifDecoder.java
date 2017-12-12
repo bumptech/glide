@@ -602,8 +602,7 @@ public class StandardGifDecoder implements GifDecoder {
             averageColor = act[currentColorIndex];
             if (averageColor != COLOR_TRANSPARENT_BLACK) {
               dest[dx] = averageColor;
-            } else if (
-                isFirstFrameTransparent == null && isFirstFrame && !isFirstFrameTransparent) {
+            } else if (isFirstFrame && isFirstFrameTransparent == null) {
               isFirstFrameTransparent = true;
             }
             sx += sampleSize;
@@ -619,7 +618,7 @@ public class StandardGifDecoder implements GifDecoder {
             averageColor = averageColorsNear(sx, maxPositionInSource, currentFrame.iw);
             if (averageColor != COLOR_TRANSPARENT_BLACK) {
               dest[dx] = averageColor;
-            } else if (isFirstFrame && !isFirstFrameTransparent) {
+            } else if (isFirstFrame && isFirstFrameTransparent == null) {
               isFirstFrameTransparent = true;
             }
             sx += sampleSize;
@@ -634,7 +633,6 @@ public class StandardGifDecoder implements GifDecoder {
           ? false : isFirstFrameTransparent;
     }
   }
-
 
   @ColorInt
   private int averageColorsNear(int positionInMainPixels, int maxPositionInMainPixels,

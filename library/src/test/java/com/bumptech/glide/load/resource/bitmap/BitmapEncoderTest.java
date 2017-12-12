@@ -6,9 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.os.Build;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
@@ -57,7 +55,6 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   public void testEncoderObeysNonNullCompressFormat() throws IOException {
     Bitmap.CompressFormat format = Bitmap.CompressFormat.WEBP;
     harness.setFormat(format);

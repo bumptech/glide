@@ -377,7 +377,7 @@ public class ActiveResourcesTest {
 
   private CountDownLatch getLatchForClearedRef() {
     final CountDownLatch toWait = new CountDownLatch(1);
-    resources.setEnqueuedResourceCallback(new DequeuedResourceCallback() {
+    resources.setDequeuedResourceCallback(new DequeuedResourceCallback() {
       @Override
       public void onResourceDequeued() {
         toWait.countDown();

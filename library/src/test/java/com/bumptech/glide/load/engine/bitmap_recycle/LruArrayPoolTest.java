@@ -8,8 +8,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,7 +19,6 @@ import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
-@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class LruArrayPoolTest {
   private static final int MAX_SIZE = 10;
   private static final int MAX_PUT_SIZE = MAX_SIZE / 2;
@@ -30,7 +27,7 @@ public class LruArrayPoolTest {
   private LruArrayPool pool;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     pool = new LruArrayPool(MAX_SIZE);
   }
 

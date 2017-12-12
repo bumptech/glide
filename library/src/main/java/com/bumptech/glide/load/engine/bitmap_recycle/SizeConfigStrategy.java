@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
@@ -23,7 +23,7 @@ import java.util.TreeMap;
  * the performance of applications. This class works around #301 by only allowing re-use of
  * {@link android.graphics.Bitmap Bitmaps} with a matching number of bytes per pixel. </p>
  */
-@TargetApi(Build.VERSION_CODES.KITKAT)
+@RequiresApi(Build.VERSION_CODES.KITKAT)
 public class SizeConfigStrategy implements LruPoolStrategy {
   private static final int MAX_SIZE_MULTIPLE = 8;
   private static final Bitmap.Config[] ARGB_8888_IN_CONFIGS =

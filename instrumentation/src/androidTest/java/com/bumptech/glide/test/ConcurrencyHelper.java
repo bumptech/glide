@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ConcurrencyHelper {
   private final Handler handler = new Handler(Looper.getMainLooper());
-  private static final long TIMEOUT_SECONDS = 5;
+  private static final long TIMEOUT_SECONDS = 10;
   private static final TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
 
   public <T> T get(final Future<T> future) {
@@ -276,7 +276,7 @@ public class ConcurrencyHelper {
     waitOnLatch(latch);
   }
 
-  static void waitOnLatch(final CountDownLatch latch) {
+  public static void waitOnLatch(final CountDownLatch latch) {
     wait(new Waiter() {
       @Override
       public boolean await(long timeout, TimeUnit timeUnit) throws InterruptedException {

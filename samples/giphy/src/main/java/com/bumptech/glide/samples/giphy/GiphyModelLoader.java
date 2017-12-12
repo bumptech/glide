@@ -1,5 +1,6 @@
 package com.bumptech.glide.samples.giphy;
 
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -18,7 +19,7 @@ import java.io.InputStream;
 public final class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
 
   @Override
-  public boolean handles(Api.GifResult model) {
+  public boolean handles(@NonNull Api.GifResult model) {
     return true;
   }
 

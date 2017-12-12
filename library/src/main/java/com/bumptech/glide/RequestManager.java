@@ -71,7 +71,8 @@ public class RequestManager implements LifecycleListener,
   private RequestOptions requestOptions;
 
   public RequestManager(
-      Glide glide, Lifecycle lifecycle, RequestManagerTreeNode treeNode, Context context) {
+      @NonNull Glide glide, @NonNull Lifecycle lifecycle,
+      @NonNull RequestManagerTreeNode treeNode, @NonNull Context context) {
     this(
         glide,
         lifecycle,
@@ -121,7 +122,7 @@ public class RequestManager implements LifecycleListener,
     requestOptions = toSet.clone().autoClone();
   }
 
-  private void updateRequestOptions(RequestOptions toUpdate) {
+  private void updateRequestOptions(@NonNull RequestOptions toUpdate) {
     requestOptions = requestOptions.apply(toUpdate);
   }
 
@@ -143,7 +144,8 @@ public class RequestManager implements LifecycleListener,
    *
    * @return This request manager.
    */
-  public RequestManager applyDefaultRequestOptions(RequestOptions requestOptions) {
+  @NonNull
+  public RequestManager applyDefaultRequestOptions(@NonNull RequestOptions requestOptions) {
     updateRequestOptions(requestOptions);
     return this;
   }
@@ -164,7 +166,8 @@ public class RequestManager implements LifecycleListener,
    *
    * @return This request manager.
    */
-  public RequestManager setDefaultRequestOptions(RequestOptions requestOptions) {
+  @NonNull
+  public RequestManager setDefaultRequestOptions(@NonNull RequestOptions requestOptions) {
     setRequestOptions(requestOptions);
     return this;
   }
@@ -205,12 +208,37 @@ public class RequestManager implements LifecycleListener,
   /**
    * Cancels any in progress loads, but does not clear resources of completed loads.
    *
+   * <p>Note #{@link #resumeRequests()} must be called for any requests made before or while the
+   * manager is paused to complete. RequestManagers attached to Fragments and Activities
+   * automatically resume onStart().
+   *
    * @see #isPaused()
    * @see #resumeRequests()
    */
   public void pauseRequests() {
     Util.assertMainThread();
     requestTracker.pauseRequests();
+  }
+
+  /**
+   * Cancels any in progress loads and clears resources of completed loads.
+   *
+   * <p>Note #{@link #resumeRequests()} must be called for any requests made before or while the
+   * manager is paused to complete. RequestManagers attached to Fragments and Activities
+   * automatically resume onStart().
+   *
+   * <p>This will release the memory used by completed bitmaps but leaves them in any configured
+   * caches. When an #{@link android.app.Activity} receives #{@link
+   * android.app.Activity#onTrimMemory(int)} at a level of #{@link
+   * android.content.ComponentCallbacks2#TRIM_MEMORY_BACKGROUND} this is desirable in order to keep
+   * your process alive longer.
+   *
+   * @see #isPaused()
+   * @see #resumeRequests()
+   */
+  public void pauseAllRequests() {
+    Util.assertMainThread();
+    requestTracker.pauseAllRequests();
   }
 
   /**
@@ -308,6 +336,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for loading a {@link android.graphics.Bitmap}
    */
+  @NonNull
   @CheckResult
   public RequestBuilder<Bitmap> asBitmap() {
     return as(Bitmap.class).apply(DECODE_TYPE_BITMAP);
@@ -326,6 +355,7 @@ public class RequestManager implements LifecycleListener,
    * @return A new request builder for loading a
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
    */
+  @NonNull
   @CheckResult
   public RequestBuilder<GifDrawable> asGif() {
     return as(GifDrawable.class).apply(DECODE_TYPE_GIF);
@@ -341,6 +371,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for loading a {@link Drawable}.
    */
+  @NonNull
   @CheckResult
   public RequestBuilder<Drawable> asDrawable() {
     return as(Drawable.class);
@@ -351,6 +382,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<Drawable> load(@Nullable Bitmap bitmap) {
@@ -362,6 +394,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<Drawable> load(@Nullable Drawable drawable) {
@@ -373,6 +406,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<Drawable> load(@Nullable String string) {
@@ -384,6 +418,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<Drawable> load(@Nullable Uri uri) {
@@ -395,6 +430,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<Drawable> load(@Nullable File file) {
@@ -407,6 +443,7 @@ public class RequestManager implements LifecycleListener,
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
   @SuppressWarnings("deprecation")
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<Drawable> load(@Nullable Integer resourceId) {
@@ -432,6 +469,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<Drawable> load(@Nullable byte[] model) {
@@ -444,6 +482,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
+  @NonNull
   @CheckResult
   @Override
   public RequestBuilder<Drawable> load(@Nullable Object model) {
@@ -461,6 +500,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for downloading content to cache and returning the cache File.
    */
+  @NonNull
   @CheckResult
   public RequestBuilder<File> downloadOnly() {
     return as(File.class).apply(DOWNLOAD_ONLY_OPTIONS);
@@ -472,6 +512,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
+  @NonNull
   @CheckResult
   public RequestBuilder<File> download(@Nullable Object model) {
     return downloadOnly().load(model);
@@ -486,6 +527,7 @@ public class RequestManager implements LifecycleListener,
    *
    * @return A new request builder for obtaining File paths to content.
    */
+  @NonNull
   @CheckResult
   public RequestBuilder<File> asFile() {
     return as(File.class).apply(skipMemoryCacheOf(true));
@@ -499,8 +541,10 @@ public class RequestManager implements LifecycleListener,
    * @param resourceClass The resource to decode.
    * @return A new request builder for loading the given resource class.
    */
+  @NonNull
   @CheckResult
-  public <ResourceType> RequestBuilder<ResourceType> as(Class<ResourceType> resourceClass) {
+  public <ResourceType> RequestBuilder<ResourceType> as(
+      @NonNull Class<ResourceType> resourceClass) {
     return new RequestBuilder<>(glide, this, resourceClass, context);
   }
 
@@ -516,7 +560,7 @@ public class RequestManager implements LifecycleListener,
    *                                  tag.
    * @see #clear(Target)
    */
-  public void clear(View view) {
+  public void clear(@NonNull View view) {
     clear(new ClearTarget(view));
   }
 
@@ -543,7 +587,7 @@ public class RequestManager implements LifecycleListener,
     }
   }
 
-  private void untrackOrDelegate(Target<?> target) {
+  private void untrackOrDelegate(@NonNull Target<?> target) {
     boolean isOwnedByUs = untrack(target);
     // We'll end up here if the Target was cleared after the RequestManager that started the request
     // is destroyed. That can happen for at least two reasons:
@@ -569,7 +613,7 @@ public class RequestManager implements LifecycleListener,
     }
   }
 
-  boolean untrack(Target<?> target) {
+  boolean untrack(@NonNull Target<?> target) {
     Request request = target.getRequest();
     // If the Target doesn't have a request, it's already been cleared.
     if (request == null) {
@@ -608,7 +652,7 @@ public class RequestManager implements LifecycleListener,
       .ConnectivityListener {
     private final RequestTracker requestTracker;
 
-    RequestManagerConnectivityListener(RequestTracker requestTracker) {
+    RequestManagerConnectivityListener(@NonNull RequestTracker requestTracker) {
       this.requestTracker = requestTracker;
     }
 
@@ -622,7 +666,7 @@ public class RequestManager implements LifecycleListener,
 
   private static class ClearTarget extends ViewTarget<View, Object> {
 
-    ClearTarget(View view) {
+    ClearTarget(@NonNull View view) {
       super(view);
     }
 

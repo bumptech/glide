@@ -463,6 +463,34 @@ public class LoadBytesTest {
         anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
   }
 
+  @Test
+  public void loadFromBuilder_withDataDiskCacheStrategy_returnsFromSource() throws IOException {
+    byte[] data = getCanonicalBytes();
+
+    concurrency.wait(
+        GlideApp.with(context)
+            .asDrawable()
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .load(data)
+            .submit());
+
+    concurrency.wait(
+        GlideApp.with(context)
+            .asDrawable()
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .skipMemoryCache(true)
+            .load(data)
+            .listener(requestListener)
+            .submit());
+
+    verify(requestListener).onResourceReady(
+        anyDrawable(),
+        any(),
+        anyDrawableTarget(),
+        eq(DataSource.DATA_DISK_CACHE),
+        anyBoolean());
+  }
+
   private Bitmap copyFromImageViewDrawable(ImageView imageView) {
     if (imageView.getDrawable() == null) {
       fail("Drawable unexpectedly null");

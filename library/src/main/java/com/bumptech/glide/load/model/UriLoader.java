@@ -3,6 +3,7 @@ package com.bumptech.glide.load.model;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
@@ -42,13 +43,13 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(Uri model, int width, int height,
-      Options options) {
+  public LoadData<Data> buildLoadData(@NonNull Uri model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(model), factory.build(model));
   }
 
   @Override
-  public boolean handles(Uri model) {
+  public boolean handles(@NonNull Uri model) {
     return SCHEMES.contains(model.getScheme());
   }
 

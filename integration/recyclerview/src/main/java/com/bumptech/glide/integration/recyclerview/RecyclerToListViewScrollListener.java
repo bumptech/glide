@@ -1,5 +1,6 @@
 package com.bumptech.glide.integration.recyclerview;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.AbsListView;
@@ -20,7 +21,7 @@ public final class RecyclerToListViewScrollListener extends RecyclerView.OnScrol
   private int lastVisibleCount = -1;
   private int lastItemCount = -1;
 
-  public RecyclerToListViewScrollListener(AbsListView.OnScrollListener scrollListener) {
+  public RecyclerToListViewScrollListener(@NonNull AbsListView.OnScrollListener scrollListener) {
     this.scrollListener = scrollListener;
   }
 

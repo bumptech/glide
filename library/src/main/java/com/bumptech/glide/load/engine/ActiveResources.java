@@ -136,7 +136,7 @@ final class ActiveResources {
   }
 
   @VisibleForTesting
-  void setEnqueuedResourceCallback(DequeuedResourceCallback cb) {
+  void setDequeuedResourceCallback(DequeuedResourceCallback cb) {
     this.cb = cb;
   }
 
