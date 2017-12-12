@@ -28,7 +28,7 @@ public final class UnitBitmapDecoder implements ResourceDecoder<Bitmap, Bitmap> 
 
     private final Bitmap bitmap;
 
-    NonOwnedBitmapResource(Bitmap bitmap) {
+    NonOwnedBitmapResource(@NonNull Bitmap bitmap) {
       this.bitmap = bitmap;
     }
 

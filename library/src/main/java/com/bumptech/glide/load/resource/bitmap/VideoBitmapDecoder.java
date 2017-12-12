@@ -110,15 +110,14 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
   @Override
   public boolean handles(@NonNull ParcelFileDescriptor data, @NonNull Options options) {
     // Calling setDataSource is expensive so avoid doing so unless we're actually called.
-    // For non-videos this isn't any cheaper, but for videos it safes the redundant call and
+    // For non-videos this isn't any cheaper, but for videos it saves the redundant call and
     // 50-100ms.
     return true;
   }
 
   @Override
   public Resource<Bitmap> decode(@NonNull ParcelFileDescriptor resource, int outWidth,
-      int outHeight,
-      @NonNull Options options) throws IOException {
+      int outHeight, @NonNull Options options) throws IOException {
     long frameTimeMicros = options.get(TARGET_FRAME);
     if (frameTimeMicros < 0 && frameTimeMicros != DEFAULT_FRAME) {
       throw new IllegalArgumentException(

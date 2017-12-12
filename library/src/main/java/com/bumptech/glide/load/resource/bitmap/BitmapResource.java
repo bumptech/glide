@@ -33,7 +33,7 @@ public class BitmapResource implements Resource<Bitmap>,
     }
   }
 
-  public BitmapResource(Bitmap bitmap, BitmapPool bitmapPool) {
+  public BitmapResource(@NonNull Bitmap bitmap, @NonNull BitmapPool bitmapPool) {
     this.bitmap = Preconditions.checkNotNull(bitmap, "Bitmap must not be null");
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool, "BitmapPool must not be null");
   }

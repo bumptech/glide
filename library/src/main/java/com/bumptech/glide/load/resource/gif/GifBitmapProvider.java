@@ -37,7 +37,7 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
 
   @NonNull
   @Override
-  public Bitmap obtain(int width, int height, Bitmap.Config config) {
+  public Bitmap obtain(int width, int height, @NonNull Bitmap.Config config) {
     return bitmapPool.getDirty(width, height, config);
   }
 
