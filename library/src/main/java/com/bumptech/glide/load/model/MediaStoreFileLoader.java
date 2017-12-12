@@ -18,7 +18,7 @@ import java.io.FileNotFoundException;
 /**
  * Loads the file path for {@link MediaStore} owned {@link Uri uris}.
  */
-public final class MediaStoreFileLoader implements ModelLoader<Uri, File>  {
+public final class MediaStoreFileLoader implements ModelLoader<Uri, File> {
 
   private final Context context;
 
@@ -29,12 +29,13 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File>  {
   }
 
   @Override
-  public LoadData<File> buildLoadData(Uri uri, int width, int height, Options options) {
+  public LoadData<File> buildLoadData(@NonNull Uri uri, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(uri), new FilePathFetcher(context, uri));
   }
 
   @Override
-  public boolean handles(Uri uri) {
+  public boolean handles(@NonNull Uri uri) {
     return MediaStoreUtil.isMediaStoreUri(uri);
   }
 

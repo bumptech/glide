@@ -110,7 +110,9 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   @Override
   public void begin() {
     isRunning = true;
-    if (!thumb.isRunning()) {
+    // If the request has completed previously, there's no need to restart both the full and the
+    // thumb, we can just restart the full.
+    if (!full.isComplete() && !thumb.isRunning()) {
       thumb.begin();
     }
     if (isRunning && !full.isRunning()) {

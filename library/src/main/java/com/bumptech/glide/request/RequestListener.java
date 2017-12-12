@@ -2,6 +2,7 @@ package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.target.Target;
@@ -18,33 +19,38 @@ public interface RequestListener<R> {
    * {@link Target#onLoadFailed(Drawable)}. Will only be called if we currently want to display an
    * image for the given model in the given target. It is recommended to create a single instance
    * per activity/fragment rather than instantiate a new object for each call to {@code
-   * Glide.load()} to avoid object churn.
+   * Glide.with(fragment/activity).load()} to avoid object churn.
    *
-   * <p> It is safe to reload this or a different model or change what is displayed in the target at
-   * this point. For example:
+   * <p>It is not safe to reload this or a different model in this callback. If you need to do so
+   * use {@link com.bumptech.glide.RequestBuilder#error(RequestBuilder)} instead.
+   *
+   * <p>Although you can't start an entirely new load, it is safe to change what is displayed in the
+   * {@link Target} at this point, as long as you return {@code true} from the method to prevent
+   * {@link Target#onLoadFailed(Drawable)} from being called.
+   *
+   * For example:
    * <pre>
    * {@code
-   * public void onLoadFailed(Exception e, T model, Target target, boolean isFirstResource) {
+   * public boolean onLoadFailed(Exception e, T model, Target target, boolean isFirstResource) {
    *     target.setPlaceholder(R.drawable.a_specific_error_for_my_exception);
-   *     Glide.load(model).into(target);
+   *     return true; // Prevent onLoadFailed from being called on the Target.
    * }
    * }
    * </pre>
    * </p>
-   *
-   * <p> Note - if you want to reload this or any other model after an exception, you will need to
-   * include all relevant builder calls (like centerCrop, placeholder etc).
    *
    * @param e               The maybe {@code null} exception containing information about why the
    *                        request failed.
    * @param model           The model we were trying to load when the exception occurred.
    * @param target          The {@link Target} we were trying to load the image into.
    * @param isFirstResource {@code true} if this exception is for the first resource to load.
-   * @return {@code true} if the listener has handled updating the target for the given exception,
-   *         {@code false} to allow Glide's request to update the target.
+   * @return {@code true} to prevent {@link Target#onLoadFailed(Drawable)} from being called on
+   * {@code target}, typically because the listener wants to update the {@code target} or the object
+   * the {@code target} wraps itself or {@code false} to allow {@link Target#onLoadFailed(Drawable)}
+   * to be called on {@code target}.
    */
-  boolean onLoadFailed(@Nullable GlideException e, Object model, Target<R> target,
-      boolean isFirstResource);
+  boolean onLoadFailed(
+      @Nullable GlideException e, Object model, Target<R> target, boolean isFirstResource);
 
   /**
    * Called when a load completes successfully, immediately before {@link
@@ -58,10 +64,12 @@ public interface RequestListener<R> {
    *                          loaded into the target. For example when loading a thumbnail and a
    *                          full-sized image, this will be {@code true} for the first image to
    *                          load and {@code false} for the second.
-   * @return {@code true} if the listener has handled setting the resource on the target,
-   *         {@code false} to allow Glide's request to update the target.
-   *         Setting the resource includes handling animations, be sure to take that into account.
+   *
+   * @return {@code true} to prevent {@link Target#onLoadFailed(Drawable)} from being called on
+   * {@code target}, typically because the listener wants to update the {@code target} or the object
+   * the {@code target} wraps itself or {@code false} to allow {@link Target#onLoadFailed(Drawable)}
+   * to be called on {@code target}.
    */
-  boolean onResourceReady(R resource, Object model, Target<R> target, DataSource dataSource,
-      boolean isFirstResource);
+  boolean onResourceReady(
+      R resource, Object model, Target<R> target, DataSource dataSource, boolean isFirstResource);
 }

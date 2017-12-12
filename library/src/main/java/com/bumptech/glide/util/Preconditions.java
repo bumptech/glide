@@ -27,7 +27,7 @@ public final class Preconditions {
   }
 
   @NonNull
-  public static <T> T checkNotNull(@Nullable T arg, String message) {
+  public static <T> T checkNotNull(@Nullable T arg, @NonNull String message) {
     if (arg == null) {
       throw new NullPointerException(message);
     }

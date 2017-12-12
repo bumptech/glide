@@ -97,6 +97,17 @@ public class RequestTracker {
     }
   }
 
+  /** Stops any in progress requests and releases bitmaps associated with completed requests. */
+  public void pauseAllRequests() {
+    isPaused = true;
+    for (Request request : Util.getSnapshot(requests)) {
+      if (request.isRunning() || request.isComplete()) {
+        request.pause();
+        pendingRequests.add(request);
+      }
+    }
+  }
+
   /**
    * Starts any not yet completed or failed requests.
    */

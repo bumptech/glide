@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
@@ -15,7 +15,7 @@ import java.util.TreeMap;
  *
  * <p> Requires {@link Build.VERSION_CODES#KITKAT KitKat} or higher. </p>
  */
-@TargetApi(Build.VERSION_CODES.KITKAT)
+@RequiresApi(Build.VERSION_CODES.KITKAT)
 class SizeStrategy implements LruPoolStrategy {
   private static final int MAX_SIZE_MULTIPLE = 8;
   private final KeyPool keyPool = new KeyPool();

@@ -31,13 +31,13 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
   }
 
   @Override
-  public LoadData<Model> buildLoadData(Model model, int width, int height,
-      Options options) {
+  public LoadData<Model> buildLoadData(@NonNull Model model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(model), new UnitFetcher<>(model));
   }
 
   @Override
-  public boolean handles(Model model) {
+  public boolean handles(@NonNull Model model) {
     return true;
   }
 

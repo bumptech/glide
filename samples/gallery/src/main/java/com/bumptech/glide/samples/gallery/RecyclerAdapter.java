@@ -3,6 +3,7 @@ package com.bumptech.glide.samples.gallery;
 import android.content.Context;
 import android.graphics.Point;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -99,9 +100,9 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
     return Collections.singletonList(data.get(position));
   }
 
-  @NonNull
+  @Nullable
   @Override
-  public RequestBuilder<GifDrawable> getPreloadRequestBuilder(MediaStoreData item) {
+  public RequestBuilder<GifDrawable> getPreloadRequestBuilder(@NonNull MediaStoreData item) {
     MediaStoreSignature signature =
         new MediaStoreSignature(item.mimeType, item.dateModified, item.orientation);
     return requestBuilder
@@ -110,8 +111,10 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
         .load(item.uri);
   }
 
+  @Nullable
   @Override
-  public int[] getPreloadSize(MediaStoreData item, int adapterPosition, int perItemPosition) {
+  public int[] getPreloadSize(@NonNull MediaStoreData item, int adapterPosition,
+      int perItemPosition) {
     return actualDimensions;
   }
 
@@ -135,7 +138,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
 
     ListViewHolder(View itemView) {
       super(itemView);
-      image = (ImageView) itemView.findViewById(R.id.image);
+      image = itemView.findViewById(R.id.image);
     }
   }
 }

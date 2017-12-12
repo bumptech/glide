@@ -210,7 +210,7 @@ public class LruCacheTest {
   @Test
   public void put_withExistingNullValue_doesNotNotifyListener() {
     String key = getKey();
-    cache.put(key, /*value=*/ null);
+    cache.put(key, /* item= */ null);
     cache.put(key, new Object());
 
     verify(listener, never()).onItemRemoved(anyObject());

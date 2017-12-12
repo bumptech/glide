@@ -108,7 +108,7 @@ public final class Downsampler {
     }
 
     @Override
-    public void onDecodeComplete(BitmapPool bitmapPool, Bitmap downsampled) throws IOException {
+    public void onDecodeComplete(BitmapPool bitmapPool, Bitmap downsampled) {
       // Do nothing.
     }
   };

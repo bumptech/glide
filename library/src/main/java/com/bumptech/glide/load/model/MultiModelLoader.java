@@ -36,8 +36,8 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(Model model, int width, int height,
-      Options options) {
+  public LoadData<Data> buildLoadData(@NonNull Model model, int width, int height,
+      @NonNull Options options) {
     Key sourceKey = null;
     int size = modelLoaders.size();
     List<DataFetcher<Data>> fetchers = new ArrayList<>(size);
@@ -56,7 +56,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
   }
 
   @Override
-  public boolean handles(Model model) {
+  public boolean handles(@NonNull Model model) {
     for (ModelLoader<Model, Data> modelLoader : modelLoaders) {
       if (modelLoader.handles(model)) {
         return true;

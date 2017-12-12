@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.request.transition.NoTransition;
 import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.request.transition.ViewAnimationFactory;
@@ -23,6 +24,7 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
    *
    * @return This request builder.
    */
+  @NonNull
   public final CHILD dontTransition() {
     return transition(NoTransition.getFactory());
   }
@@ -36,6 +38,7 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
    *                        transition.
    * @return This request builder.
    */
+  @NonNull
   public final CHILD transition(int viewAnimationId) {
     return transition(new ViewAnimationFactory<>(viewAnimationId));
   }
@@ -49,7 +52,8 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
    *                 .Animator} to run.
    * @return This request builder.
    */
-  public final CHILD transition(ViewPropertyTransition.Animator animator) {
+  @NonNull
+  public final CHILD transition(@NonNull ViewPropertyTransition.Animator animator) {
     return transition(new ViewPropertyAnimationFactory<>(animator));
   }
 
@@ -60,7 +64,9 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
    *
    * @return This request builder.
    */
-  public final CHILD transition(TransitionFactory<? super TranscodeType> transitionFactory) {
+  @NonNull
+  public final CHILD transition(
+      @NonNull TransitionFactory<? super TranscodeType> transitionFactory) {
     this.transitionFactory = Preconditions.checkNotNull(transitionFactory);
     return self();
   }

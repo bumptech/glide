@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -83,8 +84,7 @@ public class BaseGlideUrlLoaderTest {
     when(wrapped.buildLoadData(any(GlideUrl.class), eq(width), eq(height), eq(options)))
         .thenAnswer(new Answer<ModelLoader.LoadData<InputStream>>() {
           @Override
-          public ModelLoader.LoadData<InputStream> answer(InvocationOnMock invocationOnMock)
-              throws Throwable {
+          public ModelLoader.LoadData<InputStream> answer(InvocationOnMock invocationOnMock) {
             GlideUrl glideUrl = (GlideUrl) invocationOnMock.getArguments()[0];
             assertEquals(urlLoader.resultUrl, glideUrl.toStringUrl());
             return new ModelLoader.LoadData<>(mock(Key.class), fetcher);
@@ -107,7 +107,7 @@ public class BaseGlideUrlLoaderTest {
 
     doAnswer(new Answer<Void>() {
       @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) {
         GlideUrl glideUrl = (GlideUrl) invocationOnMock.getArguments()[3];
         assertEquals(urlLoader.resultUrl, glideUrl.toStringUrl());
         return null;
@@ -150,7 +150,7 @@ public class BaseGlideUrlLoaderTest {
     }
 
     @Override
-    public boolean handles(Object model) {
+    public boolean handles(@NonNull Object model) {
       return true;
     }
   }
