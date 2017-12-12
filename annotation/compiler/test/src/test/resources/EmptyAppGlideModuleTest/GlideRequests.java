@@ -43,64 +43,73 @@ public class GlideRequests extends RequestManager {
   }
 
   @Override
-  public GlideRequests applyDefaultRequestOptions(RequestOptions requestOptions) {
-    return (GlideRequests) super.applyDefaultRequestOptions(requestOptions);
+  public GlideRequests applyDefaultRequestOptions(@NonNull RequestOptions arg0) {
+    return (GlideRequests) super.applyDefaultRequestOptions(arg0);
   }
 
   @Override
-  public GlideRequests setDefaultRequestOptions(RequestOptions requestOptions) {
-    return (GlideRequests) super.setDefaultRequestOptions(requestOptions);
+  public GlideRequests setDefaultRequestOptions(@NonNull RequestOptions arg0) {
+    return (GlideRequests) super.setDefaultRequestOptions(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<Bitmap> asBitmap() {
     return (GlideRequest<Bitmap>) super.asBitmap();
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<GifDrawable> asGif() {
     return (GlideRequest<GifDrawable>) super.asGif();
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<Drawable> asDrawable() {
     return (GlideRequest<Drawable>) super.asDrawable();
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<Drawable> load(@Nullable Bitmap arg0) {
     return (GlideRequest<Drawable>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<Drawable> load(@Nullable Drawable arg0) {
     return (GlideRequest<Drawable>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<Drawable> load(@Nullable String arg0) {
     return (GlideRequest<Drawable>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<Drawable> load(@Nullable Uri arg0) {
     return (GlideRequest<Drawable>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<Drawable> load(@Nullable File arg0) {
     return (GlideRequest<Drawable>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<Drawable> load(@Nullable Integer arg0) {
     return (GlideRequest<Drawable>) super.load(arg0);
@@ -114,30 +123,35 @@ public class GlideRequests extends RequestManager {
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<Drawable> load(@Nullable byte[] arg0) {
     return (GlideRequest<Drawable>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<Drawable> load(@Nullable Object arg0) {
     return (GlideRequest<Drawable>) super.load(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<File> downloadOnly() {
     return (GlideRequest<File>) super.downloadOnly();
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<File> download(@Nullable Object arg0) {
     return (GlideRequest<File>) super.download(arg0);
   }
 
   @Override
+  @NonNull
   @CheckResult
   public GlideRequest<File> asFile() {
     return (GlideRequest<File>) super.asFile();

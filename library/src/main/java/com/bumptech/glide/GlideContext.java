@@ -33,13 +33,13 @@ public class GlideContext extends ContextWrapper {
   private final int logLevel;
 
   public GlideContext(
-      Context context,
-      ArrayPool arrayPool,
-      Registry registry,
-      ImageViewTargetFactory imageViewTargetFactory,
-      RequestOptions defaultRequestOptions,
-      Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
-      Engine engine,
+      @NonNull Context context,
+      @NonNull ArrayPool arrayPool,
+      @NonNull Registry registry,
+      @NonNull ImageViewTargetFactory imageViewTargetFactory,
+      @NonNull RequestOptions defaultRequestOptions,
+      @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
+      @NonNull Engine engine,
       int logLevel) {
     super(context.getApplicationContext());
     this.arrayPool = arrayPool;
@@ -59,7 +59,7 @@ public class GlideContext extends ContextWrapper {
 
   @SuppressWarnings("unchecked")
   @NonNull
-  public <T> TransitionOptions<?, T> getDefaultTransitionOptions(Class<T> transcodeClass) {
+  public <T> TransitionOptions<?, T> getDefaultTransitionOptions(@NonNull Class<T> transcodeClass) {
     TransitionOptions<?, ?> result = defaultTransitionOptions.get(transcodeClass);
     if (result == null) {
       for (Entry<Class<?>, TransitionOptions<?, ?>> value : defaultTransitionOptions.entrySet()) {
@@ -74,19 +74,23 @@ public class GlideContext extends ContextWrapper {
     return (TransitionOptions<?, T>) result;
   }
 
+  @NonNull
   public <X> ViewTarget<ImageView, X> buildImageViewTarget(
-      ImageView imageView, Class<X> transcodeClass) {
+      @NonNull ImageView imageView, @NonNull Class<X> transcodeClass) {
     return imageViewTargetFactory.buildTarget(imageView, transcodeClass);
   }
 
+  @NonNull
   public Handler getMainHandler() {
     return mainHandler;
   }
 
+  @NonNull
   public Engine getEngine() {
     return engine;
   }
 
+  @NonNull
   public Registry getRegistry() {
     return registry;
   }
@@ -95,6 +99,7 @@ public class GlideContext extends ContextWrapper {
     return logLevel;
   }
 
+  @NonNull
   public ArrayPool getArrayPool() {
     return arrayPool;
   }
