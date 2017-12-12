@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.util.Preconditions;
 import java.security.MessageDigest;
 import java.util.Map;
 
@@ -22,24 +22,22 @@ class EngineKey implements Key {
   private int hashCode;
 
   EngineKey(
-      Object model,
-      Key signature,
+      @NonNull Object model,
+      @NonNull Key signature,
       int width,
       int height,
-      Map<Class<?>, Transformation<?>> transformations,
-      Class<?> resourceClass,
-      Class<?> transcodeClass,
-      Options options) {
-    this.model = Preconditions.checkNotNull(model);
-    this.signature = Preconditions.checkNotNull(signature, "Signature must not be null");
+      @NonNull Map<Class<?>, Transformation<?>> transformations,
+      @NonNull Class<?> resourceClass,
+      @NonNull Class<?> transcodeClass,
+      @NonNull Options options) {
+    this.model = model;
+    this.signature = signature;
     this.width = width;
     this.height = height;
-    this.transformations = Preconditions.checkNotNull(transformations);
-    this.resourceClass =
-        Preconditions.checkNotNull(resourceClass, "Resource class must not be null");
-    this.transcodeClass =
-        Preconditions.checkNotNull(transcodeClass, "Transcode class must not be null");
-    this.options = Preconditions.checkNotNull(options);
+    this.transformations = transformations;
+    this.resourceClass = resourceClass;
+    this.transcodeClass = transcodeClass;
+    this.options = options;
   }
 
   @Override

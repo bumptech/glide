@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import com.bumptech.glide.load.Key;
@@ -45,16 +46,16 @@ public class GlideUrl implements Key {
     this(url, Headers.DEFAULT);
   }
 
-  public GlideUrl(URL url, Headers headers) {
-    this.url = Preconditions.checkNotNull(url);
+  public GlideUrl(@NonNull URL url, @NonNull Headers headers) {
+    this.url = url;
     stringUrl = null;
-    this.headers = Preconditions.checkNotNull(headers);
+    this.headers = headers;
   }
 
-  public GlideUrl(String url, Headers headers) {
+  public GlideUrl(String url, @NonNull Headers headers) {
     this.url = null;
     this.stringUrl = Preconditions.checkNotEmpty(url);
-    this.headers = Preconditions.checkNotNull(headers);
+    this.headers = headers;
   }
 
   public URL toURL() throws MalformedURLException {

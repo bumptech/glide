@@ -107,9 +107,7 @@ public class RequestManagerRetriever implements Handler.Callback {
 
   @NonNull
   public RequestManager get(@NonNull Context context) {
-    if (context == null) {
-      throw new IllegalArgumentException("You cannot start a load on a null Context");
-    } else if (Util.isOnMainThread() && !(context instanceof Application)) {
+    if (Util.isOnMainThread() && !(context instanceof Application)) {
       if (context instanceof FragmentActivity) {
         return get((FragmentActivity) context);
       } else if (context instanceof Activity) {
@@ -162,7 +160,6 @@ public class RequestManagerRetriever implements Handler.Callback {
       return get(view.getContext().getApplicationContext());
     }
 
-    Preconditions.checkNotNull(view);
     Preconditions.checkNotNull(view.getContext(),
         "Unable to obtain a request manager for a view without a Context");
     Activity activity = findActivity(view.getContext());

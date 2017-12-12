@@ -1,5 +1,6 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.util.Preconditions;
 import java.security.MessageDigest;
@@ -81,10 +82,10 @@ public final class Option<T> {
     return new Option<>(key, defaultValue, cacheKeyUpdater);
   }
 
-  private Option(String key, T defaultValue, CacheKeyUpdater<T> cacheKeyUpdater) {
+  private Option(String key, T defaultValue, @NonNull CacheKeyUpdater<T> cacheKeyUpdater) {
     this.key = Preconditions.checkNotEmpty(key);
     this.defaultValue = defaultValue;
-    this.cacheKeyUpdater = Preconditions.checkNotNull(cacheKeyUpdater);
+    this.cacheKeyUpdater = cacheKeyUpdater;
   }
 
   /**

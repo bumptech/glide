@@ -48,4 +48,25 @@
       <Bug pattern="EI_EXPOSE_REP" />
     </Match>
 
+    <!-- Null-checks are generated automatically, so, suppress them for construcors with super()/this() calls -->
+    <Match>
+        <Class name="com.bumptech.glide.GlideContext" />
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE" />
+    </Match>
+
+    <Match>
+        <Class name="com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder" />
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE" />
+    </Match>
+
+    <Match>
+        <Class name="com.bumptech.glide.RequestManager" />
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE" />
+    </Match>
+
+    <Match>
+        <Class name="com.bumptech.glide.RequestManager$ClearTarget" />
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE" />
+    </Match>
+
 </FindBugsFilter>

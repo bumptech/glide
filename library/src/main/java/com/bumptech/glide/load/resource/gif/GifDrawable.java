@@ -147,8 +147,8 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
                 firstFrame)));
   }
 
-  GifDrawable(GifState state) {
-    this.state = Preconditions.checkNotNull(state);
+  GifDrawable(@NonNull GifState state) {
+    this.state = state;
   }
 
   @VisibleForTesting

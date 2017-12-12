@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.resource;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.util.Preconditions;
 
 /**
  * Simple wrapper for an arbitrary object which helps to satisfy some of the glide engine's
@@ -14,8 +14,8 @@ import com.bumptech.glide.util.Preconditions;
 public class SimpleResource<T> implements Resource<T> {
   protected final T data;
 
-  public SimpleResource(T data) {
-    this.data = Preconditions.checkNotNull(data);
+  public SimpleResource(@NonNull T data) {
+    this.data = data;
   }
 
   @SuppressWarnings("unchecked")
