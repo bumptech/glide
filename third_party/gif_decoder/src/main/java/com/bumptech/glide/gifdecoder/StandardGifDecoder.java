@@ -34,7 +34,6 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -348,7 +347,8 @@ public class StandardGifDecoder implements GifDecoder {
   }
 
   @Override
-  public synchronized void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer, int sampleSize) {
+  public synchronized void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer,
+      int sampleSize) {
     if (sampleSize <= 0) {
       throw new IllegalArgumentException("Sample size must be >=0, not: " + sampleSize);
     }
@@ -734,7 +734,7 @@ public class StandardGifDecoder implements GifDecoder {
     // Decode GIF pixel stream.
     i = datum = bits = count = first = top = pi = bi = 0;
     while (i < npix) {
-        // Read a new data block.
+      // Read a new data block.
       if (count == 0) {
         count = readBlock();
         if (count <= 0) {

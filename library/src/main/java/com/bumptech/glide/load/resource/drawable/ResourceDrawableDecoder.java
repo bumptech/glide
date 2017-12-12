@@ -7,11 +7,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
-
 import java.util.List;
 
 /**
@@ -44,7 +42,8 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
 
   @NonNull
   @Override
-  public Resource<Drawable> decode(@NonNull Uri source, int width, int height, @NonNull Options options) {
+  public Resource<Drawable> decode(@NonNull Uri source, int width, int height,
+      @NonNull Options options) {
     @DrawableRes int resId = loadResourceIdFromUri(source);
     String packageName = source.getAuthority();
     Context toUse = packageName.equals(context.getPackageName())
@@ -69,23 +68,23 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
     List<String> segments = source.getPathSegments();
     @DrawableRes Integer result = null;
     if (segments.size() == NAME_URI_PATH_SEGMENTS) {
-       String packageName = source.getAuthority();
-       String typeName = segments.get(TYPE_PATH_SEGMENT_INDEX);
-       String resourceName = segments.get(NAME_PATH_SEGMENT_INDEX);
-       result = context.getResources().getIdentifier(resourceName, typeName, packageName);
+      String packageName = source.getAuthority();
+      String typeName = segments.get(TYPE_PATH_SEGMENT_INDEX);
+      String resourceName = segments.get(NAME_PATH_SEGMENT_INDEX);
+      result = context.getResources().getIdentifier(resourceName, typeName, packageName);
     } else if (segments.size() == ID_PATH_SEGMENTS) {
-       try {
-         result = Integer.valueOf(segments.get(RESOURCE_ID_SEGMENT_INDEX));
-       } catch (NumberFormatException e) {
-         // Ignored.
-       }
-     }
+      try {
+        result = Integer.valueOf(segments.get(RESOURCE_ID_SEGMENT_INDEX));
+      } catch (NumberFormatException e) {
+        // Ignored.
+      }
+    }
 
-     if (result == null) {
-       throw new IllegalArgumentException("Unrecognized Uri format: " + source);
-     } else if (result == 0) {
-       throw new IllegalArgumentException("Failed to obtain resource id for: " + source);
-     }
-     return result;
+    if (result == null) {
+      throw new IllegalArgumentException("Unrecognized Uri format: " + source);
+    } else if (result == 0) {
+      throw new IllegalArgumentException("Failed to obtain resource id for: " + source);
+    }
+    return result;
   }
 }

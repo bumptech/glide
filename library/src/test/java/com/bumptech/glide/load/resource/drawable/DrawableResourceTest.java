@@ -10,9 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -2,7 +2,6 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
@@ -20,7 +19,8 @@ public final class UnitBitmapDecoder implements ResourceDecoder<Bitmap, Bitmap> 
   }
 
   @Override
-  public Resource<Bitmap> decode(@NonNull Bitmap source, int width, int height, @NonNull Options options) {
+  public Resource<Bitmap> decode(@NonNull Bitmap source, int width, int height,
+      @NonNull Options options) {
     return new NonOwnedBitmapResource(source);
   }
 

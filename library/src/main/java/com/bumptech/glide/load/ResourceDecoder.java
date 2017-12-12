@@ -2,9 +2,7 @@ package com.bumptech.glide.load;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.load.engine.Resource;
-
 import java.io.IOException;
 
 /**
@@ -54,5 +52,6 @@ public interface ResourceDecoder<T, Z> {
    *                expected type.
    */
   @Nullable
-  Resource<Z> decode(@NonNull T source, int width, int height, @NonNull Options options) throws IOException;
+  Resource<Z> decode(@NonNull T source, int width, int height, @NonNull Options options)
+      throws IOException;
 }

@@ -7,9 +7,9 @@ import static org.robolectric.Shadows.shadowOf;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
-
 import com.bumptech.glide.testutil.TestUtil;
-
+import java.io.IOException;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,9 +19,6 @@ import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowBitmap;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}.

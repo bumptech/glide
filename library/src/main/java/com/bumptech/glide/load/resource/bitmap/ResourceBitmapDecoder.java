@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
@@ -46,7 +45,8 @@ public class ResourceBitmapDecoder implements ResourceDecoder<Uri, Bitmap> {
 
   @Nullable
   @Override
-  public Resource<Bitmap> decode(@NonNull Uri source, int width, int height, @NonNull Options options) {
+  public Resource<Bitmap> decode(@NonNull Uri source, int width, int height,
+      @NonNull Options options) {
     Resource<Drawable> drawableResource = drawableDecoder.decode(source, width, height, options);
     Drawable drawable = drawableResource.get();
     return DrawableToBitmapConverter.convert(bitmapPool, drawable, width, height);
