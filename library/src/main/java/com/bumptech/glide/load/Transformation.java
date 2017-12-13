@@ -2,7 +2,6 @@ package com.bumptech.glide.load;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-
 import com.bumptech.glide.load.engine.Resource;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -64,7 +63,8 @@ public interface Transformation<T> extends Key {
    * @return The transformed resource.
    */
   @NonNull
-  Resource<T> transform(@NonNull Context context, @NonNull Resource<T> resource, int outWidth, int outHeight);
+  Resource<T> transform(@NonNull Context context, @NonNull Resource<T> resource,
+      int outWidth, int outHeight);
 
   /**
    * For caching to work correctly, implementations <em>must</em> implement this method and

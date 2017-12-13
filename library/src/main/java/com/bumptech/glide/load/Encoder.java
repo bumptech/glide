@@ -1,7 +1,6 @@
 package com.bumptech.glide.load;
 
 import android.support.annotation.NonNull;
-
 import java.io.File;
 
 /**
@@ -10,7 +9,6 @@ import java.io.File;
  * @param <T> The type of the data that will be written.
  */
 public interface Encoder<T> {
-
   /**
    * Writes the given data to the given output stream and returns True if the write completed
    * successfully and should be committed.

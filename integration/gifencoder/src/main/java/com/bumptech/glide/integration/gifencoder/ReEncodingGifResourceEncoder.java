@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
-
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
@@ -24,7 +23,6 @@ import com.bumptech.glide.load.resource.gif.GifBitmapProvider;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.util.ByteBufferUtil;
 import com.bumptech.glide.util.LogTime;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,7 +39,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
 
   private static final String KEY_ENCODE_TRANSFORMATION =
       "com.bumptech.glide.load.resource.gif.GifResourceEncoder.EncodeTransformation";
-   /**
+  /**
    * A boolean option that, if set to <code>true</code>, causes the fully transformed
    * GIF to be written to cache.
    *
@@ -50,7 +48,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
    *
    * <p>Defaults to <code>false</code>.
    */
-   // Public API.
+  // Public API.
   @SuppressWarnings("WeakerAccess")
   public static final Option<Boolean> ENCODE_TRANSFORMATION =
       Option.disk(KEY_ENCODE_TRANSFORMATION, false, new Option.CacheKeyUpdater<Boolean>() {
@@ -91,7 +89,8 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
   }
 
   @Override
-  public boolean encode(@NonNull Resource<GifDrawable> resource, @NonNull File file, @NonNull Options options) {
+  public boolean encode(@NonNull Resource<GifDrawable> resource, @NonNull File file,
+      @NonNull Options options) {
     GifDrawable drawable = resource.get();
     Transformation<Bitmap> transformation = drawable.getFrameTransformation();
     boolean isTransformed = !(transformation instanceof UnitTransformation);
