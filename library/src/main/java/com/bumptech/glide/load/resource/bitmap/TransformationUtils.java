@@ -51,17 +51,38 @@ public final class TransformationUtils {
           "XT1096",
           "XT1097",
           "XT1098",
-          "XT1032"
+          // Moto G gen 1
+          "XT1031",
+          "XT1028",
+          "XT937C",
+          "XT1032",
+          "XT1008",
+          "XT1033",
+          "XT1035",
+          "XT1034",
+          "XT939G",
+          "XT1039",
+          "XT1040",
+          "XT1042",
+          "XT1045",
+          // Moto G gen 2
+          "XT1063",
+          "XT1064",
+          "XT1068",
+          "XT1069",
+          "XT1072",
+          "XT1077",
+          "XT1078",
+          "XT1079"
           );
   /**
-   * https://github.com/bumptech/glide/issues/738 On some devices (Moto X with android 5.1) bitmap
-   * drawing is not thread safe.
+   * https://github.com/bumptech/glide/issues/738 On some devices, bitmap drawing is not thread
+   * safe.
    * This lock only locks for these specific devices. For other types of devices the lock is always
    * available and therefore does not impact performance
    */
   private static final Lock BITMAP_DRAWABLE_LOCK =
       MODELS_REQUIRING_BITMAP_LOCK.contains(Build.MODEL)
-          && Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1
           ? new ReentrantLock() : new NoLock();
 
   static {
