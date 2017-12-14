@@ -2,6 +2,8 @@ package com.bumptech.glide.load.resource.gif;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.Glide;
@@ -70,13 +72,14 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   }
 
   @Override
-  public boolean handles(ByteBuffer source, Options options) throws IOException {
+  public boolean handles(@NonNull ByteBuffer source, @NonNull Options options) throws IOException {
     return !options.get(GifOptions.DISABLE_ANIMATION)
         && ImageHeaderParserUtils.getType(parsers, source) == ImageType.GIF;
   }
 
   @Override
-  public GifDrawableResource decode(ByteBuffer source, int width, int height, Options options) {
+  public GifDrawableResource decode(@NonNull ByteBuffer source, int width, int height,
+      @NonNull Options options) {
     final GifHeaderParser parser = parserPool.obtain(source);
     try {
       return decode(source, width, height, parser, options);
@@ -85,6 +88,7 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
     }
   }
 
+  @Nullable
   private GifDrawableResource decode(
       ByteBuffer byteBuffer, int width, int height, GifHeaderParser parser, Options options) {
     long startTime = LogTime.getLogTime();

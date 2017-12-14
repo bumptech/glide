@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Option;
@@ -43,6 +44,7 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
       "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.TargetFrame", DEFAULT_FRAME,
       new Option.CacheKeyUpdater<Long>() {
         private final ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
+
         @Override
         public void update(byte[] keyBytes, Long value, MessageDigest messageDigest) {
           messageDigest.update(keyBytes);
@@ -68,6 +70,7 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
       null /*defaultValue*/,
       new Option.CacheKeyUpdater<Integer>() {
         private final ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
+
         @Override
         public void update(byte[] keyBytes, Integer value, MessageDigest messageDigest) {
           if (value == null) {
@@ -105,16 +108,16 @@ public class VideoBitmapDecoder implements ResourceDecoder<ParcelFileDescriptor,
   }
 
   @Override
-  public boolean handles(ParcelFileDescriptor data, Options options) {
+  public boolean handles(@NonNull ParcelFileDescriptor data, @NonNull Options options) {
     // Calling setDataSource is expensive so avoid doing so unless we're actually called.
-    // For non-videos this isn't any cheaper, but for videos it safes the redundant call and
+    // For non-videos this isn't any cheaper, but for videos it saves the redundant call and
     // 50-100ms.
     return true;
   }
 
   @Override
-  public Resource<Bitmap> decode(ParcelFileDescriptor resource, int outWidth, int outHeight,
-      Options options) throws IOException {
+  public Resource<Bitmap> decode(@NonNull ParcelFileDescriptor resource, int outWidth,
+      int outHeight, @NonNull Options options) throws IOException {
     long frameTimeMicros = options.get(TARGET_FRAME);
     if (frameTimeMicros < 0 && frameTimeMicros != DEFAULT_FRAME) {
       throw new IllegalArgumentException(

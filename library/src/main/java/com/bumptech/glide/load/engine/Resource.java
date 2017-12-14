@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.NonNull;
 
 /**
  * A resource interface that wraps a particular type so that it can be pooled and reused.
@@ -11,6 +12,7 @@ public interface Resource<Z> {
   /**
    * Returns the {@link Class} of the wrapped resource.
    */
+  @NonNull
   Class<Z> getResourceClass();
 
   /**
@@ -23,6 +25,7 @@ public interface Resource<Z> {
    * {@link android.graphics.drawable.Drawable Drawable}s should always return a new
    * {@link android.graphics.drawable.Drawable Drawable}. </p>
    */
+  @NonNull
   Z get();
 
   /**

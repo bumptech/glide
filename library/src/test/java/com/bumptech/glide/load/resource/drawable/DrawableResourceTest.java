@@ -27,6 +27,7 @@ public class DrawableResourceTest {
   public void setUp() {
     drawable = mock(TestDrawable.class);
     resource = new DrawableResource<TestDrawable>(drawable) {
+      @NonNull
       @Override
       public Class<TestDrawable> getResourceClass() {
         return TestDrawable.class;
@@ -72,6 +73,7 @@ public class DrawableResourceTest {
   @Test(expected = NullPointerException.class)
   public void testThrowsIfDrawableIsNull() {
     new DrawableResource<TestDrawable>(null) {
+      @NonNull
       @Override
       public Class<TestDrawable> getResourceClass() {
         return TestDrawable.class;
