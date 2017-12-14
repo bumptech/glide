@@ -31,7 +31,7 @@ public final class WaitModelLoader<Model, Data>
   @Nullable
   @Override
   public LoadData<Data> buildLoadData(
-      WaitModel<Model> waitModel, int width, int height, Options options) {
+      @NonNull WaitModel<Model> waitModel, int width, int height, @NonNull Options options) {
     LoadData<Data> wrappedLoadData = wrapped
         .buildLoadData(waitModel.wrapped, width, height, options);
     if (wrappedLoadData == null) {
@@ -42,7 +42,7 @@ public final class WaitModelLoader<Model, Data>
   }
 
   @Override
-  public boolean handles(WaitModel<Model> waitModel) {
+  public boolean handles(@NonNull WaitModel<Model> waitModel) {
     return wrapped.handles(waitModel.wrapped);
   }
 

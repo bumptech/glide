@@ -39,10 +39,8 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
   public LoadData<Data> buildLoadData(@NonNull Model model, int width, int height,
       @NonNull Options options) {
     Key sourceKey = null;
-    int size = modelLoaders.size();
-    List<DataFetcher<Data>> fetchers = new ArrayList<>(size);
-    for (int i = 0; i < size; i++) {
-      ModelLoader<Model, Data> modelLoader = modelLoaders.get(i);
+    List<DataFetcher<Data>> fetchers = new ArrayList<>(modelLoaders.size());
+    for (ModelLoader<Model, Data> modelLoader : modelLoaders) {
       if (modelLoader.handles(model)) {
         LoadData<Data> loadData = modelLoader.buildLoadData(model, width, height, options);
         if (loadData != null) {

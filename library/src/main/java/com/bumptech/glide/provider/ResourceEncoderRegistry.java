@@ -26,8 +26,7 @@ public class ResourceEncoderRegistry {
   @Nullable
   public synchronized <Z> ResourceEncoder<Z> get(Class<Z> resourceClass) {
     int size = encoders.size();
-    for (int i = 0; i < size; i++) {
-      Entry<?> entry = encoders.get(i);
+    for (Entry<?> entry : encoders) {
       if (entry.handles(resourceClass)) {
         return (ResourceEncoder<Z>) entry.encoder;
       }

@@ -65,10 +65,8 @@ public class ModelLoaderRegistry {
 
   public synchronized <A> List<ModelLoader<A, ?>> getModelLoaders(A model) {
     List<ModelLoader<A, ?>> modelLoaders = getModelLoadersForClass(getClass(model));
-    int size = modelLoaders.size();
-    List<ModelLoader<A, ?>> filteredLoaders = new ArrayList<>(size);
-    for (int i = 0; i < size; i++) {
-      ModelLoader<A, ?> loader = modelLoaders.get(i);
+    List<ModelLoader<A, ?>> filteredLoaders = new ArrayList<>(modelLoaders.size());
+    for (ModelLoader<A, ?> loader : modelLoaders) {
       if (loader.handles(model)) {
         filteredLoaders.add(loader);
       }

@@ -4,7 +4,7 @@ import android.content.Context;
 import com.bumptech.glide.GlideBuilder;
 
 /**
- * An internal interface, to be removed when {@link GlideModule}s are removed.
+ * An internal interface, to be removed when {@link LibraryGlideModule}s are removed.
  */
 interface AppliesOptions {
   /**

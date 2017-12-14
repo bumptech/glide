@@ -559,21 +559,24 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
           throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
         }
         final Key key;
-        if (encodeStrategy == EncodeStrategy.SOURCE) {
-          key = new DataCacheKey(currentSourceKey, signature);
-        } else if (encodeStrategy == EncodeStrategy.TRANSFORMED) {
-          key =
-              new ResourceCacheKey(
-                  decodeHelper.getArrayPool(),
-                  currentSourceKey,
-                  signature,
-                  width,
-                  height,
-                  appliedTransformation,
-                  resourceSubClass,
-                  options);
-        } else {
-          throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);
+        switch (encodeStrategy) {
+          case SOURCE:
+            key = new DataCacheKey(currentSourceKey, signature);
+            break;
+          case TRANSFORMED:
+            key =
+                new ResourceCacheKey(
+                    decodeHelper.getArrayPool(),
+                    currentSourceKey,
+                    signature,
+                    width,
+                    height,
+                    appliedTransformation,
+                    resourceSubClass,
+                    options);
+            break;
+          default:
+            throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);
         }
 
         LockedResource<Z> lockedResult = LockedResource.obtain(transformed);
