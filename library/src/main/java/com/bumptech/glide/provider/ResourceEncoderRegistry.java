@@ -25,7 +25,6 @@ public class ResourceEncoderRegistry {
   @SuppressWarnings("unchecked")
   @Nullable
   public synchronized <Z> ResourceEncoder<Z> get(Class<Z> resourceClass) {
-    int size = encoders.size();
     for (Entry<?> entry : encoders) {
       if (entry.handles(resourceClass)) {
         return (ResourceEncoder<Z>) entry.encoder;
