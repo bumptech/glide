@@ -4,6 +4,8 @@ package com.bumptech.glide.gifencoder;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -152,7 +154,7 @@ public class AnimatedGifEncoder {
      *          BufferedImage containing frame to write.
      * @return true if successful.
      */
-    public boolean addFrame(Bitmap im) {
+    public boolean addFrame(@Nullable Bitmap im) {
         return addFrame(im, 0, 0);
     }
 
@@ -175,7 +177,7 @@ public class AnimatedGifEncoder {
      *          the Logical Screen.
      * @return true if successful.
      */
-    public boolean addFrame(Bitmap im, int x, int y) {
+    public boolean addFrame(@Nullable Bitmap im, int x, int y) {
         if ((im == null) || !started) {
             return false;
         }
@@ -318,7 +320,7 @@ public class AnimatedGifEncoder {
      *          OutputStream on which GIF images are written.
      * @return false if initial write failed.
      */
-    public boolean start(OutputStream os) {
+    public boolean start(@Nullable OutputStream os) {
         if (os == null)
             return false;
         boolean ok = true;
@@ -339,8 +341,8 @@ public class AnimatedGifEncoder {
      *          String containing output file name.
      * @return false if open or initial write failed.
      */
-    public boolean start(String file) {
-        boolean ok = true;
+    public boolean start(@NonNull String file) {
+        boolean ok;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
             ok = start(out);

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.Initializable;
 import com.bumptech.glide.load.resource.drawable.DrawableResource;
 
@@ -14,6 +15,7 @@ public class GifDrawableResource extends DrawableResource<GifDrawable>
     super(drawable);
   }
 
+  @NonNull
   @Override
   public Class<GifDrawable> getResourceClass() {
     return GifDrawable.class;
@@ -21,7 +23,7 @@ public class GifDrawableResource extends DrawableResource<GifDrawable>
 
   @Override
   public int getSize() {
-   return drawable.getSize();
+    return drawable.getSize();
   }
 
   @Override

@@ -122,19 +122,19 @@ public class StandardGifDecoder implements GifDecoder {
   // Public API.
   @SuppressWarnings("unused")
   public StandardGifDecoder(
-      GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData) {
+      @NonNull GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData) {
     this(provider, gifHeader, rawData, 1 /*sampleSize*/);
   }
 
   public StandardGifDecoder(
-      GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData,
+      @NonNull GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData,
       int sampleSize) {
     this(provider);
     setData(gifHeader, rawData, sampleSize);
   }
 
   public StandardGifDecoder(
-      GifDecoder.BitmapProvider provider) {
+      @NonNull GifDecoder.BitmapProvider provider) {
     this.bitmapProvider = provider;
     header = new GifHeader();
   }
@@ -149,6 +149,7 @@ public class StandardGifDecoder implements GifDecoder {
     return header.height;
   }
 
+  @NonNull
   @Override
   public ByteBuffer getData() {
     return rawData;
@@ -227,6 +228,7 @@ public class StandardGifDecoder implements GifDecoder {
     return rawData.limit() + mainPixels.length + (mainScratch.length * BYTES_PER_INTEGER);
   }
 
+  @Nullable
   @Override
   public synchronized Bitmap getNextFrame() {
     if (header.frameCount <= 0 || framePointer < 0) {
@@ -283,7 +285,7 @@ public class StandardGifDecoder implements GifDecoder {
   }
 
   @Override
-  public int read(InputStream is, int contentLength) {
+  public int read(@Nullable InputStream is, int contentLength) {
     if (is != null) {
       try {
         int capacity = (contentLength > 0) ? (contentLength + 4 * 1024) : 16 * 1024;
@@ -335,17 +337,18 @@ public class StandardGifDecoder implements GifDecoder {
   }
 
   @Override
-  public synchronized void setData(GifHeader header, byte[] data) {
+  public synchronized void setData(@NonNull GifHeader header, @NonNull byte[] data) {
     setData(header, ByteBuffer.wrap(data));
   }
 
   @Override
-  public synchronized void setData(GifHeader header, ByteBuffer buffer) {
+  public synchronized void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer) {
     setData(header, buffer, 1);
   }
 
   @Override
-  public synchronized void setData(GifHeader header, ByteBuffer buffer, int sampleSize) {
+  public synchronized void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer,
+      int sampleSize) {
     if (sampleSize <= 0) {
       throw new IllegalArgumentException("Sample size must be >=0, not: " + sampleSize);
     }
@@ -377,6 +380,7 @@ public class StandardGifDecoder implements GifDecoder {
     mainScratch = bitmapProvider.obtainIntArray(downsampledWidth * downsampledHeight);
   }
 
+  @NonNull
   private GifHeaderParser getHeaderParser() {
     if (parser == null) {
       parser = new GifHeaderParser();
@@ -386,7 +390,7 @@ public class StandardGifDecoder implements GifDecoder {
 
   @Override
   @GifDecodeStatus
-  public synchronized int read(byte[] data) {
+  public synchronized int read(@Nullable byte[] data) {
     this.header = getHeaderParser().setData(data).parseHeader();
     if (data != null) {
       setData(header, data);
@@ -396,7 +400,7 @@ public class StandardGifDecoder implements GifDecoder {
   }
 
   @Override
-  public void setDefaultBitmapConfig(Bitmap.Config config) {
+  public void setDefaultBitmapConfig(@NonNull Bitmap.Config config) {
     if (config != Bitmap.Config.ARGB_8888 && config != Bitmap.Config.RGB_565) {
       throw new IllegalArgumentException("Unsupported format: " + config
           + ", must be one of " + Bitmap.Config.ARGB_8888 + " or " + Bitmap.Config.RGB_565);
@@ -730,7 +734,7 @@ public class StandardGifDecoder implements GifDecoder {
     // Decode GIF pixel stream.
     i = datum = bits = count = first = top = pi = bi = 0;
     while (i < npix) {
-        // Read a new data block.
+      // Read a new data block.
       if (count == 0) {
         count = readBlock();
         if (count <= 0) {

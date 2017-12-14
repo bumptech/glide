@@ -47,12 +47,13 @@ public class BitmapDrawableDecoder<DataType> implements ResourceDecoder<DataType
   }
 
   @Override
-  public boolean handles(DataType source, Options options) throws IOException {
+  public boolean handles(@NonNull DataType source, @NonNull Options options) throws IOException {
     return decoder.handles(source, options);
   }
 
   @Override
-  public Resource<BitmapDrawable> decode(DataType source, int width, int height, Options options)
+  public Resource<BitmapDrawable> decode(@NonNull DataType source, int width, int height,
+      @NonNull Options options)
       throws IOException {
     Resource<Bitmap> bitmapResource = decoder.decode(source, width, height, options);
     return LazyBitmapDrawableResource.obtain(resources, bitmapResource);

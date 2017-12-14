@@ -61,11 +61,13 @@ public final class LazyBitmapDrawableResource implements Resource<BitmapDrawable
     this.bitmapResource = Preconditions.checkNotNull(bitmapResource);
   }
 
+  @NonNull
   @Override
   public Class<BitmapDrawable> getResourceClass() {
     return BitmapDrawable.class;
   }
 
+  @NonNull
   @Override
   public BitmapDrawable get() {
     return new BitmapDrawable(resources, bitmapResource.get());

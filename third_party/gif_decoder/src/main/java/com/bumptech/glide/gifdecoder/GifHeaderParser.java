@@ -4,6 +4,8 @@ import static com.bumptech.glide.gifdecoder.GifDecoder.STATUS_FORMAT_ERROR;
 import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_NONE;
 import static com.bumptech.glide.gifdecoder.GifFrame.DISPOSAL_UNSPECIFIED;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -122,7 +124,7 @@ public class GifHeaderParser {
   private GifHeader header;
   private int blockSize = 0;
 
-  public GifHeaderParser setData(ByteBuffer data) {
+  public GifHeaderParser setData(@NonNull ByteBuffer data) {
     reset();
     rawData = data.asReadOnlyBuffer();
     rawData.position(0);
@@ -130,7 +132,7 @@ public class GifHeaderParser {
     return this;
   }
 
-  public GifHeaderParser setData(byte[] data) {
+  public GifHeaderParser setData(@Nullable byte[] data) {
     if (data != null) {
       setData(ByteBuffer.wrap(data));
     } else {
@@ -152,6 +154,7 @@ public class GifHeaderParser {
     blockSize = 0;
   }
 
+  @NonNull
   public GifHeader parseHeader() {
     if (rawData == null) {
       throw new IllegalStateException("You must call setData() before parseHeader()");
@@ -408,6 +411,7 @@ public class GifHeaderParser {
    * @param nColors int number of colors to read.
    * @return int array containing 256 colors (packed ARGB with full alpha).
    */
+  @Nullable
   private int[] readColorTable(int nColors) {
     int nBytes = 3 * nColors;
     int[] tab = null;
