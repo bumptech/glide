@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+if [ ! "$firebase_enabled" == "true" ]; then
   echo "Unable to run Firebase tests for pull requests, exiting"
   exit 0
 fi

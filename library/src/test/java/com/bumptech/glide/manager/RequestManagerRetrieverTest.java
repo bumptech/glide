@@ -9,12 +9,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Build;
 import android.os.Looper;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import com.bumptech.glide.RequestManager;
@@ -309,7 +309,7 @@ public class RequestManagerRetrieverTest {
   }
 
   @Test
-  @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+  @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   public void testDoesNotThrowIfAskedToGetManagerForActivityPreJellYBeanMr1() {
     Util.setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
     Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
@@ -320,7 +320,7 @@ public class RequestManagerRetrieverTest {
   }
 
   @Test
-  @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+  @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   public void testDoesNotThrowIfAskedToGetManagerForFragmentPreJellyBeanMr1() {
     Util.setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
     Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();

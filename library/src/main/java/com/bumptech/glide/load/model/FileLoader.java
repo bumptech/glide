@@ -32,13 +32,13 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(File model, int width, int height,
-      Options options) {
+  public LoadData<Data> buildLoadData(@NonNull File model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(model), new FileFetcher<>(model, fileOpener));
   }
 
   @Override
-  public boolean handles(File model) {
+  public boolean handles(@NonNull File model) {
     return true;
   }
 

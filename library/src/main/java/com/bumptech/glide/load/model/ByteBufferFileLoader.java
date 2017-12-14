@@ -20,13 +20,13 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
   private static final String TAG = "ByteBufferFileLoader";
 
   @Override
-  public LoadData<ByteBuffer> buildLoadData(File file, int width, int height,
-      Options options) {
+  public LoadData<ByteBuffer> buildLoadData(@NonNull File file, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(file), new ByteBufferFetcher(file));
   }
 
   @Override
-  public boolean handles(File file) {
+  public boolean handles(@NonNull File file) {
     return true;
   }
 

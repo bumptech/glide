@@ -1,6 +1,5 @@
 package com.bumptech.glide.request.target;
 
-import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -11,6 +10,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 
@@ -90,7 +90,7 @@ public class FixedSizeDrawable extends Drawable {
     return wrapped.getCallback();
   }
 
-  @TargetApi(Build.VERSION_CODES.KITKAT)
+  @RequiresApi(Build.VERSION_CODES.KITKAT)
   @Override
   public int getAlpha() {
     return wrapped.getAlpha();

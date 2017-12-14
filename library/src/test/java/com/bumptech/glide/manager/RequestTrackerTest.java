@@ -354,6 +354,26 @@ public class RequestTrackerTest {
     assertFalse(tracker.isPaused());
   }
 
+  @Test
+  public void testPauseAllRequests_returnsTrueFromIsPaused() {
+    tracker.pauseAllRequests();
+    assertTrue(tracker.isPaused());
+  }
+
+  @Test
+  public void testPauseAllRequests_whenRequestComplete_pausesRequest() {
+    Request request = mock(Request.class);
+    when(request.isFailed()).thenReturn(false);
+    when(request.isComplete()).thenReturn(true);
+    tracker.addRequest(request);
+    tracker.pauseAllRequests();
+    verify(request).pause();
+
+    when(request.isComplete()).thenReturn(false);
+    tracker.resumeRequests();
+    verify(request).begin();
+  }
+
   private class ClearAndRemoveRequest implements Answer<Void> {
 
     private final Request toRemove;

@@ -25,12 +25,12 @@ Or use Gradle:
 ```gradle
 repositories {
   mavenCentral()
-  maven { url 'https://maven.google.com' }
+  google()
 }
 
 dependencies {
-  compile 'com.github.bumptech.glide:glide:4.3.1'
-  annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
+  implementation 'com.github.bumptech.glide:glide:4.4.0'
+  annotationProcessor 'com.github.bumptech.glide:compiler:4.4.0'
 }
 ```
 
@@ -40,7 +40,7 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.3.1</version>
+  <version>4.4.0</version>
 </dependency>
 <dependency>
   <groupId>com.google.android</groupId>
@@ -50,16 +50,16 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>compiler</artifactId>
-  <version>4.3.1</version>
+  <version>4.4.0</version>
   <optional>true</optional>
 </dependency>
 ```
 
-For info on using the bleeding edge, see the [Snapshots][17] wiki page.
+For info on using the bleeding edge, see the [Snapshots][17] docs page.
 
 ProGuard
 --------
-Depending on your ProGuard (DexGuard) config and usage, you may need to include the following lines in your proguard.cfg (see [Configuration wiki](https://github.com/bumptech/glide/wiki/Configuration#keeping-a-glidemodule) for more details):
+Depending on your ProGuard (DexGuard) config and usage, you may need to include the following lines in your proguard.cfg (see the [Download and Setup docs page][25] for more details):
 
 ```pro
 -keep public class * implements com.bumptech.glide.module.GlideModule
@@ -121,13 +121,13 @@ Comments/bugs/questions/pull requests are always welcome! Please read [CONTRIBUT
 Compatibility
 -------------
 
- * **Minimum Android SDK**: Glide requires a minimum API level of 14.
- * **Compile Android SDK**: Glide requires you to compile against API 26.
+ * **Minimum Android SDK**: Glide v4 requires a minimum API level of 14.
+ * **Compile Android SDK**: Glide v4 requires you to compile against API 26 or later.
 
- If you need to support older versions, consider staying on [Glide v3][14], which works on API 10, but not actively maintained.
- * **OkHttp 2.x**: there are optional dependencies available called `okhttp-integration`, see [Integration Libraries][12] wiki page.
- * **OkHttp 3.x**: there are optional dependencies available called `okhttp3-integration`, see [Integration Libraries][12] wiki page.
- * **Volley**: there are optional dependencies available called `volley-integration`, see [Integration Libraries][12] wiki page.
+ If you need to support older versions of Android, consider staying on [Glide v3][14], which works on API 10, but is not actively maintained.
+
+ * **OkHttp 3.x**: There is an optional dependency available called `okhttp3-integration`, see the [docs page][23].
+ * **Volley**: There is an optional dependency available called `volley-integration`, see the [docs page][24].
  * **Round Pictures**: `CircleImageView`/`CircularImageView`/`RoundedImageView` are known to have [issues][18] with `TransitionDrawable` (`.crossFade()` with `.thumbnail()` or `.placeholder()`) and animated GIFs, use a [`BitmapTransformation`][19] (`.circleCrop()` will be available in v4) or `.dontAnimate()` to fix the issue.
  * **Huge Images** (maps, comic strips): Glide can load huge images by downsampling them, but does not support zooming and panning `ImageView`s as they require special resource optimizations (such as tiling) to work without `OutOfMemoryError`s.
 
@@ -136,9 +136,8 @@ Build
 Building Glide with gradle is fairly straight forward:
 
 ```shell
-git clone git@github.com:bumptech/glide.git # use https://github.com/bumptech/glide.git if "Permission Denied"
+git clone https://github.com/bumptech/glide.git 
 cd glide
-git submodule init && git submodule update
 ./gradlew jar
 ```
 
@@ -160,14 +159,16 @@ You may also find precompiled APKs on the [releases page][1].
 Development
 -----------
 Follow the steps in the [Build](#build) section to setup the project and then edit the files however you wish.
-[Intellij IDEA 14][4] cleanly imports both Glide's source and tests and is the recommended way to work with Glide.
+[Android Studio][26] cleanly imports both Glide's source and tests and is the recommended way to work with Glide.
 
-To open the project in IntelliJ IDEA:
+To open the project in Android Studio:
 
 1. Go to *File* menu or the *Welcome Screen*
 2. Click on *Open...*
 3. Navigate to Glide's root directory.
-4. Select `build.gradle`
+4. Select `setting.gradle`
+
+For more details, see the [Contributing docs page][27].
 
 Getting Help
 ------------
@@ -214,9 +215,14 @@ This is not an official Google product.
 [14]: https://github.com/bumptech/glide/tree/3.0
 [15]: https://github.com/bumptech/glide/tree/master
 [16]: https://github.com/bumptech/glide/blob/master/LICENSE
-[17]: https://github.com/bumptech/glide/wiki/Snapshots
+[17]: http://bumptech.github.io/glide/dev/snapshots.html
 [18]: https://github.com/bumptech/glide/issues?q=is%3Aissue+CircleImageView+OR+CircularImageView+OR+RoundedImageView
 [19]: https://github.com/wasabeef/glide-transformations
 [20]: https://bumptech.github.io/glide/
 [21]: https://bumptech.github.io/glide/doc/generatedapi.html
 [22]: https://muyangmin.github.io/glide-docs-cn/
+[23]: http://bumptech.github.io/glide/int/okhttp3.html
+[24]: http://bumptech.github.io/glide/int/volley.html
+[25]: http://bumptech.github.io/glide/doc/download-setup.html#proguard
+[26]: https://developer.android.com/studio/index.html
+[27]: http://bumptech.github.io/glide/dev/contributing.html

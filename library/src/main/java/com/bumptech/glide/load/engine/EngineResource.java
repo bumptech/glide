@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
 
@@ -42,11 +43,13 @@ class EngineResource<Z> implements Resource<Z> {
     return isCacheable;
   }
 
+  @NonNull
   @Override
   public Class<Z> getResourceClass() {
     return resource.getResourceClass();
   }
 
+  @NonNull
   @Override
   public Z get() {
     return resource.get();

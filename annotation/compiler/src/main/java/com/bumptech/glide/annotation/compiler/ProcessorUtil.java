@@ -21,6 +21,8 @@ import com.squareup.javapoet.TypeVariableName;
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Type.ClassType;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -392,14 +394,39 @@ final class ProcessorUtil {
       List<?> values = (List<?>) value;
       Set<String> result = new HashSet<>(values.size());
       for (Object current : values) {
-        Attribute.Class currentClass = (Attribute.Class) current;
-        result.add(currentClass.getValue().toString());
+        result.add(getExcludedModuleClassFromAnnotationAttribute(clazz, current));
       }
       return result;
     } else {
       ClassType classType = (ClassType) value;
       return Collections.singleton(classType.toString());
     }
+  }
+
+  // We should be able to cast to Attribute.Class rather than use reflection, but there are some
+  // compilers that seem to break when we do so. See #2673 for an example.
+  private static String getExcludedModuleClassFromAnnotationAttribute(
+      Element clazz, Object attribute) {
+    if (attribute.getClass().getSimpleName().equals("UnresolvedClass")) {
+      throw new IllegalArgumentException("Failed to parse @Excludes for: " + clazz
+          + ", one or more excluded Modules could not be found at compile time. Ensure that all"
+          + "excluded Modules are included in your classpath.");
+    }
+    Method[] methods = attribute.getClass().getDeclaredMethods();
+    if (methods == null || methods.length == 0) {
+      throw new IllegalArgumentException("Failed to parse @Excludes for: " + clazz
+          + ", invalid exclude: " + attribute);
+    }
+    for (Method method : methods) {
+      if (method.getName().equals("getValue")) {
+        try {
+          return method.invoke(attribute).toString();
+        } catch (IllegalAccessException | InvocationTargetException e) {
+          throw new IllegalArgumentException("Failed to parse @Excludes for: " + clazz, e);
+        }
+      }
+    }
+    throw new IllegalArgumentException("Failed to parse @Excludes for: " + clazz);
   }
 
   private enum MethodType {

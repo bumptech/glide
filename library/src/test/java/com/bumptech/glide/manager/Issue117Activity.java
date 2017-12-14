@@ -2,11 +2,11 @@ package com.bumptech.glide.manager;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -21,7 +21,7 @@ import com.bumptech.glide.Glide;
 /**
  * A test activity to reproduce Issue #117: https://github.com/bumptech/glide/issues/117.
  */
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+@RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 class Issue117Activity extends FragmentActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {

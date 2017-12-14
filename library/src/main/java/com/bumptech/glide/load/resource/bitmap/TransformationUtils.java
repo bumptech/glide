@@ -50,7 +50,8 @@ public final class TransformationUtils {
           "XT1095",
           "XT1096",
           "XT1097",
-          "XT1098"
+          "XT1098",
+          "XT1032"
           );
   /**
    * https://github.com/bumptech/glide/issues/738 On some devices (Moto X with android 5.1) bitmap

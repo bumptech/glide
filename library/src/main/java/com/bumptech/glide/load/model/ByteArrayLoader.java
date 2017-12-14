@@ -28,12 +28,12 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
 
   @Override
   public LoadData<Data> buildLoadData(
-      byte[] model, int width, int height, Options options) {
+      @NonNull byte[] model, int width, int height, @NonNull Options options) {
     return new LoadData<>(new ObjectKey(model), new Fetcher<>(model, converter));
   }
 
   @Override
-  public boolean handles(byte[] model) {
+  public boolean handles(@NonNull byte[] model) {
     return true;
   }
 

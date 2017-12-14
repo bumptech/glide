@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorAssetPathFetcher;
@@ -33,14 +34,14 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(Uri model, int width, int height,
-      Options options) {
+  public LoadData<Data> buildLoadData(@NonNull Uri model, int width, int height,
+      @NonNull Options options) {
     String assetPath = model.toString().substring(ASSET_PREFIX_LENGTH);
     return new LoadData<>(new ObjectKey(model), factory.buildFetcher(assetManager, assetPath));
   }
 
   @Override
-  public boolean handles(Uri model) {
+  public boolean handles(@NonNull Uri model) {
     return ContentResolver.SCHEME_FILE.equals(model.getScheme()) && !model.getPathSegments()
         .isEmpty() && ASSET_PATH_SEGMENT.equals(model.getPathSegments().get(0));
   }

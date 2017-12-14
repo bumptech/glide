@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.tests.Util;
@@ -61,7 +62,7 @@ public class DiskLruCacheWrapperTest {
   public void testCanInsertAndGet() throws IOException {
     cache.put(key, new DiskCache.Writer() {
       @Override
-      public boolean write(File file) {
+      public boolean write(@NonNull File file) {
         try {
           Util.writeFile(file, data);
         } catch (IOException e) {
@@ -80,7 +81,7 @@ public class DiskLruCacheWrapperTest {
   public void testDoesNotCommitIfWriterReturnsFalse() {
     cache.put(key, new DiskCache.Writer() {
       @Override
-      public boolean write(File file) {
+      public boolean write(@NonNull File file) {
         return false;
       }
     });
@@ -92,7 +93,7 @@ public class DiskLruCacheWrapperTest {
   public void testDoesNotCommitIfWriterWritesButReturnsFalse() {
     cache.put(key, new DiskCache.Writer() {
       @Override
-      public boolean write(File file) {
+      public boolean write(@NonNull File file) {
         try {
           Util.writeFile(file, data);
         } catch (IOException e) {
@@ -110,7 +111,7 @@ public class DiskLruCacheWrapperTest {
     try {
       cache.put(key, new DiskCache.Writer() {
         @Override
-        public boolean write(File file) {
+        public boolean write(@NonNull File file) {
           throw new RuntimeException("test");
         }
       });
@@ -120,7 +121,7 @@ public class DiskLruCacheWrapperTest {
 
     cache.put(key, new DiskCache.Writer() {
       @Override
-      public boolean write(File file) {
+      public boolean write(@NonNull File file) {
         try {
           Util.writeFile(file, data);
         } catch (IOException e) {
