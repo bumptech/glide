@@ -49,7 +49,7 @@ public class LruResourceCache extends LruCache<Key, Resource<?>> implements Memo
     } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
       // Entering list of cached background apps
       // Evict oldest half of our bitmap cache
-      trimToSize(getCurrentSize() / 2);
+      trimToSize(getMaxSize() / 2);
     }
   }
 }
