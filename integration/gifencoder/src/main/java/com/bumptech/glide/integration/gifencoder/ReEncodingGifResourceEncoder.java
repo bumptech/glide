@@ -2,6 +2,7 @@ package com.bumptech.glide.integration.gifencoder;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.gifdecoder.GifDecoder;
@@ -38,7 +39,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
 
   private static final String KEY_ENCODE_TRANSFORMATION =
       "com.bumptech.glide.load.resource.gif.GifResourceEncoder.EncodeTransformation";
-   /**
+  /**
    * A boolean option that, if set to <code>true</code>, causes the fully transformed
    * GIF to be written to cache.
    *
@@ -47,7 +48,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
    *
    * <p>Defaults to <code>false</code>.
    */
-   // Public API.
+  // Public API.
   @SuppressWarnings("WeakerAccess")
   public static final Option<Boolean> ENCODE_TRANSFORMATION =
       Option.disk(KEY_ENCODE_TRANSFORMATION, false, new Option.CacheKeyUpdater<Boolean>() {
@@ -68,7 +69,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
 
   // Public API.
   @SuppressWarnings("unused")
-  public ReEncodingGifResourceEncoder(Context context, BitmapPool bitmapPool) {
+  public ReEncodingGifResourceEncoder(@NonNull Context context, @NonNull BitmapPool bitmapPool) {
     this(context, bitmapPool, FACTORY);
   }
 
@@ -81,14 +82,15 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
   }
 
   @Override
-  public EncodeStrategy getEncodeStrategy(Options options) {
+  public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
     Boolean encodeTransformation = options.get(ENCODE_TRANSFORMATION);
     return encodeTransformation != null && encodeTransformation
         ? EncodeStrategy.TRANSFORMED : EncodeStrategy.SOURCE;
   }
 
   @Override
-  public boolean encode(Resource<GifDrawable> resource, File file, Options options) {
+  public boolean encode(@NonNull Resource<GifDrawable> resource, @NonNull File file,
+      @NonNull Options options) {
     GifDrawable drawable = resource.get();
     Transformation<Bitmap> transformation = drawable.getFrameTransformation();
     boolean isTransformed = !(transformation instanceof UnitTransformation);

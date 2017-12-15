@@ -90,9 +90,10 @@ public abstract class BitmapTransformation implements Transformation<Bitmap> {
     this();
   }
 
+  @NonNull
   @Override
   public final Resource<Bitmap> transform(
-      Context context, Resource<Bitmap> resource, int outWidth, int outHeight) {
+      @NonNull Context context, @NonNull Resource<Bitmap> resource, int outWidth, int outHeight) {
     if (!Util.isValidDimensions(outWidth, outHeight)) {
       throw new IllegalArgumentException(
           "Cannot apply transformation on width: " + outWidth + " or height: " + outHeight
