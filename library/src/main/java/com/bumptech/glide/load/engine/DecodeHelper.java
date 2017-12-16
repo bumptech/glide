@@ -180,7 +180,9 @@ final class DecodeHelper<Transcode> {
 
   boolean isSourceKey(Key key) {
     List<LoadData<?>> loadData = getLoadData();
-    for (LoadData<?> current : loadData) {
+    //noinspection ForLoopReplaceableByForEach to improve perf
+    for (int i = 0, size = loadData.size(); i < size; i++) {
+      LoadData<?> current = loadData.get(i);
       if (current.sourceKey.equals(key)) {
         return true;
       }
@@ -193,7 +195,9 @@ final class DecodeHelper<Transcode> {
       isLoadDataSet = true;
       loadData.clear();
       List<ModelLoader<Object, ?>> modelLoaders = glideContext.getRegistry().getModelLoaders(model);
-      for (ModelLoader<Object, ?> modelLoader : modelLoaders) {
+      //noinspection ForLoopReplaceableByForEach to improve perf
+      for (int i = 0, size = modelLoaders.size(); i < size; i++) {
+        ModelLoader<Object, ?> modelLoader = modelLoaders.get(i);
         LoadData<?> current =
             modelLoader.buildLoadData(model, width, height, options);
         if (current != null) {
@@ -209,7 +213,9 @@ final class DecodeHelper<Transcode> {
       isCacheKeysSet = true;
       cacheKeys.clear();
       List<LoadData<?>> loadData = getLoadData();
-      for (LoadData<?> data : loadData) {
+      //noinspection ForLoopReplaceableByForEach to improve perf
+      for (int i = 0, size = loadData.size(); i < size; i++) {
+        LoadData<?> data = loadData.get(i);
         if (!cacheKeys.contains(data.sourceKey)) {
           cacheKeys.add(data.sourceKey);
         }

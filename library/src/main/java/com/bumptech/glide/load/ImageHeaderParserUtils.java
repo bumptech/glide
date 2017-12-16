@@ -31,7 +31,9 @@ public final class ImageHeaderParserUtils {
     }
 
     is.mark(MARK_POSITION);
-    for (ImageHeaderParser parser : parsers) {
+    //noinspection ForLoopReplaceableByForEach to improve perf
+    for (int i = 0, size = parsers.size(); i < size; i++) {
+      ImageHeaderParser parser = parsers.get(i);
       try {
         ImageType type = parser.getType(is);
         if (type != ImageType.UNKNOWN) {
@@ -52,7 +54,9 @@ public final class ImageHeaderParserUtils {
       return ImageType.UNKNOWN;
     }
 
-    for (ImageHeaderParser parser : parsers) {
+    //noinspection ForLoopReplaceableByForEach to improve perf
+    for (int i = 0, size = parsers.size(); i < size; i++) {
+      ImageHeaderParser parser = parsers.get(i);
       ImageType type = parser.getType(buffer);
       if (type != ImageType.UNKNOWN) {
         return type;
@@ -74,7 +78,9 @@ public final class ImageHeaderParserUtils {
     }
 
     is.mark(MARK_POSITION);
-    for (ImageHeaderParser parser : parsers) {
+    //noinspection ForLoopReplaceableByForEach to improve perf
+    for (int i = 0, size = parsers.size(); i < size; i++) {
+      ImageHeaderParser parser = parsers.get(i);
       try {
         int orientation = parser.getOrientation(is, byteArrayPool);
         if (orientation != ImageHeaderParser.UNKNOWN_ORIENTATION) {

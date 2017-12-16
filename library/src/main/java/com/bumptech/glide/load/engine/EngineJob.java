@@ -209,7 +209,9 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     engineResource.acquire();
     listener.onEngineJobComplete(this, key, engineResource);
 
-    for (ResourceCallback cb : cbs) {
+    //noinspection ForLoopReplaceableByForEach to improve perf
+    for (int i = 0, size = cbs.size(); i < size; i++) {
+      ResourceCallback cb = cbs.get(i);
       if (!isInIgnoredCallbacks(cb)) {
         engineResource.acquire();
         cb.onResourceReady(engineResource, dataSource);

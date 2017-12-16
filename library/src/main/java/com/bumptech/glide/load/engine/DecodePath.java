@@ -59,7 +59,9 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   private Resource<ResourceType> decodeResourceWithList(DataRewinder<DataType> rewinder, int width,
       int height, Options options, List<Throwable> exceptions) throws GlideException {
     Resource<ResourceType> result = null;
-    for (ResourceDecoder<DataType, ResourceType> decoder : decoders) {
+    //noinspection ForLoopReplaceableByForEach to improve perf
+    for (int i = 0, size = decoders.size(); i < size; i++) {
+      ResourceDecoder<DataType, ResourceType> decoder = decoders.get(i);
       try {
         DataType data = rewinder.rewindAndGet();
         if (decoder.handles(data, options)) {
