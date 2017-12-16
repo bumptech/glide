@@ -20,7 +20,8 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -40,28 +41,52 @@ public final class TransformationUtils {
   private static final Paint CIRCLE_CROP_BITMAP_PAINT;
 
   // See #738.
-  private static final List<String> MODELS_REQUIRING_BITMAP_LOCK =
-      Arrays.asList(
-          // Moto X gen 2
-          "XT1085",
-          "XT1092",
-          "XT1093",
-          "XT1094",
-          "XT1095",
-          "XT1096",
-          "XT1097",
-          "XT1098",
-          "XT1032"
-          );
+  private static final Set<String> MODELS_REQUIRING_BITMAP_LOCK =
+      new HashSet<>(
+          Arrays.asList(
+              // Moto X gen 2
+              "XT1085",
+              "XT1092",
+              "XT1093",
+              "XT1094",
+              "XT1095",
+              "XT1096",
+              "XT1097",
+              "XT1098",
+              // Moto G gen 1
+              "XT1031",
+              "XT1028",
+              "XT937C",
+              "XT1032",
+              "XT1008",
+              "XT1033",
+              "XT1035",
+              "XT1034",
+              "XT939G",
+              "XT1039",
+              "XT1040",
+              "XT1042",
+              "XT1045",
+              // Moto G gen 2
+              "XT1063",
+              "XT1064",
+              "XT1068",
+              "XT1069",
+              "XT1072",
+              "XT1077",
+              "XT1078",
+              "XT1079"
+          )
+      );
+
   /**
-   * https://github.com/bumptech/glide/issues/738 On some devices (Moto X with android 5.1) bitmap
-   * drawing is not thread safe.
+   * https://github.com/bumptech/glide/issues/738 On some devices, bitmap drawing is not thread
+   * safe.
    * This lock only locks for these specific devices. For other types of devices the lock is always
    * available and therefore does not impact performance
    */
   private static final Lock BITMAP_DRAWABLE_LOCK =
       MODELS_REQUIRING_BITMAP_LOCK.contains(Build.MODEL)
-          && Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1
           ? new ReentrantLock() : new NoLock();
 
   static {
