@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pools.Pool;
 import com.bumptech.glide.load.Encoder;
@@ -82,8 +83,9 @@ public class Registry {
    * @deprecated Use the equivalent {@link #append(Class, Class, ModelLoaderFactory)} method
    * instead.
    */
+  @NonNull
   @Deprecated
-  public <Data> Registry register(Class<Data> dataClass, Encoder<Data> encoder) {
+  public <Data> Registry register(@NonNull Class<Data> dataClass, @NonNull Encoder<Data> encoder) {
     return append(dataClass, encoder);
   }
 
@@ -102,7 +104,8 @@ public class Registry {
    *
    * @see #prepend(Class, Encoder)
    */
-  public <Data> Registry append(Class<Data> dataClass, Encoder<Data> encoder) {
+  @NonNull
+  public <Data> Registry append(@NonNull Class<Data> dataClass, @NonNull Encoder<Data> encoder) {
     encoderRegistry.append(dataClass, encoder);
     return this;
   }
@@ -118,7 +121,8 @@ public class Registry {
    *
    * @see #append(Class, Encoder)
    */
-  public <Data> Registry prepend(Class<Data> dataClass, Encoder<Data> encoder) {
+  @NonNull
+  public <Data> Registry prepend(@NonNull Class<Data> dataClass, @NonNull Encoder<Data> encoder) {
     encoderRegistry.prepend(dataClass, encoder);
     return this;
   }
@@ -143,10 +147,11 @@ public class Registry {
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
    * @param decoder The {@link ResourceDecoder} to register.
    */
+  @NonNull
   public <Data, TResource> Registry append(
-      Class<Data> dataClass,
-      Class<TResource> resourceClass,
-      ResourceDecoder<Data, TResource> decoder) {
+      @NonNull Class<Data> dataClass,
+      @NonNull Class<TResource> resourceClass,
+      @NonNull ResourceDecoder<Data, TResource> decoder) {
     append(BUCKET_APPEND_ALL, dataClass, resourceClass, decoder);
     return this;
   }
@@ -172,11 +177,12 @@ public class Registry {
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
    * @param decoder The {@link ResourceDecoder} to register.
    */
+  @NonNull
   public <Data, TResource> Registry append(
-      String bucket,
-      Class<Data> dataClass,
-      Class<TResource> resourceClass,
-      ResourceDecoder<Data, TResource> decoder) {
+      @NonNull String bucket,
+      @NonNull Class<Data> dataClass,
+      @NonNull Class<TResource> resourceClass,
+      @NonNull ResourceDecoder<Data, TResource> decoder) {
     decoderRegistry.append(bucket, decoder, dataClass, resourceClass);
     return this;
   }
@@ -201,10 +207,11 @@ public class Registry {
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
    * @param decoder The {@link ResourceDecoder} to register.
    */
+  @NonNull
   public <Data, TResource> Registry prepend(
-      Class<Data> dataClass,
-      Class<TResource> resourceClass,
-      ResourceDecoder<Data, TResource> decoder) {
+      @NonNull Class<Data> dataClass,
+      @NonNull Class<TResource> resourceClass,
+      @NonNull ResourceDecoder<Data, TResource> decoder) {
     prepend(BUCKET_PREPEND_ALL, dataClass, resourceClass, decoder);
     return this;
   }
@@ -230,11 +237,12 @@ public class Registry {
    * {@link com.bumptech.glide.load.resource.gif.GifDrawable} etc).
    * @param decoder The {@link ResourceDecoder} to register.
    */
+  @NonNull
   public <Data, TResource> Registry prepend(
-      String bucket,
-      Class<Data> dataClass,
-      Class<TResource> resourceClass,
-      ResourceDecoder<Data, TResource> decoder) {
+      @NonNull String bucket,
+      @NonNull Class<Data> dataClass,
+      @NonNull Class<TResource> resourceClass,
+      @NonNull ResourceDecoder<Data, TResource> decoder) {
     decoderRegistry.prepend(bucket, decoder, dataClass, resourceClass);
     return this;
   }
@@ -255,7 +263,8 @@ public class Registry {
    * @param buckets The list of bucket identifiers in order from highest priority to least priority.
    */
   // Final to avoid a PMD error.
-  public final Registry setResourceDecoderBucketPriorityList(List<String> buckets) {
+  @NonNull
+  public final Registry setResourceDecoderBucketPriorityList(@NonNull List<String> buckets) {
     List<String> modifiedBuckets = new ArrayList<>(buckets);
     modifiedBuckets.add(0, BUCKET_PREPEND_ALL);
     modifiedBuckets.add(BUCKET_APPEND_ALL);
@@ -279,9 +288,10 @@ public class Registry {
    *
    * @deprecated Use the equivalent {@link #append(Class, ResourceEncoder)} method instead.
    */
+  @NonNull
   @Deprecated
   public <TResource> Registry register(
-      Class<TResource> resourceClass, ResourceEncoder<TResource> encoder) {
+      @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
     return append(resourceClass, encoder);
   }
 
@@ -301,8 +311,9 @@ public class Registry {
    *
    * @see #prepend(Class, ResourceEncoder)
    */
+  @NonNull
   public <TResource> Registry append(
-      Class<TResource> resourceClass, ResourceEncoder<TResource> encoder) {
+      @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
     resourceEncoderRegistry.append(resourceClass, encoder);
     return this;
   }
@@ -319,8 +330,9 @@ public class Registry {
    *
    * @see #append(Class, ResourceEncoder)
    */
+  @NonNull
   public <TResource> Registry prepend(
-      Class<TResource> resourceClass, ResourceEncoder<TResource> encoder) {
+      @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
     resourceEncoderRegistry.prepend(resourceClass, encoder);
     return this;
   }
@@ -329,7 +341,8 @@ public class Registry {
    * Registers a new {@link com.bumptech.glide.load.data.DataRewinder.Factory} to handle a
    * non-default data type that can be rewind to allow for efficient reads of file headers.
    */
-  public Registry register(DataRewinder.Factory<?> factory) {
+  @NonNull
+  public Registry register(@NonNull DataRewinder.Factory<?> factory) {
     dataRewinderRegistry.register(factory);
     return this;
   }
@@ -344,8 +357,10 @@ public class Registry {
    * {@link android.graphics.drawable.BitmapDrawable}).
    * @param transcoder The {@link ResourceTranscoder} to register.
    */
-  public <TResource, Transcode> Registry register(Class<TResource> resourceClass,
-      Class<Transcode> transcodeClass, ResourceTranscoder<TResource, Transcode> transcoder) {
+  @NonNull
+  public <TResource, Transcode> Registry register(
+      @NonNull Class<TResource> resourceClass, @NonNull Class<Transcode> transcodeClass,
+      @NonNull ResourceTranscoder<TResource, Transcode> transcoder) {
     transcoderRegistry.register(resourceClass, transcodeClass, transcoder);
     return this;
   }
@@ -354,7 +369,8 @@ public class Registry {
    * Registers a new {@link ImageHeaderParser} that can obtain some basic metadata from an image
    * header (orientation, type etc).
    */
-  public Registry register(ImageHeaderParser parser) {
+  @NonNull
+  public Registry register(@NonNull ImageHeaderParser parser) {
     imageHeaderParserRegistry.add(parser);
     return this;
   }
@@ -381,6 +397,7 @@ public class Registry {
    * @param dataClass  the data class (e.g. {@link java.io.InputStream},
    * {@link java.io.FileDescriptor}).
    */
+  @NonNull
   public <Model, Data> Registry append(Class<Model> modelClass, Class<Data> dataClass,
       ModelLoaderFactory<Model, Data> factory) {
     modelLoaderRegistry.append(modelClass, dataClass, factory);
@@ -410,6 +427,7 @@ public class Registry {
    * @param dataClass  the data class (e.g. {@link java.io.InputStream},
    * {@link java.io.FileDescriptor}).
    */
+  @NonNull
   public <Model, Data> Registry prepend(Class<Model> modelClass, Class<Data> dataClass,
       ModelLoaderFactory<Model, Data> factory) {
     modelLoaderRegistry.prepend(modelClass, dataClass, factory);
@@ -439,6 +457,7 @@ public class Registry {
    * @param dataClass  the data class (e.g. {@link java.io.InputStream},
    * {@link java.io.FileDescriptor}).
    */
+  @NonNull
   public <Model, Data> Registry replace(
       Class<Model> modelClass,
       Class<Data> dataClass,
@@ -449,7 +468,7 @@ public class Registry {
 
   @Nullable
   public <Data, TResource, Transcode> LoadPath<Data, TResource, Transcode> getLoadPath(
-      Class<Data> dataClass, Class<TResource> resourceClass, Class<Transcode> transcodeClass) {
+      @NonNull Class<Data> dataClass, @NonNull Class<TResource> resourceClass, @NonNull Class<Transcode> transcodeClass) {
     LoadPath<Data, TResource, Transcode> result =
         loadPathCache.get(dataClass, resourceClass, transcodeClass);
     if (loadPathCache.isEmptyLoadPath(result)) {
@@ -471,8 +490,9 @@ public class Registry {
     return result;
   }
 
+  @NonNull
   private <Data, TResource, Transcode> List<DecodePath<Data, TResource, Transcode>> getDecodePaths(
-      Class<Data> dataClass, Class<TResource> resourceClass, Class<Transcode> transcodeClass) {
+      @NonNull Class<Data> dataClass, @NonNull Class<TResource> resourceClass, @NonNull Class<Transcode> transcodeClass) {
 
     List<DecodePath<Data, TResource, Transcode>> decodePaths = new ArrayList<>();
     List<Class<TResource>> registeredResourceClasses =
@@ -495,8 +515,9 @@ public class Registry {
     return decodePaths;
   }
 
+  @Nullable
   public <Model, TResource, Transcode> List<Class<?>> getRegisteredResourceClasses(
-      Class<Model> modelClass, Class<TResource> resourceClass, Class<Transcode> transcodeClass) {
+      Class<Model> modelClass, @NonNull Class<TResource> resourceClass, @NonNull Class<Transcode> transcodeClass) {
     List<Class<?>> result = modelToResourceClassCache.get(modelClass, resourceClass);
 
     if (result == null) {
@@ -520,11 +541,12 @@ public class Registry {
     return result;
   }
 
-  public boolean isResourceEncoderAvailable(Resource<?> resource) {
+  public boolean isResourceEncoderAvailable(@NonNull Resource<?> resource) {
     return resourceEncoderRegistry.get(resource.getResourceClass()) != null;
   }
 
-  public <X> ResourceEncoder<X> getResultEncoder(Resource<X> resource)
+  @Nullable
+  public <X> ResourceEncoder<X> getResultEncoder(@NonNull Resource<X> resource)
       throws NoResultEncoderAvailableException {
     ResourceEncoder<X> resourceEncoder = resourceEncoderRegistry.get(resource.getResourceClass());
     if (resourceEncoder != null) {
@@ -533,8 +555,9 @@ public class Registry {
     throw new NoResultEncoderAvailableException(resource.getResourceClass());
   }
 
+  @Nullable
   @SuppressWarnings("unchecked")
-  public <X> Encoder<X> getSourceEncoder(X data) throws NoSourceEncoderAvailableException {
+  public <X> Encoder<X> getSourceEncoder(@NonNull X data) throws NoSourceEncoderAvailableException {
     Encoder<X> encoder = encoderRegistry.getEncoder((Class<X>) data.getClass());
     if (encoder != null) {
       return encoder;
@@ -542,11 +565,13 @@ public class Registry {
     throw new NoSourceEncoderAvailableException(data.getClass());
   }
 
-  public <X> DataRewinder<X> getRewinder(X data) {
+  @NonNull
+  public <X> DataRewinder<X> getRewinder(@NonNull X data) {
     return dataRewinderRegistry.build(data);
   }
 
-  public <Model> List<ModelLoader<Model, ?>> getModelLoaders(Model model) {
+  @NonNull
+  public <Model> List<ModelLoader<Model, ?>> getModelLoaders(@NonNull Model model) {
     List<ModelLoader<Model, ?>> result = modelLoaderRegistry.getModelLoaders(model);
     if (result.isEmpty()) {
       throw new NoModelLoaderAvailableException(model);
@@ -554,6 +579,7 @@ public class Registry {
     return result;
   }
 
+  @NonNull
   public List<ImageHeaderParser> getImageHeaderParsers() {
     List<ImageHeaderParser> result = imageHeaderParserRegistry.getParsers();
     if (result.isEmpty()) {
