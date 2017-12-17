@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.request.Request;
@@ -63,7 +64,7 @@ public interface Target<R> extends LifecycleListener {
    *
    * @param resource the loaded resource.
    */
-  void onResourceReady(R resource, Transition<? super R> transition);
+  void onResourceReady(@NonNull R resource, @Nullable Transition<? super R> transition);
 
   /**
    * A lifecycle callback that is called when a load is cancelled and its resources are freed.
@@ -81,14 +82,14 @@ public interface Target<R> extends LifecycleListener {
    *
    * @param cb The callback that must be called when the size of the target has been determined
    */
-  void getSize(SizeReadyCallback cb);
+  void getSize(@NonNull SizeReadyCallback cb);
 
   /**
    * Removes the given callback from the pending set if it's still retained.
    *
    * @param cb The callback to remove.
    */
-  void removeCallback(SizeReadyCallback cb);
+  void removeCallback(@NonNull SizeReadyCallback cb);
 
   /**
    * Sets the current request for this target to retain, should not be called outside of Glide.

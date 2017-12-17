@@ -130,12 +130,12 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    * A callback that should never be invoked directly.
    */
   @Override
-  public void getSize(SizeReadyCallback cb) {
+  public void getSize(@NonNull SizeReadyCallback cb) {
     cb.onSizeReady(width, height);
   }
 
   @Override
-  public void removeCallback(SizeReadyCallback cb) {
+  public void removeCallback(@NonNull SizeReadyCallback cb) {
     // Do nothing because we do not retain references to SizeReadyCallbacks.
   }
 
@@ -154,7 +154,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    * A callback that should never be invoked directly.
    */
   @Override
-  public void onLoadCleared(Drawable placeholder) {
+  public void onLoadCleared(@Nullable Drawable placeholder) {
     // Do nothing.
   }
 
@@ -162,7 +162,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    * A callback that should never be invoked directly.
    */
   @Override
-  public void onLoadStarted(Drawable placeholder) {
+  public void onLoadStarted(@Nullable Drawable placeholder) {
     // Do nothing.
   }
 
@@ -170,7 +170,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    * A callback that should never be invoked directly.
    */
   @Override
-  public synchronized void onLoadFailed(Drawable errorDrawable) {
+  public synchronized void onLoadFailed(@Nullable Drawable errorDrawable) {
     // Ignored, synchronized for backwards compatibility.
   }
 
@@ -178,7 +178,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    * A callback that should never be invoked directly.
    */
   @Override
-  public synchronized void onResourceReady(R resource, Transition<? super R> transition) {
+  public synchronized void onResourceReady(@NonNull R resource, @Nullable Transition<? super R> transition) {
     // Ignored, synchronized for backwards compatibility.
   }
 

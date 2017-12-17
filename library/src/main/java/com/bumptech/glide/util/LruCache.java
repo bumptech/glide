@@ -53,7 +53,7 @@ public class LruCache<T, Y> {
    *
    * @param item The item to get the size of.
    */
-  protected int getSize(Y item) {
+  protected int getSize(@NonNull Y item) {
     return 1;
   }
 
@@ -94,7 +94,7 @@ public class LruCache<T, Y> {
    * @param key The key to check.
    */
 
-  public synchronized boolean contains(T key) {
+  public synchronized boolean contains(@NonNull T key) {
     return cache.containsKey(key);
   }
 
@@ -104,7 +104,7 @@ public class LruCache<T, Y> {
    * @param key The key to check.
    */
   @Nullable
-  public synchronized Y get(T key) {
+  public synchronized Y get(@NonNull T key) {
     return cache.get(key);
   }
 
@@ -119,17 +119,16 @@ public class LruCache<T, Y> {
    * @param key  The key to add the item at.
    * @param item The item to add.
    */
-  public synchronized Y put(T key, @Nullable Y item) {
+  @Nullable
+  public synchronized Y put(@NonNull T key, @NonNull Y item) {
     final int itemSize = getSize(item);
     if (itemSize >= maxSize) {
       onItemEvicted(key, item);
       return null;
     }
 
+    currentSize += itemSize;
     @Nullable final Y old = cache.put(key, item);
-    if (item != null) {
-      currentSize += getSize(item);
-    }
     if (old != null) {
       currentSize -= getSize(old);
 
@@ -148,7 +147,7 @@ public class LruCache<T, Y> {
    * @param key The key to remove the item at.
    */
   @Nullable
-  public synchronized Y remove(T key) {
+  public synchronized Y remove(@NonNull T key) {
     final Y value = cache.remove(key);
     if (value != null) {
       currentSize -= getSize(value);

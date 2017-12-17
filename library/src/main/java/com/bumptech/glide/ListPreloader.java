@@ -249,17 +249,17 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     PreloadTarget() { }
 
     @Override
-    public void onResourceReady(Object resource, Transition<? super Object> transition) {
+    public void onResourceReady(@NonNull Object resource, @Nullable Transition<? super Object> transition) {
       // Do nothing.
     }
 
     @Override
-    public void getSize(SizeReadyCallback cb) {
+    public void getSize(@NonNull SizeReadyCallback cb) {
       cb.onSizeReady(photoWidth, photoHeight);
     }
 
     @Override
-    public void removeCallback(SizeReadyCallback cb) {
+    public void removeCallback(@NonNull SizeReadyCallback cb) {
       // Do nothing because we don't retain references to SizeReadyCallbacks.
     }
   }

@@ -29,6 +29,8 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import com.bumptech.glide.load.DataSource;
@@ -62,7 +64,6 @@ import com.bumptech.glide.testutil.TestResourceUtil;
 import com.bumptech.glide.util.Preconditions;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -118,7 +119,7 @@ public class GlideTest {
   private Context context;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
     context = RuntimeEnvironment.application;
 
@@ -149,7 +150,7 @@ public class GlideTest {
 
     when(bgHandler.post(isA(Runnable.class))).thenAnswer(new Answer<Boolean>() {
       @Override
-      public Boolean answer(InvocationOnMock invocation) throws Throwable {
+      public Boolean answer(InvocationOnMock invocation) {
         Runnable runnable = (Runnable) invocation.getArguments()[0];
         runnable.run();
         return true;
@@ -249,13 +250,13 @@ public class GlideTest {
   }
 
   @Test
-  public void testFileDefaultLoaderWithInputStream() throws Exception {
+  public void testFileDefaultLoaderWithInputStream() {
     registerFailFactory(File.class, ParcelFileDescriptor.class);
     runTestFileDefaultLoader();
   }
 
   @Test
-  public void testFileDefaultLoaderWithFileDescriptor() throws Exception {
+  public void testFileDefaultLoaderWithFileDescriptor() {
     registerFailFactory(File.class, InputStream.class);
     runTestFileDefaultLoader();
   }
@@ -353,13 +354,13 @@ public class GlideTest {
   }
 
   @Test
-  public void testUriDefaultLoaderWithInputStream() throws Exception {
+  public void testUriDefaultLoaderWithInputStream() {
     registerFailFactory(Uri.class, ParcelFileDescriptor.class);
     runTestUriDefaultLoader();
   }
 
   @Test
-  public void testUriDefaultLoaderWithFileDescriptor() throws Exception {
+  public void testUriDefaultLoaderWithFileDescriptor() {
     registerFailFactory(Uri.class, InputStream.class);
     runTestUriDefaultLoader();
   }
@@ -388,13 +389,13 @@ public class GlideTest {
   }
 
   @Test
-  public void testFileStringDefaultLoaderWithInputStream() throws Exception {
+  public void testFileStringDefaultLoaderWithInputStream() {
     registerFailFactory(String.class, ParcelFileDescriptor.class);
     runTestFileStringDefaultLoader();
   }
 
   @Test
-  public void testFileStringDefaultLoaderWithFileDescriptor() throws Exception {
+  public void testFileStringDefaultLoaderWithFileDescriptor() {
     registerFailFactory(String.class, ParcelFileDescriptor.class);
     runTestFileStringDefaultLoader();
   }
@@ -411,13 +412,13 @@ public class GlideTest {
   }
 
   @Test
-  public void testUriStringDefaultLoaderWithInputStream() throws Exception {
+  public void testUriStringDefaultLoaderWithInputStream() {
     registerFailFactory(String.class, ParcelFileDescriptor.class);
     runTestUriStringDefaultLoader();
   }
 
   @Test
-  public void testUriStringDefaultLoaderWithFileDescriptor() throws Exception {
+  public void testUriStringDefaultLoaderWithFileDescriptor() {
     registerFailFactory(String.class, InputStream.class);
     runTestUriStringDefaultLoader();
   }
@@ -456,13 +457,13 @@ public class GlideTest {
   }
 
   @Test
-  public void testIntegerDefaultLoaderWithInputStream() throws Exception {
+  public void testIntegerDefaultLoaderWithInputStream() {
     registerFailFactory(Integer.class, ParcelFileDescriptor.class);
     runTestIntegerDefaultLoader();
   }
 
   @Test
-  public void testIntegerDefaultLoaderWithFileDescriptor() throws Exception {
+  public void testIntegerDefaultLoaderWithFileDescriptor() {
     registerFailFactory(Integer.class, InputStream.class);
     runTestIntegerDefaultLoader();
   }
@@ -513,7 +514,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testReceivesGif() throws IOException {
+  public void testReceivesGif() {
     String fakeUri = "content://fake";
     InputStream testGifData = openGif();
     mockUri(Uri.parse(fakeUri), testGifData);
@@ -524,7 +525,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testReceivesGifBytes() throws IOException {
+  public void testReceivesGifBytes() {
     String fakeUri = "content://fake";
     InputStream testGifData = openGif();
     mockUri(Uri.parse(fakeUri), testGifData);
@@ -686,7 +687,7 @@ public class GlideTest {
   public void removeFromManagers_afterRequestManagerRemoved_clearsRequest() {
     target = requestManager.load(mockUri("content://uri")).into(new SimpleTarget<Drawable>() {
       @Override
-      public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
+      public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
         // Do nothing.
       }
     });
@@ -700,7 +701,7 @@ public class GlideTest {
   }
 
   @Test
-  public void testClone() throws IOException {
+  public void testClone() {
     Target<Drawable> firstTarget = mock(Target.class);
     doAnswer(new CallSizeReady(100, 100)).when(firstTarget).getSize(isA(SizeReadyCallback.class));
     Target<Drawable> secondTarget = mock(Target.class);

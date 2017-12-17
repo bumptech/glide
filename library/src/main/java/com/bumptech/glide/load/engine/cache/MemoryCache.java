@@ -43,7 +43,7 @@ public interface MemoryCache {
    * @param key The key.
    */
   @Nullable
-  Resource<?> remove(Key key);
+  Resource<?> remove(@NonNull Key key);
 
   /**
    * Add bitmap to the cache with the given key.
@@ -53,14 +53,14 @@ public interface MemoryCache {
    * @return The old value of key (null if key is not in map).
    */
   @Nullable
-  Resource<?> put(Key key, Resource<?> resource);
+  Resource<?> put(@NonNull Key key, @NonNull Resource<?> resource);
 
   /**
    * Set the listener to be called when a bitmap is removed from the cache.
    *
    * @param listener The listener.
    */
-  void setResourceRemovedListener(ResourceRemovedListener listener);
+  void setResourceRemovedListener(@NonNull ResourceRemovedListener listener);
 
   /**
    * Evict all items from the memory cache.

@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.model.Model;
 import com.bumptech.glide.request.target.Target;
 import java.util.ArrayDeque;
@@ -29,7 +31,8 @@ public final class Util {
   /**
    * Returns the hex string of the given byte array representing a SHA256 hash.
    */
-  public static String sha256BytesToHex(byte[] bytes) {
+  @NonNull
+  public static String sha256BytesToHex(@NonNull byte[] bytes) {
     synchronized (SHA_256_CHARS) {
       return bytesToHex(bytes, SHA_256_CHARS);
     }
@@ -39,7 +42,8 @@ public final class Util {
   // http://stackoverflow.com/questions/9655181/convert-from-byte-array-to-hex-string-in-java
   // /9655275#9655275
   @SuppressWarnings("PMD.UseVarargs")
-  private static String bytesToHex(byte[] bytes, char[] hexChars) {
+  @NonNull
+  private static String bytesToHex(@NonNull byte[] bytes, @NonNull char[] hexChars) {
     int v;
     for (int j = 0; j < bytes.length; j++) {
       v = bytes[j] & 0xFF;
@@ -57,7 +61,7 @@ public final class Util {
    * removed in Glide 4.0.
    */
   @Deprecated
-  public static int getSize(Bitmap bitmap) {
+  public static int getSize(@NonNull Bitmap bitmap) {
     return getBitmapByteSize(bitmap);
   }
 
@@ -65,7 +69,7 @@ public final class Util {
    * Returns the in memory size of the given {@link Bitmap} in bytes.
    */
   @TargetApi(Build.VERSION_CODES.KITKAT)
-  public static int getBitmapByteSize(Bitmap bitmap) {
+  public static int getBitmapByteSize(@NonNull Bitmap bitmap) {
     // The return value of getAllocationByteCount silently changes for recycled bitmaps from the
     // internal buffer size to row bytes * height. To avoid random inconsistencies in caches, we
     // instead assert here.
@@ -88,11 +92,11 @@ public final class Util {
    * Returns the in memory size of {@link android.graphics.Bitmap} with the given width, height, and
    * {@link android.graphics.Bitmap.Config}.
    */
-  public static int getBitmapByteSize(int width, int height, Bitmap.Config config) {
+  public static int getBitmapByteSize(int width, int height, @Nullable Bitmap.Config config) {
     return width * height * getBytesPerPixel(config);
   }
 
-  private static int getBytesPerPixel(Bitmap.Config config) {
+  private static int getBytesPerPixel(@Nullable Bitmap.Config config) {
     // A bitmap by decoding a GIF has null "config" in certain environments.
     if (config == null) {
       config = Bitmap.Config.ARGB_8888;
@@ -162,6 +166,7 @@ public final class Util {
   /**
    * Creates a {@link java.util.Queue} of the given size using Glide's preferred implementation.
    */
+  @NonNull
   public static <T> Queue<T> createQueue(int size) {
     return new ArrayDeque<>(size);
   }
@@ -172,8 +177,9 @@ public final class Util {
    *
    * <p>See #303, #375, #322, #2262.
    */
+  @NonNull
   @SuppressWarnings("UseBulkOperation")
-  public static <T> List<T> getSnapshot(Collection<T> other) {
+  public static <T> List<T> getSnapshot(@NonNull Collection<T> other) {
     // toArray creates a new ArrayList internally and does not guarantee that the values it contains
     // are non-null. Collections.addAll in ArrayList uses toArray internally and therefore also
     // doesn't guarantee that entries are non-null. WeakHashMap's iterator does avoid returning null
@@ -192,11 +198,11 @@ public final class Util {
    *
    * @see java.util.Objects#equals
    */
-  public static boolean bothNullOrEqual(Object a, Object b) {
+  public static boolean bothNullOrEqual(@Nullable Object a, @Nullable Object b) {
     return a == null ? b == null : a.equals(b);
   }
 
-  public static boolean bothModelsNullEquivalentOrEquals(Object a, Object b) {
+  public static boolean bothModelsNullEquivalentOrEquals(@Nullable Object a, @Nullable Object b) {
     if (a == null) {
       return b == null;
     }
@@ -222,7 +228,7 @@ public final class Util {
     return hashCode(Float.floatToIntBits(value), accumulator);
   }
 
-  public static int hashCode(Object object, int accumulator) {
+  public static int hashCode(@Nullable Object object, int accumulator) {
     return hashCode(object == null ? 0 : object.hashCode(), accumulator);
   }
 
@@ -233,5 +239,4 @@ public final class Util {
   public static int hashCode(boolean value) {
     return hashCode(value, HASH_ACCUMULATOR);
   }
-
 }

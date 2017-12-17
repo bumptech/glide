@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.Nullable;
+
 /**
  * An optional interface that models can implement to enhance control over Glide behaviors.
  */
@@ -24,5 +26,5 @@ public interface Model {
    * the same image. However two requests made with the different models are not exactly the
    * same because the way the image is loaded will differ.
    */
-  boolean isEquivalentTo(Object other);
+  boolean isEquivalentTo(@Nullable Object other);
 }

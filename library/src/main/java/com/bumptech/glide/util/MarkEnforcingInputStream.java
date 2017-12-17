@@ -15,7 +15,7 @@ public class MarkEnforcingInputStream extends FilterInputStream {
 
   private int availableBytes = UNSET;
 
-  public MarkEnforcingInputStream(InputStream in) {
+  public MarkEnforcingInputStream(@NonNull InputStream in) {
     super(in);
   }
 
@@ -37,7 +37,7 @@ public class MarkEnforcingInputStream extends FilterInputStream {
   }
 
   @Override
-  public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
+  public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
     int toRead = (int) getBytesToRead(byteCount);
     if (toRead == END_OF_STREAM) {
       return END_OF_STREAM;

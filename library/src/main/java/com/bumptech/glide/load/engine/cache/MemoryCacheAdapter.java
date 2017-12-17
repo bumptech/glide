@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
 
@@ -25,19 +27,21 @@ public class MemoryCacheAdapter implements MemoryCache {
     // Do nothing.
   }
 
+  @Nullable
   @Override
-  public Resource<?> remove(Key key) {
+  public Resource<?> remove(@NonNull Key key) {
     return null;
   }
 
+  @Nullable
   @Override
-  public Resource<?> put(Key key, Resource<?> resource) {
+  public Resource<?> put(@NonNull Key key, @NonNull Resource<?> resource) {
     listener.onResourceRemoved(resource);
     return null;
   }
 
   @Override
-  public void setResourceRemovedListener(ResourceRemovedListener listener) {
+  public void setResourceRemovedListener(@NonNull ResourceRemovedListener listener) {
     this.listener = listener;
   }
 
