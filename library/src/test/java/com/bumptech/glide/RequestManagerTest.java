@@ -73,19 +73,22 @@ public class RequestManagerTest {
           }
         });
 
-     target = new BaseTarget<Drawable>() {
-       @Override
-       public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-         // Empty.
-       }
-       @Override
-       public void getSize(@NonNull SizeReadyCallback cb) {
-         // Empty.
-       }
-       @Override
-       public void removeCallback(@NonNull SizeReadyCallback cb) {
-         // Empty.
-       }
+    target = new BaseTarget<Drawable>() {
+      @Override
+      public void onResourceReady(@NonNull Drawable resource,
+          @Nullable Transition<? super Drawable> transition) {
+        // Empty.
+      }
+
+      @Override
+      public void getSize(@NonNull SizeReadyCallback cb) {
+        // Empty.
+      }
+
+      @Override
+      public void removeCallback(@NonNull SizeReadyCallback cb) {
+        // Empty.
+      }
     };
 
     requestTracker = mock(RequestTracker.class);
@@ -196,7 +199,7 @@ public class RequestManagerTest {
             return Collections.emptySet();
           }
         }, context);
-     final RequestManager child2 = new RequestManager(Glide.get(context), lifecycle,
+    final RequestManager child2 = new RequestManager(Glide.get(context), lifecycle,
         new RequestManagerTreeNode() {
           @Override
           public Set<RequestManager> getDescendants() {

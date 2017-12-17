@@ -36,7 +36,8 @@ public class SimpleTargetTest {
   public void testCanBeConstructedWithoutDimensions() {
     new SimpleTarget<Object>() {
       @Override
-      public void onResourceReady(@NonNull Object resource, @Nullable Transition<? super Object> transition) {
+      public void onResourceReady(@NonNull Object resource,
+          @Nullable Transition<? super Object> transition) {
         // Do nothing.
       }
     };
@@ -55,7 +56,8 @@ public class SimpleTargetTest {
   private SimpleTarget<Object> getTarget(int width, int height) {
     return new SimpleTarget<Object>(width, height) {
       @Override
-      public void onResourceReady(@NonNull Object resource, @Nullable Transition<? super Object> transition) {
+      public void onResourceReady(@NonNull Object resource,
+          @Nullable Transition<? super Object> transition) {
         // Do nothing.
       }
     };

@@ -178,7 +178,8 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    * A callback that should never be invoked directly.
    */
   @Override
-  public synchronized void onResourceReady(@NonNull R resource, @Nullable Transition<? super R> transition) {
+  public synchronized void onResourceReady(@NonNull R resource,
+      @Nullable Transition<? super R> transition) {
     // Ignored, synchronized for backwards compatibility.
   }
 

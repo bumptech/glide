@@ -1108,7 +1108,8 @@ public class SingleRequestTest {
     }
 
     @Override
-    public void onResourceReady(@NonNull List resource, @Nullable Transition<? super List> transition) {
+    public void onResourceReady(@NonNull List resource,
+        @Nullable Transition<? super List> transition) {
       currentPlaceholder = null;
     }
 

@@ -249,7 +249,8 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     PreloadTarget() { }
 
     @Override
-    public void onResourceReady(@NonNull Object resource, @Nullable Transition<? super Object> transition) {
+    public void onResourceReady(@NonNull Object resource,
+        @Nullable Transition<? super Object> transition) {
       // Do nothing.
     }
 

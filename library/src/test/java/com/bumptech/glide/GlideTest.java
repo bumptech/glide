@@ -123,7 +123,7 @@ public class GlideTest {
     MockitoAnnotations.initMocks(this);
     context = RuntimeEnvironment.application;
 
-     // Run all tasks on the main thread so they complete synchronously.
+    // Run all tasks on the main thread so they complete synchronously.
     GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
     when(diskCacheFactory.build()).thenReturn(diskCache);
     Glide.init(
@@ -687,7 +687,8 @@ public class GlideTest {
   public void removeFromManagers_afterRequestManagerRemoved_clearsRequest() {
     target = requestManager.load(mockUri("content://uri")).into(new SimpleTarget<Drawable>() {
       @Override
-      public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+      public void onResourceReady(@NonNull Drawable resource,
+          @Nullable Transition<? super Drawable> transition) {
         // Do nothing.
       }
     });
@@ -814,7 +815,7 @@ public class GlideTest {
   }
 
   private static <X, Y> void registerMockModelLoader(Class<X> modelClass, Class<Y> dataClass,
-        Y loadedData, Registry registry) {
+      Y loadedData, Registry registry) {
     DataFetcher<Y> mockStreamFetcher = mock(DataFetcher.class);
     when(mockStreamFetcher.getDataClass()).thenReturn(dataClass);
     try {

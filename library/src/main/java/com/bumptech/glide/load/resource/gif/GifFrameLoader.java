@@ -323,7 +323,8 @@ class GifFrameLoader {
     }
 
     @Override
-    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+    public void onResourceReady(@NonNull Bitmap resource,
+        @Nullable Transition<? super Bitmap> transition) {
       this.resource = resource;
       Message msg = handler.obtainMessage(FrameLoaderCallback.MSG_DELAY, this);
       handler.sendMessageAtTime(msg, targetTime);

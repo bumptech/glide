@@ -120,7 +120,8 @@ public class ConcurrencyHelper {
           }
 
           @Override
-          public void onResourceReady(@NonNull T resource, @Nullable Transition<? super T> transition) {
+          public void onResourceReady(@NonNull T resource,
+              @Nullable Transition<? super T> transition) {
             target.onResourceReady(resource, transition);
             latch.countDown();
           }
@@ -190,7 +191,8 @@ public class ConcurrencyHelper {
           }
 
           @Override
-          public void onResourceReady(@NonNull T resource, @Nullable Transition<? super T> transition) {
+          public void onResourceReady(@NonNull T resource,
+              @Nullable Transition<? super T> transition) {
             target.onResourceReady(resource, transition);
             if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
               latch.countDown();
@@ -292,22 +294,22 @@ public class ConcurrencyHelper {
 
   private static void wait(Waiter waiter) {
     boolean isFinished = false;
-     do {
-       try {
-         try {
-           isFinished = waiter.await(TIMEOUT_SECONDS, TIMEOUT_UNIT);
-           if (!isFinished) {
-             throw new RuntimeException("Timed out while waiting");
-           }
-         } catch (InterruptedException e) {
-           throw new RuntimeException(e);
-         }
-       } catch (RuntimeException e) {
-         if (Debug.isDebuggerConnected()) {
-           continue;
-         }
-         throw e;
-       }
-     } while (Debug.isDebuggerConnected() && !isFinished);
+    do {
+      try {
+        try {
+          isFinished = waiter.await(TIMEOUT_SECONDS, TIMEOUT_UNIT);
+          if (!isFinished) {
+            throw new RuntimeException("Timed out while waiting");
+          }
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      } catch (RuntimeException e) {
+        if (Debug.isDebuggerConnected()) {
+          continue;
+        }
+        throw e;
+      }
+    } while (Debug.isDebuggerConnected() && !isFinished);
   }
 }

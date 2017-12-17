@@ -120,7 +120,8 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
   }
 
   @Override
-  public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+  public void onResourceReady(@NonNull Bitmap resource,
+      @Nullable Transition<? super Bitmap> transition) {
     this.remoteViews.setImageViewBitmap(this.viewId, resource);
     this.update();
   }

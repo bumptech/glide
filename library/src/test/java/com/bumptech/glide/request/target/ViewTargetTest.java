@@ -790,7 +790,8 @@ public class ViewTargetTest {
     }
 
     @Override
-    public void onResourceReady(@NonNull Object resource, @Nullable Transition<? super Object> transition) { }
+    public void onResourceReady(@NonNull Object resource,
+        @Nullable Transition<? super Object> transition) { }
   }
 
   private static final class TestViewTarget extends ViewTarget<View, Object> {
@@ -800,7 +801,8 @@ public class ViewTargetTest {
     }
 
     @Override
-    public void onResourceReady(@NonNull Object resource, @Nullable Transition<? super Object> transition) {
+    public void onResourceReady(@NonNull Object resource,
+        @Nullable Transition<? super Object> transition) {
       // Avoid calling super.
     }
 
