@@ -35,8 +35,10 @@ public class MemoryCacheAdapter implements MemoryCache {
 
   @Nullable
   @Override
-  public Resource<?> put(@NonNull Key key, @NonNull Resource<?> resource) {
-    listener.onResourceRemoved(resource);
+  public Resource<?> put(@NonNull Key key, @Nullable Resource<?> resource) {
+    if (resource != null) {
+      listener.onResourceRemoved(resource);
+    }
     return null;
   }
 

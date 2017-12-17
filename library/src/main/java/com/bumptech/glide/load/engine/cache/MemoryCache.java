@@ -53,7 +53,7 @@ public interface MemoryCache {
    * @return The old value of key (null if key is not in map).
    */
   @Nullable
-  Resource<?> put(@NonNull Key key, @NonNull Resource<?> resource);
+  Resource<?> put(@NonNull Key key, @Nullable Resource<?> resource);
 
   /**
    * Set the listener to be called when a bitmap is removed from the cache.

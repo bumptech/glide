@@ -53,7 +53,7 @@ public class LruCache<T, Y> {
    *
    * @param item The item to get the size of.
    */
-  protected int getSize(@NonNull Y item) {
+  protected int getSize(@Nullable Y item) {
     return 1;
   }
 
@@ -120,14 +120,16 @@ public class LruCache<T, Y> {
    * @param item The item to add.
    */
   @Nullable
-  public synchronized Y put(@NonNull T key, @NonNull Y item) {
+  public synchronized Y put(@NonNull T key, @Nullable Y item) {
     final int itemSize = getSize(item);
     if (itemSize >= maxSize) {
       onItemEvicted(key, item);
       return null;
     }
 
-    currentSize += itemSize;
+    if (item != null) {
+      currentSize += itemSize;
+    }
     @Nullable final Y old = cache.put(key, item);
     if (old != null) {
       currentSize -= getSize(old);

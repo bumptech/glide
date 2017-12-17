@@ -35,8 +35,12 @@ public class LruResourceCache extends LruCache<Key, Resource<?>> implements Memo
   }
 
   @Override
-  protected int getSize(@NonNull Resource<?> item) {
-    return item.getSize();
+  protected int getSize(@Nullable Resource<?> item) {
+    if (item == null) {
+      return super.getSize(null);
+    } else {
+      return item.getSize();
+    }
   }
 
   @SuppressLint("InlinedApi")

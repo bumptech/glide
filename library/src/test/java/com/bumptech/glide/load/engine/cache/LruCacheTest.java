@@ -379,7 +379,7 @@ public class LruCacheTest {
     }
 
     @Override
-    protected int getSize(@NonNull Object item) {
+    protected int getSize(@Nullable Object item) {
       return listener.getSize(item);
     }
   }
