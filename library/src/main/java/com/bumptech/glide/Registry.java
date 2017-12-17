@@ -468,7 +468,8 @@ public class Registry {
 
   @Nullable
   public <Data, TResource, Transcode> LoadPath<Data, TResource, Transcode> getLoadPath(
-      @NonNull Class<Data> dataClass, @NonNull Class<TResource> resourceClass, @NonNull Class<Transcode> transcodeClass) {
+      @NonNull Class<Data> dataClass, @NonNull Class<TResource> resourceClass,
+      @NonNull Class<Transcode> transcodeClass) {
     LoadPath<Data, TResource, Transcode> result =
         loadPathCache.get(dataClass, resourceClass, transcodeClass);
     if (loadPathCache.isEmptyLoadPath(result)) {
@@ -492,8 +493,8 @@ public class Registry {
 
   @NonNull
   private <Data, TResource, Transcode> List<DecodePath<Data, TResource, Transcode>> getDecodePaths(
-      @NonNull Class<Data> dataClass, @NonNull Class<TResource> resourceClass, @NonNull Class<Transcode> transcodeClass) {
-
+      @NonNull Class<Data> dataClass, @NonNull Class<TResource> resourceClass,
+      @NonNull Class<Transcode> transcodeClass) {
     List<DecodePath<Data, TResource, Transcode>> decodePaths = new ArrayList<>();
     List<Class<TResource>> registeredResourceClasses =
         decoderRegistry.getResourceClasses(dataClass, resourceClass);
@@ -517,7 +518,8 @@ public class Registry {
 
   @Nullable
   public <Model, TResource, Transcode> List<Class<?>> getRegisteredResourceClasses(
-      Class<Model> modelClass, @NonNull Class<TResource> resourceClass, @NonNull Class<Transcode> transcodeClass) {
+      Class<Model> modelClass, @NonNull Class<TResource> resourceClass,
+      @NonNull Class<Transcode> transcodeClass) {
     List<Class<?>> result = modelToResourceClassCache.get(modelClass, resourceClass);
 
     if (result == null) {
@@ -530,7 +532,7 @@ public class Registry {
           List<Class<Transcode>> registeredTranscodeClasses = transcoderRegistry
               .getTranscodeClasses(registeredResourceClass, transcodeClass);
           if (!registeredTranscodeClasses.isEmpty() && !result.contains(registeredResourceClass)) {
-              result.add(registeredResourceClass);
+            result.add(registeredResourceClass);
           }
         }
       }
