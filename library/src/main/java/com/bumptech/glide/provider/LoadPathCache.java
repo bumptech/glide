@@ -21,7 +21,7 @@ public class LoadPathCache {
           Object.class,
           Object.class,
           Collections.singletonList(
-              new DecodePath<Object, Object, Object>(
+              new DecodePath<>(
                   Object.class,
                   Object.class,
                   Object.class,
