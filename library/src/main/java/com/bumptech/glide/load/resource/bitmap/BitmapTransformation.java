@@ -81,15 +81,6 @@ public abstract class BitmapTransformation implements Transformation<Bitmap> {
     this();
   }
 
-  /**
-   * @deprecated Use {@link #BitmapTransformation()}.
-   * @param bitmapPool Ignored.
-   */
-  @Deprecated
-  public BitmapTransformation(@SuppressWarnings("unused") BitmapPool bitmapPool) {
-    this();
-  }
-
   @NonNull
   @Override
   public final Resource<Bitmap> transform(
