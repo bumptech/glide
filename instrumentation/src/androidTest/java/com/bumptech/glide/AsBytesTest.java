@@ -84,8 +84,6 @@ public class AsBytesTest {
     assertThat(BitmapFactory.decodeByteArray(data, 0, data.length)).isNotNull();
   }
 
-  // TODO: This should pass.
-  @Ignore
   @Test
   public void loadVideoResourceId_asBytes_providesBytesOfFrame() {
     byte[] data =
@@ -99,8 +97,6 @@ public class AsBytesTest {
     assertThat(BitmapFactory.decodeByteArray(data, 0, data.length)).isNotNull();
   }
 
-  // TODO: This should pass.
-  @Ignore
   @Test
   public void loadVideoResourceId_asBytes_withFrameTime_providesBytesOfFrame() {
     byte[] data =

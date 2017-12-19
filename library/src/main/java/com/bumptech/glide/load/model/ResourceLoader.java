@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.content.ContentResolver;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
@@ -96,6 +97,30 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
     public ModelLoader<Integer, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
       return new ResourceLoader<>(
           resources, multiFactory.build(Uri.class, ParcelFileDescriptor.class));
+    }
+
+    @Override
+    public void teardown() {
+      // Do nothing.
+    }
+  }
+
+  /**
+   * Loads {@link AssetFileDescriptor}s from resource ids.
+   */
+  public static final class AssetFileDescriptorFactory
+      implements ModelLoaderFactory<Integer, AssetFileDescriptor> {
+
+    private final Resources resources;
+
+    public AssetFileDescriptorFactory(Resources resources) {
+      this.resources = resources;
+    }
+
+    @Override
+    public ModelLoader<Integer, AssetFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
+      return new ResourceLoader<>(
+          resources, multiFactory.build(Uri.class, AssetFileDescriptor.class));
     }
 
     @Override
