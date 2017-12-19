@@ -48,9 +48,9 @@ public class LoadPath<Data, ResourceType, Transcode> {
   private Resource<Transcode> loadWithExceptionList(DataRewinder<Data> rewinder, Options options,
       int width, int height, DecodePath.DecodeCallback<ResourceType> decodeCallback,
       List<Throwable> exceptions) throws GlideException {
-    int size = decodePaths.size();
     Resource<Transcode> result = null;
-    for (int i = 0; i < size; i++) {
+    //noinspection ForLoopReplaceableByForEach to improve perf
+    for (int i = 0, size = decodePaths.size(); i < size; i++) {
       DecodePath<Data, ResourceType, Transcode> path = decodePaths.get(i);
       try {
         result = path.decode(rewinder, width, height, options, decodeCallback);
