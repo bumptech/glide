@@ -67,6 +67,7 @@ public class ModelLoaderRegistry {
     List<ModelLoader<A, ?>> modelLoaders = getModelLoadersForClass(getClass(model));
     int size = modelLoaders.size();
     List<ModelLoader<A, ?>> filteredLoaders = new ArrayList<>(size);
+    //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0; i < size; i++) {
       ModelLoader<A, ?> loader = modelLoaders.get(i);
       if (loader.handles(model)) {

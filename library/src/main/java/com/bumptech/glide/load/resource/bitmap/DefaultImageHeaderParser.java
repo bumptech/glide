@@ -253,15 +253,19 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
 
     short byteOrderIdentifier = segmentData.getInt16(headerOffsetSize);
     final ByteOrder byteOrder;
-    if (byteOrderIdentifier == MOTOROLA_TIFF_MAGIC_NUMBER) {
-      byteOrder = ByteOrder.BIG_ENDIAN;
-    } else if (byteOrderIdentifier == INTEL_TIFF_MAGIC_NUMBER) {
-      byteOrder = ByteOrder.LITTLE_ENDIAN;
-    } else {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Unknown endianness = " + byteOrderIdentifier);
-      }
-      byteOrder = ByteOrder.BIG_ENDIAN;
+    switch (byteOrderIdentifier) {
+      case MOTOROLA_TIFF_MAGIC_NUMBER:
+        byteOrder = ByteOrder.BIG_ENDIAN;
+        break;
+      case INTEL_TIFF_MAGIC_NUMBER:
+        byteOrder = ByteOrder.LITTLE_ENDIAN;
+        break;
+      default:
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Unknown endianness = " + byteOrderIdentifier);
+        }
+        byteOrder = ByteOrder.BIG_ENDIAN;
+        break;
     }
 
     segmentData.order(byteOrder);

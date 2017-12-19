@@ -41,6 +41,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     Key sourceKey = null;
     int size = modelLoaders.size();
     List<DataFetcher<Data>> fetchers = new ArrayList<>(size);
+    //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0; i < size; i++) {
       ModelLoader<Model, Data> modelLoader = modelLoaders.get(i);
       if (modelLoader.handles(model)) {
