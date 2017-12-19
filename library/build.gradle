@@ -9,7 +9,7 @@ dependencies {
     api project(':third_party:gif_decoder')
     api project(':third_party:disklrucache')
     api project(':annotation')
-    api "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
+    compileOnly "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
     compileOnly "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
     testImplementation project(':testutil')
     testImplementation 'com.google.guava:guava-testlib:18.0'
