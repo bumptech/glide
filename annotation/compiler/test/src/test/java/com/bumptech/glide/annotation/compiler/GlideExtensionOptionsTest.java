@@ -1,5 +1,6 @@
 package com.bumptech.glide.annotation.compiler;
 
+import static com.bumptech.glide.annotation.compiler.test.Util.asUnixChars;
 import static com.bumptech.glide.annotation.compiler.test.Util.emptyAppModule;
 import static com.bumptech.glide.annotation.compiler.test.Util.subpackage;
 import static com.google.testing.compile.CompilationSubject.assertThat;
@@ -94,7 +95,7 @@ public class GlideExtensionOptionsTest {
   }
 
   private void runTest(String subDir, Subject subject) throws IOException {
-     Compilation compilation =
+    Compilation compilation =
         javac()
             .withProcessors(new GlideAnnotationProcessor())
             .compile(
@@ -105,7 +106,7 @@ public class GlideExtensionOptionsTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage(subject.name()))
         .contentsAsUtf8String()
-        .isEqualTo(forResource(subDir, subject.file()).getCharContent(true));
+        .isEqualTo(asUnixChars(forResource(subDir, subject.file()).getCharContent(true)));
   }
 
   private JavaFileObject extension(String subdir) {

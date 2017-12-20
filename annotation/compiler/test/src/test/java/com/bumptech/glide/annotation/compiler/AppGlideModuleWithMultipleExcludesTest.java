@@ -1,6 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.compiler.test.Util.appResource;
+import static com.bumptech.glide.annotation.compiler.test.Util.asUnixChars;
 import static com.bumptech.glide.annotation.compiler.test.Util.glide;
 import static com.bumptech.glide.annotation.compiler.test.Util.subpackage;
 import static com.google.testing.compile.CompilationSubject.assertThat;
@@ -39,7 +40,7 @@ public class AppGlideModuleWithMultipleExcludesTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideOptions"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GlideOptions.java").getCharContent(true));
+        .isEqualTo(asUnixChars(appResource("GlideOptions.java").getCharContent(true)));
   }
 
   @Test
@@ -47,7 +48,7 @@ public class AppGlideModuleWithMultipleExcludesTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideRequest"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GlideRequest.java").getCharContent(true));
+        .isEqualTo(asUnixChars(appResource("GlideRequest.java").getCharContent(true)));
   }
 
   @Test
@@ -55,7 +56,7 @@ public class AppGlideModuleWithMultipleExcludesTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideRequests"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GlideRequests.java").getCharContent(true));
+        .isEqualTo(asUnixChars(appResource("GlideRequests.java").getCharContent(true)));
   }
 
   @Test
@@ -63,7 +64,7 @@ public class AppGlideModuleWithMultipleExcludesTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideApp"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GlideApp.java").getCharContent(true));
+        .isEqualTo(asUnixChars(appResource("GlideApp.java").getCharContent(true)));
   }
 
   @Test
@@ -71,7 +72,8 @@ public class AppGlideModuleWithMultipleExcludesTest {
     assertThat(compilation)
         .generatedSourceFile(glide("GeneratedAppGlideModuleImpl"))
         .contentsAsUtf8String()
-        .isEqualTo(forResource("GeneratedAppGlideModuleImpl.java").getCharContent(true));
+        .isEqualTo(
+            asUnixChars(forResource("GeneratedAppGlideModuleImpl.java").getCharContent(true)));
   }
 
   @Test
@@ -79,7 +81,8 @@ public class AppGlideModuleWithMultipleExcludesTest {
     assertThat(compilation)
         .generatedSourceFile(glide("GeneratedRequestManagerFactory"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GeneratedRequestManagerFactory.java").getCharContent(true));
+        .isEqualTo(
+            asUnixChars(appResource("GeneratedRequestManagerFactory.java").getCharContent(true)));
   }
 
   private JavaFileObject forResource(String name) {

@@ -2,6 +2,7 @@ package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.compiler.test.Util.annotation;
 import static com.bumptech.glide.annotation.compiler.test.Util.appResource;
+import static com.bumptech.glide.annotation.compiler.test.Util.asUnixChars;
 import static com.bumptech.glide.annotation.compiler.test.Util.emptyAppModule;
 import static com.bumptech.glide.annotation.compiler.test.Util.emptyLibraryModule;
 import static com.bumptech.glide.annotation.compiler.test.Util.glide;
@@ -49,7 +50,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideOptions"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GlideOptions.java").getCharContent(true));
+        .isEqualTo(asUnixChars(appResource("GlideOptions.java").getCharContent(true)));
   }
 
   @Test
@@ -57,7 +58,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideRequest"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GlideRequest.java").getCharContent(true));
+        .isEqualTo(asUnixChars(appResource("GlideRequest.java").getCharContent(true)));
   }
 
   @Test
@@ -65,7 +66,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideRequests"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GlideRequests.java").getCharContent(true));
+        .isEqualTo(asUnixChars(appResource("GlideRequests.java").getCharContent(true)));
   }
 
   @Test
@@ -73,7 +74,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideApp"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GlideApp.java").getCharContent(true));
+        .isEqualTo(asUnixChars(appResource("GlideApp.java").getCharContent(true)));
   }
 
   @Test
@@ -81,7 +82,8 @@ public class EmptyAppAndLibraryGlideModulesTest {
     assertThat(compilation)
         .generatedSourceFile(glide("GeneratedAppGlideModuleImpl"))
         .contentsAsUtf8String()
-        .isEqualTo(forResource("GeneratedAppGlideModuleImpl.java").getCharContent(true));
+        .isEqualTo(
+            asUnixChars(forResource("GeneratedAppGlideModuleImpl.java").getCharContent(true)));
   }
 
   @Test
@@ -89,7 +91,8 @@ public class EmptyAppAndLibraryGlideModulesTest {
     assertThat(compilation)
         .generatedSourceFile(glide("GeneratedRequestManagerFactory"))
         .contentsAsUtf8String()
-        .isEqualTo(appResource("GeneratedRequestManagerFactory.java").getCharContent(true));
+        .isEqualTo(
+            asUnixChars(appResource("GeneratedRequestManagerFactory.java").getCharContent(true)));
   }
 
   @Test
@@ -99,7 +102,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
     assertThat(compilation)
         .generatedSourceFile(annotation(expectedClassName))
         .contentsAsUtf8String()
-        .isEqualTo(libraryResource(expectedClassName + ".java").getCharContent(true));
+        .isEqualTo(asUnixChars(libraryResource(expectedClassName + ".java").getCharContent(true)));
   }
 
   private JavaFileObject forResource(String name) {

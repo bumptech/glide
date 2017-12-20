@@ -1,5 +1,6 @@
 package com.bumptech.glide.provider;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ public class ResourceDecoderRegistry {
   private final List<String> bucketPriorityList = new ArrayList<>();
   private final Map<String, List<Entry<?, ?>>> decoders = new HashMap<>();
 
-  public synchronized void setBucketPriorityList(List<String> buckets) {
+  public synchronized void setBucketPriorityList(@NonNull List<String> buckets) {
     List<String> previousBuckets = new ArrayList<>(bucketPriorityList);
     bucketPriorityList.clear();
     bucketPriorityList.addAll(buckets);
@@ -29,9 +30,10 @@ public class ResourceDecoderRegistry {
     }
   }
 
+  @NonNull
   @SuppressWarnings("unchecked")
-  public synchronized <T, R> List<ResourceDecoder<T, R>> getDecoders(Class<T> dataClass,
-      Class<R> resourceClass) {
+  public synchronized <T, R> List<ResourceDecoder<T, R>> getDecoders(@NonNull Class<T> dataClass,
+      @NonNull Class<R> resourceClass) {
     List<ResourceDecoder<T, R>> result = new ArrayList<>();
     for (String bucket : bucketPriorityList) {
       List<Entry<?, ?>> entries = decoders.get(bucket);
@@ -49,9 +51,10 @@ public class ResourceDecoderRegistry {
     return result;
   }
 
+  @NonNull
   @SuppressWarnings("unchecked")
-  public synchronized <T, R> List<Class<R>> getResourceClasses(Class<T> dataClass,
-      Class<R> resourceClass) {
+  public synchronized <T, R> List<Class<R>> getResourceClasses(@NonNull Class<T> dataClass,
+      @NonNull Class<R> resourceClass) {
     List<Class<R>> result = new ArrayList<>();
     for (String bucket : bucketPriorityList) {
       List<Entry<?, ?>> entries = decoders.get(bucket);
@@ -67,17 +70,20 @@ public class ResourceDecoderRegistry {
     return result;
   }
 
-  public synchronized <T, R> void append(
-      String bucket, ResourceDecoder<T, R> decoder, Class<T> dataClass, Class<R> resourceClass) {
+  public synchronized <T, R> void append(@NonNull String bucket,
+      @NonNull ResourceDecoder<T, R> decoder,
+      @NonNull Class<T> dataClass, @NonNull Class<R> resourceClass) {
     getOrAddEntryList(bucket).add(new Entry<>(dataClass, resourceClass, decoder));
   }
 
-  public synchronized <T, R> void prepend(
-      String bucket, ResourceDecoder<T, R> decoder, Class<T> dataClass, Class<R> resourceClass) {
+  public synchronized <T, R> void prepend(@NonNull String bucket,
+      @NonNull ResourceDecoder<T, R> decoder,
+      @NonNull Class<T> dataClass, @NonNull Class<R> resourceClass) {
     getOrAddEntryList(bucket).add(0, new Entry<>(dataClass, resourceClass, decoder));
   }
 
-  private synchronized List<Entry<?, ?>> getOrAddEntryList(String bucket) {
+  @NonNull
+  private synchronized List<Entry<?, ?>> getOrAddEntryList(@NonNull String bucket) {
     if (!bucketPriorityList.contains(bucket)) {
       // Add this unspecified bucket as a low priority bucket.
       bucketPriorityList.add(bucket);
@@ -95,13 +101,14 @@ public class ResourceDecoderRegistry {
     @Synthetic final Class<R> resourceClass;
     @Synthetic final ResourceDecoder<T, R> decoder;
 
-    public Entry(Class<T> dataClass, Class<R> resourceClass, ResourceDecoder<T, R> decoder) {
+    public Entry(@NonNull Class<T> dataClass, @NonNull Class<R> resourceClass,
+        ResourceDecoder<T, R> decoder) {
       this.dataClass = dataClass;
       this.resourceClass = resourceClass;
       this.decoder = decoder;
     }
 
-    public boolean handles(Class<?> dataClass, Class<?> resourceClass) {
+    public boolean handles(@NonNull Class<?> dataClass, @NonNull Class<?> resourceClass) {
       return this.dataClass.isAssignableFrom(dataClass) && resourceClass
           .isAssignableFrom(this.resourceClass);
     }

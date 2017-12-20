@@ -1,6 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.compiler.test.Util.annotation;
+import static com.bumptech.glide.annotation.compiler.test.Util.asUnixChars;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 
@@ -45,7 +46,7 @@ public class MultipleEmptyLibraryGlideModuleTest {
     assertThat(compilation)
         .generatedSourceFile(annotation(expectedClassName))
         .contentsAsUtf8String()
-        .isEqualTo(forResource(expectedClassName + ".java").getCharContent(true));
+        .isEqualTo(asUnixChars(forResource(expectedClassName + ".java").getCharContent(true)));
   }
 
   private JavaFileObject forResource(String name) {
