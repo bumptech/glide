@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.data;
 
-import com.bumptech.glide.util.Preconditions;
+import android.support.annotation.NonNull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,8 +28,7 @@ public class DataRewinderRegistry {
   }
 
   @SuppressWarnings("unchecked")
-  public synchronized <T> DataRewinder<T> build(T data) {
-    Preconditions.checkNotNull(data);
+  public synchronized <T> DataRewinder<T> build(@NonNull T data) {
     DataRewinder.Factory<T> result = (DataRewinder.Factory<T>) rewinders.get(data.getClass());
     if (result == null) {
       for (DataRewinder.Factory<?> registeredFactory : rewinders.values()) {

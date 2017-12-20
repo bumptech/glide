@@ -15,9 +15,9 @@ import static org.mockito.Mockito.when;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
-import com.bumptech.glide.util.Preconditions;
 import com.google.common.collect.Range;
 import org.junit.Before;
 import org.junit.Test;
@@ -440,10 +440,9 @@ public class TransformationUtilsTest {
   public static class AlphaShadowBitmap extends ShadowBitmap {
 
     @Implementation
-    public static Bitmap createBitmap(int width, int height, Bitmap.Config config) {
+    public static Bitmap createBitmap(int width, int height, @NonNull Bitmap.Config config) {
       // Robolectric doesn't match the framework behavior with null configs, so we have to do so
       // here.
-      Preconditions.checkNotNull("Config must not be null");
       return ShadowBitmap.createBitmap(width, height, config);
     }
   }

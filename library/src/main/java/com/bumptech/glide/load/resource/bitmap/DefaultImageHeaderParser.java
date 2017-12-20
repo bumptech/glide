@@ -6,10 +6,10 @@ import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG_A;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.UNKNOWN;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
-import com.bumptech.glide.util.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -57,25 +57,25 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   private static final int WEBP_LOSSLESS_ALPHA_FLAG = 1 << 3;
 
   @Override
-  public ImageType getType(InputStream is) throws IOException {
-    return getType(new StreamReader(Preconditions.checkNotNull(is)));
+  public ImageType getType(@NonNull InputStream is) throws IOException {
+    return getType(new StreamReader(is));
   }
 
   @Override
-  public ImageType getType(ByteBuffer byteBuffer) throws IOException {
-    return getType(new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)));
+  public ImageType getType(@NonNull ByteBuffer byteBuffer) throws IOException {
+    return getType(new ByteBufferReader(byteBuffer));
   }
 
   @Override
-  public int getOrientation(InputStream is, ArrayPool byteArrayPool) throws IOException {
-    return getOrientation(new StreamReader(Preconditions.checkNotNull(is)),
-        Preconditions.checkNotNull(byteArrayPool));
+  public int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool)
+          throws IOException {
+    return getOrientation(new StreamReader(is), byteArrayPool);
   }
 
   @Override
-  public int getOrientation(ByteBuffer byteBuffer, ArrayPool byteArrayPool) throws IOException {
-    return getOrientation(new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)),
-        Preconditions.checkNotNull(byteArrayPool));
+  public int getOrientation(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
+          throws IOException {
+    return getOrientation(new ByteBufferReader(byteBuffer), byteArrayPool);
   }
 
   private ImageType getType(Reader reader) throws IOException {

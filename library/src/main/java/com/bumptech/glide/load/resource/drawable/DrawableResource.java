@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import com.bumptech.glide.load.engine.Initializable;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.util.Preconditions;
 
 /**
  * Simple wrapper for an Android {@link Drawable} which returns a
@@ -24,8 +23,8 @@ public abstract class DrawableResource<T extends Drawable> implements Resource<T
     Initializable {
   protected final T drawable;
 
-  public DrawableResource(T drawable) {
-    this.drawable = Preconditions.checkNotNull(drawable);
+  public DrawableResource(@NonNull T drawable) {
+    this.drawable = drawable;
   }
 
   @NonNull

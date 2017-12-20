@@ -2,7 +2,6 @@ package com.bumptech.glide.load.resource.bytes;
 
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.util.Preconditions;
 
 /**
  * An {@link com.bumptech.glide.load.engine.Resource} wrapping a byte array.
@@ -10,8 +9,8 @@ import com.bumptech.glide.util.Preconditions;
 public class BytesResource implements Resource<byte[]> {
   private final byte[] bytes;
 
-  public BytesResource(byte[] bytes) {
-    this.bytes = Preconditions.checkNotNull(bytes);
+  public BytesResource(@NonNull byte[] bytes) {
+    this.bytes = bytes;
   }
 
   @NonNull

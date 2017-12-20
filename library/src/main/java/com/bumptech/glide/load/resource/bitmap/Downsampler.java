@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -131,12 +132,12 @@ public final class Downsampler {
   private final List<ImageHeaderParser> parsers;
   private final HardwareConfigState hardwareConfigState = HardwareConfigState.getInstance();
 
-  public Downsampler(List<ImageHeaderParser> parsers, DisplayMetrics displayMetrics,
-      BitmapPool bitmapPool, ArrayPool byteArrayPool) {
+  public Downsampler(List<ImageHeaderParser> parsers, @NonNull DisplayMetrics displayMetrics,
+                     @NonNull BitmapPool bitmapPool, @NonNull ArrayPool byteArrayPool) {
     this.parsers = parsers;
-    this.displayMetrics = Preconditions.checkNotNull(displayMetrics);
-    this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
-    this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
+    this.displayMetrics = displayMetrics;
+    this.bitmapPool = bitmapPool;
+    this.byteArrayPool = byteArrayPool;
   }
 
   public boolean handles(@SuppressWarnings("unused") InputStream is) {

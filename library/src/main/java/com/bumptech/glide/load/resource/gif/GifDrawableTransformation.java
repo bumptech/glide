@@ -8,7 +8,6 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
-import com.bumptech.glide.util.Preconditions;
 import java.security.MessageDigest;
 
 /**
@@ -19,8 +18,8 @@ import java.security.MessageDigest;
 public class GifDrawableTransformation implements Transformation<GifDrawable> {
   private final Transformation<Bitmap> wrapped;
 
-  public GifDrawableTransformation(Transformation<Bitmap> wrapped) {
-    this.wrapped = Preconditions.checkNotNull(wrapped);
+  public GifDrawableTransformation(@NonNull Transformation<Bitmap> wrapped) {
+    this.wrapped = wrapped;
   }
 
   /**

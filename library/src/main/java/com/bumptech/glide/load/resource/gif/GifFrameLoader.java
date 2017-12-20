@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.Glide;
@@ -92,9 +93,10 @@ class GifFrameLoader {
     setFrameTransformation(transformation, firstFrame);
   }
 
-  void setFrameTransformation(Transformation<Bitmap> transformation, Bitmap firstFrame) {
-    this.transformation = Preconditions.checkNotNull(transformation);
-    this.firstFrame = Preconditions.checkNotNull(firstFrame);
+  void setFrameTransformation(@NonNull Transformation<Bitmap> transformation,
+                              @NonNull Bitmap firstFrame) {
+    this.transformation = transformation;
+    this.firstFrame = firstFrame;
     requestBuilder = requestBuilder.apply(new RequestOptions().transform(transformation));
   }
 

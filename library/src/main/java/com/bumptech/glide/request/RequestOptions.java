@@ -32,7 +32,6 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
 import com.bumptech.glide.load.resource.gif.GifOptions;
 import com.bumptech.glide.signature.EmptySignature;
-import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
 import java.util.HashMap;
 import java.util.Map;
@@ -502,7 +501,7 @@ public class RequestOptions implements Cloneable {
     if (isAutoCloneEnabled) {
       return clone().diskCacheStrategy(strategy);
     }
-    this.diskCacheStrategy = Preconditions.checkNotNull(strategy);
+    this.diskCacheStrategy = strategy;
     fields |= DISK_CACHE_STRATEGY;
 
     return selfOrThrowIfLocked();
@@ -520,7 +519,7 @@ public class RequestOptions implements Cloneable {
       return clone().priority(priority);
     }
 
-    this.priority = Preconditions.checkNotNull(priority);
+    this.priority = priority;
     fields |= PRIORITY;
 
     return selfOrThrowIfLocked();
@@ -751,7 +750,7 @@ public class RequestOptions implements Cloneable {
       return clone().signature(signature);
     }
 
-    this.signature = Preconditions.checkNotNull(signature);
+    this.signature = signature;
     fields |= SIGNATURE;
     return selfOrThrowIfLocked();
   }
@@ -791,8 +790,6 @@ public class RequestOptions implements Cloneable {
       return clone().set(option, value);
     }
 
-    Preconditions.checkNotNull(option);
-    Preconditions.checkNotNull(value);
     options.set(option, value);
     return selfOrThrowIfLocked();
   }
@@ -803,7 +800,7 @@ public class RequestOptions implements Cloneable {
       return clone().decode(resourceClass);
     }
 
-    this.resourceClass = Preconditions.checkNotNull(resourceClass);
+    this.resourceClass = resourceClass;
     fields |= RESOURCE_CLASS;
     return selfOrThrowIfLocked();
   }
@@ -826,7 +823,7 @@ public class RequestOptions implements Cloneable {
    */
   @CheckResult
   public RequestOptions encodeFormat(@NonNull Bitmap.CompressFormat format) {
-    return set(BitmapEncoder.COMPRESSION_FORMAT, Preconditions.checkNotNull(format));
+    return set(BitmapEncoder.COMPRESSION_FORMAT, format);
   }
 
   /**
@@ -877,7 +874,6 @@ public class RequestOptions implements Cloneable {
    */
   @CheckResult
   public RequestOptions format(@NonNull DecodeFormat format) {
-    Preconditions.checkNotNull(format);
     return set(Downsampler.DECODE_FORMAT, format)
         .set(GifOptions.DECODE_FORMAT, format);
   }
@@ -913,7 +909,7 @@ public class RequestOptions implements Cloneable {
    */
   @CheckResult
   public RequestOptions downsample(@NonNull DownsampleStrategy strategy) {
-    return set(Downsampler.DOWNSAMPLE_STRATEGY, Preconditions.checkNotNull(strategy));
+    return set(Downsampler.DOWNSAMPLE_STRATEGY, strategy);
   }
 
   /**
@@ -1205,8 +1201,6 @@ public class RequestOptions implements Cloneable {
       return clone().transform(resourceClass, transformation, isRequired);
     }
 
-    Preconditions.checkNotNull(resourceClass);
-    Preconditions.checkNotNull(transformation);
     transformations.put(resourceClass, transformation);
     fields |= TRANSFORMATION;
     isTransformationAllowed = true;

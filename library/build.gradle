@@ -1,3 +1,6 @@
+plugins {
+    id "tech.harmonysoft.oss.traute" version "1.0.5"
+}
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 apply plugin: 'findbugs'
@@ -50,6 +53,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+}
+
+traute {
+    javacPluginVersion = "1.0.10"
+    exceptionTexts = [ 'parameter' : '${PARAMETER_NAME} must not be null' ]
 }
 
 afterEvaluate {

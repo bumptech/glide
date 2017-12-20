@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.util.Preconditions;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,10 +50,11 @@ public interface ModelLoader<Model, Data> {
       this(sourceKey, Collections.<Key>emptyList(), fetcher);
     }
 
-    public LoadData(Key sourceKey, List<Key> alternateKeys, DataFetcher<Data> fetcher) {
-      this.sourceKey = Preconditions.checkNotNull(sourceKey);
-      this.alternateKeys = Preconditions.checkNotNull(alternateKeys);
-      this.fetcher = Preconditions.checkNotNull(fetcher);
+    public LoadData(@NonNull Key sourceKey, @NonNull List<Key> alternateKeys,
+                    @NonNull DataFetcher<Data> fetcher) {
+      this.sourceKey = sourceKey;
+      this.alternateKeys = alternateKeys;
+      this.fetcher = fetcher;
     }
   }
 

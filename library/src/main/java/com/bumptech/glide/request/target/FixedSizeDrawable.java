@@ -11,7 +11,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
-import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 
 /**
@@ -34,9 +33,9 @@ public class FixedSizeDrawable extends Drawable {
     this(new State(wrapped.getConstantState(), width, height), wrapped);
   }
 
-  FixedSizeDrawable(State state, Drawable wrapped) {
-    this.state = Preconditions.checkNotNull(state);
-    this.wrapped = Preconditions.checkNotNull(wrapped);
+  FixedSizeDrawable(@NonNull State state, @NonNull Drawable wrapped) {
+    this.state = state;
+    this.wrapped = wrapped;
 
     // We will do our own scaling.
     wrapped.setBounds(0, 0, wrapped.getIntrinsicWidth(), wrapped.getIntrinsicHeight());

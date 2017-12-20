@@ -9,7 +9,6 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.util.Preconditions;
 import java.io.IOException;
 
 /**
@@ -42,8 +41,8 @@ public class BitmapDrawableDecoder<DataType> implements ResourceDecoder<DataType
 
   public BitmapDrawableDecoder(
       @NonNull Resources resources, @NonNull ResourceDecoder<DataType, Bitmap> decoder) {
-    this.resources = Preconditions.checkNotNull(resources);
-    this.decoder = Preconditions.checkNotNull(decoder);
+    this.resources = resources;
+    this.decoder = decoder;
   }
 
   @Override

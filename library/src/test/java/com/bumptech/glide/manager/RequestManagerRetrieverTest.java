@@ -228,7 +228,7 @@ public class RequestManagerRetrieverTest {
     harness.doGet();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = NullPointerException.class)
   public void testThrowsIfGivenNullContext() {
     retriever.get((Context) null);
   }

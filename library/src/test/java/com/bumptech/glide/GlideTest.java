@@ -724,6 +724,7 @@ public class GlideTest {
     doAnswer(new Util.CallDataReady<>(null))
         .when(failFetcher)
         .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
+    when(failFetcher.getDataSource()).thenReturn(DataSource.MEMORY_CACHE);
     when(failFetcher.getDataClass()).thenReturn(failResource);
     ModelLoader<T, Z> failLoader = mock(ModelLoader.class);
     when(failLoader.buildLoadData(isA(failModel), anyInt(), anyInt(), isA(Options.class)))
@@ -779,6 +780,7 @@ public class GlideTest {
     } catch (Exception e) {
       // Do nothing.
     }
+    when(fetcher.getDataSource()).thenReturn(DataSource.MEMORY_CACHE);
     when(fetcher.getDataClass()).thenReturn(InputStream.class);
     when(modelLoader.buildLoadData(isA(modelClass), anyInt(), anyInt(), isA(Options.class)))
         .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), fetcher));
@@ -815,6 +817,7 @@ public class GlideTest {
   private static <X, Y> void registerMockModelLoader(Class<X> modelClass, Class<Y> dataClass,
         Y loadedData, Registry registry) {
     DataFetcher<Y> mockStreamFetcher = mock(DataFetcher.class);
+    when(mockStreamFetcher.getDataSource()).thenReturn(DataSource.MEMORY_CACHE);
     when(mockStreamFetcher.getDataClass()).thenReturn(dataClass);
     try {
       doAnswer(new Util.CallDataReady<>(loadedData))

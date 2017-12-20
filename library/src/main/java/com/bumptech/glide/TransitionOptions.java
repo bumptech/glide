@@ -6,7 +6,6 @@ import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.request.transition.ViewAnimationFactory;
 import com.bumptech.glide.request.transition.ViewPropertyAnimationFactory;
 import com.bumptech.glide.request.transition.ViewPropertyTransition;
-import com.bumptech.glide.util.Preconditions;
 
 /**
  * A base class for setting a transition to use on a resource when a load completes.
@@ -67,7 +66,7 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
   @NonNull
   public final CHILD transition(
       @NonNull TransitionFactory<? super TranscodeType> transitionFactory) {
-    this.transitionFactory = Preconditions.checkNotNull(transitionFactory);
+    this.transitionFactory = transitionFactory;
     return self();
   }
 

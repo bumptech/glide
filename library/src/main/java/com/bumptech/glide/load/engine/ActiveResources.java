@@ -178,7 +178,7 @@ final class ActiveResources {
         @NonNull ReferenceQueue<? super EngineResource<?>> queue,
         boolean isActiveResourceRetentionAllowed) {
       super(referent, queue);
-      this.key = Preconditions.checkNotNull(key);
+      this.key = key;
       this.resource =
           referent.isCacheable() && isActiveResourceRetentionAllowed
               ? Preconditions.checkNotNull(referent.getResource()) : null;

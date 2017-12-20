@@ -102,7 +102,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   @NonNull
   @CheckResult
   public RequestBuilder<TranscodeType> apply(@NonNull RequestOptions requestOptions) {
-    Preconditions.checkNotNull(requestOptions);
     this.requestOptions = getMutableOptions().apply(requestOptions);
     return this;
   }
@@ -126,7 +125,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   @CheckResult
   public RequestBuilder<TranscodeType> transition(
       @NonNull TransitionOptions<?, ? super TranscodeType> transitionOptions) {
-    this.transitionOptions = Preconditions.checkNotNull(transitionOptions);
+    this.transitionOptions = transitionOptions;
     isDefaultTransitionOptionsSet = false;
     return this;
   }
@@ -580,7 +579,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       @Nullable RequestListener<TranscodeType> targetListener,
       @NonNull RequestOptions options) {
     Util.assertMainThread();
-    Preconditions.checkNotNull(target);
     if (!isModelSet) {
       throw new IllegalArgumentException("You must call #load() before calling #into()");
     }
@@ -636,7 +634,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   @NonNull
   public ViewTarget<ImageView, TranscodeType> into(@NonNull ImageView view) {
     Util.assertMainThread();
-    Preconditions.checkNotNull(view);
 
     RequestOptions requestOptions = this.requestOptions;
     if (!requestOptions.isTransformationSet()
