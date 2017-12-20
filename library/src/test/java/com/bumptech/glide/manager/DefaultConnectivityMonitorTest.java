@@ -126,15 +126,6 @@ public class DefaultConnectivityMonitorTest {
   }
 
   @Test
-  public void register_withMissingPermission_doesNotRegisterReceiver() {
-    harness.shadowConnectivityManager.isNetworkPermissionGranted = false;
-
-    monitor.onStart();
-
-    assertThat(getConnectivityReceivers()).isEmpty();
-  }
-
-  @Test
   public void onReceive_withMissingPermission_doesNotThrow() {
     monitor.onStart();
     harness.shadowConnectivityManager.isNetworkPermissionGranted = false;
