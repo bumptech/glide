@@ -1,7 +1,6 @@
 package com.bumptech.glide.annotation.compiler.test;
 
 import com.google.testing.compile.JavaFileObjects;
-import java.io.File;
 import javax.tools.JavaFileObject;
 
 /** Test utilities. */
@@ -11,6 +10,12 @@ public final class Util {
   private static final String ANNOTATION_PACKAGE_NAME = "com.bumptech.glide.annotation.compiler";
   private static final String DEFAULT_APP_DIR_NAME = "EmptyAppGlideModuleTest";
   private static final String DEFAULT_LIBRARY_DIR_NAME = "EmptyLibraryGlideModuleTest";
+  /**
+   * Hardcoded file separator to workaround {@code JavaFileObjects.forResource(...)} defaulting to
+   * the unix one.
+   */
+  private static final String FILE_SEPARATOR = "/";
+  private static final String LINE_SEPARATOR = "\n";
 
   private Util() {
     // Utility class.
@@ -33,7 +38,7 @@ public final class Util {
   }
 
   public static JavaFileObject forResource(String directoryName, String name) {
-    return JavaFileObjects.forResource(directoryName + File.separator + name);
+    return JavaFileObjects.forResource(directoryName + FILE_SEPARATOR + name);
   }
 
   public static String annotation(String className) {
@@ -46,6 +51,10 @@ public final class Util {
 
   public static String glide(String className) {
     return qualified(GLIDE_PACKAGE_NAME, className);
+  }
+
+  public static CharSequence asUnixChars(CharSequence chars) {
+    return chars.toString().replace(System.lineSeparator(), LINE_SEPARATOR);
   }
 
   private static String qualified(String packageName, String className) {
