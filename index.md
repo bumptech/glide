@@ -7,7 +7,7 @@ title: "Fast and efficient image loading for Android"
 
 Glide is a fast and efficient image loading library for Android focused on smooth scrolling. Glide offers an easy to use API, a performant and extensible resource decoding pipeline and automatic resource pooling.
 
-![tesw](https://github.com/bumptech/glide/blob/master/static/glide_logo.png?raw=true)
+![](https://github.com/bumptech/glide/blob/master/static/glide_logo.png?raw=true)
 
 Glide supports fetching, decoding, and displaying video stills, images, and animated GIFs. Glide includes a flexible api that allows developers to plug in to almost any network stack. By default Glide uses a custom HttpUrlConnection based stack, but also includes utility libraries plug in to Google's Volley project or Square's OkHttp library instead.
 
