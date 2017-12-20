@@ -443,8 +443,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       if (lockedResource != null) {
         lockedResource.unlock();
       }
-      onEncodeComplete();
     }
+    // Call onEncodeComplete outside the finally block so that it's not called if the encode process
+    // throws.
+    onEncodeComplete();
   }
 
   private <Data> Resource<R> decodeFromData(DataFetcher<?> fetcher, Data data,
