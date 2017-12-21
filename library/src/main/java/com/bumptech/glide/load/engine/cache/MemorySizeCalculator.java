@@ -122,7 +122,7 @@ public final class MemorySizeCalculator {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       return activityManager.isLowRamDevice();
     } else {
-      return false;
+      return true;
     }
   }
 

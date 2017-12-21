@@ -32,7 +32,6 @@ public class MemorySizeCalculatorTest {
   @Before
   public void setUp() {
     initialSdkVersion = Build.VERSION.SDK_INT;
-    Util.setSdkVersionInt(18);
     harness = new MemorySizeHarness();
   }
 
@@ -139,7 +138,6 @@ public class MemorySizeCalculatorTest {
   @Test
   public void testByteArrayPoolSize_withLowRamDevice_isHalfTheSpecifiedBytes() {
     LowRamActivityManager activityManager = Shadow.extract(harness.activityManager);
-    Util.setSdkVersionInt(19);
     activityManager.setMemoryClass(getLargeEnoughMemoryClass());
     activityManager.setIsLowRam();
 
