@@ -21,6 +21,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -210,7 +211,7 @@ public class SingleRequestTest {
     RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
     doAnswer(new Answer() {
       @Override
-      public Object answer(InvocationOnMock invocation) throws Throwable {
+      public Object answer(InvocationOnMock invocation) {
         Request request = (Request) invocation.getArguments()[0];
         assertFalse(request.isComplete());
         return true;
@@ -571,7 +572,7 @@ public class SingleRequestTest {
             any(ResourceCallback.class)))
         .thenAnswer(new Answer<Object>() {
           @Override
-          public Object answer(InvocationOnMock invocation) throws Throwable {
+          public Object answer(InvocationOnMock invocation) {
             request.onResourceReady(builder.resource, DataSource.MEMORY_CACHE);
             return null;
           }
@@ -1090,41 +1091,43 @@ public class SingleRequestTest {
     private Drawable currentPlaceholder;
 
     @Override
-    public void onLoadCleared(Drawable placeholder) {
+    public void onLoadCleared(@Nullable Drawable placeholder) {
       currentPlaceholder = placeholder;
     }
 
     @Override
-    public void onLoadStarted(Drawable placeholder) {
+    public void onLoadStarted(@Nullable Drawable placeholder) {
       currentPlaceholder = placeholder;
 
     }
 
     @Override
-    public void onLoadFailed(Drawable errorDrawable) {
+    public void onLoadFailed(@Nullable Drawable errorDrawable) {
       currentPlaceholder = errorDrawable;
 
     }
 
     @Override
-    public void onResourceReady(List resource, Transition<? super List> transition) {
+    public void onResourceReady(@NonNull List resource,
+        @Nullable Transition<? super List> transition) {
       currentPlaceholder = null;
     }
 
 
     @Override
-    public void getSize(SizeReadyCallback cb) {
+    public void getSize(@NonNull SizeReadyCallback cb) {
     }
 
     @Override
-    public void removeCallback(SizeReadyCallback cb) {
+    public void removeCallback(@NonNull SizeReadyCallback cb) {
       // Do nothing.
     }
 
     @Override
-    public void setRequest(Request request) {
+    public void setRequest(@Nullable Request request) {
     }
 
+    @Nullable
     @Override
     public Request getRequest() {
       return null;

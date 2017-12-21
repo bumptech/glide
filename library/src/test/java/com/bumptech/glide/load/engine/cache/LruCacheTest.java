@@ -31,7 +31,7 @@ public class LruCacheTest {
   private String currentKey;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     currentKey = "";
     listener = mock(CacheListener.class);
     cache = new TestLruCache(SIZE, listener);
@@ -379,7 +379,7 @@ public class LruCacheTest {
     }
 
     @Override
-    protected int getSize(Object item) {
+    protected int getSize(@Nullable Object item) {
       return listener.getSize(item);
     }
   }

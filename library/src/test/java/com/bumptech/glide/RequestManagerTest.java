@@ -13,6 +13,8 @@ import static org.mockito.Mockito.when;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitor.ConnectivityListener;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
@@ -65,25 +67,28 @@ public class RequestManagerTest {
     when(factory.build(isA(Context.class), isA(ConnectivityMonitor.ConnectivityListener.class)))
         .thenAnswer(new Answer<ConnectivityMonitor>() {
           @Override
-          public ConnectivityMonitor answer(InvocationOnMock invocation) throws Throwable {
+          public ConnectivityMonitor answer(InvocationOnMock invocation) {
             connectivityListener = (ConnectivityListener) invocation.getArguments()[1];
             return connectivityMonitor;
           }
         });
 
-     target = new BaseTarget<Drawable>() {
-       @Override
-       public void onResourceReady(Drawable resource, Transition<? super Drawable> transition) {
-         // Empty.
-       }
-       @Override
-       public void getSize(SizeReadyCallback cb) {
-         // Empty.
-       }
-       @Override
-       public void removeCallback(SizeReadyCallback cb) {
-         // Empty.
-       }
+    target = new BaseTarget<Drawable>() {
+      @Override
+      public void onResourceReady(@NonNull Drawable resource,
+          @Nullable Transition<? super Drawable> transition) {
+        // Empty.
+      }
+
+      @Override
+      public void getSize(@NonNull SizeReadyCallback cb) {
+        // Empty.
+      }
+
+      @Override
+      public void removeCallback(@NonNull SizeReadyCallback cb) {
+        // Empty.
+      }
     };
 
     requestTracker = mock(RequestTracker.class);
@@ -194,7 +199,7 @@ public class RequestManagerTest {
             return Collections.emptySet();
           }
         }, context);
-     final RequestManager child2 = new RequestManager(Glide.get(context), lifecycle,
+    final RequestManager child2 = new RequestManager(Glide.get(context), lifecycle,
         new RequestManagerTreeNode() {
           @Override
           public Set<RequestManager> getDescendants() {

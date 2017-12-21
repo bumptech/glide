@@ -23,7 +23,7 @@ public class LruResourceCache extends LruCache<Key, Resource<?>> implements Memo
   }
 
   @Override
-  public void setResourceRemovedListener(ResourceRemovedListener listener) {
+  public void setResourceRemovedListener(@NonNull ResourceRemovedListener listener) {
     this.listener = listener;
   }
 
@@ -35,8 +35,12 @@ public class LruResourceCache extends LruCache<Key, Resource<?>> implements Memo
   }
 
   @Override
-  protected int getSize(Resource<?> item) {
-    return item.getSize();
+  protected int getSize(@Nullable Resource<?> item) {
+    if (item == null) {
+      return super.getSize(null);
+    } else {
+      return item.getSize();
+    }
   }
 
   @SuppressLint("InlinedApi")

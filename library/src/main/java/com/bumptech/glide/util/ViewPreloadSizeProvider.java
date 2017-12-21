@@ -41,8 +41,8 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
    */
   // Public API.
   @SuppressWarnings("WeakerAccess")
-  public ViewPreloadSizeProvider(View view) {
-    this.viewTarget = new SizeViewTarget(view, this);
+  public ViewPreloadSizeProvider(@NonNull View view) {
+    viewTarget = new SizeViewTarget(view, this);
   }
 
   @Nullable
@@ -51,13 +51,13 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
     if (size == null) {
       return null;
     } else {
-      return Arrays.copyOf(this.size, this.size.length);
+      return Arrays.copyOf(size, size.length);
     }
   }
 
   @Override
   public void onSizeReady(int width, int height) {
-    this.size = new int[] { width, height };
+    size = new int[]{width, height};
     viewTarget = null;
   }
 
@@ -70,21 +70,22 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
    * @param view A not null View the size will be extracted async with an {@link
    *             android.view.ViewTreeObserver .OnPreDrawListener}
    */
-  public void setView(View view) {
-    if (this.size != null || viewTarget != null) {
+  public void setView(@NonNull View view) {
+    if (size != null || viewTarget != null) {
       return;
     }
-    this.viewTarget = new SizeViewTarget(view, this);
+    viewTarget = new SizeViewTarget(view, this);
   }
 
   private static final class SizeViewTarget extends ViewTarget<View, Object> {
-    SizeViewTarget(View view, SizeReadyCallback callback) {
+    SizeViewTarget(@NonNull View view, @NonNull SizeReadyCallback callback) {
       super(view);
       getSize(callback);
     }
 
     @Override
-    public void onResourceReady(Object resource, Transition<? super Object> transition) {
+    public void onResourceReady(@NonNull Object resource,
+        @Nullable Transition<? super Object> transition) {
       // Do nothing
     }
   }

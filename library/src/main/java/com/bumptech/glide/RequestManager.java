@@ -671,7 +671,8 @@ public class RequestManager implements LifecycleListener,
     }
 
     @Override
-    public void onResourceReady(Object resource, Transition<? super Object> transition) {
+    public void onResourceReady(@NonNull Object resource,
+        @Nullable Transition<? super Object> transition) {
       // Do nothing.
     }
   }

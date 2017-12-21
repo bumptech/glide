@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
 import android.widget.ImageView;
@@ -101,7 +102,7 @@ public class ConcurrencyHelper {
     final CountDownLatch latch = new CountDownLatch(1);
     callOnMainThread(new Callable<Target<T>>() {
       @Override
-      public Target<T> call() throws Exception {
+      public Target<T> call() {
         builder.into(new Target<T>() {
           @Override
           public void onStart() {
@@ -119,7 +120,8 @@ public class ConcurrencyHelper {
           }
 
           @Override
-          public void onResourceReady(T resource, Transition<? super T> transition) {
+          public void onResourceReady(@NonNull T resource,
+              @Nullable Transition<? super T> transition) {
             target.onResourceReady(resource, transition);
             latch.countDown();
           }
@@ -141,12 +143,12 @@ public class ConcurrencyHelper {
           }
 
           @Override
-          public void getSize(SizeReadyCallback cb) {
+          public void getSize(@NonNull SizeReadyCallback cb) {
             target.getSize(cb);
           }
 
           @Override
-          public void removeCallback(SizeReadyCallback cb) {
+          public void removeCallback(@NonNull SizeReadyCallback cb) {
             target.removeCallback(cb);
           }
 
@@ -171,7 +173,7 @@ public class ConcurrencyHelper {
     final CountDownLatch latch = new CountDownLatch(1);
     callOnMainThread(new Callable<Target<T>>() {
       @Override
-      public Target<T> call() throws Exception {
+      public Target<T> call() {
         builder.into(new Target<T>() {
           @Override
           public void onStart() {
@@ -189,7 +191,8 @@ public class ConcurrencyHelper {
           }
 
           @Override
-          public void onResourceReady(T resource, Transition<? super T> transition) {
+          public void onResourceReady(@NonNull T resource,
+              @Nullable Transition<? super T> transition) {
             target.onResourceReady(resource, transition);
             if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
               latch.countDown();
@@ -215,12 +218,12 @@ public class ConcurrencyHelper {
           }
 
           @Override
-          public void getSize(SizeReadyCallback cb) {
+          public void getSize(@NonNull SizeReadyCallback cb) {
             target.getSize(cb);
           }
 
           @Override
-          public void removeCallback(SizeReadyCallback cb) {
+          public void removeCallback(@NonNull SizeReadyCallback cb) {
             target.removeCallback(cb);
           }
 
@@ -253,7 +256,7 @@ public class ConcurrencyHelper {
   public void runOnMainThread(final Runnable runnable) {
     callOnMainThread(new Callable<Void>() {
       @Override
-      public Void call() throws Exception {
+      public Void call() {
         runnable.run();
         return null;
       }
@@ -291,22 +294,22 @@ public class ConcurrencyHelper {
 
   private static void wait(Waiter waiter) {
     boolean isFinished = false;
-     do {
-       try {
-         try {
-           isFinished = waiter.await(TIMEOUT_SECONDS, TIMEOUT_UNIT);
-           if (!isFinished) {
-             throw new RuntimeException("Timed out while waiting");
-           }
-         } catch (InterruptedException e) {
-           throw new RuntimeException(e);
-         }
-       } catch (RuntimeException e) {
-         if (Debug.isDebuggerConnected()) {
-           continue;
-         }
-         throw e;
-       }
-     } while (Debug.isDebuggerConnected() && !isFinished);
+    do {
+      try {
+        try {
+          isFinished = waiter.await(TIMEOUT_SECONDS, TIMEOUT_UNIT);
+          if (!isFinished) {
+            throw new RuntimeException("Timed out while waiting");
+          }
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      } catch (RuntimeException e) {
+        if (Debug.isDebuggerConnected()) {
+          continue;
+        }
+        throw e;
+      }
+    } while (Debug.isDebuggerConnected() && !isFinished);
   }
 }

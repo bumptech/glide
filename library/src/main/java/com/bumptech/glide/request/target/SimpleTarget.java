@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.view.View;
 import com.bumptech.glide.util.Util;
 
@@ -94,7 +95,7 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
    * @param cb {@inheritDoc}
    */
   @Override
-  public final void getSize(SizeReadyCallback cb) {
+  public final void getSize(@NonNull SizeReadyCallback cb) {
     if (!Util.isValidDimensions(width, height)) {
       throw new IllegalArgumentException(
           "Width and height must both be > 0 or Target#SIZE_ORIGINAL, but given" + " width: "
@@ -105,7 +106,7 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
   }
 
   @Override
-  public void removeCallback(SizeReadyCallback cb) {
+  public void removeCallback(@NonNull SizeReadyCallback cb) {
     // Do nothing, we never retain a reference to the callback.
   }
 }

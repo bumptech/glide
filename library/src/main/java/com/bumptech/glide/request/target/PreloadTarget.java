@@ -4,6 +4,8 @@ import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.transition.Transition;
 
@@ -45,7 +47,7 @@ public final class PreloadTarget<Z> extends SimpleTarget<Z> {
   }
 
   @Override
-  public void onResourceReady(Z resource, Transition<? super Z> transition) {
+  public void onResourceReady(@NonNull Z resource, @Nullable Transition<? super Z> transition) {
     HANDLER.obtainMessage(MESSAGE_CLEAR, this).sendToTarget();
   }
 

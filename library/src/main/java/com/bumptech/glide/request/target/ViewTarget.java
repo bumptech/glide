@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
@@ -56,7 +57,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   /**
    * Constructor that defaults {@code waitForLayout} to {@code false}.
    */
-  public ViewTarget(T view) {
+  public ViewTarget(@NonNull T view) {
     this.view = Preconditions.checkNotNull(view);
     sizeDeterminer = new SizeDeterminer(view);
   }
@@ -76,7 +77,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @Deprecated
-  public ViewTarget(T view, boolean waitForLayout) {
+  public ViewTarget(@NonNull T view, boolean waitForLayout) {
     this(view);
     if (waitForLayout) {
       waitForLayout();
@@ -102,6 +103,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * improving your memory usage in the cases you care about.
    */
   // Public API.
+  @NonNull
   @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"})
   public final ViewTarget<T, Z> clearOnDetach() {
     if (attachStateListener != null) {
@@ -149,6 +151,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * still be used instead of the {@link View}'s dimensions even if this method is called. This
    * parameter is a fallback only.
    */
+  @NonNull
   public final ViewTarget<T, Z> waitForLayout() {
     sizeDeterminer.waitForLayout = true;
     return this;
@@ -182,6 +185,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   /**
    * Returns the wrapped {@link android.view.View}.
    */
+  @NonNull
   public T getView() {
     return view;
   }
@@ -197,19 +201,19 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    */
   @CallSuper
   @Override
-  public void getSize(SizeReadyCallback cb) {
+  public void getSize(@NonNull SizeReadyCallback cb) {
     sizeDeterminer.getSize(cb);
   }
 
   @CallSuper
   @Override
-  public void removeCallback(SizeReadyCallback cb) {
+  public void removeCallback(@NonNull SizeReadyCallback cb) {
     sizeDeterminer.removeCallback(cb);
   }
 
   @CallSuper
   @Override
-  public void onLoadCleared(Drawable placeholder) {
+  public void onLoadCleared(@Nullable Drawable placeholder) {
     super.onLoadCleared(placeholder);
     sizeDeterminer.clearCallbacksAndListener();
 
@@ -299,11 +303,11 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   // Public API.
   @SuppressWarnings("unused")
   public static void setTagId(int tagId) {
-      if (ViewTarget.tagId != null || isTagUsedAtLeastOnce) {
-          throw new IllegalArgumentException("You cannot set the tag id more than once or change"
-              + " the tag id after the first request has been made");
-      }
-      ViewTarget.tagId = tagId;
+    if (ViewTarget.tagId != null || isTagUsedAtLeastOnce) {
+      throw new IllegalArgumentException("You cannot set the tag id more than once or change"
+          + " the tag id after the first request has been made");
+    }
+    ViewTarget.tagId = tagId;
   }
 
   @VisibleForTesting
@@ -319,12 +323,12 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
     @Nullable private SizeDeterminerLayoutListener layoutListener;
 
-    SizeDeterminer(View view) {
+    SizeDeterminer(@NonNull View view) {
       this.view = view;
     }
 
     // Use the maximum to avoid depending on the device's current orientation.
-    private static int getMaxDisplayLength(Context context) {
+    private static int getMaxDisplayLength(@NonNull Context context) {
       if (maxDisplayLength == null) {
         WindowManager windowManager =
             (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -362,7 +366,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       clearCallbacksAndListener();
     }
 
-    void getSize(SizeReadyCallback cb) {
+    void getSize(@NonNull SizeReadyCallback cb) {
       int currentWidth = getTargetWidth();
       int currentHeight = getTargetHeight();
       if (isViewStateAndSizeValid(currentWidth, currentHeight)) {
@@ -388,7 +392,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
      *
      * <p>See #2237.
      */
-    void removeCallback(SizeReadyCallback cb) {
+    void removeCallback(@NonNull SizeReadyCallback cb) {
       cbs.remove(cb);
     }
 
@@ -490,7 +494,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
         implements ViewTreeObserver.OnPreDrawListener {
       private final WeakReference<SizeDeterminer> sizeDeterminerRef;
 
-      SizeDeterminerLayoutListener(SizeDeterminer sizeDeterminer) {
+      SizeDeterminerLayoutListener(@NonNull SizeDeterminer sizeDeterminer) {
         sizeDeterminerRef = new WeakReference<>(sizeDeterminer);
       }
 

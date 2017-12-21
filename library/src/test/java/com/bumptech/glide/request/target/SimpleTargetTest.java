@@ -2,6 +2,8 @@ package com.bumptech.glide.request.target;
 
 import static org.mockito.Mockito.mock;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.request.transition.Transition;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +36,8 @@ public class SimpleTargetTest {
   public void testCanBeConstructedWithoutDimensions() {
     new SimpleTarget<Object>() {
       @Override
-      public void onResourceReady(Object resource, Transition<? super Object> transition) {
+      public void onResourceReady(@NonNull Object resource,
+          @Nullable Transition<? super Object> transition) {
         // Do nothing.
       }
     };
@@ -53,7 +56,8 @@ public class SimpleTargetTest {
   private SimpleTarget<Object> getTarget(int width, int height) {
     return new SimpleTarget<Object>(width, height) {
       @Override
-      public void onResourceReady(Object resource, Transition<? super Object> transition) {
+      public void onResourceReady(@NonNull Object resource,
+          @Nullable Transition<? super Object> transition) {
         // Do nothing.
       }
     };
