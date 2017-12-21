@@ -57,6 +57,8 @@ subprojects { project ->
                 lintOptions {
                     warningsAsErrors true
                     quiet true
+                    // TODO(#2730): Remove this after updating to the latest support library.
+                    disable "GradleDependency"
                 }
             }
         }
