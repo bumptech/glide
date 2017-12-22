@@ -90,6 +90,7 @@ final class LockedResource<Z> implements Resource<Z>,
     }
   }
 
+  @NonNull
   @Override
   public StateVerifier getVerifier() {
     return stateVerifier;

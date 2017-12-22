@@ -1,5 +1,6 @@
 package com.bumptech.glide.util.pool;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.util.Synthetic;
 
 /**
@@ -11,6 +12,7 @@ public abstract class StateVerifier {
   /**
    * Creates a new {@link StateVerifier} instance.
    */
+  @NonNull
   public static StateVerifier newInstance() {
     if (DEBUG) {
       return new DebugStateVerifier();
@@ -68,9 +70,9 @@ public abstract class StateVerifier {
     @Override
     void setRecycled(boolean isRecycled) {
       if (isRecycled) {
-        this.recycledAtStackTraceException = new RuntimeException("Released");
+        recycledAtStackTraceException = new RuntimeException("Released");
       } else {
-        this.recycledAtStackTraceException = null;
+        recycledAtStackTraceException = null;
       }
     }
   }
