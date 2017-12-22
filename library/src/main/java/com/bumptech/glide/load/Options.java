@@ -1,5 +1,6 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.SimpleArrayMap;
 import java.security.MessageDigest;
@@ -39,7 +40,7 @@ public final class Options implements Key {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     for (int i = 0; i < values.size(); i++) {
       Option<?> key = values.keyAt(i);
       Object value = values.valueAt(i);

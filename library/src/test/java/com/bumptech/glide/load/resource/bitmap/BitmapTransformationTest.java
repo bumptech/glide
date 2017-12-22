@@ -50,7 +50,7 @@ public class BitmapTransformationTest {
   public void testReturnsGivenResourceWhenBitmapNotTransformed() {
     BitmapTransformation transformation = new BitmapTransformation() {
       @Override
-      public void updateDiskCacheKey(MessageDigest messageDigest) { }
+      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
 
       @Override
       protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
@@ -68,7 +68,7 @@ public class BitmapTransformationTest {
     final Bitmap transformed = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     BitmapTransformation transformation = new BitmapTransformation() {
       @Override
-      public void updateDiskCacheKey(MessageDigest messageDigest) { }
+      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
 
       @Override
       protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap bitmap, int outWidth,
@@ -88,7 +88,7 @@ public class BitmapTransformationTest {
     final Resource<Bitmap> resource = mockResource(223, 4123);
     BitmapTransformation transformation = new BitmapTransformation() {
       @Override
-      public void updateDiskCacheKey(MessageDigest messageDigest) { }
+      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
 
       @Override
       protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
@@ -109,7 +109,7 @@ public class BitmapTransformationTest {
     BitmapTransformation transformation = new BitmapTransformation() {
 
       @Override
-      public void updateDiskCacheKey(MessageDigest messageDigest) { }
+      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
 
       @Override
       protected Bitmap transform(@NonNull BitmapPool bitmapPool, @NonNull Bitmap toTransform,
@@ -125,7 +125,7 @@ public class BitmapTransformationTest {
     BitmapTransformation transformation = new BitmapTransformation() {
 
       @Override
-      public void updateDiskCacheKey(MessageDigest messageDigest) { }
+      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
 
       @Override
       protected Bitmap transform(@NonNull BitmapPool bitmapPool, @NonNull Bitmap toTransform,
@@ -142,7 +142,7 @@ public class BitmapTransformationTest {
     BitmapTransformation transform = new BitmapTransformation() {
 
       @Override
-      public void updateDiskCacheKey(MessageDigest messageDigest) {  }
+      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {  }
 
       @Override
       protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
@@ -197,6 +197,6 @@ public class BitmapTransformationTest {
     }
 
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest) { }
+    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
   }
 }

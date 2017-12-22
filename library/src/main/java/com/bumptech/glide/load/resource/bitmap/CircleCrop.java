@@ -37,7 +37,7 @@ public class CircleCrop extends BitmapTransformation {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     messageDigest.update(ID_BYTES);
   }
 }

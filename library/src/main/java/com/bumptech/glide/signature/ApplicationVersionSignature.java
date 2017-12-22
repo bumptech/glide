@@ -3,6 +3,7 @@ package com.bumptech.glide.signature;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.load.Key;
 import java.util.UUID;
@@ -20,7 +21,8 @@ public final class ApplicationVersionSignature {
    * Returns the signature {@link com.bumptech.glide.load.Key} for version code of the Application
    * of the given Context.
    */
-  public static Key obtain(Context context) {
+  @NonNull
+  public static Key obtain(@NonNull Context context) {
     String packageName = context.getPackageName();
     Key result = PACKAGE_NAME_TO_KEY.get(packageName);
     if (result == null) {
@@ -40,7 +42,8 @@ public final class ApplicationVersionSignature {
     PACKAGE_NAME_TO_KEY.clear();
   }
 
-  private static Key obtainVersionSignature(Context context) {
+  @NonNull
+  private static Key obtainVersionSignature(@NonNull Context context) {
     PackageInfo pInfo = null;
     try {
       pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);

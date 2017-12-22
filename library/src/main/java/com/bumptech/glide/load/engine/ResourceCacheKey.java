@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
@@ -72,7 +73,7 @@ final class ResourceCacheKey implements Key {
 
   // TODO: Include relevant options?
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     byte[] dimensions = arrayPool.getExact(8, byte[].class);
     ByteBuffer.wrap(dimensions).putInt(width).putInt(height).array();
     signature.updateDiskCacheKey(messageDigest);
