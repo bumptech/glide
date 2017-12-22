@@ -107,6 +107,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     return this;
   }
 
+  // We're checking to see if we need to clone our options object because we want to make sure the
+  // original is never modified, so we need reference equality.
+  @SuppressWarnings("ReferenceEquality")
   @NonNull
   protected RequestOptions getMutableOptions() {
     return defaultRequestOptions == this.requestOptions

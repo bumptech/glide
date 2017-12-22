@@ -76,6 +76,8 @@ public final class ExifOrientationStream extends FilterInputStream {
     return false;
   }
 
+  // No need for synchronized since all we do is throw.
+  @SuppressWarnings("UnsynchronizedOverridesSynchronized")
   @Override
   public void mark(int readLimit) {
     throw new UnsupportedOperationException();
@@ -121,11 +123,14 @@ public final class ExifOrientationStream extends FilterInputStream {
   public long skip(long byteCount) throws IOException {
     long skipped = super.skip(byteCount);
     if (skipped > 0) {
-      position += skipped;
+      // See http://errorprone.info/bugpattern/NarrowingCompoundAssignment.
+      position = (int) (position + skipped);
     }
     return skipped;
   }
 
+  // No need for synchronized since all we do is throw.
+  @SuppressWarnings("UnsynchronizedOverridesSynchronized")
   @Override
   public void reset() throws IOException {
     throw new UnsupportedOperationException();

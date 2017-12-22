@@ -5,11 +5,15 @@ buildscript {
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
 
     dependencies {
         classpath "com.android.tools.build:gradle:${ANDROID_GRADLE_VERSION}"
         classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${COVERALLS_GRADLE_VERSION}"
+        classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_VERSION}"
     }
 }
 

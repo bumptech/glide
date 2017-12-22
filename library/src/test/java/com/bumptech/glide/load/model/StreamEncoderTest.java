@@ -38,11 +38,11 @@ public class StreamEncoderTest {
   @Test
   public void testWritesDataFromInputStreamToOutputStream() throws IOException {
     String fakeData = "SomeRandomFakeData";
-    ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes());
+    ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes("UTF-8"));
     encoder.encode(is, file, new Options());
 
     byte[] data = ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
 
-    assertEquals(fakeData, new String(data));
+    assertEquals(fakeData, new String(data, "UTF-8"));
   }
 }

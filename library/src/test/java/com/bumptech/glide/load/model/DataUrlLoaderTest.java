@@ -118,7 +118,7 @@ public class DataUrlLoaderTest {
     assertNotNull(callback.exception);
   }
 
-  private class CallBack implements DataFetcher.DataCallback<Object> {
+  private static final class CallBack implements DataFetcher.DataCallback<Object> {
 
     public Object data;
     public Exception exception;

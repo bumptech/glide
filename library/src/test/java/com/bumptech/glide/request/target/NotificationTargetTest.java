@@ -98,6 +98,7 @@ public class NotificationTargetTest {
     Notification updatedNotification;
 
     @Implementation
+    @Override
     public void notify(String notificationTag, int notificationId, Notification notification) {
       updatedNotificationTag = notificationTag;
       updatedNotificationId = notificationId;

@@ -136,7 +136,7 @@ public class BaseGlideUrlLoaderTest {
             urlLoader.buildLoadData(new Object(), width, height, options)).fetcher);
   }
 
-  private class TestLoader extends BaseGlideUrlLoader<Object> {
+  private static final class TestLoader extends BaseGlideUrlLoader<Object> {
     String resultUrl;
 
     TestLoader(ModelLoader<GlideUrl, InputStream> concreteLoader,

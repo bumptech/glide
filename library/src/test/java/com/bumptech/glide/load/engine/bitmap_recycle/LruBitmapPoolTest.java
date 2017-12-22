@@ -13,9 +13,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.junit.Before;
@@ -228,7 +228,7 @@ public class LruBitmapPoolTest {
   }
 
   private static class MockStrategy implements LruPoolStrategy {
-    private final LinkedList<Bitmap> bitmaps = new LinkedList<>();
+    private final ArrayDeque<Bitmap> bitmaps = new ArrayDeque<>();
     private int numRemoves;
     private int numPuts;
 

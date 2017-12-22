@@ -102,7 +102,7 @@ public class Util {
     ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", version);
   }
 
-  public static class WriteDigest implements Answer<Void> {
+  public static final class WriteDigest implements Answer<Void> {
     private final String toWrite;
 
     public WriteDigest(String toWrite) {
@@ -112,13 +112,14 @@ public class Util {
     @Override
     public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
       MessageDigest md = (MessageDigest) invocationOnMock.getArguments()[0];
-      md.update(toWrite.getBytes());
+      md.update(toWrite.getBytes("UTF-8"));
       return null;
     }
   }
 
-  public static class ReturnsSelfAnswer implements Answer<Object> {
+  public static final class ReturnsSelfAnswer implements Answer<Object> {
 
+    @Override
     public Object answer(InvocationOnMock invocation) throws Throwable {
       Object mock = invocation.getMock();
       if (invocation.getMethod().getReturnType().isInstance(mock)) {

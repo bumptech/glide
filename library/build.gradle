@@ -5,6 +5,10 @@ apply plugin: 'pmd'
 apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
 
+if (!hasProperty('DISABLE_ERROR_PRONE')) {
+    apply plugin: "net.ltgt.errorprone"
+}
+
 dependencies {
     api project(':third_party:gif_decoder')
     api project(':third_party:disklrucache')

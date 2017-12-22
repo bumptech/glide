@@ -187,6 +187,7 @@ public class DefaultConnectivityMonitorTest {
     private boolean isNetworkPermissionGranted = true;
 
     @Implementation
+    @Override
     public NetworkInfo getActiveNetworkInfo() {
       if (!isNetworkPermissionGranted) {
         throw new SecurityException();

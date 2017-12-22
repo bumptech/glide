@@ -43,7 +43,7 @@ public class ByteArrayLoaderTest {
 
   @Test
   public void testFetcherReturnsObjectReceivedFromConverter() throws IOException {
-    byte[] data = "fake".getBytes();
+    byte[] data = "fake".getBytes("UTF-8");
     Object expected = new Object();
     when(converter.convert(eq(data))).thenReturn(expected);
 

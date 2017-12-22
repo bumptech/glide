@@ -184,7 +184,7 @@ public class BitmapTransformationTest {
     return resource;
   }
 
-  private class SizeTrackingTransform extends BitmapTransformation {
+  private static final class SizeTrackingTransform extends BitmapTransformation {
     int givenWidth;
     int givenHeight;
 

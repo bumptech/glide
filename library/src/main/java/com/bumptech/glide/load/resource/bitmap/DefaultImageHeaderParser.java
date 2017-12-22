@@ -86,7 +86,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       return JPEG;
     }
 
-    final int firstFourBytes = firstTwoBytes << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
+    final int firstFourBytes = (firstTwoBytes << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
     // PNG.
     if (firstFourBytes == PNG_HEADER) {
       // See: http://stackoverflow.com/questions/2057923/how-to-check-a-png-for-grayscale-alpha
@@ -109,11 +109,13 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
     // Bytes 4 - 7 contain length information. Skip these.
     reader.skip(4);
-    final int thirdFourBytes = reader.getUInt16() << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
+    final int thirdFourBytes =
+        (reader.getUInt16() << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
     if (thirdFourBytes != WEBP_HEADER) {
       return UNKNOWN;
     }
-    final int fourthFourBytes = reader.getUInt16() << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
+    final int fourthFourBytes =
+        (reader.getUInt16() << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
     if ((fourthFourBytes & VP8_HEADER_MASK) != VP8_HEADER) {
       return UNKNOWN;
     }

@@ -122,7 +122,7 @@ public class BitmapEncoderTest {
       BitmapEncoder encoder = new BitmapEncoder();
       encoder.encode(resource, file, options);
       byte[] data = ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
-      return new String(data);
+      return new String(data, "UTF-8");
     }
 
     void tearDown() {

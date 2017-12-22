@@ -661,6 +661,7 @@ public class ViewTargetTest {
     }
 
     @Implementation
+    @SuppressWarnings("WeakerAccess")
     public boolean isAlive() {
       return isAlive;
     }
@@ -686,7 +687,8 @@ public class ViewTargetTest {
     }
   }
 
-  @SuppressWarnings("UnusedReturnValue")
+  // Shadows require stronger access and unused values.
+  @SuppressWarnings({"UnusedReturnValue", "WeakerAccess", "unused"})
   @Implements(View.class)
   public static final class SizedShadowView extends ShadowView {
     @RealObject private View view;
@@ -754,6 +756,7 @@ public class ViewTargetTest {
     }
 
     @Implementation
+    @Override
     public void requestLayout() {
       isLayoutRequested = true;
     }
@@ -800,22 +803,30 @@ public class ViewTargetTest {
       super(view);
     }
 
+    // We're intentionally avoiding the super call.
+    @SuppressWarnings("MissingSuperCall")
     @Override
     public void onResourceReady(@NonNull Object resource,
         @Nullable Transition<? super Object> transition) {
       // Avoid calling super.
     }
 
+    // We're intentionally avoiding the super call.
+    @SuppressWarnings("MissingSuperCall")
     @Override
     public void onLoadCleared(@Nullable Drawable placeholder) {
       // Avoid calling super.
     }
 
+    // We're intentionally avoiding the super call.
+    @SuppressWarnings("MissingSuperCall")
     @Override
     public void onLoadStarted(@Nullable Drawable placeholder) {
       // Avoid calling super.
     }
 
+    // We're intentionally avoiding the super call.
+    @SuppressWarnings("MissingSuperCall")
     @Override
     public void onLoadFailed(@Nullable Drawable errorDrawable) {
       // Avoid calling super.

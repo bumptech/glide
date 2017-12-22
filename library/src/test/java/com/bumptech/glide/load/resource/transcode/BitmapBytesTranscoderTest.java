@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import android.graphics.Bitmap;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
+import java.nio.charset.Charset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,7 +72,7 @@ public class BitmapBytesTranscoderTest {
       BitmapBytesTranscoder transcoder = new BitmapBytesTranscoder(compressFormat, quality);
       Resource<byte[]> bytesResource = transcoder.transcode(bitmapResource, options);
 
-      return new String(bytesResource.get());
+      return new String(bytesResource.get(), Charset.defaultCharset());
     }
   }
 }
