@@ -22,8 +22,7 @@ import okhttp3.ResponseBody;
 /**
  * Fetches an {@link InputStream} using the okhttp library.
  */
-public class OkHttpStreamFetcher implements DataFetcher<InputStream>,
- okhttp3.Callback {
+public class OkHttpStreamFetcher implements DataFetcher<InputStream>, okhttp3.Callback {
   private static final String TAG = "OkHttpFetcher";
   private final Call.Factory client;
   private final GlideUrl url;
@@ -40,7 +39,8 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream>,
   }
 
   @Override
-  public void loadData(@NonNull Priority priority, @NonNull final DataCallback<? super InputStream> callback) {
+  public void loadData(@NonNull Priority priority,
+      @NonNull final DataCallback<? super InputStream> callback) {
     Request.Builder requestBuilder = new Request.Builder().url(url.toStringUrl());
     for (Map.Entry<String, String> headerEntry : url.getHeaders().entrySet()) {
       String key = headerEntry.getKey();

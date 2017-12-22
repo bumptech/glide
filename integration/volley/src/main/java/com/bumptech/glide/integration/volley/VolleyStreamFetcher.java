@@ -50,7 +50,8 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
+  public void loadData(@NonNull Priority priority,
+      @NonNull DataCallback<? super InputStream> callback) {
     request = requestFactory.create(url.toStringUrl(), callback, glideToVolleyPriority(priority),
         url.getHeaders());
     requestQueue.add(request);
