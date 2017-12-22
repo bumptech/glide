@@ -20,10 +20,9 @@ env:
   matrix:
     - COMPONENT=unit
     - COMPONENT=firebase
-      # TODO(#2738): Re-enable these when we find a fix.
-      #    - COMPONENT=instrumentation ANDROID_TARGET=16
-      #    - COMPONENT=instrumentation ANDROID_TARGET=17
-      #    - COMPONENT=instrumentation ANDROID_TARGET=18
+    - COMPONENT=instrumentation ANDROID_TARGET=16
+    - COMPONENT=instrumentation ANDROID_TARGET=17
+    - COMPONENT=instrumentation ANDROID_TARGET=18
     - COMPONENT=instrumentation ANDROID_TARGET=19
     - COMPONENT=instrumentation ANDROID_TARGET=21
     - COMPONENT=instrumentation ANDROID_TARGET=22
