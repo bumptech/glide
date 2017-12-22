@@ -48,7 +48,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
+  public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
     long startTime = LogTime.getLogTime();
     final InputStream result;
     try {

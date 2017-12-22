@@ -62,6 +62,7 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
    */
   public static class StreamFactory implements ModelLoaderFactory<String, InputStream> {
 
+    @NonNull
     @Override
     public ModelLoader<String, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new StringLoader<>(multiFactory.build(Uri.class, InputStream.class));
@@ -79,6 +80,7 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
   public static class FileDescriptorFactory
       implements ModelLoaderFactory<String, ParcelFileDescriptor> {
 
+    @NonNull
     @Override
     public ModelLoader<String, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
       return new StringLoader<>(multiFactory.build(Uri.class, ParcelFileDescriptor.class));

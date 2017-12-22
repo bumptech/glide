@@ -39,7 +39,7 @@ public interface DataFetcher<T> {
      *
      * @param e a non-null {@link Exception} indicating why the load failed.
      */
-    void onLoadFailed(Exception e);
+    void onLoadFailed(@NonNull Exception e);
   }
 
   /**
@@ -63,7 +63,7 @@ public interface DataFetcher<T> {
    * @param callback The callback to use when the request is complete
    * @see #cleanup() where the data retuned will be cleaned up
    */
-  void loadData(Priority priority, DataCallback<? super T> callback);
+  void loadData(@NonNull Priority priority, @NonNull DataCallback<? super T> callback);
 
   /**
    * Cleanup or recycle any resources used by this data fetcher. This method will be called in a

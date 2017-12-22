@@ -77,6 +77,7 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
       this.requestQueue = requestQueue;
     }
 
+    @NonNull
     @Override
     public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory factory) {
       return new VolleyUrlLoader(requestQueue, requestFactory);

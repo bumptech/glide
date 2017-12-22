@@ -50,7 +50,7 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super Model> callback) {
+    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Model> callback) {
       callback.onDataReady(resource);
     }
 
@@ -100,6 +100,7 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
       // Intentionally empty.
     }
 
+    @NonNull
     @Override
     public ModelLoader<Model, Model> build(MultiModelLoaderFactory multiFactory) {
       return UnitModelLoader.getInstance();

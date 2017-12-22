@@ -83,6 +83,7 @@ public final class WaitModelLoader<Model, Data>
       return new WaitModel<>(model);
     }
 
+    @NonNull
     @Override
     public ModelLoader<WaitModel<Model>, Data> build(
         MultiModelLoaderFactory multiFactory) {
@@ -106,7 +107,7 @@ public final class WaitModelLoader<Model, Data>
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super Data> callback) {
+    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       ConcurrencyHelper.waitOnLatch(toWaitOn);
       wrapped.loadData(priority, callback);
     }

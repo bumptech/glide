@@ -71,7 +71,7 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super Data> callback) {
+    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       try {
         data = reader.decode(dataUri);
         callback.onDataReady(data);
@@ -150,6 +150,7 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
       };
     }
 
+    @NonNull
     @Override
     public final ModelLoader<String, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new DataUrlLoader<>(opener);

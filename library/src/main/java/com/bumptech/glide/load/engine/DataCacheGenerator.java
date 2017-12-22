@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -92,7 +93,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
   }
 
   @Override
-  public void onLoadFailed(Exception e) {
+  public void onLoadFailed(@NonNull Exception e) {
     cb.onDataFetcherFailed(sourceKey, e, loadData.fetcher, DataSource.DATA_DISK_CACHE);
   }
 }

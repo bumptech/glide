@@ -40,7 +40,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream>,
   }
 
   @Override
-  public void loadData(Priority priority, final DataCallback<? super InputStream> callback) {
+  public void loadData(@NonNull Priority priority, @NonNull final DataCallback<? super InputStream> callback) {
     Request.Builder requestBuilder = new Request.Builder().url(url.toStringUrl());
     for (Map.Entry<String, String> headerEntry : url.getHeaders().entrySet()) {
       String key = headerEntry.getKey();

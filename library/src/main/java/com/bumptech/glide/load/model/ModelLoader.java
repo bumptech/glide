@@ -47,11 +47,12 @@ public interface ModelLoader<Model, Data> {
     public final List<Key> alternateKeys;
     public final DataFetcher<Data> fetcher;
 
-    public LoadData(Key sourceKey, DataFetcher<Data> fetcher) {
+    public LoadData(@NonNull Key sourceKey, @NonNull DataFetcher<Data> fetcher) {
       this(sourceKey, Collections.<Key>emptyList(), fetcher);
     }
 
-    public LoadData(Key sourceKey, List<Key> alternateKeys, DataFetcher<Data> fetcher) {
+    public LoadData(@NonNull Key sourceKey, @NonNull List<Key> alternateKeys,
+        @NonNull DataFetcher<Data> fetcher) {
       this.sourceKey = Preconditions.checkNotNull(sourceKey);
       this.alternateKeys = Preconditions.checkNotNull(alternateKeys);
       this.fetcher = Preconditions.checkNotNull(fetcher);

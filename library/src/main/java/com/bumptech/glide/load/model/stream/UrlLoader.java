@@ -40,6 +40,7 @@ public class UrlLoader implements ModelLoader<URL, InputStream> {
    */
   public static class StreamFactory implements ModelLoaderFactory<URL, InputStream> {
 
+    @NonNull
     @Override
     public ModelLoader<URL, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new UrlLoader(multiFactory.build(GlideUrl.class, InputStream.class));

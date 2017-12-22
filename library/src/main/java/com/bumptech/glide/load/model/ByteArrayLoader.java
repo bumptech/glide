@@ -56,7 +56,7 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super Data> callback) {
+    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       Data result = converter.convert(model);
       callback.onDataReady(result);
     }
@@ -90,6 +90,7 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
    */
   public static class ByteBufferFactory implements ModelLoaderFactory<byte[], ByteBuffer> {
 
+    @NonNull
     @Override
     public ModelLoader<byte[], ByteBuffer> build(MultiModelLoaderFactory multiFactory) {
       return new ByteArrayLoader<>(new Converter<ByteBuffer>() {
@@ -116,6 +117,7 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
    */
   public static class StreamFactory implements ModelLoaderFactory<byte[], InputStream> {
 
+    @NonNull
     @Override
     public ModelLoader<byte[], InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new ByteArrayLoader<>(new Converter<InputStream>() {

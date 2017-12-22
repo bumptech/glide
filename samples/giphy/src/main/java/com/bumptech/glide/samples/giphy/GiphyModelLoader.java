@@ -52,6 +52,7 @@ public final class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
    * The default factory for {@link com.bumptech.glide.samples.giphy.GiphyModelLoader}s.
    */
   public static final class Factory implements ModelLoaderFactory<GifResult, InputStream> {
+    @NonNull
     @Override
     public ModelLoader<Api.GifResult, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new GiphyModelLoader(multiFactory.build(GlideUrl.class, InputStream.class));

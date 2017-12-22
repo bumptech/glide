@@ -52,7 +52,7 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
+  public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
     try {
       inputStream = openThumbInputStream();
     } catch (FileNotFoundException e) {

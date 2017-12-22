@@ -67,6 +67,7 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
       this.assetManager = assetManager;
     }
 
+    @NonNull
     @Override
     public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new AssetUriLoader<>(assetManager, this);
@@ -96,6 +97,7 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
       this.assetManager = assetManager;
     }
 
+    @NonNull
     @Override
     public ModelLoader<Uri, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
       return new AssetUriLoader<>(assetManager, this);

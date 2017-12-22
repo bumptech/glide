@@ -2,7 +2,6 @@ package com.bumptech.glide.integration.volley;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -51,7 +50,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
+  public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
     request = requestFactory.create(url.toStringUrl(), callback, glideToVolleyPriority(priority),
         url.getHeaders());
     requestQueue.add(request);
@@ -82,7 +81,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     return DataSource.REMOTE;
   }
 
-  private static Request.Priority glideToVolleyPriority(Priority priority) {
+  private static Request.Priority glideToVolleyPriority(@NonNull Priority priority) {
     switch (priority) {
       case LOW:
         return Request.Priority.LOW;
@@ -119,7 +118,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     }
 
     @Override
-    public Map<String, String> getHeaders() throws AuthFailureError {
+    public Map<String, String> getHeaders() {
       return headers;
     }
 

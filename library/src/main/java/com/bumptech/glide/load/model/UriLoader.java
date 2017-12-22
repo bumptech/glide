@@ -79,6 +79,7 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
       return new StreamLocalUriFetcher(contentResolver, uri);
     }
 
+    @NonNull
     @Override
     public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new UriLoader<>(this);
@@ -108,6 +109,7 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
       return new FileDescriptorLocalUriFetcher(contentResolver, uri);
     }
 
+    @NonNull
     @Override
     public ModelLoader<Uri, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
       return new UriLoader<>(this);

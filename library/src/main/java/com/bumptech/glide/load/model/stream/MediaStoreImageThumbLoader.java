@@ -51,6 +51,7 @@ public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream>
       this.context = context;
     }
 
+    @NonNull
     @Override
     public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new MediaStoreImageThumbLoader(context);

@@ -27,7 +27,7 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
   }
 
   @Override
-  public void loadData(Priority priority, DataCallback<? super T> callback) {
+  public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super T> callback) {
     try {
       data = loadResource(assetManager, assetPath);
     } catch (IOException e) {
