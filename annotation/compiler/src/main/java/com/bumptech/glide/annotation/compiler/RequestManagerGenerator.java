@@ -95,7 +95,6 @@ final class RequestManagerGenerator {
     glideType = elementUtils.getTypeElement(GLIDE_QUALIFIED_NAME);
   }
 
-  @Nullable
   TypeSpec generate(
       String generatedCodePackageName, @Nullable TypeSpec requestOptions, TypeSpec requestBuilder,
       Set<String> glideExtensions) {
