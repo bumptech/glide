@@ -2,6 +2,9 @@
 
 set -e
 
+#installing xvfb needs accept android license
+echo y | sdkmanager --update
+
 ./gradlew :samples:flickr:build \
   :samples:giphy:build \
   :samples:contacturi:build \
