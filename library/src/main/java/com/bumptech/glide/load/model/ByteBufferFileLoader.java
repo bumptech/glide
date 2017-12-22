@@ -58,7 +58,8 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
     }
 
     @Override
-    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super ByteBuffer> callback) {
+    public void loadData(@NonNull Priority priority,
+        @NonNull DataCallback<? super ByteBuffer> callback) {
       ByteBuffer result;
       try {
         result = ByteBufferUtil.fromFile(file);

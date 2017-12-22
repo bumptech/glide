@@ -50,7 +50,8 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
     }
 
     @Override
-    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Model> callback) {
+    public void loadData(@NonNull Priority priority,
+        @NonNull DataCallback<? super Model> callback) {
       callback.onDataReady(resource);
     }
 
