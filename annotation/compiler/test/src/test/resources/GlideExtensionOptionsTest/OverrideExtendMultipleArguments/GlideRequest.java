@@ -71,6 +71,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#sizeMultiplier(float)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> sizeMultiplier(@FloatRange(from = 0.0, to = 1.0) float arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -84,6 +85,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#useUnlimitedSourceGeneratorsPool(boolean)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> useUnlimitedSourceGeneratorsPool(boolean flag) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -97,6 +99,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#useAnimationPool(boolean)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> useAnimationPool(boolean flag) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -110,6 +113,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#onlyRetrieveFromCache(boolean)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> onlyRetrieveFromCache(boolean flag) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -123,6 +127,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#diskCacheStrategy(DiskCacheStrategy)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> diskCacheStrategy(@NonNull DiskCacheStrategy arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -136,6 +141,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#priority(Priority)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> priority(@NonNull Priority arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -149,6 +155,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#placeholder(Drawable)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> placeholder(@Nullable Drawable arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -162,6 +169,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#placeholder(int)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> placeholder(@DrawableRes int arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -175,6 +183,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#fallback(Drawable)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> fallback(@Nullable Drawable arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -188,6 +197,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#fallback(int)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> fallback(@DrawableRes int arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -201,6 +211,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#error(Drawable)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> error(@Nullable Drawable arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -214,6 +225,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#error(int)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> error(@DrawableRes int arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -227,6 +239,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#theme(Resources.Theme)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> theme(@Nullable Resources.Theme arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -240,6 +253,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#skipMemoryCache(boolean)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> skipMemoryCache(boolean skip) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -253,6 +267,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#override(int)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> override(int size) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -266,6 +281,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#signature(Key)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> signature(@NonNull Key arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -279,6 +295,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#set(Option<T>, T)
    */
+  @NonNull
   @CheckResult
   public <T> GlideRequest<TranscodeType> set(@NonNull Option<T> arg0, @NonNull T arg1) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -292,6 +309,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#decode(Class<?>)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> decode(@NonNull Class<?> arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -305,6 +323,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#encodeFormat(Bitmap.CompressFormat)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> encodeFormat(@NonNull Bitmap.CompressFormat arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -318,6 +337,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#encodeQuality(int)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> encodeQuality(@IntRange(from = 0, to = 100) int arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -331,6 +351,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#frame(long)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> frame(@IntRange(from = 0) long arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -344,6 +365,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#format(DecodeFormat)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> format(@NonNull DecodeFormat arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -357,6 +379,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#disallowHardwareConfig()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> disallowHardwareConfig() {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -370,6 +393,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#downsample(DownsampleStrategy)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> downsample(@NonNull DownsampleStrategy arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -383,6 +407,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#timeout(int)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> timeout(@IntRange(from = 0) int arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -396,6 +421,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#optionalCenterCrop()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> optionalCenterCrop() {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -409,6 +435,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#centerCrop()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> centerCrop() {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -422,6 +449,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#optionalFitCenter()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> optionalFitCenter() {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -435,6 +463,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#fitCenter()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> fitCenter() {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -448,6 +477,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#optionalCenterInside()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> optionalCenterInside() {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -461,6 +491,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#centerInside()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> centerInside() {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -474,6 +505,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#optionalCircleCrop()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> optionalCircleCrop() {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -487,6 +519,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#circleCrop()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> circleCrop() {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -500,6 +533,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#transform(Transformation<Bitmap>)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> transform(@NonNull Transformation<Bitmap> arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -513,6 +547,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#transforms(Transformation<Bitmap>[])
    */
+  @NonNull
   @CheckResult
   @SuppressWarnings({
       "unchecked",
@@ -530,6 +565,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#optionalTransform(Transformation<Bitmap>)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> optionalTransform(@NonNull Transformation<Bitmap> arg0) {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -543,6 +579,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#optionalTransform(Class<T>, Transformation<T>)
    */
+  @NonNull
   @CheckResult
   public <T> GlideRequest<TranscodeType> optionalTransform(@NonNull Class<T> arg0,
       @NonNull Transformation<T> arg1) {
@@ -557,6 +594,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#transform(Class<T>, Transformation<T>)
    */
+  @NonNull
   @CheckResult
   public <T> GlideRequest<TranscodeType> transform(@NonNull Class<T> arg0,
       @NonNull Transformation<T> arg1) {
@@ -571,6 +609,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#dontTransform()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> dontTransform() {
     if (getMutableOptions() instanceof GlideOptions) {
@@ -584,6 +623,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#dontAnimate()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> dontAnimate() {
     if (getMutableOptions() instanceof GlideOptions) {

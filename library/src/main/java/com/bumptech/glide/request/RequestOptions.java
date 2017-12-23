@@ -122,6 +122,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link #sizeMultiplier(float)} set.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions sizeMultiplierOf(
       @FloatRange(from = 0, to = 1) float sizeMultiplier) {
@@ -131,6 +132,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #diskCacheStrategy(DiskCacheStrategy)} set.
    */
+  @NonNull
   @CheckResult
   public static RequestOptions diskCacheStrategyOf(@NonNull DiskCacheStrategy diskCacheStrategy) {
     return new RequestOptions().diskCacheStrategy(diskCacheStrategy);
@@ -140,6 +142,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link #priority(Priority)}} set.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions priorityOf(@NonNull Priority priority) {
     return new RequestOptions().priority(priority);
@@ -148,6 +151,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #placeholder(Drawable)} set.
    */
+  @NonNull
   @CheckResult
   public static RequestOptions placeholderOf(@Nullable Drawable placeholder) {
     return new RequestOptions().placeholder(placeholder);
@@ -156,6 +160,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #placeholder(int)} set.
    */
+  @NonNull
   @CheckResult
   public static RequestOptions placeholderOf(@DrawableRes int placeholderId) {
     return new RequestOptions().placeholder(placeholderId);
@@ -164,6 +169,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #error(Drawable)} set.
    */
+  @NonNull
   @CheckResult
   public static RequestOptions errorOf(@Nullable Drawable errorDrawable) {
     return new RequestOptions().error(errorDrawable);
@@ -172,6 +178,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #error(int)}} set.
    */
+  @NonNull
   @CheckResult
   public static RequestOptions errorOf(@DrawableRes int errorId) {
     return new RequestOptions().error(errorId);
@@ -180,6 +187,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #skipMemoryCache(boolean)} set.
    */
+  @NonNull
   @CheckResult
   public static RequestOptions skipMemoryCacheOf(boolean skipMemoryCache) {
     if (skipMemoryCache) {
@@ -199,6 +207,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link #override(int, int)}} set.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions overrideOf(
       @IntRange(from = 0) int width,
@@ -211,6 +220,7 @@ public class RequestOptions implements Cloneable {
    * height are the given size.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions overrideOf(@IntRange(from = 0) int size) {
     return overrideOf(size, size);
@@ -219,6 +229,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #signature} set.
    */
+  @NonNull
   @CheckResult
   public static RequestOptions signatureOf(@NonNull Key signature) {
     return new RequestOptions().signature(signature);
@@ -227,6 +238,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #fitCenter()} set.
    */
+  @NonNull
   @CheckResult
   public static RequestOptions fitCenterTransform() {
     if (fitCenterOptions == null) {
@@ -241,6 +253,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link #centerInside()} set.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions centerInsideTransform() {
     if (centerInsideOptions == null) {
@@ -255,6 +268,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link #centerCrop()} set.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions centerCropTransform() {
     if (centerCropOptions == null) {
@@ -269,6 +283,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop()} set.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions circleCropTransform() {
     if (circleCropOptions == null) {
@@ -283,6 +298,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link #transform(Transformation)} set.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions bitmapTransform(@NonNull Transformation<Bitmap> transformation) {
     return new RequestOptions().transform(transformation);
@@ -292,6 +308,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link #dontTransform()} set.
    */
   @SuppressWarnings("WeakerAccess")
+  @NonNull
   @CheckResult
   public static RequestOptions noTransformation() {
     if (noTransformOptions == null) {
@@ -306,6 +323,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with the given {@link Option} set via
    * {@link #set(Option, Object)}.
    */
+  @NonNull
   @CheckResult
   public static <T> RequestOptions option(@NonNull Option<T> option, @NonNull T value) {
     return new RequestOptions().set(option, value);
@@ -314,6 +332,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #decode(Class)} set.
    */
+  @NonNull
   @CheckResult
   public static RequestOptions decodeTypeOf(@NonNull Class<?> resourceClass) {
     return new RequestOptions().decode(resourceClass);
@@ -323,6 +342,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link #format(DecodeFormat)} set.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions formatOf(@NonNull DecodeFormat format) {
     return new RequestOptions().format(format);
@@ -332,6 +352,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link #frame(long)} set.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions frameOf(@IntRange(from = 0) long frameTimeMicros) {
     return new RequestOptions().frame(frameTimeMicros);
@@ -341,6 +362,7 @@ public class RequestOptions implements Cloneable {
    * Returns a {@link RequestOptions} object with {@link #downsample(DownsampleStrategy)} set.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions downsampleOf(@NonNull DownsampleStrategy strategy) {
     return new RequestOptions().downsample(strategy);
@@ -349,6 +371,7 @@ public class RequestOptions implements Cloneable {
   /**
    * Returns a {@link RequestOptions} object with {@link #timeout(int)} set.
    */
+  @NonNull
   @CheckResult
   public static RequestOptions timeoutOf(@IntRange(from = 0) int timeout) {
     return new RequestOptions().timeout(timeout);
@@ -359,6 +382,7 @@ public class RequestOptions implements Cloneable {
    * #encodeQuality(int)} called with the given quality.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions encodeQualityOf(@IntRange(from = 0, to = 100) int quality) {
     return new RequestOptions().encodeQuality(quality);
@@ -369,6 +393,7 @@ public class RequestOptions implements Cloneable {
    * #encodeFormat(android.graphics.Bitmap.CompressFormat)} called with the given format.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions encodeFormatOf(@NonNull Bitmap.CompressFormat format) {
     return new RequestOptions().encodeFormat(format);
@@ -379,6 +404,7 @@ public class RequestOptions implements Cloneable {
    * called.
    */
   @SuppressWarnings("WeakerAccess") // Public API
+  @NonNull
   @CheckResult
   public static RequestOptions noAnimation() {
     if (noAnimationOptions == null) {
@@ -403,6 +429,7 @@ public class RequestOptions implements Cloneable {
    *                       loading the resource.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions sizeMultiplier(@FloatRange(from = 0, to = 1) float sizeMultiplier) {
     if (isAutoCloneEnabled) {
@@ -430,6 +457,7 @@ public class RequestOptions implements Cloneable {
    * <p>If both this method and {@link #useAnimationPool(boolean)} are set, this method will be
    * preferred and {@link #useAnimationPool(boolean)} will be ignored.
    */
+  @NonNull
   @CheckResult
   public RequestOptions useUnlimitedSourceGeneratorsPool(boolean flag) {
     if (isAutoCloneEnabled) {
@@ -455,6 +483,7 @@ public class RequestOptions implements Cloneable {
    * {@link #useUnlimitedSourceGeneratorsPool(boolean)} will be preferred and this method will be
    * ignored.
    */
+  @NonNull
   @CheckResult
   public RequestOptions useAnimationPool(boolean flag) {
     if (isAutoCloneEnabled) {
@@ -471,6 +500,7 @@ public class RequestOptions implements Cloneable {
    *
    * If set to true, will only load an item if found in the cache, and will not fetch from source.
    */
+  @NonNull
   @CheckResult
   public RequestOptions onlyRetrieveFromCache(boolean flag) {
     if (isAutoCloneEnabled) {
@@ -497,6 +527,7 @@ public class RequestOptions implements Cloneable {
    * @param strategy The strategy to use.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions diskCacheStrategy(@NonNull DiskCacheStrategy strategy) {
     if (isAutoCloneEnabled) {
@@ -514,6 +545,7 @@ public class RequestOptions implements Cloneable {
    * @param priority A priority.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions priority(@NonNull Priority priority) {
     if (isAutoCloneEnabled) {
@@ -532,6 +564,7 @@ public class RequestOptions implements Cloneable {
    * @param drawable The drawable to display as a placeholder.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions placeholder(@Nullable Drawable drawable) {
     if (isAutoCloneEnabled) {
@@ -551,6 +584,7 @@ public class RequestOptions implements Cloneable {
    * @param resourceId The id of the resource to use as a placeholder
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions placeholder(@DrawableRes int resourceId) {
     if (isAutoCloneEnabled) {
@@ -576,6 +610,7 @@ public class RequestOptions implements Cloneable {
    * @param drawable The drawable to display as a placeholder.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions fallback(@Nullable Drawable drawable) {
     if (isAutoCloneEnabled) {
@@ -601,6 +636,7 @@ public class RequestOptions implements Cloneable {
    * @param resourceId The id of the resource to use as a fallback.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions fallback(@DrawableRes int resourceId) {
     if (isAutoCloneEnabled) {
@@ -619,6 +655,7 @@ public class RequestOptions implements Cloneable {
    * @param drawable The drawable to display.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions error(@Nullable Drawable drawable) {
     if (isAutoCloneEnabled) {
@@ -637,6 +674,7 @@ public class RequestOptions implements Cloneable {
    * @param resourceId The id of the resource to use as a placeholder.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions error(@DrawableRes int resourceId) {
     if (isAutoCloneEnabled) {
@@ -666,6 +704,7 @@ public class RequestOptions implements Cloneable {
    * @param theme The theme to use when loading Drawables.
    * @return this request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions theme(@Nullable Resources.Theme theme) {
     if (isAutoCloneEnabled) {
@@ -687,6 +726,7 @@ public class RequestOptions implements Cloneable {
    * @param skip True to allow the resource to skip the memory cache.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions skipMemoryCache(boolean skip) {
     if (isAutoCloneEnabled) {
@@ -708,6 +748,7 @@ public class RequestOptions implements Cloneable {
    * @param height The height in pixels to use to load the resource.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions override(int width, int height) {
     if (isAutoCloneEnabled) {
@@ -729,6 +770,7 @@ public class RequestOptions implements Cloneable {
    * @param size The width and height to use.
    * @return This request builder.
    */
+  @NonNull
   @CheckResult
   public RequestOptions override(int size) {
     return override(size, size);
@@ -745,6 +787,7 @@ public class RequestOptions implements Cloneable {
    * @return This request builder.
    * @see com.bumptech.glide.signature.ObjectKey
    */
+  @NonNull
   @CheckResult
   public RequestOptions signature(@NonNull Key signature) {
     if (isAutoCloneEnabled) {
@@ -785,6 +828,7 @@ public class RequestOptions implements Cloneable {
     }
   }
 
+  @NonNull
   @CheckResult
   public <T> RequestOptions set(@NonNull Option<T> option, @NonNull T value) {
     if (isAutoCloneEnabled) {
@@ -797,6 +841,7 @@ public class RequestOptions implements Cloneable {
     return selfOrThrowIfLocked();
   }
 
+  @NonNull
   @CheckResult
   public RequestOptions decode(@NonNull Class<?> resourceClass) {
     if (isAutoCloneEnabled) {
@@ -824,6 +869,7 @@ public class RequestOptions implements Cloneable {
    * Sets the value for key
    * {@link com.bumptech.glide.load.resource.bitmap.BitmapEncoder#COMPRESSION_FORMAT}.
    */
+  @NonNull
   @CheckResult
   public RequestOptions encodeFormat(@NonNull Bitmap.CompressFormat format) {
     return set(BitmapEncoder.COMPRESSION_FORMAT, Preconditions.checkNotNull(format));
@@ -833,6 +879,7 @@ public class RequestOptions implements Cloneable {
    * Sets the value for key
    * {@link BitmapEncoder#COMPRESSION_QUALITY}.
    */
+  @NonNull
   @CheckResult
   public RequestOptions encodeQuality(@IntRange(from = 0, to = 100) int quality) {
     return set(BitmapEncoder.COMPRESSION_QUALITY, quality);
@@ -848,6 +895,7 @@ public class RequestOptions implements Cloneable {
    * @param frameTimeMicros The time position in microseconds of the desired frame. If negative, the
    *                        Android framework implementation return a representative frame.
    */
+  @NonNull
   @CheckResult
   public RequestOptions frame(@IntRange(from = 0) long frameTimeMicros) {
     return set(VideoBitmapDecoder.TARGET_FRAME, frameTimeMicros);
@@ -875,6 +923,7 @@ public class RequestOptions implements Cloneable {
    * @see Downsampler#DECODE_FORMAT
    * @see GifOptions#DECODE_FORMAT
    */
+  @NonNull
   @CheckResult
   public RequestOptions format(@NonNull DecodeFormat format) {
     Preconditions.checkNotNull(format);
@@ -899,6 +948,7 @@ public class RequestOptions implements Cloneable {
    * {@link android.graphics.Bitmap.Config#HARDWARE} cannot be drawn to
    * {@link android.graphics.Canvas}s, which is required by most {@link Transformation}s.
    */
+  @NonNull
   @CheckResult
   public RequestOptions disallowHardwareConfig() {
     return set(Downsampler.ALLOW_HARDWARE_CONFIG, false);
@@ -911,6 +961,7 @@ public class RequestOptions implements Cloneable {
    * <p>This is a component option specific to {@link Downsampler}. If the defautlt Bitmap decoder
    * is replaced or skipped because of your configuration, this option may be ignored.
    */
+  @NonNull
   @CheckResult
   public RequestOptions downsample(@NonNull DownsampleStrategy strategy) {
     return set(Downsampler.DOWNSAMPLE_STRATEGY, Preconditions.checkNotNull(strategy));
@@ -927,6 +978,7 @@ public class RequestOptions implements Cloneable {
    * @see com.bumptech.glide.load.model.stream.HttpGlideUrlLoader#TIMEOUT
    * @param timeoutMs The read and write timeout in milliseconds.
    */
+  @NonNull
   @CheckResult
   public RequestOptions timeout(@IntRange(from = 0) int timeoutMs) {
     return set(HttpGlideUrlLoader.TIMEOUT, timeoutMs);
@@ -941,6 +993,7 @@ public class RequestOptions implements Cloneable {
    * @see #optionalTransform(Class, Transformation)
    * @see #centerCrop()
    */
+  @NonNull
   @CheckResult
   public RequestOptions optionalCenterCrop() {
     return optionalTransform(DownsampleStrategy.CENTER_OUTSIDE, new CenterCrop());
@@ -955,6 +1008,7 @@ public class RequestOptions implements Cloneable {
    * @see #transform(Class, Transformation)
    * @see #optionalCenterCrop()
    */
+  @NonNull
   @CheckResult
   public RequestOptions centerCrop() {
     return transform(DownsampleStrategy.CENTER_OUTSIDE, new CenterCrop());
@@ -971,6 +1025,7 @@ public class RequestOptions implements Cloneable {
    * @see #optionalTransform(Class, Transformation)
    * @see #fitCenter()
    */
+  @NonNull
   @CheckResult
   public RequestOptions optionalFitCenter() {
     return optionalScaleOnlyTransform(DownsampleStrategy.FIT_CENTER, new FitCenter());
@@ -987,6 +1042,7 @@ public class RequestOptions implements Cloneable {
    * @see #transform(Class, Transformation)
    * @see #optionalFitCenter()
    */
+  @NonNull
   @CheckResult
   public RequestOptions fitCenter() {
     return scaleOnlyTransform(DownsampleStrategy.FIT_CENTER, new FitCenter());
@@ -1002,6 +1058,7 @@ public class RequestOptions implements Cloneable {
    * @see #optionalTransform(Class, Transformation)
    * @see #centerInside()
    */
+  @NonNull
   @CheckResult
   public RequestOptions optionalCenterInside() {
     return optionalScaleOnlyTransform(DownsampleStrategy.CENTER_INSIDE, new CenterInside());
@@ -1017,6 +1074,7 @@ public class RequestOptions implements Cloneable {
    * @see #transform(Class, Transformation)
    * @see #optionalCenterInside()
    */
+  @NonNull
   @CheckResult
   public RequestOptions centerInside() {
     return scaleOnlyTransform(DownsampleStrategy.CENTER_INSIDE, new CenterInside());
@@ -1030,6 +1088,7 @@ public class RequestOptions implements Cloneable {
    * @see #optionalTransform(Transformation)
    * @see #circleCrop()
    */
+  @NonNull
   @CheckResult
   public RequestOptions optionalCircleCrop() {
     return optionalTransform(DownsampleStrategy.CENTER_OUTSIDE, new CircleCrop());
@@ -1044,6 +1103,7 @@ public class RequestOptions implements Cloneable {
    * @see #transform(Class, Transformation)
    * @see #optionalCenterCrop()
    */
+  @NonNull
   @CheckResult
   public RequestOptions circleCrop() {
     return transform(DownsampleStrategy.CENTER_INSIDE, new CircleCrop());
@@ -1052,8 +1112,9 @@ public class RequestOptions implements Cloneable {
   // calling optionalTransform() on the result of clone() requires greater access.
   // calling downsample is guaranteed to modify the current object by the isAutoCloneEnabledCheck.
   @SuppressWarnings({"WeakerAccess", "CheckResult"})
-  final RequestOptions optionalTransform(DownsampleStrategy downsampleStrategy,
-      Transformation<Bitmap> transformation) {
+  @NonNull
+  final RequestOptions optionalTransform(@NonNull DownsampleStrategy downsampleStrategy,
+      @NonNull Transformation<Bitmap> transformation) {
     if (isAutoCloneEnabled) {
       return clone().optionalTransform(downsampleStrategy, transformation);
     }
@@ -1065,9 +1126,10 @@ public class RequestOptions implements Cloneable {
   // calling transform() on the result of clone() requires greater access.
   // calling downsample is guaranteed to modify the current object by the isAutoCloneEnabledCheck.
   @SuppressWarnings({"WeakerAccess", "CheckResult"})
+  @NonNull
   @CheckResult
-  final RequestOptions transform(DownsampleStrategy downsampleStrategy,
-      Transformation<Bitmap> transformation) {
+  final RequestOptions transform(@NonNull DownsampleStrategy downsampleStrategy,
+      @NonNull Transformation<Bitmap> transformation) {
     if (isAutoCloneEnabled) {
       return clone().transform(downsampleStrategy, transformation);
     }
@@ -1076,19 +1138,22 @@ public class RequestOptions implements Cloneable {
     return transform(transformation);
   }
 
+  @NonNull
   private RequestOptions scaleOnlyTransform(
-      DownsampleStrategy strategy, Transformation<Bitmap> transformation) {
+      @NonNull DownsampleStrategy strategy, @NonNull Transformation<Bitmap> transformation) {
     return scaleOnlyTransform(strategy, transformation, true /*isTransformationRequired*/);
   }
 
+  @NonNull
   private RequestOptions optionalScaleOnlyTransform(
-      DownsampleStrategy strategy, Transformation<Bitmap> transformation) {
+      @NonNull DownsampleStrategy strategy, @NonNull Transformation<Bitmap> transformation) {
     return scaleOnlyTransform(strategy, transformation, false /*isTransformationRequired*/);
   }
 
+  @NonNull
   private RequestOptions scaleOnlyTransform(
-      DownsampleStrategy strategy,
-      Transformation<Bitmap> transformation,
+      @NonNull DownsampleStrategy strategy,
+      @NonNull Transformation<Bitmap> transformation,
       boolean isTransformationRequired) {
     RequestOptions result = isTransformationRequired
           ? transform(strategy, transformation) : optionalTransform(strategy, transformation);
@@ -1111,6 +1176,7 @@ public class RequestOptions implements Cloneable {
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
   @SuppressWarnings("CheckResult")
+  @NonNull
   @CheckResult
   public RequestOptions transform(@NonNull Transformation<Bitmap> transformation) {
     return transform(transformation, /*isRequired=*/ true);
@@ -1131,6 +1197,7 @@ public class RequestOptions implements Cloneable {
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
   @SuppressWarnings({"unchecked", "varargs", "CheckResult"})
+  @NonNull
   @CheckResult
   public RequestOptions transforms(@NonNull Transformation<Bitmap>... transformations) {
     return transform(new MultiTransformation<>(transformations), /*isRequired=*/ true);
@@ -1150,11 +1217,13 @@ public class RequestOptions implements Cloneable {
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
   @SuppressWarnings("CheckResult")
+  @NonNull
   @CheckResult
   public RequestOptions optionalTransform(@NonNull Transformation<Bitmap> transformation) {
     return transform(transformation, /*isRequired=*/ false);
   }
 
+  @NonNull
   private RequestOptions transform(
       @NonNull Transformation<Bitmap> transformation, boolean isRequired) {
     if (isAutoCloneEnabled) {
@@ -1191,12 +1260,14 @@ public class RequestOptions implements Cloneable {
    * @param resourceClass  The type of resource to transform.
    * @param transformation The {@link Transformation} to apply.
    */
+  @NonNull
   @CheckResult
   public <T> RequestOptions optionalTransform(
       @NonNull Class<T> resourceClass, @NonNull Transformation<T> transformation) {
     return transform(resourceClass, transformation, /*isRequired=*/ false);
   }
 
+  @NonNull
   private <T> RequestOptions transform(
       @NonNull Class<T> resourceClass,
       @NonNull Transformation<T> transformation,
@@ -1233,6 +1304,7 @@ public class RequestOptions implements Cloneable {
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
   @SuppressWarnings("CheckResult")
+  @NonNull
   @CheckResult
   public <T> RequestOptions transform(
       @NonNull Class<T> resourceClass, @NonNull Transformation<T> transformation) {
@@ -1244,6 +1316,7 @@ public class RequestOptions implements Cloneable {
    * resource classes and allows unknown resource types to be transformed without throwing an
    * exception.
    */
+  @NonNull
   @CheckResult
   public RequestOptions dontTransform() {
     if (isAutoCloneEnabled) {
@@ -1269,11 +1342,13 @@ public class RequestOptions implements Cloneable {
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
   @SuppressWarnings("CheckResult")
+  @NonNull
   @CheckResult
   public RequestOptions dontAnimate() {
     return set(GifOptions.DISABLE_ANIMATION, true);
   }
 
+  @NonNull
   @CheckResult
   public RequestOptions apply(@NonNull RequestOptions other) {
     if (isAutoCloneEnabled) {
@@ -1419,6 +1494,7 @@ public class RequestOptions implements Cloneable {
    *
    * <p> Once locked, the only way to unlock is to use {@link #clone()} </p>
    */
+  @NonNull
   @SuppressWarnings("unchecked")
   public RequestOptions lock() {
     isLocked = true;
@@ -1434,6 +1510,7 @@ public class RequestOptions implements Cloneable {
    * <p>Auto clone is not retained by cloned objects returned from mutations. The cloned objects
    * are mutable and are not locked.
    */
+  @NonNull
   public RequestOptions autoClone() {
     if (isLocked && !isAutoCloneEnabled) {
       throw new IllegalStateException("You cannot auto lock an already locked options object"
@@ -1443,6 +1520,7 @@ public class RequestOptions implements Cloneable {
     return lock();
   }
 
+  @NonNull
   @SuppressWarnings("unchecked")
   private RequestOptions selfOrThrowIfLocked() {
     if (isLocked) {
