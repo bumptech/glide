@@ -32,7 +32,7 @@ public final class GlideApp {
    * @see Glide#getPhotoCacheDir(Context)
    */
   @Nullable
-  public static File getPhotoCacheDir(Context arg0) {
+  public static File getPhotoCacheDir(@NonNull Context arg0) {
     return Glide.getPhotoCacheDir(arg0);
   }
 
@@ -40,7 +40,7 @@ public final class GlideApp {
    * @see Glide#getPhotoCacheDir(Context, String)
    */
   @Nullable
-  public static File getPhotoCacheDir(Context arg0, String arg1) {
+  public static File getPhotoCacheDir(@NonNull Context arg0, @NonNull String arg1) {
     return Glide.getPhotoCacheDir(arg0, arg1);
   }
 
@@ -48,7 +48,7 @@ public final class GlideApp {
    * @see Glide#get(Context)
    */
   @NonNull
-  public static Glide get(Context arg0) {
+  public static Glide get(@NonNull Context arg0) {
     return Glide.get(arg0);
   }
 
@@ -67,7 +67,7 @@ public final class GlideApp {
    */
   @VisibleForTesting
   @SuppressLint("VisibleForTests")
-  public static void init(Context arg0, GlideBuilder arg1) {
+  public static void init(@NonNull Context arg0, @NonNull GlideBuilder arg1) {
     Glide.init(arg0, arg1);
   }
 
@@ -83,42 +83,48 @@ public final class GlideApp {
   /**
    * @see Glide#with(Context)
    */
-  public static GlideRequests with(Context arg0) {
+  @NonNull
+  public static GlideRequests with(@NonNull Context arg0) {
     return (GlideRequests) Glide.with(arg0);
   }
 
   /**
    * @see Glide#with(Activity)
    */
-  public static GlideRequests with(Activity arg0) {
+  @NonNull
+  public static GlideRequests with(@NonNull Activity arg0) {
     return (GlideRequests) Glide.with(arg0);
   }
 
   /**
    * @see Glide#with(FragmentActivity)
    */
-  public static GlideRequests with(FragmentActivity arg0) {
+  @NonNull
+  public static GlideRequests with(@NonNull FragmentActivity arg0) {
     return (GlideRequests) Glide.with(arg0);
   }
 
   /**
    * @see Glide#with(Fragment)
    */
-  public static GlideRequests with(Fragment arg0) {
+  @NonNull
+  public static GlideRequests with(@NonNull Fragment arg0) {
     return (GlideRequests) Glide.with(arg0);
   }
 
   /**
    * @see Glide#with(Fragment)
    */
-  public static GlideRequests with(android.support.v4.app.Fragment arg0) {
+  @NonNull
+  public static GlideRequests with(@NonNull android.support.v4.app.Fragment arg0) {
     return (GlideRequests) Glide.with(arg0);
   }
 
   /**
    * @see Glide#with(View)
    */
-  public static GlideRequests with(View arg0) {
+  @NonNull
+  public static GlideRequests with(@NonNull View arg0) {
     return (GlideRequests) Glide.with(arg0);
   }
 }

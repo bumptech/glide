@@ -220,7 +220,7 @@ final class ProcessorUtil {
     return CodeBlock.of(javadocString.toString(), javadocArgs.toArray(new Object[0]));
   }
 
-   /**
+  /**
    * Returns a safe String to use in a Javadoc that will function in a link.
    *
    * <p>This method exists because by Javadoc doesn't handle type parameters({@literal <T>}
@@ -439,12 +439,12 @@ final class ProcessorUtil {
     private final TypeMirror returnType;
     private final MethodType methodType;
 
-    FilterPublicMethods(@Nullable TypeMirror returnType, MethodType methodType)  {
+    FilterPublicMethods(@Nullable TypeMirror returnType, MethodType methodType) {
       this.returnType = returnType;
       this.methodType = methodType;
     }
 
-    FilterPublicMethods(@Nullable TypeElement returnType, MethodType methodType)  {
+    FilterPublicMethods(@Nullable TypeElement returnType, MethodType methodType) {
       this(returnType != null ? returnType.asType() : null, methodType);
     }
 

@@ -276,8 +276,7 @@ final class RequestOptionsGenerator {
             methodLiterals.substring(0, methodLiterals.length() - 2));
       }
       extensionRequestOptionsArgument = CodeBlock.builder()
-          .add(
-            "super.$N(" + methodLiterals + ")", methodArgs.toArray(new Object[0]))
+          .add("super.$N(" + methodLiterals + ")", methodArgs.toArray(new Object[0]))
           .build()
           .toString();
     } else {
@@ -353,7 +352,6 @@ final class RequestOptionsGenerator {
               requestOptionsName, methodName, parameters))
           .addAnnotation(Override.class);
     }
-
 
     // Adds: <AnnotatedClass>.<thisMethodName>(RequestOptions<?>, <arg1>, <arg2>, <argN>);
     List<Object> args = new ArrayList<>();
@@ -440,25 +438,12 @@ final class RequestOptionsGenerator {
     MethodSpec.Builder methodSpecBuilder =
         MethodSpec.methodBuilder(staticMethodName)
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-        .addJavadoc(processorUtil.generateSeeMethodJavadoc(staticMethod))
-        .returns(glideOptionsName);
+            .addJavadoc(processorUtil.generateSeeMethodJavadoc(staticMethod))
+            .returns(glideOptionsName);
 
     List<? extends VariableElement> parameters = staticMethod.getParameters();
-    StringBuilder createNewOptionAndCall = new StringBuilder("new $T().$N(");
-    if (!parameters.isEmpty()) {
-      methodSpecBuilder.addParameters(ProcessorUtil.getParameters(staticMethod));
-      for (VariableElement parameter : parameters) {
-        createNewOptionAndCall.append(parameter.getSimpleName().toString());
-        // use the Application Context to avoid memory leaks.
-        if (memoize && isAndroidContext(parameter)) {
-          createNewOptionAndCall.append(".getApplicationContext()");
-        }
-        createNewOptionAndCall.append(", ");
-      }
-      createNewOptionAndCall = new StringBuilder(
-          createNewOptionAndCall.substring(0, createNewOptionAndCall.length() - 2));
-    }
-    createNewOptionAndCall.append(")");
+    StringBuilder createNewOptionAndCall = createNewOptionAndCall(memoize, methodSpecBuilder,
+        parameters, "new $T().$N(", ProcessorUtil.getParameters(staticMethod));
 
     FieldSpec requiredStaticField = null;
     if (memoize) {
@@ -542,24 +527,12 @@ final class RequestOptionsGenerator {
     // Remove is not supported.
     parameters = parameters.subList(1, parameters.size());
 
-    StringBuilder createNewOptionAndCall = new StringBuilder("new $T().$L(");
-    if (!parameters.isEmpty()) {
-      methodSpecBuilder.addParameters(ProcessorUtil.getParameters(parameters));
-      for (VariableElement parameter : parameters) {
-        createNewOptionAndCall.append(parameter.getSimpleName().toString());
-        // use the Application Context to avoid memory leaks.
-        if (memoize && isAndroidContext(parameter)) {
-          createNewOptionAndCall.append(".getApplicationContext()");
-        }
-        createNewOptionAndCall.append(", ");
-      }
-      createNewOptionAndCall = new StringBuilder(
-          createNewOptionAndCall.substring(0, createNewOptionAndCall.length() - 2));
-    }
-    createNewOptionAndCall.append(")");
+    StringBuilder createNewOptionAndCall = createNewOptionAndCall(memoize, methodSpecBuilder,
+        parameters, "new $T().$L(", ProcessorUtil.getParameters(parameters));
 
     FieldSpec requiredStaticField = null;
     if (memoize) {
+      // Generates code that looks like:
       // if (GlideOptions.<methodName> == null) {
       //   GlideOptions.<methodName> = new GlideOptions().<methodName>().autoClone()
       // }
@@ -577,6 +550,7 @@ final class RequestOptionsGenerator {
           .endControlFlow()
           .addStatement("return $T.$N", glideOptionsName, staticVariableName);
     } else {
+      // Generates code that looks like:
       // return new GlideOptions().<methodName>()
       methodSpecBuilder.addStatement(
           "return " + createNewOptionAndCall, glideOptionsName, instanceMethodName);
@@ -591,6 +565,27 @@ final class RequestOptionsGenerator {
     methodSpecBuilder.addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build());
 
     return new MethodAndStaticVar(methodSpecBuilder.build(), requiredStaticField);
+  }
+
+  private StringBuilder createNewOptionAndCall(boolean memoize,
+      MethodSpec.Builder methodSpecBuilder,
+      List<? extends VariableElement> parameters, String start, List<ParameterSpec> specs) {
+    StringBuilder createNewOptionAndCall = new StringBuilder(start);
+    if (!parameters.isEmpty()) {
+      methodSpecBuilder.addParameters(specs);
+      for (VariableElement parameter : parameters) {
+        createNewOptionAndCall.append(parameter.getSimpleName().toString());
+        // use the Application Context to avoid memory leaks.
+        if (memoize && isAndroidContext(parameter)) {
+          createNewOptionAndCall.append(".getApplicationContext()");
+        }
+        createNewOptionAndCall.append(", ");
+      }
+      createNewOptionAndCall = new StringBuilder(
+          createNewOptionAndCall.substring(0, createNewOptionAndCall.length() - 2));
+    }
+    createNewOptionAndCall.append(")");
+    return createNewOptionAndCall;
   }
 
   private boolean isAndroidContext(VariableElement variableElement) {
