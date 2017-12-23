@@ -515,6 +515,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         + Thread.currentThread().getName());
   }
 
+  @NonNull
   @Override
   public StateVerifier getVerifier() {
     return stateVerifier;

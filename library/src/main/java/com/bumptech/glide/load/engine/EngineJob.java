@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pools;
 import com.bumptech.glide.load.DataSource;
@@ -296,6 +297,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     release(false /*isRemovedFromQueue*/);
   }
 
+  @NonNull
   @Override
   public StateVerifier getVerifier() {
     return stateVerifier;

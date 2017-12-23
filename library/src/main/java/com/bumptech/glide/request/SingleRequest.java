@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pools;
 import android.util.Log;
@@ -191,6 +192,7 @@ public final class SingleRequest<R> implements Request,
     status = Status.PENDING;
   }
 
+  @NonNull
   @Override
   public StateVerifier getVerifier() {
     return stateVerifier;
