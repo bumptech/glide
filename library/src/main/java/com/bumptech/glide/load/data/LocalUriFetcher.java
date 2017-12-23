@@ -38,7 +38,8 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   }
 
   @Override
-  public final void loadData(Priority priority, DataCallback<? super T> callback) {
+  public final void loadData(@NonNull Priority priority,
+      @NonNull DataCallback<? super T> callback) {
     try {
       data = loadResource(uri, contentResolver);
     } catch (FileNotFoundException e) {

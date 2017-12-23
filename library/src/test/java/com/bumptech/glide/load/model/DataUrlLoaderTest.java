@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Base64;
 import com.bumptech.glide.Priority;
@@ -60,7 +61,7 @@ public class DataUrlLoaderTest {
   private Options options;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
     DataUrlLoader.StreamFactory factory = new DataUrlLoader.StreamFactory();
     options = new Options();
@@ -94,7 +95,7 @@ public class DataUrlLoaderTest {
   }
 
   @Test
-  public void testDecodeInvalidScheme() throws IOException {
+  public void testDecodeInvalidScheme() {
     fetcher = dataUrlLoader.buildLoadData(INVALID_URL_WRONG_SCHEME1, -1, -1, options).fetcher;
     CallBack callback = new CallBack();
     fetcher.loadData(Priority.HIGH, callback);
@@ -102,7 +103,7 @@ public class DataUrlLoaderTest {
   }
 
   @Test
-  public void testDecodeMissingComma() throws IOException {
+  public void testDecodeMissingComma() {
     fetcher = dataUrlLoader.buildLoadData(INVALID_URL_MISSING_COMMA, -1, -1, options).fetcher;
     CallBack callback = new CallBack();
     fetcher.loadData(Priority.HIGH, callback);
@@ -110,7 +111,7 @@ public class DataUrlLoaderTest {
   }
 
   @Test
-  public void testDecodeWrongEncoding() throws IOException {
+  public void testDecodeWrongEncoding() {
     fetcher = dataUrlLoader.buildLoadData(INVALID_URL_WRONG_ENCODING, -1, -1, options).fetcher;
     CallBack callback = new CallBack();
     fetcher.loadData(Priority.HIGH, callback);
@@ -128,7 +129,7 @@ public class DataUrlLoaderTest {
     }
 
     @Override
-    public void onLoadFailed(Exception e) {
+    public void onLoadFailed(@NonNull Exception e) {
       this.exception = e;
     }
   }

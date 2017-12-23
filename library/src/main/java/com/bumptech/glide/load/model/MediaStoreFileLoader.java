@@ -53,7 +53,7 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super File> callback) {
+    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super File> callback) {
       Cursor cursor = context.getContentResolver().query(uri, PROJECTION, null /*selection*/,
           null /*selectionArgs*/, null /*sortOrder*/);
 
@@ -109,6 +109,7 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File> {
       this.context = context;
     }
 
+    @NonNull
     @Override
     public ModelLoader<Uri, File> build(MultiModelLoaderFactory multiFactory) {
       return new MediaStoreFileLoader(context);

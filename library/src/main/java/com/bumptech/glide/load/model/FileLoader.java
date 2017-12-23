@@ -63,7 +63,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super Data> callback) {
+    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       try {
         data = opener.open(file);
       } catch (FileNotFoundException e) {
@@ -116,6 +116,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
       this.opener = opener;
     }
 
+    @NonNull
     @Override
     public final ModelLoader<File, Data> build(MultiModelLoaderFactory multiFactory) {
       return new FileLoader<>(opener);

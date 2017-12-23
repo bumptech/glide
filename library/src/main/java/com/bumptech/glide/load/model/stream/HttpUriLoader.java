@@ -44,6 +44,7 @@ public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
    */
   public static class Factory implements ModelLoaderFactory<Uri, InputStream> {
 
+    @NonNull
     @Override
     public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new HttpUriLoader(multiFactory.build(GlideUrl.class, InputStream.class));

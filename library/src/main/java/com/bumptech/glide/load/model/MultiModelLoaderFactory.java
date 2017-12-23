@@ -28,53 +28,55 @@ public class MultiModelLoaderFactory {
   private final Set<Entry<?, ?>> alreadyUsedEntries = new HashSet<>();
   private final Pool<List<Throwable>> throwableListPool;
 
-  public MultiModelLoaderFactory(Pool<List<Throwable>> throwableListPool) {
+  public MultiModelLoaderFactory(@NonNull Pool<List<Throwable>> throwableListPool) {
     this(throwableListPool, DEFAULT_FACTORY);
   }
 
   @VisibleForTesting
-  MultiModelLoaderFactory(Pool<List<Throwable>> throwableListPool,
-      Factory factory) {
+  MultiModelLoaderFactory(@NonNull Pool<List<Throwable>> throwableListPool,
+      @NonNull Factory factory) {
     this.throwableListPool = throwableListPool;
     this.factory = factory;
   }
 
   synchronized <Model, Data> void append(
-      Class<Model> modelClass,
-      Class<Data> dataClass,
-      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
+      @NonNull Class<Model> modelClass,
+      @NonNull Class<Data> dataClass,
+      @NonNull ModelLoaderFactory<? extends Model, ? extends Data> factory) {
     add(modelClass, dataClass, factory, /*append=*/ true);
   }
 
   synchronized <Model, Data> void prepend(
-      Class<Model> modelClass,
-      Class<Data> dataClass,
-      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
+      @NonNull Class<Model> modelClass,
+      @NonNull Class<Data> dataClass,
+      @NonNull ModelLoaderFactory<? extends Model, ? extends Data> factory) {
     add(modelClass, dataClass, factory, /*append=*/ false);
   }
 
   private <Model, Data> void add(
-      Class<Model> modelClass,
-      Class<Data> dataClass,
-      ModelLoaderFactory<? extends Model, ? extends Data> factory,
+      @NonNull Class<Model> modelClass,
+      @NonNull Class<Data> dataClass,
+      @NonNull ModelLoaderFactory<? extends Model, ? extends Data> factory,
       boolean append) {
     Entry<Model, Data> entry = new Entry<>(modelClass, dataClass, factory);
     entries.add(append ? entries.size() : 0, entry);
   }
 
+  @NonNull
   synchronized <Model, Data> List<ModelLoaderFactory<? extends Model, ? extends Data>> replace(
-      Class<Model> modelClass,
-      Class<Data> dataClass,
-      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
+      @NonNull Class<Model> modelClass,
+      @NonNull Class<Data> dataClass,
+      @NonNull ModelLoaderFactory<? extends Model, ? extends Data> factory) {
     List<ModelLoaderFactory<? extends Model, ? extends Data>> removed =
         remove(modelClass, dataClass);
     append(modelClass, dataClass, factory);
     return removed;
   }
 
+  @NonNull
   synchronized <Model, Data> List<ModelLoaderFactory<? extends Model, ? extends Data>> remove(
-      Class<Model> modelClass,
-      Class<Data> dataClass) {
+      @NonNull Class<Model> modelClass,
+      @NonNull Class<Data> dataClass) {
     List<ModelLoaderFactory<? extends Model, ? extends Data>> factories = new ArrayList<>();
     for (Iterator<Entry<?, ?>> iterator = entries.iterator(); iterator.hasNext(); ) {
       Entry<?, ?> entry = iterator.next();
@@ -86,7 +88,8 @@ public class MultiModelLoaderFactory {
     return factories;
   }
 
-  synchronized <Model> List<ModelLoader<Model, ?>> build(Class<Model> modelClass) {
+  @NonNull
+  synchronized <Model> List<ModelLoader<Model, ?>> build(@NonNull Class<Model> modelClass) {
     try {
       List<ModelLoader<Model, ?>> loaders = new ArrayList<>();
       for (Entry<?, ?> entry : entries) {
@@ -111,7 +114,8 @@ public class MultiModelLoaderFactory {
     }
   }
 
-  synchronized List<Class<?>> getDataClasses(Class<?> modelClass) {
+  @NonNull
+  synchronized List<Class<?>> getDataClasses(@NonNull Class<?> modelClass) {
     List<Class<?>> result = new ArrayList<>();
     for (Entry<?, ?> entry : entries) {
       if (!result.contains(entry.dataClass) && entry.handles(modelClass)) {
@@ -121,8 +125,9 @@ public class MultiModelLoaderFactory {
     return result;
   }
 
-  public synchronized <Model, Data> ModelLoader<Model, Data> build(Class<Model> modelClass,
-      Class<Data> dataClass) {
+  @NonNull
+  public synchronized <Model, Data> ModelLoader<Model, Data> build(@NonNull Class<Model> modelClass,
+      @NonNull Class<Data> dataClass) {
     try {
       List<ModelLoader<Model, Data>> loaders = new ArrayList<>();
       boolean ignoredAnyEntries = false;
@@ -162,16 +167,19 @@ public class MultiModelLoaderFactory {
     }
   }
 
+  @NonNull
   @SuppressWarnings("unchecked")
-  private <Model, Data> ModelLoaderFactory<Model, Data> getFactory(Entry<?, ?> entry) {
+  private <Model, Data> ModelLoaderFactory<Model, Data> getFactory(@NonNull Entry<?, ?> entry) {
     return (ModelLoaderFactory<Model, Data>) entry.factory;
   }
 
+  @NonNull
   @SuppressWarnings("unchecked")
-  private <Model, Data> ModelLoader<Model, Data> build(Entry<?, ?> entry) {
+  private <Model, Data> ModelLoader<Model, Data> build(@NonNull Entry<?, ?> entry) {
     return (ModelLoader<Model, Data>) Preconditions.checkNotNull(entry.factory.build(this));
   }
 
+  @NonNull
   @SuppressWarnings("unchecked")
   private static <Model, Data> ModelLoader<Model, Data> emptyModelLoader() {
     return (ModelLoader<Model, Data>) EMPTY_MODEL_LOADER;
@@ -183,32 +191,33 @@ public class MultiModelLoaderFactory {
     @Synthetic final ModelLoaderFactory<? extends Model, ? extends Data> factory;
 
     public Entry(
-        Class<Model> modelClass,
-        Class<Data> dataClass,
-        ModelLoaderFactory<? extends Model, ? extends Data> factory) {
+        @NonNull Class<Model> modelClass,
+        @NonNull Class<Data> dataClass,
+        @NonNull ModelLoaderFactory<? extends Model, ? extends Data> factory) {
       this.modelClass = modelClass;
       this.dataClass = dataClass;
       this.factory = factory;
     }
 
-    public boolean handles(Class<?> modelClass, Class<?> dataClass) {
+    public boolean handles(@NonNull Class<?> modelClass, @NonNull Class<?> dataClass) {
       return handles(modelClass) && this.dataClass.isAssignableFrom(dataClass);
     }
 
-    public boolean handles(Class<?> modelClass) {
+    public boolean handles(@NonNull Class<?> modelClass) {
       return this.modelClass.isAssignableFrom(modelClass);
     }
   }
 
   static class Factory {
+    @NonNull
     public <Model, Data> MultiModelLoader<Model, Data> build(
-        List<ModelLoader<Model, Data>> modelLoaders, Pool<List<Throwable>> throwableListPool) {
+        @NonNull List<ModelLoader<Model, Data>> modelLoaders,
+        @NonNull Pool<List<Throwable>> throwableListPool) {
       return new MultiModelLoader<>(modelLoaders, throwableListPool);
     }
   }
 
   private static class EmptyModelLoader implements ModelLoader<Object, Object> {
-
     @Synthetic
     EmptyModelLoader() { }
 

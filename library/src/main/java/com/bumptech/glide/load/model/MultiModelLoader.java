@@ -29,8 +29,8 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
   private final List<ModelLoader<Model, Data>> modelLoaders;
   private final Pool<List<Throwable>> exceptionListPool;
 
-  MultiModelLoader(List<ModelLoader<Model, Data>> modelLoaders,
-      Pool<List<Throwable>> exceptionListPool) {
+  MultiModelLoader(@NonNull List<ModelLoader<Model, Data>> modelLoaders,
+      @NonNull Pool<List<Throwable>> exceptionListPool) {
     this.modelLoaders = modelLoaders;
     this.exceptionListPool = exceptionListPool;
   }
@@ -82,7 +82,8 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     @Nullable
     private List<Throwable> exceptions;
 
-    MultiFetcher(List<DataFetcher<Data>> fetchers, Pool<List<Throwable>> throwableListPool) {
+    MultiFetcher(@NonNull List<DataFetcher<Data>> fetchers,
+        @NonNull Pool<List<Throwable>> throwableListPool) {
       this.throwableListPool = throwableListPool;
       Preconditions.checkNotEmpty(fetchers);
       this.fetchers = fetchers;
@@ -90,7 +91,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super Data> callback) {
+    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       this.priority = priority;
       this.callback = callback;
       exceptions = throwableListPool.acquire();
@@ -128,7 +129,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public void onDataReady(Data data) {
+    public void onDataReady(@Nullable Data data) {
       if (data != null) {
         callback.onDataReady(data);
       } else {
@@ -137,7 +138,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public void onLoadFailed(Exception e) {
+    public void onLoadFailed(@NonNull Exception e) {
       Preconditions.checkNotNull(exceptions).add(e);
       startNextOrFail();
     }

@@ -35,6 +35,7 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
    */
   public static class Factory implements ModelLoaderFactory<File, ByteBuffer> {
 
+    @NonNull
     @Override
     public ModelLoader<File, ByteBuffer> build(MultiModelLoaderFactory multiFactory) {
       return new ByteBufferFileLoader();
@@ -57,7 +58,8 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super ByteBuffer> callback) {
+    public void loadData(@NonNull Priority priority,
+        @NonNull DataCallback<? super ByteBuffer> callback) {
       ByteBuffer result;
       try {
         result = ByteBufferUtil.fromFile(file);

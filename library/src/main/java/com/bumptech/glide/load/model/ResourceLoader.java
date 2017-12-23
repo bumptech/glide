@@ -67,6 +67,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
       this.resources = resources;
     }
 
+    @NonNull
     @Override
     public ModelLoader<Integer, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new ResourceLoader<>(resources, multiFactory.build(Uri.class, InputStream.class));
@@ -90,6 +91,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
       this.resources = resources;
     }
 
+    @NonNull
     @Override
     public ModelLoader<Integer, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
       return new ResourceLoader<>(
@@ -113,6 +115,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
       this.resources = resources;
     }
 
+    @NonNull
     @Override
     public ModelLoader<Integer, Uri> build(MultiModelLoaderFactory multiFactory) {
       return new ResourceLoader<>(resources, UnitModelLoader.<Uri>getInstance());

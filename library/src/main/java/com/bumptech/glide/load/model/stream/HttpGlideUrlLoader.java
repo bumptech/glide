@@ -66,6 +66,7 @@ public class HttpGlideUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
     private final ModelCache<GlideUrl, GlideUrl> modelCache = new ModelCache<>(500);
 
+    @NonNull
     @Override
     public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new HttpGlideUrlLoader(modelCache);

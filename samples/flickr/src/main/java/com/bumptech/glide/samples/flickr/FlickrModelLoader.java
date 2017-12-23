@@ -26,6 +26,7 @@ public final class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
   public static class Factory implements ModelLoaderFactory<Photo, InputStream> {
     private final ModelCache<Photo, GlideUrl> modelCache = new ModelCache<>(500);
 
+    @NonNull
     @Override
     public ModelLoader<Photo, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new FlickrModelLoader(

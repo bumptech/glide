@@ -398,8 +398,9 @@ public class Registry {
    * {@link java.io.FileDescriptor}).
    */
   @NonNull
-  public <Model, Data> Registry append(Class<Model> modelClass, Class<Data> dataClass,
-      ModelLoaderFactory<Model, Data> factory) {
+  public <Model, Data> Registry append(
+      @NonNull Class<Model> modelClass, @NonNull Class<Data> dataClass,
+      @NonNull ModelLoaderFactory<Model, Data> factory) {
     modelLoaderRegistry.append(modelClass, dataClass, factory);
     return this;
   }
@@ -428,8 +429,9 @@ public class Registry {
    * {@link java.io.FileDescriptor}).
    */
   @NonNull
-  public <Model, Data> Registry prepend(Class<Model> modelClass, Class<Data> dataClass,
-      ModelLoaderFactory<Model, Data> factory) {
+  public <Model, Data> Registry prepend(
+      @NonNull Class<Model> modelClass, @NonNull Class<Data> dataClass,
+      @NonNull ModelLoaderFactory<Model, Data> factory) {
     modelLoaderRegistry.prepend(modelClass, dataClass, factory);
     return this;
   }
@@ -459,9 +461,9 @@ public class Registry {
    */
   @NonNull
   public <Model, Data> Registry replace(
-      Class<Model> modelClass,
-      Class<Data> dataClass,
-      ModelLoaderFactory<? extends Model, ? extends Data> factory) {
+      @NonNull Class<Model> modelClass,
+      @NonNull Class<Data> dataClass,
+      @NonNull ModelLoaderFactory<? extends Model, ? extends Data> factory) {
     modelLoaderRegistry.replace(modelClass, dataClass, factory);
     return this;
   }
@@ -518,7 +520,7 @@ public class Registry {
 
   @Nullable
   public <Model, TResource, Transcode> List<Class<?>> getRegisteredResourceClasses(
-      Class<Model> modelClass, @NonNull Class<TResource> resourceClass,
+      @NonNull Class<Model> modelClass, @NonNull Class<TResource> resourceClass,
       @NonNull Class<Transcode> transcodeClass) {
     List<Class<?>> result = modelToResourceClassCache.get(modelClass, resourceClass);
 
@@ -597,11 +599,12 @@ public class Registry {
   // Never serialized by Glide.
   @SuppressWarnings("serial")
   public static class NoModelLoaderAvailableException extends MissingComponentException {
-    public NoModelLoaderAvailableException(Object model) {
+    public NoModelLoaderAvailableException(@NonNull Object model) {
       super("Failed to find any ModelLoaders for model: " + model);
     }
 
-    public NoModelLoaderAvailableException(Class<?> modelClass, Class<?> dataClass) {
+    public NoModelLoaderAvailableException(@NonNull Class<?> modelClass,
+        @NonNull Class<?> dataClass) {
       super("Failed to find any ModelLoaders for model: " + modelClass + " and data: " + dataClass);
     }
   }
@@ -612,7 +615,7 @@ public class Registry {
   // Never serialized by Glide.
   @SuppressWarnings("serial")
   public static class NoResultEncoderAvailableException extends MissingComponentException {
-    public NoResultEncoderAvailableException(Class<?> resourceClass) {
+    public NoResultEncoderAvailableException(@NonNull Class<?> resourceClass) {
       super("Failed to find result encoder for resource class: " + resourceClass);
     }
   }
@@ -623,7 +626,7 @@ public class Registry {
   // Never serialized by Glide.
   @SuppressWarnings("serial")
   public static class NoSourceEncoderAvailableException extends MissingComponentException {
-    public NoSourceEncoderAvailableException(Class<?> dataClass) {
+    public NoSourceEncoderAvailableException(@NonNull Class<?> dataClass) {
       super("Failed to find source encoder for data class: " + dataClass);
     }
   }
@@ -634,7 +637,7 @@ public class Registry {
   // Never serialized by Glide.
   @SuppressWarnings("serial")
   public static class MissingComponentException extends RuntimeException {
-    public MissingComponentException(String message) {
+    public MissingComponentException(@NonNull String message) {
       super(message);
     }
   }
