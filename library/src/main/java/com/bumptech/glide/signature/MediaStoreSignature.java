@@ -11,7 +11,7 @@ import java.security.MessageDigest;
  * media store files like edits, rotations, and temporary file replacement.
  */
 public class MediaStoreSignature implements Key {
-  private final String mimeType;
+  @NonNull private final String mimeType;
   private final long dateModified;
   private final int orientation;
 
