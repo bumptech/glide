@@ -1,5 +1,5 @@
 language: android
-sudo: required
+sudo: false
 dist: trusty
 
 before_install:
