@@ -12,8 +12,9 @@ buildscript {
 
     dependencies {
         classpath "com.android.tools.build:gradle:${ANDROID_GRADLE_VERSION}"
-        classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${COVERALLS_GRADLE_VERSION}"
-        classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_VERSION}"
+        if (!hasProperty('DISABLE_ERROR_PRONE')) {
+            classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_VERSION}"
+        }
     }
 }
 
