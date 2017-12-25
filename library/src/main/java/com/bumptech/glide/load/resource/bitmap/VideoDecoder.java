@@ -1,9 +1,14 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import android.annotation.TargetApi;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
@@ -29,6 +34,10 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
    * frame.
    */
   public static final long DEFAULT_FRAME = -1;
+
+  /** Matches the behavior of {@link MediaMetadataRetriever#getFrameAtTime(long)}. */
+  @VisibleForTesting
+  static final int DEFAULT_FRAME_OPTION = MediaMetadataRetriever.OPTION_CLOSEST_SYNC;
 
   /**
    * A long indicating the time position (in microseconds) of the target frame which will be
@@ -66,7 +75,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   @SuppressWarnings("WeakerAccess")
   public static final Option<Integer> FRAME_OPTION = Option.disk(
       "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.FrameOption",
-      null /*defaultValue*/,
+      /*defaultValue=*/ MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
       new Option.CacheKeyUpdater<Integer>() {
         private final ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
         @Override
@@ -114,7 +123,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   }
 
   @Override
-  public boolean handles(T data, Options options) {
+  public boolean handles(@NonNull T data, @NonNull Options options) {
     // Calling setDataSource is expensive so avoid doing so unless we're actually called.
     // For non-videos this isn't any cheaper, but for videos it safes the redundant call and
     // 50-100ms.
@@ -122,33 +131,49 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   }
 
   @Override
-  public Resource<Bitmap> decode(T resource, int outWidth, int outHeight,
-      Options options) throws IOException {
+  public Resource<Bitmap> decode(
+      @NonNull T resource, int outWidth, int outHeight, @NonNull Options options)
+      throws IOException {
     long frameTimeMicros = options.get(TARGET_FRAME);
     if (frameTimeMicros < 0 && frameTimeMicros != DEFAULT_FRAME) {
       throw new IllegalArgumentException(
           "Requested frame must be non-negative, or DEFAULT_FRAME, given: " + frameTimeMicros);
     }
     Integer frameOption = options.get(FRAME_OPTION);
+    if (frameOption == null) {
+      frameOption = DEFAULT_FRAME_OPTION;
+    }
 
     final Bitmap result;
     MediaMetadataRetriever mediaMetadataRetriever = factory.build();
     try {
       initializer.initialize(mediaMetadataRetriever, resource);
-      if (frameTimeMicros == DEFAULT_FRAME) {
-        result = mediaMetadataRetriever.getFrameAtTime();
-      } else if (frameOption == null) {
-        result = mediaMetadataRetriever.getFrameAtTime(frameTimeMicros);
-      } else {
-        result = mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
-      }
+      result =
+          decodeFrame(mediaMetadataRetriever, frameTimeMicros, frameOption, outWidth, outHeight);
     } catch (RuntimeException e) {
       // MediaMetadataRetriever APIs throw generic runtime exceptions when given invalid data.
       throw new IOException(e);
     } finally {
       mediaMetadataRetriever.release();
     }
+
     return BitmapResource.obtain(result, bitmapPool);
+  }
+
+  @TargetApi(Build.VERSION_CODES.O_MR1)
+  @Nullable
+  private static Bitmap decodeFrame(
+      MediaMetadataRetriever mediaMetadataRetriever,
+      long frameTimeMicros,
+      int frameOption,
+      int outWidth,
+      int outHeight) {
+     if (Build.VERSION.SDK_INT >= VERSION_CODES.O_MR1) {
+       return mediaMetadataRetriever.getScaledFrameAtTime(
+           frameTimeMicros, frameOption, outWidth, outHeight);
+    } else {
+      return mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
+    }
   }
 
   @VisibleForTesting

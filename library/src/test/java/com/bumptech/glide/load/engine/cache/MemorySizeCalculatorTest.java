@@ -195,6 +195,7 @@ public class MemorySizeCalculatorTest {
     }
 
     @Implementation
+    @Override
     public boolean isLowRamDevice() {
       return isLowRam;
     }
