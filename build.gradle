@@ -15,6 +15,7 @@ buildscript {
         if (!hasProperty('DISABLE_ERROR_PRONE')) {
             classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_VERSION}"
         }
+        classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
     }
 }
 
