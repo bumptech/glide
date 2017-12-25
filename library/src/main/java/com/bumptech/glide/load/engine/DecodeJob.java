@@ -49,7 +49,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private final DeferredEncodeManager<?> deferredEncodeManager = new DeferredEncodeManager<>();
   private final ReleaseManager releaseManager = new ReleaseManager();
 
-  private GlideContext glideContext;
+  @SuppressWarnings("WeakerAccess") @Synthetic GlideContext glideContext;
   private Key signature;
   private Priority priority;
   private EngineKey loadKey;

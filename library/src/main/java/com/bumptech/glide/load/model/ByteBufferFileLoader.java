@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
  * Loads {@link java.nio.ByteBuffer}s using NIO for {@link java.io.File}.
  */
 public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
-  private static final String TAG = "ByteBufferFileLoader";
+  @Synthetic static final String TAG = "ByteBufferFileLoader";
 
   @Override
   public LoadData<ByteBuffer> buildLoadData(@NonNull File file, int width, int height,
@@ -37,7 +37,7 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
 
     @NonNull
     @Override
-    public ModelLoader<File, ByteBuffer> build(MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<File, ByteBuffer> build(@NonNull MultiModelLoaderFactory multiFactory) {
       return new ByteBufferFileLoader();
     }
 
@@ -47,7 +47,7 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
     }
   }
 
-  private static class ByteBufferFetcher implements DataFetcher<ByteBuffer> {
+  private static final class ByteBufferFetcher implements DataFetcher<ByteBuffer> {
 
     private final File file;
 

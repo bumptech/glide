@@ -20,10 +20,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 final class ActiveResources {
-  private static final int MSG_CLEAN_REF = 1;
+  @SuppressWarnings("WeakerAccess") @Synthetic static final int MSG_CLEAN_REF = 1;
 
   private final boolean isActiveResourceRetentionAllowed;
-  private final Handler mainHandler = new Handler(Looper.getMainLooper(), new Callback() {
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic
+  final Handler mainHandler = new Handler(Looper.getMainLooper(), new Callback() {
     @Override
     public boolean handleMessage(Message msg) {
       if (msg.what == MSG_CLEAN_REF) {
@@ -40,13 +42,14 @@ final class ActiveResources {
 
   // Lazily instantiate to avoid exceptions if Glide is initialized on a background thread. See
   // #295.
+  @SuppressWarnings("WeakerAccess")
   @Nullable
-  private ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
+  @Synthetic
+  ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
+  @SuppressWarnings("WeakerAccess") @Synthetic volatile boolean isShutdown;
+  @SuppressWarnings("WeakerAccess") @Nullable @Synthetic volatile DequeuedResourceCallback cb;
   @Nullable
   private Thread cleanReferenceQueueThread;
-  private volatile boolean isShutdown;
-  @Nullable
-  private volatile DequeuedResourceCallback cb;
 
   ActiveResources(boolean isActiveResourceRetentionAllowed) {
     this.isActiveResourceRetentionAllowed = isActiveResourceRetentionAllowed;

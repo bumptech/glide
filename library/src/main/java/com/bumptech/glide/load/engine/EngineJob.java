@@ -27,11 +27,11 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private static final Handler MAIN_THREAD_HANDLER =
       new Handler(Looper.getMainLooper(), new MainThreadCallback());
 
-  private static final int MSG_COMPLETE = 1;
-  private static final int MSG_EXCEPTION = 2;
+  @Synthetic static final int MSG_COMPLETE = 1;
+  @Synthetic static final int MSG_EXCEPTION = 2;
   // Used when we realize we're cancelled on a background thread in reschedule and can recycle
   // immediately rather than waiting for a result or an error.
-  private static final int MSG_CANCELLED = 3;
+  @Synthetic static final int MSG_CANCELLED = 3;
 
   private final List<ResourceCallback> cbs = new ArrayList<>(2);
   private final StateVerifier stateVerifier = StateVerifier.newInstance();

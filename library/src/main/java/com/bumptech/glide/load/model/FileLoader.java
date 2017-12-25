@@ -8,6 +8,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
+import com.bumptech.glide.util.Synthetic;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,7 +22,7 @@ import java.io.InputStream;
  *               java.io.InputStream} or {@link java.io.FileDescriptor} etc).
  */
 public class FileLoader<Data> implements ModelLoader<File, Data> {
-  private static final String TAG = "FileLoader";
+  @Synthetic static final String TAG = "FileLoader";
 
   private final FileOpener<Data> fileOpener;
 
@@ -52,7 +53,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     Class<Data> getDataClass();
   }
 
-  private static class FileFetcher<Data> implements DataFetcher<Data> {
+  private static final class FileFetcher<Data> implements DataFetcher<Data> {
     private final File file;
     private final FileOpener<Data> opener;
     private Data data;
@@ -118,7 +119,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
 
     @NonNull
     @Override
-    public final ModelLoader<File, Data> build(MultiModelLoaderFactory multiFactory) {
+    public final ModelLoader<File, Data> build(@NonNull MultiModelLoaderFactory multiFactory) {
       return new FileLoader<>(opener);
     }
 

@@ -16,7 +16,7 @@ import java.util.TreeMap;
  * <p> Requires {@link Build.VERSION_CODES#KITKAT KitKat} or higher. </p>
  */
 @RequiresApi(Build.VERSION_CODES.KITKAT)
-class SizeStrategy implements LruPoolStrategy {
+final class SizeStrategy implements LruPoolStrategy {
   private static final int MAX_SIZE_MULTIPLE = 8;
   private final KeyPool keyPool = new KeyPool();
   private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<>();
@@ -97,16 +97,21 @@ class SizeStrategy implements LruPoolStrategy {
     return "SizeStrategy:\n  " + groupedMap + "\n" + "  SortedSizes" + sortedSizes;
   }
 
-  private static String getBitmapString(Bitmap bitmap) {
+  static String getBitmapString(Bitmap bitmap) {
     int size = Util.getBitmapByteSize(bitmap);
     return getBitmapString(size);
   }
 
+  // PMD will warn that this creates an accessor class unless it's public, package private doesn't
+  // appear to be sufficient. Since this class isn't public, it seems fine to make this method
+  // public.
+  @SuppressWarnings("WeakerAccess")
   @Synthetic
-  static String getBitmapString(int size) {
+  public static String getBitmapString(int size) {
     return "[" + size + "]";
   }
 
+  // Non-final for mocking.
   @VisibleForTesting
   static class KeyPool extends BaseKeyPool<Key> {
 

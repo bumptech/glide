@@ -5,6 +5,7 @@ import android.support.v4.util.Pools.Pool;
 import android.support.v4.util.Pools.SimplePool;
 import android.support.v4.util.Pools.SynchronizedPool;
 import android.util.Log;
+import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
  * interface to ensure objects aren't used while inside the pool.
  */
 public final class FactoryPools {
-  private static final String TAG = "FactoryPools";
+  @Synthetic static final String TAG = "FactoryPools";
   private static final int DEFAULT_POOL_SIZE = 20;
   private static final Resetter<Object> EMPTY_RESETTER = new Resetter<Object>() {
     @Override

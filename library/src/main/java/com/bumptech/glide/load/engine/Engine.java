@@ -32,7 +32,7 @@ public class Engine implements EngineJobListener,
     MemoryCache.ResourceRemovedListener,
     EngineResource.ResourceListener {
   private static final String TAG = "Engine";
-  private static final int JOB_POOL_SIZE = 150;
+  @Synthetic static final int JOB_POOL_SIZE = 150;
   private final Jobs jobs;
   private final EngineKeyFactory keyFactory;
   private final MemoryCache cache;
@@ -394,8 +394,9 @@ public class Engine implements EngineJobListener,
   @VisibleForTesting
   static class DecodeJobFactory {
     @Synthetic final DecodeJob.DiskCacheProvider diskCacheProvider;
-    @Synthetic final Pools.Pool<DecodeJob<?>> pool = FactoryPools.simple(JOB_POOL_SIZE,
-        new FactoryPools.Factory<DecodeJob<?>>() {
+    @Synthetic final Pools.Pool<DecodeJob<?>> pool =
+        FactoryPools.simple(JOB_POOL_SIZE,
+            new FactoryPools.Factory<DecodeJob<?>>() {
           @Override
           public DecodeJob<?> create() {
             return new DecodeJob<>(diskCacheProvider, pool);
@@ -453,19 +454,21 @@ public class Engine implements EngineJobListener,
     @Synthetic final GlideExecutor sourceUnlimitedExecutor;
     @Synthetic final GlideExecutor animationExecutor;
     @Synthetic final EngineJobListener listener;
-    @Synthetic final Pools.Pool<EngineJob<?>> pool = FactoryPools.simple(JOB_POOL_SIZE,
-        new FactoryPools.Factory<EngineJob<?>>() {
-          @Override
-          public EngineJob<?> create() {
-            return new EngineJob<>(
-                diskCacheExecutor,
-                sourceExecutor,
-                sourceUnlimitedExecutor,
-                animationExecutor,
-                listener,
-                pool);
-          }
-        });
+    @Synthetic final Pools.Pool<EngineJob<?>> pool =
+        FactoryPools.simple(
+            JOB_POOL_SIZE,
+            new FactoryPools.Factory<EngineJob<?>>() {
+              @Override
+              public EngineJob<?> create() {
+                return new EngineJob<>(
+                    diskCacheExecutor,
+                    sourceExecutor,
+                    sourceUnlimitedExecutor,
+                    animationExecutor,
+                    listener,
+                    pool);
+              }
+            });
 
     EngineJobFactory(
         GlideExecutor diskCacheExecutor,
