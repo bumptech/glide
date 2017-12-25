@@ -43,7 +43,7 @@ public class ConcurrencyHelper {
           reference.set(future.get(timeout, timeUnit));
           return true;
         } catch (ExecutionException e) {
-          throw new RuntimeException(e);
+          throw new RuntimeException(e.getCause());
         } catch (TimeoutException e) {
           return false;
         }
