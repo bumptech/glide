@@ -48,6 +48,9 @@ public class ResourceBitmapDecoder implements ResourceDecoder<Uri, Bitmap> {
   public Resource<Bitmap> decode(@NonNull Uri source, int width, int height,
       @NonNull Options options) {
     Resource<Drawable> drawableResource = drawableDecoder.decode(source, width, height, options);
+    if (drawableResource == null) {
+      return null;
+    }
     Drawable drawable = drawableResource.get();
     return DrawableToBitmapConverter.convert(bitmapPool, drawable, width, height);
   }
