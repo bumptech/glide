@@ -69,6 +69,7 @@ import com.bumptech.glide.load.resource.gif.GifFrameResourceDecoder;
 import com.bumptech.glide.load.resource.gif.StreamGifDecoder;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
+import com.bumptech.glide.load.resource.transcode.DrawableBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
@@ -352,6 +353,9 @@ public class Glide implements ComponentCallbacks2 {
         new ResourceLoader.AssetFileDescriptorFactory(resources);
     BitmapEncoder bitmapEncoder = new BitmapEncoder();
 
+    BitmapBytesTranscoder bitmapBytesTranscoder = new BitmapBytesTranscoder();
+    GifDrawableBytesTranscoder gifDrawableBytesTranscoder = new GifDrawableBytesTranscoder();
+
     ContentResolver contentResolver = context.getContentResolver();
 
     registry
@@ -481,8 +485,13 @@ public class Glide implements ComponentCallbacks2 {
             Bitmap.class,
             BitmapDrawable.class,
             new BitmapDrawableTranscoder(resources))
-        .register(Bitmap.class, byte[].class, new BitmapBytesTranscoder())
-        .register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
+        .register(Bitmap.class, byte[].class, bitmapBytesTranscoder)
+        .register(
+            Drawable.class,
+            byte[].class,
+            new DrawableBytesTranscoder(
+                bitmapPool, bitmapBytesTranscoder, gifDrawableBytesTranscoder))
+        .register(GifDrawable.class, byte[].class, gifDrawableBytesTranscoder);
 
     ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     glideContext =

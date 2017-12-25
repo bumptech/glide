@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,8 +67,6 @@ public class AsBytesTest {
     assertThat(BitmapFactory.decodeByteArray(data, 0, data.length)).isNotNull();
   }
 
-  // TODO: Should this pass?
-  @Ignore
   @Test
   public void loadBitmapDrawable_asBytes_providesBytesOfBitmap() {
     Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), ResourceIds.raw.canonical);
