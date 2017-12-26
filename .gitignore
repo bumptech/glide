@@ -23,5 +23,7 @@ docs/**/*
 
 # Intellij
 *.iml
+*.ipr
+*.iws
 .idea/**
 !.idea/codeStyleSettings.xml

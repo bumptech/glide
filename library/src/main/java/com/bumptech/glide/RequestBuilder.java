@@ -13,6 +13,8 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RawRes;
+import android.support.annotation.RestrictTo;
+import android.support.annotation.RestrictTo.Scope;
 import android.widget.ImageView;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -30,6 +32,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.signature.ApplicationVersionSignature;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.net.URL;
@@ -571,8 +574,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     return into(target, /*targetListener=*/ null);
   }
 
+  @RestrictTo(Scope.LIBRARY)
   @NonNull
-  private <Y extends Target<TranscodeType>> Y into(
+  @Synthetic <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
       @Nullable RequestListener<TranscodeType> targetListener) {
     return into(target, targetListener, getMutableOptions());

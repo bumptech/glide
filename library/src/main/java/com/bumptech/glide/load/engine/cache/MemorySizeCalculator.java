@@ -4,11 +4,14 @@ import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.RestrictTo;
+import android.support.annotation.RestrictTo.Scope;
 import android.support.annotation.VisibleForTesting;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Synthetic;
 
 /**
  * A calculator that tries to intelligently determine cache sizes for a given device based on some
@@ -114,8 +117,9 @@ public final class MemorySizeCalculator {
     return Formatter.formatFileSize(context, bytes);
   }
 
+  @RestrictTo(Scope.LIBRARY)
   @TargetApi(Build.VERSION_CODES.KITKAT)
-  private static boolean isLowMemoryDevice(ActivityManager activityManager) {
+  @Synthetic static boolean isLowMemoryDevice(ActivityManager activityManager) {
     // Explicitly check with an if statement, on some devices both parts of boolean expressions
     // can be evaluated even if we'd normally expect a short circuit.
     //noinspection SimplifiableIfStatement
@@ -149,17 +153,17 @@ public final class MemorySizeCalculator {
     // 4MB.
     static final int ARRAY_POOL_SIZE_BYTES = 4 * 1024 * 1024;
 
-    private final Context context;
+    @Synthetic final Context context;
 
-    // Modifiable for testing.
-    private ActivityManager activityManager;
-    private ScreenDimensions screenDimensions;
+    // Modifiable (non-final) for testing.
+    @Synthetic ActivityManager activityManager;
+    @Synthetic ScreenDimensions screenDimensions;
 
-    private float memoryCacheScreens = MEMORY_CACHE_TARGET_SCREENS;
-    private float bitmapPoolScreens = BITMAP_POOL_TARGET_SCREENS;
-    private float maxSizeMultiplier = MAX_SIZE_MULTIPLIER;
-    private float lowMemoryMaxSizeMultiplier = LOW_MEMORY_MAX_SIZE_MULTIPLIER;
-    private int arrayPoolSizeBytes = ARRAY_POOL_SIZE_BYTES;
+    @Synthetic float memoryCacheScreens = MEMORY_CACHE_TARGET_SCREENS;
+    @Synthetic float bitmapPoolScreens = BITMAP_POOL_TARGET_SCREENS;
+    @Synthetic float maxSizeMultiplier = MAX_SIZE_MULTIPLIER;
+    @Synthetic float lowMemoryMaxSizeMultiplier = LOW_MEMORY_MAX_SIZE_MULTIPLIER;
+    @Synthetic int arrayPoolSizeBytes = ARRAY_POOL_SIZE_BYTES;
 
     public Builder(Context context) {
       this.context = context;
