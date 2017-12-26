@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine.cache;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 
 import android.support.annotation.NonNull;
@@ -53,6 +54,8 @@ public class DiskLruCacheWrapperTest {
         }
       }
     }
+    // GC before delete() to release files on Windows (https://stackoverflow.com/a/4213208/253468)
+    System.gc();
     if (!file.delete() && file.exists()) {
       throw new RuntimeException("Failed to delete: " + file);
     }
@@ -139,6 +142,7 @@ public class DiskLruCacheWrapperTest {
   // Tests #2465.
   @Test
   public void clearDiskCache_afterOpeningDiskCache_andDeleteDirectoryOutsideGlide_doesNotThrow() {
+    assumeTrue("A file handle is likely open, so cannot delete dir", !Util.isWindows());
     DiskCache cache = DiskLruCacheWrapper.create(dir, 1024 * 1024);
     cache.get(mock(Key.class));
     deleteRecursive(dir);
@@ -148,6 +152,7 @@ public class DiskLruCacheWrapperTest {
   // Tests #2465.
   @Test
   public void get_afterDeleteDirectoryOutsideGlideAndClose_doesNotThrow() {
+    assumeTrue("A file handle is likely open, so cannot delete dir", !Util.isWindows());
     DiskCache cache = DiskLruCacheWrapper.create(dir, 1024 * 1024);
     cache.get(mock(Key.class));
     deleteRecursive(dir);
