@@ -20,6 +20,10 @@ dependencies {
     testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
     testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
     testImplementation "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
+
+    if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
+       errorprone "com.google.errorprone:error_prone_core:${ERROR_PRONE_VERSION}"
+    }
 }
 
 android.testOptions.unitTests.all { Test testTask ->
