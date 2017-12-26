@@ -25,7 +25,8 @@ public class ResourceEncoderRegistry {
     encoders.add(0, new Entry<>(resourceClass, encoder));
   }
 
-  @SuppressWarnings("unchecked")
+  // Somewhat clearer to set size along with the index.
+  @SuppressWarnings({"unchecked", "PMD.OneDeclarationPerLine"})
   @Nullable
   public synchronized <Z> ResourceEncoder<Z> get(@NonNull Class<Z> resourceClass) {
     //noinspection ForLoopReplaceableByForEach to improve perf

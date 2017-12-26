@@ -56,6 +56,8 @@ public class DecodePath<DataType, ResourceType, Transcode> {
     }
   }
 
+  // Somewhat clearer to set size along with the index.
+  @SuppressWarnings("PMD.OneDeclarationPerLine")
   private Resource<ResourceType> decodeResourceWithList(DataRewinder<DataType> rewinder, int width,
       int height, Options options, List<Throwable> exceptions) throws GlideException {
     Resource<ResourceType> result = null;

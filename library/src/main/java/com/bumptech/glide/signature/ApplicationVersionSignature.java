@@ -44,12 +44,11 @@ public final class ApplicationVersionSignature {
 
   @NonNull
   private static Key obtainVersionSignature(@NonNull Context context) {
-    PackageInfo pInfo = null;
+    PackageInfo pInfo;
     try {
       pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
     } catch (PackageManager.NameNotFoundException e) {
-      // Should never happen.
-      e.printStackTrace();
+      throw new RuntimeException(e);
     }
     final String versionCode;
     if (pInfo != null) {

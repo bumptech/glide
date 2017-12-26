@@ -27,6 +27,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   @VisibleForTesting
   static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY =
       new DefaultHttpUrlConnectionFactory();
+  // Returned when a connection error prevented us from receiving an http error.
+  private static final int INVALID_STATUS_CODE = -1;
 
   private final GlideUrl glideUrl;
   private final int timeout;
@@ -51,23 +53,25 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   public void loadData(@NonNull Priority priority,
       @NonNull DataCallback<? super InputStream> callback) {
     long startTime = LogTime.getLogTime();
-    final InputStream result;
     try {
-      result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/,
-          glideUrl.getHeaders());
-    } catch (IOException e) {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Failed to load data for url", e);
+      final InputStream result;
+      try {
+        result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/,
+            glideUrl.getHeaders());
+      } catch (IOException e) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Failed to load data for url", e);
+        }
+        callback.onLoadFailed(e);
+        return;
       }
-      callback.onLoadFailed(e);
-      return;
-    }
 
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Finished http url fetcher fetch in " + LogTime.getElapsedMillis(startTime)
-          + " ms and loaded " + result);
+      callback.onDataReady(result);
+    } finally {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Finished http url fetcher fetch in " + LogTime.getElapsedMillis(startTime));
+      }
     }
-    callback.onDataReady(result);
   }
 
   private InputStream loadDataWithRedirects(URL url, int redirects, URL lastUrl,
@@ -108,9 +112,9 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       return null;
     }
     final int statusCode = urlConnection.getResponseCode();
-    if (statusCode / 100 == 2) {
+    if (isHttpOk(statusCode)) {
       return getStreamForSuccessfulRequest(urlConnection);
-    } else if (statusCode / 100 == 3) {
+    } else if (isHttpRedirect(statusCode)) {
       String redirectUrlString = urlConnection.getHeaderField("Location");
       if (TextUtils.isEmpty(redirectUrlString)) {
         throw new HttpException("Received empty or null redirect url");
@@ -120,11 +124,23 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       // to disconnecting the url connection below. See #2352.
       cleanup();
       return loadDataWithRedirects(redirectUrl, redirects + 1, url, headers);
-    } else if (statusCode == -1) {
+    } else if (statusCode == INVALID_STATUS_CODE) {
       throw new HttpException(statusCode);
     } else {
       throw new HttpException(urlConnection.getResponseMessage(), statusCode);
     }
+  }
+
+  // Referencing constants is less clear than a simple static method.
+  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
+  private static boolean isHttpOk(int statusCode) {
+    return statusCode / 100 == 2;
+  }
+
+  // Referencing constants is less clear than a simple static method.
+  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
+  private static boolean isHttpRedirect(int statusCode) {
+    return statusCode / 100 == 3;
   }
 
   private InputStream getStreamForSuccessfulRequest(HttpURLConnection urlConnection)

@@ -224,6 +224,8 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   private static final class PreloadTargetQueue {
     private final Queue<PreloadTarget> queue;
 
+    // The loop is short and the only point is to create the objects.
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     PreloadTargetQueue(int size) {
       queue = Util.createQueue(size);
 

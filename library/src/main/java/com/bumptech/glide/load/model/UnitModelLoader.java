@@ -25,6 +25,8 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
   /**
    * @deprecated Use {@link #getInstance()} instead.
    */
+  // Will be removed when the constructor is removed.
+  @SuppressWarnings({"PMD.UnnecessaryConstructor", "DeprecatedIsStillUsed"})
   @Deprecated
   public UnitModelLoader() {
     // Intentionally empty.
@@ -96,6 +98,8 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
     }
 
     /** @deprecated Use {@link #getInstance()} instead. */
+    // Will be removed when the constructor is removed.
+    @SuppressWarnings("PMD.UnnecessaryConstructor")
     @Deprecated
     public Factory() {
       // Intentionally empty.

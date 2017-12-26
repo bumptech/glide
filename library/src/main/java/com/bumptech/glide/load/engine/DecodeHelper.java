@@ -178,6 +178,8 @@ final class DecodeHelper<Transcode> {
     return glideContext.getRegistry().getModelLoaders(file);
   }
 
+  // Somewhat clearer to set size along with the index.
+  @SuppressWarnings("PMD.OneDeclarationPerLine")
   boolean isSourceKey(Key key) {
     List<LoadData<?>> loadData = getLoadData();
     //noinspection ForLoopReplaceableByForEach to improve perf
@@ -190,6 +192,8 @@ final class DecodeHelper<Transcode> {
     return false;
   }
 
+  // Somewhat clearer to set size along with the index.
+  @SuppressWarnings("PMD.OneDeclarationPerLine")
   List<LoadData<?>> getLoadData() {
     if (!isLoadDataSet) {
       isLoadDataSet = true;
@@ -208,6 +212,8 @@ final class DecodeHelper<Transcode> {
     return loadData;
   }
 
+  // Somewhat clearer to set size along with the index.
+  @SuppressWarnings("PMD.OneDeclarationPerLine")
   List<Key> getCacheKeys() {
     if (!isCacheKeysSet) {
       isCacheKeysSet = true;

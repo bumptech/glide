@@ -208,7 +208,8 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
    * {@code -1} if no exif segment is found.
    */
   private int moveToExifSegmentAndGetLength(Reader reader) throws IOException {
-    short segmentId, segmentType;
+    short segmentId;
+    short segmentType;
     int segmentLength;
     while (true) {
       segmentId = reader.getUInt8();
@@ -275,7 +276,10 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     int firstIfdOffset = segmentData.getInt32(headerOffsetSize + 4) + headerOffsetSize;
     int tagCount = segmentData.getInt16(firstIfdOffset);
 
-    int tagOffset, tagType, formatCode, componentCount;
+    int tagOffset;
+    int tagType;
+    int formatCode;
+    int componentCount;
     for (int i = 0; i < tagCount; i++) {
       tagOffset = calcTagOffset(firstIfdOffset, i);
       tagType = segmentData.getInt16(tagOffset);

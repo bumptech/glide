@@ -22,6 +22,9 @@ public class BytesResource implements Resource<byte[]> {
 
   @NonNull
   @Override
+  // We have to hope that callers don't mutate our array. In most cases it will only be retrieved
+  // once anyway. Copying the array can be prohibitively expensive and/or lead to OOMs.
+  @SuppressWarnings("PMD.MethodReturnsInternalArray")
   public byte[] get() {
     return bytes;
   }

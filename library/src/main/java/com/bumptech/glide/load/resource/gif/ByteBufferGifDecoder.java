@@ -92,6 +92,7 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   private GifDrawableResource decode(
       ByteBuffer byteBuffer, int width, int height, GifHeaderParser parser, Options options) {
     long startTime = LogTime.getLogTime();
+    try {
     final GifHeader header = parser.parseHeader();
     if (header.getNumFrames() <= 0 || header.getStatus() != GifDecoder.STATUS_OK) {
       // If we couldn't decode the GIF, we will end up with a frame count of 0.
@@ -115,11 +116,12 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
     GifDrawable gifDrawable =
         new GifDrawable(context, gifDecoder, unitTransformation, width, height, firstFrame);
 
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Decoded GIF from stream in " + LogTime.getElapsedMillis(startTime));
-    }
-
     return new GifDrawableResource(gifDrawable);
+    } finally {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Decoded GIF from stream in " + LogTime.getElapsedMillis(startTime));
+      }
+    }
   }
 
   private static int getSampleSize(GifHeader gifHeader, int targetWidth, int targetHeight) {

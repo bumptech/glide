@@ -121,7 +121,8 @@ public final class TransformationUtils {
     }
     // From ImageView/Bitmap.createScaledBitmap.
     final float scale;
-    float dx = 0, dy = 0;
+    float dx = 0;
+    float dy = 0;
     Matrix m = new Matrix();
     if (inBitmap.getWidth() * height > width * inBitmap.getHeight()) {
       scale = (float) height / (float) inBitmap.getHeight();

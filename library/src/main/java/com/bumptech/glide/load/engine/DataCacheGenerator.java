@@ -43,6 +43,9 @@ class DataCacheGenerator implements DataFetcherGenerator,
   }
 
   @Override
+  // The loop iterates a limited number of times and the actions it performs are much more expensive
+  // than a single allocation.
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   public boolean startNext() {
     while (modelLoaders == null || !hasNextModelLoader()) {
       sourceIdIndex++;

@@ -546,7 +546,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * arguments, the current model is not copied copied so changes to the model will affect both
    * builders. </p>
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "PMD.CloneThrowsCloneNotSupportedException"})
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> clone() {

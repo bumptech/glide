@@ -24,13 +24,13 @@ class ThumbnailStreamOpener {
   private final ContentResolver contentResolver;
   private final List<ImageHeaderParser> parsers;
 
-  public ThumbnailStreamOpener(
+  ThumbnailStreamOpener(
       List<ImageHeaderParser> parsers, ThumbnailQuery query, ArrayPool byteArrayPool,
       ContentResolver contentResolver) {
     this(parsers, DEFAULT_SERVICE, query, byteArrayPool, contentResolver);
   }
 
-  public ThumbnailStreamOpener(
+  ThumbnailStreamOpener(
       List<ImageHeaderParser> parsers,
       FileService service,
       ThumbnailQuery query,
@@ -43,7 +43,9 @@ class ThumbnailStreamOpener {
     this.parsers = parsers;
   }
 
-  public int getOrientation(Uri uri) {
+  // The framework can throw NPEs here.
+  @SuppressWarnings("PMD.AvoidCatchingNPE")
+  int getOrientation(Uri uri) {
     InputStream is = null;
     try {
       is = contentResolver.openInputStream(uri);
@@ -65,9 +67,10 @@ class ThumbnailStreamOpener {
     return ImageHeaderParser.UNKNOWN_ORIENTATION;
   }
 
+  // The framework can throw NPEs here.
+  @SuppressWarnings("PMD.AvoidCatchingNPE")
   public InputStream open(Uri uri) throws FileNotFoundException {
     Uri thumbnailUri = null;
-    InputStream inputStream = null;
 
     final Cursor cursor = query.query(uri);
     try {
@@ -88,6 +91,8 @@ class ThumbnailStreamOpener {
         cursor.close();
       }
     }
+
+    InputStream inputStream = null;
     if (thumbnailUri != null) {
       try {
         inputStream = contentResolver.openInputStream(thumbnailUri);

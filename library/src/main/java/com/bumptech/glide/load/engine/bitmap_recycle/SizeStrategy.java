@@ -7,7 +7,7 @@ import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
-import java.util.TreeMap;
+import java.util.NavigableMap;
 
 /**
  * A strategy for reusing bitmaps that relies on
@@ -20,7 +20,7 @@ final class SizeStrategy implements LruPoolStrategy {
   private static final int MAX_SIZE_MULTIPLE = 8;
   private final KeyPool keyPool = new KeyPool();
   private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<>();
-  private final TreeMap<Integer, Integer> sortedSizes = new PrettyPrintTreeMap<>();
+  private final NavigableMap<Integer, Integer> sortedSizes = new PrettyPrintTreeMap<>();
 
   @Override
   public void put(Bitmap bitmap) {

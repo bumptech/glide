@@ -810,7 +810,7 @@ public class RequestOptions implements Cloneable {
    * <p> Even if this object was locked, the cloned object returned from this method will not be
    * locked. </p>
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "PMD.CloneThrowsCloneNotSupportedException"})
   @CheckResult
   @Override
   public RequestOptions clone() {
@@ -1647,14 +1647,20 @@ public class RequestOptions implements Cloneable {
     return isSet(fields, flag);
   }
 
-  public final boolean getUseUnlimitedSourceGeneratorsPool() {
+  // get is just as clear.
+  @SuppressWarnings("PMD.BooleanGetMethodName")
+  final boolean getUseUnlimitedSourceGeneratorsPool() {
     return useUnlimitedSourceGeneratorsPool;
   }
 
+  // get is just as clear.
+  @SuppressWarnings("PMD.BooleanGetMethodName")
   public final boolean getUseAnimationPool() {
     return useAnimationPool;
   }
 
+  // get is just as clear.
+  @SuppressWarnings("PMD.BooleanGetMethodName")
   public final boolean getOnlyRetrieveFromCache() {
     return onlyRetrieveFromCache;
   }

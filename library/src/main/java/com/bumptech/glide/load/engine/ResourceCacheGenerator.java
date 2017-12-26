@@ -20,7 +20,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   private final FetcherReadyCallback cb;
   private final DecodeHelper<?> helper;
 
-  private int sourceIdIndex = 0;
+  private int sourceIdIndex;
   private int resourceClassIndex = -1;
   private Key sourceKey;
   private List<ModelLoader<File, ?>> modelLoaders;
@@ -38,6 +38,9 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   }
 
   @Override
+  // Each iteration is comparatively expensive anyway, we only run until the first one succeeds,
+  // the loop runs for only a limited number of iterations on the order of 10-20 in the worst case.
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   public boolean startNext() {
     List<Key> sourceIds = helper.getCacheKeys();
     if (sourceIds.isEmpty()) {

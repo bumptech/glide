@@ -22,7 +22,7 @@ public class DiskLruCacheWrapper implements DiskCache {
 
   private static final int APP_VERSION = 1;
   private static final int VALUE_COUNT = 1;
-  private static DiskLruCacheWrapper wrapper = null;
+  private static DiskLruCacheWrapper wrapper;
 
   private final SafeKeyGenerator safeKeyGenerator;
   private final File directory;

@@ -167,6 +167,8 @@ public final class ByteBufferUtil {
     @Synthetic final int limit;
     @Synthetic final byte[] data;
 
+    // Copying the array can be prohibitively expensive and/or lead to OOMs.
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     SafeArray(@NonNull byte[] data, int offset, int limit) {
       this.data = data;
       this.offset = offset;
@@ -207,7 +209,7 @@ public final class ByteBufferUtil {
     }
 
     @Override
-    public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+    public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
       if (!byteBuffer.hasRemaining()) {
         return -1;
       }

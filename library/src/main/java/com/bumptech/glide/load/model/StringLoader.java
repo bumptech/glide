@@ -42,7 +42,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     Uri uri;
     if (TextUtils.isEmpty(model)) {
       return null;
-    } else if (model.startsWith("/")) {
+    // See https://pmd.github.io/pmd-6.0.0/pmd_rules_java_performance.html#simplifystartswith
+    } else if (model.charAt(0) == '/') {
       uri = toFileUri(model);
     } else {
       uri = Uri.parse(model);

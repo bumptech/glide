@@ -38,6 +38,8 @@ public final class LazyHeaders implements Headers {
     return combinedHeaders;
   }
 
+  // Using the StringBuilder is less expensive that just appending Strings theoretically at least.
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   private Map<String, String> generateHeaders() {
     Map<String, String> combinedHeaders = new HashMap<>();
 
@@ -216,6 +218,7 @@ public final class LazyHeaders implements Headers {
       return new LazyHeaders(headers);
     }
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     private Map<String, List<LazyHeaderFactory>> copyHeaders() {
       Map<String, List<LazyHeaderFactory>> result =
           new HashMap<>(headers.size());

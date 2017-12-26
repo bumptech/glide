@@ -69,6 +69,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
     }
   }
 
+  // Creating a limited number of objects as the sole purpose of the loop.
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   private static List<Key> getAlternateKeys(List<String> alternateUrls) {
     List<Key> result = new ArrayList<>(alternateUrls.size());
     for (String alternate : alternateUrls) {
