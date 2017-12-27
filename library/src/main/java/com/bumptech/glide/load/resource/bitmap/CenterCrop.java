@@ -16,8 +16,6 @@ public class CenterCrop extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.CenterCrop";
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
-  // Bitmap doesn't implement equals, so == and .equals are equivalent here.
-  @SuppressWarnings("PMD.CompareObjectsWithEquals")
   @Override
   protected Bitmap transform(
       @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {

@@ -55,7 +55,6 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
     return arrayPool.get(size, byte[].class);
   }
 
-  @SuppressWarnings("PMD.UseVarargs")
   @Override
   public void release(@NonNull byte[] bytes) {
     if (arrayPool == null) {
