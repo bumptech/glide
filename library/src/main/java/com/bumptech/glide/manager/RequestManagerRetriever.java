@@ -327,6 +327,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
+  @NonNull
   RequestManagerFragment getRequestManagerFragment(
       @NonNull final android.app.FragmentManager fm, @Nullable android.app.Fragment parentHint) {
     RequestManagerFragment current = (RequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);

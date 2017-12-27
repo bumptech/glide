@@ -382,10 +382,11 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
     }
 
     if (count - pos >= byteCount) {
-      pos += byteCount;
+      pos = (int) (pos + byteCount);
       return byteCount;
     }
-    long read = count - pos;
+    // See http://errorprone.info/bugpattern/IntLongMath.
+    long read = (long) count - pos;
     pos = count;
 
     if (markpos != -1 && byteCount <= marklimit) {
@@ -393,7 +394,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
         return read;
       }
       if (count - pos >= byteCount - read) {
-        pos += byteCount - read;
+        // See http://errorprone.info/bugpattern/NarrowingCompoundAssignment.
+        pos = (int) (pos + byteCount - read);
         return byteCount;
       }
       // Couldn't get all the bytes, skip what we read.

@@ -89,7 +89,7 @@ public class SupportRequestManagerFragment extends Fragment {
   private Set<SupportRequestManagerFragment> getDescendantRequestManagerFragments() {
     if (rootRequestManagerFragment == null) {
       return Collections.emptySet();
-    } else if (rootRequestManagerFragment == this) {
+    } else if (this.equals(rootRequestManagerFragment)) {
       return Collections.unmodifiableSet(childRequestManagerFragments);
     } else {
       HashSet<SupportRequestManagerFragment> descendants = new HashSet<>();
@@ -124,8 +124,9 @@ public class SupportRequestManagerFragment extends Fragment {
    */
   private boolean isDescendant(Fragment fragment) {
     Fragment root = this.getParentFragmentUsingHint();
-    while (fragment.getParentFragment() != null) {
-      if (fragment.getParentFragment() == root) {
+    Fragment parentFragment;
+    while ((parentFragment = fragment.getParentFragment()) != null) {
+      if (parentFragment.equals(root)) {
         return true;
       }
       fragment = fragment.getParentFragment();
@@ -137,7 +138,7 @@ public class SupportRequestManagerFragment extends Fragment {
     unregisterFragmentWithRoot();
     rootRequestManagerFragment = Glide.get(activity).getRequestManagerRetriever()
         .getSupportRequestManagerFragment(activity.getSupportFragmentManager(), null);
-    if (rootRequestManagerFragment != this) {
+    if (!this.equals(rootRequestManagerFragment)) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
     }
   }

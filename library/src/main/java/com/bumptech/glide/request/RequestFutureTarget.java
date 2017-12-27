@@ -200,7 +200,12 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     if (timeoutMillis == null) {
       waiter.waitForTimeout(this, 0);
     } else if (timeoutMillis > 0) {
-      waiter.waitForTimeout(this, timeoutMillis);
+      long now = System.currentTimeMillis();
+      long deadline = now + timeoutMillis;
+      while (!isDone() && now < deadline) {
+        waiter.waitForTimeout(this, deadline - now);
+        now = System.currentTimeMillis();
+      }
     }
 
     if (Thread.interrupted()) {
@@ -268,6 +273,9 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   @VisibleForTesting
   static class Waiter {
 
+    // This is a simple wrapper class that is used to enable testing. The call to the wrapping class
+    // is waited on appropriately.
+    @SuppressWarnings("WaitNotInLoop")
     void waitForTimeout(Object toWaitOn, long timeoutMillis) throws InterruptedException {
       toWaitOn.wait(timeoutMillis);
     }

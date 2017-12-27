@@ -17,6 +17,7 @@ public class DefaultConnectivityMonitorFactory implements ConnectivityMonitorFac
   private static final String NETWORK_PERMISSION = "android.permission.ACCESS_NETWORK_STATE";
 
   @NonNull
+  @Override
   public ConnectivityMonitor build(
       @NonNull Context context,
       @NonNull ConnectivityMonitor.ConnectivityListener listener) {

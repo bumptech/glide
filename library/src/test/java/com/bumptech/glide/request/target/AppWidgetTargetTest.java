@@ -130,6 +130,7 @@ public class AppWidgetTargetTest {
     ComponentName updatedComponentName;
 
     @Implementation
+    @Override
     public void updateAppWidget(int[] appWidgetIds, RemoteViews views) {
       updatedWidgetIds = appWidgetIds;
       updatedRemoteViews = views;

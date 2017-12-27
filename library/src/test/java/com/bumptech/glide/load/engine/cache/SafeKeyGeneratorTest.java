@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine.cache;
 
 import static org.junit.Assert.assertTrue;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import java.security.MessageDigest;
 import java.util.regex.Matcher;
@@ -19,7 +20,7 @@ public class SafeKeyGeneratorTest {
   private int nextId;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     nextId = 0;
     keyGenerator = new SafeKeyGenerator();
   }
@@ -50,7 +51,7 @@ public class SafeKeyGeneratorTest {
     }
 
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest) {
+    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
       messageDigest.update(id.getBytes(CHARSET));
     }
   }

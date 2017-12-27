@@ -5,7 +5,10 @@ set -e
 echo "Starting emulator for $COMPONENT tests"
 ./scripts/travis_create_emulator.sh &
 
-./gradlew :instrumentation:assembleDebug :instrumentation:assembleDebugAndroidTest --parallel
+./gradlew :instrumentation:assembleDebug \
+  :instrumentation:assembleDebugAndroidTest \
+  --parallel \
+  -PDISABLE_ERROR_PRONE
 
 echo "Waiting for emulator..."
 android-wait-for-emulator

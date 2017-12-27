@@ -110,7 +110,9 @@ public final class LruArrayPool implements ArrayPool {
     return result;
   }
 
-  @SuppressWarnings("unchecked")
+
+  // Our cast is safe because the Key is based on the type.
+  @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
   @Nullable
   private <T> T getArrayForKey(Key key) {
     return (T) groupedMap.get(key);

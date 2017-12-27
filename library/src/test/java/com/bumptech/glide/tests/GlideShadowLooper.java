@@ -19,6 +19,7 @@ public class GlideShadowLooper extends ShadowLooper {
   }
 
   @Resetter
+  @Override
   public void reset() {
     queue = mock(MessageQueue.class);
   }

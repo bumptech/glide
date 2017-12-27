@@ -7,7 +7,10 @@ if [ ! "$firebase_enabled" == "true" ]; then
   exit 0
 fi
 
-./gradlew :instrumentation:assembleDebug :instrumentation:assembleDebugAndroidTest --parallel &
+./gradlew :instrumentation:assembleDebug \
+  :instrumentation:assembleDebugAndroidTest \
+  --parallel \
+  -PDISABLE_ERROR_PRONE &
 pid=$!
 ./scripts/install_firebase.sh
 wait $pid

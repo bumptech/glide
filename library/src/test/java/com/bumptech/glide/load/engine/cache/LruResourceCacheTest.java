@@ -181,7 +181,7 @@ public class LruResourceCacheTest {
 
   private static class MockKey implements Key {
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest) {
+    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
       messageDigest.update(toString().getBytes(CHARSET));
     }
   }

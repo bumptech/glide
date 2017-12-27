@@ -8,7 +8,8 @@ set -e
   :samples:gallery:build \
   :samples:imgur:build \
   :samples:svg:build \
-  --parallel &
+  --parallel \
+  -PERROR_PRONE="false" &
 pid=$!
 
 if [ ! "$firebase_enabled" == "true" ]; then

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.NonNull;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
@@ -21,7 +22,7 @@ public interface Key {
    * <p> Note - Using {@link java.security.MessageDigest#reset()} inside of this method will result
    * in undefined behavior. </p>
    */
-  void updateDiskCacheKey(MessageDigest messageDigest);
+  void updateDiskCacheKey(@NonNull MessageDigest messageDigest);
 
   @Override
   boolean equals(Object o);

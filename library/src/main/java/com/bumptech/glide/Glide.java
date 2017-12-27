@@ -77,6 +77,7 @@ import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -275,7 +276,7 @@ public class Glide implements ComponentCallbacks2 {
       Class<GeneratedAppGlideModule> clazz =
           (Class<GeneratedAppGlideModule>)
               Class.forName("com.bumptech.glide.GeneratedAppGlideModuleImpl");
-      result = clazz.newInstance();
+      result = clazz.getDeclaredConstructor().newInstance();
     } catch (ClassNotFoundException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Failed to find GeneratedAppGlideModule. You should include an"
@@ -283,17 +284,23 @@ public class Glide implements ComponentCallbacks2 {
             + " in your application and a @GlideModule annotated AppGlideModule implementation or"
             + " LibraryGlideModules will be silently ignored");
       }
+    // These exceptions can't be squashed across all versions of Android.
     } catch (InstantiationException e) {
-      throw new IllegalStateException("GeneratedAppGlideModuleImpl is implemented incorrectly."
-          + " If you've manually implemented this class, remove your implementation. The Annotation"
-          + " processor will generate a correct implementation.", e);
-      // These exceptions can't be squashed across all versions of Android.
+      throwIncorrectGlideModule(e);
     } catch (IllegalAccessException e) {
-      throw new IllegalStateException("GeneratedAppGlideModuleImpl is implemented incorrectly."
-          + " If you've manually implemented this class, remove your implementation. The Annotation"
-          + " processor will generate a correct implementation.", e);
+      throwIncorrectGlideModule(e);
+    } catch (NoSuchMethodException e) {
+      throwIncorrectGlideModule(e);
+    } catch (InvocationTargetException e) {
+      throwIncorrectGlideModule(e);
     }
     return result;
+  }
+
+  private static void throwIncorrectGlideModule(Exception e) {
+    throw new IllegalStateException("GeneratedAppGlideModuleImpl is implemented incorrectly."
+        + " If you've manually implemented this class, remove your implementation. The Annotation"
+        + " processor will generate a correct implementation.", e);
   }
 
   Glide(

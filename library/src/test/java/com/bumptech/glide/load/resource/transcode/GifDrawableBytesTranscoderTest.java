@@ -9,6 +9,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +32,7 @@ public class GifDrawableBytesTranscoderTest {
   @Test
   public void testReturnsBytesOfGivenGifDrawable() {
     for (String fakeData : new String[] { "test", "1235asfklaw3", "@$@#" }) {
-      ByteBuffer expected = ByteBuffer.wrap(fakeData.getBytes());
+      ByteBuffer expected = ByteBuffer.wrap(fakeData.getBytes(Charset.defaultCharset()));
       when(gifDrawable.getBuffer()).thenReturn(expected);
 
       Resource<byte[]> transcoded = transcoder.transcode(resource, new Options());

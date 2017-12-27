@@ -92,7 +92,7 @@ public class DrawableTransformation implements Transformation<Drawable> {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     wrapped.updateDiskCacheKey(messageDigest);
   }
 }

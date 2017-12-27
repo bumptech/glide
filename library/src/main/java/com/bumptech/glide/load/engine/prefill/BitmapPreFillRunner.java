@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.load.Key;
@@ -165,7 +166,7 @@ final class BitmapPreFillRunner implements Runnable {
     UniqueKey() { }
 
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest) {
+    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
       throw new UnsupportedOperationException();
     }
   }

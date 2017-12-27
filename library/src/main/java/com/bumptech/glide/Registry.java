@@ -518,7 +518,7 @@ public class Registry {
     return decodePaths;
   }
 
-  @Nullable
+  @NonNull
   public <Model, TResource, Transcode> List<Class<?>> getRegisteredResourceClasses(
       @NonNull Class<Model> modelClass, @NonNull Class<TResource> resourceClass,
       @NonNull Class<Transcode> transcodeClass) {
@@ -549,7 +549,7 @@ public class Registry {
     return resourceEncoderRegistry.get(resource.getResourceClass()) != null;
   }
 
-  @Nullable
+  @NonNull
   public <X> ResourceEncoder<X> getResultEncoder(@NonNull Resource<X> resource)
       throws NoResultEncoderAvailableException {
     ResourceEncoder<X> resourceEncoder = resourceEncoderRegistry.get(resource.getResourceClass());
@@ -559,7 +559,7 @@ public class Registry {
     throw new NoResultEncoderAvailableException(resource.getResourceClass());
   }
 
-  @Nullable
+  @NonNull
   @SuppressWarnings("unchecked")
   public <X> Encoder<X> getSourceEncoder(@NonNull X data) throws NoSourceEncoderAvailableException {
     Encoder<X> encoder = encoderRegistry.getEncoder((Class<X>) data.getClass());

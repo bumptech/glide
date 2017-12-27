@@ -36,7 +36,7 @@ public final class UnitTransformation<T> implements Transformation<T> {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     // Do nothing.
   }
 

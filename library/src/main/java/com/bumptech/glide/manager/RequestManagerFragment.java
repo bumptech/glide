@@ -87,7 +87,7 @@ public class RequestManagerFragment extends Fragment {
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   private Set<RequestManagerFragment> getDescendantRequestManagerFragments() {
-    if (rootRequestManagerFragment == this) {
+    if (this.equals(rootRequestManagerFragment)) {
       return Collections.unmodifiableSet(childRequestManagerFragments);
     } else if (rootRequestManagerFragment == null
         || Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -134,8 +134,9 @@ public class RequestManagerFragment extends Fragment {
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   private boolean isDescendant(Fragment fragment) {
     Fragment root = this.getParentFragment();
-    while (fragment.getParentFragment() != null) {
-      if (fragment.getParentFragment() == root) {
+    Fragment parentFragment;
+    while ((parentFragment = fragment.getParentFragment()) != null) {
+      if (parentFragment.equals(root)) {
         return true;
       }
       fragment = fragment.getParentFragment();
@@ -147,7 +148,7 @@ public class RequestManagerFragment extends Fragment {
     unregisterFragmentWithRoot();
     rootRequestManagerFragment = Glide.get(activity).getRequestManagerRetriever()
         .getRequestManagerFragment(activity.getFragmentManager(), null);
-    if (rootRequestManagerFragment != this) {
+    if (!this.equals(rootRequestManagerFragment)) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
     }
   }

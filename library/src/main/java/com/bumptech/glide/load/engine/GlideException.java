@@ -51,6 +51,8 @@ public final class GlideException extends Exception {
     this.dataClass = dataClass;
   }
 
+  // No need to synchronize when doing nothing whatsoever.
+  @SuppressWarnings("UnsynchronizedOverridesSynchronized")
   @Override
   public Throwable fillInStackTrace() {
     // Avoid an expensive allocation by doing nothing here. Causes should contain all relevant

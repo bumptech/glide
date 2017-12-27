@@ -64,7 +64,7 @@ public class MultiTransformation<T> implements Transformation<T> {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     for (Transformation<T> transformation : transformations) {
       transformation.updateDiskCacheKey(messageDigest);
     }

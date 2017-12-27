@@ -20,7 +20,7 @@ public class MarkEnforcingInputStream extends FilterInputStream {
   }
 
   @Override
-  public void mark(int readLimit) {
+  public synchronized void mark(int readLimit) {
     super.mark(readLimit);
     availableBytes = readLimit;
   }
@@ -37,7 +37,7 @@ public class MarkEnforcingInputStream extends FilterInputStream {
   }
 
   @Override
-  public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+  public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
     int toRead = (int) getBytesToRead(byteCount);
     if (toRead == END_OF_STREAM) {
       return END_OF_STREAM;
@@ -49,7 +49,7 @@ public class MarkEnforcingInputStream extends FilterInputStream {
   }
 
   @Override
-  public void reset() throws IOException {
+  public synchronized void reset() throws IOException {
     super.reset();
     availableBytes = UNSET;
   }
@@ -84,7 +84,8 @@ public class MarkEnforcingInputStream extends FilterInputStream {
 
   private void updateAvailableBytesAfterRead(long bytesRead) {
     if (availableBytes != UNSET && bytesRead != END_OF_STREAM) {
-      availableBytes -= bytesRead;
+      // See http://errorprone.info/bugpattern/NarrowingCompoundAssignment.
+      availableBytes = (int) (availableBytes - bytesRead);
     }
   }
 }

@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -184,7 +185,7 @@ public class RequestFutureTargetTest {
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
 
-    assertEquals(expected, future.get(100, TimeUnit.MILLISECONDS));
+    assertEquals(expected, future.get(1, TimeUnit.MILLISECONDS));
   }
 
   @Test(expected = CancellationException.class)
@@ -364,30 +365,31 @@ public class RequestFutureTargetTest {
 
   @Test
   public void testWaitsForGivenTimeoutMillisIfTimeoutSet() throws InterruptedException {
-    long timeout = 1234;
+    long timeout = 2;
     try {
-      future.get(1234, TimeUnit.MILLISECONDS);
+      future.get(timeout, TimeUnit.MILLISECONDS);
     } catch (InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
     } catch (TimeoutException e) {
       // Expected.
     }
 
-    verify(waiter).waitForTimeout(eq(future), eq(timeout));
+    verify(waiter, atLeastOnce()).waitForTimeout(eq(future), eq(timeout));
   }
 
   @Test
   public void testConvertsOtherTimeUnitsToMillisForWaiter() throws InterruptedException {
-    long timeoutSeconds = 10;
+    long timeoutMicros = 1000;
     try {
-      future.get(timeoutSeconds, TimeUnit.SECONDS);
+      future.get(timeoutMicros, TimeUnit.MICROSECONDS);
     } catch (InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
     } catch (TimeoutException e) {
       // Expected.
     }
 
-    verify(waiter).waitForTimeout(eq(future), eq(TimeUnit.SECONDS.toMillis(timeoutSeconds)));
+    verify(waiter, atLeastOnce())
+        .waitForTimeout(eq(future), eq(TimeUnit.MICROSECONDS.toMillis(timeoutMicros)));
   }
 
   @Test

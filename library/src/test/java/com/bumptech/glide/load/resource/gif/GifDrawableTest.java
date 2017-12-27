@@ -625,6 +625,7 @@ public class GifDrawableTest {
     private final Set<Bitmap> drawnBitmaps = new HashSet<>();
 
     @Implementation
+    @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
       drawnBitmaps.add(bitmap);
     }

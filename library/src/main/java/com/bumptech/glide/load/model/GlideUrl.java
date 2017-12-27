@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import com.bumptech.glide.load.Key;
@@ -120,7 +121,7 @@ public class GlideUrl implements Key {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     messageDigest.update(getCacheKeyBytes());
   }
 
