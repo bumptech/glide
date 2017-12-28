@@ -299,17 +299,29 @@ public class ConcurrencyHelper {
         try {
           isFinished = waiter.await(TIMEOUT_SECONDS, TIMEOUT_UNIT);
           if (!isFinished) {
-            throw new RuntimeException("Timed out while waiting");
+            throw new WaiterException("Timed out while waiting");
           }
         } catch (InterruptedException e) {
-          throw new RuntimeException(e);
+          throw new WaiterException(e);
         }
-      } catch (RuntimeException e) {
+      } catch (WaiterException e) {
         if (Debug.isDebuggerConnected()) {
           continue;
         }
         throw e;
       }
     } while (Debug.isDebuggerConnected() && !isFinished);
+  }
+
+  private static final class WaiterException extends RuntimeException {
+    private static final long serialVersionUID = -627297254223169728L;
+
+    WaiterException(String message) {
+      super(message);
+    }
+
+    WaiterException(Throwable cause) {
+      super(cause);
+    }
   }
 }
