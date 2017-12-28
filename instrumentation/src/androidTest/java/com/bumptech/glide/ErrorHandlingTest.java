@@ -23,10 +23,13 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy;
+import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.test.TearDownGlide;
+import com.bumptech.glide.test.WaitModelLoader;
+import com.bumptech.glide.test.WaitModelLoader.WaitModel;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import org.junit.Before;
@@ -104,6 +107,30 @@ public class ErrorHandlingTest {
             anyBoolean());
     verify(requestListener, never())
         .onLoadFailed(any(GlideException.class), any(), anyDrawableTarget(), anyBoolean());
+  }
+
+  @Test
+  public void clearRequest_withError_afterPrimaryFails_clearsErrorRequest()
+      throws InterruptedException {
+    WaitModel<Integer> errorModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
+
+    FutureTarget<Drawable> target =
+        Glide.with(context)
+            .load((Object) null)
+            .error(
+                Glide.with(context)
+                    .load(errorModel)
+                    .listener(requestListener))
+            .submit();
+
+    Glide.with(context).clear(target);
+    errorModel.countDown();
+
+    // Make sure any pending requests run.
+    concurrency.pokeMainThread();
+    Glide.tearDown();
+    // Make sure that any callbacks posted back to the main thread run.
+    concurrency.pokeMainThread();
   }
 
   private static final class WaitForErrorStrategy implements UncaughtThrowableStrategy {
