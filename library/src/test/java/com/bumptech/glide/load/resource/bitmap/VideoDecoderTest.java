@@ -2,6 +2,9 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,6 +15,7 @@ import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
 import java.io.IOException;
@@ -108,5 +112,40 @@ public class VideoDecoderTest {
         .thenReturn(expected);
 
     assertThat(decoder.decode(resource, 100, 100, options).get()).isSameAs(expected);
+  }
+
+  @Test
+  public void decodeFrame_withTargetSizeOriginal_onApi27_doesNotThrow() throws IOException {
+    Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    when(retriever.getFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC))
+        .thenReturn(expected);
+
+    verify(retriever, never()).getScaledFrameAtTime(anyLong(), anyInt(), anyInt(), anyInt());
+    assertThat(decoder.decode(resource, Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL, options).get())
+        .isSameAs(expected);
+  }
+
+  @Test
+  public void decodeFrame_withTargetSizeOriginalWidthOnly_onApi27_doesNotThrow()
+      throws IOException {
+    Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    when(retriever.getFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC))
+        .thenReturn(expected);
+
+    verify(retriever, never()).getScaledFrameAtTime(anyLong(), anyInt(), anyInt(), anyInt());
+    assertThat(decoder.decode(resource, Target.SIZE_ORIGINAL, 100, options).get())
+        .isSameAs(expected);
+  }
+
+  @Test
+  public void decodeFrame_withTargetSizeOriginalHeightOnly_onApi27_doesNotThrow()
+      throws IOException {
+    Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    when(retriever.getFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC))
+        .thenReturn(expected);
+
+    verify(retriever, never()).getScaledFrameAtTime(anyLong(), anyInt(), anyInt(), anyInt());
+    assertThat(decoder.decode(resource, 100, Target.SIZE_ORIGINAL, options).get())
+        .isSameAs(expected);
   }
 }

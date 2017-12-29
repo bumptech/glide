@@ -15,6 +15,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.request.target.Target;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -168,7 +169,15 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       int frameOption,
       int outWidth,
       int outHeight) {
-     if (Build.VERSION.SDK_INT >= VERSION_CODES.O_MR1) {
+    // Arguably we should handle the case where just width or just height is set to
+    // Target.SIZE_ORIGINAL. Up to and including OMR1, MediaMetadataRetriever defaults to setting
+    // the dimensions to the display width and height if they aren't specified (ie
+    // getScaledFrameAtTime is not used). Given that this is an optimization only if
+    // Target.SIZE_ORIGINAL is not used and not using getScaledFrameAtTime ever would match the
+    // behavior of Glide in all versions of Android prior to OMR1, it's probably fine for now.
+    if (Build.VERSION.SDK_INT >= VERSION_CODES.O_MR1
+         && outWidth != Target.SIZE_ORIGINAL
+         && outHeight != Target.SIZE_ORIGINAL) {
        return mediaMetadataRetriever.getScaledFrameAtTime(
            frameTimeMicros, frameOption, outWidth, outHeight);
     } else {
