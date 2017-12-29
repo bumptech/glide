@@ -20,6 +20,7 @@ apk_dir=instrumentation/build/outputs/apk
   --type instrumentation \
   --app $apk_dir/debug/instrumentation-debug.apk \
   --test $apk_dir/androidTest/debug/instrumentation-debug-androidTest.apk \
+  --device model=Nexus6P,version=27,locale=en,orientation=portrait \
   --device model=Nexus6P,version=26,locale=en,orientation=portrait \
   --device model=Nexus6P,version=25,locale=en,orientation=portrait \
   --device model=Nexus6P,version=24,locale=en,orientation=portrait \
