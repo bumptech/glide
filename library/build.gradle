@@ -1,9 +1,6 @@
-import se.bjurr.violations.gradle.plugin.ViolationsTask
-
 apply plugin: 'com.android.library'
 apply plugin: 'findbugs'
 apply plugin: 'pmd'
-apply plugin: "se.bjurr.violations.violations-gradle-plugin"
 
 if (!hasProperty('DISABLE_ERROR_PRONE')) {
     apply plugin: "net.ltgt.errorprone"
@@ -84,7 +81,7 @@ afterEvaluate {
         effort = 'max'
         excludeFilter = file("findbugs-exclude.xml")
 
-        // Failures are caught and printed by the violations plugin below.
+        // Failures are caught and printed by the violations plugin.
         ignoreFailures = true
 
         reports {
@@ -111,7 +108,7 @@ afterEvaluate {
         ruleSetFiles = files('pmd-ruleset.xml')
         source android.sourceSets.main.java.srcDirs
 
-        // Failures are caught and printed by the violations plugin below.
+        // Failures are caught and printed by the violations plugin.
         ignoreFailures = true
 
         reports {
@@ -121,20 +118,6 @@ afterEvaluate {
     }
 
     check.dependsOn('pmd')
-
-    task violations(type: ViolationsTask) {
-        minSeverity = 'INFO'
-        detailLevel = 'VERBOSE'
-        maxViolations = 0
-
-        // Many more formats available, see: https://github.com/tomasbjerre/violations-lib
-        violations = [
-                ["FINDBUGS", ".", ".*/findbugs/.*\\.xml\$", "Findbugs"],
-                ["PMD",      ".", ".*/pmd/.*\\.xml\$",      "PMD"]
-        ]
-    }
-
-    check.finalizedBy violations
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"
