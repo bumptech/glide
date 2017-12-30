@@ -3,8 +3,6 @@ package com.bumptech.glide.manager;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -87,7 +85,6 @@ public class SupportRequestManagerFragment extends Fragment {
    * Returns the set of fragments that this RequestManagerFragment's parent is a parent to. (i.e.
    * our parent is the fragment that we are annotating).
    */
-  @RestrictTo(Scope.LIBRARY)
   @Synthetic Set<SupportRequestManagerFragment> getDescendantRequestManagerFragments() {
     if (rootRequestManagerFragment == null) {
       return Collections.emptySet();

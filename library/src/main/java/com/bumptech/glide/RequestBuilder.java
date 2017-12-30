@@ -13,8 +13,6 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RawRes;
-import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.widget.ImageView;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -574,7 +572,6 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     return into(target, /*targetListener=*/ null);
   }
 
-  @RestrictTo(Scope.LIBRARY)
   @NonNull
   @Synthetic <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,

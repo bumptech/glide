@@ -4,8 +4,6 @@ import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.support.annotation.VisibleForTesting;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
@@ -117,7 +115,6 @@ public final class MemorySizeCalculator {
     return Formatter.formatFileSize(context, bytes);
   }
 
-  @RestrictTo(Scope.LIBRARY)
   @TargetApi(Build.VERSION_CODES.KITKAT)
   @Synthetic static boolean isLowMemoryDevice(ActivityManager activityManager) {
     // Explicitly check with an if statement, on some devices both parts of boolean expressions

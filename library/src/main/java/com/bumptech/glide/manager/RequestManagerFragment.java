@@ -6,8 +6,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Build;
 import android.support.annotation.Nullable;
-import android.support.annotation.RestrictTo;
-import android.support.annotation.RestrictTo.Scope;
 import android.util.Log;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -87,7 +85,6 @@ public class RequestManagerFragment extends Fragment {
    * our parent is the fragment that we are annotating).
    */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-  @RestrictTo(Scope.LIBRARY)
   @Synthetic Set<RequestManagerFragment> getDescendantRequestManagerFragments() {
     if (this.equals(rootRequestManagerFragment)) {
       return Collections.unmodifiableSet(childRequestManagerFragments);
