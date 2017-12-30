@@ -11,12 +11,15 @@ import static com.bumptech.glide.annotation.compiler.test.Util.subpackage;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 
+import com.bumptech.glide.annotation.compiler.test.ReferencedResource;
+import com.bumptech.glide.annotation.compiler.test.RegenerateResourcesRule;
 import com.bumptech.glide.annotation.compiler.test.Util;
 import com.google.common.truth.Truth;
 import com.google.testing.compile.Compilation;
 import java.io.IOException;
 import javax.tools.JavaFileObject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -27,6 +30,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class EmptyAppAndLibraryGlideModulesTest {
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(getClass());
   private Compilation compilation;
 
   @Before
@@ -46,6 +51,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
   }
 
   @Test
+  @ReferencedResource
   public void compilation_generatesExpectedGlideOptionsClass() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideOptions"))
@@ -54,6 +60,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
   }
 
   @Test
+  @ReferencedResource
   public void compilation_generatesExpectedGlideRequestClass() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideRequest"))
@@ -62,6 +69,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
   }
 
   @Test
+  @ReferencedResource
   public void compilation_generatesExpectedGlideRequestsClass() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideRequests"))
@@ -70,6 +78,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
   }
 
   @Test
+  @ReferencedResource
   public void compilationGeneratesExpectedGlideAppClass() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideApp"))
@@ -87,6 +96,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
   }
 
   @Test
+  @ReferencedResource
   public void compilation_generatesExpectedGeneratedRequestManagerFactory() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(glide("GeneratedRequestManagerFactory"))
@@ -96,6 +106,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
   }
 
   @Test
+  @ReferencedResource
   public void compilation_generatesExpectedIndexer() throws IOException {
     String expectedClassName =
         "GlideIndexer_GlideModule_com_bumptech_glide_test_EmptyLibraryModule";

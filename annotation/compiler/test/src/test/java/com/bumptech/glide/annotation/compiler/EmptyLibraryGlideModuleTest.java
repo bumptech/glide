@@ -5,12 +5,14 @@ import static com.bumptech.glide.annotation.compiler.test.Util.asUnixChars;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 
+import com.bumptech.glide.annotation.compiler.test.RegenerateResourcesRule;
 import com.bumptech.glide.annotation.compiler.test.Util;
 import com.google.common.truth.Truth;
 import com.google.testing.compile.Compilation;
 import java.io.IOException;
 import javax.tools.JavaFileObject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -20,6 +22,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class EmptyLibraryGlideModuleTest {
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(getClass());
   private static final String MODULE_NAME = "EmptyLibraryModule.java";
   private Compilation compilation;
 

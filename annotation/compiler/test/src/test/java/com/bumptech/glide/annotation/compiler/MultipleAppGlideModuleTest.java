@@ -3,6 +3,7 @@ package com.bumptech.glide.annotation.compiler;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 
+import com.bumptech.glide.annotation.compiler.test.RegenerateResourcesRule;
 import com.bumptech.glide.annotation.compiler.test.Util;
 import com.google.testing.compile.Compilation;
 import javax.tools.JavaFileObject;
@@ -18,9 +19,11 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class MultipleAppGlideModuleTest {
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
   private static final String FIRST_MODULE = "EmptyAppModule1.java";
   private static final String SECOND_MODULE = "EmptyAppModule2.java";
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(getClass());
+  @Rule public final ExpectedException expectedException = ExpectedException.none();
 
   // Throws.
   @SuppressWarnings("ResultOfMethodCallIgnored")

@@ -5,6 +5,8 @@ import javax.tools.JavaFileObject;
 
 /** Test utilities. */
 public final class Util {
+  private static final String REGENERATE_TEST_RESOURCES_PROPERTY_NAME =
+      "com.bumptech.glide.annotation.compiler.test.regenerate.path";
   private static final String GLIDE_PACKAGE_NAME = "com.bumptech.glide";
   private static final String SUB_PACKAGE_NAME = qualified(GLIDE_PACKAGE_NAME, "test");
   private static final String ANNOTATION_PACKAGE_NAME = "com.bumptech.glide.annotation.compiler";
@@ -19,6 +21,15 @@ public final class Util {
 
   private Util() {
     // Utility class.
+  }
+
+  /**
+   * Returns the {@code String} from a system property that is expected to contain the project
+   * directory for the module containing these tests or {@code null} if we're not currently
+   * attempting to regenerate test resources.
+   */
+  static String getProjectRootIfRegeneratingTestResources() {
+    return System.getProperty(REGENERATE_TEST_RESOURCES_PROPERTY_NAME);
   }
 
   public static JavaFileObject emptyAppModule() {
@@ -38,7 +49,20 @@ public final class Util {
   }
 
   public static JavaFileObject forResource(String directoryName, String name) {
-    return JavaFileObjects.forResource(directoryName + FILE_SEPARATOR + name);
+    try {
+      return JavaFileObjects.forResource(directoryName + FILE_SEPARATOR + name);
+    } catch (IllegalArgumentException e) {
+      // IllegalArgumentException will be thrown if the resource is missing. If we're trying to
+      // generate test resources for a new test, we want to avoid this exception because it does not
+      // contain any expected output that we can write to a file. By returning an empty file, we
+      // avoid the exception and get the output from our comparison tests that we can then write
+      // out.
+      // If we're not regenerating test resources, we should throw the normal exception.
+      if (getProjectRootIfRegeneratingTestResources() != null) {
+        return JavaFileObjects.forSourceString("com.bumptech.test.empty", "");
+      }
+      throw e;
+    }
   }
 
   public static String annotation(String className) {

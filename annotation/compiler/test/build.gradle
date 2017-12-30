@@ -31,3 +31,18 @@ dependencies {
     testImplementation 'com.google.android:support-v4:r6'
     testImplementation "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
 }
+
+task regenerateTestResources {
+    group 'Verification'
+    description 'Regenerates all test resource files under annotation/compiler/test/src/test/resources that are compared against the current output to detect regressions'
+    tasks.withType(Test) {
+        systemProperties.put("com.bumptech.glide.annotation.compiler.test.regenerate.path", projectDir)
+    }
+    doFirst {
+        println("Regenerating test resources....")
+    }
+    doLast {
+        println("Finished regenerating test resources")
+    }
+}
+regenerateTestResources.finalizedBy(test)
