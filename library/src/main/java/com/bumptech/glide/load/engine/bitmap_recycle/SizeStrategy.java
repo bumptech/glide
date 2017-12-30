@@ -97,17 +97,12 @@ final class SizeStrategy implements LruPoolStrategy {
     return "SizeStrategy:\n  " + groupedMap + "\n" + "  SortedSizes" + sortedSizes;
   }
 
-  static String getBitmapString(Bitmap bitmap) {
+  private static String getBitmapString(Bitmap bitmap) {
     int size = Util.getBitmapByteSize(bitmap);
     return getBitmapString(size);
   }
 
-  // PMD will warn that this creates an accessor class unless it's public, package private doesn't
-  // appear to be sufficient. Since this class isn't public, it seems fine to make this method
-  // public.
-  @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  public static String getBitmapString(int size) {
+  @Synthetic static String getBitmapString(int size) {
     return "[" + size + "]";
   }
 

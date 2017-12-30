@@ -8,7 +8,6 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
-import com.bumptech.glide.util.Synthetic;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,7 +21,7 @@ import java.io.InputStream;
  *               java.io.InputStream} or {@link java.io.FileDescriptor} etc).
  */
 public class FileLoader<Data> implements ModelLoader<File, Data> {
-  @Synthetic static final String TAG = "FileLoader";
+  private static final String TAG = "FileLoader";
 
   private final FileOpener<Data> fileOpener;
 

@@ -32,7 +32,7 @@ public class Engine implements EngineJobListener,
     MemoryCache.ResourceRemovedListener,
     EngineResource.ResourceListener {
   private static final String TAG = "Engine";
-  @Synthetic static final int JOB_POOL_SIZE = 150;
+  private static final int JOB_POOL_SIZE = 150;
   private final Jobs jobs;
   private final EngineKeyFactory keyFactory;
   private final MemoryCache cache;

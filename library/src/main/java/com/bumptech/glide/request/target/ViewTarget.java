@@ -42,7 +42,7 @@ import java.util.List;
  * @param <Z> The resource type this target will receive.
  */
 public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
-  @Synthetic static final String TAG = "ViewTarget";
+  private static final String TAG = "ViewTarget";
   private static boolean isTagUsedAtLeastOnce = false;
   @Nullable private static Integer tagId = null;
 
@@ -50,7 +50,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   private final SizeDeterminer sizeDeterminer;
   @Nullable
   private OnAttachStateChangeListener attachStateListener;
-  @SuppressWarnings("WeakerAccess") @Synthetic boolean isClearedByUs;
+  private boolean isClearedByUs;
   private boolean isAttachStateListenerAdded;
 
 
@@ -161,8 +161,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * still be used instead of the {@link View}'s dimensions even if this method is called. This
    * parameter is a fallback only.
    */
-  // Public API.
-  @SuppressWarnings("WeakerAccess")
+  @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   public final ViewTarget<T, Z> waitForLayout() {
     sizeDeterminer.waitForLayout = true;

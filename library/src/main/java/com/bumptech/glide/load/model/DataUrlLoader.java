@@ -7,7 +7,6 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
-import com.bumptech.glide.util.Synthetic;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,8 +24,8 @@ import java.io.InputStream;
  */
 public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
 
-  @SuppressWarnings("WeakerAccess") @Synthetic static final String DATA_SCHEME_IMAGE = "data:image";
-  @SuppressWarnings("WeakerAccess") @Synthetic static final String BASE64_TAG = ";base64";
+  private static final String DATA_SCHEME_IMAGE = "data:image";
+  private static final String BASE64_TAG = ";base64";
   private final DataDecoder<Data> dataDecoder;
 
   // Public API.

@@ -20,12 +20,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 final class ActiveResources {
-  @SuppressWarnings("WeakerAccess") @Synthetic static final int MSG_CLEAN_REF = 1;
+  private static final int MSG_CLEAN_REF = 1;
 
   private final boolean isActiveResourceRetentionAllowed;
-  @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  final Handler mainHandler = new Handler(Looper.getMainLooper(), new Callback() {
+  private final Handler mainHandler = new Handler(Looper.getMainLooper(), new Callback() {
     @Override
     public boolean handleMessage(Message msg) {
       if (msg.what == MSG_CLEAN_REF) {
@@ -40,16 +38,18 @@ final class ActiveResources {
 
   private ResourceListener listener;
 
-  // Lazily instantiate to avoid exceptions if Glide is initialized on a background thread. See
-  // #295.
-  @SuppressWarnings("WeakerAccess")
+  /**
+   * Lazily instantiate to avoid exceptions if Glide is initialized on a background thread.
+   *
+   * @see <a href="https://github.com/bumptech/glide/issues/295">#295</a>
+   */
   @Nullable
-  @Synthetic
-  ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
-  @SuppressWarnings("WeakerAccess") @Synthetic volatile boolean isShutdown;
-  @SuppressWarnings("WeakerAccess") @Nullable @Synthetic volatile DequeuedResourceCallback cb;
+  private ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
   @Nullable
   private Thread cleanReferenceQueueThread;
+  private volatile boolean isShutdown;
+  @Nullable
+  private volatile DequeuedResourceCallback cb;
 
   ActiveResources(boolean isActiveResourceRetentionAllowed) {
     this.isActiveResourceRetentionAllowed = isActiveResourceRetentionAllowed;

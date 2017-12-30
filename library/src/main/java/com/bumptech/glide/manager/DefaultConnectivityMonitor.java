@@ -15,7 +15,7 @@ import com.bumptech.glide.util.Synthetic;
  * Uses {@link android.net.ConnectivityManager} to identify connectivity changes.
  */
 final class DefaultConnectivityMonitor implements ConnectivityMonitor {
-  @SuppressWarnings("WeakerAccess") @Synthetic static final String TAG = "ConnectivityMonitor";
+  private static final String TAG = "ConnectivityMonitor";
   private final Context context;
   @SuppressWarnings("WeakerAccess") @Synthetic final ConnectivityListener listener;
 

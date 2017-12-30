@@ -17,7 +17,7 @@ import com.bumptech.glide.util.Synthetic;
  * @param <Z> The type of resource that will be loaded into memory.
  */
 public final class PreloadTarget<Z> extends SimpleTarget<Z> {
-  @SuppressWarnings("WeakerAccess") @Synthetic static final int MESSAGE_CLEAR = 1;
+  private static final int MESSAGE_CLEAR = 1;
   private static final Handler HANDLER = new Handler(Looper.getMainLooper(), new Callback() {
     @Override
     public boolean handleMessage(Message message) {

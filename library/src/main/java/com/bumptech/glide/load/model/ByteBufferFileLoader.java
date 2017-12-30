@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
  * Loads {@link java.nio.ByteBuffer}s using NIO for {@link java.io.File}.
  */
 public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
-  @Synthetic static final String TAG = "ByteBufferFileLoader";
+  private static final String TAG = "ByteBufferFileLoader";
 
   @Override
   public LoadData<ByteBuffer> buildLoadData(@NonNull File file, int width, int height,

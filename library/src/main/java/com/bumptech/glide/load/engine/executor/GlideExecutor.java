@@ -41,7 +41,7 @@ public final class GlideExecutor implements ExecutorService {
    */
   private static final int DEFAULT_DISK_CACHE_EXECUTOR_THREADS = 1;
 
-  @Synthetic static final String TAG = "GlideExecutor";
+  private static final String TAG = "GlideExecutor";
 
   /**
    * The default thread name prefix for executors from unlimited thread pool used to
@@ -413,9 +413,8 @@ public final class GlideExecutor implements ExecutorService {
    * android.os.Process#THREAD_PRIORITY_BACKGROUND}.
    */
   private static final class DefaultThreadFactory implements ThreadFactory {
-    @Synthetic static final int DEFAULT_PRIORITY =
-        android.os.Process.THREAD_PRIORITY_BACKGROUND
-            + android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
+    private static final int DEFAULT_PRIORITY = android.os.Process.THREAD_PRIORITY_BACKGROUND
+        + android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
     private final String name;
     @Synthetic final UncaughtThrowableStrategy uncaughtThrowableStrategy;
