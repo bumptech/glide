@@ -30,6 +30,8 @@ public class StreamEncoderTest {
 
   @After
   public void tearDown() {
+    // GC before delete() to release files on Windows (https://stackoverflow.com/a/4213208/253468)
+    System.gc();
     if (!file.delete()) {
       throw new IllegalStateException("Failed to delete: " + file);
     }

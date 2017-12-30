@@ -73,7 +73,7 @@
 
         <!-- Allow common trailing comments used to describe suppressions -->
         <module name="TrailingComment">
-          <property name="legalComment" value="Public API" />
+          <property name="legalComment" value="^Public API.?$|^NOPMD .*$" />
         </module>
 
         <!-- Checks for imports. -->

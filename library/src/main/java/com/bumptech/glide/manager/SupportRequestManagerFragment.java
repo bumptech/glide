@@ -27,8 +27,7 @@ public class SupportRequestManagerFragment extends Fragment {
   private final ActivityFragmentLifecycle lifecycle;
   private final RequestManagerTreeNode requestManagerTreeNode =
       new SupportFragmentRequestManagerTreeNode();
-  private final HashSet<SupportRequestManagerFragment> childRequestManagerFragments =
-      new HashSet<>();
+  private final Set<SupportRequestManagerFragment> childRequestManagerFragments = new HashSet<>();
 
   @Nullable private SupportRequestManagerFragment rootRequestManagerFragment;
   @Nullable private RequestManager requestManager;
@@ -86,13 +85,13 @@ public class SupportRequestManagerFragment extends Fragment {
    * Returns the set of fragments that this RequestManagerFragment's parent is a parent to. (i.e.
    * our parent is the fragment that we are annotating).
    */
-  private Set<SupportRequestManagerFragment> getDescendantRequestManagerFragments() {
+  @Synthetic Set<SupportRequestManagerFragment> getDescendantRequestManagerFragments() {
     if (rootRequestManagerFragment == null) {
       return Collections.emptySet();
     } else if (this.equals(rootRequestManagerFragment)) {
       return Collections.unmodifiableSet(childRequestManagerFragments);
     } else {
-      HashSet<SupportRequestManagerFragment> descendants = new HashSet<>();
+      Set<SupportRequestManagerFragment> descendants = new HashSet<>();
       for (SupportRequestManagerFragment fragment : rootRequestManagerFragment
           .getDescendantRequestManagerFragments()) {
         if (isDescendant(fragment.getParentFragmentUsingHint())) {
@@ -203,7 +202,7 @@ public class SupportRequestManagerFragment extends Fragment {
     public Set<RequestManager> getDescendants() {
       Set<SupportRequestManagerFragment> descendantFragments =
           getDescendantRequestManagerFragments();
-      HashSet<RequestManager> descendants = new HashSet<>(descendantFragments.size());
+      Set<RequestManager> descendants = new HashSet<>(descendantFragments.size());
       for (SupportRequestManagerFragment fragment : descendantFragments) {
         if (fragment.getRequestManager() != null) {
           descendants.add(fragment.getRequestManager());

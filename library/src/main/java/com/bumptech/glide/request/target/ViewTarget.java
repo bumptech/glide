@@ -112,24 +112,34 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     attachStateListener = new OnAttachStateChangeListener() {
       @Override
       public void onViewAttachedToWindow(View v) {
-        Request request = getRequest();
-        if (request != null && request.isPaused()) {
-          request.begin();
-        }
+        resumeMyRequest();
       }
 
       @Override
       public void onViewDetachedFromWindow(View v) {
-        Request request = getRequest();
-        if (request != null && !request.isCancelled() && !request.isPaused()) {
-          isClearedByUs = true;
-          request.pause();
-          isClearedByUs = false;
-        }
+        pauseMyRequest();
       }
     };
     maybeAddAttachStateListener();
     return this;
+  }
+
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic void resumeMyRequest() {
+    Request request = getRequest();
+    if (request != null && request.isPaused()) {
+      request.begin();
+    }
+  }
+
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic void pauseMyRequest() {
+    Request request = getRequest();
+    if (request != null && !request.isCancelled() && !request.isPaused()) {
+      isClearedByUs = true;
+      request.pause();
+      isClearedByUs = false;
+    }
   }
 
   /**
@@ -151,6 +161,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * still be used instead of the {@link View}'s dimensions even if this method is called. This
    * parameter is a fallback only.
    */
+  @SuppressWarnings("WeakerAccess")
   @NonNull
   public final ViewTarget<T, Z> waitForLayout() {
     sizeDeterminer.waitForLayout = true;
@@ -319,7 +330,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     static Integer maxDisplayLength;
     private final View view;
     private final List<SizeReadyCallback> cbs = new ArrayList<>();
-    private boolean waitForLayout;
+    @Synthetic boolean waitForLayout;
 
     @Nullable private SizeDeterminerLayoutListener layoutListener;
 

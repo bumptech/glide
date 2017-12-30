@@ -111,7 +111,7 @@ class SizeStrategy implements LruPoolStrategy {
   static class KeyPool extends BaseKeyPool<Key> {
 
     public Key get(int size) {
-      Key result = get();
+      Key result = super.get();
       result.init(size);
       return result;
     }
@@ -149,6 +149,8 @@ class SizeStrategy implements LruPoolStrategy {
       return size;
     }
 
+    // PMD.AccessorMethodGeneration: https://github.com/pmd/pmd/issues/807
+    @SuppressWarnings("PMD.AccessorMethodGeneration")
     @Override
     public String toString() {
       return getBitmapString(size);

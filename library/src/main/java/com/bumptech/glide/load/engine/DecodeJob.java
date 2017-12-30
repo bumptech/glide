@@ -41,26 +41,22 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     Poolable {
   private static final String TAG = "DecodeJob";
 
-  @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
+  private final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
   private final List<Throwable> throwables = new ArrayList<>();
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
   private final DiskCacheProvider diskCacheProvider;
   private final Pools.Pool<DecodeJob<?>> pool;
-  @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  final DeferredEncodeManager<?> deferredEncodeManager = new DeferredEncodeManager<>();
+  private final DeferredEncodeManager<?> deferredEncodeManager = new DeferredEncodeManager<>();
   private final ReleaseManager releaseManager = new ReleaseManager();
 
   private GlideContext glideContext;
-  @SuppressWarnings("WeakerAccess") @Synthetic Key signature;
+  private Key signature;
   private Priority priority;
   private EngineKey loadKey;
-  @SuppressWarnings("WeakerAccess") @Synthetic int width;
-  @SuppressWarnings("WeakerAccess") @Synthetic int height;
-  @SuppressWarnings("WeakerAccess") @Synthetic DiskCacheStrategy diskCacheStrategy;
-  @SuppressWarnings("WeakerAccess") @Synthetic Options options;
+  private int width;
+  private int height;
+  private DiskCacheStrategy diskCacheStrategy;
+  private Options options;
   private Callback<R> callback;
   private int order;
   private Stage stage;
@@ -69,7 +65,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private boolean onlyRetrieveFromCache;
 
   private Thread currentThread;
-  @SuppressWarnings("WeakerAccess") @Synthetic Key currentSourceKey;
+  private Key currentSourceKey;
   private Key currentAttemptingKey;
   private Object currentData;
   private DataSource currentDataSource;
@@ -521,6 +517,65 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     return stateVerifier;
   }
 
+  @Synthetic <Z> Resource<Z> onResourceDecoded(DataSource dataSource, Resource<Z> decoded) {
+    @SuppressWarnings("unchecked")
+    Class<Z> resourceSubClass = (Class<Z>) decoded.get().getClass();
+    Transformation<Z> appliedTransformation = null;
+    Resource<Z> transformed = decoded;
+    if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
+      appliedTransformation = decodeHelper.getTransformation(resourceSubClass);
+      transformed = appliedTransformation.transform(glideContext, decoded, width, height);
+    }
+    // TODO: Make this the responsibility of the Transformation.
+    if (!decoded.equals(transformed)) {
+      decoded.recycle();
+    }
+
+    final EncodeStrategy encodeStrategy;
+    final ResourceEncoder<Z> encoder;
+    if (decodeHelper.isResourceEncoderAvailable(transformed)) {
+      encoder = decodeHelper.getResultEncoder(transformed);
+      encodeStrategy = encoder.getEncodeStrategy(options);
+    } else {
+      encoder = null;
+      encodeStrategy = EncodeStrategy.NONE;
+    }
+
+    Resource<Z> result = transformed;
+    boolean isFromAlternateCacheKey = !decodeHelper.isSourceKey(currentSourceKey);
+    if (diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource,
+        encodeStrategy)) {
+      if (encoder == null) {
+        throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
+      }
+      final Key key;
+      switch (encodeStrategy) {
+        case SOURCE:
+          key = new DataCacheKey(currentSourceKey, signature);
+          break;
+        case TRANSFORMED:
+          key =
+              new ResourceCacheKey(
+                  decodeHelper.getArrayPool(),
+                  currentSourceKey,
+                  signature,
+                  width,
+                  height,
+                  appliedTransformation,
+                  resourceSubClass,
+                  options);
+          break;
+        default:
+          throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);
+      }
+
+      LockedResource<Z> lockedResult = LockedResource.obtain(transformed);
+      deferredEncodeManager.init(key, encoder, lockedResult);
+      result = lockedResult;
+    }
+    return result;
+  }
+
   private final class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
 
     private final DataSource dataSource;
@@ -532,66 +587,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
     @Override
     public Resource<Z> onResourceDecoded(Resource<Z> decoded) {
-      Class<Z> resourceSubClass = getResourceClass(decoded);
-      Transformation<Z> appliedTransformation = null;
-      Resource<Z> transformed = decoded;
-      if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
-        appliedTransformation = decodeHelper.getTransformation(resourceSubClass);
-        transformed = appliedTransformation.transform(glideContext, decoded, width, height);
-      }
-      // TODO: Make this the responsibility of the Transformation.
-      if (!decoded.equals(transformed)) {
-        decoded.recycle();
-      }
-
-      final EncodeStrategy encodeStrategy;
-      final ResourceEncoder<Z> encoder;
-      if (decodeHelper.isResourceEncoderAvailable(transformed)) {
-        encoder = decodeHelper.getResultEncoder(transformed);
-        encodeStrategy = encoder.getEncodeStrategy(options);
-      } else {
-        encoder = null;
-        encodeStrategy = EncodeStrategy.NONE;
-      }
-
-      Resource<Z> result = transformed;
-      boolean isFromAlternateCacheKey = !decodeHelper.isSourceKey(currentSourceKey);
-      if (diskCacheStrategy.isResourceCacheable(isFromAlternateCacheKey, dataSource,
-          encodeStrategy)) {
-        if (encoder == null) {
-          throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
-        }
-        final Key key;
-        switch (encodeStrategy) {
-          case SOURCE:
-            key = new DataCacheKey(currentSourceKey, signature);
-            break;
-          case TRANSFORMED:
-            key =
-                new ResourceCacheKey(
-                    decodeHelper.getArrayPool(),
-                    currentSourceKey,
-                    signature,
-                    width,
-                    height,
-                    appliedTransformation,
-                    resourceSubClass,
-                    options);
-            break;
-          default:
-            throw new IllegalArgumentException("Unknown strategy: " + encodeStrategy);
-        }
-
-        LockedResource<Z> lockedResult = LockedResource.obtain(transformed);
-        deferredEncodeManager.init(key, encoder, lockedResult);
-        result = lockedResult;
-      }
-      return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Class<Z> getResourceClass(Resource<Z> resource) {
-      return (Class<Z>) resource.get().getClass();
+      return DecodeJob.this.onResourceDecoded(dataSource, decoded);
     }
   }
 

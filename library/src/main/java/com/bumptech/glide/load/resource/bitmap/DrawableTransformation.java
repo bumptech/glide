@@ -69,7 +69,7 @@ public class DrawableTransformation implements Transformation<Drawable> {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "PMD.UnnecessaryLocalBeforeReturn"})
   private Resource<Drawable> newDrawableResource(
       Context context, Resource<Bitmap> transformed) {
     Resource<? extends Drawable> result =

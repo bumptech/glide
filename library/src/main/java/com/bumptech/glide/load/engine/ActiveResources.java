@@ -91,7 +91,8 @@ final class ActiveResources {
     return active;
   }
 
-  private void cleanupActiveReference(@NonNull ResourceWeakReference ref) {
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic void cleanupActiveReference(@NonNull ResourceWeakReference ref) {
     Util.assertMainThread();
     activeEngineResources.remove(ref.key);
 
@@ -112,27 +113,31 @@ final class ActiveResources {
         @Override
         public void run() {
           Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-          ResourceWeakReference ref;
-          while (!isShutdown) {
-            try {
-              ref = (ResourceWeakReference) resourceReferenceQueue.remove();
-              mainHandler.obtainMessage(MSG_CLEAN_REF, ref).sendToTarget();
-
-              // This section for testing only.
-              DequeuedResourceCallback current = cb;
-              if (current != null) {
-                current.onResourceDequeued();
-              }
-              // End for testing only.
-            } catch (InterruptedException e) {
-              Thread.currentThread().interrupt();
-            }
-          }
+          cleanReferenceQueue();
         }
       }, "glide-active-resources");
       cleanReferenceQueueThread.start();
     }
     return resourceReferenceQueue;
+  }
+
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic void cleanReferenceQueue() {
+    while (!isShutdown) {
+      try {
+        ResourceWeakReference ref = (ResourceWeakReference) resourceReferenceQueue.remove();
+        mainHandler.obtainMessage(MSG_CLEAN_REF, ref).sendToTarget();
+
+        // This section for testing only.
+        DequeuedResourceCallback current = cb;
+        if (current != null) {
+          current.onResourceDequeued();
+        }
+        // End for testing only.
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+    }
   }
 
   @VisibleForTesting

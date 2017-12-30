@@ -15,7 +15,6 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
 import java.io.File;
-import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +41,7 @@ public class StringLoaderTest {
   private Options options;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
 
     options = new Options();
@@ -51,9 +50,9 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testHandlesPaths() throws IOException {
-    // TODO on windows it will fail with schema being the drive letter (C:\... -> C)
-    assumeTrue(!Util.isWindows());
+  public void testHandlesPaths() {
+    // TODO fix drive letter parsing somehow
+    assumeTrue("it will fail with schema being the drive letter (C:\\... -> C)", !Util.isWindows());
 
     File f = RuntimeEnvironment.application.getCacheDir();
     Uri expected = Uri.fromFile(f);
@@ -69,8 +68,6 @@ public class StringLoaderTest {
 
   @Test
   public void testCanHandleComplexFilePaths() {
-    assumeTrue(!Util.isWindows());
-
     String testPath =
         "/storage/emulated/0/DCIM/Camera/IMG_20140520_100001:nopm:.jpg,mimeType=image/jpeg,"
             + "2448x3264,orientation=0,date=Tue";
@@ -86,7 +83,7 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testHandlesFileUris() throws IOException {
+  public void testHandlesFileUris() {
     File f = RuntimeEnvironment.application.getCacheDir();
 
     Uri expected = Uri.fromFile(f);
@@ -101,7 +98,7 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testHandlesResourceUris() throws IOException {
+  public void testHandlesResourceUris() {
     Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
 
     when(uriLoader.buildLoadData(eq(resourceUri), eq(IMAGE_SIDE), eq(IMAGE_SIDE), eq(options)))

@@ -433,7 +433,8 @@ public final class GlideExecutor implements ExecutorService {
       final Thread result = new Thread(runnable, "glide-" + name + "-thread-" + threadNum) {
         @Override
         public void run() {
-          android.os.Process.setThreadPriority(DEFAULT_PRIORITY);
+          // why PMD suppression is needed: https://github.com/pmd/pmd/issues/808
+          android.os.Process.setThreadPriority(DEFAULT_PRIORITY); //NOPMD AccessorMethodGeneration
           if (preventNetworkOperations) {
             StrictMode.setThreadPolicy(
                 new ThreadPolicy.Builder()
