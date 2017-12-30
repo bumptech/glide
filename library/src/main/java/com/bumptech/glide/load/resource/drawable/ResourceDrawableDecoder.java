@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
@@ -40,7 +41,7 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
     return source.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE);
   }
 
-  @NonNull
+  @Nullable
   @Override
   public Resource<Drawable> decode(@NonNull Uri source, int width, int height,
       @NonNull Options options) {

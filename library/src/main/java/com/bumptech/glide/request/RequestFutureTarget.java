@@ -11,8 +11,6 @@ import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -211,7 +209,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     if (Thread.interrupted()) {
       throw new InterruptedException();
     } else if (loadFailed) {
-      throw new GlideExecutionException(exception);
+      throw new ExecutionException(exception);
     } else if (isCancelled) {
       throw new CancellationException();
     } else if (!resultReceived) {
@@ -272,7 +270,6 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
 
   @VisibleForTesting
   static class Waiter {
-
     // This is a simple wrapper class that is used to enable testing. The call to the wrapping class
     // is waited on appropriately.
     @SuppressWarnings("WaitNotInLoop")
@@ -282,37 +279,6 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
 
     void notifyAll(Object toNotify) {
       toNotify.notifyAll();
-    }
-  }
-
-  private static class GlideExecutionException extends ExecutionException {
-    private static final long serialVersionUID = 1L;
-
-
-    private final GlideException cause;
-
-    GlideExecutionException(GlideException cause) {
-      super();
-      this.cause = cause;
-    }
-
-    @Override
-    public void printStackTrace() {
-      printStackTrace(System.err);
-    }
-
-    @Override
-    public void printStackTrace(PrintStream s) {
-      super.printStackTrace(s);
-      s.print("Caused by: ");
-      cause.printStackTrace(s);
-    }
-
-    @Override
-    public void printStackTrace(PrintWriter s) {
-      super.printStackTrace(s);
-      s.print("Caused by: ");
-      cause.printStackTrace(s);
     }
   }
 }

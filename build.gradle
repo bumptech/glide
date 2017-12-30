@@ -1,3 +1,5 @@
+import se.bjurr.violations.gradle.plugin.ViolationsTask
+
 buildscript {
     repositories {
         google()
@@ -15,6 +17,7 @@ buildscript {
         if (!hasProperty('DISABLE_ERROR_PRONE')) {
             classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_PLUGIN_VERSION}"
         }
+        classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
     }
 }
 
@@ -37,7 +40,8 @@ subprojects { project ->
         // modified, so we're not going to worry about cleaning it up.
         if ("gifencoder" != project.getName()) {
           options.compilerArgs \
-                << "-Xlint:all" << "-Werror" \
+                << "-Xlint:all" \
+                << "-Werror" \
                 /*
                  * Java expects every annotation to have a processor, but we use
                  * javax.annotation.Nullable, which doesn't have one.
@@ -62,8 +66,8 @@ subprojects { project ->
                 lintOptions {
                     warningsAsErrors true
                     quiet true
-                    // TODO(#2730): Remove this after updating to the latest support library.
-                    disable "GradleDependency"
+                    // Caught by the violations plugin.
+                    abortOnError false
                 }
             }
         }
@@ -94,15 +98,34 @@ subprojects { project ->
         source 'src'
         include '**/*.java'
         exclude '**/gen/**'
+        // Caught by the violations plugin.
+        ignoreFailures = true
 
         // empty classpath
         classpath = files()
     }
 
+    apply plugin: "se.bjurr.violations.violations-gradle-plugin"
+
+    task violations(type: ViolationsTask) {
+        minSeverity 'INFO'
+        detailLevel 'VERBOSE'
+        maxViolations 0
+
+        // Formats are listed here: https://github.com/tomasbjerre/violations-lib
+        def dir = projectDir.absolutePath;
+        violations = [
+                ["FINDBUGS",    dir, ".*/findbugs/.*\\.xml\$",   "Findbugs"],
+                ["PMD",         dir, ".*/pmd/.*\\.xml\$",        "PMD"],
+                ["ANDROIDLINT", dir, ".*/lint-results\\.xml\$",  "AndroidLint"],
+                ["CHECKSTYLE",  dir, ".*/checkstyle/.*\\.xml\$", "Checkstyle"],
+        ]
+    }
+
     afterEvaluate {
         if (project.tasks.findByName('check')) {
             check.dependsOn('checkstyle')
+            check.finalizedBy violations
         }
     }
 }
-

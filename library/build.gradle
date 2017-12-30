@@ -82,15 +82,15 @@ afterEvaluate {
                         it.javaCompile.classpath.files
                     })
         }
-
-
         effort = 'max'
-
         excludeFilter = file("findbugs-exclude.xml")
 
+        // Failures are caught and printed by the violations plugin.
+        ignoreFailures = true
+
         reports {
-            xml.enabled = false
-            html.enabled = true
+            xml.enabled = true
+            html.enabled = false
         }
     }
 
@@ -112,9 +112,12 @@ afterEvaluate {
         ruleSetFiles = files('pmd-ruleset.xml')
         source android.sourceSets.main.java.srcDirs
 
+        // Failures are caught and printed by the violations plugin.
+        ignoreFailures = true
+
         reports {
-            xml.enabled = false
-            html.enabled = true
+            xml.enabled = true
+            html.enabled = false
         }
     }
 

@@ -1,10 +1,12 @@
 package com.bumptech.glide.load.model;
 
 import android.content.ContentResolver;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Options;
+import com.bumptech.glide.load.data.AssetFileDescriptorLocalUriFetcher;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
 import com.bumptech.glide.load.data.StreamLocalUriFetcher;
@@ -94,8 +96,8 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
   /**
    * Loads {@link ParcelFileDescriptor}s from {@link Uri}s.
    */
-  public static class FileDescriptorFactory implements ModelLoaderFactory<Uri,
-      ParcelFileDescriptor>,
+  public static class FileDescriptorFactory
+      implements ModelLoaderFactory<Uri, ParcelFileDescriptor>,
       LocalUriFetcherFactory<ParcelFileDescriptor> {
 
     private final ContentResolver contentResolver;
@@ -118,6 +120,35 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
     @Override
     public void teardown() {
       // Do nothing.
+    }
+  }
+
+  /**
+   * Loads {@link AssetFileDescriptor}s from {@link Uri}s.
+   */
+  public static final class AssetFileDescriptorFactory
+      implements ModelLoaderFactory<Uri, AssetFileDescriptor>,
+      LocalUriFetcherFactory<AssetFileDescriptor> {
+
+    private final ContentResolver contentResolver;
+
+    public AssetFileDescriptorFactory(ContentResolver contentResolver) {
+      this.contentResolver = contentResolver;
+    }
+
+    @Override
+    public ModelLoader<Uri, AssetFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
+      return new UriLoader<>(this);
+    }
+
+    @Override
+    public void teardown() {
+      // Do nothing.
+    }
+
+    @Override
+    public DataFetcher<AssetFileDescriptor> build(Uri uri) {
+      return new AssetFileDescriptorLocalUriFetcher(contentResolver, uri);
     }
   }
 }

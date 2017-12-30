@@ -2,7 +2,9 @@ package com.bumptech.glide;
 
 import android.app.Activity;
 import android.content.ComponentCallbacks2;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -19,6 +21,7 @@ import android.util.Log;
 import android.view.View;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.data.InputStreamRewinder;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -54,7 +57,7 @@ import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
-import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
+import com.bumptech.glide.load.resource.bitmap.VideoDecoder;
 import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
 import com.bumptech.glide.load.resource.drawable.ResourceDrawableDecoder;
 import com.bumptech.glide.load.resource.drawable.UnitDrawableDecoder;
@@ -66,6 +69,7 @@ import com.bumptech.glide.load.resource.gif.GifFrameResourceDecoder;
 import com.bumptech.glide.load.resource.gif.StreamGifDecoder;
 import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
+import com.bumptech.glide.load.resource.transcode.DrawableBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
@@ -333,7 +337,8 @@ public class Glide implements ComponentCallbacks2 {
         resources.getDisplayMetrics(), bitmapPool, arrayPool);
     ByteBufferGifDecoder byteBufferGifDecoder =
         new ByteBufferGifDecoder(context, registry.getImageHeaderParsers(), bitmapPool, arrayPool);
-    VideoBitmapDecoder videoBitmapDecoder = new VideoBitmapDecoder(bitmapPool);
+    ResourceDecoder<ParcelFileDescriptor, Bitmap> parcelFileDescriptorVideoDecoder =
+        VideoDecoder.parcel(bitmapPool);
     ByteBufferBitmapDecoder byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
     StreamBitmapDecoder streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
     ResourceDrawableDecoder resourceDrawableDecoder =
@@ -344,7 +349,14 @@ public class Glide implements ComponentCallbacks2 {
         new ResourceLoader.UriFactory(resources);
     ResourceLoader.FileDescriptorFactory resourceLoaderFileDescriptorFactory =
         new ResourceLoader.FileDescriptorFactory(resources);
+    ResourceLoader.AssetFileDescriptorFactory resourceLoaderAssetFileDescriptorFactory =
+        new ResourceLoader.AssetFileDescriptorFactory(resources);
     BitmapEncoder bitmapEncoder = new BitmapEncoder();
+
+    BitmapBytesTranscoder bitmapBytesTranscoder = new BitmapBytesTranscoder();
+    GifDrawableBytesTranscoder gifDrawableBytesTranscoder = new GifDrawableBytesTranscoder();
+
+    ContentResolver contentResolver = context.getContentResolver();
 
     registry
         .append(ByteBuffer.class, new ByteBufferEncoder())
@@ -353,10 +365,18 @@ public class Glide implements ComponentCallbacks2 {
         .append(Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class, byteBufferBitmapDecoder)
         .append(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, streamBitmapDecoder)
         .append(
-            Registry.BUCKET_BITMAP, ParcelFileDescriptor.class, Bitmap.class, videoBitmapDecoder)
+            Registry.BUCKET_BITMAP,
+            ParcelFileDescriptor.class,
+            Bitmap.class,
+            parcelFileDescriptorVideoDecoder)
+        .append(
+            Registry.BUCKET_BITMAP,
+            AssetFileDescriptor.class,
+            Bitmap.class,
+            VideoDecoder.asset(bitmapPool))
+        .append(Bitmap.class, Bitmap.class, UnitModelLoader.Factory.<Bitmap>getInstance())
         .append(
             Registry.BUCKET_BITMAP, Bitmap.class, Bitmap.class, new UnitBitmapDecoder())
-        .append(Bitmap.class, Bitmap.class, UnitModelLoader.Factory.<Bitmap>getInstance())
         .append(Bitmap.class, bitmapEncoder)
         /* BitmapDrawables */
         .append(
@@ -373,7 +393,7 @@ public class Glide implements ComponentCallbacks2 {
             Registry.BUCKET_BITMAP_DRAWABLE,
             ParcelFileDescriptor.class,
             BitmapDrawable.class,
-            new BitmapDrawableDecoder<>(resources, videoBitmapDecoder))
+            new BitmapDrawableDecoder<>(resources, parcelFileDescriptorVideoDecoder))
         .append(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, bitmapEncoder))
         /* GIFs */
         .append(
@@ -408,33 +428,49 @@ public class Glide implements ComponentCallbacks2 {
         .register(new InputStreamRewinder.Factory(arrayPool))
         .append(int.class, InputStream.class, resourceLoaderStreamFactory)
         .append(
-                int.class,
-                ParcelFileDescriptor.class,
-                resourceLoaderFileDescriptorFactory)
+            int.class,
+            ParcelFileDescriptor.class,
+            resourceLoaderFileDescriptorFactory)
         .append(Integer.class, InputStream.class, resourceLoaderStreamFactory)
         .append(
-                Integer.class,
-                ParcelFileDescriptor.class,
-                resourceLoaderFileDescriptorFactory)
+            Integer.class,
+            ParcelFileDescriptor.class,
+            resourceLoaderFileDescriptorFactory)
         .append(Integer.class, Uri.class, resourceLoaderUriFactory)
+        .append(
+            int.class,
+            AssetFileDescriptor.class,
+            resourceLoaderAssetFileDescriptorFactory)
+        .append(
+            Integer.class,
+            AssetFileDescriptor.class,
+            resourceLoaderAssetFileDescriptorFactory)
         .append(int.class, Uri.class, resourceLoaderUriFactory)
         .append(String.class, InputStream.class, new DataUrlLoader.StreamFactory())
         .append(String.class, InputStream.class, new StringLoader.StreamFactory())
         .append(String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory())
+        .append(
+            String.class, AssetFileDescriptor.class, new StringLoader.AssetFileDescriptorFactory())
         .append(Uri.class, InputStream.class, new HttpUriLoader.Factory())
         .append(Uri.class, InputStream.class, new AssetUriLoader.StreamFactory(context.getAssets()))
         .append(
-                Uri.class,
-                ParcelFileDescriptor.class,
-                new AssetUriLoader.FileDescriptorFactory(context.getAssets()))
+            Uri.class,
+            ParcelFileDescriptor.class,
+            new AssetUriLoader.FileDescriptorFactory(context.getAssets()))
         .append(Uri.class, InputStream.class, new MediaStoreImageThumbLoader.Factory(context))
         .append(Uri.class, InputStream.class, new MediaStoreVideoThumbLoader.Factory(context))
         .append(
             Uri.class,
             InputStream.class,
-            new UriLoader.StreamFactory(context.getContentResolver()))
-        .append(Uri.class, ParcelFileDescriptor.class,
-             new UriLoader.FileDescriptorFactory(context.getContentResolver()))
+            new UriLoader.StreamFactory(contentResolver))
+        .append(
+            Uri.class,
+            ParcelFileDescriptor.class,
+             new UriLoader.FileDescriptorFactory(contentResolver))
+        .append(
+            Uri.class,
+            AssetFileDescriptor.class,
+            new UriLoader.AssetFileDescriptorFactory(contentResolver))
         .append(Uri.class, InputStream.class, new UrlUriLoader.StreamFactory())
         .append(URL.class, InputStream.class, new UrlLoader.StreamFactory())
         .append(Uri.class, File.class, new MediaStoreFileLoader.Factory(context))
@@ -449,8 +485,13 @@ public class Glide implements ComponentCallbacks2 {
             Bitmap.class,
             BitmapDrawable.class,
             new BitmapDrawableTranscoder(resources))
-        .register(Bitmap.class, byte[].class, new BitmapBytesTranscoder())
-        .register(GifDrawable.class, byte[].class, new GifDrawableBytesTranscoder());
+        .register(Bitmap.class, byte[].class, bitmapBytesTranscoder)
+        .register(
+            Drawable.class,
+            byte[].class,
+            new DrawableBytesTranscoder(
+                bitmapPool, bitmapBytesTranscoder, gifDrawableBytesTranscoder))
+        .register(GifDrawable.class, byte[].class, gifDrawableBytesTranscoder);
 
     ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     glideContext =

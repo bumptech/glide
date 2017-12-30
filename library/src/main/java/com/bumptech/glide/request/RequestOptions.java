@@ -27,7 +27,7 @@ import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.DrawableTransformation;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
-import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
+import com.bumptech.glide.load.resource.bitmap.VideoDecoder;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
 import com.bumptech.glide.load.resource.gif.GifOptions;
@@ -888,17 +888,17 @@ public class RequestOptions implements Cloneable {
   /**
    * Sets the time position of the frame to extract from a video.
    *
-   * <p>This is a component option specific to {@link VideoBitmapDecoder}. If the default video
+   * <p>This is a component option specific to {@link VideoDecoder}. If the default video
    * decoder is replaced or skipped because of your configuration, this option may be ignored.
    *
-   * @see VideoBitmapDecoder#TARGET_FRAME
+   * @see VideoDecoder#TARGET_FRAME
    * @param frameTimeMicros The time position in microseconds of the desired frame. If negative, the
    *                        Android framework implementation return a representative frame.
    */
   @NonNull
   @CheckResult
   public RequestOptions frame(@IntRange(from = 0) long frameTimeMicros) {
-    return set(VideoBitmapDecoder.TARGET_FRAME, frameTimeMicros);
+    return set(VideoDecoder.TARGET_FRAME, frameTimeMicros);
   }
 
   /**

@@ -4,7 +4,7 @@ dependencies {
     implementation project(':library')
     annotationProcessor project(':annotation:compiler')
 
-    api "com.squareup.okhttp:okhttp:2.7.1"
+    api "com.squareup.okhttp:okhttp:2.7.5"
     api "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
 }
 

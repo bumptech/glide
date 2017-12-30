@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
@@ -84,6 +85,23 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     @Override
     public ModelLoader<String, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
       return new StringLoader<>(multiFactory.build(Uri.class, ParcelFileDescriptor.class));
+    }
+
+    @Override
+    public void teardown() {
+      // Do nothing.
+    }
+  }
+
+  /**
+   * Loads {@link AssetFileDescriptor}s from Strings.
+   */
+  public static final class AssetFileDescriptorFactory
+      implements ModelLoaderFactory<String, AssetFileDescriptor> {
+
+    @Override
+    public ModelLoader<String, AssetFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
+      return new StringLoader<>(multiFactory.build(Uri.class, AssetFileDescriptor.class));
     }
 
     @Override

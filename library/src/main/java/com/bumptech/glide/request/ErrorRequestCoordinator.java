@@ -43,7 +43,9 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
   @Override
   public void clear() {
     primary.clear();
-    if (primary.isFailed()) {
+    // Don't check primary.isFailed() here because it will have been reset by the clear call
+    // immediately before this.
+    if (error.isRunning()) {
       error.clear();
     }
   }

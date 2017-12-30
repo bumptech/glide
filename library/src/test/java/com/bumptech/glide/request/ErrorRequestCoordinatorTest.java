@@ -80,8 +80,9 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void clear_whenPrimaryHasFailed_clearsError() {
+  public void clear_whenPrimaryHasFailed_errorIsRunning_clearsError() {
     when(primary.isFailed()).thenReturn(true);
+    when(error.isRunning()).thenReturn(true);
     coordinator.clear();
     verify(error).clear();
   }
@@ -91,6 +92,14 @@ public class ErrorRequestCoordinatorTest {
     when(primary.isFailed()).thenReturn(true);
     coordinator.clear();
     verify(primary).clear();
+  }
+
+  @Test
+  public void clear_whenErrorIsRunning_clearsError() {
+    when(error.isRunning()).thenReturn(true);
+    coordinator.clear();
+
+    verify(error).clear();
   }
 
   @Test
