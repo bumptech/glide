@@ -135,6 +135,8 @@
         <exclude name="CyclomaticComplexity" />
         <exclude name="NPathComplexity" />
         <exclude name="ExcessiveMethodLength" />
+        <exclude name="ExcessiveClassLength" />
+        <exclude name="ExcessivePublicCount" />
         <!-- This is redundant, also caught with AvoidCatchingNPEs. -->
         <exclude name="AvoidCatchingGenericException" />
     </rule>

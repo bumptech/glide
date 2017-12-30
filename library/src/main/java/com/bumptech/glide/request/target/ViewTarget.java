@@ -43,8 +43,8 @@ import java.util.List;
  */
 public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   private static final String TAG = "ViewTarget";
-  private static boolean isTagUsedAtLeastOnce = false;
-  @Nullable private static Integer tagId = null;
+  private static boolean isTagUsedAtLeastOnce;
+  @Nullable private static Integer tagId;
 
   protected final T view;
   private final SizeDeterminer sizeDeterminer;
@@ -74,8 +74,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    *
    * @deprecated Use {@link #waitForLayout()} instead.
    */
-  // Public API.
-  @SuppressWarnings("WeakerAccess")
+  @SuppressWarnings("WeakerAccess") // Public API
   @Deprecated
   public ViewTarget(@NonNull T view, boolean waitForLayout) {
     this(view);

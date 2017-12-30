@@ -511,8 +511,11 @@ public class Registry {
             decoderRegistry.getDecoders(dataClass, registeredResourceClass);
         ResourceTranscoder<TResource, Transcode> transcoder =
             transcoderRegistry.get(registeredResourceClass, registeredTranscodeClass);
-        decodePaths.add(new DecodePath<>(dataClass, registeredResourceClass,
-            registeredTranscodeClass, decoders, transcoder, throwableListPool));
+        @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+        DecodePath<Data, TResource, Transcode> path =
+            new DecodePath<>(dataClass, registeredResourceClass, registeredTranscodeClass,
+                decoders, transcoder, throwableListPool);
+        decodePaths.add(path);
       }
     }
     return decodePaths;

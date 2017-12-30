@@ -152,13 +152,13 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
 
     @NonNull
     @Override
-    public final ModelLoader<String, InputStream> build(
+    public ModelLoader<String, InputStream> build(
         @NonNull MultiModelLoaderFactory multiFactory) {
       return new DataUrlLoader<>(opener);
     }
 
     @Override
-    public final void teardown() {
+    public void teardown() {
       // Do nothing.
     }
   }
