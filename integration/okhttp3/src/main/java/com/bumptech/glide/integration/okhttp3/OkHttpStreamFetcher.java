@@ -1,6 +1,5 @@
 package com.bumptech.glide.integration.okhttp3;
 
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Priority;
@@ -10,7 +9,6 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.util.ContentLengthInputStream;
 import com.bumptech.glide.util.Preconditions;
-import com.bumptech.glide.util.Synthetic;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -26,10 +24,12 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream>, okhttp3.Ca
   private static final String TAG = "OkHttpFetcher";
   private final Call.Factory client;
   private final GlideUrl url;
-  @SuppressWarnings("WeakerAccess") @Synthetic InputStream stream;
-  @SuppressWarnings("WeakerAccess") @Synthetic ResponseBody responseBody;
-  private volatile Call call;
+  private InputStream stream;
+  private ResponseBody responseBody;
   private DataCallback<? super InputStream> callback;
+  // call may be accessed on the main thread while the object is in use on other threads. All other
+  // accesses to variables may occur on different threads, but only one at a time.
+  private volatile Call call;
 
   // Public API.
   @SuppressWarnings("WeakerAccess")
@@ -50,21 +50,7 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream>, okhttp3.Ca
     this.callback = callback;
 
     call = client.newCall(request);
-    if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
-      call.enqueue(this);
-    } else {
-      try {
-        // Calling execute instead of enqueue is a workaround for #2355, where okhttp throws a
-        // ClassCastException on O.
-        onResponse(call, call.execute());
-      } catch (IOException e) {
-        onFailure(call, e);
-      } catch (ClassCastException e) {
-        // It's not clear that this catch is necessary, the error may only occur even on O if
-        // enqueue is used.
-        onFailure(call, new IOException("Workaround for framework bug on O", e));
-      }
-    }
+    call.enqueue(this);
   }
 
   @Override
