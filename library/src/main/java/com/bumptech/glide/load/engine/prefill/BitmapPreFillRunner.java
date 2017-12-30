@@ -100,10 +100,6 @@ final class BitmapPreFillRunner implements Runnable {
    * more {@link android.graphics.Bitmap}s to allocate and {@code false} otherwise.
    */
   @VisibleForTesting
-  // We could probably make UniqueKey just always return false from equals, but the allocation of
-  // the Key is not nearly as expensive as the allocation of the Bitmap, so it's probably not worth
-  // it.
-  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   boolean allocate() {
     long start = clock.now();
     while (!toPrefill.isEmpty() && !isGcDetected(start)) {
@@ -127,7 +123,12 @@ final class BitmapPreFillRunner implements Runnable {
       // Don't over fill the memory cache to avoid evicting useful resources, but make sure it's
       // not empty so that we use all available space.
       if (getFreeMemoryCacheBytes() >= bitmapSize) {
-        memoryCache.put(new UniqueKey(), BitmapResource.obtain(bitmap, bitmapPool));
+        // We could probably make UniqueKey just always return false from equals,
+        // but the allocation of the Key is not nearly as expensive as the allocation of the Bitmap,
+        // so it's probably not worth it.
+        @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+        Key uniqueKey = new UniqueKey();
+        memoryCache.put(uniqueKey, BitmapResource.obtain(bitmap, bitmapPool));
       } else {
         bitmapPool.put(bitmap);
       }

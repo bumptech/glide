@@ -96,8 +96,6 @@ public final class GlideException extends Exception {
    * provide a more succinct overview of why the exception occurred, although it does not include
    * complete stack traces.
    */
-  // Somewhat clearer to set size along with the index.
-  @SuppressWarnings("PMD.OneDeclarationPerLine")
   public void logRootCauses(String tag) {
     List<Throwable> causes = getRootCauses();
     for (int i = 0, size = causes.size(); i < size; i++) {

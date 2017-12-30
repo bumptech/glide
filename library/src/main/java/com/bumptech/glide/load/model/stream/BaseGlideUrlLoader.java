@@ -11,6 +11,7 @@ import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -71,7 +72,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
 
   // Creating a limited number of objects as the sole purpose of the loop.
   @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-  private static List<Key> getAlternateKeys(List<String> alternateUrls) {
+  private static List<Key> getAlternateKeys(Collection<String> alternateUrls) {
     List<Key> result = new ArrayList<>(alternateUrls.size());
     for (String alternate : alternateUrls) {
       result.add(new GlideUrl(alternate));

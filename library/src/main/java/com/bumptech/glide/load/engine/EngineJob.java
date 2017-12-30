@@ -191,8 +191,6 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   }
 
   @Synthetic
-  // Somewhat clearer to set size along with the index.
-  @SuppressWarnings("PMD.OneDeclarationPerLine")
   void handleResultOnMainThread() {
     stateVerifier.throwIfRecycled();
     if (isCancelled) {

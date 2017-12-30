@@ -93,30 +93,30 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
       ByteBuffer byteBuffer, int width, int height, GifHeaderParser parser, Options options) {
     long startTime = LogTime.getLogTime();
     try {
-    final GifHeader header = parser.parseHeader();
-    if (header.getNumFrames() <= 0 || header.getStatus() != GifDecoder.STATUS_OK) {
-      // If we couldn't decode the GIF, we will end up with a frame count of 0.
-      return null;
-    }
+      final GifHeader header = parser.parseHeader();
+      if (header.getNumFrames() <= 0 || header.getStatus() != GifDecoder.STATUS_OK) {
+        // If we couldn't decode the GIF, we will end up with a frame count of 0.
+        return null;
+      }
 
-    Bitmap.Config config = options.get(GifOptions.DECODE_FORMAT) == DecodeFormat.PREFER_RGB_565
-        ? Bitmap.Config.RGB_565 : Bitmap.Config.ARGB_8888;
+      Bitmap.Config config = options.get(GifOptions.DECODE_FORMAT) == DecodeFormat.PREFER_RGB_565
+          ? Bitmap.Config.RGB_565 : Bitmap.Config.ARGB_8888;
 
-    int sampleSize = getSampleSize(header, width, height);
-    GifDecoder gifDecoder = gifDecoderFactory.build(provider, header, byteBuffer, sampleSize);
-    gifDecoder.setDefaultBitmapConfig(config);
-    gifDecoder.advance();
-    Bitmap firstFrame = gifDecoder.getNextFrame();
-    if (firstFrame == null) {
-      return null;
-    }
+      int sampleSize = getSampleSize(header, width, height);
+      GifDecoder gifDecoder = gifDecoderFactory.build(provider, header, byteBuffer, sampleSize);
+      gifDecoder.setDefaultBitmapConfig(config);
+      gifDecoder.advance();
+      Bitmap firstFrame = gifDecoder.getNextFrame();
+      if (firstFrame == null) {
+        return null;
+      }
 
-    Transformation<Bitmap> unitTransformation = UnitTransformation.get();
+      Transformation<Bitmap> unitTransformation = UnitTransformation.get();
 
-    GifDrawable gifDrawable =
-        new GifDrawable(context, gifDecoder, unitTransformation, width, height, firstFrame);
+      GifDrawable gifDrawable =
+          new GifDrawable(context, gifDecoder, unitTransformation, width, height, firstFrame);
 
-    return new GifDrawableResource(gifDrawable);
+      return new GifDrawableResource(gifDrawable);
     } finally {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Decoded GIF from stream in " + LogTime.getElapsedMillis(startTime));

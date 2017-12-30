@@ -368,13 +368,13 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    */
   @Override
   public synchronized long skip(long byteCount) throws IOException {
+    if (byteCount < 1) {
+      return 0;
+    }
     // Use local refs since buf and in may be invalidated by an unsynchronized close()
     byte[] localBuf = buf;
     if (localBuf == null) {
       throw streamClosed();
-    }
-    if (byteCount < 1) {
-      return 0;
     }
     InputStream localIn = in;
     if (localIn == null) {

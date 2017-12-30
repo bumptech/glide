@@ -43,15 +43,13 @@ class ThumbnailStreamOpener {
     this.parsers = parsers;
   }
 
-  // The framework can throw NPEs here.
-  @SuppressWarnings("PMD.AvoidCatchingNPE")
   int getOrientation(Uri uri) {
     InputStream is = null;
     try {
       is = contentResolver.openInputStream(uri);
       return ImageHeaderParserUtils.getOrientation(parsers, is, byteArrayPool);
-      // openInputStream can throw NPEs.
-    } catch (IOException | NullPointerException e) {
+      // PMD.AvoidCatchingNPE framework method openInputStream can throw NPEs.
+    } catch (@SuppressWarnings("PMD.AvoidCatchingNPE") IOException | NullPointerException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Failed to open uri: " + uri, e);
       }
@@ -67,8 +65,6 @@ class ThumbnailStreamOpener {
     return ImageHeaderParser.UNKNOWN_ORIENTATION;
   }
 
-  // The framework can throw NPEs here.
-  @SuppressWarnings("PMD.AvoidCatchingNPE")
   public InputStream open(Uri uri) throws FileNotFoundException {
     Uri thumbnailUri = null;
 
@@ -92,16 +88,15 @@ class ThumbnailStreamOpener {
       }
     }
 
-    InputStream inputStream = null;
-    if (thumbnailUri != null) {
-      try {
-        inputStream = contentResolver.openInputStream(thumbnailUri);
-        // openInputStream can throw NPEs.
-      } catch (NullPointerException e) {
-        throw (FileNotFoundException)
-          new FileNotFoundException("NPE opening uri: " + thumbnailUri).initCause(e);
-      }
+    if (thumbnailUri == null) {
+      return null;
     }
-    return inputStream;
+    try {
+      return contentResolver.openInputStream(thumbnailUri);
+      // PMD.AvoidCatchingNPE framework method openInputStream can throw NPEs.
+    } catch (@SuppressWarnings("PMD.AvoidCatchingNPE") NullPointerException e) {
+      throw (FileNotFoundException)
+        new FileNotFoundException("NPE opening uri: " + thumbnailUri).initCause(e);
+    }
   }
 }

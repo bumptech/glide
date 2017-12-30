@@ -20,8 +20,6 @@ public final class ImageHeaderParserUtils {
   private ImageHeaderParserUtils() { }
 
   /** Returns the ImageType for the given InputStream. */
-  // Somewhat clearer to set size along with the index.
-  @SuppressWarnings("PMD.OneDeclarationPerLine")
   public static ImageType getType(List<ImageHeaderParser> parsers, @Nullable InputStream is,
       ArrayPool byteArrayPool) throws IOException {
     if (is == null) {
@@ -50,8 +48,6 @@ public final class ImageHeaderParserUtils {
   }
 
   /** Returns the ImageType for the given ByteBuffer. */
-  // Somewhat clearer to set size along with the index.
-  @SuppressWarnings("PMD.OneDeclarationPerLine")
   public static ImageType getType(List<ImageHeaderParser> parsers, @Nullable ByteBuffer buffer)
       throws IOException {
     if (buffer == null) {
@@ -71,8 +67,6 @@ public final class ImageHeaderParserUtils {
   }
 
   /** Returns the orientation for the given InputStream. */
-  // Somewhat clearer to set size along with the index.
-  @SuppressWarnings("PMD.OneDeclarationPerLine")
   public static int getOrientation(List<ImageHeaderParser> parsers, @Nullable InputStream is,
       ArrayPool byteArrayPool) throws IOException {
     if (is == null) {

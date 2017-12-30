@@ -79,7 +79,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   }
 
   private ImageType getType(Reader reader) throws IOException {
-    int firstTwoBytes = reader.getUInt16();
+    final int firstTwoBytes = reader.getUInt16();
 
     // JPEG.
     if (firstTwoBytes == EXIF_MAGIC_NUMBER) {
@@ -208,11 +208,8 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
    * {@code -1} if no exif segment is found.
    */
   private int moveToExifSegmentAndGetLength(Reader reader) throws IOException {
-    short segmentId;
-    short segmentType;
-    int segmentLength;
     while (true) {
-      segmentId = reader.getUInt8();
+      short segmentId = reader.getUInt8();
       if (segmentId != SEGMENT_START_ID) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Unknown segmentId=" + segmentId);
@@ -220,8 +217,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         return -1;
       }
 
-      segmentType = reader.getUInt8();
-
+      short segmentType = reader.getUInt8();
       if (segmentType == SEGMENT_SOS) {
         return -1;
       } else if (segmentType == MARKER_EOI) {
@@ -232,8 +228,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       }
 
       // Segment length includes bytes for segment length.
-      segmentLength = reader.getUInt16() - 2;
-
+      int segmentLength = reader.getUInt16() - 2;
       if (segmentType != EXIF_SEGMENT_TYPE) {
         long skipped = reader.skip(segmentLength);
         if (skipped != segmentLength) {
@@ -275,22 +270,16 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
 
     int firstIfdOffset = segmentData.getInt32(headerOffsetSize + 4) + headerOffsetSize;
     int tagCount = segmentData.getInt16(firstIfdOffset);
-
-    int tagOffset;
-    int tagType;
-    int formatCode;
-    int componentCount;
     for (int i = 0; i < tagCount; i++) {
-      tagOffset = calcTagOffset(firstIfdOffset, i);
-      tagType = segmentData.getInt16(tagOffset);
+      final int tagOffset = calcTagOffset(firstIfdOffset, i);
 
+      final int tagType = segmentData.getInt16(tagOffset);
       // We only want orientation.
       if (tagType != ORIENTATION_TAG_TYPE) {
         continue;
       }
 
-      formatCode = segmentData.getInt16(tagOffset + 2);
-
+      final int formatCode = segmentData.getInt16(tagOffset + 2);
       // 12 is max format code.
       if (formatCode < 1 || formatCode > 12) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -299,8 +288,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         continue;
       }
 
-      componentCount = segmentData.getInt32(tagOffset + 4);
-
+      final int componentCount = segmentData.getInt32(tagOffset + 4);
       if (componentCount < 0) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Negative tiff component count");
@@ -314,7 +302,6 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       }
 
       final int byteCount = componentCount + BYTES_PER_FORMAT[formatCode];
-
       if (byteCount > 4) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Got byte count > 4, not orientation, continuing, formatCode=" + formatCode);
@@ -323,7 +310,6 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       }
 
       final int tagValueOffset = tagOffset + 8;
-
       if (tagValueOffset < 0 || tagValueOffset > segmentData.length()) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Illegal tagValueOffset=" + tagValueOffset + " tagType=" + tagType);

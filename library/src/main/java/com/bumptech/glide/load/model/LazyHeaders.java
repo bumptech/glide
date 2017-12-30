@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import java.util.ArrayList;
@@ -38,32 +39,34 @@ public final class LazyHeaders implements Headers {
     return combinedHeaders;
   }
 
-  // Using the StringBuilder is less expensive that just appending Strings theoretically at least.
-  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   private Map<String, String> generateHeaders() {
     Map<String, String> combinedHeaders = new HashMap<>();
 
     for (Map.Entry<String, List<LazyHeaderFactory>> entry : headers.entrySet()) {
-      StringBuilder sb = new StringBuilder();
-      List<LazyHeaderFactory> factories = entry.getValue();
-      int size = factories.size();
-      for (int i = 0; i < size; i++) {
-        LazyHeaderFactory factory = factories.get(i);
-        String header = factory.buildHeader();
-        if (!TextUtils.isEmpty(header)) {
-          sb.append(header);
-          if (i != factories.size() - 1) {
-            sb.append(',');
-          }
-        }
-      }
-      String values = sb.toString();
+      String values = buildHeaderValue(entry.getValue());
       if (!TextUtils.isEmpty(values)) {
-        combinedHeaders.put(entry.getKey(), sb.toString());
+        combinedHeaders.put(entry.getKey(), values);
       }
     }
 
     return combinedHeaders;
+  }
+
+  @NonNull
+  private String buildHeaderValue(@NonNull List<LazyHeaderFactory> factories) {
+    StringBuilder sb = new StringBuilder();
+    int size = factories.size();
+    for (int i = 0; i < size; i++) {
+      LazyHeaderFactory factory = factories.get(i);
+      String header = factory.buildHeader();
+      if (!TextUtils.isEmpty(header)) {
+        sb.append(header);
+        if (i != factories.size() - 1) {
+          sb.append(',');
+        }
+      }
+    }
+    return sb.toString();
   }
 
   @Override
@@ -98,8 +101,6 @@ public final class LazyHeaders implements Headers {
    * {@link #addHeader(String, String)}, even though {@link #addHeader(String, LazyHeaderFactory)}
    * would usually append an additional value. </p>
    */
-   // PMD doesn't like the necessary static block to initialize DEFAULT_HEADERS.
-  @SuppressWarnings({"PMD.FieldDeclarationsShouldBeAtStartOfClass", "WeakerAccess"})
   public static final class Builder {
     private static final String USER_AGENT_HEADER = "User-Agent";
     private static final String DEFAULT_USER_AGENT = getSanitizedUserAgent();
@@ -130,7 +131,6 @@ public final class LazyHeaders implements Headers {
      * (i.e. an OAuth token). </p>
      *
      * @see #addHeader(String, LazyHeaderFactory)
-
      */
     public Builder addHeader(String key, String value) {
       return addHeader(key, new StringHeaderFactory(value));
@@ -165,8 +165,7 @@ public final class LazyHeaders implements Headers {
      * <p> Use {@link #setHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
      * (i.e. an OAuth token). </p>
      */
-    // Public API.
-    @SuppressWarnings("UnusedReturnValue")
+    @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"}) // Public API
     public Builder setHeader(String key, String value) {
       return setHeader(key, value == null ? null : new StringHeaderFactory(value));
     }
@@ -218,12 +217,12 @@ public final class LazyHeaders implements Headers {
       return new LazyHeaders(headers);
     }
 
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     private Map<String, List<LazyHeaderFactory>> copyHeaders() {
-      Map<String, List<LazyHeaderFactory>> result =
-          new HashMap<>(headers.size());
+      Map<String, List<LazyHeaderFactory>> result = new HashMap<>(headers.size());
       for (Map.Entry<String, List<LazyHeaderFactory>> entry : headers.entrySet()) {
-        result.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+        @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+        List<LazyHeaderFactory> valueCopy = new ArrayList<>(entry.getValue());
+        result.put(entry.getKey(), valueCopy);
       }
       return result;
     }
@@ -231,7 +230,7 @@ public final class LazyHeaders implements Headers {
     /**
      * Ensures that the default header will pass OkHttp3's checks for header values.
      *
-     * <p>See #2331.
+     * @see <a href="https://github.com/bumptech/glide/issues/2331">#2331</a>
      */
     @VisibleForTesting
     static String getSanitizedUserAgent() {

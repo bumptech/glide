@@ -45,8 +45,6 @@ public class LoadPath<Data, ResourceType, Transcode> {
     }
   }
 
-  // Somewhat clearer to set size along with the index.
-  @SuppressWarnings("PMD.OneDeclarationPerLine")
   private Resource<Transcode> loadWithExceptionList(DataRewinder<Data> rewinder, Options options,
       int width, int height, DecodePath.DecodeCallback<ResourceType> decodeCallback,
       List<Throwable> exceptions) throws GlideException {

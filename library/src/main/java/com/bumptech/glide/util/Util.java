@@ -69,8 +69,6 @@ public final class Util {
    * Returns the in memory size of the given {@link Bitmap} in bytes.
    */
   @TargetApi(Build.VERSION_CODES.KITKAT)
-  // NPE is thrown by the framework.
-  @SuppressWarnings("PMD.AvoidCatchingNPE")
   public static int getBitmapByteSize(@NonNull Bitmap bitmap) {
     // The return value of getAllocationByteCount silently changes for recycled bitmaps from the
     // internal buffer size to row bytes * height. To avoid random inconsistencies in caches, we
@@ -83,7 +81,7 @@ public final class Util {
       // Workaround for KitKat initial release NPE in Bitmap, fixed in MR1. See issue #148.
       try {
         return bitmap.getAllocationByteCount();
-      } catch (NullPointerException e) {
+      } catch (@SuppressWarnings("PMD.AvoidCatchingNPE") NullPointerException e) {
         // Do nothing.
       }
     }

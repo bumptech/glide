@@ -20,10 +20,17 @@ public class BytesResource implements Resource<byte[]> {
     return byte[].class;
   }
 
+  /**
+   * In most cases it will only be retrieved once (see linked methods).
+   *
+   * @return the same array every time, do not mutate the contents. Not a copy returned, because
+   * copying the array can be prohibitively expensive and/or lead to OOMs.
+   * @see com.bumptech.glide.load.ResourceEncoder
+   * @see com.bumptech.glide.load.resource.transcode.ResourceTranscoder
+   * @see com.bumptech.glide.request.SingleRequest#onResourceReady
+   */
   @NonNull
   @Override
-  // We have to hope that callers don't mutate our array. In most cases it will only be retrieved
-  // once anyway. Copying the array can be prohibitively expensive and/or lead to OOMs.
   @SuppressWarnings("PMD.MethodReturnsInternalArray")
   public byte[] get() {
     return bytes;

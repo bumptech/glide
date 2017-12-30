@@ -27,7 +27,9 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   @VisibleForTesting
   static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY =
       new DefaultHttpUrlConnectionFactory();
-  // Returned when a connection error prevented us from receiving an http error.
+  /**
+   * Returned when a connection error prevented us from receiving an http error.
+   */
   private static final int INVALID_STATUS_CODE = -1;
 
   private final GlideUrl glideUrl;
@@ -54,19 +56,13 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       @NonNull DataCallback<? super InputStream> callback) {
     long startTime = LogTime.getLogTime();
     try {
-      final InputStream result;
-      try {
-        result = loadDataWithRedirects(glideUrl.toURL(), 0 /*redirects*/, null /*lastUrl*/,
-            glideUrl.getHeaders());
-      } catch (IOException e) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Failed to load data for url", e);
-        }
-        callback.onLoadFailed(e);
-        return;
-      }
-
+      InputStream result = loadDataWithRedirects(glideUrl.toURL(), 0, null, glideUrl.getHeaders());
       callback.onDataReady(result);
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to load data for url", e);
+      }
+      callback.onLoadFailed(e);
     } finally {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Finished http url fetcher fetch in " + LogTime.getElapsedMillis(startTime));
@@ -132,13 +128,11 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   }
 
   // Referencing constants is less clear than a simple static method.
-  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
   private static boolean isHttpOk(int statusCode) {
     return statusCode / 100 == 2;
   }
 
   // Referencing constants is less clear than a simple static method.
-  @SuppressWarnings("PMD.AvoidLiteralsInIfCondition")
   private static boolean isHttpRedirect(int statusCode) {
     return statusCode / 100 == 3;
   }

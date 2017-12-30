@@ -43,9 +43,6 @@ class DataCacheGenerator implements DataFetcherGenerator,
   }
 
   @Override
-  // The loop iterates a limited number of times and the actions it performs are much more expensive
-  // than a single allocation.
-  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   public boolean startNext() {
     while (modelLoaders == null || !hasNextModelLoader()) {
       sourceIdIndex++;
@@ -54,6 +51,9 @@ class DataCacheGenerator implements DataFetcherGenerator,
       }
 
       Key sourceId = cacheKeys.get(sourceIdIndex);
+      // PMD.AvoidInstantiatingObjectsInLoops The loop iterates a limited number of times
+      // and the actions it performs are much more expensive than a single allocation.
+      @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
       Key originalKey = new DataCacheKey(sourceId, helper.getSignature());
       cacheFile = helper.getDiskCache().get(originalKey);
       if (cacheFile != null) {
