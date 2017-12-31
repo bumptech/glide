@@ -51,9 +51,9 @@ public class RequestFutureTargetTest {
 
   @Test
   public void testCallsSizeReadyCallbackOnGetSize() {
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
-    future.getSize(cb);
-    verify(cb).onSizeReady(eq(width), eq(height));
+    SizeReadyCallback callback = mock(SizeReadyCallback.class);
+    future.getSize(callback);
+    verify(callback).onSizeReady(eq(width), eq(height));
   }
 
   @Test

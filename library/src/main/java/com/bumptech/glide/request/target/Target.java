@@ -80,16 +80,16 @@ public interface Target<R> extends LifecycleListener {
   /**
    * A method to retrieve the size of this target.
    *
-   * @param cb The callback that must be called when the size of the target has been determined
+   * @param callback will be called when the size of the target has been determined
    */
-  void getSize(@NonNull SizeReadyCallback cb);
+  void getSize(@NonNull SizeReadyCallback callback);
 
   /**
    * Removes the given callback from the pending set if it's still retained.
    *
-   * @param cb The callback to remove.
+   * @param callback to remove
    */
-  void removeCallback(@NonNull SizeReadyCallback cb);
+  void removeCallback(@NonNull SizeReadyCallback callback);
 
   /**
    * Sets the current request for this target to retain, should not be called outside of Glide.

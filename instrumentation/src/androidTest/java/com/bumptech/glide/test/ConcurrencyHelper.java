@@ -143,13 +143,13 @@ public class ConcurrencyHelper {
           }
 
           @Override
-          public void getSize(@NonNull SizeReadyCallback cb) {
-            target.getSize(cb);
+          public void getSize(@NonNull SizeReadyCallback callback) {
+            target.getSize(callback);
           }
 
           @Override
-          public void removeCallback(@NonNull SizeReadyCallback cb) {
-            target.removeCallback(cb);
+          public void removeCallback(@NonNull SizeReadyCallback callback) {
+            target.removeCallback(callback);
           }
 
           @Override
@@ -218,13 +218,13 @@ public class ConcurrencyHelper {
           }
 
           @Override
-          public void getSize(@NonNull SizeReadyCallback cb) {
-            target.getSize(cb);
+          public void getSize(@NonNull SizeReadyCallback callback) {
+            target.getSize(callback);
           }
 
           @Override
-          public void removeCallback(@NonNull SizeReadyCallback cb) {
-            target.removeCallback(cb);
+          public void removeCallback(@NonNull SizeReadyCallback callback) {
+            target.removeCallback(callback);
           }
 
           @Override

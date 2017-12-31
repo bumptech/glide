@@ -808,8 +808,8 @@ public class GlideTest {
 
     @Override
     public Void answer(InvocationOnMock invocation) throws Throwable {
-      SizeReadyCallback cb = (SizeReadyCallback) invocation.getArguments()[0];
-      cb.onSizeReady(width, height);
+      SizeReadyCallback callback = (SizeReadyCallback) invocation.getArguments()[0];
+      callback.onSizeReady(width, height);
       return null;
     }
   }

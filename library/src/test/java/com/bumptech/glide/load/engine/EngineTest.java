@@ -64,7 +64,7 @@ public class EngineTest {
   public void testCallbackIsAddedToNewEngineJobWithNoExistingLoad() {
     harness.doLoad();
 
-    verify(harness.job).addCallback(eq(harness.cb));
+    verify(harness.job).addCallback(eq(harness.callback));
   }
 
   @Test
@@ -77,7 +77,7 @@ public class EngineTest {
     Engine.LoadStatus loadStatus = harness.doLoad();
     loadStatus.cancel();
 
-    verify(harness.job).removeCallback(eq(harness.cb));
+    verify(harness.job).removeCallback(eq(harness.callback));
   }
 
   @Test
@@ -100,7 +100,7 @@ public class EngineTest {
     harness.doLoad();
 
     ResourceCallback newCallback = mock(ResourceCallback.class);
-    harness.cb = newCallback;
+    harness.callback = newCallback;
     harness.doLoad();
 
     verify(harness.job).addCallback(eq(newCallback));
@@ -120,7 +120,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
+    verify(harness.callback).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
@@ -154,7 +154,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
+    verify(harness.callback).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
     verify(harness.cache, never()).remove(any(Key.class));
   }
 
@@ -175,7 +175,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
+    verify(harness.callback).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
@@ -194,7 +194,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
+    verify(harness.callback).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
@@ -211,11 +211,11 @@ public class EngineTest {
         assertEquals(expected, resource.get());
         return null;
       }
-    }).when(harness.cb).onResourceReady(anyResource(), isADataSource());
+    }).when(harness.callback).onResourceReady(anyResource(), isADataSource());
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(anyResource(), isADataSource());
+    verify(harness.callback).onResourceReady(anyResource(), isADataSource());
   }
 
   @Test
@@ -448,7 +448,7 @@ public class EngineTest {
     }).when(harness.job).start(any(DecodeJob.class));
     harness.doLoad();
     harness.doLoad();
-    verify(harness.cb).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE));
+    verify(harness.callback).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
@@ -465,7 +465,7 @@ public class EngineTest {
     harness.doLoad();
     harness.getEngine().onResourceReleased(harness.cacheKey, harness.resource);
     harness.doLoad();
-    verify(harness.cb).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE));
+    verify(harness.callback).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE));
   }
 
   @Test
@@ -625,7 +625,7 @@ public class EngineTest {
   private static class EngineTestHarness {
     final EngineKey cacheKey = mock(EngineKey.class);
     final EngineKeyFactory keyFactory = mock(EngineKeyFactory.class);
-    ResourceCallback cb = mock(ResourceCallback.class);
+    ResourceCallback callback = mock(ResourceCallback.class);
     @SuppressWarnings("rawtypes")
     final EngineResource resource = mock(EngineResource.class);
     final EngineJobs jobs = new EngineJobs();
@@ -687,7 +687,7 @@ public class EngineTest {
           useUnlimitedSourceGeneratorPool,
           /*useAnimationPool=*/ false,
           onlyRetrieveFromCache,
-          cb);
+          callback);
     }
 
     Engine getEngine() {

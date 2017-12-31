@@ -25,7 +25,7 @@ class SourceGenerator implements DataFetcherGenerator,
   private static final String TAG = "SourceGenerator";
 
   private final DecodeHelper<?> helper;
-  private final FetcherReadyCallback cb;
+  private final FetcherReadyCallback callback;
 
   private int loadDataListIndex;
   private DataCacheGenerator sourceCacheGenerator;
@@ -33,9 +33,9 @@ class SourceGenerator implements DataFetcherGenerator,
   private volatile ModelLoader.LoadData<?> loadData;
   private DataCacheKey originalKey;
 
-  SourceGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
+  SourceGenerator(DecodeHelper<?> helper, FetcherReadyCallback callback) {
     this.helper = helper;
-    this.cb = cb;
+    this.callback = callback;
   }
 
   @Override
@@ -107,16 +107,17 @@ class SourceGenerator implements DataFetcherGenerator,
       dataToCache = data;
       // We might be being called back on someone else's thread. Before doing anything, we should
       // reschedule to get back onto Glide's thread.
-      cb.reschedule();
+      callback.reschedule();
     } else {
-      cb.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher,
+      callback.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher,
           loadData.fetcher.getDataSource(), originalKey);
     }
   }
 
   @Override
   public void onLoadFailed(@NonNull Exception e) {
-    cb.onDataFetcherFailed(originalKey, e, loadData.fetcher, loadData.fetcher.getDataSource());
+    DataFetcher<?> fetcher = loadData.fetcher;
+    callback.onDataFetcherFailed(originalKey, e, fetcher, fetcher.getDataSource());
   }
 
   @Override
@@ -132,12 +133,13 @@ class SourceGenerator implements DataFetcherGenerator,
       DataSource dataSource, Key attemptedKey) {
     // This data fetcher will be loading from a File and provide the wrong data source, so override
     // with the data source of the original fetcher
-    cb.onDataFetcherReady(sourceKey, data, fetcher, loadData.fetcher.getDataSource(), sourceKey);
+    DataSource originalDataSource = loadData.fetcher.getDataSource();
+    callback.onDataFetcherReady(sourceKey, data, fetcher, originalDataSource, sourceKey);
   }
 
   @Override
   public void onDataFetcherFailed(Key sourceKey, Exception e, DataFetcher<?> fetcher,
       DataSource dataSource) {
-    cb.onDataFetcherFailed(sourceKey, e, fetcher, loadData.fetcher.getDataSource());
+    callback.onDataFetcherFailed(sourceKey, e, fetcher, loadData.fetcher.getDataSource());
   }
 }

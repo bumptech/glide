@@ -273,8 +273,8 @@ class GifFrameLoader {
       // The callbacks may unregister when onFrameReady is called, so iterate in reverse to avoid
       // concurrent modifications.
       for (int i = callbacks.size() - 1; i >= 0; i--) {
-        FrameCallback cb = callbacks.get(i);
-        cb.onFrameReady();
+        FrameCallback callback = callbacks.get(i);
+        callback.onFrameReady();
       }
       if (previous != null) {
         handler.obtainMessage(FrameLoaderCallback.MSG_CLEAR, previous).sendToTarget();

@@ -30,10 +30,10 @@ public class PreloadTargetTest {
     int width = 1234;
     int height = 456;
     PreloadTarget<Object> target = PreloadTarget.obtain(requestManager, width, height);
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
-    target.getSize(cb);
+    SizeReadyCallback callback = mock(SizeReadyCallback.class);
+    target.getSize(callback);
 
-    verify(cb).onSizeReady(eq(width), eq(height));
+    verify(callback).onSizeReady(eq(width), eq(height));
   }
 
   @Test

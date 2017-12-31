@@ -207,18 +207,18 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * zero, it then adds an {@link android.view.ViewTreeObserver.OnPreDrawListener} which waits until
    * the view has been measured before calling the callback with the view's drawn width and height.
    *
-   * @param cb {@inheritDoc}
+   * @param callback {@inheritDoc}
    */
   @CallSuper
   @Override
-  public void getSize(@NonNull SizeReadyCallback cb) {
-    sizeDeterminer.getSize(cb);
+  public void getSize(@NonNull SizeReadyCallback callback) {
+    sizeDeterminer.getSize(callback);
   }
 
   @CallSuper
   @Override
-  public void removeCallback(@NonNull SizeReadyCallback cb) {
-    sizeDeterminer.removeCallback(cb);
+  public void removeCallback(@NonNull SizeReadyCallback callback) {
+    sizeDeterminer.removeCallback(callback);
   }
 
   @CallSuper
@@ -355,8 +355,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       // need a copy of the list to avoid a concurrent modification exception. One place this
       // happens is when a full request completes from the in memory cache while its thumbnail is
       // still being loaded asynchronously. See #2237.
-      for (SizeReadyCallback cb : new ArrayList<>(cbs)) {
-        cb.onSizeReady(width, height);
+      for (SizeReadyCallback callback : new ArrayList<>(cbs)) {
+        callback.onSizeReady(width, height);
       }
     }
 
@@ -376,18 +376,18 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       clearCallbacksAndListener();
     }
 
-    void getSize(@NonNull SizeReadyCallback cb) {
+    void getSize(@NonNull SizeReadyCallback callback) {
       int currentWidth = getTargetWidth();
       int currentHeight = getTargetHeight();
       if (isViewStateAndSizeValid(currentWidth, currentHeight)) {
-        cb.onSizeReady(currentWidth, currentHeight);
+        callback.onSizeReady(currentWidth, currentHeight);
         return;
       }
 
       // We want to notify callbacks in the order they were added and we only expect one or two
       // callbacks to be added a time, so a List is a reasonable choice.
-      if (!cbs.contains(cb)) {
-        cbs.add(cb);
+      if (!cbs.contains(callback)) {
+        cbs.add(callback);
       }
       if (layoutListener == null) {
         ViewTreeObserver observer = view.getViewTreeObserver();
@@ -402,8 +402,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
      *
      * <p>See #2237.
      */
-    void removeCallback(@NonNull SizeReadyCallback cb) {
-      cbs.remove(cb);
+    void removeCallback(@NonNull SizeReadyCallback callback) {
+      cbs.remove(callback);
     }
 
     void clearCallbacksAndListener() {

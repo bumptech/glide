@@ -92,21 +92,21 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
   /**
    * Immediately calls the given callback with the sizes given in the constructor.
    *
-   * @param cb {@inheritDoc}
+   * @param callback {@inheritDoc}
    */
   @Override
-  public final void getSize(@NonNull SizeReadyCallback cb) {
+  public final void getSize(@NonNull SizeReadyCallback callback) {
     if (!Util.isValidDimensions(width, height)) {
       throw new IllegalArgumentException(
           "Width and height must both be > 0 or Target#SIZE_ORIGINAL, but given" + " width: "
               + width + " and height: " + height + ", either provide dimensions in the constructor"
               + " or call override()");
     }
-    cb.onSizeReady(width, height);
+    callback.onSizeReady(width, height);
   }
 
   @Override
-  public void removeCallback(@NonNull SizeReadyCallback cb) {
+  public void removeCallback(@NonNull SizeReadyCallback callback) {
     // Do nothing, we never retain a reference to the callback.
   }
 }

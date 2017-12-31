@@ -49,7 +49,7 @@ final class ActiveResources {
   private Thread cleanReferenceQueueThread;
   private volatile boolean isShutdown;
   @Nullable
-  private volatile DequeuedResourceCallback cb;
+  private volatile DequeuedResourceCallback callback;
 
   ActiveResources(boolean isActiveResourceRetentionAllowed) {
     this.isActiveResourceRetentionAllowed = isActiveResourceRetentionAllowed;
@@ -132,7 +132,7 @@ final class ActiveResources {
         mainHandler.obtainMessage(MSG_CLEAN_REF, ref).sendToTarget();
 
         // This section for testing only.
-        DequeuedResourceCallback current = cb;
+        DequeuedResourceCallback current = callback;
         if (current != null) {
           current.onResourceDequeued();
         }
@@ -144,8 +144,8 @@ final class ActiveResources {
   }
 
   @VisibleForTesting
-  void setDequeuedResourceCallback(DequeuedResourceCallback cb) {
-    this.cb = cb;
+  void setDequeuedResourceCallback(DequeuedResourceCallback callback) {
+    this.callback = callback;
   }
 
   @VisibleForTesting
