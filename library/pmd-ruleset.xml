@@ -42,8 +42,6 @@
       <!-- Don't need to annotate package private methods. -->
       <exclude name="DefaultPackage" />
       <exclude name="CommentDefaultAccessModifier" />
-      <!-- Optionally implemented default empty methods are fine. -->
-      <exclude name="EmptyMethodInAbstractClassShouldBeAbstract" />
       <!-- Why make generics less clear by using shorter names? -->
       <exclude name="GenericsNaming" />
       <!-- No need to enforce final if it's not necessary. -->
@@ -70,6 +68,12 @@
       <exclude name="CallSuperInConstructor" />
       <!-- This is a reasonable idea, but in practice often the != null case is the expected case and it makes sense for it to come first. -->
       <exclude name="ConfusingTernary" />
+    </rule>
+    <rule ref="category/java/codestyle.xml/EmptyMethodInAbstractClassShouldBeAbstract">
+      <properties>
+        <!-- Allow if commented -->
+        <property name="violationSuppressXPath" value="Block[@containsComment='true']" />
+      </properties>
     </rule>
     <rule ref="category/java/performance.xml" >
       <!-- Android may not behave the same as java VMs, using short can be clearer when working with binary data. -->
