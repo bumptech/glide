@@ -46,6 +46,7 @@ public class GlideRequests extends RequestManager {
   /**
    * @see ExtensionWithType#asNumber(RequestBuilder)
    */
+  @NonNull
   public GlideRequest<Number> asNumber() {
     return (GlideRequest<Number>) ExtensionWithType.asNumber(this.as(Number.class));
   }

@@ -170,7 +170,7 @@ public class InvalidGlideTypeExtensionTest {
 
   @Test
   public void compilation_withAnnotatedStaticMethod_returningRequestBuilder_succeeds() {
-     Compilation compilation =
+    Compilation compilation =
         javac()
             .withProcessors(new GlideAnnotationProcessor())
             .compile(
@@ -178,12 +178,14 @@ public class InvalidGlideTypeExtensionTest {
                 JavaFileObjects.forSourceLines(
                     "Extension",
                     "package com.bumptech.glide.test;",
+                    "import android.support.annotation.NonNull;",
                     "import com.bumptech.glide.RequestBuilder;",
                     "import com.bumptech.glide.annotation.GlideExtension;",
                     "import com.bumptech.glide.annotation.GlideType;",
                     "@GlideExtension",
                     "public class Extension {",
                     "  private Extension() {}",
+                    "  @NonNull",
                     "  @GlideType(Number.class)",
                     "  public static RequestBuilder<Number> asNumber(",
                     "      RequestBuilder<Number> builder) {",
@@ -233,21 +235,21 @@ public class InvalidGlideTypeExtensionTest {
         .compile(
             emptyAppModule(),
             JavaFileObjects.forSourceLines(
-                 "Extension",
-                 "package com.bumptech.glide.test;",
-                 "import com.bumptech.glide.RequestBuilder;",
-                 "import com.bumptech.glide.annotation.GlideExtension;",
-                 "import com.bumptech.glide.annotation.GlideType;",
-                 "@GlideExtension",
-                 "public class Extension {",
-                 "  private Extension() {}",
-                 "  @GlideType(Number.class)",
-                 "  public static RequestBuilder<Object> asNumber(",
-                 "      RequestBuilder<Object> builder) {",
-                 "    return builder;",
-                 "  }",
-                 "}"));
-   }
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.RequestBuilder;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideType;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideType(Number.class)",
+                "  public static RequestBuilder<Object> asNumber(",
+                "      RequestBuilder<Object> builder) {",
+                "    return builder;",
+                "  }",
+                "}"));
+  }
 
   @Test
   public void compilation_withAnnotatedStaticMethod_returningBuilder_andMultipleParams_fails() {
@@ -261,20 +263,20 @@ public class InvalidGlideTypeExtensionTest {
         .compile(
             emptyAppModule(),
             JavaFileObjects.forSourceLines(
-                 "Extension",
-                 "package com.bumptech.glide.test;",
-                 "import com.bumptech.glide.RequestBuilder;",
-                 "import com.bumptech.glide.annotation.GlideExtension;",
-                 "import com.bumptech.glide.annotation.GlideType;",
-                 "@GlideExtension",
-                 "public class Extension {",
-                 "  private Extension() {}",
-                 "  @GlideType(Number.class)",
-                 "  public static RequestBuilder<Number> asNumber(",
-                 "      RequestBuilder<Number> builder, Object arg1) {",
-                 "    return builder;",
-                 "  }",
-                 "}"));
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.RequestBuilder;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideType;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideType(Number.class)",
+                "  public static RequestBuilder<Number> asNumber(",
+                "      RequestBuilder<Number> builder, Object arg1) {",
+                "    return builder;",
+                "  }",
+                "}"));
   }
 
   @Test
@@ -287,19 +289,47 @@ public class InvalidGlideTypeExtensionTest {
         .compile(
             emptyAppModule(),
             JavaFileObjects.forSourceLines(
-                 "Extension",
-                 "package com.bumptech.glide.test;",
-                 "import com.bumptech.glide.RequestBuilder;",
-                 "import com.bumptech.glide.annotation.GlideExtension;",
-                 "import com.bumptech.glide.annotation.GlideType;",
-                 "@GlideExtension",
-                 "public class Extension {",
-                 "  private Extension() {}",
-                 "  @GlideType(Number.class)",
-                 "  public static RequestBuilder<Number> asNumber(",
-                 "      Object arg) {",
-                 "    return null;",
-                 "  }",
-                 "}"));
-   }
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.RequestBuilder;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideType;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideType(Number.class)",
+                "  public static RequestBuilder<Number> asNumber(",
+                "      Object arg) {",
+                "    return null;",
+                "  }",
+                "}"));
+  }
+
+  @Test
+  public void compilation_withAnnotatedStaticMethod_returningRequestBuilder_missingNonNull_warns() {
+    Compilation compilation =
+        javac()
+            .withProcessors(new GlideAnnotationProcessor())
+            .compile(
+                emptyAppModule(),
+                JavaFileObjects.forSourceLines(
+                    "Extension",
+                    "package com.bumptech.glide.test;",
+                    "import com.bumptech.glide.RequestBuilder;",
+                    "import com.bumptech.glide.annotation.GlideExtension;",
+                    "import com.bumptech.glide.annotation.GlideType;",
+                    "@GlideExtension",
+                    "public class Extension {",
+                    "  private Extension() {}",
+                    "  @GlideType(Number.class)",
+                    "  public static RequestBuilder<Number> asNumber(",
+                    "      RequestBuilder<Number> builder) {",
+                    "    return builder;",
+                    "  }",
+                    "}"));
+    assertThat(compilation).succeeded();
+    assertThat(compilation).hadWarningCount(1);
+    assertThat(compilation).hadWarningContaining("@NonNull");
+    assertThat(compilation).hadWarningContaining("com.bumptech.glide.test.Extension#asNumber");
+  }
 }

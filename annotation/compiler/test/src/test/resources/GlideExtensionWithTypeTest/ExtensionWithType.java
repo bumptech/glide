@@ -1,5 +1,6 @@
 package com.bumptech.glide.test;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideType;
@@ -11,6 +12,7 @@ public final class ExtensionWithType {
     // Utility class.
   }
 
+  @NonNull
   @GlideType(Number.class)
   public static RequestBuilder<Number> asNumber(RequestBuilder<Number> builder) {
     return builder;

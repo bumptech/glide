@@ -91,23 +91,7 @@ final class GlideExtensionValidator {
   }
 
   private void validateNewGlideOptionAnnotations(ExecutableElement executableElement) {
-    Set<String> annotationNames =
-        FluentIterable.from(executableElement.getAnnotationMirrors())
-            .transform(new Function<AnnotationMirror, String>() {
-              @Override
-              public String apply(AnnotationMirror input) {
-                return input.getAnnotationType().asElement().toString();
-              }
-            })
-            .toSet();
-    if (!annotationNames.contains("android.support.annotation.NonNull")) {
-      processingEnvironment.getMessager().printMessage(
-          Kind.WARNING,
-          executableElement.getEnclosingElement() + "#" + executableElement.getSimpleName()
-              + " is missing the @NonNull annotation,"
-              + " please add it to ensure that your extension methods are always returning non-null"
-              + " values");
-    }
+    validateAnnotatedNonNull(executableElement);
   }
 
   private void validateDeprecatedGlideOption(ExecutableElement executableElement) {
@@ -197,6 +181,7 @@ final class GlideExtensionValidator {
 
   private void validateNewGlideType(ExecutableElement executableElement) {
     TypeMirror returnType = executableElement.getReturnType();
+    validateNewGlideTypeAnnotations(executableElement);
     if (!isRequestBuilder(returnType) || !typeMatchesExpected(returnType, executableElement)) {
       String expectedClassName = getGlideTypeValue(executableElement);
       throw new IllegalArgumentException("@GlideType methods should return a RequestBuilder<"
@@ -250,6 +235,30 @@ final class GlideExtensionValidator {
     if (!argumentType.toString().startsWith("com.bumptech.glide.RequestBuilder")) {
       throw new IllegalArgumentException("@GlideType methods must take a"
           + " RequestBuilder object as their first and only parameter, but given: " + argumentType);
+    }
+  }
+
+  private void validateNewGlideTypeAnnotations(ExecutableElement executableElement) {
+    validateAnnotatedNonNull(executableElement);
+  }
+
+  private void validateAnnotatedNonNull(ExecutableElement executableElement) {
+    Set<String> annotationNames =
+        FluentIterable.from(executableElement.getAnnotationMirrors())
+            .transform(new Function<AnnotationMirror, String>() {
+              @Override
+              public String apply(AnnotationMirror input) {
+                return input.getAnnotationType().asElement().toString();
+              }
+            })
+            .toSet();
+    if (!annotationNames.contains("android.support.annotation.NonNull")) {
+      processingEnvironment.getMessager().printMessage(
+          Kind.WARNING,
+          executableElement.getEnclosingElement() + "#" + executableElement.getSimpleName()
+              + " is missing the @NonNull annotation,"
+              + " please add it to ensure that your extension methods are always returning non-null"
+              + " values");
     }
   }
 

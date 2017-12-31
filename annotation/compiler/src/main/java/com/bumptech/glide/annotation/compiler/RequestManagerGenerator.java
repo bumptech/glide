@@ -60,6 +60,8 @@ final class RequestManagerGenerator {
       "com.bumptech.glide.manager.RequestManagerTreeNode";
   private static final ClassName CHECK_RESULT_CLASS_NAME =
       ClassName.get("android.support.annotation", "CheckResult");
+  private static final ClassName NON_NULL_CLASS_NAME =
+      ClassName.get("android.support.annotation", "NonNull");
   private static final ClassName CONTEXT_CLASS_NAME =
       ClassName.get("android.content", "Context");
 
@@ -270,6 +272,7 @@ final class RequestManagerGenerator {
         .addModifiers(Modifier.PUBLIC)
         .returns(parameterizedTypeName)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
+        .addAnnotation(AnnotationSpec.builder(NON_NULL_CLASS_NAME).build())
         .addStatement(
             "$T requestBuilder = this.as($T.class)", parameterizedTypeName, returnTypeClassName)
         .addStatement("$T.$N(requestBuilder)",
@@ -290,6 +293,7 @@ final class RequestManagerGenerator {
         .addModifiers(Modifier.PUBLIC)
         .returns(parameterizedTypeName)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
+        .addAnnotation(AnnotationSpec.builder(NON_NULL_CLASS_NAME).build())
         .addStatement(
             "return ($T) $T.$N(this.as($T.class))",
             parameterizedTypeName,
