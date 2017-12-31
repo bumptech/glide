@@ -140,9 +140,9 @@ public final class ByteBufferUtil {
       buffer = new byte[BUFFER_SIZE];
     }
 
-    int n;
-    while ((n = stream.read(buffer)) >= 0) {
-      outStream.write(buffer, 0, n);
+    int readByteCount;
+    while ((readByteCount = stream.read(buffer)) >= 0) {
+      outStream.write(buffer, 0, readByteCount);
     }
 
     BUFFER_REF.set(buffer);

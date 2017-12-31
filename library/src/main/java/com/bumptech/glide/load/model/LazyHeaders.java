@@ -242,9 +242,9 @@ public final class LazyHeaders implements Headers {
       int length = defaultUserAgent.length();
       StringBuilder sb = new StringBuilder(defaultUserAgent.length());
       for (int i = 0; i < length; i++) {
-        char c = defaultUserAgent.charAt(i);
-        if ((c > '\u001f' || c == '\t') && c < '\u007f') {
-          sb.append(c);
+        char chr = defaultUserAgent.charAt(i);
+        if ((chr > '\u001f' || chr == '\t') && chr < '\u007f') {
+          sb.append(chr);
         } else {
           sb.append('?');
         }

@@ -110,12 +110,12 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     }
     attachStateListener = new OnAttachStateChangeListener() {
       @Override
-      public void onViewAttachedToWindow(View v) {
+      public void onViewAttachedToWindow(View view) {
         resumeMyRequest();
       }
 
       @Override
-      public void onViewDetachedFromWindow(View v) {
+      public void onViewDetachedFromWindow(View view) {
         pauseMyRequest();
       }
     };

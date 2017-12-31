@@ -154,7 +154,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     preload(start, start + (increasing ? maxPreload : -maxPreload));
   }
 
-  private void preload(int from, int to) {
+  private void preload(int from, @SuppressWarnings("PMD.ShortVariable") int to) {
     int start;
     int end;
     if (from < to) {

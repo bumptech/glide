@@ -87,9 +87,9 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
   }
 
   @Override
-  public boolean isEquivalentTo(Request o) {
-    if (o instanceof ErrorRequestCoordinator) {
-      ErrorRequestCoordinator other = (ErrorRequestCoordinator) o;
+  public boolean isEquivalentTo(Request request) {
+    if (request instanceof ErrorRequestCoordinator) {
+      ErrorRequestCoordinator other = (ErrorRequestCoordinator) request;
       return primary.isEquivalentTo(other.primary) && error.isEquivalentTo(other.error);
     }
     return false;

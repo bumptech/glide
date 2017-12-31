@@ -214,13 +214,13 @@ public final class GlideException extends Exception {
     }
 
     @Override
-    public Appendable append(char c) throws IOException {
+    public Appendable append(char chr) throws IOException {
       if (printedNewLine) {
         printedNewLine = false;
         appendable.append(INDENT);
       }
-      printedNewLine = c == '\n';
-      appendable.append(c);
+      printedNewLine = chr == '\n';
+      appendable.append(chr);
       return this;
     }
 

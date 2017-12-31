@@ -623,20 +623,20 @@ public final class SingleRequest<R> implements Request,
   }
 
   @Override
-  public boolean isEquivalentTo(Request o) {
-    if (o instanceof SingleRequest) {
-      SingleRequest<?> that = (SingleRequest<?>) o;
-      return overrideWidth == that.overrideWidth
-          && overrideHeight == that.overrideHeight
-          && Util.bothModelsNullEquivalentOrEquals(model, that.model)
-          && transcodeClass.equals(that.transcodeClass)
-          && requestOptions.equals(that.requestOptions)
-          && priority == that.priority
+  public boolean isEquivalentTo(Request request) {
+    if (request instanceof SingleRequest) {
+      SingleRequest<?> other = (SingleRequest<?>) request;
+      return overrideWidth == other.overrideWidth
+          && overrideHeight == other.overrideHeight
+          && Util.bothModelsNullEquivalentOrEquals(model, other.model)
+          && transcodeClass.equals(other.transcodeClass)
+          && requestOptions.equals(other.requestOptions)
+          && priority == other.priority
           // We do not want to require that RequestListeners implement equals/hashcode, so we don't
           // compare them using equals(). We can however, at least assert that the request listener
           // is either present or not present in both requests.
           && (requestListener != null
-          ? that.requestListener != null : that.requestListener == null);
+          ? other.requestListener != null : other.requestListener == null);
     }
     return false;
   }

@@ -180,11 +180,11 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   }
 
   @Override
-  public boolean isEquivalentTo(Request o) {
-    if (o instanceof ThumbnailRequestCoordinator) {
-      ThumbnailRequestCoordinator that = (ThumbnailRequestCoordinator) o;
-      return (full == null ? that.full == null : full.isEquivalentTo(that.full))
-          && (thumb == null ? that.thumb == null : thumb.isEquivalentTo(that.thumb));
+  public boolean isEquivalentTo(Request request) {
+    if (request instanceof ThumbnailRequestCoordinator) {
+      ThumbnailRequestCoordinator other = (ThumbnailRequestCoordinator) request;
+      return (full == null ? other.full == null : full.isEquivalentTo(other.full))
+          && (thumb == null ? other.thumb == null : thumb.isEquivalentTo(other.thumb));
     }
     return false;
   }

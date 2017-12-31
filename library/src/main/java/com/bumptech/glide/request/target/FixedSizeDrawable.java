@@ -169,8 +169,8 @@ public class FixedSizeDrawable extends Drawable {
   }
 
   @Override
-  public void setAlpha(int i) {
-    wrapped.setAlpha(i);
+  public void setAlpha(int alpha) {
+    wrapped.setAlpha(alpha);
   }
 
   @Override

@@ -20,14 +20,14 @@ public final class ContentLengthInputStream extends FilterInputStream {
   private int readSoFar;
 
   @NonNull
-  public static InputStream obtain(@NonNull InputStream other,
+  public static InputStream obtain(@NonNull InputStream is,
       @Nullable String contentLengthHeader) {
-    return obtain(other, parseContentLength(contentLengthHeader));
+    return obtain(is, parseContentLength(contentLengthHeader));
   }
 
   @NonNull
-  public static InputStream obtain(@NonNull InputStream other, long contentLength) {
-    return new ContentLengthInputStream(other, contentLength);
+  public static InputStream obtain(@NonNull InputStream is, long contentLength) {
+    return new ContentLengthInputStream(is, contentLength);
   }
 
   private static int parseContentLength(@Nullable String contentLengthHeader) {
@@ -44,8 +44,8 @@ public final class ContentLengthInputStream extends FilterInputStream {
     return result;
   }
 
-  private ContentLengthInputStream(@NonNull InputStream in, long contentLength) {
-    super(in);
+  private ContentLengthInputStream(@NonNull InputStream is, long contentLength) {
+    super(is);
     this.contentLength = contentLength;
   }
 

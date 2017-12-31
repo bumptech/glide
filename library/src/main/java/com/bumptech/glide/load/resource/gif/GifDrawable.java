@@ -298,8 +298,8 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   }
 
   @Override
-  public void setAlpha(int i) {
-    getPaint().setAlpha(i);
+  public void setAlpha(int alpha) {
+    getPaint().setAlpha(alpha);
   }
 
   @Override

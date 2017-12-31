@@ -316,8 +316,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private void notifyFailed() {
     setNotifiedOrThrow();
-    GlideException e = new GlideException("Failed to load resource", new ArrayList<>(throwables));
-    callback.onLoadFailed(e);
+    GlideException allFailuresException =
+        new GlideException("Failed to load resource", new ArrayList<>(throwables));
+    callback.onLoadFailed(allFailuresException);
     onLoadFailed();
   }
 
