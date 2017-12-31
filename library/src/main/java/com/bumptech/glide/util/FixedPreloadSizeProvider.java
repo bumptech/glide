@@ -25,6 +25,9 @@ public class FixedPreloadSizeProvider<T> implements ListPreloader.PreloadSizePro
 
   @Nullable
   @Override
+  // It's better to take on the risk that callers may mutate the array when there isn't any reason
+  // for them to do so than it the performance overhead of copying the array with every call.
+  @SuppressWarnings("PMD.MethodReturnsInternalArray")
   public int[] getPreloadSize(@NonNull T item, int adapterPosition, int itemPosition) {
     return size;
   }

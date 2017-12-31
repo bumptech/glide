@@ -52,7 +52,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     Class<Data> getDataClass();
   }
 
-  private static class FileFetcher<Data> implements DataFetcher<Data> {
+  private static final class FileFetcher<Data> implements DataFetcher<Data> {
     private final File file;
     private final FileOpener<Data> opener;
     private Data data;
@@ -118,7 +118,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
 
     @NonNull
     @Override
-    public final ModelLoader<File, Data> build(MultiModelLoaderFactory multiFactory) {
+    public final ModelLoader<File, Data> build(@NonNull MultiModelLoaderFactory multiFactory) {
       return new FileLoader<>(opener);
     }
 

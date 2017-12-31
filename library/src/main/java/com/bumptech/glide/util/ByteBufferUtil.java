@@ -15,8 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Utilities for interacting with {@link java.nio.ByteBuffer}s.
  */
-// Public API.
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused", "WeakerAccess"}) // Public API
 public final class ByteBufferUtil {
   // 16 Kb
   private static final int BUFFER_SIZE = 16384;
@@ -167,6 +166,8 @@ public final class ByteBufferUtil {
     @Synthetic final int limit;
     @Synthetic final byte[] data;
 
+    // PMD.ArrayIsStoredDirectly Copying would be prohibitively expensive and/or lead to OOMs.
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     SafeArray(@NonNull byte[] data, int offset, int limit) {
       this.data = data;
       this.offset = offset;
@@ -207,7 +208,7 @@ public final class ByteBufferUtil {
     }
 
     @Override
-    public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+    public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
       if (!byteBuffer.hasRemaining()) {
         return -1;
       }

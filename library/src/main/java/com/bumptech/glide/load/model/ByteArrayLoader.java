@@ -20,8 +20,7 @@ import java.nio.ByteBuffer;
 public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
   private final Converter<Data> converter;
 
-  // Public API.
-  @SuppressWarnings("WeakerAccess")
+  @SuppressWarnings("WeakerAccess") // Public API
   public ByteArrayLoader(Converter<Data> converter) {
     this.converter = converter;
   }
@@ -39,10 +38,12 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
 
   /**
    * Converts between a byte array a desired model class.
+   *
    * @param <Data> The type of data to convert to.
    */
   public interface Converter<Data> {
     Data convert(byte[] model);
+
     Class<Data> getDataClass();
   }
 
@@ -50,6 +51,12 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
     private final byte[] model;
     private final Converter<Data> converter;
 
+    /**
+     * @param model We really ought to copy the model, but doing so can be hugely expensive and/or
+     *              lead to OOMs. In practice it's unlikely that users would pass an array into
+     *              Glide and then mutate it.
+     */
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     Fetcher(byte[] model, Converter<Data> converter) {
       this.model = model;
       this.converter = converter;
@@ -92,7 +99,7 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
 
     @NonNull
     @Override
-    public ModelLoader<byte[], ByteBuffer> build(MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<byte[], ByteBuffer> build(@NonNull MultiModelLoaderFactory multiFactory) {
       return new ByteArrayLoader<>(new Converter<ByteBuffer>() {
         @Override
         public ByteBuffer convert(byte[] model) {
@@ -119,7 +126,7 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
 
     @NonNull
     @Override
-    public ModelLoader<byte[], InputStream> build(MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<byte[], InputStream> build(@NonNull MultiModelLoaderFactory multiFactory) {
       return new ByteArrayLoader<>(new Converter<InputStream>() {
         @Override
         public InputStream convert(byte[] model) {

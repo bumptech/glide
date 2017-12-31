@@ -75,7 +75,6 @@ public class LoadPath<Data, ResourceType, Transcode> {
 
   @Override
   public String toString() {
-    return "LoadPath{" + "decodePaths="
-        + Arrays.toString(decodePaths.toArray(new DecodePath<?, ?, ?>[decodePaths.size()])) + '}';
+    return "LoadPath{" + "decodePaths=" + Arrays.toString(decodePaths.toArray()) + '}';
   }
 }

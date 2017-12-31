@@ -38,8 +38,11 @@ final class ActiveResources {
 
   private ResourceListener listener;
 
-  // Lazily instantiate to avoid exceptions if Glide is initialized on a background thread. See
-  // #295.
+  /**
+   * Lazily instantiate to avoid exceptions if Glide is initialized on a background thread.
+   *
+   * @see <a href="https://github.com/bumptech/glide/issues/295">#295</a>
+   */
   @Nullable
   private ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
   @Nullable

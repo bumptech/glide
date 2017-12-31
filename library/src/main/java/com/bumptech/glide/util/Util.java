@@ -81,7 +81,7 @@ public final class Util {
       // Workaround for KitKat initial release NPE in Bitmap, fixed in MR1. See issue #148.
       try {
         return bitmap.getAllocationByteCount();
-      } catch (NullPointerException e) {
+      } catch (@SuppressWarnings("PMD.AvoidCatchingNPE") NullPointerException e) {
         // Do nothing.
       }
     }

@@ -22,7 +22,7 @@ dependencies {
     testImplementation "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
 
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
-       errorprone "com.google.errorprone:error_prone_core:${ERROR_PRONE_VERSION}"
+        errorprone "com.google.errorprone:error_prone_core:${ERROR_PRONE_VERSION}"
     }
 }
 
@@ -74,13 +74,9 @@ afterEvaluate {
 
         classes = fileTree("${project.buildDir}/intermediates/classes/debug/")
         source android.sourceSets.main.java.srcDirs
-        classpath = project.configurations.compile
-        classpath += files(android.bootClasspath)
+        classpath = files()
         doFirst {
-            it.classpath +=
-                    files(project.android.libraryVariants.collect {
-                        it.javaCompile.classpath.files
-                    })
+            classpath += classPathForQuality()
         }
         effort = 'max'
         excludeFilter = file("findbugs-exclude.xml")
@@ -111,6 +107,15 @@ afterEvaluate {
         ruleSets = []
         ruleSetFiles = files('pmd-ruleset.xml')
         source android.sourceSets.main.java.srcDirs
+        classpath = files()
+        classpath += files("${project.buildDir}/intermediates/classes/debug/")
+        doFirst {
+            classpath += classPathForQuality()
+        }
+
+        //TODO enable this once new Gradle containing this flag is out
+        //see https://github.com/gradle/gradle/pull/3125#issuecomment-352442432
+        //incrementalAnalysis = true
 
         // Failures are caught and printed by the violations plugin.
         ignoreFailures = true
@@ -122,6 +127,14 @@ afterEvaluate {
     }
 
     check.dependsOn('pmd')
+}
+
+def classPathForQuality() {
+    return files(
+            android.bootClasspath,
+            project.configurations.compile,
+            project.android.libraryVariants.collect { it.javaCompile.classpath }
+    )
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"

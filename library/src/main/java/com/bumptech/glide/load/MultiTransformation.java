@@ -18,7 +18,7 @@ public class MultiTransformation<T> implements Transformation<T> {
   @SafeVarargs
   @SuppressWarnings("varargs")
   public MultiTransformation(Transformation<T>... transformations) {
-    if (transformations.length < 1) {
+    if (transformations.length == 0) {
       throw new IllegalArgumentException(
           "MultiTransformation must contain at least one Transformation");
     }

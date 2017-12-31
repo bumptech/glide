@@ -577,6 +577,7 @@ public class Glide implements ComponentCallbacks2 {
    * {@link com.bumptech.glide.load.engine.prefill.PreFillType.Builder Builders} representing
    * individual sizes and configurations of {@link android.graphics.Bitmap}s to be pre-filled.
    */
+  @SuppressWarnings("unused") // Public API
   public void preFillBitmapPool(@NonNull PreFillType.Builder... bitmapAttributeBuilders) {
     bitmapPreFiller.preFill(bitmapAttributeBuilders);
   }
@@ -644,6 +645,7 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @return the previous MemoryCategory used by Glide.
    */
+  @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   public MemoryCategory setMemoryCategory(@NonNull MemoryCategory memoryCategory) {
     // Engine asserts this anyway when removing resources, fail faster and consistently

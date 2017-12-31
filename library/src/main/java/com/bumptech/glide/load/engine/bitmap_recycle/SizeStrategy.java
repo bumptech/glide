@@ -7,7 +7,7 @@ import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
-import java.util.TreeMap;
+import java.util.NavigableMap;
 
 /**
  * A strategy for reusing bitmaps that relies on
@@ -16,11 +16,11 @@ import java.util.TreeMap;
  * <p> Requires {@link Build.VERSION_CODES#KITKAT KitKat} or higher. </p>
  */
 @RequiresApi(Build.VERSION_CODES.KITKAT)
-class SizeStrategy implements LruPoolStrategy {
+final class SizeStrategy implements LruPoolStrategy {
   private static final int MAX_SIZE_MULTIPLE = 8;
   private final KeyPool keyPool = new KeyPool();
   private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<>();
-  private final TreeMap<Integer, Integer> sortedSizes = new PrettyPrintTreeMap<>();
+  private final NavigableMap<Integer, Integer> sortedSizes = new PrettyPrintTreeMap<>();
 
   @Override
   public void put(Bitmap bitmap) {
@@ -102,11 +102,11 @@ class SizeStrategy implements LruPoolStrategy {
     return getBitmapString(size);
   }
 
-  @Synthetic
-  static String getBitmapString(int size) {
+  @Synthetic static String getBitmapString(int size) {
     return "[" + size + "]";
   }
 
+  // Non-final for mocking.
   @VisibleForTesting
   static class KeyPool extends BaseKeyPool<Key> {
 

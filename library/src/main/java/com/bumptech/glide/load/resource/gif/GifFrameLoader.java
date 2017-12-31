@@ -37,9 +37,9 @@ class GifFrameLoader {
   @SuppressWarnings("WeakerAccess") @Synthetic final RequestManager requestManager;
   private final BitmapPool bitmapPool;
 
-  private boolean isRunning = false;
-  private boolean isLoadPending = false;
-  private boolean startFromFirstFrame = false;
+  private boolean isRunning;
+  private boolean isLoadPending;
+  private boolean startFromFirstFrame;
   private RequestBuilder<Bitmap> requestBuilder;
   private DelayTarget current;
   private boolean isCleared;
@@ -111,10 +111,10 @@ class GifFrameLoader {
     if (isCleared) {
       throw new IllegalStateException("Cannot subscribe to a cleared frame loader");
     }
-    boolean start = callbacks.isEmpty();
     if (callbacks.contains(frameCallback)) {
       throw new IllegalStateException("Cannot subscribe twice in a row");
     }
+    boolean start = callbacks.isEmpty();
     callbacks.add(frameCallback);
     if (start) {
       start();

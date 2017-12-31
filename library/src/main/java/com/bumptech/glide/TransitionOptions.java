@@ -71,9 +71,16 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
     return self();
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({
+      // cast to CHILD is safe given the generic argument represents the object's runtime class
+      "unchecked",
+      // CHILD is the correct class name.
+      "PMD.CloneMethodReturnTypeMustMatchClassName",
+      // we don't want to throw to be user friendly
+      "PMD.CloneThrowsCloneNotSupportedException"
+  })
   @Override
-  protected final CHILD clone() {
+  public final CHILD clone() {
     try {
       return (CHILD) super.clone();
     } catch (CloneNotSupportedException e) {

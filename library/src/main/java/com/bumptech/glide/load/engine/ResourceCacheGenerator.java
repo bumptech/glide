@@ -20,7 +20,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   private final FetcherReadyCallback cb;
   private final DecodeHelper<?> helper;
 
-  private int sourceIdIndex = 0;
+  private int sourceIdIndex;
   private int resourceClassIndex = -1;
   private Key sourceKey;
   private List<ModelLoader<File, ?>> modelLoaders;
@@ -57,9 +57,11 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
       Key sourceId = sourceIds.get(sourceIdIndex);
       Class<?> resourceClass = resourceClasses.get(resourceClassIndex);
       Transformation<?> transformation = helper.getTransformation(resourceClass);
-
+      // PMD.AvoidInstantiatingObjectsInLoops Each iteration is comparatively expensive anyway,
+      // we only run until the first one succeeds, the loop runs for only a limited
+      // number of iterations on the order of 10-20 in the worst case.
       currentKey =
-          new ResourceCacheKey(
+          new ResourceCacheKey(// NOPMD AvoidInstantiatingObjectsInLoops
               helper.getArrayPool(),
               sourceId,
               helper.getSignature(),
@@ -70,7 +72,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
               helper.getOptions());
       cacheFile = helper.getDiskCache().get(currentKey);
       if (cacheFile != null) {
-        this.sourceKey = sourceId;
+        sourceKey = sourceId;
         modelLoaders = helper.getModelLoaders(cacheFile);
         modelLoaderIndex = 0;
       }
@@ -80,9 +82,8 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
     boolean started = false;
     while (!started && hasNextModelLoader()) {
       ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
-      loadData =
-          modelLoader.buildLoadData(cacheFile, helper.getWidth(), helper.getHeight(),
-              helper.getOptions());
+      loadData = modelLoader.buildLoadData(cacheFile,
+          helper.getWidth(), helper.getHeight(), helper.getOptions());
       if (loadData != null && helper.hasLoadPath(loadData.fetcher.getDataClass())) {
         started = true;
         loadData.fetcher.loadData(helper.getPriority(), this);

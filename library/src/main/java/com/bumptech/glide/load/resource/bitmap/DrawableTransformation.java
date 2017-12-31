@@ -69,6 +69,7 @@ public class DrawableTransformation implements Transformation<Drawable> {
     }
   }
 
+  // It's clearer to cast the result in a separate line from obtaining it.
   @SuppressWarnings({"unchecked", "PMD.UnnecessaryLocalBeforeReturn"})
   private Resource<Drawable> newDrawableResource(
       Context context, Resource<Bitmap> transformed) {

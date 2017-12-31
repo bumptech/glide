@@ -25,6 +25,8 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
   /**
    * @deprecated Use {@link #getInstance()} instead.
    */
+  // Need constructor to document deprecation, will be removed, when constructor is privatized.
+  @SuppressWarnings({"PMD.UnnecessaryConstructor", "DeprecatedIsStillUsed"})
   @Deprecated
   public UnitModelLoader() {
     // Intentionally empty.
@@ -84,7 +86,7 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
    *
    * @param <Model> The type of model that will also be returned as decodable data.
    */
-  // PMD seems to be just wrong here, maybe confused by getInstance in UnitModelLoader.
+  // PMD.SingleMethodSingleton false positive: https://github.com/pmd/pmd/issues/816
   @SuppressWarnings("PMD.SingleMethodSingleton")
   public static class Factory<Model> implements ModelLoaderFactory<Model, Model> {
     @SuppressWarnings("deprecation")
@@ -96,6 +98,8 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
     }
 
     /** @deprecated Use {@link #getInstance()} instead. */
+    // Need constructor to document deprecation, will be removed, when constructor is privatized.
+    @SuppressWarnings("PMD.UnnecessaryConstructor")
     @Deprecated
     public Factory() {
       // Intentionally empty.
