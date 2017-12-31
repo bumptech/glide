@@ -628,7 +628,7 @@ public class EngineTest {
     ResourceCallback cb = mock(ResourceCallback.class);
     @SuppressWarnings("rawtypes")
     final EngineResource resource = mock(EngineResource.class);
-    final Jobs jobs = new Jobs();
+    final EngineJobs jobs = new EngineJobs();
     final ActiveResources activeResources =
         new ActiveResources(/*isActiveResourceRetentionAllowed=*/ true);
 

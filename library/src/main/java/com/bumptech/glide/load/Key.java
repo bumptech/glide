@@ -12,6 +12,7 @@ import java.security.MessageDigest;
  * #updateDiskCacheKey(java.security.MessageDigest)}}, although this requirement is not as strict
  * for partial cache key signatures.
  */
+@SuppressWarnings("PMD.ShortClassName")
 public interface Key {
   String STRING_CHARSET_NAME = "UTF-8";
   Charset CHARSET = Charset.forName(STRING_CHARSET_NAME);

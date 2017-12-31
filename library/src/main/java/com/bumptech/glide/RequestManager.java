@@ -543,6 +543,7 @@ public class RequestManager implements LifecycleListener,
    */
   @NonNull
   @CheckResult
+  @SuppressWarnings("PMD.ShortMethodName")
   public <ResourceType> RequestBuilder<ResourceType> as(
       @NonNull Class<ResourceType> resourceClass) {
     return new RequestBuilder<>(glide, this, resourceClass, context);

@@ -51,10 +51,7 @@
       <exclude name="OnlyOneReturn" />
       <!-- Obfuscated code is best code? -->
       <exclude name="LongVariable" />
-      <!-- This is not always true. -->
-      <exclude name="ShortClassName" />
       <!-- A good idea but we have tons of violations. FIXME. -->
-      <exclude name="ShortMethodName" />
       <exclude name="ShortVariable" />
       <!-- We don't use in and out to mean modified or not modified by the method, it's useful to match framework methods. -->
       <exclude name="AvoidPrefixingMethodParameters" />
@@ -73,6 +70,18 @@
       <properties>
         <!-- Allow if commented -->
         <property name="violationSuppressXPath" value="Block[@containsComment='true']" />
+      </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/ShortClassName">
+      <properties>
+        <!-- Consider a few short class names valid. -->
+        <property name="violationSuppressRegex" value="^.*like \b(Util)\b.*$"/>
+        <!-- Globally allow `static class Key implements Poolable` as a convention. -->
+        <property name="violationSuppressXPath"
+                  value=".[@Image = 'Key']
+                          [@Nested = 'true' and @Static = 'true']
+                          [ImplementsList/ClassOrInterfaceType[@Image='Poolable']]
+                        " />
       </properties>
     </rule>
     <rule ref="category/java/performance.xml" >

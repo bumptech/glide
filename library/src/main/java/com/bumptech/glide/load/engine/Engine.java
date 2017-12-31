@@ -33,7 +33,7 @@ public class Engine implements EngineJobListener,
     EngineResource.ResourceListener {
   private static final String TAG = "Engine";
   private static final int JOB_POOL_SIZE = 150;
-  private final Jobs jobs;
+  private final EngineJobs jobs;
   private final EngineKeyFactory keyFactory;
   private final MemoryCache cache;
   private final EngineJobFactory engineJobFactory;
@@ -73,7 +73,7 @@ public class Engine implements EngineJobListener,
       GlideExecutor sourceExecutor,
       GlideExecutor sourceUnlimitedExecutor,
       GlideExecutor animationExecutor,
-      Jobs jobs,
+      EngineJobs jobs,
       EngineKeyFactory keyFactory,
       ActiveResources activeResources,
       EngineJobFactory engineJobFactory,
@@ -95,7 +95,7 @@ public class Engine implements EngineJobListener,
     this.keyFactory = keyFactory;
 
     if (jobs == null) {
-      jobs = new Jobs();
+      jobs = new EngineJobs();
     }
     this.jobs = jobs;
 
