@@ -273,6 +273,7 @@ final class RequestManagerGenerator {
         .returns(parameterizedTypeName)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
         .addAnnotation(AnnotationSpec.builder(NON_NULL_CLASS_NAME).build())
+        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
         .addStatement(
             "$T requestBuilder = this.as($T.class)", parameterizedTypeName, returnTypeClassName)
         .addStatement("$T.$N(requestBuilder)",
@@ -294,6 +295,7 @@ final class RequestManagerGenerator {
         .returns(parameterizedTypeName)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
         .addAnnotation(AnnotationSpec.builder(NON_NULL_CLASS_NAME).build())
+        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
         .addStatement(
             "return ($T) $T.$N(this.as($T.class))",
             parameterizedTypeName,
