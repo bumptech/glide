@@ -267,39 +267,9 @@ public final class Downsampler {
         targetWidth,
         targetHeight);
 
-    boolean isKitKatOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-    // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
-    if ((options.inSampleSize == 1 || isKitKatOrGreater) && shouldUsePool(imageType)) {
-      int expectedWidth;
-      int expectedHeight;
-      if (sourceWidth >= 0 && sourceHeight >= 0
-          && fixBitmapToRequestedDimensions && isKitKatOrGreater) {
-        expectedWidth = targetWidth;
-        expectedHeight = targetHeight;
-      } else {
-        float densityMultiplier = isScaling(options)
-            ? (float) options.inTargetDensity / options.inDensity : 1f;
-        int sampleSize = options.inSampleSize;
-        int downsampledWidth = (int) Math.ceil(sourceWidth / (float) sampleSize);
-        int downsampledHeight = (int) Math.ceil(sourceHeight / (float) sampleSize);
-        expectedWidth = Math.round(downsampledWidth * densityMultiplier);
-        expectedHeight = Math.round(downsampledHeight * densityMultiplier);
+    calculateExpectedSizeAndSetInBitmap(options, fixBitmapToRequestedDimensions,
+        sourceWidth, sourceHeight, targetWidth, targetHeight, imageType);
 
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-          Log.v(TAG, "Calculated target [" + expectedWidth + "x" + expectedHeight + "] for source"
-              + " [" + sourceWidth + "x" + sourceHeight + "]"
-              + ", sampleSize: " + sampleSize
-              + ", targetDensity: " + options.inTargetDensity
-              + ", density: " + options.inDensity
-              + ", density multiplier: " + densityMultiplier);
-        }
-      }
-      // If this isn't an image, or BitmapFactory was unable to parse the size, width and height
-      // will be -1 here.
-      if (expectedWidth > 0 && expectedHeight > 0) {
-        setInBitmap(options, bitmapPool, expectedWidth, expectedHeight);
-      }
-    }
     Bitmap downsampled = decodeStream(is, options, callbacks, bitmapPool);
     callbacks.onDecodeComplete(bitmapPool, downsampled);
 
@@ -321,6 +291,44 @@ public final class Downsampler {
     }
 
     return rotated;
+  }
+
+  private void calculateExpectedSizeAndSetInBitmap(BitmapFactory.Options options,
+      boolean fixBitmapToRequestedDimensions,
+      int sourceWidth, int sourceHeight, int targetWidth, int targetHeight, ImageType imageType) {
+    boolean isKitKatOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+    // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
+    if ((options.inSampleSize == 1 || isKitKatOrGreater) && shouldUsePool(imageType)) {
+      final int expectedWidth;
+      final int expectedHeight;
+      if (sourceWidth >= 0 && sourceHeight >= 0
+          && fixBitmapToRequestedDimensions && isKitKatOrGreater) {
+        expectedWidth = targetWidth;
+        expectedHeight = targetHeight;
+      } else {
+        final float densityMultiplier = isScaling(options)
+            ? (float) options.inTargetDensity / options.inDensity : 1f;
+        final int sampleSize = options.inSampleSize;
+        final int downsampledWidth = (int) Math.ceil(sourceWidth / (float) sampleSize);
+        final int downsampledHeight = (int) Math.ceil(sourceHeight / (float) sampleSize);
+        expectedWidth = Math.round(downsampledWidth * densityMultiplier);
+        expectedHeight = Math.round(downsampledHeight * densityMultiplier);
+
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+          Log.v(TAG, "Calculated target [" + expectedWidth + "x" + expectedHeight + "] for source"
+              + " [" + sourceWidth + "x" + sourceHeight + "]"
+              + ", sampleSize: " + sampleSize
+              + ", targetDensity: " + options.inTargetDensity
+              + ", density: " + options.inDensity
+              + ", density multiplier: " + densityMultiplier);
+        }
+      }
+      // If this isn't an image, or BitmapFactory was unable to parse the size, width and height
+      // will be -1 here.
+      if (expectedWidth > 0 && expectedHeight > 0) {
+        setInBitmap(options, bitmapPool, expectedWidth, expectedHeight);
+      }
+    }
   }
 
   @FloatRange(from = 0, fromInclusive = false)
