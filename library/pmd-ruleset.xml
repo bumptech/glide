@@ -4,6 +4,13 @@
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
 
     <description>Check for flaws in Glide's codebase.</description>
+    <!-- Useful tool for getting a violation count per rule in the PMD HTML report (Chrome Console):
+        var violations = {};
+        $$('table tr td:last-child a').forEach(a => {
+            var key = a.attributes['href'].value;
+            violations[key] = (violations[key] || 0) + 1;
+        }); violations
+    -->
 
     <rule ref="category/java/errorprone.xml">
         <exclude name="AvoidBranchingStatementAsLastInLoop"/>
