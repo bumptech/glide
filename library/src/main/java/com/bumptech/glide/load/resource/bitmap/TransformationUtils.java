@@ -254,6 +254,7 @@ public final class TransformationUtils {
    *                        returned unmodified.
    * @return The oriented bitmap. May be the imageToOrient without modification, or a new Bitmap.
    */
+  // TODO why do we have this method, it's not used? @Deprecate and remove?
   public static Bitmap rotateImage(@NonNull Bitmap imageToOrient, int degreesToRotate) {
     Bitmap result = imageToOrient;
     try {
@@ -263,7 +264,8 @@ public final class TransformationUtils {
         result = Bitmap.createBitmap(imageToOrient, 0, 0, imageToOrient.getWidth(),
             imageToOrient.getHeight(), matrix, true /*filter*/);
       }
-    } catch (Exception e) {
+    } catch (@SuppressWarnings("PMD.AvoidCatchingGenericException") RuntimeException e) {
+      // Any failure we ignore, but log the problem.
       if (Log.isLoggable(TAG, Log.ERROR)) {
         Log.e(TAG, "Exception when trying to orient image", e);
       }

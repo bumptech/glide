@@ -151,7 +151,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       initializer.initialize(mediaMetadataRetriever, resource);
       result =
           decodeFrame(mediaMetadataRetriever, frameTimeMicros, frameOption, outWidth, outHeight);
-    } catch (RuntimeException e) {
+    } catch (@SuppressWarnings("PMD.AvoidCatchingGenericException") RuntimeException e) {
       // MediaMetadataRetriever APIs throw generic runtime exceptions when given invalid data.
       throw new IOException(e);
     } finally {

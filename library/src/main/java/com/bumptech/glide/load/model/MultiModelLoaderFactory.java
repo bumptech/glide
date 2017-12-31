@@ -108,7 +108,8 @@ public class MultiModelLoaderFactory {
         }
       }
       return loaders;
-    } catch (Throwable t) {
+    } catch (@SuppressWarnings("PMD.AvoidCatchingThrowable") Throwable t) {
+      // PMD.AvoidCatchingThrowable clean up is needed only when an error happened
       alreadyUsedEntries.clear();
       throw t;
     }
@@ -161,7 +162,8 @@ public class MultiModelLoaderFactory {
           throw new NoModelLoaderAvailableException(modelClass, dataClass);
         }
       }
-    } catch (Throwable t) {
+    } catch (@SuppressWarnings("PMD.AvoidCatchingThrowable") Throwable t) {
+      // PMD.AvoidCatchingThrowable clean up is needed only when an error happened
       alreadyUsedEntries.clear();
       throw t;
     }

@@ -279,8 +279,9 @@ public class RequestManagerRetriever implements Handler.Callback {
       android.app.Fragment fragment = null;
       try {
         fragment = fragmentManager.getFragment(tempBundle, FRAGMENT_INDEX_KEY);
-      } catch (Exception e) {
-        // This generates log spam from FragmentManager anyway.
+      } catch (@SuppressWarnings("PMD.AvoidCatchingGenericException") RuntimeException e) {
+        // Ignore any exceptions; this generates log spam from FragmentManager anyway.
+        // See android.app.FragmentManagerImpl#throwException.
       }
       if (fragment == null) {
         break;

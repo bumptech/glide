@@ -28,8 +28,6 @@
         <exclude name="AvoidFieldNameMatchingMethodName" />
         <!-- There are enough cases where this makes sense (typically related to logic around the number of items in a collection) that a blanket ban doesn't seem like a good idea. -->
         <exclude name="AvoidLiteralsInIfCondition" />
-        <!-- It's clear that this is bad, but we have a number of cases where it makes sense and a blanket ban is irritating. -->
-        <exclude name="AvoidCatchingThrowable" />
     </rule>
     <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
       <properties>
@@ -144,8 +142,12 @@
         <exclude name="ExcessiveMethodLength" />
         <exclude name="ExcessiveClassLength" />
         <exclude name="ExcessivePublicCount" />
+    </rule>
+    <rule ref="category/java/design.xml/AvoidCatchingGenericException">
+      <properties>
         <!-- This is redundant, also caught with AvoidCatchingNPEs. -->
-        <exclude name="AvoidCatchingGenericException" />
+        <property name="violationSuppressXPath" value=".[@Image='NullPointerException']"/>
+      </properties>
     </rule>
 
     <rule ref="category/java/multithreading.xml">
