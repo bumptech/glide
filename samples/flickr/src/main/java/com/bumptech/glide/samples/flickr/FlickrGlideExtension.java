@@ -19,18 +19,11 @@ public final class FlickrGlideExtension {
 
   @GlideOption
   public static RequestOptions squareThumb(RequestOptions requestOptions) {
-    return requestOptions
-        .centerCrop();
+    return requestOptions.centerCrop();
   }
 
   @GlideOption
   public static RequestOptions squareMiniThumb(RequestOptions requestOptions) {
     return requestOptions.centerCrop().override(Api.SQUARE_THUMB_SIZE);
-  }
-
-  @GlideOption(override = GlideOption.OVERRIDE_EXTEND)
-  public static RequestOptions centerCrop(RequestOptions options) {
-    return options;
-    // Empty.
   }
 }
