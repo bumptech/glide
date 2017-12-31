@@ -2,9 +2,13 @@ package com.bumptech.glide.annotation.compiler;
 
 import com.bumptech.glide.annotation.GlideOption;
 import com.bumptech.glide.annotation.GlideType;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -14,6 +18,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.tools.Diagnostic.Kind;
 
 /**
  * Validates that classes annotated with {@link com.bumptech.glide.annotation.GlideExtension}
@@ -73,6 +78,7 @@ final class GlideExtensionValidator {
   }
 
   private void validateNewGlideOption(ExecutableElement executableElement) {
+    validateNewGlideOptionAnnotations(executableElement);
     validateGlideOptionParameters(executableElement);
     TypeMirror returnType = executableElement.getReturnType();
     if (!isRequestOptions(returnType)) {
@@ -82,6 +88,26 @@ final class GlideExtensionValidator {
           + " support will be removed in a future version");
     }
     validateGlideOptionOverride(executableElement);
+  }
+
+  private void validateNewGlideOptionAnnotations(ExecutableElement executableElement) {
+    Set<String> annotationNames =
+        FluentIterable.from(executableElement.getAnnotationMirrors())
+            .transform(new Function<AnnotationMirror, String>() {
+              @Override
+              public String apply(AnnotationMirror input) {
+                return input.getAnnotationType().asElement().toString();
+              }
+            })
+            .toSet();
+    if (!annotationNames.contains("android.support.annotation.NonNull")) {
+      processingEnvironment.getMessager().printMessage(
+          Kind.WARNING,
+          executableElement.getEnclosingElement() + "#" + executableElement.getSimpleName()
+              + " is missing the @NonNull annotation,"
+              + " please add it to ensure that your extension methods are always returning non-null"
+              + " values");
+    }
   }
 
   private void validateDeprecatedGlideOption(ExecutableElement executableElement) {

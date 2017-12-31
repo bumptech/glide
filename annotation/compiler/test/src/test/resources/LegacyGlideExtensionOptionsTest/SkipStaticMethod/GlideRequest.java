@@ -651,6 +651,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#test()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> test() {
     if (getMutableOptions() instanceof GlideOptions) {

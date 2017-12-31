@@ -651,6 +651,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#squareThumb()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> squareThumb() {
     if (getMutableOptions() instanceof GlideOptions) {

@@ -580,6 +580,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#override(int, int)
    */
   @Override
+  @NonNull
   @CheckResult
   public GlideOptions override(int width, int height) {
     return (GlideOptions) Extension.override(super.override(width, height), width, height);

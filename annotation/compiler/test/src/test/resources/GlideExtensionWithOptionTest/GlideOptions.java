@@ -594,6 +594,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
   /**
    * @see ExtensionWithOption#squareThumb(RequestOptions)
    */
+  @NonNull
   @CheckResult
   public GlideOptions squareThumb() {
     return (GlideOptions) ExtensionWithOption.squareThumb(this);

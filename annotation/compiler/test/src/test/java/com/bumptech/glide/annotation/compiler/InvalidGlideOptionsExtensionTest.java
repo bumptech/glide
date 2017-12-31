@@ -244,12 +244,14 @@ public class InvalidGlideOptionsExtensionTest {
             JavaFileObjects.forSourceLines(
                 "Extension",
                 "package com.bumptech.glide.test;",
+                "import android.support.annotation.NonNull;",
                 "import com.bumptech.glide.annotation.GlideExtension;",
                 "import com.bumptech.glide.annotation.GlideOption;",
                 "import com.bumptech.glide.request.RequestOptions;",
                 "@GlideExtension",
                 "public class Extension {",
                 "  private Extension() {}",
+                "  @NonNull",
                 "  @GlideOption",
                 "  public static RequestOptions doSomething(RequestOptions options) {",
                 "    return options;",
@@ -268,6 +270,30 @@ public class InvalidGlideOptionsExtensionTest {
             JavaFileObjects.forSourceLines(
                 "Extension",
                 "package com.bumptech.glide.test;",
+                "import android.support.annotation.NonNull;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideOption;",
+                "import com.bumptech.glide.request.RequestOptions;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @NonNull",
+                "  @GlideOption",
+                "  public static Object doSomething(RequestOptions options) {",
+                "    return options;",
+                "  }",
+                "}"));
+  }
+
+  @Test
+  public void compilation_withMissingNonNullAnnotation_warns() {
+    Compilation compilation = javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                "Extension",
+                "package com.bumptech.glide.test;",
                 "import com.bumptech.glide.annotation.GlideExtension;",
                 "import com.bumptech.glide.annotation.GlideOption;",
                 "import com.bumptech.glide.request.RequestOptions;",
@@ -275,9 +301,13 @@ public class InvalidGlideOptionsExtensionTest {
                 "public class Extension {",
                 "  private Extension() {}",
                 "  @GlideOption",
-                "  public static Object doSomething(RequestOptions options) {",
+                "  public static RequestOptions doSomething(RequestOptions options) {",
                 "    return options;",
                 "  }",
                 "}"));
+    assertThat(compilation).succeeded();
+    assertThat(compilation).hadWarningCount(1);
+    assertThat(compilation).hadWarningContaining("@NonNull");
+    assertThat(compilation).hadWarningContaining("com.bumptech.glide.test.Extension#doSomething");
   }
 }

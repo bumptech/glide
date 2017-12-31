@@ -637,6 +637,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#centerCrop()
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> centerCrop() {
     if (getMutableOptions() instanceof GlideOptions) {

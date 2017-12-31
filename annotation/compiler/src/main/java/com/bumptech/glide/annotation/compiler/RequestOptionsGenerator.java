@@ -78,6 +78,8 @@ final class RequestOptionsGenerator {
       REQUEST_OPTIONS_PACKAGE_NAME + "." + REQUEST_OPTIONS_SIMPLE_NAME;
   private static final ClassName CHECK_RESULT_CLASS_NAME =
       ClassName.get("android.support.annotation", "CheckResult");
+  private static final ClassName NON_NULL_CLASS_NAME =
+      ClassName.get("android.support.annotation", "NonNull");
 
   private final ProcessingEnvironment processingEnvironment;
   private final ClassName requestOptionsName;
@@ -298,6 +300,8 @@ final class RequestOptionsGenerator {
     code = new StringBuilder(code.substring(0, code.length() - 2));
     code.append(")");
     builder.addStatement(code.toString(), args.toArray(new Object[0]));
+
+    builder.addAnnotation(AnnotationSpec.builder(NON_NULL_CLASS_NAME).build());
     builder.addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build());
 
     List<MethodAndStaticVar> result = new ArrayList<>();
@@ -370,6 +374,7 @@ final class RequestOptionsGenerator {
     builder.addStatement(code.toString(), args.toArray(new Object[0]));
 
     builder.addStatement("return this");
+    builder.addAnnotation(AnnotationSpec.builder(NON_NULL_CLASS_NAME).build());
     builder.addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build());
 
     List<MethodAndStaticVar> result = new ArrayList<>();

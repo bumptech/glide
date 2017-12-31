@@ -637,6 +637,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#override(int, int)
    */
+  @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> override(int width, int height) {
     if (getMutableOptions() instanceof GlideOptions) {
