@@ -110,7 +110,8 @@ subprojects { project ->
     task violations(type: ViolationsTask) {
         minSeverity 'INFO'
         detailLevel 'VERBOSE'
-        maxViolations 0
+        maxViolations = 0
+        diffMaxViolations = 0
 
         // Formats are listed here: https://github.com/tomasbjerre/violations-lib
         def dir = projectDir.absolutePath;
