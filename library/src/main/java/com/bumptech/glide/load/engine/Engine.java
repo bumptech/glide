@@ -235,14 +235,10 @@ public class Engine implements EngineJobListener,
     return new LoadStatus(cb, engineJob);
   }
 
-  // false positive
-  @SuppressWarnings("PMD.UnusedPrivateMethod")
   private static void logWithTimeAndKey(String log, long startTime, Key key) {
     Log.v(TAG, log + " in " + LogTime.getElapsedMillis(startTime) + "ms, key: " + key);
   }
 
-  // false positive
-  @SuppressWarnings("PMD.UnusedPrivateMethod")
   @Nullable
   private EngineResource<?> loadFromActiveResources(Key key, boolean isMemoryCacheable) {
     if (!isMemoryCacheable) {
@@ -256,8 +252,6 @@ public class Engine implements EngineJobListener,
     return active;
   }
 
-  // false positive
-  @SuppressWarnings("PMD.UnusedPrivateMethod")
   private EngineResource<?> loadFromCache(Key key, boolean isMemoryCacheable) {
     if (!isMemoryCacheable) {
       return null;

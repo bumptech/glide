@@ -108,6 +108,7 @@ afterEvaluate {
         ruleSetFiles = files('pmd-ruleset.xml')
         source android.sourceSets.main.java.srcDirs
         classpath = files()
+        classpath += files("${project.buildDir}/intermediates/classes/debug/")
         doFirst {
             classpath += classPathForQuality()
         }
