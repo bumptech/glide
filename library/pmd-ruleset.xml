@@ -51,8 +51,6 @@
       <exclude name="OnlyOneReturn" />
       <!-- Obfuscated code is best code? -->
       <exclude name="LongVariable" />
-      <!-- A good idea but we have tons of violations. FIXME. -->
-      <exclude name="ShortVariable" />
       <!-- We don't use in and out to mean modified or not modified by the method, it's useful to match framework methods. -->
       <exclude name="AvoidPrefixingMethodParameters" />
       <!-- No idea what this is supposed to accomplish. -->
@@ -70,6 +68,37 @@
       <properties>
         <!-- Allow if commented -->
         <property name="violationSuppressXPath" value="Block[@containsComment='true']" />
+      </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/ShortVariable">
+      <properties>
+        <!-- Allow some short variable names which are frequently used. -->
+        <property name="violationSuppressXPath" value=".[
+          (
+            @Image='sb' and typeof('java.lang.StringBuilder')
+            and ancestor::LocalVariableDeclaration
+          ) or (
+            @Image='ID' and typeof('java.lang.String')
+            and ancestor::FieldDeclaration[@Static='true' and @Final='true']
+          ) or (
+            @Image='o' and typeof('java.lang.Object')
+            and ancestor::FormalParameter
+            and ancestor::MethodDeclarator[@Image='equals' or @Image='isEquivalentTo']
+            and ancestor::MethodDeclaration[@Public='true' and ResultType/Type/PrimitiveType[@Image='boolean']]
+          ) or (
+            (@Image='t' or @Image='e')
+            and ancestor::FormalParameter
+            and (
+              typeof('java.lang.Exception')
+              or typeof('java.lang.Throwable')
+              or ../Type//ClassOrInterfaceType[@Image='GlideException']
+            )
+          ) or (
+            @Image='is' and typeof('java.io.InputStream')
+          ) or (
+            @Image='os' and typeof('java.io.OutputStream')
+          )
+        ]" />
       </properties>
     </rule>
     <rule ref="category/java/codestyle.xml/ShortClassName">
