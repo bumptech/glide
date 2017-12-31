@@ -307,7 +307,7 @@ public class InvalidGlideOptionsExtensionTest {
                 "}"));
     assertThat(compilation).succeeded();
     assertThat(compilation).hadWarningCount(1);
-    assertThat(compilation).hadWarningContaining("@NonNull");
+    assertThat(compilation).hadWarningContaining("android.support.annotation.NonNull");
     assertThat(compilation).hadWarningContaining("com.bumptech.glide.test.Extension#doSomething");
   }
 }

@@ -29,6 +29,8 @@ import javax.tools.Diagnostic.Kind;
  * for an Application.
  */
 final class GlideExtensionValidator {
+  private static final String FULLY_QUALIFIED_NON_NULL_CLASS_NAME =
+      "android.support.annotation.NonNull";
 
   private final ProcessingEnvironment processingEnvironment;
   private final ProcessorUtil processorUtil;
@@ -252,11 +254,11 @@ final class GlideExtensionValidator {
               }
             })
             .toSet();
-    if (!annotationNames.contains("android.support.annotation.NonNull")) {
+    if (!annotationNames.contains(FULLY_QUALIFIED_NON_NULL_CLASS_NAME)) {
       processingEnvironment.getMessager().printMessage(
           Kind.WARNING,
           executableElement.getEnclosingElement() + "#" + executableElement.getSimpleName()
-              + " is missing the @NonNull annotation,"
+              + " is missing the " + FULLY_QUALIFIED_NON_NULL_CLASS_NAME + " annotation,"
               + " please add it to ensure that your extension methods are always returning non-null"
               + " values");
     }
