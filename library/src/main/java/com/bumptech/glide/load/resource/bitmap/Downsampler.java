@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.support.annotation.FloatRange;
+import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -321,27 +323,9 @@ public final class Downsampler {
     return rotated;
   }
 
-  private static void calculateScaling(
-      ImageType imageType,
-      InputStream is,
-      DecodeCallbacks decodeCallbacks,
-      BitmapPool bitmapPool,
-      DownsampleStrategy downsampleStrategy,
-      int degreesToRotate,
-      int sourceWidth,
-      int sourceHeight,
-      int targetWidth,
-      int targetHeight,
-      BitmapFactory.Options options) throws IOException {
-    // We can't downsample source content if we can't determine its dimensions.
-    if (sourceWidth <= 0 || sourceHeight <= 0) {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Unable to determine dimensions for: " + imageType
-            + " with target [" + targetWidth + "x" + targetHeight + "]");
-      }
-      return;
-    }
-
+  @FloatRange(from = 0, fromInclusive = false)
+  private static float getExactScaleFactor(DownsampleStrategy downsampleStrategy,
+      int degreesToRotate, int sourceWidth, int sourceHeight, int targetWidth, int targetHeight) {
     final float exactScaleFactor;
     if (degreesToRotate == 90 || degreesToRotate == 270) {
       // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image
@@ -361,26 +345,26 @@ public final class Downsampler {
           + ", source: [" + sourceWidth + "x" + sourceHeight + "]"
           + ", target: [" + targetWidth + "x" + targetHeight + "]");
     }
-    SampleSizeRounding rounding = downsampleStrategy.getSampleSizeRounding(sourceWidth,
-        sourceHeight, targetWidth, targetHeight);
-    if (rounding == null) {
-      throw new IllegalArgumentException("Cannot round with null rounding");
-    }
+    return exactScaleFactor;
+  }
 
-    int outWidth = round(exactScaleFactor * sourceWidth);
-    int outHeight = round(exactScaleFactor * sourceHeight);
+  @IntRange(from = 1)
+  private static int getPowerOfTwoSampleSize(int sourceWidth, int sourceHeight,
+      float exactScaleFactor, SampleSizeRounding rounding, String outMimeType) {
+    final int outWidth = round(exactScaleFactor * sourceWidth);
+    final int outHeight = round(exactScaleFactor * sourceHeight);
 
-    int widthScaleFactor = sourceWidth / outWidth;
-    int heightScaleFactor = sourceHeight / outHeight;
+    final int widthScaleFactor = sourceWidth / outWidth;
+    final int heightScaleFactor = sourceHeight / outHeight;
 
-    int scaleFactor = rounding == SampleSizeRounding.MEMORY
+    final int scaleFactor = rounding == SampleSizeRounding.MEMORY
         ? Math.max(widthScaleFactor, heightScaleFactor)
         : Math.min(widthScaleFactor, heightScaleFactor);
 
     int powerOfTwoSampleSize;
     // BitmapFactory does not support downsampling wbmp files on platforms <= M. See b/27305903.
     if (Build.VERSION.SDK_INT <= 23
-        && NO_DOWNSAMPLE_PRE_N_MIME_TYPES.contains(options.outMimeType)) {
+        && NO_DOWNSAMPLE_PRE_N_MIME_TYPES.contains(outMimeType)) {
       powerOfTwoSampleSize = 1;
     } else {
       powerOfTwoSampleSize = Math.max(1, Integer.highestOneBit(scaleFactor));
@@ -389,13 +373,22 @@ public final class Downsampler {
         powerOfTwoSampleSize = powerOfTwoSampleSize << 1;
       }
     }
+    return powerOfTwoSampleSize;
+  }
 
-    // Here we mimic framework logic for determining how inSampleSize division is rounded on various
-    // versions of Android. The logic here has been tested on emulators for Android versions 15-26.
-    // PNG - Always uses floor
-    // JPEG - Always uses ceiling
-    // Webp - Prior to N, always uses floor. At and after N, always uses round.
-    options.inSampleSize = powerOfTwoSampleSize;
+  /**
+   * Here we mimic framework logic for determining how inSampleSize division is rounded on various
+   * versions of Android. The logic here has been tested on emulators for Android versions 15-26.
+   * <ul>
+   *   <li>PNG - Always uses floor</li>
+   *   <li>JPEG - Always uses ceiling</li>
+   *   <li>Webp - Prior to N, always uses floor. At and after N, always uses round.</li>
+   * </ul>
+   * @return [powerOfTwoWidth, powerOfTwoHeight] or null if the image format is not understood.
+   */
+  @Nullable
+  private static int[] getImageSpecificSize(
+      ImageType imageType, int sourceWidth, int sourceHeight, int powerOfTwoSampleSize) {
     int powerOfTwoWidth;
     int powerOfTwoHeight;
     if (imageType == ImageType.JPEG) {
@@ -422,23 +415,63 @@ public final class Downsampler {
         powerOfTwoHeight = (int) Math.floor(sourceHeight / (float) powerOfTwoSampleSize);
       }
     } else if (
-        sourceWidth % powerOfTwoSampleSize != 0 || sourceHeight % powerOfTwoSampleSize != 0) {
+        sourceWidth % powerOfTwoSampleSize == 0 && sourceHeight % powerOfTwoSampleSize == 0) {
+      powerOfTwoWidth = sourceWidth / powerOfTwoSampleSize;
+      powerOfTwoHeight = sourceHeight / powerOfTwoSampleSize;
+    } else {
+      return null;
+    }
+    return new int[]{powerOfTwoWidth, powerOfTwoHeight};
+  }
+
+  private static void calculateScaling(
+      ImageType imageType,
+      InputStream is,
+      DecodeCallbacks decodeCallbacks,
+      BitmapPool bitmapPool,
+      DownsampleStrategy downsampleStrategy,
+      int degreesToRotate,
+      int sourceWidth,
+      int sourceHeight,
+      int targetWidth,
+      int targetHeight,
+      BitmapFactory.Options options) throws IOException {
+    // We can't downsample source content if we can't determine its dimensions.
+    if (sourceWidth <= 0 || sourceHeight <= 0) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Unable to determine dimensions for: " + imageType
+            + " with target [" + targetWidth + "x" + targetHeight + "]");
+      }
+      return;
+    }
+
+    SampleSizeRounding rounding = downsampleStrategy.getSampleSizeRounding(
+        sourceWidth, sourceHeight, targetWidth, targetHeight);
+    if (rounding == null) {
+      throw new IllegalArgumentException("Cannot round with null rounding");
+    }
+    final float exactScaleFactor = getExactScaleFactor(downsampleStrategy, degreesToRotate,
+        sourceWidth, sourceHeight, targetWidth, targetHeight);
+    final int powerOfTwoSampleSize = getPowerOfTwoSampleSize(
+        sourceWidth, sourceHeight, exactScaleFactor, rounding, options.outMimeType);
+    // set the sample size sooner so getDimensions can use it
+    options.inSampleSize = powerOfTwoSampleSize;
+
+    int[] powerOfTwoSize = getImageSpecificSize(
+        imageType, sourceWidth, sourceHeight, powerOfTwoSampleSize);
+    if (powerOfTwoSize == null) {
       // If we're not confident the image is in one of our types, fall back to checking the
       // dimensions again. inJustDecodeBounds decodes do obey inSampleSize.
-      int[] dimensions = getDimensions(is, options, decodeCallbacks, bitmapPool);
+      powerOfTwoSize = getDimensions(is, options, decodeCallbacks, bitmapPool);
+      // TODO this comment is out of place, probably belongs to one of getImageSpecificSize branches
       // Power of two downsampling in BitmapFactory uses a variety of random factors to determine
       // rounding that we can't reliably replicate for all image formats. Use ceiling here to make
       // sure that we at least provide a Bitmap that's large enough to fit the content we're going
       // to load.
-      powerOfTwoWidth = dimensions[0];
-      powerOfTwoHeight = dimensions[1];
-    } else {
-      powerOfTwoWidth = sourceWidth / powerOfTwoSampleSize;
-      powerOfTwoHeight = sourceHeight / powerOfTwoSampleSize;
     }
 
     double adjustedScaleFactor = downsampleStrategy.getScaleFactor(
-        powerOfTwoWidth, powerOfTwoHeight, targetWidth, targetHeight);
+        powerOfTwoSize[0], powerOfTwoSize[1], targetWidth, targetHeight);
 
     // Density scaling is only supported if inBitmap is null prior to KitKat. Avoid setting
     // densities here so we calculate the final Bitmap size correctly.
@@ -456,7 +489,7 @@ public final class Downsampler {
       Log.v(TAG, "Calculate scaling"
           + ", source: [" + sourceWidth + "x" + sourceHeight + "]"
           + ", target: [" + targetWidth + "x" + targetHeight + "]"
-          + ", power of two scaled: [" + powerOfTwoWidth + "x" + powerOfTwoHeight + "]"
+          + ", power of two scaled: [" + powerOfTwoSize[0] + "x" + powerOfTwoSize[1] + "]"
           + ", exact scale factor: " + exactScaleFactor
           + ", power of 2 sample size: " + powerOfTwoSampleSize
           + ", adjusted scale factor: " + adjustedScaleFactor
