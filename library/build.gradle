@@ -33,6 +33,10 @@ android.testOptions.unitTests.all { Test testTask ->
         // Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=2048m; support was removed in 8.0
         testTask.jvmArgs "-XX:MaxPermSize=${TEST_JVM_MEMORY_SIZE}"
     }
+
+    // Initializing Robolectric is expensive, two threads seem to be around the only level where any
+    // improvement is seen.
+    testTask.maxParallelForks = 2
 }
 
 android {

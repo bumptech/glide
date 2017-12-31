@@ -32,6 +32,7 @@ if (JavaVersion.current().isJava8Compatible()) {
 
 subprojects { project ->
     tasks.withType(JavaCompile) {
+        options.fork = true
         sourceCompatibility = 1.7
         targetCompatibility = 1.7
 
