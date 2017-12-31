@@ -71,11 +71,17 @@ For a faster development cycle, you can also just run the unit tests for the mai
 
 ``./gradlew :library:testDebugUnitTest``
 
+###### Annotation Processor tests
+
 To test annotation processor changes run:
 
 ``./gradlew :annotation:compiler:test:test``
 
-_Note:_ if you are using a Windows machine, you'll need to hardcode [this line](https://github.com/bumptech/glide/blob/b18a63f6952c947bda71c61a267dac5985210150/annotation/compiler/test/src/test/java/com/bumptech/glide/annotation/compiler/test/Util.java#L36) to use a `/` instead of the multi-platform file seperator.
+If you changed the output and the regression tests are failing, you can re-generate the test files by running:
+
+``./gradlew :annotation:compiler:test:regenerateTestResources``
+
+If you do run `regenerateTestResources`, double check and make sure that the resulting files are sane and that you only see the changes you expected.
 
 ###### Instrumentation tests.
 
