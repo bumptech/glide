@@ -1,8 +1,11 @@
 package com.bumptech.glide.signature;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.tests.KeyTester;
 import java.io.UnsupportedEncodingException;
@@ -12,6 +15,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -50,5 +54,30 @@ public class ApplicationVersionSignatureTest {
             ApplicationVersionSignature.obtain(context),
             "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9")
         .test();
+  }
+
+  @Test
+  public void testUnresolvablePackageInfo() throws NameNotFoundException {
+    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS.get());
+    String packageName = "my.package";
+    when(context.getPackageName()).thenReturn(packageName);
+    when(context.getPackageManager().getPackageInfo(packageName, 0))
+        .thenThrow(new NameNotFoundException("test"));
+
+    Key key = ApplicationVersionSignature.obtain(context);
+
+    assertNotNull(key);
+  }
+
+  @Test
+  public void testMissingPackageInfo() throws NameNotFoundException {
+    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS.get());
+    String packageName = "my.package";
+    when(context.getPackageName()).thenReturn(packageName);
+    when(context.getPackageManager().getPackageInfo(packageName, 0)).thenReturn(null);
+
+    Key key = ApplicationVersionSignature.obtain(context);
+
+    assertNotNull(key);
   }
 }

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 import com.bumptech.glide.load.Key;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentMap;
  * application version name using {@link android.content.pm.PackageInfo#versionCode}.
  */
 public final class ApplicationVersionSignature {
+  private static final String TAG = "AppVersionSignature";
   private static final ConcurrentMap<String, Key> PACKAGE_NAME_TO_KEY = new ConcurrentHashMap<>();
 
   /**
@@ -66,7 +68,8 @@ public final class ApplicationVersionSignature {
     try {
       return context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
     } catch (PackageManager.NameNotFoundException e) {
-      throw new RuntimeException(e);
+      Log.e(TAG, "Cannot resolve info for" + context.getPackageName(), e);
+      return null;
     }
   }
 
