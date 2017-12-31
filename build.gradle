@@ -69,6 +69,12 @@ subprojects { project ->
                     abortOnError false
                 }
             }
+
+            android.variantFilter { variant ->
+                if(variant.buildType.name == 'release') {
+                    variant.setIgnore(true)
+                }
+            }
         }
     }
 }
@@ -113,7 +119,7 @@ subprojects { project ->
         diffMaxViolations = 0
 
         // Formats are listed here: https://github.com/tomasbjerre/violations-lib
-        def dir = projectDir.absolutePath;
+        def dir = projectDir.absolutePath
         violations = [
                 ["FINDBUGS",    dir, ".*/findbugs/.*\\.xml\$",   "Findbugs"],
                 ["PMD",         dir, ".*/pmd/.*\\.xml\$",        "PMD"],
