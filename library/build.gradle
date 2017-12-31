@@ -112,6 +112,11 @@ afterEvaluate {
         doFirst {
             classpath += classPathForQuality()
         }
+
+        //TODO enable this once new Gradle containing this flag is out
+        //see https://github.com/gradle/gradle/pull/3125#issuecomment-352442432
+        //incrementalAnalysis = true
+
         // Failures are caught and printed by the violations plugin.
         ignoreFailures = true
 
