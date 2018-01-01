@@ -21,6 +21,9 @@ dependencies {
     compile files(Jvm.current().getToolsJar())
 }
 
+// Make sure running `gradlew :annotation:compiler:check` actually does full quality control.
+test.dependsOn ':annotation:compiler:test:test'
+
 def packagingFolder = file("${buildDir}/intermediates")
 def repackagedJar = file("${packagingFolder}/repackaged.jar")
 def proguardedJar = file("${packagingFolder}/proguarded.jar")
