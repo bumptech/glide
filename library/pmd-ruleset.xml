@@ -13,7 +13,6 @@
     -->
 
     <rule ref="category/java/errorprone.xml">
-        <exclude name="AvoidBranchingStatementAsLastInLoop"/>
         <!-- Not using beans. -->
         <exclude name="BeanMembersShouldSerialize" />
         <!-- wat -->

@@ -240,6 +240,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
   }
 
+  @SuppressWarnings("PMD.AvoidBranchingStatementAsLastInLoop")
   private static int parseExifSegment(RandomAccessReader segmentData) {
     final int headerOffsetSize = JPEG_EXIF_SEGMENT_PREAMBLE.length();
 
