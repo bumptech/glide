@@ -4,37 +4,20 @@ if (!hasProperty('DISABLE_ERROR_PRONE')) {
     apply plugin: "net.ltgt.errorprone"
 }
 
+tasks.withType(JavaCompile) {
+    options.fork = true
+}
+
 dependencies {
     api project(':third_party:gif_decoder')
     api project(':third_party:disklrucache')
     api project(':annotation')
     api "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
     compileOnly "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
-    testImplementation project(':testutil')
-    testImplementation 'com.google.guava:guava-testlib:18.0'
-    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
-    testImplementation "junit:junit:${JUNIT_VERSION}"
-    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
-    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
-    testImplementation "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
 
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
         errorprone "com.google.errorprone:error_prone_core:${ERROR_PRONE_VERSION}"
     }
-}
-
-android.testOptions.unitTests.all { Test testTask ->
-    // configure max heap size of the test JVM
-    testTask.maxHeapSize = TEST_JVM_MEMORY_SIZE as String
-    if (JavaVersion.current() <= JavaVersion.VERSION_1_7) {
-        // Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=2048m; support was removed in 8.0
-        testTask.jvmArgs "-XX:MaxPermSize=${TEST_JVM_MEMORY_SIZE}"
-    }
-
-    // Initializing Robolectric is expensive, two threads seem to be around the only level where any
-    // improvement is seen.
-    testTask.maxParallelForks = 2
 }
 
 android {
@@ -44,13 +27,6 @@ android {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
         versionName VERSION_NAME as String
-        consumerProguardFiles 'proguard-rules.txt'
-    }
-
-    buildTypes {
-        debug {
-            testCoverageEnabled = false
-        }
     }
 
     compileOptions {
@@ -61,6 +37,7 @@ android {
 
 check.dependsOn(':library:findbugs:findbugs')
 check.dependsOn(':library:pmd:pmd')
+check.dependsOn(':library:test:check')
 
 // Used in pmd and findbugs subprojects.
 @SuppressWarnings("GroovyUnusedDeclaration")

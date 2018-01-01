@@ -7,6 +7,6 @@
 [submodule "library/src/androidTest/resources/exif-orientation-examples"]
 	path = library/src/androidTest/resources/exif-orientation-examples
 	url = https://github.com/recurser/exif-orientation-examples.git
-[submodule "library/src/test/resources/exif-orientation-examples"]
-	path = library/src/test/resources/exif-orientation-examples
+[submodule "library/test/src/test/resources/exif-orientation-examples"]
+	path = library/test/src/test/resources/exif-orientation-examples
 	url = https://github.com/recurser/exif-orientation-examples
