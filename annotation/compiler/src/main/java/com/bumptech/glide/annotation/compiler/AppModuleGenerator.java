@@ -64,7 +64,8 @@ import javax.lang.model.element.TypeElement;
  *    }
  *
  *    {@literal @java.lang.Override}
- *    public java.util.Set<java.lang.Class<?>> getExcludedModuleClasses() {
+ *    {@literal @android.support.annotation.NonNull}
+ *    public java.util.Set&lt;java.lang.Class&lt;?>> getExcludedModuleClasses() {
  *      return appGlideModule.getExcludedModuleClasses();
  *    }
  *  }
@@ -164,6 +165,7 @@ final class AppModuleGenerator {
     MethodSpec.Builder builder = MethodSpec.methodBuilder("getExcludedModuleClasses")
         .addModifiers(Modifier.PUBLIC)
         .addAnnotation(Override.class)
+        .addAnnotation(ClassName.get("android.support.annotation", "NonNull"))
         .returns(setOfClassOfWildcardOfObject);
 
     if (excludedClassNames.isEmpty()) {

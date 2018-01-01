@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.test.AppModuleWithMultipleExcludes;
 import java.lang.Class;
@@ -38,6 +39,7 @@ final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   }
 
   @Override
+  @NonNull
   public Set<Class<?>> getExcludedModuleClasses() {
     Set<Class<?>> excludedClasses = new HashSet<Class<?>>();
     excludedClasses.add(com.bumptech.glide.test.EmptyLibraryModule1.class);
