@@ -167,7 +167,6 @@
         <exclude name="GodClass" />
         <!-- No idea how you reasonably define this. -->
         <exclude name="ExcessiveImports" />
-        <exclude name="CouplingBetweenObjects" />
         <exclude name="TooManyMethods" />
         <exclude name="LawOfDemeter" />
         <exclude name="NcssCount" />
