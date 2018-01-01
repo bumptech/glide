@@ -1,11 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import static com.bumptech.glide.load.ImageHeaderParser.ImageType.GIF;
-import static com.bumptech.glide.load.ImageHeaderParser.ImageType.JPEG;
-import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG;
-import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG_A;
-import static com.bumptech.glide.load.ImageHeaderParser.ImageType.UNKNOWN;
-
 import android.util.Log;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -83,7 +77,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
 
     // JPEG.
     if (firstTwoBytes == EXIF_MAGIC_NUMBER) {
-      return JPEG;
+      return ImageType.JPEG;
     }
 
     final int firstFourBytes = (firstTwoBytes << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
@@ -94,30 +88,30 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       reader.skip(25 - 4);
       int alpha = reader.getByte();
       // A RGB indexed PNG can also have transparency. Better safe than sorry!
-      return alpha >= 3 ? PNG_A : PNG;
+      return alpha >= 3 ? ImageType.PNG_A : ImageType.PNG;
     }
 
     // GIF from first 3 bytes.
     if (firstFourBytes >> 8 == GIF_HEADER) {
-      return GIF;
+      return ImageType.GIF;
     }
 
     // WebP (reads up to 21 bytes). See https://developers.google.com/speed/webp/docs/riff_container
     // for details.
     if (firstFourBytes != RIFF_HEADER) {
-      return UNKNOWN;
+      return ImageType.UNKNOWN;
     }
     // Bytes 4 - 7 contain length information. Skip these.
     reader.skip(4);
     final int thirdFourBytes =
         (reader.getUInt16() << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
     if (thirdFourBytes != WEBP_HEADER) {
-      return UNKNOWN;
+      return ImageType.UNKNOWN;
     }
     final int fourthFourBytes =
         (reader.getUInt16() << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
     if ((fourthFourBytes & VP8_HEADER_MASK) != VP8_HEADER) {
-      return UNKNOWN;
+      return ImageType.UNKNOWN;
     }
     if ((fourthFourBytes & VP8_HEADER_TYPE_MASK) == VP8_HEADER_TYPE_EXTENDED) {
       // Skip some more length bytes and check for transparency/alpha flag.

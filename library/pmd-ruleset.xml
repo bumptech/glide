@@ -57,8 +57,6 @@
       <exclude name="AvoidFinalLocalVariable" />
       <!-- These are often useful for clarity and explicitly suggested by Google's code style. -->
       <exclude name="UselessParentheses" />
-      <!-- Theoretically this might be reasonable but the number of imports probably varies from class to class and this doesn't seem worth the overhead to maintain. -->
-      <exclude name="TooManyStaticImports" />
       <!-- Lots of existing violations, not clear that the overhead is worthwhile though there are some cases where we definitely need to call super. FIXME. -->
       <exclude name="CallSuperInConstructor" />
       <!-- This is a reasonable idea, but in practice often the != null case is the expected case and it makes sense for it to come first. -->
