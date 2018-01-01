@@ -61,7 +61,9 @@ subprojects { project ->
     }
 
     project.afterEvaluate {
-        if (project.hasProperty("android")) {
+        if (project.hasProperty("android")
+                && project.name != 'pmd'
+                && project.name != 'findbugs') {
             android {
                 lintOptions {
                     warningsAsErrors true

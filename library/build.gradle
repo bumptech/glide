@@ -1,6 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'findbugs'
-apply plugin: 'pmd'
 
 if (!hasProperty('DISABLE_ERROR_PRONE')) {
     apply plugin: "net.ltgt.errorprone"
@@ -61,79 +59,11 @@ android {
     }
 }
 
-afterEvaluate {
-    if (tasks.findByName("assembleDebug") == null) {
-        return
-    }
+check.dependsOn(':library:findbugs:findbugs')
+check.dependsOn(':library:pmd:pmd')
 
-    findbugs {
-        toolVersion FINDBUGS_VERSION
-    }
-
-    tasks.create('findbugs', FindBugs) {
-        dependsOn tasks.compileDebugJavaWithJavac
-
-        description 'Run findbugs'
-        group 'verification'
-
-        classes = fileTree(tasks.compileDebugJavaWithJavac.destinationDir)
-        source android.sourceSets.main.java.srcDirs
-        classpath = files()
-        doFirst {
-            classpath += classPathForQuality()
-        }
-        effort = 'max'
-        excludeFilter = file("findbugs-exclude.xml")
-
-        // Failures are caught and printed by the violations plugin.
-        ignoreFailures = true
-
-        reports {
-            xml.enabled = true
-            html.enabled = false
-        }
-    }
-
-    check.dependsOn('findbugs')
-
-    pmd {
-        toolVersion PMD_VERSION
-    }
-
-    tasks.create('pmd', Pmd) {
-        dependsOn tasks.compileDebugJavaWithJavac
-        targetJdk = TargetJdk.VERSION_1_7
-
-        description 'Run pmd'
-        group 'verification'
-
-        // If ruleSets is not empty, it seems to contain some
-        // defaults which override rules in the ruleset file...
-        ruleSets = []
-        ruleSetFiles = files('pmd-ruleset.xml')
-        source android.sourceSets.main.java.srcDirs
-        classpath = files()
-        classpath += files(tasks.compileDebugJavaWithJavac.destinationDir)
-        doFirst {
-            classpath += classPathForQuality()
-        }
-
-        //TODO enable this once new Gradle containing this flag is out
-        //see https://github.com/gradle/gradle/pull/3125#issuecomment-352442432
-        //incrementalAnalysis = true
-
-        // Failures are caught and printed by the violations plugin.
-        ignoreFailures = true
-
-        reports {
-            xml.enabled = true
-            html.enabled = false
-        }
-    }
-
-    check.dependsOn('pmd')
-}
-
+// Used in pmd and findbugs subprojects.
+@SuppressWarnings("GroovyUnusedDeclaration")
 def classPathForQuality() {
     return files(
             android.bootClasspath,
