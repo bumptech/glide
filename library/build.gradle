@@ -97,6 +97,7 @@ afterEvaluate {
     }
 
     tasks.create('pmd', Pmd) {
+        dependsOn tasks.compileDebugJavaWithJavac
         targetJdk = TargetJdk.VERSION_1_7
 
         description 'Run pmd'
@@ -108,7 +109,7 @@ afterEvaluate {
         ruleSetFiles = files('pmd-ruleset.xml')
         source android.sourceSets.main.java.srcDirs
         classpath = files()
-        classpath += files("${project.buildDir}/intermediates/classes/debug/")
+        classpath += files(tasks.compileDebugJavaWithJavac.destinationDir)
         doFirst {
             classpath += classPathForQuality()
         }
