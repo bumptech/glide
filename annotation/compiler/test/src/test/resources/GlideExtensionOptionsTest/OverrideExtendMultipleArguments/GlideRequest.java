@@ -64,6 +64,7 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
 
   @Override
   @CheckResult
+  @NonNull
   protected GlideRequest<File> getDownloadOnlyRequest() {
     return new GlideRequest<>(File.class, this).apply(DOWNLOAD_ONLY_OPTIONS);
   }
