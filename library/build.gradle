@@ -67,12 +67,12 @@ afterEvaluate {
     }
 
     tasks.create('findbugs', FindBugs) {
-        dependsOn tasks.assembleDebug
+        dependsOn tasks.compileDebugJavaWithJavac
 
         description 'Run findbugs'
         group 'verification'
 
-        classes = fileTree("${project.buildDir}/intermediates/classes/debug/")
+        classes = fileTree(tasks.compileDebugJavaWithJavac.destinationDir)
         source android.sourceSets.main.java.srcDirs
         classpath = files()
         doFirst {
