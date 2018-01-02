@@ -22,6 +22,7 @@ public final class RoundedCorners extends BitmapTransformation {
    * @throws IllegalArgumentException if rounding radius is 0 or less.
    */
   public RoundedCorners(int roundingRadius) {
+    super();
     Preconditions.checkArgument(roundingRadius > 0, "roundingRadius must be greater than 0.");
     this.roundingRadius = roundingRadius;
   }

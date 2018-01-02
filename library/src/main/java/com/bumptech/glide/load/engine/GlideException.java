@@ -37,6 +37,7 @@ public final class GlideException extends Exception {
   }
 
   public GlideException(String detailMessage, List<Throwable> causes) {
+    super(detailMessage, null);
     this.detailMessage = detailMessage;
     setStackTrace(EMPTY_ELEMENTS);
     this.causes = causes;

@@ -58,6 +58,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    * Constructor that defaults {@code waitForLayout} to {@code false}.
    */
   public ViewTarget(@NonNull T view) {
+    super();
     this.view = Preconditions.checkNotNull(view);
     sizeDeterminer = new SizeDeterminer(view);
   }

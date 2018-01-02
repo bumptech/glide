@@ -85,6 +85,7 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
   // Public API.
   @SuppressWarnings("WeakerAccess")
   public SimpleTarget(int width, int height) {
+    super();
     this.width = width;
     this.height = height;
   }

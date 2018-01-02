@@ -42,7 +42,8 @@ public class ExceptionCatchingInputStream extends InputStream {
   }
 
   ExceptionCatchingInputStream() {
-    // Do nothing.
+    super();
+    // Do nothing, only to hide constructor from public.
   }
 
   void setInputStream(@NonNull InputStream toWrap) {

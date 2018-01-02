@@ -56,10 +56,15 @@
       <exclude name="AvoidFinalLocalVariable" />
       <!-- These are often useful for clarity and explicitly suggested by Google's code style. -->
       <exclude name="UselessParentheses" />
-      <!-- Lots of existing violations, not clear that the overhead is worthwhile though there are some cases where we definitely need to call super. FIXME. -->
-      <exclude name="CallSuperInConstructor" />
       <!-- This is a reasonable idea, but in practice often the != null case is the expected case and it makes sense for it to come first. -->
       <exclude name="ConfusingTernary" />
+    </rule>
+    <rule ref="category/java/codestyle.xml/CallSuperInConstructor">
+      <properties>
+        <!-- Ignore classes implicitly extending Object.
+             TODO report why is this not default? see definition: `count (ExtendsList/*) > 0` -->
+        <property name="violationSuppressXPath" value="ancestor::ClassOrInterfaceDeclaration[not(child::ExtendsList)]" />
+      </properties>
     </rule>
     <rule ref="category/java/codestyle.xml/EmptyMethodInAbstractClassShouldBeAbstract">
       <properties>
