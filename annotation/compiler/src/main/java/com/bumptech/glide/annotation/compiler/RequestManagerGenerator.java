@@ -64,6 +64,9 @@ final class RequestManagerGenerator {
       ClassName.get("android.support.annotation", "NonNull");
   private static final ClassName CONTEXT_CLASS_NAME =
       ClassName.get("android.content", "Context");
+  private static final AnnotationSpec NON_NULL = AnnotationSpec
+      .builder(ClassName.get("android.support.annotation", "NonNull"))
+      .build();
 
   private static final String GENERATED_REQUEST_MANAGER_SIMPLE_NAME =
       "GlideRequests";
@@ -151,10 +154,11 @@ final class RequestManagerGenerator {
     return MethodSpec.methodBuilder("as")
         .addModifiers(Modifier.PUBLIC)
         .addAnnotation(Override.class)
-        .addTypeVariable(TypeVariableName.get("ResourceType"))
-        .addParameter(classOfResouceType, "resourceClass")
         .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(NON_NULL)
+        .addTypeVariable(TypeVariableName.get("ResourceType"))
         .returns(requestBuilderOfResourceType)
+        .addParameter(classOfResouceType.annotated(NON_NULL), "resourceClass")
         .addStatement("return new $T<>(glide, this, resourceClass, context)",
             this.generatedRequestBuilderClassName)
         .build();
@@ -166,7 +170,6 @@ final class RequestManagerGenerator {
     return FluentIterable.from(
         processorUtil.findInstanceMethodsReturning(requestManagerType, requestManagerType))
         .transform(new Function<ExecutableElement, MethodSpec>() {
-          @Nullable
           @Override
           public MethodSpec apply(@Nullable ExecutableElement input) {
             return generateRequestManagerRequestManagerMethodOverride(generatedPackageName, input);

@@ -38,7 +38,8 @@ public class GlideRequests extends RequestManager {
 
   @Override
   @CheckResult
-  public <ResourceType> GlideRequest<ResourceType> as(Class<ResourceType> resourceClass) {
+  @NonNull
+  public <ResourceType> GlideRequest<ResourceType> as(@NonNull Class<ResourceType> resourceClass) {
     return new GlideRequest<>(glide, this, resourceClass, context);
   }
 

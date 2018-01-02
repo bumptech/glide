@@ -108,6 +108,9 @@ final class RequestBuilderGenerator {
       ImmutableSet.of("clone", "apply", "autoLock", "lock", "autoClone");
   private static final ClassName CHECK_RESULT_CLASS_NAME =
       ClassName.get("android.support.annotation", "CheckResult");
+  private static final AnnotationSpec NON_NULL = AnnotationSpec
+      .builder(ClassName.get("android.support.annotation", "NonNull"))
+      .build();
 
   private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
@@ -429,6 +432,7 @@ final class RequestBuilderGenerator {
     return MethodSpec.methodBuilder("getDownloadOnlyRequest")
         .addAnnotation(Override.class)
         .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(NON_NULL)
         .returns(generatedRequestBuilderOfFile)
         .addModifiers(Modifier.PROTECTED)
         .addStatement("return new $T<>($T.class, $N).apply($N)",

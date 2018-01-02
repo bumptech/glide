@@ -21,6 +21,9 @@ dependencies {
     compile files(Jvm.current().getToolsJar())
 }
 
+// Make sure running `gradlew :annotation:compiler:check` actually does full quality control.
+test.dependsOn ':annotation:compiler:test:test'
+
 def packagingFolder = file("${buildDir}/intermediates")
 def repackagedJar = file("${packagingFolder}/repackaged.jar")
 def proguardedJar = file("${packagingFolder}/proguarded.jar")
@@ -34,7 +37,7 @@ task compiledJar(type: Jar, dependsOn: classes) {
 // Repackage compileOnly dependencies to avoid namespace collisions.
 task jarjar(dependsOn: [tasks.compiledJar, configurations.compileOnly]) {
     // Set up inputs and outputs to only rebuild when necessary (code change, dependency change).
-    inputs.file compiledJar
+    inputs.files compiledJar
     inputs.files configurations.compileOnly
     outputs.file repackagedJar
 
