@@ -18,6 +18,8 @@ also effective for almost any case where you need to fetch, resize, and display 
 
 Download
 --------
+For detailed instructions and requirements, see Glide's [download and setup docs page][28].
+
 You can download a jar from GitHub's [releases page][1].
 
 Or use Gradle:
@@ -226,3 +228,4 @@ This is not an official Google product.
 [25]: http://bumptech.github.io/glide/doc/download-setup.html#proguard
 [26]: https://developer.android.com/studio/index.html
 [27]: http://bumptech.github.io/glide/dev/contributing.html
+[28]: http://bumptech.github.io/glide/doc/download-setup.html
