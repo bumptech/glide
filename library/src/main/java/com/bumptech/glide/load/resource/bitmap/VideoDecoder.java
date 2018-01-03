@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
-
 /**
  * Decodes video data to Bitmaps from {@link ParcelFileDescriptor}s and
  * {@link AssetFileDescriptor}s.
