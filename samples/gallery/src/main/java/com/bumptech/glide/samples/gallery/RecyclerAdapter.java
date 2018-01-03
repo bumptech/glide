@@ -2,6 +2,7 @@ package com.bumptech.glide.samples.gallery;
 
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -15,7 +16,6 @@ import android.widget.ImageView;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.signature.MediaStoreSignature;
 import com.bumptech.glide.util.Preconditions;
 import java.util.Collections;
@@ -30,13 +30,13 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
 
   private final List<MediaStoreData> data;
   private final int screenWidth;
-  private final GlideRequest<GifDrawable> requestBuilder;
+  private final GlideRequest<Drawable> requestBuilder;
 
   private int[] actualDimensions;
 
   RecyclerAdapter(Context context, List<MediaStoreData> data, GlideRequests glideRequests) {
     this.data = data;
-    requestBuilder = glideRequests.asGif().fitCenter();
+    requestBuilder = glideRequests.asDrawable().fitCenter();
 
     setHasStableIds(true);
 
@@ -102,7 +102,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
 
   @Nullable
   @Override
-  public RequestBuilder<GifDrawable> getPreloadRequestBuilder(@NonNull MediaStoreData item) {
+  public RequestBuilder<Drawable> getPreloadRequestBuilder(@NonNull MediaStoreData item) {
     MediaStoreSignature signature =
         new MediaStoreSignature(item.mimeType, item.dateModified, item.orientation);
     return requestBuilder
