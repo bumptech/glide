@@ -41,7 +41,6 @@ subprojects { project ->
         if ("gifencoder" != project.getName()) {
           options.compilerArgs \
                 << "-Xlint:all" \
-                << "-Werror" \
                 /*
                  * Java expects every annotation to have a processor, but we use
                  * javax.annotation.Nullable, which doesn't have one.
