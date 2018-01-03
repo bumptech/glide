@@ -14,6 +14,30 @@ disqus: 1
 
 **Compile SDK Version** - Glide must be compiled against SDK version **26** (Oreo) or higher.
 
+**Support Library Version** - Glide uses support library version **27**.
+
+If you need or would prefer to use a different version of the support library you should exclude `"com.android.support"` from your Glide dependency in your `build.gradle` file. For example, if you'd like to use v26 of the support library:
+
+```groovy
+depdendencies {
+  implementation ("com.github.bumptech.glide:glide:4.4.0") {
+    exclude group: "com.android.support"
+  }
+  implementation "com.android.support:support-fragment:26.1.0"
+}
+```
+
+Using a different support library version than the one Glide depends on can cause `RuntimeException`s like:
+
+```
+java.lang.NoSuchMethodError: No static method getFont(Landroid/content/Context;ILandroid/util/TypedValue;ILandroid/widget/TextView;)Landroid/graphics/Typeface; in class Landroid/support/v4/content/res/ResourcesCompat; or its super classes (declaration of 'android.support.v4.content.res.ResourcesCompat' 
+at android.support.v7.widget.TintTypedArray.getFont(TintTypedArray.java:119)
+```
+
+It can also lead to failures in Glide's API generator that prevent the `GlideApp` class from being generated.
+
+See [#2730][8] for more details.
+
 ### Download
 
 Glide's public releases are accessible in a number of ways.
@@ -189,3 +213,4 @@ See the [generated API][6] page for details.
 [5]: https://developer.android.com/studio/write/java8-support.html
 [6]: {{ site.baseurl }}/doc/generatedapi.html#kotlin
 [7]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/load/engine/cache/ExternalPreferredCacheDiskCacheFactory.html
+[8]: https://github.com/bumptech/glide/issues/2730
