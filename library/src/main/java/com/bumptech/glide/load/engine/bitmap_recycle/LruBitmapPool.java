@@ -128,7 +128,7 @@ public class LruBitmapPool implements BitmapPool {
       // contents individually, so we do so here. See issue #131.
       result.eraseColor(Color.TRANSPARENT);
     } else {
-      result = Bitmap.createBitmap(width, height, config);
+      result = createBitmap(width, height, config);
     }
 
     return result;
@@ -139,9 +139,14 @@ public class LruBitmapPool implements BitmapPool {
   public Bitmap getDirty(int width, int height, Bitmap.Config config) {
     Bitmap result = getDirtyOrNull(width, height, config);
     if (result == null) {
-      result = Bitmap.createBitmap(width, height, config);
+      result = createBitmap(width, height, config);
     }
     return result;
+  }
+
+  @NonNull
+  private static Bitmap createBitmap(int width, int height, @Nullable Bitmap.Config config) {
+    return Bitmap.createBitmap(width, height, config != null ? config : DEFAULT_CONFIG);
   }
 
   @TargetApi(Build.VERSION_CODES.O)
@@ -159,7 +164,8 @@ public class LruBitmapPool implements BitmapPool {
   }
 
   @Nullable
-  private synchronized Bitmap getDirtyOrNull(int width, int height, Bitmap.Config config) {
+  private synchronized Bitmap getDirtyOrNull(
+      int width, int height, @Nullable Bitmap.Config config) {
     assertNotHardwareConfig(config);
     // Config will be null for non public config types, which can lead to transformations naively
     // passing in null as the requested config here. See issue #194.

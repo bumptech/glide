@@ -138,6 +138,18 @@ public class LruBitmapPoolTest {
     assertEquals(expected, result);
   }
 
+  @Test
+  public void get_withNullConfig_andEmptyPool_returnsNewArgb8888Bitmap() {
+    Bitmap result = pool.get(100, 100, /*config=*/ null);
+    assertThat(result.getConfig()).isEqualTo(Bitmap.Config.ARGB_8888);
+  }
+
+  @Test
+  public void getDirty_withNullConfig_andEmptyPool_returnsNewArgb8888Bitmap() {
+    Bitmap result = pool.getDirty(100, 100, /*config=*/ null);
+    assertThat(result.getConfig()).isEqualTo(Bitmap.Config.ARGB_8888);
+  }
+
   private void testTrimMemory(int fillSize, int trimLevel, int expectedSize) {
     MockStrategy strategy = new MockStrategy();
     LruBitmapPool pool = new LruBitmapPool(MAX_SIZE, strategy, ALLOWED_CONFIGS);
@@ -240,7 +252,7 @@ public class LruBitmapPoolTest {
 
     @Override
     public Bitmap get(int width, int height, Bitmap.Config config) {
-      return bitmaps.removeLast();
+      return bitmaps.isEmpty() ? null : bitmaps.removeLast();
     }
 
     @Override
