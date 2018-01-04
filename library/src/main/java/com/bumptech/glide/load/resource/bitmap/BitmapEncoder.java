@@ -2,13 +2,16 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.os.TraceCompat;
 import android.util.Log;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
+import com.bumptech.glide.load.data.BufferedOutputStream;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
 import java.io.File;
@@ -49,6 +52,20 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
       "com.bumptech.glide.load.resource.bitmap.BitmapEncoder.CompressionFormat");
 
   private static final String TAG = "BitmapEncoder";
+  @Nullable
+  private final ArrayPool arrayPool;
+
+  public BitmapEncoder(@NonNull ArrayPool arrayPool) {
+    this.arrayPool = arrayPool;
+  }
+
+  /**
+   * @deprecated Use {@link #BitmapEncoder(ArrayPool)} instead.
+   */
+  @Deprecated
+  public BitmapEncoder() {
+    arrayPool = null;
+  }
 
   @Override
   public boolean encode(@NonNull Resource<Bitmap> resource, @NonNull File file,
@@ -65,6 +82,9 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
       OutputStream os = null;
       try {
         os = new FileOutputStream(file);
+        if (arrayPool != null) {
+          os = new BufferedOutputStream(os, arrayPool);
+        }
         bitmap.compress(format, quality, os);
         os.close();
         success = true;

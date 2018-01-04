@@ -351,7 +351,7 @@ public class Glide implements ComponentCallbacks2 {
         new ResourceLoader.FileDescriptorFactory(resources);
     ResourceLoader.AssetFileDescriptorFactory resourceLoaderAssetFileDescriptorFactory =
         new ResourceLoader.AssetFileDescriptorFactory(resources);
-    BitmapEncoder bitmapEncoder = new BitmapEncoder();
+    BitmapEncoder bitmapEncoder = new BitmapEncoder(arrayPool);
 
     BitmapBytesTranscoder bitmapBytesTranscoder = new BitmapBytesTranscoder();
     GifDrawableBytesTranscoder gifDrawableBytesTranscoder = new GifDrawableBytesTranscoder();
