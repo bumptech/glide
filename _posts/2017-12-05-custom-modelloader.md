@@ -400,7 +400,7 @@ public class MyAppGlideModule extends AppGlideModule { }
 Don't forget to add a dependency on Glide's annotation processor to your build.gradle file as well:
 
 ```groovy
-annotationProcessor 'com.github.bumptech.glide:compiler:4.4.0'
+annotationProcessor 'com.github.bumptech.glide:compiler:4.5.0'
 ```
 
 Next we want to get at Glide's [``Registry``][23], so we'll implement the [``registerComponents``][24] method in our ``AppGlideModule``:
