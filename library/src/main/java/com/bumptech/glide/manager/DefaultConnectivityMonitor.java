@@ -82,14 +82,14 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
     NetworkInfo networkInfo;
     try {
       networkInfo = connectivityManager.getActiveNetworkInfo();
-    } catch (RuntimeException e) {
+    } catch (@SuppressWarnings("PMD.AvoidCatchingGenericException") RuntimeException e) {
       // #1405 shows that this throws a SecurityException.
       // b/70869360 shows that this throws NullPointerException on APIs 22, 23, and 24.
       // b/70869360 also shows that this throws RuntimeException on API 24 and 25.
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Failed to determine connectivity status when connectivity changed", e);
       }
-      // Default to true;
+      // Default to true; i.e. assume we're connected, otherwise RequestManager may misbehave.
       return true;
     }
     return networkInfo != null && networkInfo.isConnected();

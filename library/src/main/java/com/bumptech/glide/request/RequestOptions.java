@@ -40,7 +40,14 @@ import java.util.Map;
 /**
  * Provides type independent options to customize loads with Glide.
  */
-@SuppressWarnings({"PMD.UseUtilityClass", "unused"})
+@SuppressWarnings({
+    // Glide has a lot of options that can customize the load, it's not feasible to split this.
+    "PMD.ExcessivePublicCount",
+    "PMD.ExcessiveClassLength",
+    "PMD.ExcessiveImports",
+    "PMD.TooManyMethods",
+    "PMD.TooManyFields"
+})
 public class RequestOptions implements Cloneable {
   private static final int UNSET = -1;
   private static final int SIZE_MULTIPLIER = 1 << 1;

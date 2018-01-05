@@ -61,7 +61,7 @@ public abstract class DownsampleStrategy {
   /**
    * Performs no downsampling or scaling.
    */
-  public static final DownsampleStrategy NONE = new None();
+  public static final DownsampleStrategy NONE = new NoScaling();
 
   /**
    * Default strategy, currently {@link #CENTER_OUTSIDE}.
@@ -183,10 +183,10 @@ public abstract class DownsampleStrategy {
     }
   }
 
-  private static class None extends DownsampleStrategy {
+  private static class NoScaling extends DownsampleStrategy {
 
     @Synthetic
-    None() { }
+    NoScaling() { }
 
     @Override
     public float getScaleFactor(int sourceWidth, int sourceHeight, int requestedWidth,

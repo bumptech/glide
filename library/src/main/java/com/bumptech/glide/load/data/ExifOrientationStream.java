@@ -63,8 +63,8 @@ public final class ExifOrientationStream extends FilterInputStream {
   private final byte orientation;
   private int position;
 
-  public ExifOrientationStream(InputStream in, int orientation) {
-    super(in);
+  public ExifOrientationStream(InputStream is, int orientation) {
+    super(is);
     if (orientation < -1 || orientation > 8) {
       throw new IllegalArgumentException("Cannot add invalid orientation: " + orientation);
     }

@@ -18,7 +18,7 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   private final List<Key> cacheKeys;
   private final DecodeHelper<?> helper;
-  private final FetcherReadyCallback cb;
+  private final FetcherReadyCallback callback;
 
   private int sourceIdIndex = -1;
   private Key sourceKey;
@@ -30,16 +30,16 @@ class DataCacheGenerator implements DataFetcherGenerator,
   @SuppressWarnings("PMD.SingularField")
   private File cacheFile;
 
-  DataCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
-    this(helper.getCacheKeys(), helper, cb);
+  DataCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback callback) {
+    this(helper.getCacheKeys(), helper, callback);
   }
 
   // In some cases we may want to load a specific cache key (when loading from source written to
   // cache), so we accept a list of keys rather than just obtain the list from the helper.
-  DataCacheGenerator(List<Key> cacheKeys, DecodeHelper<?> helper, FetcherReadyCallback cb) {
+  DataCacheGenerator(List<Key> cacheKeys, DecodeHelper<?> helper, FetcherReadyCallback callback) {
     this.cacheKeys = cacheKeys;
     this.helper = helper;
-    this.cb = cb;
+    this.callback = callback;
   }
 
   @Override
@@ -92,11 +92,12 @@ class DataCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
-    cb.onDataFetcherReady(sourceKey, data, loadData.fetcher, DataSource.DATA_DISK_CACHE, sourceKey);
+    callback.onDataFetcherReady(sourceKey, data, loadData.fetcher, DataSource.DATA_DISK_CACHE,
+        sourceKey);
   }
 
   @Override
   public void onLoadFailed(@NonNull Exception e) {
-    cb.onDataFetcherFailed(sourceKey, e, loadData.fetcher, DataSource.DATA_DISK_CACHE);
+    callback.onDataFetcherFailed(sourceKey, e, loadData.fetcher, DataSource.DATA_DISK_CACHE);
   }
 }

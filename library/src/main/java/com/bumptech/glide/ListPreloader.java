@@ -154,7 +154,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     preload(start, start + (increasing ? maxPreload : -maxPreload));
   }
 
-  private void preload(int from, int to) {
+  private void preload(int from, @SuppressWarnings("PMD.ShortVariable") int to) {
     int start;
     int end;
     if (from < to) {
@@ -257,12 +257,12 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     }
 
     @Override
-    public void getSize(@NonNull SizeReadyCallback cb) {
-      cb.onSizeReady(photoWidth, photoHeight);
+    public void getSize(@NonNull SizeReadyCallback callback) {
+      callback.onSizeReady(photoWidth, photoHeight);
     }
 
     @Override
-    public void removeCallback(@NonNull SizeReadyCallback cb) {
+    public void removeCallback(@NonNull SizeReadyCallback callback) {
       // Do nothing because we don't retain references to SizeReadyCallbacks.
     }
   }

@@ -4,9 +4,15 @@
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
 
     <description>Check for flaws in Glide's codebase.</description>
+    <!-- Useful tool for getting a violation count per rule in the PMD HTML report (Chrome Console):
+        var violations = {};
+        $$('table tr td:last-child a').forEach(a => {
+            var key = a.attributes['href'].value;
+            violations[key] = (violations[key] || 0) + 1;
+        }); violations
+    -->
 
     <rule ref="category/java/errorprone.xml">
-        <exclude name="AvoidBranchingStatementAsLastInLoop"/>
         <!-- Not using beans. -->
         <exclude name="BeanMembersShouldSerialize" />
         <!-- wat -->
@@ -21,8 +27,6 @@
         <exclude name="AvoidFieldNameMatchingMethodName" />
         <!-- There are enough cases where this makes sense (typically related to logic around the number of items in a collection) that a blanket ban doesn't seem like a good idea. -->
         <exclude name="AvoidLiteralsInIfCondition" />
-        <!-- It's clear that this is bad, but we have a number of cases where it makes sense and a blanket ban is irritating. -->
-        <exclude name="AvoidCatchingThrowable" />
     </rule>
     <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
       <properties>
@@ -37,8 +41,6 @@
       <!-- Don't need to annotate package private methods. -->
       <exclude name="DefaultPackage" />
       <exclude name="CommentDefaultAccessModifier" />
-      <!-- Optionally implemented default empty methods are fine. -->
-      <exclude name="EmptyMethodInAbstractClassShouldBeAbstract" />
       <!-- Why make generics less clear by using shorter names? -->
       <exclude name="GenericsNaming" />
       <!-- No need to enforce final if it's not necessary. -->
@@ -48,23 +50,70 @@
       <exclude name="OnlyOneReturn" />
       <!-- Obfuscated code is best code? -->
       <exclude name="LongVariable" />
-      <!-- This is not always true. -->
-      <exclude name="ShortClassName" />
-      <!-- A good idea but we have tons of violations. FIXME. -->
-      <exclude name="ShortMethodName" />
-      <exclude name="ShortVariable" />
       <!-- We don't use in and out to mean modified or not modified by the method, it's useful to match framework methods. -->
       <exclude name="AvoidPrefixingMethodParameters" />
       <!-- No idea what this is supposed to accomplish. -->
       <exclude name="AvoidFinalLocalVariable" />
       <!-- These are often useful for clarity and explicitly suggested by Google's code style. -->
       <exclude name="UselessParentheses" />
-      <!-- Theoretically this might be reasonable but the number of imports probably varies from class to class and this doesn't seem worth the overhead to maintain. -->
-      <exclude name="TooManyStaticImports" />
-      <!-- Lots of existing violations, not clear that the overhead is worthwhile though there are some cases where we definitely need to call super. FIXME. -->
-      <exclude name="CallSuperInConstructor" />
       <!-- This is a reasonable idea, but in practice often the != null case is the expected case and it makes sense for it to come first. -->
       <exclude name="ConfusingTernary" />
+    </rule>
+    <rule ref="category/java/codestyle.xml/CallSuperInConstructor">
+      <properties>
+        <!-- Ignore classes implicitly extending Object.
+             TODO report why is this not default? see definition: `count (ExtendsList/*) > 0` -->
+        <property name="violationSuppressXPath" value="ancestor::ClassOrInterfaceDeclaration[not(child::ExtendsList)]" />
+      </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/EmptyMethodInAbstractClassShouldBeAbstract">
+      <properties>
+        <!-- Allow if commented -->
+        <property name="violationSuppressXPath" value="Block[@containsComment='true']" />
+      </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/ShortVariable">
+      <properties>
+        <!-- Allow some short variable names which are frequently used. -->
+        <property name="violationSuppressXPath" value=".[
+          (
+            @Image='sb' and typeof('java.lang.StringBuilder')
+            and ancestor::LocalVariableDeclaration
+          ) or (
+            @Image='ID' and typeof('java.lang.String')
+            and ancestor::FieldDeclaration[@Static='true' and @Final='true']
+          ) or (
+            @Image='o' and typeof('java.lang.Object')
+            and ancestor::FormalParameter
+            and ancestor::MethodDeclarator[@Image='equals' or @Image='isEquivalentTo']
+            and ancestor::MethodDeclaration[@Public='true' and ResultType/Type/PrimitiveType[@Image='boolean']]
+          ) or (
+            (@Image='t' or @Image='e')
+            and ancestor::FormalParameter
+            and (
+              typeof('java.lang.Exception')
+              or typeof('java.lang.Throwable')
+              or ../Type//ClassOrInterfaceType[@Image='GlideException']
+            )
+          ) or (
+            @Image='is' and typeof('java.io.InputStream')
+          ) or (
+            @Image='os' and typeof('java.io.OutputStream')
+          )
+        ]" />
+      </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/ShortClassName">
+      <properties>
+        <!-- Consider a few short class names valid. -->
+        <property name="violationSuppressRegex" value="^.*like \b(Util)\b.*$"/>
+        <!-- Globally allow `static class Key implements Poolable` as a convention. -->
+        <property name="violationSuppressXPath"
+                  value=".[@Image = 'Key']
+                          [@Nested = 'true' and @Static = 'true']
+                          [ImplementsList/ClassOrInterfaceType[@Image='Poolable']]
+                        " />
+      </properties>
     </rule>
     <rule ref="category/java/performance.xml" >
       <!-- Android may not behave the same as java VMs, using short can be clearer when working with binary data. -->
@@ -120,7 +169,6 @@
         <exclude name="GodClass" />
         <!-- No idea how you reasonably define this. -->
         <exclude name="ExcessiveImports" />
-        <exclude name="CouplingBetweenObjects" />
         <exclude name="TooManyMethods" />
         <exclude name="LawOfDemeter" />
         <exclude name="NcssCount" />
@@ -134,11 +182,12 @@
         <!-- TODO: explore these further. -->
         <exclude name="CyclomaticComplexity" />
         <exclude name="NPathComplexity" />
-        <exclude name="ExcessiveMethodLength" />
-        <exclude name="ExcessiveClassLength" />
-        <exclude name="ExcessivePublicCount" />
+    </rule>
+    <rule ref="category/java/design.xml/AvoidCatchingGenericException">
+      <properties>
         <!-- This is redundant, also caught with AvoidCatchingNPEs. -->
-        <exclude name="AvoidCatchingGenericException" />
+        <property name="violationSuppressXPath" value=".[@Image='NullPointerException']"/>
+      </properties>
     </rule>
 
     <rule ref="category/java/multithreading.xml">

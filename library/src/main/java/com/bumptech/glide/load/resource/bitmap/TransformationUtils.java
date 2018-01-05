@@ -120,28 +120,28 @@ public final class TransformationUtils {
       return inBitmap;
     }
     // From ImageView/Bitmap.createScaledBitmap.
-    final float scale;
-    final float dx;
-    final float dy;
-    Matrix m = new Matrix();
+    final float scaleFactor;
+    final float translateDeltaX;
+    final float translateDeltaY;
+    Matrix matrix = new Matrix();
     if (inBitmap.getWidth() * height > width * inBitmap.getHeight()) {
-      scale = (float) height / (float) inBitmap.getHeight();
-      dx = (width - inBitmap.getWidth() * scale) * 0.5f;
-      dy = 0;
+      scaleFactor = (float) height / (float) inBitmap.getHeight();
+      translateDeltaX = (width - inBitmap.getWidth() * scaleFactor) * 0.5f;
+      translateDeltaY = 0;
     } else {
-      scale = (float) width / (float) inBitmap.getWidth();
-      dx = 0;
-      dy = (height - inBitmap.getHeight() * scale) * 0.5f;
+      scaleFactor = (float) width / (float) inBitmap.getWidth();
+      translateDeltaX = 0;
+      translateDeltaY = (height - inBitmap.getHeight() * scaleFactor) * 0.5f;
     }
 
-    m.setScale(scale, scale);
-    m.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
+    matrix.setScale(scaleFactor, scaleFactor);
+    matrix.postTranslate((int) (translateDeltaX + 0.5f), (int) (translateDeltaY + 0.5f));
 
     Bitmap result = pool.get(width, height, getSafeConfig(inBitmap));
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
     TransformationUtils.setAlpha(inBitmap, result);
 
-    applyMatrix(inBitmap, result, m);
+    applyMatrix(inBitmap, result, matrix);
     return result;
   }
 
@@ -254,6 +254,7 @@ public final class TransformationUtils {
    *                        returned unmodified.
    * @return The oriented bitmap. May be the imageToOrient without modification, or a new Bitmap.
    */
+  // TODO why do we have this method, it's not used? @Deprecate and remove?
   public static Bitmap rotateImage(@NonNull Bitmap imageToOrient, int degreesToRotate) {
     Bitmap result = imageToOrient;
     try {
@@ -263,7 +264,8 @@ public final class TransformationUtils {
         result = Bitmap.createBitmap(imageToOrient, 0, 0, imageToOrient.getWidth(),
             imageToOrient.getHeight(), matrix, true /*filter*/);
       }
-    } catch (Exception e) {
+    } catch (@SuppressWarnings("PMD.AvoidCatchingGenericException") RuntimeException e) {
+      // Any failure we ignore, but log the problem.
       if (Log.isLoggable(TAG, Log.ERROR)) {
         Log.e(TAG, "Exception when trying to orient image", e);
       }

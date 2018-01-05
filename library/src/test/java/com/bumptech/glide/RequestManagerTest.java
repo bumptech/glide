@@ -81,12 +81,12 @@ public class RequestManagerTest {
       }
 
       @Override
-      public void getSize(@NonNull SizeReadyCallback cb) {
+      public void getSize(@NonNull SizeReadyCallback callback) {
         // Empty.
       }
 
       @Override
-      public void removeCallback(@NonNull SizeReadyCallback cb) {
+      public void removeCallback(@NonNull SizeReadyCallback callback) {
         // Empty.
       }
     };

@@ -57,7 +57,7 @@ public class ViewTargetTest {
   private ViewTarget<View, Object> target;
   private SizedShadowView shadowView;
   private PreDrawShadowViewTreeObserver shadowObserver;
-  @Mock private SizeReadyCallback cb;
+  @Mock private SizeReadyCallback callback;
   @Mock private Request request;
   private int sdkVersion;
   private AttachStateTarget attachStateTarget;
@@ -120,9 +120,9 @@ public class ViewTargetTest {
         .setHeight(dimens)
         .setIsLaidOut(true);
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb).onSizeReady(eq(dimens), eq(dimens));
+    verify(callback).onSizeReady(eq(dimens), eq(dimens));
   }
 
   @Test
@@ -132,9 +132,9 @@ public class ViewTargetTest {
     view.setLayoutParams(layoutParams);
     shadowView.setIsLaidOut(true);
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb).onSizeReady(eq(dimens), eq(dimens));
+    verify(callback).onSizeReady(eq(dimens), eq(dimens));
   }
 
   @Test
@@ -146,9 +146,9 @@ public class ViewTargetTest {
 
     setDisplayDimens(200, 300);
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb).onSizeReady(300, 300);
+    verify(callback).onSizeReady(300, 300);
   }
 
   @Test
@@ -160,9 +160,9 @@ public class ViewTargetTest {
 
     setDisplayDimens(100, 200);
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb).onSizeReady(200, height);
+    verify(callback).onSizeReady(200, height);
   }
 
   @Test
@@ -174,9 +174,9 @@ public class ViewTargetTest {
 
     setDisplayDimens(200, 100);
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb).onSizeReady(width, 200);
+    verify(callback).onSizeReady(width, 200);
   }
 
   @Test
@@ -186,9 +186,9 @@ public class ViewTargetTest {
 
     setDisplayDimens(500, 600);
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb, never()).onSizeReady(anyInt(), anyInt());
+    verify(callback, never()).onSizeReady(anyInt(), anyInt());
 
     int height = 32;
     shadowView
@@ -197,7 +197,7 @@ public class ViewTargetTest {
 
     shadowObserver.fireOnPreDrawListeners();
 
-    verify(cb).onSizeReady(600, height);
+    verify(callback).onSizeReady(600, height);
   }
 
   @Test
@@ -207,9 +207,9 @@ public class ViewTargetTest {
 
     setDisplayDimens(300, 400);
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb, never()).onSizeReady(anyInt(), anyInt());
+    verify(callback, never()).onSizeReady(anyInt(), anyInt());
 
 
     int width = 32;
@@ -218,7 +218,7 @@ public class ViewTargetTest {
         .setIsLaidOut(true);
     shadowObserver.fireOnPreDrawListeners();
 
-    verify(cb).onSizeReady(width, 400);
+    verify(callback).onSizeReady(width, 400);
   }
 
   @Test
@@ -226,9 +226,9 @@ public class ViewTargetTest {
     LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     view.setLayoutParams(params);
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb, never()).onSizeReady(anyInt(), anyInt());
+    verify(callback, never()).onSizeReady(anyInt(), anyInt());
 
     int width = 32;
     int height = 45;
@@ -238,12 +238,12 @@ public class ViewTargetTest {
         .setIsLaidOut(true);
     shadowObserver.fireOnPreDrawListeners();
 
-    verify(cb).onSizeReady(eq(width), eq(height));
+    verify(callback).onSizeReady(eq(width), eq(height));
   }
 
   @Test
   public void testSizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParams() {
-    target.getSize(cb);
+    target.getSize(callback);
 
     int width = 12;
     int height = 32;
@@ -253,7 +253,7 @@ public class ViewTargetTest {
         .setIsLaidOut(true);
     shadowObserver.fireOnPreDrawListeners();
 
-    verify(cb).onSizeReady(eq(width), eq(height));
+    verify(callback).onSizeReady(eq(width), eq(height));
   }
 
   @Test
@@ -272,21 +272,21 @@ public class ViewTargetTest {
     shadowObserver.fireOnPreDrawListeners();
 
     InOrder order = inOrder((Object[]) cbs);
-    for (SizeReadyCallback cb : cbs) {
-      order.verify(cb).onSizeReady(eq(width), eq(height));
+    for (SizeReadyCallback callback : cbs) {
+      order.verify(callback).onSizeReady(eq(width), eq(height));
     }
   }
 
   @Test
   public void testDoesNotNotifyCallbackTwiceIfAddedTwice() {
-    target.getSize(cb);
-    target.getSize(cb);
+    target.getSize(callback);
+    target.getSize(callback);
 
     view.setLayoutParams(new LayoutParams(100, 100));
     shadowView.setIsLaidOut(true);
     shadowObserver.fireOnPreDrawListeners();
 
-    verify(cb, times(1)).onSizeReady(anyInt(), anyInt());
+    verify(callback, times(1)).onSizeReady(anyInt(), anyInt());
   }
 
   @Test
@@ -321,16 +321,16 @@ public class ViewTargetTest {
 
   @Test
   public void testSizeCallbackIsNotCalledPreDrawIfNoDimensSetOnPreDraw() {
-    target.getSize(cb);
+    target.getSize(callback);
     shadowObserver.fireOnPreDrawListeners();
 
-    verify(cb, never()).onSizeReady(anyInt(), anyInt());
+    verify(callback, never()).onSizeReady(anyInt(), anyInt());
     assertThat(shadowObserver.getPreDrawListeners()).hasSize(1);
   }
 
   @Test
   public void testSizeCallbackIsCalledPreDrawIfNoDimensAndNoLayoutParamsButLayoutParamsSetLater() {
-    target.getSize(cb);
+    target.getSize(callback);
 
     int width = 689;
     int height = 354;
@@ -339,12 +339,12 @@ public class ViewTargetTest {
     shadowView.setIsLaidOut(true);
     shadowObserver.fireOnPreDrawListeners();
 
-    verify(cb).onSizeReady(eq(width), eq(height));
+    verify(callback).onSizeReady(eq(width), eq(height));
   }
 
   @Test
   public void testCallbackIsNotCalledTwiceIfPreDrawFiresTwice() {
-    target.getSize(cb);
+    target.getSize(callback);
 
     LayoutParams layoutParams = new LayoutParams(1234, 4123);
     view.setLayoutParams(layoutParams);
@@ -352,7 +352,7 @@ public class ViewTargetTest {
     shadowObserver.fireOnPreDrawListeners();
     shadowObserver.fireOnPreDrawListeners();
 
-    verify(cb, times(1)).onSizeReady(anyInt(), anyInt());
+    verify(callback, times(1)).onSizeReady(anyInt(), anyInt());
   }
 
   @Test
@@ -376,7 +376,7 @@ public class ViewTargetTest {
 
   @Test
   public void testDoesNotThrowOnPreDrawIfViewTreeObserverIsDead() {
-    target.getSize(cb);
+    target.getSize(callback);
 
     int width = 1;
     int height = 2;
@@ -386,7 +386,7 @@ public class ViewTargetTest {
     shadowObserver.setIsAlive(false);
     shadowObserver.fireOnPreDrawListeners();
 
-    verify(cb).onSizeReady(eq(width), eq(height));
+    verify(callback).onSizeReady(eq(width), eq(height));
   }
 
   @Test(expected = NullPointerException.class)
@@ -400,9 +400,9 @@ public class ViewTargetTest {
     view.setPadding(25, 25, 25, 25);
     shadowView.setIsLaidOut(true);
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb).onSizeReady(50, 50);
+    verify(callback).onSizeReady(50, 50);
   }
 
   @Test
@@ -411,9 +411,9 @@ public class ViewTargetTest {
         .setWidth(100)
         .setHeight(100)
         .setIsLaidOut(false);
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb).onSizeReady(100, 100);
+    verify(callback).onSizeReady(100, 100);
   }
 
   @Test
@@ -423,9 +423,9 @@ public class ViewTargetTest {
         .setWidth(100)
         .setHeight(100)
         .setIsLaidOut(false);
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb, times(1)).onSizeReady(anyInt(), anyInt());
+    verify(callback, times(1)).onSizeReady(anyInt(), anyInt());
   }
 
   @Test
@@ -435,9 +435,9 @@ public class ViewTargetTest {
         .setWidth(100)
         .setHeight(100)
         .setIsLaidOut(false);
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb).onSizeReady(100, 100);
+    verify(callback).onSizeReady(100, 100);
   }
 
   @Test
@@ -448,9 +448,9 @@ public class ViewTargetTest {
         .setHeight(100)
         .requestLayout();
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb).onSizeReady(100, 100);
+    verify(callback).onSizeReady(100, 100);
   }
 
   @Test
@@ -462,9 +462,9 @@ public class ViewTargetTest {
 
     view.setPadding(50, 50, 50, 50);
 
-    target.getSize(cb);
+    target.getSize(callback);
 
-    verify(cb, never()).onSizeReady(anyInt(), anyInt());
+    verify(callback, never()).onSizeReady(anyInt(), anyInt());
   }
 
   private void setDisplayDimens(Integer width, Integer height) {

@@ -40,6 +40,7 @@ public class SupportRequestManagerFragment extends Fragment {
   // For testing only.
   @SuppressLint("ValidFragment")
   public SupportRequestManagerFragment(ActivityFragmentLifecycle lifecycle) {
+    super();
     this.lifecycle = lifecycle;
   }
 

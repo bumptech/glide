@@ -33,7 +33,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   // immediately rather than waiting for a result or an error.
   private static final int MSG_CANCELLED = 3;
 
-  private final List<ResourceCallback> cbs = new ArrayList<>(2);
+  private final List<ResourceCallback> callbacks = new ArrayList<>(2);
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
   private final Pools.Pool<EngineJob<?>> pool;
   private final EngineResourceFactory engineResourceFactory;
@@ -120,26 +120,26 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     executor.execute(decodeJob);
   }
 
-  void addCallback(ResourceCallback cb) {
+  void addCallback(ResourceCallback callback) {
     Util.assertMainThread();
     stateVerifier.throwIfRecycled();
     if (hasResource) {
-      cb.onResourceReady(engineResource, dataSource);
+      callback.onResourceReady(engineResource, dataSource);
     } else if (hasLoadFailed) {
-      cb.onLoadFailed(exception);
+      callback.onLoadFailed(exception);
     } else {
-      cbs.add(cb);
+      callbacks.add(callback);
     }
   }
 
-  void removeCallback(ResourceCallback cb) {
+  void removeCallback(ResourceCallback callback) {
     Util.assertMainThread();
     stateVerifier.throwIfRecycled();
     if (hasResource || hasLoadFailed) {
-      addIgnoredCallback(cb);
+      addIgnoredCallback(callback);
     } else {
-      cbs.remove(cb);
-      if (cbs.isEmpty()) {
+      callbacks.remove(callback);
+      if (callbacks.isEmpty()) {
         cancel();
       }
     }
@@ -159,17 +159,17 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   // request such that if notifying a callback early in the callbacks list cancels a callback later
   // in the request list, the cancellation for the later request is still obeyed. Using a put of
   // ignored callbacks allows us to avoid the exception while still meeting the requirement.
-  private void addIgnoredCallback(ResourceCallback cb) {
+  private void addIgnoredCallback(ResourceCallback callback) {
     if (ignoredCallbacks == null) {
       ignoredCallbacks = new ArrayList<>(2);
     }
-    if (!ignoredCallbacks.contains(cb)) {
-      ignoredCallbacks.add(cb);
+    if (!ignoredCallbacks.contains(callback)) {
+      ignoredCallbacks.add(callback);
     }
   }
 
-  private boolean isInIgnoredCallbacks(ResourceCallback cb) {
-    return ignoredCallbacks != null && ignoredCallbacks.contains(cb);
+  private boolean isInIgnoredCallbacks(ResourceCallback callback) {
+    return ignoredCallbacks != null && ignoredCallbacks.contains(callback);
   }
 
   // Exposed for testing.
@@ -197,7 +197,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
       resource.recycle();
       release(false /*isRemovedFromQueue*/);
       return;
-    } else if (cbs.isEmpty()) {
+    } else if (callbacks.isEmpty()) {
       throw new IllegalStateException("Received a resource without any callbacks to notify");
     } else if (hasResource) {
       throw new IllegalStateException("Already have resource");
@@ -211,11 +211,11 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     listener.onEngineJobComplete(this, key, engineResource);
 
     //noinspection ForLoopReplaceableByForEach to improve perf
-    for (int i = 0, size = cbs.size(); i < size; i++) {
-      ResourceCallback cb = cbs.get(i);
-      if (!isInIgnoredCallbacks(cb)) {
+    for (int i = 0, size = callbacks.size(); i < size; i++) {
+      ResourceCallback callback = callbacks.get(i);
+      if (!isInIgnoredCallbacks(callback)) {
         engineResource.acquire();
-        cb.onResourceReady(engineResource, dataSource);
+        callback.onResourceReady(engineResource, dataSource);
       }
     }
     // Our request is complete, so we can release the resource.
@@ -236,7 +236,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
   private void release(boolean isRemovedFromQueue) {
     Util.assertMainThread();
-    cbs.clear();
+    callbacks.clear();
     key = null;
     engineResource = null;
     resource = null;
@@ -279,7 +279,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     if (isCancelled) {
       release(false /*isRemovedFromQueue*/);
       return;
-    } else if (cbs.isEmpty()) {
+    } else if (callbacks.isEmpty()) {
       throw new IllegalStateException("Received an exception without any callbacks to notify");
     } else if (hasLoadFailed) {
       throw new IllegalStateException("Already failed once");
@@ -288,9 +288,9 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
     listener.onEngineJobComplete(this, key, null);
 
-    for (ResourceCallback cb : cbs) {
-      if (!isInIgnoredCallbacks(cb)) {
-        cb.onLoadFailed(exception);
+    for (ResourceCallback callback : callbacks) {
+      if (!isInIgnoredCallbacks(callback)) {
+        callback.onLoadFailed(exception);
       }
     }
 

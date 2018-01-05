@@ -1059,11 +1059,9 @@ public class SingleRequestTest {
 
     @Override
     public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-      ResourceCallback cb =
-          (ResourceCallback) invocationOnMock.getArguments()[
-              invocationOnMock.getArguments().length
-                  - 1];
-      cb.onResourceReady(resource, DataSource.REMOTE);
+      Object[] arguments = invocationOnMock.getArguments();
+      ResourceCallback callback = (ResourceCallback) arguments[arguments.length - 1];
+      callback.onResourceReady(resource, DataSource.REMOTE);
       return null;
     }
   }
@@ -1080,8 +1078,8 @@ public class SingleRequestTest {
 
     @Override
     public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-      SizeReadyCallback cb = (SizeReadyCallback) invocationOnMock.getArguments()[0];
-      cb.onSizeReady(width, height);
+      SizeReadyCallback callback = (SizeReadyCallback) invocationOnMock.getArguments()[0];
+      callback.onSizeReady(width, height);
       return null;
     }
   }
@@ -1115,11 +1113,11 @@ public class SingleRequestTest {
 
 
     @Override
-    public void getSize(@NonNull SizeReadyCallback cb) {
+    public void getSize(@NonNull SizeReadyCallback callback) {
     }
 
     @Override
-    public void removeCallback(@NonNull SizeReadyCallback cb) {
+    public void removeCallback(@NonNull SizeReadyCallback callback) {
       // Do nothing.
     }
 

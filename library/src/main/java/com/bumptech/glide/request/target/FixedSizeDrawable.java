@@ -35,6 +35,7 @@ public class FixedSizeDrawable extends Drawable {
   }
 
   FixedSizeDrawable(State state, Drawable wrapped) {
+    super();
     this.state = Preconditions.checkNotNull(state);
     this.wrapped = Preconditions.checkNotNull(wrapped);
 
@@ -169,8 +170,8 @@ public class FixedSizeDrawable extends Drawable {
   }
 
   @Override
-  public void setAlpha(int i) {
-    wrapped.setAlpha(i);
+  public void setAlpha(int alpha) {
+    wrapped.setAlpha(alpha);
   }
 
   @Override
@@ -209,6 +210,7 @@ public class FixedSizeDrawable extends Drawable {
     }
 
     State(ConstantState wrapped, int width, int height) {
+      super();
       this.wrapped = wrapped;
       this.width = width;
       this.height = height;

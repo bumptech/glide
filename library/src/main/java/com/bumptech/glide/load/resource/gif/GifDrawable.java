@@ -148,6 +148,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   }
 
   GifDrawable(GifState state) {
+    super();
     this.state = Preconditions.checkNotNull(state);
   }
 
@@ -298,8 +299,8 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   }
 
   @Override
-  public void setAlpha(int i) {
-    getPaint().setAlpha(i);
+  public void setAlpha(int alpha) {
+    getPaint().setAlpha(alpha);
   }
 
   @Override
@@ -395,6 +396,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     final GifFrameLoader frameLoader;
 
     GifState(GifFrameLoader frameLoader) {
+      super();
       this.frameLoader = frameLoader;
     }
 

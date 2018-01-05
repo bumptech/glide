@@ -108,7 +108,8 @@ public class MultiModelLoaderFactory {
         }
       }
       return loaders;
-    } catch (Throwable t) {
+    } catch (@SuppressWarnings("PMD.AvoidCatchingThrowable") Throwable t) {
+      // PMD.AvoidCatchingThrowable clean up is needed only when an error happened
       alreadyUsedEntries.clear();
       throw t;
     }
@@ -161,7 +162,8 @@ public class MultiModelLoaderFactory {
           throw new NoModelLoaderAvailableException(modelClass, dataClass);
         }
       }
-    } catch (Throwable t) {
+    } catch (@SuppressWarnings("PMD.AvoidCatchingThrowable") Throwable t) {
+      // PMD.AvoidCatchingThrowable clean up is needed only when an error happened
       alreadyUsedEntries.clear();
       throw t;
     }
@@ -223,13 +225,13 @@ public class MultiModelLoaderFactory {
 
     @Nullable
     @Override
-    public LoadData<Object> buildLoadData(@NonNull Object o, int width, int height,
+    public LoadData<Object> buildLoadData(@NonNull Object model, int width, int height,
         @NonNull Options options) {
       return null;
     }
 
     @Override
-    public boolean handles(@NonNull Object o) {
+    public boolean handles(@NonNull Object model) {
       return false;
     }
   }

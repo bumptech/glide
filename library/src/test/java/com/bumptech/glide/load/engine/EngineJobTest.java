@@ -53,7 +53,7 @@ public class EngineJobTest {
     job.onResourceReady(harness.resource, harness.dataSource);
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.cb).onResourceReady(eq(harness.engineResource), eq(harness.dataSource));
+    verify(harness.callback).onResourceReady(eq(harness.engineResource), eq(harness.dataSource));
   }
 
   @Test
@@ -73,8 +73,8 @@ public class EngineJobTest {
     MultiCbHarness harness = new MultiCbHarness();
     harness.job.start(harness.decodeJob);
     harness.job.onResourceReady(harness.resource, harness.dataSource);
-    for (ResourceCallback cb : harness.cbs) {
-      verify(cb).onResourceReady(eq(harness.engineResource), eq(harness.dataSource));
+    for (ResourceCallback callback : harness.callbacks) {
+      verify(callback).onResourceReady(eq(harness.engineResource), eq(harness.dataSource));
     }
   }
 
@@ -84,8 +84,8 @@ public class EngineJobTest {
     harness.job.start(harness.decodeJob);
     GlideException exception = new GlideException("test");
     harness.job.onLoadFailed(exception);
-    for (ResourceCallback cb : harness.cbs) {
-      verify(cb).onLoadFailed(eq(exception));
+    for (ResourceCallback callback : harness.callbacks) {
+      verify(callback).onLoadFailed(eq(exception));
     }
   }
 
@@ -152,7 +152,7 @@ public class EngineJobTest {
     job.onResourceReady(harness.resource, harness.dataSource);
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.cb, never()).onResourceReady(anyResource(), isADataSource());
+    verify(harness.callback, never()).onResourceReady(anyResource(), isADataSource());
   }
 
   @Test
@@ -165,14 +165,14 @@ public class EngineJobTest {
     job.onLoadFailed(new GlideException("test"));
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.cb, never()).onLoadFailed(any(GlideException.class));
+    verify(harness.callback, never()).onLoadFailed(any(GlideException.class));
   }
 
   @Test
   public void testRemovingAllCallbacksCancelsRunner() {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.removeCallback(harness.cb);
+    job.removeCallback(harness.callback);
 
     assertTrue(job.isCancelled());
   }
@@ -182,7 +182,7 @@ public class EngineJobTest {
   public void removingSomeCallbacksDoesNotCancelRunner() {
     EngineJob<Object> job = harness.getJob();
     job.addCallback(mock(ResourceCallback.class));
-    job.removeCallback(harness.cb);
+    job.removeCallback(harness.callback);
 
     assertFalse(job.isCancelled());
   }
@@ -298,43 +298,43 @@ public class EngineJobTest {
   @Test
   public void testRemovingCallbackDuringOnResourceReadyIsIgnoredIfCallbackHasAlreadyBeenCalled() {
     final EngineJob<Object> job = harness.getJob();
-    final ResourceCallback cb = mock(ResourceCallback.class);
+    final ResourceCallback callback = mock(ResourceCallback.class);
 
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        job.removeCallback(cb);
+        job.removeCallback(callback);
         return null;
       }
-    }).when(cb).onResourceReady(anyResource(), isADataSource());
+    }).when(callback).onResourceReady(anyResource(), isADataSource());
 
-    job.addCallback(cb);
+    job.addCallback(callback);
     job.start(harness.decodeJob);
     job.onResourceReady(harness.resource, harness.dataSource);
 
-    verify(cb, times(1)).onResourceReady(anyResource(), isADataSource());
+    verify(callback, times(1)).onResourceReady(anyResource(), isADataSource());
   }
 
   @Test
   public void testRemovingCallbackDuringOnExceptionIsIgnoredIfCallbackHasAlreadyBeenCalled() {
     harness = new EngineJobHarness();
     final EngineJob<Object> job = harness.getJob();
-    final ResourceCallback cb = mock(ResourceCallback.class);
+    final ResourceCallback callback = mock(ResourceCallback.class);
 
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        job.removeCallback(cb);
+        job.removeCallback(callback);
         return null;
       }
-    }).when(cb).onLoadFailed(any(GlideException.class));
+    }).when(callback).onLoadFailed(any(GlideException.class));
 
     GlideException exception = new GlideException("test");
-    job.addCallback(cb);
+    job.addCallback(callback);
     job.start(harness.decodeJob);
     job.onLoadFailed(exception);
 
-    verify(cb, times(1)).onLoadFailed(eq(exception));
+    verify(callback, times(1)).onLoadFailed(eq(exception));
   }
 
   @Test
@@ -349,7 +349,7 @@ public class EngineJobTest {
         job.removeCallback(notYetCalled);
         return null;
       }
-    }).when(harness.cb).onResourceReady(anyResource(), isADataSource());
+    }).when(harness.callback).onResourceReady(anyResource(), isADataSource());
 
     job.addCallback(notYetCalled);
     job.start(harness.decodeJob);
@@ -370,7 +370,7 @@ public class EngineJobTest {
         job.removeCallback(notYetCalled);
         return null;
       }
-    }).when(harness.cb).onResourceReady(anyResource(), isADataSource());
+    }).when(harness.callback).onResourceReady(anyResource(), isADataSource());
 
     job.addCallback(notYetCalled);
     job.start(harness.decodeJob);
@@ -465,7 +465,7 @@ public class EngineJobTest {
     final boolean useAnimationPool = false;
     final boolean onlyRetrieveFromCache = false;
     final int numCbs = 10;
-    final List<ResourceCallback> cbs = new ArrayList<>();
+    final List<ResourceCallback> callbacks = new ArrayList<>();
     final EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
     final EngineJob<Object> job;
     final GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
@@ -494,10 +494,10 @@ public class EngineJobTest {
           useAnimationPool,
           onlyRetrieveFromCache);
       for (int i = 0; i < numCbs; i++) {
-        cbs.add(mock(ResourceCallback.class));
+        callbacks.add(mock(ResourceCallback.class));
       }
-      for (ResourceCallback cb : cbs) {
-        job.addCallback(cb);
+      for (ResourceCallback callback : callbacks) {
+        job.addCallback(callback);
       }
     }
   }
@@ -507,7 +507,7 @@ public class EngineJobTest {
     final EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
     final Key key = mock(Key.class);
     final Handler mainHandler = new Handler();
-    final ResourceCallback cb = mock(ResourceCallback.class);
+    final ResourceCallback callback = mock(ResourceCallback.class);
     final Resource<Object> resource = mockResource();
     final EngineResource<Object> engineResource = mock(EngineResource.class);
     final EngineJobListener listener = mock(EngineJobListener.class);
@@ -540,7 +540,7 @@ public class EngineJobTest {
           useUnlimitedSourceGeneratorPool,
           useAnimationPool,
           onlyRetrieveFromCache);
-      result.addCallback(cb);
+      result.addCallback(callback);
       return result;
     }
   }

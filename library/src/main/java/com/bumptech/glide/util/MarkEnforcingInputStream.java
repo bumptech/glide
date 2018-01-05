@@ -15,8 +15,8 @@ public class MarkEnforcingInputStream extends FilterInputStream {
 
   private int availableBytes = UNSET;
 
-  public MarkEnforcingInputStream(@NonNull InputStream in) {
-    super(in);
+  public MarkEnforcingInputStream(@NonNull InputStream is) {
+    super(is);
   }
 
   @Override

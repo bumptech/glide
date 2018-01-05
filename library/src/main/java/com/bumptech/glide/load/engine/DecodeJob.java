@@ -228,7 +228,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         return;
       }
       runWrapped();
-    } catch (Throwable t) {
+    } catch (@SuppressWarnings("PMD.AvoidCatchingThrowable") Throwable t) {
       // Catch Throwable and not Exception to handle OOMs. Throwables are swallowed by our
       // usage of .submit() in GlideExecutor so we're not silently hiding crashes by doing this. We
       // are however ensuring that our callbacks are always notified when a load fails. Without this
@@ -316,8 +316,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
 
   private void notifyFailed() {
     setNotifiedOrThrow();
-    GlideException e = new GlideException("Failed to load resource", new ArrayList<>(throwables));
-    callback.onLoadFailed(e);
+    GlideException allFailuresException =
+        new GlideException("Failed to load resource", new ArrayList<>(throwables));
+    callback.onLoadFailed(allFailuresException);
     onLoadFailed();
   }
 

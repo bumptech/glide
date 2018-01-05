@@ -65,14 +65,14 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
   private int pos;
   private final ArrayPool byteArrayPool;
 
-  public RecyclableBufferedInputStream(InputStream in, ArrayPool byteArrayPool) {
-    this(in, byteArrayPool, ArrayPool.STANDARD_BUFFER_SIZE_BYTES);
+  public RecyclableBufferedInputStream(InputStream is, ArrayPool byteArrayPool) {
+    this(is, byteArrayPool, ArrayPool.STANDARD_BUFFER_SIZE_BYTES);
   }
 
   @VisibleForTesting
-  RecyclableBufferedInputStream(InputStream in, ArrayPool byteArrayPool,
+  RecyclableBufferedInputStream(InputStream is, ArrayPool byteArrayPool,
       int bufferSize) {
-    super(in);
+    super(is);
     this.byteArrayPool = byteArrayPool;
     buf = byteArrayPool.get(bufferSize, byte[].class);
   }

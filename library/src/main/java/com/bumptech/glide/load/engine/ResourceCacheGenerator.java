@@ -17,7 +17,7 @@ import java.util.List;
 class ResourceCacheGenerator implements DataFetcherGenerator,
     DataFetcher.DataCallback<Object> {
 
-  private final FetcherReadyCallback cb;
+  private final FetcherReadyCallback callback;
   private final DecodeHelper<?> helper;
 
   private int sourceIdIndex;
@@ -32,9 +32,9 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
   private File cacheFile;
   private ResourceCacheKey currentKey;
 
-  ResourceCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
+  ResourceCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback callback) {
     this.helper = helper;
-    this.cb = cb;
+    this.callback = callback;
   }
 
   @Override
@@ -107,12 +107,12 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
 
   @Override
   public void onDataReady(Object data) {
-    cb.onDataFetcherReady(sourceKey, data, loadData.fetcher, DataSource.RESOURCE_DISK_CACHE,
+    callback.onDataFetcherReady(sourceKey, data, loadData.fetcher, DataSource.RESOURCE_DISK_CACHE,
         currentKey);
   }
 
   @Override
   public void onLoadFailed(@NonNull Exception e) {
-    cb.onDataFetcherFailed(currentKey, e, loadData.fetcher, DataSource.RESOURCE_DISK_CACHE);
+    callback.onDataFetcherFailed(currentKey, e, loadData.fetcher, DataSource.RESOURCE_DISK_CACHE);
   }
 }

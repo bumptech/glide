@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-final class Jobs {
+final class EngineJobs {
   private final Map<Key, EngineJob<?>> jobs = new HashMap<>();
   private final Map<Key, EngineJob<?>> onlyCacheJobs = new HashMap<>();
 

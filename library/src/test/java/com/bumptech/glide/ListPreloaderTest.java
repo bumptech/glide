@@ -332,16 +332,16 @@ public class ListPreloaderTest {
 
   private <Resource> List<Integer> getTargetsSizes(
       RequestBuilder<Resource> requestBuilder, VerificationMode mode) {
-    ArgumentCaptor<Integer> integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
+    ArgumentCaptor<Integer> intArgumentCaptor = ArgumentCaptor.forClass(int.class);
     ArgumentCaptor<Target<Resource>> targetArgumentCaptor =
         cast(ArgumentCaptor.forClass(Target.class));
-    SizeReadyCallback cb = mock(SizeReadyCallback.class);
+    SizeReadyCallback callback = mock(SizeReadyCallback.class);
     verify(requestBuilder, mode).into(targetArgumentCaptor.capture());
     for (Target<Resource> target : targetArgumentCaptor.getAllValues()) {
-      target.getSize(cb);
+      target.getSize(callback);
     }
-    verify(cb, mode).onSizeReady(integerArgumentCaptor.capture(), integerArgumentCaptor.capture());
-    return integerArgumentCaptor.getAllValues();
+    verify(callback, mode).onSizeReady(intArgumentCaptor.capture(), intArgumentCaptor.capture());
+    return intArgumentCaptor.getAllValues();
   }
 
   // It's safe to ignore the return value of containsAllIn.

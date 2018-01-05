@@ -444,7 +444,8 @@ public final class GlideExecutor implements ExecutorService {
           }
           try {
             super.run();
-          } catch (Throwable t) {
+          } catch (@SuppressWarnings("PMD.AvoidCatchingThrowable") Throwable t) {
+            // TODO consider using result.setUncaughtExceptionHandler instead
             uncaughtThrowableStrategy.handle(t);
           }
         }

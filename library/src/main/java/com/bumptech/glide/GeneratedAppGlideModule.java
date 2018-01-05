@@ -20,7 +20,5 @@ abstract class GeneratedAppGlideModule extends AppGlideModule {
   abstract Set<Class<?>> getExcludedModuleClasses();
 
   @Nullable
-  RequestManagerRetriever.RequestManagerFactory getRequestManagerFactory() {
-    return null;
-  }
+  abstract RequestManagerRetriever.RequestManagerFactory getRequestManagerFactory();
 }

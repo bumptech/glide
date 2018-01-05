@@ -44,11 +44,10 @@ public final class Util {
   @SuppressWarnings("PMD.UseVarargs")
   @NonNull
   private static String bytesToHex(@NonNull byte[] bytes, @NonNull char[] hexChars) {
-    int v;
-    for (int j = 0; j < bytes.length; j++) {
-      v = bytes[j] & 0xFF;
-      hexChars[j * 2] = HEX_CHAR_ARRAY[v >>> 4];
-      hexChars[j * 2 + 1] = HEX_CHAR_ARRAY[v & 0x0F];
+    for (int i = 0; i < bytes.length; i++) {
+      final int value = bytes[i] & 0xFF;
+      hexChars[i * 2] = HEX_CHAR_ARRAY[value >>> 4];
+      hexChars[i * 2 + 1] = HEX_CHAR_ARRAY[value & 0x0F];
     }
     return new String(hexChars);
   }
@@ -198,10 +197,12 @@ public final class Util {
    *
    * @see java.util.Objects#equals
    */
+  @SuppressWarnings("PMD.ShortVariable")
   public static boolean bothNullOrEqual(@Nullable Object a, @Nullable Object b) {
     return a == null ? b == null : a.equals(b);
   }
 
+  @SuppressWarnings("PMD.ShortVariable")
   public static boolean bothModelsNullEquivalentOrEquals(@Nullable Object a, @Nullable Object b) {
     if (a == null) {
       return b == null;

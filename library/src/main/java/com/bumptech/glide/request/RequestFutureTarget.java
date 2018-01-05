@@ -128,12 +128,12 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
    * A callback that should never be invoked directly.
    */
   @Override
-  public void getSize(@NonNull SizeReadyCallback cb) {
-    cb.onSizeReady(width, height);
+  public void getSize(@NonNull SizeReadyCallback callback) {
+    callback.onSizeReady(width, height);
   }
 
   @Override
-  public void removeCallback(@NonNull SizeReadyCallback cb) {
+  public void removeCallback(@NonNull SizeReadyCallback callback) {
     // Do nothing because we do not retain references to SizeReadyCallbacks.
   }
 

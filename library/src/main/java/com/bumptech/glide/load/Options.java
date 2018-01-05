@@ -56,7 +56,7 @@ public final class Options implements Key {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> void updateDiskCacheKey(Option<T> option, Object value, MessageDigest md) {
-    option.update((T) value, md);
+  private static <T> void updateDiskCacheKey(Option<T> option, Object value, MessageDigest digest) {
+    option.update((T) value, digest);
   }
 }

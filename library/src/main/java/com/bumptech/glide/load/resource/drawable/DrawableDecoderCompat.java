@@ -15,6 +15,7 @@ import android.support.v7.content.res.AppCompatResources;
  */
 public final class DrawableDecoderCompat {
   private static volatile boolean shouldCallAppCompatResources = true;
+
   private DrawableDecoderCompat() {
     // Utility class.
   }
@@ -22,8 +23,8 @@ public final class DrawableDecoderCompat {
   /**
    * See {@code getDrawable(Context, int, Theme)}.
    */
-  public static Drawable getDrawable(Context context, @DrawableRes int id) {
-    return getDrawable(context, id, /*theme=*/ null);
+  public static Drawable getDrawable(Context context, @DrawableRes int drawableId) {
+    return getDrawable(context, drawableId, /*theme=*/ null);
   }
 
   /**
@@ -31,14 +32,15 @@ public final class DrawableDecoderCompat {
    * otherwise, depending on whether or not the v7 support library is included in the application.
    *
    * @param theme Used instead of the {@link Theme} returned from the given {@link Context} if
-   * non-null when loading the {@link Drawable}.
+   *              non-null when loading the {@link Drawable}.
    */
-  public static Drawable getDrawable(Context context, @DrawableRes int id, @Nullable Theme theme) {
+  public static Drawable getDrawable(
+      Context context, @DrawableRes int drawableId, @Nullable Theme theme) {
     try {
       // Race conditions may cause us to attempt to load using v7 more than once. That's ok since
       // this check is a modest optimization and the output will be correct anyway.
       if (shouldCallAppCompatResources) {
-        return loadDrawableV7(context, id);
+        return loadDrawableV7(context, drawableId);
       }
     } catch (NoClassDefFoundError error) {
       shouldCallAppCompatResources = false;
@@ -47,16 +49,16 @@ public final class DrawableDecoderCompat {
       // that decode attempt fails, we still want to try with the v4 ResourcesCompat below.
     }
 
-    return loadDrawableV4(context, id, theme != null ? theme : context.getTheme());
+    return loadDrawableV4(context, drawableId, theme != null ? theme : context.getTheme());
   }
 
-  private static Drawable loadDrawableV7(Context context, @DrawableRes int id) {
-    return AppCompatResources.getDrawable(context, id);
+  private static Drawable loadDrawableV7(Context context, @DrawableRes int drawableId) {
+    return AppCompatResources.getDrawable(context, drawableId);
   }
 
   private static Drawable loadDrawableV4(
-      Context context, @DrawableRes int id, @Nullable Theme theme) {
+      Context context, @DrawableRes int drawableId, @Nullable Theme theme) {
     Resources resources = context.getResources();
-    return ResourcesCompat.getDrawable(resources, id, theme);
+    return ResourcesCompat.getDrawable(resources, drawableId, theme);
   }
 }

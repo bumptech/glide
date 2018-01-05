@@ -60,7 +60,7 @@ public class GifDrawableTest {
   private Bitmap firstFrame;
   private int initialSdkVersion;
 
-  @Mock private Drawable.Callback cb;
+  @Mock private Drawable.Callback callback;
   @Mock private GifFrameLoader frameLoader;
   @Mock private Paint paint;
   @Mock private Transformation<Bitmap> transformation;
@@ -86,7 +86,7 @@ public class GifDrawableTest {
     when(frameLoader.getHeight()).thenReturn(frameHeight);
     when(frameLoader.getCurrentFrame()).thenReturn(firstFrame);
     when(frameLoader.getCurrentIndex()).thenReturn(0);
-    drawable.setCallback(cb);
+    drawable.setCallback(callback);
     initialSdkVersion = Build.VERSION.SDK_INT;
   }
 
@@ -155,7 +155,7 @@ public class GifDrawableTest {
     drawable.setVisible(true, false);
     drawable.start();
 
-    verify(cb).invalidateDrawable(eq(drawable));
+    verify(callback).invalidateDrawable(eq(drawable));
   }
 
   @Test
@@ -163,7 +163,7 @@ public class GifDrawableTest {
     drawable.setVisible(true, true);
     drawable.start();
 
-    verify(cb).invalidateDrawable(eq(drawable));
+    verify(callback).invalidateDrawable(eq(drawable));
   }
 
   @Test
@@ -193,7 +193,7 @@ public class GifDrawableTest {
     drawable.setIsRunning(true);
     drawable.onFrameReady();
 
-    verify(cb).invalidateDrawable(eq(drawable));
+    verify(callback).invalidateDrawable(eq(drawable));
   }
 
   @Test
@@ -442,7 +442,7 @@ public class GifDrawableTest {
     drawable.onFrameReady();
 
     // 4 onFrameReady(), 2 start()
-    verify(cb, times(4 + 2)).invalidateDrawable(eq(drawable));
+    verify(callback, times(4 + 2)).invalidateDrawable(eq(drawable));
     assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
   }
 
@@ -468,7 +468,7 @@ public class GifDrawableTest {
 
     int numStarts = 2;
     int expectedFrames = (initialLoopCount + newLoopCount) * frameCount + numStarts;
-    verify(cb, times(expectedFrames)).invalidateDrawable(eq(drawable));
+    verify(callback, times(expectedFrames)).invalidateDrawable(eq(drawable));
     assertFalse("drawable should be stopped after loop is completed", drawable.isRunning());
   }
 
@@ -603,7 +603,7 @@ public class GifDrawableTest {
 
   private void verifyRanLoops(int loopCount, int frameCount) {
     // 1 for invalidate in start().
-    verify(cb, times(1 + loopCount * frameCount)).invalidateDrawable(eq(drawable));
+    verify(callback, times(1 + loopCount * frameCount)).invalidateDrawable(eq(drawable));
   }
 
   private void runLoops(int loopCount, int frameCount) {
