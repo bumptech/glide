@@ -53,12 +53,12 @@ import java.net.URL;
     "deprecation"
 })
 public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> implements Cloneable {
-  GlideRequest(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
+  GlideRequest(@NonNull Class<TranscodeType> transcodeClass, @NonNull RequestBuilder<?> other) {
     super(transcodeClass, other);
   }
 
-  GlideRequest(Glide glide, RequestManager requestManager, Class<TranscodeType> transcodeClass,
-      Context context) {
+  GlideRequest(@NonNull Glide glide, @NonNull RequestManager requestManager,
+      @NonNull Class<TranscodeType> transcodeClass, @NonNull Context context) {
     super(glide, requestManager ,transcodeClass, context);
   }
 
@@ -638,8 +638,8 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   /**
    * @see GlideOptions#centerCrop()
    */
-  @NonNull
   @CheckResult
+  @NonNull
   public GlideRequest<TranscodeType> centerCrop() {
     if (getMutableOptions() instanceof GlideOptions) {
       this.requestOptions = ((GlideOptions) getMutableOptions()).centerCrop();

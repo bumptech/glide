@@ -32,8 +32,8 @@ import java.net.URL;
  */
 @SuppressWarnings("deprecation")
 public class GlideRequests extends RequestManager {
-  public GlideRequests(Glide glide, Lifecycle lifecycle, RequestManagerTreeNode treeNode,
-      Context context) {
+  public GlideRequests(@NonNull Glide glide, @NonNull Lifecycle lifecycle,
+      @NonNull RequestManagerTreeNode treeNode, @NonNull Context context) {
     super(glide, lifecycle, treeNode, context);
   }
 
@@ -56,11 +56,13 @@ public class GlideRequests extends RequestManager {
   }
 
   @Override
+  @NonNull
   public GlideRequests applyDefaultRequestOptions(@NonNull RequestOptions arg0) {
     return (GlideRequests) super.applyDefaultRequestOptions(arg0);
   }
 
   @Override
+  @NonNull
   public GlideRequests setDefaultRequestOptions(@NonNull RequestOptions arg0) {
     return (GlideRequests) super.setDefaultRequestOptions(arg0);
   }
@@ -171,6 +173,7 @@ public class GlideRequests extends RequestManager {
   }
 
   @Override
+  @NonNull
   protected void setRequestOptions(@NonNull RequestOptions toSet) {
     if (toSet instanceof com.bumptech.glide.test.GlideOptions) {
       super.setRequestOptions(toSet);

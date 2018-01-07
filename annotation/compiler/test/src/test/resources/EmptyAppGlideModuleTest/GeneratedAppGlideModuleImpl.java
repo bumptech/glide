@@ -22,12 +22,13 @@ final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   }
 
   @Override
-  public void applyOptions(Context context, GlideBuilder builder) {
+  public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {
     appGlideModule.applyOptions(context, builder);
   }
 
   @Override
-  public void registerComponents(Context context, Glide glide, Registry registry) {
+  public void registerComponents(@NonNull Context context, @NonNull Glide glide,
+      @NonNull Registry registry) {
     appGlideModule.registerComponents(context, glide, registry);
   }
 
@@ -43,6 +44,7 @@ final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   }
 
   @Override
+  @NonNull
   GeneratedRequestManagerFactory getRequestManagerFactory() {
     return new GeneratedRequestManagerFactory();
   }
