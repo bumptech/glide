@@ -1,5 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
+import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
+
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
 import com.google.common.base.Function;
@@ -108,9 +110,7 @@ final class RequestBuilderGenerator {
       ImmutableSet.of("clone", "apply", "autoLock", "lock", "autoClone");
   private static final ClassName CHECK_RESULT_CLASS_NAME =
       ClassName.get("android.support.annotation", "CheckResult");
-  private static final AnnotationSpec NON_NULL = AnnotationSpec
-      .builder(ClassName.get("android.support.annotation", "NonNull"))
-      .build();
+  private static final AnnotationSpec NON_NULL = AnnotationSpec.builder(nonNull()).build();
 
   private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
@@ -402,8 +402,14 @@ final class RequestBuilderGenerator {
 
     MethodSpec firstConstructor =
         MethodSpec.constructorBuilder()
-            .addParameter(classOfTranscodeType, "transcodeClass")
-            .addParameter(requestBuilderOfWildcardOfObject, "other")
+            .addParameter(ParameterSpec.builder(classOfTranscodeType, "transcodeClass")
+                .addAnnotation(nonNull())
+                .build()
+            )
+            .addParameter(ParameterSpec.builder(requestBuilderOfWildcardOfObject, "other")
+                .addAnnotation(nonNull())
+                .build()
+            )
         .addStatement("super($N, $N)", "transcodeClass", "other")
         .build();
 
@@ -412,10 +418,22 @@ final class RequestBuilderGenerator {
     ClassName requestManager = ClassName.get("com.bumptech.glide", "RequestManager");
     MethodSpec secondConstructor =
         MethodSpec.constructorBuilder()
-            .addParameter(glide, "glide")
-            .addParameter(requestManager, "requestManager")
-            .addParameter(classOfTranscodeType, "transcodeClass")
-            .addParameter(context, "context")
+            .addParameter(ParameterSpec.builder(glide, "glide")
+                .addAnnotation(nonNull())
+                .build()
+            )
+            .addParameter(ParameterSpec.builder(requestManager, "requestManager")
+                .addAnnotation(nonNull())
+                .build()
+            )
+            .addParameter(ParameterSpec.builder(classOfTranscodeType, "transcodeClass")
+                .addAnnotation(nonNull())
+                .build()
+            )
+            .addParameter(ParameterSpec.builder(context, "context")
+                .addAnnotation(nonNull())
+                .build()
+            )
             .addStatement(
                 "super($N, $N ,$N, $N)", "glide", "requestManager", "transcodeClass", "context")
             .build();

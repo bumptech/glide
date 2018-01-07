@@ -1,5 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
+import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
+
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideType;
 import com.google.common.base.Function;
@@ -60,13 +62,8 @@ final class RequestManagerGenerator {
       "com.bumptech.glide.manager.RequestManagerTreeNode";
   private static final ClassName CHECK_RESULT_CLASS_NAME =
       ClassName.get("android.support.annotation", "CheckResult");
-  private static final ClassName NON_NULL_CLASS_NAME =
-      ClassName.get("android.support.annotation", "NonNull");
   private static final ClassName CONTEXT_CLASS_NAME =
       ClassName.get("android.content", "Context");
-  private static final AnnotationSpec NON_NULL = AnnotationSpec
-      .builder(ClassName.get("android.support.annotation", "NonNull"))
-      .build();
 
   private static final String GENERATED_REQUEST_MANAGER_SIMPLE_NAME =
       "GlideRequests";
@@ -105,37 +102,49 @@ final class RequestManagerGenerator {
       Set<String> glideExtensions) {
     generatedRequestBuilderClassName = ClassName.get(generatedCodePackageName, requestBuilder.name);
     return TypeSpec.classBuilder(GENERATED_REQUEST_MANAGER_SIMPLE_NAME)
-         .superclass(requestManagerClassName)
-         .addJavadoc("Includes all additions from methods in {@link $T}s\n"
-                 + "annotated with {@link $T}\n"
-                 + "\n"
-                 + "<p>Generated code, do not modify\n",
-             GlideExtension.class, GlideType.class)
+        .superclass(requestManagerClassName)
+        .addJavadoc("Includes all additions from methods in {@link $T}s\n"
+                + "annotated with {@link $T}\n"
+                + "\n"
+                + "<p>Generated code, do not modify\n",
+            GlideExtension.class, GlideType.class)
         .addAnnotation(
             AnnotationSpec.builder(SuppressWarnings.class)
                 .addMember("value", "$S", "deprecation")
                 .build())
-         .addModifiers(Modifier.PUBLIC)
-         .addMethod(generateAsMethod(generatedCodePackageName, requestBuilder))
-         .addMethod(generateCallSuperConstructor())
-         .addMethods(generateExtensionRequestManagerMethods(glideExtensions))
-         .addMethods(generateRequestManagerRequestManagerMethodOverrides(generatedCodePackageName))
-         .addMethods(generateRequestManagerRequestBuilderMethodOverrides())
-         .addMethods(
-             FluentIterable.from(
-                 Collections.singletonList(
-                     generateOverrideSetRequestOptions(generatedCodePackageName, requestOptions)))
-                 .filter(Predicates.<MethodSpec>notNull()))
-         .build();
+        .addModifiers(Modifier.PUBLIC)
+        .addMethod(generateAsMethod(generatedCodePackageName, requestBuilder))
+        .addMethod(generateCallSuperConstructor())
+        .addMethods(generateExtensionRequestManagerMethods(glideExtensions))
+        .addMethods(generateRequestManagerRequestManagerMethodOverrides(generatedCodePackageName))
+        .addMethods(generateRequestManagerRequestBuilderMethodOverrides())
+        .addMethods(
+            FluentIterable.from(
+                Collections.singletonList(
+                    generateOverrideSetRequestOptions(generatedCodePackageName, requestOptions)))
+                .filter(Predicates.<MethodSpec>notNull()))
+        .build();
   }
 
   private MethodSpec generateCallSuperConstructor() {
     return MethodSpec.constructorBuilder()
         .addModifiers(Modifier.PUBLIC)
-        .addParameter(ClassName.get(glideType), "glide")
-        .addParameter(ClassName.get(lifecycleType), "lifecycle")
-        .addParameter(ClassName.get(requestManagerTreeNodeType), "treeNode")
-        .addParameter(CONTEXT_CLASS_NAME, "context")
+        .addParameter(ParameterSpec.builder(ClassName.get(glideType), "glide")
+            .addAnnotation(nonNull())
+            .build()
+        )
+        .addParameter(ParameterSpec.builder(ClassName.get(lifecycleType), "lifecycle")
+            .addAnnotation(nonNull())
+            .build()
+        )
+        .addParameter(ParameterSpec.builder(ClassName.get(requestManagerTreeNodeType), "treeNode")
+            .addAnnotation(nonNull())
+            .build()
+        )
+        .addParameter(ParameterSpec.builder(CONTEXT_CLASS_NAME, "context")
+            .addAnnotation(nonNull())
+            .build()
+        )
         .addStatement("super(glide, lifecycle, treeNode, context)")
         .build();
   }
@@ -155,10 +164,11 @@ final class RequestManagerGenerator {
         .addModifiers(Modifier.PUBLIC)
         .addAnnotation(Override.class)
         .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
-        .addAnnotation(NON_NULL)
+        .addAnnotation(nonNull())
         .addTypeVariable(TypeVariableName.get("ResourceType"))
         .returns(requestBuilderOfResourceType)
-        .addParameter(classOfResouceType.annotated(NON_NULL), "resourceClass")
+        .addParameter(classOfResouceType.annotated(AnnotationSpec.builder(nonNull()).build()),
+            "resourceClass")
         .addStatement("return new $T<>(glide, this, resourceClass, context)",
             this.generatedRequestBuilderClassName)
         .build();
@@ -183,6 +193,7 @@ final class RequestManagerGenerator {
     ClassName generatedRequestManagerName =
         ClassName.get(generatedPackageName, GENERATED_REQUEST_MANAGER_SIMPLE_NAME);
     return ProcessorUtil.overriding(method)
+        .addAnnotation(nonNull())
         .returns(generatedRequestManagerName)
         .addCode(ProcessorUtil.generateCastingSuperCall(generatedRequestManagerName, method))
         .build();
@@ -220,7 +231,7 @@ final class RequestManagerGenerator {
    */
   private MethodSpec generateRequestManagerRequestBuilderMethodOverride(
       ExecutableElement methodToOverride) {
-     // We've already verified that this method returns a RequestBuilder and RequestBuilders have
+    // We've already verified that this method returns a RequestBuilder and RequestBuilders have
     // exactly one type argument, so this is safe unless those assumptions change.
     TypeMirror typeArgument =
         ((DeclaredType) methodToOverride.getReturnType()).getTypeArguments().get(0);
@@ -265,7 +276,7 @@ final class RequestManagerGenerator {
 
   private MethodSpec generateAdditionalRequestManagerMethodLegacy(
       ExecutableElement extensionMethod) {
-     String returnType = processorUtil.findClassValuesFromAnnotationOnClassAsNames(extensionMethod,
+    String returnType = processorUtil.findClassValuesFromAnnotationOnClassAsNames(extensionMethod,
         GlideType.class).iterator().next();
     ClassName returnTypeClassName = ClassName.bestGuess(returnType);
     ParameterizedTypeName parameterizedTypeName =
@@ -275,7 +286,7 @@ final class RequestManagerGenerator {
         .addModifiers(Modifier.PUBLIC)
         .returns(parameterizedTypeName)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
-        .addAnnotation(AnnotationSpec.builder(NON_NULL_CLASS_NAME).build())
+        .addAnnotation(nonNull())
         .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
         .addStatement(
             "$T requestBuilder = this.as($T.class)", parameterizedTypeName, returnTypeClassName)
@@ -287,7 +298,7 @@ final class RequestManagerGenerator {
 
   private MethodSpec generateAdditionalRequestManagerMethodNew(
       ExecutableElement extensionMethod) {
-     String returnType = processorUtil.findClassValuesFromAnnotationOnClassAsNames(extensionMethod,
+    String returnType = processorUtil.findClassValuesFromAnnotationOnClassAsNames(extensionMethod,
         GlideType.class).iterator().next();
     ClassName returnTypeClassName = ClassName.bestGuess(returnType);
     ParameterizedTypeName parameterizedTypeName =
@@ -297,7 +308,7 @@ final class RequestManagerGenerator {
         .addModifiers(Modifier.PUBLIC)
         .returns(parameterizedTypeName)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
-        .addAnnotation(AnnotationSpec.builder(NON_NULL_CLASS_NAME).build())
+        .addAnnotation(nonNull())
         .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
         .addStatement(
             "return ($T) $T.$N(this.as($T.class))",
@@ -322,10 +333,8 @@ final class RequestManagerGenerator {
 
     Elements elementUtils = processingEnv.getElementUtils();
     TypeElement requestOptionsType =
-            elementUtils.getTypeElement(
-                RequestOptionsGenerator.REQUEST_OPTIONS_QUALIFIED_NAME);
-    TypeElement androidNonNullType =
-            elementUtils.getTypeElement("android.support.annotation.NonNull");
+        elementUtils.getTypeElement(
+            RequestOptionsGenerator.REQUEST_OPTIONS_QUALIFIED_NAME);
 
     // This class may have just been generated and therefore may not be found if we try to obtain
     // it via Elements, so use just the String version instead.
@@ -337,10 +346,11 @@ final class RequestManagerGenerator {
 
     return MethodSpec.methodBuilder(methodName)
         .addAnnotation(Override.class)
+        .addAnnotation(nonNull())
         .addModifiers(Modifier.PROTECTED)
         .addParameter(
             ParameterSpec.builder(ClassName.get(requestOptionsType), parameterName)
-                .addAnnotation(ClassName.get(androidNonNullType))
+                .addAnnotation(nonNull())
                 .build())
         .beginControlFlow("if ($N instanceof $L)",
             parameterName, generatedRequestOptionsQualifiedName)

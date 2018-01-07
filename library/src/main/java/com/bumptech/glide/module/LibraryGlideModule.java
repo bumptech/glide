@@ -16,6 +16,7 @@ import com.bumptech.glide.Registry;
  * {@link com.bumptech.glide.annotation.Excludes} annotation to selectively remove one or more of
  * the conflicting modules.
  */
+@SuppressWarnings("deprecation")
 public abstract class LibraryGlideModule implements RegistersComponents {
   @Override
   public void registerComponents(@NonNull Context context, @NonNull Glide glide,

@@ -1,6 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.GlideOption.OVERRIDE_EXTEND;
+import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
 
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
@@ -78,8 +79,6 @@ final class RequestOptionsGenerator {
       REQUEST_OPTIONS_PACKAGE_NAME + "." + REQUEST_OPTIONS_SIMPLE_NAME;
   private static final ClassName CHECK_RESULT_CLASS_NAME =
       ClassName.get("android.support.annotation", "CheckResult");
-  private static final ClassName NON_NULL_CLASS_NAME =
-      ClassName.get("android.support.annotation", "NonNull");
 
   private final ProcessingEnvironment processingEnvironment;
   private final ClassName requestOptionsName;
@@ -301,8 +300,9 @@ final class RequestOptionsGenerator {
     code.append(")");
     builder.addStatement(code.toString(), args.toArray(new Object[0]));
 
-    builder.addAnnotation(AnnotationSpec.builder(NON_NULL_CLASS_NAME).build());
-    builder.addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build());
+    builder
+        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(nonNull());
 
     List<MethodAndStaticVar> result = new ArrayList<>();
     result.add(new MethodAndStaticVar(builder.build()));
@@ -373,9 +373,9 @@ final class RequestOptionsGenerator {
     code.append(")");
     builder.addStatement(code.toString(), args.toArray(new Object[0]));
 
-    builder.addStatement("return this");
-    builder.addAnnotation(AnnotationSpec.builder(NON_NULL_CLASS_NAME).build());
-    builder.addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build());
+    builder.addStatement("return this")
+        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(nonNull());
 
     List<MethodAndStaticVar> result = new ArrayList<>();
     result.add(new MethodAndStaticVar(builder.build()));
@@ -482,7 +482,9 @@ final class RequestOptionsGenerator {
           TypeVariableName.get(typeParameterElement.getSimpleName().toString()));
     }
 
-    methodSpecBuilder.addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build());
+    methodSpecBuilder
+        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(nonNull());
 
     return new MethodAndStaticVar(methodSpecBuilder.build(), requiredStaticField);
   }
@@ -619,10 +621,8 @@ final class RequestOptionsGenerator {
   }
 
   private static final class MethodAndStaticVar {
-    @Nullable
-    final MethodSpec method;
-    @Nullable
-    final FieldSpec staticField;
+    @Nullable final MethodSpec method;
+    @Nullable final FieldSpec staticField;
 
     MethodAndStaticVar(@Nullable MethodSpec method) {
       this(method, null /*staticField*/);

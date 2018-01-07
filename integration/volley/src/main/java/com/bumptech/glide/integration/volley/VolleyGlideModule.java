@@ -1,6 +1,7 @@
 package com.bumptech.glide.integration.volley;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
@@ -22,7 +23,7 @@ import java.io.InputStream;
 @SuppressWarnings("deprecation")
 public class VolleyGlideModule implements com.bumptech.glide.module.GlideModule {
   @Override
-  public void applyOptions(Context context, GlideBuilder builder) {
+  public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {
     // Do nothing.
   }
 

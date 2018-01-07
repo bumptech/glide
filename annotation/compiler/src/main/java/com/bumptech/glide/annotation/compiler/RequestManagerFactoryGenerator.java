@@ -1,7 +1,10 @@
 package com.bumptech.glide.annotation.compiler;
 
+import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
+
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
@@ -77,11 +80,24 @@ final class RequestManagerFactoryGenerator {
             MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
+                .addAnnotation(nonNull())
                 .returns(requestManagerClassName)
-                .addParameter(ClassName.get(glideType), "glide")
-                .addParameter(ClassName.get(lifecycleType), "lifecycle")
-                .addParameter(ClassName.get(requestManagerTreeNodeType), "treeNode")
-                .addParameter(CONTEXT_CLASS_NAME, "context")
+                .addParameter(ParameterSpec.builder(ClassName.get(glideType), "glide")
+                    .addAnnotation(nonNull())
+                    .build()
+                )
+                .addParameter(ParameterSpec.builder(ClassName.get(lifecycleType), "lifecycle")
+                    .addAnnotation(nonNull())
+                    .build()
+                )
+                .addParameter(ParameterSpec.builder(ClassName.get(requestManagerTreeNodeType), "treeNode")
+                    .addAnnotation(nonNull())
+                    .build()
+                )
+                .addParameter(ParameterSpec.builder(CONTEXT_CLASS_NAME, "context")
+                    .addAnnotation(nonNull())
+                    .build()
+                )
                 .addStatement(
                     "return new $T(glide, lifecycle, treeNode, context)",
                     ClassName.get(generatedCodePackageName, generatedRequestManagerSpec.name))

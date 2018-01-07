@@ -1,5 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
+import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
+
 import com.bumptech.glide.annotation.GlideOption;
 import com.bumptech.glide.annotation.GlideType;
 import com.google.common.base.Function;
@@ -29,9 +31,6 @@ import javax.tools.Diagnostic.Kind;
  * for an Application.
  */
 final class GlideExtensionValidator {
-  private static final String FULLY_QUALIFIED_NON_NULL_CLASS_NAME =
-      "android.support.annotation.NonNull";
-
   private final ProcessingEnvironment processingEnvironment;
   private final ProcessorUtil processorUtil;
 
@@ -254,11 +253,11 @@ final class GlideExtensionValidator {
               }
             })
             .toSet();
-    if (!annotationNames.contains(FULLY_QUALIFIED_NON_NULL_CLASS_NAME)) {
+    if (!annotationNames.contains(nonNull().reflectionName())) {
       processingEnvironment.getMessager().printMessage(
           Kind.WARNING,
           executableElement.getEnclosingElement() + "#" + executableElement.getSimpleName()
-              + " is missing the " + FULLY_QUALIFIED_NON_NULL_CLASS_NAME + " annotation,"
+              + " is missing the " + nonNull().reflectionName() + " annotation,"
               + " please add it to ensure that your extension methods are always returning non-null"
               + " values");
     }
