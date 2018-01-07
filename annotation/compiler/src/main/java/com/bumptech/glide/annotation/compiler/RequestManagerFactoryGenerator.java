@@ -90,9 +90,10 @@ final class RequestManagerFactoryGenerator {
                     .addAnnotation(nonNull())
                     .build()
                 )
-                .addParameter(ParameterSpec.builder(ClassName.get(requestManagerTreeNodeType), "treeNode")
-                    .addAnnotation(nonNull())
-                    .build()
+                .addParameter(
+                    ParameterSpec.builder(ClassName.get(requestManagerTreeNodeType), "treeNode")
+                        .addAnnotation(nonNull())
+                        .build()
                 )
                 .addParameter(ParameterSpec.builder(CONTEXT_CLASS_NAME, "context")
                     .addAnnotation(nonNull())
