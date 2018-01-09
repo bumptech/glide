@@ -10,6 +10,7 @@ import com.bumptech.glide.Registry;
  */
 // Used only in javadocs.
 @SuppressWarnings("deprecation")
+@Deprecated
 interface RegistersComponents {
 
   /**

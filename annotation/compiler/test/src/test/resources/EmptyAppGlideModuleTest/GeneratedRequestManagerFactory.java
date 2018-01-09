@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
@@ -12,8 +13,9 @@ import java.lang.Override;
  */
 final class GeneratedRequestManagerFactory implements RequestManagerRetriever.RequestManagerFactory {
   @Override
-  public RequestManager build(Glide glide, Lifecycle lifecycle, RequestManagerTreeNode treeNode,
-      Context context) {
+  @NonNull
+  public RequestManager build(@NonNull Glide glide, @NonNull Lifecycle lifecycle,
+      @NonNull RequestManagerTreeNode treeNode, @NonNull Context context) {
     return new GlideRequests(glide, lifecycle, treeNode, context);
   }
 }

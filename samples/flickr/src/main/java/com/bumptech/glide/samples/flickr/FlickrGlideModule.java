@@ -19,7 +19,7 @@ import java.io.InputStream;
 public class FlickrGlideModule extends AppGlideModule {
 
   @Override
-  public void applyOptions(Context context, GlideBuilder builder) {
+  public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {
     super.applyOptions(context, builder);
     builder.setDefaultRequestOptions(new RequestOptions().format(DecodeFormat.PREFER_ARGB_8888));
   }
