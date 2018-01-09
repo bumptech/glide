@@ -87,8 +87,7 @@ public final class Downsampler {
    * <p>This option is ignored unless we're on Android O+.
    */
   public static final Option<Boolean> ALLOW_HARDWARE_CONFIG =
-      Option.memory(
-          "com.bumtpech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", null);
+      Option.memory("com.bumtpech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode");
 
   private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
   private static final String ICO_MIME_TYPE = "image/x-ico";

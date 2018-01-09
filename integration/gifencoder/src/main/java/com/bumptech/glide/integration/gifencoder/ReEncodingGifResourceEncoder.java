@@ -53,7 +53,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
   public static final Option<Boolean> ENCODE_TRANSFORMATION =
       Option.disk(KEY_ENCODE_TRANSFORMATION, false, new Option.CacheKeyUpdater<Boolean>() {
         @Override
-        public void update(byte[] keyBytes, Boolean value, MessageDigest messageDigest) {
+        public void update(@NonNull byte[] keyBytes, Boolean value, @NonNull MessageDigest messageDigest) {
           if (value) {
             messageDigest.update(keyBytes);
           }

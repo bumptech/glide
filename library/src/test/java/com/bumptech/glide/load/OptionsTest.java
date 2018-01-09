@@ -1,5 +1,6 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Option.CacheKeyUpdater;
 import com.bumptech.glide.tests.KeyTester;
 import java.nio.ByteBuffer;
@@ -24,7 +25,7 @@ public class OptionsTest {
 
     CacheKeyUpdater<Integer> updater = new CacheKeyUpdater<Integer>() {
       @Override
-      public void update(byte[] keyBytes, Integer value, MessageDigest messageDigest) {
+      public void update(@NonNull byte[] keyBytes, Integer value, @NonNull MessageDigest messageDigest) {
         messageDigest.update(keyBytes);
         messageDigest.update(ByteBuffer.allocate(4).putInt(value).array());
 

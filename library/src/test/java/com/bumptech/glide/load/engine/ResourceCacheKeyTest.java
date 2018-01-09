@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Option.CacheKeyUpdater;
@@ -13,7 +14,6 @@ import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,14 +45,14 @@ public class ResourceCacheKeyTest {
   }
 
   @Test
-  public void testEqualsAndHashCode() throws NoSuchAlgorithmException {
+  public void testEqualsAndHashCode() {
     Options memoryOptions = new Options();
     memoryOptions.set(Option.memory("key", new Object()), new Object());
 
     Options diskOptions = new Options();
     diskOptions.set(Option.disk("key", new CacheKeyUpdater<String>() {
       @Override
-      public void update(byte[] keyBytes, String value, MessageDigest messageDigest) {
+      public void update(@NonNull byte[] keyBytes, String value, @NonNull MessageDigest messageDigest) {
         messageDigest.update(keyBytes);
         messageDigest.update(value.getBytes(Key.CHARSET));
 
