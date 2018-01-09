@@ -118,7 +118,6 @@ public class RequestManager implements LifecycleListener,
     glide.registerRequestManager(this);
   }
 
-  @NonNull
   protected void setRequestOptions(@NonNull RequestOptions toSet) {
     requestOptions = toSet.clone().autoClone();
   }

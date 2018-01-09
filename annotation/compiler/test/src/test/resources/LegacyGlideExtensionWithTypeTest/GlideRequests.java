@@ -173,7 +173,6 @@ public class GlideRequests extends RequestManager {
   }
 
   @Override
-  @NonNull
   protected void setRequestOptions(@NonNull RequestOptions toSet) {
     if (toSet instanceof com.bumptech.glide.test.GlideOptions) {
       super.setRequestOptions(toSet);

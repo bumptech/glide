@@ -346,7 +346,6 @@ final class RequestManagerGenerator {
 
     return MethodSpec.methodBuilder(methodName)
         .addAnnotation(Override.class)
-        .addAnnotation(nonNull())
         .addModifiers(Modifier.PROTECTED)
         .addParameter(
             ParameterSpec.builder(ClassName.get(requestOptionsType), parameterName)
