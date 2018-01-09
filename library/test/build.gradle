@@ -1,0 +1,51 @@
+apply plugin: 'com.android.library'
+
+dependencies {
+    testImplementation "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    testImplementation project(':library')
+    testImplementation project(':testutil')
+    testImplementation 'com.google.guava:guava-testlib:18.0'
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation "junit:junit:${JUNIT_VERSION}"
+    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
+    testImplementation "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
+}
+
+tasks.withType(JavaCompile) {
+    options.fork = true
+}
+
+afterEvaluate {
+    lint.enabled = false
+    compileDebugJavaWithJavac.enabled = false
+}
+
+android.testOptions.unitTests.all { Test testTask ->
+    // configure max heap size of the test JVM
+    testTask.maxHeapSize = TEST_JVM_MEMORY_SIZE as String
+    if (JavaVersion.current() <= JavaVersion.VERSION_1_7) {
+        // Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=2048m; support was removed in 8.0
+        testTask.jvmArgs "-XX:MaxPermSize=${TEST_JVM_MEMORY_SIZE}"
+    }
+
+    // Initializing Robolectric is expensive, two threads seem to be around the only level where any
+    // improvement is seen.
+    testTask.maxParallelForks = 2
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+        versionName VERSION_NAME as String
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}

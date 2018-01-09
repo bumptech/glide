@@ -61,8 +61,8 @@ def getInternalJavaProjectsForJavadoc() {
     asProjects(getJavaPathsForJavadoc())
 }
 
-def getReleaseVariantAndroidProjectsForJar() {
-    getAndroidLibraryVariantsForJar('release')
+def getAndroidProjectsForJar() {
+    getAndroidLibraryVariantsForJar('debug')
 }
 
 def getAndroidLibraryVariantsForJar(variantName) {
@@ -102,7 +102,7 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 
 // Generate javadocs and sources containing batched documentation and sources for all internal
 // projects.
-['release'].each { variantName ->
+['debug'].each { variantName ->
 
     task("${variantName}SourceJar", type: Jar) {
         from getSourceFilesForVariantJar(variantName)
@@ -131,7 +131,7 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
                             // Finds dependencies of Android packages that would otherwise be
                             // ignored (Volley in particular)
                             getInternalAndroidProjectsForJavadoc().collect { Project project ->
-                                project.file('build/intermediates/classes/release')
+                                project.file('build/intermediates/classes/debug')
                             }
             )
         }
@@ -161,7 +161,7 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 
 jar {
     from files(
-            getReleaseVariantAndroidProjectsForJar().collect { LibraryVariant variant ->
+            getAndroidProjectsForJar().collect { LibraryVariant variant ->
                 variant.getJavaCompiler().destinationDir
             }
     )
@@ -174,21 +174,21 @@ jar {
 
 (getInternalAndroidProjectsForJar() + getInternalAndroidProjectsForJavadoc()).each {
     project ->
-        releaseJavadoc.dependsOn(project.tasks.compileReleaseSources)
-        jar.dependsOn(project.tasks.compileReleaseSources)
+        debugJavadoc.dependsOn(project.tasks.compileDebugSources)
+        jar.dependsOn(project.tasks.compileDebugSources)
 }
 
 (getInternalJavaProjectsForJar() + getInternalJavaProjectsForJavadoc()).each {
     project ->
-        releaseJavadoc.dependsOn(project.tasks.compileJava)
+        debugJavadoc.dependsOn(project.tasks.compileJava)
         jar.dependsOn(project.tasks.compileJava)
 }
 
 artifacts {
-    archives releaseJavadocJar {
+    archives debugJavadocJar {
         classifier 'javadoc'
     }
-    archives releaseSourceJar {
+    archives debugSourceJar {
         classifier 'sources'
     }
 }
