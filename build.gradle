@@ -60,13 +60,21 @@ subprojects { project ->
     }
 
     project.afterEvaluate {
-        if (project.hasProperty("android")) {
+        if (project.hasProperty("android")
+                && project.name != 'pmd'
+                && project.name != 'findbugs') {
             android {
                 lintOptions {
                     warningsAsErrors true
                     quiet true
                     // Caught by the violations plugin.
                     abortOnError false
+                }
+            }
+
+            android.variantFilter { variant ->
+                if(variant.buildType.name == 'release') {
+                    variant.setIgnore(true)
                 }
             }
         }
@@ -113,7 +121,7 @@ subprojects { project ->
         diffMaxViolations = 0
 
         // Formats are listed here: https://github.com/tomasbjerre/violations-lib
-        def dir = projectDir.absolutePath;
+        def dir = projectDir.absolutePath
         violations = [
                 ["FINDBUGS",    dir, ".*/findbugs/.*\\.xml\$",   "Findbugs"],
                 ["PMD",         dir, ".*/pmd/.*\\.xml\$",        "PMD"],

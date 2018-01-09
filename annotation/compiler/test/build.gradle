@@ -46,3 +46,6 @@ task regenerateTestResources {
     }
 }
 regenerateTestResources.finalizedBy(test)
+
+test.maxParallelForks = 2
+
