@@ -80,7 +80,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
         private final ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
         @Override
         public void update(@NonNull byte[] keyBytes, @NonNull Integer value, @NonNull MessageDigest messageDigest) {
-          //noinspection ConstantConditions public API, people could have been doing
+          //noinspection ConstantConditions public API, people could have been doing it wrong
           if (value == null) {
             return;
           }

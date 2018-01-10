@@ -11,18 +11,18 @@ import java.security.MessageDigest;
  * com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE}.
  *
  * <p>
- * Implementations must either be unique (usually declared as static final variables), or
- * implement {@link #equals(Object)} and {@link #hashCode()}.
+ *   Implementations must either be unique (usually declared as static final variables), or
+ *   implement {@link #equals(Object)} and {@link #hashCode()}.
  * </p>
  *
  * <p>
- * Implementations can implement {@link #update(Object, MessageDigest)} to make sure that
- * the disk cache key includes the specific option set.
+ *   Implementations can implement {@link #update(Object, MessageDigest)} to make sure that
+ *   the disk cache key includes the specific option set.
  * </p>
  *
  * @param <T> The type of the option ({@link Integer}, {@link
- *            android.graphics.Bitmap.CompressFormat} etc.), must implement {@link #equals(Object)} and
- *            {@link #hashCode()}.
+ * android.graphics.Bitmap.CompressFormat} etc.), must implement {@link #equals(Object)} and
+ * {@link #hashCode()}.
  */
 public final class Option<T> {
   private static final CacheKeyUpdater<Object> EMPTY_UPDATER = new CacheKeyUpdater<Object>() {
@@ -165,12 +165,13 @@ public final class Option<T> {
      * class and use {@link Option#memory(String)} or {@link Option#memory(String, Object)} instead.
      *
      * @param keyBytes The bytes of the {@link String} used as the key for this particular
-     *                 {@link Option}. Should be added to the {@code messageDigest} using
-     *                 {@link MessageDigest#update(byte[])} by all implementations if the digest is updated with
-     *                 the given {@code value} parameter.
-     * @param value    The value of of this particular option. Typically you should convert the value
-     *                 to a byte array using some stable mechanism and then call
-     *                 {@link MessageDigest#update(byte[])} to update the given digest.
+     * {@link Option}. Should be added to the {@code messageDigest} using
+     * {@link MessageDigest#update(byte[])} by all implementations if the digest is updated with
+     * the given {@code value} parameter.
+     *
+     * @param value The value of of this particular option. Typically you should convert the value
+     * to a byte array using some stable mechanism and then call
+     * {@link MessageDigest#update(byte[])} to update the given digest.
      */
     void update(@NonNull byte[] keyBytes, @NonNull T value, @NonNull MessageDigest messageDigest);
   }
