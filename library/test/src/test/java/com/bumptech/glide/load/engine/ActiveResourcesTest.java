@@ -13,6 +13,7 @@ import com.bumptech.glide.load.engine.ActiveResources.ResourceWeakReference;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -368,7 +369,7 @@ public class ActiveResourcesTest {
 
   private void waitForLatch(CountDownLatch latch) {
      try {
-      latch.await();
+      latch.await(10, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }

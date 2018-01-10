@@ -1,0 +1,39 @@
+apply plugin: 'pmd'
+
+def library = project(':library')
+
+pmd {
+    toolVersion PMD_VERSION
+}
+
+tasks.create('pmd', Pmd) {
+    dependsOn library.tasks.compileDebugJavaWithJavac
+    targetJdk = TargetJdk.VERSION_1_7
+
+    description 'Run pmd'
+    group 'verification'
+
+    // If ruleSets is not empty, it seems to contain some
+    // defaults which override rules in the ruleset file...
+    ruleSets = []
+    ruleSetFiles = files("${library.projectDir}/pmd-ruleset.xml")
+    source library.android.sourceSets.main.java.srcDirs
+    classpath = files()
+    classpath += files(library.tasks.compileDebugJavaWithJavac.destinationDir)
+    doFirst {
+        classpath += library.classPathForQuality()
+    }
+
+    //TODO enable this once new Gradle containing this flag is out
+    //see https://github.com/gradle/gradle/pull/3125#issuecomment-352442432
+    //incrementalAnalysis = true
+
+    // Failures are caught and printed by the violations plugin.
+    ignoreFailures = true
+
+    reports {
+        xml.enabled = true
+        html.enabled = false
+    }
+}
+

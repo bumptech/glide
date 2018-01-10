@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.util.ByteBufferUtil;
 import java.io.File;
 import java.io.IOException;
@@ -86,13 +88,13 @@ public class BitmapEncoderTest {
 
   @Test
   public void testReturnsTrueFromWrite() {
-    BitmapEncoder encoder = new BitmapEncoder();
+    BitmapEncoder encoder = new BitmapEncoder(harness.arrayPool);
     assertTrue(encoder.encode(harness.resource, harness.file, harness.options));
   }
 
   @Test
   public void testEncodeStrategy_alwaysReturnsTransformed() {
-    BitmapEncoder encoder = new BitmapEncoder();
+    BitmapEncoder encoder = new BitmapEncoder(harness.arrayPool);
     assertEquals(EncodeStrategy.TRANSFORMED, encoder.getEncodeStrategy(harness.options));
   }
 
@@ -105,6 +107,7 @@ public class BitmapEncoderTest {
     final Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     final Options options = new Options();
     final File file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
+    final ArrayPool arrayPool = new LruArrayPool();
 
     EncoderHarness() {
       when(resource.get()).thenReturn(bitmap);
@@ -119,7 +122,7 @@ public class BitmapEncoderTest {
     }
 
     String encode() throws IOException {
-      BitmapEncoder encoder = new BitmapEncoder();
+      BitmapEncoder encoder = new BitmapEncoder(arrayPool);
       encoder.encode(resource, file, options);
       byte[] data = ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
       return new String(data, "UTF-8");

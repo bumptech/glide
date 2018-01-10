@@ -63,6 +63,8 @@ final class ProcessorUtil {
       GLIDE_MODULE_PACKAGE_NAME + "." + LIBRARY_GLIDE_MODULE_SIMPLE_NAME;
   private static final String COMPILER_PACKAGE_NAME =
       GlideAnnotationProcessor.class.getPackage().getName();
+  private static final ClassName NONNULL_ANNOTATION =
+      ClassName.get("android.support.annotation", "NonNull");
 
   private final ProcessingEnvironment processingEnv;
   private final TypeElement appGlideModuleType;
@@ -330,6 +332,10 @@ final class ProcessorUtil {
       result.add(AnnotationSpec.get(mirror));
     }
     return result;
+  }
+
+  static ClassName nonNull() {
+    return NONNULL_ANNOTATION;
   }
 
   List<ExecutableElement> findInstanceMethodsReturning(TypeElement clazz, TypeMirror returnType) {

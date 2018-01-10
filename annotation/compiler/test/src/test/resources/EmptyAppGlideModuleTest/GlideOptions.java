@@ -46,6 +46,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#sizeMultiplierOf(float)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions sizeMultiplierOf(@FloatRange(from = 0.0, to = 1.0) float arg0) {
     return new GlideOptions().sizeMultiplier(arg0);
   }
@@ -54,6 +55,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#diskCacheStrategyOf(DiskCacheStrategy)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions diskCacheStrategyOf(@NonNull DiskCacheStrategy arg0) {
     return new GlideOptions().diskCacheStrategy(arg0);
   }
@@ -62,6 +64,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#priorityOf(Priority)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions priorityOf(@NonNull Priority arg0) {
     return new GlideOptions().priority(arg0);
   }
@@ -70,6 +73,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#placeholderOf(Drawable)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions placeholderOf(@Nullable Drawable arg0) {
     return new GlideOptions().placeholder(arg0);
   }
@@ -78,6 +82,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#placeholderOf(int)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions placeholderOf(@DrawableRes int arg0) {
     return new GlideOptions().placeholder(arg0);
   }
@@ -86,6 +91,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#errorOf(Drawable)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions errorOf(@Nullable Drawable arg0) {
     return new GlideOptions().error(arg0);
   }
@@ -94,6 +100,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#errorOf(int)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions errorOf(@DrawableRes int arg0) {
     return new GlideOptions().error(arg0);
   }
@@ -102,6 +109,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#skipMemoryCacheOf(boolean)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions skipMemoryCacheOf(boolean skipMemoryCache) {
     return new GlideOptions().skipMemoryCache(skipMemoryCache);
   }
@@ -110,6 +118,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#overrideOf(int, int)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions overrideOf(@IntRange(from = 0) int arg0,
       @IntRange(from = 0) int arg1) {
     return new GlideOptions().override(arg0, arg1);
@@ -119,6 +128,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#overrideOf(int)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions overrideOf(@IntRange(from = 0) int arg0) {
     return new GlideOptions().override(arg0);
   }
@@ -127,6 +137,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#signatureOf(Key)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions signatureOf(@NonNull Key arg0) {
     return new GlideOptions().signature(arg0);
   }
@@ -135,6 +146,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#fitCenterTransform()
    */
   @CheckResult
+  @NonNull
   public static GlideOptions fitCenterTransform() {
     if (GlideOptions.fitCenterTransform0 == null) {
       GlideOptions.fitCenterTransform0 =
@@ -147,6 +159,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#centerInsideTransform()
    */
   @CheckResult
+  @NonNull
   public static GlideOptions centerInsideTransform() {
     if (GlideOptions.centerInsideTransform1 == null) {
       GlideOptions.centerInsideTransform1 =
@@ -159,6 +172,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#centerCropTransform()
    */
   @CheckResult
+  @NonNull
   public static GlideOptions centerCropTransform() {
     if (GlideOptions.centerCropTransform2 == null) {
       GlideOptions.centerCropTransform2 =
@@ -171,6 +185,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#circleCropTransform()
    */
   @CheckResult
+  @NonNull
   public static GlideOptions circleCropTransform() {
     if (GlideOptions.circleCropTransform3 == null) {
       GlideOptions.circleCropTransform3 =
@@ -183,6 +198,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#bitmapTransform(Transformation)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions bitmapTransform(@NonNull Transformation<Bitmap> arg0) {
     return new GlideOptions().transform(arg0);
   }
@@ -191,6 +207,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#noTransformation()
    */
   @CheckResult
+  @NonNull
   public static GlideOptions noTransformation() {
     if (GlideOptions.noTransformation4 == null) {
       GlideOptions.noTransformation4 =
@@ -203,6 +220,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#option(Option, T)
    */
   @CheckResult
+  @NonNull
   public static <T> GlideOptions option(@NonNull Option<T> arg0, @NonNull T arg1) {
     return new GlideOptions().set(arg0, arg1);
   }
@@ -211,6 +229,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#decodeTypeOf(Class)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions decodeTypeOf(@NonNull Class<?> arg0) {
     return new GlideOptions().decode(arg0);
   }
@@ -219,6 +238,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#formatOf(DecodeFormat)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions formatOf(@NonNull DecodeFormat arg0) {
     return new GlideOptions().format(arg0);
   }
@@ -227,6 +247,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#frameOf(long)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions frameOf(@IntRange(from = 0) long arg0) {
     return new GlideOptions().frame(arg0);
   }
@@ -235,6 +256,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#downsampleOf(DownsampleStrategy)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions downsampleOf(@NonNull DownsampleStrategy arg0) {
     return new GlideOptions().downsample(arg0);
   }
@@ -243,6 +265,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#timeoutOf(int)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions timeoutOf(@IntRange(from = 0) int arg0) {
     return new GlideOptions().timeout(arg0);
   }
@@ -251,6 +274,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#encodeQualityOf(int)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions encodeQualityOf(@IntRange(from = 0, to = 100) int arg0) {
     return new GlideOptions().encodeQuality(arg0);
   }
@@ -259,6 +283,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#encodeFormatOf(CompressFormat)
    */
   @CheckResult
+  @NonNull
   public static GlideOptions encodeFormatOf(@NonNull Bitmap.CompressFormat arg0) {
     return new GlideOptions().encodeFormat(arg0);
   }
@@ -267,6 +292,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    * @see RequestOptions#noAnimation()
    */
   @CheckResult
+  @NonNull
   public static GlideOptions noAnimation() {
     if (GlideOptions.noAnimation5 == null) {
       GlideOptions.noAnimation5 =
