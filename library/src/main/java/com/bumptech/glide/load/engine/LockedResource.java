@@ -29,6 +29,7 @@ final class LockedResource<Z> implements Resource<Z>,
   private boolean isRecycled;
 
   @SuppressWarnings("unchecked")
+  @NonNull
   static <Z> LockedResource<Z> obtain(Resource<Z> resource) {
     LockedResource<Z> result = Preconditions.checkNotNull((LockedResource<Z>) POOL.acquire());
     result.init(resource);

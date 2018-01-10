@@ -49,7 +49,7 @@ public class ErrorHandlingTest {
   private Context context;
 
   @Before
-  public void setUp() throws InterruptedException {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
     context = InstrumentationRegistry.getTargetContext();
   }
@@ -82,8 +82,7 @@ public class ErrorHandlingTest {
   }
 
   @Test
-  public void load_whenLoadSucceeds_butEncoderFails_doesNotCallOnLoadFailed()
-      throws InterruptedException {
+  public void load_whenLoadSucceeds_butEncoderFails_doesNotCallOnLoadFailed() {
     WaitForErrorStrategy strategy = new WaitForErrorStrategy();
     Glide.init(context,
         new GlideBuilder()
@@ -110,8 +109,7 @@ public class ErrorHandlingTest {
   }
 
   @Test
-  public void clearRequest_withError_afterPrimaryFails_clearsErrorRequest()
-      throws InterruptedException {
+  public void clearRequest_withError_afterPrimaryFails_clearsErrorRequest() {
     WaitModel<Integer> errorModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
 
     FutureTarget<Drawable> target =
@@ -151,6 +149,7 @@ public class ErrorHandlingTest {
 
     static final RuntimeException TO_THROW = new RuntimeException();
 
+    @NonNull
     @Override
     public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
       return EncodeStrategy.TRANSFORMED;

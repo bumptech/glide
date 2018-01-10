@@ -54,7 +54,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       new Option.CacheKeyUpdater<Long>() {
         private final ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
         @Override
-        public void update(@NonNull byte[] keyBytes, Long value, @NonNull MessageDigest messageDigest) {
+        public void update(@NonNull byte[] keyBytes, @NonNull Long value, @NonNull MessageDigest messageDigest) {
           messageDigest.update(keyBytes);
           synchronized (buffer) {
             buffer.position(0);
@@ -79,7 +79,8 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       new Option.CacheKeyUpdater<Integer>() {
         private final ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
         @Override
-        public void update(@NonNull byte[] keyBytes, Integer value, @NonNull MessageDigest messageDigest) {
+        public void update(@NonNull byte[] keyBytes, @NonNull Integer value, @NonNull MessageDigest messageDigest) {
+          //noinspection ConstantConditions public API, people could have been doing
           if (value == null) {
             return;
           }

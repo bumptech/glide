@@ -25,7 +25,7 @@ public class OptionsTest {
 
     CacheKeyUpdater<Integer> updater = new CacheKeyUpdater<Integer>() {
       @Override
-      public void update(@NonNull byte[] keyBytes, Integer value, @NonNull MessageDigest messageDigest) {
+      public void update(@NonNull byte[] keyBytes, @NonNull Integer value, @NonNull MessageDigest messageDigest) {
         messageDigest.update(keyBytes);
         messageDigest.update(ByteBuffer.allocate(4).putInt(value).array());
 

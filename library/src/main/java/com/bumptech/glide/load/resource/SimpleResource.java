@@ -15,7 +15,7 @@ import com.bumptech.glide.util.Preconditions;
 public class SimpleResource<T> implements Resource<T> {
   protected final T data;
 
-  public SimpleResource(T data) {
+  public SimpleResource(@NonNull T data) {
     this.data = Preconditions.checkNotNull(data);
   }
 

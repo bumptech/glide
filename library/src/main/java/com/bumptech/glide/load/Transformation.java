@@ -65,18 +65,4 @@ public interface Transformation<T> extends Key {
   @NonNull
   Resource<T> transform(@NonNull Context context, @NonNull Resource<T> resource,
       int outWidth, int outHeight);
-
-  /**
-   * For caching to work correctly, implementations <em>must</em> implement this method and
-   * {@link #hashCode()}.
-   */
-  @Override
-  boolean equals(Object o);
-
-  /**
-   * For caching to work correctly, implementations <em>must</em> implement this method and
-   * {@link #equals(Object)}.
-   */
-  @Override
-  int hashCode();
 }

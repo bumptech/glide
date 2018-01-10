@@ -27,7 +27,7 @@ import java.security.MessageDigest;
 public final class Option<T> {
   private static final CacheKeyUpdater<Object> EMPTY_UPDATER = new CacheKeyUpdater<Object>() {
     @Override
-    public void update(@NonNull byte[] keyBytes, Object value,
+    public void update(@NonNull byte[] keyBytes, @NonNull Object value,
         @NonNull MessageDigest messageDigest) {
       // Do nothing.
     }
@@ -45,8 +45,9 @@ public final class Option<T> {
    * @param key A unique package prefixed {@link String} that identifies this option (must be
    *            stable across builds, so {@link Class#getName()} should <em>not</em> be used).
    */
+  @NonNull
   public static <T> Option<T> memory(@NonNull String key) {
-    return new Option<>(key, null /*defaultValue*/, Option.<T>emptyUpdater());
+    return new Option<>(key, null, Option.<T>emptyUpdater());
   }
 
   /**
@@ -56,6 +57,7 @@ public final class Option<T> {
    * @param key A unique package prefixed {@link String} that identifies this option (must be
    *            stable across builds, so {@link Class#getName()} should <em>not</em> be used).
    */
+  @NonNull
   public static <T> Option<T> memory(@NonNull String key, @NonNull T defaultValue) {
     return new Option<>(key, defaultValue, Option.<T>emptyUpdater());
   }
@@ -67,9 +69,10 @@ public final class Option<T> {
    * @param key A unique package prefixed {@link String} that identifies this option (must be
    *            stable across builds, so {@link Class#getName()} should <em>not</em> be used).
    */
+  @NonNull
   public static <T> Option<T> disk(@NonNull String key,
       @NonNull CacheKeyUpdater<T> cacheKeyUpdater) {
-    return new Option<>(key, null /*defaultValue*/, cacheKeyUpdater);
+    return new Option<>(key, null, cacheKeyUpdater);
   }
 
   /**
@@ -80,6 +83,7 @@ public final class Option<T> {
    * @param key A unique package prefixed {@link String} that identifies this option (must be
    *            stable across builds, so {@link Class#getName()} should <em>not</em> be used).
    */
+  @NonNull
   public static <T> Option<T> disk(@NonNull String key, @Nullable T defaultValue,
       @NonNull CacheKeyUpdater<T> cacheKeyUpdater) {
     return new Option<>(key, defaultValue, cacheKeyUpdater);
@@ -107,10 +111,11 @@ public final class Option<T> {
    * value using the {@link com.bumptech.glide.load.Option.CacheKeyUpdater} optionally provided in
    * the constructor.
    */
-  public void update(T value, @NonNull MessageDigest messageDigest) {
+  public void update(@NonNull T value, @NonNull MessageDigest messageDigest) {
     cacheKeyUpdater.update(getKeyBytes(), value, messageDigest);
   }
 
+  @NonNull
   private byte[] getKeyBytes() {
     if (keyBytes == null) {
       keyBytes = key.getBytes(Key.CHARSET);
@@ -167,6 +172,6 @@ public final class Option<T> {
      *                 to a byte array using some stable mechanism and then call
      *                 {@link MessageDigest#update(byte[])} to update the given digest.
      */
-    void update(@NonNull byte[] keyBytes, T value, @NonNull MessageDigest messageDigest);
+    void update(@NonNull byte[] keyBytes, @NonNull T value, @NonNull MessageDigest messageDigest);
   }
 }

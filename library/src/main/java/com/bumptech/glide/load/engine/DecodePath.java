@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.NonNull;
 import android.support.v4.util.Pools.Pool;
 import android.util.Log;
 import com.bumptech.glide.load.Options;
@@ -40,14 +41,15 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   }
 
   public Resource<Transcode> decode(DataRewinder<DataType> rewinder, int width, int height,
-      Options options, DecodeCallback<ResourceType> callback) throws GlideException {
+      @NonNull Options options, DecodeCallback<ResourceType> callback) throws GlideException {
     Resource<ResourceType> decoded = decodeResource(rewinder, width, height, options);
     Resource<ResourceType> transformed = callback.onResourceDecoded(decoded);
     return transcoder.transcode(transformed, options);
   }
 
+  @NonNull
   private Resource<ResourceType> decodeResource(DataRewinder<DataType> rewinder, int width,
-      int height, Options options) throws GlideException {
+      int height, @NonNull Options options) throws GlideException {
     List<Throwable> exceptions = Preconditions.checkNotNull(listPool.acquire());
     try {
       return decodeResourceWithList(rewinder, width, height, options, exceptions);
@@ -56,8 +58,9 @@ public class DecodePath<DataType, ResourceType, Transcode> {
     }
   }
 
+  @NonNull
   private Resource<ResourceType> decodeResourceWithList(DataRewinder<DataType> rewinder, int width,
-      int height, Options options, List<Throwable> exceptions) throws GlideException {
+      int height, @NonNull Options options, List<Throwable> exceptions) throws GlideException {
     Resource<ResourceType> result = null;
     //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0, size = decoders.size(); i < size; i++) {
@@ -95,6 +98,7 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   }
 
   interface DecodeCallback<ResourceType> {
-    Resource<ResourceType> onResourceDecoded(Resource<ResourceType> resource);
+    @NonNull
+    Resource<ResourceType> onResourceDecoded(@NonNull Resource<ResourceType> resource);
   }
 }

@@ -29,6 +29,7 @@ public class BitmapDrawableEncoder implements ResourceEncoder<BitmapDrawable> {
     return encoder.encode(new BitmapResource(data.get().getBitmap(), bitmapPool), file, options);
   }
 
+  @NonNull
   @Override
   public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
     return encoder.getEncodeStrategy(options);

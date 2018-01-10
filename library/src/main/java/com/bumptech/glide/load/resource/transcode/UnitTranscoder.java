@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.resource.transcode;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 
@@ -16,8 +18,9 @@ public class UnitTranscoder<Z> implements ResourceTranscoder<Z, Z> {
     return (ResourceTranscoder<Z, Z>) UNIT_TRANSCODER;
   }
 
+  @Nullable
   @Override
-  public Resource<Z> transcode(Resource<Z> toTranscode, Options options) {
+  public Resource<Z> transcode(@NonNull Resource<Z> toTranscode, @NonNull Options options) {
     return toTranscode;
   }
 }

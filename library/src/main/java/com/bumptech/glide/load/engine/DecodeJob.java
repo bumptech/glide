@@ -140,8 +140,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   /**
    * Called when this object is no longer in use externally.
    *
-   * @param isRemovedFromQueue {@code true} if we've been removed from the queue and {@link #run}
-   *                           is neither in progress nor will ever be called again.
+   * @param isRemovedFromQueue {@code true} if we've been removed from the queue and {@link #run} is
+   *                           neither in progress nor will ever be called again.
    */
   void release(boolean isRemovedFromQueue) {
     if (releaseManager.release(isRemovedFromQueue)) {
@@ -259,7 +259,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   private void runWrapped() {
-     switch (runReason) {
+    switch (runReason) {
       case INITIALIZE:
         stage = getNextStage(Stage.INITIALIZE);
         currentGenerator = getNextGenerator();
@@ -399,8 +399,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logWithTimeAndKey("Retrieved data", startFetchTime,
           "data: " + currentData
-          + ", cache key: " + currentSourceKey
-          + ", fetcher: " + currentFetcher);
+              + ", cache key: " + currentSourceKey
+              + ", fetcher: " + currentFetcher);
     }
     Resource<R> resource = null;
     try {
@@ -469,6 +469,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     return runLoadPath(data, dataSource, path);
   }
 
+  @NonNull
   private Options getOptionsWithHardwareConfig(DataSource dataSource) {
     Options options = this.options;
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -517,7 +518,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     return stateVerifier;
   }
 
-  @Synthetic <Z> Resource<Z> onResourceDecoded(DataSource dataSource, Resource<Z> decoded) {
+  @Synthetic
+  @NonNull
+  <Z> Resource<Z> onResourceDecoded(DataSource dataSource,
+      @NonNull Resource<Z> decoded) {
     @SuppressWarnings("unchecked")
     Class<Z> resourceSubClass = (Class<Z>) decoded.get().getClass();
     Transformation<Z> appliedTransformation = null;
@@ -585,8 +589,9 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       this.dataSource = dataSource;
     }
 
+    @NonNull
     @Override
-    public Resource<Z> onResourceDecoded(Resource<Z> decoded) {
+    public Resource<Z> onResourceDecoded(@NonNull Resource<Z> decoded) {
       return DecodeJob.this.onResourceDecoded(dataSource, decoded);
     }
   }
@@ -629,8 +634,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   }
 
   /**
-   * Allows transformed resources to be encoded after the transcoded result is already delivered
-   * to requestors.
+   * Allows transformed resources to be encoded after the transcoded result is already delivered to
+   * requestors.
    */
   private static class DeferredEncodeManager<Z> {
     private Key key;
