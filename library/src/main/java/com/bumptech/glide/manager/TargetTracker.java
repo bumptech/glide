@@ -1,5 +1,6 @@
 package com.bumptech.glide.manager;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Util;
 import java.util.Collections;
@@ -15,11 +16,11 @@ public final class TargetTracker implements LifecycleListener {
   private final Set<Target<?>> targets =
       Collections.newSetFromMap(new WeakHashMap<Target<?>, Boolean>());
 
-  public void track(Target<?> target) {
+  public void track(@NonNull Target<?> target) {
     targets.add(target);
   }
 
-  public void untrack(Target<?> target) {
+  public void untrack(@NonNull Target<?> target) {
     targets.remove(target);
   }
 
@@ -44,6 +45,7 @@ public final class TargetTracker implements LifecycleListener {
     }
   }
 
+  @NonNull
   public List<Target<?>> getAll() {
     return Util.getSnapshot(targets);
   }

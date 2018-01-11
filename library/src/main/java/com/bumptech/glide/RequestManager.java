@@ -629,7 +629,7 @@ public class RequestManager implements LifecycleListener,
     }
   }
 
-  void track(Target<?> target, Request request) {
+  void track(@NonNull Target<?> target, @NonNull Request request) {
     targetTracker.track(target);
     requestTracker.runRequest(request);
   }

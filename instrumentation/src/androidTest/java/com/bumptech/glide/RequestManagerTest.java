@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.widget.ImageView;
@@ -36,12 +37,12 @@ public class RequestManagerTest {
     Glide glide = Glide.get(context);
     requestManager = new RequestManager(glide, new Lifecycle() {
       @Override
-      public void addListener(LifecycleListener listener) {
+      public void addListener(@NonNull LifecycleListener listener) {
         listener.onStart();
       }
 
       @Override
-      public void removeListener(LifecycleListener listener) {
+      public void removeListener(@NonNull LifecycleListener listener) {
         // Do nothing.
       }
     }, treeNode, context);

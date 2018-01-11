@@ -1,5 +1,6 @@
 package com.bumptech.glide.manager;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.RequestManager;
 import java.util.Set;
 
@@ -13,5 +14,6 @@ public interface RequestManagerTreeNode {
    * Returns all descendant {@link RequestManager}s relative to the context of the current
    * {@link RequestManager}.
    */
+  @NonNull
   Set<RequestManager> getDescendants();
 }
