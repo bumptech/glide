@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
@@ -24,7 +25,7 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
 
   private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(@NonNull Context context, Intent intent) {
       boolean wasConnected = isConnected;
       isConnected = isConnected(context);
       if (wasConnected != isConnected) {
@@ -37,7 +38,7 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
     }
   };
 
-  DefaultConnectivityMonitor(Context context, ConnectivityListener listener) {
+  DefaultConnectivityMonitor(@NonNull Context context, @NonNull ConnectivityListener listener) {
     this.context = context.getApplicationContext();
     this.listener = listener;
   }
@@ -75,7 +76,7 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
   @Synthetic
   // Permissions are checked in the factory instead.
   @SuppressLint("MissingPermission")
-  boolean isConnected(Context context) {
+  boolean isConnected(@NonNull Context context) {
     ConnectivityManager connectivityManager =
         Preconditions.checkNotNull(
             (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));

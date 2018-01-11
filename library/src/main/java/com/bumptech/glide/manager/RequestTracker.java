@@ -1,5 +1,6 @@
 package com.bumptech.glide.manager;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.request.Request;
@@ -35,7 +36,7 @@ public class RequestTracker {
   /**
    * Starts tracking the given request.
    */
-  public void runRequest(Request request) {
+  public void runRequest(@NonNull Request request) {
     requests.add(request);
     if (!isPaused) {
       request.begin();

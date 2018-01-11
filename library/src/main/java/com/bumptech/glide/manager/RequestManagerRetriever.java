@@ -80,6 +80,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     handler = new Handler(Looper.getMainLooper(), this /* Callback */);
   }
 
+  @NonNull
   private RequestManager getApplicationManager(@NonNull Context context) {
     // Either an application context or we're on a background thread.
     if (applicationManager == null) {
@@ -361,6 +362,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     return requestManager;
   }
 
+  @NonNull
   SupportRequestManagerFragment getSupportRequestManagerFragment(
       @NonNull final FragmentManager fm, @Nullable Fragment parentHint) {
     SupportRequestManagerFragment current =

@@ -194,6 +194,7 @@ public class RequestManagerTest {
   public void clear_withRequestStartedInSiblingManager_doesNotThrow() {
     final RequestManager child1 = new RequestManager(Glide.get(context), lifecycle,
         new RequestManagerTreeNode() {
+          @NonNull
           @Override
           public Set<RequestManager> getDescendants() {
             return Collections.emptySet();
@@ -201,6 +202,7 @@ public class RequestManagerTest {
         }, context);
     final RequestManager child2 = new RequestManager(Glide.get(context), lifecycle,
         new RequestManagerTreeNode() {
+          @NonNull
           @Override
           public Set<RequestManager> getDescendants() {
             return Collections.emptySet();
@@ -208,6 +210,7 @@ public class RequestManagerTest {
         }, context);
     new RequestManager(Glide.get(context), lifecycle,
         new RequestManagerTreeNode() {
+          @NonNull
           @Override
           public Set<RequestManager> getDescendants() {
             return new HashSet<>(java.util.Arrays.asList(child1, child2));
@@ -223,6 +226,7 @@ public class RequestManagerTest {
   public void clear_withRequestStartedInChildManager_doesNotThrow() {
     final RequestManager child = new RequestManager(Glide.get(context), lifecycle,
         new RequestManagerTreeNode() {
+          @NonNull
           @Override
           public Set<RequestManager> getDescendants() {
             return Collections.emptySet();
@@ -230,6 +234,7 @@ public class RequestManagerTest {
         }, context);
     RequestManager parent = new RequestManager(Glide.get(context), lifecycle,
         new RequestManagerTreeNode() {
+          @NonNull
           @Override
           public Set<RequestManager> getDescendants() {
             return Collections.singleton(child);
@@ -245,6 +250,7 @@ public class RequestManagerTest {
   public void clear_withRequestStartedInParentManager_doesNotThrow() {
     final RequestManager child = new RequestManager(Glide.get(context), lifecycle,
         new RequestManagerTreeNode() {
+          @NonNull
           @Override
           public Set<RequestManager> getDescendants() {
             return Collections.emptySet();
@@ -252,6 +258,7 @@ public class RequestManagerTest {
         }, context);
     RequestManager parent = new RequestManager(Glide.get(context), lifecycle,
         new RequestManagerTreeNode() {
+          @NonNull
           @Override
           public Set<RequestManager> getDescendants() {
             return Collections.singleton(child);

@@ -2,7 +2,9 @@ package com.bumptech.glide.manager;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -37,9 +39,9 @@ public class SupportRequestManagerFragment extends Fragment {
     this(new ActivityFragmentLifecycle());
   }
 
-  // For testing only.
+  @VisibleForTesting
   @SuppressLint("ValidFragment")
-  public SupportRequestManagerFragment(ActivityFragmentLifecycle lifecycle) {
+  public SupportRequestManagerFragment(@NonNull ActivityFragmentLifecycle lifecycle) {
     this.lifecycle = lifecycle;
   }
 
@@ -52,6 +54,7 @@ public class SupportRequestManagerFragment extends Fragment {
     this.requestManager = requestManager;
   }
 
+  @NonNull
   ActivityFragmentLifecycle getGlideLifecycle() {
     return lifecycle;
   }
@@ -69,6 +72,7 @@ public class SupportRequestManagerFragment extends Fragment {
    * to the
    * associated {@link RequestManager}.
    */
+  @NonNull
   public RequestManagerTreeNode getRequestManagerTreeNode() {
     return requestManagerTreeNode;
   }
@@ -85,10 +89,12 @@ public class SupportRequestManagerFragment extends Fragment {
    * Returns the set of fragments that this RequestManagerFragment's parent is a parent to. (i.e.
    * our parent is the fragment that we are annotating).
    */
-  @Synthetic Set<SupportRequestManagerFragment> getDescendantRequestManagerFragments() {
+  @Synthetic
+  @NonNull
+  Set<SupportRequestManagerFragment> getDescendantRequestManagerFragments() {
     if (rootRequestManagerFragment == null) {
       return Collections.emptySet();
-    } else if (this.equals(rootRequestManagerFragment)) {
+    } else if (equals(rootRequestManagerFragment)) {
       return Collections.unmodifiableSet(childRequestManagerFragments);
     } else {
       Set<SupportRequestManagerFragment> descendants = new HashSet<>();
@@ -113,6 +119,7 @@ public class SupportRequestManagerFragment extends Fragment {
     }
   }
 
+  @Nullable
   private Fragment getParentFragmentUsingHint() {
     Fragment fragment = getParentFragment();
     return fragment != null ? fragment : parentFragmentHint;
@@ -121,8 +128,8 @@ public class SupportRequestManagerFragment extends Fragment {
   /**
    * Returns true if the fragment is a descendant of our parent.
    */
-  private boolean isDescendant(Fragment fragment) {
-    Fragment root = this.getParentFragmentUsingHint();
+  private boolean isDescendant(@NonNull Fragment fragment) {
+    Fragment root = getParentFragmentUsingHint();
     Fragment parentFragment;
     while ((parentFragment = fragment.getParentFragment()) != null) {
       if (parentFragment.equals(root)) {
@@ -133,11 +140,11 @@ public class SupportRequestManagerFragment extends Fragment {
     return false;
   }
 
-  private void registerFragmentWithRoot(FragmentActivity activity) {
+  private void registerFragmentWithRoot(@NonNull FragmentActivity activity) {
     unregisterFragmentWithRoot();
     rootRequestManagerFragment = Glide.get(activity).getRequestManagerRetriever()
         .getSupportRequestManagerFragment(activity.getSupportFragmentManager(), null);
-    if (!this.equals(rootRequestManagerFragment)) {
+    if (!equals(rootRequestManagerFragment)) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
     }
   }
@@ -198,6 +205,7 @@ public class SupportRequestManagerFragment extends Fragment {
     @Synthetic
     SupportFragmentRequestManagerTreeNode() { }
 
+    @NonNull
     @Override
     public Set<RequestManager> getDescendants() {
       Set<SupportRequestManagerFragment> descendantFragments =
