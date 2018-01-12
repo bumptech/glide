@@ -1,4 +1,5 @@
 import se.bjurr.violations.gradle.plugin.ViolationsTask
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 buildscript {
     repositories {
@@ -60,6 +61,12 @@ subprojects { project ->
                  * and https://bugs.openjdk.java.net/browse/JDK-8190452
                  */ \
                 << "-Xlint:-classfile"
+        }
+    }
+
+    tasks.withType(Test) {
+        testLogging {
+            exceptionFormat = TestExceptionFormat.FULL
         }
     }
 
