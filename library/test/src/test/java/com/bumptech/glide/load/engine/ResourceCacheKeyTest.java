@@ -52,13 +52,13 @@ public class ResourceCacheKeyTest {
     Options diskOptions = new Options();
     diskOptions.set(Option.disk("key", new CacheKeyUpdater<String>() {
       @Override
-      public void update(@NonNull byte[] keyBytes, @NonNull String value, @NonNull MessageDigest messageDigest) {
+      public void update(@NonNull byte[] keyBytes, @NonNull String value,
+          @NonNull MessageDigest messageDigest) {
         messageDigest.update(keyBytes);
         messageDigest.update(value.getBytes(Key.CHARSET));
 
       }
     }), "value");
-
 
     for (int i = 0; i < 20; i++) {
       byte[] array = new byte[9];

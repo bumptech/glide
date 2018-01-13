@@ -17,11 +17,11 @@ import com.caverock.androidsvg.SVG;
 public class SvgDrawableTranscoder implements ResourceTranscoder<SVG, PictureDrawable> {
   @Nullable
   @Override
-  public Resource<PictureDrawable> transcode(@NonNull Resource<SVG> toTranscode, @NonNull Options options) {
+  public Resource<PictureDrawable> transcode(@NonNull Resource<SVG> toTranscode,
+      @NonNull Options options) {
     SVG svg = toTranscode.get();
     Picture picture = svg.renderToPicture();
     PictureDrawable drawable = new PictureDrawable(picture);
     return new SimpleResource<>(drawable);
   }
 }
-

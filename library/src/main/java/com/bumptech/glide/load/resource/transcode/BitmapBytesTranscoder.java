@@ -31,7 +31,8 @@ public class BitmapBytesTranscoder implements ResourceTranscoder<Bitmap, byte[]>
 
   @Nullable
   @Override
-  public Resource<byte[]> transcode(@NonNull Resource<Bitmap> toTranscode, @NonNull Options options) {
+  public Resource<byte[]> transcode(@NonNull Resource<Bitmap> toTranscode,
+      @NonNull Options options) {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     toTranscode.get().compress(compressFormat, quality, os);
     toTranscode.recycle();

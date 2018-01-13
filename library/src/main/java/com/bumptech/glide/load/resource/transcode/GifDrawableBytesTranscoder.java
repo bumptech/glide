@@ -17,7 +17,8 @@ import java.nio.ByteBuffer;
 public class GifDrawableBytesTranscoder implements ResourceTranscoder<GifDrawable, byte[]> {
   @Nullable
   @Override
-  public Resource<byte[]> transcode(@NonNull Resource<GifDrawable> toTranscode, @NonNull Options options) {
+  public Resource<byte[]> transcode(@NonNull Resource<GifDrawable> toTranscode,
+      @NonNull Options options) {
     GifDrawable gifData = toTranscode.get();
     ByteBuffer byteBuffer = gifData.getBuffer();
     return new BytesResource(ByteBufferUtil.toBytes(byteBuffer));

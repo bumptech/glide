@@ -62,5 +62,6 @@ public interface ImageHeaderParser {
    */
   int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool) throws IOException;
 
-  int getOrientation(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool) throws IOException;
+  int getOrientation(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
+      throws IOException;
 }

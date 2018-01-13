@@ -32,7 +32,8 @@ public final class DrawableBytesTranscoder implements ResourceTranscoder<Drawabl
 
   @Nullable
   @Override
-  public Resource<byte[]> transcode(@NonNull Resource<Drawable> toTranscode, @NonNull Options options) {
+  public Resource<byte[]> transcode(@NonNull Resource<Drawable> toTranscode,
+      @NonNull Options options) {
     Drawable drawable = toTranscode.get();
     if (drawable instanceof BitmapDrawable) {
       return bitmapBytesTranscoder.transcode(

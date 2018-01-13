@@ -40,7 +40,8 @@ public class BitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, Bitm
 
   @Nullable
   @Override
-  public Resource<BitmapDrawable> transcode(@NonNull Resource<Bitmap> toTranscode, @NonNull Options options) {
+  public Resource<BitmapDrawable> transcode(@NonNull Resource<Bitmap> toTranscode,
+      @NonNull Options options) {
     return LazyBitmapDrawableResource.obtain(resources, toTranscode);
   }
 }

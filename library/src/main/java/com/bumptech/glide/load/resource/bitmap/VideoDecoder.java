@@ -53,8 +53,10 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.TargetFrame", DEFAULT_FRAME,
       new Option.CacheKeyUpdater<Long>() {
         private final ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
+
         @Override
-        public void update(@NonNull byte[] keyBytes, @NonNull Long value, @NonNull MessageDigest messageDigest) {
+        public void update(@NonNull byte[] keyBytes, @NonNull Long value,
+            @NonNull MessageDigest messageDigest) {
           messageDigest.update(keyBytes);
           synchronized (buffer) {
             buffer.position(0);
@@ -78,8 +80,10 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       /*defaultValue=*/ MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
       new Option.CacheKeyUpdater<Integer>() {
         private final ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
+
         @Override
-        public void update(@NonNull byte[] keyBytes, @NonNull Integer value, @NonNull MessageDigest messageDigest) {
+        public void update(@NonNull byte[] keyBytes, @NonNull Integer value,
+            @NonNull MessageDigest messageDigest) {
           //noinspection ConstantConditions public API, people could have been doing it wrong
           if (value == null) {
             return;
@@ -176,10 +180,10 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     // Target.SIZE_ORIGINAL is not used and not using getScaledFrameAtTime ever would match the
     // behavior of Glide in all versions of Android prior to OMR1, it's probably fine for now.
     if (Build.VERSION.SDK_INT >= VERSION_CODES.O_MR1
-         && outWidth != Target.SIZE_ORIGINAL
-         && outHeight != Target.SIZE_ORIGINAL) {
-       return mediaMetadataRetriever.getScaledFrameAtTime(
-           frameTimeMicros, frameOption, outWidth, outHeight);
+        && outWidth != Target.SIZE_ORIGINAL
+        && outHeight != Target.SIZE_ORIGINAL) {
+      return mediaMetadataRetriever.getScaledFrameAtTime(
+          frameTimeMicros, frameOption, outWidth, outHeight);
     } else {
       return mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
     }
