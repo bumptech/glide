@@ -15,6 +15,7 @@ import android.support.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
@@ -153,6 +154,38 @@ public class WideGamutTest {
                 .load(data)
                 .submit());
     assertThat(bitmap).isNotNull();
+  }
+
+  @Test
+  public void circleCrop_withWideGamutBitmap_producesWideGamutBitmap() {
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Config.RGBA_F16);
+    byte[] data = asPng(bitmap);
+
+    Bitmap result =
+        concurrency.get(
+            GlideApp.with(context)
+                .asBitmap()
+                .load(data)
+                .circleCrop()
+                .submit());
+    assertThat(result).isNotNull();
+    assertThat(result.getConfig()).isEqualTo(Config.RGBA_F16);
+  }
+
+  @Test
+  public void roundedCorners_withWideGamutBitmap_producesWideGamutBitmap() {
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Config.RGBA_F16);
+    byte[] data = asPng(bitmap);
+
+    Bitmap result =
+        concurrency.get(
+            GlideApp.with(context)
+                .asBitmap()
+                .load(data)
+                .transform(new RoundedCorners(/*roundingRadius=*/ 10))
+                .submit());
+    assertThat(result).isNotNull();
+    assertThat(result.getConfig()).isEqualTo(Config.RGBA_F16);
   }
 
   private static byte[] asJpeg(Bitmap bitmap) {

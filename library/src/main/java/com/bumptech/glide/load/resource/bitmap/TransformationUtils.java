@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -137,7 +138,7 @@ public final class TransformationUtils {
     m.setScale(scale, scale);
     m.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
 
-    Bitmap result = pool.get(width, height, getSafeConfig(inBitmap));
+    Bitmap result = pool.get(width, height, getNonNullConfig(inBitmap));
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
     TransformationUtils.setAlpha(inBitmap, result);
 
@@ -186,7 +187,7 @@ public final class TransformationUtils {
     targetWidth = (int) (minPercentage * inBitmap.getWidth());
     targetHeight = (int) (minPercentage * inBitmap.getHeight());
 
-    Bitmap.Config config = getSafeConfig(inBitmap);
+    Bitmap.Config config = getNonNullConfig(inBitmap);
     Bitmap toReuse = pool.get(targetWidth, targetHeight, config);
 
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
@@ -324,7 +325,7 @@ public final class TransformationUtils {
     final int newWidth = Math.round(newRect.width());
     final int newHeight = Math.round(newRect.height());
 
-    Bitmap.Config config = getSafeConfig(inBitmap);
+    Bitmap.Config config = getNonNullConfig(inBitmap);
     Bitmap result = pool.get(newWidth, newHeight, config);
 
     matrix.postTranslate(-newRect.left, -newRect.top);
@@ -384,7 +385,8 @@ public final class TransformationUtils {
     // Alpha is required for this transformation.
     Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
 
-    Bitmap result = pool.get(destMinEdge, destMinEdge, Bitmap.Config.ARGB_8888);
+    Bitmap.Config outConfig = getAlphaSafeConfig(inBitmap);
+    Bitmap result = pool.get(destMinEdge, destMinEdge, outConfig);
     result.setHasAlpha(true);
 
     BITMAP_DRAWABLE_LOCK.lock();
@@ -406,19 +408,32 @@ public final class TransformationUtils {
     return result;
   }
 
-  private static Bitmap getAlphaSafeBitmap(@NonNull BitmapPool pool,
-      @NonNull Bitmap maybeAlphaSafe) {
-    if (Bitmap.Config.ARGB_8888.equals(maybeAlphaSafe.getConfig())) {
+  private static Bitmap getAlphaSafeBitmap(
+      @NonNull BitmapPool pool, @NonNull Bitmap maybeAlphaSafe) {
+    Bitmap.Config safeConfig = getAlphaSafeConfig(maybeAlphaSafe);
+    if (safeConfig.equals(maybeAlphaSafe.getConfig())) {
       return maybeAlphaSafe;
     }
 
-    Bitmap argbBitmap = pool.get(maybeAlphaSafe.getWidth(), maybeAlphaSafe.getHeight(),
-        Bitmap.Config.ARGB_8888);
+    Bitmap argbBitmap =
+        pool.get(maybeAlphaSafe.getWidth(), maybeAlphaSafe.getHeight(), safeConfig);
     new Canvas(argbBitmap).drawBitmap(maybeAlphaSafe, 0 /*left*/, 0 /*top*/, null /*paint*/);
 
     // We now own this Bitmap. It's our responsibility to replace it in the pool outside this method
     // when we're finished with it.
     return argbBitmap;
+  }
+
+  @NonNull
+  private static Config getAlphaSafeConfig(@NonNull Bitmap inBitmap) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      // Avoid short circuiting the sdk check.
+      if (Bitmap.Config.RGBA_F16.equals(inBitmap.getConfig())) { // NOPMD
+        return Bitmap.Config.RGBA_F16;
+      }
+    }
+
+    return Bitmap.Config.ARGB_8888;
   }
 
   /**
@@ -462,9 +477,9 @@ public final class TransformationUtils {
     Preconditions.checkArgument(roundingRadius > 0, "roundingRadius must be greater than 0.");
 
     // Alpha is required for this transformation.
+    Bitmap.Config safeConfig = getAlphaSafeConfig(inBitmap);
     Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
-    Bitmap result =
-        pool.get(toTransform.getWidth(), toTransform.getHeight(), Bitmap.Config.ARGB_8888);
+    Bitmap result = pool.get(toTransform.getWidth(), toTransform.getHeight(), safeConfig);
 
     result.setHasAlpha(true);
 
@@ -496,7 +511,8 @@ public final class TransformationUtils {
     canvas.setBitmap(null);
   }
 
-  private static Bitmap.Config getSafeConfig(Bitmap bitmap) {
+  @NonNull
+  private static Bitmap.Config getNonNullConfig(@NonNull Bitmap bitmap) {
     return bitmap.getConfig() != null ? bitmap.getConfig() : Bitmap.Config.ARGB_8888;
   }
 
