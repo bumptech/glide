@@ -14,10 +14,7 @@ import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 
-/**
- * Provides classes related to the Imgur API via Dagger.
- */
-@Singleton
+/** Provides classes related to the Imgur API via Dagger. */
 @Module
 public final class ApiModule {
 
