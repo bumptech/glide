@@ -26,6 +26,19 @@ import java.util.TreeMap;
 @RequiresApi(Build.VERSION_CODES.KITKAT)
 public class SizeConfigStrategy implements LruPoolStrategy {
   private static final int MAX_SIZE_MULTIPLE = 8;
+
+  // TODO: This can probably be combined with ARGB_8888, it's separate only because we haven't
+  // yet tested ARGB_8888/RGBA_F16 re-use thoroughly yet.
+  private static final Bitmap.Config[] RGBA_F16_IN_CONFIGS;
+  static {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      RGBA_F16_IN_CONFIGS = new Bitmap.Config[] { Bitmap.Config.RGBA_F16 };
+    } else {
+      // THis will never be used pre O.
+      RGBA_F16_IN_CONFIGS = new Bitmap.Config[0];
+    }
+  }
+
   private static final Bitmap.Config[] ARGB_8888_IN_CONFIGS =
       new Bitmap.Config[] {
           Bitmap.Config.ARGB_8888,
@@ -232,6 +245,12 @@ public class SizeConfigStrategy implements LruPoolStrategy {
   }
 
   private static Bitmap.Config[] getInConfigs(Bitmap.Config requested) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      if (Bitmap.Config.RGBA_F16.equals(requested)) { // NOPMD - Avoid short circuiting sdk checks.
+        return RGBA_F16_IN_CONFIGS;
+      }
+    }
+
     switch (requested) {
       case ARGB_8888:
         return ARGB_8888_IN_CONFIGS;
