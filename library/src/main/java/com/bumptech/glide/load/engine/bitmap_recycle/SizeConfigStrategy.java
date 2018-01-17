@@ -1,12 +1,14 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -27,24 +29,22 @@ import java.util.TreeMap;
 public class SizeConfigStrategy implements LruPoolStrategy {
   private static final int MAX_SIZE_MULTIPLE = 8;
 
-  // TODO: This can probably be combined with ARGB_8888, it's separate only because we haven't
-  // yet tested ARGB_8888/RGBA_F16 re-use thoroughly yet.
-  private static final Bitmap.Config[] RGBA_F16_IN_CONFIGS;
+  private static final Bitmap.Config[] ARGB_8888_IN_CONFIGS;
   static {
+    Bitmap.Config[] result =
+        new Bitmap.Config[] {
+            Bitmap.Config.ARGB_8888,
+            // The value returned by Bitmaps with the hidden Bitmap config.
+            null,
+        };
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      RGBA_F16_IN_CONFIGS = new Bitmap.Config[] { Bitmap.Config.RGBA_F16 };
-    } else {
-      // THis will never be used pre O.
-      RGBA_F16_IN_CONFIGS = new Bitmap.Config[0];
+      result = Arrays.copyOf(result, result.length + 1);
+      result[result.length - 1] = Config.RGBA_F16;
     }
+    ARGB_8888_IN_CONFIGS = result;
   }
+  private static final Bitmap.Config[] RGBA_F16_IN_CONFIGS = ARGB_8888_IN_CONFIGS;
 
-  private static final Bitmap.Config[] ARGB_8888_IN_CONFIGS =
-      new Bitmap.Config[] {
-          Bitmap.Config.ARGB_8888,
-          // The value returned by Bitmaps with the hidden Bitmap config.
-          null,
-      };
   // We probably could allow ARGB_4444 and RGB_565 to decode into each other, but ARGB_4444 is
   // deprecated and we'd rather be safe.
   private static final Bitmap.Config[] RGB_565_IN_CONFIGS =

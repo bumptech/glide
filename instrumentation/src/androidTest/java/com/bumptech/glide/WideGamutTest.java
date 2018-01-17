@@ -188,6 +188,26 @@ public class WideGamutTest {
     assertThat(result.getConfig()).isEqualTo(Config.RGBA_F16);
   }
 
+  @Test
+  public void loadWideGamutImage_withArgb888OfSufficientSizeInPool_usesArgb8888Bitmap() {
+    Bitmap wideGamut = Bitmap.createBitmap(100, 50, Bitmap.Config.RGBA_F16);
+    byte[] data = asPng(wideGamut);
+
+    Bitmap argb8888 = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    Glide.init(context, new GlideBuilder()
+        .setBitmapPool(new LruBitmapPool(wideGamut.getAllocationByteCount() * 5)));
+    Glide.get(context).getBitmapPool().put(argb8888);
+
+    Bitmap result =
+        concurrency.get(
+            Glide.with(context)
+                .asBitmap()
+                .load(data)
+                .submit());
+
+    assertThat(result).isSameAs(argb8888);
+  }
+
   private static byte[] asJpeg(Bitmap bitmap) {
     return toByteArray(bitmap, CompressFormat.JPEG);
   }
