@@ -1,5 +1,6 @@
 package com.bumptech.glide.util;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import android.graphics.Bitmap;
@@ -9,7 +10,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(manifest = Config.NONE, sdk = 27)
 public class UtilTest {
 
   @Test
@@ -69,5 +70,13 @@ public class UtilTest {
     int height = 41324;
     int size = Util.getBitmapByteSize(width, height, null);
     assertEquals(width * height * 4, size);
+  }
+
+  @Test
+  public void getBitmapByteSize_withRGBA_F16_returnsCorrectSize() {
+    int width = 100;
+    int height = 200;
+    assertThat(Util.getBitmapByteSize(width, height, Bitmap.Config.RGBA_F16))
+        .isEqualTo(width * height * 8);
   }
 }

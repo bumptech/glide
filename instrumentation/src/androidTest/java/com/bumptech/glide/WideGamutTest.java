@@ -6,12 +6,14 @@ import static org.junit.Assume.assumeTrue;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
 import android.graphics.ColorSpace;
 import android.graphics.ColorSpace.Named;
 import android.os.Build;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
@@ -86,9 +88,7 @@ public class WideGamutTest {
         Bitmap.createBitmap(
             100, 100, Bitmap.Config.RGBA_F16, /*hasAlpha=*/ true, ColorSpace.get(Named.DCI_P3));
 
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    assertThat(toCompress.compress(CompressFormat.PNG, 100, os)).isTrue();
-    byte[] data = os.toByteArray();
+    byte[] data = asPng(toCompress);
 
     Bitmap bitmap =
         concurrency.get(
@@ -108,9 +108,7 @@ public class WideGamutTest {
         Bitmap.createBitmap(
             100, 100, Bitmap.Config.RGBA_F16, /*hasAlpha=*/ true, ColorSpace.get(Named.DCI_P3));
 
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    assertThat(toCompress.compress(CompressFormat.JPEG, 100, os)).isTrue();
-    byte[] data = os.toByteArray();
+    byte[] data = asJpeg(toCompress);
 
     Bitmap bitmap =
         concurrency.get(
@@ -127,9 +125,7 @@ public class WideGamutTest {
         Bitmap.createBitmap(
             100, 100, Bitmap.Config.RGBA_F16, /*hasAlpha=*/ true, ColorSpace.get(Named.DCI_P3));
 
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    assertThat(toCompress.compress(CompressFormat.WEBP, 100, os)).isTrue();
-    byte[] data = os.toByteArray();
+    byte[] data = asWebp(toCompress);
 
     Bitmap bitmap =
         concurrency.get(
@@ -138,5 +134,42 @@ public class WideGamutTest {
                 .load(data)
                 .submit());
     assertThat(bitmap.getConfig()).isEqualTo(Bitmap.Config.ARGB_8888);
+  }
+
+  @Test
+  public void load_withSmallerWideGamutInPool_decodesBitmap() {
+    BitmapPool bitmapPool = Glide.get(context).getBitmapPool();
+    Bitmap toPut = Bitmap.createBitmap(300, 298, Config.RGBA_F16);
+    bitmapPool.put(toPut);
+    // Add a second Bitmap to account for the InputStream decode.
+    bitmapPool.put(Bitmap.createBitmap(toPut));
+
+    Bitmap wideGamut = Bitmap.createBitmap(300, 300, Config.RGBA_F16);
+    byte[] data = asPng(wideGamut);
+    Bitmap bitmap =
+        concurrency.get(
+            Glide.with(context)
+                .asBitmap()
+                .load(data)
+                .submit());
+    assertThat(bitmap).isNotNull();
+  }
+
+  private static byte[] asJpeg(Bitmap bitmap) {
+    return toByteArray(bitmap, CompressFormat.JPEG);
+  }
+
+  private static byte[] asPng(Bitmap bitmap) {
+    return toByteArray(bitmap, CompressFormat.PNG);
+  }
+
+  private static byte[] asWebp(Bitmap bitmap) {
+    return toByteArray(bitmap, CompressFormat.WEBP);
+  }
+
+  private static byte[] toByteArray(Bitmap bitmap, CompressFormat format) {
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    assertThat(bitmap.compress(format, 100, os)).isTrue();
+    return os.toByteArray();
   }
 }
