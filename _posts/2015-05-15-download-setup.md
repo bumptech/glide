@@ -12,7 +12,7 @@ disqus: 1
 ### Android SDK Requirements
 **Minimum SDK Version** - Glide requires a minimum SDK version of **14** (Ice Cream Sandwich) or higher.
 
-**Compile SDK Version** - Glide must be compiled against SDK version **26** (Oreo) or higher.
+**Compile SDK Version** - Glide must be compiled against SDK version **27** (Oreo MR1) or higher.
 
 **Support Library Version** - Glide uses support library version **27**.
 
