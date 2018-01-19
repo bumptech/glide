@@ -208,6 +208,14 @@ If you use proguard, you may need to add the following lines to your ``proguard.
   public *;
 }
 
+If you're targeting any API level less than Android API 27, also include:
+```pro
+-dontwarn com.bumptech.glide.load.resource.bitmap.VideoDecoder
+```
+VideoDecoder uses API 27 APIs which may cause proguard warnings even though the newer APIs won't be called on devices with older versions of Android.
+
+If you use DexGuard you may also want to include:
+```pro
 # for DexGuard only
 -keepresourcexmlelements manifest/application/meta-data@value=GlideModule
 ```
