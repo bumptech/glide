@@ -58,7 +58,6 @@ public class DrawableTransformation implements Transformation<Drawable> {
         return resource;
       }
     }
-    // TODO bitmapResourceToTransform can be null, what to do?
     Resource<Bitmap> transformedBitmapResource =
         wrapped.transform(context, bitmapResourceToTransform, outWidth, outHeight);
 
