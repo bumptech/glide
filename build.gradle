@@ -1,4 +1,5 @@
 import se.bjurr.violations.gradle.plugin.ViolationsTask
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 buildscript {
     repositories {
@@ -31,6 +32,15 @@ if (JavaVersion.current().isJava8Compatible()) {
 }
 
 subprojects { project ->
+
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+    }
+
     tasks.withType(JavaCompile) {
         sourceCompatibility = 1.7
         targetCompatibility = 1.7
@@ -54,40 +64,15 @@ subprojects { project ->
         }
     }
 
+    tasks.withType(Test) {
+        testLogging {
+            exceptionFormat = TestExceptionFormat.FULL
+        }
+    }
+
     // Avoid issues like #2452.
     tasks.withType(Jar) {
         duplicatesStrategy = DuplicatesStrategy.FAIL
-    }
-
-    project.afterEvaluate {
-        if (project.hasProperty("android")
-                && project.name != 'pmd'
-                && project.name != 'findbugs') {
-            android {
-                lintOptions {
-                    warningsAsErrors true
-                    quiet true
-                    // Caught by the violations plugin.
-                    abortOnError false
-                }
-            }
-
-            android.variantFilter { variant ->
-                if(variant.buildType.name == 'release') {
-                    variant.setIgnore(true)
-                }
-            }
-        }
-    }
-}
-
-subprojects { project ->
-    repositories {
-        google()
-        jcenter()
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
     }
 
     apply plugin: 'checkstyle'
@@ -134,6 +119,25 @@ subprojects { project ->
         if (project.tasks.findByName('check')) {
             check.dependsOn('checkstyle')
             check.finalizedBy violations
+        }
+
+        if (project.hasProperty("android")
+                && project.name != 'pmd'
+                && project.name != 'findbugs') {
+            android {
+                lintOptions {
+                    warningsAsErrors true
+                    quiet true
+                    // Caught by the violations plugin.
+                    abortOnError false
+                }
+            }
+
+            android.variantFilter { variant ->
+                if(variant.buildType.name == 'release') {
+                    variant.setIgnore(true)
+                }
+            }
         }
     }
 }

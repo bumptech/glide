@@ -32,12 +32,14 @@ import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.gif.GifDrawableTest.BitmapTrackingShadowCanvas;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -54,6 +56,8 @@ import org.robolectric.shadows.ShadowCanvas;
 @Config(manifest = Config.NONE, sdk = 18,
     shadows = { GlideShadowLooper.class, BitmapTrackingShadowCanvas.class })
 public class GifDrawableTest {
+  @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
+
   private GifDrawable drawable;
   private int frameHeight;
   private int frameWidth;

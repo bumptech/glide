@@ -1,12 +1,14 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -26,12 +28,23 @@ import java.util.TreeMap;
 @RequiresApi(Build.VERSION_CODES.KITKAT)
 public class SizeConfigStrategy implements LruPoolStrategy {
   private static final int MAX_SIZE_MULTIPLE = 8;
-  private static final Bitmap.Config[] ARGB_8888_IN_CONFIGS =
-      new Bitmap.Config[] {
-          Bitmap.Config.ARGB_8888,
-          // The value returned by Bitmaps with the hidden Bitmap config.
-          null,
-      };
+
+  private static final Bitmap.Config[] ARGB_8888_IN_CONFIGS;
+  static {
+    Bitmap.Config[] result =
+        new Bitmap.Config[] {
+            Bitmap.Config.ARGB_8888,
+            // The value returned by Bitmaps with the hidden Bitmap config.
+            null,
+        };
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      result = Arrays.copyOf(result, result.length + 1);
+      result[result.length - 1] = Config.RGBA_F16;
+    }
+    ARGB_8888_IN_CONFIGS = result;
+  }
+  private static final Bitmap.Config[] RGBA_F16_IN_CONFIGS = ARGB_8888_IN_CONFIGS;
+
   // We probably could allow ARGB_4444 and RGB_565 to decode into each other, but ARGB_4444 is
   // deprecated and we'd rather be safe.
   private static final Bitmap.Config[] RGB_565_IN_CONFIGS =
@@ -232,6 +245,12 @@ public class SizeConfigStrategy implements LruPoolStrategy {
   }
 
   private static Bitmap.Config[] getInConfigs(Bitmap.Config requested) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      if (Bitmap.Config.RGBA_F16.equals(requested)) { // NOPMD - Avoid short circuiting sdk checks.
+        return RGBA_F16_IN_CONFIGS;
+      }
+    }
+
     switch (requested) {
       case ARGB_8888:
         return ARGB_8888_IN_CONFIGS;

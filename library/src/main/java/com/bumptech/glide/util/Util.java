@@ -111,6 +111,9 @@ public final class Util {
       case ARGB_4444:
         bytesPerPixel = 2;
         break;
+      case RGBA_F16:
+        bytesPerPixel = 8;
+        break;
       case ARGB_8888:
       default:
         bytesPerPixel = 4;
