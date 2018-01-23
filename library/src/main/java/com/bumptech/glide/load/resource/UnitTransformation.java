@@ -20,6 +20,7 @@ public final class UnitTransformation<T> implements Transformation<T> {
    * @param <T> The type of the resource to be transformed.
    */
   @SuppressWarnings("unchecked")
+  @NonNull
   public static <T> UnitTransformation<T> get() {
     return (UnitTransformation<T>) TRANSFORMATION;
   }

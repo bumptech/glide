@@ -56,7 +56,8 @@ public final class LazyBitmapDrawableResource implements Resource<BitmapDrawable
 
   }
 
-  private LazyBitmapDrawableResource(Resources resources, Resource<Bitmap> bitmapResource) {
+  private LazyBitmapDrawableResource(@NonNull Resources resources,
+      @NonNull Resource<Bitmap> bitmapResource) {
     this.resources = Preconditions.checkNotNull(resources);
     this.bitmapResource = Preconditions.checkNotNull(bitmapResource);
   }

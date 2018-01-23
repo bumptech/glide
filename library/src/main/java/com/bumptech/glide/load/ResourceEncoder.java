@@ -11,5 +11,6 @@ import com.bumptech.glide.load.engine.Resource;
  */
 public interface ResourceEncoder<T> extends Encoder<Resource<T>> {
   // specializing the generic arguments
+  @NonNull
   EncodeStrategy getEncodeStrategy(@NonNull Options options);
 }

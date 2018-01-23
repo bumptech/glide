@@ -17,6 +17,7 @@ import java.io.IOException;
 public class GifDrawableEncoder implements ResourceEncoder<GifDrawable> {
   private static final String TAG = "GifEncoder";
 
+  @NonNull
   @Override
   public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
     return EncodeStrategy.SOURCE;

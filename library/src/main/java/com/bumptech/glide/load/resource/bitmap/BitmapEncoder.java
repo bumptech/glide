@@ -125,6 +125,7 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
     }
   }
 
+  @NonNull
   @Override
   public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
     return EncodeStrategy.TRANSFORMED;

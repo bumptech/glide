@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Option.CacheKeyUpdater;
@@ -55,7 +56,8 @@ public class EngineKeyTest {
     Options diskOptions = new Options();
     diskOptions.set(Option.disk("key", new CacheKeyUpdater<String>() {
       @Override
-      public void update(byte[] keyBytes, String value, MessageDigest messageDigest) {
+      public void update(@NonNull byte[] keyBytes, @NonNull String value,
+          @NonNull MessageDigest messageDigest) {
         messageDigest.update(keyBytes);
         messageDigest.update(value.getBytes(Key.CHARSET));
 

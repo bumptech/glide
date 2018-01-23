@@ -1,5 +1,6 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -20,8 +21,9 @@ public final class ImageHeaderParserUtils {
   private ImageHeaderParserUtils() { }
 
   /** Returns the ImageType for the given InputStream. */
-  public static ImageType getType(List<ImageHeaderParser> parsers, @Nullable InputStream is,
-      ArrayPool byteArrayPool) throws IOException {
+  @NonNull
+  public static ImageType getType(@NonNull List<ImageHeaderParser> parsers,
+      @Nullable InputStream is, @NonNull ArrayPool byteArrayPool) throws IOException {
     if (is == null) {
       return ImageType.UNKNOWN;
     }
@@ -48,7 +50,9 @@ public final class ImageHeaderParserUtils {
   }
 
   /** Returns the ImageType for the given ByteBuffer. */
-  public static ImageType getType(List<ImageHeaderParser> parsers, @Nullable ByteBuffer buffer)
+  @NonNull
+  public static ImageType getType(@NonNull List<ImageHeaderParser> parsers,
+      @Nullable ByteBuffer buffer)
       throws IOException {
     if (buffer == null) {
       return ImageType.UNKNOWN;
@@ -66,9 +70,11 @@ public final class ImageHeaderParserUtils {
     return ImageType.UNKNOWN;
   }
 
-  /** Returns the orientation for the given InputStream. */
-  public static int getOrientation(List<ImageHeaderParser> parsers, @Nullable InputStream is,
-      ArrayPool byteArrayPool) throws IOException {
+  /**
+   * Returns the orientation for the given InputStream.
+   */
+  public static int getOrientation(@NonNull List<ImageHeaderParser> parsers,
+      @Nullable InputStream is, @NonNull ArrayPool byteArrayPool) throws IOException {
     if (is == null) {
       return ImageHeaderParser.UNKNOWN_ORIENTATION;
     }

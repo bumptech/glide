@@ -6,6 +6,7 @@ import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG_A;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.UNKNOWN;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -56,28 +57,33 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   private static final int WEBP_EXTENDED_ALPHA_FLAG = 1 << 4;
   private static final int WEBP_LOSSLESS_ALPHA_FLAG = 1 << 3;
 
+  @NonNull
   @Override
-  public ImageType getType(InputStream is) throws IOException {
+  public ImageType getType(@NonNull InputStream is) throws IOException {
     return getType(new StreamReader(Preconditions.checkNotNull(is)));
   }
 
+  @NonNull
   @Override
-  public ImageType getType(ByteBuffer byteBuffer) throws IOException {
+  public ImageType getType(@NonNull ByteBuffer byteBuffer) throws IOException {
     return getType(new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)));
   }
 
   @Override
-  public int getOrientation(InputStream is, ArrayPool byteArrayPool) throws IOException {
+  public int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
     return getOrientation(new StreamReader(Preconditions.checkNotNull(is)),
         Preconditions.checkNotNull(byteArrayPool));
   }
 
   @Override
-  public int getOrientation(ByteBuffer byteBuffer, ArrayPool byteArrayPool) throws IOException {
+  public int getOrientation(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
     return getOrientation(new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)),
         Preconditions.checkNotNull(byteArrayPool));
   }
 
+  @NonNull
   private ImageType getType(Reader reader) throws IOException {
     final int firstTwoBytes = reader.getUInt16();
 
@@ -232,13 +238,13 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       if (segmentType != EXIF_SEGMENT_TYPE) {
         long skipped = reader.skip(segmentLength);
         if (skipped != segmentLength) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Unable to skip enough data"
-                    + ", type: " + segmentType
-                    + ", wanted to skip: " + segmentLength
-                    + ", but actually skipped: " + skipped);
-            }
-            return -1;
+          if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Unable to skip enough data"
+                + ", type: " + segmentType
+                + ", wanted to skip: " + segmentLength
+                + ", but actually skipped: " + skipped);
+          }
+          return -1;
         }
       } else {
         return segmentLength;
@@ -389,24 +395,24 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     @Override
-    public int getUInt16() throws IOException {
+    public int getUInt16() {
       return (getByte() << 8 & 0xFF00) | (getByte() & 0xFF);
     }
 
     @Override
-    public short getUInt8() throws IOException {
+    public short getUInt8() {
       return (short) (getByte() & 0xFF);
     }
 
     @Override
-    public long skip(long total) throws IOException {
+    public long skip(long total) {
       int toSkip = (int) Math.min(byteBuffer.remaining(), total);
       byteBuffer.position(byteBuffer.position() + toSkip);
       return toSkip;
     }
 
     @Override
-    public int read(byte[] buffer, int byteCount) throws IOException {
+    public int read(byte[] buffer, int byteCount) {
       int toRead = Math.min(byteCount, byteBuffer.remaining());
       if (toRead == 0) {
         return -1;
@@ -416,7 +422,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     @Override
-    public int getByte() throws IOException {
+    public int getByte() {
       if (byteBuffer.remaining() < 1) {
         return -1;
       }
@@ -426,6 +432,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
 
   private static final class StreamReader implements Reader {
     private final InputStream is;
+
     // Motorola / big endian byte order.
     StreamReader(InputStream is) {
       this.is = is;

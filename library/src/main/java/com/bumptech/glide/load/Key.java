@@ -24,9 +24,17 @@ public interface Key {
    */
   void updateDiskCacheKey(@NonNull MessageDigest messageDigest);
 
+  /**
+   * For caching to work correctly, implementations <em>must</em> implement this method and
+   * {@link #hashCode()}.
+   */
   @Override
   boolean equals(Object o);
 
+  /**
+   * For caching to work correctly, implementations <em>must</em> implement this method and
+   * {@link #equals(Object)}.
+   */
   @Override
   int hashCode();
 }

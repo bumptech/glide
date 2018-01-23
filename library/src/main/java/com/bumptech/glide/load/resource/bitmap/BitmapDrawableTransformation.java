@@ -48,11 +48,11 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
     this(wrapped);
   }
 
+  @NonNull
   @Override
   public Resource<BitmapDrawable> transform(
-      Context context, Resource<BitmapDrawable> drawableResourceToTransform, int outWidth,
-      int outHeight) {
-
+      @NonNull Context context, @NonNull Resource<BitmapDrawable> drawableResourceToTransform,
+      int outWidth, int outHeight) {
     Resource<Drawable> toTransform = convertToDrawableResource(drawableResourceToTransform);
     Resource<Drawable> transformed = wrapped.transform(context, toTransform, outWidth, outHeight);
     return convertToBitmapDrawableResource(transformed);

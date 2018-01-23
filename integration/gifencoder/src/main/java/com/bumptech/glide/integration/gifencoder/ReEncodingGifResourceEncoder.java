@@ -53,7 +53,8 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
   public static final Option<Boolean> ENCODE_TRANSFORMATION =
       Option.disk(KEY_ENCODE_TRANSFORMATION, false, new Option.CacheKeyUpdater<Boolean>() {
         @Override
-        public void update(byte[] keyBytes, Boolean value, MessageDigest messageDigest) {
+        public void update(@NonNull byte[] keyBytes, @NonNull Boolean value,
+            @NonNull MessageDigest messageDigest) {
           if (value) {
             messageDigest.update(keyBytes);
           }
@@ -81,6 +82,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
     this.factory = factory;
   }
 
+  @NonNull
   @Override
   public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
     Boolean encodeTransformation = options.get(ENCODE_TRANSFORMATION);
@@ -213,7 +215,8 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
       return new AnimatedGifEncoder();
     }
 
-    Resource<Bitmap> buildFrameResource(Bitmap bitmap, BitmapPool bitmapPool) {
+    @NonNull
+    Resource<Bitmap> buildFrameResource(@NonNull Bitmap bitmap, @NonNull BitmapPool bitmapPool) {
       return new BitmapResource(bitmap, bitmapPool);
     }
   }

@@ -17,7 +17,7 @@ public class MultiTransformation<T> implements Transformation<T> {
 
   @SafeVarargs
   @SuppressWarnings("varargs")
-  public MultiTransformation(Transformation<T>... transformations) {
+  public MultiTransformation(@NonNull Transformation<T>... transformations) {
     if (transformations.length == 0) {
       throw new IllegalArgumentException(
           "MultiTransformation must contain at least one Transformation");
@@ -25,7 +25,7 @@ public class MultiTransformation<T> implements Transformation<T> {
     this.transformations = Arrays.asList(transformations);
   }
 
-  public MultiTransformation(Collection<? extends Transformation<T>> transformationList) {
+  public MultiTransformation(@NonNull Collection<? extends Transformation<T>> transformationList) {
     if (transformationList.isEmpty()) {
       throw new IllegalArgumentException(
           "MultiTransformation must contain at least one Transformation");
