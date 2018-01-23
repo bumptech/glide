@@ -62,10 +62,9 @@ public class ResourceDecoderRegistry {
         continue;
       }
       for (Entry<?, ?> entry : entries) {
-        if (entry.handles(dataClass, resourceClass)) {
-          if (!result.contains((Class<R>) entry.resourceClass)) {
-            result.add((Class<R>) entry.resourceClass);
-          }
+        if (entry.handles(dataClass, resourceClass)
+            && !result.contains((Class<R>) entry.resourceClass)) {
+          result.add((Class<R>) entry.resourceClass);
         }
       }
     }
