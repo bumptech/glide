@@ -124,6 +124,14 @@ final class DecodeHelper<Transcode> {
     return glideContext.getArrayPool();
   }
 
+  Class<?> getTranscodeClass() {
+    return transcodeClass;
+  }
+
+  Class<?> getModelClass() {
+    return model.getClass();
+  }
+
   List<Class<?>> getRegisteredResourceClasses() {
     return glideContext.getRegistry()
         .getRegisteredResourceClasses(model.getClass(), resourceClass, transcodeClass);

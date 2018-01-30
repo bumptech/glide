@@ -619,7 +619,10 @@ public class Registry {
   @SuppressWarnings("serial")
   public static class NoResultEncoderAvailableException extends MissingComponentException {
     public NoResultEncoderAvailableException(@NonNull Class<?> resourceClass) {
-      super("Failed to find result encoder for resource class: " + resourceClass);
+      super("Failed to find result encoder for resource class: " + resourceClass
+          + ", you may need to consider registering a new Encoder for the requested type or"
+          + " DiskCacheStrategy.DATA/DiskCacheStrategy.NONE if caching your transformed resource is"
+          + " unnecessary.");
     }
   }
 

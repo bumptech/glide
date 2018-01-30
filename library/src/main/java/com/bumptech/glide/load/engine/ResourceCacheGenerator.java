@@ -44,6 +44,14 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
       return false;
     }
     List<Class<?>> resourceClasses = helper.getRegisteredResourceClasses();
+    if (resourceClasses.isEmpty()) {
+      if (File.class.equals(helper.getTranscodeClass())) {
+        return false;
+      }
+      throw new IllegalStateException(
+          "Failed to find any load path from " + helper.getModelClass() + " to "
+              + helper.getTranscodeClass());
+    }
     while (modelLoaders == null || !hasNextModelLoader()) {
       resourceClassIndex++;
       if (resourceClassIndex >= resourceClasses.size()) {
