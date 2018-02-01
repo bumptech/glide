@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
 import java.security.MessageDigest;
 
@@ -26,26 +25,6 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
   public BitmapDrawableTransformation(Transformation<Bitmap> wrapped) {
     this.wrapped =
         Preconditions.checkNotNull(new DrawableTransformation(wrapped, /*isRequired=*/ false));
-  }
-
-  /**
-   * @deprecated use {@link #BitmapDrawableTransformation(Transformation)}}
-   */
-  @Deprecated
-  public BitmapDrawableTransformation(
-      @SuppressWarnings("unused") Context context, Transformation<Bitmap> wrapped) {
-    this(wrapped);
-  }
-
-  /**
-   * @deprecated use {@link #BitmapDrawableTransformation(Transformation)}}
-   */
-  @Deprecated
-  public BitmapDrawableTransformation(
-      @SuppressWarnings("unused") Context context,
-      @SuppressWarnings("unused") BitmapPool bitmapPool,
-      Transformation<Bitmap> wrapped) {
-    this(wrapped);
   }
 
   @NonNull
