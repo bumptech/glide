@@ -66,21 +66,6 @@ import java.security.MessageDigest;
  */
 public abstract class BitmapTransformation implements Transformation<Bitmap> {
 
-  // Public API.
-  @SuppressWarnings("WeakerAccess")
-  public BitmapTransformation() {
-    // Intentionally empty.
-  }
-
-  /**
-   * @deprecated Use {@link #BitmapTransformation()}.
-   * @param context Ignored.
-   */
-  @Deprecated
-  public BitmapTransformation(@SuppressWarnings("unused") Context context) {
-    this();
-  }
-
   @NonNull
   @Override
   public final Resource<Bitmap> transform(
