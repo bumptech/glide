@@ -23,24 +23,6 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
     this.wrapped = Preconditions.checkNotNull(wrapped);
   }
 
-  /**
-   * @deprecated Use {@link #GifDrawableTransformation(Transformation)}.
-   */
-  @Deprecated
-  public GifDrawableTransformation(
-      @SuppressWarnings("unused") Context context, Transformation<Bitmap> wrapped) {
-    this(wrapped);
-  }
-
-  /**
-   * @deprecated Use {@link #GifDrawableTransformation(Transformation)}
-   */
-  @Deprecated
-  public GifDrawableTransformation(
-      Transformation<Bitmap> wrapped, @SuppressWarnings("unused") BitmapPool bitmapPool) {
-    this(wrapped);
-  }
-
   @NonNull
   @Override
   public Resource<GifDrawable> transform(
