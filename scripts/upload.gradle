@@ -59,6 +59,7 @@ def getRepositoryPassword() {
 }
 
 afterEvaluate { project ->
+    def isAndroidProject = project.plugins.hasPlugin('com.android.application') || project.plugins.hasPlugin('com.android.library')
     // To avoid uploading the default empty jar artifact in the project root directory, we use a custom
     // configuration to specify which artifacts we want to upload.
     uploadArchives {
@@ -84,6 +85,34 @@ afterEvaluate { project ->
 
                 pom.whenConfigured { pom ->
                     pom.packaging = POM_PACKAGING
+                }
+
+                // Dependencies are only automatically included by the release plugin if the release
+                // variant is built. Since we've disabled the release variant to improve build
+                // times, we need to add the dependencies to the pom file explicitly.
+                if (isAndroidProject) {
+                    pom.withXml {
+                        def dependenciesNode = asNode().appendNode('dependencies')
+
+                        project.configurations.implementation.allDependencies.each {
+                            def groupId = it.group
+                            def artifactId = it.name
+                            // If we specify an artifact id that differs from the project name, it won't
+                            // match. To avoid that, we look up the artifact id (and group) by property
+                            // for any project dependencies.
+                            // TODO: there must be a neater way to do this.
+                            if (it instanceof ProjectDependency) {
+                                def properties = it.getDependencyProject().getProperties()
+                                groupId = properties.get("GROUP")
+                                artifactId = properties.get("POM_ARTIFACT_ID")
+                            }
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', groupId)
+                            dependencyNode.appendNode('artifactId', artifactId)
+                            dependencyNode.appendNode('version', it.version)
+                            dependencyNode.appendNode('scope', 'compile')
+                        }
+                    }
                 }
 
                 pom.project {
@@ -127,7 +156,6 @@ afterEvaluate { project ->
         sign configurations.archives
     }
 
-    def isAndroidProject = project.plugins.hasPlugin('com.android.application') || project.plugins.hasPlugin('com.android.library')
 
     if (isAndroidProject) {
         def variants = project.android.libraryVariants.findAll {
