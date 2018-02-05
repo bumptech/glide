@@ -446,7 +446,8 @@ public class Glide implements ComponentCallbacks2 {
             AssetFileDescriptor.class,
             resourceLoaderAssetFileDescriptorFactory)
         .append(int.class, Uri.class, resourceLoaderUriFactory)
-        .append(String.class, InputStream.class, new DataUrlLoader.StreamFactory())
+        .append(String.class, InputStream.class, new DataUrlLoader.StreamFactory<String>())
+        .append(Uri.class, InputStream.class, new DataUrlLoader.StreamFactory<Uri>())
         .append(String.class, InputStream.class, new StringLoader.StreamFactory())
         .append(String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory())
         .append(

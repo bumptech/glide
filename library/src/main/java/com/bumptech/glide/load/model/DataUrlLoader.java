@@ -20,9 +20,10 @@ import java.io.InputStream;
  *
  * <p>Briefly, a 'data' URL has the form: <pre>data:[mediatype][;base64],some_data</pre>
  *
- * @param <Data> The type of data that can be opened.
+ * @param <Model> The type of Model that we can retrieve data for, e.g. {@link String}.
+ * @param <Data> The type of data that can be opened, e.g. {@link InputStream}.
  */
-public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
+public final class DataUrlLoader<Model, Data> implements ModelLoader<Model, Data> {
 
   private static final String DATA_SCHEME_IMAGE = "data:image";
   private static final String BASE64_TAG = ";base64";
@@ -35,14 +36,17 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(@NonNull String model, int width, int height,
+  public LoadData<Data> buildLoadData(@NonNull Model model, int width, int height,
       @NonNull Options options) {
-    return new LoadData<>(new ObjectKey(model), new DataUriFetcher<>(model, dataDecoder));
+    return new LoadData<>(
+        new ObjectKey(model), new DataUriFetcher<>(model.toString(), dataDecoder));
   }
 
   @Override
-  public boolean handles(@NonNull String url) {
-    return url.startsWith(DATA_SCHEME_IMAGE);
+  public boolean handles(@NonNull Model model) {
+    // We expect Model to be a Uri or a String, both of which implement toString() efficiently. We
+    // should reconsider this implementation before adding any new Model types.
+    return model.toString().startsWith(DATA_SCHEME_IMAGE);
   }
 
   /**
@@ -108,9 +112,11 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
   }
 
   /**
-   * Factory for loading {@link InputStream} from Data URL string.
+   * Factory for loading {@link InputStream}s from data uris.
+   *
+   * @param <Model> The type of Model we can obtain data for, e.g. String.
    */
-  public static final class StreamFactory implements ModelLoaderFactory<String, InputStream> {
+  public static final class StreamFactory<Model> implements ModelLoaderFactory<Model, InputStream> {
 
     private final DataDecoder<InputStream> opener;
 
@@ -152,7 +158,7 @@ public final class DataUrlLoader<Data> implements ModelLoader<String, Data> {
 
     @NonNull
     @Override
-    public ModelLoader<String, InputStream> build(
+    public ModelLoader<Model, InputStream> build(
         @NonNull MultiModelLoaderFactory multiFactory) {
       return new DataUrlLoader<>(opener);
     }

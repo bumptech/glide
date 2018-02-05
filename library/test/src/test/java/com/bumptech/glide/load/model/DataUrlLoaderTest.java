@@ -56,18 +56,17 @@ public class DataUrlLoaderTest {
 
   @Mock
   private MultiModelLoaderFactory multiFactory;
-  private DataUrlLoader<InputStream> dataUrlLoader;
+  private DataUrlLoader<String, InputStream> dataUrlLoader;
   private DataFetcher<InputStream> fetcher;
   private Options options;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    DataUrlLoader.StreamFactory factory = new DataUrlLoader.StreamFactory();
+    DataUrlLoader.StreamFactory<String> factory = new DataUrlLoader.StreamFactory<>();
     options = new Options();
-    dataUrlLoader = (DataUrlLoader<InputStream>) factory.build(multiFactory);
+    dataUrlLoader = (DataUrlLoader<String, InputStream>) factory.build(multiFactory);
     fetcher = dataUrlLoader.buildLoadData(VALID_PNG, -1, -1, options).fetcher;
-
   }
 
   @Test
