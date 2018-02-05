@@ -1352,6 +1352,21 @@ public class RequestOptions implements Cloneable {
     return set(GifOptions.DISABLE_ANIMATION, true);
   }
 
+  /**
+   * Updates this options set with any options that are explicitly set in the given
+   * {@code RequestOptions} object and returns this object if {@link #autoClone()} is disabled or
+   * a new {@code RequestOptions} object if {@link #autoClone()} is enabled.
+   *
+   * <p>{@code #apply} only replaces those values that are explicitly set in the given
+   * {@code RequestOptions}. If you need to completely reset all previously set options, create a
+   * new {@code RequestOptions} object instead of using this method.
+   *
+   * <p>The options that will be set to values in the returned {@code RequestOptions} object is the
+   * intersection of the set of options in this {@code RequestOptions} object and the given
+   * {@code RequestOptions} object that were explicitly set. If the values of any of the options
+   * conflict, the values in the returned {@code RequestOptions} object will be set to those in the
+   * given {@code RequestOptions} object.
+   */
   @NonNull
   @CheckResult
   public RequestOptions apply(@NonNull RequestOptions other) {

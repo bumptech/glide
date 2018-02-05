@@ -94,8 +94,12 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   }
 
   /**
-   * Applies the given options to the request, options set or unset in the given options will
-   * replace those previously set in options in this class.
+   * Applies the given options to the request.
+   *
+   * <p>As with {@link RequestOptions#apply(RequestOptions)}, {@code #apply} only replaces those
+   * values that are explicitly set in the given {@link RequestOptions} object. If you need to
+   * completely reset all previously set options, create a new {@code RequestBuilder} instead of
+   * using this method.
    *
    * @see RequestOptions#apply(RequestOptions)
    * @return This request builder.
