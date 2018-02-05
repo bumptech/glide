@@ -184,7 +184,7 @@ public final class MemorySizeCalculator {
      * returns this Builder.
      */
     public Builder setMemoryCacheScreens(float memoryCacheScreens) {
-      Preconditions.checkArgument(bitmapPoolScreens >= 0,
+      Preconditions.checkArgument(memoryCacheScreens >= 0,
           "Memory cache screens must be greater than or equal to 0");
       this.memoryCacheScreens = memoryCacheScreens;
       return this;
