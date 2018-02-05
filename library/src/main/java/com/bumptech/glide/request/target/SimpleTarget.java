@@ -19,7 +19,7 @@ import com.bumptech.glide.util.Util;
  *       .into(new SimpleTarget<Bitmap>(250, 250) {
  *
  *         {@literal @Override}
- *         public void onResourceReady(Bitmap resource, GlideAnimation<Bitmap> glideAnimation) {
+ *         public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
  *           // Do something with bitmap here.
  *         }
  *
