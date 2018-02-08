@@ -30,8 +30,6 @@ import java.util.Map;
 /**
  * A builder class for setting default structural classes for Glide to use.
  */
-// Public API.
-@SuppressWarnings({"unused", "WeakerAccess"})
 public final class GlideBuilder {
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions = new ArrayMap<>();
   private Engine engine;
@@ -83,6 +81,8 @@ public final class GlideBuilder {
    * @param memoryCache The cache to use.
    * @return This builder.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   @NonNull
   public GlideBuilder setMemoryCache(@Nullable MemoryCache memoryCache) {
     this.memoryCache = memoryCache;
@@ -99,6 +99,8 @@ public final class GlideBuilder {
    * use {@link #setDiskCache(com.bumptech.glide.load.engine.cache.DiskCache.Factory)} instead.
    * Scheduled to be removed in Glide 4.0.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   @Deprecated
   public GlideBuilder setDiskCache(final DiskCache diskCache) {
     return setDiskCache(new DiskCache.Factory() {
@@ -117,6 +119,8 @@ public final class GlideBuilder {
    * @param diskCacheFactory The disk cache factory to use.
    * @return This builder.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   @NonNull
   public GlideBuilder setDiskCache(@Nullable DiskCache.Factory diskCacheFactory) {
     this.diskCacheFactory = diskCacheFactory;
@@ -160,6 +164,8 @@ public final class GlideBuilder {
    * @see #setDiskCacheExecutor(GlideExecutor)
    * @see GlideExecutor
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   @NonNull
   public GlideBuilder setSourceExecutor(@Nullable GlideExecutor service) {
     this.sourceExecutor = service;
@@ -181,6 +187,8 @@ public final class GlideBuilder {
    * @see #setSourceExecutor(GlideExecutor)
    * @see GlideExecutor
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   @NonNull
   public GlideBuilder setDiskCacheExecutor(@Nullable GlideExecutor service) {
     this.diskCacheExecutor = service;
@@ -199,6 +207,8 @@ public final class GlideBuilder {
    * @param service The {@link GlideExecutor} to use.
    * @return This builder.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   @NonNull
   public GlideBuilder setAnimationExecutor(@Nullable GlideExecutor service) {
     this.animationExecutor = service;
@@ -237,6 +247,8 @@ public final class GlideBuilder {
    * {@link android.graphics.drawable.BitmapDrawable}s, the transition you registered for
    * {@link android.graphics.drawable.BitmapDrawable}s will be used.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   @NonNull
   public <T> GlideBuilder setDefaultTransitionOptions(
       @NonNull Class<T> clazz, @Nullable TransitionOptions<?, T> options) {
@@ -257,6 +269,8 @@ public final class GlideBuilder {
    *
    * @deprecated Use {@link #setDefaultRequestOptions(RequestOptions)} instead.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   @Deprecated
   public GlideBuilder setDecodeFormat(DecodeFormat decodeFormat) {
     defaultRequestOptions = defaultRequestOptions.apply(new RequestOptions().format(decodeFormat));
@@ -272,6 +286,8 @@ public final class GlideBuilder {
    * @param builder The builder to use (will not be modified).
    * @return This builder.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   @NonNull
   public GlideBuilder setMemorySizeCalculator(@NonNull MemorySizeCalculator.Builder builder) {
     return setMemorySizeCalculator(builder.build());
@@ -287,6 +303,8 @@ public final class GlideBuilder {
    * @param calculator The calculator to use.
    * @return This builder.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   @NonNull
   public GlideBuilder setMemorySizeCalculator(@Nullable MemorySizeCalculator calculator) {
     this.memorySizeCalculator = calculator;
@@ -301,6 +319,8 @@ public final class GlideBuilder {
    * @param factory The factory to use
    * @return This builder.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   @NonNull
   public GlideBuilder setConnectivityMonitorFactory(@Nullable ConnectivityMonitorFactory factory) {
     this.connectivityMonitorFactory = factory;
@@ -332,6 +352,8 @@ public final class GlideBuilder {
    * @param logLevel The log level to use from {@link Log}.
    * @return This builder.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   @NonNull
   public GlideBuilder setLogLevel(int logLevel) {
     if (logLevel < Log.VERBOSE || logLevel > Log.ERROR) {
@@ -385,6 +407,8 @@ public final class GlideBuilder {
    *
    * @return This builder.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   @NonNull
   public GlideBuilder setIsActiveResourceRetentionAllowed(
       boolean isActiveResourceRetentionAllowed) {
@@ -403,7 +427,7 @@ public final class GlideBuilder {
   }
 
   @NonNull
-  public Glide build(@NonNull Context context) {
+  Glide build(@NonNull Context context) {
     if (sourceExecutor == null) {
       sourceExecutor = GlideExecutor.newSourceExecutor();
     }
