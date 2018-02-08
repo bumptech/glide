@@ -32,9 +32,9 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawableTransformation;
 import com.bumptech.glide.load.resource.gif.GifOptions;
 import com.bumptech.glide.signature.EmptySignature;
+import com.bumptech.glide.util.CachedHashCodeArrayMap;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -106,7 +106,7 @@ public class RequestOptions implements Cloneable {
   @NonNull
   private Options options = new Options();
   @NonNull
-  private Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
+  private Map<Class<?>, Transformation<?>> transformations = new CachedHashCodeArrayMap<>();
   @NonNull
   private Class<?> resourceClass = Object.class;
   private boolean isLocked;
@@ -822,7 +822,7 @@ public class RequestOptions implements Cloneable {
       RequestOptions result = (RequestOptions) super.clone();
       result.options = new Options();
       result.options.putAll(options);
-      result.transformations = new HashMap<>();
+      result.transformations = new CachedHashCodeArrayMap<>();
       result.transformations.putAll(transformations);
       result.isLocked = false;
       result.isAutoCloneEnabled = false;

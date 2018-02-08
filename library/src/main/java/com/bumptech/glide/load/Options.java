@@ -4,13 +4,14 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.SimpleArrayMap;
+import com.bumptech.glide.util.CachedHashCodeArrayMap;
 import java.security.MessageDigest;
 
 /**
  * A set of {@link Option Options} to apply to in memory and disk cache keys.
  */
 public final class Options implements Key {
-  private final ArrayMap<Option<?>, Object> values = new ArrayMap<>();
+  private final ArrayMap<Option<?>, Object> values = new CachedHashCodeArrayMap<>();
 
   public void putAll(@NonNull Options other) {
     values.putAll((SimpleArrayMap<Option<?>, Object>) other.values);
