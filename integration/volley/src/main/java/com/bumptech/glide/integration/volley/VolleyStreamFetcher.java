@@ -133,13 +133,17 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Volley failed to retrieve response", volleyError);
       }
-      callback.onLoadFailed(volleyError);
+      if (!isCanceled()) {
+        callback.onLoadFailed(volleyError);
+      }
       return super.parseNetworkError(volleyError);
     }
 
     @Override
     protected Response<byte[]> parseNetworkResponse(NetworkResponse response) {
-      callback.onDataReady(new ByteArrayInputStream(response.data));
+      if (!isCanceled()) {
+        callback.onDataReady(new ByteArrayInputStream(response.data));
+      }
       return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response));
     }
 

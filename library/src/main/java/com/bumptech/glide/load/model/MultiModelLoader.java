@@ -52,7 +52,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
         }
       }
     }
-    return !fetchers.isEmpty()
+    return !fetchers.isEmpty() && sourceKey != null
         ? new LoadData<>(sourceKey, new MultiFetcher<>(fetchers, exceptionListPool)) : null;
   }
 
@@ -80,8 +80,10 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     private DataCallback<? super Data> callback;
     @Nullable
     private List<Throwable> exceptions;
+    private boolean isCancelled;
 
-    MultiFetcher(@NonNull List<DataFetcher<Data>> fetchers,
+    MultiFetcher(
+        @NonNull List<DataFetcher<Data>> fetchers,
         @NonNull Pool<List<Throwable>> throwableListPool) {
       this.throwableListPool = throwableListPool;
       Preconditions.checkNotEmpty(fetchers);
@@ -90,7 +92,8 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
+    public synchronized void loadData(
+        @NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       this.priority = priority;
       this.callback = callback;
       exceptions = throwableListPool.acquire();
@@ -98,7 +101,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public void cleanup() {
+    public synchronized void cleanup() {
       if (exceptions != null) {
         throwableListPool.release(exceptions);
       }
@@ -109,7 +112,8 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public void cancel() {
+    public synchronized void cancel() {
+      isCancelled = true;
       for (DataFetcher<Data> fetcher : fetchers) {
         fetcher.cancel();
       }
@@ -128,7 +132,11 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public void onDataReady(@Nullable Data data) {
+    public synchronized void onDataReady(@Nullable Data data) {
+      if (isCancelled) {
+        return;
+      }
+
       if (data != null) {
         callback.onDataReady(data);
       } else {
@@ -137,12 +145,20 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public void onLoadFailed(@NonNull Exception e) {
+    public synchronized void onLoadFailed(@NonNull Exception e) {
+      if (isCancelled) {
+        return;
+      }
+
       Preconditions.checkNotNull(exceptions).add(e);
       startNextOrFail();
     }
 
     private void startNextOrFail() {
+      if (isCancelled) {
+        return;
+      }
+
       if (currentIndex < fetchers.size() - 1) {
         currentIndex++;
         loadData(priority, callback);
