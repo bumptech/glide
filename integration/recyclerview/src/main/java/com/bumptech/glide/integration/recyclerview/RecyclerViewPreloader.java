@@ -1,8 +1,8 @@
 package com.bumptech.glide.integration.recyclerview;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import com.bumptech.glide.Glide;
@@ -52,9 +52,10 @@ public final class RecyclerViewPreloader<T> extends RecyclerView.OnScrollListene
   }
 
   /**
-   * Helper constructor that accepts an {@link Fragment}.
+   * Helper constructor that accepts an {@link android.app.Fragment}.
    */
-  public RecyclerViewPreloader(@NonNull Fragment fragment,
+  @Deprecated
+  public RecyclerViewPreloader(@NonNull android.app.Fragment fragment,
       @NonNull PreloadModelProvider<T> preloadModelProvider,
       @NonNull PreloadSizeProvider<T> preloadDimensionProvider,
       int maxPreload) {
@@ -62,9 +63,9 @@ public final class RecyclerViewPreloader<T> extends RecyclerView.OnScrollListene
   }
 
   /**
-   * Helper constructor that accepts an {@link android.support.v4.app.Fragment}.
+   * Helper constructor that accepts an {@link Fragment}.
    */
-  public RecyclerViewPreloader(@NonNull android.support.v4.app.Fragment fragment,
+  public RecyclerViewPreloader(@NonNull Fragment fragment,
       @NonNull PreloadModelProvider<T> preloadModelProvider,
       @NonNull PreloadSizeProvider<T> preloadDimensionProvider,
       int maxPreload) {
