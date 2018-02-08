@@ -42,6 +42,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -563,7 +564,12 @@ public class GifDrawableTest {
   public void testSetColorFilterSetsColorFilterOnPaint() {
     ColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, Mode.ADD);
     drawable.setColorFilter(colorFilter);
-    verify(paint).setColorFilter(eq(colorFilter));
+
+    // Use ArgumentCaptor instead of eq() due to b/73121412 where ShadowPorterDuffColorFilter.equals
+    // uses a method that can't be found (PorterDuffColorFilter.getColor).
+    ArgumentCaptor<ColorFilter> captor = ArgumentCaptor.forClass(ColorFilter.class);
+    verify(paint).setColorFilter(captor.capture());
+    assertThat(captor.getValue()).isSameAs(colorFilter);
   }
 
   @Test
