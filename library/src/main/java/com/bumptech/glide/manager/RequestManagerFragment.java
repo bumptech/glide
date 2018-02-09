@@ -25,16 +25,20 @@ import java.util.Set;
  * @see com.bumptech.glide.manager.RequestManagerRetriever
  * @see com.bumptech.glide.RequestManager
  */
+@SuppressWarnings("DeprecatedIsStillUsed")
 @Deprecated
 public class RequestManagerFragment extends Fragment {
   private static final String TAG = "RMFragment";
   private final ActivityFragmentLifecycle lifecycle;
   private final RequestManagerTreeNode requestManagerTreeNode =
       new FragmentRequestManagerTreeNode();
+  @SuppressWarnings("deprecation")
   private final Set<RequestManagerFragment> childRequestManagerFragments = new HashSet<>();
 
   @Nullable private RequestManager requestManager;
-  @Nullable private RequestManagerFragment rootRequestManagerFragment;
+  @SuppressWarnings("deprecation")
+  @Nullable
+  private RequestManagerFragment rootRequestManagerFragment;
   @Nullable private Fragment parentFragmentHint;
 
   public RequestManagerFragment() {
@@ -77,10 +81,12 @@ public class RequestManagerFragment extends Fragment {
     return requestManagerTreeNode;
   }
 
+  @SuppressWarnings("deprecation")
   private void addChildRequestManagerFragment(RequestManagerFragment child) {
     childRequestManagerFragments.add(child);
   }
 
+  @SuppressWarnings("deprecation")
   private void removeChildRequestManagerFragment(RequestManagerFragment child) {
     childRequestManagerFragments.remove(child);
   }
@@ -89,6 +95,7 @@ public class RequestManagerFragment extends Fragment {
    * Returns the set of fragments that this RequestManagerFragment's parent is a parent to. (i.e.
    * our parent is the fragment that we are annotating).
    */
+  @SuppressWarnings("deprecation")
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   @Synthetic
   @NonNull
@@ -151,6 +158,7 @@ public class RequestManagerFragment extends Fragment {
     return false;
   }
 
+  @SuppressWarnings("deprecation")
   private void registerFragmentWithRoot(@NonNull Activity activity) {
     unregisterFragmentWithRoot();
     rootRequestManagerFragment = Glide.get(activity).getRequestManagerRetriever()
@@ -216,6 +224,7 @@ public class RequestManagerFragment extends Fragment {
     @Synthetic
     FragmentRequestManagerTreeNode() { }
 
+    @SuppressWarnings("deprecation")
     @NonNull
     @Override
     public Set<RequestManager> getDescendants() {
@@ -229,6 +238,7 @@ public class RequestManagerFragment extends Fragment {
       return descendants;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public String toString() {
       return super.toString() + "{fragment=" + RequestManagerFragment.this + "}";

@@ -742,7 +742,11 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @param fragment The fragment to use.
    * @return A RequestManager for the given Fragment that can be used to start a load.
+   * @deprecated Prefer support Fragments and {@link #with(Fragment)} instead,
+   * {@link android.app.Fragment} will be deprecated. See
+   * https://github.com/android/android-ktx/pull/161#issuecomment-363270555.
    */
+  @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
   public static RequestManager with(@NonNull android.app.Fragment fragment) {
