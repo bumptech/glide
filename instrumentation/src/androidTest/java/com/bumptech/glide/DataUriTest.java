@@ -10,10 +10,12 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.v4.content.ContextCompat;
 import android.util.Base64;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.test.TearDownGlide;
+import com.bumptech.glide.util.Preconditions;
 import java.io.ByteArrayOutputStream;
 import org.junit.Rule;
 import org.junit.Test;
@@ -96,7 +98,8 @@ public class DataUriTest {
 
   private String getBase64BitmapBytes(CompressFormat format) {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    Drawable drawable = context.getResources().getDrawable(ResourceIds.raw.canonical);
+    Drawable drawable =
+        Preconditions.checkNotNull(ContextCompat.getDrawable(context, ResourceIds.raw.canonical));
     Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
     bitmap.compress(format, 100, bos);
     byte[] data = bos.toByteArray();
