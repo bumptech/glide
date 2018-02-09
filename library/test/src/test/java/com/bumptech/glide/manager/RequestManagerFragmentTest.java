@@ -148,6 +148,7 @@ public class RequestManagerFragmentTest {
     void onTrimMemory(@SuppressWarnings("SameParameterValue") int level);
   }
 
+  @SuppressWarnings("deprecation")
   private static class RequestManagerHarness implements Harness {
     private final ActivityController<Activity> controller;
     private final RequestManagerFragment fragment;

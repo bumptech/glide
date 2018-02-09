@@ -53,6 +53,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   /**
    * Pending adds for RequestManagerFragments.
    */
+  @SuppressWarnings("deprecation")
   @VisibleForTesting
   final Map<android.app.FragmentManager, RequestManagerFragment> pendingRequestManagerFragments =
       new HashMap<>();
@@ -229,6 +230,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     return result;
   }
 
+  @SuppressWarnings("deprecation")
   @Deprecated
   @Nullable
   private android.app.Fragment findFragment(@NonNull View target, @NonNull Activity activity) {
@@ -256,6 +258,7 @@ public class RequestManagerRetriever implements Handler.Callback {
 
   // TODO: Consider using an accessor class in the support library package to more directly retrieve
   // non-support Fragments.
+  @SuppressWarnings("deprecation")
   @Deprecated
   @TargetApi(Build.VERSION_CODES.O)
   private void findAllFragmentsWithViews(
@@ -273,6 +276,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
+  @SuppressWarnings("deprecation")
   @Deprecated
   private void findAllFragmentsWithViewsPreO(
       @NonNull android.app.FragmentManager fragmentManager,
@@ -316,6 +320,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
+  @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -332,6 +337,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
+  @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
   RequestManagerFragment getRequestManagerFragment(
@@ -350,6 +356,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     return current;
   }
 
+  @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
   private RequestManager fragmentGet(@NonNull Context context,

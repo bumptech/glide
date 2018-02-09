@@ -52,10 +52,9 @@ public final class RecyclerViewPreloader<T> extends RecyclerView.OnScrollListene
   }
 
   /**
-   * Helper constructor that accepts an {@link android.app.Fragment}.
+   * Helper constructor that accepts an {@link Fragment}.
    */
-  @Deprecated
-  public RecyclerViewPreloader(@NonNull android.app.Fragment fragment,
+  public RecyclerViewPreloader(@NonNull Fragment fragment,
       @NonNull PreloadModelProvider<T> preloadModelProvider,
       @NonNull PreloadSizeProvider<T> preloadDimensionProvider,
       int maxPreload) {
@@ -63,9 +62,12 @@ public final class RecyclerViewPreloader<T> extends RecyclerView.OnScrollListene
   }
 
   /**
-   * Helper constructor that accepts an {@link Fragment}.
+   * Helper constructor that accepts an {@link android.app.Fragment}.
+   * @deprecated Use constructor <code>RecyclerViewPreloader(Fragment, PreloadModelProvider<T>,
+   * PreloadSizeProvider<T>)</code> instead.
    */
-  public RecyclerViewPreloader(@NonNull Fragment fragment,
+  @Deprecated
+  public RecyclerViewPreloader(@NonNull android.app.Fragment fragment,
       @NonNull PreloadModelProvider<T> preloadModelProvider,
       @NonNull PreloadSizeProvider<T> preloadDimensionProvider,
       int maxPreload) {

@@ -94,6 +94,7 @@ public class DataUriTest {
     return "data:" + mimeType + ";base64," + bytes;
   }
 
+  @SuppressWarnings("deprecation")
   private String getBase64BitmapBytes(CompressFormat format) {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     Drawable drawable = context.getResources().getDrawable(ResourceIds.raw.canonical);
