@@ -220,7 +220,9 @@ public class LruBitmapPool implements BitmapPool {
     if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
       clearMemory();
     } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
-      trimToSize(maxSize / 2);
+      trimToSize(getMaxSize() / 2);
+    } else if (level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+      trimToSize(getMaxSize() / 2);
     }
   }
 
