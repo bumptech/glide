@@ -47,11 +47,15 @@ public class LruResourceCache extends LruCache<Key, Resource<?>> implements Memo
   @Override
   public void trimMemory(int level) {
     if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
-      // Nearing middle of list of cached background apps
+      // Entering list of cached background apps
       // Evict our entire bitmap cache
       clearMemory();
     } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
-      // Entering list of cached background apps
+      // The app's UI is no longer visible
+      // Evict oldest half of our bitmap cache
+      trimToSize(getMaxSize() / 2);
+    } else if (level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+      // App is in the foreground but system is running critically low on memory
       // Evict oldest half of our bitmap cache
       trimToSize(getMaxSize() / 2);
     }
