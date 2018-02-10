@@ -142,6 +142,8 @@ public final class LruArrayPool implements ArrayPool {
       clearMemory();
     } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
       evictToSize(maxSize / 2);
+    } else if (level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+      evictToSize(maxSize / 2);
     }
   }
 
