@@ -48,4 +48,10 @@
       <Bug pattern="EI_EXPOSE_REP" />
     </Match>
 
+    <!-- We just cache the value of hashcode, no need to also override equals. -->
+    <Match>
+      <Class name="com.bumptech.glide.util.CachedHashCodeArrayMap" />
+      <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS" />
+    </Match>
+
 </FindBugsFilter>

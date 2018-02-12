@@ -3,7 +3,15 @@ package com.bumptech.glide.util;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.SimpleArrayMap;
 
-/** An {@link ArrayMap} that caches its hashCode to support efficient lookup. */
+/**
+ * An {@link ArrayMap} that caches its hashCode to support efficient lookup.
+ *
+ * @param <K> the key type.
+ * @param <V> the value type.
+ */
+// We're overriding hashcode, but not in a way that changes the output, so we don't need to
+// override equals.
+@SuppressWarnings("PMD.OverrideBothEqualsAndHashcode")
 public final class CachedHashCodeArrayMap<K, V> extends ArrayMap<K, V> {
 
   private int hashCode;
