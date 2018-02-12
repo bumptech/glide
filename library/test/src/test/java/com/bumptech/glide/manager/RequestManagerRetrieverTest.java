@@ -134,6 +134,7 @@ public class RequestManagerRetrieverTest {
     assertEquals(manager, retriever.get(fragmentActivity));
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testCanGetRequestManagerFromFragment() {
     Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
@@ -168,6 +169,7 @@ public class RequestManagerRetrieverTest {
     helpTestCanGetRequestManagerFromDetachedFragment();
   }
 
+  @SuppressWarnings("deprecation")
   private void helpTestCanGetRequestManagerFromDetachedFragment() {
     Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
     android.app.Fragment fragment = new android.app.Fragment();
@@ -202,6 +204,7 @@ public class RequestManagerRetrieverTest {
     retriever.get(fragment);
   }
 
+  @SuppressWarnings("deprecation")
   @Test(expected = IllegalArgumentException.class)
   public void testThrowsIfFragmentNotAttached() {
     android.app.Fragment fragment = new android.app.Fragment();
@@ -319,6 +322,7 @@ public class RequestManagerRetrieverTest {
     assertNotNull(retriever.get(spyActivity));
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   public void testDoesNotThrowIfAskedToGetManagerForFragmentPreJellyBeanMr1() {
@@ -376,6 +380,7 @@ public class RequestManagerRetrieverTest {
           .findFragmentByTag(RequestManagerRetriever.FRAGMENT_TAG);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void addFragmentWithTag(String tag, RequestManager requestManager) {
       RequestManagerFragment fragment = new RequestManagerFragment();
