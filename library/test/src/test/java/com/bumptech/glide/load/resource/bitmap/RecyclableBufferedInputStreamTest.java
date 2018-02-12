@@ -252,6 +252,12 @@ public class RecyclableBufferedInputStreamTest {
     stream.close();
     stream.available();
   }
+    
+  @Test
+  public void testAvailableReturnsZeroIfStreamIsReleased() throws IOException {
+    stream.release();
+    assertEquals(0, stream.available());
+  }
 
   @Test(expected = IOException.class)
   public void testReadThrowsIfStreamIsClosed() throws IOException {
