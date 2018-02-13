@@ -80,6 +80,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     private DataCallback<? super Data> callback;
     @Nullable
     private List<Throwable> exceptions;
+    private boolean isCancelled;
 
     MultiFetcher(
         @NonNull List<DataFetcher<Data>> fetchers,
@@ -112,6 +113,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
     @Override
     public void cancel() {
+      isCancelled = true;
       for (DataFetcher<Data> fetcher : fetchers) {
         fetcher.cancel();
       }
@@ -131,6 +133,10 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
     @Override
     public void onDataReady(@Nullable Data data) {
+      if (isCancelled) {
+        return;
+      }
+
       if (data != null) {
         callback.onDataReady(data);
       } else {
@@ -140,11 +146,19 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
     @Override
     public void onLoadFailed(@NonNull Exception e) {
+      if (isCancelled) {
+        return;
+      }
+
       Preconditions.checkNotNull(exceptions).add(e);
       startNextOrFail();
     }
 
     private void startNextOrFail() {
+      if (isCancelled) {
+        return;
+      }
+
       if (currentIndex < fetchers.size() - 1) {
         currentIndex++;
         loadData(priority, callback);
