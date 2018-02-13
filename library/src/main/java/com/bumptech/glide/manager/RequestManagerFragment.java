@@ -161,8 +161,8 @@ public class RequestManagerFragment extends Fragment {
   @SuppressWarnings("deprecation")
   private void registerFragmentWithRoot(@NonNull Activity activity) {
     unregisterFragmentWithRoot();
-    rootRequestManagerFragment = Glide.get(activity).getRequestManagerRetriever()
-        .getRequestManagerFragment(activity.getFragmentManager(), null);
+    rootRequestManagerFragment =
+        Glide.get(activity).getRequestManagerRetriever().getRequestManagerFragment(activity);
     if (!equals(rootRequestManagerFragment)) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
     }

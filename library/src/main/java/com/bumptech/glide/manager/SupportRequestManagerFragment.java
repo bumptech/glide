@@ -142,8 +142,8 @@ public class SupportRequestManagerFragment extends Fragment {
 
   private void registerFragmentWithRoot(@NonNull FragmentActivity activity) {
     unregisterFragmentWithRoot();
-    rootRequestManagerFragment = Glide.get(activity).getRequestManagerRetriever()
-        .getSupportRequestManagerFragment(activity.getSupportFragmentManager(), null);
+    rootRequestManagerFragment =
+        Glide.get(activity).getRequestManagerRetriever().getSupportRequestManagerFragment(activity);
     if (!equals(rootRequestManagerFragment)) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
     }
