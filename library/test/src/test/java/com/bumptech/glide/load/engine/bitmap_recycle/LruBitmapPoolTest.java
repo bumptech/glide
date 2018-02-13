@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -100,6 +101,11 @@ public class LruBitmapPoolTest {
   @Test
   public void testTrimMemoryUiHiddenOrLessRemovesHalfOfBitmaps() {
     testTrimMemory(MAX_SIZE, TRIM_MEMORY_UI_HIDDEN, MAX_SIZE / 2);
+  }
+
+  @Test
+  public void testTrimMemoryRunningCriticalRemovesHalfOfBitmaps() {
+    testTrimMemory(MAX_SIZE, TRIM_MEMORY_RUNNING_CRITICAL, MAX_SIZE / 2);
   }
 
   @Test

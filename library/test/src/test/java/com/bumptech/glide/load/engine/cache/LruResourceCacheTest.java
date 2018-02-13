@@ -106,6 +106,16 @@ public class LruResourceCacheTest {
   }
 
   @Test
+  public void testTrimMemoryRunningCritical() {
+    TrimClearMemoryCacheHarness harness = new TrimClearMemoryCacheHarness();
+
+    harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL);
+
+    verify(harness.listener).onResourceRemoved(harness.first);
+    verify(harness.listener, never()).onResourceRemoved(harness.second);
+  }
+
+  @Test
   public void testResourceRemovedListenerIsNotifiedWhenResourceIsRemoved() {
     LruResourceCache resourceCache = new LruResourceCache(100);
     Resource<?> resource = mockResource();
