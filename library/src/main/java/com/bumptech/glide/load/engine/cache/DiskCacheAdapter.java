@@ -27,4 +27,14 @@ public class DiskCacheAdapter implements DiskCache {
   public void clear() {
       // no op, default for overriders
   }
+
+  /**
+   * Default factory for {@link DiskCacheAdapter}.
+   */
+  public static final class Factory implements DiskCache.Factory {
+    @Override
+    public DiskCache build() {
+      return new DiskCacheAdapter();
+    }
+  }
 }
