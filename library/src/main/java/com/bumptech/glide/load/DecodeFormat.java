@@ -16,7 +16,9 @@ public enum DecodeFormat {
    * {@link android.graphics.Bitmap#getConfig()} when possible.
    *
    * <p>On Android O+, this format will will use ARGB_8888 only when it's not possible to use
-   * {@link android.graphics.Bitmap.Config#HARDWARE}.
+   * {@link android.graphics.Bitmap.Config#HARDWARE}. More information is available about hardware
+   * Bitmaps here: https://goo.gl/tn2A6k. If you need to disable hardware Bitmaps for a particular
+   * request, use {@link com.bumptech.glide.request.RequestOptions#disallowHardwareConfig()}.
    *
    * <p> GIF images decoded by {@link android.graphics.BitmapFactory} currently use an internal
    * hidden format that is returned as null from {@link android.graphics.Bitmap#getConfig()}. Since
