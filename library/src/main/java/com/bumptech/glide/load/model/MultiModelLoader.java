@@ -80,7 +80,6 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     private DataCallback<? super Data> callback;
     @Nullable
     private List<Throwable> exceptions;
-    private boolean isCancelled;
 
     MultiFetcher(
         @NonNull List<DataFetcher<Data>> fetchers,
@@ -92,7 +91,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public synchronized void loadData(
+    public void loadData(
         @NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       this.priority = priority;
       this.callback = callback;
@@ -101,7 +100,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public synchronized void cleanup() {
+    public void cleanup() {
       if (exceptions != null) {
         throwableListPool.release(exceptions);
       }
@@ -112,8 +111,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public synchronized void cancel() {
-      isCancelled = true;
+    public void cancel() {
       for (DataFetcher<Data> fetcher : fetchers) {
         fetcher.cancel();
       }
@@ -132,11 +130,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public synchronized void onDataReady(@Nullable Data data) {
-      if (isCancelled) {
-        return;
-      }
-
+    public void onDataReady(@Nullable Data data) {
       if (data != null) {
         callback.onDataReady(data);
       } else {
@@ -145,20 +139,12 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public synchronized void onLoadFailed(@NonNull Exception e) {
-      if (isCancelled) {
-        return;
-      }
-
+    public void onLoadFailed(@NonNull Exception e) {
       Preconditions.checkNotNull(exceptions).add(e);
       startNextOrFail();
     }
 
     private void startNextOrFail() {
-      if (isCancelled) {
-        return;
-      }
-
       if (currentIndex < fetchers.size() - 1) {
         currentIndex++;
         loadData(priority, callback);
