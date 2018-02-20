@@ -1,9 +1,22 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import com.bumptech.glide.load.Option;
 import com.bumptech.glide.util.Synthetic;
 
 /**
  * Indicates the algorithm to use when downsampling images.
+ *
+ * <p>{@code DownsampleStrategy} does not provide any guarantees about output sizes. Behavior will
+ * differ depending on the {@link com.bumptech.glide.load.ResourceDecoder} using the strategy and
+ * the version of Android the code runs on. Use {@code DownsampleStrategy} as an optimization to
+ * improve memory efficiency only. If you need a particular size or shape output, use an
+ * {@link com.bumptech.glide.load.Transformation} either instead or in addition to a
+ * {@code DownsampleStrategy}.
+ *
+ * <p>Some differences between versions of Android and
+ * {@link com.bumptech.glide.load.ResourceDecoder}s are listed below, but the list is not
+ * comprehensive because {@link DownsampleStrategy} only controls it's output scale value, not
+ * how that output value is used.
  */
 // Public API.
 @SuppressWarnings("WeakerAccess")
@@ -18,8 +31,8 @@ public abstract class DownsampleStrategy {
    * and height. To avoid upscaling, use {@link #AT_LEAST}, {@link #AT_MOST} or
    * {@link #CENTER_INSIDE}.
    *
-   * <p>On pre-KitKat devices, this is equivalent to {@link #AT_MOST} because only power of
-   * two downsampling can be used.
+   * <p>On pre-KitKat devices, {@link Downsampler} treats this as equivalent to {@link #AT_MOST}
+   * because only power of two downsampling can be used.
    */
   public static final DownsampleStrategy FIT_CENTER = new FitCenter();
 
@@ -32,20 +45,24 @@ public abstract class DownsampleStrategy {
    * and height. To avoid upscaling, use {@link #AT_LEAST}, {@link #AT_MOST},
    * or {@link #CENTER_INSIDE}.
    *
-   * <p>On pre-KitKat devices, this is equivalent to {@link #AT_LEAST} because only power of
-   * two downsampling can be used.
+   * <p>On pre-KitKat devices, {@link Downsampler} treats this as equivalent to
+   * {@link #AT_LEAST} because only power of two downsampling can be used.
    */
   public static final DownsampleStrategy CENTER_OUTSIDE = new CenterOutside();
 
   /**
    * Downsamples so the image's smallest dimension is between the given dimensions and 2x the given
    * dimensions, with no size restrictions on the image's largest dimension.
+   *
+   * <p>Does not upscale if the requested dimensions are larger than the original dimensions.
    */
   public static final DownsampleStrategy AT_LEAST = new AtLeast();
 
   /**
    * Downsamples so the image's largest dimension is between 1/2 the given dimensions and the given
    * dimensions, with no restrictions on the image's smallest dimension.
+   *
+   * <p>Does not upscale if the requested dimensions are larger than the original dimensions.
    */
   public static final DownsampleStrategy AT_MOST = new AtMost();
 
@@ -54,7 +71,7 @@ public abstract class DownsampleStrategy {
    * maintaining its original aspect ratio, so that one of the image's dimensions is exactly equal
    * to the requested size and the other is less or equal than the requested size.
    *
-   * <p>This method will not upscale.</p>
+   * <p>Does not upscale if the requested dimensions are larger than the original dimensions.
    */
   public static final DownsampleStrategy CENTER_INSIDE = new CenterInside();
 
@@ -67,6 +84,17 @@ public abstract class DownsampleStrategy {
    * Default strategy, currently {@link #CENTER_OUTSIDE}.
    */
   public static final DownsampleStrategy DEFAULT = CENTER_OUTSIDE;
+
+  /**
+   * Indicates the {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option that
+   * will be used to calculate the sample size to use to downsample an image given the original
+   * and target dimensions of the image.
+   */
+  // The exact String value here is retained to avoid breaking cache keys for images that were
+  // loaded with older versions of Glide.
+  public static final Option<DownsampleStrategy> OPTION =
+      Option.memory(
+          "com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy", DEFAULT);
 
   /**
    * Returns a float (0, +infinity) indicating a scale factor to apply to the source

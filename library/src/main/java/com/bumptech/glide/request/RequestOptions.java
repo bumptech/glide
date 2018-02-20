@@ -968,7 +968,7 @@ public class RequestOptions implements Cloneable {
   @NonNull
   @CheckResult
   public RequestOptions downsample(@NonNull DownsampleStrategy strategy) {
-    return set(Downsampler.DOWNSAMPLE_STRATEGY, Preconditions.checkNotNull(strategy));
+    return set(DownsampleStrategy.OPTION, Preconditions.checkNotNull(strategy));
   }
 
   /**

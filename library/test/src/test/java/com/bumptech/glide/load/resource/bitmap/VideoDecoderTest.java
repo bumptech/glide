@@ -107,7 +107,16 @@ public class VideoDecoderTest {
 
   @Test
   public void getScaledFrameAtTime() throws IOException {
+    // Anything other than NONE.
+    options.set(DownsampleStrategy.OPTION, DownsampleStrategy.AT_LEAST);
+
     Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    when(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH))
+        .thenReturn("100");
+    when(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT))
+        .thenReturn("100");
+    when(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION))
+        .thenReturn("0");
     when(retriever.getScaledFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC, 100, 100))
         .thenReturn(expected);
 

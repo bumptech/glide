@@ -50,10 +50,11 @@ public final class Downsampler {
    * Indicates the {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option that
    * will be used to calculate the sample size to use to downsample an image given the original
    * and target dimensions of the image.
+   *
+   * @deprecated Use {@link DownsampleStrategy#OPTION} directly instead.
    */
-  public static final Option<DownsampleStrategy> DOWNSAMPLE_STRATEGY =
-      Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy",
-          DownsampleStrategy.DEFAULT);
+  @Deprecated
+  public static final Option<DownsampleStrategy> DOWNSAMPLE_STRATEGY = DownsampleStrategy.OPTION;
   /**
    * Ensure that the size of the bitmap is fixed to the requested width and height of the
    * resource from the caller.  The final resource dimensions may differ from the requested
@@ -195,7 +196,7 @@ public final class Downsampler {
     bitmapFactoryOptions.inTempStorage = bytesForOptions;
 
     DecodeFormat decodeFormat = options.get(DECODE_FORMAT);
-    DownsampleStrategy downsampleStrategy = options.get(DOWNSAMPLE_STRATEGY);
+    DownsampleStrategy downsampleStrategy = options.get(DownsampleStrategy.OPTION);
     boolean fixBitmapToRequestedDimensions = options.get(FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS);
     boolean isHardwareConfigAllowed =
       options.get(ALLOW_HARDWARE_CONFIG) != null && options.get(ALLOW_HARDWARE_CONFIG);

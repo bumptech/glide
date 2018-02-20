@@ -63,6 +63,25 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
     sameAs(drawable);
   }
 
+  public void hasDimensions(int expectedWidth, int expectedHeight) {
+    int actualWidth = actual().getWidth();
+    int actualHeight = actual().getHeight();
+    String message;
+    if (expectedWidth != actualWidth && expectedHeight != actualHeight) {
+      message = "has dimensions of [" + expectedWidth + "x" + expectedHeight + "]";
+    } else if (expectedWidth != actualWidth) {
+      message = "has width of " + expectedWidth;
+    } else if (expectedHeight != actualHeight) {
+      message = "has height of " + expectedHeight;
+    } else {
+      message = null;
+    }
+
+    if (message != null) {
+      fail(message);
+    }
+  }
+
   public void isMutable()  {
     if (!actual().isMutable()) {
       fail("is mutable");

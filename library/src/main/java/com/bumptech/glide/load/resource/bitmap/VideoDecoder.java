@@ -10,6 +10,7 @@ import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.util.Log;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -28,6 +29,7 @@ import java.security.MessageDigest;
  * {@link AssetFileDescriptor}.
  */
 public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
+  private static final String TAG = "VideoDecoder";
 
   /**
    * A constant indicating we should use whatever frame we consider best, frequently not the first
@@ -148,13 +150,24 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     if (frameOption == null) {
       frameOption = DEFAULT_FRAME_OPTION;
     }
+    DownsampleStrategy downsampleStrategy = options.get(DownsampleStrategy.OPTION);
+    if (downsampleStrategy == null) {
+      downsampleStrategy = DownsampleStrategy.DEFAULT;
+    }
 
     final Bitmap result;
     MediaMetadataRetriever mediaMetadataRetriever = factory.build();
     try {
       initializer.initialize(mediaMetadataRetriever, resource);
       result =
-          decodeFrame(mediaMetadataRetriever, frameTimeMicros, frameOption, outWidth, outHeight);
+          decodeFrame(
+              mediaMetadataRetriever,
+              frameTimeMicros,
+              frameOption,
+              outWidth,
+              outHeight,
+              downsampleStrategy);
+
     } catch (RuntimeException e) {
       // MediaMetadataRetriever APIs throw generic runtime exceptions when given invalid data.
       throw new IOException(e);
@@ -165,14 +178,15 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     return BitmapResource.obtain(result, bitmapPool);
   }
 
-  @TargetApi(Build.VERSION_CODES.O_MR1)
   @Nullable
   private static Bitmap decodeFrame(
       MediaMetadataRetriever mediaMetadataRetriever,
       long frameTimeMicros,
       int frameOption,
       int outWidth,
-      int outHeight) {
+      int outHeight,
+      DownsampleStrategy strategy) {
+    Bitmap result = null;
     // Arguably we should handle the case where just width or just height is set to
     // Target.SIZE_ORIGINAL. Up to and including OMR1, MediaMetadataRetriever defaults to setting
     // the dimensions to the display width and height if they aren't specified (ie
@@ -181,12 +195,75 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     // behavior of Glide in all versions of Android prior to OMR1, it's probably fine for now.
     if (Build.VERSION.SDK_INT >= VERSION_CODES.O_MR1
         && outWidth != Target.SIZE_ORIGINAL
-        && outHeight != Target.SIZE_ORIGINAL) {
-      return mediaMetadataRetriever.getScaledFrameAtTime(
-          frameTimeMicros, frameOption, outWidth, outHeight);
-    } else {
-      return mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
+        && outHeight != Target.SIZE_ORIGINAL
+        && strategy != DownsampleStrategy.NONE) {
+      result =
+          decodeScaledFrame(
+              mediaMetadataRetriever, frameTimeMicros, frameOption, outWidth, outHeight, strategy);
     }
+
+    if (result == null) {
+      result = decodeOriginalFrame(mediaMetadataRetriever, frameTimeMicros, frameOption);
+    }
+
+    return result;
+  }
+
+  @TargetApi(Build.VERSION_CODES.O_MR1)
+  private static Bitmap decodeScaledFrame(
+      MediaMetadataRetriever mediaMetadataRetriever,
+      long frameTimeMicros,
+      int frameOption,
+      int outWidth,
+      int outHeight,
+      DownsampleStrategy strategy) {
+    try {
+      int originalWidth =
+          Integer.parseInt(
+              mediaMetadataRetriever.extractMetadata(
+                  MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+      int originalHeight =
+          Integer.parseInt(
+              mediaMetadataRetriever.extractMetadata(
+                  MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+      int orientation =
+          Integer.parseInt(
+              mediaMetadataRetriever.extractMetadata(
+                  MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+
+      if (orientation == 90 || orientation == 270) {
+        int temp = originalWidth;
+        //noinspection SuspiciousNameCombination
+        originalWidth = originalHeight;
+        originalHeight = temp;
+      }
+
+      float scaleFactor =
+          strategy.getScaleFactor(originalWidth, originalHeight, outWidth, outHeight);
+
+      int decodeWidth = Math.round(scaleFactor * originalWidth);
+      int decodeHeight = Math.round(scaleFactor * originalHeight);
+
+      return mediaMetadataRetriever.getScaledFrameAtTime(
+          frameTimeMicros, frameOption, decodeWidth, decodeHeight);
+     } catch (Throwable t) {
+      // This is aggressive, but we'd rather catch errors caused by reading and/or parsing metadata
+      // here and fall back to just decoding the frame whenever possible. If the exception is thrown
+      // just from decoding the frame, then it will be thrown and exposed to callers by the method
+      // below.
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Exception trying to decode frame on oreo+", t);
+      }
+
+      return null;
+    }
+  }
+
+  private static Bitmap decodeOriginalFrame(
+      MediaMetadataRetriever mediaMetadataRetriever,
+      long frameTimeMicros,
+      int frameOption) {
+    return mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
   }
 
   @VisibleForTesting

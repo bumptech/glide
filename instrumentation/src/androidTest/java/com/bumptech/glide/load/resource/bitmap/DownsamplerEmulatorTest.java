@@ -377,8 +377,7 @@ public class DownsamplerEmulatorTest {
     Downsampler downsampler = buildDownsampler();
 
     InputStream is = openBitmapStream(format, initialWidth, initialHeight);
-    Options options = new Options()
-        .set(Downsampler.DOWNSAMPLE_STRATEGY, strategy);
+    Options options = new Options().set(DownsampleStrategy.OPTION, strategy);
     Bitmap bitmap = downsampler.decode(is, targetWidth, targetHeight, options).get();
     try {
       if (bitmap.getWidth() != expectedWidth || bitmap.getHeight() != expectedHeight) {
