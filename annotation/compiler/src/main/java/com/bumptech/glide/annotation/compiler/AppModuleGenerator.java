@@ -250,13 +250,12 @@ final class AppModuleGenerator {
         "Discovered AppGlideModule from annotation: " + appGlideModule);
     // Excluded GlideModule classes from the manifest are logged in Glide's singleton.
     for (String glideModule : libraryGlideModuleClassNames) {
-      ClassName moduleClassName = ClassName.bestGuess(glideModule);
       if (excludedGlideModuleClassNames.contains(glideModule)) {
         constructorBuilder.addStatement("$T.d($S, $S)", androidLogName, GLIDE_LOG_TAG,
-            "AppGlideModule excludes LibraryGlideModule from annotation: " + moduleClassName);
+            "AppGlideModule excludes LibraryGlideModule from annotation: " + glideModule);
       } else {
         constructorBuilder.addStatement("$T.d($S, $S)", androidLogName, GLIDE_LOG_TAG,
-            "Discovered LibraryGlideModule from annotation: " + moduleClassName);
+            "Discovered LibraryGlideModule from annotation: " + glideModule);
       }
     }
     constructorBuilder.endControlFlow();
