@@ -1,11 +1,13 @@
 package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
+import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNulls;
 
 import com.bumptech.glide.annotation.GlideOption;
 import com.bumptech.glide.annotation.GlideType;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
+import com.squareup.javapoet.ClassName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -273,7 +275,14 @@ final class GlideExtensionValidator {
               }
             })
             .toSet();
-    if (!annotationNames.contains(nonNull().reflectionName())) {
+    boolean noNonNull = true;
+    for (ClassName nonNull : nonNulls()) {
+      if (annotationNames.contains(nonNull.reflectionName())) {
+        noNonNull = false;
+        break;
+      }
+    }
+    if (noNonNull) {
       processingEnvironment.getMessager().printMessage(
           Kind.WARNING,
           getQualifiedMethodName(executableElement)
