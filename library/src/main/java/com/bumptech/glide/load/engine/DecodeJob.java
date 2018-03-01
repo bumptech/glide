@@ -2,7 +2,6 @@ package com.bumptech.glide.load.engine;
 
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v4.os.TraceCompat;
 import android.support.v4.util.Pools;
 import android.util.Log;
 import com.bumptech.glide.GlideContext;
@@ -21,6 +20,7 @@ import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.pool.FactoryPools.Poolable;
+import com.bumptech.glide.util.pool.GlideTrace;
 import com.bumptech.glide.util.pool.StateVerifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +63,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private RunReason runReason;
   private long startFetchTime;
   private boolean onlyRetrieveFromCache;
+  private Object model;
 
   private Thread currentThread;
   private Key currentSourceKey;
@@ -125,6 +126,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     this.callback = callback;
     this.order = order;
     this.runReason = RunReason.INITIALIZE;
+    this.model = model;
     return this;
   }
 
@@ -188,6 +190,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     currentFetcher = null;
     startFetchTime = 0L;
     isCancelled = false;
+    model = null;
     throwables.clear();
     pool.release(this);
   }
@@ -218,7 +221,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     // This should be much more fine grained, but since Java's thread pool implementation silently
     // swallows all otherwise fatal exceptions, this will at least make it obvious to developers
     // that something is failing.
-    TraceCompat.beginSection("DecodeJob#run");
+    GlideTrace.beginSectionFormat("DecodeJob#run(model=%s)", model);
     // Methods in the try statement can invalidate currentFetcher, so set a local variable here to
     // ensure that the fetcher is cleaned up either way.
     DataFetcher<?> localFetcher = currentFetcher;
@@ -254,7 +257,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       if (localFetcher != null) {
         localFetcher.cleanup();
       }
-      TraceCompat.endSection();
+      GlideTrace.endSection();
     }
   }
 
@@ -371,11 +374,11 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       runReason = RunReason.DECODE_DATA;
       callback.reschedule(this);
     } else {
-      TraceCompat.beginSection("DecodeJob.decodeFromRetrievedData");
+      GlideTrace.beginSection("DecodeJob.decodeFromRetrievedData");
       try {
         decodeFromRetrievedData();
       } finally {
-        TraceCompat.endSection();
+        GlideTrace.endSection();
       }
     }
   }
@@ -654,13 +657,13 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
 
     void encode(DiskCacheProvider diskCacheProvider, Options options) {
-      TraceCompat.beginSection("DecodeJob.encode");
+      GlideTrace.beginSection("DecodeJob.encode");
       try {
         diskCacheProvider.getDiskCache().put(key,
             new DataCacheWriter<>(encoder, toEncode, options));
       } finally {
         toEncode.unlock();
-        TraceCompat.endSection();
+        GlideTrace.endSection();
       }
     }
 
