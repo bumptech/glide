@@ -33,6 +33,7 @@ public class Engine implements EngineJobListener,
     EngineResource.ResourceListener {
   private static final String TAG = "Engine";
   private static final int JOB_POOL_SIZE = 150;
+  private static final boolean VERBOSE_IS_LOGGABLE = Log.isLoggable(TAG, Log.VERBOSE);
   private final Jobs jobs;
   private final EngineKeyFactory keyFactory;
   private final MemoryCache cache;
@@ -173,7 +174,7 @@ public class Engine implements EngineJobListener,
     EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
     if (active != null) {
       cb.onResourceReady(active, DataSource.MEMORY_CACHE);
-      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Loaded resource from active resources", startTime, key);
       }
       return null;
@@ -182,7 +183,7 @@ public class Engine implements EngineJobListener,
     EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
     if (cached != null) {
       cb.onResourceReady(cached, DataSource.MEMORY_CACHE);
-      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Loaded resource from cache", startTime, key);
       }
       return null;
@@ -191,7 +192,7 @@ public class Engine implements EngineJobListener,
     EngineJob<?> current = jobs.get(key, onlyRetrieveFromCache);
     if (current != null) {
       current.addCallback(cb);
-      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Added to existing load", startTime, key);
       }
       return new LoadStatus(cb, current);
@@ -229,7 +230,7 @@ public class Engine implements EngineJobListener,
     engineJob.addCallback(cb);
     engineJob.start(decodeJob);
 
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+    if (VERBOSE_IS_LOGGABLE) {
       logWithTimeAndKey("Started new load", startTime, key);
     }
     return new LoadStatus(cb, engineJob);
