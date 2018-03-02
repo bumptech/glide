@@ -173,28 +173,6 @@ public class RequestManager implements LifecycleListener,
   }
 
   /**
-   * @see android.content.ComponentCallbacks2#onTrimMemory(int)
-   *
-   * @deprecated This method is called automatically by Glide's internals and shouldn't be called
-   * externally.
-   */
-  @Deprecated
-  public void onTrimMemory(int level) {
-    glide.onTrimMemory(level);
-  }
-
-  /**
-   * @see android.content.ComponentCallbacks2#onLowMemory()
-   *
-   * @deprecated This method is called automatically by Glide's internals and shouldn't be called
-   * externally.
-   */
-  @Deprecated
-  public void onLowMemory() {
-    glide.onLowMemory();
-  }
-
-  /**
    * Returns true if loads for this {@link RequestManager} are currently paused.
    *
    * @see #pauseRequests()
