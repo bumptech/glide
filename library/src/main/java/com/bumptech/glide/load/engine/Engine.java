@@ -166,7 +166,7 @@ public class Engine implements EngineJobListener,
       boolean onlyRetrieveFromCache,
       ResourceCallback cb) {
     Util.assertMainThread();
-    long startTime = LogTime.getLogTime();
+    long startTime = VERBOSE_IS_LOGGABLE ? LogTime.getLogTime() : 0;
 
     EngineKey key = keyFactory.buildKey(model, signature, width, height, transformations,
         resourceClass, transcodeClass, options);
