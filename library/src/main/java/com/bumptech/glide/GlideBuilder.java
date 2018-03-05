@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
-import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -87,28 +86,6 @@ public final class GlideBuilder {
   public GlideBuilder setMemoryCache(@Nullable MemoryCache memoryCache) {
     this.memoryCache = memoryCache;
     return this;
-  }
-
-  /**
-   * Sets the {@link com.bumptech.glide.load.engine.cache.DiskCache} implementation to use to store
-   * {@link com.bumptech.glide.load.engine.Resource} data and thumbnails.
-   *
-   * @param diskCache The disk cache to use.
-   * @return This builder.
-   * @deprecated Creating a disk cache directory on the main thread causes strict mode violations,
-   * use {@link #setDiskCache(com.bumptech.glide.load.engine.cache.DiskCache.Factory)} instead.
-   * Scheduled to be removed in Glide 4.0.
-   */
-  // Public API.
-  @SuppressWarnings("unused")
-  @Deprecated
-  public GlideBuilder setDiskCache(final DiskCache diskCache) {
-    return setDiskCache(new DiskCache.Factory() {
-      @Override
-      public DiskCache build() {
-        return diskCache;
-      }
-    });
   }
 
   /**
@@ -253,27 +230,6 @@ public final class GlideBuilder {
   public <T> GlideBuilder setDefaultTransitionOptions(
       @NonNull Class<T> clazz, @Nullable TransitionOptions<?, T> options) {
     defaultTransitionOptions.put(clazz, options);
-    return this;
-  }
-
-  /**
-   * Sets the {@link com.bumptech.glide.load.DecodeFormat} that will be the default format for all
-   * the default decoders that can change the {@link android.graphics.Bitmap.Config} of the {@link
-   * android.graphics.Bitmap}s they decode.
-   *
-   * <p> Decode format is always a suggestion, not a requirement. See {@link
-   * com.bumptech.glide.load.DecodeFormat} for more details. </p>
-   *
-   * @param decodeFormat The format to use.
-   * @return This builder.
-   *
-   * @deprecated Use {@link #setDefaultRequestOptions(RequestOptions)} instead.
-   */
-  // Public API.
-  @SuppressWarnings("unused")
-  @Deprecated
-  public GlideBuilder setDecodeFormat(DecodeFormat decodeFormat) {
-    defaultRequestOptions = defaultRequestOptions.apply(new RequestOptions().format(decodeFormat));
     return this;
   }
 
