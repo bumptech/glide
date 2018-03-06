@@ -13,6 +13,10 @@ public final class GlideTrace {
   /** Maximum length of a systrace tag. */
   private static final int MAX_LENGTH = 127;
 
+  private GlideTrace() {
+    // Utility class.
+  }
+
   private static String truncateTag(String tag) {
     if (tag.length() > MAX_LENGTH) {
       return tag.substring(0, MAX_LENGTH - 1);
