@@ -76,6 +76,20 @@ There are a couple of indicators that something might be going wrong with ``Bitm
 
 Glide's ``BitmapPool`` has a fixed size. When ``Bitmap``s are evicted from the pool without being re-used, Glide will call [``recycle()``][7]. If an application inadvertently continues to hold on to the ``Bitmap`` even after indicating to Glide that it is safe to recycle it, the application may then attempt to draw the ``Bitmap``, resulting in a crash in ``onDraw()``.
 
+This problem could be due to the fact that one target is being used for two ``ImageView``s, and one of the ``ImageView``s still tries to access the recycled ``Bitmap`` after it has been put into the ``BitmapPool``. This recycling error can be hard to reproduce, due to several factors: 1) when the bitmap is put into the pool, 2) when the bitmap is recycled, and 3) what the size of the ``BitmapPool`` and memory cache are that leads to the recycling of the ``Bitmap``. The following snippet can be put into your ``GlideModule`` to help making this problem easier to reproduce:
+
+```java
+@Override
+public void applyOptions(Context context, GlideBuilder builder) {
+    int bitmapPoolSizeBytes = 1024 * 1024 * 0; // 0mb
+    int memoryCacheSizeBytes = 1024 * 1024 * 0; // 0mb
+    builder.setMemoryCache(new LruResourceCache(memoryCacheSizeBytes));
+    builder.setBitmapPool(new LruBitmapPool(bitmapPoolSizeBytes));
+}
+```
+
+The above code makes sure that there is no memory caching and the size of the ``BitmapPool`` is zero; so ``Bitmap``, if happened to be not used, will be recycled right away. The problem will surface much quicker for debugging purposes.
+
 #### Can't call reconfigure() on a recycled bitmap
 
 Resources are returned to Glide's ``BitmapPool`` when they're not in use any more. This is handled internally based on the lifecycle of a ``Request`` (who controls [``Resource``][8]s). If something calls [``recycle()``][7] on those Bitmaps, but they're still in the pool, Glide cannot re-use them and your app crashes with the above message. One key point here is that the crash will likely happen in the future at another point in your app, and not where the offending code was executed!
