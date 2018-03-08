@@ -819,7 +819,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * @return A {@link java.util.concurrent.Future} that can be used to retrieve the cache File
    * containing the data.
    *
-   * @deprecated Use {@link RequestManager#downloadOnly()} and {@link #into(int, int)}.
+   * @deprecated Use {@link RequestManager#downloadOnly()} and {@link #submit(int, int)}.
    */
   @Deprecated
   @CheckResult
