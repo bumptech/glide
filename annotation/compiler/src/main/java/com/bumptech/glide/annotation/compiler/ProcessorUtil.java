@@ -411,9 +411,11 @@ final class ProcessorUtil {
   private static String getSmartPrimitiveParameterName(VariableElement parameter) {
     for (AnnotationMirror annotation : parameter.getAnnotationMirrors()) {
       String annotationName = annotation.getAnnotationType().toString().toUpperCase();
-      if (annotationName.endsWith("RES")) { // Catch annotations like StringRes
+      if (annotationName.endsWith("RES")) {
+        // Catch annotations like StringRes
         return "id";
-      } else if (annotationName.endsWith("RANGE")) { // Catch annotations like IntRange
+      } else if (annotationName.endsWith("RANGE")) {
+        // Catch annotations like IntRange
         return "value";
       }
     }
