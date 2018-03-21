@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -192,10 +193,12 @@ final class RequestManagerGenerator {
       String generatedPackageName, ExecutableElement method) {
     ClassName generatedRequestManagerName =
         ClassName.get(generatedPackageName, GENERATED_REQUEST_MANAGER_SIMPLE_NAME);
-    return ProcessorUtil.overriding(method)
+    Builder returns = ProcessorUtil.overriding(method)
         .addAnnotation(nonNull())
-        .returns(generatedRequestManagerName)
-        .addCode(ProcessorUtil.generateCastingSuperCall(generatedRequestManagerName, method))
+        .returns(generatedRequestManagerName);
+    return returns
+        .addCode(ProcessorUtil.generateCastingSuperCall(
+            generatedRequestManagerName, returns.build()))
         .build();
   }
 
@@ -240,10 +243,9 @@ final class RequestManagerGenerator {
         ParameterizedTypeName.get(generatedRequestBuilderClassName, ClassName.get(typeArgument));
 
     MethodSpec.Builder builder = ProcessorUtil.overriding(methodToOverride)
-        .returns(generatedRequestBuilderOfType)
-        .addCode(
-            ProcessorUtil.generateCastingSuperCall(
-                generatedRequestBuilderOfType, methodToOverride));
+        .returns(generatedRequestBuilderOfType);
+    builder.addCode(
+        ProcessorUtil.generateCastingSuperCall(generatedRequestBuilderOfType, builder.build()));
 
     for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
       builder.addAnnotation(AnnotationSpec.get(mirror));

@@ -11,8 +11,10 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.CheckResult;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RawRes;
 import android.view.View;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -424,7 +426,7 @@ public class RequestManager implements LifecycleListener,
   @NonNull
   @CheckResult
   @Override
-  public RequestBuilder<Drawable> load(@Nullable Integer resourceId) {
+  public RequestBuilder<Drawable> load(@RawRes @DrawableRes @Nullable Integer resourceId) {
     return asDrawable().load(resourceId);
   }
 
