@@ -33,7 +33,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
 
   private int lastEnd;
   private int lastStart;
-  private int lastFirstVisible;
+  private int lastFirstVisible = -1;
   private int totalItemCount;
 
   private boolean isIncreasing = true;
