@@ -8,6 +8,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.MethodSpec.Builder;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
 
 /**
@@ -138,7 +138,7 @@ final class GlideGenerator {
   }
 
   private MethodSpec overrideGlideStaticMethod(ExecutableElement methodToOverride) {
-    List<? extends VariableElement> parameters = methodToOverride.getParameters();
+    List<ParameterSpec> parameters = ProcessorUtil.getParameters(methodToOverride);
 
     TypeElement element =
         (TypeElement) processingEnv.getTypeUtils().asElement(methodToOverride.getReturnType());
@@ -147,7 +147,7 @@ final class GlideGenerator {
         MethodSpec.methodBuilder(methodToOverride.getSimpleName().toString())
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
             .addJavadoc(processorUtil.generateSeeMethodJavadoc(methodToOverride))
-            .addParameters(ProcessorUtil.getParameters(methodToOverride));
+            .addParameters(parameters);
 
     addReturnAnnotations(builder, methodToOverride);
 
@@ -162,9 +162,9 @@ final class GlideGenerator {
     args.add(ClassName.get(glideType));
     args.add(methodToOverride.getSimpleName());
     if (!parameters.isEmpty()) {
-      for (VariableElement param : parameters) {
+      for (ParameterSpec param : parameters) {
         code.append("$L, ");
-        args.add(param.getSimpleName());
+        args.add(param.name);
       }
       code = new StringBuilder(code.substring(0, code.length() - 2));
     }
@@ -210,20 +210,20 @@ final class GlideGenerator {
       String packageName, TypeSpec generatedRequestManager, ExecutableElement methodToOverride) {
     ClassName generatedRequestManagerClassName =
         ClassName.get(packageName, generatedRequestManager.name);
-    List<? extends VariableElement> parameters = methodToOverride.getParameters();
+    List<ParameterSpec> parameters = ProcessorUtil.getParameters(methodToOverride);
     Preconditions.checkArgument(
         parameters.size() == 1, "Expected size of 1, but got %s", methodToOverride);
-    VariableElement parameter = parameters.iterator().next();
+    ParameterSpec parameter = parameters.iterator().next();
 
     Builder builder = MethodSpec.methodBuilder(methodToOverride.getSimpleName().toString())
         .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(methodToOverride))
-        .addParameters(ProcessorUtil.getParameters(methodToOverride))
+        .addParameters(parameters)
         .returns(generatedRequestManagerClassName)
         .addStatement("return ($T) $T.$N($L)",
             generatedRequestManagerClassName, glideType,
             methodToOverride.getSimpleName().toString(),
-            parameter.getSimpleName());
+            parameter.name);
 
     return addReturnAnnotations(builder, methodToOverride).build();
   }

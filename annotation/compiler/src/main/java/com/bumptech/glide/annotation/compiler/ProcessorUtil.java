@@ -256,15 +256,15 @@ final class ProcessorUtil {
     processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, toLog);
   }
 
-  static CodeBlock generateCastingSuperCall(TypeName toReturn, ExecutableElement method) {
+  static CodeBlock generateCastingSuperCall(TypeName toReturn, MethodSpec method) {
     return CodeBlock.builder()
-        .add("return ($T) super.$N(", toReturn, method.getSimpleName())
+        .add("return ($T) super.$N(", toReturn, method.name)
         .add(
-            FluentIterable.from(method.getParameters())
-                .transform(new Function<VariableElement, String>() {
+            FluentIterable.from(method.parameters)
+                .transform(new Function<ParameterSpec, String>() {
                   @Override
-                  public String apply(VariableElement input) {
-                    return input.getSimpleName().toString();
+                  public String apply(ParameterSpec input) {
+                    return input.name;
                   }
                 })
                 .join(Joiner.on(",")))
@@ -317,16 +317,117 @@ final class ProcessorUtil {
     for (VariableElement parameter : parameters) {
       result.add(getParameter(parameter));
     }
-    return result;
+    return dedupedParameters(result);
   }
 
-  private static ParameterSpec getParameter(VariableElement method) {
-    TypeName type = TypeName.get(method.asType());
-    String name = method.getSimpleName().toString();
-    return ParameterSpec.builder(type, name)
-        .addModifiers(method.getModifiers())
-        .addAnnotations(getAnnotations(method))
+  private static List<ParameterSpec> dedupedParameters(List<ParameterSpec> parameters) {
+    boolean hasDupes = false;
+    Set<String> names = new HashSet<>();
+    for (ParameterSpec parameter : parameters) {
+      String name = parameter.name;
+      if (names.contains(name)) {
+        hasDupes = true;
+      } else {
+        names.add(name);
+      }
+    }
+
+    if (hasDupes) {
+      List<ParameterSpec> copy = parameters;
+      parameters = new ArrayList<>();
+      for (int i = 0; i < copy.size(); i++) {
+        ParameterSpec parameter = copy.get(i);
+        parameters.add(ParameterSpec.builder(parameter.type, parameter.name + i)
+            .addModifiers(parameter.modifiers)
+            .addAnnotations(parameter.annotations)
+            .build());
+      }
+    }
+
+    return parameters;
+  }
+
+  private static ParameterSpec getParameter(VariableElement parameter) {
+    TypeName type = TypeName.get(parameter.asType());
+    return ParameterSpec.builder(type, computeParameterName(parameter, type))
+        .addModifiers(parameter.getModifiers())
+        .addAnnotations(getAnnotations(parameter))
         .build();
+  }
+
+  private static String computeParameterName(VariableElement parameter, TypeName type) {
+    String rawClassName = type.withoutAnnotations().toString();
+
+    String name;
+
+    if (type.isPrimitive() || type.isBoxedPrimitive()) {
+      name = getSmartPrimitiveParameterName(parameter);
+    } else {
+      if (rawClassName.contains("<") && rawClassName.contains(">")) {
+        String[] preGenericSplit = rawClassName.split("<");
+        String preGeneric = preGenericSplit[0];
+        String[] postGenericSplit = rawClassName.split(">");
+        String postGeneric = postGenericSplit[postGenericSplit.length - 1];
+        if (postGenericSplit.length > 1) {
+          rawClassName = preGeneric + postGeneric;
+        } else {
+          rawClassName = preGeneric;
+        }
+      }
+
+      String[] qualifiers = rawClassName.split("\\.");
+      rawClassName = qualifiers[qualifiers.length - 1];
+
+      rawClassName = applySmartParameterNameReplacements(rawClassName);
+
+      boolean allCaps = true;
+      for (char c : rawClassName.toCharArray()) {
+        if (Character.isLowerCase(c)) {
+          allCaps = false;
+          break;
+        }
+      }
+      if (allCaps) {
+        name = rawClassName.toLowerCase();
+      } else {
+        int indexOfLastWordStart = 0;
+        char[] chars = rawClassName.toCharArray();
+        for (int i = 0, charArrayLength = chars.length; i < charArrayLength; i++) {
+          char c = chars[i];
+          if (Character.isUpperCase(c)) {
+            indexOfLastWordStart = i;
+          }
+        }
+        rawClassName = rawClassName.substring(indexOfLastWordStart, rawClassName.length());
+
+        name = Character.toLowerCase(rawClassName.charAt(0))
+            + rawClassName.substring(1, rawClassName.length());
+      }
+    }
+
+    return name;
+  }
+
+  private static String getSmartPrimitiveParameterName(VariableElement parameter) {
+    for (AnnotationMirror annotation : parameter.getAnnotationMirrors()) {
+      String annotationName = annotation.getAnnotationType().toString().toUpperCase();
+      if (annotationName.endsWith("RES")) {
+        // Catch annotations like StringRes
+        return "id";
+      } else if (annotationName.endsWith("RANGE")) {
+        // Catch annotations like IntRange
+        return "value";
+      }
+    }
+
+    return parameter.getSimpleName().toString();
+  }
+
+  private static String applySmartParameterNameReplacements(String name) {
+    name = name.replace("[]", "s");
+    name = name.replace(Class.class.getSimpleName(), "clazz");
+    name = name.replace(Object.class.getSimpleName(), "o");
+    return name;
   }
 
   private static List<AnnotationSpec> getAnnotations(VariableElement element) {
