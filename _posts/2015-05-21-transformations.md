@@ -95,7 +95,7 @@ A simple implementation might look something like this:
 ```java
 public class FillSpace extends BitmapTransformation {
     private static final String ID = "com.bumptech.glide.transformations.FillSpace";
-    private static final String ID_BYTES = ID.getBytes(STRING_CHARSET_NAME);
+    private static final byte[] ID_BYTES = ID.getBytes(Charset.forName("UTF-8"));
 
     {@literal @Override}
     public Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
@@ -107,7 +107,7 @@ public class FillSpace extends BitmapTransformation {
     }
 
     {@literal @Override}
-    public void equals(Object o) {
+    public boolean equals(Object o) {
       return o instanceof FillSpace;
     }
 
@@ -117,8 +117,7 @@ public class FillSpace extends BitmapTransformation {
     }
 
     {@literal @Override}
-    public void updateDiskCacheKey(MessageDigest messageDigest)
-        throws UnsupportedEncodingException {
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
       messageDigest.update(ID_BYTES);
     }
 }
