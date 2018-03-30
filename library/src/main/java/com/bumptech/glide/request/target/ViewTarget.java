@@ -33,7 +33,7 @@ import java.util.List;
  *
  * <p> Any calls to {@link View#setTag(Object)}} on a View given to this class will result in
  * excessive allocations and and/or {@link IllegalArgumentException}s. If you must call {@link
- * View#setTag(Object)} on a view, use {@link #setTagId(int)} to specify a custom tag for Glide to 
+ * View#setTag(Object)} on a view, use {@link #setTagId(int)} to specify a custom tag for Glide to
  * use.
  *
  * <p> Subclasses must call super in {@link #onLoadCleared(Drawable)} </p>
