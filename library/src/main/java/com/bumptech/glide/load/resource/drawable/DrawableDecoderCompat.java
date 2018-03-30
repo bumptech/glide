@@ -8,6 +8,7 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.content.res.AppCompatResources;
+import android.support.v7.view.ContextThemeWrapper;
 
 /**
  * Handles decoding Drawables with the v7 support library if present and falling back to the v4
@@ -38,7 +39,7 @@ public final class DrawableDecoderCompat {
       // Race conditions may cause us to attempt to load using v7 more than once. That's ok since
       // this check is a modest optimization and the output will be correct anyway.
       if (shouldCallAppCompatResources) {
-        return loadDrawableV7(context, id);
+        return loadDrawableV7(context, id, theme);
       }
     } catch (NoClassDefFoundError error) {
       shouldCallAppCompatResources = false;
@@ -50,8 +51,10 @@ public final class DrawableDecoderCompat {
     return loadDrawableV4(context, id, theme != null ? theme : context.getTheme());
   }
 
-  private static Drawable loadDrawableV7(Context context, @DrawableRes int id) {
-    return AppCompatResources.getDrawable(context, id);
+  private static Drawable loadDrawableV7(Context context, @DrawableRes int id,
+      @Nullable Theme theme) {
+    Context resourceContext = theme != null ? new ContextThemeWrapper(context, theme) : context;
+    return AppCompatResources.getDrawable(resourceContext, id);
   }
 
   private static Drawable loadDrawableV4(
