@@ -97,7 +97,7 @@ public class FillSpace extends BitmapTransformation {
     private static final String ID = "com.bumptech.glide.transformations.FillSpace";
     private static final byte[] ID_BYTES = ID.getBytes(Charset.forName("UTF-8"));
 
-    {@literal @Override}
+    @Override
     public Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
         if (toTransform.getWidth() == outWidth && toTransform.getHeight() == outHeight) {
             return toTransform;
@@ -106,17 +106,17 @@ public class FillSpace extends BitmapTransformation {
         return Bitmap.createScaledBitmap(toTransform, outWidth, outHeight, /*filter=*/ true);
     }
 
-    {@literal @Override}
+    @Override
     public boolean equals(Object o) {
       return o instanceof FillSpace;
     }
 
-    {@literal @Override}
+    @Override
     public int hashCode() {
       return ID.hashCode();
     }
 
-    {@literal @Override}
+    @Override
     public void updateDiskCacheKey(MessageDigest messageDigest) {
       messageDigest.update(ID_BYTES);
     }
