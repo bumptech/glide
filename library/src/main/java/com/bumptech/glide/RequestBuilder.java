@@ -34,6 +34,8 @@ import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A generic class that can handle setting options and staring loads for generic resource types.
@@ -66,7 +68,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   @Nullable private Object model;
   // model may occasionally be null, so to enforce that load() was called, put a boolean rather
   // than relying on model not to be null.
-  @Nullable private RequestListener<TranscodeType> requestListener;
+  @Nullable private List<RequestListener<TranscodeType>> requestListeners;
   @Nullable private RequestBuilder<TranscodeType> thumbnailBuilder;
   @Nullable private RequestBuilder<TranscodeType> errorBuilder;
   @Nullable private Float thumbSizeMultiplier;
@@ -144,6 +146,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * instance of an exception handler per type of request (usually activity/fragment) rather than
    * pass one in per request to avoid some redundant object allocation.
    *
+   * <p>Subsequent calls to this method will replace previously set listeners. To set multiple
+   * listeners, use {@link #addListener} instead.
+   *
    * @param requestListener The request listener to use.
    * @return This request builder.
    */
@@ -152,8 +157,27 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> listener(
       @Nullable RequestListener<TranscodeType> requestListener) {
-    this.requestListener = requestListener;
+    this.requestListeners = null;
+    return addListener(requestListener);
+  }
 
+  /**
+   * Adds a {@link RequestListener}. If called multiple times, all passed
+   * {@link RequestListener listeners} will be called in order.
+   *
+   * @param requestListener The request listener to use. If {@code null}, this method is a noop.
+   * @return This request builder.
+   */
+  @NonNull
+  @CheckResult
+  public RequestBuilder<TranscodeType> addListener(
+      @Nullable RequestListener<TranscodeType> requestListener) {
+    if (requestListener != null) {
+      if (this.requestListeners == null) {
+        this.requestListeners = new ArrayList<>();
+      }
+      this.requestListeners.add(requestListener);
+    }
     return this;
   }
 
@@ -1041,7 +1065,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
         priority,
         target,
         targetListener,
-        requestListener,
+        requestListeners,
         requestCoordinator,
         glideContext.getEngine(),
         transitionOptions.getTransitionFactory());

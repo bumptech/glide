@@ -24,6 +24,7 @@ import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
 import com.bumptech.glide.util.pool.StateVerifier;
+import java.util.List;
 
 /**
  * A {@link Request} that loads a {@link com.bumptech.glide.load.engine.Resource} into a given
@@ -103,7 +104,7 @@ public final class SingleRequest<R> implements Request,
   private int overrideHeight;
   private Priority priority;
   private Target<R> target;
-  private RequestListener<R> requestListener;
+  @Nullable private List<RequestListener<R>> requestListeners;
   private Engine engine;
   private TransitionFactory<? super R> animationFactory;
   private Resource<R> resource;
@@ -127,7 +128,7 @@ public final class SingleRequest<R> implements Request,
       Priority priority,
       Target<R> target,
       RequestListener<R> targetListener,
-      RequestListener<R> requestListener,
+      @Nullable List<RequestListener<R>> requestListeners,
       RequestCoordinator requestCoordinator,
       Engine engine,
       TransitionFactory<? super R> animationFactory) {
@@ -147,7 +148,7 @@ public final class SingleRequest<R> implements Request,
         priority,
         target,
         targetListener,
-        requestListener,
+        requestListeners,
         requestCoordinator,
         engine,
         animationFactory);
@@ -171,7 +172,7 @@ public final class SingleRequest<R> implements Request,
       Priority priority,
       Target<R> target,
       RequestListener<R> targetListener,
-      RequestListener<R> requestListener,
+      @Nullable List<RequestListener<R>> requestListeners,
       RequestCoordinator requestCoordinator,
       Engine engine,
       TransitionFactory<? super R> animationFactory) {
@@ -185,7 +186,7 @@ public final class SingleRequest<R> implements Request,
     this.priority = priority;
     this.target = target;
     this.targetListener = targetListener;
-    this.requestListener = requestListener;
+    this.requestListeners = requestListeners;
     this.requestCoordinator = requestCoordinator;
     this.engine = engine;
     this.animationFactory = animationFactory;
@@ -209,7 +210,7 @@ public final class SingleRequest<R> implements Request,
     overrideWidth = -1;
     overrideHeight = -1;
     target = null;
-    requestListener = null;
+    requestListeners = null;
     targetListener = null;
     requestCoordinator = null;
     animationFactory = null;
@@ -570,10 +571,18 @@ public final class SingleRequest<R> implements Request,
 
     isCallingCallbacks = true;
     try {
-      if ((requestListener == null
-          || !requestListener.onResourceReady(result, model, target, dataSource, isFirstResource))
-          && (targetListener == null
-          || !targetListener.onResourceReady(result, model, target, dataSource, isFirstResource))) {
+      boolean anyListenerHandledUpdatingTarget = false;
+      if (requestListeners != null) {
+        for (RequestListener<R> listener : requestListeners) {
+          anyListenerHandledUpdatingTarget |=
+              listener.onResourceReady(result, model, target, dataSource, isFirstResource);
+        }
+      }
+      anyListenerHandledUpdatingTarget |=
+          targetListener != null
+              && targetListener.onResourceReady(result, model, target, dataSource, isFirstResource);
+
+      if (!anyListenerHandledUpdatingTarget) {
         Transition<? super R> animation =
             animationFactory.build(dataSource, isFirstResource);
         target.onResourceReady(result, animation);
@@ -609,10 +618,18 @@ public final class SingleRequest<R> implements Request,
     isCallingCallbacks = true;
     try {
       //TODO: what if this is a thumbnail request?
-      if ((requestListener == null
-          || !requestListener.onLoadFailed(e, model, target, isFirstReadyResource()))
-          && (targetListener == null
-          || !targetListener.onLoadFailed(e, model, target, isFirstReadyResource()))) {
+      boolean anyListenerHandledUpdatingTarget = false;
+      if (requestListeners != null) {
+        for (RequestListener<R> listener : requestListeners) {
+          anyListenerHandledUpdatingTarget |=
+              listener.onLoadFailed(e, model, target, isFirstReadyResource());
+        }
+      }
+      anyListenerHandledUpdatingTarget |=
+          targetListener != null
+              && targetListener.onLoadFailed(e, model, target, isFirstReadyResource());
+
+      if (!anyListenerHandledUpdatingTarget) {
         setErrorPlaceholder();
       }
     } finally {
@@ -633,12 +650,17 @@ public final class SingleRequest<R> implements Request,
           && requestOptions.equals(that.requestOptions)
           && priority == that.priority
           // We do not want to require that RequestListeners implement equals/hashcode, so we don't
-          // compare them using equals(). We can however, at least assert that the request listener
-          // is either present or not present in both requests.
-          && (requestListener != null
-          ? that.requestListener != null : that.requestListener == null);
+          // compare them using equals(). We can however, at least assert that the same amount of
+          // request listeners are present in both requests
+          && listenerCountEquals(this, that);
     }
     return false;
+  }
+
+  private static boolean listenerCountEquals(SingleRequest<?> first, SingleRequest<?> second) {
+    int firstListenerCount = first.requestListeners == null ? 0 : first.requestListeners.size();
+    int secondListenerCount = second.requestListeners == null ? 0 : second.requestListeners.size();
+    return firstListenerCount == secondListenerCount;
   }
 
   private void logV(String message) {
