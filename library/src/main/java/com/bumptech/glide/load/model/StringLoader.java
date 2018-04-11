@@ -34,7 +34,7 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
 
   @Override
   public boolean handles(@NonNull String model) {
-    return true;
+    return uriLoader.handles(parseUri(model));
   }
 
   @Nullable
