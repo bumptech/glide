@@ -31,8 +31,8 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.github.bumptech.glide:glide:4.7.0'
-  annotationProcessor 'com.github.bumptech.glide:compiler:4.7.0'
+  implementation 'com.github.bumptech.glide:glide:4.7.1'
+  annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
 }
 ```
 
@@ -42,12 +42,12 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.7.0</version>
+  <version>4.7.1</version>
 </dependency>
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>compiler</artifactId>
-  <version>4.7.0</version>
+  <version>4.7.1</version>
   <optional>true</optional>
 </dependency>
 ```
