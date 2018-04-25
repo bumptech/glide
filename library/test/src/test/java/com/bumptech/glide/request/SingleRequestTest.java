@@ -569,7 +569,7 @@ public class SingleRequestTest {
 
   @Test
   public void testRequestListenerIsCalledWithLoadedFromMemoryIfLoadCompletesSynchronously() {
-    SingleRequest<List> request = builder.addRequestListener(listener1).build();
+    final SingleRequest<List> request = builder.addRequestListener(listener1).build();
 
     when(builder.engine
         .load(
