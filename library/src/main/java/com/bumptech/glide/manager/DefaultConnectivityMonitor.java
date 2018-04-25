@@ -60,6 +60,10 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Failed to register", e);
       }
+    } catch (Throwable t) {
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Failed to register", t);
+      }
     }
   }
 
