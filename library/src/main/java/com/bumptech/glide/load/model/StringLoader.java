@@ -29,11 +29,16 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
   public LoadData<Data> buildLoadData(@NonNull String model, int width, int height,
       @NonNull Options options) {
     Uri uri = parseUri(model);
-    return uri == null ? null : uriLoader.buildLoadData(uri, width, height, options);
+    if (uri == null || !uriLoader.handles(uri)) {
+      return null;
+    }
+    return uriLoader.buildLoadData(uri, width, height, options);
   }
 
   @Override
   public boolean handles(@NonNull String model) {
+    // Avoid parsing the Uri twice and simply return null from buildLoadData if we don't handle this
+    // particular Uri type.
     return true;
   }
 
@@ -66,7 +71,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
 
     @NonNull
     @Override
-    public ModelLoader<String, InputStream> build(MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<String, InputStream> build(
+        @NonNull MultiModelLoaderFactory multiFactory) {
       return new StringLoader<>(multiFactory.build(Uri.class, InputStream.class));
     }
 
@@ -84,7 +90,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
 
     @NonNull
     @Override
-    public ModelLoader<String, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<String, ParcelFileDescriptor> build(
+        @NonNull MultiModelLoaderFactory multiFactory) {
       return new StringLoader<>(multiFactory.build(Uri.class, ParcelFileDescriptor.class));
     }
 
@@ -101,7 +108,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
       implements ModelLoaderFactory<String, AssetFileDescriptor> {
 
     @Override
-    public ModelLoader<String, AssetFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<String, AssetFileDescriptor> build(
+        @NonNull MultiModelLoaderFactory multiFactory) {
       return new StringLoader<>(multiFactory.build(Uri.class, AssetFileDescriptor.class));
     }
 
