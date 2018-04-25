@@ -672,6 +672,13 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
 
   @Override
   @NonNull
+  @CheckResult
+  public GlideRequest<TranscodeType> addListener(@Nullable RequestListener<TranscodeType> listener) {
+    return (GlideRequest<TranscodeType>) super.addListener(listener);
+  }
+
+  @Override
+  @NonNull
   public GlideRequest<TranscodeType> error(@Nullable RequestBuilder<TranscodeType> builder) {
     return (GlideRequest<TranscodeType>) super.error(builder);
   }
