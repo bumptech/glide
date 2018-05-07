@@ -385,7 +385,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
       pos = (int) (pos + byteCount);
       return byteCount;
     }
-    // See http://errorprone.info/bugpattern/IntLongMath.
+    // See https://errorprone.info/bugpattern/IntLongMath.
     long read = (long) count - pos;
     pos = count;
 
@@ -394,7 +394,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
         return read;
       }
       if (count - pos >= byteCount - read) {
-        // See http://errorprone.info/bugpattern/NarrowingCompoundAssignment.
+        // See https://errorprone.info/bugpattern/NarrowingCompoundAssignment.
         pos = (int) (pos + byteCount - read);
         return byteCount;
       }

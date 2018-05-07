@@ -94,7 +94,7 @@ public class BitmapPreFillerTest {
     for (PreFillType current : sizes) {
       int currentSize =
           Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
-      // See http://errorprone.info/bugpattern/NarrowingCompoundAssignment.
+      // See https://errorprone.info/bugpattern/NarrowingCompoundAssignment.
       expectedSize = (int) (expectedSize + (currentSize * (maxSize / (3 * currentSize))));
     }
 
