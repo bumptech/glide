@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -17,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.function.ThrowingRunnable;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
@@ -27,7 +28,6 @@ import org.junit.runner.RunWith;
 @RegressionTest
 public class FitCenterRegressionTest {
   @Rule public final TestName testName = new TestName();
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   private BitmapRegressionTester bitmapRegressionTester;
   private Context context;
@@ -108,16 +108,23 @@ public class FitCenterRegressionTest {
   public void fitCenter_withHugeRectangle_throwsOOM()
       throws ExecutionException, InterruptedException {
     float multiplier = Integer.MAX_VALUE / (canonical.getWidth() * canonical.getHeight() * 2);
-    int overrideWidth = (int) multiplier * canonical.getWidth();
-    int overrideHeight = (int) multiplier * canonical.getHeight();
-    expectedException.expect(ExecutionException.class);
-    GlideApp
-        .with(context)
-        .asBitmap()
-        .load(canonical.getBitmap())
-        .fitCenter()
-        .override(overrideWidth, overrideHeight)
-        .submit()
-        .get();
+    final int overrideWidth = (int) multiplier * canonical.getWidth();
+    final int overrideHeight = (int) multiplier * canonical.getHeight();
+
+    assertThrows(
+        ExecutionException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            GlideApp
+                .with(context)
+                .asBitmap()
+                .load(canonical.getBitmap())
+                .fitCenter()
+                .override(overrideWidth, overrideHeight)
+                .submit()
+                .get();
+          }
+        });
   }
 }

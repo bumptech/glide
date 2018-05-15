@@ -2,6 +2,7 @@ package com.bumptech.glide.annotation.compiler;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
+import static org.junit.Assert.assertThrows;
 
 import com.bumptech.glide.annotation.compiler.test.RegenerateResourcesRule;
 import com.bumptech.glide.annotation.compiler.test.Util;
@@ -9,7 +10,7 @@ import com.google.testing.compile.Compilation;
 import javax.tools.JavaFileObject;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -23,16 +24,21 @@ public class MultipleAppGlideModuleTest {
   private static final String SECOND_MODULE = "EmptyAppModule2.java";
   @Rule public final RegenerateResourcesRule regenerateResourcesRule =
       new RegenerateResourcesRule(getClass());
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
 
   // Throws.
   @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
   public void compilation_withTwoAppModules_fails() {
-    expectedException.expect(RuntimeException.class);
-    javac()
-        .withProcessors(new GlideAnnotationProcessor())
-        .compile(forResource(FIRST_MODULE), forResource(SECOND_MODULE));
+    assertThrows(
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            javac()
+                .withProcessors(new GlideAnnotationProcessor())
+                .compile(forResource(FIRST_MODULE), forResource(SECOND_MODULE));
+          }
+        });
   }
 
   @Test

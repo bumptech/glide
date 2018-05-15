@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -13,9 +14,8 @@ import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -28,8 +28,6 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class MultiModelLoaderFactoryTest {
-  @Rule public final ExpectedException exception = ExpectedException.none();
-
   @Mock private ModelLoaderFactory<String, String> firstFactory;
   @Mock private ModelLoader<String, String> firstModelLoader;
   @Mock private MultiModelLoaderFactory.Factory multiModelLoaderFactory;
@@ -183,16 +181,28 @@ public class MultiModelLoaderFactoryTest {
   public void testBuild_withModelAndDataClasses_excludesModelLoadersForOtherDataClasses() {
     multiFactory.append(String.class, String.class, firstFactory);
 
-    exception.expect(NoModelLoaderAvailableException.class);
-    multiFactory.build(String.class, Integer.class);
+    assertThrows(
+        NoModelLoaderAvailableException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            multiFactory.build(String.class, Integer.class);
+          }
+        });
   }
 
   @Test
   public void testBuild_withModelAndDataClasses_excludesModelLoadersForOtherModelClasses() {
     multiFactory.append(String.class, String.class, firstFactory);
 
-    exception.expect(NoModelLoaderAvailableException.class);
-    multiFactory.build(Integer.class, String.class);
+    assertThrows(
+        NoModelLoaderAvailableException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            multiFactory.build(Integer.class, String.class);
+          }
+        });
   }
 
   @Test
@@ -212,15 +222,28 @@ public class MultiModelLoaderFactoryTest {
   @Test
   public void testBuild_withModelAndDataClass_doesNotMatchSubclassesOfModelClass() {
     appendFactoryFor(String.class, Object.class);
-    exception.expect(NoModelLoaderAvailableException.class);
-    multiFactory.build(Object.class, Object.class);
+
+    assertThrows(
+        NoModelLoaderAvailableException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            multiFactory.build(Object.class, Object.class);
+          }
+        });
   }
 
   @Test
   public void testBuild_withModelAndDataClass_doesNotMatchSubclassesOfDataClass() {
     appendFactoryFor(Object.class, String.class);
-    exception.expect(NoModelLoaderAvailableException.class);
-    multiFactory.build(Object.class, Object.class);
+    assertThrows(
+        NoModelLoaderAvailableException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            multiFactory.build(Object.class, Object.class);
+          }
+        });
   }
 
   @Test

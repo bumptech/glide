@@ -17,7 +17,6 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
@@ -27,7 +26,6 @@ import org.junit.runner.RunWith;
 @RegressionTest
 public class CenterInsideRegressionTest {
   @Rule public final TestName testName = new TestName();
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   private BitmapRegressionTester bitmapRegressionTester;
   private Context context;

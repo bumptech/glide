@@ -8,21 +8,17 @@ import static org.junit.Assert.fail;
 import com.google.common.truth.Truth;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
  * Checks assertions on {@link com.bumptech.glide.annotation.GlideExtension}s themselves.
  */
-// Avoid warnings when using ExpectedException.
+// Avoid warnings when asserting on exceptions.
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(JUnit4.class)
 public class InvalidGlideExtensionTest {
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
-
   @Test
   public void compilation_withPublicConstructor_fails() {
     try {

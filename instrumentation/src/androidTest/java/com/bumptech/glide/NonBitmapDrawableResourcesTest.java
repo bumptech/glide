@@ -3,6 +3,7 @@ package com.bumptech.glide;
 import static com.bumptech.glide.request.RequestOptions.bitmapTransform;
 import static com.bumptech.glide.request.RequestOptions.centerCropTransform;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -27,7 +28,7 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.function.ThrowingRunnable;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
@@ -36,7 +37,6 @@ import org.mockito.MockitoAnnotations;
 public class NonBitmapDrawableResourcesTest {
   @Rule public final TestName testName = new TestName();
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
 
   private Context context;
 
@@ -123,12 +123,19 @@ public class NonBitmapDrawableResourcesTest {
   @Test
   public void load_withShapeDrawableResourceId_asDrawable_withTransformation_sizeOriginal_fails()
       throws ExecutionException, InterruptedException {
-    expectedException.expect(ExecutionException.class);
-    Glide.with(context)
-        .load(ResourceIds.drawable.shape_drawable)
-        .apply(centerCropTransform())
-        .submit()
-        .get();
+    assertThrows(
+        ExecutionException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            Glide.with(context)
+                .load(ResourceIds.drawable.shape_drawable)
+                .apply(centerCropTransform())
+                .submit()
+                .get();
+
+          }
+        });
   }
 
   @Test
@@ -147,12 +154,18 @@ public class NonBitmapDrawableResourcesTest {
   @Test
   public void load_withShapeDrawableResourceId_asBitmap_withSizeOriginal_fails()
       throws ExecutionException, InterruptedException {
-    expectedException.expect(ExecutionException.class);
-    Glide.with(context)
-        .asBitmap()
-        .load(ResourceIds.drawable.shape_drawable)
-        .submit()
-        .get();
+    assertThrows(
+        ExecutionException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            Glide.with(context)
+                .asBitmap()
+                .load(ResourceIds.drawable.shape_drawable)
+                .submit()
+                .get();
+          }
+        });
   }
 
   @Test

@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,15 +23,12 @@ import com.bumptech.glide.test.GlideApp;
 import java.util.concurrent.ExecutionException;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class DrawableTransformationTest {
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
-
   private Context context;
 
   @Before
@@ -117,15 +115,21 @@ public class DrawableTransformationTest {
   @Test
   public void load_withColorDrawable_sizeOriginal_requiredTransform_fails()
       throws ExecutionException, InterruptedException {
-    Drawable colorDrawable = new ColorDrawable(Color.RED);
+    final Drawable colorDrawable = new ColorDrawable(Color.RED);
 
-    expectedException.expect(ExecutionException.class);
-    Glide.with(context)
-        .load(colorDrawable)
-        .apply(new RequestOptions()
-            .centerCrop())
-        .submit()
-        .get();
+    assertThrows(
+        ExecutionException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            Glide.with(context)
+                .load(colorDrawable)
+                .apply(new RequestOptions()
+                    .centerCrop())
+                .submit()
+                .get();
+          }
+        });
   }
 
   @Test

@@ -13,6 +13,7 @@ dependencies {
     // build.gradle file.
     testImplementation project(':glide')
     testImplementation project(':annotation:compiler')
+    testImplementation "junit:junit:${JUNIT_VERSION}"
     testImplementation "com.squareup:javapoet:${JAVAPOET_VERSION}"
     testImplementation "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
     testImplementation "com.google.code.findbugs:jsr305:${JSR_305_VERSION}"

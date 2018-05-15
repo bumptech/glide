@@ -3,14 +3,14 @@ package com.bumptech.glide.annotation.compiler;
 import static com.bumptech.glide.annotation.compiler.test.Util.emptyAppModule;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 import com.google.common.truth.Truth;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -18,30 +18,34 @@ import org.junit.runners.JUnit4;
  * Checks assertions on {@link com.bumptech.glide.annotation.GlideExtension}s for methods annotated
  * with {@link com.bumptech.glide.annotation.GlideOption}.
  */
-// Ignore warnings since most methods use ExpectedException
+// Ignore warnings since most methods use assertThrows.
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(JUnit4.class)
 public class InvalidGlideOptionsExtensionTest {
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
-
   @Test
   public void compilation_withAnnotatedNonStaticMethod_fails() {
-    expectedException.expect(RuntimeException.class);
-    javac()
-        .withProcessors(new GlideAnnotationProcessor())
-        .compile(
-            emptyAppModule(),
-            JavaFileObjects.forSourceLines(
-                "Extension",
-                "package com.bumptech.glide.test;",
-                "import com.bumptech.glide.annotation.GlideExtension;",
-                "import com.bumptech.glide.annotation.GlideOption;",
-                "@GlideExtension",
-                "public class Extension {",
-                "  private Extension() {}",
-                "  @GlideOption",
-                "  public void doSomething() {}",
-                "}"));
+    assertThrows(
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            javac()
+                .withProcessors(new GlideAnnotationProcessor())
+                .compile(
+                    emptyAppModule(),
+                    JavaFileObjects.forSourceLines(
+                        "Extension",
+                        "package com.bumptech.glide.test;",
+                        "import com.bumptech.glide.annotation.GlideExtension;",
+                        "import com.bumptech.glide.annotation.GlideOption;",
+                        "@GlideExtension",
+                        "public class Extension {",
+                        "  private Extension() {}",
+                        "  @GlideOption",
+                        "  public void doSomething() {}",
+                        "}"));
+          }
+        });
   }
 
   @Test
@@ -118,44 +122,57 @@ public class InvalidGlideOptionsExtensionTest {
 
   @Test
   public void compilation_overridingOptionWithoutAnnotationType_fails() {
-    expectedException.expect(RuntimeException.class);
-    javac()
-        .withProcessors(new GlideAnnotationProcessor())
-        .compile(
-            emptyAppModule(),
-            JavaFileObjects.forSourceLines(
-                "Extension",
-                "package com.bumptech.glide.test;",
-                "import com.bumptech.glide.annotation.GlideExtension;",
-                "import com.bumptech.glide.annotation.GlideOption;",
-                "import com.bumptech.glide.request.RequestOptions;",
-                "@GlideExtension",
-                "public class Extension {",
-                "  private Extension() {}",
-                "  @GlideOption",
-                "  public static void centerCrop(RequestOptions options) {}",
-                "}"));
+    assertThrows(
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            javac()
+                .withProcessors(new GlideAnnotationProcessor())
+                .compile(
+                emptyAppModule(),
+                JavaFileObjects.forSourceLines(
+                    "Extension",
+                    "package com.bumptech.glide.test;",
+                    "import com.bumptech.glide.annotation.GlideExtension;",
+                    "import com.bumptech.glide.annotation.GlideOption;",
+                    "import com.bumptech.glide.request.RequestOptions;",
+                    "@GlideExtension",
+                    "public class Extension {",
+                    "  private Extension() {}",
+                    "  @GlideOption",
+                    "  public static void centerCrop(RequestOptions options) {}",
+                    "}"));
+
+          }
+        });
   }
 
   @Test
   public void compilation_withOverrideExtend_butNotOverridingMethod_fails() {
-    expectedException.expect(RuntimeException.class);
-    javac()
-        .withProcessors(new GlideAnnotationProcessor())
-        .compile(
-            emptyAppModule(),
-            JavaFileObjects.forSourceLines(
-                "Extension",
-                "package com.bumptech.glide.test;",
-                "import com.bumptech.glide.annotation.GlideExtension;",
-                "import com.bumptech.glide.annotation.GlideOption;",
-                "import com.bumptech.glide.request.RequestOptions;",
-                "@GlideExtension",
-                "public class Extension {",
-                "  private Extension() {}",
-                "  @GlideOption(override = GlideOption.OVERRIDE_EXTEND)",
-                "  public static void something(RequestOptions options) {}",
-                "}"));
+    assertThrows(
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            javac()
+                .withProcessors(new GlideAnnotationProcessor())
+                .compile(
+                    emptyAppModule(),
+                    JavaFileObjects.forSourceLines(
+                        "Extension",
+                        "package com.bumptech.glide.test;",
+                        "import com.bumptech.glide.annotation.GlideExtension;",
+                        "import com.bumptech.glide.annotation.GlideOption;",
+                        "import com.bumptech.glide.request.RequestOptions;",
+                        "@GlideExtension",
+                        "public class Extension {",
+                        "  private Extension() {}",
+                        "  @GlideOption(override = GlideOption.OVERRIDE_EXTEND)",
+                        "  public static void something(RequestOptions options) {}",
+                        "}"));
+          }
+        });
   }
 
   @Test
@@ -182,23 +199,29 @@ public class InvalidGlideOptionsExtensionTest {
 
   @Test
   public void compilation_withOverrideReplace_butNotOverridingMethod_fails() {
-    expectedException.expect(RuntimeException.class);
-    javac()
-        .withProcessors(new GlideAnnotationProcessor())
-        .compile(
-            emptyAppModule(),
-            JavaFileObjects.forSourceLines(
-                "Extension",
-                "package com.bumptech.glide.test;",
-                "import com.bumptech.glide.annotation.GlideExtension;",
-                "import com.bumptech.glide.annotation.GlideOption;",
-                "import com.bumptech.glide.request.RequestOptions;",
-                "@GlideExtension",
-                "public class Extension {",
-                "  private Extension() {}",
-                "  @GlideOption(override = GlideOption.OVERRIDE_REPLACE)",
-                "  public static void something(RequestOptions options) {}",
-                "}"));
+    assertThrows(
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws Throwable {
+            javac()
+                .withProcessors(new GlideAnnotationProcessor())
+                .compile(
+                    emptyAppModule(),
+                    JavaFileObjects.forSourceLines(
+                        "Extension",
+                        "package com.bumptech.glide.test;",
+                        "import com.bumptech.glide.annotation.GlideExtension;",
+                        "import com.bumptech.glide.annotation.GlideOption;",
+                        "import com.bumptech.glide.request.RequestOptions;",
+                        "@GlideExtension",
+                        "public class Extension {",
+                        "  private Extension() {}",
+                        "  @GlideOption(override = GlideOption.OVERRIDE_REPLACE)",
+                        "  public static void something(RequestOptions options) {}",
+                        "}"));
+          }
+        });
   }
 
   @Test
