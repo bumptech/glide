@@ -22,6 +22,7 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
+import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
@@ -158,7 +159,7 @@ public class LoadResourcesWithDownsamplerTest {
         concurrency.get(
             GlideApp.with(context)
                 .asBitmap()
-                // Allow HARDWARE Bitmaps.
+                .set(Downsampler.ALLOW_HARDWARE_CONFIG, true)
                 .format(DecodeFormat.PREFER_ARGB_8888)
                 .load(new Object())
                 .submit());

@@ -479,16 +479,22 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       return options;
     }
 
-    if (options.get(Downsampler.ALLOW_HARDWARE_CONFIG) != null) {
+    boolean isHardwareConfigSafe =
+        dataSource == DataSource.RESOURCE_DISK_CACHE || decodeHelper.isScaleOnlyOrNoTransform();
+    Boolean isHardwareConfigAllowed = options.get(Downsampler.ALLOW_HARDWARE_CONFIG);
+
+    // If allow hardware config is defined, we can use it if it's set to false or if it's safe to
+    // use the hardware config for the request.
+    if (isHardwareConfigAllowed != null && (!isHardwareConfigAllowed || isHardwareConfigSafe)) {
       return options;
     }
 
-    if (dataSource == DataSource.RESOURCE_DISK_CACHE
-        || decodeHelper.isScaleOnlyOrNoTransform()) {
-      options = new Options();
-      options.putAll(this.options);
-      options.set(Downsampler.ALLOW_HARDWARE_CONFIG, true);
-    }
+    // If allow hardware config is undefined or is set to true but it's unsafe for us to use the
+    // hardware config for this request, we need to override the config.
+    options = new Options();
+    options.putAll(this.options);
+    options.set(Downsampler.ALLOW_HARDWARE_CONFIG, isHardwareConfigSafe);
+
     return options;
   }
 
