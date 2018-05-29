@@ -376,6 +376,24 @@ public class RequestTrackerTest {
     verify(request).begin();
   }
 
+  @Test
+  public void runRequest_withAllRequestsPaused_pausesNewRequest() {
+    Request request = mock(Request.class);
+    tracker.pauseAllRequests();
+    tracker.runRequest(request);
+
+    verify(request).pause();
+  }
+
+  @Test
+  public void runRequest_withRequestsPaused_pausesNewRequest() {
+    Request request = mock(Request.class);
+    tracker.pauseRequests();
+    tracker.runRequest(request);
+
+    verify(request).pause();
+  }
+
   private class ClearAndRemoveRequest implements Answer<Void> {
 
     private final Request toRemove;

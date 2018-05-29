@@ -43,6 +43,7 @@ public class RequestTracker {
     if (!isPaused) {
       request.begin();
     } else {
+      request.pause();
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Paused, delaying request");
       }
