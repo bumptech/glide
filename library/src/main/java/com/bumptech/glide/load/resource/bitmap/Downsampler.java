@@ -201,9 +201,6 @@ public final class Downsampler {
     boolean fixBitmapToRequestedDimensions = options.get(FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS);
     boolean isHardwareConfigAllowed =
       options.get(ALLOW_HARDWARE_CONFIG) != null && options.get(ALLOW_HARDWARE_CONFIG);
-    if (decodeFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE) {
-      isHardwareConfigAllowed = false;
-    }
 
     try {
       Bitmap result = decodeFromWrappedStreams(is, bitmapFactoryOptions,
@@ -525,7 +522,6 @@ public final class Downsampler {
 
     // Changing configs can cause skewing on 4.1, see issue #128.
     if (format == DecodeFormat.PREFER_ARGB_8888
-        || format == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE
         || Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
       optionsWithScaling.inPreferredConfig = Bitmap.Config.ARGB_8888;
       return;
