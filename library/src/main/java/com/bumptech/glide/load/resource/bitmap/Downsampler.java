@@ -89,7 +89,7 @@ public final class Downsampler {
    */
   public static final Option<Boolean> ALLOW_HARDWARE_CONFIG =
       Option.memory(
-          "com.bumtpech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", false);
+          "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", false);
 
   private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
   private static final String ICO_MIME_TYPE = "image/x-ico";
