@@ -6,6 +6,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.v4.os.BuildCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import com.bumptech.glide.load.DecodeFormat;
@@ -89,7 +90,8 @@ public final class Downsampler {
    */
   public static final Option<Boolean> ALLOW_HARDWARE_CONFIG =
       Option.memory(
-          "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", false);
+          "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode",
+          BuildCompat.isAtLeastP());
 
   private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
   private static final String ICO_MIME_TYPE = "image/x-ico";
