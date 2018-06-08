@@ -37,10 +37,6 @@ public interface Target<R> extends LifecycleListener {
    * called. Loads can be paused and restarted due to lifecycle or connectivity events and each
    * restart may cause a call here.
    *
-   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
-   * Transition)} is no longer displayed before redrawing the container (usually a View) or
-   * changing its visibility.
-   *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
   void onLoadStarted(@Nullable Drawable placeholder);
