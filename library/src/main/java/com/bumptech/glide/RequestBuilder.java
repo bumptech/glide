@@ -182,7 +182,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   }
 
   /**
-   * Sets a {@link RequestBuilder} that is built and run iff the load started by this
+   * Sets a {@link RequestBuilder} that is built and run if the load started by this
    * {@link RequestBuilder} fails.
    *
    * <p>If this {@link RequestBuilder} uses a thumbnail that succeeds the given error
