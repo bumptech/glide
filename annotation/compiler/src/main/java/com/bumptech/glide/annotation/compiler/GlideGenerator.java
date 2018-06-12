@@ -79,6 +79,9 @@ final class GlideGenerator {
   private static final String VISIBLE_FOR_TESTING_QUALIFIED_NAME =
       "android.support.annotation.VisibleForTesting";
 
+  private static final String VISIBLE_FOR_TESTING_QUALIFIED_NAME_ANDROIDX =
+      "androidx.annotation.VisibleForTesting";
+
   private static final String SUPPRESS_LINT_PACKAGE_NAME =
       "android.annotation";
   private static final String SUPPRESS_LINT_CLASS_NAME =
@@ -174,11 +177,14 @@ final class GlideGenerator {
   }
 
   private Builder addReturnAnnotations(Builder builder, ExecutableElement methodToOverride) {
-    String visibleForTestingTypeQualifiedName =
-        processingEnv
-            .getElementUtils()
-            .getTypeElement(VISIBLE_FOR_TESTING_QUALIFIED_NAME)
-            .toString();
+    Elements elements = processingEnv.getElementUtils();
+    TypeElement visibleForTestingTypeElement = elements
+        .getTypeElement(VISIBLE_FOR_TESTING_QUALIFIED_NAME_ANDROIDX);
+    if (visibleForTestingTypeElement == null) {
+      // Fall back to looking for the Support library version.
+      visibleForTestingTypeElement = elements.getTypeElement(VISIBLE_FOR_TESTING_QUALIFIED_NAME);
+    }
+    String visibleForTestingTypeQualifiedName = visibleForTestingTypeElement.toString();
 
     for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
       builder.addAnnotation(AnnotationSpec.get(mirror));
