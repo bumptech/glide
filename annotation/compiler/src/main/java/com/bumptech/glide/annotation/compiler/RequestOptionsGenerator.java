@@ -1,6 +1,7 @@
 package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.GlideOption.OVERRIDE_EXTEND;
+import static com.bumptech.glide.annotation.compiler.ProcessorUtil.checkResult;
 import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
 
 import com.bumptech.glide.annotation.GlideExtension;
@@ -76,8 +77,6 @@ final class RequestOptionsGenerator {
   private static final String REQUEST_OPTIONS_SIMPLE_NAME = "RequestOptions";
   static final String REQUEST_OPTIONS_QUALIFIED_NAME =
       REQUEST_OPTIONS_PACKAGE_NAME + "." + REQUEST_OPTIONS_SIMPLE_NAME;
-  private static final ClassName CHECK_RESULT_CLASS_NAME =
-      ClassName.get("android.support.annotation", "CheckResult");
 
   private final ProcessingEnvironment processingEnvironment;
   private final ClassName requestOptionsName;
@@ -301,7 +300,7 @@ final class RequestOptionsGenerator {
     builder.addStatement(code.toString(), args.toArray(new Object[0]));
 
     builder
-        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(checkResult())
         .addAnnotation(nonNull());
 
     List<MethodAndStaticVar> result = new ArrayList<>();
@@ -375,7 +374,7 @@ final class RequestOptionsGenerator {
     builder.addStatement(code.toString(), args.toArray(new Object[0]));
 
     builder.addStatement("return this")
-        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(checkResult())
         .addAnnotation(nonNull());
 
     List<MethodAndStaticVar> result = new ArrayList<>();
@@ -483,7 +482,7 @@ final class RequestOptionsGenerator {
     }
 
     methodSpecBuilder
-        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(checkResult())
         .addAnnotation(nonNull());
 
     return new MethodAndStaticVar(methodSpecBuilder.build(), requiredStaticField);
@@ -569,7 +568,7 @@ final class RequestOptionsGenerator {
           TypeVariableName.get(typeParameterElement.getSimpleName().toString()));
     }
 
-    methodSpecBuilder.addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build());
+    methodSpecBuilder.addAnnotation(checkResult());
 
     return new MethodAndStaticVar(methodSpecBuilder.build(), requiredStaticField);
   }

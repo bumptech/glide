@@ -1,5 +1,6 @@
 package com.bumptech.glide.annotation.compiler;
 
+import static com.bumptech.glide.annotation.compiler.ProcessorUtil.checkResult;
 import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
 
 import com.bumptech.glide.annotation.GlideExtension;
@@ -107,9 +108,8 @@ final class RequestBuilderGenerator {
   /** A set of method names to avoid overriding from RequestOptions. */
   private static final ImmutableSet<String> EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS =
       ImmutableSet.of("clone", "apply", "autoLock", "lock", "autoClone");
-  private static final ClassName CHECK_RESULT_CLASS_NAME =
-      ClassName.get("android.support.annotation", "CheckResult");
   private static final AnnotationSpec NON_NULL = AnnotationSpec.builder(nonNull()).build();
+  private static final AnnotationSpec CHECK_RESULT = AnnotationSpec.builder(checkResult()).build();
 
   private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
@@ -448,7 +448,7 @@ final class RequestBuilderGenerator {
         = ParameterizedTypeName.get(generatedRequestBuilderClassName, ClassName.get(File.class));
     return MethodSpec.methodBuilder("getDownloadOnlyRequest")
         .addAnnotation(Override.class)
-        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(CHECK_RESULT)
         .addAnnotation(NON_NULL)
         .returns(generatedRequestBuilderOfFile)
         .addModifiers(Modifier.PROTECTED)
