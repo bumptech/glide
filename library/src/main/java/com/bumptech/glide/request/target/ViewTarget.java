@@ -126,7 +126,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   @SuppressWarnings("WeakerAccess")
   @Synthetic void resumeMyRequest() {
     Request request = getRequest();
-    if (request != null && request.isPaused()) {
+    if (request != null && request.isCleared()) {
       request.begin();
     }
   }
@@ -134,9 +134,11 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   @SuppressWarnings("WeakerAccess")
   @Synthetic void pauseMyRequest() {
     Request request = getRequest();
-    if (request != null && !request.isCancelled() && !request.isPaused()) {
+    // If the Request were cleared by the developer, it would be null here. The only way it's
+    // present is if the developer hasn't previously cleared this Target.
+    if (request != null) {
       isClearedByUs = true;
-      request.pause();
+      request.clear();
       isClearedByUs = false;
     }
   }

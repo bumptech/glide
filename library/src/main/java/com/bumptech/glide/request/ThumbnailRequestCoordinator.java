@@ -121,22 +121,10 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   }
 
   @Override
-  public void pause() {
-    isRunning = false;
-    full.pause();
-    thumb.pause();
-  }
-
-  @Override
   public void clear() {
     isRunning = false;
     thumb.clear();
     full.clear();
-  }
-
-  @Override
-  public boolean isPaused() {
-    return full.isPaused();
   }
 
   /**
@@ -161,8 +149,8 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   }
 
   @Override
-  public boolean isCancelled() {
-    return full.isCancelled();
+  public boolean isCleared() {
+    return full.isCleared();
   }
 
   /**

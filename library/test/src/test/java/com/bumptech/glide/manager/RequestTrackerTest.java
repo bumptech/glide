@@ -5,9 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bumptech.glide.request.Request;
@@ -33,25 +30,25 @@ public class RequestTrackerTest {
 
   @Test
   public void clearRequests_doesNotRecycleRequests() {
-    Request request = mock(Request.class);
+    FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
 
     tracker.clearRequests();
 
-    verify(request).clear();
-    verify(request, never()).recycle();
+    assertThat(request.isCleared()).isTrue();
+    assertThat(request.isRecycled()).isFalse();
   }
 
   @Test
   public void clearRemoveAndRecycle_withRequestPreviouslyClearedInClearRequests_doesNothing() {
-    Request request = mock(Request.class);
+    FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
 
     tracker.clearRequests();
     tracker.clearRemoveAndRecycle(request);
 
-    verify(request).clear();
-    verify(request, never()).recycle();
+    assertThat(request.isCleared()).isTrue();
+    assertThat(request.isRecycled()).isFalse();
   }
 
   @Test
@@ -61,164 +58,164 @@ public class RequestTrackerTest {
 
   @Test
   public void clearRemoveAndRecycle_withUnTrackedRequest_doesNothingAndReturnsFalse() {
-    Request request = mock(Request.class);
+    FakeRequest request = new FakeRequest();
 
     assertThat(tracker.clearRemoveAndRecycle(request)).isFalse();
 
-    verify(request, never()).clear();
-    verify(request, never()).recycle();
+    assertThat(request.isCleared()).isFalse();
+    assertThat(request.isRecycled()).isFalse();
   }
 
   @Test
   public void clearRemoveAndRecycle_withTrackedRequest_clearsRecyclesAndReturnsTrue() {
-    Request request = mock(Request.class);
+    FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
 
     assertThat(tracker.clearRemoveAndRecycle(request)).isTrue();
-    verify(request).clear();
-    verify(request).recycle();
+    assertThat(request.isCleared()).isTrue();
+    assertThat(request.isRecycled()).isTrue();
   }
 
   @Test
   public void clearRemoveAndRecycle_withAlreadyRemovedRequest_doesNothingAndReturnsFalse() {
-    Request request = mock(Request.class);
+    FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
     tracker.clearRemoveAndRecycle(request);
     assertThat(tracker.clearRemoveAndRecycle(request)).isFalse();
 
-    verify(request, times(1)).clear();
-    verify(request, times(1)).recycle();
+    assertThat(request.isCleared()).isTrue();
+    assertThat(request.isRecycled()).isTrue();
   }
 
   @Test
-  public void testCanAddAndRemoveRequest() {
-    Request request = mock(Request.class);
+  public void clearRequests_withPreviouslyClearedRequest_doesNotClearRequestAgain() {
+    FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
     tracker.clearRemoveAndRecycle(request);
 
     tracker.clearRequests();
 
-    verify(request, times(1)).clear();
+    assertThat(request.isCleared()).isTrue();
   }
 
   @Test
-  public void testCanAddMultipleRequests() {
-    Request first = mock(Request.class);
-    Request second = mock(Request.class);
+  public void clearRequests_withMultipleRequests_clearsAllRequests() {
+    FakeRequest first = new FakeRequest();
+    FakeRequest second = new FakeRequest();
     tracker.addRequest(first);
     tracker.addRequest(second);
 
     tracker.clearRequests();
 
-    verify(first).clear();
-    verify(second).clear();
+    assertThat(first.isCleared()).isTrue();
+    assertThat(second.isCleared()).isTrue();
   }
 
   @Test
-  public void testPausesInProgressRequestsWhenPaused() {
-    Request request = mock(Request.class);
-    when(request.isRunning()).thenReturn(true);
+  public void pauseRequest_withRunningRequest_pausesRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsRunning();
     tracker.addRequest(request);
 
     tracker.pauseRequests();
 
-    verify(request).pause();
+    assertThat(request.isCleared()).isTrue();
   }
 
   @Test
-  public void testDoesNotClearCompleteRequestsWhenPaused() {
-    Request request = mock(Request.class);
+  public void pauseRequests_withCompletedRequest_doesNotClearRequest() {
+    FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
 
-    when(request.isComplete()).thenReturn(true);
+    request.setIsComplete();
     tracker.pauseRequests();
 
-    verify(request, never()).clear();
+    assertThat(request.isCleared()).isFalse();
   }
 
   @Test
-  public void testStartsRequestOnRun() {
-    Request request = mock(Request.class);
+  public void runRequest_startsRequest() {
+    FakeRequest request = new FakeRequest();
     tracker.runRequest(request);
 
-    verify(request).begin();
+    assertThat(request.isRunning()).isTrue();
   }
 
   @Test
-  public void testDoesNotStartRequestOnRunIfPaused() {
-    Request request = mock(Request.class);
+  public void runRequest_whenPaused_doesNotStartRequest() {
+    FakeRequest request = new FakeRequest();
     tracker.pauseRequests();
     tracker.runRequest(request);
 
-    verify(request, never()).begin();
+    assertThat(request.isRunning()).isFalse();
   }
 
   @Test
-  public void testStartsRequestAddedWhenPausedWhenResumed() {
-    Request request = mock(Request.class);
+  public void runRequest_afterPausingAndResuming_startsRequest() {
+    FakeRequest request = new FakeRequest();
     tracker.pauseRequests();
     tracker.runRequest(request);
     tracker.resumeRequests();
 
-    verify(request).begin();
+    assertThat(request.isRunning()).isTrue();
   }
 
   @Test
-  public void testDoesNotClearFailedRequestsWhenPaused() {
-    Request request = mock(Request.class);
-    when(request.isFailed()).thenReturn(true);
+  public void pauseRequests_withFailedRequest_doesNotClearRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsFailed();
     tracker.addRequest(request);
 
     tracker.pauseRequests();
 
-    verify(request, never()).clear();
+    assertThat(request.isCleared()).isFalse();
   }
 
   @Test
-  public void testRestartsStoppedRequestWhenResumed() {
-    Request request = mock(Request.class);
+  public void resumeRequests_withRequestAddedWhilePaused_startsRequest() {
+    FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
 
     tracker.resumeRequests();
 
-    verify(request).begin();
+    assertThat(request.isRunning()).isTrue();
   }
 
   @Test
-  public void testDoesNotRestartCompletedRequestsWhenResumed() {
-    Request request = mock(Request.class);
-    when(request.isComplete()).thenReturn(true);
+  public void resumeRequests_withCompletedRequest_doesNotRestartCompletedRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsComplete();
     tracker.addRequest(request);
 
     tracker.resumeRequests();
 
-    verify(request, never()).begin();
+    assertThat(request.isRunning()).isFalse();
   }
 
   @Test
-  public void testDoesRestartFailedRequestsWhenResumed() {
-    Request request = mock(Request.class);
-    when(request.isFailed()).thenReturn(true);
+  public void resumeRequests_withFailedRequest_restartsRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsFailed();
     tracker.addRequest(request);
 
     tracker.resumeRequests();
 
-    verify(request).begin();
+    assertThat(request.isRunning()).isTrue();
   }
 
   @Test
-  public void testDoesNotStartStartedRequestsWhenResumed() {
-    Request request = mock(Request.class);
-    when(request.isRunning()).thenReturn(true);
+  public void addRequest_withRunningRequest_doesNotRestartRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsRunning();
     tracker.addRequest(request);
 
     tracker.resumeRequests();
 
-    verify(request, never()).begin();
+    assertThat(request.isRunning()).isTrue();
   }
 
   @Test
-  public void testAvoidsConcurrentModificationWhenResuming() {
+  public void resumeRequests_withRequestThatClearsAnotherRequest_avoidsConcurrentModifications() {
     Request first = mock(Request.class);
     Request second = mock(Request.class);
 
@@ -232,12 +229,12 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testAvoidsConcurrentModificationWhenPausing() {
+  public void pauseRequests_withRequestThatClearsAnother_avoidsConcurrentModifications() {
     Request first = mock(Request.class);
     Request second = mock(Request.class);
 
     when(first.isRunning()).thenReturn(true);
-    doAnswer(new ClearAndRemoveRequest(second)).when(first).pause();
+    doAnswer(new ClearAndRemoveRequest(second)).when(first).clear();
 
     tracker.addRequest(mock(Request.class));
     tracker.addRequest(first);
@@ -247,7 +244,7 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testAvoidsConcurrentModificationWhenClearing() {
+  public void clearRequests_withRequestThatClearsAnother_avoidsConcurrentModifications() {
     Request first = mock(Request.class);
     Request second = mock(Request.class);
 
@@ -261,11 +258,11 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testAvoidsConcurrentModificationWhenRestarting() {
+  public void restartRequests_withRequestThatClearsAnother_avoidsConcurrentModifications() {
     Request first = mock(Request.class);
     Request second = mock(Request.class);
 
-    doAnswer(new ClearAndRemoveRequest(second)).when(first).pause();
+    doAnswer(new ClearAndRemoveRequest(second)).when(first).clear();
 
     tracker.addRequest(mock(Request.class));
     tracker.addRequest(first);
@@ -275,73 +272,70 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testRestartsFailedRequestRestart() {
-    Request request = mock(Request.class);
-    when(request.isFailed()).thenReturn(true);
+  public void restartRequests_withFailedRequest_restartsRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsFailed();
     tracker.addRequest(request);
 
     tracker.restartRequests();
 
-    verify(request).begin();
+    assertThat(request.isRunning()).isTrue();
   }
 
   @Test
-  public void testPausesAndRestartsNotYetFinishedRequestsOnRestart() {
-    Request request = mock(Request.class);
-    when(request.isComplete()).thenReturn(false);
+  public void restartRequests_withIncompleteRequest_restartsRequest() {
+    FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
 
     tracker.restartRequests();
 
-    verify(request).pause();
-    verify(request).begin();
+    assertThat(request.isRunning()).isTrue();
   }
 
   @Test
-  public void testDoesNotBeginFailedRequestOnRestartIfPaused() {
-    Request request = mock(Request.class);
-    when(request.isFailed()).thenReturn(true);
+  public void restartRequests_whenPaused_doesNotRestartRequests() {
+    FakeRequest request = new FakeRequest();
+    request.setIsFailed();
     tracker.pauseRequests();
     tracker.addRequest(request);
 
     tracker.restartRequests();
 
-    verify(request, never()).begin();
+    assertThat(request.isRunning()).isFalse();
   }
 
   @Test
-  public void testPausesFailedRequestOnRestartIfPaused() {
-    Request request = mock(Request.class);
-    when(request.isFailed()).thenReturn(true);
+  public void restartRequests_withFailedRequestAddedWhilePaused_clearsFailedRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsFailed();
+
     tracker.pauseRequests();
     tracker.addRequest(request);
 
     tracker.restartRequests();
-    verify(request).pause();
+    assertThat(request.isCleared()).isTrue();
   }
 
   @Test
-  public void testDoesNotBeginIncompleteRequestsOnRestartIfPaused() {
-    Request request = mock(Request.class);
-    when(request.isFailed()).thenReturn(false);
-    when(request.isComplete()).thenReturn(false);
+  public void restartRequests_withIncompleteRequestAddedWhilePaused_doesNotRestartRequest() {
+    FakeRequest request = new FakeRequest();
+
     tracker.pauseRequests();
     tracker.addRequest(request);
     tracker.restartRequests();
 
-    verify(request, never()).begin();
+    assertThat(request.isRunning()).isFalse();
   }
 
   @Test
-  public void testPausesIncompleteRequestsOnRestartIfPaused() {
-    Request request = mock(Request.class);
-    when(request.isFailed()).thenReturn(false);
-    when(request.isComplete()).thenReturn(false);
+  public void restartRequests_withIncompleteRequestAddedWhilePaused_clearsRequestOnRestart() {
+    FakeRequest request = new FakeRequest();
+
     tracker.pauseRequests();
     tracker.addRequest(request);
     tracker.restartRequests();
 
-    verify(request).pause();
+    assertThat(request.isCleared()).isTrue();
   }
 
   @Test
@@ -363,17 +357,104 @@ public class RequestTrackerTest {
   }
 
   @Test
-  public void testPauseAllRequests_whenRequestComplete_pausesRequest() {
-    Request request = mock(Request.class);
-    when(request.isFailed()).thenReturn(false);
-    when(request.isComplete()).thenReturn(true);
+  public void resumeRequests_afterRequestIsPausedViaPauseAllRequests_resumesRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsComplete();
+
     tracker.addRequest(request);
     tracker.pauseAllRequests();
-    verify(request).pause();
 
-    when(request.isComplete()).thenReturn(false);
+    assertThat(request.isCleared()).isTrue();
+
+    // reset complete status.
+    request.setIsComplete(false);
     tracker.resumeRequests();
-    verify(request).begin();
+
+    assertThat(request.isRunning()).isTrue();
+  }
+
+  private static final class FakeRequest implements Request {
+    private boolean isRunning;
+    private boolean isFailed;
+    private boolean isCleared;
+    private boolean isComplete;
+    private boolean isRecycled;
+
+    void setIsComplete() {
+      setIsComplete(true);
+    }
+
+    void setIsComplete(boolean isComplete) {
+      this.isComplete = isComplete;
+    }
+
+    void setIsFailed() {
+      isFailed = true;
+    }
+
+    void setIsRunning() {
+      isRunning = true;
+    }
+
+    boolean isRecycled() {
+      return isRecycled;
+    }
+
+    @Override
+    public void begin() {
+      if (isRunning) {
+        throw new IllegalStateException();
+      }
+      isRunning = true;
+    }
+
+    @Override
+    public void clear() {
+      if (isCleared) {
+        throw new IllegalStateException();
+      }
+      isRunning = false;
+      isFailed = false;
+      isCleared = true;
+    }
+
+    @Override
+    public boolean isRunning() {
+      return isRunning;
+    }
+
+    @Override
+    public boolean isComplete() {
+      return isComplete;
+    }
+
+    @Override
+    public boolean isResourceSet() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isCleared() {
+      return isCleared;
+    }
+
+    @Override
+    public boolean isFailed() {
+      return isFailed;
+    }
+
+    @Override
+    public void recycle() {
+      if (isRecycled) {
+        throw new IllegalStateException();
+      }
+      isRecycled = true;
+    }
+
+    @Override
+    public boolean isEquivalentTo(Request other) {
+      throw new UnsupportedOperationException();
+    }
   }
 
   @Test

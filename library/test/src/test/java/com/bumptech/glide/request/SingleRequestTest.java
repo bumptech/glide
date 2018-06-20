@@ -124,32 +124,6 @@ public class SingleRequestTest {
   }
 
   @Test
-  public void testIsPausedAfterPause() {
-    SingleRequest<List> request = builder.build();
-    request.pause();
-
-    assertTrue(request.isPaused());
-  }
-
-  @Test
-  public void testIsNotCancelledAfterPause() {
-    SingleRequest<List> request = builder.build();
-    request.pause();
-
-    assertFalse(request.isCancelled());
-  }
-
-  @Test
-  public void testIsNotPausedAfterBeginningWhilePaused() {
-    SingleRequest<List> request = builder.build();
-    request.pause();
-    request.begin();
-
-    assertFalse(request.isPaused());
-    assertTrue(request.isRunning());
-  }
-
-  @Test
   public void testIsNotFailedAfterBegin() {
     SingleRequest<List> request = builder.build();
 
@@ -182,7 +156,7 @@ public class SingleRequestTest {
     SingleRequest<List> request = builder.build();
     request.clear();
 
-    assertTrue(request.isCancelled());
+    assertTrue(request.isCleared());
   }
 
   @Test
@@ -314,7 +288,7 @@ public class SingleRequestTest {
     request.begin();
 
     request.onSizeReady(100, 100);
-    request.cancel();
+    request.clear();
 
     verify(loadStatus).cancel();
   }
@@ -740,7 +714,7 @@ public class SingleRequestTest {
   }
 
   @Test
-  public void testCanReRunCancelledRequests() {
+  public void testCanReRunClearedRequests() {
     doAnswer(new CallSizeReady(100, 100)).when(builder.target)
         .getSize(any(SizeReadyCallback.class));
 
@@ -768,7 +742,7 @@ public class SingleRequestTest {
     SingleRequest<List> request = builder.build();
 
     request.begin();
-    request.cancel();
+    request.clear();
     request.begin();
 
     verify(builder.target, times(2)).onResourceReady(eq(builder.result), anyTransition());
@@ -783,9 +757,9 @@ public class SingleRequestTest {
   }
 
   @Test
-  public void testDoesNotStartALoadIfOnSizeReadyIsCalledAfterCancel() {
+  public void testDoesNotStartALoadIfOnSizeReadyIsCalledAfterClear() {
     SingleRequest<List> request = builder.build();
-    request.cancel();
+    request.clear();
     request.onSizeReady(100, 100);
 
     verify(builder.engine, never())

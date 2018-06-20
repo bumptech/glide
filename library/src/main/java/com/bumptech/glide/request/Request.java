@@ -11,21 +11,11 @@ public interface Request {
   void begin();
 
   /**
-   * Identical to {@link #clear()} except that the request may later be restarted.
-   */
-  void pause();
-
-  /**
    * Prevents any bitmaps being loaded from previous requests, releases any resources held by this
    * request, displays the current placeholder if one was provided, and marks the request as having
    * been cancelled.
    */
   void clear();
-
-  /**
-   * Returns true if this request is paused and may be restarted.
-   */
-  boolean isPaused();
 
   /**
    * Returns true if this request is running and has not completed or failed.
@@ -44,9 +34,9 @@ public interface Request {
   boolean isResourceSet();
 
   /**
-   * Returns true if the request has been cancelled.
+   * Returns true if the request has been cleared.
    */
-  boolean isCancelled();
+  boolean isCleared();
 
   /**
    * Returns true if the request has failed.

@@ -74,17 +74,9 @@ public final class SingleRequest<R> implements Request,
      */
     FAILED,
     /**
-     * Cancelled by the user, may not be restarted.
-     */
-    CANCELLED,
-    /**
-     * Cleared by the user with a placeholder set, may not be restarted.
+     * Cleared by the user with a placeholder set, may be restarted.
      */
     CLEARED,
-    /**
-     * Temporarily paused by the system, may be restarted.
-     */
-    PAUSED,
   }
 
   @Nullable
@@ -282,11 +274,10 @@ public final class SingleRequest<R> implements Request,
    *
    * @see #clear()
    */
-  void cancel() {
+  private void cancel() {
     assertNotCallingCallbacks();
     stateVerifier.throwIfRecycled();
     target.removeCallback(this);
-    status = Status.CANCELLED;
     if (loadStatus != null) {
       loadStatus.cancel();
       loadStatus = null;
@@ -327,19 +318,8 @@ public final class SingleRequest<R> implements Request,
     if (canNotifyCleared()) {
       target.onLoadCleared(getPlaceholderDrawable());
     }
-    // Must be after cancel().
+
     status = Status.CLEARED;
-  }
-
-  @Override
-  public boolean isPaused() {
-    return status == Status.PAUSED;
-  }
-
-  @Override
-  public void pause() {
-    clear();
-    status = Status.PAUSED;
   }
 
   private void releaseResource(Resource<?> resource) {
@@ -363,8 +343,8 @@ public final class SingleRequest<R> implements Request,
   }
 
   @Override
-  public boolean isCancelled() {
-    return status == Status.CANCELLED || status == Status.CLEARED;
+  public boolean isCleared() {
+    return status == Status.CLEARED;
   }
 
   @Override

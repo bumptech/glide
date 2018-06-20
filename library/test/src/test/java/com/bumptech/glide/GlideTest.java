@@ -698,7 +698,7 @@ public class GlideTest {
     requestManager.clear(target);
 
     assertThat(target.getRequest()).isNull();
-    assertThat(request.isCancelled()).isTrue();
+    assertThat(request.isCleared()).isTrue();
   }
 
   @Test

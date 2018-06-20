@@ -488,26 +488,16 @@ public class ViewTargetTest {
     shadowView.callOnAttachedToWindow();
   }
 
+  // This behavior isn't clearly correct, but it doesn't seem like there's any harm to clear an
+  // already cleared request, so we might as well avoid the extra check/complexity in the code.
   @Test
-  public void clearOnDetach_onDetach_withCancelledRequest_doesNotPauseRequest() {
+  public void clearOnDetach_onDetach_withClearedRequest_clearsRequest() {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
-    when(request.isCancelled()).thenReturn(true);
+    when(request.isCleared()).thenReturn(true);
     shadowView.callOnDetachedFromWindow();
 
-    verify(request, never()).pause();
-    verify(request, never()).clear();
-  }
-
-  @Test
-  public void clearOnDetach_onDetach_withPausedRequest_doesNotPauseRequest() {
-    attachStateTarget.clearOnDetach();
-    attachStateTarget.setRequest(request);
-    when(request.isPaused()).thenReturn(true);
-    shadowView.callOnDetachedFromWindow();
-
-    verify(request, never()).pause();
-    verify(request, never()).clear();
+    verify(request).clear();
   }
 
   @Test
@@ -516,7 +506,7 @@ public class ViewTargetTest {
     attachStateTarget.setRequest(request);
     shadowView.callOnDetachedFromWindow();
 
-    verify(request).pause();
+    verify(request).clear();
   }
 
   @Test
@@ -526,7 +516,6 @@ public class ViewTargetTest {
     attachStateTarget.setRequest(request);
     shadowView.callOnDetachedFromWindow();
 
-    verify(request, never()).pause();
     verify(request, never()).clear();
   }
 
@@ -549,18 +538,19 @@ public class ViewTargetTest {
     attachStateTarget.setRequest(request);
     shadowView.callOnDetachedFromWindow();
 
-    verify(request, never()).pause();
     verify(request, never()).clear();
   }
 
+  // This behavior isn't clearly correct, but it doesn't seem like there's any harm to clear an
+  // already cleared request, so we might as well avoid the extra check/complexity in the code.
   @Test
-  public void clearOnDetach_onDetach_afterLoadCleared_doesNotPauseRequest() {
+  public void clearOnDetach_onDetach_afterLoadCleared_clearsRequest() {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    when(request.isCleared()).thenReturn(true);
     shadowView.callOnDetachedFromWindow();
 
-    verify(request, never()).pause();
+    verify(request).clear();
   }
 
   @Test
@@ -574,27 +564,27 @@ public class ViewTargetTest {
   public void clearOnDetach_onAttach_withRunningRequest_doesNotBeginRequest() {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
-    when(request.isPaused()).thenReturn(false);
+    when(request.isCleared()).thenReturn(false);
     shadowView.callOnAttachedToWindow();
 
     verify(request, never()).begin();
   }
 
   @Test
-  public void clearOnDetach_onAttach_withPausedRequest_beginsRequest() {
+  public void clearOnDetach_onAttach_withClearedRequest_beginsRequest() {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
-    when(request.isPaused()).thenReturn(true);
+    when(request.isCleared()).thenReturn(true);
     shadowView.callOnAttachedToWindow();
 
     verify(request).begin();
   }
 
   @Test
-  public void clearOnDetach_afterLoadClearedAndRestarted_onAttach_beingsREquest() {
+  public void clearOnDetach_afterLoadClearedAndRestarted_onAttach_beingsRequest() {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
-    when(request.isPaused()).thenReturn(true);
+    when(request.isCleared()).thenReturn(true);
     attachStateTarget.onLoadCleared(/*placeholder=*/ null);
     attachStateTarget.onLoadStarted(/*placeholder=*/ null);
     shadowView.callOnAttachedToWindow();
@@ -606,7 +596,7 @@ public class ViewTargetTest {
   public void clearOnDetach_onAttach_afterLoadCleared_doesNotBeingRequest() {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
-    when(request.isPaused()).thenReturn(true);
+    when(request.isCleared()).thenReturn(true);
     attachStateTarget.onLoadCleared(/*placeholder=*/ null);
     shadowView.callOnAttachedToWindow();
 
