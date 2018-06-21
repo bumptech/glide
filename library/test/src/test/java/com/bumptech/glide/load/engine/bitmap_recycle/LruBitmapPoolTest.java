@@ -192,7 +192,7 @@ public class LruBitmapPoolTest {
 
     pool.setSizeMultiplier(1);
 
-    assertEquals(Math.round(MAX_SIZE * sizeMultiplier) - MAX_SIZE, strategy.numRemoves);
+    assertEquals(MAX_SIZE * sizeMultiplier - MAX_SIZE, strategy.numRemoves);
   }
 
   @Test
