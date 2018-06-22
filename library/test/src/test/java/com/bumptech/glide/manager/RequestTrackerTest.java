@@ -151,6 +151,15 @@ public class RequestTrackerTest {
   }
 
   @Test
+  public void runRequest_withAllRequestsPaused_doesNotStartRequest() {
+    FakeRequest request = new FakeRequest();
+    tracker.pauseAllRequests();
+    tracker.runRequest(request);
+
+    assertThat(request.isRunning()).isFalse();
+  }
+
+  @Test
   public void runRequest_afterPausingAndResuming_startsRequest() {
     FakeRequest request = new FakeRequest();
     tracker.pauseRequests();
@@ -455,24 +464,6 @@ public class RequestTrackerTest {
     public boolean isEquivalentTo(Request other) {
       throw new UnsupportedOperationException();
     }
-  }
-
-  @Test
-  public void runRequest_withAllRequestsPaused_pausesNewRequest() {
-    Request request = mock(Request.class);
-    tracker.pauseAllRequests();
-    tracker.runRequest(request);
-
-    verify(request).pause();
-  }
-
-  @Test
-  public void runRequest_withRequestsPaused_pausesNewRequest() {
-    Request request = mock(Request.class);
-    tracker.pauseRequests();
-    tracker.runRequest(request);
-
-    verify(request).pause();
   }
 
   private class ClearAndRemoveRequest implements Answer<Void> {
