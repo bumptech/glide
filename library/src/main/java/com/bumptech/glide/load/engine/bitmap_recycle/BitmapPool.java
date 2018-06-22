@@ -85,8 +85,7 @@ public interface BitmapPool {
    * @param config The {@link android.graphics.Bitmap.Config} of the desired {@link
    *               android.graphics.Bitmap}.
    * @return A {@link android.graphics.Bitmap} with exactly the given width, height, and config
-   * potentially containing random image data or null if no such {@link android.graphics.Bitmap}
-   * could be obtained from the pool.
+   * potentially containing random image data.
    * @see #get(int, int, android.graphics.Bitmap.Config)
    */
   @NonNull
