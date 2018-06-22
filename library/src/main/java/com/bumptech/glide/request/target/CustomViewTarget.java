@@ -3,7 +3,7 @@ package com.bumptech.glide.request.target;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.CallSuper;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -15,6 +15,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import java.lang.ref.WeakReference;
@@ -23,84 +24,99 @@ import java.util.List;
 
 /**
  * A base {@link Target} for loading {@link android.graphics.Bitmap}s into {@link View}s that
- * provides default implementations for most most methods and can determine the size of views using
- * a {@link android.view.ViewTreeObserver.OnDrawListener}.
- *
- * <p>To detect {@link View} reuse in {@link android.widget.ListView} or any {@link
- * android.view.ViewGroup} that reuses views, this class uses the {@link View#setTag(Object)} method
- * to store some metadata so that if a view is reused, any previous loads or resources from previous
- * loads can be cancelled or reused.
- *
- * <p>Any calls to {@link View#setTag(Object)}} on a View given to this class will result in
- * excessive allocations and and/or {@link IllegalArgumentException}s. If you must call {@link
- * View#setTag(Object)} on a view, use {@link #setTagId(int)} to specify a custom tag for Glide to
- * use.
- *
- * <p>Subclasses must call super in {@link #onLoadCleared(Drawable)}
+ * provides default implementations for most methods and can determine the size of views using a
+ * {@link android.view.ViewTreeObserver.OnDrawListener}.
  *
  * @param <T> The specific subclass of view wrapped by this target.
  * @param <Z> The resource type this target will receive.
- * @deprecated Use {@link CustomViewTarget}. Using this class is unsafe without implementing {@link
- *     #onLoadCleared} and results in recycled bitmaps being referenced from the UI and hard to
- *     root-cause crashes.
  */
-@Deprecated
-public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
-  private static final String TAG = "ViewTarget";
-  private static boolean isTagUsedAtLeastOnce;
-  @Nullable private static Integer tagId;
+public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
+  private static final String TAG = "CustomViewTarget";
+  @IdRes private static final int VIEW_TAG_ID =
+      com.bumptech.glide.R.id.glide_custom_view_target_tag;
+
+  private final SizeDeterminer sizeDeterminer;
 
   protected final T view;
-  private final SizeDeterminer sizeDeterminer;
-  @Nullable
-  private OnAttachStateChangeListener attachStateListener;
+  @Nullable private OnAttachStateChangeListener attachStateListener;
   private boolean isClearedByUs;
   private boolean isAttachStateListenerAdded;
+  @IdRes private int overrideTag = 0;
 
-
-  /**
-   * Constructor that defaults {@code waitForLayout} to {@code false}.
-   */
-  public ViewTarget(@NonNull T view) {
+  /** Constructor that defaults {@code waitForLayout} to {@code false}. */
+  public CustomViewTarget(@NonNull T view) {
     this.view = Preconditions.checkNotNull(view);
     sizeDeterminer = new SizeDeterminer(view);
   }
 
   /**
-   * @param waitForLayout If set to {@code true}, Glide will always wait for any pending layout pass
-   * before checking for the size a View. If set to {@code false} Glide will only wait for a pending
-   * layout pass if it's unable to resolve the size from layout parameters or an existing View size.
-   * Because setting this parameter to {@code true} forces Glide to wait for the layout pass to
-   * occur before starting the load, setting this parameter to {@code true} can cause flashing in
-   * some cases and should be used sparingly. If layout parameters are set to fixed sizes, they will
-   * still be used instead of the View's dimensions even if this parameter is set to {@code true}.
-   * This parameter is a fallback only.
+   * A required callback invoked when the resource is no longer valid and must be freed.
    *
-   * @deprecated Use {@link #waitForLayout()} instead.
+   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Z,
+   * Transition)} is no longer used before redrawing the container (usually a View) or changing its
+   * visibility. <b>Not doing so will result in crashes in your app.</b>
+   *
+   * @param placeholder The placeholder drawable to optionally show, or null.
+   */
+  protected abstract void onResourceCleared(@Nullable Drawable placeholder);
+
+  /**
+   * An optional callback invoked when a resource load is started.
+   *
+   * @see Target#onLoadStarted(Drawable)
+   * @param placeholder The placeholder drawable to optionally show, or null.
+   */
+  protected void onResourceLoading(@Nullable Drawable placeholder) {}
+
+  @Override
+  public void onStart() {}
+
+  @Override
+  public void onStop() {}
+
+  @Override
+  public void onDestroy() {}
+
+  /**
+   * Indicates that Glide should always wait for any pending layout pass before checking for the
+   * size an {@link View}.
+   *
+   * <p>By default, Glide will only wait for a pending layout pass if it's unable to resolve the
+   * size from the {@link LayoutParams} or valid non-zero values for {@link View#getWidth()} and
+   * {@link View#getHeight()}.
+   *
+   * <p>Because calling this method forces Glide to wait for the layout pass to occur before
+   * starting loads, setting this parameter to {@code true} can cause Glide to asynchronous load an
+   * image even if it's in the memory cache. The load will happen asynchronously because Glide has
+   * to wait for a layout pass to occur, which won't necessarily happen in the same frame as when
+   * the image is requested. As a result, using this method can resulting in flashing in some cases
+   * and should be used sparingly.
+   *
+   * <p>If the {@link LayoutParams} of the wrapped {@link View} are set to fixed sizes, they will
+   * still be used instead of the {@link View}'s dimensions even if this method is called. This
+   * parameter is a fallback only.
    */
   @SuppressWarnings("WeakerAccess") // Public API
-  @Deprecated
-  public ViewTarget(@NonNull T view, boolean waitForLayout) {
-    this(view);
-    if (waitForLayout) {
-      waitForLayout();
-    }
+  @NonNull
+  public final CustomViewTarget<T, Z> waitForLayout() {
+    sizeDeterminer.waitForLayout = true;
+    return this;
   }
 
   /**
-   * Clears the {@link View}'s {@link Request} when the {@link View} is detached from its
-   * {@link android.view.Window} and restarts the {@link Request} when the {@link View} is
-   * re-attached from its {@link android.view.Window}.
+   * Clears the {@link View}'s {@link Request} when the {@link View} is detached from its {@link
+   * android.view.Window} and restarts the {@link Request} when the {@link View} is re-attached from
+   * its {@link android.view.Window}.
    *
    * <p>This is an experimental API that may be removed in a future version.
    *
    * <p>Using this method can save memory by allowing Glide to more eagerly clear resources when
    * transitioning screens or swapping adapters in scrolling views. However it also substantially
    * increases the odds that images will not be in memory if users subsequently return to a screen
-   * where images were previously loaded. Whether or not this happens will depend on the number
-   * of images loaded in the new screen and the size of the memory cache. Increasing the size of
-   * the memory cache can improve this behavior but it largely negates the memory benefits of using
-   * this method.
+   * where images were previously loaded. Whether or not this happens will depend on the number of
+   * images loaded in the new screen and the size of the memory cache. Increasing the size of the
+   * memory cache can improve this behavior but it largely negates the memory benefits of using this
+   * method.
    *
    * <p>Use this method with caution and measure your memory usage to ensure that it's actually
    * improving your memory usage in the cases you care about.
@@ -108,7 +124,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   // Public API.
   @NonNull
   @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"})
-  public final ViewTarget<T, Z> clearOnDetach() {
+  public final CustomViewTarget<T, Z> clearOnDetach() {
     if (attachStateListener != null) {
       return this;
     }
@@ -127,8 +143,100 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     return this;
   }
 
+  /**
+   * Override the android resource id to store temporary state allowing loads to be automatically
+   * cancelled and resources re-used in scrolling lists.
+   *
+   * <p>Unlike {@link ViewTarget}, it is <b>not</b> necessary to set a custom tag id if your app
+   * uses {@link View#setTag(Object)}. It is only necessary if loading several Glide resources into
+   * the same view, for example one foreground and one background view.
+   *
+   * @param tagId The android resource id to use.
+   */
+  // Public API.
+  @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"})
+  public final CustomViewTarget<T, Z> useTagId(@IdRes int tagId) {
+    if (this.overrideTag != 0) {
+      throw new IllegalArgumentException("You cannot change the tag id once it has been set.");
+    }
+    this.overrideTag = tagId;
+    return this;
+  }
+
+  /** Returns the wrapped {@link android.view.View}. */
+  @NonNull
+  public final T getView() {
+    return view;
+  }
+
+  /**
+   * Determines the size of the view by first checking {@link android.view.View#getWidth()} and
+   * {@link android.view.View#getHeight()}. If one or both are zero, it then checks the view's
+   * {@link LayoutParams}. If one or both of the params width and height are less than or equal to
+   * zero, it then adds an {@link android.view.ViewTreeObserver.OnPreDrawListener} which waits until
+   * the view has been measured before calling the callback with the view's drawn width and height.
+   *
+   * @param cb {@inheritDoc}
+   */
+  @Override
+  public final void getSize(@NonNull SizeReadyCallback cb) {
+    sizeDeterminer.getSize(cb);
+  }
+
+  @Override
+  public final void removeCallback(@NonNull SizeReadyCallback cb) {
+    sizeDeterminer.removeCallback(cb);
+  }
+
+  @Override
+  public final void onLoadStarted(@Nullable Drawable placeholder) {
+    maybeAddAttachStateListener();
+    onResourceLoading(placeholder);
+  }
+
+  @Override
+  public final void onLoadCleared(@Nullable Drawable placeholder) {
+    sizeDeterminer.clearCallbacksAndListener();
+
+    onResourceCleared(placeholder);
+    if (!isClearedByUs) {
+      maybeRemoveAttachStateListener();
+    }
+  }
+
+  /**
+   * Stores the request using {@link View#setTag(Object)}.
+   *
+   * @param request {@inheritDoc}
+   */
+  @Override
+  public final void setRequest(@Nullable Request request) {
+    setTag(request);
+  }
+
+  /** Returns any stored request using {@link android.view.View#getTag()}. */
+  @Override
+  @Nullable
+  public final Request getRequest() {
+    Object tag = getTag();
+    if (tag != null) {
+      if (tag instanceof Request) {
+        return (Request) tag;
+      } else {
+        throw new IllegalArgumentException("You must not pass non-R.id ids to setTag(id)");
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public String toString() {
+    return "Target for: " + view;
+  }
+
   @SuppressWarnings("WeakerAccess")
-  @Synthetic void resumeMyRequest() {
+  @Synthetic
+  final void resumeMyRequest() {
     Request request = getRequest();
     if (request != null && request.isCleared()) {
       request.begin();
@@ -136,10 +244,9 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   }
 
   @SuppressWarnings("WeakerAccess")
-  @Synthetic void pauseMyRequest() {
+  @Synthetic
+  final void pauseMyRequest() {
     Request request = getRequest();
-    // If the Request were cleared by the developer, it would be null here. The only way it's
-    // present is if the developer hasn't previously cleared this Target.
     if (request != null) {
       isClearedByUs = true;
       request.clear();
@@ -147,37 +254,13 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     }
   }
 
-  /**
-   * Indicates that Glide should always wait for any pending layout pass before checking
-   * for the size an {@link View}.
-   *
-   * <p>By default, Glide will only wait for a pending layout pass if it's unable to resolve the
-   * size from the {@link LayoutParams} or valid non-zero values for {@link View#getWidth()} and
-   * {@link View#getHeight()}.
-   *
-   * <p>Because calling this method forces Glide to wait for the layout pass to occur before
-   * starting loads, setting this parameter to {@code true} can cause Glide to asynchronous load
-   * an image even if it's in the memory cache. The load will happen asynchronously because Glide
-   * has to wait for a layout pass to occur, which won't necessarily happen in the same frame as
-   * when the image is requested. As a result, using this method can resulting in flashing in some
-   * cases and should be used sparingly.
-   *
-   * <p>If the {@link LayoutParams} of the wrapped {@link View} are set to fixed sizes, they will
-   * still be used instead of the {@link View}'s dimensions even if this method is called. This
-   * parameter is a fallback only.
-   */
-  @SuppressWarnings("WeakerAccess") // Public API
-  @NonNull
-  public final ViewTarget<T, Z> waitForLayout() {
-    sizeDeterminer.waitForLayout = true;
-    return this;
+  private void setTag(@Nullable Object tag) {
+    view.setTag(overrideTag == 0 ? VIEW_TAG_ID : overrideTag, tag);
   }
 
-  @CallSuper
-  @Override
-  public void onLoadStarted(@Nullable Drawable placeholder) {
-    super.onLoadStarted(placeholder);
-    maybeAddAttachStateListener();
+  @Nullable
+  private Object getTag() {
+    return view.getTag(overrideTag == 0 ? VIEW_TAG_ID : overrideTag);
   }
 
   private void maybeAddAttachStateListener() {
@@ -196,134 +279,6 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
     view.removeOnAttachStateChangeListener(attachStateListener);
     isAttachStateListenerAdded = false;
-  }
-
-  /**
-   * Returns the wrapped {@link android.view.View}.
-   */
-  @NonNull
-  public T getView() {
-    return view;
-  }
-
-  /**
-   * Determines the size of the view by first checking {@link android.view.View#getWidth()} and
-   * {@link android.view.View#getHeight()}. If one or both are zero, it then checks the view's
-   * {@link LayoutParams}. If one or both of the params width and height are less than or equal to
-   * zero, it then adds an {@link android.view.ViewTreeObserver.OnPreDrawListener} which waits until
-   * the view has been measured before calling the callback with the view's drawn width and height.
-   *
-   * @param cb {@inheritDoc}
-   */
-  @CallSuper
-  @Override
-  public void getSize(@NonNull SizeReadyCallback cb) {
-    sizeDeterminer.getSize(cb);
-  }
-
-  @CallSuper
-  @Override
-  public void removeCallback(@NonNull SizeReadyCallback cb) {
-    sizeDeterminer.removeCallback(cb);
-  }
-
-  @CallSuper
-  @Override
-  public void onLoadCleared(@Nullable Drawable placeholder) {
-    super.onLoadCleared(placeholder);
-    sizeDeterminer.clearCallbacksAndListener();
-
-    if (!isClearedByUs) {
-      maybeRemoveAttachStateListener();
-    }
-  }
-
-  /**
-   * Stores the request using {@link View#setTag(Object)}.
-   *
-   * @param request {@inheritDoc}
-   */
-  @Override
-  public void setRequest(@Nullable Request request) {
-    setTag(request);
-  }
-
-  /**
-   * Returns any stored request using {@link android.view.View#getTag()}.
-   *
-   * <p> For Glide to function correctly, Glide must be the only thing that calls {@link
-   * View#setTag(Object)}. If the tag is cleared or put to another object type, Glide will not be
-   * able to retrieve and cancel previous loads which will not only prevent Glide from reusing
-   * resource, but will also result in incorrect images being loaded and lots of flashing of images
-   * in lists. As a result, this will throw an {@link java.lang.IllegalArgumentException} if {@link
-   * android.view.View#getTag()}} returns a non null object that is not an {@link
-   * com.bumptech.glide.request.Request}. </p>
-   */
-  @Override
-  @Nullable
-  public Request getRequest() {
-    Object tag = getTag();
-    Request request = null;
-    if (tag != null) {
-      if (tag instanceof Request) {
-        request = (Request) tag;
-      } else {
-        throw new IllegalArgumentException(
-            "You must not call setTag() on a view Glide is targeting");
-      }
-    }
-    return request;
-  }
-
-  @Override
-  public String toString() {
-    return "Target for: " + view;
-  }
-
-  private void setTag(@Nullable Object tag) {
-    if (tagId == null) {
-      isTagUsedAtLeastOnce = true;
-      view.setTag(tag);
-    } else {
-      view.setTag(tagId, tag);
-    }
-  }
-
-  @Nullable
-  private Object getTag() {
-    if (tagId == null) {
-      return view.getTag();
-    } else {
-      return view.getTag(tagId);
-    }
-  }
-
-  /**
-   * Sets the android resource id to use in conjunction with {@link View#setTag(int, Object)}
-   * to store temporary state allowing loads to be automatically cancelled and resources re-used
-   * in scrolling lists.
-   *
-   * <p>
-   *   If no tag id is set, Glide will use {@link View#setTag(Object)}.
-   * </p>
-   *
-   * <p>
-   *   Warning: prior to Android 4.0 tags were stored in a static map. Using this method prior
-   *   to Android 4.0 may cause memory leaks and isn't recommended. If you do use this method
-   *   on older versions, be sure to call {@link com.bumptech.glide.RequestManager#clear(View)} on
-   *   any view you start a load into to ensure that the static state is removed.
-   * </p>
-   *
-   * @param tagId The android resource to use.
-   */
-  // Public API.
-  @SuppressWarnings("unused")
-  public static void setTagId(int tagId) {
-    if (ViewTarget.tagId != null || isTagUsedAtLeastOnce) {
-      throw new IllegalArgumentException("You cannot set the tag id more than once or change"
-          + " the tag id after the first request has been made");
-    }
-    ViewTarget.tagId = tagId;
   }
 
   @VisibleForTesting
