@@ -2,7 +2,7 @@ package com.bumptech.glide.test;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 
 /**
  * Internally in google we don't appear to be able to reference resource ids directly, this class is
