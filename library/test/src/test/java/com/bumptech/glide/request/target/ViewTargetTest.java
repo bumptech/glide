@@ -19,6 +19,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.view.Display;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewTreeObserver;
@@ -46,7 +47,6 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.RealObject;
 import org.robolectric.shadow.api.Shadow;
-import org.robolectric.shadows.ShadowDisplay;
 import org.robolectric.shadows.ShadowView;
 
 @RunWith(RobolectricTestRunner.class)
@@ -470,14 +470,13 @@ public class ViewTargetTest {
   private void setDisplayDimens(Integer width, Integer height) {
     WindowManager windowManager =
         (WindowManager) RuntimeEnvironment.application.getSystemService(Context.WINDOW_SERVICE);
-    ShadowDisplay shadowDisplay =
-        Shadows.shadowOf(Preconditions.checkNotNull(windowManager).getDefaultDisplay());
+    Display display = Preconditions.checkNotNull(windowManager).getDefaultDisplay();
     if (width != null) {
-      shadowDisplay.setWidth(width);
+      Shadows.shadowOf(display).setWidth(width);
     }
 
     if (height != null) {
-      shadowDisplay.setHeight(height);
+      Shadows.shadowOf(display).setHeight(height);
     }
   }
 
