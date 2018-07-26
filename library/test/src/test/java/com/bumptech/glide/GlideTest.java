@@ -646,7 +646,9 @@ public class GlideTest {
         .load(drawable)
         .into(target);
 
-    verify(target).onResourceReady(eq(drawable), any(Transition.class));
+    ArgumentCaptor<Drawable> drawableCaptor = ArgumentCaptor.forClass(Drawable.class);
+    verify(target).onResourceReady(drawableCaptor.capture(), any(Transition.class));
+    assertThat(((ColorDrawable) drawableCaptor.getValue()).getColor()).isEqualTo(Color.RED);
   }
 
   @Test

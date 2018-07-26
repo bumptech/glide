@@ -425,15 +425,10 @@ public class RequestOptionsTest {
 
   @Test
   public void getFallback_afterApplyingOptionsWithFallbackDrawable_returnsNewDrawable() {
-    Drawable expected = new ColorDrawable(Color.GREEN);
     RequestOptions toApply = new RequestOptions();
 
-    assertThat(
-        options
-          .fallback(new ColorDrawable(Color.RED))
-          .apply(toApply)
-          .getFallbackDrawable())
-        .isEqualTo(expected);
+    RequestOptions apply = options.fallback(new ColorDrawable(Color.RED)).apply(toApply);
+    assertThat(((ColorDrawable) apply.getFallbackDrawable()).getColor()).isEqualTo(Color.RED);
   }
 
   /**

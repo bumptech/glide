@@ -884,9 +884,6 @@ public class SingleRequestTest {
             new SingleRequestBuilder().setModel(null),
             new SingleRequestBuilder().setModel(null))
         .addEquivalenceGroup(
-            new SingleRequestBuilder().setErrorDrawable(new ColorDrawable(Color.GRAY)),
-            new SingleRequestBuilder().setErrorDrawable(new ColorDrawable(Color.GRAY)))
-        .addEquivalenceGroup(
             new SingleRequestBuilder().setPriority(Priority.LOW),
             new SingleRequestBuilder().setPriority(Priority.LOW))
         .test();
