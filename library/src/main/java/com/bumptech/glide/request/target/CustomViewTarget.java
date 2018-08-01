@@ -14,6 +14,7 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import com.bumptech.glide.R;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
@@ -33,7 +34,7 @@ import java.util.List;
 public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
   private static final String TAG = "CustomViewTarget";
   @IdRes private static final int VIEW_TAG_ID =
-      com.bumptech.glide.R.id.glide_custom_view_target_tag;
+      R.id.glide_custom_view_target_tag;
 
   private final SizeDeterminer sizeDeterminer;
 
@@ -41,7 +42,7 @@ public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
   @Nullable private OnAttachStateChangeListener attachStateListener;
   private boolean isClearedByUs;
   private boolean isAttachStateListenerAdded;
-  @IdRes private int overrideTag = 0;
+  @IdRes private int overrideTag;
 
   /** Constructor that defaults {@code waitForLayout} to {@code false}. */
   public CustomViewTarget(@NonNull T view) {
@@ -52,9 +53,10 @@ public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
   /**
    * A required callback invoked when the resource is no longer valid and must be freed.
    *
-   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Z,
-   * Transition)} is no longer used before redrawing the container (usually a View) or changing its
-   * visibility. <b>Not doing so will result in crashes in your app.</b>
+   * <p>You must ensure that any current Drawable received in
+   * {@link #onResourceReady(Object, Transition)} is no longer used before redrawing the container
+   * (usually a View) or changing its visibility. <b>Not doing so will result in crashes in your
+   * app.</b>
    *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
@@ -66,16 +68,24 @@ public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
    * @see Target#onLoadStarted(Drawable)
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
-  protected void onResourceLoading(@Nullable Drawable placeholder) {}
+  protected void onResourceLoading(@Nullable Drawable placeholder) {
+    // Default empty.
+  }
 
   @Override
-  public void onStart() {}
+  public void onStart() {
+    // Default empty.
+  }
 
   @Override
-  public void onStop() {}
+  public void onStop() {
+    // Default empty.
+  }
 
   @Override
-  public void onDestroy() {}
+  public void onDestroy() {
+    // Default empty.
+  }
 
   /**
    * Indicates that Glide should always wait for any pending layout pass before checking for the

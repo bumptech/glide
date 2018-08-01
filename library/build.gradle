@@ -18,6 +18,16 @@ dependencies {
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
         errorprone "com.google.errorprone:error_prone_core:${ERROR_PRONE_VERSION}"
     }
+
+    testImplementation "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    testImplementation project(':testutil')
+    testImplementation 'com.google.guava:guava-testlib:18.0'
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation "junit:junit:${JUNIT_VERSION}"
+    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
+    testImplementation "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
 }
 
 android {

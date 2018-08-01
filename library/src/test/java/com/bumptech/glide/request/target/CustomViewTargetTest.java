@@ -1,7 +1,6 @@
 package com.bumptech.glide.request.target;
 
 import static android.view.ViewGroup.LayoutParams;
-import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -29,8 +28,8 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
+import com.google.common.truth.Truth;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
 import org.junit.Before;
@@ -45,9 +44,17 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
+import org.robolectric.util.ReflectionHelpers;
 
+/**
+ * Test for {@link CustomViewTarget}.
+ *
+ * TODO: This should really be in the tests subproject, but that causes errors because the R class
+ * referenced in {@link CustomViewTarget} can't be found. This should be fixable with some gradle
+ * changes, but I've so far failed to figure out the right set of commands.
+ */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 19)
+@Config(sdk = 19, manifest = "build/intermediates/manifests/full/debug/AndroidManifest.xml")
 public class CustomViewTargetTest {
   private ActivityController<Activity> activity;
   private View view;
@@ -73,7 +80,7 @@ public class CustomViewTargetTest {
 
   @After
   public void tearDown() {
-    Util.setSdkVersionInt(sdkVersion);
+    setSdkVersionInt(sdkVersion);
     CustomViewTarget.SizeDeterminer.maxDisplayLength = null;
   }
 
@@ -433,7 +440,7 @@ public class CustomViewTargetTest {
 
   @Test
   public void getSize_withValidWidthAndHeight_preV19_layoutRequested_callsSizeReady() {
-    Util.setSdkVersionInt(18);
+    setSdkVersionInt(18);
     view.setLayoutParams(new FrameLayout.LayoutParams(100, 100));
     view.requestLayout();
 
@@ -606,7 +613,7 @@ public class CustomViewTargetTest {
 
   @Test
   public void onLoadCleared_withoutClearOnDetach_doesNotRemoveListeners() {
-    AtomicInteger count = new AtomicInteger();
+    final AtomicInteger count = new AtomicInteger();
     OnAttachStateChangeListener expected =
         new OnAttachStateChangeListener() {
           @Override
@@ -615,7 +622,9 @@ public class CustomViewTargetTest {
           }
 
           @Override
-          public void onViewDetachedFromWindow(View v) {}
+          public void onViewDetachedFromWindow(View v) {
+            // Intentionally Empty.
+          }
         };
     view.addOnAttachStateChangeListener(expected);
 
@@ -623,7 +632,7 @@ public class CustomViewTargetTest {
 
     activity.visible();
 
-    assertThat(count.get()).isEqualTo(1);
+    Truth.assertThat(count.get()).isEqualTo(1);
   }
 
   private static final class AttachStateTarget extends CustomViewTarget<View, Object> {
@@ -632,14 +641,20 @@ public class CustomViewTargetTest {
     }
 
     @Override
-    protected void onResourceCleared(@Nullable Drawable placeholder) {}
+    protected void onResourceCleared(@Nullable Drawable placeholder) {
+      // Intentionally Empty.
+    }
 
     @Override
-    public void onLoadFailed(@Nullable Drawable errorDrawable) {}
+    public void onLoadFailed(@Nullable Drawable errorDrawable) {
+      // Intentionally Empty.
+    }
 
     @Override
     public void onResourceReady(
-        @NonNull Object resource, @Nullable Transition<? super Object> transition) {}
+        @NonNull Object resource, @Nullable Transition<? super Object> transition) {
+      // Intentionally Empty.
+    }
   }
 
   private static final class TestViewTarget extends CustomViewTarget<View, Object> {
@@ -649,7 +664,9 @@ public class CustomViewTargetTest {
     }
 
     @Override
-    protected void onResourceCleared(@Nullable Drawable placeholder) {}
+    protected void onResourceCleared(@Nullable Drawable placeholder) {
+      // Intentionally Empty.
+    }
 
     // We're intentionally avoiding the super call.
     @SuppressWarnings("MissingSuperCall")
@@ -672,5 +689,9 @@ public class CustomViewTargetTest {
     public void onLoadFailed(@Nullable Drawable errorDrawable) {
       // Avoid calling super.
     }
+  }
+
+  private static void setSdkVersionInt(int version) {
+    ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", version);
   }
 }

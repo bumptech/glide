@@ -66,6 +66,9 @@ public class ModelLoaderRegistry {
     }
   }
 
+  // We're allocating in a loop to avoid allocating empty lists that will never have anything added
+  // to them.
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   @NonNull
   public <A> List<ModelLoader<A, ?>> getModelLoaders(@NonNull A model) {
     List<ModelLoader<A, ?>> modelLoaders = getModelLoadersForClass(getClass(model));

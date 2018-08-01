@@ -111,6 +111,8 @@ public final class ByteBufferUtil {
     }
   }
 
+  // We check the appropriate offsets, so this is a spurious warning.
+  @SuppressWarnings("ByteBufferBackingArray")
   @NonNull
   public static byte[] toBytes(@NonNull ByteBuffer byteBuffer) {
     final byte[] result;
