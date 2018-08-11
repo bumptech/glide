@@ -439,7 +439,7 @@ public final class MyModelLoader implements ModelLoader<File, InputStream> {
 
 #### ``using()``
 
-The [``using()``][23] API was removed in Glide 4 to encourage users to [register][24] their components once with a [``AppGlideModule``][2] to avoid object re-use. Rather than creating a new ``ModelLoader`` each time you load an image, you register it once in an [``AppGlideModule``][2] and let Glide inspect your model (the object you pass to [``load()``][25]) to figure out when to use your registered ``ModelLoader``.
+The [``using()``][23] API was removed in Glide 4 to encourage users to [register][35] their components once with a [``AppGlideModule``][2] to avoid object re-use. Rather than creating a new ``ModelLoader`` each time you load an image, you register it once in an [``AppGlideModule``][2] and let Glide inspect your model (the object you pass to [``load()``][25]) to figure out when to use your registered ``ModelLoader``.
 
 To make sure you only use your ``ModelLoader`` for certain models, implement ``handles()`` as shown above to inspect each model and return true only if your ``ModelLoader`` should be used.
 
@@ -477,3 +477,4 @@ To make sure you only use your ``ModelLoader`` for certain models, implement ``h
 [32]: https://developer.android.com/reference/android/graphics/Bitmap.Config.html#RGB_565
 [33]: https://developer.android.com/reference/android/graphics/Bitmap.Config.html#ARGB_8888
 [34]: download-setup.html
+[35]: {{ site.baseurl }}/doc/configuration.html#registering-components
