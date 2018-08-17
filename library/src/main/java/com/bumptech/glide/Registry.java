@@ -25,10 +25,13 @@ import com.bumptech.glide.provider.ModelToResourceClassCache;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import com.bumptech.glide.util.pool.FactoryPools;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Manages component registration to extend or replace Glide's default loading, decoding, and
@@ -530,17 +533,43 @@ public class Registry {
     if (result == null) {
       result = new ArrayList<>();
       List<Class<?>> dataClasses = modelLoaderRegistry.getDataClasses(modelClass);
+
+      Map<Class<?>, List<? extends Class<?>>> dataClassToResourceClasses = new HashMap<>();
+      Map<Class<?>, List<Class<Transcode>>> resourceClassToTranscodeClasses = new HashMap<>();
+
       for (Class<?> dataClass : dataClasses) {
         List<? extends Class<?>> registeredResourceClasses =
             decoderRegistry.getResourceClasses(dataClass, resourceClass);
+
+        dataClassToResourceClasses.put(dataClass, registeredResourceClasses);
+
         for (Class<?> registeredResourceClass : registeredResourceClasses) {
-          List<Class<Transcode>> registeredTranscodeClasses = transcoderRegistry
-              .getTranscodeClasses(registeredResourceClass, transcodeClass);
+
+          List<Class<Transcode>> registeredTranscodeClasses =
+              transcoderRegistry.getTranscodeClasses(registeredResourceClass, transcodeClass);
+
+          resourceClassToTranscodeClasses.put(registeredResourceClass, registeredTranscodeClasses);
+
           if (!registeredTranscodeClasses.isEmpty() && !result.contains(registeredResourceClass)) {
             result.add(registeredResourceClass);
           }
         }
       }
+
+      // Throw the exception before populating the cache in the hopes that a subsequent attempt will
+      // succeed and only one request will randomly fail. This is really debugging logic that should
+      // go away when we find the actual cause for b/73882030.
+      if (result.isEmpty() && !File.class.equals(transcodeClass)) {
+        if (dataClasses.isEmpty()) {
+          throw new IllegalStateException("Failed to find any data classes for: " + modelClass);
+        }
+
+        throw new IllegalStateException(
+            "Failed to find any resource or transcode classes for model: " + modelClass
+                + ", data to resource classes: " + dataClassToResourceClasses
+                + ", resource to transcode classes: " + resourceClassToTranscodeClasses);
+      }
+
       modelToResourceClassCache.put(modelClass, resourceClass,
           Collections.unmodifiableList(result));
     }

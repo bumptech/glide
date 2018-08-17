@@ -53,9 +53,9 @@ class ResourceCacheGenerator implements DataFetcherGenerator,
       // TODO(b/73882030): This case gets triggered when it shouldn't. With this assertion it causes
       // all loads to fail. Without this assertion it causes loads to miss the disk cache
       // unnecessarily
-      // throw new IllegalStateException(
-      //    "Failed to find any load path from " + helper.getModelClass() + " to "
-      //        + helper.getTranscodeClass());
+      throw new IllegalStateException(
+         "Failed to find any load path from " + helper.getModelClass() + " to "
+             + helper.getTranscodeClass());
     }
     while (modelLoaders == null || !hasNextModelLoader()) {
       resourceClassIndex++;
