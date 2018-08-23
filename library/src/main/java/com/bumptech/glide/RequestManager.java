@@ -16,7 +16,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RawRes;
 import android.view.View;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
@@ -26,6 +28,7 @@ import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.manager.TargetTracker;
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
@@ -34,6 +37,8 @@ import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.net.URL;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A class for managing and starting requests for Glide. Can use activity, fragment and connectivity
@@ -69,6 +74,10 @@ public class RequestManager implements LifecycleListener,
   };
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
   private final ConnectivityMonitor connectivityMonitor;
+  // Adding default listeners should be much less common than starting new requests. We want
+  // some way of making sure that requests don't mutate our listeners without creating a new copy of
+  // the list each time a request is started.
+  private final CopyOnWriteArrayList<RequestListener<Object>> defaultRequestListeners;
 
   private RequestOptions requestOptions;
 
@@ -115,6 +124,8 @@ public class RequestManager implements LifecycleListener,
     }
     lifecycle.addListener(connectivityMonitor);
 
+    defaultRequestListeners =
+        new CopyOnWriteArrayList<>(glide.getGlideContext().getDefaultRequestListeners());
     setRequestOptions(glide.getGlideContext().getDefaultRequestOptions());
 
     glide.registerRequestManager(this);
@@ -171,6 +182,29 @@ public class RequestManager implements LifecycleListener,
   @NonNull
   public RequestManager setDefaultRequestOptions(@NonNull RequestOptions requestOptions) {
     setRequestOptions(requestOptions);
+    return this;
+  }
+
+  /**
+   * Adds a default {@link RequestListener} that will be added to every request started with this
+   * {@link RequestManager}.
+   *
+   * <p>Multiple {@link RequestListener}s can be added here, in {@link RequestManager} scopes or
+   * to individual {@link RequestBuilder}s. {@link RequestListener}s are called in the order they're
+   * added. Even if an earlier {@link RequestListener} returns {@code true} from
+   * {@link RequestListener#onLoadFailed(GlideException, Object, Target, boolean)} or
+   * {@link RequestListener#onResourceReady(Object, Object, Target, DataSource, boolean)}, it will
+   * not prevent subsequent {@link RequestListener}s from being called.
+   *
+   * <p>Because Glide requests can be started for any number of individual resource types, any
+   * listener added here has to accept any generic resource type in
+   * {@link RequestListener#onResourceReady(Object, Object, Target, DataSource, boolean)}. If you
+   * must base the behavior of the listener on the resource type, you will need to use
+   * {@code instanceof} to do so. It's not safe to cast resource types without first checking
+   * with {@code instanceof}.
+   */
+  public RequestManager addDefaultRequestListener(RequestListener<Object> requestListener) {
+    defaultRequestListeners.add(requestListener);
     return this;
   }
 
@@ -612,6 +646,10 @@ public class RequestManager implements LifecycleListener,
   void track(@NonNull Target<?> target, @NonNull Request request) {
     targetTracker.track(target);
     requestTracker.runRequest(request);
+  }
+
+  List<RequestListener<Object>> getDefaultRequestListeners() {
+    return defaultRequestListeners;
   }
 
   RequestOptions getDefaultRequestOptions() {

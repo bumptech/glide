@@ -4,6 +4,7 @@ import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 import static com.bumptech.glide.request.RequestOptions.skipMemoryCacheOf;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -76,8 +77,12 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   private boolean isModelSet;
   private boolean isThumbnailBuilt;
 
-  protected RequestBuilder(Glide glide, RequestManager requestManager,
-      Class<TranscodeType> transcodeClass, Context context) {
+  @SuppressLint("CheckResult")
+  protected RequestBuilder(
+      @NonNull Glide glide,
+      RequestManager requestManager,
+      Class<TranscodeType> transcodeClass,
+      Context context) {
     this.glide = glide;
     this.requestManager = requestManager;
     this.transcodeClass = transcodeClass;
@@ -86,6 +91,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     this.transitionOptions = requestManager.getDefaultTransitionOptions(transcodeClass);
     this.requestOptions = defaultRequestOptions;
     this.glideContext = glide.getGlideContext();
+
+    initRequestListeners(requestManager.getDefaultRequestListeners());
   }
 
   protected RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
@@ -93,6 +100,16 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     model = other.model;
     isModelSet = other.isModelSet;
     requestOptions = other.requestOptions;
+  }
+
+  // Casting from Object to a specific type is always safe.
+  @SuppressWarnings("unchecked")
+  // addListener always returns the same instance.
+  @SuppressLint("CheckResult")
+  private void initRequestListeners(List<RequestListener<Object>> requestListeners) {
+    for (RequestListener<Object> listener : requestListeners) {
+      addListener((RequestListener<TranscodeType>) listener);
+    }
   }
 
   /**

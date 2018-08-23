@@ -14,6 +14,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
@@ -41,6 +42,7 @@ public final class GlideContextTest {
         new ImageViewTargetFactory(),
         new RequestOptions(),
         transitionOptions,
+        /*defaultRequestListeners=*/ Collections.emptyList(),
         mock(Engine.class),
         Log.DEBUG);
   }

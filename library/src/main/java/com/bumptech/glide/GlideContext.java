@@ -9,9 +9,11 @@ import android.support.annotation.VisibleForTesting;
 import android.widget.ImageView;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.ViewTarget;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -28,6 +30,7 @@ public class GlideContext extends ContextWrapper {
   private final Registry registry;
   private final ImageViewTargetFactory imageViewTargetFactory;
   private final RequestOptions defaultRequestOptions;
+  private final List<RequestListener<Object>> defaultRequestListeners;
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions;
   private final Engine engine;
   private final int logLevel;
@@ -39,6 +42,7 @@ public class GlideContext extends ContextWrapper {
       @NonNull ImageViewTargetFactory imageViewTargetFactory,
       @NonNull RequestOptions defaultRequestOptions,
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
+      @NonNull List<RequestListener<Object>> defaultRequestListeners,
       @NonNull Engine engine,
       int logLevel) {
     super(context.getApplicationContext());
@@ -46,11 +50,16 @@ public class GlideContext extends ContextWrapper {
     this.registry = registry;
     this.imageViewTargetFactory = imageViewTargetFactory;
     this.defaultRequestOptions = defaultRequestOptions;
+    this.defaultRequestListeners = defaultRequestListeners;
     this.defaultTransitionOptions = defaultTransitionOptions;
     this.engine = engine;
     this.logLevel = logLevel;
 
     mainHandler = new Handler(Looper.getMainLooper());
+  }
+
+  public List<RequestListener<Object>> getDefaultRequestListeners() {
+    return defaultRequestListeners;
   }
 
   public RequestOptions getDefaultRequestOptions() {

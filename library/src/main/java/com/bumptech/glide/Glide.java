@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.data.InputStreamRewinder;
 import com.bumptech.glide.load.engine.Engine;
@@ -76,6 +77,7 @@ import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.module.ManifestParser;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
@@ -319,7 +321,8 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull ConnectivityMonitorFactory connectivityMonitorFactory,
       int logLevel,
       @NonNull RequestOptions defaultRequestOptions,
-      @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions) {
+      @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
+      @NonNull List<RequestListener<Object>> defaultRequestListeners) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
@@ -342,10 +345,15 @@ public class Glide implements ComponentCallbacks2 {
     }
     registry.register(new DefaultImageHeaderParser());
 
-    Downsampler downsampler = new Downsampler(registry.getImageHeaderParsers(),
-        resources.getDisplayMetrics(), bitmapPool, arrayPool);
+    List<ImageHeaderParser> imageHeaderParsers = registry.getImageHeaderParsers();
+    Downsampler downsampler =
+        new Downsampler(
+            imageHeaderParsers,
+            resources.getDisplayMetrics(),
+            bitmapPool,
+            arrayPool);
     ByteBufferGifDecoder byteBufferGifDecoder =
-        new ByteBufferGifDecoder(context, registry.getImageHeaderParsers(), bitmapPool, arrayPool);
+        new ByteBufferGifDecoder(context, imageHeaderParsers, bitmapPool, arrayPool);
     ResourceDecoder<ParcelFileDescriptor, Bitmap> parcelFileDescriptorVideoDecoder =
         VideoDecoder.parcel(bitmapPool);
     ByteBufferBitmapDecoder byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
@@ -409,7 +417,7 @@ public class Glide implements ComponentCallbacks2 {
             Registry.BUCKET_GIF,
             InputStream.class,
             GifDrawable.class,
-            new StreamGifDecoder(registry.getImageHeaderParsers(), byteBufferGifDecoder, arrayPool))
+            new StreamGifDecoder(imageHeaderParsers, byteBufferGifDecoder, arrayPool))
         .append(Registry.BUCKET_GIF, ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
         .append(GifDrawable.class, new GifDrawableEncoder())
         /* GIF Frames */
@@ -512,6 +520,7 @@ public class Glide implements ComponentCallbacks2 {
             imageViewTargetFactory,
             defaultRequestOptions,
             defaultTransitionOptions,
+            defaultRequestListeners,
             engine,
             logLevel);
   }
