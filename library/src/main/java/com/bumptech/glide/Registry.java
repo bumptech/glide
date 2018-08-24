@@ -523,9 +523,11 @@ public class Registry {
 
   @NonNull
   public <Model, TResource, Transcode> List<Class<?>> getRegisteredResourceClasses(
-      @NonNull Class<Model> modelClass, @NonNull Class<TResource> resourceClass,
+      @NonNull Class<Model> modelClass,
+      @NonNull Class<TResource> resourceClass,
       @NonNull Class<Transcode> transcodeClass) {
-    List<Class<?>> result = modelToResourceClassCache.get(modelClass, resourceClass);
+    List<Class<?>> result =
+        modelToResourceClassCache.get(modelClass, resourceClass, transcodeClass);
 
     if (result == null) {
       result = new ArrayList<>();
@@ -541,8 +543,8 @@ public class Registry {
           }
         }
       }
-      modelToResourceClassCache.put(modelClass, resourceClass,
-          Collections.unmodifiableList(result));
+      modelToResourceClassCache.put(
+          modelClass, resourceClass, transcodeClass, Collections.unmodifiableList(result));
     }
 
     return result;
