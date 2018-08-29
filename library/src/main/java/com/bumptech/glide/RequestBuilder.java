@@ -17,6 +17,7 @@ import android.support.annotation.RawRes;
 import android.widget.ImageView;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.ErrorRequestCoordinator;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
@@ -117,12 +118,12 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   /**
    * Applies the given options to the request.
    *
-   * <p>As with {@link RequestOptions#apply(RequestOptions)}, {@code #apply} only replaces those
+   * <p>As with {@link RequestOptions#apply(BaseRequestOptions)}, {@code #apply} only replaces those
    * values that are explicitly set in the given {@link RequestOptions} object. If you need to
    * completely reset all previously set options, create a new {@code RequestBuilder} instead of
    * using this method.
    *
-   * @see RequestOptions#apply(RequestOptions)
+   * @see RequestOptions#apply(BaseRequestOptions)
    * @return This request builder.
    */
   @NonNull

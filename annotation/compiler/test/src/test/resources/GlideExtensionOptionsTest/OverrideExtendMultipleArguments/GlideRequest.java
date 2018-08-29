@@ -294,15 +294,15 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   }
 
   /**
-   * @see GlideOptions#set(Option<T>, T)
+   * @see GlideOptions#set(Option<Y>, Y)
    */
   @NonNull
   @CheckResult
-  public <T> GlideRequest<TranscodeType> set(@NonNull Option<T> option, @NonNull T t) {
+  public <Y> GlideRequest<TranscodeType> set(@NonNull Option<Y> option, @NonNull Y y) {
     if (getMutableOptions() instanceof GlideOptions) {
-      this.requestOptions = ((GlideOptions) getMutableOptions()).set(option, t);
+      this.requestOptions = ((GlideOptions) getMutableOptions()).set(option, y);
     } else {
-      this.requestOptions = new GlideOptions().apply(this.requestOptions).set(option, t);
+      this.requestOptions = new GlideOptions().apply(this.requestOptions).set(option, y);
     }
     return this;
   }
@@ -578,12 +578,12 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   }
 
   /**
-   * @see GlideOptions#optionalTransform(Class<T>, Transformation<T>)
+   * @see GlideOptions#optionalTransform(Class<Y>, Transformation<Y>)
    */
   @NonNull
   @CheckResult
-  public <T> GlideRequest<TranscodeType> optionalTransform(@NonNull Class<T> clazz,
-      @NonNull Transformation<T> transformation) {
+  public <Y> GlideRequest<TranscodeType> optionalTransform(@NonNull Class<Y> clazz,
+      @NonNull Transformation<Y> transformation) {
     if (getMutableOptions() instanceof GlideOptions) {
       this.requestOptions = ((GlideOptions) getMutableOptions()).optionalTransform(clazz, transformation);
     } else {
@@ -593,12 +593,12 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   }
 
   /**
-   * @see GlideOptions#transform(Class<T>, Transformation<T>)
+   * @see GlideOptions#transform(Class<Y>, Transformation<Y>)
    */
   @NonNull
   @CheckResult
-  public <T> GlideRequest<TranscodeType> transform(@NonNull Class<T> clazz,
-      @NonNull Transformation<T> transformation) {
+  public <Y> GlideRequest<TranscodeType> transform(@NonNull Class<Y> clazz,
+      @NonNull Transformation<Y> transformation) {
     if (getMutableOptions() instanceof GlideOptions) {
       this.requestOptions = ((GlideOptions) getMutableOptions()).transform(clazz, transformation);
     } else {

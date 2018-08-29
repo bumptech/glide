@@ -78,16 +78,19 @@ final class RequestOptionsGenerator {
   static final String REQUEST_OPTIONS_QUALIFIED_NAME =
       REQUEST_OPTIONS_PACKAGE_NAME + "." + REQUEST_OPTIONS_SIMPLE_NAME;
 
-  private final ProcessingEnvironment processingEnvironment;
+  private static final String BASE_REQUEST_OPTIONS_SIMPLE_NAME = "BaseRequestOptions";
+  static final String BASE_REQUEST_OPTIONS_QUALIFIED_NAME =
+      REQUEST_OPTIONS_PACKAGE_NAME + "." + BASE_REQUEST_OPTIONS_SIMPLE_NAME;
+
   private final ClassName requestOptionsName;
   private final TypeElement requestOptionsType;
   private final ProcessorUtil processorUtil;
+  private final TypeElement baseRequestOptionsType;
   private ClassName glideOptionsName;
   private int nextStaticFieldUniqueId;
 
   RequestOptionsGenerator(
       ProcessingEnvironment processingEnvironment, ProcessorUtil processorUtil) {
-    this.processingEnvironment = processingEnvironment;
     this.processorUtil = processorUtil;
 
     requestOptionsName = ClassName.get(REQUEST_OPTIONS_PACKAGE_NAME,
@@ -95,6 +98,9 @@ final class RequestOptionsGenerator {
 
     requestOptionsType = processingEnvironment.getElementUtils().getTypeElement(
         REQUEST_OPTIONS_QUALIFIED_NAME);
+
+    baseRequestOptionsType = processingEnvironment.getElementUtils().getTypeElement(
+        BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
   }
 
   TypeSpec generate(String generatedCodePackageName, Set<String> glideExtensionClassNames) {
@@ -183,7 +189,7 @@ final class RequestOptionsGenerator {
 
   private List<MethodSpec> generateInstanceMethodOverridesForRequestOptions() {
     return Lists.transform(
-        processorUtil.findInstanceMethodsReturning(requestOptionsType, requestOptionsType),
+        processorUtil.findInstanceMethodsReturning(baseRequestOptionsType, baseRequestOptionsType),
         new Function<ExecutableElement, MethodSpec>() {
           @Override
           public MethodSpec apply(ExecutableElement input) {

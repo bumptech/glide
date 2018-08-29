@@ -16,6 +16,7 @@ import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestOptions;
 import java.lang.Class;
 import java.lang.Cloneable;
@@ -413,8 +414,8 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
   @Override
   @NonNull
   @CheckResult
-  public final <T> GlideOptions set(@NonNull Option<T> option, @NonNull T t) {
-    return (GlideOptions) super.set(option, t);
+  public final <Y> GlideOptions set(@NonNull Option<Y> option, @NonNull Y y) {
+    return (GlideOptions) super.set(option, y);
   }
 
   @Override
@@ -555,16 +556,16 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
   @Override
   @NonNull
   @CheckResult
-  public final <T> GlideOptions optionalTransform(@NonNull Class<T> clazz,
-      @NonNull Transformation<T> transformation) {
+  public final <Y> GlideOptions optionalTransform(@NonNull Class<Y> clazz,
+      @NonNull Transformation<Y> transformation) {
     return (GlideOptions) super.optionalTransform(clazz, transformation);
   }
 
   @Override
   @NonNull
   @CheckResult
-  public final <T> GlideOptions transform(@NonNull Class<T> clazz,
-      @NonNull Transformation<T> transformation) {
+  public final <Y> GlideOptions transform(@NonNull Class<Y> clazz,
+      @NonNull Transformation<Y> transformation) {
     return (GlideOptions) super.transform(clazz, transformation);
   }
 
@@ -585,7 +586,7 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
   @Override
   @NonNull
   @CheckResult
-  public final GlideOptions apply(@NonNull RequestOptions options) {
+  public final GlideOptions apply(@NonNull BaseRequestOptions<?> options) {
     return (GlideOptions) super.apply(options);
   }
 
