@@ -7,11 +7,9 @@ import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
 import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -30,7 +28,6 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -73,7 +70,7 @@ import javax.lang.model.type.TypeKind;
  */
 final class RequestOptionsGenerator {
   private static final String GENERATED_REQUEST_OPTIONS_SIMPLE_NAME = "GlideOptions";
-  static final String REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
+  private static final String REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
   private static final String REQUEST_OPTIONS_SIMPLE_NAME = "RequestOptions";
   static final String REQUEST_OPTIONS_QUALIFIED_NAME =
       REQUEST_OPTIONS_PACKAGE_NAME + "." + REQUEST_OPTIONS_SIMPLE_NAME;
@@ -85,7 +82,7 @@ final class RequestOptionsGenerator {
   private final ClassName requestOptionsName;
   private final TypeElement requestOptionsType;
   private final ProcessorUtil processorUtil;
-  private final TypeElement baseRequestOptionsType;
+  private final RequestOptionsOverrideGenerator requestOptionsOverrideGenerator;
   private ClassName glideOptionsName;
   private int nextStaticFieldUniqueId;
 
@@ -99,8 +96,8 @@ final class RequestOptionsGenerator {
     requestOptionsType = processingEnvironment.getElementUtils().getTypeElement(
         REQUEST_OPTIONS_QUALIFIED_NAME);
 
-    baseRequestOptionsType = processingEnvironment.getElementUtils().getTypeElement(
-        BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
+    requestOptionsOverrideGenerator =
+        new RequestOptionsOverrideGenerator(processingEnvironment, processorUtil);
   }
 
   TypeSpec generate(String generatedCodePackageName, Set<String> glideExtensionClassNames) {
@@ -121,7 +118,9 @@ final class RequestOptionsGenerator {
             }));
 
     List<MethodAndStaticVar> staticOverrides = generateStaticMethodOverridesForRequestOptions();
-    List<MethodSpec> instanceOverrides = generateInstanceMethodOverridesForRequestOptions();
+    List<MethodSpec> instanceOverrides =
+        requestOptionsOverrideGenerator.generateInstanceMethodOverridesForRequestOptions(
+            glideOptionsName);
 
     List<MethodAndStaticVar> allMethodsAndStaticVars = new ArrayList<>();
     for (MethodAndStaticVar item : staticOverrides) {
@@ -185,50 +184,6 @@ final class RequestOptionsGenerator {
     }
 
     return result;
-  }
-
-  private List<MethodSpec> generateInstanceMethodOverridesForRequestOptions() {
-    return Lists.transform(
-        processorUtil.findInstanceMethodsReturning(baseRequestOptionsType, baseRequestOptionsType),
-        new Function<ExecutableElement, MethodSpec>() {
-          @Override
-          public MethodSpec apply(ExecutableElement input) {
-            return generateRequestOptionOverride(input);
-          }
-        });
-  }
-
-  private MethodSpec generateRequestOptionOverride(ExecutableElement methodToOverride) {
-    MethodSpec.Builder result = ProcessorUtil.overriding(methodToOverride)
-        .returns(glideOptionsName)
-        .addModifiers(Modifier.FINAL);
-    result.addCode(CodeBlock.builder()
-        .add("return ($T) super.$N(", glideOptionsName, methodToOverride.getSimpleName())
-        .add(FluentIterable.from(result.build().parameters)
-            .transform(new Function<ParameterSpec, String>() {
-              @Override
-              public String apply(ParameterSpec input) {
-                return input.name;
-              }
-            })
-            .join(Joiner.on(", ")))
-        .add(");\n")
-        .build());
-
-    if (methodToOverride.getSimpleName().toString().equals("transforms")) {
-      result
-          .addAnnotation(SafeVarargs.class)
-          .addAnnotation(
-              AnnotationSpec.builder(SuppressWarnings.class)
-                  .addMember("value", "$S", "varargs")
-                  .build());
-    }
-
-    for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
-      result.addAnnotation(AnnotationSpec.get(mirror));
-    }
-
-    return result.build();
   }
 
   private List<MethodAndStaticVar> generateMethodsForRequestOptionsExtension(

@@ -88,7 +88,7 @@ final class AppModuleProcessor {
       writeRequestOptions(generatedCodePackageName, generatedRequestOptions);
 
     TypeSpec generatedRequestBuilder =
-        requestBuilderGenerator.generate(generatedCodePackageName, generatedRequestOptions);
+        requestBuilderGenerator.generate(generatedCodePackageName);
     writeRequestBuilder(generatedCodePackageName, generatedRequestBuilder);
 
     TypeSpec requestManager =
