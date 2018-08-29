@@ -2,6 +2,7 @@ package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.compiler.ProcessorUtil.checkResult;
 import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
+import static com.bumptech.glide.annotation.compiler.RequestOptionsGenerator.BASE_REQUEST_OPTIONS_QUALIFIED_NAME;
 
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
@@ -113,6 +114,7 @@ final class RequestBuilderGenerator {
 
   private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
+  private final TypeElement baseRequestOptionsType;
   private ClassName generatedRequestBuilderClassName;
   private final TypeVariableName transcodeTypeName;
   private ParameterizedTypeName generatedRequestBuilderOfTranscodeType;
@@ -131,6 +133,8 @@ final class RequestBuilderGenerator {
 
     requestOptionsType = processingEnv.getElementUtils().getTypeElement(
         REQUEST_OPTIONS_QUALIFIED_NAME);
+    baseRequestOptionsType = processingEnv.getElementUtils().getTypeElement(
+        BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
   }
 
   TypeSpec generate(String generatedCodePackageName, @Nullable TypeSpec generatedOptions) {
@@ -176,7 +180,8 @@ final class RequestBuilderGenerator {
         .addSuperinterface(Cloneable.class)
         .addMethods(generateConstructors())
         .addMethod(generateDownloadOnlyRequestMethod())
-        .addMethods(generateGeneratedRequestOptionsEquivalents(generatedOptions))
+        .addMethods(generateInstanceMethodOverridesForRequestOptions())
+//        .addMethods(generateGeneratedRequestOptionsEquivalents(generatedOptions))
         .addMethods(generateRequestBuilderOverrides())
         .build();
   }
@@ -196,6 +201,66 @@ final class RequestBuilderGenerator {
             return generateRequestBuilderOverride(input);
           }
         });
+  }
+
+
+  private List<MethodSpec> generateInstanceMethodOverridesForRequestOptions() {
+    return
+        FluentIterable.from(
+            processorUtil.findInstanceMethodsReturning(
+                baseRequestOptionsType, baseRequestOptionsType))
+            .filter(new Predicate<ExecutableElement>() {
+              @Override
+              public boolean apply(ExecutableElement input) {
+                return !EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS.contains(
+                    input.getSimpleName().toString());
+              }
+            })
+            .transform(
+        new Function<ExecutableElement, MethodSpec>() {
+          @Override
+          public MethodSpec apply(ExecutableElement input) {
+            return generateRequestOptionOverride(input);
+          }
+        })
+        .toList();
+  }
+
+  private MethodSpec generateRequestOptionOverride(ExecutableElement methodToOverride) {
+    MethodSpec.Builder result = ProcessorUtil.overriding(methodToOverride)
+        .returns(generatedRequestBuilderOfTranscodeType)
+        .addModifiers(Modifier.FINAL);
+    result.addCode(
+        CodeBlock.builder()
+            .add(
+                "return ($T) super.$N(",
+                generatedRequestBuilderOfTranscodeType,
+                methodToOverride.getSimpleName())
+            .add(FluentIterable.from(result.build().parameters)
+                .transform(new Function<ParameterSpec, String>() {
+                  @Override
+                  public String apply(ParameterSpec input) {
+                    return input.name;
+                  }
+                })
+                .join(Joiner.on(", ")))
+            .add(");\n")
+            .build());
+
+    if (methodToOverride.getSimpleName().toString().equals("transforms")) {
+      result
+          .addAnnotation(SafeVarargs.class)
+          .addAnnotation(
+              AnnotationSpec.builder(SuppressWarnings.class)
+                  .addMember("value", "$S", "varargs")
+                  .build());
+    }
+
+    for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {
+      result.addAnnotation(AnnotationSpec.get(mirror));
+    }
+
+    return result.build();
   }
 
   /**
