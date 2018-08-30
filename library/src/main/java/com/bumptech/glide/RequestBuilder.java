@@ -77,7 +77,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   private boolean isModelSet;
   private boolean isThumbnailBuilt;
 
+  // We only override the method to change the return type, not the functionality.
   @SuppressLint("CheckResult")
+  @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
   protected RequestBuilder(
       @NonNull Glide glide,
       RequestManager requestManager,
