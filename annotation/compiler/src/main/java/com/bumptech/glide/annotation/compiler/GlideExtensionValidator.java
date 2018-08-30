@@ -160,7 +160,7 @@ final class GlideExtensionValidator {
     TypeElement requestOptionsType =
         processingEnvironment
             .getElementUtils()
-            .getTypeElement(RequestOptionsGenerator.REQUEST_OPTIONS_QUALIFIED_NAME);
+            .getTypeElement(RequestOptionsGenerator.BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
     List<String> toFindParameterNames = getComparableParameterNames(toFind, true /*skipFirst*/);
     String toFindSimpleName = toFind.getSimpleName().toString();
     for (Element element : requestOptionsType.getEnclosedElements()) {
