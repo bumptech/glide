@@ -100,11 +100,12 @@ final class GlideExtensionValidator {
     validateNewGlideOptionAnnotations(executableElement);
     validateGlideOptionParameters(executableElement);
     TypeMirror returnType = executableElement.getReturnType();
-    if (!isRequestOptions(returnType)) {
-      throw new IllegalArgumentException("@GlideOption methods should return a RequestOptions"
-          + " object, but " + getQualifiedMethodName(executableElement) + " returns " + returnType
-          + ". If you're using old style @GlideOption methods, your method may have a void return"
-          + " type, but doing so is deprecated and support will be removed in a future version");
+    if (!isBaseRequestOptions(returnType)) {
+      throw new IllegalArgumentException("@GlideOption methods should return a"
+          + " BaseRequestOptions<?> object, but " + getQualifiedMethodName(executableElement)
+          + " returns " + returnType + ". If you're using old style @GlideOption methods, your"
+          + " method may have a void return type, but doing so is deprecated and support will be"
+          + " removed in a future version");
     }
     validateGlideOptionOverride(executableElement);
   }
@@ -122,45 +123,45 @@ final class GlideExtensionValidator {
   private static void validateGlideOptionParameters(ExecutableElement executableElement) {
     if (executableElement.getParameters().isEmpty()) {
       throw new IllegalArgumentException("@GlideOption methods must take a "
-          + "RequestOptions object as their first parameter, but "
+          + "BaseRequestOptions<?> object as their first parameter, but "
           + getQualifiedMethodName(executableElement) + " has none");
     }
     VariableElement first = executableElement.getParameters().get(0);
     TypeMirror expected = first.asType();
-    if (!isRequestOptions(expected)) {
+    if (!isBaseRequestOptions(expected)) {
       throw new IllegalArgumentException("@GlideOption methods must take a"
-          + " RequestOptions object as their first parameter, but the first parameter in "
+          + " BaseRequestOptions<?> object as their first parameter, but the first parameter in "
           + getQualifiedMethodName(executableElement) + " is " + expected);
     }
   }
 
-  private static boolean isRequestOptions(TypeMirror typeMirror) {
-    return typeMirror.toString().equals("com.bumptech.glide.request.RequestOptions");
+  private static boolean isBaseRequestOptions(TypeMirror typeMirror) {
+    return typeMirror.toString().equals("com.bumptech.glide.request.BaseRequestOptions<?>");
   }
 
   private void validateGlideOptionOverride(ExecutableElement element) {
     int overrideType = processorUtil.getOverrideType(element);
-    boolean isOverridingRequestOptionsMethod = isMethodInRequestOptions(element);
-    if (isOverridingRequestOptionsMethod && overrideType == GlideOption.OVERRIDE_NONE) {
+    boolean isOverridingBaseRequestOptionsMethod = isMethodInBaseRequestOptions(element);
+    if (isOverridingBaseRequestOptionsMethod && overrideType == GlideOption.OVERRIDE_NONE) {
       throw new IllegalArgumentException("Accidentally attempting to override a method in"
-          + " RequestOptions. Add an 'override' value in the @GlideOption annotation"
+          + " BaseRequestOptions. Add an 'override' value in the @GlideOption annotation"
           + " if this is intentional. Offending method: "
           + getQualifiedMethodName(element));
-    } else if (!isOverridingRequestOptionsMethod && overrideType != GlideOption.OVERRIDE_NONE) {
+    } else if (!isOverridingBaseRequestOptionsMethod && overrideType != GlideOption.OVERRIDE_NONE) {
       throw new IllegalArgumentException("Requested to override an existing method in"
-          + " RequestOptions, but no such method was found. Offending method: "
+          + " BaseRequestOptions, but no such method was found. Offending method: "
           + getQualifiedMethodName(element));
     }
   }
 
-  private boolean isMethodInRequestOptions(ExecutableElement toFind) {
+  private boolean isMethodInBaseRequestOptions(ExecutableElement toFind) {
     // toFind is a method in a GlideExtension whose first argument is a BaseRequestOptions<?> type.
     // Since we're comparing against methods in BaseRequestOptions itself, we need to drop that
     // first type.
     TypeElement requestOptionsType =
         processingEnvironment
             .getElementUtils()
-            .getTypeElement(RequestOptionsGenerator.REQUEST_OPTIONS_QUALIFIED_NAME);
+            .getTypeElement(RequestOptionsGenerator.BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
     List<String> toFindParameterNames = getComparableParameterNames(toFind, true /*skipFirst*/);
     String toFindSimpleName = toFind.getSimpleName().toString();
     for (Element element : requestOptionsType.getEnclosedElements()) {
