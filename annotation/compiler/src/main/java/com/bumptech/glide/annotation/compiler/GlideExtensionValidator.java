@@ -20,7 +20,6 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic.Kind;
 
@@ -89,15 +88,7 @@ final class GlideExtensionValidator {
   }
 
   private void validateGlideOption(ExecutableElement executableElement) {
-    if (returnsVoid(executableElement)) {
-      validateDeprecatedGlideOption(executableElement);
-    } else {
-      validateNewGlideOption(executableElement);
-    }
-  }
-
-  private void validateNewGlideOption(ExecutableElement executableElement) {
-    validateNewGlideOptionAnnotations(executableElement);
+    validateGlideOptionAnnotations(executableElement);
     validateGlideOptionParameters(executableElement);
     TypeMirror returnType = executableElement.getReturnType();
     if (!isBaseRequestOptions(returnType)) {
@@ -110,14 +101,8 @@ final class GlideExtensionValidator {
     validateGlideOptionOverride(executableElement);
   }
 
-  private void validateNewGlideOptionAnnotations(ExecutableElement executableElement) {
+  private void validateGlideOptionAnnotations(ExecutableElement executableElement) {
     validateAnnotatedNonNull(executableElement);
-  }
-
-  private void validateDeprecatedGlideOption(ExecutableElement executableElement) {
-    validateStaticVoid(executableElement, GlideOption.class);
-    validateGlideOptionParameters(executableElement);
-    validateGlideOptionOverride(executableElement);
   }
 
   private static void validateGlideOptionParameters(ExecutableElement executableElement) {
@@ -194,16 +179,8 @@ final class GlideExtensionValidator {
   }
 
   private void validateGlideType(ExecutableElement executableElement) {
-    if (returnsVoid(executableElement)) {
-      validateDeprecatedGlideType(executableElement);
-    } else {
-      validateNewGlideType(executableElement);
-    }
-  }
-
-  private void validateNewGlideType(ExecutableElement executableElement) {
     TypeMirror returnType = executableElement.getReturnType();
-    validateNewGlideTypeAnnotations(executableElement);
+    validateGlideTypeAnnotations(executableElement);
     if (!isRequestBuilder(returnType) || !typeMatchesExpected(returnType, executableElement)) {
       String expectedClassName = getGlideTypeValue(executableElement);
       throw new IllegalArgumentException("@GlideType methods should return a RequestBuilder<"
@@ -241,11 +218,6 @@ final class GlideExtensionValidator {
     return toCompare.toString().equals("com.bumptech.glide.RequestBuilder");
   }
 
-  private static void validateDeprecatedGlideType(ExecutableElement executableElement) {
-    validateStaticVoid(executableElement, GlideType.class);
-    validateGlideTypeParameters(executableElement);
-  }
-
   private static void validateGlideTypeParameters(ExecutableElement executableElement) {
     if (executableElement.getParameters().size() != 1) {
       throw new IllegalArgumentException("@GlideType methods must take a"
@@ -262,7 +234,7 @@ final class GlideExtensionValidator {
     }
   }
 
-  private void validateNewGlideTypeAnnotations(ExecutableElement executableElement) {
+  private void validateGlideTypeAnnotations(ExecutableElement executableElement) {
     validateAnnotatedNonNull(executableElement);
   }
 
@@ -291,27 +263,5 @@ final class GlideExtensionValidator {
               + " please add it to ensure that your extension methods are always returning non-null"
               + " values");
     }
-  }
-
-  private static void validateStatic(ExecutableElement executableElement, Class<?> clazz) {
-    if (!executableElement.getModifiers().contains(Modifier.STATIC)) {
-      throw new IllegalArgumentException("@" + clazz.getSimpleName() + " methods must be static");
-    }
-  }
-
-  private static boolean returnsVoid(ExecutableElement executableElement) {
-    TypeMirror returnType = executableElement.getReturnType();
-    return returnType.getKind() == TypeKind.VOID;
-  }
-
-  private static void validateVoid(ExecutableElement executableElement, Class<?> clazz) {
-    if (!returnsVoid(executableElement)) {
-      throw new IllegalArgumentException("@" + clazz.getSimpleName() + " methods must return void");
-    }
-  }
-
-  private static void validateStaticVoid(ExecutableElement executableElement, Class<?> clazz) {
-    validateStatic(executableElement, clazz);
-    validateVoid(executableElement, clazz);
   }
 }

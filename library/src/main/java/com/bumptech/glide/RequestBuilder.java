@@ -92,7 +92,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     this.glideContext = glide.getGlideContext();
 
     initRequestListeners(requestManager.getDefaultRequestListeners());
-    apply(requestManager.getDefaultRequestOptions());
+    applyInternal(requestManager.getDefaultRequestOptions());
   }
 
   @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
@@ -101,7 +101,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     model = other.model;
     isModelSet = other.isModelSet;
 
-    apply(other);
+    applyInternal(other);
   }
 
   // Casting from Object to a specific type is always safe.
@@ -112,6 +112,11 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     for (RequestListener<Object> listener : requestListeners) {
       addListener((RequestListener<TranscodeType>) listener);
     }
+  }
+
+  @SuppressLint("CheckResult")
+  private void applyInternal(BaseRequestOptions<?> requestOptions) {
+    super.apply(requestOptions);
   }
 
   /**

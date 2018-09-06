@@ -8,6 +8,7 @@ import com.bumptech.glide.annotation.GlideOption;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
@@ -69,14 +70,16 @@ import javax.lang.model.element.VariableElement;
  */
 final class RequestOptionsGenerator {
   private static final String GENERATED_REQUEST_OPTIONS_SIMPLE_NAME = "GlideOptions";
-  private static final String REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
+  static final String REQUEST_OPTIONS_PACKAGE_NAME = "com.bumptech.glide.request";
   private static final String REQUEST_OPTIONS_SIMPLE_NAME = "RequestOptions";
   static final String REQUEST_OPTIONS_QUALIFIED_NAME =
       REQUEST_OPTIONS_PACKAGE_NAME + "." + REQUEST_OPTIONS_SIMPLE_NAME;
 
-  private static final String BASE_REQUEST_OPTIONS_SIMPLE_NAME = "BaseRequestOptions";
+  static final String BASE_REQUEST_OPTIONS_SIMPLE_NAME = "BaseRequestOptions";
   static final String BASE_REQUEST_OPTIONS_QUALIFIED_NAME =
       REQUEST_OPTIONS_PACKAGE_NAME + "." + BASE_REQUEST_OPTIONS_SIMPLE_NAME;
+
+  private int nextFieldId;
 
   private final ClassName requestOptionsName;
   private final TypeElement requestOptionsType;
@@ -116,10 +119,17 @@ final class RequestOptionsGenerator {
               }
             })
             .toList();
+
     List<MethodAndStaticVar> staticMethodsForExtensions =
         FluentIterable.from(
             requestOptionsExtensionGenerator.getRequestOptionExtensionMethods(
                 glideExtensionClassNames))
+            .filter(new Predicate<ExecutableElement>() {
+              @Override
+              public boolean apply(ExecutableElement input) {
+                return !skipStaticMethod(input);
+              }
+            })
         .transform(new Function<ExecutableElement, MethodAndStaticVar>() {
           @Override
           public MethodAndStaticVar apply(ExecutableElement input) {
@@ -267,7 +277,7 @@ final class RequestOptionsGenerator {
       // }
 
       // Mix in an incrementing unique id to handle method overloading.
-      String staticVariableName = staticMethodName + FieldUniqueIdGenerator.next();
+      String staticVariableName = staticMethodName + nextFieldId++;
       requiredStaticField = FieldSpec.builder(glideOptionsName, staticVariableName)
           .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
           .build();
@@ -330,14 +340,8 @@ final class RequestOptionsGenerator {
     return parameter.type.toString().equals("android.content.Context");
   }
 
-
-  @Nullable
   private MethodAndStaticVar generateStaticMethodEquivalentForExtensionMethod(
       ExecutableElement instanceMethod) {
-    boolean skipStaticMethod = skipStaticMethod(instanceMethod);
-    if (skipStaticMethod) {
-      return null;
-    }
     String staticMethodName = getStaticMethodName(instanceMethod);
     String instanceMethodName = instanceMethod.getSimpleName().toString();
     if (Strings.isNullOrEmpty(staticMethodName)) {
@@ -380,7 +384,7 @@ final class RequestOptionsGenerator {
       // }
 
       // Mix in an incrementing unique id to handle method overloading.
-      String staticVariableName = staticMethodName + FieldUniqueIdGenerator.next();
+      String staticVariableName = staticMethodName + nextFieldId++;
       requiredStaticField = FieldSpec.builder(glideOptionsName, staticVariableName)
           .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
           .build();

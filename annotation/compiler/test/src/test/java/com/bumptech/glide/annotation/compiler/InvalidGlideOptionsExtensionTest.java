@@ -28,7 +28,7 @@ public class InvalidGlideOptionsExtensionTest {
         RuntimeException.class,
         new ThrowingRunnable() {
           @Override
-          public void run() throws Throwable {
+          public void run() {
             javac()
                 .withProcessors(new GlideAnnotationProcessor())
                 .compile(
@@ -60,17 +60,20 @@ public class InvalidGlideOptionsExtensionTest {
                   "package com.bumptech.glide.test;",
                   "import com.bumptech.glide.annotation.GlideExtension;",
                   "import com.bumptech.glide.annotation.GlideOption;",
-                  "import com.bumptech.glide.request.RequestOptions;",
+                  "import com.bumptech.glide.request.BaseRequestOptions;",
                   "@GlideExtension",
                   "public class NonRequestOptionsFirstArgExtension{",
                   "  private NonRequestOptionsFirstArgExtension() {}",
                   "  @GlideOption",
-                  "  public static void doSomething(Object arg1, RequestOptions options) {}",
+                  "  public static BaseRequestOptions<?> doSomething(",
+                  "      Object arg1, BaseRequestOptions<?> options) {",
+                  "    return options;",
+                  "  }",
                   "}"));
       fail();
     } catch (RuntimeException e) {
       String message = e.getCause().getMessage();
-      Truth.assertThat(message).contains("RequestOptions object as their first parameter");
+      Truth.assertThat(message).contains("BaseRequestOptions<?> object as their first parameter");
       Truth.assertThat(message).contains("Object");
       Truth.assertThat(message).contains("NonRequestOptionsFirstArgExtension");
     }
@@ -87,15 +90,17 @@ public class InvalidGlideOptionsExtensionTest {
                 "package com.bumptech.glide.test;",
                 "import com.bumptech.glide.annotation.GlideExtension;",
                 "import com.bumptech.glide.annotation.GlideOption;",
-                "import com.bumptech.glide.request.RequestOptions;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
                 "@GlideExtension",
                 "public class Extension {",
                 "  private Extension() {}",
                 "  @GlideOption",
-                "  public static void doSomething(RequestOptions options) {}",
+                "  public static BaseRequestOptions<?> doSomething(",
+                "      BaseRequestOptions<?> options) {",
+                "    return options;",
+                "  }",
                 "}"));
     assertThat(compilation).succeeded();
-    assertThat(compilation).hadWarningContaining("is using a legacy format.");
   }
 
   @Test
@@ -109,15 +114,17 @@ public class InvalidGlideOptionsExtensionTest {
                 "package com.bumptech.glide.test;",
                 "import com.bumptech.glide.annotation.GlideExtension;",
                 "import com.bumptech.glide.annotation.GlideOption;",
-                "import com.bumptech.glide.request.RequestOptions;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
                 "@GlideExtension",
                 "public class Extension {",
                 "  private Extension() {}",
                 "  @GlideOption",
-                "  public static void doSomething(RequestOptions options, Object arg2) {}",
+                "  public static BaseRequestOptions<?> doSomething(",
+                "      BaseRequestOptions<?> options, Object arg2) {",
+                "    return options;",
+                "  }",
                 "}"));
     assertThat(compilation).succeeded();
-    assertThat(compilation).hadWarningContaining("is using a legacy format.");
   }
 
   @Test
@@ -126,7 +133,7 @@ public class InvalidGlideOptionsExtensionTest {
         RuntimeException.class,
         new ThrowingRunnable() {
           @Override
-          public void run() throws Throwable {
+          public void run() {
             javac()
                 .withProcessors(new GlideAnnotationProcessor())
                 .compile(
@@ -136,12 +143,15 @@ public class InvalidGlideOptionsExtensionTest {
                     "package com.bumptech.glide.test;",
                     "import com.bumptech.glide.annotation.GlideExtension;",
                     "import com.bumptech.glide.annotation.GlideOption;",
-                    "import com.bumptech.glide.request.RequestOptions;",
+                    "import com.bumptech.glide.request.BaseRequestOptions;",
                     "@GlideExtension",
                     "public class Extension {",
                     "  private Extension() {}",
                     "  @GlideOption",
-                    "  public static void centerCrop(RequestOptions options) {}",
+                    "  public static BaseRequestOptions<?> centerCrop(",
+                    "      BaseRequestOptions<?> options) {",
+                    "    return options;",
+                    "  }",
                     "}"));
 
           }
@@ -154,7 +164,7 @@ public class InvalidGlideOptionsExtensionTest {
         RuntimeException.class,
         new ThrowingRunnable() {
           @Override
-          public void run() throws Throwable {
+          public void run() {
             javac()
                 .withProcessors(new GlideAnnotationProcessor())
                 .compile(
@@ -164,12 +174,15 @@ public class InvalidGlideOptionsExtensionTest {
                         "package com.bumptech.glide.test;",
                         "import com.bumptech.glide.annotation.GlideExtension;",
                         "import com.bumptech.glide.annotation.GlideOption;",
-                        "import com.bumptech.glide.request.RequestOptions;",
+                        "import com.bumptech.glide.request.BaseRequestOptions;",
                         "@GlideExtension",
                         "public class Extension {",
                         "  private Extension() {}",
                         "  @GlideOption(override = GlideOption.OVERRIDE_EXTEND)",
-                        "  public static void something(RequestOptions options) {}",
+                        "  public static BaseRequestOptions<?> something(",
+                        "      BaseRequestOptions<?> options) {",
+                        "    return options;",
+                        "  }",
                         "}"));
           }
         });
@@ -186,15 +199,17 @@ public class InvalidGlideOptionsExtensionTest {
                 "package com.bumptech.glide.test;",
                 "import com.bumptech.glide.annotation.GlideExtension;",
                 "import com.bumptech.glide.annotation.GlideOption;",
-                "import com.bumptech.glide.request.RequestOptions;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
                 "@GlideExtension",
                 "public class Extension {",
                 "  private Extension() {}",
                 "  @GlideOption(override = GlideOption.OVERRIDE_EXTEND)",
-                "  public static void centerCrop(RequestOptions options) {}",
+                "  public static BaseRequestOptions<?> centerCrop(",
+                "      BaseRequestOptions<?> options) {",
+                "    return options;",
+                "  }",
                 "}"));
     assertThat(compilation).succeeded();
-    assertThat(compilation).hadWarningContaining("is using a legacy format.");
   }
 
   @Test
@@ -203,7 +218,7 @@ public class InvalidGlideOptionsExtensionTest {
         RuntimeException.class,
         new ThrowingRunnable() {
           @Override
-          public void run() throws Throwable {
+          public void run() {
             javac()
                 .withProcessors(new GlideAnnotationProcessor())
                 .compile(
@@ -213,12 +228,15 @@ public class InvalidGlideOptionsExtensionTest {
                         "package com.bumptech.glide.test;",
                         "import com.bumptech.glide.annotation.GlideExtension;",
                         "import com.bumptech.glide.annotation.GlideOption;",
-                        "import com.bumptech.glide.request.RequestOptions;",
+                        "import com.bumptech.glide.request.BaseRequestOptions;",
                         "@GlideExtension",
                         "public class Extension {",
                         "  private Extension() {}",
                         "  @GlideOption(override = GlideOption.OVERRIDE_REPLACE)",
-                        "  public static void something(RequestOptions options) {}",
+                        "  public static BaseRequestOptions<?> something(",
+                        "      BaseRequestOptions<?> options) {",
+                        "    return options;",
+                        "  }",
                         "}"));
           }
         });
@@ -235,15 +253,17 @@ public class InvalidGlideOptionsExtensionTest {
                 "package com.bumptech.glide.test;",
                 "import com.bumptech.glide.annotation.GlideExtension;",
                 "import com.bumptech.glide.annotation.GlideOption;",
-                "import com.bumptech.glide.request.RequestOptions;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
                 "@GlideExtension",
                 "public class Extension {",
                 "  private Extension() {}",
                 "  @GlideOption(override = GlideOption.OVERRIDE_REPLACE)",
-                "  public static void centerCrop(RequestOptions options) {}",
+                "  public static BaseRequestOptions<?> centerCrop(",
+                "      BaseRequestOptions<?> options) {",
+                "    return options;",
+                "  }",
                 "}"));
     assertThat(compilation).succeeded();
-    assertThat(compilation).hadWarningContaining("is using a legacy format.");
   }
 
   @Test
@@ -258,13 +278,14 @@ public class InvalidGlideOptionsExtensionTest {
                 "import android.support.annotation.NonNull;",
                 "import com.bumptech.glide.annotation.GlideExtension;",
                 "import com.bumptech.glide.annotation.GlideOption;",
-                "import com.bumptech.glide.request.RequestOptions;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
                 "@GlideExtension",
                 "public class Extension {",
                 "  private Extension() {}",
                 "  @NonNull",
                 "  @GlideOption",
-                "  public static RequestOptions doSomething(RequestOptions options) {",
+                "  public static BaseRequestOptions<?> doSomething(",
+                "      BaseRequestOptions<?> options) {",
                 "    return options;",
                 "  }",
                 "}"));
@@ -284,13 +305,13 @@ public class InvalidGlideOptionsExtensionTest {
                   "import android.support.annotation.NonNull;",
                   "import com.bumptech.glide.annotation.GlideExtension;",
                   "import com.bumptech.glide.annotation.GlideOption;",
-                  "import com.bumptech.glide.request.RequestOptions;",
+                  "import com.bumptech.glide.request.BaseRequestOptions;",
                   "@GlideExtension",
                   "public class WrongReturnTypeExtension {",
                   "  private WrongReturnTypeExtension() {}",
                   "  @NonNull",
                   "  @GlideOption",
-                  "  public static Object doSomething(RequestOptions options) {",
+                  "  public static Object doSomething(BaseRequestOptions<?> options) {",
                   "    return options;",
                   "  }",
                   "}"));
@@ -298,7 +319,7 @@ public class InvalidGlideOptionsExtensionTest {
     } catch (RuntimeException e) {
       String message = e.getCause().getMessage();
       Truth.assertThat(message)
-          .contains("@GlideOption methods should return a RequestOptions object");
+          .contains("@GlideOption methods should return a BaseRequestOptions<?> object");
       Truth.assertThat(message).contains("Object");
       Truth.assertThat(message).contains("WrongReturnTypeExtension");
     }
@@ -315,12 +336,13 @@ public class InvalidGlideOptionsExtensionTest {
                 "package com.bumptech.glide.test;",
                 "import com.bumptech.glide.annotation.GlideExtension;",
                 "import com.bumptech.glide.annotation.GlideOption;",
-                "import com.bumptech.glide.request.RequestOptions;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
                 "@GlideExtension",
                 "public class Extension {",
                 "  private Extension() {}",
                 "  @GlideOption",
-                "  public static RequestOptions doSomething(RequestOptions options) {",
+                "  public static BaseRequestOptions<?> doSomething(",
+                "      BaseRequestOptions<?> options) {",
                 "    return options;",
                 "  }",
                 "}"));
@@ -343,20 +365,20 @@ public class InvalidGlideOptionsExtensionTest {
                   "import android.support.annotation.NonNull;",
                   "import com.bumptech.glide.annotation.GlideExtension;",
                   "import com.bumptech.glide.annotation.GlideOption;",
-                  "import com.bumptech.glide.request.RequestOptions;",
+                  "import com.bumptech.glide.request.BaseRequestOptions;",
                   "@GlideExtension",
                   "public class MissingRequestOptionsExtension {",
                   "  private MissingRequestOptionsExtension() {}",
                   "  @NonNull",
                   "  @GlideOption",
-                  "  public static RequestOptions doSomething() {",
+                  "  public static BaseRequestOptions<?> doSomething() {",
                   "    return options;",
                   "  }",
                   "}"));
       fail();
     } catch (RuntimeException e) {
       String message = e.getCause().getMessage();
-      Truth.assertThat(message).contains("RequestOptions object as their first parameter");
+      Truth.assertThat(message).contains("BaseRequestOptions<?> object as their first parameter");
       Truth.assertThat(message).contains("doSomething");
       Truth.assertThat(message).contains("MissingRequestOptionsExtension");
     }
