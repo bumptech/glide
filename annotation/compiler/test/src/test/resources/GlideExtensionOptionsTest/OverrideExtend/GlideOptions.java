@@ -18,11 +18,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestOptions;
-import java.lang.Class;
-import java.lang.Cloneable;
-import java.lang.Override;
-import java.lang.SafeVarargs;
-import java.lang.SuppressWarnings;
 
 /**
  * Automatically generated from {@link com.bumptech.glide.annotation.GlideExtension} annotated classes.

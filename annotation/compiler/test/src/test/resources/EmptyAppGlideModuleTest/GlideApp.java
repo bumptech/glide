@@ -12,8 +12,6 @@ import android.view.View;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import java.io.File;
-import java.lang.Deprecated;
-import java.lang.String;
 
 /**
  * The entry point for interacting with Glide for Applications

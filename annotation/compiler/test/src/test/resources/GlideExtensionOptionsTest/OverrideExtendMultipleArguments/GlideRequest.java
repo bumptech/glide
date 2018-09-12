@@ -26,15 +26,6 @@ import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestListener;
 import java.io.File;
-import java.lang.Class;
-import java.lang.Cloneable;
-import java.lang.Deprecated;
-import java.lang.Integer;
-import java.lang.Object;
-import java.lang.Override;
-import java.lang.SafeVarargs;
-import java.lang.String;
-import java.lang.SuppressWarnings;
 import java.net.URL;
 
 /**

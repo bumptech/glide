@@ -4,9 +4,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.test.AppModuleWithExcludes;
-import java.lang.Class;
-import java.lang.Override;
-import java.lang.SuppressWarnings;
 import java.util.HashSet;
 import java.util.Set;
 
