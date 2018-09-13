@@ -61,8 +61,8 @@ import com.bumptech.glide.util.Util;
  * @param <Z> The type of resource that this target will receive.
  * @deprecated Use {@link CustomViewTarget} if loading the content into a view, the download API if
  *     in the background
- *     (http://bumptech.github.io/glide/doc/getting-started.html#background-threads), or a a fully
- *     implemented {@link Target} for any specialized use-cases. Using BaseView is unsafe if the
+ *     (http://bumptech.github.io/glide/doc/getting-started.html#background-threads), or a
+ *     {@link CustomTarget} for any specialized use-cases. Using BaseView is unsafe if the
  *     user does not implement {@link #onLoadCleared}, resulting in recycled bitmaps being
  *     referenced from the UI and hard to root-cause crashes.
  */
