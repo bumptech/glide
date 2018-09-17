@@ -265,7 +265,9 @@ public class Registry {
   // Final to avoid a PMD error.
   @NonNull
   public final Registry setResourceDecoderBucketPriorityList(@NonNull List<String> buckets) {
-    List<String> modifiedBuckets = new ArrayList<>(buckets);
+    // See #3296 and https://bugs.openjdk.java.net/browse/JDK-6260652.
+    List<String> modifiedBuckets = new ArrayList<>(buckets.size());
+    modifiedBuckets.addAll(buckets);
     modifiedBuckets.add(0, BUCKET_PREPEND_ALL);
     modifiedBuckets.add(BUCKET_APPEND_ALL);
     decoderRegistry.setBucketPriorityList(modifiedBuckets);
