@@ -2,4 +2,5 @@
 <lint>
     <issue id="AllowBackup" severity="ignore"/>
     <issue id="ExifInterface" severity="ignore"/>
+    <issue id="GradleDependency" severity="ignore"/>
 </lint>
