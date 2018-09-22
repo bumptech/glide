@@ -133,7 +133,7 @@ Build
 Building Glide with gradle is fairly straight forward:
 
 ```shell
-git clone https://github.com/bumptech/glide.git 
+git clone --recursive https://github.com/bumptech/glide.git 
 cd glide
 ./gradlew jar
 ```
