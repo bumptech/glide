@@ -1,10 +1,6 @@
 package com.bumptech.glide.samples.contacturi;
 
-import static android.os.Build.VERSION;
-import static android.os.Build.VERSION_CODES;
-
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Intent;
@@ -21,6 +17,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.Preconditions;
 
 /**
  * An activity that demonstrates loading photos using
@@ -44,11 +41,11 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    imageViewContact = (ImageView) findViewById(R.id.image_contact);
-    imageViewLookup = (ImageView) findViewById(R.id.image_lookup);
-    imageViewPhoto = (ImageView) findViewById(R.id.image_photo);
-    imageViewDisplayPhoto = (ImageView) findViewById(R.id.image_display_photo);
-    numberEntry = (EditText) findViewById(R.id.number_entry);
+    imageViewContact = findViewById(R.id.image_contact);
+    imageViewLookup = findViewById(R.id.image_lookup);
+    imageViewPhoto = findViewById(R.id.image_photo);
+    imageViewDisplayPhoto = findViewById(R.id.image_display_photo);
+    numberEntry = findViewById(R.id.number_entry);
     // Make sure that user gives application required permissions
     if (ContextCompat.checkSelfPermission(
         getApplication(),
@@ -83,7 +80,8 @@ public class MainActivity extends Activity {
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == REQUEST_CONTACT && resultCode == RESULT_OK) {
-      final Cursor cursor = getContentResolver().query(data.getData(), null, null, null, null);
+      Uri uri = Preconditions.checkNotNull(data.getData());
+      final Cursor cursor = getContentResolver().query(uri, null, null, null, null);
       try {
         if (cursor != null && cursor.moveToFirst()) {
           final long contactId = cursor.getLong(cursor.getColumnIndex(Contacts._ID));
@@ -99,7 +97,6 @@ public class MainActivity extends Activity {
     super.onActivityResult(requestCode, resultCode, data);
   }
 
-  @TargetApi(VERSION_CODES.ICE_CREAM_SANDWICH)
   private void showContact(long id) {
     GlideRequests glideRequests = GlideApp.with(this);
     RequestOptions originalSize = new RequestOptions().override(Target.SIZE_ORIGINAL);
@@ -113,9 +110,7 @@ public class MainActivity extends Activity {
     Uri photoUri = Uri.withAppendedPath(contactUri, Contacts.Photo.CONTENT_DIRECTORY);
     glideRequests.load(photoUri).apply(originalSize).into(imageViewPhoto);
 
-    if (VERSION.SDK_INT >= VERSION_CODES.ICE_CREAM_SANDWICH) {
-      Uri displayPhotoUri = Uri.withAppendedPath(contactUri, Contacts.Photo.DISPLAY_PHOTO);
-      glideRequests.load(displayPhotoUri).apply(originalSize).into(imageViewDisplayPhoto);
-    }
+    Uri displayPhotoUri = Uri.withAppendedPath(contactUri, Contacts.Photo.DISPLAY_PHOTO);
+    glideRequests.load(displayPhotoUri).apply(originalSize).into(imageViewDisplayPhoto);
   }
 }

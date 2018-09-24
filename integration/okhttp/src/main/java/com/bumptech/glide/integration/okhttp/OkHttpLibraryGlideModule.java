@@ -15,8 +15,11 @@ import java.io.InputStream;
  * <p>For Applications that depend on this library and include an
  * {@link AppGlideModule} and Glide's annotation processor, this class
  * will be automatically included.
+ *
+ * @deprecated Prefer the okhttp3 version instead.
  */
 @GlideModule
+@Deprecated
 public class OkHttpLibraryGlideModule extends LibraryGlideModule {
   @Override
   public void registerComponents(Context context, Glide glide, Registry registry) {

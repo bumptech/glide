@@ -1,14 +1,24 @@
+import se.bjurr.violations.gradle.plugin.ViolationsTask
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 buildscript {
     repositories {
+        google()
         jcenter()
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
         }
     }
 
     dependencies {
         classpath "com.android.tools.build:gradle:${ANDROID_GRADLE_VERSION}"
-        classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:${COVERALLS_GRADLE_VERSION}"
+        if (!hasProperty('DISABLE_ERROR_PRONE')) {
+            classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_PLUGIN_VERSION}"
+        }
+        classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
     }
 }
 
@@ -21,25 +31,70 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
-subprojects {
-    tasks.withType(JavaCompile) {
-        sourceCompatibility = 1.7
-        targetCompatibility = 1.7
-    }
-}
-
 subprojects { project ->
+
     repositories {
+        google()
         jcenter()
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
     }
 
+    tasks.withType(JavaCompile) {
+        sourceCompatibility = 1.7
+        targetCompatibility = 1.7
+
+        options.setBootstrapClasspath(files("${System.getProperty('java.home')}/lib/rt.jar"))
+        // gifencoder is a legacy project that has a ton of warnings and is basically never
+        // modified, so we're not going to worry about cleaning it up.
+        if ("gifencoder" != project.getName()) {
+          options.compilerArgs \
+                /*
+                 * Treat all warnings as errors.
+                 */ \
+                << "-Werror" \
+                /*
+                 * Enable all warnings.
+                 */ \
+                << "-Xlint:all" \
+                /*
+                 * Java expects every annotation to have a processor, but we use
+                 * javax.annotation.Nullable, which doesn't have one.
+                 */ \
+                << "-Xlint:-processing" \
+                /*
+                 * See https://github.com/google/dagger/issues/945
+                 * and https://bugs.openjdk.java.net/browse/JDK-8190452
+                 */ \
+                << "-Xlint:-classfile" \
+                /*
+                 * Disable deprecation warnings for ViewTarget/BaseTarget for now.
+                 */ \
+                << "-Xlint:-deprecation"
+
+            if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
+                // It's often useful to track individual objects when debugging object pooling.
+                options.compilerArgs << "-Xep:ObjectToString:OFF"
+            }
+        }
+    }
+
+    tasks.withType(Test) {
+        testLogging {
+            exceptionFormat = TestExceptionFormat.FULL
+        }
+    }
+
+    // Avoid issues like #2452.
+    tasks.withType(Jar) {
+        duplicatesStrategy = DuplicatesStrategy.FAIL
+    }
+
     apply plugin: 'checkstyle'
 
     checkstyle {
-        toolVersion = '6.12.1'
+        toolVersion = '8.5'
     }
 
     checkstyle {
@@ -51,25 +106,54 @@ subprojects { project ->
         source 'src'
         include '**/*.java'
         exclude '**/gen/**'
+        // Caught by the violations plugin.
+        ignoreFailures = true
 
         // empty classpath
         classpath = files()
     }
 
+    apply plugin: "se.bjurr.violations.violations-gradle-plugin"
+
+    task violations(type: ViolationsTask) {
+        minSeverity 'INFO'
+        detailLevel 'VERBOSE'
+        maxViolations = 0
+        diffMaxViolations = 0
+
+        // Formats are listed here: https://github.com/tomasbjerre/violations-lib
+        def dir = projectDir.absolutePath
+        violations = [
+                ["FINDBUGS",    dir, ".*/findbugs/.*\\.xml\$",   "Findbugs"],
+                ["PMD",         dir, ".*/pmd/.*\\.xml\$",        "PMD"],
+                ["ANDROIDLINT", dir, ".*/lint-results\\.xml\$",  "AndroidLint"],
+                ["CHECKSTYLE",  dir, ".*/checkstyle/.*\\.xml\$", "Checkstyle"],
+        ]
+    }
+
     afterEvaluate {
         if (project.tasks.findByName('check')) {
             check.dependsOn('checkstyle')
+            check.finalizedBy violations
+        }
+
+        if (project.hasProperty("android")
+                && project.name != 'pmd'
+                && project.name != 'findbugs') {
+            android {
+                lintOptions {
+                    warningsAsErrors true
+                    quiet true
+                    // Caught by the violations plugin.
+                    abortOnError false
+                }
+            }
+
+            android.variantFilter { variant ->
+                if(variant.buildType.name == 'release') {
+                    variant.setIgnore(true)
+                }
+            }
         }
     }
-
-    gradle.projectsEvaluated {
-        tasks.withType(JavaCompile) {
-            options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
-        }
-    }
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.9'
-    distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }

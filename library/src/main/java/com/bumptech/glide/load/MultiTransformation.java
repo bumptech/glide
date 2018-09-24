@@ -1,6 +1,7 @@
 package com.bumptech.glide.load;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.Resource;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -15,15 +16,16 @@ public class MultiTransformation<T> implements Transformation<T> {
   private final Collection<? extends Transformation<T>> transformations;
 
   @SafeVarargs
-  public MultiTransformation(Transformation<T>... transformations) {
-    if (transformations.length < 1) {
+  @SuppressWarnings("varargs")
+  public MultiTransformation(@NonNull Transformation<T>... transformations) {
+    if (transformations.length == 0) {
       throw new IllegalArgumentException(
           "MultiTransformation must contain at least one Transformation");
     }
     this.transformations = Arrays.asList(transformations);
   }
 
-  public MultiTransformation(Collection<? extends Transformation<T>> transformationList) {
+  public MultiTransformation(@NonNull Collection<? extends Transformation<T>> transformationList) {
     if (transformationList.isEmpty()) {
       throw new IllegalArgumentException(
           "MultiTransformation must contain at least one Transformation");
@@ -31,9 +33,10 @@ public class MultiTransformation<T> implements Transformation<T> {
     this.transformations = transformationList;
   }
 
+  @NonNull
   @Override
   public Resource<T> transform(
-      Context context, Resource<T> resource, int outWidth, int outHeight) {
+      @NonNull Context context, @NonNull Resource<T> resource, int outWidth, int outHeight) {
     Resource<T> previous = resource;
 
     for (Transformation<T> transformation : transformations) {
@@ -61,7 +64,7 @@ public class MultiTransformation<T> implements Transformation<T> {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     for (Transformation<T> transformation : transformations) {
       transformation.updateDiskCacheKey(messageDigest);
     }

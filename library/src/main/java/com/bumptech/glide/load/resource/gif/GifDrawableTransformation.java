@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.gif;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
@@ -22,27 +23,11 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
     this.wrapped = Preconditions.checkNotNull(wrapped);
   }
 
-  /**
-   * @deprecated Use {@link #GifDrawableTransformation(Transformation)}.
-   */
-  @Deprecated
-  public GifDrawableTransformation(
-      @SuppressWarnings("unused") Context context, Transformation<Bitmap> wrapped) {
-    this(wrapped);
-  }
-
-  /**
-   * @deprecated Use {@link #GifDrawableTransformation(Transformation)}
-   */
-  @Deprecated
-  public GifDrawableTransformation(
-      Transformation<Bitmap> wrapped, @SuppressWarnings("unused") BitmapPool bitmapPool) {
-    this(wrapped);
-  }
-
+  @NonNull
   @Override
   public Resource<GifDrawable> transform(
-      Context context, Resource<GifDrawable> resource, int outWidth, int outHeight) {
+      @NonNull Context context, @NonNull Resource<GifDrawable> resource,
+      int outWidth, int outHeight) {
     GifDrawable drawable = resource.get();
 
     // The drawable needs to be initialized with the correct width and height in order for a view
@@ -78,7 +63,7 @@ public class GifDrawableTransformation implements Transformation<GifDrawable> {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     wrapped.updateDiskCacheKey(messageDigest);
   }
 }

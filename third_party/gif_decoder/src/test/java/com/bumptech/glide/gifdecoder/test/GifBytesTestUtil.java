@@ -17,7 +17,7 @@ public class GifBytesTestUtil {
     return 3 * numColors;
   }
 
-  public static int getImageDataSize(int lzwMinCodeSize) {
+  public static int getImageDataSize() {
     // TODO: fill this out.
     return 4;
   }
@@ -78,7 +78,7 @@ public class GifBytesTestUtil {
     // Version - 89a.
     out.put((byte) 0x38).put((byte) 0x39).put((byte) 0x61);
 
-    /** LSD (Logical Screen Descriptor) **/
+    /* LSD (Logical Screen Descriptor) **/
     // Width.
     out.putShort((short) width);
     // Height.
@@ -89,7 +89,7 @@ public class GifBytesTestUtil {
     // Color resolution - next three bits.
     byte colorResolution = 1 << 5;
     // Sort flag - next bit;
-    byte sortFlag = 0 << 4;
+    byte sortFlag = 0;
     // exponent of size of color table, size = 2^(1 + exponent) - least significant 3 bits.
     byte size = (byte) gctSize;
 

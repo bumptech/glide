@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.drawable.BitmapDrawable;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.Initializable;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.drawable.DrawableResource;
@@ -20,11 +21,14 @@ public class BitmapDrawableResource extends DrawableResource<BitmapDrawable>
     implements Initializable {
   private final BitmapPool bitmapPool;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public BitmapDrawableResource(BitmapDrawable drawable, BitmapPool bitmapPool) {
     super(drawable);
     this.bitmapPool = bitmapPool;
   }
 
+  @NonNull
   @Override
   public Class<BitmapDrawable> getResourceClass() {
     return BitmapDrawable.class;

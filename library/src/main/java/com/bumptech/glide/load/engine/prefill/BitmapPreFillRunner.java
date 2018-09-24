@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -28,7 +30,8 @@ import java.util.concurrent.TimeUnit;
  * limit, we assume a GC has occurred, stop the current allocations, and try again after a delay.
  */
 final class BitmapPreFillRunner implements Runnable {
-  private static final String TAG = "PreFillRunner";
+  @VisibleForTesting
+  static final String TAG = "PreFillRunner";
   private static final Clock DEFAULT_CLOCK = new Clock();
 
   /**
@@ -62,15 +65,25 @@ final class BitmapPreFillRunner implements Runnable {
   private long currentDelay = INITIAL_BACKOFF_MS;
   private boolean isCancelled;
 
-  public BitmapPreFillRunner(BitmapPool bitmapPool, MemoryCache memoryCache,
-      PreFillQueue allocationOrder) {
-    this(bitmapPool, memoryCache, allocationOrder, DEFAULT_CLOCK,
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  public BitmapPreFillRunner(
+      BitmapPool bitmapPool, MemoryCache memoryCache, PreFillQueue allocationOrder) {
+    this(
+        bitmapPool,
+        memoryCache,
+        allocationOrder,
+        DEFAULT_CLOCK,
         new Handler(Looper.getMainLooper()));
   }
 
-  // Visible for testing.
-  BitmapPreFillRunner(BitmapPool bitmapPool, MemoryCache memoryCache, PreFillQueue allocationOrder,
-      Clock clock, Handler handler) {
+  @VisibleForTesting
+  BitmapPreFillRunner(
+      BitmapPool bitmapPool,
+      MemoryCache memoryCache,
+      PreFillQueue allocationOrder,
+      Clock clock,
+      Handler handler) {
     this.bitmapPool = bitmapPool;
     this.memoryCache = memoryCache;
     this.toPrefill = allocationOrder;
@@ -86,33 +99,44 @@ final class BitmapPreFillRunner implements Runnable {
    * Attempts to allocate {@link android.graphics.Bitmap}s and returns {@code true} if there are
    * more {@link android.graphics.Bitmap}s to allocate and {@code false} otherwise.
    */
-  private boolean allocate() {
+  @VisibleForTesting
+  boolean allocate() {
     long start = clock.now();
     while (!toPrefill.isEmpty() && !isGcDetected(start)) {
       PreFillType toAllocate = toPrefill.remove();
       final Bitmap bitmap;
       if (!seenTypes.contains(toAllocate)) {
         seenTypes.add(toAllocate);
-        bitmap = bitmapPool.getDirty(toAllocate.getWidth(), toAllocate.getHeight(),
-            toAllocate.getConfig());
+        bitmap =
+            bitmapPool.getDirty(
+                toAllocate.getWidth(), toAllocate.getHeight(), toAllocate.getConfig());
       } else {
-        bitmap = Bitmap.createBitmap(toAllocate.getWidth(), toAllocate.getHeight(),
-            toAllocate.getConfig());
+        bitmap =
+            Bitmap.createBitmap(
+                toAllocate.getWidth(), toAllocate.getHeight(), toAllocate.getConfig());
       }
 
+      // Order matters here! If the Bitmap is too large or the BitmapPool is too full, it may be
+      // recycled after the call to bitmapPool#put below.
+      int bitmapSize = Util.getBitmapByteSize(bitmap);
+
       // Don't over fill the memory cache to avoid evicting useful resources, but make sure it's
-      // not empty so
-      // we use all available space.
-      if (getFreeMemoryCacheBytes() >= Util.getBitmapByteSize(bitmap)) {
-        memoryCache.put(new UniqueKey(), BitmapResource.obtain(bitmap, bitmapPool));
+      // not empty so that we use all available space.
+      if (getFreeMemoryCacheBytes() >= bitmapSize) {
+        // We could probably make UniqueKey just always return false from equals,
+        // but the allocation of the Key is not nearly as expensive as the allocation of the Bitmap,
+        // so it's probably not worth it.
+        @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+        Key uniqueKey = new UniqueKey();
+        memoryCache.put(uniqueKey, BitmapResource.obtain(bitmap, bitmapPool));
       } else {
         bitmapPool.put(bitmap);
       }
 
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG,
-            "allocated [" + toAllocate.getWidth() + "x" + toAllocate.getHeight() + "] " + toAllocate
-                .getConfig() + " size: " + Util.getBitmapByteSize(bitmap));
+            "allocated [" + toAllocate.getWidth() + "x" + toAllocate.getHeight() + "] "
+                + toAllocate.getConfig() + " size: " + bitmapSize);
       }
     }
 
@@ -123,7 +147,7 @@ final class BitmapPreFillRunner implements Runnable {
     return clock.now() - startTimeMs >= MAX_DURATION_MS;
   }
 
-  private int getFreeMemoryCacheBytes() {
+  private long getFreeMemoryCacheBytes() {
     return memoryCache.getMaxSize() - memoryCache.getCurrentSize();
   }
 
@@ -140,20 +164,21 @@ final class BitmapPreFillRunner implements Runnable {
     return result;
   }
 
-  private static class UniqueKey implements Key {
+  private static final class UniqueKey implements Key {
 
     @Synthetic
+    @SuppressWarnings("WeakerAccess")
     UniqueKey() { }
 
     @Override
-    public void updateDiskCacheKey(MessageDigest messageDigest) {
+    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
       throw new UnsupportedOperationException();
     }
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class Clock {
-    public long now() {
+    long now() {
       return SystemClock.currentThreadTimeMillis();
     }
   }

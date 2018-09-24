@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.cache;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
@@ -12,18 +13,18 @@ public interface MemoryCache {
    * An interface that will be called whenever a bitmap is removed from the cache.
    */
   interface ResourceRemovedListener {
-    void onResourceRemoved(Resource<?> removed);
+    void onResourceRemoved(@NonNull Resource<?> removed);
   }
 
   /**
    * Returns the sum of the sizes of all the contents of the cache in bytes.
    */
-  int getCurrentSize();
+  long getCurrentSize();
 
   /**
    * Returns the current maximum size in bytes of the cache.
    */
-  int getMaxSize();
+  long getMaxSize();
 
   /**
    * Adjust the maximum size of the cache by multiplying the original size of the cache by the given
@@ -42,7 +43,7 @@ public interface MemoryCache {
    * @param key The key.
    */
   @Nullable
-  Resource<?> remove(Key key);
+  Resource<?> remove(@NonNull Key key);
 
   /**
    * Add bitmap to the cache with the given key.
@@ -52,14 +53,14 @@ public interface MemoryCache {
    * @return The old value of key (null if key is not in map).
    */
   @Nullable
-  Resource<?> put(Key key, Resource<?> resource);
+  Resource<?> put(@NonNull Key key, @Nullable Resource<?> resource);
 
   /**
    * Set the listener to be called when a bitmap is removed from the cache.
    *
    * @param listener The listener.
    */
-  void setResourceRemovedListener(ResourceRemovedListener listener);
+  void setResourceRemovedListener(@NonNull ResourceRemovedListener listener);
 
   /**
    * Evict all items from the memory cache.

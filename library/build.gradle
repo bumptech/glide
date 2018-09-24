@@ -1,62 +1,42 @@
 apply plugin: 'com.android.library'
-apply plugin: 'maven'
-apply plugin: 'findbugs'
-apply plugin: 'pmd'
-apply plugin: 'jacoco'
-apply plugin: 'com.github.kt3k.coveralls'
 
-findbugs {
-    toolVersion = FINDBUGS_VERSION
+if (!hasProperty('DISABLE_ERROR_PRONE')) {
+    apply plugin: "net.ltgt.errorprone"
 }
-jacoco {
-    toolVersion = JACOCO_VERSION
-}
-coveralls {
-    jacocoReportPath = 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
+
+tasks.withType(JavaCompile) {
+    options.fork = true
 }
 
 dependencies {
-    compile project(':third_party:gif_decoder')
-    compile project(':third_party:disklrucache')
-    compile project(':annotation')
-    compile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
-    provided "com.android.support:appcompat-v7:${SUPPORT_V7_VERSION}"
-    testCompile project(':testutil')
-    testCompile 'com.google.guava:guava-testlib:18.0'
-    testCompile "com.google.truth:truth:${TRUTH_VERSION}"
-    testCompile "junit:junit:${JUNIT_VERSION}"
-    testCompile "org.mockito:mockito-core:${MOCKITO_VERSION}"
-    testCompile "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testCompile "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
-    testCompile "com.android.support:support-v4:${SUPPORT_V4_VERSION}"
-}
+    api project(':third_party:gif_decoder')
+    api project(':third_party:disklrucache')
+    api project(':annotation')
+    api "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
+    compileOnly "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
 
-android.testOptions.unitTests.all {
-    // configure max heap size of the test JVM
-    maxHeapSize = '2048m'
-    if (JavaVersion.current() <= JavaVersion.VERSION_1_7) {
-        // Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=2048m; support was removed in 8.0
-        jvmArgs '-XX:MaxPermSize=2048m'
+    if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
+        errorprone "com.google.errorprone:error_prone_core:${ERROR_PRONE_VERSION}"
     }
+
+    testImplementation "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    testImplementation project(':testutil')
+    testImplementation 'com.google.guava:guava-testlib:18.0'
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation "junit:junit:${JUNIT_VERSION}"
+    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
+    testImplementation "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
 }
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
-    buildToolsVersion BUILD_TOOLS_VERSION as String
 
     defaultConfig {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-
         versionName VERSION_NAME as String
-
-        consumerProguardFiles 'proguard-rules.txt'
-    }
-
-    buildTypes {
-        debug {
-            testCoverageEnabled = true
-        }
     }
 
     compileOptions {
@@ -65,91 +45,18 @@ android {
     }
 }
 
-afterEvaluate {
-    if (tasks.findByName("assembleDebug") == null) {
-        return
-    }
-    task findbugs(type: FindBugs, dependsOn: assembleDebug) {
+check.dependsOn(':library:findbugs:findbugs')
+check.dependsOn(':library:pmd:pmd')
+check.dependsOn(':library:test:check')
 
-        description 'Run findbugs'
-        group 'verification'
-
-        classes = fileTree('build/intermediates/classes/debug/')
-        source = fileTree('src/main/java')
-        classpath = project.configurations.compile
-
-        effort = 'max'
-
-        excludeFilter = file("findbugs-exclude.xml")
-
-        reports {
-            xml.enabled = false
-            html.enabled = true
-        }
-    }
-
-    check.dependsOn('findbugs')
-
-    pmd {
-        toolVersion '5.4.0'
-    }
-
-    task pmd(type: Pmd) {
-        targetJdk = TargetJdk.VERSION_1_7
-
-        description 'Run pmd'
-        group 'verification'
-
-        // If ruleSets is not empty, it seems to contain some
-        // defaults which override rules in the ruleset file...
-        ruleSets = []
-        ruleSetFiles = files('pmd-ruleset.xml')
-        source = fileTree('src/main/java')
-
-        reports {
-            xml.enabled = false
-            html.enabled = true
-        }
-    }
-
-    check.dependsOn('pmd')
-
-    task jacocoTestReport(type: JacocoReport, dependsOn: testDebugUnitTest) {
-        def coverageSourceDirs = ['src/main/java']
-        group = "Reporting"
-        description = "Generate Jacoco coverage reports"
-
-        classDirectories = fileTree(
-                dir: 'build/intermediates/classes/debug',
-                excludes: ['**/R.class',
-                           '**/R$*.class',
-                           '**/BuildConfig.*',
-                           '**/Manifest*.*',
-                           '**/BitmapRequestBuilder.class',
-                           '**/DrawableRequestBuilder.class',
-                           '**/GifRequestBuilder.class',]
-        )
-
-        additionalSourceDirs = files(coverageSourceDirs)
-        sourceDirectories = files(coverageSourceDirs)
-        executionData = files('build/jacoco/testDebug.exec')
-
-        reports {
-            xml.enabled = true
-            html.enabled = true
-        }
-    }
+// Used in pmd and findbugs subprojects.
+@SuppressWarnings("GroovyUnusedDeclaration")
+def classPathForQuality() {
+    return files(
+            android.bootClasspath,
+            project.configurations.compile,
+            project.android.libraryVariants.collect { it.javaCompile.classpath }
+    )
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"
-// exclude <dependency> tag for android support-v4 library from :glide's pom
-// this will ensure that this warning will not prevent the build from completing:
-// Module 'com.github.bumptech.glide:glide:4.0.0-SNAPSHOT' depends on one or more Android Libraries
-// but is a jar. Most users will need to override support-v4 version anyway if a newer version is
-// available
-// TODO make support-v4 a <scope>runtime</scope> dependency in pom.xml
-afterEvaluate {
-    uploadArchives.repositories.mavenDeployer.pom.whenConfigured { p ->
-        p.dependencies = p.dependencies.findAll { dep -> dep.artifactId != "support-v4" }
-    }
-}

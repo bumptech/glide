@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
@@ -23,12 +24,14 @@ public class BitmapDrawableEncoder implements ResourceEncoder<BitmapDrawable> {
   }
 
   @Override
-  public boolean encode(Resource<BitmapDrawable> data, File file, Options options) {
+  public boolean encode(@NonNull Resource<BitmapDrawable> data, @NonNull File file,
+      @NonNull Options options) {
     return encoder.encode(new BitmapResource(data.get().getBitmap(), bitmapPool), file, options);
   }
 
+  @NonNull
   @Override
-  public EncodeStrategy getEncodeStrategy(Options options) {
+  public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
     return encoder.getEncodeStrategy(options);
   }
 }

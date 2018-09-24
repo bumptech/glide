@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model.stream;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import com.bumptech.glide.load.Key;
@@ -10,6 +11,7 @@ import com.bumptech.glide.load.model.ModelCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,7 +37,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
 
   @Override
   @Nullable
-  public LoadData<InputStream> buildLoadData(Model model, int width, int height, Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull Model model, int width, int height,
+      @NonNull Options options) {
     GlideUrl result = null;
     if (modelCache != null) {
       result = modelCache.get(model, width, height);
@@ -59,7 +62,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
     List<String> alternateUrls = getAlternateUrls(model, width, height, options);
     LoadData<InputStream> concreteLoaderData = concreteLoader.buildLoadData(result, width, height,
         options);
-    if (alternateUrls.isEmpty()) {
+    if (concreteLoaderData == null || alternateUrls.isEmpty()) {
       return concreteLoaderData;
     } else {
       return new LoadData<>(concreteLoaderData.sourceKey, getAlternateKeys(alternateUrls),
@@ -67,7 +70,9 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
     }
   }
 
-  private static List<Key> getAlternateKeys(List<String> alternateUrls) {
+  // Creating a limited number of objects as the sole purpose of the loop.
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+  private static List<Key> getAlternateKeys(Collection<String> alternateUrls) {
     List<Key> result = new ArrayList<>(alternateUrls.size());
     for (String alternate : alternateUrls) {
       result.add(new GlideUrl(alternate));
@@ -108,6 +113,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * @param width The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
+  // Public API.
+  @SuppressWarnings({"unused", "WeakerAccess"})
   @Nullable
   protected Headers getHeaders(Model model, int width, int height, Options options) {
     return Headers.DEFAULT;

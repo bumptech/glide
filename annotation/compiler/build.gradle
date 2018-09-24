@@ -1,17 +1,92 @@
 import org.gradle.internal.jvm.Jvm
+import proguard.gradle.ProGuardTask
 
 apply plugin: 'java'
 
-dependencies {
-    compile 'com.squareup:javapoet:1.9.0'
-    compile 'com.google.auto.service:auto-service:1.0-rc3'
-    compile 'com.google.code.findbugs:jsr305:3.0.1'
-    compile project(':annotation')
-    // This is to support com.sun.tootls.javac.util.List, currently used in RootModuleGenerator.
-    compile files(Jvm.current().getToolsJar())
+configurations {
+    // adapted from https://android.googlesource.com/platform/frameworks/testing/+/976c423/espresso/espresso-lib/build.gradle
+    // compileOnly dependencies will be repackaged, see rules in jarjar ant task below
+    jarjar 
+}
 
-    testCompile "junit:junit:${JUNIT_VERSION}"
-    testCompile 'com.google.testing.compile:compile-testing:0.10'
+dependencies {
+    // from https://code.google.com/archive/p/jarjar/downloads
+    jarjar files('libs/jarjar-1.4.jar')
+
+    compileOnly "com.squareup:javapoet:${JAVAPOET_VERSION}"
+    compileOnly "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
+    compileOnly "com.google.code.findbugs:jsr305:${JSR_305_VERSION}"
+    compile project(':annotation')
+    // This is to support com.sun.tools.javac.util.List, currently used in RootModuleGenerator.
+    compile files(Jvm.current().getToolsJar())
+}
+
+// Make sure running `gradlew :annotation:compiler:check` actually does full quality control.
+test.dependsOn ':annotation:compiler:test:test'
+
+def packagingFolder = file("${buildDir}/intermediates")
+def repackagedJar = file("${packagingFolder}/repackaged.jar")
+def proguardedJar = file("${packagingFolder}/proguarded.jar")
+
+task compiledJar(type: Jar, dependsOn: classes) {
+    destinationDir = packagingFolder
+    archiveName = 'compiled.jar'
+    from sourceSets.main.output
+}
+
+// Repackage compileOnly dependencies to avoid namespace collisions.
+task jarjar(dependsOn: [tasks.compiledJar, configurations.compileOnly]) {
+    // Set up inputs and outputs to only rebuild when necessary (code change, dependency change).
+    inputs.files compiledJar
+    inputs.files configurations.compileOnly
+    outputs.file repackagedJar
+
+    doFirst {
+        ant {
+            taskdef name: 'jarjar',
+                    classname: 'com.tonicsystems.jarjar.JarJarTask',
+                    classpath: configurations.jarjar.asPath
+
+            jarjar(jarfile: repackagedJar) {
+                configurations.compileOnly.resolve().each {
+                    zipfileset(src: it.absolutePath, excludes: [
+                        'META-INF/maven/**',
+                        'META-INF/services/javax.annotation.processing.Processor'
+                    ].join(','))
+                }
+                zipfileset(src: tasks.compiledJar.archivePath)
+                def repackageIntoGlide = 'com.bumptech.glide.repackaged.@0'
+                rule result: repackageIntoGlide, pattern: 'com.squareup.javapoet.**'
+                rule result: repackageIntoGlide, pattern: 'com.google.auto.**'
+                rule result: repackageIntoGlide, pattern: 'com.google.common.**'
+                rule result: repackageIntoGlide, pattern: 'com.google.thirdparty.publicsuffix.**'
+            }
+        }
+    }
+}
+
+// Proguard repackaged dependencies to reduce the binary size.
+task proguard(type: ProGuardTask, dependsOn: tasks.jarjar) {
+    configuration 'proguard.pro'
+
+    injars repackagedJar
+    outjars proguardedJar
+
+    libraryjars files(configurations.compile.collect())
+    libraryjars "${System.getProperty('java.home')}/lib/rt.jar"
+}
+
+// Replace the contents of the standard jar task with those from our our compiled, repackaged and
+// proguarded jar. Replacing the task itself is possible and looks simpler, but requires
+// reconstructing the task dependency chain and is more complex in practice.
+jar {
+    dependsOn proguard
+    from zipTree(proguardedJar)
+    exclude { entry ->
+        sourceSets.main.output.files*.absolutePath.any {
+            entry.file.absolutePath.startsWith it
+        }
+    }
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"

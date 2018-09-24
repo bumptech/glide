@@ -25,6 +25,8 @@ public class DrawableCrossFadeTransition implements Transition<Drawable> {
    *                         alpha at 100. See
    *                         {@link TransitionDrawable#setCrossFadeEnabled(boolean)}.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public DrawableCrossFadeTransition(int duration,
       boolean isCrossFadeEnabled) {
     this.duration = duration;

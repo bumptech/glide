@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.TransitionOptions;
 import com.bumptech.glide.request.transition.BitmapTransitionFactory;
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
@@ -10,6 +11,8 @@ import com.bumptech.glide.request.transition.TransitionFactory;
 /**
  * Contains {@link Bitmap} specific animation options.
  */
+// Public API.
+@SuppressWarnings({"unused", "WeakerAccess"})
 public final class BitmapTransitionOptions extends
     TransitionOptions<BitmapTransitionOptions, Bitmap> {
 
@@ -18,6 +21,7 @@ public final class BitmapTransitionOptions extends
    *
    * @see #crossFade()
    */
+  @NonNull
   public static BitmapTransitionOptions withCrossFade() {
     return new BitmapTransitionOptions().crossFade();
   }
@@ -27,6 +31,7 @@ public final class BitmapTransitionOptions extends
    *
    * @see #crossFade(int)
    */
+  @NonNull
   public static BitmapTransitionOptions withCrossFade(int duration) {
     return new BitmapTransitionOptions().crossFade(duration);
   }
@@ -36,8 +41,9 @@ public final class BitmapTransitionOptions extends
    *
    * @see #crossFade(DrawableCrossFadeFactory)
    */
+  @NonNull
   public static BitmapTransitionOptions withCrossFade(
-      DrawableCrossFadeFactory drawableCrossFadeFactory) {
+      @NonNull DrawableCrossFadeFactory drawableCrossFadeFactory) {
     return new BitmapTransitionOptions().crossFade(drawableCrossFadeFactory);
   }
 
@@ -46,8 +52,9 @@ public final class BitmapTransitionOptions extends
    *
    * @see #crossFade(DrawableCrossFadeFactory.Builder)
    */
+  @NonNull
   public static BitmapTransitionOptions withCrossFade(
-      DrawableCrossFadeFactory.Builder builder) {
+      @NonNull DrawableCrossFadeFactory.Builder builder) {
     return new BitmapTransitionOptions().crossFade(builder);
   }
 
@@ -57,8 +64,9 @@ public final class BitmapTransitionOptions extends
    *
    * @see #transitionUsing(TransitionFactory)
    */
+  @NonNull
   public static BitmapTransitionOptions withWrapped(
-      TransitionFactory<Drawable> drawableCrossFadeFactory) {
+      @NonNull TransitionFactory<Drawable> drawableCrossFadeFactory) {
     return new BitmapTransitionOptions().transitionUsing(drawableCrossFadeFactory);
   }
 
@@ -67,8 +75,9 @@ public final class BitmapTransitionOptions extends
    *
    * @see com.bumptech.glide.GenericTransitionOptions#with(TransitionFactory)
    */
+  @NonNull
   public static BitmapTransitionOptions with(
-      TransitionFactory<Bitmap> transitionFactory) {
+      @NonNull TransitionFactory<Bitmap> transitionFactory) {
     return new BitmapTransitionOptions().transition(transitionFactory);
   }
 
@@ -76,6 +85,7 @@ public final class BitmapTransitionOptions extends
    * Enables a cross fade animation between both the placeholder and the first resource and between
    * subsequent resources (if thumbnails are used).
    */
+  @NonNull
   public BitmapTransitionOptions crossFade() {
     return crossFade(new DrawableCrossFadeFactory.Builder());
   }
@@ -88,6 +98,7 @@ public final class BitmapTransitionOptions extends
    *     {@code DrawableCrossFadeFactory.Builder(int)}.
    * @see com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder
    */
+  @NonNull
   public BitmapTransitionOptions crossFade(int duration) {
     return crossFade(new DrawableCrossFadeFactory.Builder(duration));
   }
@@ -96,15 +107,18 @@ public final class BitmapTransitionOptions extends
    * Enables a cross fade animation between both the placeholder and the first resource and between
    * subsequent resources (if thumbnails are used).
    */
-  public BitmapTransitionOptions crossFade(DrawableCrossFadeFactory drawableCrossFadeFactory) {
+  @NonNull
+  public BitmapTransitionOptions crossFade(
+      @NonNull DrawableCrossFadeFactory drawableCrossFadeFactory) {
     return transitionUsing(drawableCrossFadeFactory);
   }
 
   /**
    * Enables a any Drawable based animation to run on Bitmaps as well.
    */
+  @NonNull
   public BitmapTransitionOptions transitionUsing(
-      TransitionFactory<Drawable> drawableCrossFadeFactory) {
+      @NonNull TransitionFactory<Drawable> drawableCrossFadeFactory) {
     return transition(new BitmapTransitionFactory(drawableCrossFadeFactory));
   }
 
@@ -112,7 +126,8 @@ public final class BitmapTransitionOptions extends
    * Enables a cross fade animation between both the placeholder and the first resource and between
    * subsequent resources (if thumbnails are used).
    */
-  public BitmapTransitionOptions crossFade(DrawableCrossFadeFactory.Builder builder) {
+  @NonNull
+  public BitmapTransitionOptions crossFade(@NonNull DrawableCrossFadeFactory.Builder builder) {
     return transitionUsing(builder.build());
   }
 }

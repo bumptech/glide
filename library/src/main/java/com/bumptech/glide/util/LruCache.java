@@ -1,6 +1,8 @@
 package com.bumptech.glide.util;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -13,10 +15,10 @@ import java.util.Map;
  * @param <Y> The type of the values.
  */
 public class LruCache<T, Y> {
-  private final LinkedHashMap<T, Y> cache = new LinkedHashMap<>(100, 0.75f, true);
-  private final int initialMaxSize;
-  private int maxSize;
-  private int currentSize = 0;
+  private final Map<T, Y> cache = new LinkedHashMap<>(100, 0.75f, true);
+  private final long initialMaxSize;
+  private long maxSize;
+  private long currentSize;
 
   /**
    * Constructor for LruCache.
@@ -24,7 +26,7 @@ public class LruCache<T, Y> {
    * @param size The maximum size of the cache, the units must match the units used in {@link
    *             #getSize(Object)}.
    */
-  public LruCache(int size) {
+  public LruCache(long size) {
     this.initialMaxSize = size;
     this.maxSize = size;
   }
@@ -51,8 +53,15 @@ public class LruCache<T, Y> {
    *
    * @param item The item to get the size of.
    */
-  protected int getSize(Y item) {
+  protected int getSize(@Nullable Y item) {
     return 1;
+  }
+
+  /**
+   * Returns the number of entries stored in cache.
+   */
+  protected synchronized int getCount() {
+    return cache.size();
   }
 
   /**
@@ -61,21 +70,21 @@ public class LruCache<T, Y> {
    * @param key  The key of the evicted item.
    * @param item The evicted item.
    */
-  protected void onItemEvicted(T key, Y item) {
+  protected void onItemEvicted(@NonNull T key, @Nullable Y item) {
     // optional override
   }
 
   /**
    * Returns the current maximum size of the cache in bytes.
    */
-  public synchronized int getMaxSize() {
+  public synchronized long getMaxSize() {
     return maxSize;
   }
 
   /**
    * Returns the sum of the sizes of all items in the cache.
    */
-  public synchronized int getCurrentSize() {
+  public synchronized long getCurrentSize() {
     return currentSize;
   }
 
@@ -85,7 +94,7 @@ public class LruCache<T, Y> {
    * @param key The key to check.
    */
 
-  public synchronized boolean contains(T key) {
+  public synchronized boolean contains(@NonNull T key) {
     return cache.containsKey(key);
   }
 
@@ -95,7 +104,7 @@ public class LruCache<T, Y> {
    * @param key The key to check.
    */
   @Nullable
-  public synchronized Y get(T key) {
+  public synchronized Y get(@NonNull T key) {
     return cache.get(key);
   }
 
@@ -103,31 +112,35 @@ public class LruCache<T, Y> {
    * Adds the given item to the cache with the given key and returns any previous entry for the
    * given key that may have already been in the cache.
    *
-   * <p> If the size of the item is larger than the total cache size, the item will not be added to
+   * <p>If the size of the item is larger than the total cache size, the item will not be added to
    * the cache and instead {@link #onItemEvicted(Object, Object)} will be called synchronously with
-   * the given key and item. </p>
+   * the given key and item.
    *
    * @param key  The key to add the item at.
    * @param item The item to add.
    */
-  public synchronized Y put(T key, Y item) {
+  @Nullable
+  public synchronized Y put(@NonNull T key, @Nullable Y item) {
     final int itemSize = getSize(item);
     if (itemSize >= maxSize) {
       onItemEvicted(key, item);
       return null;
     }
 
-    final Y result = cache.put(key, item);
     if (item != null) {
-      currentSize += getSize(item);
+      currentSize += itemSize;
     }
-    if (result != null) {
-      // TODO: should we call onItemEvicted here?
-      currentSize -= getSize(result);
+    @Nullable final Y old = cache.put(key, item);
+    if (old != null) {
+      currentSize -= getSize(old);
+
+      if (!old.equals(item)) {
+        onItemEvicted(key, old);
+      }
     }
     evict();
 
-    return result;
+    return old;
   }
 
   /**
@@ -136,7 +149,7 @@ public class LruCache<T, Y> {
    * @param key The key to remove the item at.
    */
   @Nullable
-  public synchronized Y remove(T key) {
+  public synchronized Y remove(@NonNull T key) {
     final Y value = cache.remove(key);
     if (value != null) {
       currentSize -= getSize(value);
@@ -157,14 +170,16 @@ public class LruCache<T, Y> {
    *
    * @param size The size the cache should be less than.
    */
-  protected synchronized void trimToSize(int size) {
+  protected synchronized void trimToSize(long size) {
     Map.Entry<T, Y> last;
+    Iterator<Map.Entry<T, Y>> cacheIterator;
     while (currentSize > size) {
-      last = cache.entrySet().iterator().next();
+      cacheIterator  = cache.entrySet().iterator();
+      last = cacheIterator.next();
       final Y toRemove = last.getValue();
       currentSize -= getSize(toRemove);
       final T key = last.getKey();
-      cache.remove(key);
+      cacheIterator.remove();
       onItemEvicted(key, toRemove);
     }
   }

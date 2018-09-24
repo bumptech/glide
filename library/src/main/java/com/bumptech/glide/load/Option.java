@@ -1,5 +1,6 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.util.Preconditions;
 import java.security.MessageDigest;
@@ -26,7 +27,8 @@ import java.security.MessageDigest;
 public final class Option<T> {
   private static final CacheKeyUpdater<Object> EMPTY_UPDATER = new CacheKeyUpdater<Object>() {
     @Override
-    public void update(byte[] keyBytes, Object value, MessageDigest messageDigest) {
+    public void update(@NonNull byte[] keyBytes, @NonNull Object value,
+        @NonNull MessageDigest messageDigest) {
       // Do nothing.
     }
   };
@@ -43,8 +45,9 @@ public final class Option<T> {
    * @param key A unique package prefixed {@link String} that identifies this option (must be
    *            stable across builds, so {@link Class#getName()} should <em>not</em> be used).
    */
-  public static <T> Option<T> memory(String key) {
-    return new Option<>(key, null /*defaultValue*/, Option.<T>emptyUpdater());
+  @NonNull
+  public static <T> Option<T> memory(@NonNull String key) {
+    return new Option<>(key, null, Option.<T>emptyUpdater());
   }
 
   /**
@@ -54,7 +57,8 @@ public final class Option<T> {
    * @param key A unique package prefixed {@link String} that identifies this option (must be
    *            stable across builds, so {@link Class#getName()} should <em>not</em> be used).
    */
-  public static <T> Option<T> memory(String key, T defaultValue) {
+  @NonNull
+  public static <T> Option<T> memory(@NonNull String key, @NonNull T defaultValue) {
     return new Option<>(key, defaultValue, Option.<T>emptyUpdater());
   }
 
@@ -65,8 +69,10 @@ public final class Option<T> {
    * @param key A unique package prefixed {@link String} that identifies this option (must be
    *            stable across builds, so {@link Class#getName()} should <em>not</em> be used).
    */
-  public static <T> Option<T> disk(String key, CacheKeyUpdater<T> cacheKeyUpdater) {
-    return new Option<>(key, null /*defaultValue*/, cacheKeyUpdater);
+  @NonNull
+  public static <T> Option<T> disk(@NonNull String key,
+      @NonNull CacheKeyUpdater<T> cacheKeyUpdater) {
+    return new Option<>(key, null, cacheKeyUpdater);
   }
 
   /**
@@ -77,11 +83,14 @@ public final class Option<T> {
    * @param key A unique package prefixed {@link String} that identifies this option (must be
    *            stable across builds, so {@link Class#getName()} should <em>not</em> be used).
    */
-  public static <T> Option<T> disk(String key, T defaultValue, CacheKeyUpdater<T> cacheKeyUpdater) {
+  @NonNull
+  public static <T> Option<T> disk(@NonNull String key, @Nullable T defaultValue,
+      @NonNull CacheKeyUpdater<T> cacheKeyUpdater) {
     return new Option<>(key, defaultValue, cacheKeyUpdater);
   }
 
-  Option(String key, T defaultValue, CacheKeyUpdater<T> cacheKeyUpdater) {
+  private Option(@NonNull String key, @Nullable T defaultValue,
+      @NonNull CacheKeyUpdater<T> cacheKeyUpdater) {
     this.key = Preconditions.checkNotEmpty(key);
     this.defaultValue = defaultValue;
     this.cacheKeyUpdater = Preconditions.checkNotNull(cacheKeyUpdater);
@@ -90,6 +99,8 @@ public final class Option<T> {
   /**
    * Returns a reasonable default to use if no other value is set, or {@code null}.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   @Nullable
   public T getDefaultValue() {
     return defaultValue;
@@ -100,10 +111,11 @@ public final class Option<T> {
    * value using the {@link com.bumptech.glide.load.Option.CacheKeyUpdater} optionally provided in
    * the constructor.
    */
-  public void update(T value, MessageDigest messageDigest) {
+  public void update(@NonNull T value, @NonNull MessageDigest messageDigest) {
     cacheKeyUpdater.update(getKeyBytes(), value, messageDigest);
   }
 
+  @NonNull
   private byte[] getKeyBytes() {
     if (keyBytes == null) {
       keyBytes = key.getBytes(Key.CHARSET);
@@ -125,6 +137,7 @@ public final class Option<T> {
     return key.hashCode();
   }
 
+  @NonNull
   @SuppressWarnings("unchecked")
   private static <T> CacheKeyUpdater<T> emptyUpdater() {
     return (CacheKeyUpdater<T>) EMPTY_UPDATER;
@@ -147,7 +160,19 @@ public final class Option<T> {
     /**
      * Updates the given {@link MessageDigest} with the bytes of the given key (to avoid incidental
      * value collisions when values are not particularly unique) and value.
+     *
+     * <p>If your {@link Option} shouldn't affect the disk cache key, you should not implement this
+     * class and use {@link Option#memory(String)} or {@link Option#memory(String, Object)} instead.
+     *
+     * @param keyBytes The bytes of the {@link String} used as the key for this particular
+     * {@link Option}. Should be added to the {@code messageDigest} using
+     * {@link MessageDigest#update(byte[])} by all implementations if the digest is updated with
+     * the given {@code value} parameter.
+     *
+     * @param value The value of of this particular option. Typically you should convert the value
+     * to a byte array using some stable mechanism and then call
+     * {@link MessageDigest#update(byte[])} to update the given digest.
      */
-    void update(byte[] keyBytes, T value, MessageDigest messageDigest);
+    void update(@NonNull byte[] keyBytes, @NonNull T value, @NonNull MessageDigest messageDigest);
   }
 }

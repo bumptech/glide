@@ -1,5 +1,7 @@
 package com.bumptech.glide.util;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Queue;
@@ -19,7 +21,8 @@ public class ExceptionCatchingInputStream extends InputStream {
   private InputStream wrapped;
   private IOException exception;
 
-  public static ExceptionCatchingInputStream obtain(InputStream toWrap) {
+  @NonNull
+  public static ExceptionCatchingInputStream obtain(@NonNull InputStream toWrap) {
     ExceptionCatchingInputStream result;
     synchronized (QUEUE) {
       result = QUEUE.poll();
@@ -42,7 +45,7 @@ public class ExceptionCatchingInputStream extends InputStream {
     // Do nothing.
   }
 
-  void setInputStream(InputStream toWrap) {
+  void setInputStream(@NonNull InputStream toWrap) {
     wrapped = toWrap;
   }
 
@@ -57,8 +60,8 @@ public class ExceptionCatchingInputStream extends InputStream {
   }
 
   @Override
-  public void mark(int readlimit) {
-    wrapped.mark(readlimit);
+  public void mark(int readLimit) {
+    wrapped.mark(readLimit);
   }
 
   @Override
@@ -67,7 +70,7 @@ public class ExceptionCatchingInputStream extends InputStream {
   }
 
   @Override
-  public int read(byte[] buffer) throws IOException {
+  public int read(byte[] buffer) {
     int read;
     try {
       read = wrapped.read(buffer);
@@ -79,7 +82,7 @@ public class ExceptionCatchingInputStream extends InputStream {
   }
 
   @Override
-  public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+  public int read(byte[] buffer, int byteOffset, int byteCount) {
     int read;
     try {
       read = wrapped.read(buffer, byteOffset, byteCount);
@@ -96,7 +99,7 @@ public class ExceptionCatchingInputStream extends InputStream {
   }
 
   @Override
-  public long skip(long byteCount) throws IOException {
+  public long skip(long byteCount) {
     long skipped;
     try {
       skipped = wrapped.skip(byteCount);
@@ -108,7 +111,7 @@ public class ExceptionCatchingInputStream extends InputStream {
   }
 
   @Override
-  public int read() throws IOException {
+  public int read() {
     int result;
     try {
       result = wrapped.read();
@@ -119,6 +122,7 @@ public class ExceptionCatchingInputStream extends InputStream {
     return result;
   }
 
+  @Nullable
   public IOException getException() {
     return exception;
   }

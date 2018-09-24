@@ -1,27 +1,31 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.SimpleArrayMap;
+import com.bumptech.glide.util.CachedHashCodeArrayMap;
 import java.security.MessageDigest;
-import java.util.Map;
 
 /**
  * A set of {@link Option Options} to apply to in memory and disk cache keys.
  */
 public final class Options implements Key {
-  private final ArrayMap<Option<?>, Object> values = new ArrayMap<>();
+  private final ArrayMap<Option<?>, Object> values = new CachedHashCodeArrayMap<>();
 
-  public void putAll(Options other) {
+  public void putAll(@NonNull Options other) {
     values.putAll((SimpleArrayMap<Option<?>, Object>) other.values);
   }
 
-  public <T> Options set(Option<T> option, T value) {
+  @NonNull
+  public <T> Options set(@NonNull Option<T> option, @NonNull T value) {
     values.put(option, value);
     return this;
   }
 
+  @Nullable
   @SuppressWarnings("unchecked")
-  public <T> T get(Option<T> option) {
+  public <T> T get(@NonNull Option<T> option) {
     return values.containsKey(option) ? (T) values.get(option) : option.getDefaultValue();
   }
 
@@ -40,9 +44,11 @@ public final class Options implements Key {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
-    for (Map.Entry<Option<?>, Object> entry : values.entrySet()) {
-      updateDiskCacheKey(entry.getKey(), entry.getValue(), messageDigest);
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
+    for (int i = 0; i < values.size(); i++) {
+      Option<?> key = values.keyAt(i);
+      Object value = values.valueAt(i);
+      updateDiskCacheKey(key, value, messageDigest);
     }
   }
 
@@ -54,7 +60,8 @@ public final class Options implements Key {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> void updateDiskCacheKey(Option<T> option, Object value, MessageDigest md) {
+  private static <T> void updateDiskCacheKey(@NonNull Option<T> option, @NonNull Object value,
+      @NonNull MessageDigest md) {
     option.update((T) value, md);
   }
 }

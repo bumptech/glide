@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine.prefill;
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Preconditions;
 
 /**
@@ -10,7 +11,7 @@ import com.bumptech.glide.util.Preconditions;
  * single size and configuration.
  */
 public final class PreFillType {
-  // Visible for testing.
+  @VisibleForTesting
   static final Bitmap.Config DEFAULT_CONFIG = Bitmap.Config.RGB_565;
   private final int width;
   private final int height;

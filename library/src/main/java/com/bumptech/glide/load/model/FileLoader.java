@@ -25,18 +25,20 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
 
   private final FileOpener<Data> fileOpener;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public FileLoader(FileOpener<Data> fileOpener) {
     this.fileOpener = fileOpener;
   }
 
   @Override
-  public LoadData<Data> buildLoadData(File model, int width, int height,
-      Options options) {
+  public LoadData<Data> buildLoadData(@NonNull File model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(model), new FileFetcher<>(model, fileOpener));
   }
 
   @Override
-  public boolean handles(File model) {
+  public boolean handles(@NonNull File model) {
     return true;
   }
 
@@ -50,18 +52,18 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     Class<Data> getDataClass();
   }
 
-  private static class FileFetcher<Data> implements DataFetcher<Data> {
+  private static final class FileFetcher<Data> implements DataFetcher<Data> {
     private final File file;
     private final FileOpener<Data> opener;
     private Data data;
 
-    public FileFetcher(File file, FileOpener<Data> opener) {
+    FileFetcher(File file, FileOpener<Data> opener) {
       this.file = file;
       this.opener = opener;
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super Data> callback) {
+    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       try {
         data = opener.open(file);
       } catch (FileNotFoundException e) {
@@ -114,8 +116,9 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
       this.opener = opener;
     }
 
+    @NonNull
     @Override
-    public final ModelLoader<File, Data> build(MultiModelLoaderFactory multiFactory) {
+    public final ModelLoader<File, Data> build(@NonNull MultiModelLoaderFactory multiFactory) {
       return new FileLoader<>(opener);
     }
 

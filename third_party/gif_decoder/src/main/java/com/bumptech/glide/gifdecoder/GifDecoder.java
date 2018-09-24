@@ -3,6 +3,7 @@ package com.bumptech.glide.gifdecoder;
 import android.graphics.Bitmap;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -12,6 +13,7 @@ import java.nio.ByteBuffer;
  * Shared interface for GIF decoders.
  */
 public interface GifDecoder {
+
   /** File read status: No errors. */
   int STATUS_OK = 0;
   /** File read status: Error decoding file (may be partially decoded). */
@@ -33,7 +35,7 @@ public interface GifDecoder {
    * An interface that can be used to provide reused {@link android.graphics.Bitmap}s to avoid GCs
    * from constantly allocating {@link android.graphics.Bitmap}s for every frame.
    */
-  public interface BitmapProvider {
+  interface BitmapProvider {
     /**
      * Returns an {@link Bitmap} with exactly the given dimensions and config.
      *
@@ -43,40 +45,43 @@ public interface GifDecoder {
      *               android.graphics.Bitmap}.
      */
     @NonNull
-    Bitmap obtain(int width, int height, Bitmap.Config config);
+    Bitmap obtain(int width, int height, @NonNull Bitmap.Config config);
 
     /**
      * Releases the given Bitmap back to the pool.
      */
-    void release(Bitmap bitmap);
+    void release(@NonNull Bitmap bitmap);
 
     /**
      * Returns a byte array used for decoding and generating the frame bitmap.
      *
      * @param size the size of the byte array to obtain
      */
+    @NonNull
     byte[] obtainByteArray(int size);
 
     /**
      * Releases the given byte array back to the pool.
      */
-    void release(byte[] bytes);
+    void release(@NonNull byte[] bytes);
 
     /**
      * Returns an int array used for decoding/generating the frame bitmaps.
      */
+    @NonNull
     int[] obtainIntArray(int size);
 
     /**
      * Release the given array back to the pool.
      */
-    void release(int[] array);
+    void release(@NonNull int[] array);
   }
 
   int getWidth();
 
   int getHeight();
 
+  @NonNull
   ByteBuffer getData();
 
   /**
@@ -188,6 +193,7 @@ public interface GifDecoder {
    *
    * @return Bitmap representation of frame.
    */
+  @Nullable
   Bitmap getNextFrame();
 
   /**
@@ -197,15 +203,15 @@ public interface GifDecoder {
    * @return read status code (0 = no errors).
    */
   @GifDecodeStatus
-  int read(InputStream is, int contentLength);
+  int read(@Nullable InputStream is, int contentLength);
 
   void clear();
 
-  void setData(GifHeader header, byte[] data);
+  void setData(@NonNull GifHeader header, @NonNull byte[] data);
 
-  void setData(GifHeader header, ByteBuffer buffer);
+  void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer);
 
-  void setData(GifHeader header, ByteBuffer buffer, int sampleSize);
+  void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer, int sampleSize);
 
   /**
    * Reads GIF image from byte array.
@@ -214,6 +220,23 @@ public interface GifDecoder {
    * @return read status code (0 = no errors).
    */
   @GifDecodeStatus
-  int read(byte[] data);
+  int read(@Nullable byte[] data);
 
+
+  /**
+   * Sets the default {@link android.graphics.Bitmap.Config} to use when decoding frames of a GIF.
+   *
+   * <p>Valid options are {@link android.graphics.Bitmap.Config#ARGB_8888} and
+   * {@link android.graphics.Bitmap.Config#RGB_565}.
+   * {@link android.graphics.Bitmap.Config#ARGB_8888} will produce higher quality frames, but will
+   * also use 2x the memory of {@link android.graphics.Bitmap.Config#RGB_565}.
+   *
+   * <p>Defaults to {@link android.graphics.Bitmap.Config#ARGB_8888}
+   *
+   * <p>This value is not a guarantee. For example if set to
+   * {@link android.graphics.Bitmap.Config#RGB_565} and the GIF contains transparent pixels,
+   * {@link android.graphics.Bitmap.Config#ARGB_8888} will be used anyway to support the
+   * transparency.
+   */
+  void setDefaultBitmapConfig(@NonNull Bitmap.Config format);
 }

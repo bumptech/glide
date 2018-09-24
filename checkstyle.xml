@@ -15,7 +15,9 @@
     </module>
 
     <!-- Ensure trailling newline for compatibility -->
-    <module name="NewlineAtEndOfFile" />
+    <module name="NewlineAtEndOfFile">
+        <property name="lineSeparator" value="lf"/>
+    </module>
 
     <!-- Space after 'for' and 'if' -->
     <module name="RegexpSingleline">
@@ -71,7 +73,7 @@
 
         <!-- Allow common trailing comments used to describe suppressions -->
         <module name="TrailingComment">
-          <property name="legalComment" value="Public API" />
+          <property name="legalComment" value="^Public API.?$|^NOPMD.*$" />
         </module>
 
         <!-- Checks for imports. -->
@@ -92,8 +94,16 @@
         <!-- Prevent importing Mockito matchers directly -->
         <module name="IllegalImport">
             <property name="illegalPkgs" value="org.mockito.internal" />
-            <message key="import.illegal" value="Import from illegal package - {0}. Use org.mockito.Matchers to instantiate argument matchers; or org.hamcrest.Matchers for assertThat." />
+            <message key="import.illegal" value="Import from illegal package - {0}. Use org.mockito.Matchers to instantiate argument matchers." />
         </module>
+
+        <!-- ArgumentMatchers isn't available internally, the same methods are available on org.mockito.Mockito. -->
+        <module name="IllegalImport">
+            <property name="illegalClasses" value="org\.mockito\.ArgumentMatchers.*" />
+            <property name="regexp" value="true" />
+            <message key="import.illegal" value="Import from illegal class - {0}. Use org.mockito.Mockito to statically import matcher methods." />
+        </module>
+
         <module name="ImportOrder">
           <!-- Checks for out of order import statements. -->
 
@@ -103,6 +113,7 @@
            <!-- This ensures that static imports go first. -->
            <property name="option" value="top"/>
            <property name="tokens" value="STATIC_IMPORT, IMPORT"/>
+           <property name="separated" value="true" />
          </module>
 
         <!-- Checks for whitespace. -->
@@ -127,7 +138,9 @@
 
         <!-- Checks for blocks. -->
         <!-- See http://checkstyle.sourceforge.net/config_blocks.html -->
-        <module name="AvoidNestedBlocks" />
+        <module name="AvoidNestedBlocks">
+          <property name="allowInSwitchCase" value="true" />
+        </module>
         <module name="EmptyBlock" >
             <property name="option" value="text"/>
         </module>

@@ -18,21 +18,24 @@ import java.io.FileNotFoundException;
 /**
  * Loads the file path for {@link MediaStore} owned {@link Uri uris}.
  */
-public final class MediaStoreFileLoader implements ModelLoader<Uri, File>  {
+public final class MediaStoreFileLoader implements ModelLoader<Uri, File> {
 
   private final Context context;
 
-  MediaStoreFileLoader(Context context) {
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  public MediaStoreFileLoader(Context context) {
     this.context = context;
   }
 
   @Override
-  public LoadData<File> buildLoadData(Uri uri, int width, int height, Options options) {
+  public LoadData<File> buildLoadData(@NonNull Uri uri, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(uri), new FilePathFetcher(context, uri));
   }
 
   @Override
-  public boolean handles(Uri uri) {
+  public boolean handles(@NonNull Uri uri) {
     return MediaStoreUtil.isMediaStoreUri(uri);
   }
 
@@ -50,7 +53,7 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File>  {
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super File> callback) {
+    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super File> callback) {
       Cursor cursor = context.getContentResolver().query(uri, PROJECTION, null /*selection*/,
           null /*selectionArgs*/, null /*sortOrder*/);
 
@@ -106,6 +109,7 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File>  {
       this.context = context;
     }
 
+    @NonNull
     @Override
     public ModelLoader<Uri, File> build(MultiModelLoaderFactory multiFactory) {
       return new MediaStoreFileLoader(context);

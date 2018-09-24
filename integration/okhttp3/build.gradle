@@ -1,16 +1,15 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile project(':library')
+    implementation project(':library')
     annotationProcessor project(':annotation:compiler')
 
-    compile "com.squareup.okhttp3:okhttp:${OK_HTTP_VERSION}"
-    compile "com.android.support:support-annotations:{$SUPPORT_V4_VERSION}"
+    api "com.squareup.okhttp3:okhttp:${OK_HTTP_VERSION}"
+    api "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
 }
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
-    buildToolsVersion BUILD_TOOLS_VERSION as String
 
     defaultConfig {
         minSdkVersion MIN_SDK_VERSION as int

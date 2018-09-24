@@ -1,5 +1,7 @@
 package com.bumptech.glide.util;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Utilities for interacting with {@link java.nio.ByteBuffer}s.
  */
+@SuppressWarnings({"unused", "WeakerAccess"}) // Public API
 public final class ByteBufferUtil {
   // 16 Kb
   private static final int BUFFER_SIZE = 16384;
@@ -22,7 +25,8 @@ public final class ByteBufferUtil {
     // Utility class.
   }
 
-  public static ByteBuffer fromFile(File file) throws IOException {
+  @NonNull
+  public static ByteBuffer fromFile(@NonNull File file) throws IOException {
     RandomAccessFile raf = null;
     FileChannel channel = null;
     try {
@@ -31,6 +35,11 @@ public final class ByteBufferUtil {
       if (fileLength > Integer.MAX_VALUE) {
         throw new IOException("File too large to map into memory");
       }
+      // See b/67710449.
+      if (fileLength == 0) {
+        throw new IOException("File unsuitable for memory mapping");
+      }
+
       raf = new RandomAccessFile(file, "r");
       channel = raf.getChannel();
       return channel.map(FileChannel.MapMode.READ_ONLY, 0, fileLength).load();
@@ -52,7 +61,7 @@ public final class ByteBufferUtil {
     }
   }
 
-  public static void toFile(ByteBuffer buffer, File file) throws IOException {
+  public static void toFile(@NonNull ByteBuffer buffer, @NonNull File file) throws IOException {
     buffer.position(0);
     RandomAccessFile raf = null;
     FileChannel channel = null;
@@ -81,7 +90,8 @@ public final class ByteBufferUtil {
     }
   }
 
-  public static void toStream(ByteBuffer byteBuffer, OutputStream os) throws IOException {
+  public static void toStream(@NonNull ByteBuffer byteBuffer,
+      @NonNull OutputStream os) throws IOException {
     SafeArray safeArray = getSafeArray(byteBuffer);
     if (safeArray != null) {
       os.write(safeArray.data, safeArray.offset, safeArray.offset + safeArray.limit);
@@ -101,7 +111,10 @@ public final class ByteBufferUtil {
     }
   }
 
-  public static byte[] toBytes(ByteBuffer byteBuffer) {
+  // We check the appropriate offsets, so this is a spurious warning.
+  @SuppressWarnings("ByteBufferBackingArray")
+  @NonNull
+  public static byte[] toBytes(@NonNull ByteBuffer byteBuffer) {
     final byte[] result;
     SafeArray safeArray = getSafeArray(byteBuffer);
     if (safeArray != null && safeArray.offset == 0 && safeArray.limit == safeArray.data.length) {
@@ -115,11 +128,13 @@ public final class ByteBufferUtil {
     return result;
   }
 
-  public static InputStream toStream(ByteBuffer buffer) {
+  @NonNull
+  public static InputStream toStream(@NonNull ByteBuffer buffer) {
     return new ByteBufferStream(buffer);
   }
 
-  public static ByteBuffer fromStream(InputStream stream) throws IOException {
+  @NonNull
+  public static ByteBuffer fromStream(@NonNull InputStream stream) throws IOException {
     ByteArrayOutputStream outStream = new ByteArrayOutputStream(BUFFER_SIZE);
 
     byte[] buffer = BUFFER_REF.getAndSet(null);
@@ -127,7 +142,7 @@ public final class ByteBufferUtil {
       buffer = new byte[BUFFER_SIZE];
     }
 
-    int n = -1;
+    int n;
     while ((n = stream.read(buffer)) >= 0) {
       outStream.write(buffer, 0, n);
     }
@@ -140,7 +155,8 @@ public final class ByteBufferUtil {
     return (ByteBuffer) ByteBuffer.allocateDirect(bytes.length).put(bytes).position(0);
   }
 
-  private static SafeArray getSafeArray(ByteBuffer byteBuffer) {
+  @Nullable
+  private static SafeArray getSafeArray(@NonNull ByteBuffer byteBuffer) {
     if (!byteBuffer.isReadOnly() && byteBuffer.hasArray()) {
       return new SafeArray(byteBuffer.array(), byteBuffer.arrayOffset(), byteBuffer.limit());
     }
@@ -152,7 +168,9 @@ public final class ByteBufferUtil {
     @Synthetic final int limit;
     @Synthetic final byte[] data;
 
-    public SafeArray(byte[] data, int offset, int limit) {
+    // PMD.ArrayIsStoredDirectly Copying would be prohibitively expensive and/or lead to OOMs.
+    @SuppressWarnings("PMD.ArrayIsStoredDirectly")
+    SafeArray(@NonNull byte[] data, int offset, int limit) {
       this.data = data;
       this.offset = offset;
       this.limit = limit;
@@ -161,20 +179,20 @@ public final class ByteBufferUtil {
 
   private static class ByteBufferStream extends InputStream {
     private static final int UNSET = -1;
-    private final ByteBuffer byteBuffer;
+    @NonNull private final ByteBuffer byteBuffer;
     private int markPos = UNSET;
 
-    public ByteBufferStream(ByteBuffer byteBuffer) {
+    ByteBufferStream(@NonNull ByteBuffer byteBuffer) {
       this.byteBuffer = byteBuffer;
     }
 
     @Override
-    public int available() throws IOException {
+    public int available() {
       return byteBuffer.remaining();
     }
 
     @Override
-    public int read() throws IOException {
+    public int read() {
       if (!byteBuffer.hasRemaining()) {
         return -1;
       }
@@ -182,7 +200,7 @@ public final class ByteBufferUtil {
     }
 
     @Override
-    public synchronized void mark(int readlimit) {
+    public synchronized void mark(int readLimit) {
       markPos = byteBuffer.position();
     }
 
@@ -192,7 +210,7 @@ public final class ByteBufferUtil {
     }
 
     @Override
-    public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
+    public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
       if (!byteBuffer.hasRemaining()) {
         return -1;
       }

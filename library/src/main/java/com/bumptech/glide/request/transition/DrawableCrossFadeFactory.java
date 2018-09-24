@@ -13,6 +13,8 @@ import com.bumptech.glide.load.DataSource;
  * user typically does not expect to see a transition. As a result, when the resource is loaded from
  * the memory cache this factory produces an {@link NoTransition}.
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
   private final int duration;
   private final boolean isCrossFadeEnabled;
@@ -39,9 +41,10 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
   /**
    * A Builder for {@link DrawableCrossFadeFactory}.
    */
+  @SuppressWarnings("unused")
   public static class Builder {
     private static final int DEFAULT_DURATION_MS = 300;
-    private int durationMillis;
+    private final int durationMillis;
     private boolean isCrossFadeEnabled;
 
     public Builder() {

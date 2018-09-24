@@ -84,14 +84,15 @@ final class IndexerGenerator {
       annotationBuilder.addMember(value, "$S", ClassName.get(childModule).toString());
     }
 
-    String indexerName = INDEXER_NAME_PREFIX + annotation.getSimpleName() + "_";
+    StringBuilder indexerName = new StringBuilder(
+        INDEXER_NAME_PREFIX + annotation.getSimpleName() + "_");
     for (TypeElement element : libraryModules) {
-      indexerName += element.getQualifiedName().toString().replace(".", "_");
-      indexerName += "_";
+      indexerName.append(element.getQualifiedName().toString().replace(".", "_"));
+      indexerName.append("_");
     }
-    indexerName = indexerName.substring(0, indexerName.length() - 1);
+    indexerName = new StringBuilder(indexerName.substring(0, indexerName.length() - 1));
 
-    return TypeSpec.classBuilder(indexerName)
+    return TypeSpec.classBuilder(indexerName.toString())
         .addAnnotation(annotationBuilder.build())
         .addModifiers(Modifier.PUBLIC)
         .build();

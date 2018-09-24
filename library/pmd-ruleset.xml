@@ -3,56 +3,168 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
 
-    <description>This ruleset was created from PMD.rul</description>
+    <description>Check for flaws in Glide's codebase.</description>
 
-    <rule ref="rulesets/java/basic.xml">
+    <rule ref="category/java/errorprone.xml">
         <exclude name="AvoidBranchingStatementAsLastInLoop"/>
+        <!-- Not using beans. -->
+        <exclude name="BeanMembersShouldSerialize" />
+        <!-- wat -->
+        <exclude name="AvoidFieldNameMatchingTypeName" />
+        <!-- This is identifying trivial cases that are clearly correct. -->
+        <exclude name="DataflowAnomalyAnalysis" />
+        <!-- Used regularly for object pooling. -->
+        <exclude name="NullAssignment" />
+        <!-- This can make the code easier to read and avoid duplicated logic in some cases. -->
+        <exclude name="AssignmentInOperand" />
+        <!-- I don't think this is confusing. -->
+        <exclude name="AvoidFieldNameMatchingMethodName" />
+        <!-- There are enough cases where this makes sense (typically related to logic around the number of items in a collection) that a blanket ban doesn't seem like a good idea. -->
+        <exclude name="AvoidLiteralsInIfCondition" />
+        <!-- It's clear that this is bad, but we have a number of cases where it makes sense and a blanket ban is irritating. -->
+        <exclude name="AvoidCatchingThrowable" />
     </rule>
-    <rule ref="rulesets/java/braces.xml"/>
-    <rule ref="rulesets/java/strings.xml">
-        <!-- TODO: This warns about annotations, apparently fixed in a later version. -->
-        <exclude name="AvoidDuplicateLiterals"/>
+    <rule ref="category/java/errorprone.xml/AvoidDuplicateLiterals">
+      <properties>
+        <property name="skipAnnotations" value="true" />
+      </properties>
     </rule>
-    <rule ref="rulesets/java/unusedcode.xml"/>
+    <rule ref="category/java/codestyle.xml">
+      <!-- Abstract classes don't need to have Abstract in the name -->
+      <exclude name="AbstractNaming" />
+      <!-- Who cares? -->
+      <exclude name="AtLeastOneConstructor" />
+      <!-- Don't need to annotate package private methods. -->
+      <exclude name="DefaultPackage" />
+      <exclude name="CommentDefaultAccessModifier" />
+      <!-- Optionally implemented default empty methods are fine. -->
+      <exclude name="EmptyMethodInAbstractClassShouldBeAbstract" />
+      <!-- Why make generics less clear by using shorter names? -->
+      <exclude name="GenericsNaming" />
+      <!-- No need to enforce final if it's not necessary. -->
+      <exclude name="MethodArgumentCouldBeFinal" />
+      <exclude name="LocalVariableCouldBeFinal" />
+      <!-- This isn't always the easiest way to read a method. -->
+      <exclude name="OnlyOneReturn" />
+      <!-- Obfuscated code is best code? -->
+      <exclude name="LongVariable" />
+      <!-- This is not always true. -->
+      <exclude name="ShortClassName" />
+      <!-- A good idea but we have tons of violations. FIXME. -->
+      <exclude name="ShortMethodName" />
+      <exclude name="ShortVariable" />
+      <!-- We don't use in and out to mean modified or not modified by the method, it's useful to match framework methods. -->
+      <exclude name="AvoidPrefixingMethodParameters" />
+      <!-- No idea what this is supposed to accomplish. -->
+      <exclude name="AvoidFinalLocalVariable" />
+      <!-- These are often useful for clarity and explicitly suggested by Google's code style. -->
+      <exclude name="UselessParentheses" />
+      <!-- Theoretically this might be reasonable but the number of imports probably varies from class to class and this doesn't seem worth the overhead to maintain. -->
+      <exclude name="TooManyStaticImports" />
+      <!-- Lots of existing violations, not clear that the overhead is worthwhile though there are some cases where we definitely need to call super. FIXME. -->
+      <exclude name="CallSuperInConstructor" />
+      <!-- This is a reasonable idea, but in practice often the != null case is the expected case and it makes sense for it to come first. -->
+      <exclude name="ConfusingTernary" />
+    </rule>
+    <rule ref="category/java/performance.xml" >
+      <!-- Android may not behave the same as java VMs, using short can be clearer when working with binary data. -->
+      <exclude name="AvoidUsingShortType" />
+      <!-- The suggsted alternatives are not available until Glide's minsdk level is 26+ -->
+      <exclude name="AvoidFileStream" />
+    </rule>
+    <rule ref="category/java/bestpractices.xml" >
+      <!-- Catches any method, test or not, that has the name "tearDown". -->
+      <exclude name="JUnit4TestShouldUseAfterAnnotation" />
+      <!-- This is a good idea, but in practice it's often somewhat clearer than defining a temporary variable and we do it all over the place. -->
+      <exclude name="AvoidReassigningParameters" />
+      <!-- This ignores imports used by javadocs and is worse than the existing checkstyle check. -->
+      <exclude name="UnusedImports" />
+    </rule>
+    <rule ref="category/java/bestpractices.xml/OneDeclarationPerLine">
+      <properties>
+        <property name="strictMode" value="true" />
+        <!-- Allow `for (int i = 0, size = list.size(); i < size; i++) {`
+             Somewhat clearer to set size along with the index. -->
+        <property name="violationSuppressXPath"
+                  value="self::LocalVariableDeclaration
+                           [parent::ForInit]
+                           [Type/PrimitiveType[@Image = 'int']
+                             and VariableDeclarator/VariableDeclaratorId[@Image='i']
+                             and VariableDeclarator/VariableDeclaratorId[@Image='size']
+                           ]
+                        " />
+      </properties>
+    </rule>
+    <rule ref="category/java/bestpractices.xml/AccessorMethodGeneration"
+      message="Avoid autogenerated methods to access private fields and methods of inner / outer classes.
+                       Use @Synthetic to flag members made more visible than necessary to prevent accessors.">
+      <properties>
+        <!-- Ignore references to `private static final * * = <literal>`
+             Suppress via XPath: current node (access that generates the accessor) is .
+             Check if there exists a FieldDeclaration (private static final)
+             which has a VariableInitializer with a Literal
+             and the name (@Image) of the declaration is the same as the accessed member.
+             TODO calculated constants are false positive https://github.com/pmd/pmd/issues/808
+        -->
+        <property name="violationSuppressXPath" value="
+                .[@Image =
+                    //FieldDeclaration[@Private = 'true' and @Static='true' and @Final='true']
+                    /VariableDeclarator[
+                        VariableInitializer/Expression/PrimaryExpression[not(PrimarySuffix)]/PrimaryPrefix/Literal
+                    ]/VariableDeclaratorId/@Image
+                 ]" />
+      </properties>
+    </rule>
 
-    <rule ref="rulesets/java/design.xml">
-        <exclude name="ConfusingTernary"/>
-        <exclude name="EmptyMethodInAbstractClassShouldBeAbstract"/>
+    <rule ref="category/java/design.xml">
+        <exclude name="GodClass" />
+        <!-- No idea how you reasonably define this. -->
+        <exclude name="ExcessiveImports" />
+        <exclude name="CouplingBetweenObjects" />
+        <exclude name="TooManyMethods" />
+        <exclude name="LawOfDemeter" />
+        <exclude name="NcssCount" />
+        <exclude name="ExcessiveParameterList" />
+        <exclude name="TooManyFields" />
+        <!-- We don't define any packages to use with this rule. -->
+        <exclude name="LoosePackageCoupling" />
+        <!-- Throwing other types of exceptions doesn't seem to add much to clarify. -->
+        <exclude name="AvoidThrowingRawExceptionTypes" />
+        <exclude name="AvoidThrowingNullPointerException" />
+        <!-- TODO: explore these further. -->
+        <exclude name="CyclomaticComplexity" />
+        <exclude name="NPathComplexity" />
+        <exclude name="ExcessiveMethodLength" />
+        <exclude name="ExcessiveClassLength" />
+        <exclude name="ExcessivePublicCount" />
+        <!-- This is redundant, also caught with AvoidCatchingNPEs. -->
+        <exclude name="AvoidCatchingGenericException" />
+    </rule>
+
+    <rule ref="category/java/multithreading.xml">
         <exclude name="AvoidSynchronizedAtMethodLevel"/>
-
         <!-- This check breaks on double checked locking which is safe in Java 6/7 -->
         <exclude name="NonThreadSafeSingleton"/>
-
-        <!-- TODO: Fix these -->
-        <exclude name="AvoidReassigningParameters"/>
-        <exclude name="GodClass"/>
+        <!-- Used frequently in the singleton pattern. -->
+        <exclude name="AvoidUsingVolatile" />
+        <!-- No reason to do this by default. -->
+        <exclude name="UseConcurrentHashMap" />
+        <exclude name="DoNotUseThreads" />
     </rule>
 
-    <rule ref="rulesets/java/empty.xml/EmptyCatchBlock" message="Commented blocks are ok">
+    <rule ref="category/java/errorprone.xml/EmptyCatchBlock" message="Commented blocks are ok">
         <properties>
             <property name="allowCommentedBlocks" value="true"/>
         </properties>
     </rule>
 
 
-    <!--Overrides default check to avoid violation when @Synthetic annotation is present-->
-    <rule ref="rulesets/java/design.xml/UncommentedEmptyConstructor"
-          message="Document empty constructor">
-
-        <properties>
-            <property name="xpath">
-                <value>
-                    <![CDATA[
-//ConstructorDeclaration[@Private='false'][count(BlockStatement) = 0 and
-($ignoreExplicitConstructorInvocation = 'true' or not(ExplicitConstructorInvocation)) and @containsComment = 'false'
- and not(../Annotation/MarkerAnnotation/Name[@Image='Synthetic'])]
- ]]>
-                </value>
-            </property>
-
-        </properties>
-
+  <!-- Configures check to avoid violation when @Synthetic annotation is present. -->
+    <rule ref="category/java/documentation.xml/UncommentedEmptyConstructor">
+      <properties>
+        <property name="violationSuppressXPath"
+          value="../Annotation/MarkerAnnotation/Name[@Image='Synthetic']" />
+      </properties>
     </rule>
-
 
 </ruleset>

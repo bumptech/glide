@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Encoder;
@@ -32,7 +33,7 @@ class SourceGenerator implements DataFetcherGenerator,
   private volatile ModelLoader.LoadData<?> loadData;
   private DataCacheKey originalKey;
 
-  public SourceGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
+  SourceGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
     this.helper = helper;
     this.cb = cb;
   }
@@ -114,7 +115,7 @@ class SourceGenerator implements DataFetcherGenerator,
   }
 
   @Override
-  public void onLoadFailed(Exception e) {
+  public void onLoadFailed(@NonNull Exception e) {
     cb.onDataFetcherFailed(originalKey, e, loadData.fetcher, loadData.fetcher.getDataSource());
   }
 

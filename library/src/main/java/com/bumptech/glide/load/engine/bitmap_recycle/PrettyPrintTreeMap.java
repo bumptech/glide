@@ -2,6 +2,8 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import java.util.TreeMap;
 
+// Never serialized.
+@SuppressWarnings("serial")
 class PrettyPrintTreeMap<K, V> extends TreeMap<K, V> {
   @Override
   public String toString() {

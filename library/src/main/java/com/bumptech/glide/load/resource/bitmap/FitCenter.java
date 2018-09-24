@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -14,26 +13,6 @@ import java.security.MessageDigest;
 public class FitCenter extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.FitCenter";
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
-
-  public FitCenter() {
-    // Intentionally empty.
-  }
-
-  /**
-   * @deprecated Use {@link #FitCenter()}.
-   */
-  @Deprecated
-  public FitCenter(@SuppressWarnings("unused") Context context) {
-    this();
-  }
-
-  /**
-   * @deprecated Use {@link #FitCenter()}.
-   */
-  @Deprecated
-  public FitCenter(@SuppressWarnings("unused") BitmapPool bitmapPool) {
-    this();
-  }
 
   @Override
   protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth,
@@ -52,7 +31,7 @@ public class FitCenter extends BitmapTransformation {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     messageDigest.update(ID_BYTES);
   }
 }

@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import com.bumptech.glide.load.data.mediastore.ThumbFetcher;
@@ -16,14 +17,17 @@ import java.io.InputStream;
  * thumbnails for those {@link Uri}s in the media store.
  */
 public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream> {
-  public final Context context;
+  private final Context context;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public MediaStoreImageThumbLoader(Context context) {
     this.context = context.getApplicationContext();
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(Uri model, int width, int height, Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull Uri model, int width, int height,
+      @NonNull Options options) {
     if (MediaStoreUtil.isThumbnailSize(width, height)) {
       return new LoadData<>(new ObjectKey(model), ThumbFetcher.buildImageFetcher(context, model));
     } else {
@@ -32,7 +36,7 @@ public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream>
   }
 
   @Override
-  public boolean handles(Uri model) {
+  public boolean handles(@NonNull Uri model) {
     return MediaStoreUtil.isMediaStoreImageUri(model);
   }
 
@@ -47,6 +51,7 @@ public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream>
       this.context = context;
     }
 
+    @NonNull
     @Override
     public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new MediaStoreImageThumbLoader(context);

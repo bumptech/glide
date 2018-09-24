@@ -1,5 +1,6 @@
 package com.bumptech.glide.integration.okhttp3;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
@@ -16,27 +17,31 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   private final Call.Factory client;
 
-  public OkHttpUrlLoader(Call.Factory client) {
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  public OkHttpUrlLoader(@NonNull Call.Factory client) {
     this.client = client;
   }
 
   @Override
-  public boolean handles(GlideUrl url) {
+  public boolean handles(@NonNull GlideUrl url) {
     return true;
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(GlideUrl model, int width, int height,
-      Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull GlideUrl model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(model, new OkHttpStreamFetcher(client, model));
   }
 
   /**
    * The default factory for {@link OkHttpUrlLoader}s.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
     private static volatile Call.Factory internalClient;
-    private Call.Factory client;
+    private final Call.Factory client;
 
     private static Call.Factory getInternalClient() {
       if (internalClient == null) {
@@ -61,10 +66,11 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
      *
      * @param client this is typically an instance of {@code OkHttpClient}.
      */
-    public Factory(Call.Factory client) {
+    public Factory(@NonNull Call.Factory client) {
       this.client = client;
     }
 
+    @NonNull
     @Override
     public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new OkHttpUrlLoader(client);

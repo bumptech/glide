@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.request.Request;
@@ -36,23 +37,19 @@ public interface Target<R> extends LifecycleListener {
    * called. Loads can be paused and restarted due to lifecycle or connectivity events and each
    * restart may cause a call here.
    *
-   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
-   * Transition)} is no longer displayed before redrawing the container (usually a View) or
-   * changing its visibility.
-   *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
   void onLoadStarted(@Nullable Drawable placeholder);
 
   /**
-   * A lifecycle callback that is called when a load fails.
+   * A <b>mandatory</b> lifecycle callback that is called when a load fails.
    *
-   * <p> Note - This may be called before {@link #onLoadStarted(android.graphics.drawable.Drawable)
-   * } if the model object is null.
+   * <p>Note - This may be called before {@link #onLoadStarted(android.graphics.drawable.Drawable) }
+   * if the model object is null.
    *
-   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
-   * Transition)} is no longer displayed before redrawing the container (usually a View) or
-   * changing its visibility.
+   * <p>You <b>must</b> ensure that any current Drawable received in {@link #onResourceReady(Object,
+   * Transition)} is no longer used before redrawing the container (usually a View) or changing its
+   * visibility.
    *
    * @param errorDrawable The error drawable to optionally show, or null.
    */
@@ -63,14 +60,15 @@ public interface Target<R> extends LifecycleListener {
    *
    * @param resource the loaded resource.
    */
-  void onResourceReady(R resource, Transition<? super R> transition);
+  void onResourceReady(@NonNull R resource, @Nullable Transition<? super R> transition);
 
   /**
-   * A lifecycle callback that is called when a load is cancelled and its resources are freed.
+   * A <b>mandatory</b> lifecycle callback that is called when a load is cancelled and its resources
+   * are freed.
    *
-   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
-   * Transition)} is no longer displayed before redrawing the container (usually a View) or
-   * changing its visibility.
+   * <p>You <b>must</b> ensure that any current Drawable received in {@link #onResourceReady(Object,
+   * Transition)} is no longer used before redrawing the container (usually a View) or changing its
+   * visibility.
    *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
@@ -81,14 +79,14 @@ public interface Target<R> extends LifecycleListener {
    *
    * @param cb The callback that must be called when the size of the target has been determined
    */
-  void getSize(SizeReadyCallback cb);
+  void getSize(@NonNull SizeReadyCallback cb);
 
   /**
    * Removes the given callback from the pending set if it's still retained.
    *
    * @param cb The callback to remove.
    */
-  void removeCallback(SizeReadyCallback cb);
+  void removeCallback(@NonNull SizeReadyCallback cb);
 
   /**
    * Sets the current request for this target to retain, should not be called outside of Glide.

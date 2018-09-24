@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
 
@@ -12,6 +13,7 @@ import com.bumptech.glide.util.Preconditions;
  */
 class EngineResource<Z> implements Resource<Z> {
   private final boolean isCacheable;
+  private final boolean isRecyclable;
   private ResourceListener listener;
   private Key key;
   private int acquired;
@@ -22,9 +24,10 @@ class EngineResource<Z> implements Resource<Z> {
     void onResourceReleased(Key key, EngineResource<?> resource);
   }
 
-  EngineResource(Resource<Z> toWrap, boolean isCacheable) {
+  EngineResource(Resource<Z> toWrap, boolean isCacheable, boolean isRecyclable) {
     resource = Preconditions.checkNotNull(toWrap);
     this.isCacheable = isCacheable;
+    this.isRecyclable = isRecyclable;
   }
 
   void setResourceListener(Key key, ResourceListener listener) {
@@ -32,15 +35,21 @@ class EngineResource<Z> implements Resource<Z> {
     this.listener = listener;
   }
 
+  Resource<Z> getResource() {
+    return resource;
+  }
+
   boolean isCacheable() {
     return isCacheable;
   }
 
+  @NonNull
   @Override
   public Class<Z> getResourceClass() {
     return resource.getResourceClass();
   }
 
+  @NonNull
   @Override
   public Z get() {
     return resource.get();
@@ -60,7 +69,9 @@ class EngineResource<Z> implements Resource<Z> {
       throw new IllegalStateException("Cannot recycle a resource that has already been recycled");
     }
     isRecycled = true;
-    resource.recycle();
+    if (isRecyclable) {
+      resource.recycle();
+    }
   }
 
   /**
@@ -86,9 +97,9 @@ class EngineResource<Z> implements Resource<Z> {
    * Decrements the number of consumers using the wrapped resource. Must be called on the main
    * thread.
    *
-   * <p> This must only be called when a consumer that called the {@link #acquire()} method is now
-   * done with the resource. Generally external users should never callthis method, the framework
-   * will take care of this for you. </p>
+   * <p>This must only be called when a consumer that called the {@link #acquire()} method is now
+   * done with the resource. Generally external users should never call this method, the framework
+   * will take care of this for you.
    */
   void release() {
     if (acquired <= 0) {

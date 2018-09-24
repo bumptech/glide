@@ -1,5 +1,6 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.load.engine.Resource;
 import java.io.IOException;
@@ -16,29 +17,26 @@ public interface ResourceDecoder<T, Z> {
    * Returns {@code true} if this decoder is capable of decoding the given source with the given
    * options, and {@code false} otherwise.
    *
-   * <p> Decoders should make a best effort attempt to quickly determine if they are likely to be
+   * <p>Decoders should make a best effort attempt to quickly determine if they are likely to be
    * able to decode data, but should not attempt to completely read the given data. A typical
    * implementation would check the file headers verify they match content the decoder expects to
-   * handle (i.e. a GIF decoder should verify that the image contains the GIF header block. </p>
+   * handle (i.e. a GIF decoder should verify that the image contains the GIF header block.
    *
-   * <p> Decoders that return {@code true} from {@link #handles(Object, Options)} may still
-   * return {@code null} from {@link #decode(Object, int, int, Options)} if the data is
-   * partial or formatted incorrectly. </p>
-   *
-   * @throws IOException
+   * <p>Decoders that return {@code true} from {@code handles} may still return {@code null} from
+   * {@link #decode(Object, int, int, Options)} if the data is partial or formatted incorrectly.
    */
-  boolean handles(T source, Options options) throws IOException;
+  boolean handles(@NonNull T source, @NonNull Options options) throws IOException;
 
   /**
    * Returns a decoded resource from the given data or null if no resource could be decoded.
    *
-   * <p> The {@code source} is managed by the caller, there's no need to close it. The returned
-   * {@link Resource} will be {@link Resource#recycle() released} when the engine sees fit. </p>
+   * <p>The {@code source} is managed by the caller, there's no need to close it. The returned
+   * {@link Resource} will be {@link Resource#recycle() released} when the engine sees fit.
    *
-   * <p> Note - The {@code width} and {@code height} arguments are hints only, there is no
+   * <p>Note - The {@code width} and {@code height} arguments are hints only, there is no
    * requirement that the decoded resource exactly match the given dimensions. A typical use case
    * would be to use the target dimensions to determine how much to downsample Bitmaps by to avoid
-   * overly large allocations. </p>
+   * overly large allocations.
    *
    * @param source  The data the resource should be decoded from.
    * @param width   The ideal width in pixels of the decoded resource, or {@link
@@ -52,8 +50,8 @@ public interface ResourceDecoder<T, Z> {
    *                all of their option keys are present. However, implementations may assume that
    *                if one of their option keys is present, it's value is non-null and is of the
    *                expected type.
-   * @throws IOException
    */
   @Nullable
-  Resource<Z> decode(T source, int width, int height, Options options) throws IOException;
+  Resource<Z> decode(@NonNull T source, int width, int height, @NonNull Options options)
+      throws IOException;
 }

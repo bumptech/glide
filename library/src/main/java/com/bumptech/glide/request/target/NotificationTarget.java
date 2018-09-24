@@ -5,6 +5,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.widget.RemoteViews;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
@@ -16,6 +18,8 @@ import com.bumptech.glide.util.Preconditions;
  * <p> Note - For cancellation to work correctly, you must pass in the same instance of this class
  * for every subsequent load. </p>
  */
+// Public API.
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class NotificationTarget extends SimpleTarget<Bitmap> {
   private final RemoteViews remoteViews;
   private final Context context;
@@ -29,12 +33,12 @@ public class NotificationTarget extends SimpleTarget<Bitmap> {
    * Notification in order to update it that uses {@link #SIZE_ORIGINAL} as the target width and
    * height.
    *
-   * @param context         Context to use in the AppWidgetManager initialization.
-   * @param viewId          The id of the ImageView view that will load the image.
-   * @param remoteViews     RemoteViews object which contains the ImageView that will load the
-   *                        bitmap.
-   * @param notification    The Notification object that we want to update.
-   * @param notificationId  The notificationId of the Notification that we want to load the Bitmap.
+   * @param context        Context to use in the AppWidgetManager initialization.
+   * @param viewId         The id of the ImageView view that will load the image.
+   * @param remoteViews    RemoteViews object which contains the ImageView that will load the
+   *                       bitmap.
+   * @param notification   The Notification object that we want to update.
+   * @param notificationId The notificationId of the Notification that we want to load the Bitmap.
    */
   public NotificationTarget(Context context,
       int viewId, RemoteViews remoteViews, Notification notification, int notificationId) {
@@ -58,7 +62,7 @@ public class NotificationTarget extends SimpleTarget<Bitmap> {
   public NotificationTarget(Context context, int viewId, RemoteViews remoteViews,
       Notification notification, int notificationId, String notificationTag) {
     this(context, SIZE_ORIGINAL, SIZE_ORIGINAL, viewId, remoteViews, notification, notificationId,
-      notificationTag);
+        notificationTag);
   }
 
   /**
@@ -98,11 +102,13 @@ public class NotificationTarget extends SimpleTarget<Bitmap> {
   private void update() {
     NotificationManager manager =
         (NotificationManager) this.context.getSystemService(Context.NOTIFICATION_SERVICE);
-    manager.notify(this.notificationTag, this.notificationId, this.notification);
+    Preconditions.checkNotNull(manager)
+        .notify(this.notificationTag, this.notificationId, this.notification);
   }
 
   @Override
-  public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+  public void onResourceReady(@NonNull Bitmap resource,
+      @Nullable Transition<? super Bitmap> transition) {
     this.remoteViews.setImageViewBitmap(this.viewId, resource);
     this.update();
   }

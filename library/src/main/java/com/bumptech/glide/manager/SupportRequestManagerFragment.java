@@ -2,7 +2,9 @@ package com.bumptech.glide.manager;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -27,8 +29,7 @@ public class SupportRequestManagerFragment extends Fragment {
   private final ActivityFragmentLifecycle lifecycle;
   private final RequestManagerTreeNode requestManagerTreeNode =
       new SupportFragmentRequestManagerTreeNode();
-  private final HashSet<SupportRequestManagerFragment> childRequestManagerFragments =
-      new HashSet<>();
+  private final Set<SupportRequestManagerFragment> childRequestManagerFragments = new HashSet<>();
 
   @Nullable private SupportRequestManagerFragment rootRequestManagerFragment;
   @Nullable private RequestManager requestManager;
@@ -38,9 +39,9 @@ public class SupportRequestManagerFragment extends Fragment {
     this(new ActivityFragmentLifecycle());
   }
 
-  // For testing only.
+  @VisibleForTesting
   @SuppressLint("ValidFragment")
-  public SupportRequestManagerFragment(ActivityFragmentLifecycle lifecycle) {
+  public SupportRequestManagerFragment(@NonNull ActivityFragmentLifecycle lifecycle) {
     this.lifecycle = lifecycle;
   }
 
@@ -49,10 +50,11 @@ public class SupportRequestManagerFragment extends Fragment {
    *
    * @param requestManager The manager to put.
    */
-  public void setRequestManager(RequestManager requestManager) {
+  public void setRequestManager(@Nullable RequestManager requestManager) {
     this.requestManager = requestManager;
   }
 
+  @NonNull
   ActivityFragmentLifecycle getGlideLifecycle() {
     return lifecycle;
   }
@@ -70,6 +72,7 @@ public class SupportRequestManagerFragment extends Fragment {
    * to the
    * associated {@link RequestManager}.
    */
+  @NonNull
   public RequestManagerTreeNode getRequestManagerTreeNode() {
     return requestManagerTreeNode;
   }
@@ -86,13 +89,15 @@ public class SupportRequestManagerFragment extends Fragment {
    * Returns the set of fragments that this RequestManagerFragment's parent is a parent to. (i.e.
    * our parent is the fragment that we are annotating).
    */
-  public Set<SupportRequestManagerFragment> getDescendantRequestManagerFragments() {
+  @Synthetic
+  @NonNull
+  Set<SupportRequestManagerFragment> getDescendantRequestManagerFragments() {
     if (rootRequestManagerFragment == null) {
       return Collections.emptySet();
-    } else if (rootRequestManagerFragment == this) {
+    } else if (equals(rootRequestManagerFragment)) {
       return Collections.unmodifiableSet(childRequestManagerFragments);
     } else {
-      HashSet<SupportRequestManagerFragment> descendants = new HashSet<>();
+      Set<SupportRequestManagerFragment> descendants = new HashSet<>();
       for (SupportRequestManagerFragment fragment : rootRequestManagerFragment
           .getDescendantRequestManagerFragments()) {
         if (isDescendant(fragment.getParentFragmentUsingHint())) {
@@ -107,13 +112,14 @@ public class SupportRequestManagerFragment extends Fragment {
    * Sets a hint for which fragment is our parent which allows the fragment to return correct
    * information about its parents before pending fragment transactions have been executed.
    */
-  void setParentFragmentHint(Fragment parentFragmentHint) {
+  void setParentFragmentHint(@Nullable Fragment parentFragmentHint) {
     this.parentFragmentHint = parentFragmentHint;
     if (parentFragmentHint != null && parentFragmentHint.getActivity() != null) {
       registerFragmentWithRoot(parentFragmentHint.getActivity());
     }
   }
 
+  @Nullable
   private Fragment getParentFragmentUsingHint() {
     Fragment fragment = getParentFragment();
     return fragment != null ? fragment : parentFragmentHint;
@@ -122,10 +128,11 @@ public class SupportRequestManagerFragment extends Fragment {
   /**
    * Returns true if the fragment is a descendant of our parent.
    */
-  private boolean isDescendant(Fragment fragment) {
-    Fragment root = this.getParentFragmentUsingHint();
-    while (fragment.getParentFragment() != null) {
-      if (fragment.getParentFragment() == root) {
+  private boolean isDescendant(@NonNull Fragment fragment) {
+    Fragment root = getParentFragmentUsingHint();
+    Fragment parentFragment;
+    while ((parentFragment = fragment.getParentFragment()) != null) {
+      if (parentFragment.equals(root)) {
         return true;
       }
       fragment = fragment.getParentFragment();
@@ -133,11 +140,11 @@ public class SupportRequestManagerFragment extends Fragment {
     return false;
   }
 
-  private void registerFragmentWithRoot(FragmentActivity activity) {
+  private void registerFragmentWithRoot(@NonNull FragmentActivity activity) {
     unregisterFragmentWithRoot();
-    rootRequestManagerFragment = Glide.get(activity).getRequestManagerRetriever()
-        .getSupportRequestManagerFragment(activity.getSupportFragmentManager(), null);
-    if (rootRequestManagerFragment != this) {
+    rootRequestManagerFragment =
+        Glide.get(activity).getRequestManagerRetriever().getSupportRequestManagerFragment(activity);
+    if (!equals(rootRequestManagerFragment)) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
     }
   }
@@ -198,11 +205,12 @@ public class SupportRequestManagerFragment extends Fragment {
     @Synthetic
     SupportFragmentRequestManagerTreeNode() { }
 
+    @NonNull
     @Override
     public Set<RequestManager> getDescendants() {
       Set<SupportRequestManagerFragment> descendantFragments =
           getDescendantRequestManagerFragments();
-      HashSet<RequestManager> descendants = new HashSet<>(descendantFragments.size());
+      Set<RequestManager> descendants = new HashSet<>(descendantFragments.size());
       for (SupportRequestManagerFragment fragment : descendantFragments) {
         if (fragment.getRequestManager() != null) {
           descendants.add(fragment.getRequestManager());

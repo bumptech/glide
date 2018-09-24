@@ -1,5 +1,6 @@
 package com.bumptech.glide.load;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,9 +11,9 @@ import java.nio.ByteBuffer;
  */
 public interface ImageHeaderParser {
   /**
-   * A constant indicating we were unable to parse the orientation from the image either because
-   * no exif segment containing orientation data existed, or because of an I/O error attempting to
-   * read the exif segment.
+   * A constant indicating we were unable to parse the orientation from the image either because no
+   * exif segment containing orientation data existed, or because of an I/O error attempting to read
+   * the exif segment.
    */
   int UNKNOWN_ORIENTATION = -1;
 
@@ -32,10 +33,9 @@ public interface ImageHeaderParser {
     WEBP_A(true),
     /** WebP type without alpha. */
     WEBP(false),
-    /**
-     * Unrecognized type.
-     */
+    /** Unrecognized type. */
     UNKNOWN(false);
+
     private final boolean hasAlpha;
 
     ImageType(boolean hasAlpha) {
@@ -47,8 +47,11 @@ public interface ImageHeaderParser {
     }
   }
 
-  ImageType getType(InputStream is) throws IOException;
-  ImageType getType(ByteBuffer byteBuffer) throws IOException;
+  @NonNull
+  ImageType getType(@NonNull InputStream is) throws IOException;
+
+  @NonNull
+  ImageType getType(@NonNull ByteBuffer byteBuffer) throws IOException;
 
   /**
    * Parse the orientation from the image header. If it doesn't handle this image type (or this is
@@ -56,8 +59,9 @@ public interface ImageHeaderParser {
    *
    * @return The exif orientation if present or -1 if the header couldn't be parsed or doesn't
    * contain an orientation
-   * @throws IOException
    */
-  int getOrientation(InputStream is, ArrayPool byteArrayPool) throws IOException;
-  int getOrientation(ByteBuffer byteBuffer, ArrayPool byteArrayPool) throws IOException;
+  int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool) throws IOException;
+
+  int getOrientation(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
+      throws IOException;
 }

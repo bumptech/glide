@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
@@ -28,8 +29,6 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   private final ThumbnailStreamOpener opener;
   private InputStream inputStream;
 
-  // TODO(nnaze): These build methods do not need the full Glide or Context objects.
-
   public static ThumbFetcher buildImageFetcher(Context context, Uri uri) {
     return build(context, uri, new ImageThumbnailQuery(context.getContentResolver()));
   }
@@ -46,14 +45,15 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
     return new ThumbFetcher(uri, opener);
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   ThumbFetcher(Uri mediaStoreImageUri, ThumbnailStreamOpener opener) {
     this.mediaStoreImageUri = mediaStoreImageUri;
     this.opener = opener;
   }
 
   @Override
-  public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
+  public void loadData(@NonNull Priority priority,
+      @NonNull DataCallback<? super InputStream> callback) {
     try {
       inputStream = openThumbInputStream();
     } catch (FileNotFoundException e) {
@@ -118,11 +118,11 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
     }
 
     private static final String[] PATH_PROJECTION = {
-      MediaStore.Video.Thumbnails.DATA
+        MediaStore.Video.Thumbnails.DATA
     };
     private static final String PATH_SELECTION =
         MediaStore.Video.Thumbnails.KIND + " = " + MediaStore.Video.Thumbnails.MINI_KIND
-        + " AND " + MediaStore.Video.Thumbnails.VIDEO_ID + " = ?";
+            + " AND " + MediaStore.Video.Thumbnails.VIDEO_ID + " = ?";
 
     @Override
     public Cursor query(Uri uri) {
@@ -146,11 +146,11 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
     }
 
     private static final String[] PATH_PROJECTION = {
-      MediaStore.Images.Thumbnails.DATA,
+        MediaStore.Images.Thumbnails.DATA,
     };
     private static final String PATH_SELECTION =
         MediaStore.Images.Thumbnails.KIND + " = " + MediaStore.Images.Thumbnails.MINI_KIND
-        + " AND " + MediaStore.Images.Thumbnails.IMAGE_ID + " = ?";
+            + " AND " + MediaStore.Images.Thumbnails.IMAGE_ID + " = ?";
 
     @Override
     public Cursor query(Uri uri) {

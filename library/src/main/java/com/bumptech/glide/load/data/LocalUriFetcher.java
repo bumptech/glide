@@ -30,13 +30,16 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
    *                by {@link ContentResolver#openInputStream(android.net.Uri)}
    * @see ContentResolver#openInputStream(android.net.Uri)
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public LocalUriFetcher(ContentResolver contentResolver, Uri uri) {
     this.contentResolver = contentResolver;
     this.uri = uri;
   }
 
   @Override
-  public final void loadData(Priority priority, DataCallback<? super T> callback) {
+  public final void loadData(@NonNull Priority priority,
+      @NonNull DataCallback<? super T> callback) {
     try {
       data = loadResource(uri, contentResolver);
     } catch (FileNotFoundException e) {

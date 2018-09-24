@@ -2,12 +2,11 @@
 local.properties
 *.keystore
 *.DS_Store
-proguard-project.txt
 
 # Gradle
-**/.gradle
-**/.settings
-**/build
+.gradle
+build
+jacoco.exec
 
 # gh-pages
 doc/**
@@ -19,24 +18,15 @@ docs/**/*
 *.swp
 *.swo
 
-# Intellij 
-*.ipr
+# sed
+*.bak
+
+# Intellij
 *.iml
+*.ipr
 *.iws
-**/.idea/.name
-**/.idea/compiler.xml
-**/.idea/copyright/profiles_settings.xml
-**/.idea/encodings.xml
-**/.idea/misc.xml
-**/.idea/modules.xml
-**/.idea/scopes/scope_settings.xml
-**/.idea/vcs.xml
-**/.idea/libraries
-**/.idea/workspace.xml
-**/.idea/tasks.xml
-**/.idea/gradle.xml
-**/.idea/dictionaries
-**/.idea/dataSources.ids
-**/.idea/datasources.xml
-**/.idea/uiDesigner.xml
-**/.idea/runConfigurations.xml
+.idea/**
+!.idea/codeStyleSettings.xml
+!.idea/inspectionProfiles
+!.idea/inspectionProfiles/Project_Default.xml
+

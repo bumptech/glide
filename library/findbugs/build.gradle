@@ -1,0 +1,31 @@
+apply plugin: 'findbugs'
+
+findbugs {
+    toolVersion FINDBUGS_VERSION
+}
+
+def library = project(':library')
+
+tasks.create('findbugs', FindBugs) {
+    dependsOn library.tasks.compileDebugJavaWithJavac
+
+    description 'Run findbugs'
+    group 'verification'
+
+    classes = fileTree(library.tasks.compileDebugJavaWithJavac.destinationDir)
+    source library.android.sourceSets.main.java.srcDirs
+    classpath = files()
+    doFirst {
+        classpath += library.classPathForQuality()
+    }
+    effort = 'max'
+    excludeFilter = file("${library.projectDir}/findbugs-exclude.xml")
+
+    // Failures are caught and printed by the violations plugin.
+    ignoreFailures = true
+
+    reports {
+        xml.enabled = true
+        html.enabled = false
+    }
+}

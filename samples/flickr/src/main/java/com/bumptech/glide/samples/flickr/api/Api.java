@@ -17,9 +17,8 @@ import java.util.Set;
 /**
  * A class for interfacing with Flickr's http API.
  */
-public class Api {
+public final class Api {
   private static Api api;
-  private static final String TAG = "FlickrApi";
   private static final String API_KEY = "f0e6fbb5fdf1f3842294a1d21f84e8a6";
   private static final String SIGNED_API_URL =
       "https://api.flickr.com/services/rest/?method=%s&format=json&api_key=" + API_KEY;
@@ -73,7 +72,9 @@ public class Api {
 
     boolean isFirstLargest = true;
     List<String> result = new ArrayList<>();
-    for (int edge : SORTED_SIZE_KEYS) {
+    int size = result.size();
+    for (int i = 0; i < size; i++) {
+      int edge = SORTED_SIZE_KEYS.get(i);
       if (largestEdge <= edge) {
         if (isFirstLargest) {
           isFirstLargest = false;
@@ -86,7 +87,7 @@ public class Api {
 
   }
 
-  public static String getCacheableUrl(Photo photo) {
+  static String getCacheableUrl(Photo photo) {
     return String.format(CACHEABLE_PHOTO_URL, photo.getFarm(), photo.getServer(), photo.getId(),
         photo.getSecret());
   }
@@ -154,10 +155,10 @@ public class Api {
   }
 
   private final RequestQueue requestQueue;
-  private final Set<QueryListener> queryListeners = new HashSet<QueryListener>();
+  private final Set<QueryListener> queryListeners = new HashSet<>();
   private QueryResult lastQueryResult;
 
-  protected Api(Context context) {
+  private Api(Context context) {
     this.requestQueue = Volley.newRequestQueue(context.getApplicationContext());
     QueryListener queryListener = new QueryListener() {
       @Override
@@ -202,7 +203,7 @@ public class Api {
     private final Query query;
     private final List<Photo> results;
 
-    public QueryResult(Query query, List<Photo> results) {
+    QueryResult(Query query, List<Photo> results) {
       this.query = query;
       this.results = results;
     }

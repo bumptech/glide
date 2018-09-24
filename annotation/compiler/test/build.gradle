@@ -1,0 +1,52 @@
+apply plugin: 'java'
+
+sourceSets {
+    test {
+        output.resourcesDir = "build/classes/java/test"
+    }
+}
+
+// This special test only submodule exists because adding the :glide dependency seems to break
+// the annotation processor dependency chain for the internal sample apps. It's also somewhat
+// easier to parse as a separate module given the existing complexity here and in the compiler
+dependencies {
+    // build.gradle file.
+    testImplementation project(':glide')
+    testImplementation project(':annotation:compiler')
+    testImplementation "junit:junit:${JUNIT_VERSION}"
+    testImplementation "com.squareup:javapoet:${JAVAPOET_VERSION}"
+    testImplementation "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
+    testImplementation "com.google.code.findbugs:jsr305:${JSR_305_VERSION}"
+    // Using 0.10 of compile-testing is required for Android Studio to function, but not for the
+    // gradle build. Not yet clear why, but it looks like some kind of version conflict between
+    // javapoet, guava and/or truth.
+    //noinspection GradleDependency
+    testImplementation 'com.google.testing.compile:compile-testing:0.10'
+    // Use a stupidly old version of the Android classes jar. This works because we just need to get
+    // our generated classes to compile and our generated classes tend to use simple and stable
+    // Android APIs. If that changes, we'll need to find an alternative.
+    testImplementation 'com.google.android:android:4.1.1.4'
+    // Use a stupidly old version of v4 because it's a jar. The newer support v4 packages are aars,
+    // which we can't depend on in a standard Java test. Since our usage of v4 is pretty simple,
+    // hopefully this will continue to work going forward.
+    testImplementation 'com.google.android:support-v4:r6'
+    testImplementation "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
+}
+
+task regenerateTestResources {
+    group 'Verification'
+    description 'Regenerates all test resource files under annotation/compiler/test/src/test/resources that are compared against the current output to detect regressions'
+    tasks.withType(Test) {
+        systemProperties.put("com.bumptech.glide.annotation.compiler.test.regenerate.path", projectDir)
+    }
+    doFirst {
+        println("Regenerating test resources....")
+    }
+    doLast {
+        println("Finished regenerating test resources")
+    }
+}
+regenerateTestResources.finalizedBy(test)
+
+test.maxParallelForks = 2
+

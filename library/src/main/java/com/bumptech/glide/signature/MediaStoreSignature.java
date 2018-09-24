@@ -1,7 +1,8 @@
 package com.bumptech.glide.signature;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.util.Util;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
@@ -10,7 +11,7 @@ import java.security.MessageDigest;
  * media store files like edits, rotations, and temporary file replacement.
  */
 public class MediaStoreSignature implements Key {
-  private final String mimeType;
+  @NonNull private final String mimeType;
   private final long dateModified;
   private final int orientation;
 
@@ -26,8 +27,8 @@ public class MediaStoreSignature implements Key {
    * @param orientation  The orientation of the media store media. Ok to default to 0. See {@link
    *                     android.provider.MediaStore.Images.ImageColumns#ORIENTATION}.
    */
-  public MediaStoreSignature(String mimeType, long dateModified, int orientation) {
-    this.mimeType = mimeType;
+  public MediaStoreSignature(@Nullable String mimeType, long dateModified, int orientation) {
+    this.mimeType = mimeType == null ? "" : mimeType;
     this.dateModified = dateModified;
     this.orientation = orientation;
   }
@@ -50,7 +51,7 @@ public class MediaStoreSignature implements Key {
     if (orientation != that.orientation) {
       return false;
     }
-    if (!Util.bothNullOrEqual(mimeType, that.mimeType)) {
+    if (!mimeType.equals(that.mimeType)) {
       return false;
     }
     return true;
@@ -58,14 +59,14 @@ public class MediaStoreSignature implements Key {
 
   @Override
   public int hashCode() {
-    int result = mimeType != null ? mimeType.hashCode() : 0;
+    int result = mimeType.hashCode();
     result = 31 * result + (int) (dateModified ^ (dateModified >>> 32));
     result = 31 * result + orientation;
     return result;
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     byte[] data = ByteBuffer.allocate(12).putLong(dateModified).putInt(orientation).array();
     messageDigest.update(data);
     messageDigest.update(mimeType.getBytes(CHARSET));

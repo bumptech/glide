@@ -10,7 +10,6 @@ import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -26,7 +25,6 @@ import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.samples.flickr.api.Api;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import com.bumptech.glide.samples.flickr.api.Query;
-import com.bumptech.glide.samples.flickr.api.RecentQuery;
 import com.bumptech.glide.samples.flickr.api.SearchQuery;
 import java.io.File;
 import java.util.ArrayList;
@@ -46,12 +44,14 @@ public class FlickrSearchActivity extends AppCompatActivity
     implements SearchView.OnQueryTextListener {
   private static final String TAG = "FlickrSearchActivity";
   private static final String STATE_QUERY = "state_search_string";
+  private static final Query DEFAULT_QUERY = new SearchQuery("kitten");
 
   private final QueryListener queryListener = new QueryListener();
+  private final Set<PhotoViewer> photoViewers = new HashSet<>();
+
+  private List<Photo> currentPhotos = new ArrayList<>();
   private View searching;
   private TextView searchTerm;
-  private Set<PhotoViewer> photoViewers = new HashSet<>();
-  private List<Photo> currentPhotos = new ArrayList<>();
   private View searchLoading;
   private BackgroundThumbnailFetcher backgroundThumbnailFetcher;
   private HandlerThread backgroundThread;
@@ -65,13 +65,14 @@ public class FlickrSearchActivity extends AppCompatActivity
     LIST
   }
 
-  private static final Map<Page, Integer> PAGE_TO_TITLE = new HashMap<Page, Integer>() {
-    {
-      put(Page.SMALL, R.string.small);
-      put(Page.MEDIUM, R.string.medium);
-      put(Page.LIST, R.string.list);
-    }
-  };
+  private static final Map<Page, Integer> PAGE_TO_TITLE;
+  static {
+    Map<Page, Integer> temp = new HashMap<>();
+    temp.put(Page.SMALL, R.string.small);
+    temp.put(Page.MEDIUM, R.string.medium);
+    temp.put(Page.LIST, R.string.list);
+    PAGE_TO_TITLE = Collections.unmodifiableMap(temp);
+  }
 
   @Override
   public void onAttachFragment(Fragment fragment) {
@@ -90,8 +91,7 @@ public class FlickrSearchActivity extends AppCompatActivity
     MenuInflater menuInflater = getMenuInflater();
     menuInflater.inflate(R.menu.search_activity, menu);
 
-    searchView =
-        (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
+    searchView = (SearchView) menu.findItem(R.id.search).getActionView();
     searchView.setSubmitButtonEnabled(true);
     searchView.setIconified(false);
     searchView.setOnQueryTextListener(this);
@@ -143,7 +143,7 @@ public class FlickrSearchActivity extends AppCompatActivity
         executeQuery(savedQuery);
       }
     } else {
-      executeQuery(RecentQuery.get());
+      executeQuery(DEFAULT_QUERY);
     }
 
     int smallGridSize = res.getDimensionPixelSize(R.dimen.small_photo_side);
@@ -250,12 +250,12 @@ public class FlickrSearchActivity extends AppCompatActivity
     }
   }
 
-  private class FlickrPagerAdapter extends FragmentPagerAdapter {
+  private final class FlickrPagerAdapter extends FragmentPagerAdapter {
 
     private int mLastPosition = -1;
     private Fragment mLastFragment;
 
-    public FlickrPagerAdapter(FragmentManager fm) {
+    FlickrPagerAdapter(FragmentManager fm) {
       super(fm);
     }
 
@@ -313,16 +313,17 @@ public class FlickrSearchActivity extends AppCompatActivity
   }
 
   private static class BackgroundThumbnailFetcher implements Runnable {
-    private boolean isCancelled;
-    private Context context;
-    private List<Photo> photos;
+    private final Context context;
+    private final List<Photo> photos;
 
-    public BackgroundThumbnailFetcher(Context context, List<Photo> photos) {
+    private boolean isCancelled;
+
+    BackgroundThumbnailFetcher(Context context, List<Photo> photos) {
       this.context = context;
       this.photos = photos;
     }
 
-    public void cancel() {
+    void cancel() {
       isCancelled = true;
     }
 

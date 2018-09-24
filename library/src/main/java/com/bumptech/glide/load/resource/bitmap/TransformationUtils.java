@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -13,12 +14,15 @@ import android.graphics.Shader;
 import android.media.ExifInterface;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -27,6 +31,8 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * A class with methods to efficiently resize Bitmaps.
  */
+// Legacy Public APIs.
+@SuppressWarnings("WeakerAccess")
 public final class TransformationUtils {
   private static final String TAG = "TransformationUtils";
   public static final int PAINT_FLAGS = Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
@@ -36,19 +42,52 @@ public final class TransformationUtils {
   private static final Paint CIRCLE_CROP_BITMAP_PAINT;
 
   // See #738.
-  private static final List<String> MODELS_REQUIRING_BITMAP_LOCK =
-      Arrays.asList(
-          "XT1097",
-          "XT1085");
+  private static final Set<String> MODELS_REQUIRING_BITMAP_LOCK =
+      new HashSet<>(
+          Arrays.asList(
+              // Moto X gen 2
+              "XT1085",
+              "XT1092",
+              "XT1093",
+              "XT1094",
+              "XT1095",
+              "XT1096",
+              "XT1097",
+              "XT1098",
+              // Moto G gen 1
+              "XT1031",
+              "XT1028",
+              "XT937C",
+              "XT1032",
+              "XT1008",
+              "XT1033",
+              "XT1035",
+              "XT1034",
+              "XT939G",
+              "XT1039",
+              "XT1040",
+              "XT1042",
+              "XT1045",
+              // Moto G gen 2
+              "XT1063",
+              "XT1064",
+              "XT1068",
+              "XT1069",
+              "XT1072",
+              "XT1077",
+              "XT1078",
+              "XT1079"
+          )
+      );
+
   /**
-   * https://github.com/bumptech/glide/issues/738 On some devices (Moto X with android 5.1) bitmap
-   * drawing is not thread safe.
+   * https://github.com/bumptech/glide/issues/738 On some devices, bitmap drawing is not thread
+   * safe.
    * This lock only locks for these specific devices. For other types of devices the lock is always
    * available and therefore does not impact performance
    */
   private static final Lock BITMAP_DRAWABLE_LOCK =
       MODELS_REQUIRING_BITMAP_LOCK.contains(Build.MODEL)
-          && Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1
           ? new ReentrantLock() : new NoLock();
 
   static {
@@ -83,20 +122,23 @@ public final class TransformationUtils {
     }
     // From ImageView/Bitmap.createScaledBitmap.
     final float scale;
-    float dx = 0, dy = 0;
+    final float dx;
+    final float dy;
     Matrix m = new Matrix();
     if (inBitmap.getWidth() * height > width * inBitmap.getHeight()) {
       scale = (float) height / (float) inBitmap.getHeight();
       dx = (width - inBitmap.getWidth() * scale) * 0.5f;
+      dy = 0;
     } else {
       scale = (float) width / (float) inBitmap.getWidth();
+      dx = 0;
       dy = (height - inBitmap.getHeight() * scale) * 0.5f;
     }
 
     m.setScale(scale, scale);
     m.postTranslate((int) (dx + 0.5f), (int) (dy + 0.5f));
 
-    Bitmap result = pool.get(width, height, getSafeConfig(inBitmap));
+    Bitmap result = pool.get(width, height, getNonNullConfig(inBitmap));
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
     TransformationUtils.setAlpha(inBitmap, result);
 
@@ -127,11 +169,10 @@ public final class TransformationUtils {
     final float heightPercentage = height / (float) inBitmap.getHeight();
     final float minPercentage = Math.min(widthPercentage, heightPercentage);
 
-    // take the floor of the target width/height, not round. If the matrix
-    // passed into drawBitmap rounds differently, we want to slightly
-    // overdraw, not underdraw, to avoid artifacts from bitmap reuse.
-    final int targetWidth = (int) (minPercentage * inBitmap.getWidth());
-    final int targetHeight = (int) (minPercentage * inBitmap.getHeight());
+    // Round here in case we've decoded exactly the image we want, but take the floor below to
+    // avoid a line of garbage or blank pixels in images.
+    int targetWidth = Math.round(minPercentage * inBitmap.getWidth());
+    int targetHeight = Math.round(minPercentage * inBitmap.getHeight());
 
     if (inBitmap.getWidth() == targetWidth && inBitmap.getHeight() == targetHeight) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -140,7 +181,13 @@ public final class TransformationUtils {
       return inBitmap;
     }
 
-    Bitmap.Config config = getSafeConfig(inBitmap);
+    // Take the floor of the target width/height, not round. If the matrix
+    // passed into drawBitmap rounds differently, we want to slightly
+    // overdraw, not underdraw, to avoid artifacts from bitmap reuse.
+    targetWidth = (int) (minPercentage * inBitmap.getWidth());
+    targetHeight = (int) (minPercentage * inBitmap.getHeight());
+
+    Bitmap.Config config = getNonNullConfig(inBitmap);
     Bitmap toReuse = pool.get(targetWidth, targetHeight, config);
 
     // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
@@ -172,7 +219,7 @@ public final class TransformationUtils {
    * height is larger than the given dimensions
    */
   public static Bitmap centerInside(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
-                                 int height) {
+      int height) {
     if (inBitmap.getWidth() <= width && inBitmap.getHeight() <= height) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "requested target size larger or equal to input, returning input");
@@ -264,11 +311,12 @@ public final class TransformationUtils {
    */
   public static Bitmap rotateImageExif(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap,
       int exifOrientation) {
-    final Matrix matrix = new Matrix();
-    initializeMatrixForRotation(exifOrientation, matrix);
-    if (matrix.isIdentity()) {
+    if (!isExifOrientationRequired(exifOrientation)) {
       return inBitmap;
     }
+
+    final Matrix matrix = new Matrix();
+    initializeMatrixForRotation(exifOrientation, matrix);
 
     // From Bitmap.createBitmap.
     final RectF newRect = new RectF(0, 0, inBitmap.getWidth(), inBitmap.getHeight());
@@ -277,13 +325,32 @@ public final class TransformationUtils {
     final int newWidth = Math.round(newRect.width());
     final int newHeight = Math.round(newRect.height());
 
-    Bitmap.Config config = getSafeConfig(inBitmap);
+    Bitmap.Config config = getNonNullConfig(inBitmap);
     Bitmap result = pool.get(newWidth, newHeight, config);
 
     matrix.postTranslate(-newRect.left, -newRect.top);
 
     applyMatrix(inBitmap, result, matrix);
     return result;
+  }
+
+  /**
+   * Returns {@code true} if the given exif orientation indicates that a transformation is necessary
+   * and {@code false} otherwise.
+   */
+  public static boolean isExifOrientationRequired(int exifOrientation) {
+    switch (exifOrientation) {
+      case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+      case ExifInterface.ORIENTATION_ROTATE_180:
+      case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+      case ExifInterface.ORIENTATION_TRANSPOSE:
+      case ExifInterface.ORIENTATION_ROTATE_90:
+      case ExifInterface.ORIENTATION_TRANSVERSE:
+      case ExifInterface.ORIENTATION_ROTATE_270:
+        return true;
+      default:
+        return false;
+    }
   }
 
   /**
@@ -318,7 +385,8 @@ public final class TransformationUtils {
     // Alpha is required for this transformation.
     Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
 
-    Bitmap result = pool.get(destMinEdge, destMinEdge, Bitmap.Config.ARGB_8888);
+    Bitmap.Config outConfig = getAlphaSafeConfig(inBitmap);
+    Bitmap result = pool.get(destMinEdge, destMinEdge, outConfig);
     result.setHasAlpha(true);
 
     BITMAP_DRAWABLE_LOCK.lock();
@@ -340,19 +408,32 @@ public final class TransformationUtils {
     return result;
   }
 
-  private static Bitmap getAlphaSafeBitmap(@NonNull BitmapPool pool,
-      @NonNull Bitmap maybeAlphaSafe) {
-    if (Bitmap.Config.ARGB_8888.equals(maybeAlphaSafe.getConfig())) {
+  private static Bitmap getAlphaSafeBitmap(
+      @NonNull BitmapPool pool, @NonNull Bitmap maybeAlphaSafe) {
+    Bitmap.Config safeConfig = getAlphaSafeConfig(maybeAlphaSafe);
+    if (safeConfig.equals(maybeAlphaSafe.getConfig())) {
       return maybeAlphaSafe;
     }
 
-    Bitmap argbBitmap = pool.get(maybeAlphaSafe.getWidth(), maybeAlphaSafe.getHeight(),
-        Bitmap.Config.ARGB_8888);
-    new Canvas(argbBitmap).drawBitmap(maybeAlphaSafe, 0 /*left*/, 0 /*top*/, null /*pain*/);
+    Bitmap argbBitmap =
+        pool.get(maybeAlphaSafe.getWidth(), maybeAlphaSafe.getHeight(), safeConfig);
+    new Canvas(argbBitmap).drawBitmap(maybeAlphaSafe, 0 /*left*/, 0 /*top*/, null /*paint*/);
 
     // We now own this Bitmap. It's our responsibility to replace it in the pool outside this method
     // when we're finished with it.
     return argbBitmap;
+  }
+
+  @NonNull
+  private static Config getAlphaSafeConfig(@NonNull Bitmap inBitmap) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      // Avoid short circuiting the sdk check.
+      if (Bitmap.Config.RGBA_F16.equals(inBitmap.getConfig())) { // NOPMD
+        return Bitmap.Config.RGBA_F16;
+      }
+    }
+
+    return Bitmap.Config.ARGB_8888;
   }
 
   /**
@@ -364,16 +445,41 @@ public final class TransformationUtils {
    * @param roundingRadius the corner radius to be applied (in device-specific pixels).
    * @return a {@link Bitmap} similar to inBitmap but with rounded corners.
    * @throws IllegalArgumentException if roundingRadius, width or height is 0 or less.
+   *
+   * @deprecated Width and height are unused and ignored. Use
+   * {@link #roundedCorners(BitmapPool, Bitmap, int)} instead.
    */
-  public static Bitmap roundedCorners(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap,
-      int width, int height, int roundingRadius) {
-    Preconditions.checkArgument(width > 0, "width must be greater than 0.");
-    Preconditions.checkArgument(height > 0, "height must be greater than 0.");
+  @Deprecated
+  public static Bitmap roundedCorners(
+      @NonNull BitmapPool pool,
+      @NonNull Bitmap inBitmap,
+      @SuppressWarnings("unused") int width,
+      @SuppressWarnings("unused") int height,
+      int roundingRadius) {
+    return roundedCorners(pool, inBitmap, roundingRadius);
+  }
+
+  /**
+   * Creates a bitmap from a source bitmap and rounds the corners.
+   *
+   * <p>This method does <em>NOT</em> resize the given {@link Bitmap}, it only rounds it's corners.
+   * To both resize and round the corners of an image, consider
+   * {@link com.bumptech.glide.request.RequestOptions#transforms(Transformation[])} and/or
+   * {@link com.bumptech.glide.load.MultiTransformation}.
+   *
+   * @param inBitmap the source bitmap to use as a basis for the created bitmap.
+   * @param roundingRadius the corner radius to be applied (in device-specific pixels).
+   * @return a {@link Bitmap} similar to inBitmap but with rounded corners.
+   * @throws IllegalArgumentException if roundingRadius, width or height is 0 or less.
+   */
+  public static Bitmap roundedCorners(
+      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int roundingRadius) {
     Preconditions.checkArgument(roundingRadius > 0, "roundingRadius must be greater than 0.");
 
     // Alpha is required for this transformation.
+    Bitmap.Config safeConfig = getAlphaSafeConfig(inBitmap);
     Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
-    Bitmap result = pool.get(width, height, Bitmap.Config.ARGB_8888);
+    Bitmap result = pool.get(toTransform.getWidth(), toTransform.getHeight(), safeConfig);
 
     result.setHasAlpha(true);
 
@@ -405,7 +511,8 @@ public final class TransformationUtils {
     canvas.setBitmap(null);
   }
 
-  private static Bitmap.Config getSafeConfig(Bitmap bitmap) {
+  @NonNull
+  private static Bitmap.Config getNonNullConfig(@NonNull Bitmap bitmap) {
     return bitmap.getConfig() != null ? bitmap.getConfig() : Bitmap.Config.ARGB_8888;
   }
 
@@ -421,7 +528,7 @@ public final class TransformationUtils {
     }
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static void initializeMatrixForRotation(int exifOrientation, Matrix matrix) {
     switch (exifOrientation) {
       case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:

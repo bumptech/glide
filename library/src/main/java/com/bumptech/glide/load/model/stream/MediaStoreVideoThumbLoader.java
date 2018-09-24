@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
@@ -9,7 +10,7 @@ import com.bumptech.glide.load.data.mediastore.ThumbFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-import com.bumptech.glide.load.resource.bitmap.VideoBitmapDecoder;
+import com.bumptech.glide.load.resource.bitmap.VideoDecoder;
 import com.bumptech.glide.signature.ObjectKey;
 import java.io.InputStream;
 
@@ -17,23 +18,25 @@ import java.io.InputStream;
  * Loads {@link InputStream}s from media store video {@link Uri}s that point to pre-generated
  * thumbnails for those {@link Uri}s in the media store.
  *
- * <p>If {@link VideoBitmapDecoder#TARGET_FRAME} is set with a non-null value that is not equal to
- * {@link VideoBitmapDecoder#DEFAULT_FRAME}, this loader will always return {@code null}. The media
+ * <p>If {@link VideoDecoder#TARGET_FRAME} is set with a non-null value that is not equal to
+ * {@link VideoDecoder#DEFAULT_FRAME}, this loader will always return {@code null}. The media
  * store does not use a defined frame to generate the thumbnail, so we cannot accurately fulfill
  * requests for specific frames.
  */
 public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream> {
   private final Context context;
 
-  MediaStoreVideoThumbLoader(Context context) {
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  public MediaStoreVideoThumbLoader(Context context) {
     this.context = context.getApplicationContext();
   }
 
   @Override
   @Nullable
-  public LoadData<InputStream> buildLoadData(Uri model, int width, int height, Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull Uri model, int width, int height,
+      @NonNull Options options) {
     if (MediaStoreUtil.isThumbnailSize(width, height) && isRequestingDefaultFrame(options)) {
-      // TODO(nnaze): Tighten down this call to just the dependencies neede by buildVideoFetcher
       return new LoadData<>(new ObjectKey(model), ThumbFetcher.buildVideoFetcher(context, model));
     } else {
       return null;
@@ -41,12 +44,12 @@ public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream>
   }
 
   private boolean isRequestingDefaultFrame(Options options) {
-    Long specifiedFrame = options.get(VideoBitmapDecoder.TARGET_FRAME);
-    return specifiedFrame != null && specifiedFrame == VideoBitmapDecoder.DEFAULT_FRAME;
+    Long specifiedFrame = options.get(VideoDecoder.TARGET_FRAME);
+    return specifiedFrame != null && specifiedFrame == VideoDecoder.DEFAULT_FRAME;
   }
 
   @Override
-  public boolean handles(Uri model) {
+  public boolean handles(@NonNull Uri model) {
     return MediaStoreUtil.isMediaStoreVideoUri(model);
   }
 
@@ -62,6 +65,7 @@ public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream>
       this.context = context;
     }
 
+    @NonNull
     @Override
     public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new MediaStoreVideoThumbLoader(context);

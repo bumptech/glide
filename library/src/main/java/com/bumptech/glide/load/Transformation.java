@@ -1,7 +1,10 @@
 package com.bumptech.glide.load;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.Resource;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
 
 /**
  * A class for performing an arbitrary transformation on a resource that implements
@@ -9,11 +12,17 @@ import com.bumptech.glide.load.engine.Resource;
  * cache and {@link #updateDiskCacheKey(java.security.MessageDigest)}} to identify the
  * transformation in disk caches.
  *
- * <p>Using the fully qualified class name (not {@link Class#getName()} to avoid proguard
- * obfuscation) is an easy way to implement
- * {@link #updateDiskCacheKey(java.security.MessageDigest)}} correctly.
+ * <p>Using the fully qualified class name as a static final {@link String} (not
+ * {@link Class#getName()} to avoid proguard obfuscation) is an easy way to implement
+ * {@link #updateDiskCacheKey(java.security.MessageDigest)}} correctly. If additional arguments are
+ * required they can be passed in to the constructor of the {@code Transformation} and then used to
+ * update the {@link java.security.MessageDigest} passed in to
+ * {@link #updateDiskCacheKey(MessageDigest)}. If arguments are primitive types, they can typically
+ * easily be serialized using {@link java.nio.ByteBuffer}. {@link String} types can be serialized
+ * with {@link String#getBytes(Charset)} using the constant {@link #CHARSET}.
  *
- * <p>Implementations <em>must</em> implement {@link #equals(Object)} and {@link #hashCode()}.
+ * <p>Implementations <em>must</em> implement {@link #equals(Object)} and {@link #hashCode()} for
+ * memory caching to work correctly.
  *
  * @param <T> The type of the resource being transformed.
  */
@@ -53,19 +62,7 @@ public interface Transformation<T> extends Key {
    *                  original resource height.
    * @return The transformed resource.
    */
-  Resource<T> transform(Context context, Resource<T> resource, int outWidth, int outHeight);
-
-  /**
-   * For caching to work correctly, implementations <em>must</em> implement this method and
-   * {@link #hashCode()}.
-   */
-  @Override
-  boolean equals(Object o);
-
-  /**
-   * For caching to work correctly, implementations <em>must</em> implement this method and
-   * {@link #equals(Object)}.
-   */
-  @Override
-  int hashCode();
+  @NonNull
+  Resource<T> transform(@NonNull Context context, @NonNull Resource<T> resource,
+      int outWidth, int outHeight);
 }

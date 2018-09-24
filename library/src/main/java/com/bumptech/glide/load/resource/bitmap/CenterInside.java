@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -16,26 +15,6 @@ import java.security.MessageDigest;
 public class CenterInside extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.CenterInside";
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
-
-  public CenterInside() {
-    // Intentionally empty.
-  }
-
-  /**
-   * Use {@link #CenterInside()}.
-   */
-  @Deprecated
-  public CenterInside(@SuppressWarnings("unused") Context context) {
-    this();
-  }
-
-  /**
-   * Use {@link #CenterInside()}.
-   */
-  @Deprecated
-  public CenterInside(@SuppressWarnings("unused") BitmapPool bitmapPool) {
-    this();
-  }
 
   @Override
   protected Bitmap transform(
@@ -54,7 +33,7 @@ public class CenterInside extends BitmapTransformation {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     messageDigest.update(ID_BYTES);
   }
 }

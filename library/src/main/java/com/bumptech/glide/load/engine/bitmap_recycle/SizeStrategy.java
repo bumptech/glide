@@ -1,12 +1,13 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
-import java.util.TreeMap;
+import java.util.NavigableMap;
 
 /**
  * A strategy for reusing bitmaps that relies on
@@ -14,12 +15,12 @@ import java.util.TreeMap;
  *
  * <p> Requires {@link Build.VERSION_CODES#KITKAT KitKat} or higher. </p>
  */
-@TargetApi(Build.VERSION_CODES.KITKAT)
-class SizeStrategy implements LruPoolStrategy {
+@RequiresApi(Build.VERSION_CODES.KITKAT)
+final class SizeStrategy implements LruPoolStrategy {
   private static final int MAX_SIZE_MULTIPLE = 8;
   private final KeyPool keyPool = new KeyPool();
   private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<>();
-  private final TreeMap<Integer, Integer> sortedSizes = new PrettyPrintTreeMap<>();
+  private final NavigableMap<Integer, Integer> sortedSizes = new PrettyPrintTreeMap<>();
 
   @Override
   public void put(Bitmap bitmap) {
@@ -101,16 +102,16 @@ class SizeStrategy implements LruPoolStrategy {
     return getBitmapString(size);
   }
 
-  @Synthetic
-  static String getBitmapString(int size) {
+  @Synthetic static String getBitmapString(int size) {
     return "[" + size + "]";
   }
 
-  // Visible for testing.
+  // Non-final for mocking.
+  @VisibleForTesting
   static class KeyPool extends BaseKeyPool<Key> {
 
     public Key get(int size) {
-      Key result = get();
+      Key result = super.get();
       result.init(size);
       return result;
     }
@@ -121,7 +122,7 @@ class SizeStrategy implements LruPoolStrategy {
     }
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static final class Key implements Poolable {
     private final KeyPool pool;
     @Synthetic int size;
@@ -148,6 +149,8 @@ class SizeStrategy implements LruPoolStrategy {
       return size;
     }
 
+    // PMD.AccessorMethodGeneration: https://github.com/pmd/pmd/issues/807
+    @SuppressWarnings("PMD.AccessorMethodGeneration")
     @Override
     public String toString() {
       return getBitmapString(size);

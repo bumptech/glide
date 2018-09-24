@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
@@ -46,11 +47,12 @@ public interface ModelLoader<Model, Data> {
     public final List<Key> alternateKeys;
     public final DataFetcher<Data> fetcher;
 
-    public LoadData(Key sourceKey, DataFetcher<Data> fetcher) {
+    public LoadData(@NonNull Key sourceKey, @NonNull DataFetcher<Data> fetcher) {
       this(sourceKey, Collections.<Key>emptyList(), fetcher);
     }
 
-    public LoadData(Key sourceKey, List<Key> alternateKeys, DataFetcher<Data> fetcher) {
+    public LoadData(@NonNull Key sourceKey, @NonNull List<Key> alternateKeys,
+        @NonNull DataFetcher<Data> fetcher) {
       this.sourceKey = Preconditions.checkNotNull(sourceKey);
       this.alternateKeys = Preconditions.checkNotNull(alternateKeys);
       this.fetcher = Preconditions.checkNotNull(fetcher);
@@ -77,7 +79,8 @@ public interface ModelLoader<Model, Data> {
    *               the resource should be loaded at its original height.
    */
   @Nullable
-  LoadData<Data> buildLoadData(Model model, int width, int height, Options options);
+  LoadData<Data> buildLoadData(@NonNull Model model, int width, int height,
+      @NonNull Options options);
 
   /**
    * Returns true if the given model is a of a recognized type that this loader can probably load.
@@ -89,5 +92,5 @@ public interface ModelLoader<Model, Data> {
    * results are acceptable. {@link ModelLoader ModelLoaders} that return true from this method may
    * return {@code null} from {@link #buildLoadData(Object, int, int, Options)} </p>
    */
-  boolean handles(Model model);
+  boolean handles(@NonNull Model model);
 }

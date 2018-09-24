@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -18,26 +17,6 @@ public class CircleCrop extends BitmapTransformation {
   private static final int VERSION = 1;
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.CircleCrop." + VERSION;
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
-
-  public CircleCrop() {
-    // Intentionally empty.
-  }
-
-  /**
-   * @deprecated Use {@link #CircleCrop()}.
-   */
-  @Deprecated
-  public CircleCrop(@SuppressWarnings("unused") Context context) {
-    this();
-  }
-
-  /**
-   * @deprecated Use {@link #CircleCrop()}
-   */
-  @Deprecated
-  public CircleCrop(@SuppressWarnings("unused") BitmapPool bitmapPool) {
-    this();
-  }
 
   // Bitmap doesn't implement equals, so == and .equals are equivalent here.
   @SuppressWarnings("PMD.CompareObjectsWithEquals")
@@ -58,7 +37,7 @@ public class CircleCrop extends BitmapTransformation {
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     messageDigest.update(ID_BYTES);
   }
 }

@@ -3,6 +3,8 @@ package com.bumptech.glide.samples.gallery;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -15,6 +17,7 @@ import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.signature.MediaStoreSignature;
+import com.bumptech.glide.util.Preconditions;
 import java.util.Collections;
 import java.util.List;
 
@@ -91,13 +94,15 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
     return 0;
   }
 
+  @NonNull
   @Override
   public List<MediaStoreData> getPreloadItems(int position) {
     return Collections.singletonList(data.get(position));
   }
 
+  @Nullable
   @Override
-  public RequestBuilder<Drawable> getPreloadRequestBuilder(MediaStoreData item) {
+  public RequestBuilder<Drawable> getPreloadRequestBuilder(@NonNull MediaStoreData item) {
     MediaStoreSignature signature =
         new MediaStoreSignature(item.mimeType, item.dateModified, item.orientation);
     return requestBuilder
@@ -106,8 +111,10 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
         .load(item.uri);
   }
 
+  @Nullable
   @Override
-  public int[] getPreloadSize(MediaStoreData item, int adapterPosition, int perItemPosition) {
+  public int[] getPreloadSize(@NonNull MediaStoreData item, int adapterPosition,
+      int perItemPosition) {
     return actualDimensions;
   }
 
@@ -115,7 +122,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
   @SuppressWarnings("deprecation")
   private static int getScreenWidth(Context context) {
     WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-    Display display = wm.getDefaultDisplay();
+    Display display = Preconditions.checkNotNull(wm).getDefaultDisplay();
     Point size = new Point();
     display.getSize(size);
     return size.x;
@@ -125,13 +132,13 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
    * ViewHolder containing views to display individual {@link
    * com.bumptech.glide.samples.gallery.MediaStoreData}.
    */
-  public static final class ListViewHolder extends RecyclerView.ViewHolder {
+  static final class ListViewHolder extends RecyclerView.ViewHolder {
 
     private final ImageView image;
 
-    public ListViewHolder(View itemView) {
+    ListViewHolder(View itemView) {
       super(itemView);
-      image = (ImageView) itemView.findViewById(R.id.image);
+      image = itemView.findViewById(R.id.image);
     }
   }
 }

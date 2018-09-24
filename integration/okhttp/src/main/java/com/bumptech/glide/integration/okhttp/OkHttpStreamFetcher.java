@@ -27,16 +27,19 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "OkHttpFetcher";
   private final OkHttpClient client;
   private final GlideUrl url;
-  @Synthetic InputStream stream;
-  @Synthetic ResponseBody responseBody;
+  @SuppressWarnings("WeakerAccess") @Synthetic InputStream stream;
+  @SuppressWarnings("WeakerAccess") @Synthetic ResponseBody responseBody;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public OkHttpStreamFetcher(OkHttpClient client, GlideUrl url) {
     this.client = client;
     this.url = url;
   }
 
   @Override
-  public void loadData(Priority priority, final DataCallback<? super InputStream> callback) {
+  public void loadData(@NonNull Priority priority,
+      @NonNull final DataCallback<? super InputStream> callback) {
     Request.Builder requestBuilder = new Request.Builder().url(url.toStringUrl());
     for (Map.Entry<String, String> headerEntry : url.getHeaders().entrySet()) {
       String key = headerEntry.getKey();

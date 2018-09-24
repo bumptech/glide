@@ -18,7 +18,7 @@ public enum MemoryCategory {
    */
   HIGH(1.5f);
 
-  private float multiplier;
+  private final float multiplier;
 
   MemoryCategory(float multiplier) {
     this.multiplier = multiplier;

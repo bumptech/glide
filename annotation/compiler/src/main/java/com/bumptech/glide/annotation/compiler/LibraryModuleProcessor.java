@@ -11,18 +11,18 @@ import javax.lang.model.element.TypeElement;
 
 /**
  * Generates Indexer classes annotated with {@link Index} for all
- * {@link LibraryGlideModule}s.
+ * {@code LibraryGlideModule}s.
  */
 final class LibraryModuleProcessor {
-  private ProcessorUtil processorUtil;
-  private IndexerGenerator indexerGenerator;
+  private final ProcessorUtil processorUtil;
+  private final IndexerGenerator indexerGenerator;
 
   LibraryModuleProcessor(ProcessorUtil processorUtil, IndexerGenerator indexerGenerator) {
     this.processorUtil = processorUtil;
     this.indexerGenerator = indexerGenerator;
   }
 
-  boolean processModules(Set<? extends TypeElement> set, RoundEnvironment env) {
+  boolean processModules(RoundEnvironment env) {
      // Order matters here, if we find an Indexer below, we return before writing the root module.
     // If we fail to add to appModules before then, we might accidentally skip a valid RootModule.
     List<TypeElement> libraryGlideModules = new ArrayList<>();

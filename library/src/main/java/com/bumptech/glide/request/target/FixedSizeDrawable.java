@@ -1,6 +1,5 @@
 package com.bumptech.glide.request.target;
 
-import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -10,6 +9,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 
@@ -27,6 +28,8 @@ public class FixedSizeDrawable extends Drawable {
   private State state;
   private boolean mutated;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public FixedSizeDrawable(Drawable wrapped, int width, int height) {
     this(new State(wrapped.getConstantState(), width, height), wrapped);
   }
@@ -51,7 +54,7 @@ public class FixedSizeDrawable extends Drawable {
   }
 
   @Override
-  public void setBounds(Rect bounds) {
+  public void setBounds(@NonNull Rect bounds) {
     super.setBounds(bounds);
     this.bounds.set(bounds);
     updateMatrix();
@@ -71,6 +74,7 @@ public class FixedSizeDrawable extends Drawable {
     return wrapped.getChangingConfigurations();
   }
 
+  @Deprecated
   @Override
   public void setDither(boolean dither) {
     wrapped.setDither(dither);
@@ -86,14 +90,14 @@ public class FixedSizeDrawable extends Drawable {
     return wrapped.getCallback();
   }
 
-  @TargetApi(Build.VERSION_CODES.KITKAT)
+  @RequiresApi(Build.VERSION_CODES.KITKAT)
   @Override
   public int getAlpha() {
     return wrapped.getAlpha();
   }
 
   @Override
-  public void setColorFilter(int color, PorterDuff.Mode mode) {
+  public void setColorFilter(int color, @NonNull PorterDuff.Mode mode) {
     wrapped.setColorFilter(color, mode);
   }
 
@@ -102,6 +106,7 @@ public class FixedSizeDrawable extends Drawable {
     wrapped.clearColorFilter();
   }
 
+  @NonNull
   @Override
   public Drawable getCurrent() {
     return wrapped.getCurrent();
@@ -133,7 +138,7 @@ public class FixedSizeDrawable extends Drawable {
   }
 
   @Override
-  public boolean getPadding(Rect padding) {
+  public boolean getPadding(@NonNull Rect padding) {
     return wrapped.getPadding(padding);
   }
 
@@ -144,19 +149,19 @@ public class FixedSizeDrawable extends Drawable {
   }
 
   @Override
-  public void unscheduleSelf(Runnable what) {
+  public void unscheduleSelf(@NonNull Runnable what) {
     super.unscheduleSelf(what);
     wrapped.unscheduleSelf(what);
   }
 
   @Override
-  public void scheduleSelf(Runnable what, long when) {
+  public void scheduleSelf(@NonNull Runnable what, long when) {
     super.scheduleSelf(what, when);
     wrapped.scheduleSelf(what, when);
   }
 
   @Override
-  public void draw(Canvas canvas) {
+  public void draw(@NonNull Canvas canvas) {
     canvas.save();
     canvas.concat(matrix);
     wrapped.draw(canvas);
@@ -178,6 +183,7 @@ public class FixedSizeDrawable extends Drawable {
     return wrapped.getOpacity();
   }
 
+  @NonNull
   @Override
   public Drawable mutate() {
     if (!mutated && super.mutate() == this) {
@@ -193,7 +199,7 @@ public class FixedSizeDrawable extends Drawable {
     return state;
   }
 
-  static class State extends ConstantState {
+  static final class State extends ConstantState {
     private final ConstantState wrapped;
     @Synthetic final int width;
     @Synthetic final int height;
@@ -208,11 +214,13 @@ public class FixedSizeDrawable extends Drawable {
       this.height = height;
     }
 
+    @NonNull
     @Override
     public Drawable newDrawable() {
       return new FixedSizeDrawable(this, wrapped.newDrawable());
     }
 
+    @NonNull
     @Override
     public Drawable newDrawable(Resources res) {
       return new FixedSizeDrawable(this, wrapped.newDrawable(res));

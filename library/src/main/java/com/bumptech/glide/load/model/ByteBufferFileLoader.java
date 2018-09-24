@@ -8,6 +8,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.util.ByteBufferUtil;
+import com.bumptech.glide.util.Synthetic;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -19,13 +20,13 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
   private static final String TAG = "ByteBufferFileLoader";
 
   @Override
-  public LoadData<ByteBuffer> buildLoadData(File file, int width, int height,
-      Options options) {
+  public LoadData<ByteBuffer> buildLoadData(@NonNull File file, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(file), new ByteBufferFetcher(file));
   }
 
   @Override
-  public boolean handles(File file) {
+  public boolean handles(@NonNull File file) {
     return true;
   }
 
@@ -34,8 +35,9 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
    */
   public static class Factory implements ModelLoaderFactory<File, ByteBuffer> {
 
+    @NonNull
     @Override
-    public ModelLoader<File, ByteBuffer> build(MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<File, ByteBuffer> build(@NonNull MultiModelLoaderFactory multiFactory) {
       return new ByteBufferFileLoader();
     }
 
@@ -45,17 +47,20 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
     }
   }
 
-  private static class ByteBufferFetcher implements DataFetcher<ByteBuffer> {
+  private static final class ByteBufferFetcher implements DataFetcher<ByteBuffer> {
 
     private final File file;
 
-    public ByteBufferFetcher(File file) {
+    @Synthetic
+    @SuppressWarnings("WeakerAccess")
+    ByteBufferFetcher(File file) {
       this.file = file;
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super ByteBuffer> callback) {
-      ByteBuffer result = null;
+    public void loadData(@NonNull Priority priority,
+        @NonNull DataCallback<? super ByteBuffer> callback) {
+      ByteBuffer result;
       try {
         result = ByteBufferUtil.fromFile(file);
       } catch (IOException e) {

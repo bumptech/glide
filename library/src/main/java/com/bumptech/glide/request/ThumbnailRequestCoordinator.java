@@ -1,6 +1,7 @@
 package com.bumptech.glide.request;
 
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 
 /**
  * A coordinator that coordinates two individual {@link Request}s that load a small thumbnail
@@ -8,17 +9,19 @@ import android.support.annotation.Nullable;
  */
 public class ThumbnailRequestCoordinator implements RequestCoordinator,
     Request {
+  @Nullable private final RequestCoordinator parent;
+
   private Request full;
   private Request thumb;
-  @Nullable private RequestCoordinator coordinator;
   private boolean isRunning;
 
-  public ThumbnailRequestCoordinator() {
-    this(null);
+  @VisibleForTesting
+  ThumbnailRequestCoordinator() {
+    this(/*parent=*/ null);
   }
 
-  public ThumbnailRequestCoordinator(RequestCoordinator coordinator) {
-    this.coordinator = coordinator;
+  public ThumbnailRequestCoordinator(@Nullable RequestCoordinator parent) {
+    this.parent = parent;
   }
 
   public void setRequests(Request full, Request thumb) {
@@ -38,7 +41,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   }
 
   private boolean parentCanSetImage() {
-    return coordinator == null || coordinator.canSetImage(this);
+    return parent == null || parent.canSetImage(this);
   }
 
   /**
@@ -52,8 +55,17 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     return parentCanNotifyStatusChanged() && request.equals(full) && !isAnyResourceSet();
   }
 
+  @Override
+  public boolean canNotifyCleared(Request request) {
+    return parentCanNotifyCleared() && request.equals(full);
+  }
+
+  private boolean parentCanNotifyCleared() {
+    return parent == null || parent.canNotifyCleared(this);
+  }
+
   private boolean parentCanNotifyStatusChanged() {
-    return coordinator == null || coordinator.canNotifyStatusChanged(this);
+    return parent == null || parent.canNotifyStatusChanged(this);
   }
 
   @Override
@@ -66,8 +78,8 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     if (request.equals(thumb)) {
       return;
     }
-    if (coordinator != null) {
-      coordinator.onRequestSuccess(this);
+    if (parent != null) {
+      parent.onRequestSuccess(this);
     }
     // Clearing the thumb is not necessarily safe if the thumb is being displayed in the Target,
     // as a layer in a cross fade for example. The only way we know the thumb is not being
@@ -77,8 +89,19 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     }
   }
 
+  @Override
+  public void onRequestFailed(Request request) {
+    if (!request.equals(full)) {
+      return;
+    }
+
+    if (parent != null) {
+      parent.onRequestFailed(this);
+    }
+  }
+
   private boolean parentIsAnyResourceSet() {
-    return coordinator != null && coordinator.isAnyResourceSet();
+    return parent != null && parent.isAnyResourceSet();
   }
 
   /**
@@ -87,7 +110,9 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   @Override
   public void begin() {
     isRunning = true;
-    if (!thumb.isRunning()) {
+    // If the request has completed previously, there's no need to restart both the full and the
+    // thumb, we can just restart the full.
+    if (!full.isComplete() && !thumb.isRunning()) {
       thumb.begin();
     }
     if (isRunning && !full.isRunning()) {
@@ -96,25 +121,10 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   }
 
   @Override
-  public void pause() {
-    isRunning = false;
-    full.pause();
-    thumb.pause();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
   public void clear() {
     isRunning = false;
     thumb.clear();
     full.clear();
-  }
-
-  @Override
-  public boolean isPaused() {
-    return full.isPaused();
   }
 
   /**
@@ -139,8 +149,8 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
   }
 
   @Override
-  public boolean isCancelled() {
-    return full.isCancelled();
+  public boolean isCleared() {
+    return full.isCleared();
   }
 
   /**
@@ -151,9 +161,6 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator,
     return full.isFailed();
   }
 
-  /**
-   * {@inheritDoc}.
-   */
   @Override
   public void recycle() {
     full.recycle();

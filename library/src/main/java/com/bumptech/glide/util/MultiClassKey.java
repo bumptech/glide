@@ -1,5 +1,8 @@
 package com.bumptech.glide.util;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 /**
  * A key of two {@link Class}es to be used in hashed collections.
  */
@@ -13,19 +16,20 @@ public class MultiClassKey {
     // leave them null
   }
 
-  public MultiClassKey(Class<?> first, Class<?> second) {
+  public MultiClassKey(@NonNull Class<?> first, @NonNull Class<?> second) {
     set(first, second);
   }
 
-  public MultiClassKey(Class<?> first, Class<?> second, Class<?> third) {
+  public MultiClassKey(@NonNull Class<?> first, @NonNull Class<?> second,
+      @Nullable Class<?> third) {
     set(first, second, third);
   }
 
-  public void set(Class<?> first, Class<?> second) {
+  public void set(@NonNull Class<?> first, @NonNull Class<?> second) {
     set(first, second, null);
   }
 
-  public void set(Class<?> first, Class<?> second, Class<?> third) {
+  public void set(@NonNull Class<?> first, @NonNull Class<?> second, @Nullable Class<?> third) {
     this.first = first;
     this.second = second;
     this.third = third;

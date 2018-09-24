@@ -1,11 +1,11 @@
 package com.bumptech.glide.integration.volley;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.module.GlideModule;
 import java.io.InputStream;
 
 /**
@@ -20,9 +20,10 @@ import java.io.InputStream;
  * @deprecated Replaced with {@link VolleyLibraryGlideModule}.
  */
 @Deprecated
-public class VolleyGlideModule implements GlideModule {
+@SuppressWarnings("deprecation")
+public class VolleyGlideModule implements com.bumptech.glide.module.GlideModule {
   @Override
-  public void applyOptions(Context context, GlideBuilder builder) {
+  public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {
     // Do nothing.
   }
 

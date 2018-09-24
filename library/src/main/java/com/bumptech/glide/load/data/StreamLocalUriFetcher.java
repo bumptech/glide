@@ -1,13 +1,10 @@
 package com.bumptech.glide.load.data;
 
-import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.UriMatcher;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,7 +86,6 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
     }
   }
 
-  @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   private InputStream openContactPhotoInputStream(ContentResolver contentResolver, Uri contactUri) {
     return ContactsContract.Contacts.openContactPhotoInputStream(contentResolver, contactUri,
         true /*preferHighres*/);

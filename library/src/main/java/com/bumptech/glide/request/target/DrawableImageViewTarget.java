@@ -13,6 +13,16 @@ public class DrawableImageViewTarget extends ImageViewTarget<Drawable> {
     super(view);
   }
 
+  /**
+   * @deprecated Use {@link #waitForLayout()} instead.
+   */
+  // Public API.
+  @SuppressWarnings({"unused", "deprecation"})
+  @Deprecated
+  public DrawableImageViewTarget(ImageView view, boolean waitForLayout) {
+    super(view, waitForLayout);
+  }
+
   @Override
   protected void setResource(@Nullable Drawable resource) {
     view.setImageDrawable(resource);

@@ -15,9 +15,9 @@ import javax.lang.model.element.TypeElement;
 
 /**
  * Runs the final steps of Glide's annotation process and generates the combined
- * {@link AppGlideModule}, {@link com.bumptech.glide.Glide},
- * {@link com.bumptech.glide.RequestManager}, and
- * {@link com.bumptech.glide.request.RequestOptions} classes.
+ * {@code AppGlideModule}, {@code com.bumptech.glide.Glide},
+ * {@code com.bumptech.glide.RequestManager}, and
+ * {@code com.bumptech.glide.request.RequestOptions} classes.
  */
 final class AppModuleProcessor {
   private static final String COMPILER_PACKAGE_NAME =
@@ -88,7 +88,8 @@ final class AppModuleProcessor {
       writeRequestOptions(generatedCodePackageName, generatedRequestOptions);
 
     TypeSpec generatedRequestBuilder =
-        requestBuilderGenerator.generate(generatedCodePackageName, generatedRequestOptions);
+        requestBuilderGenerator.generate(
+            generatedCodePackageName, indexedClassNames.extensions, generatedRequestOptions);
     writeRequestBuilder(generatedCodePackageName, generatedRequestBuilder);
 
     TypeSpec requestManager =
@@ -166,8 +167,8 @@ final class AppModuleProcessor {
   }
 
   private static final class FoundIndexedClassNames {
-    final Set<String> glideModules;
-    final Set<String> extensions;
+    private final Set<String> glideModules;
+    private final Set<String> extensions;
 
     private FoundIndexedClassNames(Set<String> glideModules, Set<String> extensions) {
       this.glideModules = glideModules;

@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -25,18 +26,21 @@ public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
   );
   private final ModelLoader<GlideUrl, Data> urlLoader;
 
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public UrlUriLoader(ModelLoader<GlideUrl, Data> urlLoader) {
     this.urlLoader = urlLoader;
   }
 
   @Override
-  public LoadData<Data> buildLoadData(Uri uri, int width, int height, Options options) {
+  public LoadData<Data> buildLoadData(@NonNull Uri uri, int width, int height,
+      @NonNull Options options) {
     GlideUrl glideUrl = new GlideUrl(uri.toString());
     return urlLoader.buildLoadData(glideUrl, width, height, options);
   }
 
   @Override
-  public boolean handles(Uri uri) {
+  public boolean handles(@NonNull Uri uri) {
     return SCHEMES.contains(uri.getScheme());
   }
 
@@ -46,6 +50,7 @@ public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
    */
   public static class StreamFactory implements ModelLoaderFactory<Uri, InputStream> {
 
+    @NonNull
     @Override
     public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
       return new UrlUriLoader<>(multiFactory.build(GlideUrl.class, InputStream.class));

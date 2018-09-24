@@ -37,7 +37,7 @@ public class MediaStoreDataLoader extends AsyncTaskLoader<List<MediaStoreData>> 
   private boolean observerRegistered = false;
   private final ForceLoadContentObserver forceLoadContentObserver = new ForceLoadContentObserver();
 
-  public MediaStoreDataLoader(Context context) {
+  MediaStoreDataLoader(Context context) {
     super(context);
   }
 

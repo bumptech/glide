@@ -21,6 +21,12 @@ public interface RequestCoordinator {
   boolean canNotifyStatusChanged(Request request);
 
   /**
+   * Returns {@code true} if the {@link Request} can clear the
+   * {@link com.bumptech.glide.request.target.Target}.
+   */
+  boolean canNotifyCleared(Request request);
+
+  /**
    * Returns true if any coordinated {@link Request} has successfully completed.
    *
    * @see Request#isComplete()
@@ -28,7 +34,10 @@ public interface RequestCoordinator {
   boolean isAnyResourceSet();
 
   /**
-   * Must be called when a request coordinated by this object completes successfully.
+   * Must be called when a {@link Request} coordinated by this object completes successfully.
    */
   void onRequestSuccess(Request request);
+
+  /** Must be called when a {@link Request} coordinated by this object fails. */
+  void onRequestFailed(Request request);
 }

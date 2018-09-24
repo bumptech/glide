@@ -2,7 +2,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <bitmap
-            android:src="@android:drawable/sym_def_app_icon"
+            android:src="@mipmap/ic_launcher"
             android:gravity="center" />
     </item>
     <item

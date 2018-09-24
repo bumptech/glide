@@ -4,12 +4,16 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Parses {@link com.bumptech.glide.module.GlideModule} references out of the AndroidManifest file.
  */
+// Used only in javadoc.
+@SuppressWarnings("deprecation")
+@Deprecated
 public final class ManifestParser {
   private static final String TAG = "ManifestParser";
   private static final String GLIDE_MODULE_VALUE = "GlideModule";
@@ -65,21 +69,27 @@ public final class ManifestParser {
       throw new IllegalArgumentException("Unable to find GlideModule implementation", e);
     }
 
-    Object module;
+    Object module = null;
     try {
-      module = clazz.newInstance();
+      module = clazz.getDeclaredConstructor().newInstance();
+    // These can't be combined until API minimum is 19.
     } catch (InstantiationException e) {
-      throw new RuntimeException("Unable to instantiate GlideModule implementation for " + clazz,
-              e);
-      // These can't be combined until API minimum is 19.
+      throwInstantiateGlideModuleException(clazz, e);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException("Unable to instantiate GlideModule implementation for " + clazz,
-              e);
+      throwInstantiateGlideModuleException(clazz, e);
+    } catch (NoSuchMethodException e) {
+      throwInstantiateGlideModuleException(clazz, e);
+    } catch (InvocationTargetException e) {
+      throwInstantiateGlideModuleException(clazz, e);
     }
 
     if (!(module instanceof GlideModule)) {
       throw new RuntimeException("Expected instanceof GlideModule, but found: " + module);
     }
     return (GlideModule) module;
+  }
+
+  private static void throwInstantiateGlideModuleException(Class<?> clazz, Exception e) {
+    throw new RuntimeException("Unable to instantiate GlideModule implementation for " + clazz, e);
   }
 }

@@ -4,6 +4,8 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.widget.RemoteViews;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
@@ -15,6 +17,8 @@ import com.bumptech.glide.util.Preconditions;
  * <p> Note - For cancellation to work correctly, you must pass in the same instance of this class
  * for every subsequent load. </p>
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public class AppWidgetTarget extends SimpleTarget<Bitmap> {
   private final int[] widgetIds;
   private final ComponentName componentName;
@@ -116,7 +120,8 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
   }
 
   @Override
-  public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+  public void onResourceReady(@NonNull Bitmap resource,
+      @Nullable Transition<? super Bitmap> transition) {
     this.remoteViews.setImageViewBitmap(this.viewId, resource);
     this.update();
   }

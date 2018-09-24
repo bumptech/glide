@@ -6,6 +6,7 @@ import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG_A;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.UNKNOWN;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -31,7 +32,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   private static final int MOTOROLA_TIFF_MAGIC_NUMBER = 0x4D4D;
   // "II".
   private static final int INTEL_TIFF_MAGIC_NUMBER = 0x4949;
-  static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
+  private static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
   static final byte[] JPEG_EXIF_SEGMENT_PREAMBLE_BYTES =
       JPEG_EXIF_SEGMENT_PREAMBLE.getBytes(Charset.forName("UTF-8"));
   private static final int SEGMENT_SOS = 0xDA;
@@ -56,37 +57,42 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   private static final int WEBP_EXTENDED_ALPHA_FLAG = 1 << 4;
   private static final int WEBP_LOSSLESS_ALPHA_FLAG = 1 << 3;
 
+  @NonNull
   @Override
-  public ImageType getType(InputStream is) throws IOException {
+  public ImageType getType(@NonNull InputStream is) throws IOException {
     return getType(new StreamReader(Preconditions.checkNotNull(is)));
   }
 
+  @NonNull
   @Override
-  public ImageType getType(ByteBuffer byteBuffer) throws IOException {
+  public ImageType getType(@NonNull ByteBuffer byteBuffer) throws IOException {
     return getType(new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)));
   }
 
   @Override
-  public int getOrientation(InputStream is, ArrayPool byteArrayPool) throws IOException {
+  public int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
     return getOrientation(new StreamReader(Preconditions.checkNotNull(is)),
         Preconditions.checkNotNull(byteArrayPool));
   }
 
   @Override
-  public int getOrientation(ByteBuffer byteBuffer, ArrayPool byteArrayPool) throws IOException {
+  public int getOrientation(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
     return getOrientation(new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)),
         Preconditions.checkNotNull(byteArrayPool));
   }
 
+  @NonNull
   private ImageType getType(Reader reader) throws IOException {
-    int firstTwoBytes = reader.getUInt16();
+    final int firstTwoBytes = reader.getUInt16();
 
     // JPEG.
     if (firstTwoBytes == EXIF_MAGIC_NUMBER) {
       return JPEG;
     }
 
-    final int firstFourBytes = firstTwoBytes << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
+    final int firstFourBytes = (firstTwoBytes << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
     // PNG.
     if (firstFourBytes == PNG_HEADER) {
       // See: http://stackoverflow.com/questions/2057923/how-to-check-a-png-for-grayscale-alpha
@@ -109,11 +115,13 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
     // Bytes 4 - 7 contain length information. Skip these.
     reader.skip(4);
-    final int thirdFourBytes = reader.getUInt16() << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
+    final int thirdFourBytes =
+        (reader.getUInt16() << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
     if (thirdFourBytes != WEBP_HEADER) {
       return UNKNOWN;
     }
-    final int fourthFourBytes = reader.getUInt16() << 16 & 0xFFFF0000 | reader.getUInt16() & 0xFFFF;
+    final int fourthFourBytes =
+        (reader.getUInt16() << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
     if ((fourthFourBytes & VP8_HEADER_MASK) != VP8_HEADER) {
       return UNKNOWN;
     }
@@ -137,7 +145,6 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
    *
    * @return The exif orientation if present or -1 if the header couldn't be parsed or doesn't
    * contain an orientation
-   * @throws IOException
    */
   private int getOrientation(Reader reader, ArrayPool byteArrayPool) throws IOException {
     final int magicNumber = reader.getUInt16();
@@ -160,7 +167,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       try {
         return parseExifSegment(reader, exifData, exifSegmentLength);
       } finally {
-        byteArrayPool.put(exifData, byte[].class);
+        byteArrayPool.put(exifData);
       }
     }
   }
@@ -207,10 +214,8 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
    * {@code -1} if no exif segment is found.
    */
   private int moveToExifSegmentAndGetLength(Reader reader) throws IOException {
-    short segmentId, segmentType;
-    int segmentLength;
     while (true) {
-      segmentId = reader.getUInt8();
+      short segmentId = reader.getUInt8();
       if (segmentId != SEGMENT_START_ID) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Unknown segmentId=" + segmentId);
@@ -218,8 +223,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         return -1;
       }
 
-      segmentType = reader.getUInt8();
-
+      short segmentType = reader.getUInt8();
       if (segmentType == SEGMENT_SOS) {
         return -1;
       } else if (segmentType == MARKER_EOI) {
@@ -230,18 +234,17 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       }
 
       // Segment length includes bytes for segment length.
-      segmentLength = reader.getUInt16() - 2;
-
+      int segmentLength = reader.getUInt16() - 2;
       if (segmentType != EXIF_SEGMENT_TYPE) {
         long skipped = reader.skip(segmentLength);
         if (skipped != segmentLength) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Unable to skip enough data"
-                    + ", type: " + segmentType
-                    + ", wanted to skip: " + segmentLength
-                    + ", but actually skipped: " + skipped);
-            }
-            return -1;
+          if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, "Unable to skip enough data"
+                + ", type: " + segmentType
+                + ", wanted to skip: " + segmentLength
+                + ", but actually skipped: " + skipped);
+          }
+          return -1;
         }
       } else {
         return segmentLength;
@@ -254,34 +257,35 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
 
     short byteOrderIdentifier = segmentData.getInt16(headerOffsetSize);
     final ByteOrder byteOrder;
-    if (byteOrderIdentifier == MOTOROLA_TIFF_MAGIC_NUMBER) {
-      byteOrder = ByteOrder.BIG_ENDIAN;
-    } else if (byteOrderIdentifier == INTEL_TIFF_MAGIC_NUMBER) {
-      byteOrder = ByteOrder.LITTLE_ENDIAN;
-    } else {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Unknown endianness = " + byteOrderIdentifier);
-      }
-      byteOrder = ByteOrder.BIG_ENDIAN;
+    switch (byteOrderIdentifier) {
+      case MOTOROLA_TIFF_MAGIC_NUMBER:
+        byteOrder = ByteOrder.BIG_ENDIAN;
+        break;
+      case INTEL_TIFF_MAGIC_NUMBER:
+        byteOrder = ByteOrder.LITTLE_ENDIAN;
+        break;
+      default:
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Unknown endianness = " + byteOrderIdentifier);
+        }
+        byteOrder = ByteOrder.BIG_ENDIAN;
+        break;
     }
 
     segmentData.order(byteOrder);
 
     int firstIfdOffset = segmentData.getInt32(headerOffsetSize + 4) + headerOffsetSize;
     int tagCount = segmentData.getInt16(firstIfdOffset);
-
-    int tagOffset, tagType, formatCode, componentCount;
     for (int i = 0; i < tagCount; i++) {
-      tagOffset = calcTagOffset(firstIfdOffset, i);
-      tagType = segmentData.getInt16(tagOffset);
+      final int tagOffset = calcTagOffset(firstIfdOffset, i);
 
+      final int tagType = segmentData.getInt16(tagOffset);
       // We only want orientation.
       if (tagType != ORIENTATION_TAG_TYPE) {
         continue;
       }
 
-      formatCode = segmentData.getInt16(tagOffset + 2);
-
+      final int formatCode = segmentData.getInt16(tagOffset + 2);
       // 12 is max format code.
       if (formatCode < 1 || formatCode > 12) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -290,8 +294,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         continue;
       }
 
-      componentCount = segmentData.getInt32(tagOffset + 4);
-
+      final int componentCount = segmentData.getInt32(tagOffset + 4);
       if (componentCount < 0) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Negative tiff component count");
@@ -305,7 +308,6 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       }
 
       final int byteCount = componentCount + BYTES_PER_FORMAT[formatCode];
-
       if (byteCount > 4) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Got byte count > 4, not orientation, continuing, formatCode=" + formatCode);
@@ -314,7 +316,6 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       }
 
       final int tagValueOffset = tagOffset + 8;
-
       if (tagValueOffset < 0 || tagValueOffset > segmentData.length()) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Illegal tagValueOffset=" + tagValueOffset + " tagType=" + tagType);
@@ -394,24 +395,24 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     @Override
-    public int getUInt16() throws IOException {
+    public int getUInt16() {
       return (getByte() << 8 & 0xFF00) | (getByte() & 0xFF);
     }
 
     @Override
-    public short getUInt8() throws IOException {
+    public short getUInt8() {
       return (short) (getByte() & 0xFF);
     }
 
     @Override
-    public long skip(long total) throws IOException {
+    public long skip(long total) {
       int toSkip = (int) Math.min(byteBuffer.remaining(), total);
       byteBuffer.position(byteBuffer.position() + toSkip);
       return toSkip;
     }
 
     @Override
-    public int read(byte[] buffer, int byteCount) throws IOException {
+    public int read(byte[] buffer, int byteCount) {
       int toRead = Math.min(byteCount, byteBuffer.remaining());
       if (toRead == 0) {
         return -1;
@@ -421,7 +422,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     @Override
-    public int getByte() throws IOException {
+    public int getByte() {
       if (byteBuffer.remaining() < 1) {
         return -1;
       }
@@ -431,6 +432,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
 
   private static final class StreamReader implements Reader {
     private final InputStream is;
+
     // Motorola / big endian byte order.
     StreamReader(InputStream is) {
       this.is = is;

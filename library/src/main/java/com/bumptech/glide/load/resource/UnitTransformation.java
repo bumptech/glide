@@ -1,17 +1,18 @@
 package com.bumptech.glide.load.resource;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import java.security.MessageDigest;
 
 /**
- * A noop Transformation that simply returns the given resource.
+ * A no-op Transformation that simply returns the given resource.
  *
  * @param <T> The type of the resource that will always be returned unmodified.
  */
 public final class UnitTransformation<T> implements Transformation<T> {
-  private static final Transformation<?> TRANSFORMATION = new UnitTransformation<Object>();
+  private static final Transformation<?> TRANSFORMATION = new UnitTransformation<>();
 
   /**
    * Returns a UnitTransformation for the given type.
@@ -19,6 +20,7 @@ public final class UnitTransformation<T> implements Transformation<T> {
    * @param <T> The type of the resource to be transformed.
    */
   @SuppressWarnings("unchecked")
+  @NonNull
   public static <T> UnitTransformation<T> get() {
     return (UnitTransformation<T>) TRANSFORMATION;
   }
@@ -27,13 +29,15 @@ public final class UnitTransformation<T> implements Transformation<T> {
     // Only accessible as a singleton.
   }
 
+  @NonNull
   @Override
-  public Resource<T> transform(Context context, Resource<T> resource, int outWidth, int outHeight) {
+  public Resource<T> transform(@NonNull Context context, @NonNull Resource<T> resource,
+      int outWidth, int outHeight) {
     return resource;
   }
 
   @Override
-  public void updateDiskCacheKey(MessageDigest messageDigest) {
+  public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     // Do nothing.
   }
 

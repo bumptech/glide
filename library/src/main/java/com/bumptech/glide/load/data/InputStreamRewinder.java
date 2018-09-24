@@ -1,7 +1,9 @@
 package com.bumptech.glide.load.data;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;
+import com.bumptech.glide.util.Synthetic;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -15,11 +17,13 @@ public final class InputStreamRewinder implements DataRewinder<InputStream> {
 
   private final RecyclableBufferedInputStream bufferedStream;
 
+  @Synthetic
   InputStreamRewinder(InputStream is, ArrayPool byteArrayPool) {
     bufferedStream = new RecyclableBufferedInputStream(is, byteArrayPool);
     bufferedStream.mark(MARK_LIMIT);
   }
 
+  @NonNull
   @Override
   public InputStream rewindAndGet() throws IOException {
     bufferedStream.reset();
@@ -42,11 +46,13 @@ public final class InputStreamRewinder implements DataRewinder<InputStream> {
       this.byteArrayPool = byteArrayPool;
     }
 
+    @NonNull
     @Override
     public DataRewinder<InputStream> build(InputStream data) {
       return new InputStreamRewinder(data, byteArrayPool);
     }
 
+    @NonNull
     @Override
     public Class<InputStream> getDataClass() {
       return InputStream.class;

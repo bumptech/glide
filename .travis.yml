@@ -1,30 +1,46 @@
 language: android
+sudo: false
+dist: trusty
+
+before_install:
+  - mkdir "$ANDROID_HOME/licenses" || true
+  - echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license"
+  - echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c0de7af1a06de9f4b1727b84351f2910" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
+
 android:
   components:
-  - tools
-  - platform-tools
-  - build-tools-25.0.2
-  - android-25
-  - extra-android-m2repository
-  - extra-android-support
-
-  licenses:
-  - 'android-sdk-license.*'
+    # https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943
+    - tools
+    - tools
 
 jdk:
   - oraclejdk8
 
-sudo: false
+env:
+  matrix:
+    - COMPONENT=unit
+    - COMPONENT=firebase
+    - COMPONENT=instrumentation ANDROID_TARGET=16
+    - COMPONENT=instrumentation ANDROID_TARGET=17
+    - COMPONENT=instrumentation ANDROID_TARGET=18
+    - COMPONENT=instrumentation ANDROID_TARGET=19
+    - COMPONENT=samples
 
-script: 'travis_retry ./gradlew build'
+before_script:
+  - ./scripts/travis_before_script.sh
+
+script:
+  - ./scripts/travis_script.sh
 
 after_success:
-- scripts/travis-sonatype-publish.sh
-- ./gradlew jacocoTestReport coveralls
+  - ./scripts/travis_after_success.sh
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
+

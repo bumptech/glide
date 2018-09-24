@@ -2,6 +2,8 @@ package com.bumptech.glide.integration.gifencoder;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
@@ -37,19 +39,22 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
 
   private static final String KEY_ENCODE_TRANSFORMATION =
       "com.bumptech.glide.load.resource.gif.GifResourceEncoder.EncodeTransformation";
-   /**
+  /**
    * A boolean option that, if set to <code>true</code>, causes the fully transformed
    * GIF to be written to cache.
    *
-   * <p> Warning - encoding GIFs is slow and often produces larger and less efficient GIFs than
-   * the originals. Re-encoding may be worth it to decrease the size of very large GIFs. </p>
+   * <p>Warning - encoding GIFs is slow and often produces larger and less efficient GIFs than
+   * the originals. Re-encoding may be worth it to decrease the size of very large GIFs.
    *
-   * <p> Defaults to <code>false</code>. </p>
+   * <p>Defaults to <code>false</code>.
    */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
   public static final Option<Boolean> ENCODE_TRANSFORMATION =
       Option.disk(KEY_ENCODE_TRANSFORMATION, false, new Option.CacheKeyUpdater<Boolean>() {
         @Override
-        public void update(byte[] keyBytes, Boolean value, MessageDigest messageDigest) {
+        public void update(@NonNull byte[] keyBytes, @NonNull Boolean value,
+            @NonNull MessageDigest messageDigest) {
           if (value) {
             messageDigest.update(keyBytes);
           }
@@ -59,15 +64,17 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
   private static final Factory FACTORY = new Factory();
   private static final String TAG = "GifEncoder";
   private final GifDecoder.BitmapProvider provider;
-  private Context context;
+  private final Context context;
   private final BitmapPool bitmapPool;
   private final Factory factory;
 
-  public ReEncodingGifResourceEncoder(Context context, BitmapPool bitmapPool) {
+  // Public API.
+  @SuppressWarnings("unused")
+  public ReEncodingGifResourceEncoder(@NonNull Context context, @NonNull BitmapPool bitmapPool) {
     this(context, bitmapPool, FACTORY);
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   ReEncodingGifResourceEncoder(Context context, BitmapPool bitmapPool, Factory factory) {
     this.context = context;
     this.bitmapPool = bitmapPool;
@@ -75,15 +82,17 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
     this.factory = factory;
   }
 
+  @NonNull
   @Override
-  public EncodeStrategy getEncodeStrategy(Options options) {
+  public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
     Boolean encodeTransformation = options.get(ENCODE_TRANSFORMATION);
     return encodeTransformation != null && encodeTransformation
         ? EncodeStrategy.TRANSFORMED : EncodeStrategy.SOURCE;
   }
 
   @Override
-  public boolean encode(Resource<GifDrawable> resource, File file, Options options) {
+  public boolean encode(@NonNull Resource<GifDrawable> resource, @NonNull File file,
+      @NonNull Options options) {
     GifDrawable drawable = resource.get();
     Transformation<Bitmap> transformation = drawable.getFrameTransformation();
     boolean isTransformed = !(transformation instanceof UnitTransformation);
@@ -191,22 +200,23 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
     return transformedResource;
   }
 
-  // Visible for testing.
+  @VisibleForTesting
   static class Factory {
 
-    public GifDecoder buildDecoder(GifDecoder.BitmapProvider bitmapProvider) {
+    GifDecoder buildDecoder(GifDecoder.BitmapProvider bitmapProvider) {
       return new StandardGifDecoder(bitmapProvider);
     }
 
-    public GifHeaderParser buildParser() {
+    GifHeaderParser buildParser() {
       return new GifHeaderParser();
     }
 
-    public AnimatedGifEncoder buildEncoder() {
+    AnimatedGifEncoder buildEncoder() {
       return new AnimatedGifEncoder();
     }
 
-    public Resource<Bitmap> buildFrameResource(Bitmap bitmap, BitmapPool bitmapPool) {
+    @NonNull
+    Resource<Bitmap> buildFrameResource(@NonNull Bitmap bitmap, @NonNull BitmapPool bitmapPool) {
       return new BitmapResource(bitmap, bitmapPool);
     }
   }

@@ -7,16 +7,64 @@ import java.lang.annotation.Target;
 
 /**
  * Identifies methods in {@link GlideExtension} annotated classes that extend
- * {@link com.bumptech.glide.request.RequestOptions}.
+ * {@code com.bumptech.glide.request.RequestOptions}.
  *
  * <p>All annotated methods will be added to a single
- * {@link com.bumptech.glide.request.RequestOptions} implementation generated per application.
+ * {@code com.bumptech.glide.request.RequestOptions} implementation generated per application.
  * Overlapping method names in different extensions may cause errors at compile time.
  *
  * <p>Static equivalents of annotated methods will also be generated.
  *
  * <p>Methods with this annotation will only be found if they belong to classes annotated with
  * {@link GlideExtension}.
+ *
+ * <p>The preferred way of writing extension methods returns the provided
+ * {@code com.bumptech.glide.request.RequestOptions} object with one or more methods called on it.
+ * You must not return a newly instantiated {@code com.bumptech.glide.request.RequestOptions} object
+ * as doing so my cause a {@code ClassCastException} at runtime. Calling either
+ * {@code com.bumptech.glide.request.RequestOptions#autoClone()} or
+ * {@code com.bumptech.glide.request.RequestOptions#lock()} is safe, but unnecessary and should
+ * typically be avoided. The preferred style looks like:
+ *
+ * <pre>
+ * {@code
+ * {@link @}GlideExtension
+ * public class MyExtension {
+ *   private MyExtension() {}
+ *
+ *   {@literal @}GlideOption
+ *   public static RequestOptions myOption(RequestOptions options) {
+ *     return options
+ *         .optionOne()
+ *         .optionTwo();
+ *   }
+ * }
+ * }
+ * </pre>
+ *
+ * <p>The deprecated way of writing extension methods is simply a static void method. The
+ * {@code com.bumptech.glide.request.RequestOptions} object is cloned before it is passed to this
+ * method to avoid an option method returning a new instance, but using methods like
+ * {@code com.bumptech.glide.request.RequestOptions#clone()} or
+ * {@code com.bumptech.glide.request.RequestOptions#autoClone()} can result in options applied in
+ * the method being silently ignored. Prefer the new style whenever possible.
+ *
+ * <pre>
+ * {@code
+ * {@literal @}GlideExtension
+ * public class MyExtension {
+ *   private MyExtension() {}
+ *
+ *   // Deprecated! Use the new style of GlideOption extensions instead.
+ *   {@literal @}GlideOption
+ *   public static void myOption(RequestOptions options) {
+ *     options
+ *         .optionOne()
+ *         .optionTwo();
+ *   }
+ * }
+ * }
+ * </pre>
  */
 @Target(ElementType.METHOD)
 // Needs to be parsed from class files in JAR.
@@ -51,7 +99,7 @@ public @interface GlideOption {
 
   /**
    * {@code true} to indicate that it's safe to statically memoize the result of this method using
-   * {@link com.bumptech.glide.request.RequestOptions#autoClone()}.
+   * {@code com.bumptech.glide.request.RequestOptions#autoClone()}.
    *
    * <p>This method should only be used for no-arg methods where there's only a single possible
    * value.
@@ -65,8 +113,8 @@ public @interface GlideOption {
    *
    * <p>By default static methods are generated for all methods annotated with
    * {@link GlideOption}. These static factory methods allow for a cleaner API when used
-   * with {@link com.bumptech.glide.RequestBuilder#apply}. The static factory method by default
-   * simply creates a new {@link com.bumptech.glide.request.RequestOptions} object, calls the
+   * with {@code com.bumptech.glide.RequestBuilder#apply}. The static factory method by default
+   * simply creates a new {@code com.bumptech.glide.request.RequestOptions} object, calls the
    * instance version of the method on it and returns it. For example:
    * <pre>
    * <code>

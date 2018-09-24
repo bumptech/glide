@@ -1,6 +1,7 @@
 package com.bumptech.glide.module;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import com.bumptech.glide.GlideBuilder;
 
 /**
@@ -20,6 +21,8 @@ import com.bumptech.glide.GlideBuilder;
  * annotation processor, {@link AppGlideModule} implementations should override
  * {@link #isManifestParsingEnabled()} and return {@code false}.
  */
+// Used only in javadoc.
+@SuppressWarnings("deprecation")
 public abstract class AppGlideModule extends LibraryGlideModule implements AppliesOptions {
   /**
    * Returns {@code true} if Glide should check the AndroidManifest for {@link GlideModule}s.
@@ -34,7 +37,7 @@ public abstract class AppGlideModule extends LibraryGlideModule implements Appli
   }
 
   @Override
-  public void applyOptions(Context context, GlideBuilder builder) {
+  public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {
     // Default empty impl.
   }
 }

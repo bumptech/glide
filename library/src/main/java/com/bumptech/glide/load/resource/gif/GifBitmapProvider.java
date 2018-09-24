@@ -21,29 +21,32 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
    * when requested.
    */
   public GifBitmapProvider(BitmapPool bitmapPool) {
-    this(bitmapPool, null /* arrayPool */);
+    this(bitmapPool, /*arrayPool=*/ null);
   }
 
   /**
    * Constructs an instance with a shared array pool. Arrays will be reused where
    * possible.
    */
-  public GifBitmapProvider(BitmapPool bitmapPool, ArrayPool arrayPool) {
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  public GifBitmapProvider(BitmapPool bitmapPool, @Nullable ArrayPool arrayPool) {
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
   }
 
   @NonNull
   @Override
-  public Bitmap obtain(int width, int height, Bitmap.Config config) {
+  public Bitmap obtain(int width, int height, @NonNull Bitmap.Config config) {
     return bitmapPool.getDirty(width, height, config);
   }
 
   @Override
-  public void release(Bitmap bitmap) {
+  public void release(@NonNull Bitmap bitmap) {
     bitmapPool.put(bitmap);
   }
 
+  @NonNull
   @Override
   public byte[] obtainByteArray(int size) {
     if (arrayPool == null) {
@@ -52,15 +55,15 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
     return arrayPool.get(size, byte[].class);
   }
 
-  @SuppressWarnings("PMD.UseVarargs")
   @Override
-  public void release(byte[] bytes) {
+  public void release(@NonNull byte[] bytes) {
     if (arrayPool == null) {
       return;
     }
-    arrayPool.put(bytes, byte[].class);
+    arrayPool.put(bytes);
   }
 
+  @NonNull
   @Override
   public int[] obtainIntArray(int size) {
     if (arrayPool == null) {
@@ -71,10 +74,10 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
 
   @SuppressWarnings("PMD.UseVarargs")
   @Override
-  public void release(int[] array) {
+  public void release(@NonNull int[] array) {
     if (arrayPool == null) {
       return;
     }
-    arrayPool.put(array, int[].class);
+    arrayPool.put(array);
   }
 }

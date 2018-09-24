@@ -2,7 +2,6 @@ package com.bumptech.glide.integration.volley;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -21,6 +20,8 @@ import java.util.Map;
 /**
  * A DataFetcher backed by volley for fetching images via http.
  */
+// Public API.
+@SuppressWarnings("WeakerAccess")
 public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "VolleyStreamFetcher";
   public static final VolleyRequestFactory DEFAULT_REQUEST_FACTORY = new VolleyRequestFactory() {
@@ -49,7 +50,8 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(Priority priority, DataCallback<? super InputStream> callback) {
+  public void loadData(@NonNull Priority priority,
+      @NonNull DataCallback<? super InputStream> callback) {
     request = requestFactory.create(url.toStringUrl(), callback, glideToVolleyPriority(priority),
         url.getHeaders());
     requestQueue.add(request);
@@ -80,7 +82,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     return DataSource.REMOTE;
   }
 
-  private static Request.Priority glideToVolleyPriority(Priority priority) {
+  private static Request.Priority glideToVolleyPriority(@NonNull Priority priority) {
     switch (priority) {
       case LOW:
         return Request.Priority.LOW;
@@ -97,6 +99,8 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
    * Default {@link com.android.volley.Request} implementation for Glide that receives errors and
    * results on volley's background thread.
    */
+  // Public API.
+  @SuppressWarnings("unused")
   public static class GlideRequest extends Request<byte[]> {
     private final DataCallback<? super InputStream> callback;
     private final Priority priority;
@@ -115,7 +119,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     }
 
     @Override
-    public Map<String, String> getHeaders() throws AuthFailureError {
+    public Map<String, String> getHeaders() {
       return headers;
     }
 
@@ -129,13 +133,17 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Volley failed to retrieve response", volleyError);
       }
-      callback.onLoadFailed(volleyError);
+      if (!isCanceled()) {
+        callback.onLoadFailed(volleyError);
+      }
       return super.parseNetworkError(volleyError);
     }
 
     @Override
     protected Response<byte[]> parseNetworkResponse(NetworkResponse response) {
-      callback.onDataReady(new ByteArrayInputStream(response.data));
+      if (!isCanceled()) {
+        callback.onDataReady(new ByteArrayInputStream(response.data));
+      }
       return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response));
     }
 

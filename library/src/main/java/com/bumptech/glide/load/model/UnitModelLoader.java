@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.model;
 
 import android.support.annotation.NonNull;
-
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
@@ -15,15 +14,32 @@ import com.bumptech.glide.signature.ObjectKey;
  * @param <Model> The type of model that will also be returned as decodable data.
  */
 public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
+  @SuppressWarnings("deprecation")
+  private static final UnitModelLoader<?> INSTANCE = new UnitModelLoader<>();
+
+  @SuppressWarnings("unchecked")
+  public static <T> UnitModelLoader<T> getInstance() {
+    return (UnitModelLoader<T>) INSTANCE;
+  }
+
+  /**
+   * @deprecated Use {@link #getInstance()} instead.
+   */
+  // Need constructor to document deprecation, will be removed, when constructor is privatized.
+  @SuppressWarnings({"PMD.UnnecessaryConstructor", "DeprecatedIsStillUsed"})
+  @Deprecated
+  public UnitModelLoader() {
+    // Intentionally empty.
+  }
 
   @Override
-  public LoadData<Model> buildLoadData(Model model, int width, int height,
-      Options options) {
+  public LoadData<Model> buildLoadData(@NonNull Model model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(model), new UnitFetcher<>(model));
   }
 
   @Override
-  public boolean handles(Model model) {
+  public boolean handles(@NonNull Model model) {
     return true;
   }
 
@@ -31,12 +47,13 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
 
     private final Model resource;
 
-    public UnitFetcher(Model resource) {
+    UnitFetcher(Model resource) {
       this.resource = resource;
     }
 
     @Override
-    public void loadData(Priority priority, DataCallback<? super Model> callback) {
+    public void loadData(@NonNull Priority priority,
+        @NonNull DataCallback<? super Model> callback) {
       callback.onDataReady(resource);
     }
 
@@ -69,11 +86,29 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
    *
    * @param <Model> The type of model that will also be returned as decodable data.
    */
+  // PMD.SingleMethodSingleton false positive: https://github.com/pmd/pmd/issues/816
+  @SuppressWarnings("PMD.SingleMethodSingleton")
   public static class Factory<Model> implements ModelLoaderFactory<Model, Model> {
+    @SuppressWarnings("deprecation")
+    private static final Factory<?> FACTORY = new Factory<>();
 
+    @SuppressWarnings("unchecked")
+    public static <T> Factory<T> getInstance() {
+      return (Factory<T>) FACTORY;
+    }
+
+    /** @deprecated Use {@link #getInstance()} instead. */
+    // Need constructor to document deprecation, will be removed, when constructor is privatized.
+    @SuppressWarnings("PMD.UnnecessaryConstructor")
+    @Deprecated
+    public Factory() {
+      // Intentionally empty.
+    }
+
+    @NonNull
     @Override
     public ModelLoader<Model, Model> build(MultiModelLoaderFactory multiFactory) {
-      return new UnitModelLoader<>();
+      return UnitModelLoader.getInstance();
     }
 
     @Override
