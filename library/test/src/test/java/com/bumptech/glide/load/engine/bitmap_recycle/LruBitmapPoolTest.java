@@ -215,12 +215,12 @@ public class LruBitmapPoolTest {
     assertEquals(0, strategy.numPuts);
   }
 
-  @Test
+  @Test @Config(sdk = 19)
   public void testBitmapsWithAllowedNullConfigsAreAllowed() {
     pool = new LruBitmapPool(100, strategy, Collections.<Bitmap.Config>singleton(null));
 
     Bitmap bitmap = createMutableBitmap();
-    Shadows.shadowOf(bitmap).setConfig(null);
+    bitmap.setConfig(null);
 
     pool.put(bitmap);
 
