@@ -47,14 +47,14 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
       @NonNull Options options) {
     @DrawableRes int resId = loadResourceIdFromUri(source);
     String packageName = source.getAuthority();
-    Context targetContext = getContextForPackage(source, packageName);
+    Context targetContext = findContextForPackage(source, packageName);
     // We can't get a theme from another application.
     Drawable drawable = DrawableDecoderCompat.getDrawable(context, targetContext, resId);
     return NonOwnedDrawableResource.newInstance(drawable);
   }
 
   @NonNull
-  private Context getContextForPackage(Uri source, String packageName) {
+  private Context findContextForPackage(Uri source, String packageName) {
     // Fast path
     if (packageName.equals(context.getPackageName())) {
       return context;
