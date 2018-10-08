@@ -50,7 +50,7 @@ dependencies {
 
     // Fixes a compilation warning related to dagger, see
     // https://github.com/google/guava/issues/2721.
-    compileOnly "com.google.errorprone:error_prone_annotations:2.1.3"
+    compileOnly "com.google.errorprone:error_prone_annotations:${ERROR_PRONE_VERSION}"
 }
 
 task run(type: Exec, dependsOn: 'installDebug') {

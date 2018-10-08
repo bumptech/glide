@@ -13,8 +13,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Options;
@@ -22,6 +22,7 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
+import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
@@ -158,7 +159,7 @@ public class LoadResourcesWithDownsamplerTest {
         concurrency.get(
             GlideApp.with(context)
                 .asBitmap()
-                // Allow HARDWARE Bitmaps.
+                .set(Downsampler.ALLOW_HARDWARE_CONFIG, true)
                 .format(DecodeFormat.PREFER_ARGB_8888)
                 .load(new Object())
                 .submit());

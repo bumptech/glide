@@ -2,7 +2,7 @@ package com.bumptech.glide.test;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;

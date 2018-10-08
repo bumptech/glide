@@ -14,6 +14,7 @@ import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import java.io.File;
 import java.lang.Class;
@@ -55,6 +56,12 @@ public class GlideRequests extends RequestManager {
   @NonNull
   public GlideRequests setDefaultRequestOptions(@NonNull RequestOptions options) {
     return (GlideRequests) super.setDefaultRequestOptions(options);
+  }
+
+  @Override
+  @NonNull
+  public GlideRequests addDefaultRequestListener(RequestListener<Object> listener) {
+    return (GlideRequests) super.addDefaultRequestListener(listener);
   }
 
   @Override

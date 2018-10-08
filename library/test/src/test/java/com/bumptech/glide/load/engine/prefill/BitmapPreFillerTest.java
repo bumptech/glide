@@ -94,7 +94,7 @@ public class BitmapPreFillerTest {
     for (PreFillType current : sizes) {
       int currentSize =
           Util.getBitmapByteSize(current.getWidth(), current.getHeight(), current.getConfig());
-      // See http://errorprone.info/bugpattern/NarrowingCompoundAssignment.
+      // See https://errorprone.info/bugpattern/NarrowingCompoundAssignment.
       expectedSize = (int) (expectedSize + (currentSize * (maxSize / (3 * currentSize))));
     }
 
@@ -269,8 +269,8 @@ public class BitmapPreFillerTest {
     bitmapPreFiller.preFill(builder);
 
     InOrder order = inOrder(builder);
-    order.verify(builder).setConfig(DecodeFormat.DEFAULT == DecodeFormat.PREFER_ARGB_8888
-        || DecodeFormat.DEFAULT == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE
+    order.verify(builder).setConfig(
+        DecodeFormat.DEFAULT == DecodeFormat.PREFER_ARGB_8888
         ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
     order.verify(builder).build();
   }

@@ -82,7 +82,6 @@ final class HardwareConfigState {
       boolean isExifOrientationRequired) {
     if (!isHardwareConfigAllowed
         || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
-        || decodeFormat == DecodeFormat.PREFER_ARGB_8888_DISALLOW_HARDWARE
         || isExifOrientationRequired) {
       return false;
     }

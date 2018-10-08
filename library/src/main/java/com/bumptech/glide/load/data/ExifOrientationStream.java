@@ -123,7 +123,7 @@ public final class ExifOrientationStream extends FilterInputStream {
   public long skip(long byteCount) throws IOException {
     long skipped = super.skip(byteCount);
     if (skipped > 0) {
-      // See http://errorprone.info/bugpattern/NarrowingCompoundAssignment.
+      // See https://errorprone.info/bugpattern/NarrowingCompoundAssignment.
       position = (int) (position + skipped);
     }
     return skipped;

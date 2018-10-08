@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.util.Pools;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
@@ -229,14 +230,14 @@ public class EngineJobTest {
 
   @Test
   public void testReleasesResourceIfCancelledOnReady() {
-    ShadowLooper shadowLooper = Shadows.shadowOf(harness.mainHandler.getLooper());
-    shadowLooper.pause();
+    Looper looper = harness.mainHandler.getLooper();
+    Shadows.shadowOf(looper).pause();
 
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.onResourceReady(harness.resource, harness.dataSource);
     job.cancel();
-    shadowLooper.runOneTask();
+    Shadows.shadowOf(looper).runOneTask();
 
     verify(harness.resource).recycle();
   }

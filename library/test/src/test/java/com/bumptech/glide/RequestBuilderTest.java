@@ -2,16 +2,22 @@ package com.bumptech.glide;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Application;
 import android.widget.ImageView;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.resource.SimpleResource;
 import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.SingleRequest;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.tests.BackgroundUtil.BackgroundTester;
@@ -20,6 +26,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -32,8 +40,12 @@ import org.robolectric.annotation.Config;
 public class RequestBuilderTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
+  @Mock private RequestListener<Object> listener1;
+  @Mock private RequestListener<Object> listener2;
+  @Mock private Target<Object> target;
   @Mock private GlideContext glideContext;
   @Mock private RequestManager requestManager;
+  @Captor private ArgumentCaptor<SingleRequest<Object>> requestCaptor;
   private Glide glide;
   private Application context;
 
@@ -57,12 +69,11 @@ public class RequestBuilderTest {
 
   @Test
   public void testDoesNotThrowWithNullModelWhenRequestIsBuilt() {
-    getNullModelRequest().into(mock(Target.class));
+    getNullModelRequest().into(target);
   }
 
   @Test
   public void testAddsNewRequestToRequestTracker() {
-    Target<Object> target = mock(Target.class);
     getNullModelRequest().into(target);
 
     verify(requestManager).track(eq(target), isA(Request.class));
@@ -71,7 +82,6 @@ public class RequestBuilderTest {
   @Test
   public void testRemovesPreviousRequestFromRequestTracker() {
     Request previous = mock(Request.class);
-    Target<Object> target = mock(Target.class);
     when(target.getRequest()).thenReturn(previous);
 
     getNullModelRequest().into(target);
@@ -110,6 +120,35 @@ public class RequestBuilderTest {
          getNullModelRequest().into(target);
       }
     });
+  }
+
+  @Test
+  public void testMultipleRequestListeners() {
+    getNullModelRequest().addListener(listener1).addListener(listener2).into(target);
+    verify(requestManager).track(any(Target.class), requestCaptor.capture());
+    requestCaptor.getValue().onResourceReady(new SimpleResource<>(new Object()), DataSource.LOCAL);
+
+    verify(listener1)
+        .onResourceReady(
+            any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+    verify(listener2)
+        .onResourceReady(
+            any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+  }
+
+  @Test
+  public void testListenerApiOverridesListeners() {
+    getNullModelRequest().addListener(listener1).listener(listener2).into(target);
+    verify(requestManager).track(any(Target.class), requestCaptor.capture());
+    requestCaptor.getValue().onResourceReady(new SimpleResource<>(new Object()), DataSource.LOCAL);
+
+    // The #listener API removes any previous listeners, so the first listener should not be called.
+    verify(listener1, never())
+        .onResourceReady(
+            any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+    verify(listener2)
+        .onResourceReady(
+            any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
   }
 
   private RequestBuilder<Object> getNullModelRequest() {

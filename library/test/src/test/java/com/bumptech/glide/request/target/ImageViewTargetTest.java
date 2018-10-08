@@ -1,5 +1,6 @@
 package com.bumptech.glide.request.target;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
@@ -19,6 +20,7 @@ import com.bumptech.glide.request.transition.Transition;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -108,7 +110,9 @@ public class ImageViewTargetTest {
 
     target.onResourceReady(new ColorDrawable(Color.GREEN), animation);
 
-    verify(animation).transition(eq(placeholder), eq(target));
+    ArgumentCaptor<Drawable> drawableCaptor = ArgumentCaptor.forClass(Drawable.class);
+    verify(animation).transition(drawableCaptor.capture(), eq(target));
+    assertThat(((ColorDrawable) drawableCaptor.getValue()).getColor()).isEqualTo(Color.GREEN);
   }
 
   @Test

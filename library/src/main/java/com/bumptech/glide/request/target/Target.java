@@ -37,23 +37,19 @@ public interface Target<R> extends LifecycleListener {
    * called. Loads can be paused and restarted due to lifecycle or connectivity events and each
    * restart may cause a call here.
    *
-   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
-   * Transition)} is no longer displayed before redrawing the container (usually a View) or
-   * changing its visibility.
-   *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
   void onLoadStarted(@Nullable Drawable placeholder);
 
   /**
-   * A lifecycle callback that is called when a load fails.
+   * A <b>mandatory</b> lifecycle callback that is called when a load fails.
    *
-   * <p> Note - This may be called before {@link #onLoadStarted(android.graphics.drawable.Drawable)
-   * } if the model object is null.
+   * <p>Note - This may be called before {@link #onLoadStarted(android.graphics.drawable.Drawable) }
+   * if the model object is null.
    *
-   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
-   * Transition)} is no longer displayed before redrawing the container (usually a View) or
-   * changing its visibility.
+   * <p>You <b>must</b> ensure that any current Drawable received in {@link #onResourceReady(Object,
+   * Transition)} is no longer used before redrawing the container (usually a View) or changing its
+   * visibility.
    *
    * @param errorDrawable The error drawable to optionally show, or null.
    */
@@ -67,11 +63,12 @@ public interface Target<R> extends LifecycleListener {
   void onResourceReady(@NonNull R resource, @Nullable Transition<? super R> transition);
 
   /**
-   * A lifecycle callback that is called when a load is cancelled and its resources are freed.
+   * A <b>mandatory</b> lifecycle callback that is called when a load is cancelled and its resources
+   * are freed.
    *
-   * <p>You must ensure that any current Drawable received in {@link #onResourceReady(Object,
-   * Transition)} is no longer displayed before redrawing the container (usually a View) or
-   * changing its visibility.
+   * <p>You <b>must</b> ensure that any current Drawable received in {@link #onResourceReady(Object,
+   * Transition)} is no longer used before redrawing the container (usually a View) or changing its
+   * visibility.
    *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */

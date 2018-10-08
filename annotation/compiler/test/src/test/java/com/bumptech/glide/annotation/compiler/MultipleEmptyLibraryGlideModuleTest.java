@@ -14,7 +14,6 @@ import javax.tools.JavaFileObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -25,7 +24,6 @@ import org.junit.runners.JUnit4;
 public class MultipleEmptyLibraryGlideModuleTest {
   @Rule public final RegenerateResourcesRule regenerateResourcesRule =
       new RegenerateResourcesRule(getClass());
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
   private Compilation compilation;
 
   @Before

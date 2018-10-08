@@ -67,7 +67,16 @@ subprojects { project ->
                  * See https://github.com/google/dagger/issues/945
                  * and https://bugs.openjdk.java.net/browse/JDK-8190452
                  */ \
-                << "-Xlint:-classfile"
+                << "-Xlint:-classfile" \
+                /*
+                 * Disable deprecation warnings for ViewTarget/BaseTarget for now.
+                 */ \
+                << "-Xlint:-deprecation"
+
+            if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
+                // It's often useful to track individual objects when debugging object pooling.
+                options.compilerArgs << "-Xep:ObjectToString:OFF"
+            }
         }
     }
 

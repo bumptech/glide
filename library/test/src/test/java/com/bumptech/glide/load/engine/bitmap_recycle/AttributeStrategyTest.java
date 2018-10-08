@@ -9,7 +9,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowBitmap;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
@@ -29,7 +28,7 @@ public class AttributeStrategyTest {
 
   @Test
   public void testICanAddAndGetABitmapOfTheSameSizeAndDimensions() {
-    Bitmap bitmap = ShadowBitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
     assertEquals(bitmap,
         strategy.get(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888));
@@ -37,44 +36,44 @@ public class AttributeStrategyTest {
 
   @Test
   public void testICantGetABitmapOfTheSameDimensionsButDifferentConfigs() {
-    Bitmap bitmap = ShadowBitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
     assertNull(strategy.get(100, 100, Bitmap.Config.RGB_565));
   }
 
   @Test
   public void testICantGetABitmapOfTheSameDimensionsAndSizeButDifferentConfigs() {
-    Bitmap bitmap = ShadowBitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     strategy.put(bitmap);
     assertNull(strategy.get(100, 100, Bitmap.Config.RGB_565));
   }
 
   @Test
   public void testICantGetABitmapOfDifferentWidths() {
-    Bitmap bitmap = ShadowBitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
     assertNull(strategy.get(99, 100, Bitmap.Config.ARGB_8888));
   }
 
   @Test
   public void testICantGetABitmapOfDifferentHeights() {
-    Bitmap bitmap = ShadowBitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
     assertNull(strategy.get(100, 99, Bitmap.Config.ARGB_8888));
   }
 
   @Test
   public void testICantGetABitmapOfDifferentDimensionsButTheSameSize() {
-    Bitmap bitmap = ShadowBitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
     assertNull(strategy.get(50, 200, Bitmap.Config.ARGB_8888));
   }
 
   @Test
   public void testMultipleBitmapsOfDifferentAttributesCanBeAddedAtOnce() {
-    Bitmap first = ShadowBitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
-    Bitmap second = ShadowBitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    Bitmap third = ShadowBitmap.createBitmap(120, 120, Bitmap.Config.RGB_565);
+    Bitmap first = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
+    Bitmap second = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    Bitmap third = Bitmap.createBitmap(120, 120, Bitmap.Config.RGB_565);
 
     strategy.put(first);
     strategy.put(second);
@@ -87,9 +86,9 @@ public class AttributeStrategyTest {
 
   @Test
   public void testLeastRecentlyUsedAttributeSetIsRemovedFirst() {
-    final Bitmap leastRecentlyUsed = ShadowBitmap.createBitmap(100, 100, Bitmap.Config.ALPHA_8);
-    final Bitmap other = ShadowBitmap.createBitmap(1000, 1000, Bitmap.Config.RGB_565);
-    final Bitmap mostRecentlyUsed = ShadowBitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+    final Bitmap leastRecentlyUsed = Bitmap.createBitmap(100, 100, Bitmap.Config.ALPHA_8);
+    final Bitmap other = Bitmap.createBitmap(1000, 1000, Bitmap.Config.RGB_565);
+    final Bitmap mostRecentlyUsed = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
 
     strategy.get(100, 100, Bitmap.Config.ALPHA_8);
     strategy.get(1000, 1000, Bitmap.Config.RGB_565);

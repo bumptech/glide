@@ -766,8 +766,9 @@ public class StandardGifDecoder implements GifDecoder {
         } else if (code == endOfInformation) {
           break;
         } else if (oldCode == NULL_CODE) {
-          pixelStack[top] = suffix[code];
-          ++top;
+          mainPixels[pi] = suffix[code];
+          ++pi;
+          ++i;
           oldCode = code;
           first = code;
           continue;

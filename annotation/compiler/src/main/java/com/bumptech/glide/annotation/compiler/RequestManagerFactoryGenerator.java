@@ -68,7 +68,6 @@ final class RequestManagerFactoryGenerator {
 
     TypeElement requestManagerType = elementUtils.getTypeElement(REQUEST_MANAGER_QUALIFIED_NAME);
     requestManagerClassName = ClassName.get(requestManagerType);
-
   }
 
   TypeSpec generate(String generatedCodePackageName, TypeSpec generatedRequestManagerSpec) {

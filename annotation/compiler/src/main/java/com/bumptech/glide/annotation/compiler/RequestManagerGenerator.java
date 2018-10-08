@@ -1,5 +1,6 @@
 package com.bumptech.glide.annotation.compiler;
 
+import static com.bumptech.glide.annotation.compiler.ProcessorUtil.checkResult;
 import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
 
 import com.bumptech.glide.annotation.GlideExtension;
@@ -61,8 +62,6 @@ final class RequestManagerGenerator {
       "com.bumptech.glide.manager.Lifecycle";
   private static final String REQUEST_MANAGER_TREE_NODE_QUALIFIED_NAME =
       "com.bumptech.glide.manager.RequestManagerTreeNode";
-  private static final ClassName CHECK_RESULT_CLASS_NAME =
-      ClassName.get("android.support.annotation", "CheckResult");
   private static final ClassName CONTEXT_CLASS_NAME =
       ClassName.get("android.content", "Context");
 
@@ -164,7 +163,7 @@ final class RequestManagerGenerator {
     return MethodSpec.methodBuilder("as")
         .addModifiers(Modifier.PUBLIC)
         .addAnnotation(Override.class)
-        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(checkResult())
         .addAnnotation(nonNull())
         .addTypeVariable(TypeVariableName.get("ResourceType"))
         .returns(requestBuilderOfResourceType)
@@ -289,7 +288,7 @@ final class RequestManagerGenerator {
         .returns(parameterizedTypeName)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
         .addAnnotation(nonNull())
-        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(checkResult())
         .addStatement(
             "$T requestBuilder = this.as($T.class)", parameterizedTypeName, returnTypeClassName)
         .addStatement("$T.$N(requestBuilder)",
@@ -311,7 +310,7 @@ final class RequestManagerGenerator {
         .returns(parameterizedTypeName)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
         .addAnnotation(nonNull())
-        .addAnnotation(AnnotationSpec.builder(CHECK_RESULT_CLASS_NAME).build())
+        .addAnnotation(checkResult())
         .addStatement(
             "return ($T) $T.$N(this.as($T.class))",
             parameterizedTypeName,

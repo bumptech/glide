@@ -26,21 +26,25 @@ import java.util.List;
  * provides default implementations for most most methods and can determine the size of views using
  * a {@link android.view.ViewTreeObserver.OnDrawListener}.
  *
- * <p> To detect {@link View} reuse in {@link android.widget.ListView} or any {@link
+ * <p>To detect {@link View} reuse in {@link android.widget.ListView} or any {@link
  * android.view.ViewGroup} that reuses views, this class uses the {@link View#setTag(Object)} method
  * to store some metadata so that if a view is reused, any previous loads or resources from previous
- * loads can be cancelled or reused. </p>
+ * loads can be cancelled or reused.
  *
- * <p> Any calls to {@link View#setTag(Object)}} on a View given to this class will result in
+ * <p>Any calls to {@link View#setTag(Object)}} on a View given to this class will result in
  * excessive allocations and and/or {@link IllegalArgumentException}s. If you must call {@link
  * View#setTag(Object)} on a view, use {@link #setTagId(int)} to specify a custom tag for Glide to
  * use.
  *
- * <p> Subclasses must call super in {@link #onLoadCleared(Drawable)} </p>
+ * <p>Subclasses must call super in {@link #onLoadCleared(Drawable)}
  *
  * @param <T> The specific subclass of view wrapped by this target.
  * @param <Z> The resource type this target will receive.
+ * @deprecated Use {@link CustomViewTarget}. Using this class is unsafe without implementing {@link
+ *     #onLoadCleared} and results in recycled bitmaps being referenced from the UI and hard to
+ *     root-cause crashes.
  */
+@Deprecated
 public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   private static final String TAG = "ViewTarget";
   private static boolean isTagUsedAtLeastOnce;
@@ -126,7 +130,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   @SuppressWarnings("WeakerAccess")
   @Synthetic void resumeMyRequest() {
     Request request = getRequest();
-    if (request != null && request.isPaused()) {
+    if (request != null && request.isCleared()) {
       request.begin();
     }
   }
@@ -134,9 +138,11 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   @SuppressWarnings("WeakerAccess")
   @Synthetic void pauseMyRequest() {
     Request request = getRequest();
-    if (request != null && !request.isCancelled() && !request.isPaused()) {
+    // If the Request were cleared by the developer, it would be null here. The only way it's
+    // present is if the developer hasn't previously cleared this Target.
+    if (request != null) {
       isClearedByUs = true;
-      request.pause();
+      request.clear();
       isClearedByUs = false;
     }
   }

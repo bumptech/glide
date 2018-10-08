@@ -42,32 +42,6 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void pause_whenPrimaryHasNotFailed_pausesPrimary() {
-    coordinator.pause();
-    verify(primary).pause();
-  }
-
-  @Test
-  public void pause_whenPrimaryHasFailed_doesNotPausePrimary() {
-    when(primary.isFailed()).thenReturn(true);
-    coordinator.pause();
-    verify(primary, never()).pause();
-  }
-
-  @Test
-  public void pause_whenErrorIsRunning_pausesError() {
-    when(error.isRunning()).thenReturn(true);
-    coordinator.pause();
-    verify(error).pause();
-  }
-
-  @Test
-  public void pause_whenErrorIsNotRunning_doesNotPauseError() {
-    coordinator.pause();
-    verify(error, never()).pause();
-  }
-
-  @Test
   public void clear_whenPrimaryHasNotFailed_clearsPrimary() {
     coordinator.clear();
     verify(primary).clear();
@@ -100,30 +74,6 @@ public class ErrorRequestCoordinatorTest {
     coordinator.clear();
 
     verify(error).clear();
-  }
-
-  @Test
-  public void isPaused_primaryNotFailed_primaryNotPaused_returnsFalse() {
-    assertThat(coordinator.isPaused()).isFalse();
-  }
-
-  @Test
-  public void isPaused_primaryNotFailed_primaryPaused_returnsTrue() {
-    when(primary.isPaused()).thenReturn(true);
-    assertThat(coordinator.isPaused()).isTrue();
-  }
-
-  @Test
-  public void isPaused_primaryFailed_errorNotPaused_returnsFalse() {
-    when(primary.isFailed()).thenReturn(true);
-    assertThat(coordinator.isPaused()).isFalse();
-  }
-
-  @Test
-  public void isPaused_primaryFailed_errorPaused_returnsTrue() {
-    when(primary.isFailed()).thenReturn(true);
-    when(error.isPaused()).thenReturn(true);
-    assertThat(coordinator.isPaused()).isTrue();
   }
 
   @Test
@@ -200,26 +150,26 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void isCancelled_primaryNotFailed_primaryNotCancelled_returnsFalse() {
-    assertThat(coordinator.isCancelled()).isFalse();
+    assertThat(coordinator.isCleared()).isFalse();
   }
 
   @Test
   public void isCancelled_primaryNotFailed_primaryCancelled_returnsTrue() {
-    when(primary.isCancelled()).thenReturn(true);
-    assertThat(coordinator.isCancelled()).isTrue();
+    when(primary.isCleared()).thenReturn(true);
+    assertThat(coordinator.isCleared()).isTrue();
   }
 
   @Test
   public void isCancelled_primaryFailed_errorNotCancelled_returnsFalse() {
     when(primary.isFailed()).thenReturn(true);
-    assertThat(coordinator.isCancelled()).isFalse();
+    assertThat(coordinator.isCleared()).isFalse();
   }
 
   @Test
   public void isCancelled_primaryFailed_errorCancelled_returnsTrue() {
     when(primary.isFailed()).thenReturn(true);
-    when(error.isCancelled()).thenReturn(true);
-    assertThat(coordinator.isCancelled()).isTrue();
+    when(error.isCleared()).thenReturn(true);
+    assertThat(coordinator.isCleared()).isTrue();
   }
 
   @Test

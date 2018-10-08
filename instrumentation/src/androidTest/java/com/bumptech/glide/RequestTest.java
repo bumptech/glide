@@ -11,9 +11,9 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.widget.ImageView;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.RequestListener;

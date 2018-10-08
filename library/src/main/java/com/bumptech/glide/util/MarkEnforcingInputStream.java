@@ -84,7 +84,7 @@ public class MarkEnforcingInputStream extends FilterInputStream {
 
   private void updateAvailableBytesAfterRead(long bytesRead) {
     if (availableBytes != UNSET && bytesRead != END_OF_STREAM) {
-      // See http://errorprone.info/bugpattern/NarrowingCompoundAssignment.
+      // See https://errorprone.info/bugpattern/NarrowingCompoundAssignment.
       availableBytes = (int) (availableBytes - bytesRead);
     }
   }

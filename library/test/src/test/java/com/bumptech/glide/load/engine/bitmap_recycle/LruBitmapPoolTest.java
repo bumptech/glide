@@ -25,7 +25,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowBitmap;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
@@ -192,7 +191,7 @@ public class LruBitmapPoolTest {
 
     pool.setSizeMultiplier(1);
 
-    assertEquals(Math.round(MAX_SIZE * sizeMultiplier) - MAX_SIZE, strategy.numRemoves);
+    assertEquals(MAX_SIZE * sizeMultiplier - MAX_SIZE, strategy.numRemoves);
   }
 
   @Test
@@ -239,7 +238,7 @@ public class LruBitmapPoolTest {
   }
 
   private Bitmap createMutableBitmap(Bitmap.Config config) {
-    Bitmap bitmap = ShadowBitmap.createBitmap(100, 100, config);
+    Bitmap bitmap = Bitmap.createBitmap(100, 100, config);
     Shadows.shadowOf(bitmap).setMutable(true);
     return bitmap;
 

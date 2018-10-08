@@ -47,18 +47,27 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
       @NonNull Options options) {
     @DrawableRes int resId = loadResourceIdFromUri(source);
     String packageName = source.getAuthority();
-    Context targetContext = packageName.equals(context.getPackageName())
-        ? context : getContextForPackage(source, packageName);
+    Context targetContext = findContextForPackage(source, packageName);
     // We can't get a theme from another application.
     Drawable drawable = DrawableDecoderCompat.getDrawable(context, targetContext, resId);
     return NonOwnedDrawableResource.newInstance(drawable);
   }
 
   @NonNull
-  private Context getContextForPackage(Uri source, String packageName) {
+  private Context findContextForPackage(Uri source, String packageName) {
+    // Fast path
+    if (packageName.equals(context.getPackageName())) {
+      return context;
+    }
+
     try {
       return context.createPackageContext(packageName, /*flags=*/ 0);
     } catch (NameNotFoundException e) {
+      // The parent APK holds the correct context if the resource is located in a split
+      if (packageName.contains(context.getPackageName())) {
+        return context;
+      }
+
       throw new IllegalArgumentException(
           "Failed to obtain context or unrecognized Uri format for: " + source, e);
     }

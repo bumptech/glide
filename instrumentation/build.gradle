@@ -19,14 +19,13 @@ dependencies {
     androidTestImplementation "org.mockito:mockito-android:${MOCKITO_ANDROID_VERSION}"
     androidTestImplementation "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
     androidTestImplementation "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test:rules:1.0.1'
+    androidTestImplementation "androidx.test:runner:${ANDROIDX_TEST_VERSION}"
+    androidTestImplementation "androidx.test:rules:${ANDROIDX_TEST_VERSION}"
     androidTestImplementation "com.google.truth:truth:${TRUTH_VERSION}"
     androidTestImplementation "junit:junit:${JUNIT_VERSION}"
     // Not totally clear why this is required, but it seems to be missing when tests are run on
     // 4.1.2 and 4.2.0 emulators.
     androidTestImplementation 'com.google.code.findbugs:jsr305:3.0.2'
-
 }
 
 android {
@@ -38,7 +37,7 @@ android {
         targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 1
         versionName '1.0'
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {

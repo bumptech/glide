@@ -7,7 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 import com.bumptech.glide.RequestBuilder;
 import java.io.BufferedOutputStream;
 import java.io.File;

@@ -43,6 +43,7 @@ public class RequestTracker {
     if (!isPaused) {
       request.begin();
     } else {
+      request.clear();
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Paused, delaying request");
       }
@@ -97,7 +98,7 @@ public class RequestTracker {
     isPaused = true;
     for (Request request : Util.getSnapshot(requests)) {
       if (request.isRunning()) {
-        request.pause();
+        request.clear();
         pendingRequests.add(request);
       }
     }
@@ -108,7 +109,7 @@ public class RequestTracker {
     isPaused = true;
     for (Request request : Util.getSnapshot(requests)) {
       if (request.isRunning() || request.isComplete()) {
-        request.pause();
+        request.clear();
         pendingRequests.add(request);
       }
     }
@@ -120,7 +121,10 @@ public class RequestTracker {
   public void resumeRequests() {
     isPaused = false;
     for (Request request : Util.getSnapshot(requests)) {
-      if (!request.isComplete() && !request.isCancelled() && !request.isRunning()) {
+      // We don't need to check for cleared here. Any explicit clear by a user will remove the
+      // Request from the tracker, so the only way we'd find a cleared request here is if we cleared
+      // it. As a result it should be safe for us to resume cleared requests.
+      if (!request.isComplete() && !request.isRunning()) {
         request.begin();
       }
     }
@@ -146,12 +150,12 @@ public class RequestTracker {
    */
   public void restartRequests() {
     for (Request request : Util.getSnapshot(requests)) {
-      if (!request.isComplete() && !request.isCancelled()) {
-        // Ensure the request will be restarted in onResume.
-        request.pause();
+      if (!request.isComplete() && !request.isCleared()) {
+        request.clear();
         if (!isPaused) {
           request.begin();
         } else {
+          // Ensure the request will be restarted in onResume.
           pendingRequests.add(request);
         }
       }

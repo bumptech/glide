@@ -3,6 +3,7 @@ package com.bumptech.glide.samples.giphy;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import com.bumptech.glide.util.Util;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.InputStream;
@@ -140,10 +141,30 @@ public final class Api {
 
   /**
    * A POJO mirroring an individual GIF image returned from Giphy's api.
+   *
+   * <p>Implements equals and hashcode so that in memory caching will work when this object is used
+   * as a model for loading Glide's images.
    */
   public static final class GifResult {
     public String id;
     GifUrlSet images;
+
+    @Override
+    public int hashCode() {
+      int result = id != null ? id.hashCode() : 17;
+      result = 31 * result + (images != null ? images.hashCode() : 17);
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof GifResult) {
+        GifResult other = (GifResult) obj;
+        return Util.bothNullOrEqual(id, other.id)
+            && Util.bothNullOrEqual(images, other.images);
+      }
+      return false;
+    }
 
     @Override
     public String toString() {
@@ -160,6 +181,25 @@ public final class Api {
     GifImage original;
     GifImage fixed_width;
     GifImage fixed_height;
+
+    @Override
+    public int hashCode() {
+      int result = original != null ? original.hashCode() : 17;
+      result = 31 * result + (fixed_width != null ? fixed_width.hashCode() : 17);
+      result = 31 * result + (fixed_height != null ? fixed_height.hashCode() : 17);
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof GifUrlSet) {
+        GifUrlSet other = (GifUrlSet) obj;
+        return Util.bothNullOrEqual(original, other.original)
+            && Util.bothNullOrEqual(fixed_width, other.fixed_width)
+            && Util.bothNullOrEqual(fixed_height, other.fixed_height);
+      }
+      return false;
+    }
 
     @Override
     public String toString() {
@@ -179,6 +219,24 @@ public final class Api {
     int height;
 
     @Override
+    public int hashCode() {
+      int result = url != null ? url.hashCode() : 17;
+      result = 31 * result + width;
+      result = 31 * result + height;
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj instanceof GifImage) {
+        GifImage other = (GifImage) obj;
+        return other.width == width
+            && other.height == height
+            && Util.bothNullOrEqual(url, other.url);
+      }
+      return false;
+    }
+
     public String toString() {
       return "GifImage{" + "url='" + url + '\'' + ", width=" + width + ", height=" + height + '}';
     }

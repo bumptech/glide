@@ -31,16 +31,6 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
   }
 
   @Override
-  public void pause() {
-    if (!primary.isFailed()) {
-      primary.pause();
-    }
-    if (error.isRunning()) {
-      error.pause();
-    }
-  }
-
-  @Override
   public void clear() {
     primary.clear();
     // Don't check primary.isFailed() here because it will have been reset by the clear call
@@ -48,11 +38,6 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
     if (error.isRunning()) {
       error.clear();
     }
-  }
-
-  @Override
-  public boolean isPaused() {
-    return primary.isFailed() ? error.isPaused() : primary.isPaused();
   }
 
   @Override
@@ -71,8 +56,8 @@ public final class ErrorRequestCoordinator implements RequestCoordinator,
   }
 
   @Override
-  public boolean isCancelled() {
-    return primary.isFailed() ? error.isCancelled() : primary.isCancelled();
+  public boolean isCleared() {
+    return primary.isFailed() ? error.isCleared() : primary.isCleared();
   }
 
   @Override

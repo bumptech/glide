@@ -24,8 +24,6 @@ env:
     - COMPONENT=instrumentation ANDROID_TARGET=17
     - COMPONENT=instrumentation ANDROID_TARGET=18
     - COMPONENT=instrumentation ANDROID_TARGET=19
-    - COMPONENT=instrumentation ANDROID_TARGET=21
-    - COMPONENT=instrumentation ANDROID_TARGET=22
     - COMPONENT=samples
 
 before_script:

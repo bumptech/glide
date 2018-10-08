@@ -4,8 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 import com.bumptech.glide.test.BitmapRegressionTester;
 import com.bumptech.glide.test.CanonicalBitmap;
 import com.bumptech.glide.test.GlideApp;
@@ -17,7 +17,6 @@ import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
@@ -27,7 +26,6 @@ import org.junit.runner.RunWith;
 @RegressionTest
 public class CircleCropRegressionTest {
   @Rule public final TestName testName = new TestName();
-  @Rule public final ExpectedException expectedException = ExpectedException.none();
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   private BitmapRegressionTester bitmapRegressionTester;
   private Context context;

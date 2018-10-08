@@ -66,15 +66,23 @@ public class ModelLoaderRegistry {
     }
   }
 
+  // We're allocating in a loop to avoid allocating empty lists that will never have anything added
+  // to them.
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   @NonNull
-  public synchronized <A> List<ModelLoader<A, ?>> getModelLoaders(@NonNull A model) {
+  public <A> List<ModelLoader<A, ?>> getModelLoaders(@NonNull A model) {
     List<ModelLoader<A, ?>> modelLoaders = getModelLoadersForClass(getClass(model));
     int size = modelLoaders.size();
-    List<ModelLoader<A, ?>> filteredLoaders = new ArrayList<>(size);
+    boolean isEmpty = true;
+    List<ModelLoader<A, ?>> filteredLoaders = Collections.emptyList();
     //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0; i < size; i++) {
       ModelLoader<A, ?> loader = modelLoaders.get(i);
       if (loader.handles(model)) {
+        if (isEmpty) {
+          filteredLoaders = new ArrayList<>(size - i);
+          isEmpty = false;
+        }
         filteredLoaders.add(loader);
       }
     }
@@ -92,7 +100,8 @@ public class ModelLoaderRegistry {
   }
 
   @NonNull
-  private <A> List<ModelLoader<A, ?>> getModelLoadersForClass(@NonNull Class<A> modelClass) {
+  private synchronized <A> List<ModelLoader<A, ?>> getModelLoadersForClass(
+      @NonNull Class<A> modelClass) {
     List<ModelLoader<A, ?>> loaders = cache.get(modelClass);
     if (loaders == null) {
       loaders = Collections.unmodifiableList(multiModelLoaderFactory.build(modelClass));
