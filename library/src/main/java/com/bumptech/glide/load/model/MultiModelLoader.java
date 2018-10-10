@@ -81,6 +81,8 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     @Nullable
     private List<Throwable> exceptions;
 
+    private volatile boolean isCancelled;
+
     MultiFetcher(
         @NonNull List<DataFetcher<Data>> fetchers,
         @NonNull Pool<List<Throwable>> throwableListPool) {
@@ -97,6 +99,14 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
       this.callback = callback;
       exceptions = throwableListPool.acquire();
       fetchers.get(currentIndex).loadData(priority, this);
+
+      // If a race occurred where we cancelled the fetcher in cancel() and then called loadData here
+      // immediately after, make sure that we cancel the newly started fetcher. We don't bother
+      // checking cancelled before loadData because it's not required for correctness and would
+      // require an unlikely race to be useful. 
+      if (isCancelled) {
+        cancel();
+      }
     }
 
     @Override
@@ -112,6 +122,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
     @Override
     public void cancel() {
+      isCancelled = true;
       for (DataFetcher<Data> fetcher : fetchers) {
         fetcher.cancel();
       }
@@ -145,6 +156,9 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     private void startNextOrFail() {
+      if (isCancelled) {
+        return;
+      }
       if (currentIndex < fetchers.size() - 1) {
         currentIndex++;
         loadData(priority, callback);
