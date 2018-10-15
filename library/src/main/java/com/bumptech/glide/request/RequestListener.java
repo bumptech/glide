@@ -65,9 +65,10 @@ public interface RequestListener<R> {
    *                          full-sized image, this will be {@code true} for the first image to
    *                          load and {@code false} for the second.
    *
-   * @return {@code true} to prevent {@link Target#onLoadFailed(Drawable)} from being called on
-   * {@code target}, typically because the listener wants to update the {@code target} or the object
-   * the {@code target} wraps itself or {@code false} to allow {@link Target#onLoadFailed(Drawable)}
+   * @return {@code true} to prevent {@link Target#onResourceReady(Object, Transition)} from
+   * being called on {@code target}, typically because the listener wants to
+   * update the {@code target} or the object the {@code target} wraps
+   * itself or {@code false} to allow {@link Target#onResourceReady(Object, Transition)}
    * to be called on {@code target}.
    */
   boolean onResourceReady(
