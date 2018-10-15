@@ -103,7 +103,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
       // If a race occurred where we cancelled the fetcher in cancel() and then called loadData here
       // immediately after, make sure that we cancel the newly started fetcher. We don't bother
       // checking cancelled before loadData because it's not required for correctness and would
-      // require an unlikely race to be useful. 
+      // require an unlikely race to be useful.
       if (isCancelled) {
         cancel();
       }
