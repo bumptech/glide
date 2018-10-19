@@ -25,6 +25,7 @@ import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
 import com.bumptech.glide.util.pool.StateVerifier;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * A {@link Request} that loads a {@link com.bumptech.glide.load.engine.Resource} into a given
@@ -99,6 +100,7 @@ public final class SingleRequest<R> implements Request,
   @Nullable private List<RequestListener<R>> requestListeners;
   private Engine engine;
   private TransitionFactory<? super R> animationFactory;
+  private Executor callbackExecutor;
   private Resource<R> resource;
   private Engine.LoadStatus loadStatus;
   private long startTime;
@@ -123,7 +125,8 @@ public final class SingleRequest<R> implements Request,
       @Nullable List<RequestListener<R>> requestListeners,
       RequestCoordinator requestCoordinator,
       Engine engine,
-      TransitionFactory<? super R> animationFactory) {
+      TransitionFactory<? super R> animationFactory,
+      Executor callbackExecutor) {
     @SuppressWarnings("unchecked") SingleRequest<R> request =
         (SingleRequest<R>) POOL.acquire();
     if (request == null) {
@@ -143,7 +146,8 @@ public final class SingleRequest<R> implements Request,
         requestListeners,
         requestCoordinator,
         engine,
-        animationFactory);
+        animationFactory,
+        callbackExecutor);
     return request;
   }
 
@@ -153,7 +157,7 @@ public final class SingleRequest<R> implements Request,
     // just create, instances are reused with recycle/init
   }
 
-  private void init(
+  private synchronized void init(
       Context context,
       GlideContext glideContext,
       Object model,
@@ -167,7 +171,8 @@ public final class SingleRequest<R> implements Request,
       @Nullable List<RequestListener<R>> requestListeners,
       RequestCoordinator requestCoordinator,
       Engine engine,
-      TransitionFactory<? super R> animationFactory) {
+      TransitionFactory<? super R> animationFactory,
+      Executor callbackExecutor) {
     this.context = context;
     this.glideContext = glideContext;
     this.model = model;
@@ -182,6 +187,7 @@ public final class SingleRequest<R> implements Request,
     this.requestCoordinator = requestCoordinator;
     this.engine = engine;
     this.animationFactory = animationFactory;
+    this.callbackExecutor = callbackExecutor;
     status = Status.PENDING;
   }
 
@@ -192,7 +198,7 @@ public final class SingleRequest<R> implements Request,
   }
 
   @Override
-  public void recycle() {
+  public synchronized void recycle() {
     assertNotCallingCallbacks();
     context = null;
     glideContext = null;
@@ -216,7 +222,7 @@ public final class SingleRequest<R> implements Request,
   }
 
   @Override
-  public void begin() {
+  public synchronized void begin() {
     assertNotCallingCallbacks();
     stateVerifier.throwIfRecycled();
     startTime = LogTime.getLogTime();
@@ -303,8 +309,7 @@ public final class SingleRequest<R> implements Request,
    * @see #cancel()
    */
   @Override
-  public void clear() {
-    Util.assertMainThread();
+  public synchronized void clear() {
     assertNotCallingCallbacks();
     stateVerifier.throwIfRecycled();
     if (status == Status.CLEARED) {
@@ -328,27 +333,27 @@ public final class SingleRequest<R> implements Request,
   }
 
   @Override
-  public boolean isRunning() {
+  public synchronized boolean isRunning() {
     return status == Status.RUNNING || status == Status.WAITING_FOR_SIZE;
   }
 
   @Override
-  public boolean isComplete() {
+  public synchronized boolean isComplete() {
     return status == Status.COMPLETE;
   }
 
   @Override
-  public boolean isResourceSet() {
+  public synchronized boolean isResourceSet() {
     return isComplete();
   }
 
   @Override
-  public boolean isCleared() {
+  public synchronized boolean isCleared() {
     return status == Status.CLEARED;
   }
 
   @Override
-  public boolean isFailed() {
+  public synchronized boolean isFailed() {
     return status == Status.FAILED;
   }
 
@@ -388,7 +393,7 @@ public final class SingleRequest<R> implements Request,
     return DrawableDecoderCompat.getDrawable(glideContext, resourceId, theme);
   }
 
-  private void setErrorPlaceholder() {
+  private synchronized void setErrorPlaceholder() {
     if (!canNotifyStatusChanged()) {
       return;
     }
@@ -412,7 +417,7 @@ public final class SingleRequest<R> implements Request,
    * A callback method that should never be invoked directly.
    */
   @Override
-  public void onSizeReady(int width, int height) {
+  public synchronized void onSizeReady(int width, int height) {
     stateVerifier.throwIfRecycled();
     if (IS_VERBOSE_LOGGABLE) {
       logV("Got onSizeReady in " + LogTime.getElapsedMillis(startTime));
@@ -447,7 +452,8 @@ public final class SingleRequest<R> implements Request,
         requestOptions.getUseUnlimitedSourceGeneratorsPool(),
         requestOptions.getUseAnimationPool(),
         requestOptions.getOnlyRetrieveFromCache(),
-        this);
+        this,
+        callbackExecutor);
 
     // This is a hack that's only useful for testing right now where loads complete synchronously
     // even though under any executor running on any thread but the main thread, the load would
@@ -497,7 +503,7 @@ public final class SingleRequest<R> implements Request,
    */
   @SuppressWarnings("unchecked")
   @Override
-  public void onResourceReady(Resource<?> resource, DataSource dataSource) {
+  public synchronized void onResourceReady(Resource<?> resource, DataSource dataSource) {
     stateVerifier.throwIfRecycled();
     loadStatus = null;
     if (resource == null) {
@@ -537,7 +543,7 @@ public final class SingleRequest<R> implements Request,
    * @param result   object returned by {@link Resource#get()}, checked for type and never
    *                 <code>null</code>
    */
-  private void onResourceReady(Resource<R> resource, R result, DataSource dataSource) {
+  private synchronized void onResourceReady(Resource<R> resource, R result, DataSource dataSource) {
     // We must call isFirstReadyResource before setting status.
     boolean isFirstResource = isFirstReadyResource();
     status = Status.COMPLETE;
@@ -578,11 +584,11 @@ public final class SingleRequest<R> implements Request,
    * A callback method that should never be invoked directly.
    */
   @Override
-  public void onLoadFailed(GlideException e) {
+  public synchronized void onLoadFailed(GlideException e) {
     onLoadFailed(e, Log.WARN);
   }
 
-  private void onLoadFailed(GlideException e, int maxLogLevel) {
+  private synchronized void onLoadFailed(GlideException e, int maxLogLevel) {
     stateVerifier.throwIfRecycled();
     int logLevel = glideContext.getLogLevel();
     if (logLevel <= maxLogLevel) {
@@ -619,28 +625,34 @@ public final class SingleRequest<R> implements Request,
     notifyLoadFailed();
   }
 
+  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
   @Override
-  public boolean isEquivalentTo(Request o) {
+  public synchronized boolean isEquivalentTo(Request o) {
     if (o instanceof SingleRequest) {
       SingleRequest<?> that = (SingleRequest<?>) o;
-      return overrideWidth == that.overrideWidth
-          && overrideHeight == that.overrideHeight
-          && Util.bothModelsNullEquivalentOrEquals(model, that.model)
-          && transcodeClass.equals(that.transcodeClass)
-          && requestOptions.equals(that.requestOptions)
-          && priority == that.priority
-          // We do not want to require that RequestListeners implement equals/hashcode, so we don't
-          // compare them using equals(). We can however, at least assert that the same amount of
-          // request listeners are present in both requests
-          && listenerCountEquals(this, that);
+      synchronized (that) {
+        return overrideWidth == that.overrideWidth
+            && overrideHeight == that.overrideHeight
+            && Util.bothModelsNullEquivalentOrEquals(model, that.model)
+            && transcodeClass.equals(that.transcodeClass)
+            && requestOptions.equals(that.requestOptions)
+            && priority == that.priority
+            // We do not want to require that RequestListeners implement equals/hashcode, so we
+            // don't compare them using equals(). We can however, at least assert that the same
+            // amount of request listeners are present in both requests.
+            && listenerCountEquals(that);
+      }
     }
     return false;
   }
 
-  private static boolean listenerCountEquals(SingleRequest<?> first, SingleRequest<?> second) {
-    int firstListenerCount = first.requestListeners == null ? 0 : first.requestListeners.size();
-    int secondListenerCount = second.requestListeners == null ? 0 : second.requestListeners.size();
-    return firstListenerCount == secondListenerCount;
+  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+  private synchronized boolean listenerCountEquals(SingleRequest<?> other) {
+    synchronized (other) {
+      int firstListenerCount = requestListeners == null ? 0 : requestListeners.size();
+      int secondListenerCount = other.requestListeners == null ? 0 : other.requestListeners.size();
+      return firstListenerCount == secondListenerCount;
+    }
   }
 
   private void logV(String message) {

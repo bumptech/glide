@@ -158,7 +158,8 @@ public class RequestManager implements LifecycleListener,
    * @return This request manager.
    */
   @NonNull
-  public RequestManager applyDefaultRequestOptions(@NonNull RequestOptions requestOptions) {
+  public synchronized RequestManager applyDefaultRequestOptions(
+      @NonNull RequestOptions requestOptions) {
     updateRequestOptions(requestOptions);
     return this;
   }
@@ -180,7 +181,8 @@ public class RequestManager implements LifecycleListener,
    * @return This request manager.
    */
   @NonNull
-  public RequestManager setDefaultRequestOptions(@NonNull RequestOptions requestOptions) {
+  public synchronized RequestManager setDefaultRequestOptions(
+      @NonNull RequestOptions requestOptions) {
     setRequestOptions(requestOptions);
     return this;
   }
@@ -203,7 +205,8 @@ public class RequestManager implements LifecycleListener,
    * {@code instanceof} to do so. It's not safe to cast resource types without first checking
    * with {@code instanceof}.
    */
-  public RequestManager addDefaultRequestListener(RequestListener<Object> requestListener) {
+  public synchronized RequestManager addDefaultRequestListener(
+      RequestListener<Object> requestListener) {
     defaultRequestListeners.add(requestListener);
     return this;
   }
@@ -214,8 +217,7 @@ public class RequestManager implements LifecycleListener,
    * @see #pauseRequests()
    * @see #resumeRequests()
    */
-  public boolean isPaused() {
-    Util.assertMainThread();
+  public synchronized boolean isPaused() {
     return requestTracker.isPaused();
   }
 
@@ -229,8 +231,7 @@ public class RequestManager implements LifecycleListener,
    * @see #isPaused()
    * @see #resumeRequests()
    */
-  public void pauseRequests() {
-    Util.assertMainThread();
+  public synchronized void pauseRequests() {
     requestTracker.pauseRequests();
   }
 
@@ -250,8 +251,7 @@ public class RequestManager implements LifecycleListener,
    * @see #isPaused()
    * @see #resumeRequests()
    */
-  public void pauseAllRequests() {
-    Util.assertMainThread();
+  public synchronized void pauseAllRequests() {
     requestTracker.pauseAllRequests();
   }
 
@@ -271,8 +271,7 @@ public class RequestManager implements LifecycleListener,
    */
   // Public API.
   @SuppressWarnings({"WeakerAccess", "unused"})
-  public void pauseRequestsRecursive() {
-    Util.assertMainThread();
+  public synchronized void pauseRequestsRecursive() {
     pauseRequests();
     for (RequestManager requestManager : treeNode.getDescendants()) {
       requestManager.pauseRequests();
@@ -285,8 +284,7 @@ public class RequestManager implements LifecycleListener,
    * @see #isPaused()
    * @see #pauseRequests()
    */
-  public void resumeRequests() {
-    Util.assertMainThread();
+  public synchronized void resumeRequests() {
     requestTracker.resumeRequests();
   }
 
@@ -321,7 +319,7 @@ public class RequestManager implements LifecycleListener,
    * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads.
    */
   @Override
-  public void onStop() {
+  public synchronized void onStop() {
     pauseRequests();
     targetTracker.onStop();
   }
@@ -331,7 +329,7 @@ public class RequestManager implements LifecycleListener,
    * all completed requests.
    */
   @Override
-  public void onDestroy() {
+  public synchronized void onDestroy() {
     targetTracker.onDestroy();
     for (Target<?> target : targetTracker.getAll()) {
       clear(target);
@@ -584,21 +582,12 @@ public class RequestManager implements LifecycleListener,
    *
    * @param target The Target to cancel loads for.
    */
-  public void clear(@Nullable final Target<?> target) {
+  public synchronized void clear(@Nullable final Target<?> target) {
     if (target == null) {
       return;
     }
 
-    if (Util.isOnMainThread()) {
-      untrackOrDelegate(target);
-    } else {
-      mainHandler.post(new Runnable() {
-        @Override
-        public void run() {
-          clear(target);
-        }
-      });
-    }
+    untrackOrDelegate(target);
   }
 
   private void untrackOrDelegate(@NonNull Target<?> target) {
@@ -627,7 +616,7 @@ public class RequestManager implements LifecycleListener,
     }
   }
 
-  boolean untrack(@NonNull Target<?> target) {
+  synchronized boolean untrack(@NonNull Target<?> target) {
     Request request = target.getRequest();
     // If the Target doesn't have a request, it's already been cleared.
     if (request == null) {
@@ -643,7 +632,7 @@ public class RequestManager implements LifecycleListener,
     }
   }
 
-  void track(@NonNull Target<?> target, @NonNull Request request) {
+  synchronized void track(@NonNull Target<?> target, @NonNull Request request) {
     targetTracker.track(target);
     requestTracker.runRequest(request);
   }
@@ -652,7 +641,7 @@ public class RequestManager implements LifecycleListener,
     return defaultRequestListeners;
   }
 
-  RequestOptions getDefaultRequestOptions() {
+  synchronized RequestOptions getDefaultRequestOptions() {
     return requestOptions;
   }
 

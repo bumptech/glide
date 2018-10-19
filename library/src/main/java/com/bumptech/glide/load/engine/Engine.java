@@ -16,14 +16,13 @@ import com.bumptech.glide.load.engine.cache.DiskCacheAdapter;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
-import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executor;
 
 /**
  * Responsible for starting loads and managing active and cached resources.
@@ -146,7 +145,7 @@ public class Engine implements EngineJobListener,
    * @param height The target height in pixels of the desired resource.
    * @param cb     The callback that will be called when the load completes.
    */
-  public <R> LoadStatus load(
+  public synchronized <R> LoadStatus load(
       GlideContext glideContext,
       Object model,
       Key signature,
@@ -164,8 +163,8 @@ public class Engine implements EngineJobListener,
       boolean useUnlimitedSourceExecutorPool,
       boolean useAnimationPool,
       boolean onlyRetrieveFromCache,
-      ResourceCallback cb) {
-    Util.assertMainThread();
+      ResourceCallback cb,
+      Executor callbackExecutor) {
     long startTime = VERBOSE_IS_LOGGABLE ? LogTime.getLogTime() : 0;
 
     EngineKey key = keyFactory.buildKey(model, signature, width, height, transformations,
@@ -191,7 +190,7 @@ public class Engine implements EngineJobListener,
 
     EngineJob<?> current = jobs.get(key, onlyRetrieveFromCache);
     if (current != null) {
-      current.addCallback(cb);
+      current.addCallback(cb, callbackExecutor);
       if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Added to existing load", startTime, key);
       }
@@ -227,7 +226,7 @@ public class Engine implements EngineJobListener,
 
     jobs.put(key, engineJob);
 
-    engineJob.addCallback(cb);
+    engineJob.addCallback(cb, callbackExecutor);
     engineJob.start(decodeJob);
 
     if (VERBOSE_IS_LOGGABLE) {
@@ -282,7 +281,6 @@ public class Engine implements EngineJobListener,
   }
 
   public void release(Resource<?> resource) {
-    Util.assertMainThread();
     if (resource instanceof EngineResource) {
       ((EngineResource<?>) resource).release();
     } else {
@@ -292,8 +290,8 @@ public class Engine implements EngineJobListener,
 
   @SuppressWarnings("unchecked")
   @Override
-  public void onEngineJobComplete(EngineJob<?> engineJob, Key key, EngineResource<?> resource) {
-    Util.assertMainThread();
+  public synchronized void onEngineJobComplete(
+      EngineJob<?> engineJob, Key key, EngineResource<?> resource) {
     // A null resource indicates that the load failed, usually due to an exception.
     if (resource != null) {
       resource.setResourceListener(key, this);
@@ -307,21 +305,17 @@ public class Engine implements EngineJobListener,
   }
 
   @Override
-  public void onEngineJobCancelled(EngineJob<?> engineJob, Key key) {
-    Util.assertMainThread();
-
+  public synchronized void onEngineJobCancelled(EngineJob<?> engineJob, Key key) {
     jobs.removeIfCurrent(key, engineJob);
   }
 
   @Override
   public void onResourceRemoved(@NonNull final Resource<?> resource) {
-    Util.assertMainThread();
     resourceRecycler.recycle(resource);
   }
 
   @Override
-  public void onResourceReleased(Key cacheKey, EngineResource<?> resource) {
-    Util.assertMainThread();
+  public synchronized void onResourceReleased(Key cacheKey, EngineResource<?> resource) {
     activeResources.deactivate(cacheKey);
     if (resource.isCacheable()) {
       cache.put(cacheKey, resource);
@@ -343,6 +337,8 @@ public class Engine implements EngineJobListener,
 
   /**
    * Allows a request to indicate it no longer is interested in a given load.
+   *
+   * <p>Non-final for mocking.
    */
   public static class LoadStatus {
     private final EngineJob<?> engineJob;
@@ -485,10 +481,10 @@ public class Engine implements EngineJobListener,
 
     @VisibleForTesting
     void shutdown() {
-      shutdownAndAwaitTermination(diskCacheExecutor);
-      shutdownAndAwaitTermination(sourceExecutor);
-      shutdownAndAwaitTermination(sourceUnlimitedExecutor);
-      shutdownAndAwaitTermination(animationExecutor);
+      Executors.shutdownAndAwaitTermination(diskCacheExecutor);
+      Executors.shutdownAndAwaitTermination(sourceExecutor);
+      Executors.shutdownAndAwaitTermination(sourceUnlimitedExecutor);
+      Executors.shutdownAndAwaitTermination(animationExecutor);
     }
 
     @SuppressWarnings("unchecked")
@@ -505,21 +501,6 @@ public class Engine implements EngineJobListener,
           useUnlimitedSourceGeneratorPool,
           useAnimationPool,
           onlyRetrieveFromCache);
-    }
-
-    private static void shutdownAndAwaitTermination(ExecutorService pool) {
-      long shutdownSeconds = 5;
-      pool.shutdown();
-      try {
-        if (!pool.awaitTermination(shutdownSeconds, TimeUnit.SECONDS)) {
-          pool.shutdownNow();
-          if (!pool.awaitTermination(shutdownSeconds, TimeUnit.SECONDS)) {
-            throw new RuntimeException("Failed to shutdown");
-          }
-        }
-      } catch (InterruptedException ie) {
-        throw new RuntimeException(ie);
-      }
     }
   }
 }

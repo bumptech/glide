@@ -32,8 +32,10 @@ import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.util.Executors;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,7 +66,7 @@ public class EngineTest {
   public void testCallbackIsAddedToNewEngineJobWithNoExistingLoad() {
     harness.doLoad();
 
-    verify(harness.job).addCallback(eq(harness.cb));
+    verify(harness.job).addCallback(eq(harness.cb), any(Executor.class));
   }
 
   @Test
@@ -103,7 +105,7 @@ public class EngineTest {
     harness.cb = newCallback;
     harness.doLoad();
 
-    verify(harness.job).addCallback(eq(newCallback));
+    verify(harness.job).addCallback(eq(newCallback), any(Executor.class));
   }
 
   @Test
@@ -206,7 +208,7 @@ public class EngineTest {
 
     doAnswer(new Answer<Void>() {
       @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) {
         Resource<?> resource = (Resource<?>) invocationOnMock.getArguments()[0];
         assertEquals(expected, resource.get());
         return null;
@@ -325,7 +327,7 @@ public class EngineTest {
     when(harness.resource.get()).thenReturn(expected);
     doAnswer(new Answer<Void>() {
       @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Void answer(InvocationOnMock invocationOnMock) {
         Resource<?> resource = (Resource<?>) invocationOnMock.getArguments()[1];
         assertEquals(expected, resource.get());
         return null;
@@ -426,8 +428,8 @@ public class EngineTest {
     harness.getEngine().release(mockResource());
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testThrowsIfLoadCalledOnBackgroundThread() throws InterruptedException {
+  @Test
+  public void load_whenCalledOnBackgroundThread_doesNotThrow() throws InterruptedException {
     BackgroundUtil.testInBackground(new BackgroundUtil.BackgroundTester() {
       @Override
       public void runTest() {
@@ -441,7 +443,7 @@ public class EngineTest {
     when(harness.resource.isCacheable()).thenReturn(true);
     doAnswer(new Answer<Object>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Object answer(InvocationOnMock invocationOnMock) {
         harness.callOnEngineJobComplete();
         return null;
       }
@@ -457,7 +459,7 @@ public class EngineTest {
     when(harness.resource.isCacheable()).thenReturn(true);
     doAnswer(new Answer<Object>() {
       @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      public Object answer(InvocationOnMock invocationOnMock) {
         harness.callOnEngineJobComplete();
         return null;
       }
@@ -687,7 +689,8 @@ public class EngineTest {
           useUnlimitedSourceGeneratorPool,
           /*useAnimationPool=*/ false,
           onlyRetrieveFromCache,
-          cb);
+          cb,
+          Executors.directExecutor());
     }
 
     Engine getEngine() {

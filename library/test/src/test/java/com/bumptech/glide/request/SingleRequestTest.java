@@ -37,12 +37,14 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.signature.ObjectKey;
+import com.bumptech.glide.util.Executors;
 import com.google.common.base.Equivalence;
 import com.google.common.testing.EquivalenceTester;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -247,7 +249,8 @@ public class SingleRequestTest {
             anyBoolean(),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class));
+            any(ResourceCallback.class),
+            anyExecutor());
   }
 
   @Test
@@ -281,7 +284,8 @@ public class SingleRequestTest {
             anyBoolean(),
             anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class)))
+            any(ResourceCallback.class),
+            anyExecutor()))
         .thenReturn(loadStatus);
 
     SingleRequest<List> request = builder.build();
@@ -564,7 +568,8 @@ public class SingleRequestTest {
             anyBoolean(),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class)))
+            any(ResourceCallback.class),
+            anyExecutor()))
         .thenAnswer(new Answer<Object>() {
           @Override
           public Object answer(InvocationOnMock invocation) {
@@ -699,7 +704,8 @@ public class SingleRequestTest {
             anyBoolean(),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class));
+            any(ResourceCallback.class),
+            anyExecutor());
   }
 
   @Test
@@ -737,7 +743,8 @@ public class SingleRequestTest {
             anyBoolean(),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class)))
+            any(ResourceCallback.class),
+            anyExecutor()))
         .thenAnswer(new CallResourceCallback(builder.resource));
     SingleRequest<List> request = builder.build();
 
@@ -781,7 +788,8 @@ public class SingleRequestTest {
             anyBoolean(),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class));
+            any(ResourceCallback.class),
+            anyExecutor());
   }
 
 
@@ -814,7 +822,8 @@ public class SingleRequestTest {
             eq(true),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class));
+            any(ResourceCallback.class),
+            anyExecutor());
   }
 
   @Test
@@ -846,7 +855,8 @@ public class SingleRequestTest {
             eq(false),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class));
+            any(ResourceCallback.class),
+            anyExecutor());
   }
 
   @Test
@@ -1014,7 +1024,8 @@ public class SingleRequestTest {
           requestListeners,
           requestCoordinator,
           engine,
-          transitionFactory);
+          transitionFactory,
+          Executors.directExecutor());
     }
   }
 
@@ -1038,6 +1049,10 @@ public class SingleRequestTest {
     return any(Transition.class);
   }
 
+  private static Executor anyExecutor() {
+    return any(Executor.class);
+  }
+
   private static class CallResourceCallback implements Answer {
 
     private final Resource resource;
@@ -1051,7 +1066,7 @@ public class SingleRequestTest {
       ResourceCallback cb =
           (ResourceCallback) invocationOnMock.getArguments()[
               invocationOnMock.getArguments().length
-                  - 1];
+                  - 2];
       cb.onResourceReady(resource, DataSource.REMOTE);
       return null;
     }

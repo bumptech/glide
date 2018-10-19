@@ -80,8 +80,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
     if (result != null) {
       // Decrement must be called before reconfigure.
       decrementBitmapOfSize(bestKey.size, result);
-      result.reconfigure(width, height,
-          result.getConfig() != null ? result.getConfig() : Bitmap.Config.ARGB_8888);
+      result.reconfigure(width, height, config);
     }
     return result;
   }
