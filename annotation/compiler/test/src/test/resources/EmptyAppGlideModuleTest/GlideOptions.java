@@ -20,6 +20,7 @@ import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestOptions;
 import java.lang.Class;
 import java.lang.Cloneable;
+import java.lang.Deprecated;
 import java.lang.Override;
 import java.lang.SafeVarargs;
 import java.lang.SuppressWarnings;
@@ -556,6 +557,16 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
   @Override
   @SafeVarargs
   @SuppressWarnings("varargs")
+  @NonNull
+  @CheckResult
+  public final GlideOptions transform(@NonNull Transformation<Bitmap>... transformations) {
+    return (GlideOptions) super.transform(transformations);
+  }
+
+  @Override
+  @SafeVarargs
+  @SuppressWarnings("varargs")
+  @Deprecated
   @NonNull
   @CheckResult
   public final GlideOptions transforms(@NonNull Transformation<Bitmap>... transformations) {
