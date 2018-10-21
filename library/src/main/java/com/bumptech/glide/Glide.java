@@ -74,6 +74,7 @@ import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.DrawableBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
+import com.bumptech.glide.manager.ArchLifecycleOwner;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.module.ManifestParser;
@@ -799,6 +800,19 @@ public class Glide implements ComponentCallbacks2 {
   @NonNull
   public static RequestManager with(@NonNull View view) {
     return getRetriever(view.getContext()).get(view);
+  }
+
+  /**
+   * Begin a load with Glide that will be tied to the given
+   * {@link android.arch.lifecycle.Lifecycle}'s lifecycle and that uses the given
+   * {@link android.arch.lifecycle.Lifecycle}'s default options.
+   *
+   * @param owner The lifecycle owner to use
+   * @return A RequestManager for the given Lifecycle that can be used to start a load.
+   */
+  @NonNull
+  public static RequestManager with(@NonNull ArchLifecycleOwner owner) {
+    return getRetriever(owner.getContext()).get(owner);
   }
 
   @NonNull

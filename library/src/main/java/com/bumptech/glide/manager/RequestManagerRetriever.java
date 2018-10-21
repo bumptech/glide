@@ -194,6 +194,21 @@ public class RequestManagerRetriever implements Handler.Callback {
     return get(fragment);
   }
 
+  @NonNull
+  public RequestManager get(@NonNull ArchLifecycleOwner owner) {
+    if (Util.isOnBackgroundThread()) {
+      return get(owner.getContext().getApplicationContext());
+    }
+    RequestManager requestManager = ArchLifecycleRegistry.get(owner.getLifecycle());
+    if (requestManager == null) {
+      // TODO(b/27524013): Factor out this Glide.get() call.
+      Glide glide = Glide.get(owner.getContext());
+      requestManager = ArchLifecycleRegistry.build(factory, glide, owner.getLifecycle());
+      ArchLifecycleRegistry.set(owner.getLifecycle(), requestManager);
+    }
+    return requestManager;
+  }
+
   private static void findAllSupportFragmentsWithViews(
       @Nullable Collection<Fragment> topLevelFragments,
       @NonNull Map<View, Fragment> result) {

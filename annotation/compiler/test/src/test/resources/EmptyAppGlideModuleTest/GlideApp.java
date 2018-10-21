@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.manager.ArchLifecycleOwner;
 import java.io.File;
 import java.lang.Deprecated;
 import java.lang.String;
@@ -127,5 +128,13 @@ public final class GlideApp {
   @NonNull
   public static GlideRequests with(@NonNull View view) {
     return (GlideRequests) Glide.with(view);
+  }
+
+  /**
+   * @see Glide#with(ArchLifecycleOwner)
+   */
+  @NonNull
+  public static GlideRequests with(@NonNull ArchLifecycleOwner owner) {
+    return (GlideRequests) Glide.with(owner);
   }
 }

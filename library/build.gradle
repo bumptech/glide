@@ -14,6 +14,8 @@ dependencies {
     api project(':annotation')
     api "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
     compileOnly "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    compileOnly "android.arch.lifecycle:common:${ANDROID_LIFECYCLE_VERSION}"
+    compileOnly "android.arch.lifecycle:common-java8:${ANDROID_LIFECYCLE_VERSION}"
 
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
         errorprone "com.google.errorprone:error_prone_core:${ERROR_PRONE_VERSION}"
