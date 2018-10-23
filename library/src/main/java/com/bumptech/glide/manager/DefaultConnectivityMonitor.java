@@ -18,12 +18,14 @@ import com.bumptech.glide.util.Synthetic;
 final class DefaultConnectivityMonitor implements ConnectivityMonitor {
   private static final String TAG = "ConnectivityMonitor";
   private final Context context;
-  @SuppressWarnings("WeakerAccess") @Synthetic final ConnectivityListener listener;
+  @SuppressWarnings("WeakerAccess") @Synthetic
+  static  ConnectivityListener slistener = null;
 
-  @SuppressWarnings("WeakerAccess") @Synthetic boolean isConnected;
-  private boolean isRegistered;
+  @SuppressWarnings("WeakerAccess") @Synthetic
+  static  boolean isConnected;
 
-  private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
+
+  static final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(@NonNull Context context, Intent intent) {
       boolean wasConnected = isConnected;
@@ -33,20 +35,19 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
           Log.d(TAG, "connectivity changed, isConnected: " + isConnected);
         }
 
-        listener.onConnectivityChanged(isConnected);
+        slistener.onConnectivityChanged(isConnected);
       }
     }
   };
 
   DefaultConnectivityMonitor(@NonNull Context context, @NonNull ConnectivityListener listener) {
     this.context = context.getApplicationContext();
-    this.listener = listener;
+    slistener = listener;
   }
 
   private void register() {
-    if (isRegistered) {
-      return;
-    }
+
+    context.unregisterReceiver(connectivityReceiver);
 
     // Initialize isConnected.
     isConnected = isConnected(context);
@@ -54,7 +55,7 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
       // See #1405
       context.registerReceiver(connectivityReceiver,
           new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-      isRegistered = true;
+
     } catch (SecurityException e) {
       // See #1417, registering the receiver can throw SecurityException.
       if (Log.isLoggable(TAG, Log.WARN)) {
@@ -64,19 +65,14 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
   }
 
   private void unregister() {
-    if (!isRegistered) {
-      return;
-    }
-
     context.unregisterReceiver(connectivityReceiver);
-    isRegistered = false;
   }
 
   @SuppressWarnings("WeakerAccess")
   @Synthetic
   // Permissions are checked in the factory instead.
   @SuppressLint("MissingPermission")
-  boolean isConnected(@NonNull Context context) {
+ static boolean isConnected(@NonNull Context context) {
     ConnectivityManager connectivityManager =
         Preconditions.checkNotNull(
             (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
