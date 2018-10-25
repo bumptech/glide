@@ -769,7 +769,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @NonNull
   public FutureTarget<TranscodeType> submit(int width, int height) {
     final RequestFutureTarget<TranscodeType> target =
-        new RequestFutureTarget<>(glideContext.getMainHandler(), width, height);
+        new RequestFutureTarget<>(width, height);
     return into(target, target, Executors.directExecutor());
   }
 

@@ -1,7 +1,6 @@
 package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -52,11 +51,9 @@ import java.util.concurrent.TimeoutException;
  * @param <R> The type of the resource that will be loaded.
  */
 public class RequestFutureTarget<R> implements FutureTarget<R>,
-    RequestListener<R>,
-    Runnable {
+    RequestListener<R> {
   private static final Waiter DEFAULT_WAITER = new Waiter();
 
-  private final Handler mainHandler;
   private final int width;
   private final int height;
   // Exists for testing only.
@@ -73,13 +70,12 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   /**
    * Constructor for a RequestFutureTarget. Should not be used directly.
    */
-  public RequestFutureTarget(Handler mainHandler, int width, int height) {
-    this(mainHandler, width, height, true, DEFAULT_WAITER);
+  public RequestFutureTarget(int width, int height) {
+    this(width, height, true, DEFAULT_WAITER);
   }
 
-  RequestFutureTarget(Handler mainHandler, int width, int height, boolean assertBackgroundThread,
+  RequestFutureTarget(int width, int height, boolean assertBackgroundThread,
       Waiter waiter) {
-    this.mainHandler = mainHandler;
     this.width = width;
     this.height = height;
     this.assertBackgroundThread = assertBackgroundThread;
@@ -93,8 +89,9 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     }
     isCancelled = true;
     waiter.notifyAll(this);
-    if (mayInterruptIfRunning) {
-      clearOnMainThread();
+    if (mayInterruptIfRunning && request != null) {
+      request.clear();
+      request = null;
     }
     return true;
   }
@@ -138,13 +135,13 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
   }
 
   @Override
-  public void setRequest(@Nullable Request request) {
+  public synchronized void setRequest(@Nullable Request request) {
     this.request = request;
   }
 
   @Override
   @Nullable
-  public Request getRequest() {
+  public synchronized Request getRequest() {
     return request;
   }
 
@@ -217,21 +214,6 @@ public class RequestFutureTarget<R> implements FutureTarget<R>,
     }
 
     return resource;
-  }
-
-  /**
-   * A callback that should never be invoked directly.
-   */
-  @Override
-  public void run() {
-    if (request != null) {
-      request.clear();
-      request = null;
-    }
-  }
-
-  private void clearOnMainThread() {
-    mainHandler.post(this);
   }
 
   @Override
