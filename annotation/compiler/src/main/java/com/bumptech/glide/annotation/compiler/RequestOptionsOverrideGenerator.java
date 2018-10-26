@@ -86,7 +86,8 @@ final class RequestOptionsOverrideGenerator {
             .add(");\n")
             .build());
 
-    if (methodToOverride.getSimpleName().toString().equals("transforms")) {
+    if (methodToOverride.getSimpleName().toString().contains("transform")
+        && methodToOverride.isVarArgs()) {
       result
           .addModifiers(Modifier.FINAL)
           .addAnnotation(SafeVarargs.class)

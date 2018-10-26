@@ -376,8 +376,22 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   }
 
   /**
+   * @see GlideOptions#transform(Transformation<Bitmap>[])
+   */
+  @NonNull
+  @CheckResult
+  @SuppressWarnings({
+      "unchecked",
+      "varargs"
+  })
+  public GlideRequest<TranscodeType> transform(@NonNull Transformation<Bitmap>... transformations) {
+    return (GlideRequest<TranscodeType>) super.transform(transformations);
+  }
+
+  /**
    * @see GlideOptions#transforms(Transformation<Bitmap>[])
    */
+  @Deprecated
   @NonNull
   @CheckResult
   @SuppressWarnings({
