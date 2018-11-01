@@ -108,6 +108,8 @@ public final class SingleRequest<R> implements Request,
   private Drawable fallbackDrawable;
   private int width;
   private int height;
+  @Nullable
+  private RuntimeException requestOrigin;
 
   public static <R> SingleRequest<R> obtain(
       Context context,
@@ -183,6 +185,10 @@ public final class SingleRequest<R> implements Request,
     this.engine = engine;
     this.animationFactory = animationFactory;
     status = Status.PENDING;
+
+    if (glideContext.isLoggingRequestOriginsEnabled()) {
+      requestOrigin = new RuntimeException("Glide request origin trace");
+    }
   }
 
   @NonNull
@@ -212,6 +218,7 @@ public final class SingleRequest<R> implements Request,
     fallbackDrawable = null;
     width = -1;
     height = -1;
+    requestOrigin = null;
     POOL.release(this);
   }
 
@@ -584,6 +591,7 @@ public final class SingleRequest<R> implements Request,
 
   private void onLoadFailed(GlideException e, int maxLogLevel) {
     stateVerifier.throwIfRecycled();
+    e.setOrigin(requestOrigin);
     int logLevel = glideContext.getLogLevel();
     if (logLevel <= maxLogLevel) {
       Log.w(GLIDE_TAG, "Load failed for " + model + " with size [" + width + "x" + height + "]", e);

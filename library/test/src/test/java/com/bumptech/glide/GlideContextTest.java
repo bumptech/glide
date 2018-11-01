@@ -45,6 +45,7 @@ public final class GlideContextTest {
         transitionOptions,
         /*defaultRequestListeners=*/ Collections.<RequestListener<Object>>emptyList(),
         mock(Engine.class),
+        /*isLoggingRequestOriginsEnabled=*/ false,
         Log.DEBUG);
   }
 

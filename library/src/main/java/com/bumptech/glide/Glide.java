@@ -322,7 +322,8 @@ public class Glide implements ComponentCallbacks2 {
       int logLevel,
       @NonNull RequestOptions defaultRequestOptions,
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
-      @NonNull List<RequestListener<Object>> defaultRequestListeners) {
+      @NonNull List<RequestListener<Object>> defaultRequestListeners,
+      boolean isLoggingRequestOriginsEnabled) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
@@ -522,6 +523,7 @@ public class Glide implements ComponentCallbacks2 {
             defaultTransitionOptions,
             defaultRequestListeners,
             engine,
+            isLoggingRequestOriginsEnabled,
             logLevel);
   }
 

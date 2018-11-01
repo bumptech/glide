@@ -33,6 +33,7 @@ public class GlideContext extends ContextWrapper {
   private final List<RequestListener<Object>> defaultRequestListeners;
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions;
   private final Engine engine;
+  private boolean isLoggingRequestOriginsEnabled;
   private final int logLevel;
 
   public GlideContext(
@@ -44,6 +45,7 @@ public class GlideContext extends ContextWrapper {
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
       @NonNull Engine engine,
+      boolean isLoggingRequestOriginsEnabled,
       int logLevel) {
     super(context.getApplicationContext());
     this.arrayPool = arrayPool;
@@ -53,6 +55,7 @@ public class GlideContext extends ContextWrapper {
     this.defaultRequestListeners = defaultRequestListeners;
     this.defaultTransitionOptions = defaultTransitionOptions;
     this.engine = engine;
+    this.isLoggingRequestOriginsEnabled = isLoggingRequestOriginsEnabled;
     this.logLevel = logLevel;
 
     mainHandler = new Handler(Looper.getMainLooper());
@@ -111,5 +114,15 @@ public class GlideContext extends ContextWrapper {
   @NonNull
   public ArrayPool getArrayPool() {
     return arrayPool;
+  }
+
+  /**
+   * Returns {@code true} if Glide should populate
+   * {@link com.bumptech.glide.load.engine.GlideException#setOrigin(Exception)} for failed requests.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public boolean isLoggingRequestOriginsEnabled() {
+    return isLoggingRequestOriginsEnabled;
   }
 }
