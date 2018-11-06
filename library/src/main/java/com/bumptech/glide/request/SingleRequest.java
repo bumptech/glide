@@ -125,7 +125,8 @@ public final class SingleRequest<R> implements Request,
       @Nullable List<RequestListener<R>> requestListeners,
       RequestCoordinator requestCoordinator,
       Engine engine,
-      TransitionFactory<? super R> animationFactory) {
+      TransitionFactory<? super R> animationFactory,
+      @Nullable Exception requestOrigin) {
     @SuppressWarnings("unchecked") SingleRequest<R> request =
         (SingleRequest<R>) POOL.acquire();
     if (request == null) {
@@ -145,7 +146,8 @@ public final class SingleRequest<R> implements Request,
         requestListeners,
         requestCoordinator,
         engine,
-        animationFactory);
+        animationFactory,
+        requestOrigin);
     return request;
   }
 
@@ -169,7 +171,8 @@ public final class SingleRequest<R> implements Request,
       @Nullable List<RequestListener<R>> requestListeners,
       RequestCoordinator requestCoordinator,
       Engine engine,
-      TransitionFactory<? super R> animationFactory) {
+      TransitionFactory<? super R> animationFactory,
+      @Nullable Exception requestOrigin) {
     this.context = context;
     this.glideContext = glideContext;
     this.model = model;
@@ -186,7 +189,7 @@ public final class SingleRequest<R> implements Request,
     this.animationFactory = animationFactory;
     status = Status.PENDING;
 
-    if (glideContext.isLoggingRequestOriginsEnabled()) {
+    if (requestOrigin == null && glideContext.isLoggingRequestOriginsEnabled()) {
       requestOrigin = new RuntimeException("Glide request origin trace");
     }
   }

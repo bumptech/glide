@@ -608,19 +608,21 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    */
   @NonNull
   public <Y extends Target<TranscodeType>> Y into(@NonNull Y target) {
-    return into(target, /*targetListener=*/ null);
+    return into(target, /*targetListener=*/ null, /*backgroundRequestOrigin=*/ null);
   }
 
   @NonNull
   @Synthetic <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
-      @Nullable RequestListener<TranscodeType> targetListener) {
-    return into(target, targetListener, /*options=*/ this);
+      @Nullable RequestListener<TranscodeType> targetListener,
+      @Nullable Exception backgroundRequestOrigin) {
+    return into(target, targetListener, backgroundRequestOrigin, /*options=*/ this);
   }
 
   private <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
       @Nullable RequestListener<TranscodeType> targetListener,
+      @Nullable Exception backgroundRequestOrigin,
       BaseRequestOptions<?> options) {
     Util.assertMainThread();
     Preconditions.checkNotNull(target);
@@ -712,6 +714,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     return into(
         glideContext.buildImageViewTarget(view, transcodeClass),
         /*targetListener=*/ null,
+        /*backgroundRequestOrigin=*/ null,
         requestOptions);
   }
 
@@ -770,16 +773,19 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
         new RequestFutureTarget<>(glideContext.getMainHandler(), width, height);
 
     if (Util.isOnBackgroundThread()) {
+      final Exception backgroundRequestOrigin =
+          glideContext.isLoggingRequestOriginsEnabled()
+              ? new RuntimeException("Gldie request origin trace") : null;
       glideContext.getMainHandler().post(new Runnable() {
         @Override
         public void run() {
           if (!target.isCancelled()) {
-            into(target, target);
+            into(target, target, backgroundRequestOrigin);
           }
         }
       });
     } else {
-      into(target, target);
+      into(target, target, /*backgroundRequestOrigin=*/ null);
     }
 
     return target;
@@ -890,7 +896,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
         requestOptions.getPriority(),
         requestOptions.getOverrideWidth(),
         requestOptions.getOverrideHeight(),
-        requestOptions);
+        requestOptions,
+        /*backgroundRequestOrigin=*/ null);
   }
 
   private Request buildRequestRecursive(
@@ -901,7 +908,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       Priority priority,
       int overrideWidth,
       int overrideHeight,
-      BaseRequestOptions<?> requestOptions) {
+      BaseRequestOptions<?> requestOptions,
+      @Nullable Exception backgroundRequestOrigin) {
 
     // Build the ErrorRequestCoordinator first if necessary so we can update parentCoordinator.
     ErrorRequestCoordinator errorRequestCoordinator = null;
@@ -919,7 +927,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
             priority,
             overrideWidth,
             overrideHeight,
-            requestOptions);
+            requestOptions,
+            backgroundRequestOrigin);
 
     if (errorRequestCoordinator == null) {
       return mainRequest;
@@ -941,7 +950,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
         errorBuilder.getPriority(),
         errorOverrideWidth,
         errorOverrideHeight,
-        errorBuilder);
+        errorBuilder,
+        backgroundRequestOrigin);
     errorRequestCoordinator.setRequests(mainRequest, errorRequest);
     return errorRequestCoordinator;
   }
@@ -954,7 +964,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       Priority priority,
       int overrideWidth,
       int overrideHeight,
-      BaseRequestOptions<?> requestOptions) {
+      BaseRequestOptions<?> requestOptions,
+      @Nullable Exception backgroundRequestOrigin) {
     if (thumbnailBuilder != null) {
       // Recursive case: contains a potentially recursive thumbnail request builder.
       if (isThumbnailBuilt) {
@@ -992,7 +1003,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
               transitionOptions,
               priority,
               overrideWidth,
-              overrideHeight);
+              overrideHeight,
+              backgroundRequestOrigin);
       isThumbnailBuilt = true;
       // Recursively generate thumbnail requests.
       Request thumbRequest =
@@ -1004,7 +1016,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
               thumbPriority,
               thumbOverrideWidth,
               thumbOverrideHeight,
-              thumbnailBuilder);
+              thumbnailBuilder,
+              backgroundRequestOrigin);
       isThumbnailBuilt = false;
       coordinator.setRequests(fullRequest, thumbRequest);
       return coordinator;
@@ -1020,7 +1033,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
               transitionOptions,
               priority,
               overrideWidth,
-              overrideHeight);
+              overrideHeight,
+              backgroundRequestOrigin);
       BaseRequestOptions<?> thumbnailOptions =
           requestOptions.clone().sizeMultiplier(thumbSizeMultiplier);
 
@@ -1033,7 +1047,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
               transitionOptions,
               getThumbnailPriority(priority),
               overrideWidth,
-              overrideHeight);
+              overrideHeight,
+              backgroundRequestOrigin);
 
       coordinator.setRequests(fullRequest, thumbnailRequest);
       return coordinator;
@@ -1047,7 +1062,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
           transitionOptions,
           priority,
           overrideWidth,
-          overrideHeight);
+          overrideHeight,
+          backgroundRequestOrigin);
     }
   }
 
@@ -1059,7 +1075,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       TransitionOptions<?, ? super TranscodeType> transitionOptions,
       Priority priority,
       int overrideWidth,
-      int overrideHeight) {
+      int overrideHeight,
+      Exception backgroundRequestOrigin) {
     return SingleRequest.obtain(
         context,
         glideContext,
@@ -1074,6 +1091,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
         requestListeners,
         requestCoordinator,
         glideContext.getEngine(),
-        transitionOptions.getTransitionFactory());
+        transitionOptions.getTransitionFactory(),
+        backgroundRequestOrigin);
   }
 }

@@ -1014,7 +1014,8 @@ public class SingleRequestTest {
           requestListeners,
           requestCoordinator,
           engine,
-          transitionFactory);
+          transitionFactory,
+          /*requestOrigin=*/ null);
     }
   }
 
