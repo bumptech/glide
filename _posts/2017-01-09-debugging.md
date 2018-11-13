@@ -167,6 +167,28 @@ Glide.with(fragment)
   )
   .into(imageView);
 ```
+
+#### "cannot resolve symbol 'GlideApp'"
+
+When using the generated API, you may run into errors that prevent the annotation processor from generating Glide's API. Sometimes these errors are related to [your setup][17], but other times they can be completely unrelated. 
+
+Often unrelated failures are hidden by the number of non root cause error messages. There may be so many other errors that you'll be unable to find the root cause in your build logs. If this happens and you're using Gradle, try adding the following to increase the number of error messages Gradle will print:
+
+
+```groovy
+allprojects {
+  gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xmaxerrs" << "1000"
+    }
+  }
+}
+```
+
+See also: 
+
+  *    [https://github.com/bumptech/glide/issues/1945](https://github.com/bumptech/glide/issues/1945)
+  *    [https://stackoverflow.com/questions/3115537/java-compilation-errors-limited-to-100/35707023#35707023](https://stackoverflow.com/questions/3115537/java-compilation-errors-limited-to-100/35707023#35707023)
           
 [1]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/GlideBuilder.html#setLogLevel-int-
 [2]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestBuilder.html#into-android.widget.ImageView-
@@ -184,3 +206,4 @@ Glide.with(fragment)
 [14]: http://bumptech.github.io/glide/javadocs/430/com/bumptech/glide/RequestBuilder.html#error-com.bumptech.glide.RequestBuilder-
 [15]: http://bumptech.github.io/glide/javadocs/430/com/bumptech/glide/RequestBuilder.html
 [16]: https://developer.android.com/reference/android/os/Handler.html
+[17]: {{ site.baseurl }}/doc/generatedapi.html
