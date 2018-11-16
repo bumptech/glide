@@ -24,6 +24,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
+import com.bumptech.glide.util.Executors;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
@@ -48,7 +49,7 @@ public class EngineJobTest {
   }
 
   @Test
-  public void testOnResourceReadyPassedToCallbacks() throws Exception {
+  public void testOnResourceReadyPassedToCallbacks() {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.onResourceReady(harness.resource, harness.dataSource);
@@ -182,7 +183,7 @@ public class EngineJobTest {
   @Test
   public void removingSomeCallbacksDoesNotCancelRunner() {
     EngineJob<Object> job = harness.getJob();
-    job.addCallback(mock(ResourceCallback.class));
+    job.addCallback(mock(ResourceCallback.class), Executors.directExecutor());
     job.removeCallback(harness.cb);
 
     assertFalse(job.isCancelled());
@@ -233,11 +234,10 @@ public class EngineJobTest {
     Looper looper = harness.mainHandler.getLooper();
     Shadows.shadowOf(looper).pause();
 
-    EngineJob<Object> job = harness.getJob();
+    final EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
     job.cancel();
-    Shadows.shadowOf(looper).runOneTask();
+    job.onResourceReady(harness.resource, harness.dataSource);
 
     verify(harness.resource).recycle();
   }
@@ -258,15 +258,18 @@ public class EngineJobTest {
     final ResourceCallback existingCallback = mock(ResourceCallback.class);
     final ResourceCallback newCallback = mock(ResourceCallback.class);
 
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        job.addCallback(newCallback);
-        return null;
-      }
-    }).when(existingCallback).onResourceReady(anyResource(), isADataSource());
+    doAnswer(
+            new Answer<Void>() {
+              @Override
+              public Void answer(InvocationOnMock invocationOnMock) {
+                job.addCallback(newCallback, Executors.directExecutor());
+                return null;
+              }
+            })
+        .when(existingCallback)
+        .onResourceReady(anyResource(), isADataSource());
 
-    job.addCallback(existingCallback);
+    job.addCallback(existingCallback, Executors.directExecutor());
     job.start(harness.decodeJob);
     job.onResourceReady(harness.resource, harness.dataSource);
 
@@ -280,16 +283,19 @@ public class EngineJobTest {
     final ResourceCallback existingCallback = mock(ResourceCallback.class);
     final ResourceCallback newCallback = mock(ResourceCallback.class);
 
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        job.addCallback(newCallback);
-        return null;
-      }
-    }).when(existingCallback).onLoadFailed(any(GlideException.class));
+    doAnswer(
+            new Answer<Void>() {
+              @Override
+              public Void answer(InvocationOnMock invocationOnMock) {
+                job.addCallback(newCallback, Executors.directExecutor());
+                return null;
+              }
+            })
+        .when(existingCallback)
+        .onLoadFailed(any(GlideException.class));
 
     GlideException exception = new GlideException("test");
-    job.addCallback(existingCallback);
+    job.addCallback(existingCallback, Executors.directExecutor());
     job.start(harness.decodeJob);
     job.onLoadFailed(exception);
 
@@ -301,15 +307,18 @@ public class EngineJobTest {
     final EngineJob<Object> job = harness.getJob();
     final ResourceCallback cb = mock(ResourceCallback.class);
 
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        job.removeCallback(cb);
-        return null;
-      }
-    }).when(cb).onResourceReady(anyResource(), isADataSource());
+    doAnswer(
+            new Answer<Void>() {
+              @Override
+              public Void answer(InvocationOnMock invocationOnMock) {
+                job.removeCallback(cb);
+                return null;
+              }
+            })
+        .when(cb)
+        .onResourceReady(anyResource(), isADataSource());
 
-    job.addCallback(cb);
+    job.addCallback(cb, Executors.directExecutor());
     job.start(harness.decodeJob);
     job.onResourceReady(harness.resource, harness.dataSource);
 
@@ -322,16 +331,19 @@ public class EngineJobTest {
     final EngineJob<Object> job = harness.getJob();
     final ResourceCallback cb = mock(ResourceCallback.class);
 
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        job.removeCallback(cb);
-        return null;
-      }
-    }).when(cb).onLoadFailed(any(GlideException.class));
+    doAnswer(
+            new Answer<Void>() {
+              @Override
+              public Void answer(InvocationOnMock invocationOnMock) {
+                job.removeCallback(cb);
+                return null;
+              }
+            })
+        .when(cb)
+        .onLoadFailed(any(GlideException.class));
 
     GlideException exception = new GlideException("test");
-    job.addCallback(cb);
+    job.addCallback(cb, Executors.directExecutor());
     job.start(harness.decodeJob);
     job.onLoadFailed(exception);
 
@@ -344,15 +356,18 @@ public class EngineJobTest {
     final EngineJob<Object> job = harness.getJob();
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        job.removeCallback(notYetCalled);
-        return null;
-      }
-    }).when(harness.cb).onResourceReady(anyResource(), isADataSource());
+    doAnswer(
+            new Answer<Void>() {
+              @Override
+              public Void answer(InvocationOnMock invocationOnMock) {
+                job.removeCallback(notYetCalled);
+                return null;
+              }
+            })
+        .when(harness.cb)
+        .onResourceReady(anyResource(), isADataSource());
 
-    job.addCallback(notYetCalled);
+    job.addCallback(notYetCalled, Executors.directExecutor());
     job.start(harness.decodeJob);
     job.onResourceReady(harness.resource, harness.dataSource);
 
@@ -365,15 +380,18 @@ public class EngineJobTest {
     final EngineJob<Object> job = harness.getJob();
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        job.removeCallback(notYetCalled);
-        return null;
-      }
-    }).when(harness.cb).onResourceReady(anyResource(), isADataSource());
+    doAnswer(
+            new Answer<Void>() {
+              @Override
+              public Void answer(InvocationOnMock invocationOnMock) {
+                job.removeCallback(notYetCalled);
+                return null;
+              }
+            })
+        .when(harness.cb)
+        .onResourceReady(anyResource(), isADataSource());
 
-    job.addCallback(notYetCalled);
+    job.addCallback(notYetCalled, Executors.directExecutor());
     job.start(harness.decodeJob);
 
     job.onResourceReady(harness.resource, harness.dataSource);
@@ -389,16 +407,19 @@ public class EngineJobTest {
     final ResourceCallback called = mock(ResourceCallback.class);
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        job.removeCallback(notYetCalled);
-        return null;
-      }
-    }).when(called).onLoadFailed(any(GlideException.class));
+    doAnswer(
+            new Answer<Void>() {
+              @Override
+              public Void answer(InvocationOnMock invocationOnMock) {
+                job.removeCallback(notYetCalled);
+                return null;
+              }
+            })
+        .when(called)
+        .onLoadFailed(any(GlideException.class));
 
-    job.addCallback(called);
-    job.addCallback(notYetCalled);
+    job.addCallback(called, Executors.directExecutor());
+    job.addCallback(notYetCalled, Executors.directExecutor());
     job.start(harness.decodeJob);
     job.onLoadFailed(new GlideException("test"));
 
@@ -498,7 +519,7 @@ public class EngineJobTest {
         cbs.add(mock(ResourceCallback.class));
       }
       for (ResourceCallback cb : cbs) {
-        job.addCallback(cb);
+        job.addCallback(cb, Executors.directExecutor());
       }
     }
   }
@@ -521,7 +542,7 @@ public class EngineJobTest {
     final boolean useAnimationPool = false;
     final boolean onlyRetrieveFromCache = false;
     final DecodeJob<Object> decodeJob = mock(DecodeJob.class);
-    final Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
+    final Pools.Pool<EngineJob<?>> pool = new Pools.SynchronizedPool<>(1);
     final DataSource dataSource = DataSource.DATA_DISK_CACHE;
 
     EngineJob<Object> getJob() {
@@ -541,7 +562,7 @@ public class EngineJobTest {
           useUnlimitedSourceGeneratorPool,
           useAnimationPool,
           onlyRetrieveFromCache);
-      result.addCallback(cb);
+      result.addCallback(cb, Executors.directExecutor());
       return result;
     }
   }

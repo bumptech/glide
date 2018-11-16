@@ -56,20 +56,17 @@ public interface RequestListener<R> {
    * Called when a load completes successfully, immediately before {@link
    * Target#onResourceReady(Object, com.bumptech.glide.request.transition.Transition)}.
    *
-   * @param resource          The resource that was loaded for the target.
-   * @param model             The specific model that was used to load the image.
-   * @param target            The target the model was loaded into.
-   * @param dataSource        The {@link DataSource} the resource was loaded from.
-   * @param isFirstResource   {@code true} if this is the first resource to in this load to be
-   *                          loaded into the target. For example when loading a thumbnail and a
-   *                          full-sized image, this will be {@code true} for the first image to
-   *                          load and {@code false} for the second.
-   *
-   * @return {@code true} to prevent {@link Target#onResourceReady(Object, Transition)} from
-   * being called on {@code target}, typically because the listener wants to
-   * update the {@code target} or the object the {@code target} wraps
-   * itself or {@code false} to allow {@link Target#onResourceReady(Object, Transition)}
-   * to be called on {@code target}.
+   * @param resource The resource that was loaded for the target.
+   * @param model The specific model that was used to load the image.
+   * @param target The target the model was loaded into.
+   * @param dataSource The {@link DataSource} the resource was loaded from.
+   * @param isFirstResource {@code true} if this is the first resource to in this load to be loaded
+   *     into the target. For example when loading a thumbnail and a full-sized image, this will be
+   *     {@code true} for the first image to load and {@code false} for the second.
+   * @return {@code true} to prevent {@link Target#onLoadFailed(Drawable)} from being called on
+   *     {@code target}, typically because the listener wants to update the {@code target} or the
+   *     object the {@code target} wraps itself or {@code false} to allow {@link
+   *     Target#onLoadFailed(Drawable)} to be called on {@code target}.
    */
   boolean onResourceReady(
       R resource, Object model, Target<R> target, DataSource dataSource, boolean isFirstResource);

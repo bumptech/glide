@@ -140,13 +140,13 @@ public class RequestManager implements LifecycleListener,
   }
 
   /**
-   * Updates the default {@link RequestOptions} for all loads started with this request manager
-   * with the given {@link RequestOptions}.
+   * Updates the default {@link RequestOptions} for all loads started with this request manager with
+   * the given {@link RequestOptions}.
    *
    * <p>The {@link RequestOptions} provided here are applied on top of those provided via {@link
    * GlideBuilder#setDefaultRequestOptions(RequestOptions)}. If there are conflicts, the options
-   * applied here will win. Note that this method does not mutate options provided to
-   * {@link GlideBuilder#setDefaultRequestOptions(RequestOptions)}.
+   * applied here will win. Note that this method does not mutate options provided to {@link
+   * GlideBuilder#setDefaultRequestOptions(RequestOptions)}.
    *
    * <p>Multiple sets of options can be applied. If there are conflicts the last {@link
    * RequestOptions} applied will win.
@@ -158,7 +158,8 @@ public class RequestManager implements LifecycleListener,
    * @return This request manager.
    */
   @NonNull
-  public RequestManager applyDefaultRequestOptions(@NonNull RequestOptions requestOptions) {
+  public synchronized RequestManager applyDefaultRequestOptions(
+      @NonNull RequestOptions requestOptions) {
     updateRequestOptions(requestOptions);
     return this;
   }
@@ -168,19 +169,19 @@ public class RequestManager implements LifecycleListener,
    * with the given {@link RequestOptions}.
    *
    * <p>The {@link RequestOptions} provided here replace those that have been previously provided
-   * via this method, {@link GlideBuilder#setDefaultRequestOptions(RequestOptions)}, and
-   * {@link #applyDefaultRequestOptions(RequestOptions)}.
+   * via this method, {@link GlideBuilder#setDefaultRequestOptions(RequestOptions)}, and {@link
+   * #applyDefaultRequestOptions(RequestOptions)}.
    *
-   * <p>Subsequent calls to {@link #applyDefaultRequestOptions(RequestOptions)} will not mutate
-   * the {@link RequestOptions} provided here. Instead the manager will create a clone of these
-   * options and mutate the clone.
+   * <p>Subsequent calls to {@link #applyDefaultRequestOptions(RequestOptions)} will not mutate the
+   * {@link RequestOptions} provided here. Instead the manager will create a clone of these options
+   * and mutate the clone.
    *
    * @see #applyDefaultRequestOptions(RequestOptions)
-   *
    * @return This request manager.
    */
   @NonNull
-  public RequestManager setDefaultRequestOptions(@NonNull RequestOptions requestOptions) {
+  public synchronized RequestManager setDefaultRequestOptions(
+      @NonNull RequestOptions requestOptions) {
     setRequestOptions(requestOptions);
     return this;
   }
@@ -189,21 +190,21 @@ public class RequestManager implements LifecycleListener,
    * Adds a default {@link RequestListener} that will be added to every request started with this
    * {@link RequestManager}.
    *
-   * <p>Multiple {@link RequestListener}s can be added here, in {@link RequestManager} scopes or
-   * to individual {@link RequestBuilder}s. {@link RequestListener}s are called in the order they're
-   * added. Even if an earlier {@link RequestListener} returns {@code true} from
-   * {@link RequestListener#onLoadFailed(GlideException, Object, Target, boolean)} or
-   * {@link RequestListener#onResourceReady(Object, Object, Target, DataSource, boolean)}, it will
-   * not prevent subsequent {@link RequestListener}s from being called.
+   * <p>Multiple {@link RequestListener}s can be added here, in {@link RequestManager} scopes or to
+   * individual {@link RequestBuilder}s. {@link RequestListener}s are called in the order they're
+   * added. Even if an earlier {@link RequestListener} returns {@code true} from {@link
+   * RequestListener#onLoadFailed(GlideException, Object, Target, boolean)} or {@link
+   * RequestListener#onResourceReady(Object, Object, Target, DataSource, boolean)}, it will not
+   * prevent subsequent {@link RequestListener}s from being called.
    *
    * <p>Because Glide requests can be started for any number of individual resource types, any
-   * listener added here has to accept any generic resource type in
-   * {@link RequestListener#onResourceReady(Object, Object, Target, DataSource, boolean)}. If you
-   * must base the behavior of the listener on the resource type, you will need to use
-   * {@code instanceof} to do so. It's not safe to cast resource types without first checking
-   * with {@code instanceof}.
+   * listener added here has to accept any generic resource type in {@link
+   * RequestListener#onResourceReady(Object, Object, Target, DataSource, boolean)}. If you must base
+   * the behavior of the listener on the resource type, you will need to use {@code instanceof} to
+   * do so. It's not safe to cast resource types without first checking with {@code instanceof}.
    */
-  public RequestManager addDefaultRequestListener(RequestListener<Object> requestListener) {
+  public synchronized RequestManager addDefaultRequestListener(
+      RequestListener<Object> requestListener) {
     defaultRequestListeners.add(requestListener);
     return this;
   }
@@ -214,8 +215,7 @@ public class RequestManager implements LifecycleListener,
    * @see #pauseRequests()
    * @see #resumeRequests()
    */
-  public boolean isPaused() {
-    Util.assertMainThread();
+  public synchronized boolean isPaused() {
     return requestTracker.isPaused();
   }
 
@@ -229,8 +229,7 @@ public class RequestManager implements LifecycleListener,
    * @see #isPaused()
    * @see #resumeRequests()
    */
-  public void pauseRequests() {
-    Util.assertMainThread();
+  public synchronized void pauseRequests() {
     requestTracker.pauseRequests();
   }
 
@@ -250,20 +249,19 @@ public class RequestManager implements LifecycleListener,
    * @see #isPaused()
    * @see #resumeRequests()
    */
-  public void pauseAllRequests() {
-    Util.assertMainThread();
+  public synchronized void pauseAllRequests() {
     requestTracker.pauseAllRequests();
   }
 
   /**
-   * Performs {@link #pauseRequests()} recursively for all managers that are contextually
-   * descendant to this manager based on the Activity/Fragment hierarchy:
+   * Performs {@link #pauseRequests()} recursively for all managers that are contextually descendant
+   * to this manager based on the Activity/Fragment hierarchy:
    *
    * <ul>
    *   <li>When pausing on an Activity all attached fragments will also get paused.
    *   <li>When pausing on an attached Fragment all descendant fragments will also get paused.
    *   <li>When pausing on a detached Fragment or the application context only the current
-   *   RequestManager is paused.
+   *       RequestManager is paused.
    * </ul>
    *
    * <p>Note, on pre-Jelly Bean MR1 calling pause on a Fragment will not cause child fragments to
@@ -271,8 +269,7 @@ public class RequestManager implements LifecycleListener,
    */
   // Public API.
   @SuppressWarnings({"WeakerAccess", "unused"})
-  public void pauseRequestsRecursive() {
-    Util.assertMainThread();
+  public synchronized void pauseRequestsRecursive() {
     pauseRequests();
     for (RequestManager requestManager : treeNode.getDescendants()) {
       requestManager.pauseRequests();
@@ -285,8 +282,7 @@ public class RequestManager implements LifecycleListener,
    * @see #isPaused()
    * @see #pauseRequests()
    */
-  public void resumeRequests() {
-    Util.assertMainThread();
+  public synchronized void resumeRequests() {
     requestTracker.resumeRequests();
   }
 
@@ -321,7 +317,7 @@ public class RequestManager implements LifecycleListener,
    * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads.
    */
   @Override
-  public void onStop() {
+  public synchronized void onStop() {
     pauseRequests();
     targetTracker.onStop();
   }
@@ -331,7 +327,7 @@ public class RequestManager implements LifecycleListener,
    * all completed requests.
    */
   @Override
-  public void onDestroy() {
+  public synchronized void onDestroy() {
     targetTracker.onDestroy();
     for (Target<?> target : targetTracker.getAll()) {
       clear(target);
@@ -579,26 +575,17 @@ public class RequestManager implements LifecycleListener,
   }
 
   /**
-   * Cancel any pending loads Glide may have for the target and free any resources (such as
-   * {@link Bitmap}s) that may have been loaded for the target so they may be reused.
+   * Cancel any pending loads Glide may have for the target and free any resources (such as {@link
+   * Bitmap}s) that may have been loaded for the target so they may be reused.
    *
    * @param target The Target to cancel loads for.
    */
-  public void clear(@Nullable final Target<?> target) {
+  public synchronized void clear(@Nullable final Target<?> target) {
     if (target == null) {
       return;
     }
 
-    if (Util.isOnMainThread()) {
-      untrackOrDelegate(target);
-    } else {
-      mainHandler.post(new Runnable() {
-        @Override
-        public void run() {
-          clear(target);
-        }
-      });
-    }
+    untrackOrDelegate(target);
   }
 
   private void untrackOrDelegate(@NonNull Target<?> target) {
@@ -627,7 +614,7 @@ public class RequestManager implements LifecycleListener,
     }
   }
 
-  boolean untrack(@NonNull Target<?> target) {
+  synchronized boolean untrack(@NonNull Target<?> target) {
     Request request = target.getRequest();
     // If the Target doesn't have a request, it's already been cleared.
     if (request == null) {
@@ -643,7 +630,7 @@ public class RequestManager implements LifecycleListener,
     }
   }
 
-  void track(@NonNull Target<?> target, @NonNull Request request) {
+  synchronized void track(@NonNull Target<?> target, @NonNull Request request) {
     targetTracker.track(target);
     requestTracker.runRequest(request);
   }
@@ -652,7 +639,7 @@ public class RequestManager implements LifecycleListener,
     return defaultRequestListeners;
   }
 
-  RequestOptions getDefaultRequestOptions() {
+  synchronized RequestOptions getDefaultRequestOptions() {
     return requestOptions;
   }
 

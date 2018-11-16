@@ -80,8 +80,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     private DataCallback<? super Data> callback;
     @Nullable
     private List<Throwable> exceptions;
-
-    private volatile boolean isCancelled;
+    private boolean isCancelled;
 
     MultiFetcher(
         @NonNull List<DataFetcher<Data>> fetchers,
@@ -159,6 +158,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
       if (isCancelled) {
         return;
       }
+
       if (currentIndex < fetchers.size() - 1) {
         currentIndex++;
         loadData(priority, callback);

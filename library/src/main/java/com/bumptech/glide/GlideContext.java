@@ -2,8 +2,6 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.widget.ImageView;
@@ -25,7 +23,6 @@ public class GlideContext extends ContextWrapper {
   @VisibleForTesting
   static final TransitionOptions<?, ?> DEFAULT_TRANSITION_OPTIONS =
       new GenericTransitionOptions<>();
-  private final Handler mainHandler;
   private final ArrayPool arrayPool;
   private final Registry registry;
   private final ImageViewTargetFactory imageViewTargetFactory;
@@ -57,8 +54,6 @@ public class GlideContext extends ContextWrapper {
     this.engine = engine;
     this.isLoggingRequestOriginsEnabled = isLoggingRequestOriginsEnabled;
     this.logLevel = logLevel;
-
-    mainHandler = new Handler(Looper.getMainLooper());
   }
 
   public List<RequestListener<Object>> getDefaultRequestListeners() {
@@ -90,11 +85,6 @@ public class GlideContext extends ContextWrapper {
   public <X> ViewTarget<ImageView, X> buildImageViewTarget(
       @NonNull ImageView imageView, @NonNull Class<X> transcodeClass) {
     return imageViewTargetFactory.buildTarget(imageView, transcodeClass);
-  }
-
-  @NonNull
-  public Handler getMainHandler() {
-    return mainHandler;
   }
 
   @NonNull

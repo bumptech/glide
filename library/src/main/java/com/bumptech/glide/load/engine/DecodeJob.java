@@ -231,6 +231,10 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
         return;
       }
       runWrapped();
+    } catch (CallbackException e) {
+      // If a callback not controlled by Glide throws an exception, we should avoid the Glide
+      // specific debug logic below.
+      throw e;
     } catch (Throwable t) {
       // Catch Throwable and not Exception to handle OOMs. Throwables are swallowed by our
       // usage of .submit() in GlideExecutor so we're not silently hiding crashes by doing this. We
@@ -251,6 +255,7 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
       if (!isCancelled) {
         throw t;
       }
+      throw t;
     } finally {
       // Keeping track of the fetcher here and calling cleanup is excessively paranoid, we call
       // close in all cases anyway.
@@ -332,7 +337,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
   private void setNotifiedOrThrow() {
     stateVerifier.throwIfRecycled();
     if (isCallbackNotified) {
-      throw new IllegalStateException("Already notified");
+      Throwable lastThrown = throwables.isEmpty() ? null : throwables.get(throwables.size() - 1);
+      throw new IllegalStateException("Already notified", lastThrown);
     }
     isCallbackNotified = true;
   }

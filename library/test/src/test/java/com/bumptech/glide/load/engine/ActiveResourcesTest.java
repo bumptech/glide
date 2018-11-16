@@ -7,12 +7,16 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
+import android.support.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.ActiveResources.DequeuedResourceCallback;
 import com.bumptech.glide.load.engine.ActiveResources.ResourceWeakReference;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
 import com.bumptech.glide.tests.GlideShadowLooper;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
@@ -191,8 +195,7 @@ public class ActiveResourcesTest {
   }
 
   @Test
-  public void queueIdle_withCacheableResourceInActive_removesResourceFromActive()
-      throws InterruptedException {
+  public void queueIdle_withCacheableResourceInActive_removesResourceFromActive() {
     EngineResource<Object> engineResource =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     resources.activate(key, engineResource);
@@ -275,38 +278,97 @@ public class ActiveResourcesTest {
 
   @Test
   public void queueIdle_withQueuedReferenceDeactivated_doesNotNotifyListener() {
-    EngineResource<Object> engineResource =
-        new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
-    resources.activate(key, engineResource);
+    final ExecutorService delegate = Executors.newSingleThreadExecutor();
+    try {
+      final CountDownLatch blockExecutor = new CountDownLatch(1);
+      resources =
+          new ActiveResources(
+              /*isActiveResourceRetentionAllowed=*/ true,
+              new Executor() {
+                @Override
+                public void execute(@NonNull final Runnable command) {
+                  delegate.execute(
+                      new Runnable() {
+                        @Override
+                        public void run() {
+                          try {
+                            blockExecutor.await();
+                          } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                          }
+                          command.run();
+                        }
+                      });
+                }
+              });
+      resources.setListener(listener);
 
-    ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
-    CountDownLatch latch = getLatchForClearedRef();
-    weakRef.enqueue();
+      EngineResource<Object> engineResource =
+          new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
+      resources.activate(key, engineResource);
 
-    resources.deactivate(key);
+      ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
+      CountDownLatch latch = getLatchForClearedRef();
+      weakRef.enqueue();
+      resources.deactivate(key);
+      blockExecutor.countDown();
 
-    waitForLatch(latch);
+      waitForLatch(latch);
 
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+      verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    } finally {
+      resources.shutdown();
+      com.bumptech.glide.util.Executors.shutdownAndAwaitTermination(delegate);
+    }
   }
 
   @Test
   public void queueIdle_afterReferenceQueuedThenReactivated_doesNotNotifyListener() {
-    EngineResource<Object> first =
-        new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
-    resources.activate(key, first);
+    final ExecutorService delegate = Executors.newSingleThreadExecutor();
+    try {
+      final CountDownLatch blockExecutor = new CountDownLatch(1);
+      resources =
+          new ActiveResources(
+              /*isActiveResourceRetentionAllowed=*/ true,
+              new Executor() {
+                @Override
+                public void execute(@NonNull final Runnable command) {
+                  delegate.execute(
+                      new Runnable() {
+                        @Override
+                        public void run() {
+                          try {
+                            blockExecutor.await();
+                          } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                          }
+                          command.run();
+                        }
+                      });
+                }
+              });
+      resources.setListener(listener);
 
-    ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
-    CountDownLatch latch = getLatchForClearedRef();
-    weakRef.enqueue();
+      EngineResource<Object> first =
+          new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
+      resources.activate(key, first);
 
-    EngineResource<Object> second =
-        new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
-    resources.activate(key, second);
+      ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
+      CountDownLatch latch = getLatchForClearedRef();
+      weakRef.enqueue();
 
-    waitForLatch(latch);
+      EngineResource<Object> second =
+          new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
+      resources.activate(key, second);
+      blockExecutor.countDown();
 
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+      waitForLatch(latch);
+
+      verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    } finally {
+      resources.shutdown();
+      com.bumptech.glide.util.Executors.shutdownAndAwaitTermination(delegate);
+    }
   }
 
   @Test
@@ -321,6 +383,7 @@ public class ActiveResourcesTest {
   @Test
   public void get_withActiveClearedKey_cacheableResource_retentionDisabled_doesNotCallListener() {
     resources = new ActiveResources(/*isActiveResourceRetentionAllowed=*/ false);
+    resources.setListener(listener);
     EngineResource<Object> engineResource =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     resources.activate(key, engineResource);
@@ -333,6 +396,7 @@ public class ActiveResourcesTest {
   @Test
   public void get_withQueuedReference_retentionDisabled_returnsResource() {
     resources = new ActiveResources(/*isActiveResourceRetentionAllowed=*/ false);
+    resources.setListener(listener);
     EngineResource<Object> engineResource =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     resources.activate(key, engineResource);
@@ -346,6 +410,7 @@ public class ActiveResourcesTest {
   @Test
   public void queueIdle_withQueuedReferenceRetrievedFromGet_retentionDisabled_doesNotNotify() {
     resources = new ActiveResources(/*isActiveResourceRetentionAllowed=*/ false);
+    resources.setListener(listener);
     EngineResource<Object> engineResource =
         new EngineResource<>(resource, /*isCacheable=*/ true, /*isRecyclable=*/ true);
     resources.activate(key, engineResource);
