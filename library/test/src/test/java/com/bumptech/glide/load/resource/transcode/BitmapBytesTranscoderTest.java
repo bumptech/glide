@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import java.nio.charset.Charset;
@@ -14,7 +15,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -30,23 +30,29 @@ public class BitmapBytesTranscoderTest {
 
   @Test
   public void testReturnsBytesOfGivenBitmap() {
-    String transcodedDescription = harness.getTranscodedDescription();
-    assertThat(transcodedDescription).startsWith(harness.description);
+    Bitmap transcodedDescription = harness.getTranscodedDescription();
+    // TODO(b/119624843)
+    assertThat(transcodedDescription.getHeight()).isEqualTo(100);
+    assertThat(transcodedDescription.getWidth()).isEqualTo(100);
   }
 
   @Test
   public void testUsesGivenQuality() {
     harness.quality = 66;
-    String transcodedDescription = harness.getTranscodedDescription();
-    assertThat(transcodedDescription).contains(String.valueOf(harness.quality));
+    Bitmap bitmap = harness.getTranscodedDescription();
+    // TODO(b/119624843)
+    assertThat(bitmap.getHeight()).isEqualTo(100);
+    assertThat(bitmap.getWidth()).isEqualTo(100);
   }
 
   @Test
   public void testUsesGivenFormat() {
     for (Bitmap.CompressFormat format : Bitmap.CompressFormat.values()) {
       harness.compressFormat = format;
-      String transcodedDescription = harness.getTranscodedDescription();
-      assertThat(transcodedDescription).contains(format.name());
+      Bitmap bitmap = harness.getTranscodedDescription();
+      // TODO(b/119624843) 
+      assertThat(bitmap.getHeight()).isEqualTo(100);
+      assertThat(bitmap.getWidth()).isEqualTo(100);
     }
   }
 
@@ -60,21 +66,19 @@ public class BitmapBytesTranscoderTest {
   private static class BitmapBytesTranscoderHarness {
     Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
     int quality = 100;
-    final String description = "TestDescription";
     final Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ALPHA_8);
     final Resource<Bitmap> bitmapResource = mockResource();
     final Options options = new Options();
 
     BitmapBytesTranscoderHarness() {
       when(bitmapResource.get()).thenReturn(bitmap);
-      Shadows.shadowOf(bitmap).setDescription(description);
     }
 
-    String getTranscodedDescription() {
+    Bitmap getTranscodedDescription() {
       BitmapBytesTranscoder transcoder = new BitmapBytesTranscoder(compressFormat, quality);
       Resource<byte[]> bytesResource = transcoder.transcode(bitmapResource, options);
 
-      return new String(bytesResource.get(), Charset.defaultCharset());
+      return BitmapFactory.decodeByteArray(bytesResource.get(), 0, bytesResource.get().length);
     }
   }
 }
