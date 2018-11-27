@@ -2,6 +2,7 @@ package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.widget.ImageView;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -9,6 +10,15 @@ import com.bumptech.glide.request.target.Target;
 
 /**
  * A class for monitoring the status of a request while images load.
+ *
+ * <p>All methods in this interface will be called from a background thread if the
+ * {@code RequestListener} is added to a request that is started with
+ * {@link RequestBuilder#submit()}, {@link RequestBuilder#submit(int, int)}, or
+ * {@link RequestBuilder#into(int, int)}. Those methods no longer post results back to the main
+ * thread to avoid the unnecessary thread interactions and corresponding latency. As a side affect
+ * though, listeners added to those requests are no longer called on the main thread.
+ * {@code RequestListeners} added to requests started with {@link RequestBuilder#into(Target)} or
+ * {@link RequestBuilder#into(ImageView)} will continue to be called back on the main thread.
  *
  * @param <R> The type of resource being loaded.
  */
@@ -28,6 +38,8 @@ public interface RequestListener<R> {
    * {@link Target} at this point, as long as you return {@code true} from the method to prevent
    * {@link Target#onLoadFailed(Drawable)} from being called.
    *
+   * <p>For threading guarantees, see the class comment.
+   *
    * For example:
    * <pre>
    * {@code
@@ -38,6 +50,7 @@ public interface RequestListener<R> {
    * }
    * </pre>
    * </p>
+   *
    *
    * @param e               The maybe {@code null} exception containing information about why the
    *                        request failed.
@@ -55,6 +68,8 @@ public interface RequestListener<R> {
   /**
    * Called when a load completes successfully, immediately before {@link
    * Target#onResourceReady(Object, com.bumptech.glide.request.transition.Transition)}.
+   *
+   * <p>For threading guarantees, see the class comment.
    *
    * @param resource The resource that was loaded for the target.
    * @param model The specific model that was used to load the image.
