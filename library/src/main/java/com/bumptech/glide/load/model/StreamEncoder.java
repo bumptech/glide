@@ -43,6 +43,7 @@ public class StreamEncoder implements Encoder<InputStream> {
     } finally {
       if (os != null) {
         try {
+          data.close();
           os.close();
         } catch (IOException e) {
           // Do nothing.
