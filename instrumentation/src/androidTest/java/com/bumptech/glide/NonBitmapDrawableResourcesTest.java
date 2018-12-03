@@ -395,7 +395,7 @@ public class NonBitmapDrawableResourcesTest {
 
   @Test
   public void load_withApplicationIconResourceIdUri_asBitmap_withTransformation_nonNullBitmap()
-      throws NameNotFoundException, ExecutionException, InterruptedException {
+      throws ExecutionException, InterruptedException {
     for (String packageName : getInstalledPackages()) {
       int iconResourceId = getResourceId(packageName);
 
@@ -426,9 +426,8 @@ public class NonBitmapDrawableResourcesTest {
       Uri uri = new Uri.Builder()
           .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
           .authority(packageName)
-          .path(resources.getResourceTypeName(iconResourceId))
-          .path(resources.getResourceEntryName(iconResourceId))
-          .path(String.valueOf(iconResourceId))
+          .appendPath(resources.getResourceTypeName(iconResourceId))
+          .appendPath(resources.getResourceEntryName(iconResourceId))
           .build();
 
       Drawable drawable = Glide.with(context)
@@ -451,9 +450,8 @@ public class NonBitmapDrawableResourcesTest {
       Uri uri = new Uri.Builder()
           .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
           .authority(packageName)
-          .path(resources.getResourceTypeName(iconResourceId))
-          .path(resources.getResourceEntryName(iconResourceId))
-          .path(String.valueOf(iconResourceId))
+          .appendPath(resources.getResourceTypeName(iconResourceId))
+          .appendPath(resources.getResourceEntryName(iconResourceId))
           .build();
 
       Drawable drawable = Glide.with(context)
@@ -476,9 +474,8 @@ public class NonBitmapDrawableResourcesTest {
       Uri uri = new Uri.Builder()
           .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
           .authority(packageName)
-          .path(resources.getResourceTypeName(iconResourceId))
-          .path(resources.getResourceEntryName(iconResourceId))
-          .path(String.valueOf(iconResourceId))
+          .appendPath(resources.getResourceTypeName(iconResourceId))
+          .appendPath(resources.getResourceEntryName(iconResourceId))
           .build();
 
       Bitmap bitmap = Glide.with(context)
@@ -501,9 +498,8 @@ public class NonBitmapDrawableResourcesTest {
       Uri uri = new Uri.Builder()
           .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
           .authority(packageName)
-          .path(resources.getResourceTypeName(iconResourceId))
-          .path(resources.getResourceEntryName(iconResourceId))
-          .path(String.valueOf(iconResourceId))
+          .appendPath(resources.getResourceTypeName(iconResourceId))
+          .appendPath(resources.getResourceEntryName(iconResourceId))
           .build();
 
       Bitmap bitmap = Glide.with(context)
