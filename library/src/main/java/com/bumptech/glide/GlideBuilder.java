@@ -24,6 +24,7 @@ import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory;
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -204,7 +205,7 @@ public final class GlideBuilder {
    * Sets the default {@link RequestOptions} to use for all loads across the app.
    *
    * <p>Applying additional options with {@link
-   * RequestBuilder#apply(RequestOptions)} will override defaults
+   * RequestBuilder#apply(BaseRequestOptions)} will override defaults
    * set here.
    *
    * @param requestOptions The options to use by default.
