@@ -3,6 +3,8 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.util.Util;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
 /**
@@ -30,16 +32,24 @@ public class Rotate extends BitmapTransformation {
 
   @Override
   public boolean equals(Object o) {
-    return o instanceof Rotate;
+    if (o instanceof Rotate) {
+      Rotate other = (Rotate) o;
+      return degreesToRotate == other.degreesToRotate;
+    }
+    return false;
   }
 
   @Override
   public int hashCode() {
-    return ID.hashCode();
+    return Util.hashCode(ID.hashCode(),
+            Util.hashCode(degreesToRotate));
   }
 
   @Override
   public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     messageDigest.update(ID_BYTES);
+
+    byte[] degreesData = ByteBuffer.allocate(4).putInt(degreesToRotate).array();
+    messageDigest.update(degreesData);
   }
 }
