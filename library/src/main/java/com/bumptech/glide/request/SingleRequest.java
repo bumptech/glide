@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pools;
@@ -41,7 +42,7 @@ public final class SingleRequest<R> implements Request,
   private static final String TAG = "Request";
   /** Tag for logging externally useful events (request completion, timing etc). */
   private static final String GLIDE_TAG = "Glide";
-  private static final Pools.Pool<SingleRequest<?>> POOL = FactoryPools.simple(150,
+  private static final Pools.Pool<SingleRequest<?>> POOL = FactoryPools.threadSafe(150,
       new FactoryPools.Factory<SingleRequest<?>>() {
         @Override
         public SingleRequest<?> create() {
@@ -104,6 +105,7 @@ public final class SingleRequest<R> implements Request,
   private Resource<R> resource;
   private Engine.LoadStatus loadStatus;
   private long startTime;
+  @GuardedBy("this")
   private Status status;
   private Drawable errorDrawable;
   private Drawable placeholderDrawable;
@@ -424,7 +426,7 @@ public final class SingleRequest<R> implements Request,
    * A callback method that should never be invoked directly.
    */
   @Override
-  public void onSizeReady(int width, int height) {
+  public synchronized void onSizeReady(int width, int height) {
     stateVerifier.throwIfRecycled();
     if (IS_VERBOSE_LOGGABLE) {
       logV("Got onSizeReady in " + LogTime.getElapsedMillis(startTime));

@@ -392,7 +392,7 @@ public class Engine implements EngineJobListener,
   static class DecodeJobFactory {
     @Synthetic final DecodeJob.DiskCacheProvider diskCacheProvider;
     @Synthetic final Pools.Pool<DecodeJob<?>> pool =
-        FactoryPools.simple(JOB_POOL_SIZE,
+        FactoryPools.threadSafe(JOB_POOL_SIZE,
             new FactoryPools.Factory<DecodeJob<?>>() {
           @Override
           public DecodeJob<?> create() {
@@ -452,7 +452,7 @@ public class Engine implements EngineJobListener,
     @Synthetic final GlideExecutor animationExecutor;
     @Synthetic final EngineJobListener listener;
     @Synthetic final Pools.Pool<EngineJob<?>> pool =
-        FactoryPools.simple(
+        FactoryPools.threadSafe(
             JOB_POOL_SIZE,
             new FactoryPools.Factory<EngineJob<?>>() {
               @Override
