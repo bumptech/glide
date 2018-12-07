@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import java.util.ArrayList;
@@ -132,7 +133,7 @@ public final class LazyHeaders implements Headers {
      *
      * @see #addHeader(String, LazyHeaderFactory)
      */
-    public Builder addHeader(String key, String value) {
+    public Builder addHeader(@NonNull String key, @NonNull String value) {
       return addHeader(key, new StringHeaderFactory(value));
     }
 
@@ -146,7 +147,7 @@ public final class LazyHeaders implements Headers {
      * <p> This class does not prevent you from adding the same value to a given key multiple
      * times </p>
      */
-    public Builder addHeader(String key, LazyHeaderFactory factory) {
+    public Builder addHeader(@NonNull String key, @NonNull LazyHeaderFactory factory) {
       if (isUserAgentDefault && USER_AGENT_HEADER.equalsIgnoreCase(key)) {
         return setHeader(key, factory);
       }
@@ -166,7 +167,7 @@ public final class LazyHeaders implements Headers {
      * (i.e. an OAuth token). </p>
      */
     @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"}) // Public API
-    public Builder setHeader(String key, String value) {
+    public Builder setHeader(@NonNull String key, @Nullable String value) {
       return setHeader(key, value == null ? null : new StringHeaderFactory(value));
     }
 
@@ -176,7 +177,7 @@ public final class LazyHeaders implements Headers {
      *
      * <p> If the given value is {@code null}, the header at the given key will be removed. </p>
      */
-    public Builder setHeader(String key, LazyHeaderFactory factory) {
+    public Builder setHeader(@NonNull String key, @Nullable LazyHeaderFactory factory) {
       copyIfNecessary();
       if (factory == null) {
         headers.remove(key);
@@ -255,9 +256,10 @@ public final class LazyHeaders implements Headers {
 
   static final class StringHeaderFactory implements LazyHeaderFactory {
 
+    @NonNull
     private final String value;
 
-    StringHeaderFactory(String value) {
+    StringHeaderFactory(@NonNull String value) {
       this.value = value;
     }
 
