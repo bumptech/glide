@@ -95,12 +95,14 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     apply(requestManager.getDefaultRequestOptions());
   }
 
+  @SuppressLint("CheckResult")
   @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
   protected RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
     this(other.glide, other.requestManager, transcodeClass, other.context);
     model = other.model;
     isModelSet = other.isModelSet;
 
+    // This is safe because it will always mutate, no one else has access to the object.
     apply(other);
   }
 

@@ -153,7 +153,7 @@ public class RequestManager implements LifecycleListener,
    *
    * <p>The modified options will only be applied to loads started after this method is called.
    *
-   * @see RequestBuilder#apply(RequestOptions)
+   * @see RequestBuilder#apply(com.bumptech.glide.request.BaseRequestOptions)
    *
    * @return This request manager.
    */
