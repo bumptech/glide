@@ -58,9 +58,6 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   GlideException exception;
 
   private boolean hasLoadFailed;
-  // A put of callbacks that are removed while we're notifying other callbacks of a change in
-  // status.
-  private List<ResourceCallback> ignoredCallbacks;
 
   @SuppressWarnings("WeakerAccess")
   @Synthetic
@@ -131,39 +128,17 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
   synchronized void addCallback(final ResourceCallback cb, Executor callbackExecutor) {
     stateVerifier.throwIfRecycled();
+    cbs.add(cb, callbackExecutor);
     if (hasResource) {
       // Acquire early so that the resource isn't recycled while the Runnable below is still sitting
       // in the executors queue.
       incrementPendingCallbacks(1);
-      callbackExecutor.execute(
-          new Runnable() {
-            @Override
-            public void run() {
-              synchronized (EngineJob.this) {
-                if (!isInIgnoredCallbacks(cb)) {
-                  engineResource.acquire();
-                  callCallbackOnResourceReady(cb);
-                }
-                decrementPendingCallbacks();
-              }
-            }
-          });
+      callbackExecutor.execute(new CallResourceReady(cb));
     } else if (hasLoadFailed) {
       incrementPendingCallbacks(1);
-      callbackExecutor.execute(
-          new Runnable() {
-            @Override
-            public void run() {
-              synchronized (EngineJob.class) {
-                if (!isInIgnoredCallbacks(cb)) {
-                  callCallbackOnLoadFailed(cb);
-                }
-                decrementPendingCallbacks();
-              }
-            }
-          });
+      callbackExecutor.execute(new CallLoadFailed(cb));
     } else {
-      cbs.add(cb, callbackExecutor);
+      Preconditions.checkArgument(!isCancelled, "Cannot add callbacks to a cancelled EngineJob");
     }
   }
 
@@ -191,12 +166,12 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
   synchronized void removeCallback(ResourceCallback cb) {
     stateVerifier.throwIfRecycled();
-    if (hasResource || hasLoadFailed) {
-      addIgnoredCallback(cb);
-    } else {
-      cbs.remove(cb);
-      if (cbs.isEmpty()) {
-        cancel();
+    cbs.remove(cb);
+    if (cbs.isEmpty()) {
+      cancel();
+      boolean isFinishedRunning = hasResource || hasLoadFailed;
+      if (isFinishedRunning && pendingCallbacks.get() == 0) {
+        release();
       }
     }
   }
@@ -210,41 +185,15 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
         ? sourceUnlimitedExecutor : (useAnimationPool ? animationExecutor : sourceExecutor);
   }
 
-  // We cannot remove callbacks while notifying our list of callbacks directly because doing so
-  // would cause a ConcurrentModificationException. However, we need to obey the cancellation
-  // request such that if notifying a callback early in the callbacks list cancels a callback later
-  // in the request list, the cancellation for the later request is still obeyed. Using a put of
-  // ignored callbacks allows us to avoid the exception while still meeting the requirement.
-  private synchronized void addIgnoredCallback(ResourceCallback cb) {
-    if (ignoredCallbacks == null) {
-      ignoredCallbacks = new ArrayList<>(2);
-    }
-    if (!ignoredCallbacks.contains(cb)) {
-      ignoredCallbacks.add(cb);
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  synchronized boolean isInIgnoredCallbacks(ResourceCallback cb) {
-    return ignoredCallbacks != null && ignoredCallbacks.contains(cb);
-  }
-
   // Exposed for testing.
   void cancel() {
-    Key localKey;
-    synchronized (this) {
-      if (isDone()) {
-        return;
-      }
-
-      isCancelled = true;
-      decodeJob.cancel();
-      localKey = key;
+    if (isDone()) {
+      return;
     }
-    // TODO: Consider trying to remove jobs that have never been run before from executor queues.
-    // Removing jobs that have run before can break things. See #1996.
-    listener.onEngineJobCancelled(this, localKey);
+
+    isCancelled = true;
+    decodeJob.cancel();
+    listener.onEngineJobCancelled(this, key);
   }
 
   // Exposed for testing.
@@ -292,21 +241,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     listener.onEngineJobComplete(this, localKey, localResource);
 
     for (final ResourceCallbackAndExecutor entry : copy) {
-      final ResourceCallback cb = entry.cb;
-      entry.executor.execute(
-          new Runnable() {
-            @Override
-            public void run() {
-              synchronized (EngineJob.this) {
-                if (cbs.contains(cb) && !isInIgnoredCallbacks(cb)) {
-                  // Acquire for this particular callback.
-                  engineResource.acquire();
-                  callCallbackOnResourceReady(cb);
-                }
-                decrementPendingCallbacks();
-              }
-            }
-          });
+      entry.executor.execute(new CallResourceReady(entry.cb));
     }
     decrementPendingCallbacks();
   }
@@ -323,9 +258,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   @SuppressWarnings("WeakerAccess")
   @Synthetic
   synchronized void decrementPendingCallbacks() {
-    if (!isDone()) {
-      Preconditions.checkArgument(isDone(), "Not yet complete!");
-    }
+    stateVerifier.throwIfRecycled();
+    Preconditions.checkArgument(isDone(), "Not yet complete!");
     int decremented = pendingCallbacks.decrementAndGet();
     Preconditions.checkArgument(decremented >= 0, "Can't decrement below 0");
     if (decremented == 0) {
@@ -345,9 +279,6 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     key = null;
     engineResource = null;
     resource = null;
-    if (ignoredCallbacks != null) {
-      ignoredCallbacks.clear();
-    }
     hasLoadFailed = false;
     isCancelled = false;
     hasResource = false;
@@ -411,20 +342,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     listener.onEngineJobComplete(this, localKey, /*resource=*/ null);
 
     for (ResourceCallbackAndExecutor entry : copy) {
-      final ResourceCallback cb = entry.cb;
-      entry.executor.execute(
-          new Runnable() {
-            @Override
-            public void run() {
-              synchronized (EngineJob.this) {
-                if (cbs.contains(cb) && !isInIgnoredCallbacks(cb)) {
-                  callCallbackOnLoadFailed(cb);
-                }
-
-                decrementPendingCallbacks();
-              }
-            }
-          });
+      entry.executor.execute(new CallLoadFailed(entry.cb));
     }
     decrementPendingCallbacks();
   }
@@ -433,6 +351,48 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   @Override
   public StateVerifier getVerifier() {
     return stateVerifier;
+  }
+
+  private class CallLoadFailed implements Runnable {
+
+    private final ResourceCallback cb;
+
+    CallLoadFailed(ResourceCallback cb) {
+      this.cb = cb;
+    }
+
+    @Override
+    public void run() {
+      synchronized (EngineJob.this) {
+        if (cbs.contains(cb)) {
+          callCallbackOnLoadFailed(cb);
+        }
+
+        decrementPendingCallbacks();
+      }
+    }
+  }
+
+  private class CallResourceReady implements Runnable {
+
+    private final ResourceCallback cb;
+
+    CallResourceReady(ResourceCallback cb) {
+      this.cb = cb;
+    }
+
+    @Override
+    public void run() {
+      synchronized (EngineJob.this) {
+        if (cbs.contains(cb)) {
+          // Acquire for this particular callback.
+          engineResource.acquire();
+          callCallbackOnResourceReady(cb);
+          removeCallback(cb);
+        }
+        decrementPendingCallbacks();
+      }
+    }
   }
 
   static final class ResourceCallbacksAndExecutors
