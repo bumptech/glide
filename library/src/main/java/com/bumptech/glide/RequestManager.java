@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.CheckResult;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RawRes;
@@ -63,9 +64,13 @@ public class RequestManager implements LifecycleListener,
 
   protected final Glide glide;
   protected final Context context;
+  @SuppressWarnings("WeakerAccess")
   @Synthetic final Lifecycle lifecycle;
+  @GuardedBy("this")
   private final RequestTracker requestTracker;
+  @GuardedBy("this")
   private final RequestManagerTreeNode treeNode;
+  @GuardedBy("this")
   private final TargetTracker targetTracker = new TargetTracker();
   private final Runnable addSelfToLifecycle = new Runnable() {
     @Override
@@ -80,6 +85,7 @@ public class RequestManager implements LifecycleListener,
   // the list each time a request is started.
   private final CopyOnWriteArrayList<RequestListener<Object>> defaultRequestListeners;
 
+  @GuardedBy("this")
   private RequestOptions requestOptions;
 
   public RequestManager(
@@ -132,11 +138,11 @@ public class RequestManager implements LifecycleListener,
     glide.registerRequestManager(this);
   }
 
-  protected void setRequestOptions(@NonNull RequestOptions toSet) {
+  protected synchronized void setRequestOptions(@NonNull RequestOptions toSet) {
     requestOptions = toSet.clone().autoClone();
   }
 
-  private void updateRequestOptions(@NonNull RequestOptions toUpdate) {
+  private synchronized void updateRequestOptions(@NonNull RequestOptions toUpdate) {
     requestOptions = requestOptions.apply(toUpdate);
   }
 
@@ -204,8 +210,7 @@ public class RequestManager implements LifecycleListener,
    * the behavior of the listener on the resource type, you will need to use {@code instanceof} to
    * do so. It's not safe to cast resource types without first checking with {@code instanceof}.
    */
-  public synchronized RequestManager addDefaultRequestListener(
-      RequestListener<Object> requestListener) {
+  public RequestManager addDefaultRequestListener(RequestListener<Object> requestListener) {
     defaultRequestListeners.add(requestListener);
     return this;
   }
@@ -294,7 +299,7 @@ public class RequestManager implements LifecycleListener,
    */
   // Public API.
   @SuppressWarnings("unused")
-  public void resumeRequestsRecursive() {
+  public synchronized void resumeRequestsRecursive() {
     Util.assertMainThread();
     resumeRequests();
     for (RequestManager requestManager : treeNode.getDescendants()) {
@@ -308,7 +313,7 @@ public class RequestManager implements LifecycleListener,
    * requests.
    */
   @Override
-  public void onStart() {
+  public synchronized void onStart() {
     resumeRequests();
     targetTracker.onStart();
   }
@@ -650,12 +655,13 @@ public class RequestManager implements LifecycleListener,
   }
 
   @Override
-  public String toString() {
+  public synchronized String toString() {
     return super.toString() + "{tracker=" + requestTracker + ", treeNode=" + treeNode + "}";
   }
 
-  private static class RequestManagerConnectivityListener implements ConnectivityMonitor
-      .ConnectivityListener {
+  private class RequestManagerConnectivityListener
+      implements ConnectivityMonitor.ConnectivityListener {
+    @GuardedBy("RequestManager.this")
     private final RequestTracker requestTracker;
 
     RequestManagerConnectivityListener(@NonNull RequestTracker requestTracker) {
@@ -665,7 +671,9 @@ public class RequestManager implements LifecycleListener,
     @Override
     public void onConnectivityChanged(boolean isConnected) {
       if (isConnected) {
-        requestTracker.restartRequests();
+        synchronized (RequestManager.this) {
+          requestTracker.restartRequests();
+        }
       }
     }
   }
@@ -679,7 +687,7 @@ public class RequestManager implements LifecycleListener,
     @Override
     public void onResourceReady(@NonNull Object resource,
         @Nullable Transition<? super Object> transition) {
-      // Do nothing.
+
     }
   }
 }
