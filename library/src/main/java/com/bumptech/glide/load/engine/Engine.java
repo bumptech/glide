@@ -341,7 +341,7 @@ public class Engine implements EngineJobListener,
    *
    * <p>Non-final for mocking.
    */
-  public static class LoadStatus {
+  public class LoadStatus {
     private final EngineJob<?> engineJob;
     private final ResourceCallback cb;
 
@@ -351,7 +351,13 @@ public class Engine implements EngineJobListener,
     }
 
     public void cancel() {
-      engineJob.removeCallback(cb);
+      // Acquire the Engine lock so that a new request can't get access to a particular EngineJob
+      // just after the EngineJob has been cancelled. Without this lock, we'd allow new requests
+      // to find the cancelling EngineJob in our Jobs data structure. With this lock, the EngineJob
+      // is both cancelled and removed from Jobs atomically.
+      synchronized (Engine.this) {
+        engineJob.removeCallback(cb);
+      }
     }
   }
 
