@@ -7,13 +7,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap.CompressFormat;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.util.ByteBufferUtil;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import org.junit.After;
@@ -43,10 +44,7 @@ public class BitmapEncoderTest {
 
   @Test
   public void testBitmapIsEncoded() throws IOException {
-    Bitmap bitmap = harness.encode();
-    // TODO(b/119624843)
-    assertThat(bitmap.getWidth()).isEqualTo(100);
-    assertThat(bitmap.getHeight()).isEqualTo(100);
+    assertThat(harness.encode()).isEqualTo(harness.expectedData(CompressFormat.JPEG, 90));
   }
 
   @Test
@@ -54,10 +52,7 @@ public class BitmapEncoderTest {
     int quality = 7;
     harness.setQuality(quality);
 
-    Bitmap bitmap = harness.encode();
-    // TODO(b/119624843)
-    assertThat(bitmap.getWidth()).isEqualTo(100);
-    assertThat(bitmap.getHeight()).isEqualTo(100);
+    assertThat(harness.encode()).isEqualTo(harness.expectedData(CompressFormat.JPEG, quality));
   }
 
   @Test
@@ -65,10 +60,7 @@ public class BitmapEncoderTest {
     Bitmap.CompressFormat format = Bitmap.CompressFormat.WEBP;
     harness.setFormat(format);
 
-    Bitmap bitmap = harness.encode();
-    // TODO(b/119624843)
-    assertThat(bitmap.getWidth()).isEqualTo(100);
-    assertThat(bitmap.getHeight()).isEqualTo(100);
+    assertThat(harness.encode()).isEqualTo(harness.expectedData(CompressFormat.WEBP, 90));
   }
 
   @Test
@@ -76,10 +68,7 @@ public class BitmapEncoderTest {
     harness.setFormat(null);
     harness.bitmap.setHasAlpha(false);
 
-    Bitmap bitmap = harness.encode();
-    // TODO(b/119624843)
-    assertThat(bitmap.getWidth()).isEqualTo(100);
-    assertThat(bitmap.getHeight()).isEqualTo(100);
+    assertThat(harness.encode()).isEqualTo(harness.expectedData(CompressFormat.JPEG, 90));
   }
 
   @Test
@@ -87,10 +76,7 @@ public class BitmapEncoderTest {
     harness.setFormat(null);
     harness.bitmap.setHasAlpha(true);
 
-    Bitmap bitmap = harness.encode();
-    // TODO(b/119624843)
-    assertThat(bitmap.getWidth()).isEqualTo(100);
-    assertThat(bitmap.getHeight()).isEqualTo(100);
+    assertThat(harness.encode()).isEqualTo(harness.expectedData(CompressFormat.PNG, 90));
   }
 
   @Test
@@ -124,11 +110,16 @@ public class BitmapEncoderTest {
       options.set(BitmapEncoder.COMPRESSION_FORMAT, format);
     }
 
-    Bitmap encode() throws IOException {
+    byte[] encode() throws IOException {
       BitmapEncoder encoder = new BitmapEncoder(arrayPool);
       encoder.encode(resource, file, options);
-      byte[] data = ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
-      return BitmapFactory.decodeByteArray(data, 0, data.length);
+      return ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
+    }
+
+    byte[] expectedData(CompressFormat expectedFormat, int expectedQuality) {
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      bitmap.compress(expectedFormat, expectedQuality, os);
+      return os.toByteArray();
     }
 
     void tearDown() {

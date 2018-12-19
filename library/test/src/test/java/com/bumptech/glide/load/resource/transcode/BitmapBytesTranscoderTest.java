@@ -6,10 +6,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
-import java.nio.charset.Charset;
+import com.bumptech.glide.util.Preconditions;
+import java.io.ByteArrayOutputStream;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -30,35 +30,26 @@ public class BitmapBytesTranscoderTest {
 
   @Test
   public void testReturnsBytesOfGivenBitmap() {
-    Bitmap transcodedDescription = harness.getTranscodedDescription();
-    // TODO(b/119624843)
-    assertThat(transcodedDescription.getHeight()).isEqualTo(100);
-    assertThat(transcodedDescription.getWidth()).isEqualTo(100);
+    assertThat(harness.getTranscodeResult()).isEqualTo(harness.getExpectedData());
   }
 
   @Test
   public void testUsesGivenQuality() {
     harness.quality = 66;
-    Bitmap bitmap = harness.getTranscodedDescription();
-    // TODO(b/119624843)
-    assertThat(bitmap.getHeight()).isEqualTo(100);
-    assertThat(bitmap.getWidth()).isEqualTo(100);
+    assertThat(harness.getTranscodeResult()).isEqualTo(harness.getExpectedData());
   }
 
   @Test
   public void testUsesGivenFormat() {
     for (Bitmap.CompressFormat format : Bitmap.CompressFormat.values()) {
       harness.compressFormat = format;
-      Bitmap bitmap = harness.getTranscodedDescription();
-      // TODO(b/119624843) 
-      assertThat(bitmap.getHeight()).isEqualTo(100);
-      assertThat(bitmap.getWidth()).isEqualTo(100);
+      assertThat(harness.getTranscodeResult()).isEqualTo(harness.getExpectedData());
     }
   }
 
   @Test
   public void testBitmapResourceIsRecycled() {
-    harness.getTranscodedDescription();
+    harness.getTranscodeResult();
 
     verify(harness.bitmapResource).recycle();
   }
@@ -74,11 +65,18 @@ public class BitmapBytesTranscoderTest {
       when(bitmapResource.get()).thenReturn(bitmap);
     }
 
-    Bitmap getTranscodedDescription() {
+    byte[] getTranscodeResult() {
       BitmapBytesTranscoder transcoder = new BitmapBytesTranscoder(compressFormat, quality);
-      Resource<byte[]> bytesResource = transcoder.transcode(bitmapResource, options);
+      Resource<byte[]> bytesResource =
+          Preconditions.checkNotNull(transcoder.transcode(bitmapResource, options));
 
-      return BitmapFactory.decodeByteArray(bytesResource.get(), 0, bytesResource.get().length);
+      return bytesResource.get();
+    }
+
+    byte[] getExpectedData() {
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      bitmap.compress(compressFormat, quality, os);
+      return os.toByteArray();
     }
   }
 }
