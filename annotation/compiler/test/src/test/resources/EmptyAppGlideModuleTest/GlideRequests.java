@@ -60,7 +60,7 @@ public class GlideRequests extends RequestManager {
 
   @Override
   @NonNull
-  public synchronized GlideRequests addDefaultRequestListener(RequestListener<Object> listener) {
+  public GlideRequests addDefaultRequestListener(RequestListener<Object> listener) {
     return (GlideRequests) super.addDefaultRequestListener(listener);
   }
 

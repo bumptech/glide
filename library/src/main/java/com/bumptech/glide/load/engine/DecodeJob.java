@@ -216,6 +216,8 @@ class DecodeJob<R> implements DataFetcherGenerator.FetcherReadyCallback,
     }
   }
 
+  // We need to rethrow only CallbackException, but not other types of Throwables.
+  @SuppressWarnings("PMD.AvoidRethrowingException")
   @Override
   public void run() {
     // This should be much more fine grained, but since Java's thread pool implementation silently

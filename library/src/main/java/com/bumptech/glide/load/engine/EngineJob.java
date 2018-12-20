@@ -142,7 +142,9 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     }
   }
 
-  private void callCallbackOnResourceReady(ResourceCallback cb) {
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic
+  synchronized void callCallbackOnResourceReady(ResourceCallback cb) {
     try {
       // This is overly broad, some Glide code is actually called here, but it's much
       // simpler to encapsulate here than to do so at the actual call point in the
@@ -153,7 +155,9 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     }
   }
 
-  private void callCallbackOnLoadFailed(ResourceCallback cb) {
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic
+  synchronized void callCallbackOnLoadFailed(ResourceCallback cb) {
     // This is overly broad, some Glide code is actually called here, but it's much
     // simpler to encapsulate here than to do so at the actual call point in the Request
     // implementation.
@@ -205,8 +209,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     return hasLoadFailed || hasResource || isCancelled;
   }
 
-  // We have to post Runnables in a loop. Typically there will be very few callbacks.
-  @SuppressWarnings({"WeakerAccess", "PMD.AvoidInstantiatingObjectsInLoops"})
+  // We have to post Runnables in a loop. Typically there will be very few callbacks. AccessorMethod
+  // seems to be a false positive
+  @SuppressWarnings(
+          {"WeakerAccess", "PMD.AvoidInstantiatingObjectsInLoops", "PMD.AccessorMethodGeneration"})
   @Synthetic
   void notifyCallbacksOfResult() {
     ResourceCallbacksAndExecutors copy;
@@ -313,8 +319,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     getActiveSourceExecutor().execute(job);
   }
 
-  // We have to post Runnables in a loop. Typically there will be very few callbacks.
-  @SuppressWarnings({"WeakerAccess", "PMD.AvoidInstantiatingObjectsInLoops"})
+  // We have to post Runnables in a loop. Typically there will be very few callbacks. Acessor method
+  // warning seems to be false positive.
+  @SuppressWarnings(
+          {"WeakerAccess", "PMD.AvoidInstantiatingObjectsInLoops", "PMD.AccessorMethodGeneration"})
   @Synthetic
   void notifyCallbacksOfException() {
     ResourceCallbacksAndExecutors copy;
@@ -400,7 +408,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     private final List<ResourceCallbackAndExecutor> callbacksAndExecutors;
 
     ResourceCallbacksAndExecutors() {
-      this(new ArrayList<>(2));
+      this(new ArrayList<ResourceCallbackAndExecutor>(2));
     }
 
     ResourceCallbacksAndExecutors(List<ResourceCallbackAndExecutor> callbacksAndExecutors) {

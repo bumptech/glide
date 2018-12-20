@@ -30,7 +30,7 @@ public class GlideContext extends ContextWrapper {
   private final List<RequestListener<Object>> defaultRequestListeners;
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions;
   private final Engine engine;
-  private boolean isLoggingRequestOriginsEnabled;
+  private final boolean isLoggingRequestOriginsEnabled;
   private final int logLevel;
 
   public GlideContext(
