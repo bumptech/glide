@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -28,7 +27,6 @@ import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
-@Ignore
 public class BitmapEncoderTest {
   private EncoderHarness harness;
 
