@@ -19,7 +19,9 @@ import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
 
 /**
  * A base {@link Target} for loading {@link android.graphics.Bitmap}s into {@link View}s that
@@ -334,7 +336,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     @Nullable
     static Integer maxDisplayLength;
     private final View view;
-    private final List<SizeReadyCallback> cbs = new ArrayList<>();
+    private final Set<SizeReadyCallback> cbs =
+        Collections.newSetFromMap(new IdentityHashMap<SizeReadyCallback, Boolean>());
     @Synthetic boolean waitForLayout;
 
     @Nullable private SizeDeterminerLayoutListener layoutListener;
