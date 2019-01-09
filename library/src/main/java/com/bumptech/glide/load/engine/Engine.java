@@ -14,7 +14,6 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.DiskCacheAdapter;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
-import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.LogTime;
@@ -23,6 +22,7 @@ import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Responsible for starting loads and managing active and cached resources.
@@ -45,10 +45,10 @@ public class Engine implements EngineJobListener,
   public Engine(
       MemoryCache memoryCache,
       DiskCache.Factory diskCacheFactory,
-      GlideExecutor diskCacheExecutor,
-      GlideExecutor sourceExecutor,
-      GlideExecutor sourceUnlimitedExecutor,
-      GlideExecutor animationExecutor,
+      ExecutorService diskCacheExecutor,
+      ExecutorService sourceExecutor,
+      ExecutorService sourceUnlimitedExecutor,
+      ExecutorService animationExecutor,
       boolean isActiveResourceRetentionAllowed) {
     this(
         memoryCache,
@@ -69,10 +69,10 @@ public class Engine implements EngineJobListener,
   @VisibleForTesting
   Engine(MemoryCache cache,
       DiskCache.Factory diskCacheFactory,
-      GlideExecutor diskCacheExecutor,
-      GlideExecutor sourceExecutor,
-      GlideExecutor sourceUnlimitedExecutor,
-      GlideExecutor animationExecutor,
+      ExecutorService diskCacheExecutor,
+      ExecutorService sourceExecutor,
+      ExecutorService sourceUnlimitedExecutor,
+      ExecutorService animationExecutor,
       Jobs jobs,
       EngineKeyFactory keyFactory,
       ActiveResources activeResources,
@@ -452,10 +452,10 @@ public class Engine implements EngineJobListener,
 
   @VisibleForTesting
   static class EngineJobFactory {
-    @Synthetic final GlideExecutor diskCacheExecutor;
-    @Synthetic final GlideExecutor sourceExecutor;
-    @Synthetic final GlideExecutor sourceUnlimitedExecutor;
-    @Synthetic final GlideExecutor animationExecutor;
+    @Synthetic final ExecutorService diskCacheExecutor;
+    @Synthetic final ExecutorService sourceExecutor;
+    @Synthetic final ExecutorService sourceUnlimitedExecutor;
+    @Synthetic final ExecutorService animationExecutor;
     @Synthetic final EngineJobListener listener;
     @Synthetic final Pools.Pool<EngineJob<?>> pool =
         FactoryPools.threadSafe(
@@ -474,10 +474,10 @@ public class Engine implements EngineJobListener,
             });
 
     EngineJobFactory(
-        GlideExecutor diskCacheExecutor,
-        GlideExecutor sourceExecutor,
-        GlideExecutor sourceUnlimitedExecutor,
-        GlideExecutor animationExecutor,
+        ExecutorService diskCacheExecutor,
+        ExecutorService sourceExecutor,
+        ExecutorService sourceUnlimitedExecutor,
+        ExecutorService animationExecutor,
         EngineJobListener listener) {
       this.diskCacheExecutor = diskCacheExecutor;
       this.sourceExecutor = sourceExecutor;

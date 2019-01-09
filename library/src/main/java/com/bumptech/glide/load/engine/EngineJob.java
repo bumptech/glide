@@ -5,7 +5,6 @@ import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.Pools;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
-import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.Preconditions;
@@ -16,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -34,10 +34,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private final Pools.Pool<EngineJob<?>> pool;
   private final EngineResourceFactory engineResourceFactory;
   private final EngineJobListener listener;
-  private final GlideExecutor diskCacheExecutor;
-  private final GlideExecutor sourceExecutor;
-  private final GlideExecutor sourceUnlimitedExecutor;
-  private final GlideExecutor animationExecutor;
+  private final ExecutorService diskCacheExecutor;
+  private final ExecutorService sourceExecutor;
+  private final ExecutorService sourceUnlimitedExecutor;
+  private final ExecutorService animationExecutor;
   private final AtomicInteger pendingCallbacks = new AtomicInteger();
 
   private Key key;
@@ -69,10 +69,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
   private volatile boolean isCancelled;
 
   EngineJob(
-      GlideExecutor diskCacheExecutor,
-      GlideExecutor sourceExecutor,
-      GlideExecutor sourceUnlimitedExecutor,
-      GlideExecutor animationExecutor,
+      ExecutorService diskCacheExecutor,
+      ExecutorService sourceExecutor,
+      ExecutorService sourceUnlimitedExecutor,
+      ExecutorService animationExecutor,
       EngineJobListener listener,
       Pools.Pool<EngineJob<?>> pool) {
     this(
@@ -87,10 +87,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
   @VisibleForTesting
   EngineJob(
-      GlideExecutor diskCacheExecutor,
-      GlideExecutor sourceExecutor,
-      GlideExecutor sourceUnlimitedExecutor,
-      GlideExecutor animationExecutor,
+      ExecutorService diskCacheExecutor,
+      ExecutorService sourceExecutor,
+      ExecutorService sourceUnlimitedExecutor,
+      ExecutorService animationExecutor,
       EngineJobListener listener,
       Pools.Pool<EngineJob<?>> pool,
       EngineResourceFactory engineResourceFactory) {
@@ -120,7 +120,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
 
   public synchronized void start(DecodeJob<R> decodeJob) {
     this.decodeJob = decodeJob;
-    GlideExecutor executor = decodeJob.willDecodeFromCache()
+    ExecutorService executor = decodeJob.willDecodeFromCache()
         ? diskCacheExecutor
         : getActiveSourceExecutor();
     executor.execute(decodeJob);
@@ -184,7 +184,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>,
     return onlyRetrieveFromCache;
   }
 
-  private GlideExecutor getActiveSourceExecutor() {
+  private ExecutorService getActiveSourceExecutor() {
     return useUnlimitedSourceGeneratorPool
         ? sourceUnlimitedExecutor : (useAnimationPool ? animationExecutor : sourceExecutor);
   }

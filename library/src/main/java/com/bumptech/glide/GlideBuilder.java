@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * A builder class for setting default structural classes for Glide to use.
@@ -42,8 +43,8 @@ public final class GlideBuilder {
   private BitmapPool bitmapPool;
   private ArrayPool arrayPool;
   private MemoryCache memoryCache;
-  private GlideExecutor sourceExecutor;
-  private GlideExecutor diskCacheExecutor;
+  private ExecutorService sourceExecutor;
+  private ExecutorService diskCacheExecutor;
   private DiskCache.Factory diskCacheFactory;
   private MemorySizeCalculator memorySizeCalculator;
   private ConnectivityMonitorFactory connectivityMonitorFactory;
@@ -51,7 +52,7 @@ public final class GlideBuilder {
   private RequestOptions defaultRequestOptions = new RequestOptions();
   @Nullable
   private RequestManagerFactory requestManagerFactory;
-  private GlideExecutor animationExecutor;
+  private ExecutorService animationExecutor;
   private boolean isActiveResourceRetentionAllowed;
   @Nullable
   private List<RequestListener<Object>> defaultRequestListeners;
@@ -115,7 +116,7 @@ public final class GlideBuilder {
   }
 
   /**
-   * Sets the {@link GlideExecutor} to use when retrieving
+   * Sets the {@link ExecutorService} to use when retrieving
    * {@link com.bumptech.glide.load.engine.Resource}s that are not already in the cache.
    *
    * <p>The thread count defaults to the number of cores available on the device, with a maximum of
@@ -126,18 +127,16 @@ public final class GlideBuilder {
    *
    * @param service The ExecutorService to use.
    * @return This builder.
-   * @see #setDiskCacheExecutor(GlideExecutor)
-   * @see GlideExecutor
-   *
-   * @deprecated Use {@link #setSourceExecutor(GlideExecutor)}
+   * @see #setDiskCacheExecutor(ExecutorService)
+   * @deprecated Use {@link #setSourceExecutor(ExecutorService)}
    */
   @Deprecated
-  public GlideBuilder setResizeExecutor(@Nullable GlideExecutor service) {
+  public GlideBuilder setResizeExecutor(@Nullable ExecutorService service) {
     return setSourceExecutor(service);
   }
 
   /**
-   * Sets the {@link GlideExecutor} to use when retrieving
+   * Sets the {@link ExecutorService} to use when retrieving
    * {@link com.bumptech.glide.load.engine.Resource}s that are not already in the cache.
    *
    * <p>The thread count defaults to the number of cores available on the device, with a maximum of
@@ -148,19 +147,18 @@ public final class GlideBuilder {
    *
    * @param service The ExecutorService to use.
    * @return This builder.
-   * @see #setDiskCacheExecutor(GlideExecutor)
-   * @see GlideExecutor
+   * @see #setDiskCacheExecutor(ExecutorService)
    */
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @NonNull
-  public GlideBuilder setSourceExecutor(@Nullable GlideExecutor service) {
+  public GlideBuilder setSourceExecutor(@Nullable ExecutorService service) {
     this.sourceExecutor = service;
     return this;
   }
 
   /**
-   * Sets the {@link GlideExecutor} to use when retrieving
+   * Sets the {@link ExecutorService} to use when retrieving
    * {@link com.bumptech.glide.load.engine.Resource}s that are currently in Glide's disk caches.
    *
    * <p>Defaults to a single thread which is usually the best combination of memory usage,
@@ -169,15 +167,14 @@ public final class GlideBuilder {
    * <p>Use the {@link GlideExecutor#newDiskCacheExecutor()} if you'd like to specify options
    * for the disk cache executor.
    *
-   * @param service The {@link GlideExecutor} to use.
+   * @param service The ExecutorService to use.
    * @return This builder.
-   * @see #setSourceExecutor(GlideExecutor)
-   * @see GlideExecutor
+   * @see #setSourceExecutor(ExecutorService)
    */
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @NonNull
-  public GlideBuilder setDiskCacheExecutor(@Nullable GlideExecutor service) {
+  public GlideBuilder setDiskCacheExecutor(@Nullable ExecutorService service) {
     this.diskCacheExecutor = service;
     return this;
   }
@@ -191,13 +188,13 @@ public final class GlideBuilder {
    * <p>Use the {@link GlideExecutor#newAnimationExecutor()} methods  if you'd like to specify
    * options for the animation executor.
    *
-   * @param service The {@link GlideExecutor} to use.
+   * @param service The ExecutorService to use.
    * @return This builder.
    */
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @NonNull
-  public GlideBuilder setAnimationExecutor(@Nullable GlideExecutor service) {
+  public GlideBuilder setAnimationExecutor(@Nullable ExecutorService service) {
     this.animationExecutor = service;
     return this;
   }
@@ -247,10 +244,9 @@ public final class GlideBuilder {
    * Sets the {@link MemorySizeCalculator} to use to calculate maximum sizes for default
    * {@link MemoryCache MemoryCaches} and/or default {@link BitmapPool BitmapPools}.
    *
-   * @see #setMemorySizeCalculator(MemorySizeCalculator)
-   *
    * @param builder The builder to use (will not be modified).
    * @return This builder.
+   * @see #setMemorySizeCalculator(MemorySizeCalculator)
    */
   // Public API.
   @SuppressWarnings("unused")
