@@ -27,7 +27,7 @@ import java.util.Map;
  * convenience. </p>
  */
 public class GlideUrl implements Key {
-  private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%;$";
+  private static final String ALLOWED_URI_CHARS = "@#&=*+-_.,:!?()/~'%;$|";
   private final Headers headers;
   @Nullable private final URL url;
   @Nullable private final String stringUrl;
