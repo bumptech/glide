@@ -41,44 +41,44 @@ subprojects { project ->
         }
     }
 
-    tasks.withType(JavaCompile) {
-        sourceCompatibility = 1.7
-        targetCompatibility = 1.7
-
-        options.setBootstrapClasspath(files("${System.getProperty('java.home')}/lib/rt.jar"))
-        // gifencoder is a legacy project that has a ton of warnings and is basically never
-        // modified, so we're not going to worry about cleaning it up.
-        if ("gifencoder" != project.getName()) {
-          options.compilerArgs \
-                /*
-                 * Treat all warnings as errors.
-                 */ \
-                << "-Werror" \
-                /*
-                 * Enable all warnings.
-                 */ \
-                << "-Xlint:all" \
-                /*
-                 * Java expects every annotation to have a processor, but we use
-                 * javax.annotation.Nullable, which doesn't have one.
-                 */ \
-                << "-Xlint:-processing" \
-                /*
-                 * See https://github.com/google/dagger/issues/945
-                 * and https://bugs.openjdk.java.net/browse/JDK-8190452
-                 */ \
-                << "-Xlint:-classfile" \
-                /*
-                 * Disable deprecation warnings for ViewTarget/BaseTarget for now.
-                 */ \
-                << "-Xlint:-deprecation"
-
-            if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
-                // It's often useful to track individual objects when debugging object pooling.
-                options.compilerArgs << "-Xep:ObjectToString:OFF"
-            }
-        }
-    }
+//    tasks.withType(JavaCompile) {
+//        sourceCompatibility = 1.7
+//        targetCompatibility = 1.7
+//
+//        options.setBootstrapClasspath(files("${System.getProperty('java.home')}/lib/rt.jar"))
+//        // gifencoder is a legacy project that has a ton of warnings and is basically never
+//        // modified, so we're not going to worry about cleaning it up.
+//        if ("gifencoder" != project.getName()) {
+//          options.compilerArgs \
+//                /*
+//                 * Treat all warnings as errors.
+//                 */ \
+//                << "-Werror" \
+//                /*
+//                 * Enable all warnings.
+//                 */ \
+//                << "-Xlint:all" \
+//                /*
+//                 * Java expects every annotation to have a processor, but we use
+//                 * javax.annotation.Nullable, which doesn't have one.
+//                 */ \
+//                << "-Xlint:-processing" \
+//                /*
+//                 * See https://github.com/google/dagger/issues/945
+//                 * and https://bugs.openjdk.java.net/browse/JDK-8190452
+//                 */ \
+//                << "-Xlint:-classfile" \
+//                /*
+//                 * Disable deprecation warnings for ViewTarget/BaseTarget for now.
+//                 */ \
+//                << "-Xlint:-deprecation"
+//
+//            if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
+//                // It's often useful to track individual objects when debugging object pooling.
+//                options.compilerArgs << "-Xep:ObjectToString:OFF"
+//            }
+//        }
+//    }
 
     tasks.withType(Test) {
         testLogging {
