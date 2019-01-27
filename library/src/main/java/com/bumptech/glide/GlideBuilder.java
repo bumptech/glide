@@ -24,6 +24,7 @@ import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory;
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -54,6 +55,7 @@ public final class GlideBuilder {
   private boolean isActiveResourceRetentionAllowed;
   @Nullable
   private List<RequestListener<Object>> defaultRequestListeners;
+  private boolean isLoggingRequestOriginsEnabled;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -204,7 +206,7 @@ public final class GlideBuilder {
    * Sets the default {@link RequestOptions} to use for all loads across the app.
    *
    * <p>Applying additional options with {@link
-   * RequestBuilder#apply(RequestOptions)} will override defaults
+   * RequestBuilder#apply(BaseRequestOptions)} will override defaults
    * set here.
    *
    * @param requestOptions The options to use by default.
@@ -406,6 +408,21 @@ public final class GlideBuilder {
     return this;
   }
 
+  /**
+   * Set to {@code true} to make Glide populate
+   * {@link com.bumptech.glide.load.engine.GlideException#setOrigin(Exception)} for failed requests.
+   *
+   * <p>The exception set by this method is not printed by {@link GlideException} and can only be
+   * viewed via a {@link RequestListener} that reads the field via
+   * {@link GlideException#getOrigin()}.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder setLogRequestOrigins(boolean isEnabled) {
+    isLoggingRequestOriginsEnabled = isEnabled;
+    return this;
+  }
+
   void setRequestManagerFactory(@Nullable RequestManagerFactory factory) {
     this.requestManagerFactory = factory;
   }
@@ -491,6 +508,7 @@ public final class GlideBuilder {
         logLevel,
         defaultRequestOptions.lock(),
         defaultTransitionOptions,
-        defaultRequestListeners);
+        defaultRequestListeners,
+        isLoggingRequestOriginsEnabled);
   }
 }

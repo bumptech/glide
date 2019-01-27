@@ -322,7 +322,8 @@ public class Glide implements ComponentCallbacks2 {
       int logLevel,
       @NonNull RequestOptions defaultRequestOptions,
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
-      @NonNull List<RequestListener<Object>> defaultRequestListeners) {
+      @NonNull List<RequestListener<Object>> defaultRequestListeners,
+      boolean isLoggingRequestOriginsEnabled) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
@@ -336,14 +337,12 @@ public class Glide implements ComponentCallbacks2 {
     final Resources resources = context.getResources();
 
     registry = new Registry();
+    registry.register(new DefaultImageHeaderParser());
     // Right now we're only using this parser for HEIF images, which are only supported on OMR1+.
     // If we need this for other file types, we should consider removing this restriction.
-    // Note that order here matters. We want to check the ExifInterface parser first for orientation
-    // and then fall back to DefaultImageHeaderParser for other fields.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
       registry.register(new ExifInterfaceImageHeaderParser());
     }
-    registry.register(new DefaultImageHeaderParser());
 
     List<ImageHeaderParser> imageHeaderParsers = registry.getImageHeaderParsers();
     Downsampler downsampler =
@@ -522,6 +521,7 @@ public class Glide implements ComponentCallbacks2 {
             defaultTransitionOptions,
             defaultRequestListeners,
             engine,
+            isLoggingRequestOriginsEnabled,
             logLevel);
   }
 

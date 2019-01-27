@@ -32,8 +32,10 @@ import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
+import com.bumptech.glide.util.Executors;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,7 +66,7 @@ public class EngineTest {
   public void testCallbackIsAddedToNewEngineJobWithNoExistingLoad() {
     harness.doLoad();
 
-    verify(harness.job).addCallback(eq(harness.cb));
+    verify(harness.job).addCallback(eq(harness.cb), any(Executor.class));
   }
 
   @Test
@@ -103,7 +105,7 @@ public class EngineTest {
     harness.cb = newCallback;
     harness.doLoad();
 
-    verify(harness.job).addCallback(eq(newCallback));
+    verify(harness.job).addCallback(eq(newCallback), any(Executor.class));
   }
 
   @Test
@@ -204,14 +206,17 @@ public class EngineTest {
     when(fromCache.get()).thenReturn(expected);
     when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(fromCache);
 
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        Resource<?> resource = (Resource<?>) invocationOnMock.getArguments()[0];
-        assertEquals(expected, resource.get());
-        return null;
-      }
-    }).when(harness.cb).onResourceReady(anyResource(), isADataSource());
+    doAnswer(
+            new Answer<Void>() {
+              @Override
+              public Void answer(InvocationOnMock invocationOnMock) {
+                Resource<?> resource = (Resource<?>) invocationOnMock.getArguments()[0];
+                assertEquals(expected, resource.get());
+                return null;
+              }
+            })
+        .when(harness.cb)
+        .onResourceReady(anyResource(), isADataSource());
 
     harness.doLoad();
 
@@ -323,14 +328,17 @@ public class EngineTest {
     final Object expected = new Object();
     when(harness.resource.isCacheable()).thenReturn(true);
     when(harness.resource.get()).thenReturn(expected);
-    doAnswer(new Answer<Void>() {
-      @Override
-      public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-        Resource<?> resource = (Resource<?>) invocationOnMock.getArguments()[1];
-        assertEquals(expected, resource.get());
-        return null;
-      }
-    }).when(harness.cache).put(eq(harness.cacheKey), anyResource());
+    doAnswer(
+            new Answer<Void>() {
+              @Override
+              public Void answer(InvocationOnMock invocationOnMock) {
+                Resource<?> resource = (Resource<?>) invocationOnMock.getArguments()[1];
+                assertEquals(expected, resource.get());
+                return null;
+              }
+            })
+        .when(harness.cache)
+        .put(eq(harness.cacheKey), anyResource());
 
     harness.getEngine().onResourceReleased(harness.cacheKey, harness.resource);
 
@@ -426,8 +434,8 @@ public class EngineTest {
     harness.getEngine().release(mockResource());
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testThrowsIfLoadCalledOnBackgroundThread() throws InterruptedException {
+  @Test
+  public void load_whenCalledOnBackgroundThread_doesNotThrow() throws InterruptedException {
     BackgroundUtil.testInBackground(new BackgroundUtil.BackgroundTester() {
       @Override
       public void runTest() {
@@ -439,13 +447,16 @@ public class EngineTest {
   @Test
   public void load_afterResourceIsLoadedInActiveResources_returnsFromMemoryCache() {
     when(harness.resource.isCacheable()).thenReturn(true);
-    doAnswer(new Answer<Object>() {
-      @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        harness.callOnEngineJobComplete();
-        return null;
-      }
-    }).when(harness.job).start(any(DecodeJob.class));
+    doAnswer(
+            new Answer<Object>() {
+              @Override
+              public Object answer(InvocationOnMock invocationOnMock) {
+                harness.callOnEngineJobComplete();
+                return null;
+              }
+            })
+        .when(harness.job)
+        .start(any(DecodeJob.class));
     harness.doLoad();
     harness.doLoad();
     verify(harness.cb).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE));
@@ -455,13 +466,16 @@ public class EngineTest {
   public void load_afterResourceIsLoadedAndReleased_returnsFromMemoryCache() {
     harness.cache = new LruResourceCache(100);
     when(harness.resource.isCacheable()).thenReturn(true);
-    doAnswer(new Answer<Object>() {
-      @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        harness.callOnEngineJobComplete();
-        return null;
-      }
-    }).when(harness.job).start(any(DecodeJob.class));
+    doAnswer(
+            new Answer<Object>() {
+              @Override
+              public Object answer(InvocationOnMock invocationOnMock) {
+                harness.callOnEngineJobComplete();
+                return null;
+              }
+            })
+        .when(harness.job)
+        .start(any(DecodeJob.class));
     harness.doLoad();
     harness.getEngine().onResourceReleased(harness.cacheKey, harness.resource);
     harness.doLoad();
@@ -670,24 +684,27 @@ public class EngineTest {
               eq(cacheKey), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
           .thenReturn((EngineJob<Object>) job);
       when(job.onlyRetrieveFromCache()).thenReturn(onlyRetrieveFromCache);
-      return getEngine().load(glideContext,
-          model,
-          signature,
-          width,
-          height,
-          Object.class /*resourceClass*/,
-          Object.class /*transcodeClass*/,
-          Priority.HIGH,
-          DiskCacheStrategy.ALL,
-          transformations,
-          false /*isTransformationRequired*/,
-          isScaleOnlyOrNoTransform,
-          options,
-          isMemoryCacheable,
-          useUnlimitedSourceGeneratorPool,
-          /*useAnimationPool=*/ false,
-          onlyRetrieveFromCache,
-          cb);
+      return getEngine()
+          .load(
+              glideContext,
+              model,
+              signature,
+              width,
+              height,
+              Object.class /*resourceClass*/,
+              Object.class /*transcodeClass*/,
+              Priority.HIGH,
+              DiskCacheStrategy.ALL,
+              transformations,
+              false /*isTransformationRequired*/,
+              isScaleOnlyOrNoTransform,
+              options,
+              isMemoryCacheable,
+              useUnlimitedSourceGeneratorPool,
+              /*useAnimationPool=*/ false,
+              onlyRetrieveFromCache,
+              cb,
+              Executors.directExecutor());
     }
 
     Engine getEngine() {

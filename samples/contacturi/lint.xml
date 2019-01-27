@@ -2,4 +2,5 @@
 <lint>
     <issue id="GoogleAppIndexingWarning" severity="ignore"/>
     <issue id="GradleDependency" severity="ignore"/>
+    <issue id="Autofill" severity="ignore" />
 </lint>

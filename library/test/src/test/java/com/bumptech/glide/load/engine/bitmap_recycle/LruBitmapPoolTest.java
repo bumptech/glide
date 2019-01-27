@@ -27,7 +27,7 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(manifest = Config.NONE, sdk = 28)
 public class LruBitmapPoolTest {
   private static final int MAX_SIZE = 10;
   private static final Set<Bitmap.Config> ALLOWED_CONFIGS =
@@ -215,12 +215,12 @@ public class LruBitmapPoolTest {
     assertEquals(0, strategy.numPuts);
   }
 
-  @Test
+  @Test @Config(sdk = 19)
   public void testBitmapsWithAllowedNullConfigsAreAllowed() {
     pool = new LruBitmapPool(100, strategy, Collections.<Bitmap.Config>singleton(null));
 
     Bitmap bitmap = createMutableBitmap();
-    Shadows.shadowOf(bitmap).setConfig(null);
+    bitmap.setConfig(null);
 
     pool.put(bitmap);
 

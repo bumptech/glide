@@ -2,8 +2,6 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.widget.ImageView;
@@ -25,7 +23,6 @@ public class GlideContext extends ContextWrapper {
   @VisibleForTesting
   static final TransitionOptions<?, ?> DEFAULT_TRANSITION_OPTIONS =
       new GenericTransitionOptions<>();
-  private final Handler mainHandler;
   private final ArrayPool arrayPool;
   private final Registry registry;
   private final ImageViewTargetFactory imageViewTargetFactory;
@@ -33,6 +30,7 @@ public class GlideContext extends ContextWrapper {
   private final List<RequestListener<Object>> defaultRequestListeners;
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions;
   private final Engine engine;
+  private final boolean isLoggingRequestOriginsEnabled;
   private final int logLevel;
 
   public GlideContext(
@@ -44,6 +42,7 @@ public class GlideContext extends ContextWrapper {
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
       @NonNull Engine engine,
+      boolean isLoggingRequestOriginsEnabled,
       int logLevel) {
     super(context.getApplicationContext());
     this.arrayPool = arrayPool;
@@ -53,9 +52,8 @@ public class GlideContext extends ContextWrapper {
     this.defaultRequestListeners = defaultRequestListeners;
     this.defaultTransitionOptions = defaultTransitionOptions;
     this.engine = engine;
+    this.isLoggingRequestOriginsEnabled = isLoggingRequestOriginsEnabled;
     this.logLevel = logLevel;
-
-    mainHandler = new Handler(Looper.getMainLooper());
   }
 
   public List<RequestListener<Object>> getDefaultRequestListeners() {
@@ -90,11 +88,6 @@ public class GlideContext extends ContextWrapper {
   }
 
   @NonNull
-  public Handler getMainHandler() {
-    return mainHandler;
-  }
-
-  @NonNull
   public Engine getEngine() {
     return engine;
   }
@@ -111,5 +104,15 @@ public class GlideContext extends ContextWrapper {
   @NonNull
   public ArrayPool getArrayPool() {
     return arrayPool;
+  }
+
+  /**
+   * Returns {@code true} if Glide should populate
+   * {@link com.bumptech.glide.load.engine.GlideException#setOrigin(Exception)} for failed requests.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public boolean isLoggingRequestOriginsEnabled() {
+    return isLoggingRequestOriginsEnabled;
   }
 }

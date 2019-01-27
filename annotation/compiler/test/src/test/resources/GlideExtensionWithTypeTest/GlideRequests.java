@@ -58,13 +58,13 @@ public class GlideRequests extends RequestManager {
 
   @Override
   @NonNull
-  public GlideRequests applyDefaultRequestOptions(@NonNull RequestOptions options) {
+  public synchronized GlideRequests applyDefaultRequestOptions(@NonNull RequestOptions options) {
     return (GlideRequests) super.applyDefaultRequestOptions(options);
   }
 
   @Override
   @NonNull
-  public GlideRequests setDefaultRequestOptions(@NonNull RequestOptions options) {
+  public synchronized GlideRequests setDefaultRequestOptions(@NonNull RequestOptions options) {
     return (GlideRequests) super.setDefaultRequestOptions(options);
   }
 

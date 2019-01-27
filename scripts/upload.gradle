@@ -218,7 +218,7 @@ afterEvaluate { project ->
             // includes the release aar in archives. Since we've disabled our release variants and
             // want to include an aar, we need to manually specify the task that produces the aar
             // here.
-            archives project.tasks.bundleDebug
+            archives project.tasks.bundleDebugAar
         }
     } else if (project.plugins.hasPlugin('java')) {
         task sourcesJar(type: Jar, dependsOn: classes) {

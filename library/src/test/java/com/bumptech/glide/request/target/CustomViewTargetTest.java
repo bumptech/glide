@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
@@ -74,8 +75,19 @@ public class CustomViewTargetTest {
     target = new TestViewTarget(view);
     attachStateTarget = new AttachStateTarget(view);
 
-    activity.get().setContentView(view);
-    parent = (ViewGroup) view.getParent();
+    LinearLayout linearLayout = new LinearLayout(activity.get());
+    View expandView = new View(activity.get());
+    LinearLayout.LayoutParams linearLayoutParams =
+        new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, /*height=*/ 0);
+    linearLayoutParams.weight = 1f;
+    expandView.setLayoutParams(linearLayoutParams);
+    linearLayout.addView(expandView);
+
+    parent = new FrameLayout(activity.get());
+    parent.addView(view);
+    linearLayout.addView(parent);
+
+    activity.get().setContentView(linearLayout);
   }
 
   @After
@@ -113,7 +125,7 @@ public class CustomViewTargetTest {
   @Test
   public void testSizeCallbackIsCalledSynchronouslyIfViewSizeSet() {
     int dimens = 333;
-    activity.get().setContentView(view);
+    // activity.get().setContentView(view);
     view.layout(0, 0, dimens, dimens);
 
     target.getSize(cb);
@@ -231,14 +243,10 @@ public class CustomViewTargetTest {
 
     verify(cb, never()).onSizeReady(anyInt(), anyInt());
 
-    int width = 32;
-    int height = 45;
-    parent.getLayoutParams().width = width;
-    parent.getLayoutParams().height = height;
     activity.visible();
     view.getViewTreeObserver().dispatchOnPreDraw();
 
-    verify(cb).onSizeReady(eq(width), eq(height));
+    verify(cb).onSizeReady(eq(parent.getWidth()), eq(parent.getHeight()));
   }
 
   @Test

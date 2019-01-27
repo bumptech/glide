@@ -330,6 +330,8 @@ public final class TransformationUtils {
 
     matrix.postTranslate(-newRect.left, -newRect.top);
 
+    result.setHasAlpha(inBitmap.hasAlpha());
+
     applyMatrix(inBitmap, result, matrix);
     return result;
   }
@@ -464,7 +466,7 @@ public final class TransformationUtils {
    *
    * <p>This method does <em>NOT</em> resize the given {@link Bitmap}, it only rounds it's corners.
    * To both resize and round the corners of an image, consider
-   * {@link com.bumptech.glide.request.RequestOptions#transforms(Transformation[])} and/or
+   * {@link com.bumptech.glide.request.RequestOptions#transform(Transformation[])} and/or
    * {@link com.bumptech.glide.load.MultiTransformation}.
    *
    * @param inBitmap the source bitmap to use as a basis for the created bitmap.

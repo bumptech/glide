@@ -395,7 +395,7 @@ public class NonBitmapDrawableResourcesTest {
 
   @Test
   public void load_withApplicationIconResourceIdUri_asBitmap_withTransformation_nonNullBitmap()
-      throws NameNotFoundException, ExecutionException, InterruptedException {
+      throws ExecutionException, InterruptedException {
     for (String packageName : getInstalledPackages()) {
       int iconResourceId = getResourceId(packageName);
 
@@ -426,9 +426,8 @@ public class NonBitmapDrawableResourcesTest {
       Uri uri = new Uri.Builder()
           .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
           .authority(packageName)
-          .path(resources.getResourceTypeName(iconResourceId))
-          .path(resources.getResourceEntryName(iconResourceId))
-          .path(String.valueOf(iconResourceId))
+          .appendPath(resources.getResourceTypeName(iconResourceId))
+          .appendPath(resources.getResourceEntryName(iconResourceId))
           .build();
 
       Drawable drawable = Glide.with(context)
@@ -438,7 +437,6 @@ public class NonBitmapDrawableResourcesTest {
       assertThat(drawable).isNotNull();
     }
   }
-
 
   @Test
   public void load_withApplicationIconResourceNameUri_asDrawable_withTransform_nonNullDrawable()
@@ -451,9 +449,8 @@ public class NonBitmapDrawableResourcesTest {
       Uri uri = new Uri.Builder()
           .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
           .authority(packageName)
-          .path(resources.getResourceTypeName(iconResourceId))
-          .path(resources.getResourceEntryName(iconResourceId))
-          .path(String.valueOf(iconResourceId))
+          .appendPath(resources.getResourceTypeName(iconResourceId))
+          .appendPath(resources.getResourceEntryName(iconResourceId))
           .build();
 
       Drawable drawable = Glide.with(context)
@@ -476,9 +473,8 @@ public class NonBitmapDrawableResourcesTest {
       Uri uri = new Uri.Builder()
           .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
           .authority(packageName)
-          .path(resources.getResourceTypeName(iconResourceId))
-          .path(resources.getResourceEntryName(iconResourceId))
-          .path(String.valueOf(iconResourceId))
+          .appendPath(resources.getResourceTypeName(iconResourceId))
+          .appendPath(resources.getResourceEntryName(iconResourceId))
           .build();
 
       Bitmap bitmap = Glide.with(context)
@@ -501,9 +497,8 @@ public class NonBitmapDrawableResourcesTest {
       Uri uri = new Uri.Builder()
           .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
           .authority(packageName)
-          .path(resources.getResourceTypeName(iconResourceId))
-          .path(resources.getResourceEntryName(iconResourceId))
-          .path(String.valueOf(iconResourceId))
+          .appendPath(resources.getResourceTypeName(iconResourceId))
+          .appendPath(resources.getResourceEntryName(iconResourceId))
           .build();
 
       Bitmap bitmap = Glide.with(context)
@@ -524,8 +519,10 @@ public class NonBitmapDrawableResourcesTest {
         packageManager.queryIntentActivities(mainIntent, /*flags=*/ 0);
     Set<String> result = new HashSet<>();
     for (ResolveInfo info : pkgAppsList) {
-      int iconResourceId = getResourceId(info.activityInfo.packageName);
-      if (iconResourceId != 0) {
+      String packageName = info.activityInfo.packageName;
+      int iconResourceId = getResourceId(packageName);
+      if (iconResourceId != 0
+              && doesApplicationPackageNameMatchResourcePackageName(packageName, iconResourceId)) {
         result.add(info.activityInfo.packageName);
       }
     }
@@ -540,5 +537,45 @@ public class NonBitmapDrawableResourcesTest {
       return 0;
     }
     return packageInfo.applicationInfo.icon;
+  }
+
+  /**
+   * Returns {@code true} iff the resource package name is exactly the same as the containing
+   * application package name for a given resource id.
+   *
+   * <p>The resource package name is the value returned by
+   * {@link Resources#getResourcePackageName(int)}. The application package name is package name of
+   * the enclosing application. If these two things are equal, then we can both construct a Context
+   * for that package and retrieve a resource id for that package from a "standard" resource Uri
+   * containing a name instead of an id. If they aren't equal, then we can do only one of the two
+   * required tasks, so our Uri load will always fail. To handle this properly, we'd need callers to
+   * include both package names in the Uri. I'm not aware of any standardized Uri format for doing
+   * so, so these requests will just be treated as unsupported for the time being.
+   *
+   * <p>Take Calendar (emulators API 24 and below) as an example:
+   * <ul>
+   *     <li>package name: com.google.android.calendar</li>
+   *     <li>resource package name: com.android.calendar</li>
+   * </ul>
+   * We can construct one of two possible Uris:
+   * <ul>
+   *     <li>android.resource://com.google.android.calendar/mipmap/ic_icon_calendar.</li>
+   *     <li>android.resource://com.android.calendar/mipmap/ic_icon_calendar.<</li>
+   * </ul>
+   * From the first Uri, we can obtain the correct Context/Resources for the calendar package, but
+   * our attempts to resolve the correct resource id will fail because we do not have the resource
+   * package name. From the second Uri we cannot obtain the Context/Resources for the calendar
+   * package because the resource package name doesn't match the application package name.
+   */
+  private boolean doesApplicationPackageNameMatchResourcePackageName(
+          String applicationPackageName, int iconResourceId) {
+    try {
+      Context current = context.createPackageContext(applicationPackageName, /*flags=*/ 0);
+      String resourcePackageName = current.getResources().getResourcePackageName(iconResourceId);
+      return applicationPackageName.equals(resourcePackageName);
+    } catch (NameNotFoundException e) {
+      // This should never happen
+      throw new RuntimeException(e);
+    }
   }
 }

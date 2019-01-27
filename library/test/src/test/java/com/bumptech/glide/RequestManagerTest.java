@@ -162,8 +162,9 @@ public class RequestManagerTest {
     verify(requestTracker, never()).restartRequests();
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testThrowsIfResumeCalledOnBackgroundThread() throws InterruptedException {
+  @Test
+  public void resumeRequests_whenCalledOnBackgroundThread_doesNotThrow()
+      throws InterruptedException {
     testInBackground(new BackgroundUtil.BackgroundTester() {
       @Override
       public void runTest() {
@@ -172,8 +173,9 @@ public class RequestManagerTest {
     });
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testThrowsIfPauseCalledOnBackgroundThread() throws InterruptedException {
+  @Test
+  public void pauseRequests_whenCalledOnBackgroundThread_doesNotThrow()
+      throws InterruptedException {
     testInBackground(new BackgroundUtil.BackgroundTester() {
       @Override
       public void runTest() {

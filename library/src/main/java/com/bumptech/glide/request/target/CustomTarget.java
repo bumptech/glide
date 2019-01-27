@@ -57,7 +57,7 @@ public abstract class CustomTarget<T> implements Target<T> {
   }
 
   /**
-   * Creates a new {@code CustomTarget} that will return the given {@code width} and {@link @code}
+   * Creates a new {@code CustomTarget} that will return the given {@code width} and {@code height}
    * as the requested size (unless overridden by
    * {@link com.bumptech.glide.request.RequestOptions#override(int)} in the request).
    *

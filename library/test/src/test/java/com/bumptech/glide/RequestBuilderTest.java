@@ -111,8 +111,8 @@ public class RequestBuilderTest {
     });
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testThrowsIfIntoTargetCalledOnBackgroundThread() throws InterruptedException {
+  @Test
+  public void doesNotThrowIfIntoTargetCalledOnBackgroundThread() throws InterruptedException {
     final Target<Object> target = mock(Target.class);
     testInBackground(new BackgroundTester() {
       @Override

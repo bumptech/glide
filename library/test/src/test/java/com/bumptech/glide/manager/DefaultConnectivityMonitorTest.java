@@ -178,7 +178,7 @@ public class DefaultConnectivityMonitorTest {
 
     void broadcast() {
       Intent connected = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-      ShadowApplication.getInstance().sendBroadcast(connected);
+      RuntimeEnvironment.application.sendBroadcast(connected);
     }
   }
 
