@@ -19,6 +19,7 @@ dependencies {
     compile project(':annotation')
     // This is to support com.sun.tools.javac.util.List, currently used in RootModuleGenerator.
     compile files(Jvm.current().getToolsJar())
+    annotationProcessor "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
 }
 
 // Make sure running `gradlew :annotation:compiler:check` actually does full quality control.

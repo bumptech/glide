@@ -10,7 +10,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.ColorSpace;
 import android.graphics.ColorSpace.Named;
 import android.os.Build;
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 public class WideGamutTest {
   @Rule public final TestRule tearDownGlide = new TearDownGlide();
   private final ConcurrencyHelper concurrency = new ConcurrencyHelper();
-  private final Context context = InstrumentationRegistry.getTargetContext();
+  private final Context context = ApplicationProvider.getApplicationContext();
 
   @Before
   public void setUp() {

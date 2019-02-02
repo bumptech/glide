@@ -108,9 +108,6 @@ public final class GlideAnnotationProcessor extends AbstractProcessor {
    */
   @Override
   public boolean process(Set<? extends TypeElement> set, RoundEnvironment env) {
-    //    if (set.isEmpty() && !isGeneratedAppGlideModulePending) {
-    //      return false;
-    //    }
     processorUtil.process();
     boolean newModulesWritten = libraryModuleProcessor.processModules(env);
     boolean newExtensionWritten = extensionProcessor.processExtensions(env);

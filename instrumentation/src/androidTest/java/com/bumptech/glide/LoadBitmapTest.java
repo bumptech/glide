@@ -14,7 +14,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -51,7 +51,7 @@ public class LoadBitmapTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    context = InstrumentationRegistry.getTargetContext();
+    context = ApplicationProvider.getApplicationContext();
 
     // Clearing the future here can race with clearing the EngineResource held on to by EngineJob
     // while it's notifying callbacks. Forcing all executors to use the same thread avoids the race

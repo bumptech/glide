@@ -12,7 +12,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
@@ -42,7 +42,7 @@ public class RequestTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    context = InstrumentationRegistry.getTargetContext();
+    context = ApplicationProvider.getApplicationContext();
     imageView = new ImageView(context);
     imageView.measure(100, 100);
     imageView.layout(0, 0, 100, 100);

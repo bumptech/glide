@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    testImplementation "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    testImplementation "androidx.appcompat:appcompat:${ANDROID_X_VERSION}"
     testImplementation project(':library')
     testImplementation project(':testutil')
     testImplementation 'com.google.guava:guava-testlib:18.0'
@@ -10,7 +10,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
     testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
     testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
-    testImplementation "com.android.support:support-v4:${ANDROID_SUPPORT_VERSION}"
+    testImplementation "androidx.legacy:legacy-support-v4:${ANDROID_X_VERSION}"
 }
 
 tasks.withType(JavaCompile) {

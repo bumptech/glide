@@ -2,8 +2,8 @@ apply plugin: 'com.android.library'
 
 dependencies {
     implementation project(':library')
-    compileOnly "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
-    compileOnly "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
+    compileOnly "androidx.recyclerview:recyclerview:${ANDROID_X_VERSION}"
+    compileOnly "androidx.fragment:fragment:${ANDROID_X_VERSION}"
 }
 
 android {

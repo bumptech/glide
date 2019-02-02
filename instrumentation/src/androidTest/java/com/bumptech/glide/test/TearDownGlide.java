@@ -1,6 +1,6 @@
 package com.bumptech.glide.test;
 
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import org.junit.rules.TestRule;
@@ -24,7 +24,7 @@ public final class TearDownGlide implements TestRule {
                     @Override
                     public void run() {
                       RequestManager requestManager =
-                          Glide.with(InstrumentationRegistry.getTargetContext());
+                          Glide.with(ApplicationProvider.getApplicationContext());
                       requestManager.onStop();
                       requestManager.onDestroy();
                     }
