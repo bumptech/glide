@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * <p>Replaces <meta-data /> tags in AndroidManifest.xml.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface GlideModule {
   /**
    * Returns the name of the class that will be used as a replacement for
