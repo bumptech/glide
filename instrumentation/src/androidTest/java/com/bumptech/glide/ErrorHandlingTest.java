@@ -13,8 +13,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
@@ -51,7 +51,7 @@ public class ErrorHandlingTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    context = InstrumentationRegistry.getTargetContext();
+    context = ApplicationProvider.getApplicationContext();
   }
 
   // ResourceEncoders are expected not to throw and to return true or false. If they do throw, it's

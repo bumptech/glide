@@ -20,7 +20,7 @@ import android.os.Looper;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;

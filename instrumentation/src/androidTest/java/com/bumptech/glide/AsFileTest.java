@@ -5,7 +5,7 @@ import static org.junit.Assert.fail;
 
 import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;

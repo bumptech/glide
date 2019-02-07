@@ -7,7 +7,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.ConcurrencyHelper;

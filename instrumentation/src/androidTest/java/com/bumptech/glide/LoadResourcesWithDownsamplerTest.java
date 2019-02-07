@@ -13,8 +13,8 @@ import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Options;
@@ -51,7 +51,7 @@ import org.junit.runner.RunWith;
 public class LoadResourcesWithDownsamplerTest {
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   private final ConcurrencyHelper concurrency = new ConcurrencyHelper();
-  private final Context context = InstrumentationRegistry.getTargetContext();
+  private final Context context = ApplicationProvider.getApplicationContext();
 
   @Test
   public void loadJpegResource_withNoOtherLoaders_decodesResource() {

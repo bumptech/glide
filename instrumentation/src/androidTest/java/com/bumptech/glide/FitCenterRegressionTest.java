@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThrows;
 import android.content.Context;
 import android.graphics.Bitmap;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.test.BitmapRegressionTester;
 import com.bumptech.glide.test.CanonicalBitmap;
 import com.bumptech.glide.test.GlideApp;

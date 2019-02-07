@@ -2,10 +2,10 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
 import android.widget.ImageView;
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
@@ -33,7 +33,7 @@ public class RequestManagerTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    context = InstrumentationRegistry.getTargetContext();
+    context = ApplicationProvider.getApplicationContext();
     Glide glide = Glide.get(context);
     requestManager =
         new RequestManager(

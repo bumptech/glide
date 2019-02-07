@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.DiskCache.Factory;

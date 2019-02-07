@@ -11,7 +11,7 @@ dependencies {
 
     androidTestImplementation project(':library')
     androidTestImplementation "org.mockito:mockito-android:${MOCKITO_ANDROID_VERSION}"
-    androidTestImplementation "androidx.test:runner:${ANDROIDX_TEST_VERSION}"
+    androidTestImplementation "androidx.test.ext:junit:${ANDROIDX_TEST_VERSION}"
     androidTestImplementation "androidx.test:rules:${ANDROIDX_TEST_VERSION}"
     androidTestImplementation "androidx.test:core:${ANDROIDX_TEST_VERSION}"
     androidTestImplementation "com.google.truth:truth:${TRUTH_VERSION}"
