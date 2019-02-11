@@ -7,31 +7,34 @@ import java.io.File;
  * disk cache directory.
  *
  * <p>If you need to make I/O access before returning the cache directory use the {@link
- * DiskLruCacheFactory#DiskLruCacheFactory(CacheDirectoryGetter, long)} constructor variant.
+ * ExpirableDiskLruCacheFactory#ExpirableDiskLruCacheFactory(CacheDirectoryGetter, long, long)}
+ * constructor variant.
  */
 // Public API.
 @SuppressWarnings("unused")
-public class DiskLruCacheFactory implements DiskCache.Factory {
+public class ExpirableDiskLruCacheFactory implements DiskCache.Factory {
   private final long diskCacheSize;
+  private final long expirationMillis;
   private final CacheDirectoryGetter cacheDirectoryGetter;
 
-  public DiskLruCacheFactory(final String diskCacheFolder, long diskCacheSize) {
+  public ExpirableDiskLruCacheFactory(final String diskCacheFolder, long diskCacheSize,
+                                      long expirationMillis) {
     this(new CacheDirectoryGetter() {
       @Override
       public File getCacheDirectory() {
         return new File(diskCacheFolder);
       }
-    }, diskCacheSize);
+    }, diskCacheSize, expirationMillis);
   }
 
-  public DiskLruCacheFactory(final String diskCacheFolder, final String diskCacheName,
-                             long diskCacheSize) {
+  public ExpirableDiskLruCacheFactory(final String diskCacheFolder, final String diskCacheName,
+                                      long diskCacheSize, long expirationMillis) {
     this(new CacheDirectoryGetter() {
       @Override
       public File getCacheDirectory() {
         return new File(diskCacheFolder, diskCacheName);
       }
-    }, diskCacheSize);
+    }, diskCacheSize, expirationMillis);
   }
 
   /**
@@ -40,11 +43,14 @@ public class DiskLruCacheFactory implements DiskCache.Factory {
    *
    * @param cacheDirectoryGetter Interface called out of UI thread to get the cache folder.
    * @param diskCacheSize        Desired max bytes size for the LRU disk cache.
+   * @param expirationMillis     The expiration time in milliseconds
    */
   // Public API.
   @SuppressWarnings("WeakerAccess")
-  public DiskLruCacheFactory(CacheDirectoryGetter cacheDirectoryGetter, long diskCacheSize) {
+  public ExpirableDiskLruCacheFactory(CacheDirectoryGetter cacheDirectoryGetter,
+                                      long diskCacheSize, long expirationMillis) {
     this.diskCacheSize = diskCacheSize;
+    this.expirationMillis = expirationMillis;
     this.cacheDirectoryGetter = cacheDirectoryGetter;
   }
 
@@ -60,6 +66,6 @@ public class DiskLruCacheFactory implements DiskCache.Factory {
       return null;
     }
 
-    return DiskLruCacheWrapper.create(cacheDir, diskCacheSize);
+    return ExpirableDiskLruCacheWrapper.create(cacheDir, diskCacheSize, expirationMillis);
   }
 }
