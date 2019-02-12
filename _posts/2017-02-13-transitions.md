@@ -43,12 +43,26 @@ Animations in Android can be expensive, particularly if a large number are start
 #### Cross fading with placeholders and transparent images
 Glide's default cross fade animation leverages [``TransitionDrawable``][8]. [``TransitionDrawable``][8] offers two animation modes, controlled by [``setCrossFadeEnabled()``][9]. When cross fades are disabled, the image that is transitioned to is faded in on top of the image that was already showing. When cross fades are enabled, the image that is being transitioned from is animated from opaque to transparent and the image that is being transitioned to is animated from transparent to opaque. 
 
-In Glide, we default to disabling cross fades because it typically provides a much nicer looking animation. An actual cross fade where the alpha of both images is changing at once often produces a white flash in the middle of the animation where both images are partially opaque. 
+In Glide, we default to disabling cross fades because it typically provides a much nicer looking animation. An actual cross fade where the alpha of both images is changing at once often produces a white flash in the middle of the animation where both images are partially opaque.
 
-Unfortunately although disabling cross fades is typically a better default, it can also lead to problems when the image that is being loaded contains transparent pixels. When the placeholder is larger than the image that is being loaded or the image is partially transparent, disabling cross fades results in the placeholder being visible behind the image after the animation finishes. If you are loading transparent images with placeholders, you can enable cross fades by adjusting the options in [``DrawableCrossFadeFactory``][10] and passing the result into [``transition()``][11].
+Unfortunately although disabling cross fades is typically a better default, it can also lead to problems when the image that is being loaded contains transparent pixels. When the placeholder is larger than the image that is being loaded or the image is partially transparent, disabling cross fades results in the placeholder being visible behind the image after the animation finishes. If you are loading transparent images with placeholders, you can enable cross fades by adjusting the options in [``DrawableCrossFadeFactory``][10] and passing the result into [``transition()``][11]:
+
+```java
+DrawableCrossFadeFactory factory =
+        new DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build();
+
+GlideApp.with(context)
+        .load(url)
+        .transition(withCrossFade(factory))
+        .diskCacheStrategy(DiskCacheStrategy.ALL)
+        .placeholder(R.color.placeholder)
+        .into(imageView);
+```
+
+See [Issue #2017](https://github.com/bumptech/glide/issues/2017) for more information. Thanks @minas90 for writing down the example above.
 
 #### Cross fading across requests.
-[``Transitions``][1] do not allow you to cross fade between two different images that are loaded with different requests. Glide by default will cancel any existing requests when you start a new load into an existing View or Target (See [Targets documentation][19] for more details). As a result, if you want to load two different images and cross fade between them, you cannot do so with Glide directly. Strategies like waiting for the first load to finish, grabbing a Bitmap or Drawable out of the View, starting a second load, and then manually animating between the Drawale or Bitmap and the new image are unsafe and may result in crashes or graphical corruption. 
+[``Transitions``][1] do not allow you to cross fade between two different images that are loaded with different requests. Glide by default will cancel any existing requests when you start a new load into an existing View or Target (See [Targets documentation][19] for more details). As a result, if you want to load two different images and cross fade between them, you cannot do so with Glide directly. Strategies like waiting for the first load to finish, grabbing a Bitmap or Drawable out of the View, starting a second load, and then manually animating between the Drawale or Bitmap and the new image are unsafe and may result in crashes or graphical corruption.
 
 Instead, the easiest way to cross fade across two different images loaded in two separate requests is to use [``ViewSwitcher``][2] containing two [``ImageViews``][3]. Load the first image into the result of [``getNextView()``][4]. Then load the second image into the next result of [``getNextView()``][4] and use a [``RequestListener``][5] to call [``showNext()``][6] when the second image load finishes. For better control, you can also follow the strategy outlined in the [developer documentation][7]. As with the [``ViewSwitcher``][2], only start the cross fade after the second image load finishes.
 
