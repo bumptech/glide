@@ -83,7 +83,7 @@ public void onBindViewHolder(ViewHolder viewHolder, int position) {
   ImageView imageView = ((MyViewHolder) viewHolder).imageView;
   String currentUrl = myUrls.get(position);
 
-  GlideApp.with(fragment)
+  Glide.with(fragment)
     .load(currentUrl)
     .override(imageWidthPixels, imageHeightPixels)
     .into(imageView);
@@ -112,7 +112,7 @@ private class MyPreloadModelProvider implements PreloadModelProvider {
   @Nullable
   RequestBuilder getPreloadRequestBuilder(String url) {
     return 
-      GlideApp.with(fragment)
+      Glide.with(fragment)
         .load(url) 
         .override(imageWidthPixels, imageHeightPixels);
   }
@@ -217,7 +217,7 @@ public final class ImagesFragment extends Fragment {
     @Nullable
     public RequestBuilder getPreloadRequestBuilder(String url) {
       return 
-        GlideApp.with(fragment)
+        Glide.with(fragment)
           .load(url) 
           .override(imageWidthPixels, imageHeightPixels);
     }

@@ -24,24 +24,12 @@ Temporarily, set the default [`DecodeFormat`][1] to [`DecodeFormat.PREFER_ARGB_8
 In the long run Glide will load hardware `Bitmaps` by default and no changes will be needed to enable the format, only to disable it.
 
 ### How do we disable hardware Bitmaps?
-If you need to disable hardware `Bitmaps`, you should try to do so only for requests where you need to do one of the slow or broken things below. You can disable hardware `Bitmaps` for a particular request using [`disallowHardwareConfig()`][5].
-
-If you’re using the generated API:
+If you need to disable hardware `Bitmaps`, you should try to do so only for requests where you need to do one of the slow or broken things below. You can disable hardware `Bitmaps` for a particular request using [`disallowHardwareConfig()`][5]:
 
 ```java
-GlideApp.with(fragment)
-  .load(url)
-  .disallowHardwareConfig()
-  .into(imageView);
-```
-
-Or just via `RequestOptions`:
-
-```java
-RequestOptions options = new RequestOptions().disallowHardwareConfig();
 Glide.with(fragment)
   .load(url)
-  .apply(options)
+  .disallowHardwareConfig()
   .into(imageView);
 ```
 

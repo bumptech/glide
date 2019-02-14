@@ -58,6 +58,7 @@ repositories {
 
 dependencies {
     compile 'com.github.bumptech.glide:glide:4.9.0'
+    // Skip this if you don't want to use integration libraries or configure Glide.
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 }
 ```

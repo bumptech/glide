@@ -11,7 +11,7 @@ disqus: 1
 
 ### About
 
-Glide v4 uses an [annotation processor][1] to generate an API that allows applications to access all options in [``RequestBuilder``][2], [``RequestOptions``][3] and any included integration libraries in a single fluent API.
+Glide v4 uses an [annotation processor][1] to generate an API that allows applications to extend Glide's API and include components provided by integration libraries.
 
 The generated API serves two purposes:
 1. Integration libraries can extend Glide's API with custom options.

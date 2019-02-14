@@ -27,31 +27,40 @@ Glide.with(fragment).clear(imageView);
 
 Although it's good practice to clear loads you no longer need, you're not required to do so. In fact, Glide will automatically clear the load and recycle any resources used by the load when the Activity or Fragment you pass in to [``Glide.with()``][1] is destroyed.
 
-### Applications
+### Customizing requests.
 
-Applications can add an appropriately annotated [``AppGlideModule``][6] implementation to generate a fluent API that inlines most options, including those defined in integration libraries:
+Glide offers a variety of options that can be applied to individual requests, including transformations, transitions, caching options etc.
 
-```java
-package com.example.myapp;
-
-import com.bumptech.glide.annotation.GlideModule;
-import com.bumptech.glide.module.AppGlideModule;
-
-@GlideModule
-public final class MyAppGlideModule extends AppGlideModule {}
-```
-
-The API is generated in the same package as the [``AppGlideModule``][6] and is named ``GlideApp`` by default. Applications can use the API by starting all loads with ``GlideApp.with()`` instead of ``Glide.with()``:
+Default options can be applied directly on a request:
 
 ```java
-GlideApp.with(fragment)
-   .load(myUrl)
-   .placeholder(placeholder)
-   .fitCenter()
-   .into(imageView);
+Glide.with(fragment)
+  .load(myUrl)
+  .placeholder(placeholder)
+  .fitCenter()
+  .into(imageView);
 ```
 
-See Glide's [generated API page][7] for more information.
+Options can be shared across requests using the `RequestOptions` class:
+
+```java
+RequestOptions sharedOptions = 
+    new RequestOptions()
+      .placeholder(placeholder)
+      .fitCenter();
+
+Glide.with(fragment)
+  .load(myUrl)
+  .apply(sharedOptions)
+  .into(imageView1);
+
+Glide.with(fragment)
+  .load(myUrl)
+  .apply(sharedOptions)
+  .into(imageView2);
+```
+
+Glide's API can be further extended to include custom options using Glide's [generated API][7] for advanced use cases.
 
 ### ListView and RecyclerView
 

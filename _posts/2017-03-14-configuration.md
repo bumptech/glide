@@ -10,10 +10,19 @@ disqus: 1
 {:toc}
 
 ### Setup
-For Glide's configuration to work properly, libraries and applications need to perform a certain set of steps. Note that libraries that do not wish to register additional components are not required to do this.
+Starting in Glide 4.9.0, setup is required in a couple of cases.
+
+For applications, setup is only required if the application wants to:
+
+* Use one or more integration libraries
+* Change Glide's configuration (disk cache size/location, memory cache size etc)
+* Extend Glide's API 
+
+For libraries, setup is only required if the library wants to register one or more components.
 
 #### Applications
-Applications must:
+Applications that wish to use integration libraries and/or Glide's API extensions must:
+
 1. Add exactly one [``AppGlideModule``][1] implementation
 2. Optionally add one or more [``LibraryGlideModule``][2] implementations.
 3. Add the [``@GlideModule``][5] annotation to the [``AppGlideModule``][1] implementation and all [``LibraryGlideModule``][2] implementations.
@@ -73,7 +82,7 @@ Libraries must **not** include ``AppGlideModule`` implementations. Doing so will
 
 In addition, if two libraries include ``AppGlideModule``s, applications will be unable to compile if they depend on both and will be forced to pick one or other other. 
 
-This does mean that libraries won't be able to use Glide's generated API, but loads with ``RequestOptions`` will still work just fine (see the [options page][42] for examples).
+This does mean that libraries won't be able to use Glide's generated API, but loads with the standard `RequestBuilder` and `RequestOptions` will still work just fine (see the [options page][42] for examples).
 
 ### Application Options
 Glide allows applications to use [``AppGlideModule``][1] implementations to completely control Glide's memory and disk cache usage. Glide tries to provide reasonable defaults for most applications, but for some applications, it will be necessary to customize these values. Be sure to measure the results of any changes to avoid performance regressions.
@@ -387,7 +396,7 @@ public class YourAppGlideModule extends AppGlideModule {
 Glide v4 relies on two classes, [``AppGlideModule``][1] and [``LibraryGlideModule``][2], to configure the Glide singleton. Both classes are allowed to register additional components, like [``ModelLoaders``][3], [``ResourceDecoders``][4] etc. Only the [``AppGlideModules``][1] are allowed to configure application specific settings, like cache implementations and sizes. 
 
 #### AppGlideModule
-All applications must add a [``AppGlideModule``][1] implementation, even if the Application is not changing any additional settings or implementing any methods in [``AppGlideModule``][1]. The [``AppGlideModule``][1] implementation acts as a signal that allows Glide's annotation processor to generate a single combined class with with all discovered [``LibraryGlideModules``][2].
+All applications can optionally add a [``AppGlideModule``][1] implementation if the Application is implementing any methods in [``AppGlideModule``][1] or wants to use any integration libraries. The [``AppGlideModule``][1] implementation acts as a signal that allows Glide's annotation processor to generate a single combined class with with all discovered [``LibraryGlideModules``][2].
 
 There can be only one [``AppGlideModule``][1] implementation in a given application (having more than one produce errors at compile time). As a result, libraries must never provide a [``AppGlideModule``][1] implementation. 
 

@@ -82,15 +82,6 @@ Glide.with(fragment)
 ```java
 Glide.with(fragment)
   .load(url)
-  .apply(new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(20)))
-  .into(target);
-```
-
-Or with the [generated API][24]:
-
-```java
-GlideApp.with(fragment)
-  .load(url)
   .transforms(new CenterCrop(), new RoundedCorners(20))
   .into(target);
 ```
@@ -166,32 +157,6 @@ Glide.with(fragment)
 ### Generated API
 
 To make it even easier to use Glide v4, Glide now also offers a generated API for Applications. Applications can access the generated API by including an appropriately annotated [``AppGlideModule``][2] implementation. See the [Generated API][11] page for details on how this works.
-
-The generated API adds a ``GlideApp`` class, that provides access to ``RequestBuilder`` and ``RequestOptions`` subclasses. The ``RequestOptions`` subclass contains all methods in ``RequestOptions`` and any methods defined in [``GlideExtensions``][12]. The ``RequestBuilder`` subclass provides access to all methods in the generated ``RequestOptions`` subclass without having to use ``apply``:
-
-A request without the generated API might look like this:
-
-```java
-Glide.with(fragment)
-    .load(url)
-    .apply(centerCropTransform()
-        .placeholder(R.drawable.placeholder)
-        .error(R.drawable.error)
-        .priority(Priority.HIGH))
-    .into(imageView);
-```
-
-With the generated API, the ``RequestOptions`` calls can be inlined:
-
-```java
-GlideApp.with(fragment)
-    .load(url)
-    .centerCrop()
-    .placeholder(R.drawable.placeholder)
-    .error(R.drawable.error)
-    .priority(Priority.HIGH)
-    .into(imageView);
-```
 
 You can still use the generated ``RequestOptions`` subclass to apply the same set of options to multiple loads, but generated ``RequestBuilder`` subclass may be more convenient in most cases.
 

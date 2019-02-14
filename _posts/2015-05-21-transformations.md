@@ -26,6 +26,15 @@ Transformations are applied using the [RequestOptions][9] class:
 #### Default Transformations
 
 ```java
+Glide.with(fragment)
+  .load(url)
+  .fitCenter()
+  .into(imageView);
+```
+
+Or with `RequestOptions`:
+
+```java
 RequestOptions options = new RequestOptions();
 options.centerCrop();
 
@@ -35,26 +44,6 @@ Glide.with(fragment)
     .into(imageView);
 ```
 
-Most built in transformations also have static imports for a more fluent API. For example, you can apply a [FitCenter][2] transformation using a static method:
-
-```java
-import static com.bumptech.glide.request.RequestOptions.fitCenterTransform;
-
-Glide.with(fragment)
-    .load(url)
-    .apply(fitCenterTransform())
-    .into(imageView);
-```
-
-If you're using the [generated API][16] the transformation methods are inlined, so it's even easier:
-
-```java
-GlideApp.with(fragment)
-  .load(url)
-  .fitCenter()
-  .into(imageView);
-```
-
 For more information on using RequestOptions, see the [Options][3] wiki page.
 
 #### Multiple Transformations.
@@ -62,21 +51,19 @@ By default, each subsequent call to [``transform()``][17] or any specific transf
 
 To instead apply multiple transformations to a single load, use the [``MultiTransformation``][18] class or the shortcut [``.transforms()``][19] method.
 
-With the [generated API][16]:
-
 ```java
-GlideApp.with(fragment)
+Glide.with(fragment)
   .load(url)
   .transform(new MultiTransformation(new FitCenter(), new YourCustomTransformation())
   .into(imageView);
 ```
 
-Or with the shortcut method and the [generated API][16]:
+Or with the shortcut method:
 
 ```java
-GlideApp.with(fragment)
+Glide.with(fragment)
   .load(url)
-  .transforms(new FitCenter(), new YourCustomTransformation())
+  .transform(new FitCenter(), new YourCustomTransformation())
   .into(imageView);
 ```
 
