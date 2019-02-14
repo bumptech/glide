@@ -13,11 +13,12 @@ import com.bumptech.glide.util.Preconditions;
 class EngineResource<Z> implements Resource<Z> {
   private final boolean isCacheable;
   private final boolean isRecyclable;
+  private final Resource<Z> resource;
+
   private ResourceListener listener;
   private Key key;
   private int acquired;
   private boolean isRecycled;
-  private final Resource<Z> resource;
 
   interface ResourceListener {
     void onResourceReleased(Key key, EngineResource<?> resource);
@@ -97,12 +98,21 @@ class EngineResource<Z> implements Resource<Z> {
    * done with the resource. Generally external users should never call this method, the framework
    * will take care of this for you.
    */
-  synchronized void release() {
-    if (acquired <= 0) {
-      throw new IllegalStateException("Cannot release a recycled or not yet acquired resource");
-    }
-    if (--acquired == 0) {
-      listener.onResourceReleased(key, this);
+  // listener is effectively final.
+  @SuppressWarnings("SynchronizeOnNonFinalField")
+  void release() {
+    // To avoid deadlock, always acquire the listener lock before our lock so that the locking
+    // scheme is consistent (Engine -> EngineResource). Violating this order leads to deadlock
+    // (b/123646037).
+    synchronized (listener) {
+      synchronized (this) {
+        if (acquired <= 0) {
+          throw new IllegalStateException("Cannot release a recycled or not yet acquired resource");
+        }
+        if (--acquired == 0) {
+          listener.onResourceReleased(key, this);
+        }
+      }
     }
   }
 
