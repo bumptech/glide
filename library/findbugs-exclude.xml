@@ -54,4 +54,10 @@
       <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS" />
     </Match>
 
+    <!-- Inconsistent synchronization is due to synchronizing on Engine/listener to avoid deadlock only. -->
+    <Match>
+      <Class name="com.bumptech.glide.load.engine.EngineResource" />
+      <Bug pattern="IS2_INCONSISTENT_SYNC" />
+    </Match>
+
 </FindBugsFilter>
