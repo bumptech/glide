@@ -40,8 +40,8 @@ And then change your dependencies to the snapshot version:
 
 ```gradle
 dependencies {
-  compile 'com.github.bumptech.glide:glide:4.9.0-SNAPSHOT'
-  compile 'com.github.bumptech.glide:okhttp-integration:4.9.0-SNAPSHOT'
+  compile 'com.github.bumptech.glide:glide:4.10.0-SNAPSHOT'
+  compile 'com.github.bumptech.glide:okhttp-integration:4.10.0-SNAPSHOT'
 }
 ```
 
@@ -73,12 +73,12 @@ Then change your dependencies to the snapshot version:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.9.0-SNAPSHOT</version>
+  <version>4.10.0-SNAPSHOT</version>
 </dependency>
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>okhttp-integration</artifactId>
-  <version>4.9.0-SNAPSHOT</version>
+  <version>4.10.0-SNAPSHOT</version>
 </dependency>
 ```
 
