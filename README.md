@@ -31,8 +31,8 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.github.bumptech.glide:glide:4.8.0'
-  annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
+  implementation 'com.github.bumptech.glide:glide:4.9.0'
+  annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
 }
 ```
 
@@ -42,12 +42,12 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.8.0</version>
+  <version>4.9.0</version>
 </dependency>
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>compiler</artifactId>
-  <version>4.8.0</version>
+  <version>4.9.0</version>
   <optional>true</optional>
 </dependency>
 ```
@@ -76,7 +76,7 @@ Check out the [documentation][20] for pages on a variety of topics, and see the 
 
 For Glide v3, see the [wiki][2].
 
-Simple use cases with Glide's [generated API][21] will look something like this:
+Simple use cases will look something like this:
 
 ```java
 // For a simple view:
@@ -84,7 +84,7 @@ Simple use cases with Glide's [generated API][21] will look something like this:
   ...
   ImageView imageView = (ImageView) findViewById(R.id.my_image_view);
 
-  GlideApp.with(this).load("http://goo.gl/gEgYUd").into(imageView);
+  Glide.with(this).load("http://goo.gl/gEgYUd").into(imageView);
 }
 
 // For a simple image list:
@@ -98,7 +98,7 @@ Simple use cases with Glide's [generated API][21] will look something like this:
 
   String url = myUrls.get(position);
 
-  GlideApp
+  Glide
     .with(myFragment)
     .load(url)
     .centerCrop()
@@ -111,7 +111,7 @@ Simple use cases with Glide's [generated API][21] will look something like this:
 
 Status
 ------
-Version 4 is now released and stable. Updates are currently released at least monthly with new features and bug fixes.
+Version 4 is now released and stable. Updates are released periodically with new features and bug fixes.
 
 Comments/bugs/questions/pull requests are always welcome! Please read [CONTRIBUTING.md][5] on how to report issues.
 
@@ -133,7 +133,7 @@ Build
 Building Glide with gradle is fairly straight forward:
 
 ```shell
-git clone https://github.com/bumptech/glide.git 
+git clone https://github.com/bumptech/glide.git
 cd glide
 ./gradlew jar
 ```
@@ -216,7 +216,6 @@ This is not an official Google product.
 [18]: https://github.com/bumptech/glide/issues?q=is%3Aissue+CircleImageView+OR+CircularImageView+OR+RoundedImageView
 [19]: https://github.com/wasabeef/glide-transformations
 [20]: https://bumptech.github.io/glide/
-[21]: https://bumptech.github.io/glide/doc/generatedapi.html
 [22]: https://muyangmin.github.io/glide-docs-cn/
 [23]: http://bumptech.github.io/glide/int/okhttp3.html
 [24]: http://bumptech.github.io/glide/int/volley.html
