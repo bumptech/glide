@@ -27,6 +27,8 @@ public final class GlideException extends Exception {
   private DataSource dataSource;
   private Class<?> dataClass;
   private String detailMessage;
+  @Nullable
+  private Exception exception;
 
   public GlideException(String message) {
     this(message, Collections.<Throwable>emptyList());
@@ -52,7 +54,25 @@ public final class GlideException extends Exception {
     this.dataClass = dataClass;
   }
 
+  /**
+   * Sets a stack trace that includes where the request originated.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public void setOrigin(@Nullable Exception exception) {
+    this.exception = exception;
+  }
 
+  /**
+   * Returns an {@link Exception} with a stack trace that includes where the request originated
+   * (if previously set via {@link #setOrigin(Exception)})
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  @Nullable
+  public Exception getOrigin() {
+    return exception;
+  }
 
   // No need to synchronize when doing nothing whatsoever.
   @SuppressWarnings("UnsynchronizedOverridesSynchronized")

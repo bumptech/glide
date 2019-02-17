@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.drawable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.DrawableRes;
@@ -22,6 +23,18 @@ import java.util.List;
  * other packages.
  */
 public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
+  /**
+   * The package name to provide {@link Resources#getIdentifier(String, String, String)} when trying
+   * to find system resource ids.
+   *
+   * <p>As far as I can tell this is undocumented, but works.
+   */
+  private static final String ANDROID_PACKAGE_NAME = "android";
+  /**
+   * {@link Resources#getIdentifier(String, String, String)} documents that it will return 0 and
+   * that 0 is not a valid resouce id.
+   */
+  private static final int MISSING_RESOURCE_ID = 0;
   // android.resource://<package_name>/<type>/<name>.
   private static final int NAME_URI_PATH_SEGMENTS = 2;
   private static final int TYPE_PATH_SEGMENT_INDEX = 0;
@@ -45,47 +58,71 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
   @Override
   public Resource<Drawable> decode(@NonNull Uri source, int width, int height,
       @NonNull Options options) {
-    @DrawableRes int resId = loadResourceIdFromUri(source);
     String packageName = source.getAuthority();
-    Context targetContext = packageName.equals(context.getPackageName())
-        ? context : getContextForPackage(source, packageName);
+    Context targetContext = findContextForPackage(source, packageName);
+    @DrawableRes int resId = findResourceIdFromUri(targetContext, source);
     // We can't get a theme from another application.
     Drawable drawable = DrawableDecoderCompat.getDrawable(context, targetContext, resId);
     return NonOwnedDrawableResource.newInstance(drawable);
   }
 
   @NonNull
-  private Context getContextForPackage(Uri source, String packageName) {
+  private Context findContextForPackage(Uri source, String packageName) {
+    // Fast path
+    if (packageName.equals(context.getPackageName())) {
+      return context;
+    }
+
     try {
       return context.createPackageContext(packageName, /*flags=*/ 0);
     } catch (NameNotFoundException e) {
+      // The parent APK holds the correct context if the resource is located in a split
+      if (packageName.contains(context.getPackageName())) {
+        return context;
+      }
+
       throw new IllegalArgumentException(
           "Failed to obtain context or unrecognized Uri format for: " + source, e);
     }
   }
 
   @DrawableRes
-  private int loadResourceIdFromUri(Uri source) {
+  private int findResourceIdFromUri(Context context, Uri source) {
     List<String> segments = source.getPathSegments();
-    @DrawableRes Integer result = null;
     if (segments.size() == NAME_URI_PATH_SEGMENTS) {
-      String packageName = source.getAuthority();
-      String typeName = segments.get(TYPE_PATH_SEGMENT_INDEX);
-      String resourceName = segments.get(NAME_PATH_SEGMENT_INDEX);
-      result = context.getResources().getIdentifier(resourceName, typeName, packageName);
+      return findResourceIdFromTypeAndNameResourceUri(context, source);
     } else if (segments.size() == ID_PATH_SEGMENTS) {
-      try {
-        result = Integer.valueOf(segments.get(RESOURCE_ID_SEGMENT_INDEX));
-      } catch (NumberFormatException e) {
-        // Ignored.
-      }
-    }
-
-    if (result == null) {
+      return findResourceIdFromResourceIdUri(source);
+    } else {
       throw new IllegalArgumentException("Unrecognized Uri format: " + source);
-    } else if (result == 0) {
-      throw new IllegalArgumentException("Failed to obtain resource id for: " + source);
+    }
+  }
+
+  // android.resource://com.android.camera2/mipmap/logo_camera_color
+  @DrawableRes
+  private int findResourceIdFromTypeAndNameResourceUri(Context context, Uri source) {
+    List<String> segments = source.getPathSegments();
+    String packageName = source.getAuthority();
+    String typeName = segments.get(TYPE_PATH_SEGMENT_INDEX);
+    String resourceName = segments.get(NAME_PATH_SEGMENT_INDEX);
+    int result = context.getResources().getIdentifier(resourceName, typeName, packageName);
+    if (result == MISSING_RESOURCE_ID) {
+      result = Resources.getSystem().getIdentifier(resourceName, typeName, ANDROID_PACKAGE_NAME);
+    }
+    if (result == MISSING_RESOURCE_ID) {
+      throw new IllegalArgumentException("Failed to find resource id for: " + source);
     }
     return result;
+  }
+
+  // android.resource://com.android.camera2/123456
+  @DrawableRes
+  private int findResourceIdFromResourceIdUri(Uri source) {
+    List<String> segments = source.getPathSegments();
+    try {
+      return Integer.parseInt(segments.get(RESOURCE_ID_SEGMENT_INDEX));
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("Unrecognized Uri format: " + source, e);
+    }
   }
 }

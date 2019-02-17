@@ -21,6 +21,8 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCacheAdapter;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.ConcurrencyHelper;
@@ -43,19 +45,31 @@ public class LoadDrawableTest {
   @Mock private RequestListener<Drawable> listener;
 
   private Context context;
+  private GlideExecutor executor;
+  private GlideBuilder glideBuilder;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
+    executor = MockGlideExecutor.newMainThreadExecutor();
+
     context = InstrumentationRegistry.getTargetContext();
+    glideBuilder =
+        new GlideBuilder()
+            .setAnimationExecutor(executor)
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor);
   }
+
 
   @Test
   public void clear_withLoadedBitmapDrawable_doesNotRecycleBitmap() {
-    Glide.init(context, new GlideBuilder()
-        .setMemoryCache(new MemoryCacheAdapter())
-        .setBitmapPool(new BitmapPoolAdapter()));
+    Glide.init(
+        context,
+        glideBuilder
+            .setMemoryCache(new MemoryCacheAdapter())
+            .setBitmapPool(new BitmapPoolAdapter()));
     Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), ResourceIds.raw.canonical);
     BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
     Target<Drawable> target =
@@ -73,9 +87,11 @@ public class LoadDrawableTest {
 
   @Test
   public void transform_withLoadedBitmapDrawable_doesNotRecycleBitmap() {
-    Glide.init(context, new GlideBuilder()
-        .setMemoryCache(new MemoryCacheAdapter())
-        .setBitmapPool(new BitmapPoolAdapter()));
+    Glide.init(
+        context,
+        glideBuilder
+            .setMemoryCache(new MemoryCacheAdapter())
+            .setBitmapPool(new BitmapPoolAdapter()));
     Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), ResourceIds.raw.canonical);
     BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
     concurrency.wait(
@@ -91,9 +107,11 @@ public class LoadDrawableTest {
   public void loadFromRequestManager_withBitmap_doesNotLoadFromDiskCache() {
     Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), ResourceIds.raw.canonical);
     BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
-    Glide.init(context, new GlideBuilder()
-        .setMemoryCache(new LruResourceCache(Util.getBitmapByteSize(bitmap) * 10))
-        .setBitmapPool(new LruBitmapPool(Util.getBitmapByteSize(bitmap) * 10)));
+    Glide.init(
+        context,
+        glideBuilder
+            .setMemoryCache(new LruResourceCache(Util.getBitmapByteSize(bitmap) * 10))
+            .setBitmapPool(new LruBitmapPool(Util.getBitmapByteSize(bitmap) * 10)));
     Target<Drawable> target =
         concurrency.wait(
             GlideApp.with(context)
@@ -131,9 +149,11 @@ public class LoadDrawableTest {
   public void loadFromRequestBuilder_asDrawable_withBitmap_doesNotLoadFromDiskCache() {
     Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), ResourceIds.raw.canonical);
     BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
-    Glide.init(context, new GlideBuilder()
-        .setMemoryCache(new LruResourceCache(Util.getBitmapByteSize(bitmap) * 10))
-        .setBitmapPool(new LruBitmapPool(Util.getBitmapByteSize(bitmap) * 10)));
+    Glide.init(
+        context,
+        glideBuilder
+            .setMemoryCache(new LruResourceCache(Util.getBitmapByteSize(bitmap) * 10))
+            .setBitmapPool(new LruBitmapPool(Util.getBitmapByteSize(bitmap) * 10)));
     Target<Drawable> target =
         concurrency.wait(
             GlideApp.with(context)
@@ -172,9 +192,11 @@ public class LoadDrawableTest {
   public void loadFromRequestBuilder_asDrawable_withBitmapAndStrategyBeforeLoad_notFromCache() {
     Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), ResourceIds.raw.canonical);
     BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
-    Glide.init(context, new GlideBuilder()
-        .setMemoryCache(new LruResourceCache(Util.getBitmapByteSize(bitmap) * 10))
-        .setBitmapPool(new LruBitmapPool(Util.getBitmapByteSize(bitmap) * 10)));
+    Glide.init(
+        context,
+        glideBuilder
+            .setMemoryCache(new LruResourceCache(Util.getBitmapByteSize(bitmap) * 10))
+            .setBitmapPool(new LruBitmapPool(Util.getBitmapByteSize(bitmap) * 10)));
     Target<Drawable> target =
         concurrency.wait(
             GlideApp.with(context)

@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.data.InputStreamRewinder;
 import com.bumptech.glide.load.engine.Engine;
@@ -76,6 +77,7 @@ import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.module.ManifestParser;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
@@ -319,7 +321,9 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull ConnectivityMonitorFactory connectivityMonitorFactory,
       int logLevel,
       @NonNull RequestOptions defaultRequestOptions,
-      @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions) {
+      @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
+      @NonNull List<RequestListener<Object>> defaultRequestListeners,
+      boolean isLoggingRequestOriginsEnabled) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
@@ -333,19 +337,22 @@ public class Glide implements ComponentCallbacks2 {
     final Resources resources = context.getResources();
 
     registry = new Registry();
+    registry.register(new DefaultImageHeaderParser());
     // Right now we're only using this parser for HEIF images, which are only supported on OMR1+.
     // If we need this for other file types, we should consider removing this restriction.
-    // Note that order here matters. We want to check the ExifInterface parser first for orientation
-    // and then fall back to DefaultImageHeaderParser for other fields.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
       registry.register(new ExifInterfaceImageHeaderParser());
     }
-    registry.register(new DefaultImageHeaderParser());
 
-    Downsampler downsampler = new Downsampler(registry.getImageHeaderParsers(),
-        resources.getDisplayMetrics(), bitmapPool, arrayPool);
+    List<ImageHeaderParser> imageHeaderParsers = registry.getImageHeaderParsers();
+    Downsampler downsampler =
+        new Downsampler(
+            imageHeaderParsers,
+            resources.getDisplayMetrics(),
+            bitmapPool,
+            arrayPool);
     ByteBufferGifDecoder byteBufferGifDecoder =
-        new ByteBufferGifDecoder(context, registry.getImageHeaderParsers(), bitmapPool, arrayPool);
+        new ByteBufferGifDecoder(context, imageHeaderParsers, bitmapPool, arrayPool);
     ResourceDecoder<ParcelFileDescriptor, Bitmap> parcelFileDescriptorVideoDecoder =
         VideoDecoder.parcel(bitmapPool);
     ByteBufferBitmapDecoder byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
@@ -409,7 +416,7 @@ public class Glide implements ComponentCallbacks2 {
             Registry.BUCKET_GIF,
             InputStream.class,
             GifDrawable.class,
-            new StreamGifDecoder(registry.getImageHeaderParsers(), byteBufferGifDecoder, arrayPool))
+            new StreamGifDecoder(imageHeaderParsers, byteBufferGifDecoder, arrayPool))
         .append(Registry.BUCKET_GIF, ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
         .append(GifDrawable.class, new GifDrawableEncoder())
         /* GIF Frames */
@@ -512,7 +519,9 @@ public class Glide implements ComponentCallbacks2 {
             imageViewTargetFactory,
             defaultRequestOptions,
             defaultTransitionOptions,
+            defaultRequestListeners,
             engine,
+            isLoggingRequestOriginsEnabled,
             logLevel);
   }
 

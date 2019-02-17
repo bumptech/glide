@@ -37,12 +37,14 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.signature.ObjectKey;
+import com.bumptech.glide.util.Executors;
 import com.google.common.base.Equivalence;
 import com.google.common.testing.EquivalenceTester;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -247,7 +249,8 @@ public class SingleRequestTest {
             anyBoolean(),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class));
+            any(ResourceCallback.class),
+            anyExecutor());
   }
 
   @Test
@@ -262,8 +265,7 @@ public class SingleRequestTest {
   public void testEngineLoadCancelledOnCancel() {
     Engine.LoadStatus loadStatus = mock(Engine.LoadStatus.class);
 
-    when(builder.engine
-        .load(
+    when(builder.engine.load(
             eq(builder.glideContext),
             eq(builder.model),
             eq(builder.signature),
@@ -281,7 +283,8 @@ public class SingleRequestTest {
             anyBoolean(),
             anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class)))
+            any(ResourceCallback.class),
+            anyExecutor()))
         .thenReturn(loadStatus);
 
     SingleRequest<List> request = builder.build();
@@ -545,8 +548,7 @@ public class SingleRequestTest {
   public void testRequestListenerIsCalledWithLoadedFromMemoryIfLoadCompletesSynchronously() {
     final SingleRequest<List> request = builder.addRequestListener(listener1).build();
 
-    when(builder.engine
-        .load(
+    when(builder.engine.load(
             eq(builder.glideContext),
             eq(builder.model),
             eq(builder.signature),
@@ -564,14 +566,16 @@ public class SingleRequestTest {
             anyBoolean(),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class)))
-        .thenAnswer(new Answer<Object>() {
-          @Override
-          public Object answer(InvocationOnMock invocation) {
-            request.onResourceReady(builder.resource, DataSource.MEMORY_CACHE);
-            return null;
-          }
-        });
+            any(ResourceCallback.class),
+            anyExecutor()))
+        .thenAnswer(
+            new Answer<Object>() {
+              @Override
+              public Object answer(InvocationOnMock invocation) {
+                request.onResourceReady(builder.resource, DataSource.MEMORY_CACHE);
+                return null;
+              }
+            });
 
     request.begin();
     request.onSizeReady(100, 100);
@@ -699,7 +703,8 @@ public class SingleRequestTest {
             anyBoolean(),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class));
+            any(ResourceCallback.class),
+            anyExecutor());
   }
 
   @Test
@@ -718,8 +723,7 @@ public class SingleRequestTest {
     doAnswer(new CallSizeReady(100, 100)).when(builder.target)
         .getSize(any(SizeReadyCallback.class));
 
-    when(builder.engine
-        .load(
+    when(builder.engine.load(
             eq(builder.glideContext),
             eq(builder.model),
             eq(builder.signature),
@@ -737,7 +741,8 @@ public class SingleRequestTest {
             anyBoolean(),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class)))
+            any(ResourceCallback.class),
+            anyExecutor()))
         .thenAnswer(new CallResourceCallback(builder.resource));
     SingleRequest<List> request = builder.build();
 
@@ -781,7 +786,8 @@ public class SingleRequestTest {
             anyBoolean(),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class));
+            any(ResourceCallback.class),
+            anyExecutor());
   }
 
 
@@ -814,7 +820,8 @@ public class SingleRequestTest {
             eq(true),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class));
+            any(ResourceCallback.class),
+            anyExecutor());
   }
 
   @Test
@@ -846,7 +853,8 @@ public class SingleRequestTest {
             eq(false),
             /*useAnimationPool=*/ anyBoolean(),
             anyBoolean(),
-            any(ResourceCallback.class));
+            any(ResourceCallback.class),
+            anyExecutor());
   }
 
   @Test
@@ -1001,8 +1009,8 @@ public class SingleRequestTest {
           .signature(signature)
           .useUnlimitedSourceGeneratorsPool(useUnlimitedSourceGeneratorsPool);
       return SingleRequest.obtain(
-          /*context=*/glideContext,
-          /*glideContext=*/glideContext,
+          /*context=*/ glideContext,
+          /*glideContext=*/ glideContext,
           model,
           transcodeClass,
           requestOptions,
@@ -1014,7 +1022,8 @@ public class SingleRequestTest {
           requestListeners,
           requestCoordinator,
           engine,
-          transitionFactory);
+          transitionFactory,
+          Executors.directExecutor());
     }
   }
 
@@ -1038,6 +1047,10 @@ public class SingleRequestTest {
     return any(Transition.class);
   }
 
+  private static Executor anyExecutor() {
+    return any(Executor.class);
+  }
+
   private static class CallResourceCallback implements Answer {
 
     private final Resource resource;
@@ -1049,9 +1062,8 @@ public class SingleRequestTest {
     @Override
     public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
       ResourceCallback cb =
-          (ResourceCallback) invocationOnMock.getArguments()[
-              invocationOnMock.getArguments().length
-                  - 1];
+          (ResourceCallback)
+              invocationOnMock.getArguments()[invocationOnMock.getArguments().length - 2];
       cb.onResourceReady(resource, DataSource.REMOTE);
       return null;
     }

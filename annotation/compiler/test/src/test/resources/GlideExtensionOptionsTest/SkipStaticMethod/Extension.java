@@ -3,7 +3,7 @@ package com.bumptech.glide.test;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
-import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.BaseRequestOptions;
 
 @GlideExtension
 public final class Extension {
@@ -14,7 +14,7 @@ public final class Extension {
 
   @NonNull
   @GlideOption(skipStaticMethod = true)
-  public static RequestOptions test(RequestOptions requestOptions) {
+  public static BaseRequestOptions<?> test(BaseRequestOptions<?> requestOptions) {
     return requestOptions.centerCrop();
   }
 }

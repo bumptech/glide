@@ -255,7 +255,7 @@ public class RequestOptionsTest {
   @Test
   @SuppressWarnings({"unchecked", "varargs"})
   public void testApplyMultiTransform() {
-    options.transforms(new CircleCrop(), new CenterCrop());
+    options.transform(new CircleCrop(), new CenterCrop());
     assertThat(options.isTransformationRequired()).isTrue();
     assertThat(options.getTransformations()).containsKey(Bitmap.class);
     assertThat(options.getTransformations().get(Bitmap.class))

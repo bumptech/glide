@@ -13,6 +13,7 @@ dependencies {
     api project(':third_party:disklrucache')
     api project(':annotation')
     api "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
+    api "com.android.support:animated-vector-drawable:${ANDROID_SUPPORT_VERSION}"
     compileOnly "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
 
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
@@ -37,6 +38,7 @@ android {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
         versionName VERSION_NAME as String
+        consumerProguardFiles 'proguard-rules.txt'
     }
 
     compileOptions {

@@ -258,10 +258,6 @@ final class ProcessorUtil {
     processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "[" + round + "] " + toLog);
   }
 
-  void warnLog(String toLog) {
-    processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, toLog);
-  }
-
   static CodeBlock generateCastingSuperCall(TypeName toReturn, MethodSpec method) {
     return CodeBlock.builder()
         .add("return ($T) super.$N(", toReturn, method.name)

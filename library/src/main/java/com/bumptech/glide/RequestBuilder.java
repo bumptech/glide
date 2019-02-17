@@ -4,6 +4,7 @@ import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 import static com.bumptech.glide.request.RequestOptions.skipMemoryCacheOf;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -16,6 +17,7 @@ import android.support.annotation.RawRes;
 import android.widget.ImageView;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.ErrorRequestCoordinator;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.Request;
@@ -29,6 +31,7 @@ import com.bumptech.glide.request.target.PreloadTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.signature.ApplicationVersionSignature;
+import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
@@ -36,6 +39,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * A generic class that can handle setting options and staring loads for generic resource types.
@@ -45,7 +49,8 @@ import java.util.List;
  */
 // Public API.
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class RequestBuilder<TranscodeType> implements Cloneable,
+public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBuilder<TranscodeType>>
+    implements Cloneable,
     ModelTypes<RequestBuilder<TranscodeType>> {
   // Used in generated subclasses
   protected static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
@@ -55,11 +60,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   private final Context context;
   private final RequestManager requestManager;
   private final Class<TranscodeType> transcodeClass;
-  private final RequestOptions defaultRequestOptions;
   private final Glide glide;
   private final GlideContext glideContext;
-
-  @NonNull protected RequestOptions requestOptions;
 
   @NonNull
   @SuppressWarnings("unchecked")
@@ -76,51 +78,63 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   private boolean isModelSet;
   private boolean isThumbnailBuilt;
 
-  protected RequestBuilder(Glide glide, RequestManager requestManager,
-      Class<TranscodeType> transcodeClass, Context context) {
+  // We only override the method to change the return type, not the functionality.
+  @SuppressLint("CheckResult")
+  @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
+  protected RequestBuilder(
+      @NonNull Glide glide,
+      RequestManager requestManager,
+      Class<TranscodeType> transcodeClass,
+      Context context) {
     this.glide = glide;
     this.requestManager = requestManager;
     this.transcodeClass = transcodeClass;
-    this.defaultRequestOptions = requestManager.getDefaultRequestOptions();
     this.context = context;
     this.transitionOptions = requestManager.getDefaultTransitionOptions(transcodeClass);
-    this.requestOptions = defaultRequestOptions;
     this.glideContext = glide.getGlideContext();
+
+    initRequestListeners(requestManager.getDefaultRequestListeners());
+    apply(requestManager.getDefaultRequestOptions());
   }
 
+  @SuppressLint("CheckResult")
+  @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
   protected RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
     this(other.glide, other.requestManager, transcodeClass, other.context);
     model = other.model;
     isModelSet = other.isModelSet;
-    requestOptions = other.requestOptions;
+
+    // This is safe because it will always mutate, no one else has access to the object.
+    apply(other);
+  }
+
+  // Casting from Object to a specific type is always safe.
+  @SuppressWarnings("unchecked")
+  // addListener always returns the same instance.
+  @SuppressLint("CheckResult")
+  private void initRequestListeners(List<RequestListener<Object>> requestListeners) {
+    for (RequestListener<Object> listener : requestListeners) {
+      addListener((RequestListener<TranscodeType>) listener);
+    }
   }
 
   /**
    * Applies the given options to the request.
    *
-   * <p>As with {@link RequestOptions#apply(RequestOptions)}, {@code #apply} only replaces those
+   * <p>As with {@link RequestOptions#apply(BaseRequestOptions)}, {@code #apply} only replaces those
    * values that are explicitly set in the given {@link RequestOptions} object. If you need to
    * completely reset all previously set options, create a new {@code RequestBuilder} instead of
    * using this method.
    *
-   * @see RequestOptions#apply(RequestOptions)
+   * @see RequestOptions#apply(BaseRequestOptions)
    * @return This request builder.
    */
   @NonNull
   @CheckResult
-  public RequestBuilder<TranscodeType> apply(@NonNull RequestOptions requestOptions) {
+  @Override
+  public RequestBuilder<TranscodeType> apply(@NonNull BaseRequestOptions<?> requestOptions) {
     Preconditions.checkNotNull(requestOptions);
-    this.requestOptions = getMutableOptions().apply(requestOptions);
-    return this;
-  }
-
-  // We're checking to see if we need to clone our options object because we want to make sure the
-  // original is never modified, so we need reference equality.
-  @SuppressWarnings("ReferenceEquality")
-  @NonNull
-  protected RequestOptions getMutableOptions() {
-    return defaultRequestOptions == this.requestOptions
-        ? this.requestOptions.clone() : this.requestOptions;
+    return super.apply(requestOptions);
   }
 
   /**
@@ -370,7 +384,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * {@link com.bumptech.glide.load.ResourceDecoder} instead of using this method.
    *
    * <p>The {@link DiskCacheStrategy} is set to {@link DiskCacheStrategy#NONE}. Previous calls to
-   * {@link #apply(RequestOptions)} or previously applied {@link DiskCacheStrategy}s will be
+   * {@link #apply(BaseRequestOptions)} or previously applied {@link DiskCacheStrategy}s will be
    * overridden by this method. Applying an {@link DiskCacheStrategy} other than
    * {@link DiskCacheStrategy#NONE} after calling this method may result in undefined behavior.
    *
@@ -397,7 +411,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    * {@link com.bumptech.glide.load.ResourceDecoder} instead of using this method.
    *
    * <p>The {@link DiskCacheStrategy} is set to {@link DiskCacheStrategy#NONE}. Previous calls to
-   * {@link #apply(RequestOptions)} or previously applied {@link DiskCacheStrategy}s will be
+   * {@link #apply(BaseRequestOptions)} or previously applied {@link DiskCacheStrategy}s will be
    * overridden by this method. Applying an {@link DiskCacheStrategy} other than
    * {@link DiskCacheStrategy#NONE} after calling this method may result in undefined behavior.
    *
@@ -557,10 +571,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable byte[] model) {
     RequestBuilder<TranscodeType> result = loadGeneric(model);
-    if (!result.requestOptions.isDiskCacheStrategySet()) {
+    if (!result.isDiskCacheStrategySet()) {
         result = result.apply(diskCacheStrategyOf(DiskCacheStrategy.NONE));
     }
-    if (!result.requestOptions.isSkipMemoryCacheSet()) {
+    if (!result.isSkipMemoryCacheSet()) {
       result = result.apply(skipMemoryCacheOf(true /*skipMemoryCache*/));
     }
     return result;
@@ -582,14 +596,9 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> clone() {
-    try {
-      RequestBuilder<TranscodeType> result = (RequestBuilder<TranscodeType>) super.clone();
-      result.requestOptions = result.requestOptions.clone();
-      result.transitionOptions = result.transitionOptions.clone();
-      return result;
-    } catch (CloneNotSupportedException e) {
-      throw new RuntimeException(e);
-    }
+    RequestBuilder<TranscodeType> result = super.clone();
+    result.transitionOptions = result.transitionOptions.clone();
+    return result;
   }
 
   /**
@@ -601,28 +610,29 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    */
   @NonNull
   public <Y extends Target<TranscodeType>> Y into(@NonNull Y target) {
-    return into(target, /*targetListener=*/ null);
+    return into(target, /*targetListener=*/ null, Executors.mainThreadExecutor());
   }
 
   @NonNull
-  @Synthetic <Y extends Target<TranscodeType>> Y into(
+  @Synthetic
+  <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
-      @Nullable RequestListener<TranscodeType> targetListener) {
-    return into(target, targetListener, getMutableOptions());
+      @Nullable RequestListener<TranscodeType> targetListener,
+      Executor callbackExecutor) {
+    return into(target, targetListener, /*options=*/ this, callbackExecutor);
   }
 
   private <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
       @Nullable RequestListener<TranscodeType> targetListener,
-      @NonNull RequestOptions options) {
-    Util.assertMainThread();
+      BaseRequestOptions<?> options,
+      Executor callbackExecutor) {
     Preconditions.checkNotNull(target);
     if (!isModelSet) {
       throw new IllegalArgumentException("You must call #load() before calling #into()");
     }
 
-    options = options.autoClone();
-    Request request = buildRequest(target, targetListener, options);
+    Request request = buildRequest(target, targetListener, options, callbackExecutor);
 
     Request previous = target.getRequest();
     if (request.isEquivalentTo(previous)
@@ -654,7 +664,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
   // because the previous request must also be using skipMemoryCache for the requests to be
   // equivalent. See #2663 for additional context.
   private boolean isSkipMemoryCacheWithCompletePreviousRequest(
-      RequestOptions options, Request previous) {
+      BaseRequestOptions<?> options, Request previous) {
     return !options.isMemoryCacheable() && previous.isComplete();
   }
 
@@ -674,7 +684,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     Util.assertMainThread();
     Preconditions.checkNotNull(view);
 
-    RequestOptions requestOptions = this.requestOptions;
+    BaseRequestOptions<?> requestOptions = this;
     if (!requestOptions.isTransformationSet()
         && requestOptions.isTransformationAllowed()
         && view.getScaleType() != null) {
@@ -706,7 +716,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
     return into(
         glideContext.buildImageViewTarget(view, transcodeClass),
         /*targetListener=*/ null,
-        requestOptions);
+        requestOptions,
+        Executors.mainThreadExecutor());
   }
 
   /**
@@ -760,23 +771,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
    */
   @NonNull
   public FutureTarget<TranscodeType> submit(int width, int height) {
-    final RequestFutureTarget<TranscodeType> target =
-        new RequestFutureTarget<>(glideContext.getMainHandler(), width, height);
-
-    if (Util.isOnBackgroundThread()) {
-      glideContext.getMainHandler().post(new Runnable() {
-        @Override
-        public void run() {
-          if (!target.isCancelled()) {
-            into(target, target);
-          }
-        }
-      });
-    } else {
-      into(target, target);
-    }
-
-    return target;
+    final RequestFutureTarget<TranscodeType> target = new RequestFutureTarget<>(width, height);
+    return into(target, target, Executors.directExecutor());
   }
 
   /**
@@ -868,14 +864,15 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       case IMMEDIATE:
         return Priority.IMMEDIATE;
       default:
-        throw new IllegalArgumentException("unknown priority: " + requestOptions.getPriority());
+        throw new IllegalArgumentException("unknown priority: " + getPriority());
     }
   }
 
   private Request buildRequest(
       Target<TranscodeType> target,
       @Nullable RequestListener<TranscodeType> targetListener,
-      RequestOptions requestOptions) {
+      BaseRequestOptions<?> requestOptions,
+      Executor callbackExecutor) {
     return buildRequestRecursive(
         target,
         targetListener,
@@ -884,7 +881,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
         requestOptions.getPriority(),
         requestOptions.getOverrideWidth(),
         requestOptions.getOverrideHeight(),
-        requestOptions);
+        requestOptions,
+        callbackExecutor);
   }
 
   private Request buildRequestRecursive(
@@ -895,7 +893,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       Priority priority,
       int overrideWidth,
       int overrideHeight,
-      RequestOptions requestOptions) {
+      BaseRequestOptions<?> requestOptions,
+      Executor callbackExecutor) {
 
     // Build the ErrorRequestCoordinator first if necessary so we can update parentCoordinator.
     ErrorRequestCoordinator errorRequestCoordinator = null;
@@ -913,29 +912,32 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
             priority,
             overrideWidth,
             overrideHeight,
-            requestOptions);
+            requestOptions,
+            callbackExecutor);
 
     if (errorRequestCoordinator == null) {
       return mainRequest;
     }
 
-    int errorOverrideWidth = errorBuilder.requestOptions.getOverrideWidth();
-    int errorOverrideHeight = errorBuilder.requestOptions.getOverrideHeight();
+    int errorOverrideWidth = errorBuilder.getOverrideWidth();
+    int errorOverrideHeight = errorBuilder.getOverrideHeight();
     if (Util.isValidDimensions(overrideWidth, overrideHeight)
-        && !errorBuilder.requestOptions.isValidOverride()) {
+        && !errorBuilder.isValidOverride()) {
       errorOverrideWidth = requestOptions.getOverrideWidth();
       errorOverrideHeight = requestOptions.getOverrideHeight();
     }
 
-    Request errorRequest = errorBuilder.buildRequestRecursive(
-        target,
-        targetListener,
-        errorRequestCoordinator,
-        errorBuilder.transitionOptions,
-        errorBuilder.requestOptions.getPriority(),
-        errorOverrideWidth,
-        errorOverrideHeight,
-        errorBuilder.requestOptions);
+    Request errorRequest =
+        errorBuilder.buildRequestRecursive(
+            target,
+            targetListener,
+            errorRequestCoordinator,
+            errorBuilder.transitionOptions,
+            errorBuilder.getPriority(),
+            errorOverrideWidth,
+            errorOverrideHeight,
+            errorBuilder,
+            callbackExecutor);
     errorRequestCoordinator.setRequests(mainRequest, errorRequest);
     return errorRequestCoordinator;
   }
@@ -948,7 +950,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
       Priority priority,
       int overrideWidth,
       int overrideHeight,
-      RequestOptions requestOptions) {
+      BaseRequestOptions<?> requestOptions,
+      Executor callbackExecutor) {
     if (thumbnailBuilder != null) {
       // Recursive case: contains a potentially recursive thumbnail request builder.
       if (isThumbnailBuilt) {
@@ -965,13 +968,13 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
         thumbTransitionOptions = transitionOptions;
       }
 
-      Priority thumbPriority = thumbnailBuilder.requestOptions.isPrioritySet()
-          ? thumbnailBuilder.requestOptions.getPriority() : getThumbnailPriority(priority);
+      Priority thumbPriority = thumbnailBuilder.isPrioritySet()
+          ? thumbnailBuilder.getPriority() : getThumbnailPriority(priority);
 
-      int thumbOverrideWidth = thumbnailBuilder.requestOptions.getOverrideWidth();
-      int thumbOverrideHeight = thumbnailBuilder.requestOptions.getOverrideHeight();
+      int thumbOverrideWidth = thumbnailBuilder.getOverrideWidth();
+      int thumbOverrideHeight = thumbnailBuilder.getOverrideHeight();
       if (Util.isValidDimensions(overrideWidth, overrideHeight)
-          && !thumbnailBuilder.requestOptions.isValidOverride()) {
+          && !thumbnailBuilder.isValidOverride()) {
         thumbOverrideWidth = requestOptions.getOverrideWidth();
         thumbOverrideHeight = requestOptions.getOverrideHeight();
       }
@@ -986,7 +989,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
               transitionOptions,
               priority,
               overrideWidth,
-              overrideHeight);
+              overrideHeight,
+              callbackExecutor);
       isThumbnailBuilt = true;
       // Recursively generate thumbnail requests.
       Request thumbRequest =
@@ -998,7 +1002,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
               thumbPriority,
               thumbOverrideWidth,
               thumbOverrideHeight,
-              thumbnailBuilder.requestOptions);
+              thumbnailBuilder,
+              callbackExecutor);
       isThumbnailBuilt = false;
       coordinator.setRequests(fullRequest, thumbRequest);
       return coordinator;
@@ -1014,9 +1019,10 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
               transitionOptions,
               priority,
               overrideWidth,
-              overrideHeight);
-      RequestOptions thumbnailOptions = requestOptions.clone()
-          .sizeMultiplier(thumbSizeMultiplier);
+              overrideHeight,
+              callbackExecutor);
+      BaseRequestOptions<?> thumbnailOptions =
+          requestOptions.clone().sizeMultiplier(thumbSizeMultiplier);
 
       Request thumbnailRequest =
           obtainRequest(
@@ -1027,7 +1033,8 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
               transitionOptions,
               getThumbnailPriority(priority),
               overrideWidth,
-              overrideHeight);
+              overrideHeight,
+              callbackExecutor);
 
       coordinator.setRequests(fullRequest, thumbnailRequest);
       return coordinator;
@@ -1041,19 +1048,21 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
           transitionOptions,
           priority,
           overrideWidth,
-          overrideHeight);
+          overrideHeight,
+          callbackExecutor);
     }
   }
 
   private Request obtainRequest(
       Target<TranscodeType> target,
       RequestListener<TranscodeType> targetListener,
-      RequestOptions requestOptions,
+      BaseRequestOptions<?> requestOptions,
       RequestCoordinator requestCoordinator,
       TransitionOptions<?, ? super TranscodeType> transitionOptions,
       Priority priority,
       int overrideWidth,
-      int overrideHeight) {
+      int overrideHeight,
+      Executor callbackExecutor) {
     return SingleRequest.obtain(
         context,
         glideContext,
@@ -1068,6 +1077,7 @@ public class RequestBuilder<TranscodeType> implements Cloneable,
         requestListeners,
         requestCoordinator,
         glideContext.getEngine(),
-        transitionOptions.getTransitionFactory());
+        transitionOptions.getTransitionFactory(),
+        callbackExecutor);
   }
 }

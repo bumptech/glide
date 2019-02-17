@@ -25,6 +25,8 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCacheAdapter;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -67,12 +69,11 @@ public class CachingTest {
   private Context context;
 
   @Before
-  public void setUp() throws InterruptedException {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
     context = InstrumentationRegistry.getTargetContext();
 
-    Glide.init(
-        context, new GlideBuilder().setMemoryCache(new LruResourceCache(CACHE_SIZE_BYTES)));
+    Glide.init(context, new GlideBuilder().setMemoryCache(new LruResourceCache(CACHE_SIZE_BYTES)));
   }
 
   @Test
@@ -164,8 +165,18 @@ public class CachingTest {
   }
 
   @Test
-  public void submit_withPreviousRequestClearedFromMemory_completesFromDataDiskCache()
-      throws InterruptedException, ExecutionException, TimeoutException {
+  public void submit_withPreviousRequestClearedFromMemory_completesFromDataDiskCache() {
+    // Clearing the future here can race with clearing the EngineResource held on to by EngineJob
+    // while it's notifying callbacks. Forcing all executors to use the same thread avoids the race
+    // by making our clear and EngineJob's clear run on the same thread.
+    GlideExecutor mainThreadExecutor = MockGlideExecutor.newMainThreadExecutor();
+    Glide.init(
+        context,
+        new GlideBuilder()
+            .setSourceExecutor(mainThreadExecutor)
+            .setDiskCacheExecutor(mainThreadExecutor)
+            .setAnimationExecutor(mainThreadExecutor));
+
     FutureTarget<Drawable> future = GlideApp.with(context)
         .load(ResourceIds.raw.canonical)
         .diskCacheStrategy(DiskCacheStrategy.DATA)
@@ -192,8 +203,7 @@ public class CachingTest {
   }
 
   @Test
-  public void submit_withPreviousButNoLongerReferencedIdenticalRequest_completesFromMemoryCache()
-      throws InterruptedException, TimeoutException, ExecutionException {
+  public void submit_withPreviousButNoLongerReferencedIdenticalRequest_completesFromMemoryCache() {
     // We can't allow any mocks (RequestListner, Target etc) to reference this request or the test
     // will fail due to the transient strong reference to the request.
     concurrency.get(
@@ -224,8 +234,7 @@ public class CachingTest {
   }
 
   @Test
-  public void submit_withPreviousButNoLongerReferencedIdenticalRequest_doesNotRecycleBitmap()
-      throws InterruptedException, TimeoutException, ExecutionException {
+  public void submit_withPreviousButNoLongerReferencedIdenticalRequest_doesNotRecycleBitmap() {
     // We can't allow any mocks (RequestListener, Target etc) to reference this request or the test
     // will fail due to the transient strong reference to the request.
     Bitmap bitmap =
@@ -255,27 +264,42 @@ public class CachingTest {
   }
 
   @Test
-  public void clearDiskCache_doesNotPreventFutureLoads()
-      throws ExecutionException, InterruptedException, TimeoutException {
-    FutureTarget<Drawable> future = GlideApp.with(context)
-        .load(ResourceIds.raw.canonical)
-        .diskCacheStrategy(DiskCacheStrategy.DATA)
-        .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
-    concurrency.get(future);
-    GlideApp.with(context).clear(future);
+  public void clearDiskCache_doesNotPreventFutureLoads() {
+    // Clearing the future here can race with clearing the EngineResource held on to by EngineJob
+    // while it's notifying callbacks. Forcing all executors to use the same thread avoids the race
+    // by making our clear and EngineJob's clear run on the same thread.
+    GlideExecutor mainThreadExecutor = MockGlideExecutor.newMainThreadExecutor();
+    Glide.init(
+        context,
+        new GlideBuilder()
+            .setSourceExecutor(mainThreadExecutor)
+            .setDiskCacheExecutor(mainThreadExecutor)
+            .setAnimationExecutor(mainThreadExecutor));
 
+    // Load the request once.
+    FutureTarget<Drawable> future =
+        GlideApp.with(context)
+            .load(ResourceIds.raw.canonical)
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
+    concurrency.get(future);
+    // Clear the result from all of our caches.
+    GlideApp.with(context).clear(future);
     clearMemoryCacheOnMainThread();
     GlideApp.get(context).clearDiskCache();
 
-    future = GlideApp.with(context)
-        .load(ResourceIds.raw.canonical)
-        .diskCacheStrategy(DiskCacheStrategy.DATA)
-        .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
+    // Load the request a second time into the disk cache.
+    future =
+        GlideApp.with(context)
+            .load(ResourceIds.raw.canonical)
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+            .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
     concurrency.get(future);
-
+    // Clear the second request from everywhere but the disk cache.
     GlideApp.with(context).clear(future);
     clearMemoryCacheOnMainThread();
 
+    // Load the request a third time.
     concurrency.get(
         GlideApp.with(context)
             .load(ResourceIds.raw.canonical)
@@ -283,6 +307,8 @@ public class CachingTest {
             .diskCacheStrategy(DiskCacheStrategy.DATA)
             .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS));
 
+    // Assert that the third request comes from the disk cache (which was populated by the second
+    // request).
     verify(requestListener)
         .onResourceReady(
             anyDrawable(),
@@ -351,12 +377,14 @@ public class CachingTest {
     // Verify that the request that didn't have retrieve from cache succeeds
     assertThat(concurrency.get(expectedFuture)).isNotNull();
     // The first request only from cache should fail because the item is not in cache.
-    assertThrows(RuntimeException.class, new ThrowingRunnable() {
-      @Override
-      public void run() throws Throwable {
-        concurrency.get(firstQueuedFuture);
-      }
-    });
+    assertThrows(
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() {
+            concurrency.get(firstQueuedFuture);
+          }
+        });
   }
 
   @Test
@@ -482,7 +510,7 @@ public class CachingTest {
             anyBoolean());
   }
 
-  private void clearMemoryCacheOnMainThread() throws InterruptedException {
+  private void clearMemoryCacheOnMainThread() {
     concurrency.runOnMainThread(new Runnable() {
       @Override
       public void run() {

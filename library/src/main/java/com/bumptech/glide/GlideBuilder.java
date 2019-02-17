@@ -6,7 +6,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.Engine;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
@@ -22,8 +24,13 @@ import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory;
+import com.bumptech.glide.request.BaseRequestOptions;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,6 +53,9 @@ public final class GlideBuilder {
   private RequestManagerFactory requestManagerFactory;
   private GlideExecutor animationExecutor;
   private boolean isActiveResourceRetentionAllowed;
+  @Nullable
+  private List<RequestListener<Object>> defaultRequestListeners;
+  private boolean isLoggingRequestOriginsEnabled;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -196,7 +206,7 @@ public final class GlideBuilder {
    * Sets the default {@link RequestOptions} to use for all loads across the app.
    *
    * <p>Applying additional options with {@link
-   * RequestBuilder#apply(RequestOptions)} will override defaults
+   * RequestBuilder#apply(BaseRequestOptions)} will override defaults
    * set here.
    *
    * @param requestOptions The options to use by default.
@@ -372,6 +382,47 @@ public final class GlideBuilder {
     return this;
   }
 
+  /**
+   * Adds a global {@link RequestListener} that will be added to every request started with Glide.
+   *
+   * <p>Multiple {@link RequestListener}s can be added here, in {@link RequestManager} scopes or
+   * to individual {@link RequestBuilder}s. {@link RequestListener}s are called in the order they're
+   * added. Even if an earlier {@link RequestListener} returns {@code true} from
+   * {@link RequestListener#onLoadFailed(GlideException, Object, Target, boolean)} or
+   * {@link RequestListener#onResourceReady(Object, Object, Target, DataSource, boolean)}, it will
+   * not prevent subsequent {@link RequestListener}s from being called.
+   *
+   * <p>Because Glide requests can be started for any number of individual resource types, any
+   * listener added here has to accept any generic resource type in
+   * {@link RequestListener#onResourceReady(Object, Object, Target, DataSource, boolean)}. If you
+   * must base the behavior of the listener on the resource type, you will need to use
+   * {@code instanceof} to do so. It's not safe to cast resource types without first checking
+   * with {@code instanceof}.
+   */
+  @NonNull
+  public GlideBuilder addGlobalRequestListener(@NonNull RequestListener<Object> listener) {
+    if (defaultRequestListeners == null) {
+      defaultRequestListeners = new ArrayList<>();
+    }
+    defaultRequestListeners.add(listener);
+    return this;
+  }
+
+  /**
+   * Set to {@code true} to make Glide populate
+   * {@link com.bumptech.glide.load.engine.GlideException#setOrigin(Exception)} for failed requests.
+   *
+   * <p>The exception set by this method is not printed by {@link GlideException} and can only be
+   * viewed via a {@link RequestListener} that reads the field via
+   * {@link GlideException#getOrigin()}.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder setLogRequestOrigins(boolean isEnabled) {
+    isLoggingRequestOriginsEnabled = isEnabled;
+    return this;
+  }
+
   void setRequestManagerFactory(@Nullable RequestManagerFactory factory) {
     this.requestManagerFactory = factory;
   }
@@ -437,6 +488,12 @@ public final class GlideBuilder {
               isActiveResourceRetentionAllowed);
     }
 
+    if (defaultRequestListeners == null) {
+      defaultRequestListeners = Collections.emptyList();
+    } else {
+      defaultRequestListeners = Collections.unmodifiableList(defaultRequestListeners);
+    }
+
     RequestManagerRetriever requestManagerRetriever =
         new RequestManagerRetriever(requestManagerFactory);
 
@@ -450,6 +507,8 @@ public final class GlideBuilder {
         connectivityMonitorFactory,
         logLevel,
         defaultRequestOptions.lock(),
-        defaultTransitionOptions);
+        defaultTransitionOptions,
+        defaultRequestListeners,
+        isLoggingRequestOriginsEnabled);
   }
 }

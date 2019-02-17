@@ -48,7 +48,8 @@ subprojects { project ->
         options.setBootstrapClasspath(files("${System.getProperty('java.home')}/lib/rt.jar"))
         // gifencoder is a legacy project that has a ton of warnings and is basically never
         // modified, so we're not going to worry about cleaning it up.
-        if ("gifencoder" != project.getName()) {
+        // Imgur uses generated code from dagger that has warnings.
+        if ("gifencoder" != project.getName() && "imgur" != project.getName()) {
           options.compilerArgs \
                 /*
                  * Treat all warnings as errors.

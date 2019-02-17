@@ -24,12 +24,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A base {@link Target} for loading {@link android.graphics.Bitmap}s into {@link View}s that
- * provides default implementations for most methods and can determine the size of views using a
- * {@link android.view.ViewTreeObserver.OnDrawListener}.
+ * A base {@link Target} for loading resources ({@link android.graphics.Bitmap}, {@link Drawable}
+ * etc) into {@link View}s that provides default implementations for most methods and can determine
+ * the size of views using a {@link android.view.ViewTreeObserver.OnDrawListener}.
  *
- * @param <T> The specific subclass of view wrapped by this target.
- * @param <Z> The resource type this target will receive.
+ * @param <T> The specific subclass of view wrapped by this target (e.g.
+ *          {@link android.widget.ImageView})
+ * @param <Z> The resource type this target will receive (e.g. {@link android.graphics.Bitmap}).
  */
 public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
   private static final String TAG = "CustomViewTarget";

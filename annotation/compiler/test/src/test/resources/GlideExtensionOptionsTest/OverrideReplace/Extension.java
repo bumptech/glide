@@ -3,7 +3,7 @@ package com.bumptech.glide.test;
 import android.support.annotation.NonNull;
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
-import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.BaseRequestOptions;
 
 @GlideExtension
 public final class Extension {
@@ -14,7 +14,7 @@ public final class Extension {
 
   @NonNull
   @GlideOption(override = GlideOption.OVERRIDE_REPLACE)
-  public static RequestOptions centerCrop(RequestOptions requestOptions) {
+  public static BaseRequestOptions<?> centerCrop(BaseRequestOptions<?> requestOptions) {
     return requestOptions.centerCrop();
   }
 }

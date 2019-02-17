@@ -43,8 +43,9 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
     screenWidth = getScreenWidth(context);
   }
 
+  @NonNull
   @Override
-  public ListViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+  public ListViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
     LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
     final View view = inflater.inflate(R.layout.recycler_item, viewGroup, false);
     view.getLayoutParams().width = screenWidth;
@@ -66,7 +67,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
   }
 
   @Override
-  public void onBindViewHolder(ListViewHolder viewHolder, int position) {
+  public void onBindViewHolder(@NonNull ListViewHolder viewHolder, int position) {
     MediaStoreData current = data.get(position);
 
     Key signature =
@@ -97,7 +98,9 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
   @NonNull
   @Override
   public List<MediaStoreData> getPreloadItems(int position) {
-    return Collections.singletonList(data.get(position));
+    return data.isEmpty()
+            ? Collections.<MediaStoreData>emptyList()
+            : Collections.singletonList(data.get(position));
   }
 
   @Nullable

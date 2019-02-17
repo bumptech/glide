@@ -4,4 +4,6 @@
     <issue id="GradleOverrides" severity="ignore" />
     <issue id="IconMissingDensityFolder" severity="ignore"/>
     <issue id="GoogleAppIndexingWarning" severity="ignore"/>
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="Autofill" severity="ignore" />
 </lint>

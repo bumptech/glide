@@ -20,8 +20,6 @@ import org.junit.runners.JUnit4;
 
 /**
  * Verifies only the output we expect to change based on the various configurations of GlideOptions.
- *
- * <p>The output for all classes is tested in {@link LegacyGlideExtensionWithOptionTest}.
  */
 @RunWith(JUnit4.class)
 public class GlideExtensionOptionsTest {

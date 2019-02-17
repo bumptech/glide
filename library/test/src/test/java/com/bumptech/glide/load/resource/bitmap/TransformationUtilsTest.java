@@ -32,7 +32,7 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowBitmap;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18, shadows = {
+@Config(manifest = Config.NONE, sdk = 28, shadows = {
     TransformationUtilsTest.AlphaShadowBitmap.class })
 public class TransformationUtilsTest {
 
@@ -162,10 +162,10 @@ public class TransformationUtilsTest {
     assertTrue(toCrop == transformed);
   }
 
-  @Test
+  @Test @Config(sdk = 19)
   public void testFitCenterHandlesBitmapsWithNullConfigs() {
     Bitmap toFit = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
-    Shadows.shadowOf(toFit).setConfig(null);
+    toFit.setConfig(null);
     Bitmap transformed = TransformationUtils.fitCenter(bitmapPool, toFit, 50, 50);
     assertEquals(Bitmap.Config.ARGB_8888, transformed.getConfig());
   }
@@ -220,10 +220,10 @@ public class TransformationUtilsTest {
     assertTrue(result.hasAlpha());
   }
 
-  @Test
+  @Test @Config(sdk = 19)
   public void testCenterCropHandlesBitmapsWithNullConfigs() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
-    Shadows.shadowOf(toTransform).setConfig(null);
+    toTransform.setConfig(null);
 
     Bitmap transformed = TransformationUtils.centerCrop(bitmapPool, toTransform, 50, 50);
 
@@ -383,10 +383,10 @@ public class TransformationUtilsTest {
     assertTrue(toRotate == rotated);
   }
 
-  @Test
+  @Test @Config(sdk = 19)
   public void testRotateImageExifHandlesBitmapsWithNullConfigs() {
     Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
-    Shadows.shadowOf(toRotate).setConfig(null);
+    toRotate.setConfig(null);
     Bitmap rotated = TransformationUtils.rotateImageExif(bitmapPool, toRotate,
         ExifInterface.ORIENTATION_ROTATE_180);
     assertEquals(Bitmap.Config.ARGB_8888, rotated.getConfig());

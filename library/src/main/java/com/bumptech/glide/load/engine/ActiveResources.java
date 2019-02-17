@@ -1,71 +1,82 @@
 package com.bumptech.glide.load.engine;
 
-import android.os.Handler;
-import android.os.Handler.Callback;
-import android.os.Looper;
-import android.os.Message;
 import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
+import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
-import com.bumptech.glide.util.Util;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 final class ActiveResources {
-  private static final int MSG_CLEAN_REF = 1;
-
   private final boolean isActiveResourceRetentionAllowed;
-  private final Handler mainHandler = new Handler(Looper.getMainLooper(), new Callback() {
-    @Override
-    public boolean handleMessage(Message msg) {
-      if (msg.what == MSG_CLEAN_REF) {
-        cleanupActiveReference((ResourceWeakReference) msg.obj);
-        return true;
-      }
-      return false;
-    }
-  });
+  private final Executor monitorClearedResourcesExecutor;
   @VisibleForTesting
   final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
+  private final ReferenceQueue<EngineResource<?>> resourceReferenceQueue = new ReferenceQueue<>();
 
   private ResourceListener listener;
 
-  /**
-   * Lazily instantiate to avoid exceptions if Glide is initialized on a background thread.
-   *
-   * @see <a href="https://github.com/bumptech/glide/issues/295">#295</a>
-   */
-  @Nullable
-  private ReferenceQueue<EngineResource<?>> resourceReferenceQueue;
-  @Nullable
-  private Thread cleanReferenceQueueThread;
   private volatile boolean isShutdown;
   @Nullable
   private volatile DequeuedResourceCallback cb;
 
   ActiveResources(boolean isActiveResourceRetentionAllowed) {
+    this(
+        isActiveResourceRetentionAllowed,
+        java.util.concurrent.Executors.newSingleThreadExecutor(
+            new ThreadFactory() {
+              @Override
+              public Thread newThread(@NonNull final Runnable r) {
+                return new Thread(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                        r.run();
+                      }
+                    },
+                    "glide-active-resources");
+              }
+            }));
+  }
+
+  @VisibleForTesting
+  ActiveResources(
+      boolean isActiveResourceRetentionAllowed, Executor monitorClearedResourcesExecutor) {
     this.isActiveResourceRetentionAllowed = isActiveResourceRetentionAllowed;
+    this.monitorClearedResourcesExecutor = monitorClearedResourcesExecutor;
+
+    monitorClearedResourcesExecutor.execute(
+        new Runnable() {
+          @Override
+          public void run() {
+            cleanReferenceQueue();
+          }
+        });
   }
 
   void setListener(ResourceListener listener) {
-    this.listener = listener;
+    synchronized (listener) {
+      synchronized (this) {
+        this.listener = listener;
+      }
+    }
   }
 
-  void activate(Key key, EngineResource<?> resource) {
+  synchronized void activate(Key key, EngineResource<?> resource) {
     ResourceWeakReference toPut =
         new ResourceWeakReference(
-            key,
-            resource,
-            getReferenceQueue(),
-            isActiveResourceRetentionAllowed);
+            key, resource, resourceReferenceQueue, isActiveResourceRetentionAllowed);
 
     ResourceWeakReference removed = activeEngineResources.put(key, toPut);
     if (removed != null) {
@@ -73,7 +84,7 @@ final class ActiveResources {
     }
   }
 
-  void deactivate(Key key) {
+  synchronized void deactivate(Key key) {
     ResourceWeakReference removed = activeEngineResources.remove(key);
     if (removed != null) {
       removed.reset();
@@ -81,7 +92,7 @@ final class ActiveResources {
   }
 
   @Nullable
-  EngineResource<?> get(Key key) {
+  synchronized EngineResource<?> get(Key key) {
     ResourceWeakReference activeRef = activeEngineResources.get(key);
     if (activeRef == null) {
       return null;
@@ -94,34 +105,24 @@ final class ActiveResources {
     return active;
   }
 
-  @SuppressWarnings("WeakerAccess")
-  @Synthetic void cleanupActiveReference(@NonNull ResourceWeakReference ref) {
-    Util.assertMainThread();
-    activeEngineResources.remove(ref.key);
+  @SuppressWarnings({"WeakerAccess", "SynchronizeOnNonFinalField"})
+  @Synthetic
+  void cleanupActiveReference(@NonNull ResourceWeakReference ref) {
+    // Fixes a deadlock where we normally acquire the Engine lock and then the ActiveResources lock
+    // but reverse that order in this one particular test. This is definitely a bit of a hack...
+    synchronized (listener) {
+      synchronized (this) {
+        activeEngineResources.remove(ref.key);
 
-    if (!ref.isCacheable || ref.resource == null) {
-      return;
-    }
-    EngineResource<?> newResource =
-        new EngineResource<>(ref.resource, /*isCacheable=*/ true, /*isRecyclable=*/ false);
-    newResource.setResourceListener(ref.key, listener);
-    listener.onResourceReleased(ref.key, newResource);
-  }
-
-  private ReferenceQueue<EngineResource<?>> getReferenceQueue() {
-    if (resourceReferenceQueue == null) {
-      resourceReferenceQueue = new ReferenceQueue<>();
-      cleanReferenceQueueThread = new Thread(new Runnable() {
-        @SuppressWarnings("InfiniteLoopStatement")
-        @Override
-        public void run() {
-          Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-          cleanReferenceQueue();
+        if (!ref.isCacheable || ref.resource == null) {
+          return;
         }
-      }, "glide-active-resources");
-      cleanReferenceQueueThread.start();
+        EngineResource<?> newResource =
+            new EngineResource<>(ref.resource, /*isCacheable=*/ true, /*isRecyclable=*/ false);
+        newResource.setResourceListener(ref.key, listener);
+        listener.onResourceReleased(ref.key, newResource);
+      }
     }
-    return resourceReferenceQueue;
   }
 
   @SuppressWarnings("WeakerAccess")
@@ -129,7 +130,7 @@ final class ActiveResources {
     while (!isShutdown) {
       try {
         ResourceWeakReference ref = (ResourceWeakReference) resourceReferenceQueue.remove();
-        mainHandler.obtainMessage(MSG_CLEAN_REF, ref).sendToTarget();
+        cleanupActiveReference(ref);
 
         // This section for testing only.
         DequeuedResourceCallback current = cb;
@@ -156,18 +157,9 @@ final class ActiveResources {
   @VisibleForTesting
   void shutdown() {
     isShutdown = true;
-    if (cleanReferenceQueueThread == null) {
-      return;
-    }
-
-    cleanReferenceQueueThread.interrupt();
-    try {
-      cleanReferenceQueueThread.join(TimeUnit.SECONDS.toMillis(5));
-      if (cleanReferenceQueueThread.isAlive()) {
-        throw new RuntimeException("Failed to join in time");
-      }
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
+    if (monitorClearedResourcesExecutor instanceof ExecutorService) {
+      ExecutorService service = (ExecutorService) monitorClearedResourcesExecutor;
+      Executors.shutdownAndAwaitTermination(service);
     }
   }
 

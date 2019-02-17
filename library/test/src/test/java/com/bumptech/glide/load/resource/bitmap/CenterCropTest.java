@@ -31,11 +31,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(manifest = Config.NONE, sdk = 28)
 public class CenterCropTest {
   @Rule public final KeyTester keyTester = new KeyTester();
   @Mock private Resource<Bitmap> resource;
@@ -101,9 +100,9 @@ public class CenterCropTest {
     verify(resource, never()).recycle();
   }
 
-  @Test
+  @Test @Config(sdk = 19)
   public void testAsksBitmapPoolForArgb8888IfInConfigIsNull() {
-    Shadows.shadowOf(bitmap).setConfig(null);
+    bitmap.setConfig(null);
 
     centerCrop.transform(context, resource, 10, 10);
 
