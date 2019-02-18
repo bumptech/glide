@@ -484,7 +484,7 @@ public final class GlideBuilder {
               diskCacheExecutor,
               sourceExecutor,
               GlideExecutor.newUnlimitedSourceExecutor(),
-              GlideExecutor.newAnimationExecutor(),
+              animationExecutor,
               isActiveResourceRetentionAllowed);
     }
 
