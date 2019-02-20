@@ -11,6 +11,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.cache.DiskCacheAdapter;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
@@ -102,7 +103,12 @@ public class Engine implements EngineJobListener,
     if (engineJobFactory == null) {
       engineJobFactory =
           new EngineJobFactory(
-              diskCacheExecutor, sourceExecutor, sourceUnlimitedExecutor, animationExecutor, this);
+              diskCacheExecutor,
+              sourceExecutor,
+              sourceUnlimitedExecutor,
+              animationExecutor,
+              /*engineJobListener=*/ this,
+              /*resourceListener=*/ this);
     }
     this.engineJobFactory = engineJobFactory;
 
@@ -276,7 +282,8 @@ public class Engine implements EngineJobListener,
       // Save an object allocation if we've cached an EngineResource (the typical case).
       result = (EngineResource<?>) cached;
     } else {
-      result = new EngineResource<>(cached, true /*isMemoryCacheable*/, true /*isRecyclable*/);
+      result = new EngineResource<>(
+          cached, /*isMemoryCacheable=*/ true, /*isRecyclable=*/ true, key, /*listener=*/ this);
     }
     return result;
   }
@@ -295,9 +302,7 @@ public class Engine implements EngineJobListener,
       EngineJob<?> engineJob, Key key, EngineResource<?> resource) {
     // A null resource indicates that the load failed, usually due to an exception.
     if (resource != null) {
-      resource.setResourceListener(key, this);
-
-      if (resource.isCacheable()) {
+      if (resource.isMemoryCacheable()) {
         activeResources.activate(key, resource);
       }
     }
@@ -318,7 +323,7 @@ public class Engine implements EngineJobListener,
   @Override
   public synchronized void onResourceReleased(Key cacheKey, EngineResource<?> resource) {
     activeResources.deactivate(cacheKey);
-    if (resource.isCacheable()) {
+    if (resource.isMemoryCacheable()) {
       cache.put(cacheKey, resource);
     } else {
       resourceRecycler.recycle(resource);
@@ -456,7 +461,8 @@ public class Engine implements EngineJobListener,
     @Synthetic final GlideExecutor sourceExecutor;
     @Synthetic final GlideExecutor sourceUnlimitedExecutor;
     @Synthetic final GlideExecutor animationExecutor;
-    @Synthetic final EngineJobListener listener;
+    @Synthetic final EngineJobListener engineJobListener;
+    @Synthetic final ResourceListener resourceListener;
     @Synthetic final Pools.Pool<EngineJob<?>> pool =
         FactoryPools.threadSafe(
             JOB_POOL_SIZE,
@@ -468,7 +474,8 @@ public class Engine implements EngineJobListener,
                     sourceExecutor,
                     sourceUnlimitedExecutor,
                     animationExecutor,
-                    listener,
+                    engineJobListener,
+                    resourceListener,
                     pool);
               }
             });
@@ -478,12 +485,14 @@ public class Engine implements EngineJobListener,
         GlideExecutor sourceExecutor,
         GlideExecutor sourceUnlimitedExecutor,
         GlideExecutor animationExecutor,
-        EngineJobListener listener) {
+        EngineJobListener engineJobListener,
+        ResourceListener resourceListener) {
       this.diskCacheExecutor = diskCacheExecutor;
       this.sourceExecutor = sourceExecutor;
       this.sourceUnlimitedExecutor = sourceUnlimitedExecutor;
       this.animationExecutor = animationExecutor;
-      this.listener = listener;
+      this.engineJobListener = engineJobListener;
+      this.resourceListener = resourceListener;
     }
 
     @VisibleForTesting

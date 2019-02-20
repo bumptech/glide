@@ -11,12 +11,12 @@ import com.bumptech.glide.util.Preconditions;
  * @param <Z> The type of data returned by the wrapped {@link Resource}.
  */
 class EngineResource<Z> implements Resource<Z> {
-  private final boolean isCacheable;
+  private final boolean isMemoryCacheable;
   private final boolean isRecyclable;
   private final Resource<Z> resource;
+  private final ResourceListener listener;
+  private final Key key;
 
-  private ResourceListener listener;
-  private Key key;
   private int acquired;
   private boolean isRecycled;
 
@@ -24,23 +24,25 @@ class EngineResource<Z> implements Resource<Z> {
     void onResourceReleased(Key key, EngineResource<?> resource);
   }
 
-  EngineResource(Resource<Z> toWrap, boolean isCacheable, boolean isRecyclable) {
+  EngineResource(
+      Resource<Z> toWrap,
+      boolean isMemoryCacheable,
+      boolean isRecyclable,
+      Key key,
+      ResourceListener listener) {
     resource = Preconditions.checkNotNull(toWrap);
-    this.isCacheable = isCacheable;
+    this.isMemoryCacheable = isMemoryCacheable;
     this.isRecyclable = isRecyclable;
-  }
-
-  synchronized void setResourceListener(Key key, ResourceListener listener) {
     this.key = key;
-    this.listener = listener;
+    this.listener = Preconditions.checkNotNull(listener);
   }
 
   Resource<Z> getResource() {
     return resource;
   }
 
-  boolean isCacheable() {
-    return isCacheable;
+  boolean isMemoryCacheable() {
+    return isMemoryCacheable;
   }
 
   @NonNull
@@ -119,7 +121,7 @@ class EngineResource<Z> implements Resource<Z> {
   @Override
   public synchronized String toString() {
     return "EngineResource{"
-        + "isCacheable=" + isCacheable
+        + "isMemoryCacheable=" + isMemoryCacheable
         + ", listener=" + listener
         + ", key=" + key
         + ", acquired=" + acquired

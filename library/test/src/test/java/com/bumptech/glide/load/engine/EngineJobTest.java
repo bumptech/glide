@@ -21,6 +21,7 @@ import android.os.Looper;
 import android.support.v4.util.Pools;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
@@ -66,7 +67,7 @@ public class EngineJobTest {
 
     ShadowLooper.runUiThreadTasks();
 
-    verify(harness.listener)
+    verify(harness.engineJobListener)
         .onEngineJobComplete(eq(job), eq(harness.key), eq(harness.engineResource));
   }
 
@@ -110,7 +111,7 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.onLoadFailed(new GlideException("test"));
     ShadowLooper.runUiThreadTasks();
-    verify(harness.listener)
+    verify(harness.engineJobListener)
         .onEngineJobComplete(eq(job), eq(harness.key), isNull(EngineResource.class));
   }
 
@@ -122,7 +123,9 @@ public class EngineJobTest {
     job.onResourceReady(harness.resource, harness.dataSource);
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.factory).build(anyResource(), eq(harness.isCacheable));
+    verify(harness.factory)
+        .build(
+            anyResource(), eq(harness.isCacheable), eq(harness.key), eq(harness.resourceListener));
   }
 
   @Test
@@ -133,7 +136,9 @@ public class EngineJobTest {
     job.onResourceReady(harness.resource, harness.dataSource);
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.factory).build(anyResource(), eq(harness.isCacheable));
+    verify(harness.factory)
+        .build(
+            anyResource(), eq(harness.isCacheable), eq(harness.key), eq(harness.resourceListener));
   }
 
   @Test
@@ -142,7 +147,7 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.cancel();
 
-    verify(harness.listener).onEngineJobCancelled(eq(job), eq(harness.key));
+    verify(harness.engineJobListener).onEngineJobCancelled(eq(job), eq(harness.key));
   }
 
   @Test
@@ -205,7 +210,7 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.onResourceReady(harness.resource, harness.dataSource);
 
-    verify(harness.listener, never()).onEngineJobCancelled(eq(job), eq(harness.key));
+    verify(harness.engineJobListener, never()).onEngineJobCancelled(eq(job), eq(harness.key));
   }
 
   @Test
@@ -215,7 +220,7 @@ public class EngineJobTest {
     job.cancel();
     job.cancel();
 
-    verify(harness.listener, times(1)).onEngineJobCancelled(eq(job), eq(harness.key));
+    verify(harness.engineJobListener, times(1)).onEngineJobCancelled(eq(job), eq(harness.key));
   }
 
   @Test
@@ -224,9 +229,10 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.onLoadFailed(new GlideException("test"));
 
-    verify(harness.listener)
+    verify(harness.engineJobListener)
         .onEngineJobComplete(eq(job), eq(harness.key), isNull(EngineResource.class));
-    verify(harness.listener, never()).onEngineJobCancelled(any(EngineJob.class), any(Key.class));
+    verify(harness.engineJobListener, never())
+        .onEngineJobCancelled(any(EngineJob.class), any(Key.class));
   }
 
   @Test
@@ -481,7 +487,8 @@ public class EngineJobTest {
     final Key key = mock(Key.class);
     final Resource<Object> resource = mockResource();
     final EngineResource<Object> engineResource = mock(EngineResource.class);
-    final EngineJobListener listener = mock(EngineJobListener.class);
+    final EngineJobListener engineJobListener = mock(EngineJobListener.class);
+    final ResourceListener resourceListener = mock(ResourceListener.class);
     final boolean isCacheable = true;
     final boolean useUnlimitedSourceGeneratorPool = false;
     final boolean useAnimationPool = false;
@@ -499,14 +506,15 @@ public class EngineJobTest {
     final DataSource dataSource = DataSource.LOCAL;
 
     public MultiCbHarness() {
-      when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
+      when(factory.build(resource, isCacheable, key, resourceListener)).thenReturn(engineResource);
       job =
           new EngineJob<>(
               diskCacheService,
               sourceService,
               sourceUnlimitedService,
               animationService,
-              listener,
+              engineJobListener,
+              resourceListener,
               pool,
               factory);
       job.init(
@@ -532,7 +540,8 @@ public class EngineJobTest {
     final ResourceCallback cb = mock(ResourceCallback.class);
     final Resource<Object> resource = mockResource();
     final EngineResource<Object> engineResource = mock(EngineResource.class);
-    final EngineJobListener listener = mock(EngineJobListener.class);
+    final EngineJobListener engineJobListener = mock(EngineJobListener.class);
+    final ResourceListener resourceListener = mock(ResourceListener.class);
     final GlideExecutor diskCacheService = MockGlideExecutor.newMainThreadExecutor();
     final GlideExecutor sourceService = MockGlideExecutor.newMainThreadExecutor();
     final GlideExecutor sourceUnlimitedService = MockGlideExecutor.newMainThreadExecutor();
@@ -546,14 +555,15 @@ public class EngineJobTest {
     final DataSource dataSource = DataSource.DATA_DISK_CACHE;
 
     EngineJob<Object> getJob() {
-      when(factory.build(eq(resource), eq(isCacheable))).thenReturn(engineResource);
+      when(factory.build(resource, isCacheable, key, resourceListener)).thenReturn(engineResource);
       EngineJob<Object> result =
           new EngineJob<>(
               diskCacheService,
               sourceService,
               sourceUnlimitedService,
               animationService,
-              listener,
+              engineJobListener,
+              resourceListener,
               pool,
               factory);
       result.init(

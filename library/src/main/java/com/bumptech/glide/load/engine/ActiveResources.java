@@ -118,8 +118,12 @@ final class ActiveResources {
           return;
         }
         EngineResource<?> newResource =
-            new EngineResource<>(ref.resource, /*isCacheable=*/ true, /*isRecyclable=*/ false);
-        newResource.setResourceListener(ref.key, listener);
+            new EngineResource<>(
+                ref.resource,
+                /*isMemoryCacheable=*/ true,
+                /*isRecyclable=*/ false,
+                ref.key,
+                listener);
         listener.onResourceReleased(ref.key, newResource);
       }
     }
@@ -180,9 +184,9 @@ final class ActiveResources {
       super(referent, queue);
       this.key = Preconditions.checkNotNull(key);
       this.resource =
-          referent.isCacheable() && isActiveResourceRetentionAllowed
+          referent.isMemoryCacheable() && isActiveResourceRetentionAllowed
               ? Preconditions.checkNotNull(referent.getResource()) : null;
-      isCacheable = referent.isCacheable();
+      isCacheable = referent.isMemoryCacheable();
     }
 
     void reset() {

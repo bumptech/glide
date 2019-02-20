@@ -268,15 +268,6 @@ public class EngineTest {
   }
 
   @Test
-  public void testEngineIsSetAsResourceListenerOnJobComplete() {
-    harness.doLoad();
-
-    harness.callOnEngineJobComplete();
-
-    verify(harness.resource).setResourceListener(eq(harness.cacheKey), eq(harness.getEngine()));
-  }
-
-  @Test
   public void testEngineIsNotSetAsResourceListenerIfResourceIsNullOnJobComplete() {
     harness.doLoad();
 
@@ -285,7 +276,7 @@ public class EngineTest {
 
   @Test
   public void testResourceIsAddedToActiveResourcesOnEngineComplete() {
-    when(harness.resource.isCacheable()).thenReturn(true);
+    when(harness.resource.isMemoryCacheable()).thenReturn(true);
     harness.callOnEngineJobComplete();
 
     EngineResource<?> resource = harness.activeResources.get(harness.cacheKey);
@@ -300,7 +291,7 @@ public class EngineTest {
 
   @Test
   public void testDoesNotPutResourceThatIsNotCacheableInActiveResourcesOnEngineComplete() {
-    when(harness.resource.isCacheable()).thenReturn(false);
+    when(harness.resource.isMemoryCacheable()).thenReturn(false);
     harness.callOnEngineJobComplete();
     assertThat(harness.activeResources.get(harness.cacheKey)).isNull();
   }
@@ -326,7 +317,7 @@ public class EngineTest {
   @Test
   public void testResourceIsAddedToCacheOnReleased() {
     final Object expected = new Object();
-    when(harness.resource.isCacheable()).thenReturn(true);
+    when(harness.resource.isMemoryCacheable()).thenReturn(true);
     when(harness.resource.get()).thenReturn(expected);
     doAnswer(
             new Answer<Void>() {
@@ -347,7 +338,7 @@ public class EngineTest {
 
   @Test
   public void testResourceIsNotAddedToCacheOnReleasedIfNotCacheable() {
-    when(harness.resource.isCacheable()).thenReturn(false);
+    when(harness.resource.isMemoryCacheable()).thenReturn(false);
     harness.getEngine().onResourceReleased(harness.cacheKey, harness.resource);
 
     verify(harness.cache, never()).put(eq(harness.cacheKey), eq(harness.resource));
@@ -355,7 +346,7 @@ public class EngineTest {
 
   @Test
   public void testResourceIsRecycledIfNotCacheableWhenReleased() {
-    when(harness.resource.isCacheable()).thenReturn(false);
+    when(harness.resource.isMemoryCacheable()).thenReturn(false);
     harness.getEngine().onResourceReleased(harness.cacheKey, harness.resource);
     verify(harness.resourceRecycler).recycle(eq(harness.resource));
   }
@@ -446,7 +437,7 @@ public class EngineTest {
 
   @Test
   public void load_afterResourceIsLoadedInActiveResources_returnsFromMemoryCache() {
-    when(harness.resource.isCacheable()).thenReturn(true);
+    when(harness.resource.isMemoryCacheable()).thenReturn(true);
     doAnswer(
             new Answer<Object>() {
               @Override
@@ -465,7 +456,7 @@ public class EngineTest {
   @Test
   public void load_afterResourceIsLoadedAndReleased_returnsFromMemoryCache() {
     harness.cache = new LruResourceCache(100);
-    when(harness.resource.isCacheable()).thenReturn(true);
+    when(harness.resource.isMemoryCacheable()).thenReturn(true);
     doAnswer(
             new Answer<Object>() {
               @Override
