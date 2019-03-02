@@ -278,6 +278,13 @@ public class StandardGifDecoder implements GifDecoder {
       act = pct;
       // Set transparent color if specified.
       act[currentFrame.transIndex] = COLOR_TRANSPARENT_BLACK;
+
+      if (currentFrame.dispose == DISPOSAL_BACKGROUND && framePointer == 0) {
+        // TODO: We should check and see if all individual pixels are replaced. If they are, the
+        // first frame isn't actually transparent. For now, it's simpler and safer to assume
+        // drawing a transparent background means the GIF contains transparency.
+        isFirstFrameTransparent = true;
+      }
     }
 
     // Transfer pixel data to image.
@@ -446,11 +453,6 @@ public class StandardGifDecoder implements GifDecoder {
           if (currentFrame.lct != null && header.bgIndex == currentFrame.transIndex) {
             c = COLOR_TRANSPARENT_BLACK;
           }
-        } else if (framePointer == 0) {
-          // TODO: We should check and see if all individual pixels are replaced. If they are, the
-          // first frame isn't actually transparent. For now, it's simpler and safer to assume
-          // drawing a transparent background means the GIF contains transparency.
-          isFirstFrameTransparent = true;
         }
         // The area used by the graphic must be restored to the background color.
         int downsampledIH = previousFrame.ih / sampleSize;
@@ -540,7 +542,8 @@ public class StandardGifDecoder implements GifDecoder {
     }
 
     isFirstFrameTransparent =
-        isFirstFrameTransparent == null && isFirstFrame && transparentColorIndex != -1;
+        (isFirstFrameTransparent != null && isFirstFrameTransparent)
+            || (isFirstFrameTransparent == null && isFirstFrame && transparentColorIndex != -1);
   }
 
   private void copyCopyIntoScratchRobust(GifFrame currentFrame) {
