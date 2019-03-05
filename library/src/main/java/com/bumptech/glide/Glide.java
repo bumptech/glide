@@ -267,7 +267,15 @@ public class Glide implements ComponentCallbacks2 {
     }
     Glide glide = builder.build(applicationContext);
     for (com.bumptech.glide.module.GlideModule module : manifestModules) {
-      module.registerComponents(applicationContext, glide, glide.registry);
+      try {
+        module.registerComponents(applicationContext, glide, glide.registry);
+      } catch (AbstractMethodError e) {
+        throw new IllegalStateException(
+            "Attempting to register a Glide v3 module. If you see this, you or one of your"
+                + " dependencies may be including Glide v3 even though you're using Glide v4."
+                + " You'll need to find and remove (or update) the offending dependency."
+                + " The v3 module name is: " + module.getClass().getName(), e);
+      }
     }
     if (annotationGeneratedModule != null) {
       annotationGeneratedModule.registerComponents(applicationContext, glide, glide.registry);
