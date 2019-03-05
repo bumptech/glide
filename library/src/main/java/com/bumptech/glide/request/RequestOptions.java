@@ -135,9 +135,7 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
-  public static RequestOptions overrideOf(
-      @IntRange(from = 0) int width,
-      @IntRange(from = 0) int height) {
+  public static RequestOptions overrideOf(int width, int height) {
     return new RequestOptions().override(width, height);
   }
 
@@ -148,7 +146,7 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
-  public static RequestOptions overrideOf(@IntRange(from = 0) int size) {
+  public static RequestOptions overrideOf(int size) {
     return overrideOf(size, size);
   }
 

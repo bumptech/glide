@@ -122,9 +122,8 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    */
   @CheckResult
   @NonNull
-  public static GlideOptions overrideOf(@IntRange(from = 0) int value0,
-      @IntRange(from = 0) int value1) {
-    return new GlideOptions().override(value0, value1);
+  public static GlideOptions overrideOf(int width, int height) {
+    return new GlideOptions().override(width, height);
   }
 
   /**
@@ -132,8 +131,8 @@ public final class GlideOptions extends RequestOptions implements Cloneable {
    */
   @CheckResult
   @NonNull
-  public static GlideOptions overrideOf(@IntRange(from = 0) int value) {
-    return new GlideOptions().override(value);
+  public static GlideOptions overrideOf(int size) {
+    return new GlideOptions().override(size);
   }
 
   /**
