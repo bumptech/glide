@@ -45,11 +45,18 @@ final class HardwareConfigState {
    */
   private static final int MINIMUM_DECODES_BETWEEN_FD_CHECKS = 50;
 
+  // See https://bit.ly/2IW5AmI
+  private static boolean isSamsungGalaxyS7Edge() {
+    return Build.MODEL.startsWith("SM-G935") || Build.MODEL.startsWith("SM-G930");
+  }
+
   /**
    * 700 with an error of 50 Bitmaps in between at two FDs each lets us use up to 800 FDs for
    * hardware Bitmaps.
+   *
+   * <p>Reduced on S7 Edge devices due to  https://github.com/bumptech/glide/issues/3275.
    */
-  private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS = 700;
+  private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS = isSamsungGalaxyS7Edge() ? 350 : 700;
 
   private volatile int decodesSinceLastFdCheck;
   private volatile boolean isHardwareConfigAllowed = true;
