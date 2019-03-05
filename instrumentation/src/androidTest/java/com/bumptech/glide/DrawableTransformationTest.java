@@ -13,6 +13,8 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -20,7 +22,9 @@ import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.test.BitmapSubject;
 import com.bumptech.glide.test.GlideApp;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -116,6 +120,26 @@ public class DrawableTransformationTest {
   public void load_withColorDrawable_sizeOriginal_requiredTransform_fails()
       throws ExecutionException, InterruptedException {
     final Drawable colorDrawable = new ColorDrawable(Color.RED);
+
+    // The following section is a hack to workaround a weird behavior where a post in RequestManager
+    // can cause a failed request to be started twice in a row if the first attempt happens before.
+    // the post. This seems rather unlikely to happen in real applications and it only occurs when
+    // the request fails unexpectedly, so we're working around this weird behavior in this test.
+    // See #3551.
+
+    // Trigger the Glide application RequestManager to be created.
+    Glide.get(context).getRequestManagerRetriever().get(context);
+    // Wait until it's added as a lifecycle observer.
+    final CountDownLatch latch = new CountDownLatch(1);
+    new Handler(Looper.getMainLooper()).post(new Runnable() {
+      @Override
+      public void run() {
+        latch.countDown();
+      }
+    });
+    latch.await(5, TimeUnit.SECONDS);
+
+    // End hacks.
 
     assertThrows(
         ExecutionException.class,
