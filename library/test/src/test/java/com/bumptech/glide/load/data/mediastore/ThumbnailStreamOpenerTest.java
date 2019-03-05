@@ -1,8 +1,10 @@
 package com.bumptech.glide.load.data.mediastore;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -90,6 +92,12 @@ public class ThumbnailStreamOpenerTest {
   }
 
   @Test
+  public void open_returnsNull_whenQueryThrowsSecurityException() throws FileNotFoundException {
+    when(harness.query.query(any(Uri.class))).thenThrow(new SecurityException());
+    assertThat(harness.get().open(harness.uri)).isNull();
+  }
+
+  @Test
   public void testVideoQueryReturnsVideoCursor() {
     Uri queryUri = MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI;
     ThumbFetcher.VideoThumbnailQuery query =
@@ -123,7 +131,7 @@ public class ThumbnailStreamOpenerTest {
     final FileService service = mock(FileService.class);
     final ArrayPool byteArrayPool = new LruArrayPool();
 
-    public Harness() {
+    Harness() {
       cursor.addRow(new String[] { file.getAbsolutePath() });
       when(query.query(eq(uri))).thenReturn(cursor);
       when(service.get(eq(file.getAbsolutePath()))).thenReturn(file);

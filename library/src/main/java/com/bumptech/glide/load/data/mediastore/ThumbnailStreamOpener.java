@@ -90,13 +90,19 @@ class ThumbnailStreamOpener {
 
   @Nullable
   private String getPath(@NonNull Uri uri) {
-    final Cursor cursor = query.query(uri);
+    Cursor cursor = null;
     try {
+      cursor = query.query(uri);
       if (cursor != null && cursor.moveToFirst()) {
         return cursor.getString(0);
       } else {
         return null;
       }
+    } catch (SecurityException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to query for thumbnail for Uri: " + uri, e);
+      }
+      return null;
     } finally {
       if (cursor != null) {
         cursor.close();
