@@ -301,10 +301,8 @@ public class Engine implements EngineJobListener,
   public synchronized void onEngineJobComplete(
       EngineJob<?> engineJob, Key key, EngineResource<?> resource) {
     // A null resource indicates that the load failed, usually due to an exception.
-    if (resource != null) {
-      if (resource.isMemoryCacheable()) {
-        activeResources.activate(key, resource);
-      }
+    if (resource != null && resource.isMemoryCacheable()) {
+      activeResources.activate(key, resource);
     }
 
     jobs.removeIfCurrent(key, engineJob);
