@@ -145,9 +145,10 @@ public class MyAppExtension {
 
   private MyAppExtension() { } // utility class
 
+  @NonNull
   @GlideOption
-  public static void miniThumb(RequestOptions options) {
-    options
+  public static BaseRequestOptions<?> miniThumb(BaseRequestOptions<?> options) {
+    return options
       .fitCenter()
       .override(MINI_THUMB_SIZE);
   }
@@ -159,7 +160,7 @@ This will generate a method in a [``RequestOptions``][3] subclass that looks lik
 public class GlideOptions extends RequestOptions {
   
   public GlideOptions miniThumb() {
-    MyAppExtension.miniThumb(this);
+    return (GlideOptions) MyAppExtension.miniThumb(this);
   }
 
   ...
@@ -170,8 +171,8 @@ You can include as many additional arguments in your methods as you want, as lon
 
 ```java
 @GlideOption
-public static void miniThumb(RequestOptions options, int size) {
-  options
+public static BaseRequestOptions<?> miniThumb(BaseRequestOptions<?> options, int size) {
+  return options
     .fitCenter()
     .override(size);
 }
@@ -181,7 +182,7 @@ The additional arguments will be added as arguments to the generated method:
 
 ```java
 public GlideOptions miniThumb(int size) {
-  MyAppExtension.miniThumb(this);
+  return (GlideOptions) MyAppExtension.miniThumb(this);
 }
 ```
 
@@ -194,7 +195,7 @@ GlideApp.with(fragment)
    .into(imageView);
 ```
 
-Methods with the ``GlideOption`` annotation are expected to be static and to return void. Note that the generated methods will not be available on the standard ``Glide`` and ``RequestOptions`` classes.
+Methods with the ``GlideOption`` annotation are expected to be static and to return `BaseRequestOptions<?>`. Note that the generated methods will not be available on the standard ``Glide`` and ``RequestOptions`` classes, only the generated equivalents.
 
 #### GlideType
 
@@ -207,9 +208,10 @@ For example, to add support for GIFs, you might add a ``GlideType`` method:
 public class MyAppExtension {
   private static final RequestOptions DECODE_TYPE_GIF = decodeTypeOf(GifDrawable.class).lock();
 
+  @NonNull
   @GlideType(GifDrawable.class)
-  public static void asGif(RequestBuilder<GifDrawable> requestBuilder) {
-    requestBuilder
+  public static RequestBuilder<GifDrwable> asGif(RequestBuilder<GifDrawable> requestBuilder) {
+    return requestBuilder
       .transition(new DrawableTransitionOptions())
       .apply(DECODE_TYPE_GIF);
   }
@@ -221,10 +223,8 @@ Doing so will generate a [``RequestManager``][11] with a method that looks like 
 ```java
 public class GlideRequests extends RequesetManager {
 
-  public RequestBuilder<GifDrawable> asGif() {
-    RequestBuilder<GifDrawable> builder = as(GifDrawable.class);
-    MyAppExtension.asGif(builder);
-    return builder;
+  public GlideRequest<GifDrawable> asGif() {
+    return (GlideRequest<GifDrawable> MyAppExtension.asGif(this.as(GifDrawable.class));
   }
   
   ...
@@ -240,7 +240,7 @@ GlideApp.with(fragment)
   .into(imageView);
 ```
 
-Methods annotated with ``GlideType`` must take a [``RequestBuilder<T>``][2] as their first argument where the type ``<T>`` matches the class provided to the [``GlideType``][8] annotation. Methods are expected to be static and return void. Methods must be defined in a class annotated with [``GlideExtension``][6]. 
+Methods annotated with ``GlideType`` must take a [``RequestBuilder<T>``][2] as their first argument where the type ``<T>`` matches the class provided to the [``GlideType``][8] annotation. Methods are expected to be static and return `RequestBuilder<T>`. Methods must be defined in a class annotated with [``GlideExtension``][6]. 
 
 
 [1]: https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html
