@@ -74,6 +74,10 @@ final class ProcessorUtil {
       ClassName.get("android.support.annotation", "CheckResult");
   private static final ClassName ANDROIDX_CHECK_RESULT_ANNOTATION =
       ClassName.get("androidx.annotation", "CheckResult");
+  private static final ClassName VISIBLE_FOR_TESTING =
+      ClassName.get("android.support.annotation", "VisibleForTesting");
+  private static final ClassName ANDROIDX_VISIBLE_FOR_TESTING =
+      ClassName.get("androidx.annotation", "VisibleForTesting");
 
   private final ProcessingEnvironment processingEnv;
   private final TypeElement appGlideModuleType;
@@ -438,6 +442,15 @@ final class ProcessorUtil {
       result.add(AnnotationSpec.get(mirror));
     }
     return result;
+  }
+
+  static ClassName visibleForTesting() {
+    try {
+      Class.forName(ANDROIDX_VISIBLE_FOR_TESTING.reflectionName());
+      return ANDROIDX_VISIBLE_FOR_TESTING;
+    } catch (ClassNotFoundException e) {
+      return VISIBLE_FOR_TESTING;
+    }
   }
 
   static ClassName nonNull() {
