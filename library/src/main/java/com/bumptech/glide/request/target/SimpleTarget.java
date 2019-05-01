@@ -62,9 +62,9 @@ import com.bumptech.glide.util.Util;
  * @deprecated Use {@link CustomViewTarget} if loading the content into a view, the download API if
  *     in the background
  *     (http://bumptech.github.io/glide/doc/getting-started.html#background-threads), or a
- *     {@link CustomTarget} for any specialized use-cases. Using BaseView is unsafe if the
- *     user does not implement {@link #onLoadCleared}, resulting in recycled bitmaps being
- *     referenced from the UI and hard to root-cause crashes.
+ *     {@link CustomTarget} for any specialized use-cases. Using {@link SimpleTarget} or
+ *     {@link BaseTarget} is unsafe if the user does not implement {@link #onLoadCleared}, resulting
+ *     in recycled bitmaps being referenced from the UI and hard to root-cause crashes.
  */
 @Deprecated
 public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
