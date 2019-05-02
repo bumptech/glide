@@ -4,6 +4,7 @@ import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
 import static com.bumptech.glide.request.RequestOptions.signatureOf;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -20,7 +21,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.util.Preconditions;
@@ -49,6 +50,9 @@ class GifFrameLoader {
   private DelayTarget pendingTarget;
   @Nullable
   private GifFrameLoader.OnEveryFrameListener onEveryFrameListener;
+  private int firstFrameSize;
+  private int width;
+  private int height;
 
   public interface FrameCallback {
     void onFrameReady();
@@ -97,6 +101,10 @@ class GifFrameLoader {
     this.transformation = Preconditions.checkNotNull(transformation);
     this.firstFrame = Preconditions.checkNotNull(firstFrame);
     requestBuilder = requestBuilder.apply(new RequestOptions().transform(transformation));
+
+    firstFrameSize = Util.getBitmapByteSize(firstFrame);
+    width = firstFrame.getWidth();
+    height = firstFrame.getHeight();
   }
 
   Transformation<Bitmap> getFrameTransformation() {
@@ -129,24 +137,19 @@ class GifFrameLoader {
   }
 
   int getWidth() {
-    return getCurrentFrame().getWidth();
+    return width;
   }
 
   int getHeight() {
-    return getCurrentFrame().getHeight();
+    return height;
   }
 
   int getSize() {
-    return gifDecoder.getByteSize() + getFrameSize();
+    return gifDecoder.getByteSize() + firstFrameSize;
   }
 
   int getCurrentIndex() {
     return current != null ? current.index : -1;
-  }
-
-  private int getFrameSize() {
-    return Util.getBitmapByteSize(getCurrentFrame().getWidth(), getCurrentFrame().getHeight(),
-        getCurrentFrame().getConfig());
   }
 
   ByteBuffer getBuffer() {
@@ -306,7 +309,7 @@ class GifFrameLoader {
   }
 
   @VisibleForTesting
-  static class DelayTarget extends SimpleTarget<Bitmap> {
+  static class DelayTarget extends CustomTarget<Bitmap> {
     private final Handler handler;
     @Synthetic final int index;
     private final long targetTime;
@@ -328,6 +331,11 @@ class GifFrameLoader {
       this.resource = resource;
       Message msg = handler.obtainMessage(FrameLoaderCallback.MSG_DELAY, this);
       handler.sendMessageAtTime(msg, targetTime);
+    }
+
+    @Override
+    public void onLoadCleared(@Nullable Drawable placeholder) {
+      this.resource = null;
     }
   }
 

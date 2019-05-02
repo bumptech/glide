@@ -53,7 +53,7 @@ import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
@@ -687,13 +687,23 @@ public class GlideTest {
 
   @Test
   public void removeFromManagers_afterRequestManagerRemoved_clearsRequest() {
-    target = requestManager.load(mockUri("content://uri")).into(new SimpleTarget<Drawable>() {
-      @Override
-      public void onResourceReady(@NonNull Drawable resource,
-          @Nullable Transition<? super Drawable> transition) {
-        // Do nothing.
-      }
-    });
+    target =
+        requestManager
+            .load(mockUri("content://uri"))
+            .into(
+                new CustomTarget<Drawable>() {
+                  @Override
+                  public void onResourceReady(
+                      @NonNull Drawable resource,
+                      @Nullable Transition<? super Drawable> transition) {
+                    // Do nothing.
+                  }
+                  @Override
+                  public void onLoadCleared(@Nullable Drawable placeholder) {
+                    // Do nothing, we don't retain a reference to our resource.
+                  }
+                });
+
     Request request = Preconditions.checkNotNull(target.getRequest());
 
     requestManager.onDestroy();

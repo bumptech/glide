@@ -1,5 +1,6 @@
 package com.bumptech.glide.request.target;
 
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Looper;
@@ -16,7 +17,7 @@ import com.bumptech.glide.util.Synthetic;
  *
  * @param <Z> The type of resource that will be loaded into memory.
  */
-public final class PreloadTarget<Z> extends SimpleTarget<Z> {
+public final class PreloadTarget<Z> extends CustomTarget<Z> {
   private static final int MESSAGE_CLEAR = 1;
   private static final Handler HANDLER = new Handler(Looper.getMainLooper(), new Callback() {
     @Override
@@ -50,6 +51,11 @@ public final class PreloadTarget<Z> extends SimpleTarget<Z> {
   @Override
   public void onResourceReady(@NonNull Z resource, @Nullable Transition<? super Z> transition) {
     HANDLER.obtainMessage(MESSAGE_CLEAR, this).sendToTarget();
+  }
+
+  @Override
+  public void onLoadCleared(@Nullable Drawable placeholder) {
+    // Do nothing, we don't retain a reference to our resource.
   }
 
   @SuppressWarnings("WeakerAccess")

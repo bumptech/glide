@@ -187,10 +187,11 @@ public class GifFrameLoaderTest {
     // Force the loader to create a real Handler.
     loader = createGifFrameLoader(null);
 
-    DelayTarget previous = mock(DelayTarget.class);
+    DelayTarget previous = newDelayTarget();
     Request previousRequest = mock(Request.class);
-    when(previous.getRequest()).thenReturn(previousRequest);
-    when(previous.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
+    previous.setRequest(previousRequest);
+    previous.onResourceReady(
+        Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), /*transition=*/ null);
 
     DelayTarget current = mock(DelayTarget.class);
     when(current.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565));
@@ -205,10 +206,11 @@ public class GifFrameLoaderTest {
     // Force the loader to create a real Handler by passing null.
     loader = createGifFrameLoader(null);
 
-    DelayTarget previous = mock(DelayTarget.class);
+    DelayTarget previous = newDelayTarget();
     Request previousRequest = mock(Request.class);
-    when(previous.getRequest()).thenReturn(previousRequest);
-    when(previous.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
+    previous.setRequest(previousRequest);
+    previous.onResourceReady(
+        Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null);
 
     DelayTarget current = mock(DelayTarget.class);
     when(current.getResource()).thenReturn(null);
@@ -241,9 +243,9 @@ public class GifFrameLoaderTest {
     // Force the loader to create a real Handler by passing null;
     loader = createGifFrameLoader(null);
     loader.clear();
-    DelayTarget delayTarget = mock(DelayTarget.class);
+    DelayTarget delayTarget = newDelayTarget();
     Request request = mock(Request.class);
-    when(delayTarget.getRequest()).thenReturn(request);
+    delayTarget.setRequest(request);
 
     loader.onFrameReady(delayTarget);
 
@@ -352,6 +354,10 @@ public class GifFrameLoaderTest {
 
     loader.subscribe(callback);
     verify(callback, times(1)).onFrameReady();
+  }
+
+  private DelayTarget newDelayTarget() {
+    return new DelayTarget(handler, /*index=*/ 0, /*targetTime=*/ 0);
   }
 
   @SuppressWarnings("unchecked")

@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.RemoteViews;
@@ -20,7 +21,7 @@ import com.bumptech.glide.util.Preconditions;
  */
 // Public API.
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class NotificationTarget extends SimpleTarget<Bitmap> {
+public class NotificationTarget extends CustomTarget<Bitmap> {
   private final RemoteViews remoteViews;
   private final Context context;
   private final int notificationId;
@@ -109,7 +110,16 @@ public class NotificationTarget extends SimpleTarget<Bitmap> {
   @Override
   public void onResourceReady(@NonNull Bitmap resource,
       @Nullable Transition<? super Bitmap> transition) {
-    this.remoteViews.setImageViewBitmap(this.viewId, resource);
+    setBitmap(resource);
+  }
+
+  @Override
+  public void onLoadCleared(@Nullable Drawable placeholder) {
+    setBitmap(null);
+  }
+
+  private void setBitmap(@Nullable Bitmap bitmap) {
+    this.remoteViews.setImageViewBitmap(this.viewId, bitmap);
     this.update();
   }
 }

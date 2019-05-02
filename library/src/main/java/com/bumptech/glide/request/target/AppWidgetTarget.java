@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.RemoteViews;
@@ -19,7 +20,7 @@ import com.bumptech.glide.util.Preconditions;
  */
 // Public API.
 @SuppressWarnings("WeakerAccess")
-public class AppWidgetTarget extends SimpleTarget<Bitmap> {
+public class AppWidgetTarget extends CustomTarget<Bitmap> {
   private final int[] widgetIds;
   private final ComponentName componentName;
   private final RemoteViews remoteViews;
@@ -122,7 +123,16 @@ public class AppWidgetTarget extends SimpleTarget<Bitmap> {
   @Override
   public void onResourceReady(@NonNull Bitmap resource,
       @Nullable Transition<? super Bitmap> transition) {
-    this.remoteViews.setImageViewBitmap(this.viewId, resource);
-    this.update();
+    setBitmap(resource);
+  }
+
+  @Override
+  public void onLoadCleared(@Nullable Drawable placeholder) {
+    setBitmap(null);
+  }
+
+  private void setBitmap(@Nullable Bitmap bitmap) {
+    this.remoteViews.setImageViewBitmap(viewId, bitmap);
+    update();
   }
 }
