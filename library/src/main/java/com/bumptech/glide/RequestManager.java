@@ -32,8 +32,8 @@ import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.CustomViewTarget;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
@@ -678,16 +678,26 @@ public class RequestManager implements LifecycleListener,
     }
   }
 
-  private static class ClearTarget extends ViewTarget<View, Object> {
+  private static class ClearTarget extends CustomViewTarget<View, Object> {
 
     ClearTarget(@NonNull View view) {
       super(view);
     }
 
     @Override
-    public void onResourceReady(@NonNull Object resource,
-        @Nullable Transition<? super Object> transition) {
+    protected void onResourceCleared(@Nullable Drawable placeholder) {
+      // Do nothing, we don't retain a reference to our resource.
+    }
 
+    @Override
+    public void onLoadFailed(@Nullable Drawable errorDrawable) {
+      // Do nothing.
+    }
+
+    @Override
+    public void onResourceReady(
+        @NonNull Object resource, @Nullable Transition<? super Object> transition) {
+      // Do nothing.
     }
   }
 }

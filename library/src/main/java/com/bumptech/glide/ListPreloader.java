@@ -1,10 +1,12 @@
 package com.bumptech.glide;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.widget.AbsListView;
-import com.bumptech.glide.request.target.BaseTarget;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
@@ -243,16 +245,33 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     }
   }
 
-  private static final class PreloadTarget extends BaseTarget<Object> {
+  private static final class PreloadTarget implements Target<Object> {
     @Synthetic int photoHeight;
     @Synthetic int photoWidth;
+    @Nullable
+    private Request request;
 
     @Synthetic
     PreloadTarget() { }
 
     @Override
-    public void onResourceReady(@NonNull Object resource,
-        @Nullable Transition<? super Object> transition) {
+    public void onLoadStarted(@Nullable Drawable placeholder) {
+      // Do nothing.
+    }
+
+    @Override
+    public void onLoadFailed(@Nullable Drawable errorDrawable) {
+      // Do nothing.
+    }
+
+    @Override
+    public void onResourceReady(
+        @NonNull Object resource, @Nullable Transition<? super Object> transition) {
+      // Do nothing.
+    }
+
+    @Override
+    public void onLoadCleared(@Nullable Drawable placeholder) {
       // Do nothing.
     }
 
@@ -264,6 +283,32 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     @Override
     public void removeCallback(@NonNull SizeReadyCallback cb) {
       // Do nothing because we don't retain references to SizeReadyCallbacks.
+    }
+
+    @Override
+    public void setRequest(@Nullable Request request) {
+      this.request = request;
+    }
+
+    @Nullable
+    @Override
+    public Request getRequest() {
+      return request;
+    }
+
+    @Override
+    public void onStart() {
+      // Do nothing.
+    }
+
+    @Override
+    public void onStop() {
+      // Do nothing.
+    }
+
+    @Override
+    public void onDestroy() {
+      // Do nothing.
     }
   }
 }

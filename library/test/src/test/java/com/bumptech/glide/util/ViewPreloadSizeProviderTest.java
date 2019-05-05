@@ -12,8 +12,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-// containsExactly does not need its return value checked.
-@SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class ViewPreloadSizeProviderTest {
@@ -39,7 +37,7 @@ public class ViewPreloadSizeProviderTest {
     provider.onSizeReady(width, height);
 
     int[] size = provider.getPreloadSize(new Object(), 0, 0);
-    assertThat(size).asList().containsExactly(width, height);
+    assertThat(size).asList().containsExactly(width, height).inOrder();
   }
 
   @Test
@@ -53,7 +51,7 @@ public class ViewPreloadSizeProviderTest {
     provider.setView(view);
 
     int[] size = provider.getPreloadSize(new Object(), 0, 0);
-    assertThat(size).asList().containsExactly(width, height);
+    assertThat(size).asList().containsExactly(width, height).inOrder();
   }
 
   @Test
@@ -66,7 +64,7 @@ public class ViewPreloadSizeProviderTest {
     provider.setView(view);
 
     int[] size = provider.getPreloadSize(new Object(), 0, 0);
-    assertThat(size).asList().containsExactly(width, height);
+    assertThat(size).asList().containsExactly(width, height).inOrder();
   }
 
   @Test
@@ -90,6 +88,6 @@ public class ViewPreloadSizeProviderTest {
     provider = new ViewPreloadSizeProvider<>(view);
 
     int[] size = provider.getPreloadSize(new Object(), 0, 0);
-    assertThat(size).asList().containsExactly(width, height);
+    assertThat(size).asList().containsExactly(width, height).inOrder();
   }
 }

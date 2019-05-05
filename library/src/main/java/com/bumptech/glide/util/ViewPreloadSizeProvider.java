@@ -1,11 +1,12 @@
 package com.bumptech.glide.util;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.request.target.CustomViewTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
-import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.request.transition.Transition;
 import java.util.Arrays;
 
@@ -42,7 +43,8 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
   // Public API.
   @SuppressWarnings("WeakerAccess")
   public ViewPreloadSizeProvider(@NonNull View view) {
-    viewTarget = new SizeViewTarget(view, this);
+    viewTarget = new SizeViewTarget(view);
+    viewTarget.getSize(this);
   }
 
   @Nullable
@@ -74,19 +76,29 @@ public class ViewPreloadSizeProvider<T> implements ListPreloader.PreloadSizeProv
     if (size != null || viewTarget != null) {
       return;
     }
-    viewTarget = new SizeViewTarget(view, this);
+    viewTarget = new SizeViewTarget(view);
+    viewTarget.getSize(this);
   }
 
-  private static final class SizeViewTarget extends ViewTarget<View, Object> {
-    SizeViewTarget(@NonNull View view, @NonNull SizeReadyCallback callback) {
+  static final class SizeViewTarget extends CustomViewTarget<View, Object> {
+    SizeViewTarget(@NonNull View view) {
       super(view);
-      getSize(callback);
+    }
+
+    @Override
+    protected void onResourceCleared(@Nullable Drawable placeholder) {
+
+    }
+
+    @Override
+    public void onLoadFailed(@Nullable Drawable errorDrawable) {
+
     }
 
     @Override
     public void onResourceReady(@NonNull Object resource,
         @Nullable Transition<? super Object> transition) {
-      // Do nothing
+
     }
   }
 }

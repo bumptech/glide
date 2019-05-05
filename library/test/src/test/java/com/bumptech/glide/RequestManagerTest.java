@@ -21,8 +21,7 @@ import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
-import com.bumptech.glide.request.target.BaseTarget;
-import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.tests.BackgroundUtil;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -56,7 +55,7 @@ public class RequestManagerTest {
   private RequestTracker requestTracker;
   private ConnectivityListener connectivityListener;
   private Application context;
-  private BaseTarget<Drawable> target;
+  private CustomTarget<Drawable> target;
 
   @Before
   public void setUp() {
@@ -73,7 +72,7 @@ public class RequestManagerTest {
           }
         });
 
-    target = new BaseTarget<Drawable>() {
+    target = new CustomTarget<Drawable>() {
       @Override
       public void onResourceReady(@NonNull Drawable resource,
           @Nullable Transition<? super Drawable> transition) {
@@ -81,13 +80,8 @@ public class RequestManagerTest {
       }
 
       @Override
-      public void getSize(@NonNull SizeReadyCallback cb) {
-        // Empty.
-      }
+      public void onLoadCleared(@Nullable Drawable placeholder) {
 
-      @Override
-      public void removeCallback(@NonNull SizeReadyCallback cb) {
-        // Empty.
       }
     };
 
