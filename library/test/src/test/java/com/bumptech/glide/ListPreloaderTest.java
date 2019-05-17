@@ -370,7 +370,7 @@ public class ListPreloaderTest {
         preloaderAdapter, preloaderAdapter, 10);
 
     preloader.onScroll(null, 1, 10, 13);
-    assertThat(loadedObjects).containsAllIn(objects);
+    assertThat(loadedObjects).containsAtLeastElementsIn(objects);
   }
 
   private static class ListPreloaderAdapter implements ListPreloader.PreloadModelProvider<Object>,

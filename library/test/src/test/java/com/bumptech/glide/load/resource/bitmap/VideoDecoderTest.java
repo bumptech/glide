@@ -120,7 +120,7 @@ public class VideoDecoderTest {
     when(retriever.getScaledFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC, 100, 100))
         .thenReturn(expected);
 
-    assertThat(decoder.decode(resource, 100, 100, options).get()).isSameAs(expected);
+    assertThat(decoder.decode(resource, 100, 100, options).get()).isSameInstanceAs(expected);
   }
 
   @Test
@@ -131,7 +131,7 @@ public class VideoDecoderTest {
 
     verify(retriever, never()).getScaledFrameAtTime(anyLong(), anyInt(), anyInt(), anyInt());
     assertThat(decoder.decode(resource, Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL, options).get())
-        .isSameAs(expected);
+        .isSameInstanceAs(expected);
   }
 
   @Test
@@ -143,7 +143,7 @@ public class VideoDecoderTest {
 
     verify(retriever, never()).getScaledFrameAtTime(anyLong(), anyInt(), anyInt(), anyInt());
     assertThat(decoder.decode(resource, Target.SIZE_ORIGINAL, 100, options).get())
-        .isSameAs(expected);
+        .isSameInstanceAs(expected);
   }
 
   @Test
@@ -155,6 +155,6 @@ public class VideoDecoderTest {
 
     verify(retriever, never()).getScaledFrameAtTime(anyLong(), anyInt(), anyInt(), anyInt());
     assertThat(decoder.decode(resource, 100, Target.SIZE_ORIGINAL, options).get())
-        .isSameAs(expected);
+        .isSameInstanceAs(expected);
   }
 }

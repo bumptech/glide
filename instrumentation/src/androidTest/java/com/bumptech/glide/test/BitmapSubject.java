@@ -1,5 +1,7 @@
 package com.bumptech.glide.test;
 
+import static com.google.common.truth.Fact.simpleFact;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -28,8 +30,11 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
         }
       };
 
+  private final Bitmap actual;
+
   private BitmapSubject(FailureMetadata failureMetadata, Bitmap subject) {
     super(failureMetadata, subject);
+    this.actual = subject;
   }
 
   public static BitmapSubject assertThat(Drawable drawable) {
@@ -45,7 +50,7 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
 
   @Override
   protected String actualCustomStringRepresentation() {
-    return getDisplayString(actual());
+    return getDisplayString(actual);
   }
 
   private static String getDisplayString(Bitmap bitmap) {
@@ -64,59 +69,52 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
   }
 
   public void hasDimensions(int expectedWidth, int expectedHeight) {
-    int actualWidth = actual().getWidth();
-    int actualHeight = actual().getHeight();
-    String message;
+    int actualWidth = actual.getWidth();
+    int actualHeight = actual.getHeight();
     if (expectedWidth != actualWidth && expectedHeight != actualHeight) {
-      message = "has dimensions of [" + expectedWidth + "x" + expectedHeight + "]";
+      failWithActual("expected to have dimensions", expectedWidth + "x" + expectedHeight);
     } else if (expectedWidth != actualWidth) {
-      message = "has width of " + expectedWidth;
+      failWithActual("expected to have width", expectedWidth);
     } else if (expectedHeight != actualHeight) {
-      message = "has height of " + expectedHeight;
-    } else {
-      message = null;
-    }
-
-    if (message != null) {
-      fail(message);
+      failWithActual("expected to have height", expectedHeight);
     }
   }
 
   public void isMutable()  {
-    if (!actual().isMutable()) {
-      fail("is mutable");
+    if (!actual.isMutable()) {
+      failWithActual(simpleFact("expected to be mutable"));
     }
   }
 
   public void isImmutable() {
-    if (actual().isMutable()) {
-      fail("is immutable");
+    if (actual.isMutable()) {
+      failWithActual(simpleFact("expected to be immutable"));
     }
   }
 
   public void isNotRecycled() {
-    if (actual().isRecycled()) {
-      fail("is not recycled");
+    if (actual.isRecycled()) {
+      failWithActual(simpleFact("expected not to be recycled"));
     }
   }
 
   @SuppressWarnings({"unchecked", "ConstantConditions"})
   public void sameAs(Drawable other) {
     if (!(other instanceof BitmapDrawable)) {
-      fail("Not a BitmapDrawable");
+      failWithoutActual(simpleFact("The given expected value was not a BitmapDrawable."));
     }
     sameAs(((BitmapDrawable) other).getBitmap());
   }
 
   public void sameAs(Bitmap other) {
-    if (!actual().sameAs(other)) {
-      fail("is the same as " + getDisplayString(other));
+    if (!actual.sameAs(other)) {
+      failWithActual("expected to be the same as", getDisplayString(other));
     }
   }
 
   public void isNotSameAs(Bitmap other) {
-    if (actual().sameAs(other)) {
-      fail("is not the same as " + getDisplayString(other));
+    if (actual.sameAs(other)) {
+      failWithActual("expected not to be the same as", getDisplayString(other));
     }
   }
 }

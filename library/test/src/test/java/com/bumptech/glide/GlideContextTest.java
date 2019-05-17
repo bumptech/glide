@@ -7,7 +7,9 @@ import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import com.bumptech.glide.Glide.RequestOptionsFactory;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -41,7 +43,13 @@ public final class GlideContextTest {
         new LruArrayPool(),
         new Registry(),
         new ImageViewTargetFactory(),
-        new RequestOptions(),
+        new RequestOptionsFactory() {
+          @NonNull
+          @Override
+          public RequestOptions build() {
+            return new RequestOptions();
+          }
+        },
         transitionOptions,
         /*defaultRequestListeners=*/ Collections.<RequestListener<Object>>emptyList(),
         mock(Engine.class),

@@ -12,7 +12,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.MessageQueue.IdleHandler;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -31,6 +33,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.prefill.BitmapPreFiller;
 import com.bumptech.glide.load.engine.prefill.PreFillType;
+import com.bumptech.glide.load.engine.prefill.PreFillType.Builder;
 import com.bumptech.glide.load.model.AssetUriLoader;
 import com.bumptech.glide.load.model.ByteArrayLoader;
 import com.bumptech.glide.load.model.ByteBufferEncoder;
@@ -109,14 +112,17 @@ public class Glide implements ComponentCallbacks2 {
   private final Engine engine;
   private final BitmapPool bitmapPool;
   private final MemoryCache memoryCache;
-  private final BitmapPreFiller bitmapPreFiller;
   private final GlideContext glideContext;
   private final Registry registry;
   private final ArrayPool arrayPool;
   private final RequestManagerRetriever requestManagerRetriever;
   private final ConnectivityMonitorFactory connectivityMonitorFactory;
   private final List<RequestManager> managers = new ArrayList<>();
+  private final RequestOptionsFactory defaultRequestOptionsFactory;
   private MemoryCategory memoryCategory = MemoryCategory.NORMAL;
+  @GuardedBy("this")
+  @Nullable
+  private BitmapPreFiller bitmapPreFiller;
 
   /**
    * Returns a directory with a default name in the private cache directory of the application to
@@ -328,7 +334,7 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull RequestManagerRetriever requestManagerRetriever,
       @NonNull ConnectivityMonitorFactory connectivityMonitorFactory,
       int logLevel,
-      @NonNull RequestOptions defaultRequestOptions,
+      @NonNull RequestOptionsFactory defaultRequestOptionsFactory,
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
       boolean isLoggingRequestOriginsEnabled) {
@@ -338,9 +344,7 @@ public class Glide implements ComponentCallbacks2 {
     this.memoryCache = memoryCache;
     this.requestManagerRetriever = requestManagerRetriever;
     this.connectivityMonitorFactory = connectivityMonitorFactory;
-
-    DecodeFormat decodeFormat = defaultRequestOptions.getOptions().get(Downsampler.DECODE_FORMAT);
-    bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
+    this.defaultRequestOptionsFactory = defaultRequestOptionsFactory;
 
     final Resources resources = context.getResources();
 
@@ -525,7 +529,7 @@ public class Glide implements ComponentCallbacks2 {
             arrayPool,
             registry,
             imageViewTargetFactory,
-            defaultRequestOptions,
+            defaultRequestOptionsFactory,
             defaultTransitionOptions,
             defaultRequestListeners,
             engine,
@@ -580,7 +584,7 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   /**
-   * Pre-fills the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} using the given
+   * Pre-fills the {@link BitmapPool} using the given
    * sizes.
    *
    * <p> Enough Bitmaps are added to completely fill the pool, so most or all of the Bitmaps
@@ -589,23 +593,30 @@ public class Glide implements ComponentCallbacks2 {
    * </p>
    *
    * <p> Note - Pre-filling is done asynchronously using and
-   * {@link android.os.MessageQueue.IdleHandler}. Any currently running pre-fill will be cancelled
+   * {@link IdleHandler}. Any currently running pre-fill will be cancelled
    * and replaced by a call to this method. </p>
    *
    * <p> This method should be used with caution, overly aggressive pre-filling is substantially
    * worse than not pre-filling at all. Pre-filling should only be started in onCreate to avoid
    * constantly clearing and re-filling the
-   * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}. Rotation should be carefully
+   * {@link BitmapPool}. Rotation should be carefully
    * considered as well. It may be worth calling this method only when no saved instance state
    * exists so that pre-filling only happens when the Activity is first created, rather than on
    * every rotation. </p>
    *
    * @param bitmapAttributeBuilders The list of
-   * {@link com.bumptech.glide.load.engine.prefill.PreFillType.Builder Builders} representing
-   * individual sizes and configurations of {@link android.graphics.Bitmap}s to be pre-filled.
+   * {@link Builder Builders} representing
+   * individual sizes and configurations of {@link Bitmap}s to be pre-filled.
    */
   @SuppressWarnings("unused") // Public API
-  public void preFillBitmapPool(@NonNull PreFillType.Builder... bitmapAttributeBuilders) {
+  public synchronized void preFillBitmapPool(
+      @NonNull PreFillType.Builder... bitmapAttributeBuilders) {
+    if (bitmapPreFiller == null) {
+      DecodeFormat decodeFormat =
+          defaultRequestOptionsFactory.build().getOptions().get(Downsampler.DECODE_FORMAT);
+      bitmapPreFiller = new BitmapPreFiller(memoryCache, bitmapPool, decodeFormat);
+    }
+
     bitmapPreFiller.preFill(bitmapAttributeBuilders);
   }
 
@@ -857,5 +868,17 @@ public class Glide implements ComponentCallbacks2 {
   @Override
   public void onLowMemory() {
     clearMemory();
+  }
+
+  /**
+   * Creates a new instance of {@link RequestOptions}.
+   */
+  public interface RequestOptionsFactory {
+
+    /**
+     * Returns a non-null {@link RequestOptions} object.
+     */
+    @NonNull
+    RequestOptions build();
   }
 }

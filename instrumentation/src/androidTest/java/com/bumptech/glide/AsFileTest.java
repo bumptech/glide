@@ -47,6 +47,18 @@ public class AsFileTest {
   }
 
   @Test
+  public void asFile_withUrlAndDiskCacheStrategyAutomatic_succeeds() {
+    File file =
+        concurrency.get(
+            GlideApp.with(context)
+                .asFile()
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .load(URL)
+                .submit());
+    assertThat(file).isNotNull();
+  }
+
+  @Test
   public void asFile_withUrlAndDiskCacheStrategyData_succeeds() {
     File file =
         concurrency.get(

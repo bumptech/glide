@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
+import com.bumptech.glide.Glide.RequestOptionsFactory;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.GlideException;
@@ -28,6 +29,7 @@ import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.Preconditions;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +50,13 @@ public final class GlideBuilder {
   private MemorySizeCalculator memorySizeCalculator;
   private ConnectivityMonitorFactory connectivityMonitorFactory;
   private int logLevel = Log.INFO;
-  private RequestOptions defaultRequestOptions = new RequestOptions();
+  private RequestOptionsFactory defaultRequestOptionsFactory = new RequestOptionsFactory() {
+    @NonNull
+    @Override
+    public RequestOptions build() {
+      return new RequestOptions();
+    }
+  };
   @Nullable
   private RequestManagerFactory requestManagerFactory;
   private GlideExecutor animationExecutor;
@@ -209,12 +217,38 @@ public final class GlideBuilder {
    * RequestBuilder#apply(BaseRequestOptions)} will override defaults
    * set here.
    *
+   * @see #setDefaultRequestOptions(RequestOptionsFactory)
+   *
    * @param requestOptions The options to use by default.
    * @return This builder.
    */
   @NonNull
-  public GlideBuilder setDefaultRequestOptions(@Nullable RequestOptions requestOptions) {
-    this.defaultRequestOptions = requestOptions;
+  public GlideBuilder setDefaultRequestOptions(@Nullable final RequestOptions requestOptions) {
+    return setDefaultRequestOptions(new RequestOptionsFactory() {
+      @NonNull
+      @Override
+      public RequestOptions build() {
+        return requestOptions != null ? requestOptions : new RequestOptions();
+      }
+    });
+  }
+
+  /**
+   * Sets a factory for the default {@link RequestOptions} to use for all loads across the app and
+   * returns this {@code GlideBuilder}.
+   *
+   * <p>This factory will <em>NOT</em> be called once per load. Instead it will be called a handful
+   * of times and memoized. It's not safe to assume that this factory will be called again for
+   * every new load.
+   *
+   * <p>Applying additional options with {@link RequestBuilder#apply(BaseRequestOptions)} will
+   * override defaults set here.
+   *
+   * @see #setDefaultRequestOptions(RequestOptionsFactory)
+   */
+  @NonNull
+  public GlideBuilder setDefaultRequestOptions(@NonNull RequestOptionsFactory factory) {
+    this.defaultRequestOptionsFactory = Preconditions.checkNotNull(factory);
     return this;
   }
 
@@ -506,7 +540,7 @@ public final class GlideBuilder {
         requestManagerRetriever,
         connectivityMonitorFactory,
         logLevel,
-        defaultRequestOptions.lock(),
+        defaultRequestOptionsFactory,
         defaultTransitionOptions,
         defaultRequestListeners,
         isLoggingRequestOriginsEnabled);

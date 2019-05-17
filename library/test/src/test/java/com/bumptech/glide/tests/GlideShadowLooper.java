@@ -7,10 +7,10 @@ import android.os.MessageQueue;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.Resetter;
-import org.robolectric.shadows.ShadowLooper;
+import org.robolectric.shadows.ShadowLegacyLooper;
 
 @Implements(Looper.class)
-public class GlideShadowLooper extends ShadowLooper {
+public class GlideShadowLooper extends ShadowLegacyLooper {
   public static MessageQueue queue = mock(MessageQueue.class);
 
   @Implementation

@@ -2,9 +2,12 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.widget.ImageView;
+import com.bumptech.glide.Glide.RequestOptionsFactory;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.request.RequestListener;
@@ -26,19 +29,22 @@ public class GlideContext extends ContextWrapper {
   private final ArrayPool arrayPool;
   private final Registry registry;
   private final ImageViewTargetFactory imageViewTargetFactory;
-  private final RequestOptions defaultRequestOptions;
+  private final RequestOptionsFactory defaultRequestOptionsFactory;
   private final List<RequestListener<Object>> defaultRequestListeners;
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions;
   private final Engine engine;
   private final boolean isLoggingRequestOriginsEnabled;
   private final int logLevel;
+  @Nullable
+  @GuardedBy("this")
+  private RequestOptions defaultRequestOptions;
 
   public GlideContext(
       @NonNull Context context,
       @NonNull ArrayPool arrayPool,
       @NonNull Registry registry,
       @NonNull ImageViewTargetFactory imageViewTargetFactory,
-      @NonNull RequestOptions defaultRequestOptions,
+      @NonNull RequestOptionsFactory defaultRequestOptionsFactory,
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
       @NonNull Engine engine,
@@ -48,7 +54,7 @@ public class GlideContext extends ContextWrapper {
     this.arrayPool = arrayPool;
     this.registry = registry;
     this.imageViewTargetFactory = imageViewTargetFactory;
-    this.defaultRequestOptions = defaultRequestOptions;
+    this.defaultRequestOptionsFactory = defaultRequestOptionsFactory;
     this.defaultRequestListeners = defaultRequestListeners;
     this.defaultTransitionOptions = defaultTransitionOptions;
     this.engine = engine;
@@ -60,7 +66,11 @@ public class GlideContext extends ContextWrapper {
     return defaultRequestListeners;
   }
 
-  public RequestOptions getDefaultRequestOptions() {
+  public synchronized RequestOptions getDefaultRequestOptions() {
+    if (defaultRequestOptions == null) {
+      defaultRequestOptions = defaultRequestOptionsFactory.build().lock();
+    }
+
     return defaultRequestOptions;
   }
 

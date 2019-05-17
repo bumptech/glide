@@ -569,7 +569,7 @@ public class GifDrawableTest {
     // uses a method that can't be found (PorterDuffColorFilter.getColor).
     ArgumentCaptor<ColorFilter> captor = ArgumentCaptor.forClass(ColorFilter.class);
     verify(paint).setColorFilter(captor.capture());
-    assertThat(captor.getValue()).isSameAs(colorFilter);
+    assertThat(captor.getValue()).isSameInstanceAs(colorFilter);
   }
 
   @Test

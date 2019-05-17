@@ -65,7 +65,7 @@ public class LazyBitmapDrawableResourceTest {
   @Test
   public void get_returnsDrawableContainingWrappedBitmap() {
     BitmapDrawable drawable = resource.get();
-    assertThat(drawable.getBitmap()).isSameAs(bitmap);
+    assertThat(drawable.getBitmap()).isSameInstanceAs(bitmap);
   }
 
   @Test

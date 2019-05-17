@@ -101,7 +101,7 @@ public class LruArrayPoolTest {
   public void get_withPoolContainingLargerArray_returnsLargerArray() {
     byte[] expected = new byte[MAX_PUT_SIZE];
     pool.put(expected);
-    assertThat(pool.get(MAX_PUT_SIZE - 1, byte[].class)).isSameAs(expected);
+    assertThat(pool.get(MAX_PUT_SIZE - 1, byte[].class)).isSameInstanceAs(expected);
   }
 
   @Test
@@ -115,7 +115,7 @@ public class LruArrayPoolTest {
     int size = MAX_SIZE / 2;
     byte[] expected = new byte[size];
     pool.put(expected);
-    assertThat(pool.get(1, byte[].class)).isSameAs(expected);
+    assertThat(pool.get(1, byte[].class)).isSameInstanceAs(expected);
   }
 
   @Test
@@ -165,7 +165,7 @@ public class LruArrayPoolTest {
   public void getExact_withPoolContainingExactArray_returnsArray() {
     byte[] expected = new byte[MAX_PUT_SIZE];
     pool.put(expected);
-    assertThat(pool.getExact(MAX_PUT_SIZE, byte[].class)).isSameAs(expected);
+    assertThat(pool.getExact(MAX_PUT_SIZE, byte[].class)).isSameInstanceAs(expected);
   }
 
   @Test
@@ -174,7 +174,7 @@ public class LruArrayPoolTest {
     byte[] toPut = new byte[targetSize];
     pool.put(toPut);
     assertThat(pool.getCurrentSize()).isEqualTo(0);
-    assertThat(pool.get(targetSize, byte[].class)).isNotSameAs(toPut);
+    assertThat(pool.get(targetSize, byte[].class)).isNotSameInstanceAs(toPut);
   }
 
   private void testTrimMemory(int fillSize, int trimLevel, int expectedSize) {

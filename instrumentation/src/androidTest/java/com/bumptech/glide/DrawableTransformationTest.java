@@ -208,7 +208,7 @@ public class DrawableTransformationTest {
     Bitmap first = bitmapPool.get(width, height, Config.ARGB_8888);
     Bitmap second = bitmapPool.get(width, height, Config.ARGB_8888);
 
-    assertThat(first).isNotSameAs(second);
+    assertThat(first).isNotSameInstanceAs(second);
   }
    @Test
   public void load_withColorDrawable_fixedSize_functionalBitmapTransform_doesNotRecycleOutput()
@@ -232,6 +232,6 @@ public class DrawableTransformationTest {
     Bitmap first = bitmapPool.get(width, height, Config.ARGB_8888);
     Bitmap second = bitmapPool.get(width, height, Config.ARGB_8888);
 
-    assertThat(first).isNotSameAs(second);
+    assertThat(first).isNotSameInstanceAs(second);
   }
 }

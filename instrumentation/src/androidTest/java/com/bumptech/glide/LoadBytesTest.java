@@ -94,7 +94,7 @@ public class LoadBytesTest {
 
     // This assertion alone doesn't catch the case where the second Bitmap is loaded from the result
     // cache of the data from the first Bitmap.
-    BitmapSubject.assertThat(firstBitmap).isNotSameAs(secondBitmap);
+    BitmapSubject.assertThat(firstBitmap).isNotSameInstanceAs(secondBitmap);
 
     Bitmap expectedCanonicalBitmap =
         BitmapFactory.decodeByteArray(canonicalBytes, /*offset=*/ 0, canonicalBytes.length);
@@ -127,7 +127,7 @@ public class LoadBytesTest {
 
     // This assertion alone doesn't catch the case where the second Bitmap is loaded from the result
     // cache of the data from the first Bitmap.
-    BitmapSubject.assertThat(firstBitmap).isNotSameAs(secondBitmap);
+    BitmapSubject.assertThat(firstBitmap).isNotSameInstanceAs(secondBitmap);
 
     Bitmap expectedCanonicalBitmap =
         BitmapFactory.decodeByteArray(canonicalBytes, /*offset=*/ 0, canonicalBytes.length);
