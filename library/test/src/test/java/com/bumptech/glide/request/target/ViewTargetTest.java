@@ -90,12 +90,6 @@ public class ViewTargetTest {
     assertNull(target.getRequest());
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfViewTagIsNotRequestObject() {
-    view.setTag(new Object());
-    target.getRequest();
-  }
-
   @Test
   public void testCanSetAndRetrieveRequest() {
     target.setRequest(request);

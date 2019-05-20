@@ -14,6 +14,7 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import com.bumptech.glide.R;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
@@ -48,7 +49,7 @@ import java.util.List;
 public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   private static final String TAG = "ViewTarget";
   private static boolean isTagUsedAtLeastOnce;
-  @Nullable private static Integer tagId;
+  private static int tagId = R.id.glide_custom_view_target_tag;
 
   protected final T view;
   private final SizeDeterminer sizeDeterminer;
@@ -281,21 +282,13 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   }
 
   private void setTag(@Nullable Object tag) {
-    if (tagId == null) {
-      isTagUsedAtLeastOnce = true;
-      view.setTag(tag);
-    } else {
-      view.setTag(tagId, tag);
-    }
+    isTagUsedAtLeastOnce = true;
+    view.setTag(tagId, tag);
   }
 
   @Nullable
   private Object getTag() {
-    if (tagId == null) {
-      return view.getTag();
-    } else {
-      return view.getTag(tagId);
-    }
+    return view.getTag(tagId);
   }
 
   /**
@@ -314,12 +307,16 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
    *   any view you start a load into to ensure that the static state is removed.
    * </p>
    *
+   * @deprecated Glide uses it's own default tag id, so there's no need to specify your own. This
+   * method will be removed in a future version.
+   *
    * @param tagId The android resource to use.
    */
   // Public API.
   @SuppressWarnings("unused")
+  @Deprecated
   public static void setTagId(int tagId) {
-    if (ViewTarget.tagId != null || isTagUsedAtLeastOnce) {
+    if (isTagUsedAtLeastOnce) {
       throw new IllegalArgumentException("You cannot set the tag id more than once or change"
           + " the tag id after the first request has been made");
     }
