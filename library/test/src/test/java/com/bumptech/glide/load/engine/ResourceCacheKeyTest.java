@@ -38,9 +38,11 @@ public class ResourceCacheKeyTest {
     MockitoAnnotations.initMocks(this);
 
     arrayPool = new LruArrayPool();
-    doAnswer(new Util.WriteDigest("transformation1")).when(transformation1)
+    doAnswer(new Util.WriteDigest("transformation1"))
+        .when(transformation1)
         .updateDiskCacheKey(any(MessageDigest.class));
-    doAnswer(new Util.WriteDigest("transformation1")).when(transformation2)
+    doAnswer(new Util.WriteDigest("transformation1"))
+        .when(transformation2)
         .updateDiskCacheKey(any(MessageDigest.class));
   }
 
@@ -50,15 +52,20 @@ public class ResourceCacheKeyTest {
     memoryOptions.set(Option.memory("key", new Object()), new Object());
 
     Options diskOptions = new Options();
-    diskOptions.set(Option.disk("key", new CacheKeyUpdater<String>() {
-      @Override
-      public void update(@NonNull byte[] keyBytes, @NonNull String value,
-          @NonNull MessageDigest messageDigest) {
-        messageDigest.update(keyBytes);
-        messageDigest.update(value.getBytes(Key.CHARSET));
-
-      }
-    }), "value");
+    diskOptions.set(
+        Option.disk(
+            "key",
+            new CacheKeyUpdater<String>() {
+              @Override
+              public void update(
+                  @NonNull byte[] keyBytes,
+                  @NonNull String value,
+                  @NonNull MessageDigest messageDigest) {
+                messageDigest.update(keyBytes);
+                messageDigest.update(value.getBytes(Key.CHARSET));
+              }
+            }),
+        "value");
 
     for (int i = 0; i < 20; i++) {
       byte[] array = new byte[9];

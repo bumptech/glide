@@ -3,9 +3,7 @@ package com.bumptech.glide.load.engine.cache;
 import com.bumptech.glide.load.Key;
 import java.io.File;
 
-/**
- * A simple class that returns null for all gets and ignores all writes.
- */
+/** A simple class that returns null for all gets and ignores all writes. */
 public class DiskCacheAdapter implements DiskCache {
   @Override
   public File get(Key key) {
@@ -25,12 +23,10 @@ public class DiskCacheAdapter implements DiskCache {
 
   @Override
   public void clear() {
-      // no op, default for overriders
+    // no op, default for overriders
   }
 
-  /**
-   * Default factory for {@link DiskCacheAdapter}.
-   */
+  /** Default factory for {@link DiskCacheAdapter}. */
   public static final class Factory implements DiskCache.Factory {
     @Override
     public DiskCache build() {

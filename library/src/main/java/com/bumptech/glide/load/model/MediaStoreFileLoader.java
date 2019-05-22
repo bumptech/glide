@@ -15,9 +15,7 @@ import com.bumptech.glide.signature.ObjectKey;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-/**
- * Loads the file path for {@link MediaStore} owned {@link Uri uris}.
- */
+/** Loads the file path for {@link MediaStore} owned {@link Uri uris}. */
 public final class MediaStoreFileLoader implements ModelLoader<Uri, File> {
 
   private final Context context;
@@ -29,8 +27,8 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File> {
   }
 
   @Override
-  public LoadData<File> buildLoadData(@NonNull Uri uri, int width, int height,
-      @NonNull Options options) {
+  public LoadData<File> buildLoadData(
+      @NonNull Uri uri, int width, int height, @NonNull Options options) {
     return new LoadData<>(new ObjectKey(uri), new FilePathFetcher(context, uri));
   }
 
@@ -40,9 +38,10 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File> {
   }
 
   private static class FilePathFetcher implements DataFetcher<File> {
-    private static final String[] PROJECTION = new String[] {
-        MediaStore.MediaColumns.DATA,
-    };
+    private static final String[] PROJECTION =
+        new String[] {
+          MediaStore.MediaColumns.DATA,
+        };
 
     private final Context context;
     private final Uri uri;
@@ -54,8 +53,11 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File> {
 
     @Override
     public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super File> callback) {
-      Cursor cursor = context.getContentResolver().query(uri, PROJECTION, null /*selection*/,
-          null /*selectionArgs*/, null /*sortOrder*/);
+      Cursor cursor =
+          context
+              .getContentResolver()
+              .query(
+                  uri, PROJECTION, null /*selection*/, null /*selectionArgs*/, null /*sortOrder*/);
 
       String filePath = null;
       if (cursor != null) {
@@ -98,9 +100,7 @@ public final class MediaStoreFileLoader implements ModelLoader<Uri, File> {
     }
   }
 
-  /**
-   * {@link ModelLoaderFactory} for {@link MediaStoreFileLoader}s.
-   */
+  /** {@link ModelLoaderFactory} for {@link MediaStoreFileLoader}s. */
   public static final class Factory implements ModelLoaderFactory<Uri, File> {
 
     private final Context context;

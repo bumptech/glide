@@ -11,9 +11,7 @@ import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests AppGlideModules with invalid usages of the @Excludes annotation.
- */
+/** Tests AppGlideModules with invalid usages of the @Excludes annotation. */
 // Ignore warnings since most methods use assertThrows
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(JUnit4.class)
@@ -63,7 +61,7 @@ public class InvalidAppGlideModuleWithExcludesTest {
 
   @Test
   public void compilation_withNonGlideModule_throws() {
-     Compilation compilation =
+    Compilation compilation =
         javac()
             .withProcessors(new GlideAnnotationProcessor())
             .compile(

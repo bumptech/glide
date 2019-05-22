@@ -61,10 +61,10 @@ public class CircleCropRegressionTest {
     Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)
-              .asBitmap()
-              .load(canonical.getBitmap())
-              .circleCrop()
-              .override(multipliedWidth));
+                .asBitmap()
+                .load(canonical.getBitmap())
+                .circleCrop()
+                .override(multipliedWidth));
 
     assertThat(result.getWidth()).isEqualTo(multipliedWidth);
     assertThat(result.getHeight()).isEqualTo(multipliedWidth);
@@ -76,10 +76,10 @@ public class CircleCropRegressionTest {
     Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)
-              .asBitmap()
-              .load(canonical.getBitmap())
-              .circleCrop()
-              .override(canonical.getWidth() / 10, canonical.getHeight()));
+                .asBitmap()
+                .load(canonical.getBitmap())
+                .circleCrop()
+                .override(canonical.getWidth() / 10, canonical.getHeight()));
 
     assertThat(result.getWidth()).isEqualTo(canonical.getWidth() / 10);
     assertThat(result.getHeight()).isEqualTo(canonical.getWidth() / 10);
@@ -88,13 +88,13 @@ public class CircleCropRegressionTest {
   @Test
   public void circleCrop_withShortRectangle_fitsWithinMaintainingAspectRatio()
       throws ExecutionException, InterruptedException {
-     Bitmap result =
+    Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)
-              .asBitmap()
-              .load(canonical.getBitmap())
-              .circleCrop()
-              .override(canonical.getWidth(), canonical.getHeight() / 2));
+                .asBitmap()
+                .load(canonical.getBitmap())
+                .circleCrop()
+                .override(canonical.getWidth(), canonical.getHeight() / 2));
 
     assertThat(result.getWidth()).isEqualTo(canonical.getHeight() / 2);
     assertThat(result.getHeight()).isEqualTo(canonical.getHeight() / 2);

@@ -6,17 +6,15 @@ import java.util.Collection;
 import java.util.List;
 import org.json.JSONException;
 
-/**
- * Handles photo list responses and errors from Flickr API calls.
- */
-final class FlickrQueryResponseListener implements Response.Listener<String>,
-    Response.ErrorListener {
+/** Handles photo list responses and errors from Flickr API calls. */
+final class FlickrQueryResponseListener
+    implements Response.Listener<String>, Response.ErrorListener {
   private final PhotoJsonStringParser parser;
   private final Query query;
   private final Collection<Api.QueryListener> listeners;
 
-  FlickrQueryResponseListener(PhotoJsonStringParser parser, Query query,
-      Collection<Api.QueryListener> listeners) {
+  FlickrQueryResponseListener(
+      PhotoJsonStringParser parser, Query query, Collection<Api.QueryListener> listeners) {
     this.parser = parser;
     this.query = query;
     this.listeners = listeners;

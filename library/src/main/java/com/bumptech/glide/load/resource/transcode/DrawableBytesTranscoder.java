@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.transcode;
 
-
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -13,8 +12,8 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 
 /**
- * Obtains {@code byte[]} from {@link BitmapDrawable}s by delegating to a
- * {@link ResourceTranscoder} for {@link Bitmap}s to {@code byte[]}s.
+ * Obtains {@code byte[]} from {@link BitmapDrawable}s by delegating to a {@link ResourceTranscoder}
+ * for {@link Bitmap}s to {@code byte[]}s.
  */
 public final class DrawableBytesTranscoder implements ResourceTranscoder<Drawable, byte[]> {
   private final BitmapPool bitmapPool;
@@ -32,8 +31,8 @@ public final class DrawableBytesTranscoder implements ResourceTranscoder<Drawabl
 
   @Nullable
   @Override
-  public Resource<byte[]> transcode(@NonNull Resource<Drawable> toTranscode,
-      @NonNull Options options) {
+  public Resource<byte[]> transcode(
+      @NonNull Resource<Drawable> toTranscode, @NonNull Options options) {
     Drawable drawable = toTranscode.get();
     if (drawable instanceof BitmapDrawable) {
       return bitmapBytesTranscoder.transcode(

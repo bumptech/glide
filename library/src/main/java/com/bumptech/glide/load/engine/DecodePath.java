@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Attempts to decode and transcode  resource type from a given data type.
+ * Attempts to decode and transcode resource type from a given data type.
  *
- * @param <DataType>     The type of data ResourceType that will be decoded from.
+ * @param <DataType> The type of data ResourceType that will be decoded from.
  * @param <ResourceType> The type of intermediate resource that will be decoded.
- * @param <Transcode>    The final type of resource that will be transcoded from ResourceType and
- *                       returned to the caller.
+ * @param <Transcode> The final type of resource that will be transcoded from ResourceType and
+ *     returned to the caller.
  */
 public class DecodePath<DataType, ResourceType, Transcode> {
   private static final String TAG = "DecodePath";
@@ -28,28 +28,43 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   private final Pool<List<Throwable>> listPool;
   private final String failureMessage;
 
-  public DecodePath(Class<DataType> dataClass, Class<ResourceType> resourceClass,
+  public DecodePath(
+      Class<DataType> dataClass,
+      Class<ResourceType> resourceClass,
       Class<Transcode> transcodeClass,
       List<? extends ResourceDecoder<DataType, ResourceType>> decoders,
-      ResourceTranscoder<ResourceType, Transcode> transcoder, Pool<List<Throwable>> listPool) {
+      ResourceTranscoder<ResourceType, Transcode> transcoder,
+      Pool<List<Throwable>> listPool) {
     this.dataClass = dataClass;
     this.decoders = decoders;
     this.transcoder = transcoder;
     this.listPool = listPool;
-    failureMessage = "Failed DecodePath{" + dataClass.getSimpleName() + "->"
-        + resourceClass.getSimpleName() + "->" + transcodeClass.getSimpleName() + "}";
+    failureMessage =
+        "Failed DecodePath{"
+            + dataClass.getSimpleName()
+            + "->"
+            + resourceClass.getSimpleName()
+            + "->"
+            + transcodeClass.getSimpleName()
+            + "}";
   }
 
-  public Resource<Transcode> decode(DataRewinder<DataType> rewinder, int width, int height,
-      @NonNull Options options, DecodeCallback<ResourceType> callback) throws GlideException {
+  public Resource<Transcode> decode(
+      DataRewinder<DataType> rewinder,
+      int width,
+      int height,
+      @NonNull Options options,
+      DecodeCallback<ResourceType> callback)
+      throws GlideException {
     Resource<ResourceType> decoded = decodeResource(rewinder, width, height, options);
     Resource<ResourceType> transformed = callback.onResourceDecoded(decoded);
     return transcoder.transcode(transformed, options);
   }
 
   @NonNull
-  private Resource<ResourceType> decodeResource(DataRewinder<DataType> rewinder, int width,
-      int height, @NonNull Options options) throws GlideException {
+  private Resource<ResourceType> decodeResource(
+      DataRewinder<DataType> rewinder, int width, int height, @NonNull Options options)
+      throws GlideException {
     List<Throwable> exceptions = Preconditions.checkNotNull(listPool.acquire());
     try {
       return decodeResourceWithList(rewinder, width, height, options, exceptions);
@@ -59,8 +74,13 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   }
 
   @NonNull
-  private Resource<ResourceType> decodeResourceWithList(DataRewinder<DataType> rewinder, int width,
-      int height, @NonNull Options options, List<Throwable> exceptions) throws GlideException {
+  private Resource<ResourceType> decodeResourceWithList(
+      DataRewinder<DataType> rewinder,
+      int width,
+      int height,
+      @NonNull Options options,
+      List<Throwable> exceptions)
+      throws GlideException {
     Resource<ResourceType> result = null;
     //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0, size = decoders.size(); i < size; i++) {
@@ -93,8 +113,14 @@ public class DecodePath<DataType, ResourceType, Transcode> {
 
   @Override
   public String toString() {
-    return "DecodePath{" + " dataClass=" + dataClass + ", decoders=" + decoders + ", transcoder="
-        + transcoder + '}';
+    return "DecodePath{"
+        + " dataClass="
+        + dataClass
+        + ", decoders="
+        + decoders
+        + ", transcoder="
+        + transcoder
+        + '}';
   }
 
   interface DecodeCallback<ResourceType> {

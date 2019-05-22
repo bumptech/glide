@@ -31,8 +31,10 @@ public final class ManifestParser {
     }
     List<GlideModule> modules = new ArrayList<>();
     try {
-      ApplicationInfo appInfo = context.getPackageManager()
-          .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+      ApplicationInfo appInfo =
+          context
+              .getPackageManager()
+              .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
       if (appInfo.metaData == null) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Got null app info metadata");
@@ -72,7 +74,7 @@ public final class ManifestParser {
     Object module = null;
     try {
       module = clazz.getDeclaredConstructor().newInstance();
-    // These can't be combined until API minimum is 19.
+      // These can't be combined until API minimum is 19.
     } catch (InstantiationException e) {
       throwInstantiateGlideModuleException(clazz, e);
     } catch (IllegalAccessException e) {

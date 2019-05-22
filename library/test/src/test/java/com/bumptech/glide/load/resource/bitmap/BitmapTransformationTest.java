@@ -29,8 +29,7 @@ import org.robolectric.annotation.Config;
 @Config(manifest = Config.NONE, sdk = 18)
 public class BitmapTransformationTest {
 
-  @Mock
-  private BitmapPool bitmapPool;
+  @Mock private BitmapPool bitmapPool;
   private Application context;
 
   @Before
@@ -48,16 +47,17 @@ public class BitmapTransformationTest {
 
   @Test
   public void testReturnsGivenResourceWhenBitmapNotTransformed() {
-    BitmapTransformation transformation = new BitmapTransformation() {
-      @Override
-      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
+    BitmapTransformation transformation =
+        new BitmapTransformation() {
+          @Override
+          public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {}
 
-      @Override
-      protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
-          int outWidth, int outHeight) {
-        return toTransform;
-      }
-    };
+          @Override
+          protected Bitmap transform(
+              @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+            return toTransform;
+          }
+        };
 
     Resource<Bitmap> resource = mockResource(100, 100);
     assertEquals(resource, transformation.transform(context, resource, 1, 1));
@@ -66,16 +66,17 @@ public class BitmapTransformationTest {
   @Test
   public void testReturnsNewResourceWhenBitmapTransformed() {
     final Bitmap transformed = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
-    BitmapTransformation transformation = new BitmapTransformation() {
-      @Override
-      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
+    BitmapTransformation transformation =
+        new BitmapTransformation() {
+          @Override
+          public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {}
 
-      @Override
-      protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap bitmap, int outWidth,
-          int outHeight) {
-        return transformed;
-      }
-    };
+          @Override
+          protected Bitmap transform(
+              @NonNull BitmapPool pool, @NonNull Bitmap bitmap, int outWidth, int outHeight) {
+            return transformed;
+          }
+        };
 
     Resource<Bitmap> resource = mockResource(1, 2);
     assertNotSame(resource, transformation.transform(context, resource, 100, 100));
@@ -86,70 +87,79 @@ public class BitmapTransformationTest {
     final int expectedWidth = 13;
     final int expectedHeight = 148;
     final Resource<Bitmap> resource = mockResource(223, 4123);
-    BitmapTransformation transformation = new BitmapTransformation() {
-      @Override
-      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
+    BitmapTransformation transformation =
+        new BitmapTransformation() {
+          @Override
+          public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {}
 
-      @Override
-      protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
-          int outWidth, int outHeight) {
-        assertEquals(bitmapPool, pool);
-        assertEquals(resource.get(), toTransform);
-        assertEquals(expectedWidth, outWidth);
-        assertEquals(expectedHeight, outHeight);
-        return resource.get();
-      }
-    };
+          @Override
+          protected Bitmap transform(
+              @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+            assertEquals(bitmapPool, pool);
+            assertEquals(resource.get(), toTransform);
+            assertEquals(expectedWidth, outWidth);
+            assertEquals(expectedHeight, outHeight);
+            return resource.get();
+          }
+        };
 
     transformation.transform(context, resource, expectedWidth, expectedHeight);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testThrowsIfGivenInvalidWidth() {
-    BitmapTransformation transformation = new BitmapTransformation() {
+    BitmapTransformation transformation =
+        new BitmapTransformation() {
 
-      @Override
-      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
+          @Override
+          public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {}
 
-      @Override
-      protected Bitmap transform(@NonNull BitmapPool bitmapPool, @NonNull Bitmap toTransform,
-          int outWidth, int outHeight) {
-        return null;
-      }
-    };
+          @Override
+          protected Bitmap transform(
+              @NonNull BitmapPool bitmapPool,
+              @NonNull Bitmap toTransform,
+              int outWidth,
+              int outHeight) {
+            return null;
+          }
+        };
     transformation.transform(context, mockResource(1, 1), -1, 100);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testThrowsIfGivenInvalidHeight() {
-    BitmapTransformation transformation = new BitmapTransformation() {
+    BitmapTransformation transformation =
+        new BitmapTransformation() {
 
-      @Override
-      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
+          @Override
+          public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {}
 
-      @Override
-      protected Bitmap transform(@NonNull BitmapPool bitmapPool, @NonNull Bitmap toTransform,
-          int outWidth, int outHeight) {
-        return null;
-      }
-
-    };
+          @Override
+          protected Bitmap transform(
+              @NonNull BitmapPool bitmapPool,
+              @NonNull Bitmap toTransform,
+              int outWidth,
+              int outHeight) {
+            return null;
+          }
+        };
     transformation.transform(context, mockResource(1, 1), 100, -1);
   }
 
   @Test
   public void testReturnsNullIfTransformReturnsNull() {
-    BitmapTransformation transform = new BitmapTransformation() {
+    BitmapTransformation transform =
+        new BitmapTransformation() {
 
-      @Override
-      public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {  }
+          @Override
+          public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {}
 
-      @Override
-      protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform,
-          int outWidth, int outHeight) {
-        return null;
-      }
-    };
+          @Override
+          protected Bitmap transform(
+              @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+            return null;
+          }
+        };
 
     Resource<Bitmap> resource = mockResource(100, 100);
     assertNull(transform.transform(context, resource, 100, 100));
@@ -189,14 +199,14 @@ public class BitmapTransformationTest {
     int givenHeight;
 
     @Override
-    protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth,
-        int outHeight) {
+    protected Bitmap transform(
+        @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
       givenWidth = outWidth;
       givenHeight = outHeight;
       return null;
     }
 
     @Override
-    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) { }
+    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {}
   }
 }

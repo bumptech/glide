@@ -71,15 +71,15 @@ public class BitmapDrawableTransformationTest {
   public void testReturnsOriginalResourceIfTransformationDoesNotTransform() {
     int outWidth = 123;
     int outHeight = 456;
-    when(wrapped.transform(
-        anyContext(), Util.<Bitmap>anyResource(), eq(outWidth), eq(outHeight)))
-        .thenAnswer(new Answer<Resource<Bitmap>>() {
-          @SuppressWarnings("unchecked")
-          @Override
-          public Resource<Bitmap> answer(InvocationOnMock invocation) throws Throwable {
-            return (Resource<Bitmap>) invocation.getArguments()[1];
-          }
-        });
+    when(wrapped.transform(anyContext(), Util.<Bitmap>anyResource(), eq(outWidth), eq(outHeight)))
+        .thenAnswer(
+            new Answer<Resource<Bitmap>>() {
+              @SuppressWarnings("unchecked")
+              @Override
+              public Resource<Bitmap> answer(InvocationOnMock invocation) throws Throwable {
+                return (Resource<Bitmap>) invocation.getArguments()[1];
+              }
+            });
 
     Resource<BitmapDrawable> transformed =
         transformation.transform(context, drawableResourceToTransform, outWidth, outHeight);
@@ -124,16 +124,17 @@ public class BitmapDrawableTransformationTest {
 
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
-    doAnswer(new Util.WriteDigest("wrapped")).when(wrapped)
+    doAnswer(new Util.WriteDigest("wrapped"))
+        .when(wrapped)
         .updateDiskCacheKey(any(MessageDigest.class));
-    @SuppressWarnings("unchecked") Transformation<Bitmap> other = mock(Transformation.class);
-    doAnswer(new Util.WriteDigest("other")).when(other)
+    @SuppressWarnings("unchecked")
+    Transformation<Bitmap> other = mock(Transformation.class);
+    doAnswer(new Util.WriteDigest("other"))
+        .when(other)
         .updateDiskCacheKey(any(MessageDigest.class));
 
     keyTester
-        .addEquivalenceGroup(
-            transformation,
-            new BitmapDrawableTransformation(wrapped))
+        .addEquivalenceGroup(transformation, new BitmapDrawableTransformation(wrapped))
         .addEquivalenceGroup(new BitmapDrawableTransformation(other))
         .addEquivalenceGroup(wrapped)
         .addRegressionTest(

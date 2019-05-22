@@ -11,8 +11,8 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 /**
- * A fixed size Array Pool that evicts arrays using an LRU strategy to keep the pool under
- * the maximum byte size.
+ * A fixed size Array Pool that evicts arrays using an LRU strategy to keep the pool under the
+ * maximum byte size.
  */
 public final class LruArrayPool implements ArrayPool {
   // 4MB.
@@ -22,8 +22,7 @@ public final class LruArrayPool implements ArrayPool {
    * The maximum number of times larger an int array may be to be than a requested size to eligible
    * to be returned from the pool.
    */
-  @VisibleForTesting
-  static final int MAX_OVER_SIZE_MULTIPLE = 8;
+  @VisibleForTesting static final int MAX_OVER_SIZE_MULTIPLE = 8;
   /** Used to calculate the maximum % of the total pool size a single byte array may consume. */
   private static final int SINGLE_ARRAY_MAX_SIZE_DIVISOR = 2;
 
@@ -109,7 +108,6 @@ public final class LruArrayPool implements ArrayPool {
     }
     return result;
   }
-
 
   // Our cast is safe because the Key is based on the type.
   @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
@@ -200,8 +198,8 @@ public final class LruArrayPool implements ArrayPool {
       } else if (arrayPoolClass.equals(byte[].class)) {
         adapter = new ByteArrayAdapter();
       } else {
-          throw new IllegalArgumentException("No array pool found for: "
-              + arrayPoolClass.getSimpleName());
+        throw new IllegalArgumentException(
+            "No array pool found for: " + arrayPoolClass.getSimpleName());
       }
       adapters.put(arrayPoolClass, adapter);
     }
@@ -223,7 +221,7 @@ public final class LruArrayPool implements ArrayPool {
   private static final class KeyPool extends BaseKeyPool<Key> {
 
     @Synthetic
-    KeyPool() { }
+    KeyPool() {}
 
     Key get(int size, Class<?> arrayClass) {
       Key result = get();

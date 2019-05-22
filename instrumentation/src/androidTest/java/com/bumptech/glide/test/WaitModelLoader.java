@@ -19,8 +19,7 @@ import java.util.concurrent.CountDownLatch;
  * Allows callers to load an object but force the load to pause until {@link WaitModel#countDown()}
  * is called.
  */
-public final class WaitModelLoader<Model, Data>
-    implements ModelLoader<WaitModel<Model>, Data> {
+public final class WaitModelLoader<Model, Data> implements ModelLoader<WaitModel<Model>, Data> {
 
   private final ModelLoader<Model, Data> wrapped;
 
@@ -32,8 +31,8 @@ public final class WaitModelLoader<Model, Data>
   @Override
   public LoadData<Data> buildLoadData(
       @NonNull WaitModel<Model> waitModel, int width, int height, @NonNull Options options) {
-    LoadData<Data> wrappedLoadData = wrapped
-        .buildLoadData(waitModel.wrapped, width, height, options);
+    LoadData<Data> wrappedLoadData =
+        wrapped.buildLoadData(waitModel.wrapped, width, height, options);
     if (wrappedLoadData == null) {
       return null;
     }
@@ -74,7 +73,8 @@ public final class WaitModelLoader<Model, Data>
     }
 
     public static synchronized <T> WaitModel<T> waitOn(T model) {
-      @SuppressWarnings("unchecked") ModelLoaderFactory<WaitModel<T>, InputStream> streamFactory =
+      @SuppressWarnings("unchecked")
+      ModelLoaderFactory<WaitModel<T>, InputStream> streamFactory =
           new Factory<>((Class<T>) model.getClass(), InputStream.class);
       Glide.get(InstrumentationRegistry.getTargetContext())
           .getRegistry()
@@ -85,8 +85,7 @@ public final class WaitModelLoader<Model, Data>
 
     @NonNull
     @Override
-    public ModelLoader<WaitModel<Model>, Data> build(
-        MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<WaitModel<Model>, Data> build(MultiModelLoaderFactory multiFactory) {
       return new WaitModelLoader<>(multiFactory.build(modelClass, dataClass));
     }
 

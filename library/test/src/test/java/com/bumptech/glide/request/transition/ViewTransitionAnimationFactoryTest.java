@@ -33,8 +33,7 @@ public class ViewTransitionAnimationFactoryTest {
 
   @Test
   public void testFactoryReturnsNoAnimationIfFromMemoryCache() {
-    Transition<Object> animation =
-        factory.build(DataSource.MEMORY_CACHE, true /*isFirstResource*/);
+    Transition<Object> animation = factory.build(DataSource.MEMORY_CACHE, true /*isFirstResource*/);
     assertEquals(NoTransition.get(), animation);
     verify(viewTransitionAnimationFactory, never()).build(RuntimeEnvironment.application);
   }

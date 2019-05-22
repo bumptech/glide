@@ -70,4 +70,3 @@ public class DrawableCrossFadeViewAnimationTest {
         new DrawableCrossFadeTransition(duration, true /*isCrossFadeEnabled*/);
   }
 }
-

@@ -11,14 +11,14 @@ import java.util.List;
 
 /**
  * For a given {@link com.bumptech.glide.load.data.DataFetcher} for a given data class, attempts to
- * fetch the data and then run it through one or more
- * {@link com.bumptech.glide.load.engine.DecodePath}s.
+ * fetch the data and then run it through one or more {@link
+ * com.bumptech.glide.load.engine.DecodePath}s.
  *
- * @param <Data>         The type of data that will be fetched.
+ * @param <Data> The type of data that will be fetched.
  * @param <ResourceType> The type of intermediate resource that will be decoded within one of the
- *                       {@link com.bumptech.glide.load.engine.DecodePath}s.
- * @param <Transcode>    The type of resource that will be returned as the result if the load and
- *                       one of the decode paths succeeds.
+ *     {@link com.bumptech.glide.load.engine.DecodePath}s.
+ * @param <Transcode> The type of resource that will be returned as the result if the load and one
+ *     of the decode paths succeeds.
  */
 public class LoadPath<Data, ResourceType, Transcode> {
   private final Class<Data> dataClass;
@@ -26,18 +26,32 @@ public class LoadPath<Data, ResourceType, Transcode> {
   private final List<? extends DecodePath<Data, ResourceType, Transcode>> decodePaths;
   private final String failureMessage;
 
-  public LoadPath(Class<Data> dataClass, Class<ResourceType> resourceClass,
+  public LoadPath(
+      Class<Data> dataClass,
+      Class<ResourceType> resourceClass,
       Class<Transcode> transcodeClass,
-      List<DecodePath<Data, ResourceType, Transcode>> decodePaths, Pool<List<Throwable>> listPool) {
+      List<DecodePath<Data, ResourceType, Transcode>> decodePaths,
+      Pool<List<Throwable>> listPool) {
     this.dataClass = dataClass;
     this.listPool = listPool;
     this.decodePaths = Preconditions.checkNotEmpty(decodePaths);
-    failureMessage = "Failed LoadPath{" + dataClass.getSimpleName() + "->"
-        + resourceClass.getSimpleName() + "->" + transcodeClass.getSimpleName() + "}";
+    failureMessage =
+        "Failed LoadPath{"
+            + dataClass.getSimpleName()
+            + "->"
+            + resourceClass.getSimpleName()
+            + "->"
+            + transcodeClass.getSimpleName()
+            + "}";
   }
 
-  public Resource<Transcode> load(DataRewinder<Data> rewinder, @NonNull Options options, int width,
-      int height, DecodePath.DecodeCallback<ResourceType> decodeCallback) throws GlideException {
+  public Resource<Transcode> load(
+      DataRewinder<Data> rewinder,
+      @NonNull Options options,
+      int width,
+      int height,
+      DecodePath.DecodeCallback<ResourceType> decodeCallback)
+      throws GlideException {
     List<Throwable> throwables = Preconditions.checkNotNull(listPool.acquire());
     try {
       return loadWithExceptionList(rewinder, options, width, height, decodeCallback, throwables);
@@ -46,10 +60,14 @@ public class LoadPath<Data, ResourceType, Transcode> {
     }
   }
 
-  private Resource<Transcode> loadWithExceptionList(DataRewinder<Data> rewinder,
+  private Resource<Transcode> loadWithExceptionList(
+      DataRewinder<Data> rewinder,
       @NonNull Options options,
-      int width, int height, DecodePath.DecodeCallback<ResourceType> decodeCallback,
-      List<Throwable> exceptions) throws GlideException {
+      int width,
+      int height,
+      DecodePath.DecodeCallback<ResourceType> decodeCallback,
+      List<Throwable> exceptions)
+      throws GlideException {
     Resource<Transcode> result = null;
     //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0, size = decodePaths.size(); i < size; i++) {

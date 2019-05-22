@@ -31,10 +31,7 @@ public class DataUriTest {
   public void load_withJpegAsDataUriString_returnsBitmap() {
     Bitmap bitmap =
         concurrency.get(
-            Glide.with(context)
-                .asBitmap()
-                .load(getDataUriString(CompressFormat.JPEG))
-                .submit());
+            Glide.with(context).asBitmap().load(getDataUriString(CompressFormat.JPEG)).submit());
     assertThat(bitmap).isNotNull();
   }
 
@@ -42,10 +39,7 @@ public class DataUriTest {
   public void load_withPngDataUriString_returnsBitmap() {
     Bitmap bitmap =
         concurrency.get(
-            Glide.with(context)
-                .asBitmap()
-                .load(getDataUriString(CompressFormat.PNG))
-                .submit());
+            Glide.with(context).asBitmap().load(getDataUriString(CompressFormat.PNG)).submit());
     assertThat(bitmap).isNotNull();
   }
 
@@ -53,10 +47,7 @@ public class DataUriTest {
   public void load_withJpegAsDataUri_returnsBitmap() {
     Bitmap bitmap =
         concurrency.get(
-            Glide.with(context)
-                .asBitmap()
-                .load(getDataUri(CompressFormat.JPEG))
-                .submit());
+            Glide.with(context).asBitmap().load(getDataUri(CompressFormat.JPEG)).submit());
     assertThat(bitmap).isNotNull();
   }
 
@@ -64,10 +55,7 @@ public class DataUriTest {
   public void load_withPngAsDataUri_returnsBitmap() {
     Bitmap bitmap =
         concurrency.get(
-            Glide.with(context)
-                .asBitmap()
-                .load(getDataUri(CompressFormat.PNG))
-                .submit());
+            Glide.with(context).asBitmap().load(getDataUri(CompressFormat.PNG)).submit());
     assertThat(bitmap).isNotNull();
   }
 

@@ -14,8 +14,7 @@ public class MediaStoreSignatureTest {
   public void equalsHashCodeAndDigest() {
     keyTester
         .addEquivalenceGroup(
-            new MediaStoreSignature("first", 100, 1),
-            new MediaStoreSignature("first", 100, 1))
+            new MediaStoreSignature("first", 100, 1), new MediaStoreSignature("first", 100, 1))
         .addEquivalenceGroup(new MediaStoreSignature("second", 100, 1))
         .addEquivalenceGroup(new MediaStoreSignature("first", 200, 1))
         .addEquivalenceGroup(new MediaStoreSignature("first", 100, 2))

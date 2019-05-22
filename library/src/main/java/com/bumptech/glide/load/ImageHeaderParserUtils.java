@@ -10,20 +10,21 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-/**
- * Utilities for the ImageHeaderParser.
- */
+/** Utilities for the ImageHeaderParser. */
 public final class ImageHeaderParserUtils {
   // 5MB. This is the max image header size we can handle, we preallocate a much smaller buffer but
   // will resize up to this amount if necessary.
   private static final int MARK_POSITION = 5 * 1024 * 1024;
 
-  private ImageHeaderParserUtils() { }
+  private ImageHeaderParserUtils() {}
 
   /** Returns the ImageType for the given InputStream. */
   @NonNull
-  public static ImageType getType(@NonNull List<ImageHeaderParser> parsers,
-      @Nullable InputStream is, @NonNull ArrayPool byteArrayPool) throws IOException {
+  public static ImageType getType(
+      @NonNull List<ImageHeaderParser> parsers,
+      @Nullable InputStream is,
+      @NonNull ArrayPool byteArrayPool)
+      throws IOException {
     if (is == null) {
       return ImageType.UNKNOWN;
     }
@@ -51,9 +52,8 @@ public final class ImageHeaderParserUtils {
 
   /** Returns the ImageType for the given ByteBuffer. */
   @NonNull
-  public static ImageType getType(@NonNull List<ImageHeaderParser> parsers,
-      @Nullable ByteBuffer buffer)
-      throws IOException {
+  public static ImageType getType(
+      @NonNull List<ImageHeaderParser> parsers, @Nullable ByteBuffer buffer) throws IOException {
     if (buffer == null) {
       return ImageType.UNKNOWN;
     }
@@ -70,11 +70,12 @@ public final class ImageHeaderParserUtils {
     return ImageType.UNKNOWN;
   }
 
-  /**
-   * Returns the orientation for the given InputStream.
-   */
-  public static int getOrientation(@NonNull List<ImageHeaderParser> parsers,
-      @Nullable InputStream is, @NonNull ArrayPool byteArrayPool) throws IOException {
+  /** Returns the orientation for the given InputStream. */
+  public static int getOrientation(
+      @NonNull List<ImageHeaderParser> parsers,
+      @Nullable InputStream is,
+      @NonNull ArrayPool byteArrayPool)
+      throws IOException {
     if (is == null) {
       return ImageHeaderParser.UNKNOWN_ORIENTATION;
     }

@@ -31,26 +31,20 @@ import java.io.InputStream;
  * and that copying takes place when filling that buffer, but this is usually outweighed by the
  * performance benefits.
  *
- * <p>A typical application pattern for the class looks like this:</p>
+ * <p>A typical application pattern for the class looks like this:
  *
  * <pre>
  * BufferedInputStream buf = new BufferedInputStream(new FileInputStream("file.java"));
  * </pre>
  */
 public class RecyclableBufferedInputStream extends FilterInputStream {
-  /**
-   * The buffer containing the current bytes read from the target InputStream.
-   */
+  /** The buffer containing the current bytes read from the target InputStream. */
   private volatile byte[] buf;
 
-  /**
-   * The total number of bytes inside the byte array {@code buf}.
-   */
+  /** The total number of bytes inside the byte array {@code buf}. */
   private int count;
 
-  /**
-   * The current limit, which when passed, invalidates the current mark.
-   */
+  /** The current limit, which when passed, invalidates the current mark. */
   private int marklimit;
 
   /**
@@ -59,10 +53,9 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    */
   private int markpos = -1;
 
-  /**
-   * The current position within the byte array {@code buf}.
-   */
+  /** The current position within the byte array {@code buf}. */
   private int pos;
+
   private final ArrayPool byteArrayPool;
 
   public RecyclableBufferedInputStream(@NonNull InputStream in, @NonNull ArrayPool byteArrayPool) {
@@ -70,8 +63,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
   }
 
   @VisibleForTesting
-  RecyclableBufferedInputStream(@NonNull InputStream in, @NonNull ArrayPool byteArrayPool,
-      int bufferSize) {
+  RecyclableBufferedInputStream(
+      @NonNull InputStream in, @NonNull ArrayPool byteArrayPool, int bufferSize) {
     super(in);
     this.byteArrayPool = byteArrayPool;
     buf = byteArrayPool.get(bufferSize, byte[].class);
@@ -264,10 +257,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    * @param buffer the byte array in which to store the bytes read.
    * @return the number of bytes actually read or -1 if end of stream.
    * @throws IndexOutOfBoundsException if {@code offset < 0} or {@code byteCount < 0}, or if {@code
-   *                                   offset + byteCount} is greater than the size of {@code
-   *                                   buffer}.
-   * @throws IOException               if the stream is already closed or another IOException
-   *                                   occurs.
+   *     offset + byteCount} is greater than the size of {@code buffer}.
+   * @throws IOException if the stream is already closed or another IOException occurs.
    */
   @Override
   public synchronized int read(@NonNull byte[] buffer, int offset, int byteCount)
@@ -277,7 +268,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
     if (localBuf == null) {
       throw streamClosed();
     }
-    //Arrays.checkOffsetAndCount(buffer.length, offset, byteCount);
+    // Arrays.checkOffsetAndCount(buffer.length, offset, byteCount);
     if (byteCount == 0) {
       return 0;
     }
@@ -341,8 +332,7 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    * Resets this stream to the last marked location.
    *
    * @throws IOException if this stream is closed, no mark has been put or the mark is no longer
-   *                     valid because more than {@code readlimit} bytes have been read since
-   *                     setting the mark.
+   *     valid because more than {@code readlimit} bytes have been read since setting the mark.
    * @see #mark(int)
    */
   @Override
@@ -351,8 +341,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
       throw new IOException("Stream is closed");
     }
     if (-1 == markpos) {
-      throw new InvalidMarkException("Mark has been invalidated, pos: " + pos + " markLimit: "
-          + marklimit);
+      throw new InvalidMarkException(
+          "Mark has been invalidated, pos: " + pos + " markLimit: " + marklimit);
     }
     pos = markpos;
   }
@@ -361,8 +351,8 @@ public class RecyclableBufferedInputStream extends FilterInputStream {
    * Skips {@code byteCount} bytes in this stream. Subsequent calls to {@link #read} will not return
    * these bytes unless {@link #reset} is used.
    *
-   * @param byteCount the number of bytes to skip. This method does nothing and returns 0 if
-   *                  {@code byteCount} is less than zero.
+   * @param byteCount the number of bytes to skip. This method does nothing and returns 0 if {@code
+   *     byteCount} is less than zero.
    * @return the number of bytes actually skipped.
    * @throws IOException if this stream is closed or another IOException occurs.
    */

@@ -42,11 +42,12 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowSystemClock;
 
 /**
- * Tests {@link com.bumptech.glide.integration.volley.VolleyStreamFetcher} against server
- * responses.
+ * Tests {@link com.bumptech.glide.integration.volley.VolleyStreamFetcher} against server responses.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18,
+@Config(
+    manifest = Config.NONE,
+    sdk = 18,
     shadows = VolleyStreamFetcherServerTest.FakeSystemClock.class)
 public class VolleyStreamFetcherServerTest {
   private static final String DEFAULT_PATH = "/fakepath";
@@ -92,8 +93,10 @@ public class VolleyStreamFetcherServerTest {
   @Test
   public void testHandlesRedirect301s() throws Exception {
     String expected = "fakedata";
-    mockWebServer.enqueue(new MockResponse().setResponseCode(301)
-        .setHeader("Location", mockWebServer.url("/redirect").toString()));
+    mockWebServer.enqueue(
+        new MockResponse()
+            .setResponseCode(301)
+            .setHeader("Location", mockWebServer.url("/redirect").toString()));
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
     getFetcher().loadData(Priority.LOW, callback);
     waitForResponseLatch.await();
@@ -104,8 +107,10 @@ public class VolleyStreamFetcherServerTest {
   @Test
   public void testHandlesRedirect302s() throws Exception {
     String expected = "fakedata";
-    mockWebServer.enqueue(new MockResponse().setResponseCode(302)
-        .setHeader("Location", mockWebServer.url("/redirect").toString()));
+    mockWebServer.enqueue(
+        new MockResponse()
+            .setResponseCode(302)
+            .setHeader("Location", mockWebServer.url("/redirect").toString()));
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
     getFetcher().loadData(Priority.LOW, callback);
     waitForResponseLatch.await();
@@ -119,8 +124,10 @@ public class VolleyStreamFetcherServerTest {
     String expected = "redirectedData";
     String redirectBase = "/redirect";
     for (int i = 0; i < numRedirects; i++) {
-      mockWebServer.enqueue(new MockResponse().setResponseCode(301)
-          .setHeader("Location", mockWebServer.url(redirectBase + i).toString()));
+      mockWebServer.enqueue(
+          new MockResponse()
+              .setResponseCode(301)
+              .setHeader("Location", mockWebServer.url(redirectBase + i).toString()));
     }
     mockWebServer.enqueue(new MockResponse().setResponseCode(200).setBody(expected));
 
@@ -157,8 +164,10 @@ public class VolleyStreamFetcherServerTest {
   @Test
   public void testCallsLoadFailedAfterTooManyRedirects() throws Exception {
     for (int i = 0; i < 20; i++) {
-      mockWebServer.enqueue(new MockResponse().setResponseCode(301)
-          .setHeader("Location", mockWebServer.url("/redirect" + i).toString()));
+      mockWebServer.enqueue(
+          new MockResponse()
+              .setResponseCode(301)
+              .setHeader("Location", mockWebServer.url("/redirect" + i).toString()));
     }
     getFetcher().loadData(Priority.NORMAL, callback);
     waitForResponseLatch.await();
@@ -215,9 +224,7 @@ public class VolleyStreamFetcherServerTest {
     }
   }
 
-  /**
-   * A shadow clock that doesn't rely on running on an Android thread with a Looper.
-   */
+  /** A shadow clock that doesn't rely on running on an Android thread with a Looper. */
   @Implements(SystemClock.class)
   public static class FakeSystemClock extends ShadowSystemClock {
 

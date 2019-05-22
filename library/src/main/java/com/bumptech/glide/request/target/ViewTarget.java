@@ -53,14 +53,11 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
   protected final T view;
   private final SizeDeterminer sizeDeterminer;
-  @Nullable
-  private OnAttachStateChangeListener attachStateListener;
+  @Nullable private OnAttachStateChangeListener attachStateListener;
   private boolean isClearedByUs;
   private boolean isAttachStateListenerAdded;
 
-  /**
-   * Constructor that defaults {@code waitForLayout} to {@code false}.
-   */
+  /** Constructor that defaults {@code waitForLayout} to {@code false}. */
   public ViewTarget(@NonNull T view) {
     this.view = Preconditions.checkNotNull(view);
     sizeDeterminer = new SizeDeterminer(view);
@@ -68,14 +65,13 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
 
   /**
    * @param waitForLayout If set to {@code true}, Glide will always wait for any pending layout pass
-   * before checking for the size a View. If set to {@code false} Glide will only wait for a pending
-   * layout pass if it's unable to resolve the size from layout parameters or an existing View size.
-   * Because setting this parameter to {@code true} forces Glide to wait for the layout pass to
-   * occur before starting the load, setting this parameter to {@code true} can cause flashing in
-   * some cases and should be used sparingly. If layout parameters are set to fixed sizes, they will
-   * still be used instead of the View's dimensions even if this parameter is set to {@code true}.
-   * This parameter is a fallback only.
-   *
+   *     before checking for the size a View. If set to {@code false} Glide will only wait for a
+   *     pending layout pass if it's unable to resolve the size from layout parameters or an
+   *     existing View size. Because setting this parameter to {@code true} forces Glide to wait for
+   *     the layout pass to occur before starting the load, setting this parameter to {@code true}
+   *     can cause flashing in some cases and should be used sparingly. If layout parameters are set
+   *     to fixed sizes, they will still be used instead of the View's dimensions even if this
+   *     parameter is set to {@code true}. This parameter is a fallback only.
    * @deprecated Use {@link #waitForLayout()} instead.
    */
   @SuppressWarnings("WeakerAccess") // Public API
@@ -88,19 +84,19 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   }
 
   /**
-   * Clears the {@link View}'s {@link Request} when the {@link View} is detached from its
-   * {@link android.view.Window} and restarts the {@link Request} when the {@link View} is
-   * re-attached from its {@link android.view.Window}.
+   * Clears the {@link View}'s {@link Request} when the {@link View} is detached from its {@link
+   * android.view.Window} and restarts the {@link Request} when the {@link View} is re-attached from
+   * its {@link android.view.Window}.
    *
    * <p>This is an experimental API that may be removed in a future version.
    *
    * <p>Using this method can save memory by allowing Glide to more eagerly clear resources when
    * transitioning screens or swapping adapters in scrolling views. However it also substantially
    * increases the odds that images will not be in memory if users subsequently return to a screen
-   * where images were previously loaded. Whether or not this happens will depend on the number
-   * of images loaded in the new screen and the size of the memory cache. Increasing the size of
-   * the memory cache can improve this behavior but it largely negates the memory benefits of using
-   * this method.
+   * where images were previously loaded. Whether or not this happens will depend on the number of
+   * images loaded in the new screen and the size of the memory cache. Increasing the size of the
+   * memory cache can improve this behavior but it largely negates the memory benefits of using this
+   * method.
    *
    * <p>Use this method with caution and measure your memory usage to ensure that it's actually
    * improving your memory usage in the cases you care about.
@@ -112,23 +108,25 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     if (attachStateListener != null) {
       return this;
     }
-    attachStateListener = new OnAttachStateChangeListener() {
-      @Override
-      public void onViewAttachedToWindow(View v) {
-        resumeMyRequest();
-      }
+    attachStateListener =
+        new OnAttachStateChangeListener() {
+          @Override
+          public void onViewAttachedToWindow(View v) {
+            resumeMyRequest();
+          }
 
-      @Override
-      public void onViewDetachedFromWindow(View v) {
-        pauseMyRequest();
-      }
-    };
+          @Override
+          public void onViewDetachedFromWindow(View v) {
+            pauseMyRequest();
+          }
+        };
     maybeAddAttachStateListener();
     return this;
   }
 
   @SuppressWarnings("WeakerAccess")
-  @Synthetic void resumeMyRequest() {
+  @Synthetic
+  void resumeMyRequest() {
     Request request = getRequest();
     if (request != null && request.isCleared()) {
       request.begin();
@@ -136,7 +134,8 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   }
 
   @SuppressWarnings("WeakerAccess")
-  @Synthetic void pauseMyRequest() {
+  @Synthetic
+  void pauseMyRequest() {
     Request request = getRequest();
     // If the Request were cleared by the developer, it would be null here. The only way it's
     // present is if the developer hasn't previously cleared this Target.
@@ -148,19 +147,19 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   }
 
   /**
-   * Indicates that Glide should always wait for any pending layout pass before checking
-   * for the size an {@link View}.
+   * Indicates that Glide should always wait for any pending layout pass before checking for the
+   * size an {@link View}.
    *
    * <p>By default, Glide will only wait for a pending layout pass if it's unable to resolve the
    * size from the {@link LayoutParams} or valid non-zero values for {@link View#getWidth()} and
    * {@link View#getHeight()}.
    *
    * <p>Because calling this method forces Glide to wait for the layout pass to occur before
-   * starting loads, setting this parameter to {@code true} can cause Glide to asynchronous load
-   * an image even if it's in the memory cache. The load will happen asynchronously because Glide
-   * has to wait for a layout pass to occur, which won't necessarily happen in the same frame as
-   * when the image is requested. As a result, using this method can resulting in flashing in some
-   * cases and should be used sparingly.
+   * starting loads, setting this parameter to {@code true} can cause Glide to asynchronous load an
+   * image even if it's in the memory cache. The load will happen asynchronously because Glide has
+   * to wait for a layout pass to occur, which won't necessarily happen in the same frame as when
+   * the image is requested. As a result, using this method can resulting in flashing in some cases
+   * and should be used sparingly.
    *
    * <p>If the {@link LayoutParams} of the wrapped {@link View} are set to fixed sizes, they will
    * still be used instead of the {@link View}'s dimensions even if this method is called. This
@@ -198,9 +197,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
     isAttachStateListenerAdded = false;
   }
 
-  /**
-   * Returns the wrapped {@link android.view.View}.
-   */
+  /** Returns the wrapped {@link android.view.View}. */
   @NonNull
   public T getView() {
     return view;
@@ -251,13 +248,13 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   /**
    * Returns any stored request using {@link android.view.View#getTag()}.
    *
-   * <p> For Glide to function correctly, Glide must be the only thing that calls {@link
+   * <p>For Glide to function correctly, Glide must be the only thing that calls {@link
    * View#setTag(Object)}. If the tag is cleared or put to another object type, Glide will not be
    * able to retrieve and cancel previous loads which will not only prevent Glide from reusing
    * resource, but will also result in incorrect images being loaded and lots of flashing of images
    * in lists. As a result, this will throw an {@link java.lang.IllegalArgumentException} if {@link
    * android.view.View#getTag()}} returns a non null object that is not an {@link
-   * com.bumptech.glide.request.Request}. </p>
+   * com.bumptech.glide.request.Request}.
    */
   @Override
   @Nullable
@@ -291,24 +288,19 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   }
 
   /**
-   * Sets the android resource id to use in conjunction with {@link View#setTag(int, Object)}
-   * to store temporary state allowing loads to be automatically cancelled and resources re-used
-   * in scrolling lists.
+   * Sets the android resource id to use in conjunction with {@link View#setTag(int, Object)} to
+   * store temporary state allowing loads to be automatically cancelled and resources re-used in
+   * scrolling lists.
    *
-   * <p>
-   *   If no tag id is set, Glide will use {@link View#setTag(Object)}.
-   * </p>
+   * <p>If no tag id is set, Glide will use {@link View#setTag(Object)}.
    *
-   * <p>
-   *   Warning: prior to Android 4.0 tags were stored in a static map. Using this method prior
-   *   to Android 4.0 may cause memory leaks and isn't recommended. If you do use this method
-   *   on older versions, be sure to call {@link com.bumptech.glide.RequestManager#clear(View)} on
-   *   any view you start a load into to ensure that the static state is removed.
-   * </p>
+   * <p>Warning: prior to Android 4.0 tags were stored in a static map. Using this method prior to
+   * Android 4.0 may cause memory leaks and isn't recommended. If you do use this method on older
+   * versions, be sure to call {@link com.bumptech.glide.RequestManager#clear(View)} on any view you
+   * start a load into to ensure that the static state is removed.
    *
    * @deprecated Glide uses it's own default tag id, so there's no need to specify your own. This
-   * method will be removed in a future version.
-   *
+   *     method will be removed in a future version.
    * @param tagId The android resource to use.
    */
   // Public API.
@@ -316,8 +308,9 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   @Deprecated
   public static void setTagId(int tagId) {
     if (isTagUsedAtLeastOnce) {
-      throw new IllegalArgumentException("You cannot set the tag id more than once or change"
-          + " the tag id after the first request has been made");
+      throw new IllegalArgumentException(
+          "You cannot set the tag id more than once or change"
+              + " the tag id after the first request has been made");
     }
     ViewTarget.tagId = tagId;
   }
@@ -326,9 +319,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   static final class SizeDeterminer {
     // Some negative sizes (Target.SIZE_ORIGINAL) are valid, 0 is never valid.
     private static final int PENDING_SIZE = 0;
-    @VisibleForTesting
-    @Nullable
-    static Integer maxDisplayLength;
+    @VisibleForTesting @Nullable static Integer maxDisplayLength;
     private final View view;
     private final List<SizeReadyCallback> cbs = new ArrayList<>();
     @Synthetic boolean waitForLayout;
@@ -482,12 +473,14 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
       // layout to complete before using this fallback parameter (ConstraintLayout among others).
       if (!view.isLayoutRequested() && paramSize == LayoutParams.WRAP_CONTENT) {
         if (Log.isLoggable(TAG, Log.INFO)) {
-          Log.i(TAG, "Glide treats LayoutParams.WRAP_CONTENT as a request for an image the size of"
-              + " this device's screen dimensions. If you want to load the original image and are"
-              + " ok with the corresponding memory cost and OOMs (depending on the input size), use"
-              + " .override(Target.SIZE_ORIGINAL). Otherwise, use LayoutParams.MATCH_PARENT, set"
-              + " layout_width and layout_height to fixed dimension, or use .override() with fixed"
-              + " dimensions.");
+          Log.i(
+              TAG,
+              "Glide treats LayoutParams.WRAP_CONTENT as a request for an image the size of"
+                  + " this device's screen dimensions. If you want to load the original image and are"
+                  + " ok with the corresponding memory cost and OOMs (depending on the input size), use"
+                  + " .override(Target.SIZE_ORIGINAL). Otherwise, use LayoutParams.MATCH_PARENT, set"
+                  + " layout_width and layout_height to fixed dimension, or use .override() with fixed"
+                  + " dimensions.");
         }
         return getMaxDisplayLength(view.getContext());
       }

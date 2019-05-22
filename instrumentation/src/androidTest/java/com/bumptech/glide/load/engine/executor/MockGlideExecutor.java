@@ -10,9 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-/**
- * Creates mock {@link GlideExecutor}s.
- */
+/** Creates mock {@link GlideExecutor}s. */
 @VisibleForTesting
 public final class MockGlideExecutor {
   private MockGlideExecutor() {
@@ -29,9 +27,7 @@ public final class MockGlideExecutor {
     return newTestExecutor(new DirectExecutorService());
   }
 
-  /**
-   * @deprecated Use {@link #newMainThreadExecutor} instead.
-   */
+  /** @deprecated Use {@link #newMainThreadExecutor} instead. */
   @Deprecated
   public static GlideExecutor newMainThreadUnlimitedExecutor() {
     return newMainThreadExecutor();
@@ -43,10 +39,7 @@ public final class MockGlideExecutor {
    */
   private static final class DirectExecutorService extends ForwardingExecutorService {
     private static final StrictMode.ThreadPolicy THREAD_POLICY =
-        new StrictMode.ThreadPolicy.Builder()
-            .detectNetwork()
-            .penaltyDeath()
-            .build();
+        new StrictMode.ThreadPolicy.Builder().detectNetwork().penaltyDeath().build();
 
     private final ExecutorService delegate;
 
@@ -79,18 +72,19 @@ public final class MockGlideExecutor {
 
     @Override
     public void execute(@NonNull final Runnable command) {
-      delegate.execute(new Runnable() {
-        @Override
-        public void run() {
-          StrictMode.ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
-          StrictMode.setThreadPolicy(THREAD_POLICY);
-          try {
-            command.run();
-          } finally {
-            StrictMode.setThreadPolicy(oldPolicy);
-          }
-        }
-      });
+      delegate.execute(
+          new Runnable() {
+            @Override
+            public void run() {
+              StrictMode.ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
+              StrictMode.setThreadPolicy(THREAD_POLICY);
+              try {
+                command.run();
+              } finally {
+                StrictMode.setThreadPolicy(oldPolicy);
+              }
+            }
+          });
     }
 
     private <T> Future<T> getUninterruptibly(Future<T> future) {

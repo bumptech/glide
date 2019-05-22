@@ -59,7 +59,8 @@ public class ErrorHandlingTest {
   @Test
   public void load_whenEncoderFails_callsUncaughtThrowableStrategy() {
     WaitForErrorStrategy strategy = new WaitForErrorStrategy();
-    Glide.init(context,
+    Glide.init(
+        context,
         new GlideBuilder()
             .setAnimationExecutor(GlideExecutor.newAnimationExecutor(/*threadCount=*/ 1, strategy))
             .setSourceExecutor(GlideExecutor.newSourceExecutor(strategy))
@@ -67,10 +68,7 @@ public class ErrorHandlingTest {
     Glide.get(context).getRegistry().prepend(Bitmap.class, new FailEncoder());
 
     concurrency.get(
-        Glide.with(context)
-            .load(ResourceIds.raw.canonical)
-            .listener(requestListener)
-            .submit());
+        Glide.with(context).load(ResourceIds.raw.canonical).listener(requestListener).submit());
 
     // Writing to the disk cache and therefore the exception caused by our FailEncoder may happen
     // after the request completes, so we should wait for the expected error explicitly.
@@ -84,7 +82,8 @@ public class ErrorHandlingTest {
   @Test
   public void load_whenLoadSucceeds_butEncoderFails_doesNotCallOnLoadFailed() {
     WaitForErrorStrategy strategy = new WaitForErrorStrategy();
-    Glide.init(context,
+    Glide.init(
+        context,
         new GlideBuilder()
             .setAnimationExecutor(GlideExecutor.newAnimationExecutor(/*threadCount=*/ 1, strategy))
             .setSourceExecutor(GlideExecutor.newSourceExecutor(strategy))
@@ -92,18 +91,11 @@ public class ErrorHandlingTest {
     Glide.get(context).getRegistry().prepend(Bitmap.class, new FailEncoder());
 
     concurrency.get(
-        Glide.with(context)
-            .load(ResourceIds.raw.canonical)
-            .listener(requestListener)
-            .submit());
+        Glide.with(context).load(ResourceIds.raw.canonical).listener(requestListener).submit());
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(),
-            any(),
-            anyDrawableTarget(),
-            any(DataSource.class),
-            anyBoolean());
+            anyDrawable(), any(), anyDrawableTarget(), any(DataSource.class), anyBoolean());
     verify(requestListener, never())
         .onLoadFailed(any(GlideException.class), any(), anyDrawableTarget(), anyBoolean());
   }
@@ -115,10 +107,7 @@ public class ErrorHandlingTest {
     FutureTarget<Drawable> target =
         Glide.with(context)
             .load((Object) null)
-            .error(
-                Glide.with(context)
-                    .load(errorModel)
-                    .listener(requestListener))
+            .error(Glide.with(context).load(errorModel).listener(requestListener))
             .submit();
 
     Glide.with(context).clear(target);

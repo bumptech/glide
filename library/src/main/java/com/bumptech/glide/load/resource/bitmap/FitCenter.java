@@ -15,8 +15,8 @@ public class FitCenter extends BitmapTransformation {
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
   @Override
-  protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth,
-      int outHeight) {
+  protected Bitmap transform(
+      @NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
     return TransformationUtils.fitCenter(pool, toTransform, outWidth, outHeight);
   }
 
@@ -35,5 +35,3 @@ public class FitCenter extends BitmapTransformation {
     messageDigest.update(ID_BYTES);
   }
 }
-
-

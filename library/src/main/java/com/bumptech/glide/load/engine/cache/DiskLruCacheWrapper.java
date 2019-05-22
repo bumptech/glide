@@ -36,9 +36,8 @@ public class DiskLruCacheWrapper implements DiskCache {
    * ignored.
    *
    * @param directory The directory for the disk cache
-   * @param maxSize   The max size for the disk cache
+   * @param maxSize The max size for the disk cache
    * @return The new disk cache with the given arguments, or the current cache if one already exists
-   *
    * @deprecated Use {@link #create(File, long)} to create a new cache with the specified arguments.
    */
   @SuppressWarnings("deprecation")
@@ -56,7 +55,7 @@ public class DiskLruCacheWrapper implements DiskCache {
    * Create a new DiskCache in the given directory with a specified max size.
    *
    * @param directory The directory for the disk cache
-   * @param maxSize   The max size for the disk cache
+   * @param maxSize The max size for the disk cache
    * @return The new disk cache with the given arguments
    */
   @SuppressWarnings("deprecation")
@@ -64,9 +63,7 @@ public class DiskLruCacheWrapper implements DiskCache {
     return new DiskLruCacheWrapper(directory, maxSize);
   }
 
-  /**
-   * @deprecated Do not extend this class.
-   */
+  /** @deprecated Do not extend this class. */
   @Deprecated
   // Deprecated public API.
   @SuppressWarnings({"WeakerAccess", "DeprecatedIsStillUsed"})

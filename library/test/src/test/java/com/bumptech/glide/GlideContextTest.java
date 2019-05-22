@@ -38,23 +38,24 @@ public final class GlideContextTest {
     Application app = RuntimeEnvironment.application;
 
     transitionOptions = new HashMap<>();
-    context = new GlideContext(
-        app,
-        new LruArrayPool(),
-        new Registry(),
-        new ImageViewTargetFactory(),
-        new RequestOptionsFactory() {
-          @NonNull
-          @Override
-          public RequestOptions build() {
-            return new RequestOptions();
-          }
-        },
-        transitionOptions,
-        /*defaultRequestListeners=*/ Collections.<RequestListener<Object>>emptyList(),
-        mock(Engine.class),
-        /*isLoggingRequestOriginsEnabled=*/ false,
-        Log.DEBUG);
+    context =
+        new GlideContext(
+            app,
+            new LruArrayPool(),
+            new Registry(),
+            new ImageViewTargetFactory(),
+            new RequestOptionsFactory() {
+              @NonNull
+              @Override
+              public RequestOptions build() {
+                return new RequestOptions();
+              }
+            },
+            transitionOptions,
+            /*defaultRequestListeners=*/ Collections.<RequestListener<Object>>emptyList(),
+            mock(Engine.class),
+            /*isLoggingRequestOriginsEnabled=*/ false,
+            Log.DEBUG);
   }
 
   @Test
@@ -74,17 +75,14 @@ public final class GlideContextTest {
   public void getDefaultTransitionOptions_withMatchingOptionsRegistered_returnsMatchingOptions() {
     GenericTransitionOptions<Object> expected = new GenericTransitionOptions<>();
     transitionOptions.put(Bitmap.class, expected);
-    assertThat(context.getDefaultTransitionOptions(Bitmap.class))
-        .isEqualTo(expected);
+    assertThat(context.getDefaultTransitionOptions(Bitmap.class)).isEqualTo(expected);
   }
 
   @Test
   public void getDefaultTransitionOptions_withSuperClassRegistered_returnsSuperClassOptions() {
     DrawableTransitionOptions expected = new DrawableTransitionOptions();
     transitionOptions.put(Drawable.class, expected);
-    assertThat(context.getDefaultTransitionOptions(BitmapDrawable.class))
-        .isEqualTo(expected);
-    assertThat(context.getDefaultTransitionOptions(GifDrawable.class))
-        .isEqualTo(expected);
+    assertThat(context.getDefaultTransitionOptions(BitmapDrawable.class)).isEqualTo(expected);
+    assertThat(context.getDefaultTransitionOptions(GifDrawable.class)).isEqualTo(expected);
   }
 }

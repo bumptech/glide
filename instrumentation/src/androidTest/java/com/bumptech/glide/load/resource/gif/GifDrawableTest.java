@@ -79,10 +79,7 @@ public class GifDrawableTest {
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
         concurrencyHelper.get(
-            GlideApp.with(context)
-                .asGif()
-                .load(ResourceIds.raw.transparent_gif)
-                .submit());
+            GlideApp.with(context).asGif().load(ResourceIds.raw.transparent_gif).submit());
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -91,10 +88,7 @@ public class GifDrawableTest {
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
         concurrencyHelper.get(
-            GlideApp.with(context)
-                .asGif()
-                .load(ResourceIds.raw.transparent_gif)
-                .submit(10, 10));
+            GlideApp.with(context).asGif().load(ResourceIds.raw.transparent_gif).submit(10, 10));
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -103,10 +97,7 @@ public class GifDrawableTest {
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
         concurrencyHelper.get(
-            GlideApp.with(context)
-                .asGif()
-                .load(ResourceIds.raw.opaque_gif)
-                .submit());
+            GlideApp.with(context).asGif().load(ResourceIds.raw.opaque_gif).submit());
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -115,10 +106,7 @@ public class GifDrawableTest {
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
         concurrencyHelper.get(
-            GlideApp.with(context)
-                .asGif()
-                .load(ResourceIds.raw.opaque_gif)
-                .submit(10, 10));
+            GlideApp.with(context).asGif().load(ResourceIds.raw.opaque_gif).submit(10, 10));
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -127,10 +115,7 @@ public class GifDrawableTest {
       throws ExecutionException, InterruptedException {
     GifDrawable gifDrawable =
         concurrencyHelper.get(
-            GlideApp.with(context)
-                .asGif()
-              .load(ResourceIds.raw.opaque_interlaced_gif)
-              .submit());
+            GlideApp.with(context).asGif().load(ResourceIds.raw.opaque_interlaced_gif).submit());
     assertThat(gifDrawable).isNotNull();
   }
 
@@ -167,12 +152,13 @@ public class GifDrawableTest {
             // Make sure a frame is loaded while the drawable is stopped.
             GifState gifState =
                 (GifState) Preconditions.checkNotNull(gifDrawable.getConstantState());
-            gifState.frameLoader.setOnEveryFrameReadyListener(new OnEveryFrameListener() {
-              @Override
-              public void onFrameReady() {
-                waitForGifFrame.countDown();
-              }
-            });
+            gifState.frameLoader.setOnEveryFrameReadyListener(
+                new OnEveryFrameListener() {
+                  @Override
+                  public void onFrameReady() {
+                    waitForGifFrame.countDown();
+                  }
+                });
             gifDrawable.start();
             gifDrawable.stop();
           }
@@ -191,10 +177,7 @@ public class GifDrawableTest {
         });
 
     concurrencyHelper.loadOnMainThread(
-        GlideApp.with(context)
-            .load(gifDrawable)
-            .override(Target.SIZE_ORIGINAL),
-        imageView);
+        GlideApp.with(context).load(gifDrawable).override(Target.SIZE_ORIGINAL), imageView);
 
     GifDrawable drawableFromView = (GifDrawable) imageView.getDrawable();
     assertThat(drawableFromView.isRunning()).isTrue();
@@ -212,9 +195,9 @@ public class GifDrawableTest {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             ? LayoutParams.TYPE_APPLICATION_OVERLAY
             : Build.VERSION.SDK_INT == Build.VERSION_CODES.M
-                ? LayoutParams.TYPE_TOAST : LayoutParams.TYPE_SYSTEM_ALERT;
-    WindowManager windowManager =
-        (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+                ? LayoutParams.TYPE_TOAST
+                : LayoutParams.TYPE_SYSTEM_ALERT;
+    WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     Preconditions.checkNotNull(windowManager).addView(view, layoutParams);
   }
 }

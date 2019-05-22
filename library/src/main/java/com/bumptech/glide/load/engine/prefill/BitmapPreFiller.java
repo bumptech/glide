@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A class for pre-filling {@link android.graphics.Bitmap Bitmaps} in a
- * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}.
+ * A class for pre-filling {@link android.graphics.Bitmap Bitmaps} in a {@link
+ * com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}.
  */
 public final class BitmapPreFiller {
 
@@ -24,8 +24,8 @@ public final class BitmapPreFiller {
 
   private BitmapPreFillRunner current;
 
-  public BitmapPreFiller(MemoryCache memoryCache, BitmapPool bitmapPool,
-      DecodeFormat defaultFormat) {
+  public BitmapPreFiller(
+      MemoryCache memoryCache, BitmapPool bitmapPool, DecodeFormat defaultFormat) {
     this.memoryCache = memoryCache;
     this.bitmapPool = bitmapPool;
     this.defaultFormat = defaultFormat;
@@ -43,7 +43,8 @@ public final class BitmapPreFiller {
       if (builder.getConfig() == null) {
         builder.setConfig(
             defaultFormat == DecodeFormat.PREFER_ARGB_8888
-            ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+                ? Bitmap.Config.ARGB_8888
+                : Bitmap.Config.RGB_565);
       }
       bitmapAttributes[i] = builder.build();
     }
@@ -80,4 +81,3 @@ public final class BitmapPreFiller {
     return Util.getBitmapByteSize(size.getWidth(), size.getHeight(), size.getConfig());
   }
 }
-

@@ -40,13 +40,14 @@ public class BufferedOutputStreamFuzzTest {
     MockitoAnnotations.initMocks(this);
 
     when(arrayPool.get(anyInt(), eq(byte[].class)))
-        .thenAnswer(new Answer<byte[]>() {
-          @Override
-          public byte[] answer(InvocationOnMock invocation) throws Throwable {
-            int size = (Integer) invocation.getArguments()[0];
-            return new byte[size];
-          }
-        });
+        .thenAnswer(
+            new Answer<byte[]>() {
+              @Override
+              public byte[] answer(InvocationOnMock invocation) throws Throwable {
+                int size = (Integer) invocation.getArguments()[0];
+                return new byte[size];
+              }
+            });
   }
 
   @Test
@@ -84,7 +85,7 @@ public class BufferedOutputStreamFuzzTest {
           bufferedOutputStream.write(write.data, write.offset, write.length);
           break;
         default:
-            throw new IllegalArgumentException();
+          throw new IllegalArgumentException();
       }
     }
 
@@ -96,9 +97,14 @@ public class BufferedOutputStreamFuzzTest {
       for (Write write : writes) {
         writesBuilder.append(write).append("\n");
       }
-      fail("Expected: " + Arrays.toString(fromByteArrayStream) + "\n"
-          + "but got: " + Arrays.toString(fromWrappedStream) + "\n"
-          + writesBuilder.toString());
+      fail(
+          "Expected: "
+              + Arrays.toString(fromByteArrayStream)
+              + "\n"
+              + "but got: "
+              + Arrays.toString(fromWrappedStream)
+              + "\n"
+              + writesBuilder.toString());
     }
   }
 
@@ -149,10 +155,14 @@ public class BufferedOutputStreamFuzzTest {
     @Override
     public String toString() {
       return "Write{"
-          + "data=" + Arrays.toString(data)
-          + ", length=" + length
-          + ", offset=" + offset
-          + ", writeType=" + writeType
+          + "data="
+          + Arrays.toString(data)
+          + ", length="
+          + length
+          + ", offset="
+          + offset
+          + ", writeType="
+          + writeType
           + '}';
     }
 

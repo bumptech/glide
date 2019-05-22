@@ -9,9 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-/**
- * Writes {@link ByteBuffer ByteBuffers} to {@link File Files}.
- */
+/** Writes {@link ByteBuffer ByteBuffers} to {@link File Files}. */
 public class ByteBufferEncoder implements Encoder<ByteBuffer> {
   private static final String TAG = "ByteBufferEncoder";
 

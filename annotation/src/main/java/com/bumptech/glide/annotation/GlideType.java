@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Identifies methods in {@link GlideExtension} annotated classes that extend
- * {@code com.bumptech.glide.RequestManager}.
+ * Identifies methods in {@link GlideExtension} annotated classes that extend {@code
+ * com.bumptech.glide.RequestManager}.
  *
  * <p>If one or more method is found with this annotation, an additional API entry point that
  * exposes a generated {@code com.bumptech.glide.RequestManager} subclass will be created. The
@@ -21,9 +21,9 @@ import java.lang.annotation.Target;
  * <p>Methods with this annotation will only be found if they are contained in a class annotated
  * with {@link GlideExtension}.
  *
- * <p>Methods annotated with GlideType must have a single parameter. The type of the
- * single parameter must be {@code com.bumptech.glide.RequestBuilder}, with a type
- * matching the value of {@link #value()}.
+ * <p>Methods annotated with GlideType must have a single parameter. The type of the single
+ * parameter must be {@code com.bumptech.glide.RequestBuilder}, with a type matching the value of
+ * {@link #value()}.
  *
  * <p>Compilation will fail if a method annotated with this method is identical to a method in
  * {@code com.bumptech.glide.RequestManager}

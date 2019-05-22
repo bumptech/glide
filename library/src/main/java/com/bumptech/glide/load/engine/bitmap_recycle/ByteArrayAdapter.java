@@ -1,8 +1,6 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
-/**
- * Adapter for handling primitive byte arrays.
- */
+/** Adapter for handling primitive byte arrays. */
 @SuppressWarnings("PMD.UseVarargs")
 public final class ByteArrayAdapter implements ArrayAdapterInterface<byte[]> {
   private static final String TAG = "ByteArrayPool";

@@ -14,9 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * A class for interfacing with Flickr's http API.
- */
+/** A class for interfacing with Flickr's http API. */
 public final class Api {
   private static Api api;
   private static final String API_KEY = "f0e6fbb5fdf1f3842294a1d21f84e8a6";
@@ -30,20 +28,19 @@ public final class Api {
   private static final int MAX_ITEMS_PER_PAGE = 300;
   private static final String PER_PAGE = "&per_page=" + MAX_ITEMS_PER_PAGE;
 
-  private static final SparseArray<String> EDGE_TO_SIZE_KEY = new SparseArray<String>() {
-    {
-      put(75, "s");
-      put(100, "t");
-      put(150, "q");
-      put(240, "m");
-      put(320, "n");
-      put(640, "z");
-      put(1024, "b");
-    }
-  };
-  private static final List<Integer> SORTED_SIZE_KEYS =
-      new ArrayList<>(EDGE_TO_SIZE_KEY.size());
-
+  private static final SparseArray<String> EDGE_TO_SIZE_KEY =
+      new SparseArray<String>() {
+        {
+          put(75, "s");
+          put(100, "t");
+          put(150, "q");
+          put(240, "m");
+          put(320, "n");
+          put(640, "z");
+          put(1024, "b");
+        }
+      };
+  private static final List<Integer> SORTED_SIZE_KEYS = new ArrayList<>(EDGE_TO_SIZE_KEY.size());
 
   static {
     for (int i = 0; i < EDGE_TO_SIZE_KEY.size(); i++) {
@@ -84,12 +81,11 @@ public final class Api {
       }
     }
     return result;
-
   }
 
   static String getCacheableUrl(Photo photo) {
-    return String.format(CACHEABLE_PHOTO_URL, photo.getFarm(), photo.getServer(), photo.getId(),
-        photo.getSecret());
+    return String.format(
+        CACHEABLE_PHOTO_URL, photo.getFarm(), photo.getServer(), photo.getId(), photo.getSecret());
   }
 
   public static String getPhotoURL(Photo photo, int width, int height) {
@@ -126,14 +122,12 @@ public final class Api {
     return getUrlForMethod("flickr.photos.getRecent" + PER_PAGE);
   }
 
-  /**
-   * An interface for listening for search results from the Flickr API.
-   */
+  /** An interface for listening for search results from the Flickr API. */
   public interface QueryListener {
     /**
      * Called when a search completes successfully.
      *
-     * @param query  The query used to obtain the results.
+     * @param query The query used to obtain the results.
      * @param photos A list of images that were found for the given search term.
      */
     void onSearchCompleted(Query query, List<Photo> photos);
@@ -142,7 +136,7 @@ public final class Api {
      * Called when a search fails.
      *
      * @param query The query we attempted to obtain results for.
-     * @param e     The exception that caused the search to fail.
+     * @param e The exception that caused the search to fail.
      */
     void onSearchFailed(Query query, Exception e);
   }
@@ -160,17 +154,18 @@ public final class Api {
 
   private Api(Context context) {
     this.requestQueue = Volley.newRequestQueue(context.getApplicationContext());
-    QueryListener queryListener = new QueryListener() {
-      @Override
-      public void onSearchCompleted(Query query, List<Photo> photos) {
-        lastQueryResult = new QueryResult(query, photos);
-      }
+    QueryListener queryListener =
+        new QueryListener() {
+          @Override
+          public void onSearchCompleted(Query query, List<Photo> photos) {
+            lastQueryResult = new QueryResult(query, photos);
+          }
 
-      @Override
-      public void onSearchFailed(Query query, Exception e) {
-        lastQueryResult = null;
-      }
-    };
+          @Override
+          public void onSearchFailed(Query query, Exception e) {
+            lastQueryResult = null;
+          }
+        };
     queryListeners.add(queryListener);
   }
 
@@ -190,12 +185,13 @@ public final class Api {
       return;
     }
 
-    FlickrQueryResponseListener responseListener
-        = new FlickrQueryResponseListener(new PhotoJsonStringParser(), query, queryListeners);
-    StringRequest request = new StringRequest(Request.Method.GET, query.getUrl(),
-        responseListener, responseListener);
-    request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 3,
-        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+    FlickrQueryResponseListener responseListener =
+        new FlickrQueryResponseListener(new PhotoJsonStringParser(), query, queryListeners);
+    StringRequest request =
+        new StringRequest(Request.Method.GET, query.getUrl(), responseListener, responseListener);
+    request.setRetryPolicy(
+        new DefaultRetryPolicy(
+            DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, 3, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
     requestQueue.add(request);
   }
 

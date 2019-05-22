@@ -25,10 +25,12 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18, shadows = { ContentResolverShadow.class })
+@Config(
+    manifest = Config.NONE,
+    sdk = 18,
+    shadows = {ContentResolverShadow.class})
 public class StreamLocalUriFetcherTest {
-  @Mock
-  private DataFetcher.DataCallback<InputStream> callback;
+  @Mock private DataFetcher.DataCallback<InputStream> callback;
 
   @Before
   public void setUp() {

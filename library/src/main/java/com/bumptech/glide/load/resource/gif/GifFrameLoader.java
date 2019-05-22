@@ -35,7 +35,11 @@ class GifFrameLoader {
   private final GifDecoder gifDecoder;
   private final Handler handler;
   private final List<FrameCallback> callbacks = new ArrayList<>();
-  @SuppressWarnings("WeakerAccess") @Synthetic final RequestManager requestManager;
+
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic
+  final RequestManager requestManager;
+
   private final BitmapPool bitmapPool;
 
   private boolean isRunning;
@@ -48,8 +52,7 @@ class GifFrameLoader {
   private Bitmap firstFrame;
   private Transformation<Bitmap> transformation;
   private DelayTarget pendingTarget;
-  @Nullable
-  private GifFrameLoader.OnEveryFrameListener onEveryFrameListener;
+  @Nullable private GifFrameLoader.OnEveryFrameListener onEveryFrameListener;
   private int firstFrameSize;
   private int width;
   private int height;
@@ -292,7 +295,7 @@ class GifFrameLoader {
     static final int MSG_CLEAR = 2;
 
     @Synthetic
-    FrameLoaderCallback() { }
+    FrameLoaderCallback() {}
 
     @Override
     public boolean handleMessage(Message msg) {
@@ -326,8 +329,8 @@ class GifFrameLoader {
     }
 
     @Override
-    public void onResourceReady(@NonNull Bitmap resource,
-        @Nullable Transition<? super Bitmap> transition) {
+    public void onResourceReady(
+        @NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
       this.resource = resource;
       Message msg = handler.obtainMessage(FrameLoaderCallback.MSG_DELAY, this);
       handler.sendMessageAtTime(msg, targetTime);

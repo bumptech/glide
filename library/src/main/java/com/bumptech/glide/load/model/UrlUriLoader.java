@@ -16,14 +16,8 @@ import java.util.Set;
  * @param <Data> The type of data this Loader will obtain for a {@link Uri}.
  */
 public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
-  private static final Set<String> SCHEMES = Collections.unmodifiableSet(
-      new HashSet<>(
-          Arrays.asList(
-              "http",
-              "https"
-          )
-      )
-  );
+  private static final Set<String> SCHEMES =
+      Collections.unmodifiableSet(new HashSet<>(Arrays.asList("http", "https")));
   private final ModelLoader<GlideUrl, Data> urlLoader;
 
   // Public API.
@@ -33,8 +27,8 @@ public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(@NonNull Uri uri, int width, int height,
-      @NonNull Options options) {
+  public LoadData<Data> buildLoadData(
+      @NonNull Uri uri, int width, int height, @NonNull Options options) {
     GlideUrl glideUrl = new GlideUrl(uri.toString());
     return urlLoader.buildLoadData(glideUrl, width, height, options);
   }
@@ -45,8 +39,8 @@ public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
   }
 
   /**
-   * Loads {@link java.io.InputStream InputStreams} from {@link android.net.Uri Uris} with http
-   * or https schemes.
+   * Loads {@link java.io.InputStream InputStreams} from {@link android.net.Uri Uris} with http or
+   * https schemes.
    */
   public static class StreamFactory implements ModelLoaderFactory<Uri, InputStream> {
 

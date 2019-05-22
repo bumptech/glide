@@ -8,7 +8,7 @@ import org.robolectric.shadows.ShadowLog;
 /**
  * Exists only to "enable" logging for test coverage.
  *
- * TODO: when we can ignore Log.* via configuration, remove this class.
+ * <p>TODO: when we can ignore Log.* via configuration, remove this class.
  */
 @Implements(Log.class)
 public class GlideShadowLog extends ShadowLog {

@@ -24,8 +24,8 @@ public class GifDrawableEncoder implements ResourceEncoder<GifDrawable> {
   }
 
   @Override
-  public boolean encode(@NonNull Resource<GifDrawable> data, @NonNull File file,
-      @NonNull Options options) {
+  public boolean encode(
+      @NonNull Resource<GifDrawable> data, @NonNull File file, @NonNull Options options) {
     GifDrawable drawable = data.get();
     boolean success = false;
     try {

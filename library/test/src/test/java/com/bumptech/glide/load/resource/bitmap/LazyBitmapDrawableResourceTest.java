@@ -83,8 +83,7 @@ public class LazyBitmapDrawableResourceTest {
     verify(bitmapResource).initialize();
   }
 
-  private interface InitializableBitmapResource extends Initializable,
-      Resource<Bitmap> {
+  private interface InitializableBitmapResource extends Initializable, Resource<Bitmap> {
     // Intentionally empty.
   }
 }

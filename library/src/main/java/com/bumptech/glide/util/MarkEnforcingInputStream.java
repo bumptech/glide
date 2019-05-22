@@ -68,7 +68,8 @@ public class MarkEnforcingInputStream extends FilterInputStream {
 
   @Override
   public int available() throws IOException {
-    return availableBytes == UNSET ? super.available()
+    return availableBytes == UNSET
+        ? super.available()
         : Math.min(availableBytes, super.available());
   }
 

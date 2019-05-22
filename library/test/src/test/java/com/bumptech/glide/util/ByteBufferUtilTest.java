@@ -36,9 +36,7 @@ public class ByteBufferUtilTest {
     testFromStream(12 * BUFFER_SIZE + 12345);
   }
 
-  /**
-   * All tests are basically the same thing but with different amounts of data.
-   */
+  /** All tests are basically the same thing but with different amounts of data. */
   private void testFromStream(int dataLength) throws IOException {
     byte[] bytes = createByteData(dataLength);
     InputStream byteStream = new ByteArrayInputStream(bytes);

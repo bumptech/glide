@@ -21,13 +21,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Verifies the output of the processor with a simple single extension type.
- */
+/** Verifies the output of the processor with a simple single extension type. */
 @RunWith(JUnit4.class)
 public class GlideExtensionWithTypeTest implements CompilationProvider {
-  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
-      new RegenerateResourcesRule(this);
+  @Rule
+  public final RegenerateResourcesRule regenerateResourcesRule = new RegenerateResourcesRule(this);
+
   private Compilation compilation;
 
   @Before
@@ -35,9 +34,7 @@ public class GlideExtensionWithTypeTest implements CompilationProvider {
     compilation =
         javac()
             .withProcessors(new GlideAnnotationProcessor())
-            .compile(
-                emptyAppModule(),
-                forResource("ExtensionWithType.java"));
+            .compile(emptyAppModule(), forResource("ExtensionWithType.java"));
     assertThat(compilation).succeededWithoutWarnings();
   }
 

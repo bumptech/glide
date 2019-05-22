@@ -11,11 +11,12 @@ import com.bumptech.glide.util.Preconditions;
 /**
  * A base class for setting a transition to use on a resource when a load completes.
  *
- * @param <CHILD>         The implementation of this class to return to chain methods.
+ * @param <CHILD> The implementation of this class to return to chain methods.
  * @param <TranscodeType> The type of resource that will be animated.
  */
-public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, TranscodeType>,
-    TranscodeType> implements Cloneable {
+public abstract class TransitionOptions<
+        CHILD extends TransitionOptions<CHILD, TranscodeType>, TranscodeType>
+    implements Cloneable {
   private TransitionFactory<? super TranscodeType> transitionFactory = NoTransition.getFactory();
 
   /**
@@ -31,11 +32,11 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
 
   /**
    * Sets an {@link android.view.animation.Animation} to run on the wrapped target when an resource
-   * load finishes.
-   * Will only be run if the resource was loaded asynchronously (i.e. was not in the memory cache).
+   * load finishes. Will only be run if the resource was loaded asynchronously (i.e. was not in the
+   * memory cache).
    *
    * @param viewAnimationId The resource id of the {@link android.view.animation} to use as the
-   *                        transition.
+   *     transition.
    * @return This request builder.
    */
   @NonNull
@@ -45,11 +46,11 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
 
   /**
    * Sets an animator to run a {@link android.view.ViewPropertyAnimator} on a view that the target
-   * may be wrapping when a resource load finishes.
-   * Will only be run if the load was loaded asynchronously (i.e. was not in the memory cache).
+   * may be wrapping when a resource load finishes. Will only be run if the load was loaded
+   * asynchronously (i.e. was not in the memory cache).
    *
    * @param animator The {@link com.bumptech.glide.request.transition.ViewPropertyTransition
-   *                 .Animator} to run.
+   *     .Animator} to run.
    * @return This request builder.
    */
   @NonNull
@@ -58,9 +59,9 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
   }
 
   /**
-   * Uses the given {@link TransitionFactory} to build a
-   * {@link com.bumptech.glide.request.transition.Transition} for each request started with these
-   * {@code TransitionOptions}.
+   * Uses the given {@link TransitionFactory} to build a {@link
+   * com.bumptech.glide.request.transition.Transition} for each request started with these {@code
+   * TransitionOptions}.
    *
    * @return This request builder.
    */
@@ -72,12 +73,12 @@ public abstract class TransitionOptions<CHILD extends TransitionOptions<CHILD, T
   }
 
   @SuppressWarnings({
-      // cast to CHILD is safe given the generic argument represents the object's runtime class
-      "unchecked",
-      // CHILD is the correct class name.
-      "PMD.CloneMethodReturnTypeMustMatchClassName",
-      // we don't want to throw to be user friendly
-      "PMD.CloneThrowsCloneNotSupportedException"
+    // cast to CHILD is safe given the generic argument represents the object's runtime class
+    "unchecked",
+    // CHILD is the correct class name.
+    "PMD.CloneMethodReturnTypeMustMatchClassName",
+    // we don't want to throw to be user friendly
+    "PMD.CloneThrowsCloneNotSupportedException"
   })
   @Override
   public final CHILD clone() {

@@ -35,15 +35,16 @@ public class EngineKeyTest {
   @Test
   public void updateDiskCacheKey_throwsException() throws NoSuchAlgorithmException {
     // If this test fails, update testEqualsAndHashcode to use KeyTester including regression tests.
-    final EngineKey key = new EngineKey(
-        "id",
-        new ObjectKey("signature"),
-        100,
-        100,
-        Collections.<Class<?>, Transformation<?>>emptyMap(),
-        Object.class,
-        Object.class,
-        new Options());
+    final EngineKey key =
+        new EngineKey(
+            "id",
+            new ObjectKey("signature"),
+            100,
+            100,
+            Collections.<Class<?>, Transformation<?>>emptyMap(),
+            Object.class,
+            Object.class,
+            new Options());
     assertThrows(
         UnsupportedOperationException.class,
         new ThrowingRunnable() {
@@ -60,15 +61,20 @@ public class EngineKeyTest {
     memoryOptions.set(Option.memory("key", new Object()), new Object());
 
     Options diskOptions = new Options();
-    diskOptions.set(Option.disk("key", new CacheKeyUpdater<String>() {
-      @Override
-      public void update(@NonNull byte[] keyBytes, @NonNull String value,
-          @NonNull MessageDigest messageDigest) {
-        messageDigest.update(keyBytes);
-        messageDigest.update(value.getBytes(Key.CHARSET));
-
-      }
-    }), "value");
+    diskOptions.set(
+        Option.disk(
+            "key",
+            new CacheKeyUpdater<String>() {
+              @Override
+              public void update(
+                  @NonNull byte[] keyBytes,
+                  @NonNull String value,
+                  @NonNull MessageDigest messageDigest) {
+                messageDigest.update(keyBytes);
+                messageDigest.update(value.getBytes(Key.CHARSET));
+              }
+            }),
+        "value");
 
     new EqualsTester()
         .addEqualityGroup(

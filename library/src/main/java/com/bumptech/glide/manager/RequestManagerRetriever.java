@@ -34,8 +34,7 @@ import java.util.Map;
  * retrieving existing ones from activities and fragment.
  */
 public class RequestManagerRetriever implements Handler.Callback {
-  @VisibleForTesting
-  static final String FRAGMENT_TAG = "com.bumptech.glide.manager";
+  @VisibleForTesting static final String FRAGMENT_TAG = "com.bumptech.glide.manager";
   private static final String TAG = "RMRetriever";
 
   private static final int ID_REMOVE_FRAGMENT_MANAGER = 1;
@@ -45,30 +44,23 @@ public class RequestManagerRetriever implements Handler.Callback {
   // allow us to iterate over and retrieve all active Fragments in a FragmentManager.
   private static final String FRAGMENT_INDEX_KEY = "key";
 
-  /**
-   * The top application level RequestManager.
-   */
+  /** The top application level RequestManager. */
   private volatile RequestManager applicationManager;
 
-  /**
-   * Pending adds for RequestManagerFragments.
-   */
+  /** Pending adds for RequestManagerFragments. */
   @SuppressWarnings("deprecation")
   @VisibleForTesting
   final Map<android.app.FragmentManager, RequestManagerFragment> pendingRequestManagerFragments =
       new HashMap<>();
 
-  /**
-   * Pending adds for SupportRequestManagerFragments.
-   */
+  /** Pending adds for SupportRequestManagerFragments. */
   @VisibleForTesting
   final Map<FragmentManager, SupportRequestManagerFragment> pendingSupportRequestManagerFragments =
       new HashMap<>();
 
-  /**
-   * Main thread handler to handle cleaning up pending fragment maps.
-   */
+  /** Main thread handler to handle cleaning up pending fragment maps. */
   private final Handler handler;
+
   private final RequestManagerFactory factory;
 
   // Objects used to find Fragments and Activities containing views.
@@ -131,15 +123,15 @@ public class RequestManagerRetriever implements Handler.Callback {
     } else {
       assertNotDestroyed(activity);
       FragmentManager fm = activity.getSupportFragmentManager();
-      return supportFragmentGet(
-          activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
+      return supportFragmentGet(activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
     }
   }
 
   @NonNull
   public RequestManager get(@NonNull Fragment fragment) {
-    Preconditions.checkNotNull(fragment.getActivity(),
-          "You cannot start a load on a fragment before it is attached or after it is destroyed");
+    Preconditions.checkNotNull(
+        fragment.getActivity(),
+        "You cannot start a load on a fragment before it is attached or after it is destroyed");
     if (Util.isOnBackgroundThread()) {
       return get(fragment.getActivity().getApplicationContext());
     } else {
@@ -156,8 +148,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     } else {
       assertNotDestroyed(activity);
       android.app.FragmentManager fm = activity.getFragmentManager();
-      return fragmentGet(
-          activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
+      return fragmentGet(activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
     }
   }
 
@@ -169,8 +160,8 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
 
     Preconditions.checkNotNull(view);
-    Preconditions.checkNotNull(view.getContext(),
-        "Unable to obtain a request manager for a view without a Context");
+    Preconditions.checkNotNull(
+        view.getContext(), "Unable to obtain a request manager for a view without a Context");
     Activity activity = findActivity(view.getContext());
     // The view might be somewhere else, like a service.
     if (activity == null) {
@@ -195,8 +186,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   }
 
   private static void findAllSupportFragmentsWithViews(
-      @Nullable Collection<Fragment> topLevelFragments,
-      @NonNull Map<View, Fragment> result) {
+      @Nullable Collection<Fragment> topLevelFragments, @NonNull Map<View, Fragment> result) {
     if (topLevelFragments == null) {
       return;
     }
@@ -375,7 +365,8 @@ public class RequestManagerRetriever implements Handler.Callback {
   @SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
   @Deprecated
   @NonNull
-  private RequestManager fragmentGet(@NonNull Context context,
+  private RequestManager fragmentGet(
+      @NonNull Context context,
       @NonNull android.app.FragmentManager fm,
       @Nullable android.app.Fragment parentHint,
       boolean isParentVisible) {
@@ -471,9 +462,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     return handled;
   }
 
-  /**
-   * Used internally to create {@link RequestManager}s.
-   */
+  /** Used internally to create {@link RequestManager}s. */
   public interface RequestManagerFactory {
     @NonNull
     RequestManager build(
@@ -483,12 +472,16 @@ public class RequestManagerRetriever implements Handler.Callback {
         @NonNull Context context);
   }
 
-  private static final RequestManagerFactory DEFAULT_FACTORY = new RequestManagerFactory() {
-    @NonNull
-    @Override
-    public RequestManager build(@NonNull Glide glide, @NonNull Lifecycle lifecycle,
-        @NonNull RequestManagerTreeNode requestManagerTreeNode, @NonNull Context context) {
-      return new RequestManager(glide, lifecycle, requestManagerTreeNode, context);
-    }
-  };
+  private static final RequestManagerFactory DEFAULT_FACTORY =
+      new RequestManagerFactory() {
+        @NonNull
+        @Override
+        public RequestManager build(
+            @NonNull Glide glide,
+            @NonNull Lifecycle lifecycle,
+            @NonNull RequestManagerTreeNode requestManagerTreeNode,
+            @NonNull Context context) {
+          return new RequestManager(glide, lifecycle, requestManagerTreeNode, context);
+        }
+      };
 }

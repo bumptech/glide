@@ -16,12 +16,13 @@ import java.util.Collections;
  * using registered {@link com.bumptech.glide.load.model.ModelLoader ModelLoaders} and the model
  * provided for the load.
  *
- * <p> Depending on the disk cache strategy, source data may first be written to disk and then
- * loaded from the cache file rather than returned directly. </p>
+ * <p>Depending on the disk cache strategy, source data may first be written to disk and then loaded
+ * from the cache file rather than returned directly.
  */
-class SourceGenerator implements DataFetcherGenerator,
-    DataFetcher.DataCallback<Object>,
-    DataFetcherGenerator.FetcherReadyCallback {
+class SourceGenerator
+    implements DataFetcherGenerator,
+        DataFetcher.DataCallback<Object>,
+        DataFetcherGenerator.FetcherReadyCallback {
   private static final String TAG = "SourceGenerator";
 
   private final DecodeHelper<?> helper;
@@ -57,7 +58,7 @@ class SourceGenerator implements DataFetcherGenerator,
       loadData = helper.getLoadData().get(loadDataListIndex++);
       if (loadData != null
           && (helper.getDiskCacheStrategy().isDataCacheable(loadData.fetcher.getDataSource())
-          || helper.hasLoadPath(loadData.fetcher.getDataClass()))) {
+              || helper.hasLoadPath(loadData.fetcher.getDataClass()))) {
         started = true;
         loadData.fetcher.loadData(helper.getPriority(), this);
       }
@@ -78,11 +79,17 @@ class SourceGenerator implements DataFetcherGenerator,
       originalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
       helper.getDiskCache().put(originalKey, writer);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
-        Log.v(TAG, "Finished encoding source to cache"
-            + ", key: " + originalKey
-            + ", data: " + dataToCache
-            + ", encoder: " + encoder
-            + ", duration: " + LogTime.getElapsedMillis(startTime));
+        Log.v(
+            TAG,
+            "Finished encoding source to cache"
+                + ", key: "
+                + originalKey
+                + ", data: "
+                + dataToCache
+                + ", encoder: "
+                + encoder
+                + ", duration: "
+                + LogTime.getElapsedMillis(startTime));
       }
     } finally {
       loadData.fetcher.cleanup();
@@ -109,8 +116,12 @@ class SourceGenerator implements DataFetcherGenerator,
       // reschedule to get back onto Glide's thread.
       cb.reschedule();
     } else {
-      cb.onDataFetcherReady(loadData.sourceKey, data, loadData.fetcher,
-          loadData.fetcher.getDataSource(), originalKey);
+      cb.onDataFetcherReady(
+          loadData.sourceKey,
+          data,
+          loadData.fetcher,
+          loadData.fetcher.getDataSource(),
+          originalKey);
     }
   }
 
@@ -128,16 +139,16 @@ class SourceGenerator implements DataFetcherGenerator,
 
   // Called from source cache generator.
   @Override
-  public void onDataFetcherReady(Key sourceKey, Object data, DataFetcher<?> fetcher,
-      DataSource dataSource, Key attemptedKey) {
+  public void onDataFetcherReady(
+      Key sourceKey, Object data, DataFetcher<?> fetcher, DataSource dataSource, Key attemptedKey) {
     // This data fetcher will be loading from a File and provide the wrong data source, so override
     // with the data source of the original fetcher
     cb.onDataFetcherReady(sourceKey, data, fetcher, loadData.fetcher.getDataSource(), sourceKey);
   }
 
   @Override
-  public void onDataFetcherFailed(Key sourceKey, Exception e, DataFetcher<?> fetcher,
-      DataSource dataSource) {
+  public void onDataFetcherFailed(
+      Key sourceKey, Exception e, DataFetcher<?> fetcher, DataSource dataSource) {
     cb.onDataFetcherFailed(sourceKey, e, fetcher, loadData.fetcher.getDataSource());
   }
 }

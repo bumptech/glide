@@ -25,27 +25,33 @@ public final class ApiModule {
     return imgurObservables.getHotViralImages(5 /*maxPages*/);
   }
 
-  @Provides ImgurObservables imgurObservables(ImgurService imgurService) {
+  @Provides
+  ImgurObservables imgurObservables(ImgurService imgurService) {
     return new ImgurObservables(imgurService);
   }
 
-  @Provides ImgurService getImgurService(Retrofit retrofit) {
+  @Provides
+  ImgurService getImgurService(Retrofit retrofit) {
     return retrofit.create(ImgurService.class);
   }
 
-  @Provides Retrofit retrofit() {
-    OkHttpClient client = new OkHttpClient.Builder()
-        .addInterceptor(new Interceptor() {
-          @Override
-          public Response intercept(Chain chain) throws IOException {
-            return chain.proceed(
-                chain.request()
-                    .newBuilder()
-                    .addHeader("Authorization", "Client-ID " + ImgurService.CLIENT_ID)
-                    .build());
-          }
-        })
-        .build();
+  @Provides
+  Retrofit retrofit() {
+    OkHttpClient client =
+        new OkHttpClient.Builder()
+            .addInterceptor(
+                new Interceptor() {
+                  @Override
+                  public Response intercept(Chain chain) throws IOException {
+                    return chain.proceed(
+                        chain
+                            .request()
+                            .newBuilder()
+                            .addHeader("Authorization", "Client-ID " + ImgurService.CLIENT_ID)
+                            .build());
+                  }
+                })
+            .build();
     return new Retrofit.Builder()
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())

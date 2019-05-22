@@ -26,6 +26,7 @@ public class GlideContext extends ContextWrapper {
   @VisibleForTesting
   static final TransitionOptions<?, ?> DEFAULT_TRANSITION_OPTIONS =
       new GenericTransitionOptions<>();
+
   private final ArrayPool arrayPool;
   private final Registry registry;
   private final ImageViewTargetFactory imageViewTargetFactory;
@@ -35,6 +36,7 @@ public class GlideContext extends ContextWrapper {
   private final Engine engine;
   private final boolean isLoggingRequestOriginsEnabled;
   private final int logLevel;
+
   @Nullable
   @GuardedBy("this")
   private RequestOptions defaultRequestOptions;
@@ -117,8 +119,8 @@ public class GlideContext extends ContextWrapper {
   }
 
   /**
-   * Returns {@code true} if Glide should populate
-   * {@link com.bumptech.glide.load.engine.GlideException#setOrigin(Exception)} for failed requests.
+   * Returns {@code true} if Glide should populate {@link
+   * com.bumptech.glide.load.engine.GlideException#setOrigin(Exception)} for failed requests.
    *
    * <p>This is an experimental API that may be removed in the future.
    */

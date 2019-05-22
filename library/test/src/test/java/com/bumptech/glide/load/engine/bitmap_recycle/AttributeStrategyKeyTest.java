@@ -42,8 +42,12 @@ public class AttributeStrategyKeyTest {
     Key fifth = new Key(keyPool);
     fifth.init(100, 100, Bitmap.Config.RGB_565);
 
-    new EqualsTester().addEqualityGroup(first, second).addEqualityGroup(third)
-        .addEqualityGroup(fourth).addEqualityGroup(fifth).testEquals();
+    new EqualsTester()
+        .addEqualityGroup(first, second)
+        .addEqualityGroup(third)
+        .addEqualityGroup(fourth)
+        .addEqualityGroup(fifth)
+        .testEquals();
   }
 
   @Test

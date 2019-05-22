@@ -4,17 +4,18 @@ import android.os.Parcel;
 
 /** Wraps a search query string. */
 public final class SearchQuery implements Query {
-  public static final Creator<SearchQuery> CREATOR = new Creator<SearchQuery>() {
-    @Override
-    public SearchQuery createFromParcel(Parcel source) {
-      return new SearchQuery(source);
-    }
+  public static final Creator<SearchQuery> CREATOR =
+      new Creator<SearchQuery>() {
+        @Override
+        public SearchQuery createFromParcel(Parcel source) {
+          return new SearchQuery(source);
+        }
 
-    @Override
-    public SearchQuery[] newArray(int size) {
-      return new SearchQuery[size];
-    }
-  };
+        @Override
+        public SearchQuery[] newArray(int size) {
+          return new SearchQuery[size];
+        }
+      };
 
   private final String queryString;
 

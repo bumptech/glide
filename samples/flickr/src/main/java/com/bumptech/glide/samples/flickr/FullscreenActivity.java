@@ -9,9 +9,7 @@ import android.support.v4.app.FragmentActivity;
 import android.widget.ImageView;
 import com.bumptech.glide.samples.flickr.api.Photo;
 
-/**
- * A simple activity for viewing a single photo.
- */
+/** A simple activity for viewing a single photo. */
 public class FullscreenActivity extends FragmentActivity {
   private static final String ARG_PHOTO = "photo";
 

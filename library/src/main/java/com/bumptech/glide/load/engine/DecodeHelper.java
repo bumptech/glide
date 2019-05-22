@@ -72,7 +72,6 @@ final class DecodeHelper<Transcode> {
     this.transformations = transformations;
     this.isTransformationRequired = isTransformationRequired;
     this.isScaleOnlyOrNoTransform = isScaleOnlyOrNoTransform;
-
   }
 
   void clear() {
@@ -133,7 +132,8 @@ final class DecodeHelper<Transcode> {
   }
 
   List<Class<?>> getRegisteredResourceClasses() {
-    return glideContext.getRegistry()
+    return glideContext
+        .getRegistry()
         .getRegisteredResourceClasses(model.getClass(), resourceClass, transcodeClass);
   }
 
@@ -164,7 +164,9 @@ final class DecodeHelper<Transcode> {
     if (result == null) {
       if (transformations.isEmpty() && isTransformationRequired) {
         throw new IllegalArgumentException(
-            "Missing transformation for " + resourceClass + ". If you wish to"
+            "Missing transformation for "
+                + resourceClass
+                + ". If you wish to"
                 + " ignore unknown resource types, use the optional transformation methods.");
       } else {
         return UnitTransformation.get();
@@ -206,8 +208,7 @@ final class DecodeHelper<Transcode> {
       //noinspection ForLoopReplaceableByForEach to improve perf
       for (int i = 0, size = modelLoaders.size(); i < size; i++) {
         ModelLoader<Object, ?> modelLoader = modelLoaders.get(i);
-        LoadData<?> current =
-            modelLoader.buildLoadData(model, width, height, options);
+        LoadData<?> current = modelLoader.buildLoadData(model, width, height, options);
         if (current != null) {
           loadData.add(current);
         }

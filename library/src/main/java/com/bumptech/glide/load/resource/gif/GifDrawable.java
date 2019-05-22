@@ -28,11 +28,9 @@ import java.util.List;
 /**
  * An animated {@link android.graphics.drawable.Drawable} that plays the frames of an animated GIF.
  */
-public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallback,
-    Animatable, Animatable2Compat {
-  /**
-   * A constant indicating that an animated drawable should loop continuously.
-   */
+public class GifDrawable extends Drawable
+    implements GifFrameLoader.FrameCallback, Animatable, Animatable2Compat {
+  /** A constant indicating that an animated drawable should loop continuously. */
   // Public API.
   @SuppressWarnings("WeakerAccess")
   public static final int LOOP_FOREVER = -1;
@@ -44,20 +42,15 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   // Public API.
   @SuppressWarnings("WeakerAccess")
   public static final int LOOP_INTRINSIC = 0;
+
   private static final int GRAVITY = Gravity.FILL;
 
   private final GifState state;
-  /**
-   * True if the drawable is currently animating.
-   */
+  /** True if the drawable is currently animating. */
   private boolean isRunning;
-  /**
-   * True if the drawable should animate while visible.
-   */
+  /** True if the drawable should animate while visible. */
   private boolean isStarted;
-  /**
-   * True if the drawable's resources have been recycled.
-   */
+  /** True if the drawable's resources have been recycled. */
   private boolean isRecycled;
   /**
    * True if the drawable is currently visible. Default to true because on certain platforms (at
@@ -66,43 +59,34 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
    * See issue #130.
    */
   private boolean isVisible = true;
-  /**
-   * The number of times we've looped over all the frames in the GIF.
-   */
+  /** The number of times we've looped over all the frames in the GIF. */
   private int loopCount;
-  /**
-   * The number of times to loop through the GIF animation.
-   */
+  /** The number of times to loop through the GIF animation. */
   private int maxLoopCount = LOOP_FOREVER;
 
   private boolean applyGravity;
   private Paint paint;
   private Rect destRect;
 
-  /**
-   * Callbacks to notify loop completion of a gif, where the loop count is explicitly specified.
-   */
+  /** Callbacks to notify loop completion of a gif, where the loop count is explicitly specified. */
   private List<AnimationCallback> animationCallbacks;
 
   /**
    * Constructor for GifDrawable.
    *
-   * @param context             A context.
-   * @param bitmapPool          Ignored, see deprecation note.
+   * @param context A context.
+   * @param bitmapPool Ignored, see deprecation note.
    * @param frameTransformation An {@link com.bumptech.glide.load.Transformation} that can be
-   *                            applied to each frame.
-   * @param targetFrameWidth    The desired width of the frames displayed by this drawable (the
-   *                            width of the view or
-   *                            {@link com.bumptech.glide.request.target.Target}
-   *                            this drawable is being loaded into).
-   * @param targetFrameHeight   The desired height of the frames displayed by this drawable (the
-   *                            height of the view or
-   *                            {@link com.bumptech.glide.request.target.Target}
-   *                            this drawable is being loaded into).
-   * @param gifDecoder          The decoder to use to decode GIF data.
-   * @param firstFrame          The decoded and transformed first frame of this GIF.
+   *     applied to each frame.
+   * @param targetFrameWidth The desired width of the frames displayed by this drawable (the width
+   *     of the view or {@link com.bumptech.glide.request.target.Target} this drawable is being
+   *     loaded into).
+   * @param targetFrameHeight The desired height of the frames displayed by this drawable (the
+   *     height of the view or {@link com.bumptech.glide.request.target.Target} this drawable is
+   *     being loaded into).
+   * @param gifDecoder The decoder to use to decode GIF data.
+   * @param firstFrame The decoded and transformed first frame of this GIF.
    * @see #setFrameTransformation(com.bumptech.glide.load.Transformation, android.graphics.Bitmap)
-   *
    * @deprecated Use {@link #GifDrawable(Context, GifDecoder, Transformation, int, int, Bitmap)}
    */
   @SuppressWarnings("deprecation")
@@ -118,22 +102,20 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     this(context, gifDecoder, frameTransformation, targetFrameWidth, targetFrameHeight, firstFrame);
   }
 
-   /**
+  /**
    * Constructor for GifDrawable.
    *
-   * @param context             A context.
+   * @param context A context.
    * @param frameTransformation An {@link com.bumptech.glide.load.Transformation} that can be
-   *                            applied to each frame.
-   * @param targetFrameWidth    The desired width of the frames displayed by this drawable (the
-   *                            width of the view or
-   *                            {@link com.bumptech.glide.request.target.Target}
-   *                            this drawable is being loaded into).
-   * @param targetFrameHeight   The desired height of the frames displayed by this drawable (the
-   *                            height of the view or
-   *                            {@link com.bumptech.glide.request.target.Target}
-   *                            this drawable is being loaded into).
-   * @param gifDecoder          The decoder to use to decode GIF data.
-   * @param firstFrame          The decoded and transformed first frame of this GIF.
+   *     applied to each frame.
+   * @param targetFrameWidth The desired width of the frames displayed by this drawable (the width
+   *     of the view or {@link com.bumptech.glide.request.target.Target} this drawable is being
+   *     loaded into).
+   * @param targetFrameHeight The desired height of the frames displayed by this drawable (the
+   *     height of the view or {@link com.bumptech.glide.request.target.Target} this drawable is
+   *     being loaded into).
+   * @param gifDecoder The decoder to use to decode GIF data.
+   * @param firstFrame The decoded and transformed first frame of this GIF.
    * @see #setFrameTransformation(com.bumptech.glide.load.Transformation, android.graphics.Bitmap)
    */
   public GifDrawable(
@@ -175,8 +157,8 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
   // Public API.
   @SuppressWarnings("WeakerAccess")
-  public void setFrameTransformation(Transformation<Bitmap> frameTransformation,
-      Bitmap firstFrame) {
+  public void setFrameTransformation(
+      Transformation<Bitmap> frameTransformation, Bitmap firstFrame) {
     state.frameLoader.setFrameTransformation(frameTransformation, firstFrame);
   }
 
@@ -233,8 +215,10 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   }
 
   private void startRunning() {
-    Preconditions.checkArgument(!isRecycled, "You cannot start a recycled Drawable. Ensure that"
-        + "you clear any references to the Drawable when clearing the corresponding request.");
+    Preconditions.checkArgument(
+        !isRecycled,
+        "You cannot start a recycled Drawable. Ensure that"
+            + "you clear any references to the Drawable when clearing the corresponding request.");
     // If we have only a single frame, we don't want to decode it endlessly.
     if (state.frameLoader.getFrameCount() == 1) {
       invalidateSelf();
@@ -252,9 +236,11 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
 
   @Override
   public boolean setVisible(boolean visible, boolean restart) {
-    Preconditions.checkArgument(!isRecycled, "Cannot change the visibility of a recycled resource."
-        + " Ensure that you unset the Drawable from your View before changing the View's"
-        + " visibility.");
+    Preconditions.checkArgument(
+        !isRecycled,
+        "Cannot change the visibility of a recycled resource."
+            + " Ensure that you unset the Drawable from your View before changing the View's"
+            + " visibility.");
     isVisible = visible;
     if (!visible) {
       stopRunning();
@@ -377,9 +363,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
     return state;
   }
 
-  /**
-   * Clears any resources for loading frames that are currently held on to by this object.
-   */
+  /** Clears any resources for loading frames that are currently held on to by this object. */
   public void recycle() {
     isRecycled = true;
     state.frameLoader.clear();
@@ -394,8 +378,9 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   @SuppressWarnings("WeakerAccess")
   public void setLoopCount(int loopCount) {
     if (loopCount <= 0 && loopCount != LOOP_FOREVER && loopCount != LOOP_INTRINSIC) {
-      throw new IllegalArgumentException("Loop count must be greater than 0, or equal to "
-          + "GlideDrawable.LOOP_FOREVER, or equal to GlideDrawable.LOOP_INTRINSIC");
+      throw new IllegalArgumentException(
+          "Loop count must be greater than 0, or equal to "
+              + "GlideDrawable.LOOP_FOREVER, or equal to GlideDrawable.LOOP_INTRINSIC");
     }
 
     if (loopCount == LOOP_INTRINSIC) {
@@ -408,13 +393,13 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   }
 
   /**
-   * Register callback to listen to GifDrawable animation end event after specific loop count
-   * set by {@link GifDrawable#setLoopCount(int)}.
+   * Register callback to listen to GifDrawable animation end event after specific loop count set by
+   * {@link GifDrawable#setLoopCount(int)}.
    *
-   * Note: This will only be called if the Gif stop because it reaches the loop count. Unregister
+   * <p>Note: This will only be called if the Gif stop because it reaches the loop count. Unregister
    * this in onLoadCleared to avoid potential memory leak.
-   * @see GifDrawable#unregisterAnimationCallback(AnimationCallback).
    *
+   * @see GifDrawable#unregisterAnimationCallback(AnimationCallback).
    * @param animationCallback Animation callback {@link Animatable2Compat.AnimationCallback}.
    */
   @Override
@@ -444,8 +429,7 @@ public class GifDrawable extends Drawable implements GifFrameLoader.FrameCallbac
   }
 
   static final class GifState extends ConstantState {
-    @VisibleForTesting
-    final GifFrameLoader frameLoader;
+    @VisibleForTesting final GifFrameLoader frameLoader;
 
     GifState(GifFrameLoader frameLoader) {
       this.frameLoader = frameLoader;

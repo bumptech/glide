@@ -6,13 +6,12 @@ import android.support.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Preconditions;
 
 /**
- * A container for a put of options used to pre-fill a
- * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} with {@link Bitmap Bitmaps} of a
- * single size and configuration.
+ * A container for a put of options used to pre-fill a {@link
+ * com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} with {@link Bitmap Bitmaps} of a single
+ * size and configuration.
  */
 public final class PreFillType {
-  @VisibleForTesting
-  static final Bitmap.Config DEFAULT_CONFIG = Bitmap.Config.RGB_565;
+  @VisibleForTesting static final Bitmap.Config DEFAULT_CONFIG = Bitmap.Config.RGB_565;
   private final int width;
   private final int height;
   private final Bitmap.Config config;
@@ -21,13 +20,13 @@ public final class PreFillType {
   /**
    * Constructor for a single type of {@link android.graphics.Bitmap}.
    *
-   * @param width  The width in pixels of the {@link android.graphics.Bitmap Bitmaps} to pre-fill.
+   * @param width The width in pixels of the {@link android.graphics.Bitmap Bitmaps} to pre-fill.
    * @param height The height in pixels of the {@link android.graphics.Bitmap Bitmaps} to pre-fill.
-   * @param config The {@link android.graphics.Bitmap.Config} of the
-   *               {@link android.graphics.Bitmap Bitmaps} to pre-fill.
+   * @param config The {@link android.graphics.Bitmap.Config} of the {@link android.graphics.Bitmap
+   *     Bitmaps} to pre-fill.
    * @param weight An integer indicating how to balance pre-filling this size and configuration of
-   *               {@link android.graphics.Bitmap} against any other sizes/configurations that may
-   *               be being pre-filled.
+   *     {@link android.graphics.Bitmap} against any other sizes/configurations that may be being
+   *     pre-filled.
    */
   PreFillType(int width, int height, Bitmap.Config config, int weight) {
     this.config = Preconditions.checkNotNull(config, "Config must not be null");
@@ -36,31 +35,25 @@ public final class PreFillType {
     this.weight = weight;
   }
 
-  /**
-   * Returns the width in pixels of the {@link android.graphics.Bitmap Bitmaps}.
-   */
+  /** Returns the width in pixels of the {@link android.graphics.Bitmap Bitmaps}. */
   int getWidth() {
     return width;
   }
 
-  /**
-   * Returns the height in pixels of the {@link android.graphics.Bitmap Bitmaps}.
-   */
+  /** Returns the height in pixels of the {@link android.graphics.Bitmap Bitmaps}. */
   int getHeight() {
     return height;
   }
 
   /**
-   * Returns the {@link android.graphics.Bitmap.Config} of the
-   * {@link android.graphics.Bitmap Bitmaps}.
+   * Returns the {@link android.graphics.Bitmap.Config} of the {@link android.graphics.Bitmap
+   * Bitmaps}.
    */
   Bitmap.Config getConfig() {
     return config;
   }
 
-  /**
-   * Returns the weight of the {@link android.graphics.Bitmap Bitmaps} of this type.
-   */
+  /** Returns the weight of the {@link android.graphics.Bitmap Bitmaps} of this type. */
   int getWeight() {
     return weight;
   }
@@ -69,7 +62,9 @@ public final class PreFillType {
   public boolean equals(Object o) {
     if (o instanceof PreFillType) {
       PreFillType other = (PreFillType) o;
-      return height == other.height && width == other.width && weight == other.weight
+      return height == other.height
+          && width == other.width
+          && weight == other.weight
           && config == other.config;
     }
     return false;
@@ -86,13 +81,19 @@ public final class PreFillType {
 
   @Override
   public String toString() {
-    return "PreFillSize{" + "width=" + width + ", height=" + height + ", config=" + config
-        + ", weight=" + weight + '}';
+    return "PreFillSize{"
+        + "width="
+        + width
+        + ", height="
+        + height
+        + ", config="
+        + config
+        + ", weight="
+        + weight
+        + '}';
   }
 
-  /**
-   * Builder for {@link PreFillType}.
-   */
+  /** Builder for {@link PreFillType}. */
   public static class Builder {
     private final int width;
     private final int height;
@@ -114,7 +115,7 @@ public final class PreFillType {
      * Constructor for a builder that uses the given dimensions as the dimensions of the Bitmaps to
      * prefill.
      *
-     * @param width  The width in pixels of the Bitmaps to prefill.
+     * @param width The width in pixels of the Bitmaps to prefill.
      * @param height The height in pixels of the Bitmaps to prefill.
      */
     public Builder(int width, int height) {
@@ -139,9 +140,7 @@ public final class PreFillType {
       return this;
     }
 
-    /**
-     * Returns the current {@link android.graphics.Bitmap.Config}.
-     */
+    /** Returns the current {@link android.graphics.Bitmap.Config}. */
     Bitmap.Config getConfig() {
       return config;
     }
@@ -151,8 +150,8 @@ public final class PreFillType {
      * other requested types.
      *
      * @param weight An integer indicating how to balance pre-filling this size and configuration of
-     *               {@link android.graphics.Bitmap} against any other sizes/configurations that may
-     *               be being pre-filled.
+     *     {@link android.graphics.Bitmap} against any other sizes/configurations that may be being
+     *     pre-filled.
      * @return This builder.
      */
     public Builder setWeight(int weight) {
@@ -163,9 +162,7 @@ public final class PreFillType {
       return this;
     }
 
-    /**
-     * Returns a new {@link PreFillType}.
-     */
+    /** Returns a new {@link PreFillType}. */
     PreFillType build() {
       return new PreFillType(width, height, config, weight);
     }

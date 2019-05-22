@@ -25,12 +25,11 @@ import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-/**
- * Responsible for starting loads and managing active and cached resources.
- */
-public class Engine implements EngineJobListener,
-    MemoryCache.ResourceRemovedListener,
-    EngineResource.ResourceListener {
+/** Responsible for starting loads and managing active and cached resources. */
+public class Engine
+    implements EngineJobListener,
+        MemoryCache.ResourceRemovedListener,
+        EngineResource.ResourceListener {
   private static final String TAG = "Engine";
   private static final int JOB_POOL_SIZE = 150;
   private static final boolean VERBOSE_IS_LOGGABLE = Log.isLoggable(TAG, Log.VERBOSE);
@@ -68,7 +67,8 @@ public class Engine implements EngineJobListener,
   }
 
   @VisibleForTesting
-  Engine(MemoryCache cache,
+  Engine(
+      MemoryCache cache,
       DiskCache.Factory diskCacheFactory,
       GlideExecutor diskCacheExecutor,
       GlideExecutor sourceExecutor,
@@ -174,8 +174,16 @@ public class Engine implements EngineJobListener,
       Executor callbackExecutor) {
     long startTime = VERBOSE_IS_LOGGABLE ? LogTime.getLogTime() : 0;
 
-    EngineKey key = keyFactory.buildKey(model, signature, width, height, transformations,
-        resourceClass, transcodeClass, options);
+    EngineKey key =
+        keyFactory.buildKey(
+            model,
+            signature,
+            width,
+            height,
+            transformations,
+            resourceClass,
+            transcodeClass,
+            options);
 
     EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
     if (active != null) {
@@ -282,8 +290,9 @@ public class Engine implements EngineJobListener,
       // Save an object allocation if we've cached an EngineResource (the typical case).
       result = (EngineResource<?>) cached;
     } else {
-      result = new EngineResource<>(
-          cached, /*isMemoryCacheable=*/ true, /*isRecyclable=*/ true, key, /*listener=*/ this);
+      result =
+          new EngineResource<>(
+              cached, /*isMemoryCacheable=*/ true, /*isRecyclable=*/ true, key, /*listener=*/ this);
     }
     return result;
   }
@@ -400,14 +409,18 @@ public class Engine implements EngineJobListener,
   @VisibleForTesting
   static class DecodeJobFactory {
     @Synthetic final DecodeJob.DiskCacheProvider diskCacheProvider;
-    @Synthetic final Pools.Pool<DecodeJob<?>> pool =
-        FactoryPools.threadSafe(JOB_POOL_SIZE,
+
+    @Synthetic
+    final Pools.Pool<DecodeJob<?>> pool =
+        FactoryPools.threadSafe(
+            JOB_POOL_SIZE,
             new FactoryPools.Factory<DecodeJob<?>>() {
-          @Override
-          public DecodeJob<?> create() {
-            return new DecodeJob<>(diskCacheProvider, pool);
-          }
-        });
+              @Override
+              public DecodeJob<?> create() {
+                return new DecodeJob<>(diskCacheProvider, pool);
+              }
+            });
+
     private int creationOrder;
 
     DecodeJobFactory(DecodeJob.DiskCacheProvider diskCacheProvider) {
@@ -415,7 +428,8 @@ public class Engine implements EngineJobListener,
     }
 
     @SuppressWarnings("unchecked")
-    <R> DecodeJob<R> build(GlideContext glideContext,
+    <R> DecodeJob<R> build(
+        GlideContext glideContext,
         Object model,
         EngineKey loadKey,
         Key signature,
@@ -461,7 +475,9 @@ public class Engine implements EngineJobListener,
     @Synthetic final GlideExecutor animationExecutor;
     @Synthetic final EngineJobListener engineJobListener;
     @Synthetic final ResourceListener resourceListener;
-    @Synthetic final Pools.Pool<EngineJob<?>> pool =
+
+    @Synthetic
+    final Pools.Pool<EngineJob<?>> pool =
         FactoryPools.threadSafe(
             JOB_POOL_SIZE,
             new FactoryPools.Factory<EngineJob<?>>() {

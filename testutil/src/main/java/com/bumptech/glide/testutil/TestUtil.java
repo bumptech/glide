@@ -6,9 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Shared utility classes for tests.
- */
+/** Shared utility classes for tests. */
 // Public API.
 @SuppressWarnings("WeakerAccess")
 public final class TestUtil {

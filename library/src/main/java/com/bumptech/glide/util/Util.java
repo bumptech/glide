@@ -14,9 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 
-/**
- * A collection of assorted utility classes.
- */
+/** A collection of assorted utility classes. */
 public final class Util {
   private static final int HASH_MULTIPLIER = 31;
   private static final int HASH_ACCUMULATOR = 17;
@@ -28,9 +26,7 @@ public final class Util {
     // Utility class.
   }
 
-  /**
-   * Returns the hex string of the given byte array representing a SHA256 hash.
-   */
+  /** Returns the hex string of the given byte array representing a SHA256 hash. */
   @NonNull
   public static String sha256BytesToHex(@NonNull byte[] bytes) {
     synchronized (SHA_256_CHARS) {
@@ -58,30 +54,37 @@ public final class Util {
    *
    * @see #getBitmapByteSize(android.graphics.Bitmap)
    * @deprecated Use {@link #getBitmapByteSize(android.graphics.Bitmap)} instead. Scheduled to be
-   * removed in Glide 4.0.
+   *     removed in Glide 4.0.
    */
   @Deprecated
   public static int getSize(@NonNull Bitmap bitmap) {
     return getBitmapByteSize(bitmap);
   }
 
-  /**
-   * Returns the in memory size of the given {@link Bitmap} in bytes.
-   */
+  /** Returns the in memory size of the given {@link Bitmap} in bytes. */
   @TargetApi(Build.VERSION_CODES.KITKAT)
   public static int getBitmapByteSize(@NonNull Bitmap bitmap) {
     // The return value of getAllocationByteCount silently changes for recycled bitmaps from the
     // internal buffer size to row bytes * height. To avoid random inconsistencies in caches, we
     // instead assert here.
     if (bitmap.isRecycled()) {
-      throw new IllegalStateException("Cannot obtain size for recycled Bitmap: " + bitmap
-          + "[" + bitmap.getWidth() + "x" + bitmap.getHeight() + "] " + bitmap.getConfig());
+      throw new IllegalStateException(
+          "Cannot obtain size for recycled Bitmap: "
+              + bitmap
+              + "["
+              + bitmap.getWidth()
+              + "x"
+              + bitmap.getHeight()
+              + "] "
+              + bitmap.getConfig());
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       // Workaround for KitKat initial release NPE in Bitmap, fixed in MR1. See issue #148.
       try {
         return bitmap.getAllocationByteCount();
-      } catch (@SuppressWarnings("PMD.AvoidCatchingNPE") NullPointerException e) {
+      } catch (
+          @SuppressWarnings("PMD.AvoidCatchingNPE")
+          NullPointerException e) {
         // Do nothing.
       }
     }
@@ -122,9 +125,7 @@ public final class Util {
     return bytesPerPixel;
   }
 
-  /**
-   * Returns true if width and height are both > 0 and/or equal to {@link Target#SIZE_ORIGINAL}.
-   */
+  /** Returns true if width and height are both > 0 and/or equal to {@link Target#SIZE_ORIGINAL}. */
   public static boolean isValidDimensions(int width, int height) {
     return isValidDimension(width) && isValidDimension(height);
   }
@@ -143,32 +144,24 @@ public final class Util {
     }
   }
 
-  /**
-   * Throws an {@link java.lang.IllegalArgumentException} if called on the main thread.
-   */
+  /** Throws an {@link java.lang.IllegalArgumentException} if called on the main thread. */
   public static void assertBackgroundThread() {
     if (!isOnBackgroundThread()) {
       throw new IllegalArgumentException("You must call this method on a background thread");
     }
   }
 
-  /**
-   * Returns {@code true} if called on the main thread, {@code false} otherwise.
-   */
+  /** Returns {@code true} if called on the main thread, {@code false} otherwise. */
   public static boolean isOnMainThread() {
     return Looper.myLooper() == Looper.getMainLooper();
   }
 
-  /**
-   * Returns {@code true} if called on a background thread, {@code false} otherwise.
-   */
+  /** Returns {@code true} if called on a background thread, {@code false} otherwise. */
   public static boolean isOnBackgroundThread() {
     return !isOnMainThread();
   }
 
-  /**
-   * Creates a {@link java.util.Queue} of the given size using Glide's preferred implementation.
-   */
+  /** Creates a {@link java.util.Queue} of the given size using Glide's preferred implementation. */
   @NonNull
   public static <T> Queue<T> createQueue(int size) {
     return new ArrayDeque<>(size);

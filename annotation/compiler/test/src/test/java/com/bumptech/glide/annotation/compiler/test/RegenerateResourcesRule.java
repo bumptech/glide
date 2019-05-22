@@ -13,14 +13,12 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 /**
- * Regenerates test resources for annotation compiler tests when the
- * {@link Util#REGENERATE_TEST_RESOURCES_PROPERTY_NAME} property is set to the directory containing
- * the project.
+ * Regenerates test resources for annotation compiler tests when the {@link
+ * Util#REGENERATE_TEST_RESOURCES_PROPERTY_NAME} property is set to the directory containing the
+ * project.
  *
- * <p>This can easily be used via gradle by running:
- * {@code
- *  ./gradlew :annotation:compiler:test:regenerateTestResources
- * }
+ * <p>This can easily be used via gradle by running: {@code ./gradlew
+ * :annotation:compiler:test:regenerateTestResources }
  *
  * <p>Our regenerate task will set the appropriate environment variables that will allow the logic
  * here to succeed. When running the tests normally, this class will do nothing.

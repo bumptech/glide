@@ -12,9 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Checks assertions on {@link com.bumptech.glide.annotation.GlideExtension}s themselves.
- */
+/** Checks assertions on {@link com.bumptech.glide.annotation.GlideExtension}s themselves. */
 // Avoid warnings when asserting on exceptions.
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(JUnit4.class)
@@ -37,7 +35,6 @@ public class InvalidGlideExtensionTest {
       Throwable cause = e.getCause();
       Truth.assertThat(cause.getMessage()).contains("non-private constructor");
       Truth.assertThat(cause.getMessage()).contains("PublicConstructor");
-
     }
   }
 

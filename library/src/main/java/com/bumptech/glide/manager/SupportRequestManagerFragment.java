@@ -59,17 +59,14 @@ public class SupportRequestManagerFragment extends Fragment {
     return lifecycle;
   }
 
-  /**
-   * Returns the current {@link com.bumptech.glide.RequestManager} or null if none is put.
-   */
+  /** Returns the current {@link com.bumptech.glide.RequestManager} or null if none is put. */
   @Nullable
   public RequestManager getRequestManager() {
     return requestManager;
   }
 
   /**
-   * Returns the {@link RequestManagerTreeNode} that provides tree traversal methods relative
-   * to the
+   * Returns the {@link RequestManagerTreeNode} that provides tree traversal methods relative to the
    * associated {@link RequestManager}.
    */
   @NonNull
@@ -98,8 +95,8 @@ public class SupportRequestManagerFragment extends Fragment {
       return Collections.unmodifiableSet(childRequestManagerFragments);
     } else {
       Set<SupportRequestManagerFragment> descendants = new HashSet<>();
-      for (SupportRequestManagerFragment fragment : rootRequestManagerFragment
-          .getDescendantRequestManagerFragments()) {
+      for (SupportRequestManagerFragment fragment :
+          rootRequestManagerFragment.getDescendantRequestManagerFragments()) {
         if (isDescendant(fragment.getParentFragmentUsingHint())) {
           descendants.add(fragment);
         }
@@ -125,9 +122,7 @@ public class SupportRequestManagerFragment extends Fragment {
     return fragment != null ? fragment : parentFragmentHint;
   }
 
-  /**
-   * Returns true if the fragment is a descendant of our parent.
-   */
+  /** Returns true if the fragment is a descendant of our parent. */
   private boolean isDescendant(@NonNull Fragment fragment) {
     Fragment root = getParentFragmentUsingHint();
     Fragment parentFragment;
@@ -203,7 +198,7 @@ public class SupportRequestManagerFragment extends Fragment {
   private class SupportFragmentRequestManagerTreeNode implements RequestManagerTreeNode {
 
     @Synthetic
-    SupportFragmentRequestManagerTreeNode() { }
+    SupportFragmentRequestManagerTreeNode() {}
 
     @NonNull
     @Override

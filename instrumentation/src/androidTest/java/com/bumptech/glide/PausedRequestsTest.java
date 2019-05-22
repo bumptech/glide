@@ -16,8 +16,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 /**
- * Tests how {@link com.bumptech.glide.request.Request}s behave when the corresponding
- * {@link RequestManager} is paused.
+ * Tests how {@link com.bumptech.glide.request.Request}s behave when the corresponding {@link
+ * RequestManager} is paused.
  */
 public final class PausedRequestsTest {
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
@@ -30,22 +30,20 @@ public final class PausedRequestsTest {
     final ImageView imageView = new ImageView(context);
 
     final GlideRequests requests = GlideApp.with(context);
-    concurrency.runOnMainThread(new Runnable() {
-      @Override
-      public void run() {
-        requests.pauseAllRequests();
-      }
-    });
+    concurrency.runOnMainThread(
+        new Runnable() {
+          @Override
+          public void run() {
+            requests.pauseAllRequests();
+          }
+        });
 
     final ColorDrawable expected = new ColorDrawable(Color.RED);
     concurrency.runOnMainThread(
         new Runnable() {
           @Override
           public void run() {
-            requests
-                .load(ResourceIds.drawable.bitmap_alias)
-                .placeholder(expected)
-                .into(imageView);
+            requests.load(ResourceIds.drawable.bitmap_alias).placeholder(expected).into(imageView);
           }
         });
 

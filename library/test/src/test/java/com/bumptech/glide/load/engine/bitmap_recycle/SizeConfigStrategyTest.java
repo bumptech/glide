@@ -12,8 +12,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class SizeConfigStrategyTest {
 
-  @Mock
-  private SizeConfigStrategy.KeyPool pool;
+  @Mock private SizeConfigStrategy.KeyPool pool;
 
   @Before
   public void setUp() {
@@ -25,8 +24,7 @@ public class SizeConfigStrategyTest {
     new EqualsTester()
         .addEqualityGroup(
             new SizeConfigStrategy.Key(pool, 100, Bitmap.Config.ARGB_8888),
-            new SizeConfigStrategy.Key(pool, 100, Bitmap.Config.ARGB_8888)
-        )
+            new SizeConfigStrategy.Key(pool, 100, Bitmap.Config.ARGB_8888))
         .addEqualityGroup(new SizeConfigStrategy.Key(pool, 101, Bitmap.Config.ARGB_8888))
         .addEqualityGroup(new SizeConfigStrategy.Key(pool, 100, Bitmap.Config.RGB_565))
         .addEqualityGroup(new SizeConfigStrategy.Key(pool, 100, null /*config*/))

@@ -38,18 +38,17 @@ public interface ResourceDecoder<T, Z> {
    * would be to use the target dimensions to determine how much to downsample Bitmaps by to avoid
    * overly large allocations.
    *
-   * @param source  The data the resource should be decoded from.
-   * @param width   The ideal width in pixels of the decoded resource, or {@link
-   *                com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate the original
-   *                resource width.
-   * @param height  The ideal height in pixels of the decoded resource, or {@link
-   *                com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate the original
-   *                resource height.
+   * @param source The data the resource should be decoded from.
+   * @param width The ideal width in pixels of the decoded resource, or {@link
+   *     com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate the original resource
+   *     width.
+   * @param height The ideal height in pixels of the decoded resource, or {@link
+   *     com.bumptech.glide.request.target.Target#SIZE_ORIGINAL} to indicate the original resource
+   *     height.
    * @param options A map of string keys to objects that may or may not contain options available to
-   *                this particular implementation. Implementations should not assume that any or
-   *                all of their option keys are present. However, implementations may assume that
-   *                if one of their option keys is present, it's value is non-null and is of the
-   *                expected type.
+   *     this particular implementation. Implementations should not assume that any or all of their
+   *     option keys are present. However, implementations may assume that if one of their option
+   *     keys is present, it's value is non-null and is of the expected type.
    */
   @Nullable
   Resource<Z> decode(@NonNull T source, int width, int height, @NonNull Options options)

@@ -20,11 +20,13 @@ public class ModelCacheTest {
 
   @Test
   public void testModelKeyEquivalence() {
-    new EqualsTester().addEqualityGroup(ModelCache.ModelKey.get(14f, 100, 200),
-        ModelCache.ModelKey.get(14f, 100, 200))
+    new EqualsTester()
+        .addEqualityGroup(
+            ModelCache.ModelKey.get(14f, 100, 200), ModelCache.ModelKey.get(14f, 100, 200))
         .addEqualityGroup(ModelCache.ModelKey.get(13f, 100, 200))
         .addEqualityGroup(ModelCache.ModelKey.get(14f, 200, 200))
-        .addEqualityGroup(ModelCache.ModelKey.get(14f, 100, 300)).testEquals();
+        .addEqualityGroup(ModelCache.ModelKey.get(14f, 100, 300))
+        .testEquals();
   }
 
   @Test

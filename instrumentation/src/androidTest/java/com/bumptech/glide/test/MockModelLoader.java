@@ -47,8 +47,8 @@ public final class MockModelLoader<ModelT, DataT> implements ModelLoader<ModelT,
   }
 
   @Override
-  public LoadData<DataT> buildLoadData(@NonNull ModelT modelT, int width, int height,
-      @NonNull Options options) {
+  public LoadData<DataT> buildLoadData(
+      @NonNull ModelT modelT, int width, int height, @NonNull Options options) {
     return new LoadData<>(new ObjectKey(modelT), new MockDataFetcher<>(data));
   }
 

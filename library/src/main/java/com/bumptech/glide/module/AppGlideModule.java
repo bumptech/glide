@@ -7,19 +7,19 @@ import com.bumptech.glide.GlideBuilder;
 /**
  * Defines a set of dependencies and options to use when initializing Glide within an application.
  *
- * <p>There can be at most one {@link AppGlideModule} in an application. Only Applications
- * can include a {@link AppGlideModule}. Libraries must use {@link LibraryGlideModule}.
+ * <p>There can be at most one {@link AppGlideModule} in an application. Only Applications can
+ * include a {@link AppGlideModule}. Libraries must use {@link LibraryGlideModule}.
  *
- * <p>Classes that extend {@link AppGlideModule} must be annotated with
- * {@link com.bumptech.glide.annotation.GlideModule} to be processed correctly.
+ * <p>Classes that extend {@link AppGlideModule} must be annotated with {@link
+ * com.bumptech.glide.annotation.GlideModule} to be processed correctly.
  *
- * <p>Classes that extend {@link AppGlideModule} can optionally be annotated with
- * {@link com.bumptech.glide.annotation.Excludes} to optionally exclude one or more
- * {@link LibraryGlideModule} and/or {@link GlideModule} classes.
+ * <p>Classes that extend {@link AppGlideModule} can optionally be annotated with {@link
+ * com.bumptech.glide.annotation.Excludes} to optionally exclude one or more {@link
+ * LibraryGlideModule} and/or {@link GlideModule} classes.
  *
  * <p>Once an application has migrated itself and all libraries it depends on to use Glide's
- * annotation processor, {@link AppGlideModule} implementations should override
- * {@link #isManifestParsingEnabled()} and return {@code false}.
+ * annotation processor, {@link AppGlideModule} implementations should override {@link
+ * #isManifestParsingEnabled()} and return {@code false}.
  */
 // Used only in javadoc.
 @SuppressWarnings("deprecation")

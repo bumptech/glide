@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies a set of GlideModule and/or LibraryGlideModule classes that should be excluded
- * from an application.
+ * Specifies a set of GlideModule and/or LibraryGlideModule classes that should be excluded from an
+ * application.
  *
  * <p>Used only on AppGlideModules. Adding this annotation to other classes will have no affect.
  *

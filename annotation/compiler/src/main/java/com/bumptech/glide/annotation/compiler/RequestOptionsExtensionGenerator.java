@@ -37,7 +37,8 @@ final class RequestOptionsExtensionGenerator {
    * given extension class names.
    */
   List<ExecutableElement> getRequestOptionExtensionMethods(Set<String> glideExtensionClassNames) {
-   return processorUtil.findAnnotatedElementsInClasses(glideExtensionClassNames, GlideOption.class);
+    return processorUtil.findAnnotatedElementsInClasses(
+        glideExtensionClassNames, GlideOption.class);
   }
 
   /**
@@ -56,13 +57,15 @@ final class RequestOptionsExtensionGenerator {
     return result;
   }
 
-  private MethodSpec generateMethodsForRequestOptionsExtension(
-      ExecutableElement element) {
+  private MethodSpec generateMethodsForRequestOptionsExtension(ExecutableElement element) {
     // Assert for legacy versions
     if (element.getReturnType().getKind() == TypeKind.VOID) {
       throw new IllegalArgumentException(
-          "The " + element.getSimpleName() + " method annotated with @GlideOption in the "
-              + element.getEnclosingElement().getSimpleName() + " @GlideExtension is using a legacy"
+          "The "
+              + element.getSimpleName()
+              + " method annotated with @GlideOption in the "
+              + element.getEnclosingElement().getSimpleName()
+              + " @GlideExtension is using a legacy"
               + " format that is no longer supported. Please change your method definition so that"
               + " your @GlideModule annotated methods return BaseRequestOptions<?> objects instead"
               + " of null.");
@@ -71,15 +74,16 @@ final class RequestOptionsExtensionGenerator {
     int overrideType = processorUtil.getOverrideType(element);
 
     String methodName = element.getSimpleName().toString();
-    MethodSpec.Builder builder = MethodSpec.methodBuilder(methodName)
-        .addModifiers(Modifier.PUBLIC)
-        .addJavadoc(processorUtil.generateSeeMethodJavadoc(element))
-        .varargs(element.isVarArgs())
-        .returns(containingClassName)
-        .addAnnotation(
-            AnnotationSpec.builder(SuppressWarnings.class)
-                .addMember("value", "$S", "unchecked")
-                .build());
+    MethodSpec.Builder builder =
+        MethodSpec.methodBuilder(methodName)
+            .addModifiers(Modifier.PUBLIC)
+            .addJavadoc(processorUtil.generateSeeMethodJavadoc(element))
+            .varargs(element.isVarArgs())
+            .returns(containingClassName)
+            .addAnnotation(
+                AnnotationSpec.builder(SuppressWarnings.class)
+                    .addMember("value", "$S", "unchecked")
+                    .build());
 
     // The 0th element is expected to be a RequestOptions object.
     List<? extends VariableElement> paramElements =
@@ -103,13 +107,14 @@ final class RequestOptionsExtensionGenerator {
           methodLiterals.append("$L, ");
           methodArgs.add(parameter.name);
         }
-        methodLiterals = new StringBuilder(
-            methodLiterals.substring(0, methodLiterals.length() - 2));
+        methodLiterals =
+            new StringBuilder(methodLiterals.substring(0, methodLiterals.length() - 2));
       }
-      extensionRequestOptionsArgument = CodeBlock.builder()
-          .add("super.$N(" + methodLiterals + ")", methodArgs.toArray(new Object[0]))
-          .build()
-          .toString();
+      extensionRequestOptionsArgument =
+          CodeBlock.builder()
+              .add("super.$N(" + methodLiterals + ")", methodArgs.toArray(new Object[0]))
+              .build()
+              .toString();
     } else {
       extensionRequestOptionsArgument = "this";
     }
@@ -130,9 +135,7 @@ final class RequestOptionsExtensionGenerator {
     code.append(")");
     builder.addStatement(code.toString(), args.toArray(new Object[0]));
 
-    builder
-        .addAnnotation(checkResult())
-        .addAnnotation(nonNull());
+    builder.addAnnotation(checkResult()).addAnnotation(nonNull());
 
     return builder.build();
   }

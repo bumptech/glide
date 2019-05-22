@@ -26,9 +26,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Helper for running sections of code on the main thread in emulator tests.
- */
+/** Helper for running sections of code on the main thread in emulator tests. */
 public class ConcurrencyHelper {
   private final Handler handler = new Handler(Looper.getMainLooper());
   private static final long TIMEOUT_SECONDS = 10;
@@ -36,19 +34,20 @@ public class ConcurrencyHelper {
 
   public <T> T get(final Future<T> future) {
     final AtomicReference<T> reference = new AtomicReference<>();
-    wait(new Waiter() {
-      @Override
-      public boolean await(long timeout, TimeUnit timeUnit) throws InterruptedException {
-        try {
-          reference.set(future.get(timeout, timeUnit));
-          return true;
-        } catch (ExecutionException e) {
-          throw new RuntimeException(e.getCause());
-        } catch (TimeoutException e) {
-          return false;
-        }
-      }
-    });
+    wait(
+        new Waiter() {
+          @Override
+          public boolean await(long timeout, TimeUnit timeUnit) throws InterruptedException {
+            try {
+              reference.set(future.get(timeout, timeUnit));
+              return true;
+            } catch (ExecutionException e) {
+              throw new RuntimeException(e.getCause());
+            } catch (TimeoutException e) {
+              return false;
+            }
+          }
+        });
     return reference.get();
   }
 
@@ -59,233 +58,241 @@ public class ConcurrencyHelper {
 
   public void loadOnOtherThread(final Runnable runnable) {
     final AtomicBoolean isDone = new AtomicBoolean();
-    final Thread thread = new Thread(new Runnable() {
-      @Override
-      public void run() {
-        runnable.run();
-        isDone.set(true);
-      }
-    });
+    final Thread thread =
+        new Thread(
+            new Runnable() {
+              @Override
+              public void run() {
+                runnable.run();
+                isDone.set(true);
+              }
+            });
     thread.start();
 
-    wait(new Waiter() {
-      @Override
-      public boolean await(long timeout, TimeUnit timeUnit) throws InterruptedException {
-        thread.join(timeUnit.toMillis(timeout));
-        return isDone.get();
-      }
-    });
+    wait(
+        new Waiter() {
+          @Override
+          public boolean await(long timeout, TimeUnit timeUnit) throws InterruptedException {
+            thread.join(timeUnit.toMillis(timeout));
+            return isDone.get();
+          }
+        });
   }
 
-  public void loadOnMainThread(
-      final RequestBuilder<Drawable> builder, ImageView imageView) {
+  public void loadOnMainThread(final RequestBuilder<Drawable> builder, ImageView imageView) {
     loadOnMainThread(builder, new DrawableImageViewTarget(imageView));
   }
 
   public void clearOnMainThread(final ImageView imageView) {
-    runOnMainThread(new Runnable() {
-      @Override
-      public void run() {
-        Glide.with(InstrumentationRegistry.getTargetContext())
-            .clear(imageView);
-      }
-    });
+    runOnMainThread(
+        new Runnable() {
+          @Override
+          public void run() {
+            Glide.with(InstrumentationRegistry.getTargetContext()).clear(imageView);
+          }
+        });
   }
 
-  public void loadUntilFirstFinish(
-      final RequestBuilder<Drawable> builder, ImageView imageView) {
+  public void loadUntilFirstFinish(final RequestBuilder<Drawable> builder, ImageView imageView) {
     loadUntilFirstFinish(builder, new DrawableImageViewTarget(imageView));
   }
 
-  private <T> void loadUntilFirstFinish(
-      final RequestBuilder<T> builder, final Target<T> target) {
+  private <T> void loadUntilFirstFinish(final RequestBuilder<T> builder, final Target<T> target) {
     final CountDownLatch latch = new CountDownLatch(1);
-    callOnMainThread(new Callable<Target<T>>() {
-      @Override
-      public Target<T> call() {
-        builder.into(new Target<T>() {
+    callOnMainThread(
+        new Callable<Target<T>>() {
           @Override
-          public void onStart() {
-            target.onStart();
-          }
+          public Target<T> call() {
+            builder.into(
+                new Target<T>() {
+                  @Override
+                  public void onStart() {
+                    target.onStart();
+                  }
 
-          @Override
-          public void onStop() {
-            target.onStop();
-          }
+                  @Override
+                  public void onStop() {
+                    target.onStop();
+                  }
 
-          @Override
-          public void onDestroy() {
-            target.onDestroy();
-          }
+                  @Override
+                  public void onDestroy() {
+                    target.onDestroy();
+                  }
 
-          @Override
-          public void onResourceReady(@NonNull T resource,
-              @Nullable Transition<? super T> transition) {
-            target.onResourceReady(resource, transition);
-            latch.countDown();
-          }
+                  @Override
+                  public void onResourceReady(
+                      @NonNull T resource, @Nullable Transition<? super T> transition) {
+                    target.onResourceReady(resource, transition);
+                    latch.countDown();
+                  }
 
-          @Override
-          public void onLoadCleared(@Nullable Drawable placeholder) {
-            target.onLoadCleared(placeholder);
-          }
+                  @Override
+                  public void onLoadCleared(@Nullable Drawable placeholder) {
+                    target.onLoadCleared(placeholder);
+                  }
 
-          @Override
-          public void onLoadStarted(@Nullable Drawable placeholder) {
-            target.onLoadStarted(placeholder);
-          }
+                  @Override
+                  public void onLoadStarted(@Nullable Drawable placeholder) {
+                    target.onLoadStarted(placeholder);
+                  }
 
-          @Override
-          public void onLoadFailed(@Nullable Drawable errorDrawable) {
-            target.onLoadFailed(errorDrawable);
-            latch.countDown();
-          }
+                  @Override
+                  public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                    target.onLoadFailed(errorDrawable);
+                    latch.countDown();
+                  }
 
-          @Override
-          public void getSize(@NonNull SizeReadyCallback cb) {
-            target.getSize(cb);
-          }
+                  @Override
+                  public void getSize(@NonNull SizeReadyCallback cb) {
+                    target.getSize(cb);
+                  }
 
-          @Override
-          public void removeCallback(@NonNull SizeReadyCallback cb) {
-            target.removeCallback(cb);
-          }
+                  @Override
+                  public void removeCallback(@NonNull SizeReadyCallback cb) {
+                    target.removeCallback(cb);
+                  }
 
-          @Override
-          public void setRequest(@Nullable Request request) {
-            target.setRequest(request);
-          }
+                  @Override
+                  public void setRequest(@Nullable Request request) {
+                    target.setRequest(request);
+                  }
 
-          @Nullable
-          @Override
-          public Request getRequest() {
-            return target.getRequest();
+                  @Nullable
+                  @Override
+                  public Request getRequest() {
+                    return target.getRequest();
+                  }
+                });
+            return target;
           }
         });
-        return target;
-      }
-    });
     waitOnLatch(latch);
   }
 
   private <T> void loadOnMainThread(final RequestBuilder<T> builder, final Target<T> target) {
     final CountDownLatch latch = new CountDownLatch(1);
-    callOnMainThread(new Callable<Target<T>>() {
-      @Override
-      public Target<T> call() {
-        builder.into(new Target<T>() {
+    callOnMainThread(
+        new Callable<Target<T>>() {
           @Override
-          public void onStart() {
-            target.onStart();
-          }
+          public Target<T> call() {
+            builder.into(
+                new Target<T>() {
+                  @Override
+                  public void onStart() {
+                    target.onStart();
+                  }
 
-          @Override
-          public void onStop() {
-            target.onStop();
-          }
+                  @Override
+                  public void onStop() {
+                    target.onStop();
+                  }
 
-          @Override
-          public void onDestroy() {
-            target.onDestroy();
-          }
+                  @Override
+                  public void onDestroy() {
+                    target.onDestroy();
+                  }
 
-          @Override
-          public void onResourceReady(@NonNull T resource,
-              @Nullable Transition<? super T> transition) {
-            target.onResourceReady(resource, transition);
-            if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
-              latch.countDown();
-            }
-          }
+                  @Override
+                  public void onResourceReady(
+                      @NonNull T resource, @Nullable Transition<? super T> transition) {
+                    target.onResourceReady(resource, transition);
+                    if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
+                      latch.countDown();
+                    }
+                  }
 
-          @Override
-          public void onLoadCleared(@Nullable Drawable placeholder) {
-            target.onLoadCleared(placeholder);
-          }
+                  @Override
+                  public void onLoadCleared(@Nullable Drawable placeholder) {
+                    target.onLoadCleared(placeholder);
+                  }
 
-          @Override
-          public void onLoadStarted(@Nullable Drawable placeholder) {
-            target.onLoadStarted(placeholder);
-          }
+                  @Override
+                  public void onLoadStarted(@Nullable Drawable placeholder) {
+                    target.onLoadStarted(placeholder);
+                  }
 
-          @Override
-          public void onLoadFailed(@Nullable Drawable errorDrawable) {
-            target.onLoadFailed(errorDrawable);
-            if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
-              latch.countDown();
-            }
-          }
+                  @Override
+                  public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                    target.onLoadFailed(errorDrawable);
+                    if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
+                      latch.countDown();
+                    }
+                  }
 
-          @Override
-          public void getSize(@NonNull SizeReadyCallback cb) {
-            target.getSize(cb);
-          }
+                  @Override
+                  public void getSize(@NonNull SizeReadyCallback cb) {
+                    target.getSize(cb);
+                  }
 
-          @Override
-          public void removeCallback(@NonNull SizeReadyCallback cb) {
-            target.removeCallback(cb);
-          }
+                  @Override
+                  public void removeCallback(@NonNull SizeReadyCallback cb) {
+                    target.removeCallback(cb);
+                  }
 
-          @Override
-          public void setRequest(@Nullable Request request) {
-            target.setRequest(request);
-          }
+                  @Override
+                  public void setRequest(@Nullable Request request) {
+                    target.setRequest(request);
+                  }
 
-          @Nullable
-          @Override
-          public Request getRequest() {
-            return target.getRequest();
+                  @Nullable
+                  @Override
+                  public Request getRequest() {
+                    return target.getRequest();
+                  }
+                });
+            return target;
           }
         });
-        return target;
-      }
-    });
     waitOnLatch(latch);
   }
 
   public void pokeMainThread() {
-    runOnMainThread(new Runnable() {
-      @Override
-      public void run() {
-        // Do nothing.
-      }
-    });
+    runOnMainThread(
+        new Runnable() {
+          @Override
+          public void run() {
+            // Do nothing.
+          }
+        });
   }
 
   public void runOnMainThread(final Runnable runnable) {
-    callOnMainThread(new Callable<Void>() {
-      @Override
-      public Void call() {
-        runnable.run();
-        return null;
-      }
-    });
+    callOnMainThread(
+        new Callable<Void>() {
+          @Override
+          public Void call() {
+            runnable.run();
+            return null;
+          }
+        });
   }
 
   private <T> void callOnMainThread(final Callable<T> callable) {
     final CountDownLatch latch = new CountDownLatch(1);
-    handler.post(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          callable.call();
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-        latch.countDown();
-      }
-    });
+    handler.post(
+        new Runnable() {
+          @Override
+          public void run() {
+            try {
+              callable.call();
+            } catch (Exception e) {
+              throw new RuntimeException(e);
+            }
+            latch.countDown();
+          }
+        });
     waitOnLatch(latch);
   }
 
   public static void waitOnLatch(final CountDownLatch latch) {
-    wait(new Waiter() {
-      @Override
-      public boolean await(long timeout, TimeUnit timeUnit) throws InterruptedException {
-        return latch.await(timeout, timeUnit);
-      }
-    });
+    wait(
+        new Waiter() {
+          @Override
+          public boolean await(long timeout, TimeUnit timeUnit) throws InterruptedException {
+            return latch.await(timeout, timeUnit);
+          }
+        });
   }
 
   private interface Waiter {

@@ -29,5 +29,4 @@ public class BytesResourceTest {
   public void testThrowsIfGivenNullBytes() {
     new BytesResource(null);
   }
-
 }

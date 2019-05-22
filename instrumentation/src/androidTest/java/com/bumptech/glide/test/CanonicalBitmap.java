@@ -9,10 +9,8 @@ import androidx.test.InstrumentationRegistry;
 import com.bumptech.glide.util.Preconditions;
 
 public final class CanonicalBitmap {
-  @Nullable
-  private Bitmap bitmap;
-  @Nullable
-  private Float scaleFactor;
+  @Nullable private Bitmap bitmap;
+  @Nullable private Float scaleFactor;
 
   @NonNull
   public synchronized Bitmap getBitmap() {
@@ -43,11 +41,12 @@ public final class CanonicalBitmap {
     int resourceId = ResourceIds.raw.canonical;
     Bitmap result = BitmapFactory.decodeResource(context.getResources(), resourceId, options);
     if (scaleFactor != null) {
-      result = Bitmap.createScaledBitmap(
-          result,
-          (int) (result.getWidth() * scaleFactor),
-          (int) (result.getHeight() * scaleFactor),
-          /*filter=*/false);
+      result =
+          Bitmap.createScaledBitmap(
+              result,
+              (int) (result.getWidth() * scaleFactor),
+              (int) (result.getHeight() * scaleFactor),
+              /*filter=*/ false);
     }
     // Make sure the Bitmap is immutable.
     return result;

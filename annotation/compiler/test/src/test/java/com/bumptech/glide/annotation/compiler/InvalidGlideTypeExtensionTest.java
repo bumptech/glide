@@ -1,6 +1,5 @@
 package com.bumptech.glide.annotation.compiler;
 
-
 import static com.bumptech.glide.annotation.compiler.test.Util.emptyAppModule;
 import static com.bumptech.glide.annotation.compiler.test.Util.subpackage;
 import static com.google.testing.compile.CompilationSubject.assertThat;
@@ -89,26 +88,27 @@ public class InvalidGlideTypeExtensionTest {
 
   @Test
   public void compilation_withAnnotatedStaticMethod_withRequestBuilderArg_succeeds() {
-    Compilation compilation = javac()
-        .withProcessors(new GlideAnnotationProcessor())
-        .compile(
-            emptyAppModule(),
-            JavaFileObjects.forSourceLines(
-                "Extension",
-                "package com.bumptech.glide.test;",
-                "import android.support.annotation.NonNull;",
-                "import com.bumptech.glide.RequestBuilder;",
-                "import com.bumptech.glide.annotation.GlideExtension;",
-                "import com.bumptech.glide.annotation.GlideType;",
-                "@GlideExtension",
-                "public class Extension {",
-                "  private Extension() {}",
-                "  @NonNull",
-                "  @GlideType(Number.class)",
-                "  public static RequestBuilder<Number> type(RequestBuilder<Number> builder) {",
-                "    return builder;",
-                "  }",
-                "}"));
+    Compilation compilation =
+        javac()
+            .withProcessors(new GlideAnnotationProcessor())
+            .compile(
+                emptyAppModule(),
+                JavaFileObjects.forSourceLines(
+                    "Extension",
+                    "package com.bumptech.glide.test;",
+                    "import android.support.annotation.NonNull;",
+                    "import com.bumptech.glide.RequestBuilder;",
+                    "import com.bumptech.glide.annotation.GlideExtension;",
+                    "import com.bumptech.glide.annotation.GlideType;",
+                    "@GlideExtension",
+                    "public class Extension {",
+                    "  private Extension() {}",
+                    "  @NonNull",
+                    "  @GlideType(Number.class)",
+                    "  public static RequestBuilder<Number> type(RequestBuilder<Number> builder) {",
+                    "    return builder;",
+                    "  }",
+                    "}"));
     assertThat(compilation).succeededWithoutWarnings();
   }
 
@@ -307,8 +307,7 @@ public class InvalidGlideTypeExtensionTest {
       String message = e.getCause().getMessage();
       Truth.assertThat(message)
           .contains("@GlideType methods should return a RequestBuilder<java.lang.Number>");
-      Truth.assertThat(message)
-          .contains("WrongBuilderTypeExtension");
+      Truth.assertThat(message).contains("WrongBuilderTypeExtension");
     }
   }
 
@@ -375,8 +374,10 @@ public class InvalidGlideTypeExtensionTest {
       fail();
     } catch (RuntimeException e) {
       String message = e.getCause().getMessage();
-      Truth.assertThat(message).contains("@GlideType methods must take a RequestBuilder object"
-          + " as their first and only parameter");
+      Truth.assertThat(message)
+          .contains(
+              "@GlideType methods must take a RequestBuilder object"
+                  + " as their first and only parameter");
       Truth.assertThat(message).contains("Object");
       Truth.assertThat(message).contains("IncorrectParameterExtension");
     }

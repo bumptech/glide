@@ -1,6 +1,5 @@
 package com.bumptech.glide;
 
-
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.fail;
 
@@ -37,12 +36,7 @@ public class AsFileTest {
 
   @Test
   public void asFile_withUrl_succeeds() {
-    File file =
-        concurrency.get(
-            GlideApp.with(context)
-                .asFile()
-                .load(URL)
-                .submit());
+    File file = concurrency.get(GlideApp.with(context).asFile().load(URL).submit());
     assertThat(file).isNotNull();
   }
 

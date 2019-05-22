@@ -18,26 +18,27 @@ import java.util.List;
 /**
  * Allows attempting multiple ModelLoaders registered for a given model and data class.
  *
- * <p> TODO: we should try to find a way to remove this class. It exists to allow individual
+ * <p>TODO: we should try to find a way to remove this class. It exists to allow individual
  * ModelLoaders to delegate to multiple ModelLoaders without having to duplicate this logic
  * everywhere. We have very similar logic in the {@link
  * com.bumptech.glide.load.engine.DataFetcherGenerator} implementations and should try to avoid this
- * duplication. </p>
+ * duplication.
  */
 class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
 
   private final List<ModelLoader<Model, Data>> modelLoaders;
   private final Pool<List<Throwable>> exceptionListPool;
 
-  MultiModelLoader(@NonNull List<ModelLoader<Model, Data>> modelLoaders,
+  MultiModelLoader(
+      @NonNull List<ModelLoader<Model, Data>> modelLoaders,
       @NonNull Pool<List<Throwable>> exceptionListPool) {
     this.modelLoaders = modelLoaders;
     this.exceptionListPool = exceptionListPool;
   }
 
   @Override
-  public LoadData<Data> buildLoadData(@NonNull Model model, int width, int height,
-      @NonNull Options options) {
+  public LoadData<Data> buildLoadData(
+      @NonNull Model model, int width, int height, @NonNull Options options) {
     Key sourceKey = null;
     int size = modelLoaders.size();
     List<DataFetcher<Data>> fetchers = new ArrayList<>(size);
@@ -53,7 +54,8 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
       }
     }
     return !fetchers.isEmpty() && sourceKey != null
-        ? new LoadData<>(sourceKey, new MultiFetcher<>(fetchers, exceptionListPool)) : null;
+        ? new LoadData<>(sourceKey, new MultiFetcher<>(fetchers, exceptionListPool))
+        : null;
   }
 
   @Override
@@ -78,8 +80,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     private int currentIndex;
     private Priority priority;
     private DataCallback<? super Data> callback;
-    @Nullable
-    private List<Throwable> exceptions;
+    @Nullable private List<Throwable> exceptions;
     private boolean isCancelled;
 
     MultiFetcher(
@@ -92,8 +93,7 @@ class MultiModelLoader<Model, Data> implements ModelLoader<Model, Data> {
     }
 
     @Override
-    public void loadData(
-        @NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
+    public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       this.priority = priority;
       this.callback = callback;
       exceptions = throwableListPool.acquire();

@@ -10,8 +10,8 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.TypeElement;
 
 /**
- * Writes Indexer classes annotated with {@link Index} for all
- * classes found annotated with {@link GlideExtension}.
+ * Writes Indexer classes annotated with {@link Index} for all classes found annotated with {@link
+ * GlideExtension}.
  */
 final class ExtensionProcessor {
   private final ProcessorUtil processorUtil;

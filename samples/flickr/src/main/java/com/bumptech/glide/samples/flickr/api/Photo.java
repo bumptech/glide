@@ -5,21 +5,20 @@ import android.os.Parcelable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * A POJO representing a JSON object returned from Flickr's api representing a single image.
- */
+/** A POJO representing a JSON object returned from Flickr's api representing a single image. */
 public class Photo implements Parcelable {
-  public static final Creator<Photo> CREATOR = new Creator<Photo>() {
-    @Override
-    public Photo createFromParcel(Parcel parcel) {
-      return new Photo(parcel);
-    }
+  public static final Creator<Photo> CREATOR =
+      new Creator<Photo>() {
+        @Override
+        public Photo createFromParcel(Parcel parcel) {
+          return new Photo(parcel);
+        }
 
-    @Override
-    public Photo[] newArray(int i) {
-      return new Photo[i];
-    }
-  };
+        @Override
+        public Photo[] newArray(int i) {
+          return new Photo[i];
+        }
+      };
 
   private final String id;
   private final String owner;
@@ -28,7 +27,6 @@ public class Photo implements Parcelable {
   private final String farm;
   private final String secret;
   private String partialUrl = null;
-
 
   public Photo(JSONObject jsonPhoto) throws JSONException {
     this.id = jsonPhoto.getString("id");
