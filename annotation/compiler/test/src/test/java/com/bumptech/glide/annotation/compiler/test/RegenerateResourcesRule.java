@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import org.junit.ComparisonFailure;
+import javax.tools.JavaFileObject;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -27,10 +27,10 @@ import org.junit.runners.model.Statement;
  */
 public final class RegenerateResourcesRule implements TestRule {
 
-  private final Class<?> testClass;
+  private CompilationProvider test;
 
-  public RegenerateResourcesRule(Class<?> testClass) {
-    this.testClass = testClass;
+  public RegenerateResourcesRule(CompilationProvider test) {
+    this.test = test;
   }
 
   @Override
@@ -40,7 +40,7 @@ public final class RegenerateResourcesRule implements TestRule {
       public void evaluate() throws Throwable {
         try {
           base.evaluate();
-        } catch (ComparisonFailure e) {
+        } catch (AssertionError e) {
           String projectRoot = Util.getProjectRootIfRegeneratingTestResources();
           if (projectRoot == null || description.getAnnotation(ReferencedResource.class) != null) {
             throw e;
@@ -52,8 +52,8 @@ public final class RegenerateResourcesRule implements TestRule {
   }
 
   private void updateResourceFile(
-      ComparisonFailure e, @NonNull String projectDirectory, Description description) {
-    String testClassName = testClass.getSimpleName();
+      AssertionError e, @NonNull String projectDirectory, Description description) {
+    String testClassName = test.getClass().getSimpleName();
     String testFileName = parseFileNameFromMessage(e);
     String testDirectory = projectDirectory + "/src/test/resources/" + testClassName;
     String subDirectorySegment =
@@ -75,7 +75,7 @@ public final class RegenerateResourcesRule implements TestRule {
     Writer writer = null;
     try {
       writer = new FileWriter(expectedFile);
-      writer.write(asUnixChars(e.getActual()).toString());
+      writer.write(asUnixChars(parseActual(testFileName)).toString());
       writer.close();
     } catch (IOException e1) {
       throw new RuntimeException("Failed to regenerate test file", e1);
@@ -90,8 +90,21 @@ public final class RegenerateResourcesRule implements TestRule {
     }
   }
 
+  private String parseActual(String fileName) {
+    for (JavaFileObject javaFileObject : test.getCompilation().generatedSourceFiles()) {
+      if (javaFileObject.getName().contains(fileName)) {
+        try {
+          return javaFileObject.getCharContent(true).toString();
+        } catch (IOException e) {
+          throw new IllegalStateException(e);
+        }
+      }
+    }
+    throw new IllegalStateException("Failed to find source file for name: " + fileName);
+  }
+
   // Parses </SOURCE_OUTPUT/com/bumptech/glide/test/GlideOptions.java> to GlideOptions.java.
-  private static String parseFileNameFromMessage(ComparisonFailure e) {
+  private static String parseFileNameFromMessage(AssertionError e) {
     String message = e.getMessage();
     int firstGreaterThanIndex = message.indexOf('>');
     String substring = message.substring(0, firstGreaterThanIndex);

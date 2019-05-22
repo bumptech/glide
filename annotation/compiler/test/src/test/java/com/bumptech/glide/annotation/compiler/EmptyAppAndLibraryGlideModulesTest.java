@@ -2,7 +2,6 @@ package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.compiler.test.Util.annotation;
 import static com.bumptech.glide.annotation.compiler.test.Util.appResource;
-import static com.bumptech.glide.annotation.compiler.test.Util.asUnixChars;
 import static com.bumptech.glide.annotation.compiler.test.Util.emptyAppModule;
 import static com.bumptech.glide.annotation.compiler.test.Util.emptyLibraryModule;
 import static com.bumptech.glide.annotation.compiler.test.Util.glide;
@@ -11,6 +10,7 @@ import static com.bumptech.glide.annotation.compiler.test.Util.subpackage;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 
+import com.bumptech.glide.annotation.compiler.test.CompilationProvider;
 import com.bumptech.glide.annotation.compiler.test.ReferencedResource;
 import com.bumptech.glide.annotation.compiler.test.RegenerateResourcesRule;
 import com.bumptech.glide.annotation.compiler.test.Util;
@@ -29,9 +29,9 @@ import org.junit.runners.JUnit4;
  * {@link com.bumptech.glide.module.LibraryGlideModule} in a single project.
  */
 @RunWith(JUnit4.class)
-public class EmptyAppAndLibraryGlideModulesTest {
+public class EmptyAppAndLibraryGlideModulesTest implements CompilationProvider {
   @Rule public final RegenerateResourcesRule regenerateResourcesRule =
-      new RegenerateResourcesRule(getClass());
+      new RegenerateResourcesRule(this);
   private Compilation compilation;
 
   @Before
@@ -55,8 +55,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
   public void compilation_generatesExpectedGlideOptionsClass() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideOptions"))
-        .contentsAsUtf8String()
-        .isEqualTo(asUnixChars(appResource("GlideOptions.java").getCharContent(true)));
+        .hasSourceEquivalentTo(appResource("GlideOptions.java"));
   }
 
   @Test
@@ -64,8 +63,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
   public void compilation_generatesExpectedGlideRequestClass() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideRequest"))
-        .contentsAsUtf8String()
-        .isEqualTo(asUnixChars(appResource("GlideRequest.java").getCharContent(true)));
+        .hasSourceEquivalentTo(appResource("GlideRequest.java"));
   }
 
   @Test
@@ -73,8 +71,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
   public void compilation_generatesExpectedGlideRequestsClass() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideRequests"))
-        .contentsAsUtf8String()
-        .isEqualTo(asUnixChars(appResource("GlideRequests.java").getCharContent(true)));
+        .hasSourceEquivalentTo(appResource("GlideRequests.java"));
   }
 
   @Test
@@ -82,17 +79,14 @@ public class EmptyAppAndLibraryGlideModulesTest {
   public void compilationGeneratesExpectedGlideAppClass() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(subpackage("GlideApp"))
-        .contentsAsUtf8String()
-        .isEqualTo(asUnixChars(appResource("GlideApp.java").getCharContent(true)));
+        .hasSourceEquivalentTo(appResource("GlideApp.java"));
   }
 
   @Test
   public void compilation_generatesExpectedGeneratedAppGlideModuleImpl() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(glide("GeneratedAppGlideModuleImpl"))
-        .contentsAsUtf8String()
-        .isEqualTo(
-            asUnixChars(forResource("GeneratedAppGlideModuleImpl.java").getCharContent(true)));
+        .hasSourceEquivalentTo(forResource("GeneratedAppGlideModuleImpl.java"));
   }
 
   @Test
@@ -100,9 +94,7 @@ public class EmptyAppAndLibraryGlideModulesTest {
   public void compilation_generatesExpectedGeneratedRequestManagerFactory() throws IOException {
     assertThat(compilation)
         .generatedSourceFile(glide("GeneratedRequestManagerFactory"))
-        .contentsAsUtf8String()
-        .isEqualTo(
-            asUnixChars(appResource("GeneratedRequestManagerFactory.java").getCharContent(true)));
+        .hasSourceEquivalentTo(appResource("GeneratedRequestManagerFactory.java"));
   }
 
   @Test
@@ -112,11 +104,15 @@ public class EmptyAppAndLibraryGlideModulesTest {
         "GlideIndexer_GlideModule_com_bumptech_glide_test_EmptyLibraryModule";
     assertThat(compilation)
         .generatedSourceFile(annotation(expectedClassName))
-        .contentsAsUtf8String()
-        .isEqualTo(asUnixChars(libraryResource(expectedClassName + ".java").getCharContent(true)));
+        .hasSourceEquivalentTo(libraryResource(expectedClassName + ".java"));
   }
 
   private JavaFileObject forResource(String name) {
     return Util.forResource(getClass().getSimpleName(), name);
+  }
+
+  @Override
+  public Compilation getCompilation() {
+    return compilation;
   }
 }

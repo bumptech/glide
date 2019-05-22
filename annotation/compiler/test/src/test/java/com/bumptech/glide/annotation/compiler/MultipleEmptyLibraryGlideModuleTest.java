@@ -1,10 +1,10 @@
 package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.compiler.test.Util.annotation;
-import static com.bumptech.glide.annotation.compiler.test.Util.asUnixChars;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 
+import com.bumptech.glide.annotation.compiler.test.CompilationProvider;
 import com.bumptech.glide.annotation.compiler.test.RegenerateResourcesRule;
 import com.bumptech.glide.annotation.compiler.test.Util;
 import com.google.common.truth.Truth;
@@ -21,9 +21,9 @@ import org.junit.runners.JUnit4;
  * Tests adding multiple {@link com.bumptech.glide.module.LibraryGlideModule}s in a project.
  */
 @RunWith(JUnit4.class)
-public class MultipleEmptyLibraryGlideModuleTest {
+public class MultipleEmptyLibraryGlideModuleTest implements CompilationProvider {
   @Rule public final RegenerateResourcesRule regenerateResourcesRule =
-      new RegenerateResourcesRule(getClass());
+      new RegenerateResourcesRule(this);
   private Compilation compilation;
 
   @Before
@@ -49,11 +49,15 @@ public class MultipleEmptyLibraryGlideModuleTest {
             + "_test_EmptyLibraryModule2";
     assertThat(compilation)
         .generatedSourceFile(annotation(expectedClassName))
-        .contentsAsUtf8String()
-        .isEqualTo(asUnixChars(forResource(expectedClassName + ".java").getCharContent(true)));
+        .hasSourceEquivalentTo(forResource(expectedClassName + ".java"));
   }
 
   private JavaFileObject forResource(String name) {
     return Util.forResource(getClass().getSimpleName(), name);
+  }
+
+  @Override
+  public Compilation getCompilation() {
+    return compilation;
   }
 }

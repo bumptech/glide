@@ -1,11 +1,11 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static com.bumptech.glide.annotation.compiler.test.Util.asUnixChars;
 import static com.bumptech.glide.annotation.compiler.test.Util.emptyAppModule;
 import static com.bumptech.glide.annotation.compiler.test.Util.subpackage;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 
+import com.bumptech.glide.annotation.compiler.test.CompilationProvider;
 import com.bumptech.glide.annotation.compiler.test.RegenerateResourcesRule;
 import com.bumptech.glide.annotation.compiler.test.SubDirectory;
 import com.bumptech.glide.annotation.compiler.test.TestDescription;
@@ -22,11 +22,12 @@ import org.junit.runners.JUnit4;
  * Verifies only the output we expect to change based on the various configurations of GlideOptions.
  */
 @RunWith(JUnit4.class)
-public class GlideExtensionOptionsTest {
+public class GlideExtensionOptionsTest implements CompilationProvider {
   @Rule public final RegenerateResourcesRule regenerateResourcesRule =
-      new RegenerateResourcesRule(getClass());
+      new RegenerateResourcesRule(this);
   @Rule public final TestDescription testDescription = new TestDescription();
   private static final String EXTENSION_NAME = "Extension.java";
+  private Compilation currentCompilation;
 
   @Test
   @SubDirectory("OverrideExtend")
@@ -102,6 +103,11 @@ public class GlideExtensionOptionsTest {
     runTest(Subject.GlideRequest);
   }
 
+  @Override
+  public Compilation getCompilation() {
+    return currentCompilation;
+  }
+
   private enum Subject {
     GlideOptions,
     GlideRequest;
@@ -111,20 +117,19 @@ public class GlideExtensionOptionsTest {
     }
   }
 
-  private void runTest(Subject subject) throws IOException {
+  private void runTest(Subject subject) {
     String subDir = getSubDirectoryName();
-    Compilation compilation =
+    currentCompilation =
         javac()
             .withProcessors(new GlideAnnotationProcessor())
             .compile(
                 emptyAppModule(),
                 extension(subDir));
-    assertThat(compilation).succeededWithoutWarnings();
+    assertThat(currentCompilation).succeededWithoutWarnings();
 
-    assertThat(compilation)
+    assertThat(currentCompilation)
         .generatedSourceFile(subpackage(subject.name()))
-        .contentsAsUtf8String()
-        .isEqualTo(asUnixChars(forResource(subDir, subject.file()).getCharContent(true)));
+        .hasSourceEquivalentTo(forResource(subDir, subject.file()));
   }
 
   private String getSubDirectoryName() {

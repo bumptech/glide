@@ -4,6 +4,7 @@ import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 import static org.junit.Assert.assertThrows;
 
+import com.bumptech.glide.annotation.compiler.test.CompilationProvider;
 import com.bumptech.glide.annotation.compiler.test.RegenerateResourcesRule;
 import com.bumptech.glide.annotation.compiler.test.Util;
 import com.google.testing.compile.Compilation;
@@ -19,11 +20,12 @@ import org.junit.runners.JUnit4;
  * will fail.
  */
 @RunWith(JUnit4.class)
-public class MultipleAppGlideModuleTest {
+public class MultipleAppGlideModuleTest implements CompilationProvider {
   private static final String FIRST_MODULE = "EmptyAppModule1.java";
   private static final String SECOND_MODULE = "EmptyAppModule2.java";
   @Rule public final RegenerateResourcesRule regenerateResourcesRule =
-      new RegenerateResourcesRule(getClass());
+      new RegenerateResourcesRule(this);
+  private Compilation compilation;
 
   // Throws.
   @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -43,7 +45,7 @@ public class MultipleAppGlideModuleTest {
 
   @Test
   public void compilation_withFirstModuleOnly_succeeds() {
-    Compilation compilation = javac()
+    compilation = javac()
         .withProcessors(new GlideAnnotationProcessor())
         .compile(forResource(FIRST_MODULE));
     assertThat(compilation).succeededWithoutWarnings();
@@ -51,7 +53,7 @@ public class MultipleAppGlideModuleTest {
 
   @Test
   public void compilation_withSecondModuleOnly_succeeds() {
-    Compilation compilation = javac()
+    compilation = javac()
         .withProcessors(new GlideAnnotationProcessor())
         .compile(forResource(SECOND_MODULE));
     assertThat(compilation).succeededWithoutWarnings();
@@ -59,5 +61,10 @@ public class MultipleAppGlideModuleTest {
 
   private JavaFileObject forResource(String name) {
     return Util.forResource(getClass().getSimpleName(), name);
+  }
+
+  @Override
+  public Compilation getCompilation() {
+    return compilation;
   }
 }
