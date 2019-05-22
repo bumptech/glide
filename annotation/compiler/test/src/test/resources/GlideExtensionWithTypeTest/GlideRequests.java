@@ -17,14 +17,6 @@ import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import java.io.File;
-import java.lang.Class;
-import java.lang.Deprecated;
-import java.lang.Integer;
-import java.lang.Number;
-import java.lang.Object;
-import java.lang.Override;
-import java.lang.String;
-import java.lang.SuppressWarnings;
 import java.net.URL;
 
 /**

@@ -5,9 +5,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.test.EmptyAppModule;
 import com.bumptech.glide.test.EmptyLibraryModule;
-import java.lang.Class;
-import java.lang.Override;
-import java.lang.SuppressWarnings;
 import java.util.Collections;
 import java.util.Set;
 

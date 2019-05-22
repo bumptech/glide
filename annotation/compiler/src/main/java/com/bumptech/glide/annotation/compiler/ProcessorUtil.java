@@ -124,7 +124,10 @@ final class ProcessorUtil {
   void writeClass(String packageName, TypeSpec clazz) {
     try {
       debugLog("Writing class:\n" + clazz);
-      JavaFile.builder(packageName, clazz).build().writeTo(processingEnv.getFiler());
+      JavaFile.builder(packageName, clazz)
+          .skipJavaLangImports(true)
+          .build()
+          .writeTo(processingEnv.getFiler());
     } catch (Throwable e) {
       throw new RuntimeException(e);
     }
