@@ -1,8 +1,6 @@
 package com.bumptech.glide.manager;
 
-/**
- * A no-op {@link com.bumptech.glide.manager.ConnectivityMonitor}.
- */
+/** A no-op {@link com.bumptech.glide.manager.ConnectivityMonitor}. */
 class NullConnectivityMonitor implements ConnectivityMonitor {
 
   @Override

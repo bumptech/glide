@@ -5,9 +5,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import com.bumptech.glide.request.target.Target;
 
-/**
- * Utility classes for interacting with the media store.
- */
+/** Utility classes for interacting with the media store. */
 public final class MediaStoreUtil {
   private static final int MINI_THUMB_WIDTH = 512;
   private static final int MINI_THUMB_HEIGHT = 384;
@@ -17,7 +15,8 @@ public final class MediaStoreUtil {
   }
 
   public static boolean isMediaStoreUri(Uri uri) {
-    return uri != null && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())
+    return uri != null
+        && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())
         && MediaStore.AUTHORITY.equals(uri.getAuthority());
   }
 

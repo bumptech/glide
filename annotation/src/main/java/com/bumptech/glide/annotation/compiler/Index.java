@@ -16,5 +16,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @interface Index {
   String[] modules() default {};
+
   String[] extensions() default {};
 }

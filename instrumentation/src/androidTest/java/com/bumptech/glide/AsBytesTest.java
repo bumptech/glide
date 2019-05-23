@@ -45,10 +45,7 @@ public class AsBytesTest {
   public void loadImageResourceId_asBytes_providesBytesOfBitmap() {
     byte[] data =
         concurrency.get(
-            Glide.with(context)
-                .as(byte[].class)
-                .load(ResourceIds.raw.canonical)
-                .submit());
+            Glide.with(context).as(byte[].class).load(ResourceIds.raw.canonical).submit());
     assertThat(data).isNotNull();
     assertThat(BitmapFactory.decodeByteArray(data, 0, data.length)).isNotNull();
   }
@@ -56,12 +53,7 @@ public class AsBytesTest {
   @Test
   public void loadBitmap_asBytes_providesBytesOfBitmap() {
     Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), ResourceIds.raw.canonical);
-    byte[] data =
-        concurrency.get(
-            Glide.with(context)
-                .as(byte[].class)
-                .load(bitmap)
-                .submit());
+    byte[] data = concurrency.get(Glide.with(context).as(byte[].class).load(bitmap).submit());
 
     assertThat(data).isNotNull();
     assertThat(BitmapFactory.decodeByteArray(data, 0, data.length)).isNotNull();
@@ -84,11 +76,7 @@ public class AsBytesTest {
   @Test
   public void loadVideoResourceId_asBytes_providesBytesOfFrame() {
     byte[] data =
-        concurrency.get(
-            Glide.with(context)
-                .as(byte[].class)
-                .load(ResourceIds.raw.video)
-                .submit());
+        concurrency.get(Glide.with(context).as(byte[].class).load(ResourceIds.raw.video).submit());
 
     assertThat(data).isNotNull();
     assertThat(BitmapFactory.decodeByteArray(data, 0, data.length)).isNotNull();
@@ -111,11 +99,7 @@ public class AsBytesTest {
   @Test
   public void loadVideoFile_asBytes_providesByteOfFrame() throws IOException {
     byte[] data =
-        concurrency.get(
-            Glide.with(context)
-                .as(byte[].class)
-                .load(writeVideoToFile())
-                .submit());
+        concurrency.get(Glide.with(context).as(byte[].class).load(writeVideoToFile()).submit());
 
     assertThat(data).isNotNull();
     assertThat(BitmapFactory.decodeByteArray(data, 0, data.length)).isNotNull();
@@ -166,10 +150,7 @@ public class AsBytesTest {
   public void loadVideoFileUri_asBytes_providesByteOfFrame() throws IOException {
     byte[] data =
         concurrency.get(
-            Glide.with(context)
-                .as(byte[].class)
-                .load(Uri.fromFile(writeVideoToFile()))
-                .submit());
+            Glide.with(context).as(byte[].class).load(Uri.fromFile(writeVideoToFile())).submit());
 
     assertThat(data).isNotNull();
     assertThat(BitmapFactory.decodeByteArray(data, 0, data.length)).isNotNull();

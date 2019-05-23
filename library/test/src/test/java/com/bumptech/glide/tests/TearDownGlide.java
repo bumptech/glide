@@ -5,9 +5,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-/**
- * Clears out Glide's disk cache and the Glide singleton after every test method.
- */
+/** Clears out Glide's disk cache and the Glide singleton after every test method. */
 public final class TearDownGlide implements TestRule {
   @Override
   public Statement apply(final Statement base, Description description) {
@@ -18,7 +16,6 @@ public final class TearDownGlide implements TestRule {
           base.evaluate();
         } finally {
           Glide.tearDown();
-
         }
       }
     };

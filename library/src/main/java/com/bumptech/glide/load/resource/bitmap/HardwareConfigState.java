@@ -106,10 +106,13 @@ final class HardwareConfigState {
       isHardwareConfigAllowed = currentFds < MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
 
       if (!isHardwareConfigAllowed && Log.isLoggable(Downsampler.TAG, Log.WARN)) {
-        Log.w(Downsampler.TAG,
+        Log.w(
+            Downsampler.TAG,
             "Excluding HARDWARE bitmap config because we're over the file descriptor limit"
-                + ", file descriptors " + currentFds
-                + ", limit " + MAXIMUM_FDS_FOR_HARDWARE_CONFIGS);
+                + ", file descriptors "
+                + currentFds
+                + ", limit "
+                + MAXIMUM_FDS_FOR_HARDWARE_CONFIGS);
       }
     }
 

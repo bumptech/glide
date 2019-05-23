@@ -12,7 +12,7 @@ import java.util.Queue;
  * framework issue where exceptions during reads while decoding bitmaps in {@link
  * android.graphics.BitmapFactory} can return partially decoded bitmaps.
  *
- * See https://github.com/bumptech/glide/issues/126.
+ * <p>See https://github.com/bumptech/glide/issues/126.
  */
 public class ExceptionCatchingInputStream extends InputStream {
 

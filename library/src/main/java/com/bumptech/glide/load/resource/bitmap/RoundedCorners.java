@@ -8,9 +8,7 @@ import com.bumptech.glide.util.Util;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
-/**
- * A {@link BitmapTransformation} which rounds the corners of a bitmap.
- */
+/** A {@link BitmapTransformation} which rounds the corners of a bitmap. */
 public final class RoundedCorners extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.RoundedCorners";
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
@@ -43,8 +41,7 @@ public final class RoundedCorners extends BitmapTransformation {
 
   @Override
   public int hashCode() {
-    return Util.hashCode(ID.hashCode(),
-        Util.hashCode(roundingRadius));
+    return Util.hashCode(ID.hashCode(), Util.hashCode(roundingRadius));
   }
 
   @Override

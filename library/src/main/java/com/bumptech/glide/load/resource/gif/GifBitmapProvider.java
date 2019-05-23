@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.gif;
 
-
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,10 +23,7 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
     this(bitmapPool, /*arrayPool=*/ null);
   }
 
-  /**
-   * Constructs an instance with a shared array pool. Arrays will be reused where
-   * possible.
-   */
+  /** Constructs an instance with a shared array pool. Arrays will be reused where possible. */
   // Public API.
   @SuppressWarnings("WeakerAccess")
   public GifBitmapProvider(BitmapPool bitmapPool, @Nullable ArrayPool arrayPool) {

@@ -10,13 +10,9 @@ public enum EncodeStrategy {
    */
   SOURCE,
 
-  /**
-   * Writes the decoded, downsampled and transformed data for the resource to disk.
-   */
+  /** Writes the decoded, downsampled and transformed data for the resource to disk. */
   TRANSFORMED,
 
-  /**
-   * Will write no data.
-   */
+  /** Will write no data. */
   NONE,
 }

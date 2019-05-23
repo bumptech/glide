@@ -26,8 +26,8 @@ public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream>
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(@NonNull Uri model, int width, int height,
-      @NonNull Options options) {
+  public LoadData<InputStream> buildLoadData(
+      @NonNull Uri model, int width, int height, @NonNull Options options) {
     if (MediaStoreUtil.isThumbnailSize(width, height)) {
       return new LoadData<>(new ObjectKey(model), ThumbFetcher.buildImageFetcher(context, model));
     } else {
@@ -40,9 +40,7 @@ public class MediaStoreImageThumbLoader implements ModelLoader<Uri, InputStream>
     return MediaStoreUtil.isMediaStoreImageUri(model);
   }
 
-  /**
-   * Factory that loads {@link InputStream}s from media store image {@link Uri}s.
-   */
+  /** Factory that loads {@link InputStream}s from media store image {@link Uri}s. */
   public static class Factory implements ModelLoaderFactory<Uri, InputStream> {
 
     private final Context context;

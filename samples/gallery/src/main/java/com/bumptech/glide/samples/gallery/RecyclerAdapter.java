@@ -21,12 +21,10 @@ import com.bumptech.glide.util.Preconditions;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Displays {@link com.bumptech.glide.samples.gallery.MediaStoreData} in a recycler view.
- */
+/** Displays {@link com.bumptech.glide.samples.gallery.MediaStoreData} in a recycler view. */
 class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolder>
     implements ListPreloader.PreloadSizeProvider<MediaStoreData>,
-    ListPreloader.PreloadModelProvider<MediaStoreData> {
+        ListPreloader.PreloadModelProvider<MediaStoreData> {
 
   private final List<MediaStoreData> data;
   private final int screenWidth;
@@ -51,16 +49,18 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
     view.getLayoutParams().width = screenWidth;
 
     if (actualDimensions == null) {
-      view.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-        @Override
-        public boolean onPreDraw() {
-          if (actualDimensions == null) {
-            actualDimensions = new int[] { view.getWidth(), view.getHeight() };
-          }
-          view.getViewTreeObserver().removeOnPreDrawListener(this);
-          return true;
-        }
-      });
+      view.getViewTreeObserver()
+          .addOnPreDrawListener(
+              new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                  if (actualDimensions == null) {
+                    actualDimensions = new int[] {view.getWidth(), view.getHeight()};
+                  }
+                  view.getViewTreeObserver().removeOnPreDrawListener(this);
+                  return true;
+                }
+              });
     }
 
     return new ListViewHolder(view);
@@ -73,11 +73,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
     Key signature =
         new MediaStoreSignature(current.mimeType, current.dateModified, current.orientation);
 
-    requestBuilder
-        .clone()
-        .signature(signature)
-        .load(current.uri)
-        .into(viewHolder.image);
+    requestBuilder.clone().signature(signature).load(current.uri).into(viewHolder.image);
   }
 
   @Override
@@ -99,8 +95,8 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
   @Override
   public List<MediaStoreData> getPreloadItems(int position) {
     return data.isEmpty()
-            ? Collections.<MediaStoreData>emptyList()
-            : Collections.singletonList(data.get(position));
+        ? Collections.<MediaStoreData>emptyList()
+        : Collections.singletonList(data.get(position));
   }
 
   @Nullable
@@ -108,16 +104,13 @@ class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ListViewHolde
   public RequestBuilder<Drawable> getPreloadRequestBuilder(@NonNull MediaStoreData item) {
     MediaStoreSignature signature =
         new MediaStoreSignature(item.mimeType, item.dateModified, item.orientation);
-    return requestBuilder
-        .clone()
-        .signature(signature)
-        .load(item.uri);
+    return requestBuilder.clone().signature(signature).load(item.uri);
   }
 
   @Nullable
   @Override
-  public int[] getPreloadSize(@NonNull MediaStoreData item, int adapterPosition,
-      int perItemPosition) {
+  public int[] getPreloadSize(
+      @NonNull MediaStoreData item, int adapterPosition, int perItemPosition) {
     return actualDimensions;
   }
 

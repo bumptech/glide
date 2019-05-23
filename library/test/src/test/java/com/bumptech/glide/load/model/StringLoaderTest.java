@@ -24,9 +24,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-/**
- * Tests for the {@link com.bumptech.glide.load.model.StringLoader} class.
- */
+/** Tests for the {@link com.bumptech.glide.load.model.StringLoader} class. */
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class StringLoaderTest {
@@ -63,7 +61,8 @@ public class StringLoaderTest {
     assertEquals(
         fetcher,
         Preconditions.checkNotNull(
-            loader.buildLoadData(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
+                loader.buildLoadData(f.getAbsolutePath(), IMAGE_SIDE, IMAGE_SIDE, options))
+            .fetcher);
   }
 
   @Test
@@ -78,8 +77,8 @@ public class StringLoaderTest {
     assertTrue(loader.handles(testPath));
     assertEquals(
         fetcher,
-        Preconditions.checkNotNull(
-            loader.buildLoadData(testPath, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
+        Preconditions.checkNotNull(loader.buildLoadData(testPath, IMAGE_SIDE, IMAGE_SIDE, options))
+            .fetcher);
   }
 
   @Test
@@ -94,7 +93,8 @@ public class StringLoaderTest {
     assertEquals(
         fetcher,
         Preconditions.checkNotNull(
-            loader.buildLoadData(expected.toString(), IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
+                loader.buildLoadData(expected.toString(), IMAGE_SIDE, IMAGE_SIDE, options))
+            .fetcher);
   }
 
   @Test
@@ -108,7 +108,8 @@ public class StringLoaderTest {
     assertEquals(
         fetcher,
         Preconditions.checkNotNull(
-            loader.buildLoadData(resourceUri.toString(), IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
+                loader.buildLoadData(resourceUri.toString(), IMAGE_SIDE, IMAGE_SIDE, options))
+            .fetcher);
   }
 
   @Test
@@ -122,8 +123,8 @@ public class StringLoaderTest {
     assertTrue(loader.handles(url));
     assertEquals(
         fetcher,
-        Preconditions.checkNotNull(
-            loader.buildLoadData(url, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
+        Preconditions.checkNotNull(loader.buildLoadData(url, IMAGE_SIDE, IMAGE_SIDE, options))
+            .fetcher);
   }
 
   @Test
@@ -137,8 +138,8 @@ public class StringLoaderTest {
     assertTrue(loader.handles(url));
     assertEquals(
         fetcher,
-        Preconditions.checkNotNull(
-            loader.buildLoadData(url, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
+        Preconditions.checkNotNull(loader.buildLoadData(url, IMAGE_SIDE, IMAGE_SIDE, options))
+            .fetcher);
   }
 
   @Test
@@ -152,8 +153,8 @@ public class StringLoaderTest {
     assertTrue(loader.handles(content));
     assertEquals(
         fetcher,
-        Preconditions.checkNotNull(
-            loader.buildLoadData(content, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
+        Preconditions.checkNotNull(loader.buildLoadData(content, IMAGE_SIDE, IMAGE_SIDE, options))
+            .fetcher);
   }
 
   @Test

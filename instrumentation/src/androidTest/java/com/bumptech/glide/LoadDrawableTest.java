@@ -62,7 +62,6 @@ public class LoadDrawableTest {
             .setDiskCacheExecutor(executor);
   }
 
-
   @Test
   public void clear_withLoadedBitmapDrawable_doesNotRecycleBitmap() {
     Glide.init(
@@ -73,10 +72,7 @@ public class LoadDrawableTest {
     Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), ResourceIds.raw.canonical);
     BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
     Target<Drawable> target =
-        concurrency.wait(
-            GlideApp.with(context)
-                .load(drawable)
-                .submit(100, 100));
+        concurrency.wait(GlideApp.with(context).load(drawable).submit(100, 100));
     Glide.with(context).clear(target);
 
     // Allow Glide's resource recycler to run on the main thread.
@@ -94,11 +90,7 @@ public class LoadDrawableTest {
             .setBitmapPool(new BitmapPoolAdapter()));
     Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), ResourceIds.raw.canonical);
     BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
-    concurrency.wait(
-        GlideApp.with(context)
-            .load(drawable)
-            .centerCrop()
-            .submit(100, 100));
+    concurrency.wait(GlideApp.with(context).load(drawable).centerCrop().submit(100, 100));
 
     assertThat(bitmap.isRecycled()).isFalse();
   }
@@ -113,36 +105,25 @@ public class LoadDrawableTest {
             .setMemoryCache(new LruResourceCache(Util.getBitmapByteSize(bitmap) * 10))
             .setBitmapPool(new LruBitmapPool(Util.getBitmapByteSize(bitmap) * 10)));
     Target<Drawable> target =
-        concurrency.wait(
-            GlideApp.with(context)
-                .load(drawable)
-                .centerCrop()
-                .submit(100, 100));
+        concurrency.wait(GlideApp.with(context).load(drawable).centerCrop().submit(100, 100));
     Glide.with(context).clear(target);
 
     assertThat(bitmap.isRecycled()).isFalse();
 
-    concurrency.runOnMainThread(new Runnable() {
-      @Override
-      public void run() {
-        Glide.get(context).clearMemory();
-      }
-    });
+    concurrency.runOnMainThread(
+        new Runnable() {
+          @Override
+          public void run() {
+            Glide.get(context).clearMemory();
+          }
+        });
 
     concurrency.wait(
-        GlideApp.with(context)
-            .load(drawable)
-            .centerCrop()
-            .listener(listener)
-            .submit(100, 100));
+        GlideApp.with(context).load(drawable).centerCrop().listener(listener).submit(100, 100));
 
     verify(listener)
         .onResourceReady(
-            anyDrawable(),
-            any(),
-            anyDrawableTarget(),
-            eq(DataSource.LOCAL),
-            anyBoolean());
+            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
   }
 
   @Test
@@ -156,36 +137,25 @@ public class LoadDrawableTest {
             .setBitmapPool(new LruBitmapPool(Util.getBitmapByteSize(bitmap) * 10)));
     Target<Drawable> target =
         concurrency.wait(
-            GlideApp.with(context)
-                .asDrawable()
-                .load(drawable)
-                .centerCrop()
-                .submit(100, 100));
+            GlideApp.with(context).asDrawable().load(drawable).centerCrop().submit(100, 100));
     Glide.with(context).clear(target);
 
     assertThat(bitmap.isRecycled()).isFalse();
 
-    concurrency.runOnMainThread(new Runnable() {
-      @Override
-      public void run() {
-        Glide.get(context).clearMemory();
-      }
-    });
+    concurrency.runOnMainThread(
+        new Runnable() {
+          @Override
+          public void run() {
+            Glide.get(context).clearMemory();
+          }
+        });
 
     concurrency.wait(
-        GlideApp.with(context)
-            .load(drawable)
-            .centerCrop()
-            .listener(listener)
-            .submit(100, 100));
+        GlideApp.with(context).load(drawable).centerCrop().listener(listener).submit(100, 100));
 
     verify(listener)
         .onResourceReady(
-            anyDrawable(),
-            any(),
-            anyDrawableTarget(),
-            eq(DataSource.LOCAL),
-            anyBoolean());
+            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
   }
 
   @Test
@@ -209,26 +179,19 @@ public class LoadDrawableTest {
 
     assertThat(bitmap.isRecycled()).isFalse();
 
-    concurrency.runOnMainThread(new Runnable() {
-      @Override
-      public void run() {
-        Glide.get(context).clearMemory();
-      }
-    });
+    concurrency.runOnMainThread(
+        new Runnable() {
+          @Override
+          public void run() {
+            Glide.get(context).clearMemory();
+          }
+        });
 
     concurrency.wait(
-        GlideApp.with(context)
-            .load(drawable)
-            .centerCrop()
-            .listener(listener)
-            .submit(100, 100));
+        GlideApp.with(context).load(drawable).centerCrop().listener(listener).submit(100, 100));
 
     verify(listener)
         .onResourceReady(
-            anyDrawable(),
-            any(),
-            anyDrawableTarget(),
-            eq(DataSource.LOCAL),
-            anyBoolean());
+            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
   }
 }

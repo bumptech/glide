@@ -6,9 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import com.bumptech.glide.request.target.Target;
 
-/**
- * Mockito matchers for various common classes.
- */
+/** Mockito matchers for various common classes. */
 public final class Matchers {
 
   private Matchers() {

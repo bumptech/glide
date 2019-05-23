@@ -16,26 +16,27 @@ public class TranscoderRegistry {
    * Registers the given {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} using
    * the given classes so it can later be retrieved using the given classes.
    *
-   * @param decodedClass    The class of the resource that the transcoder transcodes from.
+   * @param decodedClass The class of the resource that the transcoder transcodes from.
    * @param transcodedClass The class of the resource that the transcoder transcodes to.
-   * @param transcoder      The transcoder.
-   * @param <Z>             The type of the resource that the transcoder transcodes from.
-   * @param <R>             The type of the resource that the transcoder transcodes to.
+   * @param transcoder The transcoder.
+   * @param <Z> The type of the resource that the transcoder transcodes from.
+   * @param <R> The type of the resource that the transcoder transcodes to.
    */
   public synchronized <Z, R> void register(
-      @NonNull Class<Z> decodedClass, @NonNull Class<R> transcodedClass,
+      @NonNull Class<Z> decodedClass,
+      @NonNull Class<R> transcodedClass,
       @NonNull ResourceTranscoder<Z, R> transcoder) {
     transcoders.add(new Entry<>(decodedClass, transcodedClass, transcoder));
   }
 
   /**
-   * Returns the currently registered
-   * {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} for the given classes.
+   * Returns the currently registered {@link
+   * com.bumptech.glide.load.resource.transcode.ResourceTranscoder} for the given classes.
    *
-   * @param resourceClass   The class of the resource that the transcoder transcodes from.
+   * @param resourceClass The class of the resource that the transcoder transcodes from.
    * @param transcodedClass The class of the resource that the transcoder transcodes to.
-   * @param <Z>             The type of the resource that the transcoder transcodes from.
-   * @param <R>             The type of the resource that the transcoder transcodes to.
+   * @param <Z> The type of the resource that the transcoder transcodes from.
+   * @param <R> The type of the resource that the transcoder transcodes to.
    */
   @NonNull
   @SuppressWarnings("unchecked")
@@ -82,7 +83,9 @@ public class TranscoderRegistry {
     private final Class<R> toClass;
     @Synthetic final ResourceTranscoder<Z, R> transcoder;
 
-    Entry(@NonNull Class<Z> fromClass, @NonNull Class<R> toClass,
+    Entry(
+        @NonNull Class<Z> fromClass,
+        @NonNull Class<R> toClass,
         @NonNull ResourceTranscoder<Z, R> transcoder) {
       this.fromClass = fromClass;
       this.toClass = toClass;
@@ -91,9 +94,9 @@ public class TranscoderRegistry {
 
     /**
      * If we convert from a specific Drawable, we must get that specific Drawable class or a
-     * subclass of that Drawable. In contrast, if we we convert <em>to</em> a specific Drawable,
-     * we can fulfill requests for a more generic parent class (like Drawable). As a result, we
-     * check fromClass and toClass in different orders.
+     * subclass of that Drawable. In contrast, if we we convert <em>to</em> a specific Drawable, we
+     * can fulfill requests for a more generic parent class (like Drawable). As a result, we check
+     * fromClass and toClass in different orders.
      */
     public boolean handles(@NonNull Class<?> fromClass, @NonNull Class<?> toClass) {
       return this.fromClass.isAssignableFrom(fromClass) && toClass.isAssignableFrom(this.toClass);

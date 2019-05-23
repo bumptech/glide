@@ -16,9 +16,7 @@ import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.util.Preconditions;
 import java.io.File;
 
-/**
- * Displays an SVG image loaded from an android raw resource.
- */
+/** Displays an SVG image loaded from an android raw resource. */
 public class MainActivity extends Activity {
   private static final String TAG = "SVGActivity";
 
@@ -34,12 +32,13 @@ public class MainActivity extends Activity {
     imageViewRes = (ImageView) findViewById(R.id.svg_image_view1);
     imageViewNet = (ImageView) findViewById(R.id.svg_image_view2);
 
-    requestBuilder = GlideApp.with(this)
-        .as(PictureDrawable.class)
-        .placeholder(R.drawable.image_loading)
-        .error(R.drawable.image_error)
-        .transition(withCrossFade())
-        .listener(new SvgSoftwareLayerSetter());
+    requestBuilder =
+        GlideApp.with(this)
+            .as(PictureDrawable.class)
+            .placeholder(R.drawable.image_loading)
+            .error(R.drawable.image_error)
+            .transition(withCrossFade())
+            .listener(new SvgSoftwareLayerSetter());
   }
 
   @Override
@@ -86,8 +85,13 @@ public class MainActivity extends Activity {
   }
 
   private void loadRes() {
-    Uri uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getPackageName() + "/"
-        + R.raw.android_toy_h);
+    Uri uri =
+        Uri.parse(
+            ContentResolver.SCHEME_ANDROID_RESOURCE
+                + "://"
+                + getPackageName()
+                + "/"
+                + R.raw.android_toy_h);
     requestBuilder.load(uri).into(imageViewRes);
   }
 

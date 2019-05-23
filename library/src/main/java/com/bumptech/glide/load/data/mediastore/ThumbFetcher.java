@@ -39,9 +39,12 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
 
   private static ThumbFetcher build(Context context, Uri uri, ThumbnailQuery query) {
     ArrayPool byteArrayPool = Glide.get(context).getArrayPool();
-    ThumbnailStreamOpener opener = new ThumbnailStreamOpener(
-        Glide.get(context).getRegistry().getImageHeaderParsers(), query, byteArrayPool,
-        context.getContentResolver());
+    ThumbnailStreamOpener opener =
+        new ThumbnailStreamOpener(
+            Glide.get(context).getRegistry().getImageHeaderParsers(),
+            query,
+            byteArrayPool,
+            context.getContentResolver());
     return new ThumbFetcher(uri, opener);
   }
 
@@ -52,8 +55,8 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(@NonNull Priority priority,
-      @NonNull DataCallback<? super InputStream> callback) {
+  public void loadData(
+      @NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
     try {
       inputStream = openThumbInputStream();
     } catch (FileNotFoundException e) {
@@ -117,12 +120,14 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
       this.contentResolver = contentResolver;
     }
 
-    private static final String[] PATH_PROJECTION = {
-        MediaStore.Video.Thumbnails.DATA
-    };
+    private static final String[] PATH_PROJECTION = {MediaStore.Video.Thumbnails.DATA};
     private static final String PATH_SELECTION =
-        MediaStore.Video.Thumbnails.KIND + " = " + MediaStore.Video.Thumbnails.MINI_KIND
-            + " AND " + MediaStore.Video.Thumbnails.VIDEO_ID + " = ?";
+        MediaStore.Video.Thumbnails.KIND
+            + " = "
+            + MediaStore.Video.Thumbnails.MINI_KIND
+            + " AND "
+            + MediaStore.Video.Thumbnails.VIDEO_ID
+            + " = ?";
 
     @Override
     public Cursor query(Uri uri) {
@@ -136,7 +141,6 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
     }
   }
 
-
   static class ImageThumbnailQuery implements ThumbnailQuery {
 
     private final ContentResolver contentResolver;
@@ -146,11 +150,15 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
     }
 
     private static final String[] PATH_PROJECTION = {
-        MediaStore.Images.Thumbnails.DATA,
+      MediaStore.Images.Thumbnails.DATA,
     };
     private static final String PATH_SELECTION =
-        MediaStore.Images.Thumbnails.KIND + " = " + MediaStore.Images.Thumbnails.MINI_KIND
-            + " AND " + MediaStore.Images.Thumbnails.IMAGE_ID + " = ?";
+        MediaStore.Images.Thumbnails.KIND
+            + " = "
+            + MediaStore.Images.Thumbnails.MINI_KIND
+            + " AND "
+            + MediaStore.Images.Thumbnails.IMAGE_ID
+            + " = ?";
 
     @Override
     public Cursor query(Uri uri) {

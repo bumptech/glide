@@ -30,8 +30,10 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
   @NonNull
   @Override
   public Resource<BitmapDrawable> transform(
-      @NonNull Context context, @NonNull Resource<BitmapDrawable> drawableResourceToTransform,
-      int outWidth, int outHeight) {
+      @NonNull Context context,
+      @NonNull Resource<BitmapDrawable> drawableResourceToTransform,
+      int outWidth,
+      int outHeight) {
     Resource<Drawable> toTransform = convertToDrawableResource(drawableResourceToTransform);
     Resource<Drawable> transformed = wrapped.transform(context, toTransform, outWidth, outHeight);
     return convertToBitmapDrawableResource(transformed);
@@ -49,8 +51,7 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
   }
 
   @SuppressWarnings("unchecked")
-  private static Resource<Drawable> convertToDrawableResource(
-      Resource<BitmapDrawable> toConvert) {
+  private static Resource<Drawable> convertToDrawableResource(Resource<BitmapDrawable> toConvert) {
     return (Resource<Drawable>) (Resource<? extends Drawable>) toConvert;
   }
 

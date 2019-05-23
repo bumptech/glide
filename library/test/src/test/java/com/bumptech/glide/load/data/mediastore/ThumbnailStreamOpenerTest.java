@@ -58,7 +58,7 @@ public class ThumbnailStreamOpenerTest {
   @Test
   public void testReturnsNullIfCursorHasEmptyPath() throws FileNotFoundException {
     MatrixCursor cursor = new MatrixCursor(new String[1]);
-    cursor.addRow(new Object[] { "" });
+    cursor.addRow(new Object[] {""});
     when(harness.query.query(eq(harness.uri))).thenReturn(cursor);
     assertNull(harness.get().open(harness.uri));
   }
@@ -132,7 +132,7 @@ public class ThumbnailStreamOpenerTest {
     final ArrayPool byteArrayPool = new LruArrayPool();
 
     Harness() {
-      cursor.addRow(new String[] { file.getAbsolutePath() });
+      cursor.addRow(new String[] {file.getAbsolutePath()});
       when(query.query(eq(uri))).thenReturn(cursor);
       when(service.get(eq(file.getAbsolutePath()))).thenReturn(file);
       when(service.exists(eq(file))).thenReturn(true);

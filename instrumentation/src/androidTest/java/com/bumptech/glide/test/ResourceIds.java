@@ -28,7 +28,7 @@ public final class ResourceIds {
 
   public interface drawable {
     int bitmap_alias = getResourceId("drawable", "bitmap_alias");
-    int googlelogo_color_120x44dp= getResourceId("drawable", "googlelogo_color_120x44dp");
+    int googlelogo_color_120x44dp = getResourceId("drawable", "googlelogo_color_120x44dp");
     int shape_drawable = getResourceId("drawable", "shape_drawable");
     int state_list_drawable = getResourceId("drawable", "state_list_drawable");
     int vector_drawable = getResourceId("drawable", "vector_drawable");

@@ -69,11 +69,13 @@ public class GlideUrlTest {
   @Test
   public void testIssue133() throws MalformedURLException {
     // u00e0=à
-    final String original = "http://www.commitstrip.com/wp-content/uploads/2014/07/"
-        + "Excel-\u00E0-toutes-les-sauces-650-finalenglish.jpg";
+    final String original =
+        "http://www.commitstrip.com/wp-content/uploads/2014/07/"
+            + "Excel-\u00E0-toutes-les-sauces-650-finalenglish.jpg";
 
-    final String escaped = "http://www.commitstrip.com/wp-content/uploads/2014/07/"
-        + "Excel-%C3%A0-toutes-les-sauces-650-finalenglish.jpg";
+    final String escaped =
+        "http://www.commitstrip.com/wp-content/uploads/2014/07/"
+            + "Excel-%C3%A0-toutes-les-sauces-650-finalenglish.jpg";
 
     GlideUrl glideUrlFromString = new GlideUrl(original);
     assertEquals(escaped, glideUrlFromString.toURL().toString());
@@ -109,19 +111,10 @@ public class GlideUrlTest {
             new GlideUrl(url),
             new GlideUrl(url),
             new GlideUrl(new URL(url)),
-            new GlideUrl(new URL(url))
-        )
-        .addEqualityGroup(
-            new GlideUrl(otherUrl),
-            new GlideUrl(new URL(otherUrl))
-        )
-        .addEqualityGroup(
-            new GlideUrl(url, headers),
-            new GlideUrl(new URL(url), headers)
-        )
-        .addEqualityGroup(
-            new GlideUrl(url, otherHeaders),
-            new GlideUrl(new URL(url), otherHeaders)
-        ).testEquals();
+            new GlideUrl(new URL(url)))
+        .addEqualityGroup(new GlideUrl(otherUrl), new GlideUrl(new URL(otherUrl)))
+        .addEqualityGroup(new GlideUrl(url, headers), new GlideUrl(new URL(url), headers))
+        .addEqualityGroup(new GlideUrl(url, otherHeaders), new GlideUrl(new URL(url), otherHeaders))
+        .testEquals();
   }
 }

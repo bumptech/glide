@@ -62,10 +62,10 @@ public class CenterInsideRegressionTest {
     Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)
-              .asBitmap()
-              .load(canonical.getBitmap())
-              .centerInside()
-              .override(multipliedWidth));
+                .asBitmap()
+                .load(canonical.getBitmap())
+                .centerInside()
+                .override(multipliedWidth));
 
     assertThat(result.getWidth()).isEqualTo(canonical.getWidth());
     assertThat(result.getHeight()).isEqualTo(canonical.getHeight());
@@ -77,10 +77,10 @@ public class CenterInsideRegressionTest {
     Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)
-              .asBitmap()
-              .load(canonical.getBitmap())
-              .centerInside()
-              .override(canonical.getWidth() / 10, canonical.getHeight()));
+                .asBitmap()
+                .load(canonical.getBitmap())
+                .centerInside()
+                .override(canonical.getWidth() / 10, canonical.getHeight()));
 
     assertThat(result.getWidth()).isEqualTo(canonical.getWidth() / 10);
     assertThat(result.getHeight()).isEqualTo(canonical.getHeight() / 10);
@@ -89,13 +89,13 @@ public class CenterInsideRegressionTest {
   @Test
   public void centerInside_withShortRectangle_fitsWithinMaintainingAspectRatio()
       throws ExecutionException, InterruptedException {
-     Bitmap result =
+    Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)
-              .asBitmap()
-              .load(canonical.getBitmap())
-              .centerInside()
-              .override(canonical.getWidth(), canonical.getHeight() / 2));
+                .asBitmap()
+                .load(canonical.getBitmap())
+                .centerInside()
+                .override(canonical.getWidth(), canonical.getHeight() / 2));
 
     assertThat(result.getWidth()).isEqualTo(canonical.getWidth() / 2);
     assertThat(result.getHeight()).isEqualTo(canonical.getHeight() / 2);

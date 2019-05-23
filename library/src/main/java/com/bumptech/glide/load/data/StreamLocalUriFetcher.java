@@ -9,35 +9,25 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Fetches an {@link java.io.InputStream} for a local {@link android.net.Uri}.
- */
+/** Fetches an {@link java.io.InputStream} for a local {@link android.net.Uri}. */
 public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
-  /**
-   * A lookup uri (e.g. content://com.android.contacts/contacts/lookup/3570i61d948d30808e537)
-   */
+  /** A lookup uri (e.g. content://com.android.contacts/contacts/lookup/3570i61d948d30808e537) */
   private static final int ID_CONTACTS_LOOKUP = 1;
-  /**
-   * A contact thumbnail uri (e.g. content://com.android.contacts/contacts/38/photo)
-   */
+  /** A contact thumbnail uri (e.g. content://com.android.contacts/contacts/38/photo) */
   private static final int ID_CONTACTS_THUMBNAIL = 2;
-  /**
-   * A contact uri (e.g. content://com.android.contacts/contacts/38)
-   */
+  /** A contact uri (e.g. content://com.android.contacts/contacts/38) */
   private static final int ID_CONTACTS_CONTACT = 3;
   /**
-   * A contact display photo (high resolution) uri
-   * (e.g. content://com.android.contacts/5/display_photo)
+   * A contact display photo (high resolution) uri (e.g.
+   * content://com.android.contacts/5/display_photo)
    */
   private static final int ID_CONTACTS_PHOTO = 4;
   /**
-   * Uri for optimized search of phones by number
-   * (e.g. content://com.android.contacts/phone_lookup/232323232
+   * Uri for optimized search of phones by number (e.g.
+   * content://com.android.contacts/phone_lookup/232323232
    */
   private static final int ID_LOOKUP_BY_PHONE = 5;
-  /**
-   * Match the incoming Uri for special cases which we can handle nicely.
-   */
+  /** Match the incoming Uri for special cases which we can handle nicely. */
   private static final UriMatcher URI_MATCHER;
 
   static {
@@ -64,7 +54,6 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
     return inputStream;
   }
 
-
   private InputStream loadResourceFromUri(Uri uri, ContentResolver contentResolver)
       throws FileNotFoundException {
     switch (URI_MATCHER.match(uri)) {
@@ -87,8 +76,8 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
   }
 
   private InputStream openContactPhotoInputStream(ContentResolver contentResolver, Uri contactUri) {
-    return ContactsContract.Contacts.openContactPhotoInputStream(contentResolver, contactUri,
-        true /*preferHighres*/);
+    return ContactsContract.Contacts.openContactPhotoInputStream(
+        contentResolver, contactUri, true /*preferHighres*/);
   }
 
   @Override

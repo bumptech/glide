@@ -27,8 +27,14 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "OkHttpFetcher";
   private final OkHttpClient client;
   private final GlideUrl url;
-  @SuppressWarnings("WeakerAccess") @Synthetic InputStream stream;
-  @SuppressWarnings("WeakerAccess") @Synthetic ResponseBody responseBody;
+
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic
+  InputStream stream;
+
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic
+  ResponseBody responseBody;
 
   // Public API.
   @SuppressWarnings("WeakerAccess")
@@ -38,8 +44,8 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(@NonNull Priority priority,
-      @NonNull final DataCallback<? super InputStream> callback) {
+  public void loadData(
+      @NonNull Priority priority, @NonNull final DataCallback<? super InputStream> callback) {
     Request.Builder requestBuilder = new Request.Builder().url(url.toStringUrl());
     for (Map.Entry<String, String> headerEntry : url.getHeaders().entrySet()) {
       String key = headerEntry.getKey();
@@ -47,27 +53,31 @@ public class OkHttpStreamFetcher implements DataFetcher<InputStream> {
     }
     Request request = requestBuilder.build();
 
-    client.newCall(request).enqueue(new com.squareup.okhttp.Callback() {
-      @Override
-      public void onFailure(Request request, IOException e) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "OkHttp failed to obtain result", e);
-        }
-        callback.onLoadFailed(e);
-      }
+    client
+        .newCall(request)
+        .enqueue(
+            new com.squareup.okhttp.Callback() {
+              @Override
+              public void onFailure(Request request, IOException e) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                  Log.d(TAG, "OkHttp failed to obtain result", e);
+                }
+                callback.onLoadFailed(e);
+              }
 
-      @Override
-      public void onResponse(Response response) throws IOException {
-        responseBody = response.body();
-        if (response.isSuccessful()) {
-          long contentLength = responseBody.contentLength();
-          stream = ContentLengthInputStream.obtain(responseBody.byteStream(), contentLength);
-          callback.onDataReady(stream);
-        } else {
-          callback.onLoadFailed(new HttpException(response.message(), response.code()));
-        }
-      }
-    });
+              @Override
+              public void onResponse(Response response) throws IOException {
+                responseBody = response.body();
+                if (response.isSuccessful()) {
+                  long contentLength = responseBody.contentLength();
+                  stream =
+                      ContentLengthInputStream.obtain(responseBody.byteStream(), contentLength);
+                  callback.onDataReady(stream);
+                } else {
+                  callback.onLoadFailed(new HttpException(response.message(), response.code()));
+                }
+              }
+            });
   }
 
   @Override

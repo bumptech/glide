@@ -17,8 +17,8 @@ import java.util.List;
 
 /**
  * A relatively inefficient decoder for {@link com.bumptech.glide.load.resource.gif.GifDrawable}
- * that converts {@link java.io.InputStream}s to {@link java.nio.ByteBuffer}s and then passes
- * the buffer to a wrapped decoder.
+ * that converts {@link java.io.InputStream}s to {@link java.nio.ByteBuffer}s and then passes the
+ * buffer to a wrapped decoder.
  */
 public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawable> {
   private static final String TAG = "StreamGifDecoder";
@@ -27,8 +27,10 @@ public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawabl
   private final ResourceDecoder<ByteBuffer, GifDrawable> byteBufferDecoder;
   private final ArrayPool byteArrayPool;
 
-  public StreamGifDecoder(List<ImageHeaderParser> parsers, ResourceDecoder<ByteBuffer,
-      GifDrawable> byteBufferDecoder, ArrayPool byteArrayPool) {
+  public StreamGifDecoder(
+      List<ImageHeaderParser> parsers,
+      ResourceDecoder<ByteBuffer, GifDrawable> byteBufferDecoder,
+      ArrayPool byteArrayPool) {
     this.parsers = parsers;
     this.byteBufferDecoder = byteBufferDecoder;
     this.byteArrayPool = byteArrayPool;
@@ -41,8 +43,9 @@ public class StreamGifDecoder implements ResourceDecoder<InputStream, GifDrawabl
   }
 
   @Override
-  public Resource<GifDrawable> decode(@NonNull InputStream source, int width, int height,
-      @NonNull Options options) throws IOException {
+  public Resource<GifDrawable> decode(
+      @NonNull InputStream source, int width, int height, @NonNull Options options)
+      throws IOException {
     byte[] data = inputStreamToBytes(source);
     if (data == null) {
       return null;

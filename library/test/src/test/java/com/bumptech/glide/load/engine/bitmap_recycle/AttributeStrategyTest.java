@@ -30,8 +30,8 @@ public class AttributeStrategyTest {
   public void testICanAddAndGetABitmapOfTheSameSizeAndDimensions() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
-    assertEquals(bitmap,
-        strategy.get(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888));
+    assertEquals(
+        bitmap, strategy.get(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888));
   }
 
   @Test
@@ -101,6 +101,7 @@ public class AttributeStrategyTest {
     Bitmap removed = strategy.removeLast();
     assertEquals(
         "Expected=" + strategy.logBitmap(leastRecentlyUsed) + " got=" + strategy.logBitmap(removed),
-        leastRecentlyUsed, removed);
+        leastRecentlyUsed,
+        removed);
   }
 }

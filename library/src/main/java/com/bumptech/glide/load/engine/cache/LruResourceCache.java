@@ -7,9 +7,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.LruCache;
 
-/**
- * An LRU in memory cache for {@link com.bumptech.glide.load.engine.Resource}s.
- */
+/** An LRU in memory cache for {@link com.bumptech.glide.load.engine.Resource}s. */
 public class LruResourceCache extends LruCache<Key, Resource<?>> implements MemoryCache {
   private ResourceRemovedListener listener;
 

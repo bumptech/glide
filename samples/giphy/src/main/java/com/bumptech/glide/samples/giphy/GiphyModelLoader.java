@@ -13,8 +13,8 @@ import java.io.InputStream;
 
 /**
  * A model loader that translates a POJO mirroring a JSON object representing a single image from
- * Giphy's api into an {@link java.io.InputStream} that can be decoded into an
- * {@link android.graphics.drawable.Drawable}.
+ * Giphy's api into an {@link java.io.InputStream} that can be decoded into an {@link
+ * android.graphics.drawable.Drawable}.
  */
 public final class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
 
@@ -48,9 +48,7 @@ public final class GiphyModelLoader extends BaseGlideUrlLoader<Api.GifResult> {
     return Math.abs(width - gifImage.width) + Math.abs(height - gifImage.height);
   }
 
-  /**
-   * The default factory for {@link com.bumptech.glide.samples.giphy.GiphyModelLoader}s.
-   */
+  /** The default factory for {@link com.bumptech.glide.samples.giphy.GiphyModelLoader}s. */
   public static final class Factory implements ModelLoaderFactory<GifResult, InputStream> {
     @NonNull
     @Override

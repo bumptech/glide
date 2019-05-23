@@ -8,11 +8,11 @@ import com.bumptech.glide.load.DataSource;
 
 /**
  * A {@link TransitionFactory} for complex types that have a {@link android.graphics.Bitmap} inside.
- * The transitioning bitmap is wrapped in a {@link android.graphics.drawable.BitmapDrawable}.
- * Most commonly used with {@link DrawableCrossFadeFactory}.
+ * The transitioning bitmap is wrapped in a {@link android.graphics.drawable.BitmapDrawable}. Most
+ * commonly used with {@link DrawableCrossFadeFactory}.
  *
  * @param <R> The type of the composite object that contains the {@link android.graphics.Bitmap} to
- *            be transitioned.
+ *     be transitioned.
  */
 public abstract class BitmapContainerTransitionFactory<R> implements TransitionFactory<R> {
   private final TransitionFactory<Drawable> realFactory;
@@ -31,8 +31,9 @@ public abstract class BitmapContainerTransitionFactory<R> implements TransitionF
 
   /**
    * Retrieve the Bitmap from a composite object.
-   * <p><b>Warning:</b> Do not convert any arbitrary object to Bitmap
-   * via expensive drawing here, this method is called on the UI thread.</p>
+   *
+   * <p><b>Warning:</b> Do not convert any arbitrary object to Bitmap via expensive drawing here,
+   * this method is called on the UI thread.
    *
    * @param current composite object containing a Bitmap and some other information
    * @return the Bitmap contained within {@code current}

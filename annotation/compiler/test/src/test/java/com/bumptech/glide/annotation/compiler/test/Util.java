@@ -17,6 +17,7 @@ public final class Util {
    * the unix one.
    */
   private static final String FILE_SEPARATOR = "/";
+
   private static final String LINE_SEPARATOR = "\n";
 
   private Util() {

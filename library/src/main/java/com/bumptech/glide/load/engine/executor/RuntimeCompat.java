@@ -8,9 +8,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.regex.Pattern;
 
-/**
- * Compatibility methods for {@link java.lang.Runtime}.
- */
+/** Compatibility methods for {@link java.lang.Runtime}. */
 final class RuntimeCompat {
   private static final String TAG = "GlideRuntimeCompat";
   private static final String CPU_NAME_REGEX = "cpu[0-9]+";
@@ -20,9 +18,7 @@ final class RuntimeCompat {
     // Utility class.
   }
 
-  /**
-   * Determines the number of cores available on the device.
-   */
+  /** Determines the number of cores available on the device. */
   static int availableProcessors() {
     int cpus = Runtime.getRuntime().availableProcessors();
     if (Build.VERSION.SDK_INT < 17) {
@@ -50,12 +46,14 @@ final class RuntimeCompat {
     try {
       File cpuInfo = new File(CPU_LOCATION);
       final Pattern cpuNamePattern = Pattern.compile(CPU_NAME_REGEX);
-      cpus = cpuInfo.listFiles(new FilenameFilter() {
-        @Override
-        public boolean accept(File file, String s) {
-          return cpuNamePattern.matcher(s).matches();
-        }
-      });
+      cpus =
+          cpuInfo.listFiles(
+              new FilenameFilter() {
+                @Override
+                public boolean accept(File file, String s) {
+                  return cpuNamePattern.matcher(s).matches();
+                }
+              });
     } catch (Throwable t) {
       if (Log.isLoggable(TAG, Log.ERROR)) {
         Log.e(TAG, "Failed to calculate accurate cpu count", t);

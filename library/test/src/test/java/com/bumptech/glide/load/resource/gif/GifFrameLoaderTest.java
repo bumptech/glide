@@ -75,14 +75,15 @@ public class GifFrameLoaderTest {
   @NonNull
   private GifFrameLoader createGifFrameLoader(Handler handler) {
     Glide glide = getGlideSingleton();
-    GifFrameLoader result = new GifFrameLoader(
-        glide.getBitmapPool(),
-        requestManager,
-        gifDecoder,
-        handler,
-        requestBuilder,
-        transformation,
-        firstFrame);
+    GifFrameLoader result =
+        new GifFrameLoader(
+            glide.getBitmapPool(),
+            requestManager,
+            gifDecoder,
+            handler,
+            requestBuilder,
+            transformation,
+            firstFrame);
     result.subscribe(callback);
     return result;
   }
@@ -209,8 +210,7 @@ public class GifFrameLoaderTest {
     DelayTarget previous = newDelayTarget();
     Request previousRequest = mock(Request.class);
     previous.setRequest(previousRequest);
-    previous.onResourceReady(
-        Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null);
+    previous.onResourceReady(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null);
 
     DelayTarget current = mock(DelayTarget.class);
     when(current.getResource()).thenReturn(null);
@@ -224,8 +224,9 @@ public class GifFrameLoaderTest {
   public void testDelayTargetSendsMessageWithHandlerDelayed() {
     long targetTime = 1234;
     DelayTarget delayTarget = new DelayTarget(handler, 1, targetTime);
-    delayTarget.onResourceReady(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null
-    /*glideAnimation*/);
+    delayTarget.onResourceReady(
+        Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null
+        /*glideAnimation*/ );
     verify(handler).sendMessageAtTime(isA(Message.class), eq(targetTime));
   }
 
@@ -254,7 +255,7 @@ public class GifFrameLoaderTest {
 
   @Test
   public void
-  testDoesNotReturnResourceForCompletedFrameInGetCurrentFrameIfLoadCompletesWhileCleared() {
+      testDoesNotReturnResourceForCompletedFrameInGetCurrentFrameIfLoadCompletesWhileCleared() {
     loader.clear();
     DelayTarget delayTarget = mock(DelayTarget.class);
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
@@ -325,8 +326,7 @@ public class GifFrameLoaderTest {
 
     DelayTarget nextFrame = mock(DelayTarget.class);
     Bitmap expected = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
-    when(nextFrame.getResource())
-        .thenReturn(expected);
+    when(nextFrame.getResource()).thenReturn(expected);
     loader.onFrameReady(nextFrame);
 
     verify(callback, times(1)).onFrameReady();
@@ -345,8 +345,7 @@ public class GifFrameLoaderTest {
 
     DelayTarget nextFrame = mock(DelayTarget.class);
     Bitmap expected = Bitmap.createBitmap(200, 200, Bitmap.Config.ARGB_8888);
-    when(nextFrame.getResource())
-        .thenReturn(expected);
+    when(nextFrame.getResource()).thenReturn(expected);
     loader.onFrameReady(nextFrame);
 
     loader.setNextStartFromFirstFrame();

@@ -12,9 +12,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Utilities for interacting with {@link java.nio.ByteBuffer}s.
- */
+/** Utilities for interacting with {@link java.nio.ByteBuffer}s. */
 @SuppressWarnings({"unused", "WeakerAccess"}) // Public API
 public final class ByteBufferUtil {
   // 16 Kb
@@ -90,8 +88,8 @@ public final class ByteBufferUtil {
     }
   }
 
-  public static void toStream(@NonNull ByteBuffer byteBuffer,
-      @NonNull OutputStream os) throws IOException {
+  public static void toStream(@NonNull ByteBuffer byteBuffer, @NonNull OutputStream os)
+      throws IOException {
     SafeArray safeArray = getSafeArray(byteBuffer);
     if (safeArray != null) {
       os.write(safeArray.data, safeArray.offset, safeArray.offset + safeArray.limit);

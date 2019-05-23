@@ -11,8 +11,8 @@ import java.util.Set;
  */
 public interface RequestManagerTreeNode {
   /**
-   * Returns all descendant {@link RequestManager}s relative to the context of the current
-   * {@link RequestManager}.
+   * Returns all descendant {@link RequestManager}s relative to the context of the current {@link
+   * RequestManager}.
    */
   @NonNull
   Set<RequestManager> getDescendants();

@@ -7,9 +7,7 @@ import android.support.v4.util.SimpleArrayMap;
 import com.bumptech.glide.util.CachedHashCodeArrayMap;
 import java.security.MessageDigest;
 
-/**
- * A set of {@link Option Options} to apply to in memory and disk cache keys.
- */
+/** A set of {@link Option Options} to apply to in memory and disk cache keys. */
 public final class Options implements Key {
   private final ArrayMap<Option<?>, Object> values = new CachedHashCodeArrayMap<>();
 
@@ -54,14 +52,12 @@ public final class Options implements Key {
 
   @Override
   public String toString() {
-    return "Options{"
-        + "values=" + values
-        + '}';
+    return "Options{" + "values=" + values + '}';
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> void updateDiskCacheKey(@NonNull Option<T> option, @NonNull Object value,
-      @NonNull MessageDigest md) {
+  private static <T> void updateDiskCacheKey(
+      @NonNull Option<T> option, @NonNull Object value, @NonNull MessageDigest md) {
     option.update((T) value, md);
   }
 }

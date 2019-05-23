@@ -61,10 +61,10 @@ import com.bumptech.glide.util.Util;
  * @param <Z> The type of resource that this target will receive.
  * @deprecated Use {@link CustomViewTarget} if loading the content into a view, the download API if
  *     in the background
- *     (http://bumptech.github.io/glide/doc/getting-started.html#background-threads), or a
- *     {@link CustomTarget} for any specialized use-cases. Using {@link SimpleTarget} or
- *     {@link BaseTarget} is unsafe if the user does not implement {@link #onLoadCleared}, resulting
- *     in recycled bitmaps being referenced from the UI and hard to root-cause crashes.
+ *     (http://bumptech.github.io/glide/doc/getting-started.html#background-threads), or a {@link
+ *     CustomTarget} for any specialized use-cases. Using {@link SimpleTarget} or {@link BaseTarget}
+ *     is unsafe if the user does not implement {@link #onLoadCleared}, resulting in recycled
+ *     bitmaps being referenced from the UI and hard to root-cause crashes.
  */
 @Deprecated
 public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
@@ -85,7 +85,7 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
    * Constructor for the target that takes the desired dimensions of the decoded and/or transformed
    * resource.
    *
-   * @param width  The width in pixels of the desired resource.
+   * @param width The width in pixels of the desired resource.
    * @param height The height in pixels of the desired resource.
    */
   // Public API.
@@ -104,8 +104,12 @@ public abstract class SimpleTarget<Z> extends BaseTarget<Z> {
   public final void getSize(@NonNull SizeReadyCallback cb) {
     if (!Util.isValidDimensions(width, height)) {
       throw new IllegalArgumentException(
-          "Width and height must both be > 0 or Target#SIZE_ORIGINAL, but given" + " width: "
-              + width + " and height: " + height + ", either provide dimensions in the constructor"
+          "Width and height must both be > 0 or Target#SIZE_ORIGINAL, but given"
+              + " width: "
+              + width
+              + " and height: "
+              + height
+              + ", either provide dimensions in the constructor"
               + " or call override()");
     }
     cb.onSizeReady(width, height);

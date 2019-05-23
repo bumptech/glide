@@ -55,5 +55,4 @@ public class ViewPropertyTransition<R> implements Transition<R> {
      */
     void animate(View view);
   }
-
 }

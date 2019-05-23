@@ -15,12 +15,14 @@ import java.util.concurrent.locks.Lock;
 
 final class DrawableToBitmapConverter {
   private static final String TAG = "DrawableToBitmap";
-  private static final BitmapPool NO_RECYCLE_BITMAP_POOL = new BitmapPoolAdapter() {
-    @Override
-    public void put(Bitmap bitmap) {
-      // Avoid calling super to avoid recycling the given Bitmap.
-    }
-  };
+  private static final BitmapPool NO_RECYCLE_BITMAP_POOL =
+      new BitmapPoolAdapter() {
+        @Override
+        public void put(Bitmap bitmap) {
+          // Avoid calling super to avoid recycling the given Bitmap.
+        }
+      };
+
   private DrawableToBitmapConverter() {
     // Utility class.
   }
@@ -48,15 +50,23 @@ final class DrawableToBitmapConverter {
       BitmapPool bitmapPool, Drawable drawable, int width, int height) {
     if (width == Target.SIZE_ORIGINAL && drawable.getIntrinsicWidth() <= 0) {
       if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Unable to draw " + drawable + " to Bitmap with Target.SIZE_ORIGINAL because the"
-            + " Drawable has no intrinsic width");
+        Log.w(
+            TAG,
+            "Unable to draw "
+                + drawable
+                + " to Bitmap with Target.SIZE_ORIGINAL because the"
+                + " Drawable has no intrinsic width");
       }
       return null;
     }
     if (height == Target.SIZE_ORIGINAL && drawable.getIntrinsicHeight() <= 0) {
       if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Unable to draw " + drawable + " to Bitmap with Target.SIZE_ORIGINAL because the"
-            + " Drawable has no intrinsic height");
+        Log.w(
+            TAG,
+            "Unable to draw "
+                + drawable
+                + " to Bitmap with Target.SIZE_ORIGINAL because the"
+                + " Drawable has no intrinsic height");
       }
       return null;
     }

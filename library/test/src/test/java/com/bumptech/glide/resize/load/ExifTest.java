@@ -29,8 +29,8 @@ public class ExifTest {
     InputStream is = null;
     try {
       is = open(filePrefix + "_" + expectedOrientation + ".jpg");
-      assertEquals(new DefaultImageHeaderParser().getOrientation(is, byteArrayPool),
-          expectedOrientation);
+      assertEquals(
+          new DefaultImageHeaderParser().getOrientation(is, byteArrayPool), expectedOrientation);
     } catch (IOException e) {
       throw new RuntimeException(e);
     } finally {

@@ -41,8 +41,8 @@ public class ModelToResourceClassCache {
       @NonNull Class<?> transcodeClass,
       @NonNull List<Class<?>> resourceClasses) {
     synchronized (registeredResourceClassCache) {
-      registeredResourceClassCache
-          .put(new MultiClassKey(modelClass, resourceClass, transcodeClass), resourceClasses);
+      registeredResourceClassCache.put(
+          new MultiClassKey(modelClass, resourceClass, transcodeClass), resourceClasses);
     }
   }
 

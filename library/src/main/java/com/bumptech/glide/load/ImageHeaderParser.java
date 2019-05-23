@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-/**
- * Interface for the ImageHeaderParser.
- */
+/** Interface for the ImageHeaderParser. */
 public interface ImageHeaderParser {
   /**
    * A constant indicating we were unable to parse the orientation from the image either because no
@@ -18,8 +16,7 @@ public interface ImageHeaderParser {
   int UNKNOWN_ORIENTATION = -1;
 
   /**
-   * The format of the image data including whether or not the image may include transparent
-   * pixels.
+   * The format of the image data including whether or not the image may include transparent pixels.
    */
   enum ImageType {
     GIF(true),
@@ -58,7 +55,7 @@ public interface ImageHeaderParser {
    * not an image) it will return a default value rather than throwing an exception.
    *
    * @return The exif orientation if present or -1 if the header couldn't be parsed or doesn't
-   * contain an orientation
+   *     contain an orientation
    */
   int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool) throws IOException;
 

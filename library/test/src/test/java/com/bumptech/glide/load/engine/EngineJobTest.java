@@ -358,7 +358,7 @@ public class EngineJobTest {
 
   @Test
   public void
-  testRemovingCallbackDuringOnResourceReadyPreventsCallbackFromBeingCalledIfNotYetCalled() {
+      testRemovingCallbackDuringOnResourceReadyPreventsCallbackFromBeingCalledIfNotYetCalled() {
     final EngineJob<Object> job = harness.getJob();
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 
@@ -382,7 +382,7 @@ public class EngineJobTest {
 
   @Test
   public void
-  testRemovingCallbackDuringOnResourceReadyPreventsResourceFromBeingAcquiredForCallback() {
+      testRemovingCallbackDuringOnResourceReadyPreventsResourceFromBeingAcquiredForCallback() {
     final EngineJob<Object> job = harness.getJob();
     final ResourceCallback notYetCalled = mock(ResourceCallback.class);
 

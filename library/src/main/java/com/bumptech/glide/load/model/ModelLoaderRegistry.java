@@ -45,8 +45,8 @@ public class ModelLoaderRegistry {
     cache.clear();
   }
 
-  public synchronized <Model, Data> void remove(@NonNull Class<Model> modelClass,
-      @NonNull Class<Data> dataClass) {
+  public synchronized <Model, Data> void remove(
+      @NonNull Class<Model> modelClass, @NonNull Class<Data> dataClass) {
     tearDown(multiModelLoaderFactory.remove(modelClass, dataClass));
     cache.clear();
   }
@@ -89,8 +89,8 @@ public class ModelLoaderRegistry {
     return filteredLoaders;
   }
 
-  public synchronized <Model, Data> ModelLoader<Model, Data> build(@NonNull Class<Model> modelClass,
-      @NonNull Class<Data> dataClass) {
+  public synchronized <Model, Data> ModelLoader<Model, Data> build(
+      @NonNull Class<Model> modelClass, @NonNull Class<Data> dataClass) {
     return multiModelLoaderFactory.build(modelClass, dataClass);
   }
 
@@ -120,7 +120,7 @@ public class ModelLoaderRegistry {
     private final Map<Class<?>, Entry<?>> cachedModelLoaders = new HashMap<>();
 
     @Synthetic
-    ModelLoaderCache() { }
+    ModelLoaderCache() {}
 
     public void clear() {
       cachedModelLoaders.clear();

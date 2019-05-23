@@ -7,8 +7,8 @@ import android.widget.AbsListView;
 import android.widget.ListView;
 
 /**
- * Converts {@link android.support.v7.widget.RecyclerView.OnScrollListener} events to
- * {@link AbsListView} scroll events.
+ * Converts {@link android.support.v7.widget.RecyclerView.OnScrollListener} events to {@link
+ * AbsListView} scroll events.
  *
  * <p>Requires that the the recycler view be using a {@link LinearLayoutManager} subclass.
  */
@@ -53,7 +53,8 @@ public final class RecyclerToListViewScrollListener extends RecyclerView.OnScrol
     int visibleCount = Math.abs(firstVisible - layoutManager.findLastVisibleItemPosition());
     int itemCount = recyclerView.getAdapter().getItemCount();
 
-    if (firstVisible != lastFirstVisible || visibleCount != lastVisibleCount
+    if (firstVisible != lastFirstVisible
+        || visibleCount != lastVisibleCount
         || itemCount != lastItemCount) {
       scrollListener.onScroll(null, firstVisible, visibleCount, itemCount);
       lastFirstVisible = firstVisible;

@@ -45,7 +45,10 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18, shadows = { GlideShadowLooper.class })
+@Config(
+    manifest = Config.NONE,
+    sdk = 18,
+    shadows = {GlideShadowLooper.class})
 @SuppressWarnings("unchecked")
 public class EngineTest {
   private EngineTestHarness harness;
@@ -202,7 +205,8 @@ public class EngineTest {
   @Test
   public void testHandlesNonEngineResourcesFromCacheIfPresent() {
     final Object expected = new Object();
-    @SuppressWarnings("rawtypes") Resource fromCache = mockResource();
+    @SuppressWarnings("rawtypes")
+    Resource fromCache = mockResource();
     when(fromCache.get()).thenReturn(expected);
     when(harness.cache.remove(eq(harness.cacheKey))).thenReturn(fromCache);
 
@@ -384,20 +388,28 @@ public class EngineTest {
     harness.doLoad();
 
     verify(harness.keyFactory)
-        .buildKey(eq(harness.model), eq(harness.signature), eq(harness.width), eq(harness.height),
-            eq(harness.transformations), eq(Object.class), eq(Object.class), eq(harness.options));
+        .buildKey(
+            eq(harness.model),
+            eq(harness.signature),
+            eq(harness.width),
+            eq(harness.height),
+            eq(harness.transformations),
+            eq(Object.class),
+            eq(Object.class),
+            eq(harness.options));
   }
 
   @Test
   public void testFactoryIsGivenNecessaryArguments() {
     harness.doLoad();
 
-    verify(harness.engineJobFactory).build(
-        eq(harness.cacheKey),
-        eq(true) /*isMemoryCacheable*/,
-        eq(false) /*useUnlimitedSourceGeneratorPool*/,
-        /*useAnimationPool=*/ eq(false),
-        /*onlyRetrieveFromCache=*/ eq(false));
+    verify(harness.engineJobFactory)
+        .build(
+            eq(harness.cacheKey),
+            eq(true) /*isMemoryCacheable*/,
+            eq(false) /*useUnlimitedSourceGeneratorPool*/,
+            /*useAnimationPool=*/ eq(false),
+            /*onlyRetrieveFromCache=*/ eq(false));
   }
 
   @Test
@@ -405,12 +417,13 @@ public class EngineTest {
     harness.useUnlimitedSourceGeneratorPool = true;
     harness.doLoad();
 
-    verify(harness.engineJobFactory).build(
-        eq(harness.cacheKey),
-        eq(true) /*isMemoryCacheable*/,
-        eq(true) /*useUnlimitedSourceGeneratorPool*/,
-        /*useAnimationPool=*/ eq(false),
-        /*onlyRetrieveFromCache=*/ eq(false));
+    verify(harness.engineJobFactory)
+        .build(
+            eq(harness.cacheKey),
+            eq(true) /*isMemoryCacheable*/,
+            eq(true) /*useUnlimitedSourceGeneratorPool*/,
+            /*useAnimationPool=*/ eq(false),
+            /*onlyRetrieveFromCache=*/ eq(false));
   }
 
   @Test
@@ -427,12 +440,13 @@ public class EngineTest {
 
   @Test
   public void load_whenCalledOnBackgroundThread_doesNotThrow() throws InterruptedException {
-    BackgroundUtil.testInBackground(new BackgroundUtil.BackgroundTester() {
-      @Override
-      public void runTest() {
-        harness.doLoad();
-      }
-    });
+    BackgroundUtil.testInBackground(
+        new BackgroundUtil.BackgroundTester() {
+          @Override
+          public void runTest() {
+            harness.doLoad();
+          }
+        });
   }
 
   @Test
@@ -579,7 +593,8 @@ public class EngineTest {
   @Test
   public void onEngineJobComplete_withOldJobForKey_doesNotRemoveJob() {
     harness.doLoad();
-    harness.getEngine()
+    harness
+        .getEngine()
         .onEngineJobComplete(mock(EngineJob.class), harness.cacheKey, harness.resource);
 
     harness.job = mock(EngineJob.class);
@@ -591,8 +606,7 @@ public class EngineTest {
   @Test
   public void onEngineJobCancelled_withOldJobForKey_doesNotRemoveJob() {
     harness.doLoad();
-    harness.getEngine()
-        .onEngineJobCancelled(mock(EngineJob.class), harness.cacheKey);
+    harness.getEngine().onEngineJobCancelled(mock(EngineJob.class), harness.cacheKey);
 
     harness.job = mock(EngineJob.class);
     harness.doLoad();
@@ -600,12 +614,12 @@ public class EngineTest {
     verify(harness.job, never()).start(any(DecodeJob.class));
   }
 
-
   @Test
   public void onEngineJobComplete_withOnlyRetrieveFromCacheAndOldJobForKey_doesNotRemoveJob() {
     harness.onlyRetrieveFromCache = true;
     harness.doLoad();
-    harness.getEngine()
+    harness
+        .getEngine()
         .onEngineJobComplete(mock(EngineJob.class), harness.cacheKey, harness.resource);
 
     harness.job = mock(EngineJob.class);
@@ -618,8 +632,7 @@ public class EngineTest {
   public void onEngineJobCancelled_withOnlyRetrieveFromCacheAndOldJobForKey_doesNotRemoveJob() {
     harness.onlyRetrieveFromCache = true;
     harness.doLoad();
-    harness.getEngine()
-        .onEngineJobCancelled(mock(EngineJob.class), harness.cacheKey);
+    harness.getEngine().onEngineJobCancelled(mock(EngineJob.class), harness.cacheKey);
 
     harness.job = mock(EngineJob.class);
     harness.doLoad();
@@ -631,8 +644,10 @@ public class EngineTest {
     final EngineKey cacheKey = mock(EngineKey.class);
     final EngineKeyFactory keyFactory = mock(EngineKeyFactory.class);
     ResourceCallback cb = mock(ResourceCallback.class);
+
     @SuppressWarnings("rawtypes")
     final EngineResource resource = mock(EngineResource.class);
+
     final Jobs jobs = new Jobs();
     final ActiveResources activeResources =
         new ActiveResources(/*isActiveResourceRetentionAllowed=*/ true);
@@ -657,8 +672,16 @@ public class EngineTest {
     final boolean isScaleOnlyOrNoTransform = true;
 
     EngineTestHarness() {
-      when(keyFactory.buildKey(eq(model), eq(signature), anyInt(), anyInt(), eq(transformations),
-          eq(Object.class), eq(Object.class), eq(options))).thenReturn(cacheKey);
+      when(keyFactory.buildKey(
+              eq(model),
+              eq(signature),
+              anyInt(),
+              anyInt(),
+              eq(transformations),
+              eq(Object.class),
+              eq(Object.class),
+              eq(options)))
+          .thenReturn(cacheKey);
       when(resource.getResource()).thenReturn(mock(Resource.class));
 
       job = mock(EngineJob.class);
@@ -668,10 +691,8 @@ public class EngineTest {
       getEngine().onEngineJobComplete(job, cacheKey, resource);
     }
 
-
     Engine.LoadStatus doLoad() {
-      when(
-          engineJobFactory.build(
+      when(engineJobFactory.build(
               eq(cacheKey), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean()))
           .thenReturn((EngineJob<Object>) job);
       when(job.onlyRetrieveFromCache()).thenReturn(onlyRetrieveFromCache);
@@ -719,5 +740,4 @@ public class EngineTest {
       return engine;
     }
   }
-
 }

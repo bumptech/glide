@@ -25,13 +25,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests adding both an empty {@link com.bumptech.glide.module.AppGlideModule} and an empty
- * {@link com.bumptech.glide.module.LibraryGlideModule} in a single project.
+ * Tests adding both an empty {@link com.bumptech.glide.module.AppGlideModule} and an empty {@link
+ * com.bumptech.glide.module.LibraryGlideModule} in a single project.
  */
 @RunWith(JUnit4.class)
 public class EmptyAppAndLibraryGlideModulesTest implements CompilationProvider {
-  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
-      new RegenerateResourcesRule(this);
+  @Rule
+  public final RegenerateResourcesRule regenerateResourcesRule = new RegenerateResourcesRule(this);
+
   private Compilation compilation;
 
   @Before
@@ -39,9 +40,7 @@ public class EmptyAppAndLibraryGlideModulesTest implements CompilationProvider {
     compilation =
         javac()
             .withProcessors(new GlideAnnotationProcessor())
-            .compile(
-                emptyAppModule(),
-                emptyLibraryModule());
+            .compile(emptyAppModule(), emptyLibraryModule());
     assertThat(compilation).succeededWithoutWarnings();
   }
 

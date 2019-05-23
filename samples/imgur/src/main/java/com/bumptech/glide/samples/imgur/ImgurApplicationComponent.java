@@ -16,5 +16,5 @@ import javax.inject.Singleton;
       ApiModule.class
     })
 public interface ImgurApplicationComponent extends AndroidInjector<ImgurApplication> {
-    // Empty.
+  // Empty.
 }

@@ -23,7 +23,7 @@ import org.robolectric.annotation.Config;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class StreamGifDecoderTest {
-  private static final byte[] GIF_HEADER = new byte[] { 0x47, 0x49, 0x46 };
+  private static final byte[] GIF_HEADER = new byte[] {0x47, 0x49, 0x46};
 
   @Mock private ResourceDecoder<ByteBuffer, GifDrawable> byteBufferDecoder;
   private StreamGifDecoder decoder;

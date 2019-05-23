@@ -6,13 +6,11 @@ import com.bumptech.glide.TransitionOptions;
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
 import com.bumptech.glide.request.transition.TransitionFactory;
 
-/**
- * Contains {@link Drawable} specific animation options.
- */
+/** Contains {@link Drawable} specific animation options. */
 // Public API.
 @SuppressWarnings("WeakerAccess")
-public final class DrawableTransitionOptions extends
-    TransitionOptions<DrawableTransitionOptions, Drawable> {
+public final class DrawableTransitionOptions
+    extends TransitionOptions<DrawableTransitionOptions, Drawable> {
 
   /**
    * Returns a {@link DrawableTransitionOptions} object that enables a cross fade animation.
@@ -80,8 +78,8 @@ public final class DrawableTransitionOptions extends
    * Enables a cross fade animation between both the placeholder and the first resource and between
    * subsequent resources (if thumbnails are used).
    *
-   * @param duration The duration of the animation, see
-   *     {@code DrawableCrossFadeFactory.Builder(int)}
+   * @param duration The duration of the animation, see {@code
+   *     DrawableCrossFadeFactory.Builder(int)}
    * @see com.bumptech.glide.request.transition.DrawableCrossFadeFactory.Builder
    */
   @NonNull
@@ -108,4 +106,3 @@ public final class DrawableTransitionOptions extends
     return crossFade(builder.build());
   }
 }
-

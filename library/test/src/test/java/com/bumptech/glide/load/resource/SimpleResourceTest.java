@@ -35,6 +35,5 @@ public class SimpleResourceTest {
     new SimpleResource<>(null);
   }
 
-  private static class Anything {
-  }
+  private static class Anything {}
 }

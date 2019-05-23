@@ -39,7 +39,7 @@ import org.junit.runner.RunWith;
 /**
  * Runs tests to make sure that DownsampleStrategy provides the output we expect.
  *
- * WEBP at and above N rounds. Webp below N floors. PNG always floors. JPEG always rounds.
+ * <p>WEBP at and above N rounds. Webp below N floors. PNG always floors. JPEG always rounds.
  */
 @RunWith(AndroidJUnit4.class)
 @SuppressWarnings("VisibleForTests")
@@ -53,77 +53,46 @@ public class DownsamplerEmulatorTest {
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(400, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(300, onAllApisAndAllFormatsExpect(75, 75))
-        .givenImageWithDimensionsOf(799, 100,
+        .givenImageWithDimensionsOf(
+            799,
+            100,
             atAndAbove(VERSION_CODES.N)
-                .with(
-                    formats(JPEG, WEBP)
-                        .expect(100, 13),
-                    formats(PNG)
-                        .expect(99, 12)),
+                .with(formats(JPEG, WEBP).expect(100, 13), formats(PNG).expect(99, 12)),
             below(VERSION_CODES.N)
-                .with(
-                    formats(JPEG)
-                        .expect(100, 13),
-                    formats(PNG, WEBP)
-                        .expect(99, 12)))
-        .givenImageWithDimensionsOf(800, 100,
+                .with(formats(JPEG).expect(100, 13), formats(PNG, WEBP).expect(99, 12)))
+        .givenImageWithDimensionsOf(
+            800,
+            100,
             atAndAbove(VERSION_CODES.N)
-                .with(
-                    formats(JPEG, WEBP)
-                        .expect(100, 13),
-                    formats(PNG)
-                        .expect(100, 12)),
+                .with(formats(JPEG, WEBP).expect(100, 13), formats(PNG).expect(100, 12)),
             below(VERSION_CODES.N)
-                .with(
-                    formats(JPEG)
-                        .expect(100, 13),
-                    formats(PNG, WEBP)
-                        .expect(100, 12)))
+                .with(formats(JPEG).expect(100, 13), formats(PNG, WEBP).expect(100, 12)))
         .givenImageWithDimensionsOf(801, 100, onAllApisAndAllFormatsExpect(50, 6))
-        .givenImageWithDimensionsOf(100, 800,
+        .givenImageWithDimensionsOf(
+            100,
+            800,
             atAndAbove(VERSION_CODES.N)
-                .with(
-                    formats(JPEG, WEBP)
-                        .expect(13, 100),
-                    formats(PNG)
-                        .expect(12, 100)),
+                .with(formats(JPEG, WEBP).expect(13, 100), formats(PNG).expect(12, 100)),
             below(VERSION_CODES.N)
-                .with(
-                    formats(JPEG)
-                        .expect(13, 100),
-                    formats(PNG, WEBP)
-                        .expect(12, 100)))
+                .with(formats(JPEG).expect(13, 100), formats(PNG, WEBP).expect(12, 100)))
         .givenImageWithDimensionsOf(87, 78, onAllApisAndAllFormatsExpect(87, 78))
         // This set of examples demonstrate that webp uses round on N+ and floor < N.
         .setTargetDimensions(13, 13)
-        .givenSquareImageWithDimensionOf(99,
+        .givenSquareImageWithDimensionOf(
+            99,
             atAndAbove(KITKAT)
                 .with(
                     // 99 / 8.0 = 12.375. ceil(12.375) = 13. round(12.375) = 12. floor(12.375) = 12.
-                    formats(JPEG)
-                        .expect(13, 13),
-                    formats(PNG, WEBP)
-                        .expect(12, 12)),
-            below(KITKAT)
-                .with(
-                    formats(JPEG)
-                        .expect(13, 13),
-                    formats(PNG, WEBP)
-                        .expect(12, 12)))
-        .givenSquareImageWithDimensionOf(100,
+                    formats(JPEG).expect(13, 13), formats(PNG, WEBP).expect(12, 12)),
+            below(KITKAT).with(formats(JPEG).expect(13, 13), formats(PNG, WEBP).expect(12, 12)))
+        .givenSquareImageWithDimensionOf(
+            100,
             atAndAbove(VERSION_CODES.N)
                 .with(
                     // 100 / 8.0 = 12.5. ceil(12.5) = 13. round(12.5) = 13. floor(12.5) = 12.
-                    formats(JPEG, WEBP)
-                        .expect(13, 13),
-                    formats(PNG)
-                        .expect(12, 12)),
+                    formats(JPEG, WEBP).expect(13, 13), formats(PNG).expect(12, 12)),
             below(VERSION_CODES.N)
-                .with(
-                    formats(JPEG)
-                        .expect(13, 13),
-                    formats(PNG, WEBP)
-                        .expect(12, 12)))
+                .with(formats(JPEG).expect(13, 13), formats(PNG, WEBP).expect(12, 12)))
         // Upscaling
         .setTargetDimensions(500, 500)
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(200, 200))
@@ -158,33 +127,28 @@ public class DownsamplerEmulatorTest {
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(400, onAllApisAndAllFormatsExpect(100, 100))
-        .givenImageWithDimensionsOf(300, 300,
+        .givenImageWithDimensionsOf(
+            300,
+            300,
             atAndAbove(KITKAT).with(allFormats().expect(100, 100)),
             below(KITKAT).with(allFormats().expect(150, 150)))
-        .givenImageWithDimensionsOf(799, 100,
+        .givenImageWithDimensionsOf(
+            799,
+            100,
             atAndAbove(KITKAT).with(allFormats().expect(100, 13)),
-            below(KITKAT)
-                .with(
-                    formats(JPEG)
-                        .expect(200, 25),
-                    formats(PNG, WEBP)
-                        .expect(199, 25)))
-        .givenImageWithDimensionsOf(800, 100,
+            below(KITKAT).with(formats(JPEG).expect(200, 25), formats(PNG, WEBP).expect(199, 25)))
+        .givenImageWithDimensionsOf(
+            800,
+            100,
             atAndAbove(KITKAT).with(allFormats().expect(100, 13)),
             below(KITKAT).with(allFormats().expect(200, 25)))
-        .givenImageWithDimensionsOf(801, 100,
+        .givenImageWithDimensionsOf(
+            801,
+            100,
             atAndAbove(VERSION_CODES.N)
-                .with(
-                    formats(JPEG, WEBP)
-                        .expect(100, 13),
-                    formats(PNG)
-                        .expect(100, 12)),
+                .with(formats(JPEG, WEBP).expect(100, 13), formats(PNG).expect(100, 12)),
             apis(KITKAT, VERSION_CODES.M)
-              .with(
-                  formats(JPEG)
-                      .expect(100, 13),
-                  formats(PNG, WEBP)
-                      .expect(100, 12)),
+                .with(formats(JPEG).expect(100, 13), formats(PNG, WEBP).expect(100, 12)),
             below(KITKAT)
                 .with(
                     // JPEG is correct because CENTER_INSIDE wants to give a subsequent
@@ -192,16 +156,17 @@ public class DownsamplerEmulatorTest {
                     // Api > VERSION_CODES.KITKAT, CENTER_INSIDE can do the transformation itself.
                     // On < VERSION_CODES.KITKAT, it has to assume a subsequent transformation will
                     // be called.
-                    formats(JPEG)
-                        .expect(101, 13),
-                    formats(PNG, WEBP)
-                        .expect(100, 12)))
-        .givenImageWithDimensionsOf(100, 800,
+                    formats(JPEG).expect(101, 13), formats(PNG, WEBP).expect(100, 12)))
+        .givenImageWithDimensionsOf(
+            100,
+            800,
             atAndAbove(KITKAT).with(allFormats().expect(13, 100)),
             below(KITKAT).with(allFormats().expect(25, 200)))
         .givenImageWithDimensionsOf(87, 78, onAllApisAndAllFormatsExpect(87, 78))
         .setTargetDimensions(897, 897)
-        .givenImageWithDimensionsOf(2208, 1520,
+        .givenImageWithDimensionsOf(
+            2208,
+            1520,
             atAndAbove(KITKAT).with(allFormats().expect(897, 618)),
             below(KITKAT).with(allFormats().expect(1104, 760)))
         // Upscaling
@@ -219,25 +184,33 @@ public class DownsamplerEmulatorTest {
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(400, onAllApisAndAllFormatsExpect(100, 100))
-        .givenImageWithDimensionsOf(300, 300,
+        .givenImageWithDimensionsOf(
+            300,
+            300,
             atAndAbove(KITKAT).with(allFormats().expect(100, 100)),
             below(KITKAT).with(allFormats().expect(150, 150)))
         .givenImageWithDimensionsOf(799, 100, onAllApisAndAllFormatsExpect(799, 100))
         .givenImageWithDimensionsOf(800, 100, onAllApisAndAllFormatsExpect(800, 100))
         .givenImageWithDimensionsOf(801, 100, onAllApisAndAllFormatsExpect(801, 100))
         .givenImageWithDimensionsOf(100, 800, onAllApisAndAllFormatsExpect(100, 800))
-        .givenImageWithDimensionsOf(87, 78,
+        .givenImageWithDimensionsOf(
+            87,
+            78,
             atAndAbove(KITKAT).with(allFormats().expect(112, 100)),
             below(KITKAT).with(allFormats().expect(87, 78)))
         // Upscaling
         .setTargetDimensions(500, 500)
-        .givenSquareImageWithDimensionOf(200,
+        .givenSquareImageWithDimensionOf(
+            200,
             atAndAbove(KITKAT).with(allFormats().expect(500, 500)),
             below(KITKAT).with(allFormats().expect(200, 200)))
-        .givenSquareImageWithDimensionOf(450,
+        .givenSquareImageWithDimensionOf(
+            450,
             atAndAbove(KITKAT).with(allFormats().expect(500, 500)),
             below(KITKAT).with(allFormats().expect(450, 450)))
-        .givenImageWithDimensionsOf(200, 450,
+        .givenImageWithDimensionsOf(
+            200,
+            450,
             atAndAbove(KITKAT).with(allFormats().expect(500, 1125)),
             below(KITKAT).with(allFormats().expect(200, 450)))
         .run();
@@ -270,33 +243,28 @@ public class DownsamplerEmulatorTest {
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(400, onAllApisAndAllFormatsExpect(100, 100))
-        .givenImageWithDimensionsOf(300, 300,
+        .givenImageWithDimensionsOf(
+            300,
+            300,
             atAndAbove(KITKAT).with(allFormats().expect(100, 100)),
             below(KITKAT).with(allFormats().expect(150, 150)))
-        .givenImageWithDimensionsOf(799, 100,
+        .givenImageWithDimensionsOf(
+            799,
+            100,
             atAndAbove(KITKAT).with(allFormats().expect(100, 13)),
-            below(KITKAT)
-                .with(
-                    formats(JPEG)
-                        .expect(200, 25),
-                    formats(PNG, WEBP)
-                        .expect(199, 25)))
-        .givenImageWithDimensionsOf(800, 100,
+            below(KITKAT).with(formats(JPEG).expect(200, 25), formats(PNG, WEBP).expect(199, 25)))
+        .givenImageWithDimensionsOf(
+            800,
+            100,
             atAndAbove(KITKAT).with(allFormats().expect(100, 13)),
             below(KITKAT).with(allFormats().expect(200, 25)))
-        .givenImageWithDimensionsOf(801, 100,
+        .givenImageWithDimensionsOf(
+            801,
+            100,
             atAndAbove(VERSION_CODES.N)
-                .with(
-                    formats(JPEG, WEBP)
-                        .expect(100, 13),
-                    formats(PNG)
-                        .expect(100, 12)),
+                .with(formats(JPEG, WEBP).expect(100, 13), formats(PNG).expect(100, 12)),
             apis(KITKAT, VERSION_CODES.M)
-                .with(
-                    formats(JPEG)
-                        .expect(100, 13),
-                    formats(PNG, WEBP)
-                        .expect(100, 12)),
+                .with(formats(JPEG).expect(100, 13), formats(PNG, WEBP).expect(100, 12)),
             below(KITKAT)
                 .with(
                     // JPEG is correct because FIT_CENTER wants to give a subsequent transformation
@@ -304,60 +272,68 @@ public class DownsamplerEmulatorTest {
                     // Api > VERSION_CODES.KITKAT, FIT_CENTER can do the transformation itself.
                     // On < VERSION_CODES.KITKAT, it has to assume a transformation will be run
                     // after it that will fix the rounding error.
-                    formats(JPEG)
-                        .expect(101, 13),
-                    formats(PNG, WEBP)
-                        .expect(100, 12)))
-        .givenImageWithDimensionsOf(100, 800,
+                    formats(JPEG).expect(101, 13), formats(PNG, WEBP).expect(100, 12)))
+        .givenImageWithDimensionsOf(
+            100,
+            800,
             atAndAbove(KITKAT).with(allFormats().expect(13, 100)),
             below(KITKAT).with(allFormats().expect(25, 200)))
-        .givenImageWithDimensionsOf(87, 78,
+        .givenImageWithDimensionsOf(
+            87,
+            78,
             atAndAbove(KITKAT).with(allFormats().expect(100, 90)),
             below(KITKAT).with(allFormats().expect(87, 78)))
         .setTargetDimensions(897, 897)
-        .givenImageWithDimensionsOf(2208, 1520,
+        .givenImageWithDimensionsOf(
+            2208,
+            1520,
             atAndAbove(KITKAT).with(allFormats().expect(897, 618)),
             below(KITKAT).with(allFormats().expect(1104, 760)))
         .setTargetDimensions(270, 270)
         // This set of larger image examples exercises sample sizes > 8. Android' scaling logic
         // varies for jpegs.
-        .givenImageWithDimensionsOf(9014, 1638,
+        .givenImageWithDimensionsOf(
+            9014,
+            1638,
             // 15 and 16 will OOM so don't run them.
             atAndAbove(KITKAT).with(allFormats().expect(270, 49)),
             apis(VERSION_CODES.JELLY_BEAN_MR1, VERSION_CODES.JELLY_BEAN_MR2)
                 .with(allFormats().expect(281, 51)))
-        .givenImageWithDimensionsOf(1638, 9014,
+        .givenImageWithDimensionsOf(
+            1638,
+            9014,
             // 15 and 16 will OOM so don't run them.
             atAndAbove(KITKAT).with(allFormats().expect(49, 270)),
             apis(VERSION_CODES.JELLY_BEAN_MR1, VERSION_CODES.JELLY_BEAN_MR2)
                 .with(allFormats().expect(51, 281)))
-        .givenImageWithDimensionsOf(1638, 1638,
+        .givenImageWithDimensionsOf(
+            1638,
+            1638,
             atAndAbove(KITKAT).with(allFormats().expect(270, 270)),
-            below(KITKAT)
-                .with(
-                    formats(JPEG)
-                        .expect(410, 410),
-                    formats(PNG, WEBP)
-                        .expect(409, 409)))
-        .givenImageWithDimensionsOf(4507, 819,
+            below(KITKAT).with(formats(JPEG).expect(410, 410), formats(PNG, WEBP).expect(409, 409)))
+        .givenImageWithDimensionsOf(
+            4507,
+            819,
             atAndAbove(KITKAT).with(allFormats().expect(270, 49)),
-            below(KITKAT).with(
-                formats(JPEG)
-                    .expect(282, 51),
-                formats(PNG, WEBP)
-                    .expect(281, 51)))
-        .givenImageWithDimensionsOf(4503, 819,
+            below(KITKAT).with(formats(JPEG).expect(282, 51), formats(PNG, WEBP).expect(281, 51)))
+        .givenImageWithDimensionsOf(
+            4503,
+            819,
             atAndAbove(KITKAT).with(allFormats().expect(270, 49)),
             below(KITKAT).with(allFormats().expect(281, 51)))
         // Upscaling
         .setTargetDimensions(500, 500)
-        .givenSquareImageWithDimensionOf(200,
+        .givenSquareImageWithDimensionOf(
+            200,
             atAndAbove(KITKAT).with(allFormats().expect(500, 500)),
             below(KITKAT).with(allFormats().expect(200, 200)))
-        .givenSquareImageWithDimensionOf(450,
+        .givenSquareImageWithDimensionOf(
+            450,
             atAndAbove(KITKAT).with(allFormats().expect(500, 500)),
             below(KITKAT).with(allFormats().expect(450, 450)))
-        .givenImageWithDimensionsOf(200, 450,
+        .givenImageWithDimensionsOf(
+            200,
+            450,
             atAndAbove(KITKAT).with(allFormats().expect(222, 500)),
             below(KITKAT).with(allFormats().expect(200, 450)))
         .run();
@@ -373,7 +349,8 @@ public class DownsamplerEmulatorTest {
       int targetHeight,
       DownsampleStrategy strategy,
       int expectedWidth,
-      int expectedHeight) throws IOException {
+      int expectedHeight)
+      throws IOException {
     Downsampler downsampler = buildDownsampler();
 
     InputStream is = openBitmapStream(format, initialWidth, initialHeight);
@@ -381,12 +358,23 @@ public class DownsamplerEmulatorTest {
     Bitmap bitmap = downsampler.decode(is, targetWidth, targetHeight, options).get();
     try {
       if (bitmap.getWidth() != expectedWidth || bitmap.getHeight() != expectedHeight) {
-        return "API: " + Build.VERSION.SDK_INT + ", os: " + Build.VERSION.RELEASE
-            + ", format: " + format + ", strategy: " + strategy + " -"
-            + " Initial " + readableDimens(initialWidth, initialHeight)
-            + " Target " + readableDimens(targetWidth, targetHeight)
-            + " Expected " + readableDimens(expectedWidth, expectedHeight)
-            + ", but Received " + readableDimens(bitmap.getWidth(), bitmap.getHeight());
+        return "API: "
+            + Build.VERSION.SDK_INT
+            + ", os: "
+            + Build.VERSION.RELEASE
+            + ", format: "
+            + format
+            + ", strategy: "
+            + strategy
+            + " -"
+            + " Initial "
+            + readableDimens(initialWidth, initialHeight)
+            + " Target "
+            + readableDimens(targetWidth, targetHeight)
+            + " Expected "
+            + readableDimens(expectedWidth, expectedHeight)
+            + ", but Received "
+            + readableDimens(bitmap.getWidth(), bitmap.getHeight());
       }
     } finally {
       bitmap.recycle();
@@ -439,8 +427,7 @@ public class DownsamplerEmulatorTest {
       return givenImageWithDimensionsOf(dimension, dimension, apis);
     }
 
-    Tester givenImageWithDimensionsOf(
-        int sourceWidth, int sourceHeight, Api... apis) {
+    Tester givenImageWithDimensionsOf(int sourceWidth, int sourceHeight, Api... apis) {
       testCases.add(new TestCase(sourceWidth, sourceHeight, targetWidth, targetHeight, apis));
       return this;
     }
@@ -477,8 +464,7 @@ public class DownsamplerEmulatorTest {
         this.apis = apis;
       }
 
-      List<String> test(DownsampleStrategy strategy)
-          throws IOException {
+      List<String> test(DownsampleStrategy strategy) throws IOException {
         List<String> results = new ArrayList<>();
         for (Api api : apis) {
           results.addAll(api.test(sourceWidth, sourceHeight, targetWidth, targetHeight, strategy));
@@ -554,7 +540,6 @@ public class DownsamplerEmulatorTest {
       for (Formats format : formats) {
         results.addAll(
             format.runTest(sourceWidth, sourceHeight, targetWidth, targetHeight, strategy));
-
       }
       return results;
     }
@@ -596,18 +581,20 @@ public class DownsamplerEmulatorTest {
         int sourceHeight,
         int targetWidth,
         int targetHeight,
-        DownsampleStrategy strategy) throws IOException {
+        DownsampleStrategy strategy)
+        throws IOException {
       List<String> result = new ArrayList<>();
       for (CompressFormat format : formats) {
-        String testResult = runScaleTest(
-            format,
-            sourceWidth,
-            sourceHeight,
-            targetWidth,
-            targetHeight,
-            strategy,
-            expectedWidth,
-            expectedHeight);
+        String testResult =
+            runScaleTest(
+                format,
+                sourceWidth,
+                sourceHeight,
+                targetWidth,
+                targetHeight,
+                strategy,
+                expectedWidth,
+                expectedHeight);
         if (testResult != null) {
           result.add(testResult);
         }

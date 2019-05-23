@@ -12,9 +12,8 @@ import java.io.InputStream;
 /**
  * Registers OkHttp related classes via Glide's annotation processor.
  *
- * <p>For Applications that depend on this library and include an
- * {@link AppGlideModule} and Glide's annotation processor, this class
- * will be automatically included.
+ * <p>For Applications that depend on this library and include an {@link AppGlideModule} and Glide's
+ * annotation processor, this class will be automatically included.
  *
  * @deprecated Prefer the okhttp3 version instead.
  */

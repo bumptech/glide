@@ -25,27 +25,16 @@ import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 @SuppressWarnings("PMD.UseUtilityClass")
 public class RequestOptions extends BaseRequestOptions<RequestOptions> {
 
-  @Nullable
-  private static RequestOptions skipMemoryCacheTrueOptions;
-  @Nullable
-  private static RequestOptions skipMemoryCacheFalseOptions;
-  @Nullable
-  private static RequestOptions fitCenterOptions;
-  @Nullable
-  private static RequestOptions centerInsideOptions;
-  @Nullable
-  private static RequestOptions centerCropOptions;
-  @Nullable
-  private static RequestOptions circleCropOptions;
-  @Nullable
-  private static RequestOptions noTransformOptions;
-  @Nullable
-  private static RequestOptions noAnimationOptions;
+  @Nullable private static RequestOptions skipMemoryCacheTrueOptions;
+  @Nullable private static RequestOptions skipMemoryCacheFalseOptions;
+  @Nullable private static RequestOptions fitCenterOptions;
+  @Nullable private static RequestOptions centerInsideOptions;
+  @Nullable private static RequestOptions centerCropOptions;
+  @Nullable private static RequestOptions circleCropOptions;
+  @Nullable private static RequestOptions noTransformOptions;
+  @Nullable private static RequestOptions noAnimationOptions;
 
-
-  /**
-   * Returns a {@link RequestOptions} object with {@link #sizeMultiplier(float)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #sizeMultiplier(float)} set. */
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
@@ -74,45 +63,35 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
     return new RequestOptions().priority(priority);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #placeholder(Drawable)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #placeholder(Drawable)} set. */
   @NonNull
   @CheckResult
   public static RequestOptions placeholderOf(@Nullable Drawable placeholder) {
     return new RequestOptions().placeholder(placeholder);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #placeholder(int)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #placeholder(int)} set. */
   @NonNull
   @CheckResult
   public static RequestOptions placeholderOf(@DrawableRes int placeholderId) {
     return new RequestOptions().placeholder(placeholderId);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #error(Drawable)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #error(Drawable)} set. */
   @NonNull
   @CheckResult
   public static RequestOptions errorOf(@Nullable Drawable errorDrawable) {
     return new RequestOptions().error(errorDrawable);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #error(int)}} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #error(int)}} set. */
   @NonNull
   @CheckResult
   public static RequestOptions errorOf(@DrawableRes int errorId) {
     return new RequestOptions().error(errorId);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #skipMemoryCache(boolean)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #skipMemoryCache(boolean)} set. */
   @NonNull
   @CheckResult
   public static RequestOptions skipMemoryCacheOf(boolean skipMemoryCache) {
@@ -129,9 +108,7 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
     }
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #override(int, int)}} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #override(int, int)}} set. */
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
@@ -150,77 +127,57 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
     return overrideOf(size, size);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #signature} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #signature} set. */
   @NonNull
   @CheckResult
   public static RequestOptions signatureOf(@NonNull Key signature) {
     return new RequestOptions().signature(signature);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #fitCenter()} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #fitCenter()} set. */
   @NonNull
   @CheckResult
   public static RequestOptions fitCenterTransform() {
     if (fitCenterOptions == null) {
-      fitCenterOptions = new RequestOptions()
-          .fitCenter()
-          .autoClone();
+      fitCenterOptions = new RequestOptions().fitCenter().autoClone();
     }
     return fitCenterOptions;
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #centerInside()} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #centerInside()} set. */
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
   public static RequestOptions centerInsideTransform() {
     if (centerInsideOptions == null) {
-      centerInsideOptions = new RequestOptions()
-              .centerInside()
-              .autoClone();
+      centerInsideOptions = new RequestOptions().centerInside().autoClone();
     }
     return centerInsideOptions;
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #centerCrop()} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #centerCrop()} set. */
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
   public static RequestOptions centerCropTransform() {
     if (centerCropOptions == null) {
-      centerCropOptions = new RequestOptions()
-          .centerCrop()
-          .autoClone();
+      centerCropOptions = new RequestOptions().centerCrop().autoClone();
     }
     return centerCropOptions;
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop()} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link RequestOptions#circleCrop()} set. */
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
   public static RequestOptions circleCropTransform() {
     if (circleCropOptions == null) {
-      circleCropOptions = new RequestOptions()
-          .circleCrop()
-          .autoClone();
+      circleCropOptions = new RequestOptions().circleCrop().autoClone();
     }
     return circleCropOptions;
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #transform(Transformation)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #transform(Transformation)} set. */
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
@@ -228,24 +185,20 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
     return new RequestOptions().transform(transformation);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #dontTransform()} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #dontTransform()} set. */
   @SuppressWarnings("WeakerAccess")
   @NonNull
   @CheckResult
   public static RequestOptions noTransformation() {
     if (noTransformOptions == null) {
-      noTransformOptions = new RequestOptions()
-          .dontTransform()
-          .autoClone();
+      noTransformOptions = new RequestOptions().dontTransform().autoClone();
     }
     return noTransformOptions;
   }
 
   /**
-   * Returns a {@link RequestOptions} object with the given {@link Option} set via
-   * {@link #set(Option, Object)}.
+   * Returns a {@link RequestOptions} object with the given {@link Option} set via {@link
+   * #set(Option, Object)}.
    */
   @NonNull
   @CheckResult
@@ -253,18 +206,14 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
     return new RequestOptions().set(option, value);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #decode(Class)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #decode(Class)} set. */
   @NonNull
   @CheckResult
   public static RequestOptions decodeTypeOf(@NonNull Class<?> resourceClass) {
     return new RequestOptions().decode(resourceClass);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #format(DecodeFormat)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #format(DecodeFormat)} set. */
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
@@ -272,9 +221,7 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
     return new RequestOptions().format(format);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #frame(long)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #frame(long)} set. */
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
@@ -282,9 +229,7 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
     return new RequestOptions().frame(frameTimeMicros);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #downsample(DownsampleStrategy)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #downsample(DownsampleStrategy)} set. */
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
   @CheckResult
@@ -292,9 +237,7 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
     return new RequestOptions().downsample(strategy);
   }
 
-  /**
-   * Returns a {@link RequestOptions} object with {@link #timeout(int)} set.
-   */
+  /** Returns a {@link RequestOptions} object with {@link #timeout(int)} set. */
   @NonNull
   @CheckResult
   public static RequestOptions timeoutOf(@IntRange(from = 0) int timeout) {
@@ -302,8 +245,8 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
   }
 
   /**
-   * Returns a {@link com.bumptech.glide.request.RequestOptions} with {@link
-   * #encodeQuality(int)} called with the given quality.
+   * Returns a {@link com.bumptech.glide.request.RequestOptions} with {@link #encodeQuality(int)}
+   * called with the given quality.
    */
   @SuppressWarnings("WeakerAccess") // Public API
   @NonNull
@@ -332,11 +275,8 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
   @CheckResult
   public static RequestOptions noAnimation() {
     if (noAnimationOptions == null) {
-      noAnimationOptions = new RequestOptions()
-          .dontAnimate()
-          .autoClone();
+      noAnimationOptions = new RequestOptions().dontAnimate().autoClone();
     }
     return noAnimationOptions;
   }
-
 }

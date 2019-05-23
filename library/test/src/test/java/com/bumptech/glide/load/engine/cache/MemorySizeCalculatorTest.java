@@ -68,8 +68,7 @@ public class MemorySizeCalculatorTest {
 
     float memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
-    assertThat(memoryCacheSize)
-        .isIn(Range.atMost(memoryClassBytes * harness.sizeMultiplier));
+    assertThat(memoryCacheSize).isIn(Range.atMost(memoryClassBytes * harness.sizeMultiplier));
   }
 
   @Test
@@ -106,9 +105,11 @@ public class MemorySizeCalculatorTest {
 
   @Test
   public void testCumulativePoolAndMemoryCacheSizeAreLimitedByMemoryClass() {
-    final int memoryClassBytes = Math.round(
-        harness.getScreenSize() * (harness.bitmapPoolScreens + harness.memoryCacheScreens)
-            * harness.sizeMultiplier);
+    final int memoryClassBytes =
+        Math.round(
+            harness.getScreenSize()
+                * (harness.bitmapPoolScreens + harness.memoryCacheScreens)
+                * harness.sizeMultiplier);
     Shadows.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
 
     int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();

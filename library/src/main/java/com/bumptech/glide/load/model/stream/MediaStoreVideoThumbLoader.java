@@ -18,10 +18,10 @@ import java.io.InputStream;
  * Loads {@link InputStream}s from media store video {@link Uri}s that point to pre-generated
  * thumbnails for those {@link Uri}s in the media store.
  *
- * <p>If {@link VideoDecoder#TARGET_FRAME} is set with a non-null value that is not equal to
- * {@link VideoDecoder#DEFAULT_FRAME}, this loader will always return {@code null}. The media
- * store does not use a defined frame to generate the thumbnail, so we cannot accurately fulfill
- * requests for specific frames.
+ * <p>If {@link VideoDecoder#TARGET_FRAME} is set with a non-null value that is not equal to {@link
+ * VideoDecoder#DEFAULT_FRAME}, this loader will always return {@code null}. The media store does
+ * not use a defined frame to generate the thumbnail, so we cannot accurately fulfill requests for
+ * specific frames.
  */
 public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream> {
   private final Context context;
@@ -34,8 +34,8 @@ public class MediaStoreVideoThumbLoader implements ModelLoader<Uri, InputStream>
 
   @Override
   @Nullable
-  public LoadData<InputStream> buildLoadData(@NonNull Uri model, int width, int height,
-      @NonNull Options options) {
+  public LoadData<InputStream> buildLoadData(
+      @NonNull Uri model, int width, int height, @NonNull Options options) {
     if (MediaStoreUtil.isThumbnailSize(width, height) && isRequestingDefaultFrame(options)) {
       return new LoadData<>(new ObjectKey(model), ThumbFetcher.buildVideoFetcher(context, model));
     } else {

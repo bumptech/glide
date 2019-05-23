@@ -57,10 +57,9 @@ public class LruBitmapPool implements BitmapPool {
   /**
    * Constructor for LruBitmapPool.
    *
-   * @param maxSize        The initial maximum size of the pool in bytes.
+   * @param maxSize The initial maximum size of the pool in bytes.
    * @param allowedConfigs A white listed put of {@link android.graphics.Bitmap.Config} that are
-   *                       allowed to be put into the pool. Configs not in the allowed put will be
-   *                       rejected.
+   *     allowed to be put into the pool. Configs not in the allowed put will be rejected.
    */
   // Public API.
   @SuppressWarnings("unused")
@@ -87,13 +86,19 @@ public class LruBitmapPool implements BitmapPool {
     if (bitmap.isRecycled()) {
       throw new IllegalStateException("Cannot pool recycled bitmap");
     }
-    if (!bitmap.isMutable() || strategy.getSize(bitmap) > maxSize
+    if (!bitmap.isMutable()
+        || strategy.getSize(bitmap) > maxSize
         || !allowedConfigs.contains(bitmap.getConfig())) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
-        Log.v(TAG, "Reject bitmap from pool"
-                + ", bitmap: " + strategy.logBitmap(bitmap)
-                + ", is mutable: " + bitmap.isMutable()
-                + ", is allowed config: " + allowedConfigs.contains(bitmap.getConfig()));
+        Log.v(
+            TAG,
+            "Reject bitmap from pool"
+                + ", bitmap: "
+                + strategy.logBitmap(bitmap)
+                + ", is mutable: "
+                + bitmap.isMutable()
+                + ", is allowed config: "
+                + allowedConfigs.contains(bitmap.getConfig()));
       }
       bitmap.recycle();
       return;
@@ -157,9 +162,11 @@ public class LruBitmapPool implements BitmapPool {
     }
 
     if (config == Bitmap.Config.HARDWARE) {
-      throw new IllegalArgumentException("Cannot create a mutable Bitmap with config: " + config
-          + ". Consider setting Downsampler#ALLOW_HARDWARE_CONFIG to false in your RequestOptions"
-          + " and/or in GlideBuilder.setDefaultRequestOptions");
+      throw new IllegalArgumentException(
+          "Cannot create a mutable Bitmap with config: "
+              + config
+              + ". Consider setting Downsampler#ALLOW_HARDWARE_CONFIG to false in your"
+              + " RequestOptions and/or in GlideBuilder.setDefaultRequestOptions");
     }
   }
 
@@ -255,8 +262,22 @@ public class LruBitmapPool implements BitmapPool {
   }
 
   private void dumpUnchecked() {
-    Log.v(TAG, "Hits=" + hits + ", misses=" + misses + ", puts=" + puts + ", evictions=" + evictions
-        + ", currentSize=" + currentSize + ", maxSize=" + maxSize + "\nStrategy=" + strategy);
+    Log.v(
+        TAG,
+        "Hits="
+            + hits
+            + ", misses="
+            + misses
+            + ", puts="
+            + puts
+            + ", evictions="
+            + evictions
+            + ", currentSize="
+            + currentSize
+            + ", maxSize="
+            + maxSize
+            + "\nStrategy="
+            + strategy);
   }
 
   private static LruPoolStrategy getDefaultStrategy() {
@@ -299,8 +320,13 @@ public class LruBitmapPool implements BitmapPool {
     public void add(Bitmap bitmap) {
       if (bitmaps.contains(bitmap)) {
         throw new IllegalStateException(
-            "Can't add already added bitmap: " + bitmap + " [" + bitmap.getWidth() + "x" + bitmap
-                .getHeight() + "]");
+            "Can't add already added bitmap: "
+                + bitmap
+                + " ["
+                + bitmap.getWidth()
+                + "x"
+                + bitmap.getHeight()
+                + "]");
       }
       bitmaps.add(bitmap);
     }
@@ -317,7 +343,7 @@ public class LruBitmapPool implements BitmapPool {
   private static final class NullBitmapTracker implements BitmapTracker {
 
     @Synthetic
-    NullBitmapTracker() { }
+    NullBitmapTracker() {}
 
     @Override
     public void add(Bitmap bitmap) {

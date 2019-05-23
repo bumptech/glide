@@ -35,7 +35,6 @@ public class DefaultConnectivityMonitorTest {
   private DefaultConnectivityMonitor monitor;
   private ConnectivityHarness harness;
 
-
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
@@ -161,8 +160,9 @@ public class DefaultConnectivityMonitorTest {
     private final PermissionConnectivityManager shadowConnectivityManager;
 
     public ConnectivityHarness() {
-      ConnectivityManager connectivityManager = (ConnectivityManager) RuntimeEnvironment.application
-          .getSystemService(Context.CONNECTIVITY_SERVICE);
+      ConnectivityManager connectivityManager =
+          (ConnectivityManager)
+              RuntimeEnvironment.application.getSystemService(Context.CONNECTIVITY_SERVICE);
       shadowConnectivityManager = Shadow.extract(connectivityManager);
     }
 

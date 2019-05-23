@@ -62,12 +62,9 @@ public class DownsampleVideoTest {
 
   @Test
   public void loadVideo_downsampleDefault_downsamplesVideo() {
-     Bitmap bitmap =
+    Bitmap bitmap =
         concurrency.get(
-            GlideApp.with(context)
-                .asBitmap()
-                .load(ResourceIds.raw.video)
-                .submit(10, 10));
+            GlideApp.with(context).asBitmap().load(ResourceIds.raw.video).submit(10, 10));
 
     assertThat(bitmap).hasDimensions(10, 18);
   }
@@ -108,7 +105,7 @@ public class DownsampleVideoTest {
     assertThat(bitmap).hasDimensions(540, 960);
   }
 
-    @Test
+  @Test
   public void loadVideo_downsampleAtLeast_doesNotUpscale() {
     Bitmap bitmap =
         concurrency.get(

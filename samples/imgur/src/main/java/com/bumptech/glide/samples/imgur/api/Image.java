@@ -15,11 +15,21 @@ public final class Image {
   @Override
   public String toString() {
     return "Image{"
-        + "id='" + id + '\''
-        + ", title='" + title + '\''
-        + ", description='" + description + '\''
-        + ", link='" + link + '\''
-        + ", is_album='" + is_album + '\''
+        + "id='"
+        + id
+        + '\''
+        + ", title='"
+        + title
+        + '\''
+        + ", description='"
+        + description
+        + '\''
+        + ", link='"
+        + link
+        + '\''
+        + ", is_album='"
+        + is_album
+        + '\''
         + '}';
   }
 }
