@@ -33,8 +33,8 @@ final class RequestOptionsOverrideGenerator {
       ProcessingEnvironment processingEnv, ProcessorUtil processorUtil) {
 
     this.processorUtil = processorUtil;
-    baseRequestOptionsType =
-        processingEnv.getElementUtils().getTypeElement(BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
+    baseRequestOptionsType = processingEnv.getElementUtils().getTypeElement(
+        BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
   }
 
   List<MethodSpec> generateInstanceMethodOverridesForRequestOptions(TypeName typeToOverrideIn) {
@@ -44,43 +44,45 @@ final class RequestOptionsOverrideGenerator {
 
   List<MethodSpec> generateInstanceMethodOverridesForRequestOptions(
       final TypeName typeToOverrideIn, final Set<String> excludedMethods) {
-    return FluentIterable.from(
+    return
+        FluentIterable.from(
             processorUtil.findInstanceMethodsReturning(
                 baseRequestOptionsType, baseRequestOptionsType))
-        .filter(
-            new Predicate<ExecutableElement>() {
+            .filter(new Predicate<ExecutableElement>() {
               @Override
               public boolean apply(ExecutableElement input) {
                 return !excludedMethods.contains(input.getSimpleName().toString());
               }
             })
-        .transform(
-            new Function<ExecutableElement, MethodSpec>() {
-              @Override
-              public MethodSpec apply(ExecutableElement input) {
-                return generateRequestOptionOverride(typeToOverrideIn, input);
-              }
-            })
+            .transform(
+        new Function<ExecutableElement, MethodSpec>() {
+          @Override
+          public MethodSpec apply(ExecutableElement input) {
+            return generateRequestOptionOverride(typeToOverrideIn, input);
+          }
+        })
         .toList();
   }
 
   private MethodSpec generateRequestOptionOverride(
       TypeName typeToOverrideIn, ExecutableElement methodToOverride) {
     MethodSpec.Builder result =
-        ProcessorUtil.overriding(methodToOverride).returns(typeToOverrideIn);
+        ProcessorUtil.overriding(methodToOverride)
+            .returns(typeToOverrideIn);
     result.addCode(
         CodeBlock.builder()
-            .add("return ($T) super.$N(", typeToOverrideIn, methodToOverride.getSimpleName())
             .add(
-                FluentIterable.from(result.build().parameters)
-                    .transform(
-                        new Function<ParameterSpec, String>() {
-                          @Override
-                          public String apply(ParameterSpec input) {
-                            return input.name;
-                          }
-                        })
-                    .join(Joiner.on(", ")))
+                "return ($T) super.$N(",
+                typeToOverrideIn,
+                methodToOverride.getSimpleName())
+            .add(FluentIterable.from(result.build().parameters)
+                .transform(new Function<ParameterSpec, String>() {
+                  @Override
+                  public String apply(ParameterSpec input) {
+                    return input.name;
+                  }
+                })
+                .join(Joiner.on(", ")))
             .add(");\n")
             .build());
 

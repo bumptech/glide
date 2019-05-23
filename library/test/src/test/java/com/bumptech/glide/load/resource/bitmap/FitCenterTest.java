@@ -37,10 +37,7 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowCanvas;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    manifest = Config.NONE,
-    sdk = 18,
-    shadows = {FitCenterTest.DrawNothingCanvas.class})
+@Config(manifest = Config.NONE, sdk = 18, shadows = { FitCenterTest.DrawNothingCanvas.class })
 public class FitCenterTest {
   @Rule public final KeyTester keyTester = new KeyTester();
 
@@ -63,6 +60,7 @@ public class FitCenterTest {
     context = RuntimeEnvironment.application;
     Glide.init(context, new GlideBuilder().setBitmapPool(pool));
 
+
     fitCenter = new FitCenter();
   }
 
@@ -73,7 +71,8 @@ public class FitCenterTest {
 
   @Test
   public void testReturnsGivenResourceIfMatchesSizeExactly() {
-    Resource<Bitmap> result = fitCenter.transform(context, resource, bitmapWidth, bitmapHeight);
+    Resource<Bitmap> result =
+        fitCenter.transform(context, resource, bitmapWidth, bitmapHeight);
 
     assertEquals(resource, result);
   }
@@ -94,8 +93,7 @@ public class FitCenterTest {
 
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
-    doAnswer(new Util.WriteDigest("other"))
-        .when(transformation)
+    doAnswer(new Util.WriteDigest("other")).when(transformation)
         .updateDiskCacheKey(any(MessageDigest.class));
     keyTester
         .addEquivalenceGroup(fitCenter, new FitCenter(), new FitCenter())

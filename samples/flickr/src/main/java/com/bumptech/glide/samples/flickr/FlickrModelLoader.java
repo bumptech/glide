@@ -20,7 +20,9 @@ import java.util.List;
  */
 public final class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
 
-  /** The default factory for {@link com.bumptech.glide.samples.flickr.FlickrModelLoader}s. */
+  /**
+   * The default factory for {@link com.bumptech.glide.samples.flickr.FlickrModelLoader}s.
+   */
   public static class Factory implements ModelLoaderFactory<Photo, InputStream> {
     private final ModelCache<Photo, GlideUrl> modelCache = new ModelCache<>(500);
 
@@ -32,7 +34,8 @@ public final class FlickrModelLoader extends BaseGlideUrlLoader<Photo> {
     }
 
     @Override
-    public void teardown() {}
+    public void teardown() {
+    }
   }
 
   private FlickrModelLoader(

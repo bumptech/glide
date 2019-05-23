@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-// TODO: add a test for bitmap size using getAllocationByteSize when robolectric supports kitkat.
+//TODO: add a test for bitmap size using getAllocationByteSize when robolectric supports kitkat.
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class BitmapResourceTest {
@@ -42,8 +42,8 @@ public class BitmapResourceTest {
   @Test
   public void testSizeIsBasedOnDimensPreKitKat() {
     Util.setSdkVersionInt(18);
-    assertEquals(
-        harness.bitmap.getWidth() * harness.bitmap.getHeight() * 4, harness.resource.getSize());
+    assertEquals(harness.bitmap.getWidth() * harness.bitmap.getHeight() * 4,
+        harness.resource.getSize());
   }
 
   @Test

@@ -35,11 +35,11 @@ public final class KeyTester implements TestRule {
 
       @Override
       public void evaluate() throws Throwable {
-        isUsedAsRule = true;
-        base.evaluate();
-        if (isUsedWithoutCallingTest) {
-          fail("You used KeyTester but failed to call test()!");
-        }
+          isUsedAsRule = true;
+          base.evaluate();
+          if (isUsedWithoutCallingTest) {
+            fail("You used KeyTester but failed to call test()!");
+          }
       }
     };
   }
@@ -62,9 +62,8 @@ public final class KeyTester implements TestRule {
   public KeyTester addRegressionTest(Key key, String expectedDigest) {
     assertUsedAsRule();
     if (EMPTY_DIGEST_STRING.equals(expectedDigest)) {
-      throw new IllegalArgumentException(
-          "Expected digest is empty, if this is intended use "
-              + "addEmptyDigestRegressionTest instead");
+      throw new IllegalArgumentException("Expected digest is empty, if this is intended use "
+          + "addEmptyDigestRegressionTest instead");
     }
     return addRegressionTestInternal(key, expectedDigest);
   }
@@ -96,8 +95,7 @@ public final class KeyTester implements TestRule {
       assert_()
           .withMessage(
               "Unexpected digest for regression test [" + i + "]: with key: " + entry.getKey())
-          .that(sha256.getStringDigest(entry.getKey()))
-          .isEqualTo(entry.getValue());
+          .that(sha256.getStringDigest(entry.getKey())).isEqualTo(entry.getValue());
       i++;
     }
   }
@@ -123,12 +121,15 @@ public final class KeyTester implements TestRule {
       }
     }
 
+
     String getStringDigest(Key key) {
       return com.bumptech.glide.util.Util.sha256BytesToHex(getDigest(key));
     }
   }
 
-  /** Tests equals, hashcode and digest methods of {@link Key}s. */
+  /**
+   * Tests equals, hashcode and digest methods of {@link Key}s.
+   */
   private static final class KeyEquivalence extends Equivalence<Key> {
 
     private final Sha256 sha256;

@@ -26,22 +26,22 @@ public class DrawableResourceTest {
   @Before
   public void setUp() {
     drawable = mock(TestDrawable.class);
-    resource =
-        new DrawableResource<TestDrawable>(drawable) {
-          @NonNull
-          @Override
-          public Class<TestDrawable> getResourceClass() {
-            return TestDrawable.class;
-          }
+    resource = new DrawableResource<TestDrawable>(drawable) {
+      @NonNull
+      @Override
+      public Class<TestDrawable> getResourceClass() {
+        return TestDrawable.class;
+      }
 
-          @Override
-          public int getSize() {
-            return 0;
-          }
+      @Override
+      public int getSize() {
+        return 0;
+      }
 
-          @Override
-          public void recycle() {}
-        };
+      @Override
+      public void recycle() {
+      }
+    };
   }
 
   @Test
@@ -85,20 +85,30 @@ public class DrawableResourceTest {
       }
 
       @Override
-      public void recycle() {}
+      public void recycle() {
+
+      }
     };
   }
 
-  /** Just to have a type to test with which is not directly Drawable */
+  /**
+   * Just to have a type to test with which is not directly Drawable
+   */
   private static class TestDrawable extends Drawable {
     @Override
-    public void draw(@NonNull Canvas canvas) {}
+    public void draw(@NonNull Canvas canvas) {
+
+    }
 
     @Override
-    public void setAlpha(int alpha) {}
+    public void setAlpha(int alpha) {
+
+    }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {}
+    public void setColorFilter(ColorFilter cf) {
+
+    }
 
     @Override
     public int getOpacity() {

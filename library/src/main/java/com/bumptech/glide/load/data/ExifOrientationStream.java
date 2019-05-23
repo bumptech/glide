@@ -9,57 +9,55 @@ import java.io.InputStream;
  * Adds an exif segment with an orientation attribute to a wrapped {@link InputStream} containing
  * image data.
  *
- * <p>This class assumes that the wrapped stream contains an image format that can contain exif
- * information and performs no verification.
+ * <p>This class assumes that the wrapped stream contains an image format that can contain
+ * exif information and performs no verification. </p>
  */
 public final class ExifOrientationStream extends FilterInputStream {
   /** Allow two bytes for the file format. */
   private static final int SEGMENT_START_POSITION = 2;
-
-  private static final byte[] EXIF_SEGMENT =
-      new byte[] {
-        /* segment start id. */
-        (byte) 0xFF,
-        /* segment type. */
-        (byte) 0xE1,
-        /* segmentLength. */
-        0x00,
-        (byte) 0x1C,
-        /* exif identifier. */
-        0x45,
-        0x78,
-        0x69,
-        0x66,
-        0x00,
-        0x00,
-        /* motorola byte order (big endian). */
-        (byte) 0x4D,
-        (byte) 0x4D,
-        /* filler? */
-        0x00,
-        0x00,
-        /* first id offset. */
-        0x00,
-        0x00,
-        0x00,
-        0x08,
-        /* tagCount. */
-        0x00,
-        0x01,
-        /* exif tag type. */
-        0x01,
-        0x12,
-        /* 2 byte format. */
-        0x00,
-        0x02,
-        /* component count. */
-        0x00,
-        0x00,
-        0x00,
-        0x01,
-        /* 2 byte orientation value, the first byte of which is always 0. */
-        0x00,
-      };
+  private static final byte[] EXIF_SEGMENT = new byte[] {
+      /* segment start id. */
+      (byte) 0xFF,
+      /* segment type. */
+      (byte) 0xE1,
+      /* segmentLength. */
+      0x00,
+      (byte) 0x1C,
+      /* exif identifier. */
+      0x45,
+      0x78,
+      0x69,
+      0x66,
+      0x00,
+      0x00,
+      /* motorola byte order (big endian). */
+      (byte) 0x4D,
+      (byte) 0x4D,
+      /* filler? */
+      0x00,
+      0x00,
+      /* first id offset. */
+      0x00,
+      0x00,
+      0x00,
+      0x08,
+      /* tagCount. */
+      0x00,
+      0x01,
+      /* exif tag type. */
+      0x01,
+      0x12,
+      /* 2 byte format. */
+      0x00,
+      0x02,
+      /* component count. */
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      /* 2 byte orientation value, the first byte of which is always 0. */
+      0x00,
+  };
   private static final int SEGMENT_LENGTH = EXIF_SEGMENT.length;
   private static final int ORIENTATION_POSITION = SEGMENT_LENGTH + SEGMENT_START_POSITION;
   private final byte orientation;

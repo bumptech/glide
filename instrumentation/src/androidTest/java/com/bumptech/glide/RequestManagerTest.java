@@ -35,25 +35,22 @@ public class RequestManagerTest {
     MockitoAnnotations.initMocks(this);
     context = InstrumentationRegistry.getTargetContext();
     Glide glide = Glide.get(context);
-    requestManager =
-        new RequestManager(
-            glide,
-            new Lifecycle() {
-              @Override
-              public void addListener(@NonNull LifecycleListener listener) {
-                listener.onStart();
-              }
+    requestManager = new RequestManager(glide, new Lifecycle() {
+      @Override
+      public void addListener(@NonNull LifecycleListener listener) {
+        listener.onStart();
+      }
 
-              @Override
-              public void removeListener(@NonNull LifecycleListener listener) {
-                // Do nothing.
-              }
-            },
-            treeNode,
-            context);
+      @Override
+      public void removeListener(@NonNull LifecycleListener listener) {
+        // Do nothing.
+      }
+    }, treeNode, context);
   }
 
-  /** Tests #2262. */
+  /**
+   * Tests #2262.
+   */
   @Test
   public void clear_withNonOwningRequestManager_afterOwningManagerIsDestroyed_doesNotThrow() {
     // First destroy our Fragment/Activity RequestManager.
@@ -66,34 +63,34 @@ public class RequestManagerTest {
     concurrency.loadOnMainThread(requestManager.load(ResourceIds.raw.canonical), imageView);
 
     // Finally clear our new load with any RequestManager other than the one we used to start it.
-    concurrency.runOnMainThread(
-        new Runnable() {
-          @Override
-          public void run() {
-            Glide.with(context).clear(imageView);
-          }
-        });
+    concurrency.runOnMainThread(new Runnable() {
+      @Override
+      public void run() {
+        Glide.with(context).clear(imageView);
+      }
+    });
   }
 
-  /** Tests b/69361054. */
+  /**
+   * Tests b/69361054.
+   */
   @Test
   public void clear_withNonOwningRequestManager_onBackgroundTHread_doesNotThrow() {
-    concurrency.runOnMainThread(
-        new Runnable() {
-          @Override
-          public void run() {
-            requestManager.onDestroy();
-          }
-        });
+    concurrency.runOnMainThread(new Runnable() {
+      @Override
+      public void run() {
+        requestManager.onDestroy();
+      }
+    });
 
-    final Target<Drawable> target = concurrency.wait(requestManager.load(raw.canonical).submit());
+    final Target<Drawable> target =
+        concurrency.wait(requestManager.load(raw.canonical).submit());
 
-    concurrency.runOnMainThread(
-        new Runnable() {
-          @Override
-          public void run() {
-            Glide.with(context).clear(target);
-          }
-        });
+    concurrency.runOnMainThread(new Runnable() {
+      @Override
+      public void run() {
+        Glide.with(context).clear(target);
+      }
+    });
   }
 }

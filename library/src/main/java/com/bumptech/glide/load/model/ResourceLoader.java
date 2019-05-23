@@ -30,8 +30,8 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(
-      @NonNull Integer model, int width, int height, @NonNull Options options) {
+  public LoadData<Data> buildLoadData(@NonNull Integer model, int width, int height,
+      @NonNull Options options) {
     Uri uri = getResourceUri(model);
     return uri == null ? null : uriLoader.buildLoadData(uri, width, height, options);
   }
@@ -39,14 +39,10 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
   @Nullable
   private Uri getResourceUri(Integer model) {
     try {
-      return Uri.parse(
-          ContentResolver.SCHEME_ANDROID_RESOURCE
-              + "://"
-              + resources.getResourcePackageName(model)
-              + '/'
-              + resources.getResourceTypeName(model)
-              + '/'
-              + resources.getResourceEntryName(model));
+      return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://"
+          + resources.getResourcePackageName(model) + '/'
+          + resources.getResourceTypeName(model) + '/'
+          + resources.getResourceEntryName(model));
     } catch (Resources.NotFoundException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Received invalid resource id: " + model, e);
@@ -61,7 +57,9 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
     return true;
   }
 
-  /** Factory for loading {@link InputStream}s from Android resource ids. */
+  /**
+   * Factory for loading {@link InputStream}s from Android resource ids.
+   */
   public static class StreamFactory implements ModelLoaderFactory<Integer, InputStream> {
 
     private final Resources resources;
@@ -82,7 +80,9 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
     }
   }
 
-  /** Factory for loading {@link ParcelFileDescriptor}s from Android resource ids. */
+  /**
+   * Factory for loading {@link ParcelFileDescriptor}s from Android resource ids.
+   */
   public static class FileDescriptorFactory
       implements ModelLoaderFactory<Integer, ParcelFileDescriptor> {
 
@@ -105,7 +105,9 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
     }
   }
 
-  /** Loads {@link AssetFileDescriptor}s from resource ids. */
+  /**
+   * Loads {@link AssetFileDescriptor}s from resource ids.
+   */
   public static final class AssetFileDescriptorFactory
       implements ModelLoaderFactory<Integer, AssetFileDescriptor> {
 
@@ -127,7 +129,9 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
     }
   }
 
-  /** Factory for loading resource {@link Uri}s from Android resource ids. */
+  /**
+   * Factory for loading resource {@link Uri}s from Android resource ids.
+   */
   public static class UriFactory implements ModelLoaderFactory<Integer, Uri> {
 
     private final Resources resources;

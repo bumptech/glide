@@ -19,13 +19,13 @@ class ActivityFragmentLifecycle implements Lifecycle {
   /**
    * Adds the given listener to the list of listeners to be notified on each lifecycle event.
    *
-   * <p>The latest lifecycle event will be called on the given listener synchronously in this
+   * <p> The latest lifecycle event will be called on the given listener synchronously in this
    * method. If the activity or fragment is stopped, {@link LifecycleListener#onStop()}} will be
-   * called, and same for onStart and onDestroy.
+   * called, and same for onStart and onDestroy. </p>
    *
-   * <p>Note - {@link com.bumptech.glide.manager.LifecycleListener}s that are added more than once
+   * <p> Note - {@link com.bumptech.glide.manager.LifecycleListener}s that are added more than once
    * will have their lifecycle methods called more than once. It is the caller's responsibility to
-   * avoid adding listeners multiple times.
+   * avoid adding listeners multiple times. </p>
    */
   @Override
   public void addListener(@NonNull LifecycleListener listener) {

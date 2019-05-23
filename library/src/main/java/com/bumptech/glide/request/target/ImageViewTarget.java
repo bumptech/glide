@@ -12,20 +12,23 @@ import com.bumptech.glide.request.transition.Transition;
  * android.widget.ImageView}s.
  *
  * @param <Z> The type of resource that this target will display in the wrapped {@link
- *     android.widget.ImageView}.
+ *            android.widget.ImageView}.
  */
 // Public API.
 @SuppressWarnings("WeakerAccess")
 public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
     implements Transition.ViewAdapter {
 
-  @Nullable private Animatable animatable;
+  @Nullable
+  private Animatable animatable;
 
   public ImageViewTarget(ImageView view) {
     super(view);
   }
 
-  /** @deprecated Use {@link #waitForLayout()} instead. */
+  /**
+   * @deprecated Use {@link #waitForLayout()} instead.
+   */
   @SuppressWarnings({"deprecation"})
   @Deprecated
   public ImageViewTarget(ImageView view, boolean waitForLayout) {
@@ -136,3 +139,4 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
 
   protected abstract void setResource(@Nullable Z resource);
 }
+

@@ -104,6 +104,34 @@
             <message key="import.illegal" value="Import from illegal class - {0}. Use org.mockito.Mockito to statically import matcher methods." />
         </module>
 
+        <module name="ImportOrder">
+          <!-- Checks for out of order import statements. -->
+
+          <property name="sortStaticImportsAlphabetically" value="true"/>
+           <property name="severity" value="error"/>
+           <property name="groups" value="*"/>
+           <!-- This ensures that static imports go first. -->
+           <property name="option" value="top"/>
+           <property name="tokens" value="STATIC_IMPORT, IMPORT"/>
+           <property name="separated" value="true" />
+         </module>
+
+        <!-- Checks for whitespace. -->
+        <!-- See http://checkstyle.sourceforge.net/config_whitespace.html -->
+        <module name="GenericWhitespace" />
+        <module name="MethodParamPad" />
+        <module name="NoWhitespaceAfter">
+            <property name="tokens"
+                      value="BNOT, DEC, DOT, INC, LNOT, UNARY_MINUS, UNARY_PLUS" />
+        </module>
+        <module name="NoWhitespaceBefore" />
+        <module name="OperatorWrap" />
+        <module name="ParenPad" />
+        <module name="TypecastParenPad" />
+        <module name="WhitespaceAfter" />
+        <module name="WhitespaceAround" />
+
+
         <!-- Modifier Checks. -->
         <!-- See http://checkstyle.sourceforge.net/config_modifier.html -->
         <module name="ModifierOrder" />
@@ -138,6 +166,9 @@
         <module name="SimplifyBooleanReturn" />
         <module name="StringLiteralEquality" />
         <module name="UnnecessaryParentheses" />
+        <module name="LineLength">
+            <property name="max" value="100" />
+        </module>
 
         <!-- Checks for class design. -->
         <!-- See http://checkstyle.sourceforge.net/config_design.html -->

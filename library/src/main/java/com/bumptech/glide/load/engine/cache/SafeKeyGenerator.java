@@ -20,19 +20,17 @@ import java.security.NoSuchAlgorithmException;
 @SuppressWarnings("WeakerAccess")
 public class SafeKeyGenerator {
   private final LruCache<Key, String> loadIdToSafeHash = new LruCache<>(1000);
-  private final Pools.Pool<PoolableDigestContainer> digestPool =
-      FactoryPools.threadSafe(
-          10,
-          new FactoryPools.Factory<PoolableDigestContainer>() {
-            @Override
-            public PoolableDigestContainer create() {
-              try {
-                return new PoolableDigestContainer(MessageDigest.getInstance("SHA-256"));
-              } catch (NoSuchAlgorithmException e) {
-                throw new RuntimeException(e);
-              }
-            }
-          });
+  private final Pools.Pool<PoolableDigestContainer> digestPool = FactoryPools.threadSafe(10,
+      new FactoryPools.Factory<PoolableDigestContainer>() {
+        @Override
+        public PoolableDigestContainer create() {
+          try {
+            return new PoolableDigestContainer(MessageDigest.getInstance("SHA-256"));
+          } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+          }
+        }
+      });
 
   public String getSafeKey(Key key) {
     String safeKey;

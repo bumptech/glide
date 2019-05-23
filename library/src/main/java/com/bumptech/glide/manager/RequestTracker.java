@@ -33,10 +33,11 @@ public class RequestTracker {
   // before they start running or while they are paused. See #346.
   @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
   private final List<Request> pendingRequests = new ArrayList<>();
-
   private boolean isPaused;
 
-  /** Starts tracking the given request. */
+  /**
+   * Starts tracking the given request.
+   */
   public void runRequest(@NonNull Request request) {
     requests.add(request);
     if (!isPaused) {
@@ -66,9 +67,9 @@ public class RequestTracker {
   }
 
   private boolean clearRemoveAndMaybeRecycle(@Nullable Request request, boolean isSafeToRecycle) {
-    if (request == null) {
-      // If the Request is null, the request is already cleared and we don't need to search further
-      // for its owner.
+     if (request == null) {
+       // If the Request is null, the request is already cleared and we don't need to search further
+       // for its owner.
       return true;
     }
     boolean isOwnedByUs = requests.remove(request);
@@ -83,12 +84,16 @@ public class RequestTracker {
     return isOwnedByUs;
   }
 
-  /** Returns {@code true} if requests are currently paused, and {@code false} otherwise. */
+  /**
+   * Returns {@code true} if requests are currently paused, and {@code false} otherwise.
+   */
   public boolean isPaused() {
     return isPaused;
   }
 
-  /** Stops any in progress requests. */
+  /**
+   * Stops any in progress requests.
+   */
   public void pauseRequests() {
     isPaused = true;
     for (Request request : Util.getSnapshot(requests)) {
@@ -110,7 +115,9 @@ public class RequestTracker {
     }
   }
 
-  /** Starts any not yet completed or failed requests. */
+  /**
+   * Starts any not yet completed or failed requests.
+   */
   public void resumeRequests() {
     isPaused = false;
     for (Request request : Util.getSnapshot(requests)) {
@@ -138,7 +145,9 @@ public class RequestTracker {
     pendingRequests.clear();
   }
 
-  /** Restarts failed requests and cancels and restarts in progress requests. */
+  /**
+   * Restarts failed requests and cancels and restarts in progress requests.
+   */
   public void restartRequests() {
     for (Request request : Util.getSnapshot(requests)) {
       if (!request.isComplete() && !request.isCleared()) {

@@ -32,12 +32,14 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   @SuppressWarnings("deprecation")
   @Override
-  public LoadData<InputStream> buildLoadData(
-      @NonNull GlideUrl model, int width, int height, @NonNull Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull GlideUrl model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(model, new OkHttpStreamFetcher(client, model));
   }
 
-  /** The default factory for {@link OkHttpUrlLoader}s. */
+  /**
+   * The default factory for {@link OkHttpUrlLoader}s.
+   */
   // Public API.
   @SuppressWarnings({"WeakerAccess", "deprecation"})
   public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
@@ -55,12 +57,16 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
       return internalClient;
     }
 
-    /** Constructor for a new Factory that runs requests using a static singleton client. */
+    /**
+     * Constructor for a new Factory that runs requests using a static singleton client.
+     */
     public Factory() {
       this(getInternalClient());
     }
 
-    /** Constructor for a new Factory that runs requests using given client. */
+    /**
+     * Constructor for a new Factory that runs requests using given client.
+     */
     public Factory(OkHttpClient client) {
       this.client = client;
     }

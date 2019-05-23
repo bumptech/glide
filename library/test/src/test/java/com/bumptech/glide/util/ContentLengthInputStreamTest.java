@@ -37,7 +37,8 @@ public class ContentLengthInputStreamTest {
   }
 
   @Test
-  public void testAvailable_withNullContentLength_returnsWrappedAvailable() throws IOException {
+  public void testAvailable_withNullContentLength_returnsWrappedAvailable()
+      throws IOException {
     InputStream is = ContentLengthInputStream.obtain(wrapped, null /*contentLengthHeader*/);
     int expected = 1234;
     when(wrapped.available()).thenReturn(expected);

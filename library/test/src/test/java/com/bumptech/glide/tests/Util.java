@@ -28,9 +28,9 @@ import org.robolectric.util.ReflectionHelpers;
 public class Util {
 
   /**
-   * Gives the proper generic type to the {@link ArgumentCaptor}. Only useful when the captor's
-   * {@code T} is also a generic type. Without this it's really ugly to have a properly typed captor
-   * object.
+   * Gives the proper generic type to the {@link ArgumentCaptor}.
+   * Only useful when the captor's {@code T} is also a generic type.
+   * Without this it's really ugly to have a properly typed captor object.
    */
   @SuppressWarnings("unchecked")
   public static <T> ArgumentCaptor<T> cast(ArgumentCaptor<?> captor) {
@@ -46,8 +46,8 @@ public class Util {
   }
 
   /**
-   * Creates a Mockito argument matcher to be used in verify. It returns a generic typed {@link
-   * Resource} to prevent unchecked warnings.
+   * Creates a Mockito argument matcher to be used in verify.
+   * It returns a generic typed {@link Resource} to prevent unchecked warnings.
    */
   @SuppressWarnings("unchecked")
   public static <T> Resource<T> anyResource() {
@@ -55,8 +55,8 @@ public class Util {
   }
 
   /**
-   * Creates a Mockito mock object. It returns a generic typed {@link Resource} to prevent unchecked
-   * warnings.
+   * Creates a Mockito mock object.
+   * It returns a generic typed {@link Resource} to prevent unchecked warnings.
    */
   @SuppressWarnings("unchecked")
   public static <T> Resource<T> mockResource() {

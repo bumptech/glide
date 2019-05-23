@@ -68,7 +68,7 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
    * the concrete data type returned by the AssetManager.
    *
    * @param assetManager An AssetManager to use to open the given path.
-   * @param path A string path pointing to a resource in assets to open.
+   * @param path         A string path pointing to a resource in assets to open.
    */
   protected abstract T loadResource(AssetManager assetManager, String path) throws IOException;
 

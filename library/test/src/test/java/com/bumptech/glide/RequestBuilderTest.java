@@ -103,25 +103,23 @@ public class RequestBuilderTest {
   @Test(expected = RuntimeException.class)
   public void testThrowsIfIntoViewCalledOnBackgroundThread() throws InterruptedException {
     final ImageView imageView = new ImageView(RuntimeEnvironment.application);
-    testInBackground(
-        new BackgroundTester() {
-          @Override
-          public void runTest() {
-            getNullModelRequest().into(imageView);
-          }
-        });
+    testInBackground(new BackgroundTester() {
+      @Override
+      public void runTest() {
+       getNullModelRequest().into(imageView);
+      }
+    });
   }
 
   @Test
   public void doesNotThrowIfIntoTargetCalledOnBackgroundThread() throws InterruptedException {
     final Target<Object> target = mock(Target.class);
-    testInBackground(
-        new BackgroundTester() {
-          @Override
-          public void runTest() {
-            getNullModelRequest().into(target);
-          }
-        });
+    testInBackground(new BackgroundTester() {
+      @Override
+      public void runTest() {
+         getNullModelRequest().into(target);
+      }
+    });
   }
 
   @Test
@@ -131,9 +129,11 @@ public class RequestBuilderTest {
     requestCaptor.getValue().onResourceReady(new SimpleResource<>(new Object()), DataSource.LOCAL);
 
     verify(listener1)
-        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+        .onResourceReady(
+            any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
     verify(listener2)
-        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+        .onResourceReady(
+            any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
   }
 
   @Test
@@ -144,18 +144,22 @@ public class RequestBuilderTest {
 
     // The #listener API removes any previous listeners, so the first listener should not be called.
     verify(listener1, never())
-        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+        .onResourceReady(
+            any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
     verify(listener2)
-        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+        .onResourceReady(
+            any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
   }
 
   private RequestBuilder<Object> getNullModelRequest() {
     when(glideContext.buildImageViewTarget(isA(ImageView.class), isA(Class.class)))
         .thenReturn(mock(ViewTarget.class));
     when(glideContext.getDefaultRequestOptions()).thenReturn(new RequestOptions());
-    when(requestManager.getDefaultRequestOptions()).thenReturn(new RequestOptions());
+    when(requestManager.getDefaultRequestOptions())
+        .thenReturn(new RequestOptions());
     when(requestManager.getDefaultTransitionOptions(any(Class.class)))
         .thenReturn(new GenericTransitionOptions<>());
-    return new RequestBuilder<>(glide, requestManager, Object.class, context).load((Object) null);
+    return new RequestBuilder<>(glide, requestManager, Object.class, context)
+        .load((Object) null);
   }
 }

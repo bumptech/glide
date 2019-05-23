@@ -50,49 +50,51 @@ public class DrawableTransformationTest {
   public void load_withColorDrawable_sizeOriginal_optionalTransform_returnsColorDrawable()
       throws ExecutionException, InterruptedException {
     Drawable colorDrawable = new ColorDrawable(Color.RED);
-    Drawable result =
-        Glide.with(context)
-            .load(colorDrawable)
-            .apply(new RequestOptions().optionalCenterCrop())
-            .submit()
-            .get();
-
-    assertThat(result).isInstanceOf(ColorDrawable.class);
-    assertThat(((ColorDrawable) result).getColor()).isEqualTo(Color.RED);
-  }
-
-  /** Transformations that do nothing can simply return the original Bitmap. */
-  @Test
-  public void load_withColorDrawable_fixedSize_requiredUnitTransform_returnsOriginalDrawable()
-      throws ExecutionException, InterruptedException {
-    Drawable colorDrawable = new ColorDrawable(Color.RED);
-
-    Drawable result =
-        Glide.with(context)
-            .load(colorDrawable)
-            .apply(new RequestOptions().centerCrop())
-            .submit(100, 100)
-            .get();
+    Drawable result = Glide.with(context)
+        .load(colorDrawable)
+        .apply(new RequestOptions()
+            .optionalCenterCrop())
+        .submit()
+        .get();
 
     assertThat(result).isInstanceOf(ColorDrawable.class);
     assertThat(((ColorDrawable) result).getColor()).isEqualTo(Color.RED);
   }
 
   /**
-   * Transformations that produce a different output color/shape/image etc will end up returning a
-   * {@link Bitmap} based on the original {@link Drawable} but with the transformation applied.
+   * Transformations that do nothing can simply return the original Bitmap.
+   */
+  @Test
+  public void load_withColorDrawable_fixedSize_requiredUnitTransform_returnsOriginalDrawable()
+      throws ExecutionException, InterruptedException {
+    Drawable colorDrawable = new ColorDrawable(Color.RED);
+
+    Drawable result = Glide.with(context)
+        .load(colorDrawable)
+        .apply(new RequestOptions()
+            .centerCrop())
+        .submit(100, 100)
+        .get();
+
+    assertThat(result).isInstanceOf(ColorDrawable.class);
+    assertThat(((ColorDrawable) result).getColor()).isEqualTo(Color.RED);
+  }
+
+  /**
+   * Transformations that produce a different output color/shape/image etc will end up returning
+   * a {@link Bitmap} based on the original {@link Drawable} but with the transformation applied.
    */
   @Test
   public void load_withColorDrawable_fixedSize_nonUnitRequiredTransform_returnsBitmapDrawable()
       throws ExecutionException, InterruptedException {
     Drawable colorDrawable = new ColorDrawable(Color.RED);
 
-    Drawable result =
-        Glide.with(context)
-            .load(colorDrawable)
-            .apply(new RequestOptions().circleCrop())
-            .submit(100, 100)
-            .get();
+    Drawable result = Glide.with(context)
+        .load(colorDrawable)
+        .apply(new RequestOptions()
+            .circleCrop())
+        .submit(100, 100)
+        .get();
 
     Bitmap redSquare = Bitmap.createBitmap(100, 100, Config.ARGB_8888);
     Canvas canvas = new Canvas(redSquare);
@@ -129,14 +131,12 @@ public class DrawableTransformationTest {
     Glide.get(context).getRequestManagerRetriever().get(context);
     // Wait until it's added as a lifecycle observer.
     final CountDownLatch latch = new CountDownLatch(1);
-    new Handler(Looper.getMainLooper())
-        .post(
-            new Runnable() {
-              @Override
-              public void run() {
-                latch.countDown();
-              }
-            });
+    new Handler(Looper.getMainLooper()).post(new Runnable() {
+      @Override
+      public void run() {
+        latch.countDown();
+      }
+    });
     latch.await(5, TimeUnit.SECONDS);
 
     // End hacks.
@@ -148,7 +148,8 @@ public class DrawableTransformationTest {
           public void run() throws Throwable {
             Glide.with(context)
                 .load(colorDrawable)
-                .apply(new RequestOptions().centerCrop())
+                .apply(new RequestOptions()
+                    .centerCrop())
                 .submit()
                 .get();
           }
@@ -161,13 +162,12 @@ public class DrawableTransformationTest {
     Bitmap bitmap = Bitmap.createBitmap(100, 200, Config.ARGB_8888);
     BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
 
-    Drawable result =
-        GlideApp.with(context)
-            .load(drawable)
-            .fitCenter()
-            .override(bitmap.getWidth(), bitmap.getHeight())
-            .submit()
-            .get();
+    Drawable result = GlideApp.with(context)
+        .load(drawable)
+        .fitCenter()
+        .override(bitmap.getWidth(), bitmap.getHeight())
+        .submit()
+        .get();
 
     BitmapSubject.assertThat(result).isNotRecycled();
   }
@@ -175,16 +175,15 @@ public class DrawableTransformationTest {
   @Test
   public void load_withBitmapDrawable_andFunctionalTransformation_doesNotRecycleBitmap()
       throws ExecutionException, InterruptedException {
-    Bitmap bitmap = Bitmap.createBitmap(100, 200, Config.ARGB_8888);
+      Bitmap bitmap = Bitmap.createBitmap(100, 200, Config.ARGB_8888);
     BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
 
-    Drawable result =
-        GlideApp.with(context)
-            .load(drawable)
-            .fitCenter()
-            .override(bitmap.getWidth() / 2, bitmap.getHeight() / 2)
-            .submit()
-            .get();
+    Drawable result = GlideApp.with(context)
+        .load(drawable)
+        .fitCenter()
+        .override(bitmap.getWidth() / 2, bitmap.getHeight() / 2)
+        .submit()
+        .get();
 
     BitmapSubject.assertThat(result).isNotRecycled();
   }
@@ -197,7 +196,12 @@ public class DrawableTransformationTest {
     int width = 100;
     int height = 200;
 
-    GlideApp.with(context).load(colorDrawable).fitCenter().override(width, height).submit().get();
+    GlideApp.with(context)
+        .load(colorDrawable)
+        .fitCenter()
+        .override(width, height)
+        .submit()
+        .get();
 
     BitmapPool bitmapPool = Glide.get(context).getBitmapPool();
     // Make sure we didn't put the same Bitmap twice.
@@ -206,8 +210,7 @@ public class DrawableTransformationTest {
 
     assertThat(first).isNotSameInstanceAs(second);
   }
-
-  @Test
+   @Test
   public void load_withColorDrawable_fixedSize_functionalBitmapTransform_doesNotRecycleOutput()
       throws ExecutionException, InterruptedException {
     Drawable colorDrawable = new ColorDrawable(Color.RED);
@@ -215,15 +218,14 @@ public class DrawableTransformationTest {
     int width = 100;
     int height = 200;
 
-    Drawable result =
-        GlideApp.with(context)
-            .load(colorDrawable)
-            .circleCrop()
-            .override(width, height)
-            .submit()
-            .get();
+    Drawable result = GlideApp.with(context)
+        .load(colorDrawable)
+        .circleCrop()
+        .override(width, height)
+        .submit()
+        .get();
 
-    BitmapSubject.assertThat(result).isNotRecycled();
+     BitmapSubject.assertThat(result).isNotRecycled();
 
     BitmapPool bitmapPool = Glide.get(context).getBitmapPool();
     // Make sure we didn't put the same Bitmap twice.

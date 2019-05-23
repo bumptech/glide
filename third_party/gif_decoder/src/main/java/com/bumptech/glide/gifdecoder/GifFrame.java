@@ -13,34 +13,34 @@ import java.lang.annotation.RetentionPolicy;
 class GifFrame {
   /**
    * GIF Disposal Method meaning take no action.
-   *
-   * <p><b>GIF89a</b>: <i>No disposal specified. The decoder is not required to take any action.</i>
+   * <p><b>GIF89a</b>: <i>No disposal specified.
+   * The decoder is not required to take any action.</i></p>
    */
   static final int DISPOSAL_UNSPECIFIED = 0;
   /**
    * GIF Disposal Method meaning leave canvas from previous frame.
-   *
-   * <p><b>GIF89a</b>: <i>Do not dispose. The graphic is to be left in place.</i>
+   * <p><b>GIF89a</b>: <i>Do not dispose.
+   * The graphic is to be left in place.</i></p>
    */
   static final int DISPOSAL_NONE = 1;
   /**
    * GIF Disposal Method meaning clear canvas to background color.
-   *
-   * <p><b>GIF89a</b>: <i>Restore to background color. The area used by the graphic must be restored
-   * to the background color.</i>
+   * <p><b>GIF89a</b>: <i>Restore to background color.
+   * The area used by the graphic must be restored to the background color.</i></p>
    */
   static final int DISPOSAL_BACKGROUND = 2;
   /**
    * GIF Disposal Method meaning clear canvas to frame before last.
-   *
-   * <p><b>GIF89a</b>: <i>Restore to previous. The decoder is required to restore the area
-   * overwritten by the graphic with what was there prior to rendering the graphic.</i>
+   * <p><b>GIF89a</b>: <i>Restore to previous.
+   * The decoder is required to restore the area overwritten by the graphic
+   * with what was there prior to rendering the graphic.</i></p>
    */
   static final int DISPOSAL_PREVIOUS = 3;
 
   /**
-   * <b>GIF89a</b>: <i>Indicates the way in which the graphic is to be treated after being
-   * displayed.</i> Disposal methods 0-3 are defined, 4-7 are reserved for future use.
+   * <p><b>GIF89a</b>:
+   * <i>Indicates the way in which the graphic is to be treated after being displayed.</i></p>
+   * Disposal methods 0-3 are defined, 4-7 are reserved for future use.
    *
    * @see #DISPOSAL_UNSPECIFIED
    * @see #DISPOSAL_NONE
@@ -49,21 +49,38 @@ class GifFrame {
    */
   @Retention(RetentionPolicy.SOURCE)
   @IntDef(value = {DISPOSAL_UNSPECIFIED, DISPOSAL_NONE, DISPOSAL_BACKGROUND, DISPOSAL_PREVIOUS})
-  private @interface GifDisposalMethod {}
+  private @interface GifDisposalMethod {
+  }
 
   int ix, iy, iw, ih;
-  /** Control Flag. */
+  /**
+   * Control Flag.
+   */
   boolean interlace;
-  /** Control Flag. */
+  /**
+   * Control Flag.
+   */
   boolean transparency;
-  /** Disposal Method. */
-  @GifDisposalMethod int dispose;
-  /** Transparency Index. */
+  /**
+   * Disposal Method.
+   */
+  @GifDisposalMethod
+  int dispose;
+  /**
+   * Transparency Index.
+   */
   int transIndex;
-  /** Delay, in milliseconds, to next frame. */
+  /**
+   * Delay, in milliseconds, to next frame.
+   */
   int delay;
-  /** Index in the raw buffer where we need to start reading to decode. */
+  /**
+   * Index in the raw buffer where we need to start reading to decode.
+   */
   int bufferFrameStart;
-  /** Local Color Table. */
-  @ColorInt int[] lct;
+  /**
+   * Local Color Table.
+   */
+  @ColorInt
+  int[] lct;
 }

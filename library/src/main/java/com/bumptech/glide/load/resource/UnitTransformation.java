@@ -31,8 +31,8 @@ public final class UnitTransformation<T> implements Transformation<T> {
 
   @NonNull
   @Override
-  public Resource<T> transform(
-      @NonNull Context context, @NonNull Resource<T> resource, int outWidth, int outHeight) {
+  public Resource<T> transform(@NonNull Context context, @NonNull Resource<T> resource,
+      int outWidth, int outHeight) {
     return resource;
   }
 

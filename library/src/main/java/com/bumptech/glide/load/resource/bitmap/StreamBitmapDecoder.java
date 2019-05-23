@@ -31,8 +31,8 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
   }
 
   @Override
-  public Resource<Bitmap> decode(
-      @NonNull InputStream source, int width, int height, @NonNull Options options)
+  public Resource<Bitmap> decode(@NonNull InputStream source, int width, int height,
+      @NonNull Options options)
       throws IOException {
 
     // Use to fix the mark limit to avoid allocating buffers that fit entire images.
@@ -76,8 +76,7 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
     private final RecyclableBufferedInputStream bufferedStream;
     private final ExceptionCatchingInputStream exceptionStream;
 
-    UntrustedCallbacks(
-        RecyclableBufferedInputStream bufferedStream,
+    UntrustedCallbacks(RecyclableBufferedInputStream bufferedStream,
         ExceptionCatchingInputStream exceptionStream) {
       this.bufferedStream = bufferedStream;
       this.exceptionStream = exceptionStream;

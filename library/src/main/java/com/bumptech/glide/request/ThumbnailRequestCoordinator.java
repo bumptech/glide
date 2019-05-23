@@ -7,7 +7,8 @@ import android.support.annotation.VisibleForTesting;
  * A coordinator that coordinates two individual {@link Request}s that load a small thumbnail
  * version of an image and the full size version of the image at the same time.
  */
-public class ThumbnailRequestCoordinator implements RequestCoordinator, Request {
+public class ThumbnailRequestCoordinator implements RequestCoordinator,
+    Request {
   @Nullable private final RequestCoordinator parent;
 
   private Request full;
@@ -103,7 +104,9 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     return parent != null && parent.isAnyResourceSet();
   }
 
-  /** Starts first the thumb request and then the full request. */
+  /**
+   * Starts first the thumb request and then the full request.
+   */
   @Override
   public void begin() {
     isRunning = true;
@@ -124,13 +127,17 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     full.clear();
   }
 
-  /** Returns true if the full request is still running. */
+  /**
+   * Returns true if the full request is still running.
+   */
   @Override
   public boolean isRunning() {
     return full.isRunning();
   }
 
-  /** Returns true if the full request is complete. */
+  /**
+   * Returns true if the full request is complete.
+   */
   @Override
   public boolean isComplete() {
     return full.isComplete() || thumb.isComplete();
@@ -146,7 +153,9 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     return full.isCleared();
   }
 
-  /** Returns true if the full request has failed. */
+  /**
+   * Returns true if the full request has failed.
+   */
   @Override
   public boolean isFailed() {
     return full.isFailed();

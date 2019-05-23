@@ -111,14 +111,16 @@ public class ManifestParserTest {
     applicationInfo.metaData.putString(key, MODULE_VALUE);
   }
 
-  private static class InvalidClass {}
+  private static class InvalidClass { }
 
   public static class TestModule1 implements GlideModule {
     @Override
-    public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {}
+    public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {
+    }
 
     @Override
-    public void registerComponents(Context context, Glide glide, Registry registry) {}
+    public void registerComponents(Context context, Glide glide, Registry registry) {
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -134,10 +136,12 @@ public class ManifestParserTest {
   public static class TestModule2 implements GlideModule {
 
     @Override
-    public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {}
+    public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {
+    }
 
     @Override
-    public void registerComponents(Context context, Glide glide, Registry registry) {}
+    public void registerComponents(Context context, Glide glide, Registry registry) {
+    }
 
     @Override
     public boolean equals(Object o) {

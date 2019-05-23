@@ -46,17 +46,12 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   // Public API.
   @SuppressWarnings("unused")
   public ByteBufferGifDecoder(Context context) {
-    this(
-        context,
-        Glide.get(context).getRegistry().getImageHeaderParsers(),
-        Glide.get(context).getBitmapPool(),
-        Glide.get(context).getArrayPool());
+    this(context, Glide.get(context).getRegistry().getImageHeaderParsers(),
+        Glide.get(context).getBitmapPool(), Glide.get(context).getArrayPool());
   }
 
   public ByteBufferGifDecoder(
-      Context context,
-      List<ImageHeaderParser> parsers,
-      BitmapPool bitmapPool,
+      Context context, List<ImageHeaderParser> parsers, BitmapPool bitmapPool,
       ArrayPool arrayPool) {
     this(context, parsers, bitmapPool, arrayPool, PARSER_POOL, GIF_DECODER_FACTORY);
   }
@@ -83,8 +78,8 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   }
 
   @Override
-  public GifDrawableResource decode(
-      @NonNull ByteBuffer source, int width, int height, @NonNull Options options) {
+  public GifDrawableResource decode(@NonNull ByteBuffer source, int width, int height,
+      @NonNull Options options) {
     final GifHeaderParser parser = parserPool.obtain(source);
     try {
       return decode(source, width, height, parser, options);
@@ -104,10 +99,8 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
         return null;
       }
 
-      Bitmap.Config config =
-          options.get(GifOptions.DECODE_FORMAT) == DecodeFormat.PREFER_RGB_565
-              ? Bitmap.Config.RGB_565
-              : Bitmap.Config.ARGB_8888;
+      Bitmap.Config config = options.get(GifOptions.DECODE_FORMAT) == DecodeFormat.PREFER_RGB_565
+          ? Bitmap.Config.RGB_565 : Bitmap.Config.ARGB_8888;
 
       int sampleSize = getSampleSize(header, width, height);
       GifDecoder gifDecoder = gifDecoderFactory.build(provider, header, byteBuffer, sampleSize);
@@ -132,36 +125,25 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   }
 
   private static int getSampleSize(GifHeader gifHeader, int targetWidth, int targetHeight) {
-    int exactSampleSize =
-        Math.min(gifHeader.getHeight() / targetHeight, gifHeader.getWidth() / targetWidth);
+    int exactSampleSize = Math.min(gifHeader.getHeight() / targetHeight,
+        gifHeader.getWidth() / targetWidth);
     int powerOfTwoSampleSize = exactSampleSize == 0 ? 0 : Integer.highestOneBit(exactSampleSize);
     // Although functionally equivalent to 0 for BitmapFactory, 1 is a safer default for our code
     // than 0.
     int sampleSize = Math.max(1, powerOfTwoSampleSize);
     if (Log.isLoggable(TAG, Log.VERBOSE) && sampleSize > 1) {
-      Log.v(
-          TAG,
-          "Downsampling GIF"
-              + ", sampleSize: "
-              + sampleSize
-              + ", target dimens: ["
-              + targetWidth
-              + "x"
-              + targetHeight
-              + "]"
-              + ", actual dimens: ["
-              + gifHeader.getWidth()
-              + "x"
-              + gifHeader.getHeight()
-              + "]");
+      Log.v(TAG, "Downsampling GIF"
+          + ", sampleSize: " + sampleSize
+          + ", target dimens: [" + targetWidth + "x" + targetHeight + "]"
+          + ", actual dimens: [" + gifHeader.getWidth() + "x" + gifHeader.getHeight() + "]");
     }
     return sampleSize;
   }
 
   @VisibleForTesting
   static class GifDecoderFactory {
-    GifDecoder build(
-        GifDecoder.BitmapProvider provider, GifHeader header, ByteBuffer data, int sampleSize) {
+    GifDecoder build(GifDecoder.BitmapProvider provider, GifHeader header,
+        ByteBuffer data, int sampleSize) {
       return new StandardGifDecoder(provider, header, data, sampleSize);
     }
   }

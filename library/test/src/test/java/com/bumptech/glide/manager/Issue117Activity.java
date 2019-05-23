@@ -18,7 +18,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 
-/** A test activity to reproduce Issue #117: https://github.com/bumptech/glide/issues/117. */
+/**
+ * A test activity to reproduce Issue #117: https://github.com/bumptech/glide/issues/117.
+ */
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 class Issue117Activity extends FragmentActivity {
   @Override
@@ -67,3 +69,4 @@ class Issue117Activity extends FragmentActivity {
     }
   }
 }
+

@@ -83,8 +83,7 @@ public class ImageViewTargetTest {
 
   @Test
   public void testSetsDrawableOnViewInOnResourceReadyWhenAnimationReturnsFalse() {
-    @SuppressWarnings("unchecked")
-    Transition<Drawable> animation = mock(Transition.class);
+    @SuppressWarnings("unchecked") Transition<Drawable> animation = mock(Transition.class);
     when(animation.transition(any(Drawable.class), eq(target))).thenReturn(false);
     Drawable resource = new ColorDrawable(Color.GRAY);
     target.onResourceReady(resource, animation);
@@ -95,8 +94,7 @@ public class ImageViewTargetTest {
   @Test
   public void testDoesNotSetDrawableOnViewInOnResourceReadyWhenAnimationReturnsTrue() {
     Drawable resource = new ColorDrawable(Color.RED);
-    @SuppressWarnings("unchecked")
-    Transition<Drawable> animation = mock(Transition.class);
+    @SuppressWarnings("unchecked") Transition<Drawable> animation = mock(Transition.class);
     when(animation.transition(eq(resource), eq(target))).thenReturn(true);
     target.onResourceReady(resource, animation);
 
@@ -108,8 +106,7 @@ public class ImageViewTargetTest {
     Drawable placeholder = new ColorDrawable(Color.BLACK);
     view.setImageDrawable(placeholder);
 
-    @SuppressWarnings("unchecked")
-    Transition<Drawable> animation = mock(Transition.class);
+    @SuppressWarnings("unchecked") Transition<Drawable> animation = mock(Transition.class);
 
     target.onResourceReady(new ColorDrawable(Color.GREEN), animation);
 

@@ -89,17 +89,14 @@ import org.robolectric.annotation.Resetter;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowBitmap;
 
-/** Tests for the {@link Glide} interface and singleton. */
+/**
+ * Tests for the {@link Glide} interface and singleton.
+ */
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    manifest = Config.NONE,
-    sdk = 18,
-    shadows = {
-      GlideTest.ShadowFileDescriptorContentResolver.class,
-      GlideTest.ShadowMediaMetadataRetriever.class,
-      GlideShadowLooper.class,
-      GlideTest.MutableShadowBitmap.class
-    })
+@Config(manifest = Config.NONE, sdk = 18, shadows = {
+    GlideTest.ShadowFileDescriptorContentResolver.class,
+    GlideTest.ShadowMediaMetadataRetriever.class, GlideShadowLooper.class,
+    GlideTest.MutableShadowBitmap.class })
 @SuppressWarnings("unchecked")
 public class GlideTest {
   // Fixes method overload confusion.
@@ -108,9 +105,7 @@ public class GlideTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
   @SuppressWarnings("rawtypes")
-  @Mock
-  private Target target;
-
+  @Mock private Target target;
   @Mock private DiskCache.Factory diskCacheFactory;
   @Mock private DiskCache diskCache;
   @Mock private MemoryCache memoryCache;
@@ -153,16 +148,14 @@ public class GlideTest {
     imageView.layout(0, 0, 100, 100);
     doAnswer(new CallSizeReady()).when(target).getSize(isA(SizeReadyCallback.class));
 
-    when(bgHandler.post(isA(Runnable.class)))
-        .thenAnswer(
-            new Answer<Boolean>() {
-              @Override
-              public Boolean answer(InvocationOnMock invocation) {
-                Runnable runnable = (Runnable) invocation.getArguments()[0];
-                runnable.run();
-                return true;
-              }
-            });
+    when(bgHandler.post(isA(Runnable.class))).thenAnswer(new Answer<Boolean>() {
+      @Override
+      public Boolean answer(InvocationOnMock invocation) {
+        Runnable runnable = (Runnable) invocation.getArguments()[0];
+        runnable.run();
+        return true;
+      }
+    });
 
     requestManager = new RequestManager(Glide.get(context), lifecycle, treeNode, context);
     requestManager.resumeRequests();
@@ -172,7 +165,10 @@ public class GlideTest {
   public void testCanSetMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
+        new GlideBuilder()
+            .setBitmapPool(bitmapPool)
+            .setMemoryCache(memoryCache)
+            .build(context);
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -183,7 +179,10 @@ public class GlideTest {
   public void testCanIncreaseMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
+        new GlideBuilder()
+            .setBitmapPool(bitmapPool)
+            .setMemoryCache(memoryCache)
+            .build(context);
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -202,7 +201,10 @@ public class GlideTest {
   public void testCanDecreaseMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
     Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
+        new GlideBuilder()
+            .setBitmapPool(bitmapPool)
+            .setMemoryCache(memoryCache)
+            .build(context);
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -220,7 +222,10 @@ public class GlideTest {
   @Test
   public void testClearMemory() {
     Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
+        new GlideBuilder()
+            .setBitmapPool(bitmapPool)
+            .setMemoryCache(memoryCache)
+            .build(context);
 
     glide.clearMemory();
 
@@ -231,7 +236,10 @@ public class GlideTest {
   @Test
   public void testTrimMemory() {
     Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
+        new GlideBuilder()
+            .setBitmapPool(bitmapPool)
+            .setMemoryCache(memoryCache)
+            .build(context);
 
     final int level = 123;
 
@@ -310,7 +318,9 @@ public class GlideTest {
     ColorDrawable colorDrawable = new ColorDrawable(Color.RED);
     requestManager
         .load(colorDrawable)
-        .apply(new RequestOptions().override(100, 100).centerCrop())
+        .apply(new RequestOptions()
+            .override(100, 100)
+            .centerCrop())
         .into(target);
 
     ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
@@ -327,7 +337,9 @@ public class GlideTest {
     ColorDrawable colorDrawable = new ColorDrawable(Color.RED);
     requestManager
         .load(colorDrawable)
-        .apply(new RequestOptions().override(100, 100).circleCrop())
+        .apply(new RequestOptions()
+            .override(100, 100)
+            .circleCrop())
         .into(target);
 
     ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
@@ -423,30 +435,19 @@ public class GlideTest {
   }
 
   private void runTestStringDefaultLoader(String string) {
-    requestManager
-        .load(string)
-        .listener(
-            new RequestListener<Drawable>() {
-              @Override
-              public boolean onLoadFailed(
-                  GlideException e,
-                  Object model,
-                  Target<Drawable> target,
-                  boolean isFirstResource) {
-                throw new RuntimeException("Load failed");
-              }
+    requestManager.load(string).listener(new RequestListener<Drawable>() {
+      @Override
+      public boolean onLoadFailed(GlideException e, Object model, Target<Drawable> target,
+          boolean isFirstResource) {
+        throw new RuntimeException("Load failed");
+      }
 
-              @Override
-              public boolean onResourceReady(
-                  Drawable resource,
-                  Object model,
-                  Target<Drawable> target,
-                  DataSource dataSource,
-                  boolean isFirstResource) {
-                return false;
-              }
-            })
-        .into(target);
+      @Override
+      public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target,
+          DataSource dataSource, boolean isFirstResource) {
+        return false;
+      }
+    }).into(target);
     requestManager.load(string).into(imageView);
 
     verify(target).onResourceReady(isA(BitmapDrawable.class), isA(Transition.class));
@@ -497,6 +498,7 @@ public class GlideTest {
     assertNotNull(imageView.getDrawable());
   }
 
+
   @Test(expected = Exception.class)
   public void testUnregisteredModelThrowsException() {
     Float unregistered = 0.5f;
@@ -528,10 +530,7 @@ public class GlideTest {
     InputStream testGifData = openGif();
     mockUri(Uri.parse(fakeUri), testGifData);
 
-    requestManager
-        .as(byte[].class)
-        .apply(decodeTypeOf(GifDrawable.class))
-        .load(fakeUri)
+    requestManager.as(byte[].class).apply(decodeTypeOf(GifDrawable.class)).load(fakeUri)
         .into(target);
 
     verify(target).onResourceReady(isA(byte[].class), isA(Transition.class));
@@ -550,30 +549,27 @@ public class GlideTest {
   public void testReceivesThumbnails() {
     String full = mockUri("content://full");
     String thumb = mockUri("content://thumb");
-    requestManager.load(full).thumbnail(requestManager.load(thumb)).into(target);
+    requestManager
+        .load(full)
+        .thumbnail(requestManager.load(thumb))
+        .into(target);
 
     verify(target, times(2)).onResourceReady(isA(Drawable.class), isA(Transition.class));
   }
 
   @Test
   public void testReceivesRecursiveThumbnails() {
-    requestManager
-        .load(mockUri("content://first"))
-        .thumbnail(
-            requestManager
-                .load(mockUri("content://second"))
-                .thumbnail(
-                    requestManager
-                        .load(mockUri("content://third"))
-                        .thumbnail(requestManager.load(mockUri("content://fourth")))))
+    requestManager.load(mockUri("content://first")).thumbnail(
+        requestManager.load(mockUri("content://second")).thumbnail(
+            requestManager.load(mockUri("content://third")).thumbnail(
+                requestManager.load(mockUri("content://fourth")))))
         .into(target);
     verify(target, times(4)).onResourceReady(isA(Drawable.class), isA(Transition.class));
   }
 
   @Test
   public void testReceivesRecursiveThumbnailWithPercentage() {
-    requestManager
-        .load(mockUri("content://first"))
+    requestManager.load(mockUri("content://first"))
         .thumbnail(requestManager.load(mockUri("content://second")).thumbnail(0.5f))
         .into(target);
     verify(target, times(3)).onResourceReady(isA(Drawable.class), isA(Transition.class));
@@ -597,7 +593,10 @@ public class GlideTest {
   @Test
   public void testNullModelDoesNotThrow() {
     Drawable drawable = new ColorDrawable(Color.RED);
-    requestManager.load(NULL).apply(errorOf(drawable)).into(target);
+    requestManager
+        .load(NULL)
+        .apply(errorOf(drawable))
+        .into(target);
 
     verify(target).onLoadFailed(eq(drawable));
   }
@@ -607,7 +606,11 @@ public class GlideTest {
     Drawable placeholder = new ColorDrawable(Color.GREEN);
     Drawable error = new ColorDrawable(Color.RED);
 
-    requestManager.load(NULL).apply(placeholderOf(placeholder).error(error)).into(target);
+    requestManager
+        .load(NULL)
+        .apply(placeholderOf(placeholder)
+            .error(error))
+        .into(target);
 
     verify(target).onLoadFailed(eq(error));
   }
@@ -615,7 +618,10 @@ public class GlideTest {
   @Test
   public void testLoadBitmap_asBitmap() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    requestManager.asBitmap().load(bitmap).into(target);
+    requestManager
+        .asBitmap()
+        .load(bitmap)
+        .into(target);
 
     verify(target).onResourceReady(eq(bitmap), any(Transition.class));
   }
@@ -623,7 +629,9 @@ public class GlideTest {
   @Test
   public void testLoadBitmap_asDrawable() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-    requestManager.load(bitmap).into(target);
+    requestManager
+        .load(bitmap)
+        .into(target);
 
     ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
     verify(target).onResourceReady(captor.capture(), any(Transition.class));
@@ -634,7 +642,9 @@ public class GlideTest {
   @Test
   public void testLoadDrawable() {
     Drawable drawable = new ColorDrawable(Color.RED);
-    requestManager.load(drawable).into(target);
+    requestManager
+        .load(drawable)
+        .into(target);
 
     ArgumentCaptor<Drawable> drawableCaptor = ArgumentCaptor.forClass(Drawable.class);
     verify(target).onResourceReady(drawableCaptor.capture(), any(Transition.class));
@@ -649,7 +659,9 @@ public class GlideTest {
 
     requestManager
         .load(NULL)
-        .apply(placeholderOf(placeholder).error(error).fallback(fallback))
+        .apply(placeholderOf(placeholder)
+            .error(error)
+            .fallback(fallback))
         .into(target);
 
     verify(target).onLoadFailed(eq(fallback));
@@ -659,14 +671,17 @@ public class GlideTest {
   public void testNullModelResolvesToUsePlaceholder() {
     Drawable placeholder = new ColorDrawable(Color.GREEN);
 
-    requestManager.load(NULL).apply(placeholderOf(placeholder)).into(target);
+    requestManager
+        .load(NULL)
+        .apply(placeholderOf(placeholder))
+        .into(target);
 
     verify(target).onLoadFailed(eq(placeholder));
   }
 
   @Test
   public void testByteData() {
-    byte[] data = new byte[] {1, 2, 3, 4, 5, 6};
+    byte[] data = new byte[] { 1, 2, 3, 4, 5, 6 };
     requestManager.load(data).into(target);
   }
 
@@ -683,7 +698,6 @@ public class GlideTest {
                       @Nullable Transition<? super Drawable> transition) {
                     // Do nothing.
                   }
-
                   @Override
                   public void onLoadCleared(@Nullable Drawable placeholder) {
                     // Do nothing, we don't retain a reference to our resource.
@@ -705,11 +719,14 @@ public class GlideTest {
     doAnswer(new CallSizeReady(100, 100)).when(firstTarget).getSize(isA(SizeReadyCallback.class));
     Target<Drawable> secondTarget = mock(Target.class);
     doAnswer(new CallSizeReady(100, 100)).when(secondTarget).getSize(isA(SizeReadyCallback.class));
-    RequestBuilder<Drawable> firstRequest = requestManager.load(mockUri("content://first"));
+    RequestBuilder<Drawable> firstRequest = requestManager
+        .load(mockUri("content://first"));
 
     firstRequest.into(firstTarget);
 
-    firstRequest.clone().apply(placeholderOf(new ColorDrawable(Color.RED))).into(secondTarget);
+    firstRequest.clone()
+        .apply(placeholderOf(new ColorDrawable(Color.RED)))
+        .into(secondTarget);
 
     verify(firstTarget).onResourceReady(isA(Drawable.class), isA(Transition.class));
     verify(secondTarget).onResourceReady(notNull(Drawable.class), isA(Transition.class));
@@ -762,7 +779,8 @@ public class GlideTest {
     ModelLoaderFactory<T, InputStream> modelLoaderFactory = mock(ModelLoaderFactory.class);
     when(modelLoaderFactory.build(isA(MultiModelLoaderFactory.class))).thenReturn(modelLoader);
 
-    Glide.get(context).getRegistry().prepend(modelClass, InputStream.class, modelLoaderFactory);
+    Glide.get(context).getRegistry()
+        .prepend(modelClass, InputStream.class, modelLoaderFactory);
   }
 
   @SuppressWarnings("unchecked")
@@ -770,8 +788,7 @@ public class GlideTest {
     ModelLoader<T, InputStream> modelLoader = mock(ModelLoader.class);
     DataFetcher<InputStream> fetcher = mock(DataFetcher.class);
     try {
-      doAnswer(new Util.CallDataReady<>(new ByteArrayInputStream(new byte[0])))
-          .when(fetcher)
+      doAnswer(new Util.CallDataReady<>(new ByteArrayInputStream(new byte[0]))).when(fetcher)
           .loadData(isA(Priority.class), isA(DataFetcher.DataCallback.class));
     } catch (Exception e) {
       // Do nothing.
@@ -809,8 +826,8 @@ public class GlideTest {
     }
   }
 
-  private static <X, Y> void registerMockModelLoader(
-      Class<X> modelClass, Class<Y> dataClass, Y loadedData, Registry registry) {
+  private static <X, Y> void registerMockModelLoader(Class<X> modelClass, Class<Y> dataClass,
+      Y loadedData, Registry registry) {
     DataFetcher<Y> mockStreamFetcher = mock(DataFetcher.class);
     when(mockStreamFetcher.getDataClass()).thenReturn(dataClass);
     try {
@@ -825,7 +842,8 @@ public class GlideTest {
         .thenReturn(new ModelLoader.LoadData<>(mock(Key.class), mockStreamFetcher));
     when(mockUrlLoader.handles(isA(modelClass))).thenReturn(true);
     ModelLoaderFactory<X, Y> mockUrlLoaderFactory = mock(ModelLoaderFactory.class);
-    when(mockUrlLoaderFactory.build(isA(MultiModelLoaderFactory.class))).thenReturn(mockUrlLoader);
+    when(mockUrlLoaderFactory.build(isA(MultiModelLoaderFactory.class)))
+        .thenReturn(mockUrlLoader);
 
     registry.replace(modelClass, dataClass, mockUrlLoaderFactory);
   }
@@ -896,3 +914,4 @@ public class GlideTest {
     }
   }
 }
+

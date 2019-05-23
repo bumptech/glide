@@ -80,7 +80,8 @@ public class CenterCropTest {
 
   @Test
   public void testReturnsGivenResourceIfMatchesSizeExactly() {
-    Resource<Bitmap> result = centerCrop.transform(context, resource, bitmapWidth, bitmapHeight);
+    Resource<Bitmap> result =
+        centerCrop.transform(context, resource, bitmapWidth, bitmapHeight);
 
     assertEquals(resource, result);
   }
@@ -99,8 +100,7 @@ public class CenterCropTest {
     verify(resource, never()).recycle();
   }
 
-  @Test
-  @Config(sdk = 19)
+  @Test @Config(sdk = 19)
   public void testAsksBitmapPoolForArgb8888IfInConfigIsNull() {
     bitmap.setConfig(null);
 
@@ -115,8 +115,8 @@ public class CenterCropTest {
     int expectedWidth = 75;
     int expectedHeight = 74;
 
-    for (int[] dimens :
-        new int[][] {new int[] {800, 200}, new int[] {450, 100}, new int[] {78, 78}}) {
+    for (int[] dimens : new int[][] { new int[] { 800, 200 }, new int[] { 450, 100 },
+        new int[] { 78, 78 } }) {
       Bitmap toTransform = Bitmap.createBitmap(dimens[0], dimens[1], Bitmap.Config.ARGB_4444);
       when(resource.get()).thenReturn(toTransform);
 
@@ -133,7 +133,8 @@ public class CenterCropTest {
     int expectedWidth = 100;
     int expectedHeight = 100;
 
-    for (int[] dimens : new int[][] {new int[] {50, 90}, new int[] {150, 2}, new int[] {78, 78}}) {
+    for (int[] dimens : new int[][] { new int[] { 50, 90 }, new int[] { 150, 2 },
+        new int[] { 78, 78 } }) {
       Bitmap toTransform = Bitmap.createBitmap(dimens[0], dimens[1], Bitmap.Config.ARGB_4444);
       when(resource.get()).thenReturn(toTransform);
 
@@ -147,12 +148,14 @@ public class CenterCropTest {
 
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
-    doAnswer(new Util.WriteDigest("other"))
-        .when(transformation)
+    doAnswer(new Util.WriteDigest("other")).when(transformation)
         .updateDiskCacheKey(any(MessageDigest.class));
     keyTester
-        .addEquivalenceGroup(new CenterCrop(), new CenterCrop())
-        .addEquivalenceGroup(transformation)
+        .addEquivalenceGroup(
+            new CenterCrop(),
+            new CenterCrop())
+        .addEquivalenceGroup(
+            transformation)
         .addRegressionTest(
             new CenterCrop(), "68bd5819c42b37efbe7124bb851443a6388ee3e2e9034213da6eaa15381d3457")
         .test();

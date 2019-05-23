@@ -40,14 +40,14 @@ public class UnitTransformationTest {
 
   @Test
   public void testEqualsHashCodeDigest() throws NoSuchAlgorithmException {
-    @SuppressWarnings("unchecked")
-    Transformation<Object> other = mock(Transformation.class);
-    doAnswer(new Util.WriteDigest("other"))
-        .when(other)
+    @SuppressWarnings("unchecked") Transformation<Object> other = mock(Transformation.class);
+    doAnswer(new Util.WriteDigest("other")).when(other)
         .updateDiskCacheKey(any(MessageDigest.class));
 
     keyTester
-        .addEquivalenceGroup(UnitTransformation.get(), UnitTransformation.get())
+        .addEquivalenceGroup(
+            UnitTransformation.get(),
+            UnitTransformation.get())
         .addEquivalenceGroup(other)
         .addEmptyDigestRegressionTest(UnitTransformation.get())
         .test();

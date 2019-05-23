@@ -11,20 +11,22 @@ import java.io.IOException;
 public interface DataRewinder<T> {
 
   /**
-   * A factory interface for producing individual {@link
-   * com.bumptech.glide.load.data.DataRewinder}s.
+   * A factory interface for producing individual
+   * {@link com.bumptech.glide.load.data.DataRewinder}s.
    *
    * @param <T> The type of data that the {@link com.bumptech.glide.load.data.DataRewinder} will
-   *     wrap.
+   *            wrap.
    */
   interface Factory<T> {
-    /** Returns a new {@link com.bumptech.glide.load.data.DataRewinder} wrapping the given data. */
+    /**
+     * Returns a new {@link com.bumptech.glide.load.data.DataRewinder} wrapping the given data.
+     */
     @NonNull
     DataRewinder<T> build(@NonNull T data);
 
     /**
-     * Returns the class of data this factory can produce {@link
-     * com.bumptech.glide.load.data.DataRewinder}s for.
+     * Returns the class of data this factory can produce
+     * {@link com.bumptech.glide.load.data.DataRewinder}s for.
      */
     @NonNull
     Class<T> getDataClass();
@@ -42,7 +44,7 @@ public interface DataRewinder<T> {
   /**
    * Called when this rewinder is no longer needed and can be cleaned up.
    *
-   * <p>The underlying data may still be in use and should not be closed or invalidated.
+   * <p> The underlying data may still be in use and should not be closed or invalidated. </p>
    */
   void cleanup();
 }

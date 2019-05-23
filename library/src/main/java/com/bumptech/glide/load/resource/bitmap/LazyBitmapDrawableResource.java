@@ -13,35 +13,37 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
 
 /**
- * Lazily allocates a {@link android.graphics.drawable.BitmapDrawable} from a given {@link
- * android.graphics.Bitmap} on the first call to {@link #get()}.
+ * Lazily allocates a {@link android.graphics.drawable.BitmapDrawable} from a given
+ * {@link android.graphics.Bitmap} on the first call to {@link #get()}.
  */
-public final class LazyBitmapDrawableResource implements Resource<BitmapDrawable>, Initializable {
+public final class LazyBitmapDrawableResource implements Resource<BitmapDrawable>,
+    Initializable {
 
   private final Resources resources;
   private final Resource<Bitmap> bitmapResource;
 
   /**
    * @deprecated Use {@link #obtain(Resources, Resource)} instead, it can be unsafe to extract
-   *     {@link Bitmap}s from their wrapped {@link Resource}.
+   * {@link Bitmap}s from their wrapped {@link Resource}.
    */
   @Deprecated
   public static LazyBitmapDrawableResource obtain(Context context, Bitmap bitmap) {
-    return (LazyBitmapDrawableResource)
-        obtain(
-            context.getResources(),
-            BitmapResource.obtain(bitmap, Glide.get(context).getBitmapPool()));
+    return
+        (LazyBitmapDrawableResource)
+            obtain(
+                context.getResources(),
+                BitmapResource.obtain(bitmap, Glide.get(context).getBitmapPool()));
   }
 
   /**
    * @deprecated Use {@link #obtain(Resources, Resource)} instead, it can be unsafe to extract
-   *     {@link Bitmap}s from their wrapped {@link Resource}.
+   * {@link Bitmap}s from their wrapped {@link Resource}.
    */
   @Deprecated
-  public static LazyBitmapDrawableResource obtain(
-      Resources resources, BitmapPool bitmapPool, Bitmap bitmap) {
-    return (LazyBitmapDrawableResource)
-        obtain(resources, BitmapResource.obtain(bitmap, bitmapPool));
+  public static LazyBitmapDrawableResource obtain(Resources resources, BitmapPool bitmapPool,
+      Bitmap bitmap) {
+    return
+        (LazyBitmapDrawableResource) obtain(resources, BitmapResource.obtain(bitmap, bitmapPool));
   }
 
   @Nullable
@@ -51,10 +53,11 @@ public final class LazyBitmapDrawableResource implements Resource<BitmapDrawable
       return null;
     }
     return new LazyBitmapDrawableResource(resources, bitmapResource);
+
   }
 
-  private LazyBitmapDrawableResource(
-      @NonNull Resources resources, @NonNull Resource<Bitmap> bitmapResource) {
+  private LazyBitmapDrawableResource(@NonNull Resources resources,
+      @NonNull Resource<Bitmap> bitmapResource) {
     this.resources = Preconditions.checkNotNull(resources);
     this.bitmapResource = Preconditions.checkNotNull(bitmapResource);
   }

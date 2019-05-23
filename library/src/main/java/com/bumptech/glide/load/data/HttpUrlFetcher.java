@@ -18,15 +18,18 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 
-/** A DataFetcher that retrieves an {@link java.io.InputStream} for a Url. */
+/**
+ * A DataFetcher that retrieves an {@link java.io.InputStream} for a Url.
+ */
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "HttpUrlFetcher";
   private static final int MAXIMUM_REDIRECTS = 5;
-
   @VisibleForTesting
   static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY =
       new DefaultHttpUrlConnectionFactory();
-  /** Returned when a connection error prevented us from receiving an http error. */
+  /**
+   * Returned when a connection error prevented us from receiving an http error.
+   */
   private static final int INVALID_STATUS_CODE = -1;
 
   private final GlideUrl glideUrl;
@@ -49,8 +52,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   }
 
   @Override
-  public void loadData(
-      @NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
+  public void loadData(@NonNull Priority priority,
+      @NonNull DataCallback<? super InputStream> callback) {
     long startTime = LogTime.getLogTime();
     try {
       InputStream result = loadDataWithRedirects(glideUrl.toURL(), 0, null, glideUrl.getHeaders());
@@ -67,8 +70,8 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     }
   }
 
-  private InputStream loadDataWithRedirects(
-      URL url, int redirects, URL lastUrl, Map<String, String> headers) throws IOException {
+  private InputStream loadDataWithRedirects(URL url, int redirects, URL lastUrl,
+      Map<String, String> headers) throws IOException {
     if (redirects >= MAXIMUM_REDIRECTS) {
       throw new HttpException("Too many (> " + MAXIMUM_REDIRECTS + ") redirects!");
     } else {
@@ -77,6 +80,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
       try {
         if (lastUrl != null && url.toURI().equals(lastUrl.toURI())) {
           throw new HttpException("In re-direct loop");
+
         }
       } catch (URISyntaxException e) {
         // Do nothing, this is best effort.
@@ -188,7 +192,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   private static class DefaultHttpUrlConnectionFactory implements HttpUrlConnectionFactory {
 
     @Synthetic
-    DefaultHttpUrlConnectionFactory() {}
+    DefaultHttpUrlConnectionFactory() { }
 
     @Override
     public HttpURLConnection build(URL url) throws IOException {

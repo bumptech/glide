@@ -29,17 +29,13 @@ public class DataCacheKeyTest {
   @Before
   public void setUp() throws UnsupportedEncodingException {
     MockitoAnnotations.initMocks(this);
-    doAnswer(new WriteDigest("firstKey"))
-        .when(firstKey)
+    doAnswer(new WriteDigest("firstKey")).when(firstKey)
         .updateDiskCacheKey(any(MessageDigest.class));
-    doAnswer(new WriteDigest("firstSignature"))
-        .when(firstSignature)
+    doAnswer(new WriteDigest("firstSignature")).when(firstSignature)
         .updateDiskCacheKey(any(MessageDigest.class));
-    doAnswer(new WriteDigest("secondKey"))
-        .when(secondKey)
+    doAnswer(new WriteDigest("secondKey")).when(secondKey)
         .updateDiskCacheKey(any(MessageDigest.class));
-    doAnswer(new WriteDigest("secondSignature"))
-        .when(secondSignature)
+    doAnswer(new WriteDigest("secondSignature")).when(secondSignature)
         .updateDiskCacheKey(any(MessageDigest.class));
   }
 
@@ -47,7 +43,8 @@ public class DataCacheKeyTest {
   public void testEqualsHashCodeDigest() throws NoSuchAlgorithmException {
     keyTester
         .addEquivalenceGroup(
-            new DataCacheKey(firstKey, firstSignature), new DataCacheKey(firstKey, firstSignature))
+            new DataCacheKey(firstKey, firstSignature),
+            new DataCacheKey(firstKey, firstSignature))
         .addEquivalenceGroup(new DataCacheKey(firstKey, secondSignature))
         .addEquivalenceGroup(new DataCacheKey(secondKey, firstSignature))
         .addEquivalenceGroup(new DataCacheKey(secondKey, secondSignature))

@@ -23,8 +23,8 @@ import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Tests that Glide is able to load videos stored in resources and loaded as {@link
- * android.content.res.AssetFileDescriptor}s.
+ * Tests that Glide is able to load videos stored in resources and loaded as
+ * {@link android.content.res.AssetFileDescriptor}s.
  */
 @RunWith(AndroidJUnit4.class)
 public class LoadVideoResourceTest {
@@ -41,7 +41,11 @@ public class LoadVideoResourceTest {
 
   @Test
   public void loadVideoResourceId_fromInt_decodesFrame() {
-    Drawable frame = concurrency.get(Glide.with(context).load(ResourceIds.raw.video).submit());
+    Drawable frame =
+        concurrency.get(
+            Glide.with(context)
+                .load(ResourceIds.raw.video)
+                .submit());
 
     assertThat(frame).isNotNull();
   }
@@ -63,7 +67,10 @@ public class LoadVideoResourceTest {
   @Test
   public void loadVideoResourceId_fromInteger_decodesFrame() {
     Drawable frame =
-        concurrency.get(Glide.with(context).load(new Integer(ResourceIds.raw.video)).submit());
+        concurrency.get(
+            Glide.with(context)
+                .load(new Integer(ResourceIds.raw.video))
+                .submit());
 
     assertThat(frame).isNotNull();
   }
@@ -85,7 +92,11 @@ public class LoadVideoResourceTest {
   @Test
   public void loadVideoResourceId_asBitmap_decodesFrame() {
     Bitmap frame =
-        concurrency.get(Glide.with(context).asBitmap().load(ResourceIds.raw.video).submit());
+        concurrency.get(
+            Glide.with(context)
+                .asBitmap()
+                .load(ResourceIds.raw.video)
+                .submit());
 
     assertThat(frame).isNotNull();
   }
@@ -112,7 +123,11 @@ public class LoadVideoResourceTest {
             .path(String.valueOf(ResourceIds.raw.video))
             .build();
 
-    Drawable frame = concurrency.get(GlideApp.with(context).load(uri).submit());
+    Drawable frame =
+        concurrency.get(
+            GlideApp.with(context)
+                .load(uri)
+                .submit());
 
     assertThat(frame).isNotNull();
   }
@@ -126,7 +141,12 @@ public class LoadVideoResourceTest {
             .path(String.valueOf(ResourceIds.raw.video))
             .build();
 
-    Bitmap frame = concurrency.get(GlideApp.with(context).asBitmap().load(uri).submit());
+    Bitmap frame =
+        concurrency.get(
+            GlideApp.with(context)
+                .asBitmap()
+                .load(uri)
+                .submit());
 
     assertThat(frame).isNotNull();
   }
@@ -160,7 +180,12 @@ public class LoadVideoResourceTest {
             .path(String.valueOf(ResourceIds.raw.video))
             .build();
 
-    Bitmap frame = concurrency.get(GlideApp.with(context).asBitmap().load(uri.toString()).submit());
+    Bitmap frame =
+        concurrency.get(
+            GlideApp.with(context)
+                .asBitmap()
+                .load(uri.toString())
+                .submit());
 
     assertThat(frame).isNotNull();
   }
@@ -197,7 +222,11 @@ public class LoadVideoResourceTest {
             .appendPath(resources.getResourceEntryName(resourceId))
             .build();
 
-    Drawable frame = concurrency.get(GlideApp.with(context).load(uri).submit());
+    Drawable frame =
+        concurrency.get(
+            GlideApp.with(context)
+                .load(uri)
+                .submit());
 
     assertThat(frame).isNotNull();
   }
@@ -214,7 +243,12 @@ public class LoadVideoResourceTest {
             .appendPath(resources.getResourceEntryName(resourceId))
             .build();
 
-    Bitmap frame = concurrency.get(GlideApp.with(context).asBitmap().load(uri).submit());
+    Bitmap frame =
+        concurrency.get(
+            GlideApp.with(context)
+                .asBitmap()
+                .load(uri)
+                .submit());
 
     assertThat(frame).isNotNull();
   }
@@ -254,7 +288,12 @@ public class LoadVideoResourceTest {
             .appendPath(resources.getResourceEntryName(resourceId))
             .build();
 
-    Bitmap frame = concurrency.get(GlideApp.with(context).asBitmap().load(uri.toString()).submit());
+    Bitmap frame =
+        concurrency.get(
+            GlideApp.with(context)
+                .asBitmap()
+                .load(uri.toString())
+                .submit());
 
     assertThat(frame).isNotNull();
   }

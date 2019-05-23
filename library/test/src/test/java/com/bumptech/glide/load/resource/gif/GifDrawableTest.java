@@ -54,10 +54,8 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowCanvas;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    manifest = Config.NONE,
-    sdk = 18,
-    shadows = {GlideShadowLooper.class, BitmapTrackingShadowCanvas.class})
+@Config(manifest = Config.NONE, sdk = 18,
+    shadows = { GlideShadowLooper.class, BitmapTrackingShadowCanvas.class })
 public class GifDrawableTest {
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
 
@@ -516,6 +514,7 @@ public class GifDrawableTest {
     assertTrue("drawable should be still running", drawable.isRunning());
   }
 
+
   @Test
   public void testDoesNotDrawFrameAfterRecycle() {
     Bitmap bitmap = Bitmap.createBitmap(100, 112341, Bitmap.Config.RGB_565);
@@ -590,7 +589,7 @@ public class GifDrawableTest {
 
   @Test
   public void onFrameReady_whenAttachedToDrawableCallbackButNotViewCallback_stops() {
-    TransitionDrawable topLevel = new TransitionDrawable(new Drawable[] {drawable});
+    TransitionDrawable topLevel = new TransitionDrawable(new Drawable[] { drawable });
     drawable.setCallback(topLevel);
     topLevel.setCallback(null);
 
@@ -602,7 +601,7 @@ public class GifDrawableTest {
 
   @Test
   public void onFrameReady_whenAttachedtoDrawableCallbackWithViewCallbackParent_doesNotStop() {
-    TransitionDrawable topLevel = new TransitionDrawable(new Drawable[] {drawable});
+      TransitionDrawable topLevel = new TransitionDrawable(new Drawable[] { drawable });
     drawable.setCallback(topLevel);
     topLevel.setCallback(new View(context));
 
@@ -621,15 +620,16 @@ public class GifDrawableTest {
     for (int loop = 0; loop < loopCount; loop++) {
       for (int frame = 0; frame < frameCount; frame++) {
         when(frameLoader.getCurrentIndex()).thenReturn(frame);
-        assertTrue(
-            "drawable should be started before calling drawable.onFrameReady()",
+        assertTrue("drawable should be started before calling drawable.onFrameReady()",
             drawable.isRunning());
         drawable.onFrameReady();
       }
     }
   }
 
-  /** Keeps track of the set of Bitmaps drawn to the canvas. */
+  /**
+   * Keeps track of the set of Bitmaps drawn to the canvas.
+   */
   @Implements(Canvas.class)
   public static final class BitmapTrackingShadowCanvas extends ShadowCanvas {
     private final Set<Bitmap> drawnBitmaps = new HashSet<>();

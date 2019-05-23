@@ -63,8 +63,8 @@ public class BitmapPreFillRunnerTest {
   }
 
   private BitmapPreFillRunner getHandler(Map<PreFillType, Integer> allocationOrder) {
-    return new BitmapPreFillRunner(
-        pool, cache, new PreFillQueue(allocationOrder), clock, mainHandler);
+    return new BitmapPreFillRunner(pool, cache, new PreFillQueue(allocationOrder), clock,
+        mainHandler);
   }
 
   @Test
@@ -89,9 +89,7 @@ public class BitmapPreFillRunnerTest {
         new PreFillType.Builder(100, 50).setConfig(Bitmap.Config.RGB_565).build();
 
     PreFillType[] expectedOrder =
-        new PreFillType[] {
-          smallWidth, smallHeight, smallWidth, smallHeight,
-        };
+        new PreFillType[] { smallWidth, smallHeight, smallWidth, smallHeight, };
 
     HashMap<PreFillType, Integer> allocationOrder = new HashMap<>();
     allocationOrder.put(smallWidth, 2);
@@ -162,18 +160,14 @@ public class BitmapPreFillRunnerTest {
     handler.run();
     verify(mainHandler).postDelayed(eq(handler), eq(BitmapPreFillRunner.INITIAL_BACKOFF_MS));
 
-    when(clock.now())
-        .thenReturn(BitmapPreFillRunner.MAX_DURATION_MS)
-        .thenReturn(
-            BitmapPreFillRunner.MAX_DURATION_MS
-                + BitmapPreFillRunner.INITIAL_BACKOFF_MS * BitmapPreFillRunner.BACKOFF_RATIO);
+    when(clock.now()).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS).thenReturn(
+        BitmapPreFillRunner.MAX_DURATION_MS
+            + BitmapPreFillRunner.INITIAL_BACKOFF_MS * BitmapPreFillRunner.BACKOFF_RATIO);
 
     handler.run();
 
-    verify(mainHandler)
-        .postDelayed(
-            eq(handler),
-            eq(BitmapPreFillRunner.INITIAL_BACKOFF_MS * BitmapPreFillRunner.BACKOFF_RATIO));
+    verify(mainHandler).postDelayed(eq(handler),
+        eq(BitmapPreFillRunner.INITIAL_BACKOFF_MS * BitmapPreFillRunner.BACKOFF_RATIO));
 
     when(clock.now()).thenReturn(0L).thenReturn(BitmapPreFillRunner.MAX_DURATION_MS);
     handler.run();
@@ -208,8 +202,7 @@ public class BitmapPreFillRunnerTest {
     when(cache.getMaxSize()).thenReturn(Long.valueOf(Util.getBitmapByteSize(bitmap)));
 
     PreFillType size =
-        new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight())
-            .setConfig(bitmap.getConfig())
+        new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight()).setConfig(bitmap.getConfig())
             .build();
     Map<PreFillType, Integer> allocationOrder = new HashMap<>();
     allocationOrder.put(size, 1);
@@ -228,8 +221,7 @@ public class BitmapPreFillRunnerTest {
     when(cache.getMaxSize()).thenReturn(0L);
 
     PreFillType size =
-        new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight())
-            .setConfig(bitmap.getConfig())
+        new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight()).setConfig(bitmap.getConfig())
             .build();
     Map<PreFillType, Integer> allocationOrder = new HashMap<>();
     allocationOrder.put(size, 1);
@@ -248,8 +240,7 @@ public class BitmapPreFillRunnerTest {
     when(cache.getMaxSize()).thenReturn((long) Util.getBitmapByteSize(bitmap) / 2);
 
     PreFillType size =
-        new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight())
-            .setConfig(bitmap.getConfig())
+        new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight()).setConfig(bitmap.getConfig())
             .build();
     Map<PreFillType, Integer> allocationOrder = new HashMap<>();
     allocationOrder.put(size, 1);
@@ -258,22 +249,20 @@ public class BitmapPreFillRunnerTest {
 
     verify(cache, never()).put(any(Key.class), anyResource());
     // TODO(b/20335397): This code was relying on Bitmap equality which Robolectric removed
-    // verify(pool).put(eq(bitmap));
-    // assertThat(addedBitmaps).containsExactly(bitmap);
+    //verify(pool).put(eq(bitmap));
+    //assertThat(addedBitmaps).containsExactly(bitmap);
   }
 
   @Test
   public void testDoesAGetFromPoolBeforeAddingForEachSize() {
     Bitmap first = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     PreFillType firstSize =
-        new PreFillType.Builder(first.getWidth(), first.getHeight())
-            .setConfig(first.getConfig())
+        new PreFillType.Builder(first.getWidth(), first.getHeight()).setConfig(first.getConfig())
             .build();
 
     Bitmap second = Bitmap.createBitmap(200, 200, Bitmap.Config.RGB_565);
     PreFillType secondSize =
-        new PreFillType.Builder(second.getWidth(), second.getHeight())
-            .setConfig(second.getConfig())
+        new PreFillType.Builder(second.getWidth(), second.getHeight()).setConfig(second.getConfig())
             .build();
 
     Map<PreFillType, Integer> allocationOrder = new HashMap<>();
@@ -283,15 +272,13 @@ public class BitmapPreFillRunnerTest {
     getHandler(allocationOrder).run();
 
     InOrder firstOrder = inOrder(pool);
-    firstOrder
-        .verify(pool)
-        .getDirty(eq(first.getWidth()), eq(first.getHeight()), eq(first.getConfig()));
+    firstOrder.verify(pool).getDirty(eq(first.getWidth()), eq(first.getHeight()),
+        eq(first.getConfig()));
     // TODO(b/20335397): This code was relying on Bitmap equality which Robolectric removed
     // firstOrder.verify(pool).put(eq(first));
 
     InOrder secondOrder = inOrder(pool);
-    secondOrder
-        .verify(pool)
+    secondOrder.verify(pool)
         .getDirty(eq(second.getWidth()), eq(second.getHeight()), eq(second.getConfig()));
     // TODO(b/20335397): This code was relying on Bitmap equality which Robolectric removed
     // secondOrder.verify(pool).put(eq(second));
@@ -301,8 +288,7 @@ public class BitmapPreFillRunnerTest {
   public void testDoesNotGetMoreThanOncePerSize() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     PreFillType size =
-        new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight())
-            .setConfig(bitmap.getConfig())
+        new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight()).setConfig(bitmap.getConfig())
             .build();
 
     final int numBitmaps = 5;
@@ -312,9 +298,8 @@ public class BitmapPreFillRunnerTest {
     getHandler(allocationOrder).run();
 
     InOrder order = inOrder(pool);
-    order
-        .verify(pool)
-        .getDirty(eq(bitmap.getWidth()), eq(bitmap.getHeight()), eq(bitmap.getConfig()));
+    order.verify(pool).getDirty(eq(bitmap.getWidth()), eq(bitmap.getHeight()),
+        eq(bitmap.getConfig()));
     // TODO(b/20335397): This code was relying on Bitmap equality which Robolectric removed
     // order.verify(pool, times(numBitmaps)).put(eq(bitmap));
   }

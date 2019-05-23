@@ -8,11 +8,11 @@ import java.security.MessageDigest;
 /**
  * Wraps an {@link java.lang.Object}, delegating {@link #equals(Object)} and {@link #hashCode()} to
  * the wrapped Object and providing the bytes of the result of the Object's {@link #toString()}
- * method to the {@link java.security.MessageDigest} in {@link
- * #updateDiskCacheKey(java.security.MessageDigest)}.
+ * method to the {@link java.security.MessageDigest} in
+ * {@link #updateDiskCacheKey(java.security.MessageDigest)}.
  *
  * <p>The Object's {@link #toString()} method must be unique and suitable for use as a disk cache
- * key.
+ * key.</p>
  */
 public final class ObjectKey implements Key {
   private final Object object;
@@ -23,7 +23,9 @@ public final class ObjectKey implements Key {
 
   @Override
   public String toString() {
-    return "ObjectKey{" + "object=" + object + '}';
+    return "ObjectKey{"
+        + "object=" + object
+        + '}';
   }
 
   @Override
@@ -45,3 +47,4 @@ public final class ObjectKey implements Key {
     messageDigest.update(object.toString().getBytes(CHARSET));
   }
 }
+

@@ -19,10 +19,10 @@ import java.util.Queue;
  * the appearance of an infinitely large image cache, depending on scrolling speed, cpu speed, and
  * cache size.
  *
- * <p>Must be put using {@link
- * AbsListView#setOnScrollListener(android.widget.AbsListView.OnScrollListener)}, or have its
+ * <p> Must be put using
+ * {@link AbsListView#setOnScrollListener(android.widget.AbsListView.OnScrollListener)}, or have its
  * corresponding methods called from another {@link android.widget.AbsListView.OnScrollListener} to
- * function.
+ * function. </p>
  *
  * @param <T> The type of the model being displayed in the list.
  */
@@ -68,15 +68,15 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     List<U> getPreloadItems(int position);
 
     /**
-     * Returns a {@link RequestBuilder} for a given item on which {@link
-     * RequestBuilder#load(Object)}} has been called or {@code null} if no valid load can be
+     * Returns a {@link RequestBuilder} for a given item on which
+     * {@link RequestBuilder#load(Object)}} has been called or {@code null} if no valid load can be
      * started.
      *
      * <p>For the preloader to be effective, the {@link RequestBuilder} returned here must use
      * exactly the same size and set of options as the {@link RequestBuilder} used when the ``View``
      * is bound. You may need to specify a size in both places to ensure that the width and height
-     * match exactly. If so, you can use {@link
-     * com.bumptech.glide.request.RequestOptions#override(int, int)} to do so.
+     * match exactly. If so, you can use
+     * {@link com.bumptech.glide.request.RequestOptions#override(int, int)} to do so.
      *
      * <p>The target and context will be provided by the preloader.
      *
@@ -117,15 +117,13 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
    * the dimensions of images to preload, the list of models to preload for a given position, and
    * the request to use to load images.
    *
-   * @param preloadModelProvider Provides models to load and requests capable of loading them.
+   * @param preloadModelProvider     Provides models to load and requests capable of loading them.
    * @param preloadDimensionProvider Provides the dimensions of images to load.
-   * @param maxPreload Maximum number of items to preload.
+   * @param maxPreload               Maximum number of items to preload.
    */
-  public ListPreloader(
-      @NonNull RequestManager requestManager,
+  public ListPreloader(@NonNull RequestManager requestManager,
       @NonNull PreloadModelProvider<T> preloadModelProvider,
-      @NonNull PreloadSizeProvider<T> preloadDimensionProvider,
-      int maxPreload) {
+      @NonNull PreloadSizeProvider<T> preloadDimensionProvider, int maxPreload) {
     this.requestManager = requestManager;
     this.preloadModelProvider = preloadModelProvider;
     this.preloadDimensionProvider = preloadDimensionProvider;
@@ -139,8 +137,8 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   }
 
   @Override
-  public void onScroll(
-      AbsListView absListView, int firstVisible, int visibleCount, int totalCount) {
+  public void onScroll(AbsListView absListView, int firstVisible, int visibleCount,
+      int totalCount) {
     totalItemCount = totalCount;
     if (firstVisible > lastFirstVisible) {
       preload(firstVisible + visibleCount, true);
@@ -205,7 +203,8 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     if (item == null) {
       return;
     }
-    int[] dimensions = preloadDimensionProvider.getPreloadSize(item, position, perItemPosition);
+    int[] dimensions =
+        preloadDimensionProvider.getPreloadSize(item, position, perItemPosition);
     if (dimensions == null) {
       return;
     }
@@ -249,10 +248,11 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   private static final class PreloadTarget implements Target<Object> {
     @Synthetic int photoHeight;
     @Synthetic int photoWidth;
-    @Nullable private Request request;
+    @Nullable
+    private Request request;
 
     @Synthetic
-    PreloadTarget() {}
+    PreloadTarget() { }
 
     @Override
     public void onLoadStarted(@Nullable Drawable placeholder) {

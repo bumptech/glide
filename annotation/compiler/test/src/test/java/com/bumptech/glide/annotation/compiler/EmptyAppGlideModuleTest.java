@@ -18,20 +18,22 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests adding a single {@link com.bumptech.glide.test.EmptyAppModule} in a project. */
+/**
+ * Tests adding a single {@link com.bumptech.glide.test.EmptyAppModule} in a project.
+ */
 @RunWith(JUnit4.class)
 public class EmptyAppGlideModuleTest implements CompilationProvider {
   private static final String MODULE_NAME = "EmptyAppModule.java";
-
-  @Rule
-  public final RegenerateResourcesRule regenerateResourcesRule = new RegenerateResourcesRule(this);
-
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(this);
   private Compilation compilation;
 
   @Before
   public void setUp() {
     compilation =
-        javac().withProcessors(new GlideAnnotationProcessor()).compile(forResource(MODULE_NAME));
+        javac()
+            .withProcessors(new GlideAnnotationProcessor())
+            .compile(forResource(MODULE_NAME));
     assertThat(compilation).succeededWithoutWarnings();
   }
 
@@ -91,3 +93,4 @@ public class EmptyAppGlideModuleTest implements CompilationProvider {
     return compilation;
   }
 }
+

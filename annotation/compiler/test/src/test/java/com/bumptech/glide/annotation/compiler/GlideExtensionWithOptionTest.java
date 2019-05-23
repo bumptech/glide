@@ -22,14 +22,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Verifies the output of the processor with a simple single extension option in the new option
- * style where extension methods always return values.
+ * Verifies the output of the processor with a simple single extension option in the new
+ * option style where extension methods always return values.
  */
 @RunWith(JUnit4.class)
 public class GlideExtensionWithOptionTest implements CompilationProvider {
-  @Rule
-  public final RegenerateResourcesRule regenerateResourcesRule = new RegenerateResourcesRule(this);
-
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(this);
   private Compilation compilation;
 
   @Before
@@ -37,7 +36,9 @@ public class GlideExtensionWithOptionTest implements CompilationProvider {
     compilation =
         javac()
             .withProcessors(new GlideAnnotationProcessor())
-            .compile(emptyAppModule(), forResource("ExtensionWithOption.java"));
+            .compile(
+                emptyAppModule(),
+                forResource("ExtensionWithOption.java"));
     assertThat(compilation).succeededWithoutWarnings();
   }
 

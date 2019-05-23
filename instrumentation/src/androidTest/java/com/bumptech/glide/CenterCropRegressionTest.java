@@ -55,7 +55,7 @@ public class CenterCropRegressionTest {
   @Test
   public void centerCrop_withRectangleSmallerThanImage_returnsRectangularImage()
       throws ExecutionException, InterruptedException {
-    Bitmap result =
+     Bitmap result =
         bitmapRegressionTester.test(
             GlideApp.with(context)
                 .asBitmap()
@@ -70,7 +70,7 @@ public class CenterCropRegressionTest {
   public void centerCrop_withSquareLargerThanImage_returnsUpscaledRectangularImage()
       throws ExecutionException, InterruptedException {
     Bitmap result =
-        bitmapRegressionTester.test(
+          bitmapRegressionTester.test(
             GlideApp.with(context)
                 .asBitmap()
                 .load(canonical.getBitmap())

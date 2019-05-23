@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data;
 
+
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
@@ -72,7 +73,7 @@ public class BufferedOutputStreamTest {
 
   @Test
   public void write_withEmptyBuffer_andDataWithOffsetSizeSmallerThanBuffer_doesNotWriteToStream()
-      throws IOException {
+    throws IOException {
     int offset = 1;
     int length = bufferSize - offset;
     byte[] data = nextWithOffset(offset, length);
@@ -83,7 +84,7 @@ public class BufferedOutputStreamTest {
 
   @Test
   public void write_withEmptyBuffer_andDataWithPaddingSizeSmallerThanBuffer_doesNotWriteToStream()
-      throws IOException {
+    throws IOException {
     int padding = 1;
     int length = bufferSize - padding;
     byte[] data = nextWithPadding(length, padding);
@@ -799,62 +800,53 @@ public class BufferedOutputStreamTest {
 
   @Test
   public void write_throwsIfOffsetIsLessThanZero() {
-    assertThrows(
-        IndexOutOfBoundsException.class,
-        new ThrowingRunnable() {
-          @Override
-          public void run() throws Throwable {
-            os.write(new byte[0], /*initialOffset=*/ -1, /*length=*/ 0);
-          }
-        });
+    assertThrows(IndexOutOfBoundsException.class, new ThrowingRunnable() {
+      @Override
+      public void run() throws Throwable {
+        os.write(new byte[0], /*initialOffset=*/ -1, /*length=*/ 0);
+      }
+    });
   }
 
   @Test
   public void write_throwsIfLengthIsLessThanZero() {
-    assertThrows(
-        IndexOutOfBoundsException.class,
-        new ThrowingRunnable() {
-          @Override
-          public void run() throws Throwable {
-            os.write(new byte[0], /*initialOffset=*/ 0, /*length=*/ -1);
-          }
-        });
+    assertThrows(IndexOutOfBoundsException.class, new ThrowingRunnable() {
+      @Override
+      public void run() throws Throwable {
+        os.write(new byte[0], /*initialOffset=*/ 0, /*length=*/ -1);
+      }
+    });
   }
 
   @Test
   public void write_throwsIfOffsetIsGreaterThanLength() {
-    assertThrows(
-        IndexOutOfBoundsException.class,
-        new ThrowingRunnable() {
-          @Override
-          public void run() throws Throwable {
-            os.write(new byte[0], /*initialOffset=*/ 1, /*length=*/ 0);
-          }
-        });
+    assertThrows(IndexOutOfBoundsException.class, new ThrowingRunnable() {
+      @Override
+      public void run() throws Throwable {
+        os.write(new byte[0], /*initialOffset=*/ 1, /*length=*/ 0);
+      }
+    });
   }
 
   @Test
   public void write_throwsIfLengthsIsGreaterThanLength() {
-    assertThrows(
-        IndexOutOfBoundsException.class,
-        new ThrowingRunnable() {
-          @Override
-          public void run() throws Throwable {
-            os.write(new byte[0], /*initialOffset=*/ 0, /*length=*/ 1);
-          }
-        });
+    assertThrows(IndexOutOfBoundsException.class, new ThrowingRunnable() {
+      @Override
+      public void run() throws Throwable {
+        os.write(new byte[0], /*initialOffset=*/ 0, /*length=*/ 1);
+      }
+    });
   }
+
 
   @Test
   public void write_throwsIfLengthAndOffsetsIsGreaterThanLength() {
-    assertThrows(
-        IndexOutOfBoundsException.class,
-        new ThrowingRunnable() {
-          @Override
-          public void run() throws Throwable {
-            os.write(new byte[1], /*initialOffset=*/ 1, /*length=*/ 1);
-          }
-        });
+    assertThrows(IndexOutOfBoundsException.class, new ThrowingRunnable() {
+      @Override
+      public void run() throws Throwable {
+        os.write(new byte[1], /*initialOffset=*/ 1, /*length=*/ 1);
+      }
+    });
   }
 
   @Test
@@ -870,6 +862,7 @@ public class BufferedOutputStreamTest {
 
     assertThat(inner.toByteArray()).hasLength(0);
   }
+
 
   @Test
   public void write_afterWriteWithZeroLengthBuffer_writesExpected() throws IOException {

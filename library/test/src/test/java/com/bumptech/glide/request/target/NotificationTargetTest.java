@@ -22,10 +22,8 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowNotificationManager;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    manifest = Config.NONE,
-    sdk = 18,
-    shadows = NotificationTargetTest.UpdateShadowNotificationManager.class)
+@Config(manifest = Config.NONE, sdk = 18, shadows = NotificationTargetTest
+    .UpdateShadowNotificationManager.class)
 public class NotificationTargetTest {
   private UpdateShadowNotificationManager shadowManager;
   private RemoteViews remoteViews;
@@ -48,16 +46,10 @@ public class NotificationTargetTest {
     notificationId = 456;
     notificationTag = "tag";
 
+
     target =
-        new NotificationTarget(
-            RuntimeEnvironment.application,
-            100 /*width*/,
-            100 /*height*/,
-            viewId,
-            remoteViews,
-            notification,
-            notificationId,
-            notificationTag);
+        new NotificationTarget(RuntimeEnvironment.application, 100 /*width*/, 100 /*height*/,
+            viewId, remoteViews, notification, notificationId, notificationTag);
   }
 
   @Test
@@ -69,9 +61,8 @@ public class NotificationTargetTest {
 
   @Test
   public void updatesNotificationManagerWithNotificationIdAndNotificationOnResourceReady() {
-    target.onResourceReady(
-        Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null
-        /*glideAnimation*/ );
+    target.onResourceReady(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null
+    /*glideAnimation*/);
 
     assertEquals(notificationId, shadowManager.updatedNotificationId);
     assertEquals(notificationTag, shadowManager.updatedNotificationTag);
@@ -80,40 +71,23 @@ public class NotificationTargetTest {
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfContextIsNull() {
-    new NotificationTarget(
-        null /*context*/,
-        100 /*width*/,
-        100 /*height*/,
-        123 /*viewId*/,
-        mock(RemoteViews.class),
-        mock(Notification.class),
-        456 /*notificationId*/,
+    new NotificationTarget(null /*context*/, 100 /*width*/, 100 /*height*/,
+        123 /*viewId*/, mock(RemoteViews.class), mock(Notification.class), 456 /*notificationId*/,
         "tag" /*notificationTag*/);
   }
 
+
   @Test(expected = NullPointerException.class)
   public void testThrowsIfNotificationIsNull() {
-    new NotificationTarget(
-        RuntimeEnvironment.application,
-        100 /*width*/,
-        100 /*height*/,
-        123 /*viewId*/,
-        mock(RemoteViews.class),
-        null /*notification*/,
-        456 /*notificationId*/,
+    new NotificationTarget(RuntimeEnvironment.application, 100 /*width*/, 100 /*height*/,
+        123 /*viewId*/, mock(RemoteViews.class), null /*notification*/, 456 /*notificationId*/,
         "tag" /*notificationTag*/);
   }
 
   @Test(expected = NullPointerException.class)
   public void testThrowsIfRemoteViewsIsNull() {
-    new NotificationTarget(
-        RuntimeEnvironment.application,
-        100 /*width*/,
-        100 /*height*/,
-        123 /*viewId*/,
-        null /*remoteViews*/,
-        mock(Notification.class),
-        456 /*notificationId*/,
+    new NotificationTarget(RuntimeEnvironment.application, 100 /*width*/, 100 /*height*/,
+        123 /*viewId*/, null /*remoteViews*/, mock(Notification.class), 456 /*notificationId*/,
         "tag" /*notificationTag*/);
   }
 

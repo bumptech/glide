@@ -11,12 +11,14 @@ import com.bumptech.glide.load.data.DataFetcher;
  */
 interface DataFetcherGenerator {
   /**
-   * Called when the generator has finished loading data from a {@link
-   * com.bumptech.glide.load.data.DataFetcher}.
+   * Called when the generator has finished loading data from a
+   * {@link com.bumptech.glide.load.data.DataFetcher}.
    */
   interface FetcherReadyCallback {
 
-    /** Requests that we call startNext() again on a Glide owned thread. */
+    /**
+     * Requests that we call startNext() again on a Glide owned thread.
+     */
     void reschedule();
 
     /**
@@ -28,12 +30,8 @@ interface DataFetcherGenerator {
      * @param dataSource The data source we were loading from.
      * @param attemptedKey The key we were loading data from (may be an alternate).
      */
-    void onDataFetcherReady(
-        Key sourceKey,
-        @Nullable Object data,
-        DataFetcher<?> fetcher,
-        DataSource dataSource,
-        Key attemptedKey);
+    void onDataFetcherReady(Key sourceKey, @Nullable Object data, DataFetcher<?> fetcher,
+        DataSource dataSource, Key attemptedKey);
 
     /**
      * Notifies the callback when the load fails.
@@ -43,20 +41,20 @@ interface DataFetcherGenerator {
      * @param fetcher The fetcher we were loading from.
      * @param dataSource The data source we were loading from.
      */
-    void onDataFetcherFailed(
-        Key attemptedKey, Exception e, DataFetcher<?> fetcher, DataSource dataSource);
+    void onDataFetcherFailed(Key attemptedKey, Exception e, DataFetcher<?> fetcher,
+        DataSource dataSource);
   }
 
   /**
-   * Attempts to a single new {@link com.bumptech.glide.load.data.DataFetcher} and returns true if a
-   * {@link com.bumptech.glide.load.data.DataFetcher} was started, and false otherwise.
+   * Attempts to a single new {@link com.bumptech.glide.load.data.DataFetcher} and returns true if
+   * a {@link com.bumptech.glide.load.data.DataFetcher} was started, and false otherwise.
    */
   boolean startNext();
 
   /**
    * Attempts to cancel the currently running fetcher.
    *
-   * <p>This will be called on the main thread and should complete quickly.
+   * <p> This will be called on the main thread and should complete quickly. </p>
    */
   void cancel();
 }

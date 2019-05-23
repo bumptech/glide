@@ -33,8 +33,8 @@ public class MultiModelLoaderFactory {
   }
 
   @VisibleForTesting
-  MultiModelLoaderFactory(
-      @NonNull Pool<List<Throwable>> throwableListPool, @NonNull Factory factory) {
+  MultiModelLoaderFactory(@NonNull Pool<List<Throwable>> throwableListPool,
+      @NonNull Factory factory) {
     this.throwableListPool = throwableListPool;
     this.factory = factory;
   }
@@ -75,7 +75,8 @@ public class MultiModelLoaderFactory {
 
   @NonNull
   synchronized <Model, Data> List<ModelLoaderFactory<? extends Model, ? extends Data>> remove(
-      @NonNull Class<Model> modelClass, @NonNull Class<Data> dataClass) {
+      @NonNull Class<Model> modelClass,
+      @NonNull Class<Data> dataClass) {
     List<ModelLoaderFactory<? extends Model, ? extends Data>> factories = new ArrayList<>();
     for (Iterator<Entry<?, ?>> iterator = entries.iterator(); iterator.hasNext(); ) {
       Entry<?, ?> entry = iterator.next();
@@ -125,8 +126,8 @@ public class MultiModelLoaderFactory {
   }
 
   @NonNull
-  public synchronized <Model, Data> ModelLoader<Model, Data> build(
-      @NonNull Class<Model> modelClass, @NonNull Class<Data> dataClass) {
+  public synchronized <Model, Data> ModelLoader<Model, Data> build(@NonNull Class<Model> modelClass,
+      @NonNull Class<Data> dataClass) {
     try {
       List<ModelLoader<Model, Data>> loaders = new ArrayList<>();
       boolean ignoredAnyEntries = false;
@@ -218,12 +219,12 @@ public class MultiModelLoaderFactory {
 
   private static class EmptyModelLoader implements ModelLoader<Object, Object> {
     @Synthetic
-    EmptyModelLoader() {}
+    EmptyModelLoader() { }
 
     @Nullable
     @Override
-    public LoadData<Object> buildLoadData(
-        @NonNull Object o, int width, int height, @NonNull Options options) {
+    public LoadData<Object> buildLoadData(@NonNull Object o, int width, int height,
+        @NonNull Options options) {
       return null;
     }
 

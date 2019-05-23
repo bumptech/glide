@@ -24,7 +24,7 @@ public class LruCache<T, Y> {
    * Constructor for LruCache.
    *
    * @param size The maximum size of the cache, the units must match the units used in {@link
-   *     #getSize(Object)}.
+   *             #getSize(Object)}.
    */
   public LruCache(long size) {
     this.initialMaxSize = size;
@@ -57,7 +57,9 @@ public class LruCache<T, Y> {
     return 1;
   }
 
-  /** Returns the number of entries stored in cache. */
+  /**
+   * Returns the number of entries stored in cache.
+   */
   protected synchronized int getCount() {
     return cache.size();
   }
@@ -65,19 +67,23 @@ public class LruCache<T, Y> {
   /**
    * A callback called whenever an item is evicted from the cache. Subclasses can override.
    *
-   * @param key The key of the evicted item.
+   * @param key  The key of the evicted item.
    * @param item The evicted item.
    */
   protected void onItemEvicted(@NonNull T key, @Nullable Y item) {
     // optional override
   }
 
-  /** Returns the current maximum size of the cache in bytes. */
+  /**
+   * Returns the current maximum size of the cache in bytes.
+   */
   public synchronized long getMaxSize() {
     return maxSize;
   }
 
-  /** Returns the sum of the sizes of all items in the cache. */
+  /**
+   * Returns the sum of the sizes of all items in the cache.
+   */
   public synchronized long getCurrentSize() {
     return currentSize;
   }
@@ -87,6 +93,7 @@ public class LruCache<T, Y> {
    *
    * @param key The key to check.
    */
+
   public synchronized boolean contains(@NonNull T key) {
     return cache.containsKey(key);
   }
@@ -109,7 +116,7 @@ public class LruCache<T, Y> {
    * the cache and instead {@link #onItemEvicted(Object, Object)} will be called synchronously with
    * the given key and item.
    *
-   * @param key The key to add the item at.
+   * @param key  The key to add the item at.
    * @param item The item to add.
    */
   @Nullable
@@ -150,7 +157,9 @@ public class LruCache<T, Y> {
     return value;
   }
 
-  /** Clears all items in the cache. */
+  /**
+   * Clears all items in the cache.
+   */
   public void clearMemory() {
     trimToSize(0);
   }
@@ -165,7 +174,7 @@ public class LruCache<T, Y> {
     Map.Entry<T, Y> last;
     Iterator<Map.Entry<T, Y>> cacheIterator;
     while (currentSize > size) {
-      cacheIterator = cache.entrySet().iterator();
+      cacheIterator  = cache.entrySet().iterator();
       last = cacheIterator.next();
       final Y toRemove = last.getValue();
       currentSize -= getSize(toRemove);

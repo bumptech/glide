@@ -5,7 +5,9 @@ import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
 import java.io.IOException;
 
-/** Fetches an {@link android.os.ParcelFileDescriptor} for an asset path. */
+/**
+ * Fetches an {@link android.os.ParcelFileDescriptor} for an asset path.
+ */
 public class FileDescriptorAssetPathFetcher extends AssetPathFetcher<ParcelFileDescriptor> {
   public FileDescriptorAssetPathFetcher(AssetManager assetManager, String assetPath) {
     super(assetManager, assetPath);

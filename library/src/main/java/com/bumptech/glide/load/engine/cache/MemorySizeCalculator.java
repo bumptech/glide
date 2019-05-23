@@ -17,7 +17,8 @@ import com.bumptech.glide.util.Synthetic;
  */
 public final class MemorySizeCalculator {
   private static final String TAG = "MemorySizeCalculator";
-  @VisibleForTesting static final int BYTES_PER_ARGB_8888_PIXEL = 4;
+  @VisibleForTesting
+  static final int BYTES_PER_ARGB_8888_PIXEL = 4;
   private static final int LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR = 2;
 
   private final int bitmapPoolSize;
@@ -27,7 +28,6 @@ public final class MemorySizeCalculator {
 
   interface ScreenDimensions {
     int getWidthPixels();
-
     int getHeightPixels();
   }
 
@@ -82,27 +82,33 @@ public final class MemorySizeCalculator {
     }
   }
 
-  /** Returns the recommended memory cache size for the device it is run on in bytes. */
+  /**
+   * Returns the recommended memory cache size for the device it is run on in bytes.
+   */
   public int getMemoryCacheSize() {
     return memoryCacheSize;
   }
 
-  /** Returns the recommended bitmap pool size for the device it is run on in bytes. */
+  /**
+   * Returns the recommended bitmap pool size for the device it is run on in bytes.
+   */
   public int getBitmapPoolSize() {
     return bitmapPoolSize;
   }
 
-  /** Returns the recommended array pool size for the device it is run on in bytes. */
+  /**
+   * Returns the recommended array pool size for the device it is run on in bytes.
+   */
   public int getArrayPoolSizeInBytes() {
     return arrayPoolSize;
   }
 
-  private static int getMaxSize(
-      ActivityManager activityManager, float maxSizeMultiplier, float lowMemoryMaxSizeMultiplier) {
+  private static int getMaxSize(ActivityManager activityManager, float maxSizeMultiplier,
+      float lowMemoryMaxSizeMultiplier) {
     final int memoryClassBytes = activityManager.getMemoryClass() * 1024 * 1024;
     final boolean isLowMemoryDevice = isLowMemoryDevice(activityManager);
-    return Math.round(
-        memoryClassBytes * (isLowMemoryDevice ? lowMemoryMaxSizeMultiplier : maxSizeMultiplier));
+    return Math.round(memoryClassBytes * (isLowMemoryDevice ? lowMemoryMaxSizeMultiplier
+        : maxSizeMultiplier));
   }
 
   private String toMb(int bytes) {
@@ -110,8 +116,7 @@ public final class MemorySizeCalculator {
   }
 
   @TargetApi(Build.VERSION_CODES.KITKAT)
-  @Synthetic
-  static boolean isLowMemoryDevice(ActivityManager activityManager) {
+  @Synthetic static boolean isLowMemoryDevice(ActivityManager activityManager) {
     // Explicitly check with an if statement, on some devices both parts of boolean expressions
     // can be evaluated even if we'd normally expect a short circuit.
     //noinspection SimplifiableIfStatement
@@ -129,7 +134,8 @@ public final class MemorySizeCalculator {
   // Public API.
   @SuppressWarnings({"WeakerAccess", "unused"})
   public static final class Builder {
-    @VisibleForTesting static final int MEMORY_CACHE_TARGET_SCREENS = 2;
+    @VisibleForTesting
+    static final int MEMORY_CACHE_TARGET_SCREENS = 2;
 
     /**
      * On Android O+, we use {@link android.graphics.Bitmap.Config#HARDWARE} for all reasonably
@@ -158,7 +164,8 @@ public final class MemorySizeCalculator {
 
     public Builder(Context context) {
       this.context = context;
-      activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+      activityManager =
+          (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
       screenDimensions =
           new DisplayMetricsScreenDimensions(context.getResources().getDisplayMetrics());
 
@@ -172,38 +179,37 @@ public final class MemorySizeCalculator {
     }
 
     /**
-     * Sets the number of device screens worth of pixels the {@link
-     * com.bumptech.glide.load.engine.cache.MemoryCache} should be able to hold and returns this
-     * Builder.
+     * Sets the number of device screens worth of pixels the
+     * {@link com.bumptech.glide.load.engine.cache.MemoryCache} should be able to hold and
+     * returns this Builder.
      */
     public Builder setMemoryCacheScreens(float memoryCacheScreens) {
-      Preconditions.checkArgument(
-          memoryCacheScreens >= 0, "Memory cache screens must be greater than or equal to 0");
+      Preconditions.checkArgument(memoryCacheScreens >= 0,
+          "Memory cache screens must be greater than or equal to 0");
       this.memoryCacheScreens = memoryCacheScreens;
       return this;
     }
 
     /**
-     * Sets the number of device screens worth of pixels the {@link
-     * com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} should be able to hold and returns
-     * this Builder.
+     * Sets the number of device screens worth of pixels the
+     * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} should be able to hold and
+     * returns this Builder.
      */
     public Builder setBitmapPoolScreens(float bitmapPoolScreens) {
-      Preconditions.checkArgument(
-          bitmapPoolScreens >= 0, "Bitmap pool screens must be greater than or equal to 0");
+      Preconditions.checkArgument(bitmapPoolScreens >= 0,
+          "Bitmap pool screens must be greater than or equal to 0");
       this.bitmapPoolScreens = bitmapPoolScreens;
       return this;
     }
 
     /**
      * Sets the maximum percentage of the device's memory class for standard devices that can be
-     * taken up by Glide's {@link com.bumptech.glide.load.engine.cache.MemoryCache} and {@link
-     * com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} put together, and returns this
-     * builder.
+     * taken up by Glide's {@link com.bumptech.glide.load.engine.cache.MemoryCache} and
+     * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} put together, and returns
+     * this builder.
      */
     public Builder setMaxSizeMultiplier(float maxSizeMultiplier) {
-      Preconditions.checkArgument(
-          maxSizeMultiplier >= 0 && maxSizeMultiplier <= 1,
+      Preconditions.checkArgument(maxSizeMultiplier >= 0 && maxSizeMultiplier <= 1,
           "Size multiplier must be between 0 and 1");
       this.maxSizeMultiplier = maxSizeMultiplier;
       return this;
@@ -211,26 +217,27 @@ public final class MemorySizeCalculator {
 
     /**
      * Sets the maximum percentage of the device's memory class for low ram devices that can be
-     * taken up by Glide's {@link com.bumptech.glide.load.engine.cache.MemoryCache} and {@link
-     * com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} put together, and returns this
-     * builder.
+     * taken up by Glide's {@link com.bumptech.glide.load.engine.cache.MemoryCache} and
+     * {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} put together, and returns
+     * this builder.
      *
      * @see ActivityManager#isLowRamDevice()
      */
     public Builder setLowMemoryMaxSizeMultiplier(float lowMemoryMaxSizeMultiplier) {
       Preconditions.checkArgument(
           lowMemoryMaxSizeMultiplier >= 0 && lowMemoryMaxSizeMultiplier <= 1,
-          "Low memory max size multiplier must be between 0 and 1");
+              "Low memory max size multiplier must be between 0 and 1");
       this.lowMemoryMaxSizeMultiplier = lowMemoryMaxSizeMultiplier;
       return this;
     }
 
     /**
-     * Sets the size in bytes of the {@link com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool}
-     * to use to store temporary arrays while decoding data and returns this builder.
+     * Sets the size in bytes of the {@link
+     * com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool} to use to store temporary
+     * arrays while decoding data and returns this builder.
      *
-     * <p>This number will be halved on low memory devices that return {@code true} from {@link
-     * ActivityManager#isLowRamDevice()}.
+     * <p>This number will be halved on low memory devices that return {@code true} from
+     * {@link ActivityManager#isLowRamDevice()}.
      */
     public Builder setArrayPoolSize(int arrayPoolSizeBytes) {
       this.arrayPoolSizeBytes = arrayPoolSizeBytes;

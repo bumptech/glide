@@ -20,7 +20,9 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowBitmap;
 
-/** Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}. */
+/**
+ * Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}.
+ */
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class GifDecoderTest {
@@ -156,10 +158,8 @@ public class GifDecoderTest {
     decoder.getNextFrame();
     decoder.advance();
     Bitmap firstFrameTwice = decoder.getNextFrame();
-    assertTrue(
-        Arrays.equals(
-            (((CustomShadowBitmap) shadowOf(firstFrame))).getPixels(),
-            (((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels()));
+    assertTrue(Arrays.equals((((CustomShadowBitmap) shadowOf(firstFrame))).getPixels(),
+        (((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels()));
   }
 
   @Test
@@ -177,21 +177,21 @@ public class GifDecoderTest {
     decoder.getNextFrame();
     decoder.advance();
     Bitmap firstFrameTwice = decoder.getNextFrame();
-    assertTrue(
-        Arrays.equals(
-            (((CustomShadowBitmap) shadowOf(firstFrame))).getPixels(),
-            (((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels()));
+    assertTrue(Arrays.equals((((CustomShadowBitmap) shadowOf(firstFrame))).getPixels(),
+        (((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels()));
   }
 
-  /** Preserve generated bitmap data for checking. */
+  /**
+   * Preserve generated bitmap data for checking.
+   */
   @Implements(Bitmap.class)
   public static class CustomShadowBitmap extends ShadowBitmap {
 
     private int[] pixels;
 
     @Implementation
-    public void setPixels(
-        int[] pixels, int offset, int stride, int x, int y, int width, int height) {
+    public void setPixels(int[] pixels, int offset, int stride,
+        int x, int y, int width, int height) {
       this.pixels = new int[pixels.length];
       System.arraycopy(pixels, 0, this.pixels, 0, this.pixels.length);
     }
@@ -237,5 +237,6 @@ public class GifDecoderTest {
     public void release(@NonNull int[] array) {
       // Do Nothing
     }
+
   }
 }

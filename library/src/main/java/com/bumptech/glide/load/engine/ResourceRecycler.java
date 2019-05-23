@@ -5,7 +5,9 @@ import android.os.Looper;
 import android.os.Message;
 import com.bumptech.glide.util.Synthetic;
 
-/** A class that can safely recycle recursive resources. */
+/**
+ * A class that can safely recycle recursive resources.
+ */
 class ResourceRecycler {
   private boolean isRecycling;
   private final Handler handler =
@@ -28,7 +30,7 @@ class ResourceRecycler {
     static final int RECYCLE_RESOURCE = 1;
 
     @Synthetic
-    ResourceRecyclerCallback() {}
+    ResourceRecyclerCallback() { }
 
     @Override
     public boolean handleMessage(Message message) {

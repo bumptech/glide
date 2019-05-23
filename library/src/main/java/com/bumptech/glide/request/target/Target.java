@@ -11,35 +11,31 @@ import com.bumptech.glide.request.transition.Transition;
  * An interface that Glide can load a resource into and notify of relevant lifecycle events during a
  * load.
  *
- * <p>The lifecycle events in this class are as follows:
- *
- * <ul>
- *   <li>onLoadStarted
- *   <li>onResourceReady
- *   <li>onLoadCleared
- *   <li>onLoadFailed
- * </ul>
+ * <p> The lifecycle events in this class are as follows: <ul> <li>onLoadStarted</li>
+ * <li>onResourceReady</li> <li>onLoadCleared</li> <li>onLoadFailed</li> </ul>
  *
  * The typical lifecycle is onLoadStarted -> onResourceReady or onLoadFailed -> onLoadCleared.
  * However, there are no guarantees. onLoadStarted may not be called if the resource is in memory or
  * if the load will fail because of a null model object. onLoadCleared similarly may never be called
- * if the target is never cleared. See the docs for the individual methods for details.
+ * if the target is never cleared. See the docs for the individual methods for details. </p>
  *
  * @param <R> The type of resource the target can display.
  */
 public interface Target<R> extends LifecycleListener {
-  /** Indicates that we want the resource in its original unmodified width and/or height. */
+  /**
+   * Indicates that we want the resource in its original unmodified width and/or height.
+   */
   int SIZE_ORIGINAL = Integer.MIN_VALUE;
 
   /**
    * A lifecycle callback that is called when a load is started.
    *
-   * <p>Note - This may not be called for every load, it is possible for example for loads to fail
+   * <p> Note - This may not be called for every load, it is possible for example for loads to fail
    * before the load starts (when the model object is null).
    *
-   * <p>Note - This method may be called multiple times before any other lifecycle method is called.
-   * Loads can be paused and restarted due to lifecycle or connectivity events and each restart may
-   * cause a call here.
+   * <p> Note - This method may be called multiple times before any other lifecycle method is
+   * called. Loads can be paused and restarted due to lifecycle or connectivity events and each
+   * restart may cause a call here.
    *
    * @param placeholder The placeholder drawable to optionally show, or null.
    */
@@ -92,10 +88,14 @@ public interface Target<R> extends LifecycleListener {
    */
   void removeCallback(@NonNull SizeReadyCallback cb);
 
-  /** Sets the current request for this target to retain, should not be called outside of Glide. */
+  /**
+   * Sets the current request for this target to retain, should not be called outside of Glide.
+   */
   void setRequest(@Nullable Request request);
 
-  /** Retrieves the current request for this target, should not be called outside of Glide. */
+  /**
+   * Retrieves the current request for this target, should not be called outside of Glide.
+   */
   @Nullable
   Request getRequest();
 }

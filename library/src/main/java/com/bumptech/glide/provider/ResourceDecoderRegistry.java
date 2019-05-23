@@ -32,8 +32,8 @@ public class ResourceDecoderRegistry {
 
   @NonNull
   @SuppressWarnings("unchecked")
-  public synchronized <T, R> List<ResourceDecoder<T, R>> getDecoders(
-      @NonNull Class<T> dataClass, @NonNull Class<R> resourceClass) {
+  public synchronized <T, R> List<ResourceDecoder<T, R>> getDecoders(@NonNull Class<T> dataClass,
+      @NonNull Class<R> resourceClass) {
     List<ResourceDecoder<T, R>> result = new ArrayList<>();
     for (String bucket : bucketPriorityList) {
       List<Entry<?, ?>> entries = decoders.get(bucket);
@@ -53,8 +53,8 @@ public class ResourceDecoderRegistry {
 
   @NonNull
   @SuppressWarnings("unchecked")
-  public synchronized <T, R> List<Class<R>> getResourceClasses(
-      @NonNull Class<T> dataClass, @NonNull Class<R> resourceClass) {
+  public synchronized <T, R> List<Class<R>> getResourceClasses(@NonNull Class<T> dataClass,
+      @NonNull Class<R> resourceClass) {
     List<Class<R>> result = new ArrayList<>();
     for (String bucket : bucketPriorityList) {
       List<Entry<?, ?>> entries = decoders.get(bucket);
@@ -71,19 +71,15 @@ public class ResourceDecoderRegistry {
     return result;
   }
 
-  public synchronized <T, R> void append(
-      @NonNull String bucket,
+  public synchronized <T, R> void append(@NonNull String bucket,
       @NonNull ResourceDecoder<T, R> decoder,
-      @NonNull Class<T> dataClass,
-      @NonNull Class<R> resourceClass) {
+      @NonNull Class<T> dataClass, @NonNull Class<R> resourceClass) {
     getOrAddEntryList(bucket).add(new Entry<>(dataClass, resourceClass, decoder));
   }
 
-  public synchronized <T, R> void prepend(
-      @NonNull String bucket,
+  public synchronized <T, R> void prepend(@NonNull String bucket,
       @NonNull ResourceDecoder<T, R> decoder,
-      @NonNull Class<T> dataClass,
-      @NonNull Class<R> resourceClass) {
+      @NonNull Class<T> dataClass, @NonNull Class<R> resourceClass) {
     getOrAddEntryList(bucket).add(0, new Entry<>(dataClass, resourceClass, decoder));
   }
 
@@ -106,9 +102,7 @@ public class ResourceDecoderRegistry {
     @Synthetic final Class<R> resourceClass;
     @Synthetic final ResourceDecoder<T, R> decoder;
 
-    public Entry(
-        @NonNull Class<T> dataClass,
-        @NonNull Class<R> resourceClass,
+    public Entry(@NonNull Class<T> dataClass, @NonNull Class<R> resourceClass,
         ResourceDecoder<T, R> decoder) {
       this.dataClass = dataClass;
       this.resourceClass = resourceClass;
@@ -116,8 +110,8 @@ public class ResourceDecoderRegistry {
     }
 
     public boolean handles(@NonNull Class<?> dataClass, @NonNull Class<?> resourceClass) {
-      return this.dataClass.isAssignableFrom(dataClass)
-          && resourceClass.isAssignableFrom(this.resourceClass);
+      return this.dataClass.isAssignableFrom(dataClass) && resourceClass
+          .isAssignableFrom(this.resourceClass);
     }
   }
 }

@@ -12,7 +12,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * An {@link com.bumptech.glide.load.Encoder} that can write an {@link java.io.InputStream} to disk.
+ * An {@link com.bumptech.glide.load.Encoder} that can write an {@link java.io.InputStream} to
+ * disk.
  */
 public class StreamEncoder implements Encoder<InputStream> {
   private static final String TAG = "StreamEncoder";

@@ -14,7 +14,9 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 
-/** A java wrapper for Giphy's http api based on https://github.com/Giphy/GiphyAPI. */
+/**
+ * A java wrapper for Giphy's http api based on https://github.com/Giphy/GiphyAPI.
+ */
 public final class Api {
   private static volatile Api api = null;
   private static final String BETA_KEY = "dc6zaTOxFJmzC";
@@ -34,7 +36,9 @@ public final class Api {
     return signUrl(BASE_URL + TRENDING_PATH + "?limit=" + LIMIT + "&offset=" + OFFSET);
   }
 
-  /** An interface for listening for search results. */
+  /**
+   * An interface for listening for search results.
+   */
   public interface Monitor {
     /**
      * Called when a search completes.
@@ -77,55 +81,55 @@ public final class Api {
   }
 
   private void query(final String apiUrl) {
-    bgHandler.post(
-        new Runnable() {
+    bgHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        URL url;
+        try {
+          url = new URL(apiUrl);
+        } catch (MalformedURLException e) {
+          throw new RuntimeException(e);
+        }
+
+        HttpURLConnection urlConnection = null;
+        InputStream is = null;
+        SearchResult result = new SearchResult();
+        try {
+          urlConnection = (HttpURLConnection) url.openConnection();
+          is = urlConnection.getInputStream();
+          InputStreamReader reader = new InputStreamReader(is);
+          result = new Gson().fromJson(reader, SearchResult.class);
+        } catch (IOException e) {
+          e.printStackTrace();
+        } finally {
+          if (is != null) {
+            try {
+              is.close();
+            } catch (IOException e) {
+              // Do nothing.
+            }
+          }
+          if (urlConnection != null) {
+            urlConnection.disconnect();
+          }
+        }
+
+        final SearchResult finalResult = result;
+        mainHandler.post(new Runnable() {
           @Override
           public void run() {
-            URL url;
-            try {
-              url = new URL(apiUrl);
-            } catch (MalformedURLException e) {
-              throw new RuntimeException(e);
+            for (Monitor monitor : monitors) {
+              monitor.onSearchComplete(finalResult);
             }
-
-            HttpURLConnection urlConnection = null;
-            InputStream is = null;
-            SearchResult result = new SearchResult();
-            try {
-              urlConnection = (HttpURLConnection) url.openConnection();
-              is = urlConnection.getInputStream();
-              InputStreamReader reader = new InputStreamReader(is);
-              result = new Gson().fromJson(reader, SearchResult.class);
-            } catch (IOException e) {
-              e.printStackTrace();
-            } finally {
-              if (is != null) {
-                try {
-                  is.close();
-                } catch (IOException e) {
-                  // Do nothing.
-                }
-              }
-              if (urlConnection != null) {
-                urlConnection.disconnect();
-              }
-            }
-
-            final SearchResult finalResult = result;
-            mainHandler.post(
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    for (Monitor monitor : monitors) {
-                      monitor.onSearchComplete(finalResult);
-                    }
-                  }
-                });
           }
         });
+      }
+    });
   }
 
-  /** A POJO mirroring the top level result JSON object returned from Giphy's api. */
+  /**
+   * A POJO mirroring the top level result JSON object returned from Giphy's api.
+   */
   public static final class SearchResult {
     public GifResult[] data;
 
@@ -156,14 +160,16 @@ public final class Api {
     public boolean equals(Object obj) {
       if (obj instanceof GifResult) {
         GifResult other = (GifResult) obj;
-        return Util.bothNullOrEqual(id, other.id) && Util.bothNullOrEqual(images, other.images);
+        return Util.bothNullOrEqual(id, other.id)
+            && Util.bothNullOrEqual(images, other.images);
       }
       return false;
     }
 
     @Override
     public String toString() {
-      return "GifResult{" + "id='" + id + '\'' + ", images=" + images + '}';
+      return "GifResult{" + "id='" + id + '\'' + ", images=" + images
+          + '}';
     }
   }
 
@@ -197,13 +203,8 @@ public final class Api {
 
     @Override
     public String toString() {
-      return "GifUrlSet{"
-          + "original="
-          + original
-          + ", fixed_width="
-          + fixed_width
-          + ", fixed_height="
-          + fixed_height
+      return "GifUrlSet{" + "original=" + original + ", fixed_width="
+          + fixed_width + ", fixed_height=" + fixed_height
           + '}';
     }
   }

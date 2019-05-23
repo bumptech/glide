@@ -2,7 +2,9 @@ package com.bumptech.glide.gifdecoder.test;
 
 import java.nio.ByteBuffer;
 
-/** Utils for writing the bytes of various parts of GIFs to byte buffers. */
+/**
+ * Utils for writing the bytes of various parts of GIFs to byte buffers.
+ */
 public class GifBytesTestUtil {
   // Length in bytes.
   public static final int HEADER_LENGTH = 13;
@@ -43,14 +45,8 @@ public class GifBytesTestUtil {
     }
   }
 
-  public static void writeImageDescriptor(
-      ByteBuffer out,
-      int imageLeft,
-      int imageTop,
-      int imageWidth,
-      int imageHeight,
-      boolean hasLct,
-      int numColors) {
+  public static void writeImageDescriptor(ByteBuffer out, int imageLeft, int imageTop,
+      int imageWidth, int imageHeight, boolean hasLct, int numColors) {
     verifyRemaining(out, IMAGE_DESCRIPTOR_LENGTH);
     verifyShortValues(imageLeft, imageTop, imageWidth, imageHeight);
 
@@ -64,19 +60,16 @@ public class GifBytesTestUtil {
 
     // Image separator
     out.put((byte) 0x2C);
-    out.putShort((short) imageLeft)
-        .putShort((short) imageTop)
-        .putShort((short) imageWidth)
-        .putShort((short) imageHeight)
-        .put(packed);
+    out.putShort((short) imageLeft).putShort((short) imageTop).putShort((short) imageWidth)
+        .putShort((short) imageHeight).put(packed);
   }
 
   private static int log2(int num) {
     return (int) Math.round(Math.log(num) / Math.log(2));
   }
 
-  public static void writeHeaderAndLsd(
-      ByteBuffer out, int width, int height, boolean hasGct, int gctSize) {
+  public static void writeHeaderAndLsd(ByteBuffer out, int width, int height, boolean hasGct,
+      int gctSize) {
     verifyRemaining(out, HEADER_LENGTH);
     verifyShortValues(width, height);
 

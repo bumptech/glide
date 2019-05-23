@@ -32,16 +32,13 @@ public class RequestManagerFragment extends Fragment {
   private final ActivityFragmentLifecycle lifecycle;
   private final RequestManagerTreeNode requestManagerTreeNode =
       new FragmentRequestManagerTreeNode();
-
   @SuppressWarnings("deprecation")
   private final Set<RequestManagerFragment> childRequestManagerFragments = new HashSet<>();
 
   @Nullable private RequestManager requestManager;
-
   @SuppressWarnings("deprecation")
   @Nullable
   private RequestManagerFragment rootRequestManagerFragment;
-
   @Nullable private Fragment parentFragmentHint;
 
   public RequestManagerFragment() {
@@ -68,13 +65,17 @@ public class RequestManagerFragment extends Fragment {
     return lifecycle;
   }
 
-  /** Returns the current {@link com.bumptech.glide.RequestManager} or null if none exists. */
+  /**
+   * Returns the current {@link com.bumptech.glide.RequestManager} or null if none exists.
+   */
   @Nullable
   public RequestManager getRequestManager() {
     return requestManager;
   }
 
-  /** Returns the {@link RequestManagerTreeNode} for this fragment. */
+  /**
+   * Returns the {@link RequestManagerTreeNode} for this fragment.
+   */
   @NonNull
   public RequestManagerTreeNode getRequestManagerTreeNode() {
     return requestManagerTreeNode;
@@ -108,8 +109,8 @@ public class RequestManagerFragment extends Fragment {
       return Collections.emptySet();
     } else {
       Set<RequestManagerFragment> descendants = new HashSet<>();
-      for (RequestManagerFragment fragment :
-          rootRequestManagerFragment.getDescendantRequestManagerFragments()) {
+      for (RequestManagerFragment fragment : rootRequestManagerFragment
+          .getDescendantRequestManagerFragments()) {
         if (isDescendant(fragment.getParentFragment())) {
           descendants.add(fragment);
         }
@@ -141,7 +142,9 @@ public class RequestManagerFragment extends Fragment {
     return fragment != null ? fragment : parentFragmentHint;
   }
 
-  /** Returns true if the fragment is a descendant of our parent. */
+  /**
+   * Returns true if the fragment is a descendant of our parent.
+   */
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
   private boolean isDescendant(@NonNull Fragment fragment) {
     Fragment root = getParentFragment();
@@ -219,7 +222,7 @@ public class RequestManagerFragment extends Fragment {
   private class FragmentRequestManagerTreeNode implements RequestManagerTreeNode {
 
     @Synthetic
-    FragmentRequestManagerTreeNode() {}
+    FragmentRequestManagerTreeNode() { }
 
     @SuppressWarnings("deprecation")
     @NonNull

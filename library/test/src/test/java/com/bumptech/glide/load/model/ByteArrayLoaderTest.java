@@ -47,8 +47,7 @@ public class ByteArrayLoaderTest {
     Object expected = new Object();
     when(converter.convert(eq(data))).thenReturn(expected);
 
-    Preconditions.checkNotNull(loader.buildLoadData(data, 10, 10, options))
-        .fetcher
+    Preconditions.checkNotNull(loader.buildLoadData(data, 10, 10, options)).fetcher
         .loadData(Priority.HIGH, callback);
     verify(callback).onDataReady(eq(expected));
   }
@@ -58,8 +57,7 @@ public class ByteArrayLoaderTest {
     when(converter.getDataClass()).thenReturn(Object.class);
     assertEquals(
         Object.class,
-        Preconditions.checkNotNull(loader.buildLoadData(new byte[10], 10, 10, options))
-            .fetcher
+        Preconditions.checkNotNull(loader.buildLoadData(new byte[10], 10, 10, options)).fetcher
             .getDataClass());
   }
 }

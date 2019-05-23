@@ -14,7 +14,8 @@ import java.util.List;
  * Generates {@link com.bumptech.glide.load.data.DataFetcher DataFetchers} from cache files
  * containing downsampled/transformed resource data.
  */
-class ResourceCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCallback<Object> {
+class ResourceCacheGenerator implements DataFetcherGenerator,
+    DataFetcher.DataCallback<Object> {
 
   private final FetcherReadyCallback cb;
   private final DecodeHelper<?> helper;
@@ -29,7 +30,6 @@ class ResourceCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCa
   // multiple calls to startNext.
   @SuppressWarnings("PMD.SingularField")
   private File cacheFile;
-
   private ResourceCacheKey currentKey;
 
   ResourceCacheGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
@@ -51,10 +51,8 @@ class ResourceCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCa
         return false;
       }
       throw new IllegalStateException(
-          "Failed to find any load path from "
-              + helper.getModelClass()
-              + " to "
-              + helper.getTranscodeClass());
+         "Failed to find any load path from " + helper.getModelClass() + " to "
+             + helper.getTranscodeClass());
     }
     while (modelLoaders == null || !hasNextModelLoader()) {
       resourceClassIndex++;
@@ -73,7 +71,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCa
       // we only run until the first one succeeds, the loop runs for only a limited
       // number of iterations on the order of 10-20 in the worst case.
       currentKey =
-          new ResourceCacheKey( // NOPMD AvoidInstantiatingObjectsInLoops
+          new ResourceCacheKey(// NOPMD AvoidInstantiatingObjectsInLoops
               helper.getArrayPool(),
               sourceId,
               helper.getSignature(),
@@ -94,9 +92,8 @@ class ResourceCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCa
     boolean started = false;
     while (!started && hasNextModelLoader()) {
       ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
-      loadData =
-          modelLoader.buildLoadData(
-              cacheFile, helper.getWidth(), helper.getHeight(), helper.getOptions());
+      loadData = modelLoader.buildLoadData(cacheFile,
+          helper.getWidth(), helper.getHeight(), helper.getOptions());
       if (loadData != null && helper.hasLoadPath(loadData.fetcher.getDataClass())) {
         started = true;
         loadData.fetcher.loadData(helper.getPriority(), this);
@@ -120,8 +117,8 @@ class ResourceCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCa
 
   @Override
   public void onDataReady(Object data) {
-    cb.onDataFetcherReady(
-        sourceKey, data, loadData.fetcher, DataSource.RESOURCE_DISK_CACHE, currentKey);
+    cb.onDataFetcherReady(sourceKey, data, loadData.fetcher, DataSource.RESOURCE_DISK_CACHE,
+        currentKey);
   }
 
   @Override

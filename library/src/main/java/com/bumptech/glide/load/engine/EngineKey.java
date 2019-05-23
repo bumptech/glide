@@ -8,7 +8,9 @@ import com.bumptech.glide.util.Preconditions;
 import java.security.MessageDigest;
 import java.util.Map;
 
-/** An in memory only cache key used to multiplex loads. */
+/**
+ * An in memory only cache key used to multiplex loads.
+ */
 class EngineKey implements Key {
   private final Object model;
   private final int width;
@@ -75,24 +77,15 @@ class EngineKey implements Key {
   @Override
   public String toString() {
     return "EngineKey{"
-        + "model="
-        + model
-        + ", width="
-        + width
-        + ", height="
-        + height
-        + ", resourceClass="
-        + resourceClass
-        + ", transcodeClass="
-        + transcodeClass
-        + ", signature="
-        + signature
-        + ", hashCode="
-        + hashCode
-        + ", transformations="
-        + transformations
-        + ", options="
-        + options
+        + "model=" + model
+        + ", width=" + width
+        + ", height=" + height
+        + ", resourceClass=" + resourceClass
+        + ", transcodeClass=" + transcodeClass
+        + ", signature=" + signature
+        + ", hashCode=" + hashCode
+        + ", transformations=" + transformations
+        + ", options=" + options
         + '}';
   }
 

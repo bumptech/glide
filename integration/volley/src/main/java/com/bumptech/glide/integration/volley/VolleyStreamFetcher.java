@@ -17,22 +17,20 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
-/** A DataFetcher backed by volley for fetching images via http. */
+/**
+ * A DataFetcher backed by volley for fetching images via http.
+ */
 // Public API.
 @SuppressWarnings("WeakerAccess")
 public class VolleyStreamFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "VolleyStreamFetcher";
-  public static final VolleyRequestFactory DEFAULT_REQUEST_FACTORY =
-      new VolleyRequestFactory() {
-        @Override
-        public Request<byte[]> create(
-            String url,
-            DataCallback<? super InputStream> callback,
-            Request.Priority priority,
-            Map<String, String> headers) {
-          return new GlideRequest(url, callback, priority, headers);
-        }
-      };
+  public static final VolleyRequestFactory DEFAULT_REQUEST_FACTORY = new VolleyRequestFactory() {
+    @Override
+    public Request<byte[]> create(String url, DataCallback<? super InputStream> callback,
+        Request.Priority priority, Map<String, String> headers) {
+      return new GlideRequest(url, callback, priority, headers);
+    }
+  };
 
   private final RequestQueue requestQueue;
   private final VolleyRequestFactory requestFactory;
@@ -44,19 +42,18 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
     this(requestQueue, url, DEFAULT_REQUEST_FACTORY);
   }
 
-  public VolleyStreamFetcher(
-      RequestQueue requestQueue, GlideUrl url, VolleyRequestFactory requestFactory) {
+  public VolleyStreamFetcher(RequestQueue requestQueue, GlideUrl url,
+      VolleyRequestFactory requestFactory) {
     this.requestQueue = requestQueue;
     this.url = url;
     this.requestFactory = requestFactory;
   }
 
   @Override
-  public void loadData(
-      @NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
-    request =
-        requestFactory.create(
-            url.toStringUrl(), callback, glideToVolleyPriority(priority), url.getHeaders());
+  public void loadData(@NonNull Priority priority,
+      @NonNull DataCallback<? super InputStream> callback) {
+    request = requestFactory.create(url.toStringUrl(), callback, glideToVolleyPriority(priority),
+        url.getHeaders());
     requestQueue.add(request);
   }
 
@@ -113,10 +110,7 @@ public class VolleyStreamFetcher implements DataFetcher<InputStream> {
       this(url, callback, priority, Collections.<String, String>emptyMap());
     }
 
-    public GlideRequest(
-        String url,
-        DataCallback<? super InputStream> callback,
-        Priority priority,
+    public GlideRequest(String url, DataCallback<? super InputStream> callback, Priority priority,
         Map<String, String> headers) {
       super(Method.GET, url, null);
       this.callback = callback;

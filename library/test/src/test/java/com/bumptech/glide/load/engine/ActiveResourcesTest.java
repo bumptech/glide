@@ -411,7 +411,7 @@ public class ActiveResourcesTest {
   }
 
   private void waitForLatch(CountDownLatch latch) {
-    try {
+     try {
       latch.await(10, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
@@ -421,13 +421,12 @@ public class ActiveResourcesTest {
 
   private CountDownLatch getLatchForClearedRef() {
     final CountDownLatch toWait = new CountDownLatch(1);
-    resources.setDequeuedResourceCallback(
-        new DequeuedResourceCallback() {
-          @Override
-          public void onResourceDequeued() {
-            toWait.countDown();
-          }
-        });
+    resources.setDequeuedResourceCallback(new DequeuedResourceCallback() {
+      @Override
+      public void onResourceDequeued() {
+        toWait.countDown();
+      }
+    });
     return toWait;
   }
 
@@ -443,7 +442,7 @@ public class ActiveResourcesTest {
 
   @SuppressWarnings("unchecked")
   private static ArgumentCaptor<EngineResource<?>> getEngineResourceCaptor() {
-    return (ArgumentCaptor<EngineResource<?>>)
-        (ArgumentCaptor<?>) ArgumentCaptor.forClass(EngineResource.class);
+    return (ArgumentCaptor<EngineResource<?>>) (ArgumentCaptor<?>)
+        ArgumentCaptor.forClass(EngineResource.class);
   }
 }

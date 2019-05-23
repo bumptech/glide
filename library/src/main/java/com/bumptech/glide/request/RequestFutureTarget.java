@@ -24,24 +24,26 @@ import java.util.concurrent.TimeoutException;
  * of reusing objects of this class, the pattern should be:
  *
  * <pre>{@code
- * FutureTarget<File> target = null;
- * RequestManager requestManager = Glide.with(context);
- * try {
- *   target = requestManager
- *      .downloadOnly()
- *      .load(model)
- *      .submit();
- *   File downloadedFile = target.get();
- *   // ... do something with the file (usually throws IOException)
- * } catch (ExecutionException | InterruptedException | IOException e) {
- *   // ... bug reporting or recovery
- * } finally {
- *   // make sure to cancel pending operations and free resources
- *   if (target != null) {
- *     target.cancel(true); // mayInterruptIfRunning
- *   }
+ *  FutureTarget<File> target = null;
+ *  RequestManager requestManager = Glide.with(context);
+ *  try {
+ *    target = requestManager
+ *       .downloadOnly()
+ *       .load(model)
+ *       .submit();
+ *    File downloadedFile = target.get();
+ *    // ... do something with the file (usually throws IOException)
+ *  } catch (ExecutionException | InterruptedException | IOException e) {
+ *    // ... bug reporting or recovery
+ *  } finally {
+ *    // make sure to cancel pending operations and free resources
+ *    if (target != null) {
+ *      target.cancel(true); // mayInterruptIfRunning
+ *    }
+ *  }
  * }
- * }</pre>
+ *
+ * </pre>
  *
  * The {@link #cancel(boolean)} call will cancel pending operations and make sure that any resources
  * used are recycled.
@@ -115,7 +117,9 @@ public class RequestFutureTarget<R> implements FutureTarget<R>, RequestListener<
     return doGet(timeUnit.toMillis(time));
   }
 
-  /** A callback that should never be invoked directly. */
+  /**
+   * A callback that should never be invoked directly.
+   */
   @Override
   public void getSize(@NonNull SizeReadyCallback cb) {
     cb.onSizeReady(width, height);
@@ -137,28 +141,36 @@ public class RequestFutureTarget<R> implements FutureTarget<R>, RequestListener<
     return request;
   }
 
-  /** A callback that should never be invoked directly. */
+  /**
+   * A callback that should never be invoked directly.
+   */
   @Override
   public void onLoadCleared(@Nullable Drawable placeholder) {
     // Do nothing.
   }
 
-  /** A callback that should never be invoked directly. */
+  /**
+   * A callback that should never be invoked directly.
+   */
   @Override
   public void onLoadStarted(@Nullable Drawable placeholder) {
     // Do nothing.
   }
 
-  /** A callback that should never be invoked directly. */
+  /**
+   * A callback that should never be invoked directly.
+   */
   @Override
   public synchronized void onLoadFailed(@Nullable Drawable errorDrawable) {
     // Ignored, synchronized for backwards compatibility.
   }
 
-  /** A callback that should never be invoked directly. */
+  /**
+   * A callback that should never be invoked directly.
+   */
   @Override
-  public synchronized void onResourceReady(
-      @NonNull R resource, @Nullable Transition<? super R> transition) {
+  public synchronized void onResourceReady(@NonNull R resource,
+      @Nullable Transition<? super R> transition) {
     // Ignored, synchronized for backwards compatibility.
   }
 

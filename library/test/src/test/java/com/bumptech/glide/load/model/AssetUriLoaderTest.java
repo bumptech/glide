@@ -43,7 +43,6 @@ public class AssetUriLoaderTest {
     assertEquals(
         fetcher,
         Preconditions.checkNotNull(
-                loader.buildLoadData(assetUri, IMAGE_SIDE, IMAGE_SIDE, new Options()))
-            .fetcher);
+            loader.buildLoadData(assetUri, IMAGE_SIDE, IMAGE_SIDE, new Options())).fetcher);
   }
 }

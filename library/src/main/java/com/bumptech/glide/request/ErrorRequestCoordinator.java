@@ -6,9 +6,11 @@ import android.support.annotation.Nullable;
  * Runs a single primary {@link Request} until it completes and then a fallback error request only
  * if the single primary request fails.
  */
-public final class ErrorRequestCoordinator implements RequestCoordinator, Request {
+public final class ErrorRequestCoordinator implements RequestCoordinator,
+    Request {
 
-  @Nullable private final RequestCoordinator parent;
+  @Nullable
+  private final RequestCoordinator parent;
   private Request primary;
   private Request error;
 

@@ -16,20 +16,19 @@ import java.util.List;
 public final class FactoryPools {
   private static final String TAG = "FactoryPools";
   private static final int DEFAULT_POOL_SIZE = 20;
-  private static final Resetter<Object> EMPTY_RESETTER =
-      new Resetter<Object>() {
-        @Override
-        public void reset(@NonNull Object object) {
-          // Do nothing.
-        }
-      };
+  private static final Resetter<Object> EMPTY_RESETTER = new Resetter<Object>() {
+    @Override
+    public void reset(@NonNull Object object) {
+      // Do nothing.
+    }
+  };
 
-  private FactoryPools() {}
+  private FactoryPools() { }
 
   /**
-   * Returns a non-thread safe {@link Pool} that never returns {@code null} from {@link
-   * Pool#acquire()} and that contains objects of the type created by the given {@link Factory} with
-   * the given maximum size.
+   * Returns a non-thread safe {@link Pool} that never returns {@code null} from
+   * {@link Pool#acquire()} and that contains objects of the type created by the given
+   * {@link Factory} with the given maximum size.
    *
    * <p>If the pool is empty when {@link Pool#acquire()} is called, the given {@link Factory} will
    * be used to create a new instance.
@@ -42,9 +41,9 @@ public final class FactoryPools {
   }
 
   /**
-   * Returns a new thread safe {@link Pool} that never returns {@code null} from {@link
-   * Pool#acquire()} and that contains objects of the type created by the given {@link Factory} with
-   * the given maximum size.
+   * Returns a new thread safe {@link Pool} that never returns {@code null} from
+   * {@link Pool#acquire()} and that contains objects of the type created by the given
+   * {@link Factory} with the given maximum size.
    *
    * <p>If the pool is empty when {@link Pool#acquire()} is called, the given {@link Factory} will
    * be used to create a new instance.
@@ -71,8 +70,8 @@ public final class FactoryPools {
   }
 
   /**
-   * Returns a new thread safe {@link Pool} that never returns {@code null} and that contains {@link
-   * List Lists} of a specific generic type with the given maximum size.
+   * Returns a new thread safe {@link Pool} that never returns {@code null} and that contains
+   * {@link List Lists} of a specific generic type with the given maximum size.
    *
    * <p>If the pool is empty when {@link Pool#acquire()} is called, a new {@link List} will be
    * created.
@@ -83,32 +82,29 @@ public final class FactoryPools {
   @SuppressWarnings("WeakerAccess")
   @NonNull
   public static <T> Pool<List<T>> threadSafeList(int size) {
-    return build(
-        new SynchronizedPool<List<T>>(size),
-        new Factory<List<T>>() {
-          @NonNull
-          @Override
-          public List<T> create() {
-            return new ArrayList<>();
-          }
-        },
-        new Resetter<List<T>>() {
-          @Override
-          public void reset(@NonNull List<T> object) {
-            object.clear();
-          }
-        });
+    return build(new SynchronizedPool<List<T>>(size), new Factory<List<T>>() {
+      @NonNull
+      @Override
+      public List<T> create() {
+        return new ArrayList<>();
+      }
+    }, new Resetter<List<T>>() {
+      @Override
+      public void reset(@NonNull List<T> object) {
+        object.clear();
+      }
+    });
   }
 
   @NonNull
-  private static <T extends Poolable> Pool<T> build(
-      @NonNull Pool<T> pool, @NonNull Factory<T> factory) {
+  private static <T extends Poolable> Pool<T> build(@NonNull Pool<T> pool,
+      @NonNull Factory<T> factory) {
     return build(pool, factory, FactoryPools.<T>emptyResetter());
   }
 
   @NonNull
-  private static <T> Pool<T> build(
-      @NonNull Pool<T> pool, @NonNull Factory<T> factory, @NonNull Resetter<T> resetter) {
+  private static <T> Pool<T> build(@NonNull Pool<T> pool, @NonNull Factory<T> factory,
+      @NonNull Resetter<T> resetter) {
     return new FactoryPool<>(pool, factory, resetter);
   }
 
@@ -137,8 +133,8 @@ public final class FactoryPools {
   }
 
   /**
-   * Allows additional verification to catch errors caused by using objects while they are in an
-   * object pool.
+   * Allows additional verification to catch errors caused by using objects while they are in
+   * an object pool.
    */
   public interface Poolable {
     @NonNull

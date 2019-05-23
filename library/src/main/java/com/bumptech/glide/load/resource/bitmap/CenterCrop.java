@@ -10,7 +10,7 @@ import java.security.MessageDigest;
  * the image is greater than the given height or vice versa, and then crop the larger dimension to
  * match the given dimension.
  *
- * <p>Does not maintain the image's aspect ratio
+ * Does not maintain the image's aspect ratio
  */
 public class CenterCrop extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.CenterCrop";

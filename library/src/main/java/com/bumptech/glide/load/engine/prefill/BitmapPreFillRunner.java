@@ -30,7 +30,8 @@ import java.util.concurrent.TimeUnit;
  * limit, we assume a GC has occurred, stop the current allocations, and try again after a delay.
  */
 final class BitmapPreFillRunner implements Runnable {
-  @VisibleForTesting static final String TAG = "PreFillRunner";
+  @VisibleForTesting
+  static final String TAG = "PreFillRunner";
   private static final Clock DEFAULT_CLOCK = new Clock();
 
   /**
@@ -44,10 +45,14 @@ final class BitmapPreFillRunner implements Runnable {
    */
   static final long INITIAL_BACKOFF_MS = 40;
 
-  /** The amount by which the current backoff time is multiplied each time we detect a GC. */
+  /**
+   * The amount by which the current backoff time is multiplied each time we detect a GC.
+   */
   static final int BACKOFF_RATIO = 4;
 
-  /** The maximum amount of time in ms we wait before continuing to allocate. */
+  /**
+   * The maximum amount of time in ms we wait before continuing to allocate.
+   */
   static final long MAX_BACKOFF_MS = TimeUnit.SECONDS.toMillis(1);
 
   private final BitmapPool bitmapPool;
@@ -129,16 +134,9 @@ final class BitmapPreFillRunner implements Runnable {
       }
 
       if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(
-            TAG,
-            "allocated ["
-                + toAllocate.getWidth()
-                + "x"
-                + toAllocate.getHeight()
-                + "] "
-                + toAllocate.getConfig()
-                + " size: "
-                + bitmapSize);
+        Log.d(TAG,
+            "allocated [" + toAllocate.getWidth() + "x" + toAllocate.getHeight() + "] "
+                + toAllocate.getConfig() + " size: " + bitmapSize);
       }
     }
 
@@ -170,7 +168,7 @@ final class BitmapPreFillRunner implements Runnable {
 
     @Synthetic
     @SuppressWarnings("WeakerAccess")
-    UniqueKey() {}
+    UniqueKey() { }
 
     @Override
     public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {

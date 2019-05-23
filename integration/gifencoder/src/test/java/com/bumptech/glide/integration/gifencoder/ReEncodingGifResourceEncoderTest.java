@@ -42,7 +42,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-/** Tests for {@link com.bumptech.glide.integration.gifencoder.ReEncodingGifResourceEncoder}. */
+/**
+ * Tests for {@link com.bumptech.glide.integration.gifencoder.ReEncodingGifResourceEncoder}.
+ */
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class ReEncodingGifResourceEncoderTest {
@@ -247,7 +249,7 @@ public class ReEncodingGifResourceEncoderTest {
     Bitmap transformedFrame = Bitmap.createBitmap(200, 200, Bitmap.Config.RGB_565);
     when(transformedResource.get()).thenReturn(transformedFrame);
     when(frameTransformation.transform(
-            anyContext(), eq(frameResource), eq(expectedWidth), eq(expectedHeight)))
+        anyContext(), eq(frameResource), eq(expectedWidth), eq(expectedHeight)))
         .thenReturn(transformedResource);
     when(gifDrawable.getFrameTransformation()).thenReturn(frameTransformation);
 

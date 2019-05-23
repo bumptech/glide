@@ -11,7 +11,8 @@ import java.io.OutputStream;
  * provided {@link ArrayPool}.
  */
 public final class BufferedOutputStream extends OutputStream {
-  @NonNull private final OutputStream out;
+  @NonNull
+  private final OutputStream out;
   private byte[] buffer;
   private ArrayPool arrayPool;
   private int index;

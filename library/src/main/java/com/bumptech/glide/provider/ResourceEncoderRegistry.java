@@ -15,13 +15,13 @@ public class ResourceEncoderRegistry {
   // TODO: this should probably be a put.
   private final List<Entry<?>> encoders = new ArrayList<>();
 
-  public synchronized <Z> void append(
-      @NonNull Class<Z> resourceClass, @NonNull ResourceEncoder<Z> encoder) {
+  public synchronized <Z> void append(@NonNull Class<Z> resourceClass,
+      @NonNull ResourceEncoder<Z> encoder) {
     encoders.add(new Entry<>(resourceClass, encoder));
   }
 
-  public synchronized <Z> void prepend(
-      @NonNull Class<Z> resourceClass, @NonNull ResourceEncoder<Z> encoder) {
+  public synchronized <Z> void prepend(@NonNull Class<Z> resourceClass,
+      @NonNull ResourceEncoder<Z> encoder) {
     encoders.add(0, new Entry<>(resourceClass, encoder));
   }
 

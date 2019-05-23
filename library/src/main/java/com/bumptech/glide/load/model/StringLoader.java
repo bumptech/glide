@@ -26,8 +26,8 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(
-      @NonNull String model, int width, int height, @NonNull Options options) {
+  public LoadData<Data> buildLoadData(@NonNull String model, int width, int height,
+      @NonNull Options options) {
     Uri uri = parseUri(model);
     if (uri == null || !uriLoader.handles(uri)) {
       return null;
@@ -47,7 +47,7 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     Uri uri;
     if (TextUtils.isEmpty(model)) {
       return null;
-      // See https://pmd.github.io/pmd-6.0.0/pmd_rules_java_performance.html#simplifystartswith
+    // See https://pmd.github.io/pmd-6.0.0/pmd_rules_java_performance.html#simplifystartswith
     } else if (model.charAt(0) == '/') {
       uri = toFileUri(model);
     } else {
@@ -64,12 +64,15 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     return Uri.fromFile(new File(path));
   }
 
-  /** Factory for loading {@link InputStream}s from Strings. */
+  /**
+   * Factory for loading {@link InputStream}s from Strings.
+   */
   public static class StreamFactory implements ModelLoaderFactory<String, InputStream> {
 
     @NonNull
     @Override
-    public ModelLoader<String, InputStream> build(@NonNull MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<String, InputStream> build(
+        @NonNull MultiModelLoaderFactory multiFactory) {
       return new StringLoader<>(multiFactory.build(Uri.class, InputStream.class));
     }
 
@@ -79,7 +82,9 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     }
   }
 
-  /** Factory for loading {@link ParcelFileDescriptor}s from Strings. */
+  /**
+   * Factory for loading {@link ParcelFileDescriptor}s from Strings.
+   */
   public static class FileDescriptorFactory
       implements ModelLoaderFactory<String, ParcelFileDescriptor> {
 
@@ -96,7 +101,9 @@ public class StringLoader<Data> implements ModelLoader<String, Data> {
     }
   }
 
-  /** Loads {@link AssetFileDescriptor}s from Strings. */
+  /**
+   * Loads {@link AssetFileDescriptor}s from Strings.
+   */
   public static final class AssetFileDescriptorFactory
       implements ModelLoaderFactory<String, AssetFileDescriptor> {
 

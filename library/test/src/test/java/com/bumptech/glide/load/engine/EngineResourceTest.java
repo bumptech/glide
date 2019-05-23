@@ -101,19 +101,17 @@ public class EngineResourceTest {
 
   @Test
   public void testThrowsIfAcquiredOnBackgroundThread() throws InterruptedException {
-    Thread otherThread =
-        new Thread(
-            new Runnable() {
-              @Override
-              public void run() {
-                try {
-                  engineResource.acquire();
-                } catch (IllegalThreadStateException e) {
-                  return;
-                }
-                fail("Failed to receive expected IllegalThreadStateException");
-              }
-            });
+    Thread otherThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          engineResource.acquire();
+        } catch (IllegalThreadStateException e) {
+          return;
+        }
+        fail("Failed to receive expected IllegalThreadStateException");
+      }
+    });
     otherThread.start();
     otherThread.join();
   }
@@ -121,19 +119,17 @@ public class EngineResourceTest {
   @Test
   public void testThrowsIfReleasedOnBackgroundThread() throws InterruptedException {
     engineResource.acquire();
-    Thread otherThread =
-        new Thread(
-            new Runnable() {
-              @Override
-              public void run() {
-                try {
-                  engineResource.release();
-                } catch (IllegalThreadStateException e) {
-                  return;
-                }
-                fail("Failed to receive expected IllegalThreadStateException");
-              }
-            });
+    Thread otherThread = new Thread(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          engineResource.release();
+        } catch (IllegalThreadStateException e) {
+          return;
+        }
+        fail("Failed to receive expected IllegalThreadStateException");
+      }
+    });
     otherThread.start();
     otherThread.join();
   }

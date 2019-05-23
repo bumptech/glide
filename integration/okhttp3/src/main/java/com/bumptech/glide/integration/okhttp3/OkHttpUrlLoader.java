@@ -10,7 +10,9 @@ import java.io.InputStream;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 
-/** A simple model loader for fetching media over http/https using OkHttp. */
+/**
+ * A simple model loader for fetching media over http/https using OkHttp.
+ */
 public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   private final Call.Factory client;
@@ -27,12 +29,14 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(
-      @NonNull GlideUrl model, int width, int height, @NonNull Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull GlideUrl model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(model, new OkHttpStreamFetcher(client, model));
   }
 
-  /** The default factory for {@link OkHttpUrlLoader}s. */
+  /**
+   * The default factory for {@link OkHttpUrlLoader}s.
+   */
   // Public API.
   @SuppressWarnings("WeakerAccess")
   public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
@@ -50,7 +54,9 @@ public class OkHttpUrlLoader implements ModelLoader<GlideUrl, InputStream> {
       return internalClient;
     }
 
-    /** Constructor for a new Factory that runs requests using a static singleton client. */
+    /**
+     * Constructor for a new Factory that runs requests using a static singleton client.
+     */
     public Factory() {
       this(getInternalClient());
     }

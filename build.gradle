@@ -19,8 +19,6 @@ buildscript {
             classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_PLUGIN_VERSION}"
         }
         classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
-        // TODO: Re-enable once import ordering is consistent when exporting with Copybara.
-//        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.23.0"
     }
 }
 
@@ -93,21 +91,6 @@ subprojects { project ->
     tasks.withType(Jar) {
         duplicatesStrategy = DuplicatesStrategy.FAIL
     }
-
-    // TODO: Re-enable once import ordering is consistent when exporting with Copybara.
-//    apply plugin: "com.diffplug.gradle.spotless"
-//
-//    spotless {
-//        java {
-//            target fileTree('.') {
-//                include '**/*.java'
-//                exclude '**/resources/**'
-//                exclude '**/build/**'
-//                exclude '**/disklrucache/**'
-//            }
-//            googleJavaFormat()
-//        }
-//    }
 
     apply plugin: 'checkstyle'
 

@@ -56,8 +56,8 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
 
   @Nullable
   @Override
-  public Resource<Drawable> decode(
-      @NonNull Uri source, int width, int height, @NonNull Options options) {
+  public Resource<Drawable> decode(@NonNull Uri source, int width, int height,
+      @NonNull Options options) {
     String packageName = source.getAuthority();
     Context targetContext = findContextForPackage(source, packageName);
     @DrawableRes int resId = findResourceIdFromUri(targetContext, source);

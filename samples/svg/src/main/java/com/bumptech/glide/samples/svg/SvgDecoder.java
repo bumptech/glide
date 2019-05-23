@@ -10,7 +10,9 @@ import com.caverock.androidsvg.SVGParseException;
 import java.io.IOException;
 import java.io.InputStream;
 
-/** Decodes an SVG internal representation from an {@link InputStream}. */
+/**
+ * Decodes an SVG internal representation from an {@link InputStream}.
+ */
 public class SvgDecoder implements ResourceDecoder<InputStream, SVG> {
 
   @Override
@@ -19,8 +21,8 @@ public class SvgDecoder implements ResourceDecoder<InputStream, SVG> {
     return true;
   }
 
-  public Resource<SVG> decode(
-      @NonNull InputStream source, int width, int height, @NonNull Options options)
+  public Resource<SVG> decode(@NonNull InputStream source, int width, int height,
+      @NonNull Options options)
       throws IOException {
     try {
       SVG svg = SVG.getFromInputStream(source);

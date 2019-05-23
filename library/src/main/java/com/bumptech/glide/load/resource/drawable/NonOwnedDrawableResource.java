@@ -6,8 +6,8 @@ import android.support.annotation.Nullable;
 import com.bumptech.glide.load.engine.Resource;
 
 /**
- * Handles generic {@link Drawable} types where we may be uncertain of their size or type and where
- * we don't know that it's safe for us to recycle or re-use the Drawable.
+ * Handles generic {@link Drawable} types where we may be uncertain of their size or type and
+ * where we don't know that it's safe for us to recycle or re-use the Drawable.
  */
 final class NonOwnedDrawableResource extends DrawableResource<Drawable> {
 

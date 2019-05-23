@@ -5,7 +5,9 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-/** An always square {@link ImageView}. */
+/**
+ * An always square {@link ImageView}.
+ */
 public final class SquareImageView extends AppCompatImageView {
 
   public SquareImageView(Context context) {
@@ -27,3 +29,4 @@ public final class SquareImageView extends AppCompatImageView {
     super.onMeasure(widthMeasureSpec, widthMeasureSpec);
   }
 }
+

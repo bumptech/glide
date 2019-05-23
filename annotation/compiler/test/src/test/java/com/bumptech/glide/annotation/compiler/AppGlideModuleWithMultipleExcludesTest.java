@@ -24,9 +24,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class AppGlideModuleWithMultipleExcludesTest implements CompilationProvider {
-  @Rule
-  public final RegenerateResourcesRule regenerateResourcesRule = new RegenerateResourcesRule(this);
-
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(this);
   private Compilation compilation;
 
   @Before

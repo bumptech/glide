@@ -22,10 +22,8 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowAppWidgetManager;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    manifest = Config.NONE,
-    sdk = 18,
-    shadows = AppWidgetTargetTest.UpdateShadowAppWidgetManager.class)
+@Config(manifest = Config.NONE, sdk = 18, shadows = AppWidgetTargetTest
+    .UpdateShadowAppWidgetManager.class)
 public class AppWidgetTargetTest {
   private UpdateShadowAppWidgetManager shadowManager;
   private RemoteViews views;
@@ -56,9 +54,8 @@ public class AppWidgetTargetTest {
     AppWidgetTarget target =
         new AppWidgetTarget(RuntimeEnvironment.application, viewId, views, componentName);
 
-    target.onResourceReady(
-        Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null
-        /*glideAnimation*/ );
+    target.onResourceReady(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null
+    /*glideAnimation*/);
 
     assertEquals(componentName, shadowManager.updatedComponentName);
     assertEquals(views, shadowManager.updatedRemoteViews);
@@ -66,7 +63,7 @@ public class AppWidgetTargetTest {
 
   @Test
   public void testSetsBitmapOnRemoteViewsWithViewIdWhenCreatedWithWidgetIds() {
-    int[] widgetIds = new int[] {1};
+    int[] widgetIds = new int[] { 1 };
     AppWidgetTarget target =
         new AppWidgetTarget(RuntimeEnvironment.application, viewId, views, widgetIds);
 
@@ -78,13 +75,12 @@ public class AppWidgetTargetTest {
 
   @Test
   public void testUpdatesAppWidgetWhenCreatedWithWidgetIds() {
-    int[] widgetIds = new int[] {1};
+    int[] widgetIds = new int[] { 1 };
     AppWidgetTarget target =
         new AppWidgetTarget(RuntimeEnvironment.application, viewId, views, widgetIds);
 
-    target.onResourceReady(
-        Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888), null
-        /*glideAnimation*/ );
+    target.onResourceReady(Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888), null
+    /*glideAnimation*/);
 
     assertThat(widgetIds).isEqualTo(shadowManager.updatedWidgetIds);
     assertEquals(views, shadowManager.updatedRemoteViews);
@@ -102,14 +98,14 @@ public class AppWidgetTargetTest {
 
   @Test(expected = NullPointerException.class)
   public void testThrowsWhenGivenNullRemoteViewsWithWidgetIds() {
-    new AppWidgetTarget(
-        RuntimeEnvironment.application, viewId, null /*remoteViews*/, 1 /*widgetIds*/);
+    new AppWidgetTarget(RuntimeEnvironment.application,
+        viewId, null /*remoteViews*/, 1 /*widgetIds*/);
   }
 
   @Test(expected = NullPointerException.class)
   public void testThrowsWhenGivenNullRemoteViewsWithComponentName() {
-    new AppWidgetTarget(
-        RuntimeEnvironment.application, viewId, null /*remoteViews*/, mock(ComponentName.class));
+    new AppWidgetTarget(RuntimeEnvironment.application,
+        viewId, null /*remoteViews*/, mock(ComponentName.class));
   }
 
   @Test(expected = NullPointerException.class)

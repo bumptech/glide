@@ -54,35 +54,30 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see Glide#with(android.support.v4.app.Fragment)
  * @see Glide#with(Context)
  */
-public class RequestManager implements LifecycleListener, ModelTypes<RequestBuilder<Drawable>> {
+public class RequestManager implements LifecycleListener,
+    ModelTypes<RequestBuilder<Drawable>> {
   private static final RequestOptions DECODE_TYPE_BITMAP = decodeTypeOf(Bitmap.class).lock();
   private static final RequestOptions DECODE_TYPE_GIF = decodeTypeOf(GifDrawable.class).lock();
   private static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
-      diskCacheStrategyOf(DiskCacheStrategy.DATA).priority(Priority.LOW).skipMemoryCache(true);
+      diskCacheStrategyOf(DiskCacheStrategy.DATA).priority(Priority.LOW)
+          .skipMemoryCache(true);
 
   protected final Glide glide;
   protected final Context context;
-
   @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  final Lifecycle lifecycle;
-
+  @Synthetic final Lifecycle lifecycle;
   @GuardedBy("this")
   private final RequestTracker requestTracker;
-
   @GuardedBy("this")
   private final RequestManagerTreeNode treeNode;
-
   @GuardedBy("this")
   private final TargetTracker targetTracker = new TargetTracker();
-
-  private final Runnable addSelfToLifecycle =
-      new Runnable() {
-        @Override
-        public void run() {
-          lifecycle.addListener(RequestManager.this);
-        }
-      };
+  private final Runnable addSelfToLifecycle = new Runnable() {
+    @Override
+    public void run() {
+      lifecycle.addListener(RequestManager.this);
+    }
+  };
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
   private final ConnectivityMonitor connectivityMonitor;
   // Adding default listeners should be much less common than starting new requests. We want
@@ -94,10 +89,8 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
   private RequestOptions requestOptions;
 
   public RequestManager(
-      @NonNull Glide glide,
-      @NonNull Lifecycle lifecycle,
-      @NonNull RequestManagerTreeNode treeNode,
-      @NonNull Context context) {
+      @NonNull Glide glide, @NonNull Lifecycle lifecycle,
+      @NonNull RequestManagerTreeNode treeNode, @NonNull Context context) {
     this(
         glide,
         lifecycle,
@@ -168,6 +161,7 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
    * <p>The modified options will only be applied to loads started after this method is called.
    *
    * @see RequestBuilder#apply(BaseRequestOptions)
+   *
    * @return This request manager.
    */
   @NonNull
@@ -365,17 +359,17 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
   }
 
   /**
-   * Attempts to always load the resource as a {@link
-   * com.bumptech.glide.load.resource.gif.GifDrawable}.
+   * Attempts to always load the resource as a
+   * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
    *
-   * <p>If the underlying data is not a GIF, this will fail. As a result, this should only be used
+   * <p> If the underlying data is not a GIF, this will fail. As a result, this should only be used
    * if the model represents an animated GIF and the caller wants to interact with the GifDrawable
    * directly. Normally using just {@link #asDrawable()} is sufficient because it will determine
    * whether or not the given data represents an animated GIF and return the appropriate {@link
-   * Drawable}, animated or not, automatically.
+   * Drawable}, animated or not, automatically. </p>
    *
-   * @return A new request builder for loading a {@link
-   *     com.bumptech.glide.load.resource.gif.GifDrawable}.
+   * @return A new request builder for loading a
+   * {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
    */
   @NonNull
   @CheckResult
@@ -387,9 +381,9 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
    * Attempts to always load the resource using any registered {@link
    * com.bumptech.glide.load.ResourceDecoder}s that can decode any subclass of {@link Drawable}.
    *
-   * <p>By default, may return either a {@link android.graphics.drawable.BitmapDrawable} or {@link
+   * <p> By default, may return either a {@link android.graphics.drawable.BitmapDrawable} or {@link
    * GifDrawable}, but if additional decoders are registered for other {@link Drawable} subclasses,
-   * any of those subclasses may also be returned.
+   * any of those subclasses may also be returned. </p>
    *
    * @return A new request builder for loading a {@link Drawable}.
    */
@@ -485,6 +479,7 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
     return asDrawable().load(url);
   }
 
+
   /**
    * Equivalent to calling {@link #asDrawable()} and then {@link RequestBuilder#load(byte[])}.
    *
@@ -515,8 +510,9 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
    * cached source data.
    *
    * <p>This method is designed to work for remote data that is or will be cached using {@link
-   * com.bumptech.glide.load.engine.DiskCacheStrategy#DATA}. As a result, specifying a {@link
-   * com.bumptech.glide.load.engine.DiskCacheStrategy} on this request is generally not recommended.
+   * com.bumptech.glide.load.engine.DiskCacheStrategy#DATA}. As a result, specifying a
+   * {@link com.bumptech.glide.load.engine.DiskCacheStrategy} on this request is generally not
+   * recommended.
    *
    * @return A new request builder for downloading content to cache and returning the cache File.
    */
@@ -540,8 +536,8 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
 
   /**
    * Attempts to always load a {@link File} containing the resource, either using a file path
-   * obtained from the media store (for local images/videos), or using Glide's disk cache (for
-   * remote images/videos).
+   * obtained from the media store (for local images/videos), or using Glide's disk cache
+   * (for remote images/videos).
    *
    * <p>For remote content, prefer {@link #downloadOnly()}.
    *
@@ -554,9 +550,9 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
   }
 
   /**
-   * Attempts to load the resource using any registered {@link
-   * com.bumptech.glide.load.ResourceDecoder}s that can decode the given resource class or any
-   * subclass of the given resource class.
+   * Attempts to load the resource using any registered
+   * {@link com.bumptech.glide.load.ResourceDecoder}s
+   * that can decode the given resource class or any subclass of the given resource class.
    *
    * @param resourceClass The resource to decode.
    * @return A new request builder for loading the given resource class.
@@ -572,12 +568,12 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
    * Cancel any pending loads Glide may have for the view and free any resources that may have been
    * loaded for the view.
    *
-   * <p>Note that this will only work if {@link View#setTag(Object)} is not called on this view
-   * outside of Glide.
+   * <p> Note that this will only work if {@link View#setTag(Object)} is not called on this view
+   * outside of Glide. </p>
    *
    * @param view The view to cancel loads and free resources for.
    * @throws IllegalArgumentException if an object other than Glide's metadata is put as the view's
-   *     tag.
+   *                                  tag.
    * @see #clear(Target)
    */
   public void clear(@NonNull View view) {

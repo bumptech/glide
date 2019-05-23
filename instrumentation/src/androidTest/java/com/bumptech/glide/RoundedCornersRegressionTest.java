@@ -69,13 +69,12 @@ public class RoundedCornersRegressionTest {
 
     Glide.get(context).getBitmapPool().put(redRect);
 
-    Bitmap roundedRect =
-        bitmapRegressionTester.test(
-            GlideApp.with(context)
-                .asBitmap()
-                .load(canonicalBitmap.getBitmap())
-                .override(canonicalBitmap.getWidth(), canonicalBitmap.getHeight())
-                .transform(new RoundedCorners(5)));
+    Bitmap roundedRect = bitmapRegressionTester.test(
+        GlideApp.with(context)
+            .asBitmap()
+            .load(canonicalBitmap.getBitmap())
+            .override(canonicalBitmap.getWidth(), canonicalBitmap.getHeight())
+            .transform(new RoundedCorners(5)));
 
     assertThat(roundedRect).isEqualTo(redRect);
   }

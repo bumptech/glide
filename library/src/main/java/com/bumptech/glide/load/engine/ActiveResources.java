@@ -20,13 +20,15 @@ import java.util.concurrent.ThreadFactory;
 final class ActiveResources {
   private final boolean isActiveResourceRetentionAllowed;
   private final Executor monitorClearedResourcesExecutor;
-  @VisibleForTesting final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
+  @VisibleForTesting
+  final Map<Key, ResourceWeakReference> activeEngineResources = new HashMap<>();
   private final ReferenceQueue<EngineResource<?>> resourceReferenceQueue = new ReferenceQueue<>();
 
   private ResourceListener listener;
 
   private volatile boolean isShutdown;
-  @Nullable private volatile DequeuedResourceCallback cb;
+  @Nullable
+  private volatile DequeuedResourceCallback cb;
 
   ActiveResources(boolean isActiveResourceRetentionAllowed) {
     this(
@@ -128,8 +130,7 @@ final class ActiveResources {
   }
 
   @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  void cleanReferenceQueue() {
+  @Synthetic void cleanReferenceQueue() {
     while (!isShutdown) {
       try {
         ResourceWeakReference ref = (ResourceWeakReference) resourceReferenceQueue.remove();
@@ -168,18 +169,10 @@ final class ActiveResources {
 
   @VisibleForTesting
   static final class ResourceWeakReference extends WeakReference<EngineResource<?>> {
-    @SuppressWarnings("WeakerAccess")
-    @Synthetic
-    final Key key;
+    @SuppressWarnings("WeakerAccess") @Synthetic final Key key;
+    @SuppressWarnings("WeakerAccess") @Synthetic final boolean isCacheable;
 
-    @SuppressWarnings("WeakerAccess")
-    @Synthetic
-    final boolean isCacheable;
-
-    @Nullable
-    @SuppressWarnings("WeakerAccess")
-    @Synthetic
-    Resource<?> resource;
+    @Nullable @SuppressWarnings("WeakerAccess") @Synthetic Resource<?> resource;
 
     @Synthetic
     @SuppressWarnings("WeakerAccess")
@@ -192,8 +185,7 @@ final class ActiveResources {
       this.key = Preconditions.checkNotNull(key);
       this.resource =
           referent.isMemoryCacheable() && isActiveResourceRetentionAllowed
-              ? Preconditions.checkNotNull(referent.getResource())
-              : null;
+              ? Preconditions.checkNotNull(referent.getResource()) : null;
       isCacheable = referent.isMemoryCacheable();
     }
 

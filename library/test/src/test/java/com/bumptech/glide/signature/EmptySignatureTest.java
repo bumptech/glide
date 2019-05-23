@@ -1,5 +1,6 @@
 package com.bumptech.glide.signature;
 
+
 import static org.mockito.Mockito.mock;
 
 import com.bumptech.glide.load.Key;
@@ -16,7 +17,9 @@ public class EmptySignatureTest {
   @Test
   public void testEquals() {
     keyTester
-        .addEquivalenceGroup(EmptySignature.obtain(), EmptySignature.obtain())
+        .addEquivalenceGroup(
+            EmptySignature.obtain(),
+            EmptySignature.obtain())
         .addEquivalenceGroup(mock(Key.class))
         .addEmptyDigestRegressionTest(EmptySignature.obtain())
         .test();

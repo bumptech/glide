@@ -81,51 +81,49 @@ public class InvalidGlideOptionsExtensionTest {
 
   @Test
   public void compilation_withAnnotatedStaticMethod_withRequestOptionsArg_succeeds() {
-    Compilation compilation =
-        javac()
-            .withProcessors(new GlideAnnotationProcessor())
-            .compile(
-                emptyAppModule(),
-                JavaFileObjects.forSourceLines(
-                    "Extension",
-                    "package com.bumptech.glide.test;",
-                    "import com.bumptech.glide.annotation.GlideExtension;",
-                    "import com.bumptech.glide.annotation.GlideOption;",
-                    "import com.bumptech.glide.request.BaseRequestOptions;",
-                    "@GlideExtension",
-                    "public class Extension {",
-                    "  private Extension() {}",
-                    "  @GlideOption",
-                    "  public static BaseRequestOptions<?> doSomething(",
-                    "      BaseRequestOptions<?> options) {",
-                    "    return options;",
-                    "  }",
-                    "}"));
+    Compilation compilation = javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideOption;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideOption",
+                "  public static BaseRequestOptions<?> doSomething(",
+                "      BaseRequestOptions<?> options) {",
+                "    return options;",
+                "  }",
+                "}"));
     assertThat(compilation).succeeded();
   }
 
   @Test
   public void compilation_withAnnotatedStaticMethod_withRequestOptionsArgAndOtherArg_succeeds() {
-    Compilation compilation =
-        javac()
-            .withProcessors(new GlideAnnotationProcessor())
-            .compile(
-                emptyAppModule(),
-                JavaFileObjects.forSourceLines(
-                    "Extension",
-                    "package com.bumptech.glide.test;",
-                    "import com.bumptech.glide.annotation.GlideExtension;",
-                    "import com.bumptech.glide.annotation.GlideOption;",
-                    "import com.bumptech.glide.request.BaseRequestOptions;",
-                    "@GlideExtension",
-                    "public class Extension {",
-                    "  private Extension() {}",
-                    "  @GlideOption",
-                    "  public static BaseRequestOptions<?> doSomething(",
-                    "      BaseRequestOptions<?> options, Object arg2) {",
-                    "    return options;",
-                    "  }",
-                    "}"));
+    Compilation compilation = javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideOption;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideOption",
+                "  public static BaseRequestOptions<?> doSomething(",
+                "      BaseRequestOptions<?> options, Object arg2) {",
+                "    return options;",
+                "  }",
+                "}"));
     assertThat(compilation).succeeded();
   }
 
@@ -139,22 +137,23 @@ public class InvalidGlideOptionsExtensionTest {
             javac()
                 .withProcessors(new GlideAnnotationProcessor())
                 .compile(
-                    emptyAppModule(),
-                    JavaFileObjects.forSourceLines(
-                        "Extension",
-                        "package com.bumptech.glide.test;",
-                        "import com.bumptech.glide.annotation.GlideExtension;",
-                        "import com.bumptech.glide.annotation.GlideOption;",
-                        "import com.bumptech.glide.request.BaseRequestOptions;",
-                        "@GlideExtension",
-                        "public class Extension {",
-                        "  private Extension() {}",
-                        "  @GlideOption",
-                        "  public static BaseRequestOptions<?> centerCrop(",
-                        "      BaseRequestOptions<?> options) {",
-                        "    return options;",
-                        "  }",
-                        "}"));
+                emptyAppModule(),
+                JavaFileObjects.forSourceLines(
+                    "Extension",
+                    "package com.bumptech.glide.test;",
+                    "import com.bumptech.glide.annotation.GlideExtension;",
+                    "import com.bumptech.glide.annotation.GlideOption;",
+                    "import com.bumptech.glide.request.BaseRequestOptions;",
+                    "@GlideExtension",
+                    "public class Extension {",
+                    "  private Extension() {}",
+                    "  @GlideOption",
+                    "  public static BaseRequestOptions<?> centerCrop(",
+                    "      BaseRequestOptions<?> options) {",
+                    "    return options;",
+                    "  }",
+                    "}"));
+
           }
         });
   }
@@ -191,26 +190,25 @@ public class InvalidGlideOptionsExtensionTest {
 
   @Test
   public void compilation_withOverrideExtend_andOverridingMethod_succeeds() {
-    Compilation compilation =
-        javac()
-            .withProcessors(new GlideAnnotationProcessor())
-            .compile(
-                emptyAppModule(),
-                JavaFileObjects.forSourceLines(
-                    "Extension",
-                    "package com.bumptech.glide.test;",
-                    "import com.bumptech.glide.annotation.GlideExtension;",
-                    "import com.bumptech.glide.annotation.GlideOption;",
-                    "import com.bumptech.glide.request.BaseRequestOptions;",
-                    "@GlideExtension",
-                    "public class Extension {",
-                    "  private Extension() {}",
-                    "  @GlideOption(override = GlideOption.OVERRIDE_EXTEND)",
-                    "  public static BaseRequestOptions<?> centerCrop(",
-                    "      BaseRequestOptions<?> options) {",
-                    "    return options;",
-                    "  }",
-                    "}"));
+    Compilation compilation = javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideOption;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideOption(override = GlideOption.OVERRIDE_EXTEND)",
+                "  public static BaseRequestOptions<?> centerCrop(",
+                "      BaseRequestOptions<?> options) {",
+                "    return options;",
+                "  }",
+                "}"));
     assertThat(compilation).succeeded();
   }
 
@@ -246,53 +244,51 @@ public class InvalidGlideOptionsExtensionTest {
 
   @Test
   public void compilation_withOverrideReplace_andOverridingMethod_succeeds() {
-    Compilation compilation =
-        javac()
-            .withProcessors(new GlideAnnotationProcessor())
-            .compile(
-                emptyAppModule(),
-                JavaFileObjects.forSourceLines(
-                    "Extension",
-                    "package com.bumptech.glide.test;",
-                    "import com.bumptech.glide.annotation.GlideExtension;",
-                    "import com.bumptech.glide.annotation.GlideOption;",
-                    "import com.bumptech.glide.request.BaseRequestOptions;",
-                    "@GlideExtension",
-                    "public class Extension {",
-                    "  private Extension() {}",
-                    "  @GlideOption(override = GlideOption.OVERRIDE_REPLACE)",
-                    "  public static BaseRequestOptions<?> centerCrop(",
-                    "      BaseRequestOptions<?> options) {",
-                    "    return options;",
-                    "  }",
-                    "}"));
+    Compilation compilation = javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideOption;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideOption(override = GlideOption.OVERRIDE_REPLACE)",
+                "  public static BaseRequestOptions<?> centerCrop(",
+                "      BaseRequestOptions<?> options) {",
+                "    return options;",
+                "  }",
+                "}"));
     assertThat(compilation).succeeded();
   }
 
   @Test
   public void compilation_withRequestOptionsReturnValue_succeeds() {
-    Compilation compilation =
-        javac()
-            .withProcessors(new GlideAnnotationProcessor())
-            .compile(
-                emptyAppModule(),
-                JavaFileObjects.forSourceLines(
-                    "Extension",
-                    "package com.bumptech.glide.test;",
-                    "import android.support.annotation.NonNull;",
-                    "import com.bumptech.glide.annotation.GlideExtension;",
-                    "import com.bumptech.glide.annotation.GlideOption;",
-                    "import com.bumptech.glide.request.BaseRequestOptions;",
-                    "@GlideExtension",
-                    "public class Extension {",
-                    "  private Extension() {}",
-                    "  @NonNull",
-                    "  @GlideOption",
-                    "  public static BaseRequestOptions<?> doSomething(",
-                    "      BaseRequestOptions<?> options) {",
-                    "    return options;",
-                    "  }",
-                    "}"));
+     Compilation compilation = javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import android.support.annotation.NonNull;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideOption;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @NonNull",
+                "  @GlideOption",
+                "  public static BaseRequestOptions<?> doSomething(",
+                "      BaseRequestOptions<?> options) {",
+                "    return options;",
+                "  }",
+                "}"));
     assertThat(compilation).succeededWithoutWarnings();
   }
 
@@ -331,26 +327,25 @@ public class InvalidGlideOptionsExtensionTest {
 
   @Test
   public void compilation_withMissingNonNullAnnotation_warns() {
-    Compilation compilation =
-        javac()
-            .withProcessors(new GlideAnnotationProcessor())
-            .compile(
-                emptyAppModule(),
-                JavaFileObjects.forSourceLines(
-                    "Extension",
-                    "package com.bumptech.glide.test;",
-                    "import com.bumptech.glide.annotation.GlideExtension;",
-                    "import com.bumptech.glide.annotation.GlideOption;",
-                    "import com.bumptech.glide.request.BaseRequestOptions;",
-                    "@GlideExtension",
-                    "public class Extension {",
-                    "  private Extension() {}",
-                    "  @GlideOption",
-                    "  public static BaseRequestOptions<?> doSomething(",
-                    "      BaseRequestOptions<?> options) {",
-                    "    return options;",
-                    "  }",
-                    "}"));
+    Compilation compilation = javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(
+            emptyAppModule(),
+            JavaFileObjects.forSourceLines(
+                "Extension",
+                "package com.bumptech.glide.test;",
+                "import com.bumptech.glide.annotation.GlideExtension;",
+                "import com.bumptech.glide.annotation.GlideOption;",
+                "import com.bumptech.glide.request.BaseRequestOptions;",
+                "@GlideExtension",
+                "public class Extension {",
+                "  private Extension() {}",
+                "  @GlideOption",
+                "  public static BaseRequestOptions<?> doSomething(",
+                "      BaseRequestOptions<?> options) {",
+                "    return options;",
+                "  }",
+                "}"));
     assertThat(compilation).succeeded();
     assertThat(compilation).hadWarningCount(1);
     assertThat(compilation).hadWarningContaining("android.support.annotation.NonNull");

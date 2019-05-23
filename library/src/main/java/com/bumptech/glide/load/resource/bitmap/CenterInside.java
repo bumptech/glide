@@ -6,11 +6,11 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import java.security.MessageDigest;
 
 /**
- * Returns the image with its original size if its dimensions match or are smaller than the
- * target's, couple with {@link android.widget.ImageView.ScaleType#CENTER_INSIDE} in order to center
- * it in Target. If not, then it is scaled so that one of the dimensions of the image will be equal
- * to the given dimension and the other will be less than the given dimension (maintaining the
- * image's aspect ratio).
+ * Returns the image with its original size if its dimensions match or are smaller
+ * than the target's, couple with {@link android.widget.ImageView.ScaleType#CENTER_INSIDE}
+ * in order to center it in Target. If not, then it is scaled so that one of the dimensions of
+ * the image will be equal to the given dimension and the other will be less than the given
+ * dimension (maintaining the image's aspect ratio).
  */
 public class CenterInside extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.CenterInside";
@@ -37,3 +37,5 @@ public class CenterInside extends BitmapTransformation {
     messageDigest.update(ID_BYTES);
   }
 }
+
+

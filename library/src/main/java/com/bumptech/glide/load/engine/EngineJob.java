@@ -23,7 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * A class that manages a load by adding and removing callbacks for for the load and notifying
  * callbacks when the load completes.
  */
-class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
+class EngineJob<R> implements DecodeJob.Callback<R>,
+    Poolable {
   private static final EngineResourceFactory DEFAULT_FACTORY = new EngineResourceFactory();
 
   @SuppressWarnings("WeakerAccess")
@@ -125,8 +126,9 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
 
   public synchronized void start(DecodeJob<R> decodeJob) {
     this.decodeJob = decodeJob;
-    GlideExecutor executor =
-        decodeJob.willDecodeFromCache() ? diskCacheExecutor : getActiveSourceExecutor();
+    GlideExecutor executor = decodeJob.willDecodeFromCache()
+        ? diskCacheExecutor
+        : getActiveSourceExecutor();
     executor.execute(decodeJob);
   }
 
@@ -190,8 +192,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
 
   private GlideExecutor getActiveSourceExecutor() {
     return useUnlimitedSourceGeneratorPool
-        ? sourceUnlimitedExecutor
-        : (useAnimationPool ? animationExecutor : sourceExecutor);
+        ? sourceUnlimitedExecutor : (useAnimationPool ? animationExecutor : sourceExecutor);
   }
 
   // Exposed for testing.
@@ -216,11 +217,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
 
   // We have to post Runnables in a loop. Typically there will be very few callbacks. AccessorMethod
   // seems to be a false positive
-  @SuppressWarnings({
-    "WeakerAccess",
-    "PMD.AvoidInstantiatingObjectsInLoops",
-    "PMD.AccessorMethodGeneration"
-  })
+  @SuppressWarnings(
+          {"WeakerAccess", "PMD.AvoidInstantiatingObjectsInLoops", "PMD.AccessorMethodGeneration"})
   @Synthetic
   void notifyCallbacksOfResult() {
     ResourceCallbacksAndExecutors copy;
@@ -329,11 +327,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
 
   // We have to post Runnables in a loop. Typically there will be very few callbacks. Acessor method
   // warning seems to be false positive.
-  @SuppressWarnings({
-    "WeakerAccess",
-    "PMD.AvoidInstantiatingObjectsInLoops",
-    "PMD.AccessorMethodGeneration"
-  })
+  @SuppressWarnings(
+          {"WeakerAccess", "PMD.AvoidInstantiatingObjectsInLoops", "PMD.AccessorMethodGeneration"})
   @Synthetic
   void notifyCallbacksOfException() {
     ResourceCallbacksAndExecutors copy;

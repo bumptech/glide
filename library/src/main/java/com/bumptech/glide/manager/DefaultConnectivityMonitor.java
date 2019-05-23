@@ -12,36 +12,31 @@ import android.util.Log;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 
-/** Uses {@link android.net.ConnectivityManager} to identify connectivity changes. */
+/**
+ * Uses {@link android.net.ConnectivityManager} to identify connectivity changes.
+ */
 final class DefaultConnectivityMonitor implements ConnectivityMonitor {
   private static final String TAG = "ConnectivityMonitor";
   private final Context context;
+  @SuppressWarnings("WeakerAccess") @Synthetic final ConnectivityListener listener;
 
-  @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  final ConnectivityListener listener;
-
-  @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  boolean isConnected;
-
+  @SuppressWarnings("WeakerAccess") @Synthetic boolean isConnected;
   private boolean isRegistered;
 
-  private final BroadcastReceiver connectivityReceiver =
-      new BroadcastReceiver() {
-        @Override
-        public void onReceive(@NonNull Context context, Intent intent) {
-          boolean wasConnected = isConnected;
-          isConnected = isConnected(context);
-          if (wasConnected != isConnected) {
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-              Log.d(TAG, "connectivity changed, isConnected: " + isConnected);
-            }
-
-            listener.onConnectivityChanged(isConnected);
-          }
+  private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(@NonNull Context context, Intent intent) {
+      boolean wasConnected = isConnected;
+      isConnected = isConnected(context);
+      if (wasConnected != isConnected) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "connectivity changed, isConnected: " + isConnected);
         }
-      };
+
+        listener.onConnectivityChanged(isConnected);
+      }
+    }
+  };
 
   DefaultConnectivityMonitor(@NonNull Context context, @NonNull ConnectivityListener listener) {
     this.context = context.getApplicationContext();
@@ -57,8 +52,8 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
     isConnected = isConnected(context);
     try {
       // See #1405
-      context.registerReceiver(
-          connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+      context.registerReceiver(connectivityReceiver,
+          new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
       isRegistered = true;
     } catch (SecurityException e) {
       // See #1417, registering the receiver can throw SecurityException.

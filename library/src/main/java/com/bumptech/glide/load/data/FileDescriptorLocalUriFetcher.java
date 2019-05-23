@@ -8,7 +8,9 @@ import android.support.annotation.NonNull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-/** Fetches an {@link android.os.ParcelFileDescriptor} for a local {@link android.net.Uri}. */
+/**
+ * Fetches an {@link android.os.ParcelFileDescriptor} for a local {@link android.net.Uri}.
+ */
 public class FileDescriptorLocalUriFetcher extends LocalUriFetcher<ParcelFileDescriptor> {
   public FileDescriptorLocalUriFetcher(ContentResolver contentResolver, Uri uri) {
     super(contentResolver, uri);

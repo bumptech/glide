@@ -40,4 +40,5 @@ public class GifDrawableResourceTest {
     inOrder.verify(drawable).stop();
     inOrder.verify(drawable).recycle();
   }
+
 }

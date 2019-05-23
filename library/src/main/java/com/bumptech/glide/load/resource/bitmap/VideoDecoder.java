@@ -22,11 +22,11 @@ import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
 /**
- * Decodes video data to Bitmaps from {@link ParcelFileDescriptor}s and {@link
- * AssetFileDescriptor}s.
+ * Decodes video data to Bitmaps from {@link ParcelFileDescriptor}s and
+ * {@link AssetFileDescriptor}s.
  *
- * @param <T> The type of data, currently either {@link ParcelFileDescriptor} or {@link
- *     AssetFileDescriptor}.
+ * @param <T> The type of data, currently either {@link ParcelFileDescriptor} or
+ * {@link AssetFileDescriptor}.
  */
 public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   private static final String TAG = "VideoDecoder";
@@ -43,67 +43,61 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
 
   /**
    * A long indicating the time position (in microseconds) of the target frame which will be
-   * retrieved. {@link android.media.MediaMetadataRetriever#getFrameAtTime(long)} is used to extract
-   * the video frame.
+   * retrieved. {@link android.media.MediaMetadataRetriever#getFrameAtTime(long)} is used to
+   * extract the video frame.
    *
    * <p>When retrieving the frame at the given time position, there is no guarantee that the data
    * source has a frame located at the position. When this happens, a frame nearby will be returned.
    * If the long is negative, time position and option will ignored, and any frame that the
    * implementation considers as representative may be returned.
    */
-  public static final Option<Long> TARGET_FRAME =
-      Option.disk(
-          "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.TargetFrame",
-          DEFAULT_FRAME,
-          new Option.CacheKeyUpdater<Long>() {
-            private final ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
+  public static final Option<Long> TARGET_FRAME = Option.disk(
+      "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.TargetFrame", DEFAULT_FRAME,
+      new Option.CacheKeyUpdater<Long>() {
+        private final ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
 
-            @Override
-            public void update(
-                @NonNull byte[] keyBytes,
-                @NonNull Long value,
-                @NonNull MessageDigest messageDigest) {
-              messageDigest.update(keyBytes);
-              synchronized (buffer) {
-                buffer.position(0);
-                messageDigest.update(buffer.putLong(value).array());
-              }
-            }
-          });
+        @Override
+        public void update(@NonNull byte[] keyBytes, @NonNull Long value,
+            @NonNull MessageDigest messageDigest) {
+          messageDigest.update(keyBytes);
+          synchronized (buffer) {
+            buffer.position(0);
+            messageDigest.update(buffer.putLong(value).array());
+          }
+        }
+      });
 
   /**
    * An integer indicating the frame option used to retrieve a target frame.
    *
-   * <p>This option will be ignored if {@link #TARGET_FRAME} is not set or is set to {@link
-   * #DEFAULT_FRAME}.
+   * <p>This option will be ignored if {@link #TARGET_FRAME} is not set or is set to
+   * {@link #DEFAULT_FRAME}.
    *
    * @see MediaMetadataRetriever#getFrameAtTime(long, int)
    */
   // Public API.
   @SuppressWarnings("WeakerAccess")
-  public static final Option<Integer> FRAME_OPTION =
-      Option.disk(
-          "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.FrameOption",
-          /*defaultValue=*/ MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
-          new Option.CacheKeyUpdater<Integer>() {
-            private final ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
+  public static final Option<Integer> FRAME_OPTION = Option.disk(
+      "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.FrameOption",
+      /*defaultValue=*/ MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
+      new Option.CacheKeyUpdater<Integer>() {
+        private final ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
 
-            @Override
-            public void update(
-                @NonNull byte[] keyBytes,
-                @NonNull Integer value,
-                @NonNull MessageDigest messageDigest) {
-              //noinspection ConstantConditions public API, people could have been doing it wrong
-              if (value == null) {
-                return;
-              }
-              messageDigest.update(keyBytes);
-              synchronized (buffer) {
-                buffer.position(0);
-                messageDigest.update(buffer.putInt(value).array());
-              }
-            }
-          });
+        @Override
+        public void update(@NonNull byte[] keyBytes, @NonNull Integer value,
+            @NonNull MessageDigest messageDigest) {
+          //noinspection ConstantConditions public API, people could have been doing it wrong
+          if (value == null) {
+            return;
+          }
+          messageDigest.update(keyBytes);
+          synchronized (buffer) {
+            buffer.position(0);
+            messageDigest.update(buffer.putInt(value).array());
+          }
+        }
+      }
+  );
 
   private static final MediaMetadataRetrieverFactory DEFAULT_FACTORY =
       new MediaMetadataRetrieverFactory();
@@ -120,7 +114,8 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     return new VideoDecoder<>(bitmapPool, new ParcelFileDescriptorInitializer());
   }
 
-  VideoDecoder(BitmapPool bitmapPool, MediaMetadataRetrieverInitializer<T> initializer) {
+  VideoDecoder(
+      BitmapPool bitmapPool, MediaMetadataRetrieverInitializer<T> initializer) {
     this(bitmapPool, initializer, DEFAULT_FACTORY);
   }
 
@@ -251,7 +246,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
 
       return mediaMetadataRetriever.getScaledFrameAtTime(
           frameTimeMicros, frameOption, decodeWidth, decodeHeight);
-    } catch (Throwable t) {
+     } catch (Throwable t) {
       // This is aggressive, but we'd rather catch errors caused by reading and/or parsing metadata
       // here and fall back to just decoding the frame whenever possible. If the exception is thrown
       // just from decoding the frame, then it will be thrown and exposed to callers by the method
@@ -265,7 +260,9 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   }
 
   private static Bitmap decodeOriginalFrame(
-      MediaMetadataRetriever mediaMetadataRetriever, long frameTimeMicros, int frameOption) {
+      MediaMetadataRetriever mediaMetadataRetriever,
+      long frameTimeMicros,
+      int frameOption) {
     return mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
   }
 

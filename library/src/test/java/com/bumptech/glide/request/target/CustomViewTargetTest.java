@@ -51,9 +51,9 @@ import org.robolectric.util.ReflectionHelpers;
 /**
  * Test for {@link CustomViewTarget}.
  *
- * <p>TODO: This should really be in the tests subproject, but that causes errors because the R
- * class referenced in {@link CustomViewTarget} can't be found. This should be fixable with some
- * gradle changes, but I've so far failed to figure out the right set of commands.
+ * TODO: This should really be in the tests subproject, but that causes errors because the R class
+ * referenced in {@link CustomViewTarget} can't be found. This should be fixable with some gradle
+ * changes, but I've so far failed to figure out the right set of commands.
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 19, manifest = "build/intermediates/manifests/full/debug/AndroidManifest.xml")
@@ -528,7 +528,9 @@ public class CustomViewTargetTest {
   public void clearOnDetach_moreThanOnce_registersObserverOnce() {
     activity.visible();
     attachStateTarget.setRequest(request);
-    attachStateTarget.clearOnDetach().clearOnDetach();
+    attachStateTarget
+        .clearOnDetach()
+        .clearOnDetach();
     parent.removeView(view);
 
     verify(request).clear();
@@ -537,7 +539,10 @@ public class CustomViewTargetTest {
   @Test
   public void clearOnDetach_onDetach_afterMultipleClearOnDetaches_removesListener() {
     activity.visible();
-    attachStateTarget.clearOnDetach().clearOnDetach().clearOnDetach();
+    attachStateTarget
+        .clearOnDetach()
+        .clearOnDetach()
+        .clearOnDetach();
     attachStateTarget.onLoadCleared(/*placeholder=*/ null);
     attachStateTarget.setRequest(request);
     parent.removeView(view);

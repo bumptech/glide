@@ -9,8 +9,11 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
 
-/** A resource wrapping a {@link android.graphics.Bitmap} object. */
-public class BitmapResource implements Resource<Bitmap>, Initializable {
+/**
+ * A resource wrapping a {@link android.graphics.Bitmap} object.
+ */
+public class BitmapResource implements Resource<Bitmap>,
+    Initializable {
   private final Bitmap bitmap;
   private final BitmapPool bitmapPool;
 
@@ -18,7 +21,7 @@ public class BitmapResource implements Resource<Bitmap>, Initializable {
    * Returns a new {@link BitmapResource} wrapping the given {@link Bitmap} if the Bitmap is
    * non-null or null if the given Bitmap is null.
    *
-   * @param bitmap A Bitmap.
+   * @param bitmap     A Bitmap.
    * @param bitmapPool A non-null {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}.
    */
   @Nullable

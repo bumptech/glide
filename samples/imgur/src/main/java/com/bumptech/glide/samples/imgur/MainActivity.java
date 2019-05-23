@@ -23,13 +23,12 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-/** Displays images and GIFs from Imgur in a scrollable list of cards. */
+/**
+ * Displays images and GIFs from Imgur in a scrollable list of cards.
+ */
 public final class MainActivity extends AppCompatActivity {
 
-  @Inject
-  @Named("hotViralImages")
-  Observable<List<Image>> fetchImagesObservable;
-
+  @Inject @Named("hotViralImages") Observable<List<Image>> fetchImagesObservable;
   private ImgurImageAdapter adapter;
 
   @Override
@@ -48,19 +47,18 @@ public final class MainActivity extends AppCompatActivity {
     fetchImagesObservable
         .subscribeOn(Schedulers.newThread())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-            new Observer<List<Image>>() {
-              @Override
-              public void onCompleted() {}
+        .subscribe(new Observer<List<Image>>() {
+          @Override
+          public void onCompleted() { }
 
-              @Override
-              public void onError(Throwable e) {}
+          @Override
+          public void onError(Throwable e) { }
 
-              @Override
-              public void onNext(List<Image> images) {
-                adapter.setData(images);
-              }
-            });
+          @Override
+          public void onNext(List<Image> images) {
+            adapter.setData(images);
+          }
+        });
   }
 
   @Override
@@ -80,17 +78,20 @@ public final class MainActivity extends AppCompatActivity {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-      return new ViewHolder(
-          LayoutInflater.from(parent.getContext()).inflate(R.layout.image_card, parent, false));
+      return new ViewHolder(LayoutInflater.from(parent.getContext())
+          .inflate(R.layout.image_card, parent, false));
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
       ViewHolder vh = (ViewHolder) holder;
       Image image = images.get(position);
-      vh.title.setText(TextUtils.isEmpty(image.title) ? image.description : image.title);
+      vh.title.setText(
+          TextUtils.isEmpty(image.title) ? image.description : image.title);
 
-      ImgurGlide.with(vh.imageView).load(image.link).into(vh.imageView);
+      ImgurGlide.with(vh.imageView)
+          .load(image.link)
+          .into(vh.imageView);
     }
 
     @Override

@@ -64,13 +64,12 @@ public class LruBitmapPoolTest {
 
   @Test
   public void testBitmapLargerThanPoolIsNotAdded() {
-    strategy =
-        new MockStrategy() {
-          @Override
-          public int getSize(Bitmap bitmap) {
-            return 4;
-          }
-        };
+    strategy = new MockStrategy() {
+      @Override
+      public int getSize(Bitmap bitmap) {
+        return 4;
+      }
+    };
     pool = new LruBitmapPool(3, strategy, ALLOWED_CONFIGS);
     pool.put(createMutableBitmap());
     assertEquals(0, strategy.numRemoves);
@@ -115,7 +114,7 @@ public class LruBitmapPoolTest {
 
   @Test
   public void testTrimMemoryBackgroundOrGreaterRemovesAllBitmaps() {
-    for (int trimLevel : new int[] {TRIM_MEMORY_BACKGROUND, TRIM_MEMORY_COMPLETE}) {
+    for (int trimLevel : new int[] { TRIM_MEMORY_BACKGROUND, TRIM_MEMORY_COMPLETE }) {
       testTrimMemory(MAX_SIZE, trimLevel, MAX_SIZE);
     }
   }
@@ -216,8 +215,7 @@ public class LruBitmapPoolTest {
     assertEquals(0, strategy.numPuts);
   }
 
-  @Test
-  @Config(sdk = 19)
+  @Test @Config(sdk = 19)
   public void testBitmapsWithAllowedNullConfigsAreAllowed() {
     pool = new LruBitmapPool(100, strategy, Collections.<Bitmap.Config>singleton(null));
 
@@ -243,6 +241,7 @@ public class LruBitmapPoolTest {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, config);
     Shadows.shadowOf(bitmap).setMutable(true);
     return bitmap;
+
   }
 
   private static class MockStrategy implements LruPoolStrategy {

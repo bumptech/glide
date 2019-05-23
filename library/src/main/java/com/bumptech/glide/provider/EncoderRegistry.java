@@ -7,7 +7,9 @@ import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Contains an ordered list of {@link Encoder}s capable of encoding arbitrary data types. */
+/**
+ * Contains an ordered list of {@link Encoder}s capable of encoding arbitrary data types.
+ */
 public class EncoderRegistry {
   // TODO: This registry should probably contain a put, rather than a list.
   private final List<Entry<?>> encoders = new ArrayList<>();
@@ -33,10 +35,7 @@ public class EncoderRegistry {
 
   private static final class Entry<T> {
     private final Class<T> dataClass;
-
-    @Synthetic
-    @SuppressWarnings("WeakerAccess")
-    final Encoder<T> encoder;
+    @Synthetic @SuppressWarnings("WeakerAccess") final Encoder<T> encoder;
 
     Entry(@NonNull Class<T> dataClass, @NonNull Encoder<T> encoder) {
       this.dataClass = dataClass;

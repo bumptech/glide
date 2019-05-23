@@ -14,7 +14,9 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.Truth;
 
-/** Truth assertions for comparing {@link Bitmap}s. */
+/**
+ * Truth assertions for comparing {@link Bitmap}s.
+ */
 // Test APIs.
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
@@ -52,12 +54,8 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
   }
 
   private static String getDisplayString(Bitmap bitmap) {
-    return "<"
-        + "["
-        + bitmap.getWidth()
-        + "x"
-        + bitmap.getHeight()
-        + "]"
+     return "<"
+        + "[" + bitmap.getWidth() + "x" + bitmap.getHeight() + "]"
         + " "
         + bitmap.getConfig()
         + ">";
@@ -82,7 +80,7 @@ public final class BitmapSubject extends Subject<BitmapSubject, Bitmap> {
     }
   }
 
-  public void isMutable() {
+  public void isMutable()  {
     if (!actual.isMutable()) {
       failWithActual(simpleFact("expected to be mutable"));
     }

@@ -42,8 +42,8 @@ public class BitmapDrawableResourceTest {
 
   @Test
   public void testReturnsSizeFromGivenBitmap() {
-    assertEquals(
-        harness.bitmap.getHeight() * harness.bitmap.getRowBytes(), harness.create().getSize());
+    assertEquals(harness.bitmap.getHeight() * harness.bitmap.getRowBytes(),
+        harness.create().getSize());
   }
 
   @Test

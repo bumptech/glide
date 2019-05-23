@@ -23,9 +23,8 @@ import org.junit.runners.JUnit4;
  */
 @RunWith(JUnit4.class)
 public class GlideExtensionOptionsTest implements CompilationProvider {
-  @Rule
-  public final RegenerateResourcesRule regenerateResourcesRule = new RegenerateResourcesRule(this);
-
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(this);
   @Rule public final TestDescription testDescription = new TestDescription();
   private static final String EXTENSION_NAME = "Extension.java";
   private Compilation currentCompilation;
@@ -123,7 +122,9 @@ public class GlideExtensionOptionsTest implements CompilationProvider {
     currentCompilation =
         javac()
             .withProcessors(new GlideAnnotationProcessor())
-            .compile(emptyAppModule(), extension(subDir));
+            .compile(
+                emptyAppModule(),
+                extension(subDir));
     assertThat(currentCompilation).succeededWithoutWarnings();
 
     assertThat(currentCompilation)
@@ -132,7 +133,10 @@ public class GlideExtensionOptionsTest implements CompilationProvider {
   }
 
   private String getSubDirectoryName() {
-    return testDescription.getDescription().getAnnotation(SubDirectory.class).value();
+    return testDescription
+        .getDescription()
+        .getAnnotation(SubDirectory.class)
+        .value();
   }
 
   private JavaFileObject extension(String subdir) {

@@ -62,7 +62,7 @@ public class RequestFutureTargetTest {
     future.onResourceReady(
         /*resource=*/ new Object(),
         /*model=*/ null,
-        /*target=*/ future,
+        /*target=*/future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     assertTrue(future.isDone());
@@ -105,7 +105,7 @@ public class RequestFutureTargetTest {
     future.onResourceReady(
         /*resource=*/ new Object(),
         /*model=*/ null,
-        /*target=*/ future,
+        /*target=*/future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     future.cancel(true);
@@ -124,7 +124,7 @@ public class RequestFutureTargetTest {
     future.onResourceReady(
         /*resource=*/ new Object(),
         /*model=*/ null,
-        /*target=*/ future,
+        /*target=*/future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     future.cancel(true);
@@ -143,7 +143,7 @@ public class RequestFutureTargetTest {
     future.onResourceReady(
         /*resource=*/ new Object(),
         /*model=*/ null,
-        /*target=*/ future,
+        /*target=*/future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     assertFalse(future.cancel(true));
@@ -156,7 +156,7 @@ public class RequestFutureTargetTest {
     future.onResourceReady(
         /*resource=*/ expected,
         /*model=*/ null,
-        /*target=*/ future,
+        /*target=*/future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
 
@@ -170,7 +170,7 @@ public class RequestFutureTargetTest {
     future.onResourceReady(
         /*resource=*/ expected,
         /*model=*/ null,
-        /*target=*/ future,
+        /*target=*/future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
 
@@ -226,12 +226,13 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testGetSucceedsOnMainThreadIfDone() throws ExecutionException, InterruptedException {
+  public void testGetSucceedsOnMainThreadIfDone()
+      throws ExecutionException, InterruptedException {
     future = new RequestFutureTarget<>(width, height, true, waiter);
     future.onResourceReady(
         /*resource=*/ new Object(),
         /*model=*/ null,
-        /*target=*/ future,
+        /*target=*/future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     future.get();
@@ -310,7 +311,7 @@ public class RequestFutureTargetTest {
     future.onResourceReady(
         /*resource=*/ new Object(),
         /*model=*/ null,
-        /*target=*/ future,
+        /*target=*/future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     verify(waiter).notifyAll(eq(future));

@@ -12,8 +12,8 @@ import java.io.File;
 import java.net.URL;
 
 /**
- * Ensures that the set of explicitly supported model types remains consistent across Glide's API
- * surface.
+ * Ensures that the set of explicitly supported model types remains consistent across Glide's
+ * API surface.
  */
 interface ModelTypes<T> {
   @NonNull

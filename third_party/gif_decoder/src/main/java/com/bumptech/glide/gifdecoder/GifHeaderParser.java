@@ -49,13 +49,11 @@ public class GifHeaderParser {
   private static final int GCE_DISPOSAL_METHOD_SHIFT = 2;
   /**
    * Mask (bit 0) to extract Transparent Color Flag of the current frame.
-   *
-   * <p><b>GIF89a</b>: <i>Indicates whether a transparency index is given in the Transparent Index
-   * field.</i> Possible values are:
-   *
-   * <ul>
-   *   <li>0 - Transparent Index is not given.
-   *   <li>1 - Transparent Index is given.
+   * <p><b>GIF89a</b>: <i>Indicates whether a transparency index is given
+   * in the Transparent Index field.</i></p>
+   * Possible values are:<ul>
+   * <li>0 - Transparent Index is not given.</li>
+   * <li>1 - Transparent Index is given.</li>
    * </ul>
    */
   private static final int GCE_MASK_TRANSPARENT_COLOR_FLAG = 0b00000001;
@@ -64,30 +62,26 @@ public class GifHeaderParser {
 
   /**
    * Mask (bit 7) to extract Local Color Table Flag of the current image.
-   *
-   * <p><b>GIF89a</b>: <i>Indicates the presence of a Local Color Table immediately following this
-   * Image Descriptor.</i>
+   * <p><b>GIF89a</b>: <i>Indicates the presence of a Local Color Table
+   * immediately following this Image Descriptor.</i></p>
    */
   private static final int DESCRIPTOR_MASK_LCT_FLAG = 0b10000000;
   /**
    * Mask (bit 6) to extract Interlace Flag of the current image.
-   *
-   * <p><b>GIF89a</b>: <i>Indicates if the image is interlaced. An image is interlaced in a
-   * four-pass interlace pattern.</i> Possible values are:
-   *
-   * <ul>
-   *   <li>0 - Image is not interlaced.
-   *   <li>1 - Image is interlaced.
+   * <p><b>GIF89a</b>: <i>Indicates if the image is interlaced.
+   * An image is interlaced in a four-pass interlace pattern.</i></p>
+   * Possible values are:<ul>
+   * <li>0 - Image is not interlaced.</li>
+   * <li>1 - Image is interlaced.</li>
    * </ul>
    */
   private static final int DESCRIPTOR_MASK_INTERLACE_FLAG = 0b01000000;
   /**
    * Mask (bits 2-0) to extract Size of the Local Color Table of the current image.
-   *
-   * <p><b>GIF89a</b>: <i>If the Local Color Table Flag is set to 1, the value in this field is used
-   * to calculate the number of bytes contained in the Local Color Table. To determine that actual
-   * size of the color table, raise 2 to [the value of the field + 1]. This value should be 0 if
-   * there is no Local Color Table specified.</i>
+   * <p><b>GIF89a</b>: <i>If the Local Color Table Flag is set to 1, the value in this
+   * field is used to calculate the number of bytes contained in the Local Color Table.
+   * To determine that actual size of the color table, raise 2 to [the value of the field + 1].
+   * This value should be 0 if there is no Local Color Table specified.</i></p>
    */
   private static final int DESCRIPTOR_MASK_LCT_SIZE = 0b00000111;
 
@@ -95,33 +89,30 @@ public class GifHeaderParser {
 
   /**
    * Mask (bit 7) to extract Global Color Table Flag of the current image.
-   *
-   * <p><b>GIF89a</b>: <i>Indicates the presence of a Global Color Table immediately following this
-   * Image Descriptor.</i> Possible values are:
-   *
-   * <ul>
-   *   <li>0 - No Global Color Table follows, the Background Color Index field is meaningless.
-   *   <li>1 - A Global Color Table will immediately follow, the Background Color Index field is
-   *       meaningful.
+   * <p><b>GIF89a</b>: <i>Indicates the presence of a Global Color Table
+   * immediately following this Image Descriptor.</i></p>
+   * Possible values are:<ul>
+   * <li>0 - No Global Color Table follows, the Background Color Index field is meaningless.</li>
+   * <li>1 - A Global Color Table will immediately follow,
+   * the Background Color Index field is meaningful.</li>
    * </ul>
    */
   private static final int LSD_MASK_GCT_FLAG = 0b10000000;
   /**
    * Mask (bits 2-0) to extract Size of the Global Color Table of the current image.
-   *
-   * <p><b>GIF89a</b>: <i>If the Global Color Table Flag is set to 1, the value in this field is
-   * used to calculate the number of bytes contained in the Global Color Table. To determine that
-   * actual size of the color table, raise 2 to [the value of the field + 1]. Even if there is no
-   * Global Color Table specified, set this field according to the above formula so that decoders
-   * can choose the best graphics mode to display the stream in.</i>
+   * <p><b>GIF89a</b>: <i>If the Global Color Table Flag is set to 1, the value in this
+   * field is used to calculate the number of bytes contained in the Global Color Table.
+   * To determine that actual size of the color table, raise 2 to [the value of the field + 1].
+   * Even if there is no Global Color Table specified, set this field according to the above
+   * formula so that decoders can choose the best graphics mode to display the stream in.</i></p>
    */
   private static final int LSD_MASK_GCT_SIZE = 0b00000111;
 
   /** The minimum frame delay in hundredths of a second. */
   static final int MIN_FRAME_DELAY = 2;
   /**
-   * The default frame delay in hundredths of a second. This is used for GIFs with frame delays less
-   * than the minimum.
+   * The default frame delay in hundredths of a second.
+   * This is used for GIFs with frame delays less than the minimum.
    */
   static final int DEFAULT_FRAME_DELAY = 10;
 
@@ -184,8 +175,8 @@ public class GifHeaderParser {
   }
 
   /**
-   * Determines if the GIF is animated by trying to read in the first 2 frames This method re-parses
-   * the data even if the header has already been read.
+   * Determines if the GIF is animated by trying to read in the first 2 frames
+   * This method re-parses the data even if the header has already been read.
    */
   public boolean isAnimated() {
     readHeader();
@@ -195,12 +186,16 @@ public class GifHeaderParser {
     return header.frameCount > 1;
   }
 
-  /** Main file parser. Reads GIF content blocks. */
+  /**
+   * Main file parser. Reads GIF content blocks.
+   */
   private void readContents() {
     readContents(Integer.MAX_VALUE /* maxFrames */);
   }
 
-  /** Main file parser. Reads GIF content blocks. Stops after reading maxFrames */
+  /**
+   * Main file parser. Reads GIF content blocks. Stops after reading maxFrames
+   */
   private void readContents(int maxFrames) {
     // Read GIF file content blocks.
     boolean done = false;
@@ -253,7 +248,7 @@ public class GifHeaderParser {
           // This block is a single-field block indicating the end of the GIF Data Stream.
           done = true;
           break;
-          // Bad byte, but keep going and see what happens
+        // Bad byte, but keep going and see what happens
         case 0x00:
         default:
           header.status = STATUS_FORMAT_ERROR;
@@ -261,7 +256,9 @@ public class GifHeaderParser {
     }
   }
 
-  /** Reads Graphic Control Extension values. */
+  /**
+   * Reads Graphic Control Extension values.
+   */
   private void readGraphicControlExt() {
     // Block size.
     read();
@@ -298,7 +295,9 @@ public class GifHeaderParser {
     read();
   }
 
-  /** Reads next frame image. */
+  /**
+   * Reads next frame image.
+   */
   private void readBitmap() {
     // (sub)image position & size.
     header.currentFrame.ix = readShort();
@@ -344,7 +343,9 @@ public class GifHeaderParser {
     header.frames.add(header.currentFrame);
   }
 
-  /** Reads Netscape extension to obtain iteration count. */
+  /**
+   * Reads Netscape extension to obtain iteration count.
+   */
   private void readNetscapeExt() {
     do {
       readBlock();
@@ -357,7 +358,10 @@ public class GifHeaderParser {
     } while ((blockSize > 0) && !err());
   }
 
-  /** Reads GIF file header information. */
+
+  /**
+   * Reads GIF file header information.
+   */
   private void readHeader() {
     StringBuilder id = new StringBuilder();
     for (int i = 0; i < 6; i++) {
@@ -374,7 +378,9 @@ public class GifHeaderParser {
     }
   }
 
-  /** Reads Logical Screen Descriptor. */
+  /**
+   * Reads Logical Screen Descriptor.
+   */
   private void readLSD() {
     // Logical screen size.
     header.width = readShort();
@@ -435,7 +441,9 @@ public class GifHeaderParser {
     return tab;
   }
 
-  /** Skips LZW image data for a single frame to advance buffer. */
+  /**
+   * Skips LZW image data for a single frame to advance buffer.
+   */
   private void skipImageData() {
     // lzwMinCodeSize
     read();
@@ -443,7 +451,9 @@ public class GifHeaderParser {
     skip();
   }
 
-  /** Skips variable length blocks up to and including next zero length block. */
+  /**
+   * Skips variable length blocks up to and including next zero length block.
+   */
   private void skip() {
     int blockSize;
     do {
@@ -453,7 +463,9 @@ public class GifHeaderParser {
     } while (blockSize > 0);
   }
 
-  /** Reads next variable length block from input. */
+  /**
+   * Reads next variable length block from input.
+   */
   private void readBlock() {
     blockSize = read();
     int n = 0;
@@ -468,17 +480,17 @@ public class GifHeaderParser {
         }
       } catch (Exception e) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(
-              TAG,
-              "Error Reading Block n: " + n + " count: " + count + " blockSize: " + blockSize,
-              e);
+          Log.d(TAG,
+              "Error Reading Block n: " + n + " count: " + count + " blockSize: " + blockSize, e);
         }
         header.status = STATUS_FORMAT_ERROR;
       }
     }
   }
 
-  /** Reads a single byte from the input stream. */
+  /**
+   * Reads a single byte from the input stream.
+   */
   private int read() {
     int currByte = 0;
     try {
@@ -489,7 +501,9 @@ public class GifHeaderParser {
     return currByte;
   }
 
-  /** Reads next 16-bit value, LSB first. */
+  /**
+   * Reads next 16-bit value, LSB first.
+   */
   private int readShort() {
     // Read 16-bit value.
     return rawData.getShort();

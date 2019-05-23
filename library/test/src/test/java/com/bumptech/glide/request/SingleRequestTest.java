@@ -84,8 +84,8 @@ public class SingleRequestTest {
     request.onResourceReady(null, DataSource.LOCAL);
 
     assertTrue(request.isFailed());
-    verify(listener1)
-        .onLoadFailed(isAGlideException(), isA(Number.class), eq(builder.target), anyBoolean());
+    verify(listener1).onLoadFailed(isAGlideException(), isA(Number.class),
+        eq(builder.target), anyBoolean());
   }
 
   @Test
@@ -97,8 +97,8 @@ public class SingleRequestTest {
 
     assertTrue(request.isFailed());
     verify(builder.engine).release(eq(builder.resource));
-    verify(listener1)
-        .onLoadFailed(isAGlideException(), any(Number.class), eq(builder.target), anyBoolean());
+    verify(listener1).onLoadFailed(isAGlideException(), any(Number.class),
+        eq(builder.target), anyBoolean());
   }
 
   @Test
@@ -111,8 +111,8 @@ public class SingleRequestTest {
 
     assertTrue(request.isFailed());
     verify(builder.engine).release(eq(builder.resource));
-    verify(listener1)
-        .onLoadFailed(isAGlideException(), any(Number.class), eq(builder.target), anyBoolean());
+    verify(listener1).onLoadFailed(isAGlideException(), any(Number.class),
+        eq(builder.target), anyBoolean());
   }
 
   @Test
@@ -190,19 +190,18 @@ public class SingleRequestTest {
   @Test
   public void testResourceIsNotCompleteWhenAskingCoordinatorIfCanSetImage() {
     RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
-    doAnswer(
-            new Answer() {
-              @Override
-              public Object answer(InvocationOnMock invocation) {
-                Request request = (Request) invocation.getArguments()[0];
-                assertFalse(request.isComplete());
-                return true;
-              }
-            })
-        .when(requestCoordinator)
-        .canSetImage(any(Request.class));
+    doAnswer(new Answer() {
+      @Override
+      public Object answer(InvocationOnMock invocation) {
+        Request request = (Request) invocation.getArguments()[0];
+        assertFalse(request.isComplete());
+        return true;
+      }
+    }).when(requestCoordinator).canSetImage(any(Request.class));
 
-    SingleRequest<List> request = builder.setRequestCoordinator(requestCoordinator).build();
+    SingleRequest<List> request = builder
+        .setRequestCoordinator(requestCoordinator)
+        .build();
 
     request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
 
@@ -313,8 +312,10 @@ public class SingleRequestTest {
 
     MockTarget target = new MockTarget();
 
-    SingleRequest<List> request =
-        builder.setPlaceholderDrawable(expected).setTarget(target).build();
+    SingleRequest<List> request = builder
+        .setPlaceholderDrawable(expected)
+        .setTarget(target)
+        .build();
     request.begin();
 
     assertThat(target.currentPlaceholder).isEqualTo(expected);
@@ -326,7 +327,10 @@ public class SingleRequestTest {
 
     MockTarget target = new MockTarget();
 
-    SingleRequest<List> request = builder.setErrorDrawable(expected).setTarget(target).build();
+    SingleRequest<List> request = builder
+        .setErrorDrawable(expected)
+        .setTarget(target)
+        .build();
 
     request.onLoadFailed(new GlideException("test"));
 
@@ -339,8 +343,11 @@ public class SingleRequestTest {
 
     MockTarget target = new MockTarget();
 
-    SingleRequest<List> request =
-        builder.setErrorDrawable(placeholder).setTarget(target).setModel(null).build();
+    SingleRequest<List> request = builder
+        .setErrorDrawable(placeholder)
+        .setTarget(target)
+        .setModel(null)
+        .build();
 
     request.begin();
 
@@ -354,18 +361,18 @@ public class SingleRequestTest {
 
     MockTarget target = new MockTarget();
 
-    SingleRequest<List> request =
-        builder
-            .setPlaceholderDrawable(placeholder)
-            .setErrorDrawable(errorPlaceholder)
-            .setTarget(target)
-            .setModel(null)
-            .build();
+    SingleRequest<List> request = builder
+        .setPlaceholderDrawable(placeholder)
+        .setErrorDrawable(errorPlaceholder)
+        .setTarget(target)
+        .setModel(null)
+        .build();
 
     request.begin();
 
     assertThat(target.currentPlaceholder).isEqualTo(errorPlaceholder);
   }
+
 
   @Test
   public void testFallbackDrawableSetOnNullModelWithErrorAndFallbackDrawables() {
@@ -374,18 +381,18 @@ public class SingleRequestTest {
     Drawable fallback = new ColorDrawable(Color.BLUE);
 
     MockTarget target = new MockTarget();
-    SingleRequest<List> request =
-        builder
-            .setPlaceholderDrawable(placeholder)
-            .setErrorDrawable(errorPlaceholder)
-            .setFallbackDrawable(fallback)
-            .setTarget(target)
-            .setModel(null)
-            .build();
+    SingleRequest<List> request = builder
+        .setPlaceholderDrawable(placeholder)
+        .setErrorDrawable(errorPlaceholder)
+        .setFallbackDrawable(fallback)
+        .setTarget(target)
+        .setModel(null)
+        .build();
     request.begin();
 
     assertThat(target.currentPlaceholder).isEqualTo(fallback);
   }
+
 
   @Test
   public void testIsNotRunningBeforeRunCalled() {
@@ -439,12 +446,12 @@ public class SingleRequestTest {
     SingleRequest<List> request =
         builder.addRequestListener(listener1).addRequestListener(listener2).build();
 
-    when(listener1.onResourceReady(
-            any(List.class), any(Number.class), eq(builder.target), isADataSource(), anyBoolean()))
-        .thenReturn(false);
-    when(listener2.onResourceReady(
-            any(List.class), any(Number.class), eq(builder.target), isADataSource(), anyBoolean()))
-        .thenReturn(false);
+    when(listener1
+        .onResourceReady(any(List.class), any(Number.class), eq(builder.target), isADataSource(),
+            anyBoolean())).thenReturn(false);
+    when(listener2
+        .onResourceReady(any(List.class), any(Number.class), eq(builder.target), isADataSource(),
+            anyBoolean())).thenReturn(false);
     request.onResourceReady(builder.resource, DataSource.LOCAL);
 
     verify(builder.target).onResourceReady(eq(builder.result), anyTransition());
@@ -455,12 +462,12 @@ public class SingleRequestTest {
     SingleRequest<List> request =
         builder.addRequestListener(listener1).addRequestListener(listener2).build();
 
-    when(listener1.onResourceReady(
-            any(List.class), any(Number.class), eq(builder.target), isADataSource(), anyBoolean()))
-        .thenReturn(false);
-    when(listener1.onResourceReady(
-            any(List.class), any(Number.class), eq(builder.target), isADataSource(), anyBoolean()))
-        .thenReturn(true);
+    when(listener1
+        .onResourceReady(any(List.class), any(Number.class), eq(builder.target), isADataSource(),
+            anyBoolean())).thenReturn(false);
+    when(listener1
+        .onResourceReady(any(List.class), any(Number.class), eq(builder.target), isADataSource(),
+            anyBoolean())).thenReturn(true);
     request.onResourceReady(builder.resource, DataSource.REMOTE);
 
     verify(builder.target, never()).onResourceReady(any(List.class), anyTransition());
@@ -479,11 +486,11 @@ public class SingleRequestTest {
     SingleRequest<List> request =
         builder.addRequestListener(listener1).addRequestListener(listener2).build();
 
-    when(listener1.onLoadFailed(
-            isAGlideException(), any(Number.class), eq(builder.target), anyBoolean()))
+    when(listener1.onLoadFailed(isAGlideException(), any(Number.class),
+        eq(builder.target), anyBoolean()))
         .thenReturn(false);
-    when(listener2.onLoadFailed(
-            isAGlideException(), any(Number.class), eq(builder.target), anyBoolean()))
+    when(listener2.onLoadFailed(isAGlideException(), any(Number.class),
+        eq(builder.target), anyBoolean()))
         .thenReturn(false);
     request.onLoadFailed(new GlideException("test"));
 
@@ -495,11 +502,11 @@ public class SingleRequestTest {
     SingleRequest<List> request =
         builder.addRequestListener(listener1).addRequestListener(listener2).build();
 
-    when(listener1.onLoadFailed(
-            isAGlideException(), any(Number.class), eq(builder.target), anyBoolean()))
+    when(listener1.onLoadFailed(isAGlideException(), any(Number.class),
+        eq(builder.target), anyBoolean()))
         .thenReturn(false);
-    when(listener2.onLoadFailed(
-            isAGlideException(), any(Number.class), eq(builder.target), anyBoolean()))
+    when(listener2.onLoadFailed(isAGlideException(), any(Number.class),
+        eq(builder.target), anyBoolean()))
         .thenReturn(true);
 
     request.onLoadFailed(new GlideException("test"));
@@ -513,8 +520,8 @@ public class SingleRequestTest {
     request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
 
     verify(listener1)
-        .onResourceReady(
-            eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), anyBoolean());
+        .onResourceReady(eq(builder.result), any(Number.class), isAListTarget(), isADataSource(),
+            anyBoolean());
   }
 
   @Test
@@ -523,8 +530,8 @@ public class SingleRequestTest {
     request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
 
     verify(listener1)
-        .onResourceReady(
-            any(List.class), eq(builder.model), isAListTarget(), isADataSource(), anyBoolean());
+        .onResourceReady(any(List.class), eq(builder.model), isAListTarget(), isADataSource(),
+            anyBoolean());
   }
 
   @Test
@@ -533,8 +540,8 @@ public class SingleRequestTest {
     request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
 
     verify(listener1)
-        .onResourceReady(
-            any(List.class), any(Number.class), eq(builder.target), isADataSource(), anyBoolean());
+        .onResourceReady(any(List.class), any(Number.class), eq(builder.target), isADataSource(),
+            anyBoolean());
   }
 
   @Test
@@ -573,39 +580,33 @@ public class SingleRequestTest {
     request.begin();
     request.onSizeReady(100, 100);
     verify(listener1)
-        .onResourceReady(
-            eq(builder.result),
-            any(Number.class),
-            isAListTarget(),
-            eq(DataSource.MEMORY_CACHE),
-            anyBoolean());
+        .onResourceReady(eq(builder.result), any(Number.class), isAListTarget(),
+            eq(DataSource.MEMORY_CACHE), anyBoolean());
   }
 
   @Test
   public void
-      testRequestListenerIsCalledWithNotLoadedFromMemoryCacheIfLoadCompletesAsynchronously() {
+  testRequestListenerIsCalledWithNotLoadedFromMemoryCacheIfLoadCompletesAsynchronously() {
     SingleRequest<List> request = builder.addRequestListener(listener1).build();
     request.onSizeReady(100, 100);
     request.onResourceReady(builder.resource, DataSource.LOCAL);
 
     verify(listener1)
-        .onResourceReady(
-            eq(builder.result),
-            any(Number.class),
-            isAListTarget(),
-            eq(DataSource.LOCAL),
-            anyBoolean());
+        .onResourceReady(eq(builder.result), any(Number.class), isAListTarget(),
+            eq(DataSource.LOCAL), anyBoolean());
   }
 
   @Test
   public void testRequestListenerIsCalledWithIsFirstResourceIfNoRequestCoordinator() {
-    SingleRequest<List> request =
-        builder.setRequestCoordinator(null).addRequestListener(listener1).build();
+    SingleRequest<List> request = builder
+        .setRequestCoordinator(null)
+        .addRequestListener(listener1)
+        .build();
     request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
 
     verify(listener1)
-        .onResourceReady(
-            eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(true));
+        .onResourceReady(eq(builder.result), any(Number.class), isAListTarget(), isADataSource(),
+            eq(true));
   }
 
   @Test
@@ -615,20 +616,20 @@ public class SingleRequestTest {
     request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
 
     verify(listener1)
-        .onResourceReady(
-            eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(true));
+        .onResourceReady(eq(builder.result), any(Number.class), isAListTarget(), isADataSource(),
+            eq(true));
   }
 
   @Test
   public void
-      testRequestListenerIsCalledWithNotIsFirstRequestIfRequestCoordinatorReturnsResourceSet() {
+  testRequestListenerIsCalledWithNotIsFirstRequestIfRequestCoordinatorReturnsResourceSet() {
     SingleRequest<List> request = builder.addRequestListener(listener1).build();
     when(builder.requestCoordinator.isAnyResourceSet()).thenReturn(true);
     request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
 
     verify(listener1)
-        .onResourceReady(
-            eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(false));
+        .onResourceReady(eq(builder.result), any(Number.class), isAListTarget(),
+            isADataSource(), eq(false));
   }
 
   @Test
@@ -644,7 +645,10 @@ public class SingleRequestTest {
 
   @Test
   public void testCallsGetSizeIfOverrideWidthIsLessThanZero() {
-    SingleRequest<List> request = builder.setOverrideWidth(-1).setOverrideHeight(100).build();
+    SingleRequest<List> request = builder
+        .setOverrideWidth(-1)
+        .setOverrideHeight(100)
+        .build();
     request.begin();
 
     verify(builder.target).getSize(any(SizeReadyCallback.class));
@@ -652,7 +656,10 @@ public class SingleRequestTest {
 
   @Test
   public void testCallsGetSizeIfOverrideHeightIsLessThanZero() {
-    SingleRequest<List> request = builder.setOverrideWidth(100).setOverrideHeight(-1).build();
+    SingleRequest<List> request = builder
+        .setOverrideWidth(100)
+        .setOverrideHeight(-1)
+        .build();
     request.begin();
 
     verify(builder.target).getSize(any(SizeReadyCallback.class));
@@ -660,7 +667,10 @@ public class SingleRequestTest {
 
   @Test
   public void testDoesNotCallGetSizeIfOverrideWidthAndHeightAreSet() {
-    SingleRequest<List> request = builder.setOverrideWidth(100).setOverrideHeight(100).build();
+    SingleRequest<List> request = builder
+        .setOverrideWidth(100)
+        .setOverrideHeight(100)
+        .build();
     request.begin();
 
     verify(builder.target, never()).getSize(any(SizeReadyCallback.class));
@@ -668,7 +678,10 @@ public class SingleRequestTest {
 
   @Test
   public void testCallsEngineWithOverrideWidthAndHeightIfSet() {
-    SingleRequest<List> request = builder.setOverrideWidth(1).setOverrideHeight(2).build();
+    SingleRequest<List> request = builder
+        .setOverrideWidth(1)
+        .setOverrideHeight(2)
+        .build();
     request.begin();
 
     verify(builder.engine)
@@ -696,7 +709,9 @@ public class SingleRequestTest {
 
   @Test
   public void testDoesNotSetErrorDrawableIfRequestCoordinatorDoesntAllowIt() {
-    SingleRequest<List> request = builder.setErrorDrawable(new ColorDrawable(Color.RED)).build();
+    SingleRequest<List> request = builder
+        .setErrorDrawable(new ColorDrawable(Color.RED))
+        .build();
     when(builder.requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(false);
     request.onLoadFailed(new GlideException("test"));
 
@@ -705,8 +720,7 @@ public class SingleRequestTest {
 
   @Test
   public void testCanReRunClearedRequests() {
-    doAnswer(new CallSizeReady(100, 100))
-        .when(builder.target)
+    doAnswer(new CallSizeReady(100, 100)).when(builder.target)
         .getSize(any(SizeReadyCallback.class));
 
     when(builder.engine.load(
@@ -776,13 +790,15 @@ public class SingleRequestTest {
             anyExecutor());
   }
 
+
   @Test
   public void testCallsSourceUnlimitedExecutorEngineIfOptionsIsSet() {
-    doAnswer(new CallSizeReady(100, 100))
-        .when(builder.target)
+    doAnswer(new CallSizeReady(100, 100)).when(builder.target)
         .getSize(any(SizeReadyCallback.class));
 
-    SingleRequest<List> request = builder.setUseUnlimitedSourceGeneratorsPool(true).build();
+    SingleRequest<List> request = builder
+        .setUseUnlimitedSourceGeneratorsPool(true)
+        .build();
     request.begin();
 
     verify(builder.engine)
@@ -810,11 +826,12 @@ public class SingleRequestTest {
 
   @Test
   public void testCallsSourceExecutorEngineIfOptionsIsSet() {
-    doAnswer(new CallSizeReady(100, 100))
-        .when(builder.target)
+    doAnswer(new CallSizeReady(100, 100)).when(builder.target)
         .getSize(any(SizeReadyCallback.class));
 
-    SingleRequest<List> request = builder.setUseUnlimitedSourceGeneratorsPool(false).build();
+    SingleRequest<List> request = builder
+        .setUseUnlimitedSourceGeneratorsPool(false)
+        .build();
     request.begin();
 
     verify(builder.engine)
@@ -844,20 +861,19 @@ public class SingleRequestTest {
   // Varargs
   @SuppressWarnings("unchecked")
   public void testIsEquivalentTo() {
-    EquivalenceTester<SingleRequestBuilder> tester =
-        EquivalenceTester.of(
-            new Equivalence<SingleRequestBuilder>() {
-              @Override
-              protected boolean doEquivalent(
-                  @NonNull SingleRequestBuilder a, @NonNull SingleRequestBuilder b) {
-                return a.build().isEquivalentTo(b.build()) && b.build().isEquivalentTo(a.build());
-              }
+    EquivalenceTester<SingleRequestBuilder> tester = EquivalenceTester
+        .of(new Equivalence<SingleRequestBuilder>() {
+          @Override
+          protected boolean doEquivalent(
+              @NonNull SingleRequestBuilder a, @NonNull SingleRequestBuilder b) {
+            return a.build().isEquivalentTo(b.build()) && b.build().isEquivalentTo(a.build());
+          }
 
-              @Override
-              protected int doHash(@NonNull SingleRequestBuilder listSingleRequest) {
-                return 0;
-              }
-            });
+          @Override
+          protected int doHash(@NonNull SingleRequestBuilder listSingleRequest) {
+            return 0;
+          }
+        });
     tester
         .addEquivalenceGroup(
             // Non-null request listeners are treated as equivalent, even if they're not equal.
@@ -870,9 +886,11 @@ public class SingleRequestTest {
             new SingleRequestBuilder().setOverrideWidth(500),
             new SingleRequestBuilder().setOverrideWidth(500))
         .addEquivalenceGroup(
-            new SingleRequestBuilder().setModel(12345), new SingleRequestBuilder().setModel(12345))
+            new SingleRequestBuilder().setModel(12345),
+            new SingleRequestBuilder().setModel(12345))
         .addEquivalenceGroup(
-            new SingleRequestBuilder().setModel(null), new SingleRequestBuilder().setModel(null))
+            new SingleRequestBuilder().setModel(null),
+            new SingleRequestBuilder().setModel(null))
         .addEquivalenceGroup(
             new SingleRequestBuilder().setPriority(Priority.LOW),
             new SingleRequestBuilder().setPriority(Priority.LOW))
@@ -882,22 +900,17 @@ public class SingleRequestTest {
   static final class SingleRequestBuilder {
     private Engine engine = mock(Engine.class);
     private Number model = 123456;
-
     @SuppressWarnings("unchecked")
     private Target<List> target = mock(Target.class);
-
     private Resource<List> resource = mockResource();
     private RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
     private Drawable placeholderDrawable = null;
     private Drawable errorDrawable = null;
     private Drawable fallbackDrawable = null;
-
     @SuppressWarnings("unchecked")
     private List<RequestListener<List>> requestListeners = new ArrayList<>();
-
     @SuppressWarnings("unchecked")
     private final TransitionFactory<List> transitionFactory = mock(TransitionFactory.class);
-
     private int overrideWidth = -1;
     private int overrideHeight = -1;
     private List<?> result = new ArrayList<>();
@@ -987,15 +1000,14 @@ public class SingleRequestTest {
     }
 
     SingleRequest<List> build() {
-      RequestOptions requestOptions =
-          new RequestOptions()
-              .error(errorDrawable)
-              .placeholder(placeholderDrawable)
-              .fallback(fallbackDrawable)
-              .override(overrideWidth, overrideHeight)
-              .priority(priority)
-              .signature(signature)
-              .useUnlimitedSourceGeneratorsPool(useUnlimitedSourceGeneratorsPool);
+      RequestOptions requestOptions = new RequestOptions()
+          .error(errorDrawable)
+          .placeholder(placeholderDrawable)
+          .fallback(fallbackDrawable)
+          .override(overrideWidth, overrideHeight)
+          .priority(priority)
+          .signature(signature)
+          .useUnlimitedSourceGeneratorsPool(useUnlimitedSourceGeneratorsPool);
       return SingleRequest.obtain(
           /*context=*/ glideContext,
           /*glideContext=*/ glideContext,
@@ -1087,21 +1099,25 @@ public class SingleRequestTest {
     @Override
     public void onLoadStarted(@Nullable Drawable placeholder) {
       currentPlaceholder = placeholder;
+
     }
 
     @Override
     public void onLoadFailed(@Nullable Drawable errorDrawable) {
       currentPlaceholder = errorDrawable;
+
     }
 
     @Override
-    public void onResourceReady(
-        @NonNull List resource, @Nullable Transition<? super List> transition) {
+    public void onResourceReady(@NonNull List resource,
+        @Nullable Transition<? super List> transition) {
       currentPlaceholder = null;
     }
 
+
     @Override
-    public void getSize(@NonNull SizeReadyCallback cb) {}
+    public void getSize(@NonNull SizeReadyCallback cb) {
+    }
 
     @Override
     public void removeCallback(@NonNull SizeReadyCallback cb) {
@@ -1109,7 +1125,8 @@ public class SingleRequestTest {
     }
 
     @Override
-    public void setRequest(@Nullable Request request) {}
+    public void setRequest(@Nullable Request request) {
+    }
 
     @Nullable
     @Override
@@ -1118,12 +1135,17 @@ public class SingleRequestTest {
     }
 
     @Override
-    public void onStart() {}
+    public void onStart() {
+    }
 
     @Override
-    public void onStop() {}
+    public void onStop() {
+
+    }
 
     @Override
-    public void onDestroy() {}
+    public void onDestroy() {
+
+    }
   }
 }

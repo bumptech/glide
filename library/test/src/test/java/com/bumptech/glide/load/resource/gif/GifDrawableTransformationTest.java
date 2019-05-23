@@ -86,13 +86,10 @@ public class GifDrawableTransformationTest {
 
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
-    doAnswer(new Util.WriteDigest("first"))
-        .when(wrapped)
+    doAnswer(new Util.WriteDigest("first")).when(wrapped)
         .updateDiskCacheKey(isA(MessageDigest.class));
-    @SuppressWarnings("unchecked")
-    Transformation<Bitmap> other = mock(Transformation.class);
-    doAnswer(new Util.WriteDigest("other"))
-        .when(other)
+    @SuppressWarnings("unchecked") Transformation<Bitmap> other = mock(Transformation.class);
+    doAnswer(new Util.WriteDigest("other")).when(other)
         .updateDiskCacheKey(isA(MessageDigest.class));
     keyTester
         .addEquivalenceGroup(

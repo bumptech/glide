@@ -12,7 +12,9 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.samples.flickr.api.Photo;
 import java.io.InputStream;
 
-/** Register {@link FlickrModelLoader} for the Flickr sample app. */
+/**
+ * Register {@link FlickrModelLoader} for the Flickr sample app.
+ */
 @GlideModule
 public class FlickrGlideModule extends AppGlideModule {
 
@@ -23,8 +25,8 @@ public class FlickrGlideModule extends AppGlideModule {
   }
 
   @Override
-  public void registerComponents(
-      @NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
+  public void registerComponents(@NonNull Context context, @NonNull Glide glide,
+      @NonNull Registry registry) {
     registry.append(Photo.class, InputStream.class, new FlickrModelLoader.Factory());
   }
 

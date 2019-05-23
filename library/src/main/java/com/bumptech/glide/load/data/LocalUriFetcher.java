@@ -14,7 +14,7 @@ import java.io.IOException;
  * android.net.Uri} pointing to a local resource.
  *
  * @param <T> The type of data that will obtained for the given uri (For example, {@link
- *     java.io.InputStream} or {@link android.os.ParcelFileDescriptor}.
+ *            java.io.InputStream} or {@link android.os.ParcelFileDescriptor}.
  */
 public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   private static final String TAG = "LocalUriFetcher";
@@ -26,8 +26,8 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
    * Opens an input stream for a uri pointing to a local asset. Only certain uris are supported
    *
    * @param contentResolver Any {@link android.content.ContentResolver}.
-   * @param uri A Uri pointing to a local asset. This load will fail if the uri isn't openable by
-   *     {@link ContentResolver#openInputStream(android.net.Uri)}
+   * @param uri     A Uri pointing to a local asset. This load will fail if the uri isn't openable
+   *                by {@link ContentResolver#openInputStream(android.net.Uri)}
    * @see ContentResolver#openInputStream(android.net.Uri)
    */
   // Public API.
@@ -38,8 +38,8 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   }
 
   @Override
-  public final void loadData(
-      @NonNull Priority priority, @NonNull DataCallback<? super T> callback) {
+  public final void loadData(@NonNull Priority priority,
+      @NonNull DataCallback<? super T> callback) {
     try {
       data = loadResource(uri, contentResolver);
     } catch (FileNotFoundException e) {
@@ -84,10 +84,11 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   /**
    * Closes the concrete data type if necessary.
    *
-   * <p>Note - We can't rely on the closeable interface because it was added after our min API
-   * level. See issue #157.
+   * <p> Note - We can't rely on the closeable interface because it was added after our min API
+   * level. See issue #157. </p>
    *
    * @param data The data to close.
    */
   protected abstract void close(T data) throws IOException;
 }
+

@@ -20,12 +20,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests AppGlideModules that use the @Excludes annotation with a single excluded Module class. */
+/**
+ * Tests AppGlideModules that use the @Excludes annotation with a single excluded Module class.
+ */
 @RunWith(JUnit4.class)
 public class AppGlideModuleWithExcludesTest implements CompilationProvider {
-  @Rule
-  public final RegenerateResourcesRule regenerateResourcesRule = new RegenerateResourcesRule(this);
-
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(this);
   private Compilation compilation;
 
   @Before
@@ -33,7 +34,9 @@ public class AppGlideModuleWithExcludesTest implements CompilationProvider {
     compilation =
         javac()
             .withProcessors(new GlideAnnotationProcessor())
-            .compile(forResource("AppModuleWithExcludes.java"), emptyLibraryModule());
+            .compile(
+                forResource("AppModuleWithExcludes.java"),
+                emptyLibraryModule());
     assertThat(compilation).succeededWithoutWarnings();
   }
 

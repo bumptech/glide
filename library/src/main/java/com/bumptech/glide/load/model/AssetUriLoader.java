@@ -34,17 +34,16 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(
-      @NonNull Uri model, int width, int height, @NonNull Options options) {
+  public LoadData<Data> buildLoadData(@NonNull Uri model, int width, int height,
+      @NonNull Options options) {
     String assetPath = model.toString().substring(ASSET_PREFIX_LENGTH);
     return new LoadData<>(new ObjectKey(model), factory.buildFetcher(assetManager, assetPath));
   }
 
   @Override
   public boolean handles(@NonNull Uri model) {
-    return ContentResolver.SCHEME_FILE.equals(model.getScheme())
-        && !model.getPathSegments().isEmpty()
-        && ASSET_PATH_SEGMENT.equals(model.getPathSegments().get(0));
+    return ContentResolver.SCHEME_FILE.equals(model.getScheme()) && !model.getPathSegments()
+        .isEmpty() && ASSET_PATH_SEGMENT.equals(model.getPathSegments().get(0));
   }
 
   /**
@@ -56,9 +55,11 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
     DataFetcher<Data> buildFetcher(AssetManager assetManager, String assetPath);
   }
 
-  /** Factory for loading {@link InputStream}s from asset manager Uris. */
-  public static class StreamFactory
-      implements ModelLoaderFactory<Uri, InputStream>, AssetFetcherFactory<InputStream> {
+  /**
+   * Factory for loading {@link InputStream}s from asset manager Uris.
+   */
+  public static class StreamFactory implements ModelLoaderFactory<Uri, InputStream>,
+      AssetFetcherFactory<InputStream> {
 
     private final AssetManager assetManager;
 
@@ -83,10 +84,12 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
     }
   }
 
-  /** Factory for loading {@link ParcelFileDescriptor}s from asset manager Uris. */
-  public static class FileDescriptorFactory
-      implements ModelLoaderFactory<Uri, ParcelFileDescriptor>,
-          AssetFetcherFactory<ParcelFileDescriptor> {
+  /**
+   * Factory for loading {@link ParcelFileDescriptor}s from asset manager Uris.
+   */
+  public static class FileDescriptorFactory implements ModelLoaderFactory<Uri,
+      ParcelFileDescriptor>,
+      AssetFetcherFactory<ParcelFileDescriptor> {
 
     private final AssetManager assetManager;
 
@@ -106,8 +109,8 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
     }
 
     @Override
-    public DataFetcher<ParcelFileDescriptor> buildFetcher(
-        AssetManager assetManager, String assetPath) {
+    public DataFetcher<ParcelFileDescriptor> buildFetcher(AssetManager assetManager,
+        String assetPath) {
       return new FileDescriptorAssetPathFetcher(assetManager, assetPath);
     }
   }

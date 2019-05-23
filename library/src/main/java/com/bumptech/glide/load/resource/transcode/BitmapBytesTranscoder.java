@@ -11,7 +11,8 @@ import java.io.ByteArrayOutputStream;
 /**
  * An {@link com.bumptech.glide.load.resource.transcode.ResourceTranscoder} that converts {@link
  * android.graphics.Bitmap}s into byte arrays using {@link android.graphics.Bitmap#compress
- * (android.graphics.Bitmap.CompressFormat, int, java.io.OutputStream)}.
+ * (android.graphics.Bitmap.CompressFormat,
+ * int, java.io.OutputStream)}.
  */
 public class BitmapBytesTranscoder implements ResourceTranscoder<Bitmap, byte[]> {
   private final Bitmap.CompressFormat compressFormat;
@@ -30,8 +31,8 @@ public class BitmapBytesTranscoder implements ResourceTranscoder<Bitmap, byte[]>
 
   @Nullable
   @Override
-  public Resource<byte[]> transcode(
-      @NonNull Resource<Bitmap> toTranscode, @NonNull Options options) {
+  public Resource<byte[]> transcode(@NonNull Resource<Bitmap> toTranscode,
+      @NonNull Options options) {
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     toTranscode.get().compress(compressFormat, quality, os);
     toTranscode.recycle();

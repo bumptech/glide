@@ -10,10 +10,10 @@ import com.bumptech.glide.util.Util;
 import java.util.NavigableMap;
 
 /**
- * A strategy for reusing bitmaps that relies on {@link Bitmap#reconfigure(int, int,
- * Bitmap.Config)}.
+ * A strategy for reusing bitmaps that relies on
+ * {@link Bitmap#reconfigure(int, int, Bitmap.Config)}.
  *
- * <p>Requires {@link Build.VERSION_CODES#KITKAT KitKat} or higher.
+ * <p> Requires {@link Build.VERSION_CODES#KITKAT KitKat} or higher. </p>
  */
 @RequiresApi(Build.VERSION_CODES.KITKAT)
 final class SizeStrategy implements LruPoolStrategy {
@@ -102,8 +102,7 @@ final class SizeStrategy implements LruPoolStrategy {
     return getBitmapString(size);
   }
 
-  @Synthetic
-  static String getBitmapString(int size) {
+  @Synthetic static String getBitmapString(int size) {
     return "[" + size + "]";
   }
 

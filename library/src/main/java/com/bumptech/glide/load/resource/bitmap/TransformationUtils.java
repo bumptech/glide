@@ -28,7 +28,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/** A class with methods to efficiently resize Bitmaps. */
+/**
+ * A class with methods to efficiently resize Bitmaps.
+ */
 // Legacy Public APIs.
 @SuppressWarnings("WeakerAccess")
 public final class TransformationUtils {
@@ -74,15 +76,19 @@ public final class TransformationUtils {
               "XT1072",
               "XT1077",
               "XT1078",
-              "XT1079"));
+              "XT1079"
+          )
+      );
 
   /**
    * https://github.com/bumptech/glide/issues/738 On some devices, bitmap drawing is not thread
-   * safe. This lock only locks for these specific devices. For other types of devices the lock is
-   * always available and therefore does not impact performance
+   * safe.
+   * This lock only locks for these specific devices. For other types of devices the lock is always
+   * available and therefore does not impact performance
    */
   private static final Lock BITMAP_DRAWABLE_LOCK =
-      MODELS_REQUIRING_BITMAP_LOCK.contains(Build.MODEL) ? new ReentrantLock() : new NoLock();
+      MODELS_REQUIRING_BITMAP_LOCK.contains(Build.MODEL)
+          ? new ReentrantLock() : new NoLock();
 
   static {
     CIRCLE_CROP_BITMAP_PAINT = new Paint(CIRCLE_CROP_PAINT_FLAGS);
@@ -93,6 +99,7 @@ public final class TransformationUtils {
     // Utility class.
   }
 
+
   public static Lock getBitmapDrawableLock() {
     return BITMAP_DRAWABLE_LOCK;
   }
@@ -102,14 +109,14 @@ public final class TransformationUtils {
    * dimensions. This operation is significantly less expensive in terms of memory if a mutable
    * Bitmap with the given dimensions is passed in as well.
    *
-   * @param pool The BitmapPool to obtain a bitmap from.
-   * @param inBitmap The Bitmap to resize.
-   * @param width The width in pixels of the final Bitmap.
-   * @param height The height in pixels of the final Bitmap.
+   * @param pool     The BitmapPool to obtain a bitmap from.
+   * @param inBitmap   The Bitmap to resize.
+   * @param width    The width in pixels of the final Bitmap.
+   * @param height   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
-  public static Bitmap centerCrop(
-      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width, int height) {
+  public static Bitmap centerCrop(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
+      int height) {
     if (inBitmap.getWidth() == width && inBitmap.getHeight() == height) {
       return inBitmap;
     }
@@ -143,15 +150,15 @@ public final class TransformationUtils {
    * An expensive operation to resize the given Bitmap down so that it fits within the given
    * dimensions maintain the original proportions.
    *
-   * @param pool The BitmapPool obtain a bitmap from.
-   * @param inBitmap The Bitmap to shrink.
-   * @param width The width in pixels the final image will fit within.
+   * @param pool   The BitmapPool obtain a bitmap from.
+   * @param inBitmap  The Bitmap to shrink.
+   * @param width  The width in pixels the final image will fit within.
    * @param height The height in pixels the final image will fit within.
    * @return A new Bitmap shrunk to fit within the given dimensions, or toFit if toFit's width or
-   *     height matches the given dimensions and toFit fits within the given dimensions
+   * height matches the given dimensions and toFit fits within the given dimensions
    */
-  public static Bitmap fitCenter(
-      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width, int height) {
+  public static Bitmap fitCenter(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
+      int height) {
     if (inBitmap.getWidth() == width && inBitmap.getHeight() == height) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "requested target size matches input, returning input");
@@ -204,15 +211,15 @@ public final class TransformationUtils {
    * If the Bitmap is smaller or equal to the Target it returns the original size, if not then
    * {@link #fitCenter(BitmapPool, Bitmap, int, int)} is called instead.
    *
-   * @param pool The BitmapPool obtain a bitmap from.
-   * @param inBitmap The Bitmap to center.
-   * @param width The width in pixels of the target.
+   * @param pool   The BitmapPool obtain a bitmap from.
+   * @param inBitmap  The Bitmap to center.
+   * @param width  The width in pixels of the target.
    * @param height The height in pixels of the target.
    * @return returns input Bitmap if smaller or equal to target, or toFit if the Bitmap's width or
-   *     height is larger than the given dimensions
+   * height is larger than the given dimensions
    */
-  public static Bitmap centerInside(
-      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width, int height) {
+  public static Bitmap centerInside(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width,
+      int height) {
     if (inBitmap.getWidth() <= width && inBitmap.getHeight() <= height) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "requested target size larger or equal to input, returning input");
@@ -232,8 +239,8 @@ public final class TransformationUtils {
    * the transformation for transformations that don't add or remove transparent pixels.
    *
    * @param inBitmap The {@link android.graphics.Bitmap} that will be transformed.
-   * @param outBitmap The {@link android.graphics.Bitmap} that will be returned from the
-   *     transformation.
+   * @param outBitmap   The {@link android.graphics.Bitmap} that will be returned from the
+   *                    transformation.
    */
   public static void setAlpha(Bitmap inBitmap, Bitmap outBitmap) {
     outBitmap.setHasAlpha(inBitmap.hasAlpha());
@@ -243,9 +250,9 @@ public final class TransformationUtils {
    * This is an expensive operation that copies the image in place with the pixels rotated. If
    * possible rather use getOrientationMatrix, and put that as the imageMatrix on an ImageView.
    *
-   * @param imageToOrient Image Bitmap to orient.
+   * @param imageToOrient   Image Bitmap to orient.
    * @param degreesToRotate number of degrees to rotate the image by. If zero the original image is
-   *     returned unmodified.
+   *                        returned unmodified.
    * @return The oriented bitmap. May be the imageToOrient without modification, or a new Bitmap.
    */
   public static Bitmap rotateImage(@NonNull Bitmap imageToOrient, int degreesToRotate) {
@@ -254,15 +261,8 @@ public final class TransformationUtils {
       if (degreesToRotate != 0) {
         Matrix matrix = new Matrix();
         matrix.setRotate(degreesToRotate);
-        result =
-            Bitmap.createBitmap(
-                imageToOrient,
-                0,
-                0,
-                imageToOrient.getWidth(),
-                imageToOrient.getHeight(),
-                matrix,
-                true /*filter*/);
+        result = Bitmap.createBitmap(imageToOrient, 0, 0, imageToOrient.getWidth(),
+            imageToOrient.getHeight(), matrix, true /*filter*/);
       }
     } catch (Exception e) {
       if (Log.isLoggable(TAG, Log.ERROR)) {
@@ -303,13 +303,14 @@ public final class TransformationUtils {
   /**
    * Rotate and/or flip the image to match the given exif orientation.
    *
-   * @param pool A pool that may or may not contain an image of the necessary dimensions.
-   * @param inBitmap The bitmap to rotate/flip.
+   * @param pool            A pool that may or may not contain an image of the necessary
+   *                        dimensions.
+   * @param inBitmap        The bitmap to rotate/flip.
    * @param exifOrientation the exif orientation [1-8].
    * @return The rotated and/or flipped image or toOrient if no rotation or flip was necessary.
    */
-  public static Bitmap rotateImageExif(
-      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int exifOrientation) {
+  public static Bitmap rotateImageExif(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap,
+      int exifOrientation) {
     if (!isExifOrientationRequired(exifOrientation)) {
       return inBitmap;
     }
@@ -355,17 +356,17 @@ public final class TransformationUtils {
   }
 
   /**
-   * Crop the image to a circle and resize to the specified width/height. The circle crop will have
-   * the same width and height equal to the min-edge of the result image.
+   * Crop the image to a circle and resize to the specified width/height.  The circle crop will
+   * have the same width and height equal to the min-edge of the result image.
    *
-   * @param pool The BitmapPool obtain a bitmap from.
-   * @param inBitmap The Bitmap to resize.
-   * @param destWidth The width in pixels of the final Bitmap.
-   * @param destHeight The height in pixels of the final Bitmap.
+   * @param pool   The BitmapPool obtain a bitmap from.
+   * @param inBitmap   The Bitmap to resize.
+   * @param destWidth    The width in pixels of the final Bitmap.
+   * @param destHeight   The height in pixels of the final Bitmap.
    * @return The resized Bitmap (will be recycled if recycled is not null).
    */
-  public static Bitmap circleCrop(
-      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int destWidth, int destHeight) {
+  public static Bitmap circleCrop(@NonNull BitmapPool pool, @NonNull Bitmap inBitmap,
+      int destWidth, int destHeight) {
     int destMinEdge = Math.min(destWidth, destHeight);
     float radius = destMinEdge / 2f;
 
@@ -416,7 +417,8 @@ public final class TransformationUtils {
       return maybeAlphaSafe;
     }
 
-    Bitmap argbBitmap = pool.get(maybeAlphaSafe.getWidth(), maybeAlphaSafe.getHeight(), safeConfig);
+    Bitmap argbBitmap =
+        pool.get(maybeAlphaSafe.getWidth(), maybeAlphaSafe.getHeight(), safeConfig);
     new Canvas(argbBitmap).drawBitmap(maybeAlphaSafe, 0 /*left*/, 0 /*top*/, null /*paint*/);
 
     // We now own this Bitmap. It's our responsibility to replace it in the pool outside this method
@@ -445,8 +447,9 @@ public final class TransformationUtils {
    * @param roundingRadius the corner radius to be applied (in device-specific pixels).
    * @return a {@link Bitmap} similar to inBitmap but with rounded corners.
    * @throws IllegalArgumentException if roundingRadius, width or height is 0 or less.
-   * @deprecated Width and height are unused and ignored. Use {@link #roundedCorners(BitmapPool,
-   *     Bitmap, int)} instead.
+   *
+   * @deprecated Width and height are unused and ignored. Use
+   * {@link #roundedCorners(BitmapPool, Bitmap, int)} instead.
    */
   @Deprecated
   public static Bitmap roundedCorners(
@@ -462,9 +465,9 @@ public final class TransformationUtils {
    * Creates a bitmap from a source bitmap and rounds the corners.
    *
    * <p>This method does <em>NOT</em> resize the given {@link Bitmap}, it only rounds it's corners.
-   * To both resize and round the corners of an image, consider {@link
-   * com.bumptech.glide.request.RequestOptions#transform(Transformation[])} and/or {@link
-   * com.bumptech.glide.load.MultiTransformation}.
+   * To both resize and round the corners of an image, consider
+   * {@link com.bumptech.glide.request.RequestOptions#transform(Transformation[])} and/or
+   * {@link com.bumptech.glide.load.MultiTransformation}.
    *
    * @param inBitmap the source bitmap to use as a basis for the created bitmap.
    * @param roundingRadius the corner radius to be applied (in device-specific pixels).
@@ -482,8 +485,8 @@ public final class TransformationUtils {
 
     result.setHasAlpha(true);
 
-    BitmapShader shader =
-        new BitmapShader(toTransform, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+    BitmapShader shader = new BitmapShader(toTransform, Shader.TileMode.CLAMP,
+        Shader.TileMode.CLAMP);
     Paint paint = new Paint();
     paint.setAntiAlias(true);
     paint.setShader(shader);
@@ -515,8 +518,8 @@ public final class TransformationUtils {
     return bitmap.getConfig() != null ? bitmap.getConfig() : Bitmap.Config.ARGB_8888;
   }
 
-  private static void applyMatrix(
-      @NonNull Bitmap inBitmap, @NonNull Bitmap targetBitmap, Matrix matrix) {
+  private static void applyMatrix(@NonNull Bitmap inBitmap, @NonNull Bitmap targetBitmap,
+      Matrix matrix) {
     BITMAP_DRAWABLE_LOCK.lock();
     try {
       Canvas canvas = new Canvas(targetBitmap);
@@ -562,7 +565,7 @@ public final class TransformationUtils {
   private static final class NoLock implements Lock {
 
     @Synthetic
-    NoLock() {}
+    NoLock() { }
 
     @Override
     public void lock() {

@@ -13,7 +13,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-/** Loads {@link InputStream}s from http or https {@link Uri}s. */
+/**
+ * Loads {@link InputStream}s from http or https {@link Uri}s.
+ */
 public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
   private static final Set<String> SCHEMES =
       Collections.unmodifiableSet(new HashSet<>(Arrays.asList("http", "https")));
@@ -27,8 +29,8 @@ public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(
-      @NonNull Uri model, int width, int height, @NonNull Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull Uri model, int width, int height,
+      @NonNull Options options) {
     return urlLoader.buildLoadData(new GlideUrl(model.toString()), width, height, options);
   }
 
@@ -37,7 +39,9 @@ public class HttpUriLoader implements ModelLoader<Uri, InputStream> {
     return SCHEMES.contains(model.getScheme());
   }
 
-  /** Factory for loading {@link InputStream}s from http/https {@link Uri}s. */
+  /**
+   * Factory for loading {@link InputStream}s from http/https {@link Uri}s.
+   */
   public static class Factory implements ModelLoaderFactory<Uri, InputStream> {
 
     @NonNull

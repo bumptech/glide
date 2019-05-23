@@ -50,13 +50,8 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowView;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    manifest = Config.NONE,
-    sdk = 19,
-    shadows = {
-      ViewTargetTest.SizedShadowView.class,
-      ViewTargetTest.PreDrawShadowViewTreeObserver.class
-    })
+@Config(manifest = Config.NONE, sdk = 19, shadows = { ViewTargetTest.SizedShadowView.class,
+    ViewTargetTest.PreDrawShadowViewTreeObserver.class })
 public class ViewTargetTest {
   private View view;
   private ViewTarget<View, Object> target;
@@ -114,7 +109,10 @@ public class ViewTargetTest {
   @Test
   public void testSizeCallbackIsCalledSynchronouslyIfViewSizeSet() {
     int dimens = 333;
-    shadowView.setWidth(dimens).setHeight(dimens).setIsLaidOut(true);
+    shadowView
+        .setWidth(dimens)
+        .setHeight(dimens)
+        .setIsLaidOut(true);
 
     target.getSize(cb);
 
@@ -187,7 +185,9 @@ public class ViewTargetTest {
     verify(cb, never()).onSizeReady(anyInt(), anyInt());
 
     int height = 32;
-    shadowView.setHeight(height).setIsLaidOut(true);
+    shadowView
+        .setHeight(height)
+        .setIsLaidOut(true);
 
     shadowObserver.fireOnPreDrawListeners();
 
@@ -205,8 +205,11 @@ public class ViewTargetTest {
 
     verify(cb, never()).onSizeReady(anyInt(), anyInt());
 
+
     int width = 32;
-    shadowView.setWidth(width).setIsLaidOut(true);
+    shadowView
+        .setWidth(width)
+        .setIsLaidOut(true);
     shadowObserver.fireOnPreDrawListeners();
 
     verify(cb).onSizeReady(width, 400);
@@ -223,7 +226,10 @@ public class ViewTargetTest {
 
     int width = 32;
     int height = 45;
-    shadowView.setWidth(width).setHeight(height).setIsLaidOut(true);
+    shadowView
+        .setWidth(width)
+        .setHeight(height)
+        .setIsLaidOut(true);
     shadowObserver.fireOnPreDrawListeners();
 
     verify(cb).onSizeReady(eq(width), eq(height));
@@ -235,7 +241,10 @@ public class ViewTargetTest {
 
     int width = 12;
     int height = 32;
-    shadowView.setWidth(width).setHeight(height).setIsLaidOut(true);
+    shadowView
+        .setWidth(width)
+        .setHeight(height)
+        .setIsLaidOut(true);
     shadowObserver.fireOnPreDrawListeners();
 
     verify(cb).onSizeReady(eq(width), eq(height));
@@ -250,7 +259,10 @@ public class ViewTargetTest {
     }
 
     int width = 100, height = 111;
-    shadowView.setWidth(width).setHeight(height).setIsLaidOut(true);
+    shadowView
+        .setWidth(width)
+        .setHeight(height)
+        .setIsLaidOut(true);
     shadowObserver.fireOnPreDrawListeners();
 
     InOrder order = inOrder((Object[]) cbs);
@@ -389,7 +401,10 @@ public class ViewTargetTest {
 
   @Test
   public void getSize_withValidWidthAndHeight_notLaidOut_notLayoutRequested_callsSizeReady() {
-    shadowView.setWidth(100).setHeight(100).setIsLaidOut(false);
+    shadowView
+        .setWidth(100)
+        .setHeight(100)
+        .setIsLaidOut(false);
     target.getSize(cb);
 
     verify(cb).onSizeReady(100, 100);
@@ -422,7 +437,10 @@ public class ViewTargetTest {
   @Test
   public void getSize_withValidWidthAndHeight_preV19_layoutRequested_callsSizeReady() {
     Util.setSdkVersionInt(18);
-    shadowView.setWidth(100).setHeight(100).requestLayout();
+    shadowView
+        .setWidth(100)
+        .setHeight(100)
+        .requestLayout();
 
     target.getSize(cb);
 
@@ -431,7 +449,10 @@ public class ViewTargetTest {
 
   @Test
   public void getSize_withWidthAndHeightEqualToPadding_doesNotCallSizeReady() {
-    shadowView.setWidth(100).setHeight(100).setIsLaidOut(true);
+    shadowView
+        .setWidth(100)
+        .setHeight(100)
+        .setIsLaidOut(true);
 
     view.setPadding(50, 50, 50, 50);
 
@@ -493,14 +514,19 @@ public class ViewTargetTest {
 
   @Test
   public void clearOnDetach_moreThanOnce_registersObserverOnce() {
-    attachStateTarget.clearOnDetach().clearOnDetach();
+    attachStateTarget
+        .clearOnDetach()
+        .clearOnDetach();
 
     assertThat(shadowView.attachStateListeners).hasSize(1);
   }
 
   @Test
   public void clearOnDetach_onDetach_afterMultipleClearOnDetaches_removesListener() {
-    attachStateTarget.clearOnDetach().clearOnDetach().clearOnDetach();
+    attachStateTarget
+        .clearOnDetach()
+        .clearOnDetach()
+        .clearOnDetach();
     attachStateTarget.onLoadCleared(/*placeholder=*/ null);
     attachStateTarget.setRequest(request);
     shadowView.callOnDetachedFromWindow();
@@ -581,14 +607,15 @@ public class ViewTargetTest {
   @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
   public void onLoadCleared_withoutClearOnDetach_doesNotRemoveListeners() {
-    OnAttachStateChangeListener expected =
-        new OnAttachStateChangeListener() {
-          @Override
-          public void onViewAttachedToWindow(View v) {}
+    OnAttachStateChangeListener expected = new OnAttachStateChangeListener() {
+      @Override
+      public void onViewAttachedToWindow(View v) {
+      }
 
-          @Override
-          public void onViewDetachedFromWindow(View v) {}
-        };
+      @Override
+      public void onViewDetachedFromWindow(View v) {
+      }
+    };
     shadowView.addOnAttachStateChangeListener(expected);
 
     attachStateTarget.onLoadCleared(/*placeholder=*/ null);
@@ -749,8 +776,8 @@ public class ViewTargetTest {
     }
 
     @Override
-    public void onResourceReady(
-        @NonNull Object resource, @Nullable Transition<? super Object> transition) {}
+    public void onResourceReady(@NonNull Object resource,
+        @Nullable Transition<? super Object> transition) { }
   }
 
   private static final class TestViewTarget extends ViewTarget<View, Object> {
@@ -762,8 +789,8 @@ public class ViewTargetTest {
     // We're intentionally avoiding the super call.
     @SuppressWarnings("MissingSuperCall")
     @Override
-    public void onResourceReady(
-        @NonNull Object resource, @Nullable Transition<? super Object> transition) {
+    public void onResourceReady(@NonNull Object resource,
+        @Nullable Transition<? super Object> transition) {
       // Avoid calling super.
     }
 

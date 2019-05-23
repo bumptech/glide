@@ -14,8 +14,9 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 
 /**
- * Runs the final steps of Glide's annotation process and generates the combined {@code
- * AppGlideModule}, {@code com.bumptech.glide.Glide}, {@code com.bumptech.glide.RequestManager}, and
+ * Runs the final steps of Glide's annotation process and generates the combined
+ * {@code AppGlideModule}, {@code com.bumptech.glide.Glide},
+ * {@code com.bumptech.glide.RequestManager}, and
  * {@code com.bumptech.glide.request.RequestOptions} classes.
  */
 final class AppModuleProcessor {
@@ -45,11 +46,11 @@ final class AppModuleProcessor {
   }
 
   void processModules(Set<? extends TypeElement> set, RoundEnvironment env) {
-    for (TypeElement element : processorUtil.getElementsFor(GlideModule.class, env)) {
-      if (processorUtil.isAppGlideModule(element)) {
-        appGlideModules.add(element);
-      }
-    }
+     for (TypeElement element : processorUtil.getElementsFor(GlideModule.class, env)) {
+       if (processorUtil.isAppGlideModule(element)) {
+         appGlideModules.add(element);
+       }
+     }
 
     processorUtil.debugLog("got app modules: " + appGlideModules);
 
@@ -83,8 +84,8 @@ final class AppModuleProcessor {
     String generatedCodePackageName = appModule.getEnclosingElement().toString();
 
     TypeSpec generatedRequestOptions =
-        requestOptionsGenerator.generate(generatedCodePackageName, indexedClassNames.extensions);
-    writeRequestOptions(generatedCodePackageName, generatedRequestOptions);
+          requestOptionsGenerator.generate(generatedCodePackageName, indexedClassNames.extensions);
+      writeRequestOptions(generatedCodePackageName, generatedRequestOptions);
 
     TypeSpec generatedRequestBuilder =
         requestBuilderGenerator.generate(
@@ -93,9 +94,7 @@ final class AppModuleProcessor {
 
     TypeSpec requestManager =
         requestManagerGenerator.generate(
-            generatedCodePackageName,
-            generatedRequestOptions,
-            generatedRequestBuilder,
+            generatedCodePackageName, generatedRequestOptions, generatedRequestBuilder,
             indexedClassNames.extensions);
     writeRequestManager(generatedCodePackageName, requestManager);
 

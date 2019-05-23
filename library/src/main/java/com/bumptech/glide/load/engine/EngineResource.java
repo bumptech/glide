@@ -121,18 +121,12 @@ class EngineResource<Z> implements Resource<Z> {
   @Override
   public synchronized String toString() {
     return "EngineResource{"
-        + "isMemoryCacheable="
-        + isMemoryCacheable
-        + ", listener="
-        + listener
-        + ", key="
-        + key
-        + ", acquired="
-        + acquired
-        + ", isRecycled="
-        + isRecycled
-        + ", resource="
-        + resource
+        + "isMemoryCacheable=" + isMemoryCacheable
+        + ", listener=" + listener
+        + ", key=" + key
+        + ", acquired=" + acquired
+        + ", isRecycled=" + isRecycled
+        + ", resource=" + resource
         + '}';
   }
 }

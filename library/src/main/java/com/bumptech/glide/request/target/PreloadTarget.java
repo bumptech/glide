@@ -19,28 +19,25 @@ import com.bumptech.glide.util.Synthetic;
  */
 public final class PreloadTarget<Z> extends CustomTarget<Z> {
   private static final int MESSAGE_CLEAR = 1;
-  private static final Handler HANDLER =
-      new Handler(
-          Looper.getMainLooper(),
-          new Callback() {
-            @Override
-            public boolean handleMessage(Message message) {
-              if (message.what == MESSAGE_CLEAR) {
-                ((PreloadTarget<?>) message.obj).clear();
-                return true;
-              }
-              return false;
-            }
-          });
+  private static final Handler HANDLER = new Handler(Looper.getMainLooper(), new Callback() {
+    @Override
+    public boolean handleMessage(Message message) {
+      if (message.what == MESSAGE_CLEAR) {
+        ((PreloadTarget<?>) message.obj).clear();
+        return true;
+      }
+      return false;
+    }
+  });
 
   private final RequestManager requestManager;
 
   /**
    * Returns a PreloadTarget.
    *
-   * @param width The width in pixels of the desired resource.
+   * @param width  The width in pixels of the desired resource.
    * @param height The height in pixels of the desired resource.
-   * @param <Z> The type of the desired resource.
+   * @param <Z>    The type of the desired resource.
    */
   public static <Z> PreloadTarget<Z> obtain(RequestManager requestManager, int width, int height) {
     return new PreloadTarget<>(requestManager, width, height);
@@ -62,8 +59,7 @@ public final class PreloadTarget<Z> extends CustomTarget<Z> {
   }
 
   @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  void clear() {
+  @Synthetic void clear() {
     requestManager.clear(this);
   }
 }

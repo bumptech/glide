@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-/** Decodes {@link android.graphics.Bitmap Bitmaps} from {@link java.nio.ByteBuffer ByteBuffers}. */
+/**
+ * Decodes {@link android.graphics.Bitmap Bitmaps} from {@link java.nio.ByteBuffer ByteBuffers}.
+ */
 public class ByteBufferBitmapDecoder implements ResourceDecoder<ByteBuffer, Bitmap> {
   private final Downsampler downsampler;
 
@@ -24,8 +26,8 @@ public class ByteBufferBitmapDecoder implements ResourceDecoder<ByteBuffer, Bitm
   }
 
   @Override
-  public Resource<Bitmap> decode(
-      @NonNull ByteBuffer source, int width, int height, @NonNull Options options)
+  public Resource<Bitmap> decode(@NonNull ByteBuffer source, int width, int height,
+      @NonNull Options options)
       throws IOException {
     InputStream is = ByteBufferUtil.toStream(source);
     return downsampler.decode(is, width, height, options);

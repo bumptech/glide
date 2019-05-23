@@ -19,7 +19,9 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-/** Tests for the {@link UriLoader} class. */
+/**
+ * Tests for the {@link UriLoader} class.
+ */
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class UriLoaderTest {
@@ -47,8 +49,8 @@ public class UriLoaderTest {
     assertTrue(loader.handles(fileUri));
     assertEquals(
         localUriFetcher,
-        Preconditions.checkNotNull(loader.buildLoadData(fileUri, IMAGE_SIDE, IMAGE_SIDE, options))
-            .fetcher);
+        Preconditions.checkNotNull(
+            loader.buildLoadData(fileUri, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test
@@ -60,8 +62,7 @@ public class UriLoaderTest {
     assertEquals(
         localUriFetcher,
         Preconditions.checkNotNull(
-                loader.buildLoadData(resourceUri, IMAGE_SIDE, IMAGE_SIDE, options))
-            .fetcher);
+            loader.buildLoadData(resourceUri, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 
   @Test
@@ -73,7 +74,6 @@ public class UriLoaderTest {
     assertEquals(
         localUriFetcher,
         Preconditions.checkNotNull(
-                loader.buildLoadData(contentUri, IMAGE_SIDE, IMAGE_SIDE, options))
-            .fetcher);
+            loader.buildLoadData(contentUri, IMAGE_SIDE, IMAGE_SIDE, options)).fetcher);
   }
 }

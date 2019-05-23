@@ -13,7 +13,9 @@ import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 import com.bumptech.glide.MemoryCategory;
 
-/** Displays a {@link HorizontalGalleryFragment}. */
+/**
+ * Displays a {@link HorizontalGalleryFragment}.
+ */
 @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
 public class MainActivity extends FragmentActivity {
 
@@ -26,7 +28,7 @@ public class MainActivity extends FragmentActivity {
     GlideApp.get(this).setMemoryCategory(MemoryCategory.HIGH);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
         && ContextCompat.checkSelfPermission(this, permission.READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
+        != PackageManager.PERMISSION_GRANTED) {
       requestStoragePermission();
     } else {
       replaceFragment();
@@ -34,8 +36,9 @@ public class MainActivity extends FragmentActivity {
   }
 
   private void requestStoragePermission() {
-    ActivityCompat.requestPermissions(
-        this, new String[] {permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_STORAGE);
+     ActivityCompat.requestPermissions(this,
+        new String[]{permission.READ_EXTERNAL_STORAGE},
+        REQUEST_READ_STORAGE);
   }
 
   private void replaceFragment() {
@@ -47,20 +50,21 @@ public class MainActivity extends FragmentActivity {
   }
 
   @Override
-  public void onRequestPermissionsResult(
-      int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+      @NonNull int[] grantResults) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     switch (requestCode) {
-      case REQUEST_READ_STORAGE:
-        {
-          // If request is cancelled, the result arrays are empty.
-          if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            replaceFragment();
-          } else {
-            Toast.makeText(this, "Storage permission is required", Toast.LENGTH_LONG).show();
-            requestStoragePermission();
-          }
+      case REQUEST_READ_STORAGE: {
+        // If request is cancelled, the result arrays are empty.
+        if (grantResults.length > 0
+            && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+          replaceFragment();
+        } else {
+          Toast.makeText(this, "Storage permission is required", Toast.LENGTH_LONG)
+              .show();
+          requestStoragePermission();
         }
+      }
     }
   }
 }

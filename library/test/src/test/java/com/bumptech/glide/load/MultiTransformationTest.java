@@ -45,11 +45,9 @@ public class MultiTransformationTest {
 
     context = RuntimeEnvironment.application;
 
-    doAnswer(new Util.WriteDigest("first"))
-        .when(first)
+    doAnswer(new Util.WriteDigest("first")).when(first)
         .updateDiskCacheKey(any(MessageDigest.class));
-    doAnswer(new Util.WriteDigest("second"))
-        .when(second)
+    doAnswer(new Util.WriteDigest("second")).when(second)
         .updateDiskCacheKey(any(MessageDigest.class));
   }
 
@@ -93,7 +91,7 @@ public class MultiTransformationTest {
 
   @Test
   public void
-      testInitialResourceIsNotRecycledIfReturnedByOneTransformationButNotByALaterTransformation() {
+  testInitialResourceIsNotRecycledIfReturnedByOneTransformationButNotByALaterTransformation() {
     when(first.transform(anyContext(), anyResource(), anyInt(), anyInt())).thenReturn(initial);
     when(second.transform(anyContext(), anyResource(), anyInt(), anyInt()))
         .thenReturn(mockResource());
@@ -133,7 +131,9 @@ public class MultiTransformationTest {
   @Test
   public void testEquals() throws NoSuchAlgorithmException {
     keyTester
-        .addEquivalenceGroup(new MultiTransformation<>(first), new MultiTransformation<>(first))
+        .addEquivalenceGroup(
+            new MultiTransformation<>(first),
+            new MultiTransformation<>(first))
         .addEquivalenceGroup(new MultiTransformation<>(second))
         .addEquivalenceGroup(new MultiTransformation<>(first, second))
         .addEquivalenceGroup(new MultiTransformation<>(second, first))
@@ -144,5 +144,6 @@ public class MultiTransformationTest {
             new MultiTransformation<>(first, second),
             "da83f63e1a473003712c18f5afc5a79044221943d1083c7c5a7ac7236d85e8d2")
         .test();
+
   }
 }

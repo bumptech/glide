@@ -24,7 +24,9 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-/** Tests for the {@link com.bumptech.glide.load.model.ResourceLoader} class. */
+/**
+ * Tests for the {@link com.bumptech.glide.load.model.ResourceLoader} class.
+ */
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 18)
 public class ResourceLoaderTest {
@@ -57,10 +59,10 @@ public class ResourceLoaderTest {
         Preconditions.checkNotNull(loader.buildLoadData(id, 100, 100, new Options())).fetcher);
   }
 
-  @Test
-  public void testDoesNotThrowOnInvalidOrMissingId() {
-    assertThat(loader.buildLoadData(1234, 0, 0, options)).isNull();
-    verify(uriLoader, never())
-        .buildLoadData(any(Uri.class), anyInt(), anyInt(), any(Options.class));
-  }
+    @Test
+    public void testDoesNotThrowOnInvalidOrMissingId() {
+      assertThat(loader.buildLoadData(1234, 0, 0, options)).isNull();
+      verify(uriLoader, never()).buildLoadData(any(Uri.class), anyInt(), anyInt(),
+          any(Options.class));
+    }
 }

@@ -16,7 +16,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests for {@link com.bumptech.glide.gifdecoder.GifHeaderParser}. */
+/**
+ * Tests for {@link com.bumptech.glide.gifdecoder.GifHeaderParser}.
+ */
 @RunWith(JUnit4.class)
 public class GifHeaderParserTest {
   private GifHeaderParser parser;
@@ -107,7 +109,8 @@ public class GifHeaderParserTest {
   }
 
   @Test
-  public void testLoopCountReturnsMinusOneWithoutNetscapeIterationCount() throws IOException {
+  public void testLoopCountReturnsMinusOneWithoutNetscapeIterationCount()
+          throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "gif_without_netscape_iteration.gif");
     parser.setData(data);
     GifHeader header = parser.parseHeader();
@@ -117,12 +120,9 @@ public class GifHeaderParserTest {
   @Test
   public void testCanReadImageDescriptorWithoutGraphicalExtension() {
     final int lzwMinCodeSize = 2;
-    ByteBuffer buffer =
-        ByteBuffer.allocate(
-                GifBytesTestUtil.HEADER_LENGTH
-                    + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
-                    + GifBytesTestUtil.getImageDataSize())
-            .order(ByteOrder.LITTLE_ENDIAN);
+    ByteBuffer buffer = ByteBuffer.allocate(
+        GifBytesTestUtil.HEADER_LENGTH + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
+            .getImageDataSize()).order(ByteOrder.LITTLE_ENDIAN);
     GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
     GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0);
     GifBytesTestUtil.writeFakeImageData(buffer, lzwMinCodeSize);
@@ -137,13 +137,10 @@ public class GifHeaderParserTest {
 
   private static ByteBuffer writeHeaderWithGceAndFrameDelay(short frameDelay) {
     final int lzwMinCodeSize = 2;
-    ByteBuffer buffer =
-        ByteBuffer.allocate(
-                GifBytesTestUtil.HEADER_LENGTH
-                    + GifBytesTestUtil.GRAPHICS_CONTROL_EXTENSION_LENGTH
-                    + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
-                    + GifBytesTestUtil.getImageDataSize())
-            .order(ByteOrder.LITTLE_ENDIAN);
+    ByteBuffer buffer = ByteBuffer.allocate(
+        GifBytesTestUtil.HEADER_LENGTH + GifBytesTestUtil.GRAPHICS_CONTROL_EXTENSION_LENGTH
+            + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
+            .getImageDataSize()).order(ByteOrder.LITTLE_ENDIAN);
     GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
     GifBytesTestUtil.writeGraphicsControlExtension(buffer, frameDelay);
     GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0);
@@ -205,12 +202,9 @@ public class GifHeaderParserTest {
   @Test
   public void testSetsFrameLocalColorTableToNullIfNoColorTable() {
     final int lzwMinCodeSize = 2;
-    ByteBuffer buffer =
-        ByteBuffer.allocate(
-                GifBytesTestUtil.HEADER_LENGTH
-                    + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
-                    + GifBytesTestUtil.getImageDataSize())
-            .order(ByteOrder.LITTLE_ENDIAN);
+    ByteBuffer buffer = ByteBuffer.allocate(
+        GifBytesTestUtil.HEADER_LENGTH + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
+            .getImageDataSize()).order(ByteOrder.LITTLE_ENDIAN);
     GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
     GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, false /*hasLct*/, 0);
     GifBytesTestUtil.writeFakeImageData(buffer, lzwMinCodeSize);
@@ -228,13 +222,10 @@ public class GifHeaderParserTest {
   public void testSetsFrameLocalColorTableIfHasColorTable() {
     final int lzwMinCodeSize = 2;
     final int numColors = 4;
-    ByteBuffer buffer =
-        ByteBuffer.allocate(
-                GifBytesTestUtil.HEADER_LENGTH
-                    + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
-                    + GifBytesTestUtil.getImageDataSize()
-                    + GifBytesTestUtil.getColorTableLength(numColors))
-            .order(ByteOrder.LITTLE_ENDIAN);
+    ByteBuffer buffer = ByteBuffer.allocate(
+        GifBytesTestUtil.HEADER_LENGTH + GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
+            .getImageDataSize() + GifBytesTestUtil.getColorTableLength(numColors))
+        .order(ByteOrder.LITTLE_ENDIAN);
     GifBytesTestUtil.writeHeaderAndLsd(buffer, 1, 1, false, 0);
     GifBytesTestUtil.writeImageDescriptor(buffer, 0, 0, 1, 1, true /*hasLct*/, numColors);
     GifBytesTestUtil.writeColorTable(buffer, numColors);
@@ -256,8 +247,8 @@ public class GifHeaderParserTest {
     final int lzwMinCodeSize = 2;
     final int expectedFrames = 3;
 
-    final int frameSize =
-        GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil.getImageDataSize();
+    final int frameSize = GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil
+        .getImageDataSize();
     ByteBuffer buffer =
         ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH + expectedFrames * frameSize)
             .order(ByteOrder.LITTLE_ENDIAN);
@@ -280,7 +271,8 @@ public class GifHeaderParserTest {
     final int numFrames = 3;
 
     final int frameSize =
-        GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil.getImageDataSize();
+        GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+            + GifBytesTestUtil.getImageDataSize();
     ByteBuffer buffer =
         ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH + numFrames * frameSize)
             .order(ByteOrder.LITTLE_ENDIAN);
@@ -300,7 +292,8 @@ public class GifHeaderParserTest {
     final int lzwMinCodeSize = 2;
 
     final int frameSize =
-        GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH + GifBytesTestUtil.getImageDataSize();
+        GifBytesTestUtil.IMAGE_DESCRIPTOR_LENGTH
+            + GifBytesTestUtil.getImageDataSize();
 
     ByteBuffer buffer =
         ByteBuffer.allocate(GifBytesTestUtil.HEADER_LENGTH + frameSize)
@@ -313,6 +306,7 @@ public class GifHeaderParserTest {
     parser.setData(buffer.array());
     assertFalse(parser.isAnimated());
   }
+
 
   @Test(expected = IllegalStateException.class)
   public void testThrowsIfParseHeaderCalledBeforeSetData() {

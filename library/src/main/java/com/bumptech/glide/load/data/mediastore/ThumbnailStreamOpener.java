@@ -27,9 +27,7 @@ class ThumbnailStreamOpener {
   private final List<ImageHeaderParser> parsers;
 
   ThumbnailStreamOpener(
-      List<ImageHeaderParser> parsers,
-      ThumbnailQuery query,
-      ArrayPool byteArrayPool,
+      List<ImageHeaderParser> parsers, ThumbnailQuery query, ArrayPool byteArrayPool,
       ContentResolver contentResolver) {
     this(parsers, DEFAULT_SERVICE, query, byteArrayPool, contentResolver);
   }
@@ -84,9 +82,7 @@ class ThumbnailStreamOpener {
     try {
       return contentResolver.openInputStream(thumbnailUri);
       // PMD.AvoidCatchingNPE framework method openInputStream can throw NPEs.
-    } catch (
-        @SuppressWarnings("PMD.AvoidCatchingNPE")
-        NullPointerException e) {
+    } catch (@SuppressWarnings("PMD.AvoidCatchingNPE") NullPointerException e) {
       throw (FileNotFoundException)
           new FileNotFoundException("NPE opening uri: " + uri + " -> " + thumbnailUri).initCause(e);
     }

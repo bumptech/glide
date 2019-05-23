@@ -7,7 +7,9 @@ import com.bumptech.glide.util.Util;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
-/** A {@link BitmapTransformation} which rotates the bitmap. */
+/**
+ * A {@link BitmapTransformation} which rotates the bitmap.
+ */
 public class Rotate extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.Rotate";
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
@@ -15,8 +17,8 @@ public class Rotate extends BitmapTransformation {
   private final int degreesToRotate;
 
   /**
-   * @param degreesToRotate number of degrees to rotate the image by. If zero the original image is
-   *     not modified.
+    * @param degreesToRotate number of degrees to rotate the image by. If zero the original image is
+    *                        not modified.
    */
   public Rotate(int degreesToRotate) {
     this.degreesToRotate = degreesToRotate;
@@ -39,7 +41,8 @@ public class Rotate extends BitmapTransformation {
 
   @Override
   public int hashCode() {
-    return Util.hashCode(ID.hashCode(), Util.hashCode(degreesToRotate));
+    return Util.hashCode(ID.hashCode(),
+            Util.hashCode(degreesToRotate));
   }
 
   @Override

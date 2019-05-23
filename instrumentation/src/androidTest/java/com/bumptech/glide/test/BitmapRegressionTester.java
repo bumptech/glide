@@ -24,10 +24,10 @@ import org.junit.rules.TestName;
  * saved Bitmap.
  *
  * <p>Can be used to generate or re-generate expected {@link Bitmap}s by placing a file named
- * "regenerate" in /sdcard/DCIM/test_files. The apks containing this tester will need to have {@link
- * android.Manifest.permission#WRITE_EXTERNAL_STORAGE}. Resources can be split by apk by adding
- * {@link SplitBySdk} to test methods or classes. If {@link SplitBySdk} is added to both a test
- * class and a particular method, the values from the method will be used.
+ * "regenerate" in /sdcard/DCIM/test_files. The apks containing this tester will need to have
+ * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}. Resources can be split by apk
+ * by adding {@link SplitBySdk} to test methods or classes. If {@link SplitBySdk} is added to both
+ * a test class and a particular method, the values from the method will be used.
  *
  * <p>This class only handles exactly one Bitmap comparison per test method because the resource
  * names it expects and generates are based on the method name.
@@ -55,7 +55,9 @@ public final class BitmapRegressionTester {
 
   public Bitmap test(RequestBuilder<Bitmap> request)
       throws ExecutionException, InterruptedException {
-    Bitmap result = request.submit().get();
+    Bitmap result = request
+        .submit()
+        .get();
     if (writeNewExpected()) {
       writeBitmap(result);
     }
@@ -66,8 +68,7 @@ public final class BitmapRegressionTester {
 
   private String getResourceName() {
     return getClassNameString()
-        + SEPARATOR
-        + testName.getMethodName().toLowerCase()
+        + SEPARATOR + testName.getMethodName().toLowerCase()
         + getSdkIntString()
         + getCpuString();
   }
@@ -150,7 +151,7 @@ public final class BitmapRegressionTester {
     OutputStream os = null;
     try {
       os = new BufferedOutputStream(new FileOutputStream(file));
-      bitmap.compress(CompressFormat.PNG, /*quality=*/ 100, os);
+      bitmap.compress(CompressFormat.PNG, /*quality=*/100, os);
       os.close();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -172,17 +173,11 @@ public final class BitmapRegressionTester {
 
   private Bitmap decodeExpected() {
     int resourceId =
-        context
-            .getResources()
+        context.getResources()
             .getIdentifier(getResourceName(), RESOURCE_TYPE, context.getPackageName());
     if (resourceId == 0) {
-      throw new IllegalArgumentException(
-          "Failed to find resource for: "
-              + getResourceName()
-              + " with type: "
-              + RESOURCE_TYPE
-              + " and package: "
-              + context.getPackageName());
+      throw new IllegalArgumentException("Failed to find resource for: " + getResourceName()
+       + " with type: " + RESOURCE_TYPE + " and package: " + context.getPackageName());
     }
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inScaled = false;

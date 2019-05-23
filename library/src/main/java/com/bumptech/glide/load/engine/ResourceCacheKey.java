@@ -10,7 +10,9 @@ import com.bumptech.glide.util.Util;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
-/** A cache key for downsampled and transformed resource data + any requested signature. */
+/**
+ * A cache key for downsampled and transformed resource data + any requested signature.
+ */
 final class ResourceCacheKey implements Key {
   private static final LruCache<Class<?>, byte[]> RESOURCE_CLASS_BYTES = new LruCache<>(50);
   private final ArrayPool arrayPool;
@@ -45,8 +47,7 @@ final class ResourceCacheKey implements Key {
   public boolean equals(Object o) {
     if (o instanceof ResourceCacheKey) {
       ResourceCacheKey other = (ResourceCacheKey) o;
-      return height == other.height
-          && width == other.width
+      return height == other.height && width == other.width
           && Util.bothNullOrEqual(transformation, other.transformation)
           && decodedResourceClass.equals(other.decodedResourceClass)
           && sourceKey.equals(other.sourceKey)
@@ -98,21 +99,13 @@ final class ResourceCacheKey implements Key {
   @Override
   public String toString() {
     return "ResourceCacheKey{"
-        + "sourceKey="
-        + sourceKey
-        + ", signature="
-        + signature
-        + ", width="
-        + width
-        + ", height="
-        + height
-        + ", decodedResourceClass="
-        + decodedResourceClass
-        + ", transformation='"
-        + transformation
-        + '\''
-        + ", options="
-        + options
+        + "sourceKey=" + sourceKey
+        + ", signature=" + signature
+        + ", width=" + width
+        + ", height=" + height
+        + ", decodedResourceClass=" + decodedResourceClass
+        + ", transformation='" + transformation + '\''
+        + ", options=" + options
         + '}';
   }
 }

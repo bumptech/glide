@@ -27,13 +27,11 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    manifest = Config.NONE,
-    sdk = 18,
-    shadows = {ContentResolverShadow.class})
+@Config(manifest = Config.NONE, sdk = 18, shadows = { ContentResolverShadow.class })
 public class FileDescriptorLocalUriFetcherTest {
 
-  @Mock private DataFetcher.DataCallback<ParcelFileDescriptor> callback;
+  @Mock
+  private DataFetcher.DataCallback<ParcelFileDescriptor> callback;
 
   @Before
   public void setUp() {

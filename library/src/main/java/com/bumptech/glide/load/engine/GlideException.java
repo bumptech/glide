@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** An exception with zero or more causes indicating why a load in Glide failed. */
+/**
+ * An exception with zero or more causes indicating why a load in Glide failed.
+ */
 // Public API.
 @SuppressWarnings("WeakerAccess")
 public final class GlideException extends Exception {
@@ -25,7 +27,8 @@ public final class GlideException extends Exception {
   private DataSource dataSource;
   private Class<?> dataClass;
   private String detailMessage;
-  @Nullable private Exception exception;
+  @Nullable
+  private Exception exception;
 
   public GlideException(String message) {
     this(message, Collections.<Throwable>emptyList());
@@ -61,8 +64,8 @@ public final class GlideException extends Exception {
   }
 
   /**
-   * Returns an {@link Exception} with a stack trace that includes where the request originated (if
-   * previously set via {@link #setOrigin(Exception)})
+   * Returns an {@link Exception} with a stack trace that includes where the request originated
+   * (if previously set via {@link #setOrigin(Exception)})
    *
    * <p>This is an experimental API that may be removed in the future.
    */
@@ -84,7 +87,7 @@ public final class GlideException extends Exception {
    * Returns a list of causes that are immediate children of this exception.
    *
    * <p>Causes may or may not be {@link GlideException GlideExceptions}. Causes may also not be root
-   * causes, and in turn my have been caused by other failures.
+   * causes, and in turn my have been caused by other failures.</p>
    *
    * @see #getRootCauses()
    */
@@ -155,12 +158,11 @@ public final class GlideException extends Exception {
   @SuppressWarnings("PMD.InsufficientStringBufferDeclaration")
   @Override
   public String getMessage() {
-    StringBuilder result =
-        new StringBuilder(71)
-            .append(detailMessage)
-            .append(dataClass != null ? ", " + dataClass : "")
-            .append(dataSource != null ? ", " + dataSource : "")
-            .append(key != null ? ", " + key : "");
+    StringBuilder result = new StringBuilder(71)
+        .append(detailMessage)
+        .append(dataClass != null ? ", " + dataClass : "")
+        .append(dataSource != null ? ", " + dataSource : "")
+        .append(key != null ? ", " + key : "");
 
     List<Throwable> rootCauses = getRootCauses();
     if (rootCauses.isEmpty()) {
@@ -171,12 +173,8 @@ public final class GlideException extends Exception {
       result.append("\nThere were ").append(rootCauses.size()).append(" causes:");
     }
     for (Throwable cause : rootCauses) {
-      result
-          .append('\n')
-          .append(cause.getClass().getName())
-          .append('(')
-          .append(cause.getMessage())
-          .append(')');
+      result.append('\n')
+          .append(cause.getClass().getName()).append('(').append(cause.getMessage()).append(')');
     }
     result.append("\n call GlideException#logRootCauses(String) for more detail");
     return result.toString();
@@ -209,8 +207,7 @@ public final class GlideException extends Exception {
       throws IOException {
     int size = causes.size();
     for (int i = 0; i < size; i++) {
-      appendable
-          .append("Cause (")
+      appendable.append("Cause (")
           .append(String.valueOf(i + 1))
           .append(" of ")
           .append(String.valueOf(size))

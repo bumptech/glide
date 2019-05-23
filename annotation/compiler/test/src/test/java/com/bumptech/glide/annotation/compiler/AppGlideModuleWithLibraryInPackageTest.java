@@ -20,14 +20,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 /**
- * Tests AppGlideModules that use the @Excludes annotation with a single excluded Module class in a
- * strangely named subpackage.
+ * Tests AppGlideModules that use the @Excludes annotation
+ * with a single excluded Module class in a strangely named subpackage.
  */
 @RunWith(JUnit4.class)
 public class AppGlideModuleWithLibraryInPackageTest implements CompilationProvider {
-  @Rule
-  public final RegenerateResourcesRule regenerateResourcesRule = new RegenerateResourcesRule(this);
-
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(this);
   private Compilation compilation;
 
   @Before

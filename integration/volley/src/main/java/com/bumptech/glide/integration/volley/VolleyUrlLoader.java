@@ -11,7 +11,9 @@ import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import java.io.InputStream;
 
-/** A simple model loader for fetching media over http/https using Volley. */
+/**
+ * A simple model loader for fetching media over http/https using Volley.
+ */
 public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   private final RequestQueue requestQueue;
@@ -36,12 +38,14 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
   }
 
   @Override
-  public LoadData<InputStream> buildLoadData(
-      @NonNull GlideUrl url, int width, int height, @NonNull Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull GlideUrl url, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(url, new VolleyStreamFetcher(requestQueue, url, requestFactory));
   }
 
-  /** The default factory for {@link VolleyUrlLoader}s. */
+  /**
+   * The default factory for {@link VolleyUrlLoader}s.
+   */
   // Public API.
   @SuppressWarnings("WeakerAccess")
   public static class Factory implements ModelLoaderFactory<GlideUrl, InputStream> {
@@ -50,12 +54,16 @@ public class VolleyUrlLoader implements ModelLoader<GlideUrl, InputStream> {
     private final VolleyRequestFactory requestFactory;
     private final RequestQueue requestQueue;
 
-    /** Constructor for a new Factory that runs requests using a static singleton request queue. */
+    /**
+     * Constructor for a new Factory that runs requests using a static singleton request queue.
+     */
     public Factory(Context context) {
       this(getInternalQueue(context));
     }
 
-    /** Constructor for a new Factory that runs requests using the given {@link RequestQueue}. */
+    /**
+     * Constructor for a new Factory that runs requests using the given {@link RequestQueue}.
+     */
     public Factory(RequestQueue requestQueue) {
       this(requestQueue, VolleyStreamFetcher.DEFAULT_REQUEST_FACTORY);
     }

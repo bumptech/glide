@@ -13,7 +13,9 @@ import android.view.ViewGroup;
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import java.util.List;
 
-/** Displays media store data in a recycler view. */
+/**
+ * Displays media store data in a recycler view.
+ */
 public class HorizontalGalleryFragment extends Fragment
     implements LoaderManager.LoaderCallbacks<List<MediaStoreData>> {
 
@@ -44,10 +46,11 @@ public class HorizontalGalleryFragment extends Fragment
   }
 
   @Override
-  public void onLoadFinished(
-      Loader<List<MediaStoreData>> loader, List<MediaStoreData> mediaStoreData) {
+  public void onLoadFinished(Loader<List<MediaStoreData>> loader,
+      List<MediaStoreData> mediaStoreData) {
     GlideRequests glideRequests = GlideApp.with(this);
-    RecyclerAdapter adapter = new RecyclerAdapter(getActivity(), mediaStoreData, glideRequests);
+    RecyclerAdapter adapter =
+        new RecyclerAdapter(getActivity(), mediaStoreData, glideRequests);
     RecyclerViewPreloader<MediaStoreData> preloader =
         new RecyclerViewPreloader<>(glideRequests, adapter, adapter, 3);
     recyclerView.addOnScrollListener(preloader);

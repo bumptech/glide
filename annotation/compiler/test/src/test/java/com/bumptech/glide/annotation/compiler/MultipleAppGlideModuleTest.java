@@ -23,10 +23,8 @@ import org.junit.runners.JUnit4;
 public class MultipleAppGlideModuleTest implements CompilationProvider {
   private static final String FIRST_MODULE = "EmptyAppModule1.java";
   private static final String SECOND_MODULE = "EmptyAppModule2.java";
-
-  @Rule
-  public final RegenerateResourcesRule regenerateResourcesRule = new RegenerateResourcesRule(this);
-
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(this);
   private Compilation compilation;
 
   // Throws.
@@ -47,15 +45,17 @@ public class MultipleAppGlideModuleTest implements CompilationProvider {
 
   @Test
   public void compilation_withFirstModuleOnly_succeeds() {
-    compilation =
-        javac().withProcessors(new GlideAnnotationProcessor()).compile(forResource(FIRST_MODULE));
+    compilation = javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(forResource(FIRST_MODULE));
     assertThat(compilation).succeededWithoutWarnings();
   }
 
   @Test
   public void compilation_withSecondModuleOnly_succeeds() {
-    compilation =
-        javac().withProcessors(new GlideAnnotationProcessor()).compile(forResource(SECOND_MODULE));
+    compilation = javac()
+        .withProcessors(new GlideAnnotationProcessor())
+        .compile(forResource(SECOND_MODULE));
     assertThat(compilation).succeededWithoutWarnings();
   }
 

@@ -18,21 +18,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A ModelLoader for {@link android.net.Uri}s that handles local {@link android.net.Uri}s directly
- * and routes remote {@link android.net.Uri}s to a wrapped {@link
- * com.bumptech.glide.load.model.ModelLoader} that handles {@link
- * com.bumptech.glide.load.model.GlideUrl}s.
+ * A ModelLoader for {@link android.net.Uri}s that handles local {@link android.net.Uri}s
+ * directly and routes remote {@link android.net.Uri}s to a wrapped
+ * {@link com.bumptech.glide.load.model.ModelLoader} that handles
+ * {@link com.bumptech.glide.load.model.GlideUrl}s.
  *
  * @param <Data> The type of data that will be retrieved for {@link android.net.Uri}s.
  */
 public class UriLoader<Data> implements ModelLoader<Uri, Data> {
-  private static final Set<String> SCHEMES =
-      Collections.unmodifiableSet(
-          new HashSet<>(
-              Arrays.asList(
-                  ContentResolver.SCHEME_FILE,
-                  ContentResolver.SCHEME_ANDROID_RESOURCE,
-                  ContentResolver.SCHEME_CONTENT)));
+  private static final Set<String> SCHEMES = Collections.unmodifiableSet(
+      new HashSet<>(
+          Arrays.asList(
+              ContentResolver.SCHEME_FILE,
+              ContentResolver.SCHEME_ANDROID_RESOURCE,
+              ContentResolver.SCHEME_CONTENT
+          )
+      )
+  );
 
   private final LocalUriFetcherFactory<Data> factory;
 
@@ -43,8 +45,8 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
   }
 
   @Override
-  public LoadData<Data> buildLoadData(
-      @NonNull Uri model, int width, int height, @NonNull Options options) {
+  public LoadData<Data> buildLoadData(@NonNull Uri model, int width, int height,
+      @NonNull Options options) {
     return new LoadData<>(new ObjectKey(model), factory.build(model));
   }
 
@@ -62,9 +64,11 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
     DataFetcher<Data> build(Uri uri);
   }
 
-  /** Loads {@link InputStream}s from {@link Uri}s. */
-  public static class StreamFactory
-      implements ModelLoaderFactory<Uri, InputStream>, LocalUriFetcherFactory<InputStream> {
+  /**
+   * Loads {@link InputStream}s from {@link Uri}s.
+   */
+  public static class StreamFactory implements ModelLoaderFactory<Uri, InputStream>,
+      LocalUriFetcherFactory<InputStream> {
 
     private final ContentResolver contentResolver;
 
@@ -89,10 +93,12 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
     }
   }
 
-  /** Loads {@link ParcelFileDescriptor}s from {@link Uri}s. */
+  /**
+   * Loads {@link ParcelFileDescriptor}s from {@link Uri}s.
+   */
   public static class FileDescriptorFactory
       implements ModelLoaderFactory<Uri, ParcelFileDescriptor>,
-          LocalUriFetcherFactory<ParcelFileDescriptor> {
+      LocalUriFetcherFactory<ParcelFileDescriptor> {
 
     private final ContentResolver contentResolver;
 
@@ -117,10 +123,12 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
     }
   }
 
-  /** Loads {@link AssetFileDescriptor}s from {@link Uri}s. */
+  /**
+   * Loads {@link AssetFileDescriptor}s from {@link Uri}s.
+   */
   public static final class AssetFileDescriptorFactory
       implements ModelLoaderFactory<Uri, AssetFileDescriptor>,
-          LocalUriFetcherFactory<AssetFileDescriptor> {
+      LocalUriFetcherFactory<AssetFileDescriptor> {
 
     private final ContentResolver contentResolver;
 

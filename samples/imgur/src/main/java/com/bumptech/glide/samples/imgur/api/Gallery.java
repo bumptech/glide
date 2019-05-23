@@ -12,6 +12,8 @@ final class Gallery {
 
   @Override
   public String toString() {
-    return "Gallery{" + "data=" + data + '}';
+    return "Gallery{"
+        + "data=" + data
+        + '}';
   }
 }

@@ -11,8 +11,8 @@ import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Maintains a cache of data, resource, and transcode classes to available {@link
- * com.bumptech.glide.load.engine.LoadPath}s capable of decoding with the requested types.
+ * Maintains a cache of data, resource, and transcode classes to available
+ * {@link com.bumptech.glide.load.engine.LoadPath}s capable of decoding with the requested types.
  */
 public class LoadPathCache {
   private static final LoadPath<?, ?, ?> NO_PATHS_SIGNAL =
@@ -34,9 +34,9 @@ public class LoadPathCache {
   private final AtomicReference<MultiClassKey> keyRef = new AtomicReference<>();
 
   /**
-   * Returns {@code} true if the given {@link LoadPath} is the signal object returned from {@link
-   * #get(Class, Class, Class)} that indicates that we've previously found that there are no
-   * available paths to load the requested resources and {@code false} otherwise.
+   * Returns {@code} true if the given {@link LoadPath} is the signal object returned from
+   * {@link #get(Class, Class, Class)} that indicates that we've previously found that there are
+   * no available paths to load the requested resources and {@code false} otherwise.
    */
   public boolean isEmptyLoadPath(@Nullable LoadPath<?, ?, ?> path) {
     return NO_PATHS_SIGNAL.equals(path);
@@ -44,8 +44,8 @@ public class LoadPathCache {
 
   /**
    * May return {@link #NO_PATHS_SIGNAL} to indicate that we've previously found that there are 0
-   * available load paths for the requested types. Callers must check using {@link
-   * #isEmptyLoadPath(LoadPath)} before using any load path returned by this method.
+   * available load paths for the requested types. Callers must check using
+   * {@link #isEmptyLoadPath(LoadPath)} before using any load path returned by this method.
    */
   @SuppressWarnings("unchecked")
   @Nullable
@@ -54,7 +54,7 @@ public class LoadPathCache {
     MultiClassKey key = getKey(dataClass, resourceClass, transcodeClass);
     LoadPath<?, ?, ?> result;
     synchronized (cache) {
-      result = cache.get(key);
+       result = cache.get(key);
     }
     keyRef.set(key);
 
@@ -62,8 +62,7 @@ public class LoadPathCache {
   }
 
   public void put(
-      Class<?> dataClass,
-      Class<?> resourceClass,
+      Class<?> dataClass, Class<?> resourceClass,
       Class<?> transcodeClass,
       @Nullable LoadPath<?, ?, ?> loadPath) {
     synchronized (cache) {
@@ -73,9 +72,9 @@ public class LoadPathCache {
     }
   }
 
-  private MultiClassKey getKey(
-      Class<?> dataClass, Class<?> resourceClass, Class<?> transcodeClass) {
-    MultiClassKey key = keyRef.getAndSet(null);
+  private MultiClassKey getKey(Class<?> dataClass, Class<?> resourceClass,
+      Class<?> transcodeClass) {
+     MultiClassKey key = keyRef.getAndSet(null);
     if (key == null) {
       key = new MultiClassKey();
     }

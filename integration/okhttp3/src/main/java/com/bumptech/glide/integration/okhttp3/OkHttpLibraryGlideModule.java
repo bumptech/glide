@@ -13,14 +13,15 @@ import java.io.InputStream;
 /**
  * Registers OkHttp related classes via Glide's annotation processor.
  *
- * <p>For Applications that depend on this library and include an {@link AppGlideModule} and Glide's
- * annotation processor, this class will be automatically included.
+ * <p>For Applications that depend on this library and include an
+ * {@link AppGlideModule} and Glide's annotation processor, this class
+ * will be automatically included.
  */
 @GlideModule
 public final class OkHttpLibraryGlideModule extends LibraryGlideModule {
   @Override
-  public void registerComponents(
-      @NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
+  public void registerComponents(@NonNull Context context, @NonNull Glide glide,
+      @NonNull Registry registry) {
     registry.replace(GlideUrl.class, InputStream.class, new OkHttpUrlLoader.Factory());
   }
 }

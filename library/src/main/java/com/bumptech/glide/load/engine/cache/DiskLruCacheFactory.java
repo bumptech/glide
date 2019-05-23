@@ -15,32 +15,30 @@ public class DiskLruCacheFactory implements DiskCache.Factory {
   private final long diskCacheSize;
   private final CacheDirectoryGetter cacheDirectoryGetter;
 
-  /** Interface called out of UI thread to get the cache folder. */
+  /**
+   * Interface called out of UI thread to get the cache folder.
+   */
   public interface CacheDirectoryGetter {
     File getCacheDirectory();
   }
 
   public DiskLruCacheFactory(final String diskCacheFolder, long diskCacheSize) {
-    this(
-        new CacheDirectoryGetter() {
-          @Override
-          public File getCacheDirectory() {
-            return new File(diskCacheFolder);
-          }
-        },
-        diskCacheSize);
+    this(new CacheDirectoryGetter() {
+      @Override
+      public File getCacheDirectory() {
+        return new File(diskCacheFolder);
+      }
+    }, diskCacheSize);
   }
 
-  public DiskLruCacheFactory(
-      final String diskCacheFolder, final String diskCacheName, long diskCacheSize) {
-    this(
-        new CacheDirectoryGetter() {
-          @Override
-          public File getCacheDirectory() {
-            return new File(diskCacheFolder, diskCacheName);
-          }
-        },
-        diskCacheSize);
+  public DiskLruCacheFactory(final String diskCacheFolder, final String diskCacheName,
+                             long diskCacheSize) {
+    this(new CacheDirectoryGetter() {
+      @Override
+      public File getCacheDirectory() {
+        return new File(diskCacheFolder, diskCacheName);
+      }
+    }, diskCacheSize);
   }
 
   /**
@@ -48,7 +46,7 @@ public class DiskLruCacheFactory implements DiskCache.Factory {
    * of UI thread, allowing to do I/O access without performance impacts.
    *
    * @param cacheDirectoryGetter Interface called out of UI thread to get the cache folder.
-   * @param diskCacheSize Desired max bytes size for the LRU disk cache.
+   * @param diskCacheSize        Desired max bytes size for the LRU disk cache.
    */
   // Public API.
   @SuppressWarnings("WeakerAccess")

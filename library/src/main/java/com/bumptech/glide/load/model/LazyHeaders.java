@@ -14,10 +14,10 @@ import java.util.Map;
  * A wrapper class for a set of headers to be included in a Glide request, allowing headers to be
  * constructed lazily.
  *
- * <p>Ideally headers are constructed once and then re-used for multiple loads, rather then being
- * constructed individually for each load.
+ * <p> Ideally headers are constructed once and then re-used for multiple loads, rather then being
+ * constructed individually for each load. </p>
  *
- * <p>This class is thread safe.
+ * <p> This class is thread safe. </p>
  */
 public final class LazyHeaders implements Headers {
   private final Map<String, List<LazyHeaderFactory>> headers;
@@ -72,7 +72,9 @@ public final class LazyHeaders implements Headers {
 
   @Override
   public String toString() {
-    return "LazyHeaders{" + "headers=" + headers + '}';
+    return "LazyHeaders{"
+        + "headers=" + headers
+        + '}';
   }
 
   @Override
@@ -90,15 +92,15 @@ public final class LazyHeaders implements Headers {
   }
 
   /**
-   * Adds an {@link LazyHeaderFactory} that will be used to construct a value for the given key*
-   * lazily on a background thread.
+   * Adds an {@link LazyHeaderFactory} that will be used to construct a value for the given
+   * key* lazily on a background thread.
    *
-   * <p>This class is not thread safe.
+   * <p> This class is not thread safe. </p>
    *
-   * <p>This class may include default values for User-Agent and Accept-Encoding headers. These will
-   * be replaced by calls to either {@link #setHeader(String, LazyHeaderFactory)} or {@link
-   * #addHeader(String, String)}, even though {@link #addHeader(String, LazyHeaderFactory)} would
-   * usually append an additional value.
+   * <p> This class may include default values for User-Agent and Accept-Encoding headers. These
+   * will be replaced by calls to either {@link #setHeader(String, LazyHeaderFactory)} or
+   * {@link #addHeader(String, String)}, even though {@link #addHeader(String, LazyHeaderFactory)}
+   * would usually append an additional value. </p>
    */
   public static final class Builder {
     private static final String USER_AGENT_HEADER = "User-Agent";
@@ -109,10 +111,10 @@ public final class LazyHeaders implements Headers {
     // images and also makes it more difficult for us to detect and prevent partial content
     // rendering. See #440.
     static {
-      Map<String, List<LazyHeaderFactory>> temp = new HashMap<>(2);
+      Map<String, List<LazyHeaderFactory>> temp
+          = new HashMap<>(2);
       if (!TextUtils.isEmpty(DEFAULT_USER_AGENT)) {
-        temp.put(
-            USER_AGENT_HEADER,
+        temp.put(USER_AGENT_HEADER,
             Collections.<LazyHeaderFactory>singletonList(
                 new StringHeaderFactory(DEFAULT_USER_AGENT)));
       }
@@ -126,8 +128,8 @@ public final class LazyHeaders implements Headers {
     /**
      * Adds a value for the given header and returns this builder.
      *
-     * <p>Use {@link #addHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
-     * (i.e. an OAuth token).
+     * <p> Use {@link #addHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
+     * (i.e. an OAuth token). </p>
      *
      * @see #addHeader(String, LazyHeaderFactory)
      */
@@ -136,13 +138,14 @@ public final class LazyHeaders implements Headers {
     }
 
     /**
-     * Adds an {@link LazyHeaderFactory} that will be used to construct a value for the given key
-     * lazily on a background thread.
+     * Adds an {@link LazyHeaderFactory} that will be used to construct a value for the given
+     * key lazily on a background thread.
      *
-     * <p>Headers may have multiple values whose order is defined by the order in which this method
-     * is called.
+     * <p> Headers may have multiple values whose order is defined by the order in which
+     * this method is called. </p>
      *
-     * <p>This class does not prevent you from adding the same value to a given key multiple times
+     * <p> This class does not prevent you from adding the same value to a given key multiple
+     * times </p>
      */
     public Builder addHeader(@NonNull String key, @NonNull LazyHeaderFactory factory) {
       if (isUserAgentDefault && USER_AGENT_HEADER.equalsIgnoreCase(key)) {
@@ -155,13 +158,13 @@ public final class LazyHeaders implements Headers {
     }
 
     /**
-     * Replaces all existing {@link LazyHeaderFactory LazyHeaderFactorys} for the given key with the
-     * given {@link LazyHeaderFactory}.
+     * Replaces all existing {@link LazyHeaderFactory LazyHeaderFactorys} for the given key
+     * with the given {@link LazyHeaderFactory}.
      *
-     * <p>If the given value is {@code null}, the header at the given key will be removed.
+     * <p> If the given value is {@code null}, the header at the given key will be removed. </p>
      *
-     * <p>Use {@link #setHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
-     * (i.e. an OAuth token).
+     * <p> Use {@link #setHeader(String, LazyHeaderFactory)} if obtaining the value requires I/O
+     * (i.e. an OAuth token). </p>
      */
     @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"}) // Public API
     public Builder setHeader(@NonNull String key, @Nullable String value) {
@@ -169,10 +172,10 @@ public final class LazyHeaders implements Headers {
     }
 
     /**
-     * Replaces all existing {@link LazyHeaderFactory LazyHeaderFactorys} for the given key with the
-     * given {@link LazyHeaderFactory}.
+     * Replaces all existing {@link LazyHeaderFactory LazyHeaderFactorys} for the given key
+     * with the given {@link LazyHeaderFactory}.
      *
-     * <p>If the given value is {@code null}, the header at the given key will be removed.
+     * <p> If the given value is {@code null}, the header at the given key will be removed. </p>
      */
     public Builder setHeader(@NonNull String key, @Nullable LazyHeaderFactory factory) {
       copyIfNecessary();
@@ -207,7 +210,9 @@ public final class LazyHeaders implements Headers {
       }
     }
 
-    /** Returns a new immutable {@link LazyHeaders} object. */
+    /**
+     * Returns a new immutable {@link LazyHeaders} object.
+     */
     public LazyHeaders build() {
       copyOnModify = true;
       return new LazyHeaders(headers);
@@ -251,7 +256,8 @@ public final class LazyHeaders implements Headers {
 
   static final class StringHeaderFactory implements LazyHeaderFactory {
 
-    @NonNull private final String value;
+    @NonNull
+    private final String value;
 
     StringHeaderFactory(@NonNull String value) {
       this.value = value;
@@ -264,7 +270,9 @@ public final class LazyHeaders implements Headers {
 
     @Override
     public String toString() {
-      return "StringHeaderFactory{" + "value='" + value + '\'' + '}';
+      return "StringHeaderFactory{"
+          + "value='" + value + '\''
+          + '}';
     }
 
     @Override

@@ -64,14 +64,11 @@ public class PreFillTypeTest {
 
   @Test
   public void testEquality() {
-    new EqualsTester()
-        .addEqualityGroup(
-            new PreFillType(100, 100, Bitmap.Config.ARGB_4444, 1),
-            new PreFillType(100, 100, Bitmap.Config.ARGB_4444, 1))
+    new EqualsTester().addEqualityGroup(new PreFillType(100, 100, Bitmap.Config.ARGB_4444, 1),
+        new PreFillType(100, 100, Bitmap.Config.ARGB_4444, 1))
         .addEqualityGroup(new PreFillType(200, 100, Bitmap.Config.ARGB_4444, 1))
         .addEqualityGroup(new PreFillType(100, 200, Bitmap.Config.ARGB_4444, 1))
         .addEqualityGroup(new PreFillType(100, 100, Bitmap.Config.ARGB_8888, 1))
-        .addEqualityGroup(new PreFillType(100, 100, Bitmap.Config.ARGB_4444, 2))
-        .testEquals();
+        .addEqualityGroup(new PreFillType(100, 100, Bitmap.Config.ARGB_4444, 2)).testEquals();
   }
 }

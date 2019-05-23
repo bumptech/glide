@@ -22,7 +22,7 @@ public class GroupedLinkedMapTest {
 
   @Test
   public void testReturnsNullForGetWithNoBitmap() {
-    Key key = new Key("key", /*width=*/ 1, /*height=*/ 1);
+    Key key =  new Key("key", /*width=*/ 1, /*height=*/ 1);
     assertNull(map.get(key));
   }
 

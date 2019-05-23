@@ -66,7 +66,6 @@ public class FlickrSearchActivity extends AppCompatActivity
   }
 
   private static final Map<Page, Integer> PAGE_TO_TITLE;
-
   static {
     Map<Page, Integer> temp = new HashMap<>();
     temp.put(Page.SMALL, R.string.small);
@@ -112,12 +111,16 @@ public class FlickrSearchActivity extends AppCompatActivity
     return false;
   }
 
-  /** Called when the activity is first created. */
+  /**
+   * Called when the activity is first created.
+   */
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    StrictMode.setThreadPolicy(
-        new StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build());
+    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+        .detectAll()
+        .penaltyLog()
+        .build());
 
     backgroundThread = new HandlerThread("BackgroundThumbnailHandlerThread");
     backgroundThread.start();
@@ -151,11 +154,10 @@ public class FlickrSearchActivity extends AppCompatActivity
     if (savedInstanceState == null) {
       // Weight values determined experimentally by measuring the number of incurred GCs while
       // scrolling through the various photo grids/lists.
-      GlideApp.get(this)
-          .preFillBitmapPool(
-              new PreFillType.Builder(smallGridSize).setWeight(1),
-              new PreFillType.Builder(mediumGridSize).setWeight(1),
-              new PreFillType.Builder(screenWidth / 2, listHeightSize).setWeight(6));
+      GlideApp.get(this).preFillBitmapPool(
+          new PreFillType.Builder(smallGridSize).setWeight(1),
+          new PreFillType.Builder(mediumGridSize).setWeight(1),
+          new PreFillType.Builder(screenWidth / 2, listHeightSize).setWeight(6));
     }
   }
 
@@ -333,11 +335,10 @@ public class FlickrSearchActivity extends AppCompatActivity
           return;
         }
 
-        FutureTarget<File> futureTarget =
-            GlideApp.with(context)
-                .downloadOnly()
-                .load(photo)
-                .submit(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
+        FutureTarget<File> futureTarget = GlideApp.with(context)
+            .downloadOnly()
+            .load(photo)
+            .submit(Api.SQUARE_THUMB_SIZE, Api.SQUARE_THUMB_SIZE);
 
         try {
           futureTarget.get();

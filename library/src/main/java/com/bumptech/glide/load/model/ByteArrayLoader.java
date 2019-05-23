@@ -53,8 +53,8 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
 
     /**
      * @param model We really ought to copy the model, but doing so can be hugely expensive and/or
-     *     lead to OOMs. In practice it's unlikely that users would pass an array into Glide and
-     *     then mutate it.
+     *              lead to OOMs. In practice it's unlikely that users would pass an array into
+     *              Glide and then mutate it.
      */
     @SuppressWarnings("PMD.ArrayIsStoredDirectly")
     Fetcher(byte[] model, Converter<Data> converter) {
@@ -92,26 +92,25 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
   }
 
   /**
-   * Factory for {@link com.bumptech.glide.load.model.ByteArrayLoader} and {@link
-   * java.nio.ByteBuffer}.
+   * Factory for {@link com.bumptech.glide.load.model.ByteArrayLoader} and
+   * {@link java.nio.ByteBuffer}.
    */
   public static class ByteBufferFactory implements ModelLoaderFactory<byte[], ByteBuffer> {
 
     @NonNull
     @Override
     public ModelLoader<byte[], ByteBuffer> build(@NonNull MultiModelLoaderFactory multiFactory) {
-      return new ByteArrayLoader<>(
-          new Converter<ByteBuffer>() {
-            @Override
-            public ByteBuffer convert(byte[] model) {
-              return ByteBuffer.wrap(model);
-            }
+      return new ByteArrayLoader<>(new Converter<ByteBuffer>() {
+        @Override
+        public ByteBuffer convert(byte[] model) {
+          return ByteBuffer.wrap(model);
+        }
 
-            @Override
-            public Class<ByteBuffer> getDataClass() {
-              return ByteBuffer.class;
-            }
-          });
+        @Override
+        public Class<ByteBuffer> getDataClass() {
+          return ByteBuffer.class;
+        }
+      });
     }
 
     @Override
@@ -120,24 +119,25 @@ public class ByteArrayLoader<Data> implements ModelLoader<byte[], Data> {
     }
   }
 
-  /** Factory for {@link ByteArrayLoader} and {@link java.io.InputStream}. */
+  /**
+   * Factory for {@link ByteArrayLoader} and {@link java.io.InputStream}.
+   */
   public static class StreamFactory implements ModelLoaderFactory<byte[], InputStream> {
 
     @NonNull
     @Override
     public ModelLoader<byte[], InputStream> build(@NonNull MultiModelLoaderFactory multiFactory) {
-      return new ByteArrayLoader<>(
-          new Converter<InputStream>() {
-            @Override
-            public InputStream convert(byte[] model) {
-              return new ByteArrayInputStream(model);
-            }
+      return new ByteArrayLoader<>(new Converter<InputStream>() {
+        @Override
+        public InputStream convert(byte[] model) {
+          return new ByteArrayInputStream(model);
+        }
 
-            @Override
-            public Class<InputStream> getDataClass() {
-              return InputStream.class;
-            }
-          });
+        @Override
+        public Class<InputStream> getDataClass() {
+          return InputStream.class;
+        }
+      });
     }
 
     @Override

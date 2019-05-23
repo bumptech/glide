@@ -63,12 +63,17 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     photoSize = args.getInt(IMAGE_SIZE_KEY);
     thumbnail = args.getBoolean(THUMBNAIL_KEY);
 
-    fullRequest = GlideApp.with(this).asDrawable().centerCrop();
+    fullRequest = GlideApp.with(this)
+        .asDrawable()
+        .centerCrop();
 
-    thumbnailRequest =
-        GlideApp.with(this).asDrawable().centerCrop().override(Api.SQUARE_THUMB_SIZE);
+    thumbnailRequest = GlideApp.with(this)
+        .asDrawable()
+        .centerCrop()
+        .override(Api.SQUARE_THUMB_SIZE);
 
-    preloadRequest = thumbnail ? thumbnailRequest.clone().priority(Priority.HIGH) : fullRequest;
+    preloadRequest =
+        thumbnail ? thumbnailRequest.clone().priority(Priority.HIGH) : fullRequest;
 
     final View result = inflater.inflate(R.layout.flickr_photo_grid, container, false);
 
@@ -78,22 +83,20 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     layoutManager = new GridLayoutManager(getActivity(), spanCount);
     grid.setLayoutManager(layoutManager);
 
-    grid.addItemDecoration(
-        new RecyclerView.ItemDecoration() {
-          @Override
-          public void getItemOffsets(
-              Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            outRect.set(gridMargin, gridMargin, gridMargin, gridMargin);
-          }
-        });
-    grid.setRecyclerListener(
-        new RecyclerView.RecyclerListener() {
-          @Override
-          public void onViewRecycled(RecyclerView.ViewHolder holder) {
-            PhotoViewHolder photoViewHolder = (PhotoViewHolder) holder;
-            GlideApp.with(FlickrPhotoGrid.this).clear(photoViewHolder.imageView);
-          }
-        });
+    grid.addItemDecoration(new RecyclerView.ItemDecoration() {
+      @Override
+      public void getItemOffsets(Rect outRect, View view, RecyclerView parent,
+          RecyclerView.State state) {
+        outRect.set(gridMargin, gridMargin, gridMargin, gridMargin);
+      }
+    });
+    grid.setRecyclerListener(new RecyclerView.RecyclerListener() {
+      @Override
+      public void onViewRecycled(RecyclerView.ViewHolder holder) {
+        PhotoViewHolder photoViewHolder = (PhotoViewHolder) holder;
+        GlideApp.with(FlickrPhotoGrid.this).clear(photoViewHolder.imageView);
+      }
+    });
 
     int heightCount = getResources().getDisplayMetrics().heightPixels / photoSize;
     grid.getRecycledViewPool().setMaxRecycledViews(0, spanCount * heightCount * 2);
@@ -103,9 +106,8 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
 
     FixedPreloadSizeProvider<Photo> preloadSizeProvider =
         new FixedPreloadSizeProvider<>(photoSize, photoSize);
-    RecyclerViewPreloader<Photo> preloader =
-        new RecyclerViewPreloader<>(
-            Glide.with(this), adapter, preloadSizeProvider, args.getInt(PRELOAD_KEY));
+    RecyclerViewPreloader<Photo> preloader = new RecyclerViewPreloader<>(Glide.with(this), adapter,
+        preloadSizeProvider, args.getInt(PRELOAD_KEY));
     grid.addOnScrollListener(preloader);
 
     if (currentPhotos != null) {
@@ -137,8 +139,8 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     }
   }
 
-  private class PhotoAdapter extends RecyclerView.Adapter<PhotoViewHolder>
-      implements ListPreloader.PreloadModelProvider<Photo> {
+  private class PhotoAdapter extends RecyclerView.Adapter<PhotoViewHolder> implements
+      ListPreloader.PreloadModelProvider<Photo> {
     private final LayoutInflater inflater;
     private List<Photo> photos = Collections.emptyList();
 
@@ -169,19 +171,17 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
     public void onBindViewHolder(PhotoViewHolder holder, int position) {
       final Photo current = photos.get(position);
 
-      fullRequest
-          .load(current)
+      fullRequest.load(current)
           .thumbnail(thumbnail ? thumbnailRequest.load(current) : null)
           .into(holder.imageView);
 
-      holder.imageView.setOnClickListener(
-          new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-              Intent intent = FullscreenActivity.getIntent(getActivity(), current);
-              startActivity(intent);
-            }
-          });
+      holder.imageView.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+          Intent intent = FullscreenActivity.getIntent(getActivity(), current);
+          startActivity(intent);
+        }
+      });
     }
 
     @Override

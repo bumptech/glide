@@ -34,51 +34,64 @@ import java.util.concurrent.Executor;
  *
  * @param <R> The type of the resource that will be transcoded from the loaded resource.
  */
-public final class SingleRequest<R>
-    implements Request, SizeReadyCallback, ResourceCallback, FactoryPools.Poolable {
+public final class SingleRequest<R> implements Request,
+    SizeReadyCallback,
+    ResourceCallback,
+    FactoryPools.Poolable {
   /** Tag for logging internal events, not generally suitable for public use. */
   private static final String TAG = "Request";
   /** Tag for logging externally useful events (request completion, timing etc). */
   private static final String GLIDE_TAG = "Glide";
-
-  private static final Pools.Pool<SingleRequest<?>> POOL =
-      FactoryPools.threadSafe(
-          150,
-          new FactoryPools.Factory<SingleRequest<?>>() {
-            @Override
-            public SingleRequest<?> create() {
-              return new SingleRequest<Object>();
-            }
-          });
+  private static final Pools.Pool<SingleRequest<?>> POOL = FactoryPools.threadSafe(150,
+      new FactoryPools.Factory<SingleRequest<?>>() {
+        @Override
+        public SingleRequest<?> create() {
+          return new SingleRequest<Object>();
+        }
+      });
   private boolean isCallingCallbacks;
 
-  private static final boolean IS_VERBOSE_LOGGABLE = Log.isLoggable(TAG, Log.VERBOSE);
+  private static final boolean IS_VERBOSE_LOGGABLE =
+      Log.isLoggable(TAG, Log.VERBOSE);
 
   private enum Status {
-    /** Created but not yet running. */
+    /**
+     * Created but not yet running.
+     */
     PENDING,
-    /** In the process of fetching media. */
+    /**
+     * In the process of fetching media.
+     */
     RUNNING,
-    /** Waiting for a callback given to the Target to be called to determine target dimensions. */
+    /**
+     * Waiting for a callback given to the Target to be called to determine target dimensions.
+     */
     WAITING_FOR_SIZE,
-    /** Finished loading media successfully. */
+    /**
+     * Finished loading media successfully.
+     */
     COMPLETE,
-    /** Failed to load media, may be restarted. */
+    /**
+     * Failed to load media, may be restarted.
+     */
     FAILED,
-    /** Cleared by the user with a placeholder set, may be restarted. */
+    /**
+     * Cleared by the user with a placeholder set, may be restarted.
+     */
     CLEARED,
   }
 
   @Nullable
   private final String tag = IS_VERBOSE_LOGGABLE ? String.valueOf(super.hashCode()) : null;
-
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
 
-  @Nullable private RequestListener<R> targetListener;
+  @Nullable
+  private RequestListener<R> targetListener;
   private RequestCoordinator requestCoordinator;
   private Context context;
   private GlideContext glideContext;
-  @Nullable private Object model;
+  @Nullable
+  private Object model;
   private Class<R> transcodeClass;
   private BaseRequestOptions<?> requestOptions;
   private int overrideWidth;
@@ -92,16 +105,15 @@ public final class SingleRequest<R>
   private Resource<R> resource;
   private Engine.LoadStatus loadStatus;
   private long startTime;
-
   @GuardedBy("this")
   private Status status;
-
   private Drawable errorDrawable;
   private Drawable placeholderDrawable;
   private Drawable fallbackDrawable;
   private int width;
   private int height;
-  @Nullable private RuntimeException requestOrigin;
+  @Nullable
+  private RuntimeException requestOrigin;
 
   public static <R> SingleRequest<R> obtain(
       Context context,
@@ -119,8 +131,8 @@ public final class SingleRequest<R>
       Engine engine,
       TransitionFactory<? super R> animationFactory,
       Executor callbackExecutor) {
-    @SuppressWarnings("unchecked")
-    SingleRequest<R> request = (SingleRequest<R>) POOL.acquire();
+    @SuppressWarnings("unchecked") SingleRequest<R> request =
+        (SingleRequest<R>) POOL.acquire();
     if (request == null) {
       request = new SingleRequest<>();
     }
@@ -273,7 +285,7 @@ public final class SingleRequest<R>
    * Cancels the current load but does not release any resources held by the request and continues
    * to display the loaded resource if the load completed before the call to cancel.
    *
-   * <p>Cancelled requests can be restarted with a subsequent call to {@link #begin()}.
+   * <p> Cancelled requests can be restarted with a subsequent call to {@link #begin()}. </p>
    *
    * @see #clear()
    */
@@ -290,11 +302,10 @@ public final class SingleRequest<R>
   // Avoids difficult to understand errors like #2413.
   private void assertNotCallingCallbacks() {
     if (isCallingCallbacks) {
-      throw new IllegalStateException(
-          "You can't start or clear loads in RequestListener or"
-              + " Target callbacks. If you're trying to start a fallback request when a load fails, use"
-              + " RequestBuilder#error(RequestBuilder). Otherwise consider posting your into() or"
-              + " clear() calls to the main thread using a Handler instead.");
+      throw new IllegalStateException("You can't start or clear loads in RequestListener or"
+          + " Target callbacks. If you're trying to start a fallback request when a load fails, use"
+          + " RequestBuilder#error(RequestBuilder). Otherwise consider posting your into() or"
+          + " clear() calls to the main thread using a Handler instead.");
     }
   }
 
@@ -366,7 +377,7 @@ public final class SingleRequest<R>
   }
 
   private Drawable getPlaceholderDrawable() {
-    if (placeholderDrawable == null) {
+     if (placeholderDrawable == null) {
       placeholderDrawable = requestOptions.getPlaceholderDrawable();
       if (placeholderDrawable == null && requestOptions.getPlaceholderId() > 0) {
         placeholderDrawable = loadDrawable(requestOptions.getPlaceholderId());
@@ -386,8 +397,8 @@ public final class SingleRequest<R>
   }
 
   private Drawable loadDrawable(@DrawableRes int resourceId) {
-    Theme theme =
-        requestOptions.getTheme() != null ? requestOptions.getTheme() : context.getTheme();
+    Theme theme = requestOptions.getTheme() != null
+        ? requestOptions.getTheme() : context.getTheme();
     return DrawableDecoderCompat.getDrawable(glideContext, resourceId, theme);
   }
 
@@ -411,7 +422,9 @@ public final class SingleRequest<R>
     target.onLoadFailed(error);
   }
 
-  /** A callback method that should never be invoked directly. */
+  /**
+   * A callback method that should never be invoked directly.
+   */
   @Override
   public synchronized void onSizeReady(int width, int height) {
     stateVerifier.throwIfRecycled();
@@ -502,12 +515,8 @@ public final class SingleRequest<R>
     stateVerifier.throwIfRecycled();
     loadStatus = null;
     if (resource == null) {
-      GlideException exception =
-          new GlideException(
-              "Expected to receive a Resource<R> with an "
-                  + "object of "
-                  + transcodeClass
-                  + " inside, but instead got null.");
+      GlideException exception = new GlideException("Expected to receive a Resource<R> with an "
+          + "object of " + transcodeClass + " inside, but instead got null.");
       onLoadFailed(exception);
       return;
     }
@@ -515,25 +524,12 @@ public final class SingleRequest<R>
     Object received = resource.get();
     if (received == null || !transcodeClass.isAssignableFrom(received.getClass())) {
       releaseResource(resource);
-      GlideException exception =
-          new GlideException(
-              "Expected to receive an object of "
-                  + transcodeClass
-                  + " but instead"
-                  + " got "
-                  + (received != null ? received.getClass() : "")
-                  + "{"
-                  + received
-                  + "} inside"
-                  + " "
-                  + "Resource{"
-                  + resource
-                  + "}."
-                  + (received != null
-                      ? ""
-                      : " "
-                          + "To indicate failure return a null Resource "
-                          + "object, rather than a Resource object containing null data."));
+      GlideException exception = new GlideException("Expected to receive an object of "
+          + transcodeClass + " but instead" + " got "
+          + (received != null ? received.getClass() : "") + "{" + received + "} inside" + " "
+          + "Resource{" + resource + "}."
+          + (received != null ? "" : " " + "To indicate failure return a null Resource "
+          + "object, rather than a Resource object containing null data."));
       onLoadFailed(exception);
       return;
     }
@@ -562,21 +558,9 @@ public final class SingleRequest<R>
     this.resource = resource;
 
     if (glideContext.getLogLevel() <= Log.DEBUG) {
-      Log.d(
-          GLIDE_TAG,
-          "Finished loading "
-              + result.getClass().getSimpleName()
-              + " from "
-              + dataSource
-              + " for "
-              + model
-              + " with size ["
-              + width
-              + "x"
-              + height
-              + "] in "
-              + LogTime.getElapsedMillis(startTime)
-              + " ms");
+      Log.d(GLIDE_TAG, "Finished loading " + result.getClass().getSimpleName() + " from "
+          + dataSource + " for " + model + " with size [" + width + "x" + height + "] in "
+          + LogTime.getElapsedMillis(startTime) + " ms");
     }
 
     isCallingCallbacks = true;
@@ -593,7 +577,8 @@ public final class SingleRequest<R>
               && targetListener.onResourceReady(result, model, target, dataSource, isFirstResource);
 
       if (!anyListenerHandledUpdatingTarget) {
-        Transition<? super R> animation = animationFactory.build(dataSource, isFirstResource);
+        Transition<? super R> animation =
+            animationFactory.build(dataSource, isFirstResource);
         target.onResourceReady(result, animation);
       }
     } finally {
@@ -625,7 +610,7 @@ public final class SingleRequest<R>
 
     isCallingCallbacks = true;
     try {
-      // TODO: what if this is a thumbnail request?
+      //TODO: what if this is a thumbnail request?
       boolean anyListenerHandledUpdatingTarget = false;
       if (requestListeners != null) {
         for (RequestListener<R> listener : requestListeners) {

@@ -17,19 +17,22 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/** Tests adding a single {@link com.bumptech.glide.module.LibraryGlideModule} in a project. */
+/**
+ * Tests adding a single {@link com.bumptech.glide.module.LibraryGlideModule} in a project.
+ */
 @RunWith(JUnit4.class)
 public class EmptyLibraryGlideModuleTest implements CompilationProvider {
-  @Rule
-  public final RegenerateResourcesRule regenerateResourcesRule = new RegenerateResourcesRule(this);
-
+  @Rule public final RegenerateResourcesRule regenerateResourcesRule =
+      new RegenerateResourcesRule(this);
   private static final String MODULE_NAME = "EmptyLibraryModule.java";
   private Compilation compilation;
 
   @Before
   public void setUp() {
     compilation =
-        javac().withProcessors(new GlideAnnotationProcessor()).compile(forResource(MODULE_NAME));
+        javac()
+            .withProcessors(new GlideAnnotationProcessor())
+            .compile(forResource(MODULE_NAME));
     assertThat(compilation).succeededWithoutWarnings();
   }
 

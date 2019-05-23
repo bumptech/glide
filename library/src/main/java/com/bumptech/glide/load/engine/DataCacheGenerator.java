@@ -13,7 +13,8 @@ import java.util.List;
  * Generates {@link com.bumptech.glide.load.data.DataFetcher DataFetchers} from cache files
  * containing original unmodified source data.
  */
-class DataCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCallback<Object> {
+class DataCacheGenerator implements DataFetcherGenerator,
+    DataFetcher.DataCallback<Object> {
 
   private final List<Key> cacheKeys;
   private final DecodeHelper<?> helper;
@@ -67,8 +68,8 @@ class DataCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCallba
     while (!started && hasNextModelLoader()) {
       ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
       loadData =
-          modelLoader.buildLoadData(
-              cacheFile, helper.getWidth(), helper.getHeight(), helper.getOptions());
+          modelLoader.buildLoadData(cacheFile, helper.getWidth(), helper.getHeight(),
+              helper.getOptions());
       if (loadData != null && helper.hasLoadPath(loadData.fetcher.getDataClass())) {
         started = true;
         loadData.fetcher.loadData(helper.getPriority(), this);

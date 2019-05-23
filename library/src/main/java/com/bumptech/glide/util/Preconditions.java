@@ -5,7 +5,9 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import java.util.Collection;
 
-/** Contains common assertions. */
+/**
+ * Contains common assertions.
+ */
 public final class Preconditions {
 
   private Preconditions() {

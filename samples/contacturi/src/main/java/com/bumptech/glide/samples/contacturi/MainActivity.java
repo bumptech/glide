@@ -20,11 +20,11 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Preconditions;
 
 /**
- * An activity that demonstrates loading photos using {@link
- * com.bumptech.glide.load.data.StreamLocalUriFetcher content uris} through Glide. It works by
- * making the user to choose a contact when presses a button, and after he chooses a contact with
- * photo, We try to load both a high res image and thumbnail image of that contact with various
- * Uris.
+ * An activity that demonstrates loading photos using
+ * {@link com.bumptech.glide.load.data.StreamLocalUriFetcher content uris} through Glide.
+ * It works by making the user to choose a contact when presses a button,
+ * and after he chooses a contact with photo,
+ * We try to load both a high res image and thumbnail image of that contact with various Uris.
  */
 public class MainActivity extends Activity {
   private static final int REQUEST_CONTACT = 1;
@@ -47,38 +47,34 @@ public class MainActivity extends Activity {
     imageViewDisplayPhoto = findViewById(R.id.image_display_photo);
     numberEntry = findViewById(R.id.number_entry);
     // Make sure that user gives application required permissions
-    if (ContextCompat.checkSelfPermission(getApplication(), Manifest.permission.READ_CONTACTS)
-        != PackageManager.PERMISSION_GRANTED) {
+    if (ContextCompat.checkSelfPermission(
+        getApplication(),
+        Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
       // No explanation needed, we can request the permission.
-      ActivityCompat.requestPermissions(
-          this, new String[] {Manifest.permission.READ_CONTACTS}, READ_CONTACTS);
+      ActivityCompat.requestPermissions(this,
+      new String[]{Manifest.permission.READ_CONTACTS},
+      READ_CONTACTS);
     }
 
-    findViewById(R.id.button_pick_contact)
-        .setOnClickListener(
-            new View.OnClickListener() {
-              @Override
-              public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
-                startActivityForResult(intent, REQUEST_CONTACT);
-              }
-            });
+    findViewById(R.id.button_pick_contact).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Intent intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
+        startActivityForResult(intent, REQUEST_CONTACT);
+      }
+    });
 
-    findViewById(R.id.button_find)
-        .setOnClickListener(
-            new View.OnClickListener() {
-              @Override
-              public void onClick(View v) {
-                Uri uri =
-                    Uri.withAppendedPath(
-                        ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
-                        Uri.encode(numberEntry.getText().toString()));
-                GlideApp.with(MainActivity.this)
-                    .load(uri)
-                    .override(Target.SIZE_ORIGINAL)
-                    .into(imageViewLookup);
-              }
-            });
+    findViewById(R.id.button_find).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                                       Uri.encode(numberEntry.getText().toString()));
+        GlideApp.with(MainActivity.this)
+                .load(uri)
+                .override(Target.SIZE_ORIGINAL)
+                .into(imageViewLookup);
+        }
+    });
   }
 
   @Override

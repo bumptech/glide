@@ -114,17 +114,14 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void testDoesNotStartFullIfClearedByThumb() {
-    doAnswer(
-            new Answer<Void>() {
-              @Override
-              public Void answer(InvocationOnMock invocation) throws Throwable {
-                coordinator.clear();
+    doAnswer(new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocation) throws Throwable {
+        coordinator.clear();
 
-                return null;
-              }
-            })
-        .when(thumb)
-        .begin();
+        return null;
+      }
+    }).when(thumb).begin();
 
     coordinator.begin();
 
@@ -171,7 +168,7 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void
-      testCanSetImageReturnsTrueForThumbRequestIfParentIsNullAndFullDoesNotHaveResourceSet() {
+  testCanSetImageReturnsTrueForThumbRequestIfParentIsNullAndFullDoesNotHaveResourceSet() {
     when(full.isResourceSet()).thenReturn(false);
     assertTrue(coordinator.canSetImage(thumb));
   }

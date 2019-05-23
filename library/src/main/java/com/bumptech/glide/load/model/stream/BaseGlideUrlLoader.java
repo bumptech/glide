@@ -29,8 +29,7 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
     this(concreteLoader, null);
   }
 
-  protected BaseGlideUrlLoader(
-      ModelLoader<GlideUrl, InputStream> concreteLoader,
+  protected BaseGlideUrlLoader(ModelLoader<GlideUrl, InputStream> concreteLoader,
       @Nullable ModelCache<Model, GlideUrl> modelCache) {
     this.concreteLoader = concreteLoader;
     this.modelCache = modelCache;
@@ -38,8 +37,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
 
   @Override
   @Nullable
-  public LoadData<InputStream> buildLoadData(
-      @NonNull Model model, int width, int height, @NonNull Options options) {
+  public LoadData<InputStream> buildLoadData(@NonNull Model model, int width, int height,
+      @NonNull Options options) {
     GlideUrl result = null;
     if (modelCache != null) {
       result = modelCache.get(model, width, height);
@@ -61,14 +60,12 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
     // TODO: this is expensive and slow to calculate every time, we should either cache these, or
     // try to come up with a way to avoid finding them when not necessary.
     List<String> alternateUrls = getAlternateUrls(model, width, height, options);
-    LoadData<InputStream> concreteLoaderData =
-        concreteLoader.buildLoadData(result, width, height, options);
+    LoadData<InputStream> concreteLoaderData = concreteLoader.buildLoadData(result, width, height,
+        options);
     if (concreteLoaderData == null || alternateUrls.isEmpty()) {
       return concreteLoaderData;
     } else {
-      return new LoadData<>(
-          concreteLoaderData.sourceKey,
-          getAlternateKeys(alternateUrls),
+      return new LoadData<>(concreteLoaderData.sourceKey, getAlternateKeys(alternateUrls),
           concreteLoaderData.fetcher);
     }
   }
@@ -86,8 +83,8 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
   /**
    * Returns a valid url http:// or https:// for the given model and dimensions as a string.
    *
-   * @param model The model.
-   * @param width The width in pixels of the view/target the image will be loaded into.
+   * @param model  The model.
+   * @param width  The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
   protected abstract String getUrl(Model model, int width, int height, Options options);
@@ -97,13 +94,14 @@ public abstract class BaseGlideUrlLoader<Model> implements ModelLoader<Model, In
    * data can be obtained (usually the same image with the same aspect ratio, but in a larger size)
    * as the primary url.
    *
-   * <p>Implementing this method allows Glide to fulfill requests for bucketed images in smaller
-   * bucket sizes using already cached data for larger bucket sizes.
+   * <p> Implementing this method allows Glide to fulfill requests for bucketed images in smaller
+   * bucket sizes using already cached data for larger bucket sizes. </p>
    *
-   * @param width The width in pixels of the view/target the image will be loaded into.
+   * @param width  The width in pixels of the view/target the image will be loaded into.
    * @param height The height in pixels of the view/target the image will be loaded into.
    */
-  protected List<String> getAlternateUrls(Model model, int width, int height, Options options) {
+  protected List<String> getAlternateUrls(Model model, int width, int height,
+      Options options) {
     return Collections.emptyList();
   }
 

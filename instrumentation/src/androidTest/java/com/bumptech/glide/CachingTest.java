@@ -59,7 +59,8 @@ import org.mockito.MockitoAnnotations;
 public class CachingTest {
   private static final int IMAGE_SIZE_PIXELS = 500;
   // Store at least 10 500x500 pixel Bitmaps with the ARGB_8888 config to be safe.
-  private static final long CACHE_SIZE_BYTES = IMAGE_SIZE_PIXELS * IMAGE_SIZE_PIXELS * 4 * 10;
+  private static final long CACHE_SIZE_BYTES =
+      IMAGE_SIZE_PIXELS * IMAGE_SIZE_PIXELS * 4 * 10;
 
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
   @Mock private RequestListener<Drawable> requestListener;
@@ -77,32 +78,46 @@ public class CachingTest {
 
   @Test
   public void submit_withDisabledMemoryCache_andResourceInActiveResources_loadsFromMemory() {
-    Glide.init(context, new GlideBuilder().setMemoryCache(new MemoryCacheAdapter()));
+    Glide.init(
+        context, new GlideBuilder().setMemoryCache(new MemoryCacheAdapter()));
 
-    FutureTarget<Drawable> first = GlideApp.with(context).load(raw.canonical).submit();
+    FutureTarget<Drawable> first =
+        GlideApp.with(context)
+            .load(raw.canonical)
+            .submit();
     concurrency.get(first);
 
     concurrency.get(
-        GlideApp.with(context).load(ResourceIds.raw.canonical).listener(requestListener).submit());
+        GlideApp.with(context)
+            .load(ResourceIds.raw.canonical)
+            .listener(requestListener)
+            .submit());
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            anyDrawable(),
+            any(),
+            anyDrawableTarget(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
   public void submit_withRequestClearedFromMemory_doesNotLoadFromMemory() {
-    Glide.init(context, new GlideBuilder().setMemoryCache(new MemoryCacheAdapter()));
+    Glide.init(
+        context, new GlideBuilder().setMemoryCache(new MemoryCacheAdapter()));
 
     // Allow the request to be run and GCed without being cleared.
-    concurrency.loadOnOtherThread(
-        new Runnable() {
-          @Override
-          public void run() {
-            FutureTarget<Drawable> first = GlideApp.with(context).load(raw.canonical).submit();
-            concurrency.get(first);
-          }
-        });
+    concurrency.loadOnOtherThread(new Runnable() {
+      @Override
+      public void run() {
+        FutureTarget<Drawable> first =
+            GlideApp.with(context)
+                .load(raw.canonical)
+                .submit();
+        concurrency.get(first);
+      }
+    });
 
     // Wait for the weak reference to be cleared and the request to be removed from active
     // resources.
@@ -135,7 +150,10 @@ public class CachingTest {
     }
 
     concurrency.get(
-        GlideApp.with(context).load(ResourceIds.raw.canonical).listener(requestListener).submit());
+        GlideApp.with(context)
+            .load(ResourceIds.raw.canonical)
+            .listener(requestListener)
+            .submit());
 
     verify(requestListener)
         .onResourceReady(
@@ -159,11 +177,10 @@ public class CachingTest {
             .setDiskCacheExecutor(mainThreadExecutor)
             .setAnimationExecutor(mainThreadExecutor));
 
-    FutureTarget<Drawable> future =
-        GlideApp.with(context)
-            .load(ResourceIds.raw.canonical)
-            .diskCacheStrategy(DiskCacheStrategy.DATA)
-            .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
+    FutureTarget<Drawable> future = GlideApp.with(context)
+        .load(ResourceIds.raw.canonical)
+        .diskCacheStrategy(DiskCacheStrategy.DATA)
+        .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
     concurrency.get(future);
     GlideApp.with(context).clear(future);
 
@@ -209,7 +226,11 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            anyDrawable(),
+            any(),
+            anyDrawableTarget(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -229,12 +250,11 @@ public class CachingTest {
     Runtime.getRuntime().gc();
     concurrency.pokeMainThread();
 
-    FutureTarget<Bitmap> future =
-        GlideApp.with(context)
-            .asBitmap()
-            .load(ResourceIds.raw.canonical)
-            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-            .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
+    FutureTarget<Bitmap> future = GlideApp.with(context)
+        .asBitmap()
+        .load(ResourceIds.raw.canonical)
+        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+        .submit(IMAGE_SIZE_PIXELS, IMAGE_SIZE_PIXELS);
     concurrency.get(future);
     Glide.with(context).clear(future);
 
@@ -303,10 +323,14 @@ public class CachingTest {
   public void onlyRetrieveFromCache_withPreviousRequestLoadingFromSource_doesNotBlock() {
     final WaitModel<Integer> waitModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
 
-    FutureTarget<Drawable> loadFromSourceFuture = GlideApp.with(context).load(waitModel).submit();
+    FutureTarget<Drawable> loadFromSourceFuture = GlideApp.with(context)
+        .load(waitModel)
+        .submit();
 
-    FutureTarget<Drawable> onlyFromCacheFuture =
-        GlideApp.with(context).load(waitModel).onlyRetrieveFromCache(true).submit();
+    FutureTarget<Drawable> onlyFromCacheFuture = GlideApp.with(context)
+        .load(waitModel)
+        .onlyRetrieveFromCache(true)
+        .submit();
     try {
       onlyFromCacheFuture.get(1000, TimeUnit.MILLISECONDS);
       fail("Expected only from cache Future to time out");
@@ -326,22 +350,22 @@ public class CachingTest {
     // Block the main thread so that we know that both requests will be queued but not started at
     // the same time.
     final CountDownLatch blockMainThread = new CountDownLatch(1);
-    new Handler(Looper.getMainLooper())
-        .post(
-            new Runnable() {
-              @Override
-              public void run() {
-                try {
-                  blockMainThread.await();
-                } catch (InterruptedException e) {
-                  throw new RuntimeException(e);
-                }
-              }
-            });
+    new Handler(Looper.getMainLooper()).post(new Runnable() {
+      @Override
+      public void run() {
+         try {
+          blockMainThread.await();
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
 
     // Queue the retrieve from cache request first.
-    final Future<Drawable> firstQueuedFuture =
-        GlideApp.with(context).load(ResourceIds.raw.canonical).onlyRetrieveFromCache(true).submit();
+    final Future<Drawable> firstQueuedFuture = GlideApp.with(context)
+        .load(ResourceIds.raw.canonical)
+        .onlyRetrieveFromCache(true)
+        .submit();
 
     // Then queue the normal request.
     FutureTarget<Drawable> expectedFuture =
@@ -397,7 +421,11 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            anyDrawable(),
+            any(),
+            anyDrawableTarget(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -436,7 +464,11 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            anyDrawable(),
+            any(),
+            anyDrawableTarget(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -479,12 +511,11 @@ public class CachingTest {
   }
 
   private void clearMemoryCacheOnMainThread() {
-    concurrency.runOnMainThread(
-        new Runnable() {
-          @Override
-          public void run() {
-            Glide.get(context).clearMemory();
-          }
-        });
+    concurrency.runOnMainThread(new Runnable() {
+      @Override
+      public void run() {
+        Glide.get(context).clearMemory();
+      }
+    });
   }
 }

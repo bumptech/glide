@@ -71,16 +71,18 @@ public class ExternallyClearedDiskCacheTest {
     Glide.init(
         context,
         new GlideBuilder()
-            .setDiskCache(
-                new Factory() {
-                  @Override
-                  public DiskCache build() {
-                    return cache;
-                  }
-                }));
+            .setDiskCache(new Factory() {
+              @Override
+              public DiskCache build() {
+                return cache;
+              }
+            }));
 
     Drawable drawable =
-        concurrency.get(Glide.with(context).load(ResourceIds.raw.canonical).submit());
+        concurrency.get(
+            Glide.with(context)
+                .load(ResourceIds.raw.canonical)
+                .submit());
     assertThat(drawable).isNotNull();
   }
 
@@ -93,15 +95,17 @@ public class ExternallyClearedDiskCacheTest {
     Glide.init(
         context,
         new GlideBuilder()
-            .setDiskCache(
-                new Factory() {
-                  @Override
-                  public DiskCache build() {
-                    return cache;
-                  }
-                }));
+            .setDiskCache(new Factory() {
+              @Override
+              public DiskCache build() {
+                return cache;
+              }
+            }));
 
-    Drawable drawable = concurrency.get(Glide.with(context).load(raw.canonical).submit());
+    Drawable drawable =
+        concurrency.get(Glide.with(context)
+            .load(raw.canonical)
+            .submit());
     assertThat(drawable).isNotNull();
   }
 

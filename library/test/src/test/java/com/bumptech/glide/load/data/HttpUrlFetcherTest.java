@@ -89,7 +89,8 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testCancelDoesNotDisconnectIfAlreadyConnected() throws IOException {
+  public void testCancelDoesNotDisconnectIfAlreadyConnected()
+      throws IOException {
     fetcher.loadData(Priority.HIGH, callback);
     fetcher.cancel();
 
