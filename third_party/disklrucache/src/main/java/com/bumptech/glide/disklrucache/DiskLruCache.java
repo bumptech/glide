@@ -16,6 +16,9 @@
 
 package com.bumptech.glide.disklrucache;
 
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
+import android.os.StrictMode;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.EOFException;
@@ -158,7 +161,7 @@ public final class DiskLruCache implements Closeable {
   /** This cache uses a single background thread to evict entries. */
   final ThreadPoolExecutor executorService =
       new ThreadPoolExecutor(0, 1, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(),
-            new DiskLruCacheThreadFactory());
+          new DiskLruCacheThreadFactory());
   private final Callable<Void> cleanupCallable = new Callable<Void>() {
     public Void call() throws Exception {
       synchronized (DiskLruCache.this) {
@@ -348,7 +351,7 @@ public final class DiskLruCache implements Closeable {
    */
   private synchronized void rebuildJournal() throws IOException {
     if (journalWriter != null) {
-      journalWriter.close();
+      closeWriter(journalWriter);
     }
 
     Writer writer = new BufferedWriter(
@@ -372,7 +375,7 @@ public final class DiskLruCache implements Closeable {
         }
       }
     } finally {
-      writer.close();
+      closeWriter(writer);
     }
 
     if (journalFile.exists()) {
@@ -465,7 +468,7 @@ public final class DiskLruCache implements Closeable {
     journalWriter.append(' ');
     journalWriter.append(key);
     journalWriter.append('\n');
-    journalWriter.flush();
+    flushWriter(journalWriter);
     return editor;
   }
 
@@ -556,7 +559,7 @@ public final class DiskLruCache implements Closeable {
       journalWriter.append(entry.key);
       journalWriter.append('\n');
     }
-    journalWriter.flush();
+    flushWriter(journalWriter);
 
     if (size > maxSize || journalRebuildRequired()) {
       executorService.submit(cleanupCallable);
@@ -625,7 +628,7 @@ public final class DiskLruCache implements Closeable {
   public synchronized void flush() throws IOException {
     checkNotClosed();
     trimToSize();
-    journalWriter.flush();
+    flushWriter(journalWriter);
   }
 
   /** Closes this cache. Stored values will remain on the filesystem. */
@@ -639,7 +642,7 @@ public final class DiskLruCache implements Closeable {
       }
     }
     trimToSize();
-    journalWriter.close();
+    closeWriter(journalWriter);
     journalWriter = null;
   }
 
@@ -662,6 +665,52 @@ public final class DiskLruCache implements Closeable {
 
   private static String inputStreamToString(InputStream in) throws IOException {
     return Util.readFully(new InputStreamReader(in, Util.UTF_8));
+  }
+
+  /**
+   * Closes the writer while whitelisting with StrictMode if necessary.
+   *
+   * <p>Analogous to b/71520172.
+   */
+  private static void closeWriter(Writer writer) throws IOException {
+    // If API is less than 26, we don't need to whitelist with StrictMode.
+    if (VERSION.SDK_INT < VERSION_CODES.O) {
+      writer.close();
+      return;
+    }
+
+    StrictMode.ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
+    StrictMode.ThreadPolicy unbufferedIoPolicy =
+        new StrictMode.ThreadPolicy.Builder(oldPolicy).permitUnbufferedIo().build();
+    StrictMode.setThreadPolicy(unbufferedIoPolicy);
+    try {
+      writer.close();
+    } finally {
+      StrictMode.setThreadPolicy(oldPolicy);
+    }
+  }
+
+  /**
+   * Flushes the writer while whitelisting with StrictMode if necessary.
+   *
+   * <p>See b/71520172.
+   */
+  private static void flushWriter(Writer writer) throws IOException {
+    // If API is less than 26, we don't need to whitelist with StrictMode.
+    if (VERSION.SDK_INT < VERSION_CODES.O) {
+      writer.flush();
+      return;
+    }
+
+    StrictMode.ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
+    StrictMode.ThreadPolicy unbufferedIoPolicy =
+        new StrictMode.ThreadPolicy.Builder(oldPolicy).permitUnbufferedIo().build();
+    StrictMode.setThreadPolicy(unbufferedIoPolicy);
+    try {
+      writer.flush();
+    } finally {
+      StrictMode.setThreadPolicy(oldPolicy);
+    }
   }
 
   /** A snapshot of the values for an entry. */
