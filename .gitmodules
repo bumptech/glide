@@ -1,3 +1,0 @@
-[submodule "library/test/src/test/resources/exif-orientation-examples"]
-	path = library/test/src/test/resources/exif-orientation-examples
-	url = https://github.com/recurser/exif-orientation-examples.git

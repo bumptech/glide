@@ -22,7 +22,7 @@ public class ExifTest {
   private ArrayPool byteArrayPool;
 
   private InputStream open(String imageName) {
-    return TestResourceUtil.openResource(getClass(), "exif-orientation-examples/" + imageName);
+    return TestResourceUtil.openResource(getClass(), imageName);
   }
 
   private void assertOrientation(String filePrefix, int expectedOrientation) {

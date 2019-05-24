@@ -50,4 +50,13 @@ android {
     }
 
     testOptions.unitTests.includeAndroidResources = true
+
+    sourceSets {
+        androidTest {
+            resources.srcDirs += ['../../third_party/exif-orientation-examples']
+        }
+        test {
+            resources.srcDirs += ['../../third_party/exif-orientation-examples']
+        }
+    }
 }

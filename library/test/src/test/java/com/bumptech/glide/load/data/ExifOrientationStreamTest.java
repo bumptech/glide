@@ -22,7 +22,7 @@ public class ExifOrientationStreamTest {
   private InputStream openOrientationExample(boolean isLandscape, int item) {
     String filePrefix = isLandscape ? "Landscape" : "Portrait";
     return TestResourceUtil.openResource(
-        getClass(), "exif-orientation-examples/" + filePrefix + "_" + item + ".jpg");
+        getClass(), filePrefix + "_" + item + ".jpg");
   }
 
   @Before
