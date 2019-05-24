@@ -53,10 +53,10 @@ android {
 
     sourceSets {
         androidTest {
-            resources.srcDirs += ['../../third_party/exif-orientation-examples']
+            resources.srcDirs += ['../../third_party/exif_orientation_examples']
         }
         test {
-            resources.srcDirs += ['../../third_party/exif-orientation-examples']
+            resources.srcDirs += ['../../third_party/exif_orientation_examples']
         }
     }
 }
