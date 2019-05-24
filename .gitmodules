@@ -1,6 +1,3 @@
-[submodule "third_party/disklrucache"]
-	path = third_party/disklrucache
-	url = https://github.com/sjudd/DiskLruCache.git
 [submodule "library/test/src/test/resources/exif-orientation-examples"]
 	path = library/test/src/test/resources/exif-orientation-examples
 	url = https://github.com/recurser/exif-orientation-examples.git

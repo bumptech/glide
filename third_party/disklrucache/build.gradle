@@ -1,0 +1,26 @@
+apply plugin: 'java'
+apply plugin: 'checkstyle'
+
+repositories {
+  jcenter()
+}
+
+checkstyle {
+    toolVersion = "6.6"
+}
+
+checkstyle {
+    configFile = new File(projectDir, 'checkstyle.xml')
+}
+
+dependencies {
+    def junitVersion = hasProperty('JUNIT_VERSION') ? JUNIT_VERSION : '4.11';
+    testCompile "junit:junit:${junitVersion}"
+    testCompile 'commons-io:commons-io:2.1'
+    testCompile 'org.easytesting:fest-assert-core:2.0M10'
+}
+
+def uploaderScript = "${rootProject.projectDir}/scripts/upload.gradle"
+if (file(uploaderScript).exists()) {
+	apply from: uploaderScript
+}
