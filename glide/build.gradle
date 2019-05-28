@@ -4,12 +4,7 @@ apply plugin: 'java'
 
 // The paths of Android projects that should be included in the jar and javadoc.
 static def getAndroidPathsForJar() {
-    [':third_party:gif_decoder', ':library']
-}
-
-// The paths of Java projects that should be included in the jar and javadoc.
-static def getJavaPathsForJar() {
-    [':third_party:disklrucache']
+    [':third_party:gif_decoder', ':library', ':third_party:disklrucache' ]
 }
 
 // The paths of Android projects that should be included only in Javadoc, not in the jar.
@@ -19,7 +14,7 @@ static def getAndroidPathsForJavadoc() {
             ':integration:okhttp3',
             ':integration:volley',
             ':integration:gifencoder',
-            ':integration:recyclerview'
+            ':integration:recyclerview',
     ]
 }
 
@@ -28,8 +23,7 @@ static def getJavaPathsForJavadoc() {
     [':annotation']
 }
 
-(getAndroidPathsForJavadoc() + getAndroidPathsForJar() +
-        getJavaPathsForJar() + getJavaPathsForJavadoc()).each {
+(getAndroidPathsForJavadoc() + getAndroidPathsForJar() + getJavaPathsForJavadoc()).each {
     evaluationDependsOn(it)
 }
 
@@ -49,16 +43,8 @@ def getInternalAndroidProjectsForJar() {
     asProjects(getAndroidPathsForJar())
 }
 
-def getInternalJavaProjectsForJar() {
-    asProjects(getJavaPathsForJar())
-}
-
 def getInternalAndroidProjectsForJavadoc() {
     asProjects(getAndroidPathsForJavadoc())
-}
-
-def getInternalJavaProjectsForJavadoc() {
-    asProjects(getJavaPathsForJavadoc())
 }
 
 def getAndroidProjectsForJar() {
@@ -82,16 +68,15 @@ static def getAndroidLibraryVariants(projects, variantName) {
 }
 
 def getSourceFilesForVariantJar(variantName) {
-    getAndroidLibraryVariantsForJar(variantName).collect {
-        it.getJavaCompiler().source.findAll {
+    getAndroidLibraryVariantsForJar(variantName).collect { variant -> 
+        variant.getJavaCompiler().source.findAll { 
             return !it.getName().equals("R.java") && !it.getName().equals("BuildConfig.java")
         }
-    } + getInternalJavaProjectsForJar().collect { it.sourceSets.main.allJava }
+    }
 }
 
 def getSourceFilesForVariantJavadoc(variantName) {
-    getAndroidLibraryVariantsForJavadoc(variantName).collect { it.getJavaCompiler().source } +
-            getInternalJavaProjectsForJavadoc().collect { it.sourceSets.main.allJava }
+    getAndroidLibraryVariantsForJavadoc(variantName).collect { it.getJavaCompiler().source }
 }
 
 def getAndroidJar() {
@@ -104,14 +89,10 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 // projects.
 ['debug'].each { variantName ->
 
-    task("${variantName}SourceJar", type: Jar) {
-        from getSourceFilesForVariantJar(variantName)
-    }
-
     def javadocTask = tasks.create("${variantName}Javadoc", Javadoc) {
         source = getSourceFilesForVariantJar(variantName)
         source += getSourceFilesForVariantJavadoc(variantName)
-
+      
         doFirst {
             it.classpath =
                     project.files(
@@ -121,12 +102,6 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
                             },
                             getAndroidLibraryVariantsForJavadoc(variantName).collect {
                                 LibraryVariant lib -> lib.getJavaCompiler().classpath.files
-                            },
-                            getInternalJavaProjectsForJavadoc().collect { Project project ->
-                                project.sourceSets.main.compileClasspath.files
-                            },
-                            getInternalJavaProjectsForJar().collect { Project project ->
-                                project.sourceSets.main.compileClasspath.files
                             },
                             // Finds dependencies of Android packages that would otherwise be
                             // ignored (Volley in particular)
@@ -165,7 +140,6 @@ jar {
                 variant.getJavaCompiler().destinationDir
             }
     )
-    from files(getInternalJavaProjectsForJar().collect { it.sourceSets.main.output })
     exclude "**/R.class"
     exclude "**/BuildConfig.class"
     exclude "**/R\$*.class"
@@ -178,17 +152,9 @@ jar {
         jar.dependsOn(project.tasks.compileDebugSources)
 }
 
-(getInternalJavaProjectsForJar() + getInternalJavaProjectsForJavadoc()).each {
-    project ->
-        debugJavadoc.dependsOn(project.tasks.compileJava)
-        jar.dependsOn(project.tasks.compileJava)
-}
-
 artifacts {
     archives debugJavadocJar {
         classifier 'javadoc'
     }
-    archives debugSourceJar {
-        classifier 'sources'
-    }
 }
+

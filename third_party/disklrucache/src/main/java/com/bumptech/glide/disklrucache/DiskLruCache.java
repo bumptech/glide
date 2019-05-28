@@ -16,6 +16,7 @@
 
 package com.bumptech.glide.disklrucache;
 
+import android.annotation.TargetApi;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.StrictMode;
@@ -672,6 +673,7 @@ public final class DiskLruCache implements Closeable {
    *
    * <p>Analogous to b/71520172.
    */
+  @TargetApi(VERSION_CODES.O)
   private static void closeWriter(Writer writer) throws IOException {
     // If API is less than 26, we don't need to whitelist with StrictMode.
     if (VERSION.SDK_INT < VERSION_CODES.O) {
@@ -695,6 +697,7 @@ public final class DiskLruCache implements Closeable {
    *
    * <p>See b/71520172.
    */
+  @TargetApi(VERSION_CODES.O)
   private static void flushWriter(Writer writer) throws IOException {
     // If API is less than 26, we don't need to whitelist with StrictMode.
     if (VERSION.SDK_INT < VERSION_CODES.O) {
