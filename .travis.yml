@@ -20,10 +20,6 @@ jdk:
 env:
   matrix:
     - COMPONENT=unit
-    - COMPONENT=firebase
-    - COMPONENT=instrumentation ANDROID_TARGET=16
-    - COMPONENT=instrumentation ANDROID_TARGET=17
-    - COMPONENT=instrumentation ANDROID_TARGET=18
     - COMPONENT=samples
 
 before_script:

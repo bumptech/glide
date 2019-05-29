@@ -10,3 +10,4 @@ set -e
   -x :samples:imgur:build \
   -x :samples:svg:build \
   --parallel
+./gradlew :instrumentation:assembleAndroidTest
