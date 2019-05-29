@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.engine;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.cache.DiskCache;

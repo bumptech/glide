@@ -279,7 +279,7 @@ public class InvalidGlideOptionsExtensionTest {
                 JavaFileObjects.forSourceLines(
                     "Extension",
                     "package com.bumptech.glide.test;",
-                    "import android.support.annotation.NonNull;",
+                    "import androidx.annotation.NonNull;",
                     "import com.bumptech.glide.annotation.GlideExtension;",
                     "import com.bumptech.glide.annotation.GlideOption;",
                     "import com.bumptech.glide.request.BaseRequestOptions;",
@@ -306,7 +306,7 @@ public class InvalidGlideOptionsExtensionTest {
               JavaFileObjects.forSourceLines(
                   "WrongReturnTypeExtension",
                   "package com.bumptech.glide.test;",
-                  "import android.support.annotation.NonNull;",
+                  "import androidx.annotation.NonNull;",
                   "import com.bumptech.glide.annotation.GlideExtension;",
                   "import com.bumptech.glide.annotation.GlideOption;",
                   "import com.bumptech.glide.request.BaseRequestOptions;",
@@ -353,7 +353,7 @@ public class InvalidGlideOptionsExtensionTest {
                     "}"));
     assertThat(compilation).succeeded();
     assertThat(compilation).hadWarningCount(1);
-    assertThat(compilation).hadWarningContaining("android.support.annotation.NonNull");
+    assertThat(compilation).hadWarningContaining("androidx.annotation.NonNull");
     assertThat(compilation).hadWarningContaining("com.bumptech.glide.test.Extension#doSomething");
   }
 
@@ -367,7 +367,7 @@ public class InvalidGlideOptionsExtensionTest {
               JavaFileObjects.forSourceLines(
                   "MissingRequestOptionsExtension",
                   "package com.bumptech.glide.test;",
-                  "import android.support.annotation.NonNull;",
+                  "import androidx.annotation.NonNull;",
                   "import com.bumptech.glide.annotation.GlideExtension;",
                   "import com.bumptech.glide.annotation.GlideOption;",
                   "import com.bumptech.glide.request.BaseRequestOptions;",

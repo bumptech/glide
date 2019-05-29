@@ -2,7 +2,7 @@ package com.bumptech.glide.load.engine.cache;
 
 import static org.junit.Assert.assertTrue;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import java.security.MessageDigest;
 import java.util.regex.Matcher;

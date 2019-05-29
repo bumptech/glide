@@ -1,6 +1,6 @@
 package com.bumptech.glide.load;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Option.CacheKeyUpdater;
 import com.bumptech.glide.tests.KeyTester;
 import java.nio.ByteBuffer;

@@ -8,7 +8,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import android.util.Base64;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;

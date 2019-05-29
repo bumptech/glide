@@ -2,7 +2,7 @@ package com.bumptech.glide.load.engine.executor;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

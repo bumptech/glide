@@ -1,7 +1,7 @@
 package com.bumptech.glide.module;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.GlideBuilder;
 
 /** An internal interface, to be removed when {@link GlideModule}s are removed. */

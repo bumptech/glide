@@ -1,10 +1,10 @@
 package com.bumptech.glide.integration.recyclerview;
 
 import android.app.Activity;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.ListPreloader.PreloadModelProvider;
@@ -19,11 +19,11 @@ import com.bumptech.glide.RequestManager;
  *
  * <p>Must be added as a listener to the {@link RecyclerView} using {@link
  * RecyclerView#addOnScrollListener(RecyclerView.OnScrollListener)}, or have its corresponding
- * methods called from another {@link android.support.v7.widget.RecyclerView.OnScrollListener} to
+ * methods called from another {@link androidx.recyclerview.widget.RecyclerView.OnScrollListener} to
  * function.
  *
- * <p>This class only works with {@link android.support.v7.widget.LinearLayoutManager} and
- * subclasses of {@link android.support.v7.widget.LinearLayoutManager}.
+ * <p>This class only works with {@link androidx.recyclerview.widget.LinearLayoutManager} and
+ * subclasses of {@link androidx.recyclerview.widget.LinearLayoutManager}.
  *
  * @param <T> The type of the model being displayed in the {@link RecyclerView}.
  */

@@ -64,7 +64,7 @@ import javax.lang.model.util.Elements;
  *     return (GeneratedRequestManager) Glide.with(fragment);
  *   }
  *
- *   public static GeneratedRequestManager with(android.support.v4.app.Fragment fragment) {
+ *   public static GeneratedRequestManager with(androidx.fragment.app.Fragment fragment) {
  *     return (GeneratedRequestManager) Glide.with(fragment);
  *   }
  * </code>

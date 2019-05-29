@@ -6,7 +6,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 import com.bumptech.glide.RequestBuilder;
 import java.io.BufferedOutputStream;

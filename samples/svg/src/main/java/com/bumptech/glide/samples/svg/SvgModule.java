@@ -2,7 +2,7 @@ package com.bumptech.glide.samples.svg;
 
 import android.content.Context;
 import android.graphics.drawable.PictureDrawable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.annotation.GlideModule;

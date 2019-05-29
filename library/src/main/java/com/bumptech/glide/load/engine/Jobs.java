@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.engine;
 
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.load.Key;
 import java.util.Collections;
 import java.util.HashMap;

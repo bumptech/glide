@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.bumptech.glide.load.model.LazyHeaders.Builder;
 import com.google.common.testing.EqualsTester;
 import java.util.Map;

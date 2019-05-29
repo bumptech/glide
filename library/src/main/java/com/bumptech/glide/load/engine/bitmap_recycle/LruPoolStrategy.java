@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 interface LruPoolStrategy {
   void put(Bitmap bitmap);

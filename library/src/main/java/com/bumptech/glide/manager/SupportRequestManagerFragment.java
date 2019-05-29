@@ -2,11 +2,11 @@ package com.bumptech.glide.manager;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import android.util.Log;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A view-less {@link android.support.v4.app.Fragment} used to safely store an {@link
+ * A view-less {@link androidx.fragment.app.Fragment} used to safely store an {@link
  * com.bumptech.glide.RequestManager} that can be used to start, stop and manage Glide requests
  * started for targets within the fragment or activity this fragment is a child of.
  *

@@ -8,7 +8,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.ActiveResources.DequeuedResourceCallback;
 import com.bumptech.glide.load.engine.ActiveResources.ResourceWeakReference;

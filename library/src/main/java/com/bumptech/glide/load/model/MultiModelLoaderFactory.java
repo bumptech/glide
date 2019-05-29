@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.model;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.util.Pools.Pool;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+import androidx.core.util.Pools.Pool;
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.util.Preconditions;

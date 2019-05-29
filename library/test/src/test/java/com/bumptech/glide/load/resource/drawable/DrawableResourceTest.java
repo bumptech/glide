@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import org.junit.Before;
 import org.junit.Test;

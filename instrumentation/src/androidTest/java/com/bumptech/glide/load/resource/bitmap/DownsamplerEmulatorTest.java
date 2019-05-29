@@ -17,7 +17,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.DisplayMetrics;
 import androidx.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.ImageHeaderParser;

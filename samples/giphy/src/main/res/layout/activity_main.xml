@@ -11,7 +11,7 @@
         android:layout_height="50dp"
         android:layout_gravity="center_horizontal"
         android:contentDescription="@string/giphy_logo_description" />
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/gif_list"
         android:layout_height="0dp"
         android:layout_width="match_parent"

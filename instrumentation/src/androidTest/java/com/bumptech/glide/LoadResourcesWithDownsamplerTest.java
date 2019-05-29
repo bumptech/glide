@@ -11,8 +11,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.ColorSpace;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
@@ -222,7 +222,7 @@ public class LoadResourcesWithDownsamplerTest {
       this.resourceId = resourceId;
     }
 
-    @android.support.annotation.Nullable
+    @androidx.annotation.Nullable
     @Override
     public LoadData<InputStream> buildLoadData(
         @NonNull Object o, int width, int height, @NonNull Options options) {

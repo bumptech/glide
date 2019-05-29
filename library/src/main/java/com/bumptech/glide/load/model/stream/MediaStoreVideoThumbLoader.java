@@ -2,8 +2,8 @@ package com.bumptech.glide.load.model.stream;
 
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import com.bumptech.glide.load.data.mediastore.ThumbFetcher;

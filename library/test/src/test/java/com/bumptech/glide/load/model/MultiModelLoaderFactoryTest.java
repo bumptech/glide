@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.support.v4.util.Pools.Pool;
+import androidx.core.util.Pools.Pool;
 import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.pool.FactoryPools;

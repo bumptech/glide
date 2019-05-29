@@ -17,8 +17,8 @@ package com.bumptech.glide.load.resource.bitmap;
  *  limitations under the License.
  */
 
-import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import java.io.FilterInputStream;
 import java.io.IOException;

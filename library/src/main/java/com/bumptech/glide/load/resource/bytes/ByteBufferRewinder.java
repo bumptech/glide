@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.resource.bytes;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.data.DataRewinder;
 import java.nio.ByteBuffer;
 

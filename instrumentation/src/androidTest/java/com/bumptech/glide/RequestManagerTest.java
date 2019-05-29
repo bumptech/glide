@@ -2,7 +2,7 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.widget.ImageView;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;

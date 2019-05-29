@@ -2,7 +2,7 @@ package com.bumptech.glide.annotation.compiler.test;
 
 import static com.bumptech.glide.annotation.compiler.test.Util.asUnixChars;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;

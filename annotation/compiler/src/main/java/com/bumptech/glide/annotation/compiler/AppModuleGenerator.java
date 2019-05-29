@@ -68,7 +68,7 @@ import javax.lang.model.element.TypeElement;
  *    }
  *
  *    {@literal @java.lang.Override}
- *    {@literal @android.support.annotation.NonNull}
+ *    {@literal @androidx.annotation.NonNull}
  *    public java.util.Set&lt;java.lang.Class&lt;?>> getExcludedModuleClasses() {
  *      return appGlideModule.getExcludedModuleClasses();
  *    }

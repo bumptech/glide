@@ -2,9 +2,9 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.ArrayMap;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.collection.ArrayMap;
 import android.util.Log;
 import com.bumptech.glide.Glide.RequestOptionsFactory;
 import com.bumptech.glide.load.DataSource;
