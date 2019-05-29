@@ -170,6 +170,7 @@ public class Glide implements ComponentCallbacks2 {
   @NonNull
   public static Glide get(@NonNull Context context) {
     if (glide == null) {
+
       synchronized (Glide.class) {
         if (glide == null) {
           checkAndInitializeGlide(context);
