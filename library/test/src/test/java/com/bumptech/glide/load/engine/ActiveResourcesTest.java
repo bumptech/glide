@@ -208,17 +208,6 @@ public class ActiveResourcesTest {
   }
 
   @Test
-  public void get_withQueuedReference_returnsResource() {
-    EngineResource<Object> engineResource = newCacheableEngineResource();
-    resources.activate(key, engineResource);
-
-    ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
-    weakRef.enqueue();
-
-    assertThat(resources.get(key)).isEqualTo(engineResource);
-  }
-
-  @Test
   public void get_withQueuedReference_doesNotNotifyListener() {
     EngineResource<Object> engineResource = newCacheableEngineResource();
     resources.activate(key, engineResource);
@@ -371,19 +360,6 @@ public class ActiveResourcesTest {
     resources.get(key);
 
     verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
-  }
-
-  @Test
-  public void get_withQueuedReference_retentionDisabled_returnsResource() {
-    resources = new ActiveResources(/*isActiveResourceRetentionAllowed=*/ false);
-    resources.setListener(listener);
-    EngineResource<Object> engineResource = newCacheableEngineResource();
-    resources.activate(key, engineResource);
-
-    ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
-    weakRef.enqueue();
-
-    assertThat(resources.get(key)).isEqualTo(engineResource);
   }
 
   @Test
