@@ -53,7 +53,7 @@ final class HardwareConfigState {
   private static volatile HardwareConfigState instance;
 
   private volatile int decodesSinceLastFdCheck;
-  private volatile boolean isHardwareConfigAllowed = true;
+  private volatile boolean isFdSizeBelowHardwareLimit = true;
 
   static HardwareConfigState getInstance() {
     if (instance == null) {
@@ -100,9 +100,9 @@ final class HardwareConfigState {
     if (++decodesSinceLastFdCheck >= MINIMUM_DECODES_BETWEEN_FD_CHECKS) {
       decodesSinceLastFdCheck = 0;
       int currentFds = FD_SIZE_LIST.list().length;
-      isHardwareConfigAllowed = currentFds < MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
+      isFdSizeBelowHardwareLimit = currentFds < MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
 
-      if (!isHardwareConfigAllowed && Log.isLoggable(Downsampler.TAG, Log.WARN)) {
+      if (!isFdSizeBelowHardwareLimit && Log.isLoggable(Downsampler.TAG, Log.WARN)) {
         Log.w(
             Downsampler.TAG,
             "Excluding HARDWARE bitmap config because we're over the file descriptor limit"
@@ -113,6 +113,6 @@ final class HardwareConfigState {
       }
     }
 
-    return isHardwareConfigAllowed;
+    return isFdSizeBelowHardwareLimit;
   }
 }
