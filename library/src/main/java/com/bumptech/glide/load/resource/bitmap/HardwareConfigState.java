@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Log;
+import androidx.annotation.GuardedBy;
+import androidx.annotation.VisibleForTesting;
 import java.io.File;
 
 /**
@@ -21,7 +23,7 @@ final class HardwareConfigState {
    *
    * @see #FD_SIZE_LIST
    */
-  private static final int MIN_HARDWARE_DIMENSION = 128;
+  @VisibleForTesting static final int MIN_HARDWARE_DIMENSION = 128;
 
   /**
    * Allows us to check to make sure we're not exceeding the FD limit for a process with hardware
@@ -52,8 +54,13 @@ final class HardwareConfigState {
 
   private static volatile HardwareConfigState instance;
 
-  private volatile int decodesSinceLastFdCheck;
-  private volatile boolean isFdSizeBelowHardwareLimit = true;
+  private final boolean isHardwareConfigAllowedByDeviceModel;
+
+  @GuardedBy("this")
+  private int decodesSinceLastFdCheck;
+
+  @GuardedBy("this")
+  private boolean isFdSizeBelowHardwareLimit = true;
 
   static HardwareConfigState getInstance() {
     if (instance == null) {
@@ -66,7 +73,9 @@ final class HardwareConfigState {
     return instance;
   }
 
-  private HardwareConfigState() {
+  @VisibleForTesting
+  HardwareConfigState() {
+    isHardwareConfigAllowedByDeviceModel = isHardwareConfigAllowedByDeviceModel();
     // Singleton constructor.
   }
 
@@ -78,6 +87,7 @@ final class HardwareConfigState {
       boolean isHardwareConfigAllowed,
       boolean isExifOrientationRequired) {
     if (!isHardwareConfigAllowed
+        || !isHardwareConfigAllowedByDeviceModel
         || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
         || isExifOrientationRequired) {
       return false;
@@ -94,6 +104,28 @@ final class HardwareConfigState {
       optionsWithScaling.inMutable = false;
     }
     return result;
+  }
+
+  private static boolean isHardwareConfigAllowedByDeviceModel() {
+    switch (Build.MODEL.substring(0, 7)) {
+      case "SM-N935":
+        // Fall through
+      case "SM-J720":
+        // Fall through
+      case "SM-G960":
+        // Fall through
+      case "SM-G965":
+        // Fall through
+      case "SM-G935":
+        // Fall through
+      case "SM-G930":
+        // Fall through
+      case "SM-A520":
+        // Fall through
+        return Build.VERSION.SDK_INT != Build.VERSION_CODES.O;
+      default:
+        return true;
+    }
   }
 
   private synchronized boolean isFdSizeBelowHardwareLimit() {
