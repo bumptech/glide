@@ -20,11 +20,27 @@ import static com.bumptech.glide.disklrucache.DiskLruCache.JOURNAL_FILE;
 import static com.bumptech.glide.disklrucache.DiskLruCache.JOURNAL_FILE_BACKUP;
 import static com.bumptech.glide.disklrucache.DiskLruCache.MAGIC;
 import static com.bumptech.glide.disklrucache.DiskLruCache.VERSION_1;
-import static org.fest.assertions.api.Assertions.assertThat;
+import static com.google.common.truth.Fact.simpleFact;
+import static com.google.common.truth.Truth.assertThat;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assume.assumeThat;
 
-import org.apache.commons.io.FileUtils;
+import com.google.common.truth.ComparableSubject;
+import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.Subject;
+import com.google.common.truth.Truth;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.After;
 import org.junit.Assert;
@@ -35,18 +51,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(JUnit4.class)
 public final class DiskLruCacheTest {
@@ -630,7 +634,7 @@ public final class DiskLruCacheTest {
     creator.commit();
     cache.flush();
 
-    FileUtils.copyFile(journalFile, journalBkpFile);
+    Files.copy(journalFile.toPath(), journalBkpFile.toPath());
 
     creator = cache.edit("k2");
     creator.set(0, "F");
@@ -730,7 +734,7 @@ public final class DiskLruCacheTest {
 
   /** @see <a href="https://github.com/JakeWharton/DiskLruCache/issues/2">Issue #2</a> */
   @Test public void aggressiveClearingHandlesWrite() throws Exception {
-    FileUtils.deleteDirectory(cacheDir);
+    deleteDirectory(cacheDir);
     set("a", "a", "a");
     assertValue("a", "a", "a");
   }
@@ -739,7 +743,7 @@ public final class DiskLruCacheTest {
   @Test public void aggressiveClearingHandlesEdit() throws Exception {
     set("a", "a", "a");
     DiskLruCache.Editor a = cache.get("a").edit();
-    FileUtils.deleteDirectory(cacheDir);
+    deleteDirectory(cacheDir);
     a.set(1, "a2");
     a.commit();
   }
@@ -756,7 +760,7 @@ public final class DiskLruCacheTest {
     set("b", "b", "b");
     DiskLruCache.Editor a = cache.get("a").edit();
     a.set(0, "a1");
-    FileUtils.deleteDirectory(cacheDir);
+    deleteDirectory(cacheDir);
     a.set(1, "a2");
     a.commit();
     assertThat(cache.get("a")).isNull();
@@ -764,7 +768,7 @@ public final class DiskLruCacheTest {
 
   /** @see <a href="https://github.com/JakeWharton/DiskLruCache/issues/2">Issue #2</a> */
   @Test public void aggressiveClearingHandlesRead() throws Exception {
-    FileUtils.deleteDirectory(cacheDir);
+    deleteDirectory(cacheDir);
     assertThat(cache.get("a")).isNull();
   }
 
@@ -878,12 +882,12 @@ public final class DiskLruCacheTest {
   }
 
   private void assertGarbageFilesAllDeleted() throws Exception {
-    assertThat(getCleanFile("g1", 0)).doesNotExist();
-    assertThat(getCleanFile("g1", 1)).doesNotExist();
-    assertThat(getCleanFile("g2", 0)).doesNotExist();
-    assertThat(getCleanFile("g2", 1)).doesNotExist();
-    assertThat(new File(cacheDir, "otherFile0")).doesNotExist();
-    assertThat(new File(cacheDir, "dir1")).doesNotExist();
+    FileSubject.assertThat(getCleanFile("g1", 0)).doesNotExist();
+    FileSubject.assertThat(getCleanFile("g1", 1)).doesNotExist();
+    FileSubject.assertThat(getCleanFile("g2", 0)).doesNotExist();
+    FileSubject.assertThat(getCleanFile("g2", 1)).doesNotExist();
+    FileSubject.assertThat(new File(cacheDir, "otherFile0")).doesNotExist();
+    FileSubject.assertThat(new File(cacheDir, "dir1")).doesNotExist();
   }
 
   private void set(String key, String value0, String value1) throws Exception {
@@ -898,10 +902,10 @@ public final class DiskLruCacheTest {
     if (value != null) {
       Assert.fail();
     }
-    assertThat(getCleanFile(key, 0)).doesNotExist();
-    assertThat(getCleanFile(key, 1)).doesNotExist();
-    assertThat(getDirtyFile(key, 0)).doesNotExist();
-    assertThat(getDirtyFile(key, 1)).doesNotExist();
+    FileSubject.assertThat(getCleanFile(key, 0)).doesNotExist();
+    FileSubject.assertThat(getCleanFile(key, 1)).doesNotExist();
+    FileSubject.assertThat(getDirtyFile(key, 0)).doesNotExist();
+    FileSubject.assertThat(getDirtyFile(key, 1)).doesNotExist();
   }
 
   private void assertValue(String key, String value0, String value1) throws Exception {
@@ -910,7 +914,51 @@ public final class DiskLruCacheTest {
     assertThat(value.getLength(0)).isEqualTo(value0.length());
     assertThat(value.getString(1)).isEqualTo(value1);
     assertThat(value.getLength(1)).isEqualTo(value1.length());
-    assertThat(getCleanFile(key, 0)).exists();
-    assertThat(getCleanFile(key, 1)).exists();
+    FileSubject.assertThat(getCleanFile(key, 0)).exists();
+    FileSubject.assertThat(getCleanFile(key, 1)).exists();
+  }
+
+  private static void deleteDirectory(File file) {
+    if (file.isDirectory()) {
+      File[] children = file.listFiles();
+      if (children != null && children.length > 0) {
+        for (File child : children) {
+          deleteDirectory(child);
+        }
+      }
+    }
+    assertThat(!file.exists() || file.delete()).isTrue();
+  }
+
+  static final class FileSubject extends ComparableSubject<FileSubject, File> {
+    private static final Subject.Factory<FileSubject, File> FACTORY =
+        new Subject.Factory<FileSubject, File>() {
+          @Override
+          public FileSubject createSubject(FailureMetadata metadata, File actual) {
+            return new FileSubject(metadata, actual);
+          }
+        };
+    private final File actual;
+
+    static FileSubject assertThat(File file) {
+      return Truth.assertAbout(FACTORY).that(file);
+    }
+
+    protected FileSubject(FailureMetadata metadata, File actual) {
+      super(metadata, actual);
+      this.actual = actual;
+    }
+
+    public void doesNotExist() {
+      if (actual.exists()) {
+        failWithActual(simpleFact("expected to not exist"));
+      }
+    }
+
+    public void exists() {
+      if (!actual.exists()) {
+        failWithActual(simpleFact("expected to exist"));
+      }
+    }
   }
 }

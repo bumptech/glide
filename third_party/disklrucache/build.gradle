@@ -14,9 +14,8 @@ checkstyle {
 
 dependencies {
     def junitVersion = hasProperty('JUNIT_VERSION') ? JUNIT_VERSION : '4.11';
-    testCompile "junit:junit:${junitVersion}"
-    testCompile 'commons-io:commons-io:2.4'
-    testCompile 'org.easytesting:fest-assert-core:2.0M10'
+    testImplementation "junit:junit:${junitVersion}"
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
 }
 
 android {
