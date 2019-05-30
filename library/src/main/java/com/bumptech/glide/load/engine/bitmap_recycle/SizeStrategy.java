@@ -2,9 +2,9 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
 import android.os.Build;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.util.NavigableMap;

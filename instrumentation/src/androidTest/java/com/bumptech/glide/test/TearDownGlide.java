@@ -1,6 +1,7 @@
 package com.bumptech.glide.test;
 
-import androidx.test.InstrumentationRegistry;
+import android.content.Context;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import org.junit.rules.TestRule;
@@ -23,8 +24,10 @@ public final class TearDownGlide implements TestRule {
                   new Runnable() {
                     @Override
                     public void run() {
+                      // Casting to Context explicitly is required on Java8, or the context will
+                      // be interpreted as a FragmentActivity.
                       RequestManager requestManager =
-                          Glide.with(InstrumentationRegistry.getTargetContext());
+                          Glide.with(ApplicationProvider.<Context>getApplicationContext());
                       requestManager.onStop();
                       requestManager.onDestroy();
                     }

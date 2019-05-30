@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.model;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * An interface for lazily creating headers that allows expensive to calculate headers (oauth for

@@ -1,7 +1,5 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
-
 import com.bumptech.glide.annotation.Excludes;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -68,7 +66,7 @@ import javax.lang.model.element.TypeElement;
  *    }
  *
  *    {@literal @java.lang.Override}
- *    {@literal @android.support.annotation.NonNull}
+ *    {@literal @androidx.annotation.NonNull}
  *    public java.util.Set&lt;java.lang.Class&lt;?>> getExcludedModuleClasses() {
  *      return appGlideModule.getExcludedModuleClasses();
  *    }
@@ -115,12 +113,12 @@ final class AppModuleGenerator {
             .addAnnotation(Override.class)
             .addParameter(
                 ParameterSpec.builder(ClassName.get("android.content", "Context"), "context")
-                    .addAnnotation(nonNull())
+                    .addAnnotation(processorUtil.nonNull())
                     .build())
             .addParameter(
                 ParameterSpec.builder(
                         ClassName.get("com.bumptech.glide", "GlideBuilder"), "builder")
-                    .addAnnotation(nonNull())
+                    .addAnnotation(processorUtil.nonNull())
                     .build())
             .addStatement("appGlideModule.applyOptions(context, builder)", appGlideModule)
             .build();
@@ -158,7 +156,7 @@ final class AppModuleGenerator {
     builder.addMethod(
         MethodSpec.methodBuilder("getRequestManagerFactory")
             .addAnnotation(Override.class)
-            .addAnnotation(nonNull())
+            .addAnnotation(processorUtil.nonNull())
             .returns(generatedRequestManagerFactoryClassName)
             .addStatement("return new $T()", generatedRequestManagerFactoryClassName)
             .build());
@@ -178,7 +176,7 @@ final class AppModuleGenerator {
         MethodSpec.methodBuilder("getExcludedModuleClasses")
             .addModifiers(Modifier.PUBLIC)
             .addAnnotation(Override.class)
-            .addAnnotation(nonNull())
+            .addAnnotation(processorUtil.nonNull())
             .returns(setOfClassOfWildcardOfObject);
 
     if (excludedClassNames.isEmpty()) {
@@ -209,15 +207,15 @@ final class AppModuleGenerator {
             .addAnnotation(Override.class)
             .addParameter(
                 ParameterSpec.builder(ClassName.get("android.content", "Context"), "context")
-                    .addAnnotation(nonNull())
+                    .addAnnotation(processorUtil.nonNull())
                     .build())
             .addParameter(
                 ParameterSpec.builder(ClassName.get("com.bumptech.glide", "Glide"), "glide")
-                    .addAnnotation(nonNull())
+                    .addAnnotation(processorUtil.nonNull())
                     .build())
             .addParameter(
                 ParameterSpec.builder(ClassName.get("com.bumptech.glide", "Registry"), "registry")
-                    .addAnnotation(nonNull())
+                    .addAnnotation(processorUtil.nonNull())
                     .build());
 
     for (String glideModule : libraryGlideModuleClassNames) {

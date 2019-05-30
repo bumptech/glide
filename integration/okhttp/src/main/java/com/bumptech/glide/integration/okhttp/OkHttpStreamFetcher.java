@@ -1,6 +1,6 @@
 package com.bumptech.glide.integration.okhttp;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;

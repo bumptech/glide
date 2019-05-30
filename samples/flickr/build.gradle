@@ -7,9 +7,9 @@ dependencies {
     }
     annotationProcessor project(':annotation:compiler')
 
-    implementation "com.android.support:appcompat-v7:${ANDROID_SUPPORT_VERSION}"
+    implementation "androidx.appcompat:appcompat:${ANDROID_X_VERSION}"
     implementation "com.android.volley:volley:${VOLLEY_VERSION}"
-    implementation "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
+    implementation "androidx.recyclerview:recyclerview:${ANDROID_X_VERSION}"
 }
 
 android {

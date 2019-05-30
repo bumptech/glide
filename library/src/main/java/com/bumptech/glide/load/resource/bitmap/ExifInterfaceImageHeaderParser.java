@@ -2,8 +2,8 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.media.ExifInterface;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.util.ByteBufferUtil;

@@ -1,7 +1,7 @@
 package com.bumptech.glide.load;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;

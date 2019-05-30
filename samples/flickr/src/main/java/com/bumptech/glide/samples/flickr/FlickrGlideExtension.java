@@ -1,6 +1,6 @@
 package com.bumptech.glide.samples.flickr;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
 import com.bumptech.glide.request.BaseRequestOptions;

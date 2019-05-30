@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 

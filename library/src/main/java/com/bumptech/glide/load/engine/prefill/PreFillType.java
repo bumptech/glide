@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.engine.prefill;
 
 import android.graphics.Bitmap;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Preconditions;
 
 /**

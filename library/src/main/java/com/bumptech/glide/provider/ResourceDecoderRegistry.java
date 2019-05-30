@@ -1,6 +1,6 @@
 package com.bumptech.glide.provider;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;

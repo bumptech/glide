@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.engine;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
-import android.support.v4.util.Pools;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
+import androidx.core.util.Pools;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;

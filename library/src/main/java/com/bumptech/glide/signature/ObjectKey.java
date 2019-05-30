@@ -1,6 +1,6 @@
 package com.bumptech.glide.signature;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
 import java.security.MessageDigest;

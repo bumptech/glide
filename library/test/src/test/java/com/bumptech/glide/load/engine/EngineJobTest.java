@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.util.Pools;
+import androidx.core.util.Pools;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;

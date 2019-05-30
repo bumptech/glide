@@ -8,8 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
@@ -38,7 +38,7 @@ public class AsBytesTest {
   @Before
   public void setUp() throws IOException {
     MockitoAnnotations.initMocks(this);
-    context = InstrumentationRegistry.getTargetContext();
+    context = ApplicationProvider.getApplicationContext();
   }
 
   @Test

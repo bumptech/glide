@@ -4,7 +4,7 @@ import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.AssetFileDescriptorLocalUriFetcher;
 import com.bumptech.glide.load.data.DataFetcher;

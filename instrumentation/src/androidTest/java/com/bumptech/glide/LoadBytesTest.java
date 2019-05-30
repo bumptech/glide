@@ -19,8 +19,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.AbsListView.LayoutParams;
 import android.widget.ImageView;
-import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
@@ -59,7 +59,7 @@ public class LoadBytesTest {
   @Before
   public void setUp() throws IOException {
     MockitoAnnotations.initMocks(this);
-    context = InstrumentationRegistry.getTargetContext();
+    context = ApplicationProvider.getApplicationContext();
 
     imageView = new ImageView(context);
     int[] dimensions = getCanonicalDimensions();

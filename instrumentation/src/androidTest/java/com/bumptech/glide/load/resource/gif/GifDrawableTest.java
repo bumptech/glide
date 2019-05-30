@@ -9,9 +9,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.GrantPermissionRule;
-import androidx.test.runner.AndroidJUnit4;
 import com.bumptech.glide.load.resource.gif.GifDrawable.GifState;
 import com.bumptech.glide.load.resource.gif.GifFrameLoader.OnEveryFrameListener;
 import com.bumptech.glide.request.target.Target;
@@ -47,7 +47,7 @@ public class GifDrawableTest {
 
   @Before
   public void setUp() {
-    context = InstrumentationRegistry.getTargetContext();
+    context = ApplicationProvider.getApplicationContext();
   }
 
   @Test

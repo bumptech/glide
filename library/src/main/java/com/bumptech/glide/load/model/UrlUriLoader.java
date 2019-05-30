@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import java.io.InputStream;
 import java.util.Arrays;

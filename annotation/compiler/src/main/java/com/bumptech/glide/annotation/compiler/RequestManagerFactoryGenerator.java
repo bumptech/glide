@@ -1,7 +1,5 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -51,8 +49,10 @@ final class RequestManagerFactoryGenerator {
   private final TypeElement requestManagerTreeNodeType;
   private final TypeElement requestManagerFactoryInterface;
   private final ClassName requestManagerClassName;
+  private final ProcessorUtil processorUtil;
 
-  RequestManagerFactoryGenerator(ProcessingEnvironment processingEnv) {
+  RequestManagerFactoryGenerator(ProcessingEnvironment processingEnv, ProcessorUtil processorUtil) {
+    this.processorUtil = processorUtil;
     Elements elementUtils = processingEnv.getElementUtils();
     glideType = elementUtils.getTypeElement(GLIDE_QUALIFIED_NAME);
     lifecycleType = elementUtils.getTypeElement(LIFECYCLE_QUALIFIED_NAME);
@@ -75,23 +75,23 @@ final class RequestManagerFactoryGenerator {
             MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
-                .addAnnotation(nonNull())
+                .addAnnotation(processorUtil.nonNull())
                 .returns(requestManagerClassName)
                 .addParameter(
                     ParameterSpec.builder(ClassName.get(glideType), "glide")
-                        .addAnnotation(nonNull())
+                        .addAnnotation(processorUtil.nonNull())
                         .build())
                 .addParameter(
                     ParameterSpec.builder(ClassName.get(lifecycleType), "lifecycle")
-                        .addAnnotation(nonNull())
+                        .addAnnotation(processorUtil.nonNull())
                         .build())
                 .addParameter(
                     ParameterSpec.builder(ClassName.get(requestManagerTreeNodeType), "treeNode")
-                        .addAnnotation(nonNull())
+                        .addAnnotation(processorUtil.nonNull())
                         .build())
                 .addParameter(
                     ParameterSpec.builder(CONTEXT_CLASS_NAME, "context")
-                        .addAnnotation(nonNull())
+                        .addAnnotation(processorUtil.nonNull())
                         .build())
                 .addStatement(
                     "return new $T(glide, lifecycle, treeNode, context)",

@@ -1,7 +1,7 @@
 package com.bumptech.glide.load;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.engine.Resource;
 import java.security.MessageDigest;
 import java.util.Arrays;

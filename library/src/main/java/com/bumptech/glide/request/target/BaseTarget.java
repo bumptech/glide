@@ -1,7 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.bumptech.glide.request.Request;
 
 /**

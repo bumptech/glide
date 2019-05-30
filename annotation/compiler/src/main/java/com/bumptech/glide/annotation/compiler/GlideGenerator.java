@@ -23,7 +23,7 @@ import javax.lang.model.util.Elements;
  * Generates a Glide look-alike that acts as the entry point to the generated API
  * (GlideApp.with(...)).
  *
- * <p>>Generated {@code com.bumptech.glide.Glide} look-alikes look like this (note that the name is
+ * <p>Generated {@code com.bumptech.glide.Glide} look-alikes look like this (note that the name is
  * configurable in {@link com.bumptech.glide.annotation.GlideModule}):
  *
  * <pre>
@@ -64,7 +64,7 @@ import javax.lang.model.util.Elements;
  *     return (GeneratedRequestManager) Glide.with(fragment);
  *   }
  *
- *   public static GeneratedRequestManager with(android.support.v4.app.Fragment fragment) {
+ *   public static GeneratedRequestManager with(androidx.fragment.app.Fragment fragment) {
  *     return (GeneratedRequestManager) Glide.with(fragment);
  *   }
  * </code>
@@ -171,7 +171,7 @@ final class GlideGenerator {
   private Builder addReturnAnnotations(Builder builder, ExecutableElement methodToOverride) {
     Elements elements = processingEnv.getElementUtils();
     TypeElement visibleForTestingTypeElement =
-        elements.getTypeElement(ProcessorUtil.visibleForTesting().reflectionName());
+        elements.getTypeElement(processorUtil.visibleForTesting().reflectionName());
     String visibleForTestingTypeQualifiedName = visibleForTestingTypeElement.toString();
 
     for (AnnotationMirror mirror : methodToOverride.getAnnotationMirrors()) {

@@ -1,6 +1,6 @@
 package com.bumptech.glide.test;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideType;

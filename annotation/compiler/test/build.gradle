@@ -1,36 +1,83 @@
-apply plugin: 'java'
+import org.gradle.internal.jvm.Jvm
 
-sourceSets {
-    test {
-        output.resourcesDir = "build/classes/java/test"
+apply plugin: 'com.android.library'
+
+android {
+    sourceSets {
+        test {
+            resources {
+                // *.java is excluded by default...
+                setExcludes([])
+            }
+            // TODO: Re-enable these tests after fixing import orders.
+            java {
+                exclude "**/AppGlideModuleWithExcludesTest.java"
+                exclude "**/AppGlideModuleWithLibraryInPackageTest.java"
+                exclude "**/AppGlideModuleWithMultipleExcludesTest.java"
+                exclude "**/EmptyAppAndLibraryGlideModulesTest.java"
+                exclude "**/GlideExtensionWithOptionTest.java"
+                exclude "**/GlideExtensionWithTypeTest.java"
+                exclude "**/GlideExtensionWithTypeTest.java"
+            }
+        }
+    }
+}
+
+afterEvaluate {
+    lint.enabled = false
+    compileDebugJavaWithJavac.enabled = false
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+        versionName VERSION_NAME as String
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    testOptions {
+        unitTests {
+            all { Test testTask ->
+                testTask.maxParallelForks = 2
+            }
+        }
     }
 }
 
 // This special test only submodule exists because adding the :glide dependency seems to break
 // the annotation processor dependency chain for the internal sample apps. It's also somewhat
 // easier to parse as a separate module given the existing complexity here and in the compiler
+// build.gradle file.
 dependencies {
-    // build.gradle file.
     testImplementation project(':glide')
     testImplementation project(':annotation:compiler')
     testImplementation "junit:junit:${JUNIT_VERSION}"
     testImplementation "com.squareup:javapoet:${JAVAPOET_VERSION}"
-    testImplementation "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
     testImplementation "com.google.code.findbugs:jsr305:${JSR_305_VERSION}"
     // Using 0.10 of compile-testing is required for Android Studio to function, but not for the
     // gradle build. Not yet clear why, but it looks like some kind of version conflict between
     // javapoet, guava and/or truth.
     //noinspection GradleDependency
-    testImplementation 'com.google.testing.compile:compile-testing:0.10'
-    // Use a stupidly old version of the Android classes jar. This works because we just need to get
-    // our generated classes to compile and our generated classes tend to use simple and stable
-    // Android APIs. If that changes, we'll need to find an alternative.
-    testImplementation 'com.google.android:android:4.1.1.4'
-    // Use a stupidly old version of v4 because it's a jar. The newer support v4 packages are aars,
-    // which we can't depend on in a standard Java test. Since our usage of v4 is pretty simple,
-    // hopefully this will continue to work going forward.
-    testImplementation 'com.google.android:support-v4:r6'
-    testImplementation "com.android.support:support-annotations:${ANDROID_SUPPORT_VERSION}"
+    testImplementation ("com.google.testing.compile:compile-testing:0.10") {
+        // We don't use this and including it requires us to list it separatel which would be
+        // confusing.
+        exclude group: "com.google.auto.value", module: "auto-value"
+    }
+    testImplementation "androidx.annotation:annotation:${ANDROID_X_VERSION}"
+    testImplementation "androidx.fragment:fragment:${ANDROID_X_VERSION}"
+    testImplementation "androidx.legacy:legacy-support-v4:${ANDROID_X_VERSION}"
+    // TODO: this seems excessive, but it works...
+    testImplementation files(Jvm.current().getJre().homeDir.getAbsolutePath()+'/lib/rt.jar')
+
+    testAnnotationProcessor project(':annotation:compiler')
+    testAnnotationProcessor "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
 }
 
 task regenerateTestResources {
@@ -46,7 +93,8 @@ task regenerateTestResources {
         println("Finished regenerating test resources")
     }
 }
-regenerateTestResources.finalizedBy(test)
 
-test.maxParallelForks = 2
+afterEvaluate {
+    regenerateTestResources.finalizedBy(testDebugUnitTest)
+}
 

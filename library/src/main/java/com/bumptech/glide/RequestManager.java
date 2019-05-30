@@ -10,12 +10,12 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.CheckResult;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.GuardedBy;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RawRes;
+import androidx.annotation.CheckResult;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.GuardedBy;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RawRes;
 import android.view.View;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -49,9 +49,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * handling, use the static Glide.load methods with your Fragment or Activity.
  *
  * @see Glide#with(android.app.Activity)
- * @see Glide#with(android.support.v4.app.FragmentActivity)
+ * @see Glide#with(androidx.fragment.app.FragmentActivity)
  * @see Glide#with(android.app.Fragment)
- * @see Glide#with(android.support.v4.app.Fragment)
+ * @see Glide#with(androidx.fragment.app.Fragment)
  * @see Glide#with(Context)
  */
 public class RequestManager implements LifecycleListener, ModelTypes<RequestBuilder<Drawable>> {

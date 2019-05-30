@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.model;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /** An optional interface that models can implement to enhance control over Glide behaviors. */
 public interface Model {

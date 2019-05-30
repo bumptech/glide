@@ -6,7 +6,7 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.tests.Util;

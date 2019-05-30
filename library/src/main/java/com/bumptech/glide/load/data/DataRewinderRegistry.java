@@ -1,6 +1,6 @@
 package com.bumptech.glide.load.data;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.util.Preconditions;
 import java.util.HashMap;
 import java.util.Map;

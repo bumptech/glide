@@ -4,12 +4,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.content.res.AppCompatResources;
-import android.support.v7.view.ContextThemeWrapper;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.view.ContextThemeWrapper;
 
 /**
  * Handles decoding Drawables with the v7 support library if present and falling back to the v4

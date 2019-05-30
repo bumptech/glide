@@ -6,7 +6,7 @@ import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG_A;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.UNKNOWN;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;

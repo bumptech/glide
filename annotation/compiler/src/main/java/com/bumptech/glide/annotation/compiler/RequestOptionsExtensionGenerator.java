@@ -1,8 +1,6 @@
 package com.bumptech.glide.annotation.compiler;
 
 import static com.bumptech.glide.annotation.GlideOption.OVERRIDE_EXTEND;
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.checkResult;
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
 
 import com.bumptech.glide.annotation.GlideOption;
 import com.squareup.javapoet.AnnotationSpec;
@@ -135,7 +133,7 @@ final class RequestOptionsExtensionGenerator {
     code.append(")");
     builder.addStatement(code.toString(), args.toArray(new Object[0]));
 
-    builder.addAnnotation(checkResult()).addAnnotation(nonNull());
+    builder.addAnnotation(processorUtil.checkResult()).addAnnotation(processorUtil.nonNull());
 
     return builder.build();
   }

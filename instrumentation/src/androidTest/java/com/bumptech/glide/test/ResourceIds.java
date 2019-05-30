@@ -2,7 +2,7 @@ package com.bumptech.glide.test;
 
 import android.content.Context;
 import android.content.res.Resources;
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 
 /**
  * Internally in google we don't appear to be able to reference resource ids directly, this class is
@@ -35,7 +35,7 @@ public final class ResourceIds {
   }
 
   private static int getResourceId(String type, String resourceName) {
-    Context context = InstrumentationRegistry.getTargetContext();
+    Context context = ApplicationProvider.getApplicationContext();
     Resources res = context.getResources();
     return res.getIdentifier(resourceName, type, context.getPackageName());
   }

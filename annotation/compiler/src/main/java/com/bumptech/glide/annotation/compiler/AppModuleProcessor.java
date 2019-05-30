@@ -39,7 +39,8 @@ final class AppModuleProcessor {
     appModuleGenerator = new AppModuleGenerator(processorUtil);
     requestOptionsGenerator = new RequestOptionsGenerator(processingEnv, processorUtil);
     requestManagerGenerator = new RequestManagerGenerator(processingEnv, processorUtil);
-    requestManagerFactoryGenerator = new RequestManagerFactoryGenerator(processingEnv);
+    requestManagerFactoryGenerator =
+        new RequestManagerFactoryGenerator(processingEnv, processorUtil);
     glideGenerator = new GlideGenerator(processingEnv, processorUtil);
     requestBuilderGenerator = new RequestBuilderGenerator(processingEnv, processorUtil);
   }

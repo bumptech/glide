@@ -1,7 +1,7 @@
 package com.bumptech.glide.util;
 
-import android.support.v4.util.ArrayMap;
-import android.support.v4.util.SimpleArrayMap;
+import androidx.collection.ArrayMap;
+import androidx.collection.SimpleArrayMap;
 
 /**
  * An {@link ArrayMap} that caches its hashCode to support efficient lookup.

@@ -4,8 +4,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assert_;
 import static org.junit.Assert.fail;
 
-import android.support.annotation.CheckResult;
-import android.support.annotation.NonNull;
+import androidx.annotation.CheckResult;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.google.common.base.Equivalence;
 import com.google.common.testing.EquivalenceTester;

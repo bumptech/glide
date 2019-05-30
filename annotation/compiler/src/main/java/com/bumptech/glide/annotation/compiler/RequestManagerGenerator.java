@@ -1,8 +1,5 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.checkResult;
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
-
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideType;
 import com.google.common.base.Function;
@@ -132,18 +129,20 @@ final class RequestManagerGenerator {
         .addModifiers(Modifier.PUBLIC)
         .addParameter(
             ParameterSpec.builder(ClassName.get(glideType), "glide")
-                .addAnnotation(nonNull())
+                .addAnnotation(processorUtil.nonNull())
                 .build())
         .addParameter(
             ParameterSpec.builder(ClassName.get(lifecycleType), "lifecycle")
-                .addAnnotation(nonNull())
+                .addAnnotation(processorUtil.nonNull())
                 .build())
         .addParameter(
             ParameterSpec.builder(ClassName.get(requestManagerTreeNodeType), "treeNode")
-                .addAnnotation(nonNull())
+                .addAnnotation(processorUtil.nonNull())
                 .build())
         .addParameter(
-            ParameterSpec.builder(CONTEXT_CLASS_NAME, "context").addAnnotation(nonNull()).build())
+            ParameterSpec.builder(CONTEXT_CLASS_NAME, "context")
+                .addAnnotation(processorUtil.nonNull())
+                .build())
         .addStatement("super(glide, lifecycle, treeNode, context)")
         .build();
   }
@@ -162,12 +161,12 @@ final class RequestManagerGenerator {
     return MethodSpec.methodBuilder("as")
         .addModifiers(Modifier.PUBLIC)
         .addAnnotation(Override.class)
-        .addAnnotation(checkResult())
-        .addAnnotation(nonNull())
+        .addAnnotation(processorUtil.checkResult())
+        .addAnnotation(processorUtil.nonNull())
         .addTypeVariable(TypeVariableName.get("ResourceType"))
         .returns(requestBuilderOfResourceType)
         .addParameter(
-            classOfResouceType.annotated(AnnotationSpec.builder(nonNull()).build()),
+            classOfResouceType.annotated(AnnotationSpec.builder(processorUtil.nonNull()).build()),
             "resourceClass")
         .addStatement(
             "return new $T<>(glide, this, resourceClass, context)",
@@ -197,7 +196,7 @@ final class RequestManagerGenerator {
         ClassName.get(generatedPackageName, GENERATED_REQUEST_MANAGER_SIMPLE_NAME);
     Builder returns =
         ProcessorUtil.overriding(method)
-            .addAnnotation(nonNull())
+            .addAnnotation(processorUtil.nonNull())
             .returns(generatedRequestManagerName);
     return returns
         .addCode(
@@ -296,8 +295,8 @@ final class RequestManagerGenerator {
         .addModifiers(Modifier.PUBLIC)
         .returns(parameterizedTypeName)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
-        .addAnnotation(nonNull())
-        .addAnnotation(checkResult())
+        .addAnnotation(processorUtil.nonNull())
+        .addAnnotation(processorUtil.checkResult())
         .addStatement(
             "$T requestBuilder = this.as($T.class)", parameterizedTypeName, returnTypeClassName)
         .addStatement(
@@ -322,8 +321,8 @@ final class RequestManagerGenerator {
         .addModifiers(Modifier.PUBLIC)
         .returns(parameterizedTypeName)
         .addJavadoc(processorUtil.generateSeeMethodJavadoc(extensionMethod))
-        .addAnnotation(nonNull())
-        .addAnnotation(checkResult())
+        .addAnnotation(processorUtil.nonNull())
+        .addAnnotation(processorUtil.checkResult())
         .addStatement(
             "return ($T) $T.$N(this.as($T.class))",
             parameterizedTypeName,
@@ -362,7 +361,7 @@ final class RequestManagerGenerator {
         .addModifiers(Modifier.PROTECTED)
         .addParameter(
             ParameterSpec.builder(ClassName.get(requestOptionsType), parameterName)
-                .addAnnotation(nonNull())
+                .addAnnotation(processorUtil.nonNull())
                 .build())
         .beginControlFlow(
             "if ($N instanceof $L)", parameterName, generatedRequestOptionsQualifiedName)

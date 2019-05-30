@@ -4,7 +4,7 @@ import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.VisibleForTesting;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.Log;

@@ -1,9 +1,9 @@
 package com.bumptech.glide.load;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.ArrayMap;
-import android.support.v4.util.SimpleArrayMap;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.collection.ArrayMap;
+import androidx.collection.SimpleArrayMap;
 import com.bumptech.glide.util.CachedHashCodeArrayMap;
 import java.security.MessageDigest;
 

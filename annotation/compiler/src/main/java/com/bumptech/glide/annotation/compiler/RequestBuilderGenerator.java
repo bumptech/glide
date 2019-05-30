@@ -1,8 +1,5 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.checkResult;
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
-
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
 import com.google.common.base.Function;
@@ -108,9 +105,6 @@ final class RequestBuilderGenerator {
   /** A set of method names to avoid overriding from RequestOptions. */
   private static final ImmutableSet<String> EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS =
       ImmutableSet.of("clone", "apply", "autoLock", "lock", "autoClone");
-
-  private static final AnnotationSpec NON_NULL = AnnotationSpec.builder(nonNull()).build();
-  private static final AnnotationSpec CHECK_RESULT = AnnotationSpec.builder(checkResult()).build();
 
   private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
@@ -433,11 +427,11 @@ final class RequestBuilderGenerator {
         MethodSpec.constructorBuilder()
             .addParameter(
                 ParameterSpec.builder(classOfTranscodeType, "transcodeClass")
-                    .addAnnotation(nonNull())
+                    .addAnnotation(processorUtil.nonNull())
                     .build())
             .addParameter(
                 ParameterSpec.builder(requestBuilderOfWildcardOfObject, "other")
-                    .addAnnotation(nonNull())
+                    .addAnnotation(processorUtil.nonNull())
                     .build())
             .addStatement("super($N, $N)", "transcodeClass", "other")
             .build();
@@ -447,17 +441,22 @@ final class RequestBuilderGenerator {
     ClassName requestManager = ClassName.get("com.bumptech.glide", "RequestManager");
     MethodSpec secondConstructor =
         MethodSpec.constructorBuilder()
-            .addParameter(ParameterSpec.builder(glide, "glide").addAnnotation(nonNull()).build())
+            .addParameter(
+                ParameterSpec.builder(glide, "glide")
+                    .addAnnotation(processorUtil.nonNull())
+                    .build())
             .addParameter(
                 ParameterSpec.builder(requestManager, "requestManager")
-                    .addAnnotation(nonNull())
+                    .addAnnotation(processorUtil.nonNull())
                     .build())
             .addParameter(
                 ParameterSpec.builder(classOfTranscodeType, "transcodeClass")
-                    .addAnnotation(nonNull())
+                    .addAnnotation(processorUtil.nonNull())
                     .build())
             .addParameter(
-                ParameterSpec.builder(context, "context").addAnnotation(nonNull()).build())
+                ParameterSpec.builder(context, "context")
+                    .addAnnotation(processorUtil.nonNull())
+                    .build())
             .addStatement(
                 "super($N, $N ,$N, $N)", "glide", "requestManager", "transcodeClass", "context")
             .build();
@@ -473,8 +472,8 @@ final class RequestBuilderGenerator {
         ParameterizedTypeName.get(generatedRequestBuilderClassName, ClassName.get(File.class));
     return MethodSpec.methodBuilder("getDownloadOnlyRequest")
         .addAnnotation(Override.class)
-        .addAnnotation(CHECK_RESULT)
-        .addAnnotation(NON_NULL)
+        .addAnnotation(processorUtil.checkResult())
+        .addAnnotation(processorUtil.nonNull())
         .returns(generatedRequestBuilderOfFile)
         .addModifiers(Modifier.PROTECTED)
         .addStatement(

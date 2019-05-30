@@ -1,8 +1,8 @@
 package com.bumptech.glide;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.util.Pools.Pool;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.util.Pools.Pool;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.Options;

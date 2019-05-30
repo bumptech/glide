@@ -3,7 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;

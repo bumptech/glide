@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine.cache;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import java.io.File;
 
 /**

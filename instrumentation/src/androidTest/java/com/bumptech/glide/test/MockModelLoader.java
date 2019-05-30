@@ -1,7 +1,7 @@
 package com.bumptech.glide.test;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;

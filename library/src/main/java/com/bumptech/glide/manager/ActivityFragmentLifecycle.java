@@ -1,6 +1,6 @@
 package com.bumptech.glide.manager;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.util.Util;
 import java.util.Collections;
 import java.util.Set;

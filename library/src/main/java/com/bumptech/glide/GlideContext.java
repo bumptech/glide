@@ -2,10 +2,10 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.support.annotation.GuardedBy;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.VisibleForTesting;
+import androidx.annotation.GuardedBy;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import android.widget.ImageView;
 import com.bumptech.glide.Glide.RequestOptionsFactory;
 import com.bumptech.glide.load.engine.Engine;

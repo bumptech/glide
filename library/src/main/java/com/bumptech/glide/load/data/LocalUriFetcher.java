@@ -2,7 +2,7 @@ package com.bumptech.glide.load.data;
 
 import android.content.ContentResolver;
 import android.net.Uri;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;

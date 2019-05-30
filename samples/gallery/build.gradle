@@ -5,8 +5,8 @@ dependencies {
     implementation(project(':integration:recyclerview')) {
         transitive = false
     }
-    implementation "com.android.support:recyclerview-v7:${ANDROID_SUPPORT_VERSION}"
-    implementation "com.android.support:support-fragment:${ANDROID_SUPPORT_VERSION}"
+    implementation "androidx.recyclerview:recyclerview:${ANDROID_X_VERSION}"
+    implementation "androidx.fragment:fragment:${ANDROID_X_VERSION}"
     annotationProcessor project(':annotation:compiler')
 }
 

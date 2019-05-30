@@ -1,6 +1,5 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
 import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNulls;
 
 import com.bumptech.glide.annotation.GlideOption;
@@ -284,7 +283,7 @@ final class GlideExtensionValidator {
               Kind.WARNING,
               getQualifiedMethodName(executableElement)
                   + " is missing the "
-                  + nonNull().reflectionName()
+                  + processorUtil.nonNull().reflectionName()
                   + " annotation,"
                   + " please add it to ensure that your extension methods are always returning"
                   + " non-null values");

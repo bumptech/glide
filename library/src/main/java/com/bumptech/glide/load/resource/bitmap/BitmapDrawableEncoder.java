@@ -2,7 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;

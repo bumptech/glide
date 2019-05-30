@@ -1,8 +1,5 @@
 package com.bumptech.glide.annotation.compiler;
 
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.checkResult;
-import static com.bumptech.glide.annotation.compiler.ProcessorUtil.nonNull;
-
 import com.bumptech.glide.annotation.GlideExtension;
 import com.bumptech.glide.annotation.GlideOption;
 import com.google.common.base.Function;
@@ -312,7 +309,9 @@ final class RequestOptionsGenerator {
           TypeVariableName.get(typeParameterElement.getSimpleName().toString()));
     }
 
-    methodSpecBuilder.addAnnotation(checkResult()).addAnnotation(nonNull());
+    methodSpecBuilder
+        .addAnnotation(processorUtil.checkResult())
+        .addAnnotation(processorUtil.nonNull());
 
     return new MethodAndStaticVar(methodSpecBuilder.build(), requiredStaticField);
   }
@@ -430,7 +429,7 @@ final class RequestOptionsGenerator {
           TypeVariableName.get(typeParameterElement.getSimpleName().toString()));
     }
 
-    methodSpecBuilder.addAnnotation(checkResult());
+    methodSpecBuilder.addAnnotation(processorUtil.checkResult());
 
     return new MethodAndStaticVar(methodSpecBuilder.build(), requiredStaticField);
   }

@@ -69,14 +69,16 @@ static def getAndroidLibraryVariants(projects, variantName) {
 
 def getSourceFilesForVariantJar(variantName) {
     getAndroidLibraryVariantsForJar(variantName).collect { variant -> 
-        variant.getJavaCompiler().source.findAll { 
+        variant.getJavaCompileProvider().get().source.findAll { 
             return !it.getName().equals("R.java") && !it.getName().equals("BuildConfig.java")
         }
     }
 }
 
 def getSourceFilesForVariantJavadoc(variantName) {
-    getAndroidLibraryVariantsForJavadoc(variantName).collect { it.getJavaCompiler().source }
+    getAndroidLibraryVariantsForJavadoc(variantName).collect { 
+        it.getJavaCompileProvider().get().source 
+    }
 }
 
 def getAndroidJar() {
@@ -98,10 +100,12 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
                     project.files(
                             getAndroidJar(),
                             getAndroidLibraryVariantsForJar(variantName).collect {
-                                LibraryVariant lib -> lib.getJavaCompiler().classpath.files
+                                LibraryVariant lib ->
+                                    lib.getJavaCompileProvider().get().classpath.files
                             },
                             getAndroidLibraryVariantsForJavadoc(variantName).collect {
-                                LibraryVariant lib -> lib.getJavaCompiler().classpath.files
+                                LibraryVariant lib ->
+                                    lib.getJavaCompileProvider().get().classpath.files
                             },
                             // Finds dependencies of Android packages that would otherwise be
                             // ignored (Volley in particular)
@@ -137,7 +141,7 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 jar {
     from files(
             getAndroidProjectsForJar().collect { LibraryVariant variant ->
-                variant.getJavaCompiler().destinationDir
+                variant.getJavaCompileProvider().get().destinationDir
             }
     )
     exclude "**/R.class"
