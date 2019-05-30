@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.util.Log;
-import com.bumptech.glide.load.DecodeFormat;
 import java.io.File;
 
 /**
@@ -72,12 +71,10 @@ final class HardwareConfigState {
   }
 
   @TargetApi(Build.VERSION_CODES.O)
-  @SuppressWarnings("deprecation")
   boolean setHardwareConfigIfAllowed(
       int targetWidth,
       int targetHeight,
       BitmapFactory.Options optionsWithScaling,
-      DecodeFormat decodeFormat,
       boolean isHardwareConfigAllowed,
       boolean isExifOrientationRequired) {
     if (!isHardwareConfigAllowed

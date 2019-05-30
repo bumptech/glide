@@ -592,7 +592,6 @@ public final class Downsampler {
         targetWidth,
         targetHeight,
         optionsWithScaling,
-        format,
         isHardwareConfigAllowed,
         isExifOrientationRequired)) {
       return;
