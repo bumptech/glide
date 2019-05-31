@@ -4,9 +4,8 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import androidx.annotation.GuardedBy;
-import androidx.annotation.VisibleForTesting;
 import android.util.Log;
+import com.bumptech.glide.load.DecodeFormat;
 import java.io.File;
 
 /**
@@ -23,7 +22,7 @@ final class HardwareConfigState {
    *
    * @see #FD_SIZE_LIST
    */
-  @VisibleForTesting static final int MIN_HARDWARE_DIMENSION = 128;
+  private static final int MIN_HARDWARE_DIMENSION = 128;
 
   /**
    * Allows us to check to make sure we're not exceeding the FD limit for a process with hardware
@@ -54,13 +53,8 @@ final class HardwareConfigState {
 
   private static volatile HardwareConfigState instance;
 
-  private final boolean isHardwareConfigAllowedByDeviceModel;
-
-  @GuardedBy("this")
-  private int decodesSinceLastFdCheck;
-
-  @GuardedBy("this")
-  private boolean isFdSizeBelowHardwareLimit = true;
+  private volatile int decodesSinceLastFdCheck;
+  private volatile boolean isHardwareConfigAllowed = true;
 
   static HardwareConfigState getInstance() {
     if (instance == null) {
@@ -73,21 +67,20 @@ final class HardwareConfigState {
     return instance;
   }
 
-  @VisibleForTesting
-  HardwareConfigState() {
-    isHardwareConfigAllowedByDeviceModel = isHardwareConfigAllowedByDeviceModel();
+  private HardwareConfigState() {
     // Singleton constructor.
   }
 
   @TargetApi(Build.VERSION_CODES.O)
+  @SuppressWarnings("deprecation")
   boolean setHardwareConfigIfAllowed(
       int targetWidth,
       int targetHeight,
       BitmapFactory.Options optionsWithScaling,
+      DecodeFormat decodeFormat,
       boolean isHardwareConfigAllowed,
       boolean isExifOrientationRequired) {
     if (!isHardwareConfigAllowed
-        || !isHardwareConfigAllowedByDeviceModel
         || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
         || isExifOrientationRequired) {
       return false;
@@ -106,35 +99,13 @@ final class HardwareConfigState {
     return result;
   }
 
-  private static boolean isHardwareConfigAllowedByDeviceModel() {
-    switch (Build.MODEL.substring(0, 7)) {
-      case "SM-N935":
-        // Fall through
-      case "SM-J720":
-        // Fall through
-      case "SM-G960":
-        // Fall through
-      case "SM-G965":
-        // Fall through
-      case "SM-G935":
-        // Fall through
-      case "SM-G930":
-        // Fall through
-      case "SM-A520":
-        // Fall through
-        return Build.VERSION.SDK_INT != Build.VERSION_CODES.O;
-      default:
-        return true;
-    }
-  }
-
   private synchronized boolean isFdSizeBelowHardwareLimit() {
     if (++decodesSinceLastFdCheck >= MINIMUM_DECODES_BETWEEN_FD_CHECKS) {
       decodesSinceLastFdCheck = 0;
       int currentFds = FD_SIZE_LIST.list().length;
-      isFdSizeBelowHardwareLimit = currentFds < MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
+      isHardwareConfigAllowed = currentFds < MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
 
-      if (!isFdSizeBelowHardwareLimit && Log.isLoggable(Downsampler.TAG, Log.WARN)) {
+      if (!isHardwareConfigAllowed && Log.isLoggable(Downsampler.TAG, Log.WARN)) {
         Log.w(
             Downsampler.TAG,
             "Excluding HARDWARE bitmap config because we're over the file descriptor limit"
@@ -145,6 +116,6 @@ final class HardwareConfigState {
       }
     }
 
-    return isFdSizeBelowHardwareLimit;
+    return isHardwareConfigAllowed;
   }
 }
