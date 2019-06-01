@@ -384,18 +384,20 @@ public final class Downsampler {
       return;
     }
 
-    final float exactScaleFactor;
+    int orientedSourceWidth = sourceWidth;
+    int orientedSourceHeight = sourceHeight;
+    // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image
+    // width is decreased to near our target's height and the image height is decreased to near
+    // our target width.
+    //noinspection SuspiciousNameCombination
     if (degreesToRotate == 90 || degreesToRotate == 270) {
-      // If we're rotating the image +-90 degrees, we need to downsample accordingly so the image
-      // width is decreased to near our target's height and the image height is decreased to near
-      // our target width.
-      //noinspection SuspiciousNameCombination
-      exactScaleFactor =
-          downsampleStrategy.getScaleFactor(sourceHeight, sourceWidth, targetWidth, targetHeight);
-    } else {
-      exactScaleFactor =
-          downsampleStrategy.getScaleFactor(sourceWidth, sourceHeight, targetWidth, targetHeight);
+      orientedSourceWidth = sourceHeight;
+      orientedSourceHeight = sourceWidth;
     }
+
+    final float exactScaleFactor =
+          downsampleStrategy.getScaleFactor(
+              orientedSourceWidth, orientedSourceHeight, targetWidth, targetHeight);
 
     if (exactScaleFactor <= 0f) {
       throw new IllegalArgumentException(
@@ -414,18 +416,19 @@ public final class Downsampler {
               + targetHeight
               + "]");
     }
+
     SampleSizeRounding rounding =
         downsampleStrategy.getSampleSizeRounding(
-            sourceWidth, sourceHeight, targetWidth, targetHeight);
+            orientedSourceWidth, orientedSourceHeight, targetWidth, targetHeight);
     if (rounding == null) {
       throw new IllegalArgumentException("Cannot round with null rounding");
     }
 
-    int outWidth = round(exactScaleFactor * sourceWidth);
-    int outHeight = round(exactScaleFactor * sourceHeight);
+    int outWidth = round(exactScaleFactor * orientedSourceWidth);
+    int outHeight = round(exactScaleFactor * orientedSourceHeight);
 
-    int widthScaleFactor = sourceWidth / outWidth;
-    int heightScaleFactor = sourceHeight / outHeight;
+    int widthScaleFactor = orientedSourceWidth / outWidth;
+    int heightScaleFactor = orientedSourceHeight / outHeight;
 
     int scaleFactor =
         rounding == SampleSizeRounding.MEMORY
@@ -458,26 +461,26 @@ public final class Downsampler {
       // After libjpegturbo's native rounding, skia does a secondary scale using floor
       // (integer division). Here we replicate that logic.
       int nativeScaling = Math.min(powerOfTwoSampleSize, 8);
-      powerOfTwoWidth = (int) Math.ceil(sourceWidth / (float) nativeScaling);
-      powerOfTwoHeight = (int) Math.ceil(sourceHeight / (float) nativeScaling);
+      powerOfTwoWidth = (int) Math.ceil(orientedSourceWidth / (float) nativeScaling);
+      powerOfTwoHeight = (int) Math.ceil(orientedSourceHeight / (float) nativeScaling);
       int secondaryScaling = powerOfTwoSampleSize / 8;
       if (secondaryScaling > 0) {
         powerOfTwoWidth = powerOfTwoWidth / secondaryScaling;
         powerOfTwoHeight = powerOfTwoHeight / secondaryScaling;
       }
     } else if (imageType == ImageType.PNG || imageType == ImageType.PNG_A) {
-      powerOfTwoWidth = (int) Math.floor(sourceWidth / (float) powerOfTwoSampleSize);
-      powerOfTwoHeight = (int) Math.floor(sourceHeight / (float) powerOfTwoSampleSize);
+      powerOfTwoWidth = (int) Math.floor(orientedSourceWidth / (float) powerOfTwoSampleSize);
+      powerOfTwoHeight = (int) Math.floor(orientedSourceHeight / (float) powerOfTwoSampleSize);
     } else if (imageType == ImageType.WEBP || imageType == ImageType.WEBP_A) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        powerOfTwoWidth = Math.round(sourceWidth / (float) powerOfTwoSampleSize);
-        powerOfTwoHeight = Math.round(sourceHeight / (float) powerOfTwoSampleSize);
+        powerOfTwoWidth = Math.round(orientedSourceWidth / (float) powerOfTwoSampleSize);
+        powerOfTwoHeight = Math.round(orientedSourceHeight / (float) powerOfTwoSampleSize);
       } else {
-        powerOfTwoWidth = (int) Math.floor(sourceWidth / (float) powerOfTwoSampleSize);
-        powerOfTwoHeight = (int) Math.floor(sourceHeight / (float) powerOfTwoSampleSize);
+        powerOfTwoWidth = (int) Math.floor(orientedSourceWidth / (float) powerOfTwoSampleSize);
+        powerOfTwoHeight = (int) Math.floor(orientedSourceHeight / (float) powerOfTwoSampleSize);
       }
-    } else if (sourceWidth % powerOfTwoSampleSize != 0
-        || sourceHeight % powerOfTwoSampleSize != 0) {
+    } else if (orientedSourceWidth % powerOfTwoSampleSize != 0
+        || orientedSourceHeight % powerOfTwoSampleSize != 0) {
       // If we're not confident the image is in one of our types, fall back to checking the
       // dimensions again. inJustDecodeBounds decodes do obey inSampleSize.
       int[] dimensions = getDimensions(is, options, decodeCallbacks, bitmapPool);
@@ -488,8 +491,8 @@ public final class Downsampler {
       powerOfTwoWidth = dimensions[0];
       powerOfTwoHeight = dimensions[1];
     } else {
-      powerOfTwoWidth = sourceWidth / powerOfTwoSampleSize;
-      powerOfTwoHeight = sourceHeight / powerOfTwoSampleSize;
+      powerOfTwoWidth = orientedSourceWidth / powerOfTwoSampleSize;
+      powerOfTwoHeight = orientedSourceHeight / powerOfTwoSampleSize;
     }
 
     double adjustedScaleFactor =
@@ -517,6 +520,8 @@ public final class Downsampler {
               + "x"
               + sourceHeight
               + "]"
+              + ", degreesToRotate: "
+              + degreesToRotate
               + ", target: ["
               + targetWidth
               + "x"

@@ -57,6 +57,9 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withAtMost() throws IOException {
     new Tester(DownsampleStrategy.AT_MOST)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(3024, 4032, onAllApisAndAllFormatsExpect(1512, 2016))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
@@ -113,6 +116,9 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withAtLeast() throws IOException {
     new Tester(DownsampleStrategy.AT_LEAST)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(3024, 4032, onAllApisAndAllFormatsExpect(3024, 4032))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
@@ -133,6 +139,12 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withCenterInside() throws IOException {
     new Tester(DownsampleStrategy.CENTER_INSIDE)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(3024, 4032,
+            atAndAbove(KITKAT).with(allFormats().expect(1977, 2636)),
+            // TODO(b/134182995): This shouldn't be preserving quality.
+            below(KITKAT).with(allFormats().expect(3024, 4032)))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(400, onAllApisAndAllFormatsExpect(100, 100))
@@ -189,6 +201,11 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withCenterOutside() throws IOException {
     new Tester(DownsampleStrategy.CENTER_OUTSIDE)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(3024, 4032,
+            atAndAbove(KITKAT).with(allFormats().expect(1977, 2636)),
+            below(KITKAT).with(allFormats().expect(3024, 4032)))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
@@ -228,6 +245,9 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withNone() throws IOException {
     new Tester(DownsampleStrategy.NONE)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(3024, 4032, onAllApisAndAllFormatsExpect(3024, 4032))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(200, 200))
@@ -248,6 +268,12 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withFitCenter() throws IOException {
     new Tester(DownsampleStrategy.FIT_CENTER)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(3024, 4032,
+            atAndAbove(KITKAT).with(allFormats().expect(1977, 2636)),
+            // TODO(b/134182995): This shouldn't be preserving quality.
+            below(KITKAT).with(allFormats().expect(3024, 4032)))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
