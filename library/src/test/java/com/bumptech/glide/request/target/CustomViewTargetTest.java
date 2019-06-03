@@ -584,7 +584,7 @@ public class CustomViewTargetTest {
   }
 
   @Test
-  public void clearOnDetach_afterLoadClearedAndRestarted_onAttach_beingsREquest() {
+  public void clearOnDetach_afterLoadClearedAndRestarted_onAttach_beginsRequest() {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
     when(request.isCleared()).thenReturn(true);

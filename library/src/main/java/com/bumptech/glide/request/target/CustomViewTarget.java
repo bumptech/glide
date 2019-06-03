@@ -42,7 +42,6 @@ public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
   @Nullable private OnAttachStateChangeListener attachStateListener;
   private boolean isClearedByUs;
   private boolean isAttachStateListenerAdded;
-  @IdRes private int overrideTag;
 
   /** Constructor that defaults {@code waitForLayout} to {@code false}. */
   public CustomViewTarget(@NonNull T view) {
@@ -162,14 +161,14 @@ public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
    * the same view, for example one foreground and one background view.
    *
    * @param tagId The android resource id to use.
+   * @deprecated Using this method prevents clearing the target from working properly. Glide uses
+   *     its own internal tag id so this method should not be necessary. This method is currently a
+   *     no-op.
    */
   // Public API.
   @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"})
+  @Deprecated
   public final CustomViewTarget<T, Z> useTagId(@IdRes int tagId) {
-    if (this.overrideTag != 0) {
-      throw new IllegalArgumentException("You cannot change the tag id once it has been set.");
-    }
-    this.overrideTag = tagId;
     return this;
   }
 
@@ -265,12 +264,12 @@ public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
   }
 
   private void setTag(@Nullable Object tag) {
-    view.setTag(overrideTag == 0 ? VIEW_TAG_ID : overrideTag, tag);
+    view.setTag(VIEW_TAG_ID, tag);
   }
 
   @Nullable
   private Object getTag() {
-    return view.getTag(overrideTag == 0 ? VIEW_TAG_ID : overrideTag);
+    return view.getTag(VIEW_TAG_ID);
   }
 
   private void maybeAddAttachStateListener() {
