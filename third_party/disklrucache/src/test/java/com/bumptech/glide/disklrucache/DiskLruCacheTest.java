@@ -524,7 +524,7 @@ public final class DiskLruCacheTest {
   @Test public void readingTheSameFileMultipleTimes() throws Exception {
     set("a", "a", "b");
     DiskLruCache.Value value = cache.get("a");
-    assertThat(value.getFile(0)).isSameAs(value.getFile(0));
+    assertThat(value.getFile(0)).isSameInstanceAs(value.getFile(0));
   }
 
   @Test public void rebuildJournalOnRepeatedReads() throws Exception {

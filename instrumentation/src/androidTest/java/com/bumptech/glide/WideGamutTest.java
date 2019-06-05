@@ -60,7 +60,7 @@ public class WideGamutTest {
     Bitmap bitmap =
         concurrency.get(
             Glide.with(context).asBitmap().load(ResourceIds.raw.webkit_logo_p3).submit());
-    assertThat(bitmap).isSameAs(expected);
+    assertThat(bitmap).isSameInstanceAs(expected);
   }
 
   // TODO: Even with hardware allowed, we get a wide F16. Attempting to decode the resource with
@@ -172,7 +172,7 @@ public class WideGamutTest {
 
     Bitmap result = concurrency.get(Glide.with(context).asBitmap().load(data).submit());
 
-    assertThat(result).isSameAs(argb8888);
+    assertThat(result).isSameInstanceAs(argb8888);
   }
 
   private static byte[] asJpeg(Bitmap bitmap) {
