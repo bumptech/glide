@@ -30,7 +30,7 @@ public class HorizontalGalleryFragment extends Fragment
       @NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View result = inflater.inflate(R.layout.recycler_view, container, false);
     recyclerView = (RecyclerView) result.findViewById(R.id.recycler_view);
-    GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 1);
+    GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
     layoutManager.setOrientation(RecyclerView.HORIZONTAL);
     recyclerView.setLayoutManager(layoutManager);
     recyclerView.setHasFixedSize(true);
