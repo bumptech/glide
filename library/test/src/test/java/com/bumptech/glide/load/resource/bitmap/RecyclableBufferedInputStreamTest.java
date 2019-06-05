@@ -22,7 +22,7 @@ import org.robolectric.annotation.Config;
 // Not required in tests.
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class RecyclableBufferedInputStreamTest {
 
   private static final int DATA_SIZE = 30;

@@ -38,7 +38,6 @@ import org.robolectric.shadows.ShadowCanvas;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
     sdk = 18,
     shadows = {FitCenterTest.DrawNothingCanvas.class})
 public class FitCenterTest {

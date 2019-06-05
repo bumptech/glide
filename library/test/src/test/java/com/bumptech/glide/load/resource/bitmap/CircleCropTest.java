@@ -27,10 +27,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE)
 public class CircleCropTest {
   @Rule public final KeyTester keyTester = new KeyTester();
   @Mock private BitmapPool bitmapPool;

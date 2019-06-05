@@ -29,7 +29,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 27)
+@Config(sdk = 27)
 public class VideoDecoderTest {
   @Mock private ParcelFileDescriptor resource;
   @Mock private VideoDecoder.MediaMetadataRetrieverFactory factory;

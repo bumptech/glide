@@ -18,7 +18,7 @@ import org.robolectric.annotation.Config;
 
 // TODO: add a test for bitmap size using getAllocationByteSize when robolectric supports kitkat.
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class BitmapResourceTest {
   private int currentBuildVersion;
   private BitmapResourceHarness harness;

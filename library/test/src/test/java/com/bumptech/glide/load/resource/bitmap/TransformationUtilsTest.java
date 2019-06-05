@@ -33,7 +33,6 @@ import org.robolectric.shadows.ShadowBitmap;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
     sdk = 28,
     shadows = {TransformationUtilsTest.AlphaShadowBitmap.class})
 public class TransformationUtilsTest {
