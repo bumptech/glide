@@ -92,7 +92,6 @@ import org.robolectric.shadows.ShadowBitmap;
 /** Tests for the {@link Glide} interface and singleton. */
 @RunWith(RobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
     sdk = 18,
     shadows = {
       GlideTest.ShadowFileDescriptorContentResolver.class,

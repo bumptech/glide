@@ -19,7 +19,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class LruArrayPoolTest {
   private static final int MAX_SIZE = 10;
   private static final int MAX_PUT_SIZE = MAX_SIZE / 2;
