@@ -26,7 +26,7 @@ import org.robolectric.annotation.Config;
 
 /** Tests for the {@link com.bumptech.glide.load.model.ResourceLoader} class. */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class ResourceLoaderTest {
 
   @Mock private ModelLoader<Uri, Object> uriLoader;

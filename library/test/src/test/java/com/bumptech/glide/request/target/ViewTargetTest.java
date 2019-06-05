@@ -51,7 +51,6 @@ import org.robolectric.shadows.ShadowView;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
     sdk = 19,
     shadows = {
       ViewTargetTest.SizedShadowView.class,

@@ -26,7 +26,7 @@ import org.robolectric.annotation.Config;
 
 /** Tests for the {@link DataUrlLoader} class. */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class DataUrlLoaderTest {
 
   // A valid base64-encoded PNG (a small "Google" logo).

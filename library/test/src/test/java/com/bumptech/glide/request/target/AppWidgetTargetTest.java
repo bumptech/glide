@@ -22,10 +22,7 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowAppWidgetManager;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    manifest = Config.NONE,
-    sdk = 18,
-    shadows = AppWidgetTargetTest.UpdateShadowAppWidgetManager.class)
+@Config(sdk = 18, shadows = AppWidgetTargetTest.UpdateShadowAppWidgetManager.class)
 public class AppWidgetTargetTest {
   private UpdateShadowAppWidgetManager shadowManager;
   private RemoteViews views;

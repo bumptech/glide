@@ -21,7 +21,7 @@ import org.robolectric.annotation.Config;
 
 /** Tests for the {@link UriLoader} class. */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class UriLoaderTest {
   // Not a magic number, just arbitrary non zero.
   private static final int IMAGE_SIDE = 120;

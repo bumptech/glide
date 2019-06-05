@@ -26,7 +26,7 @@ import org.robolectric.annotation.Config;
 
 /** Tests for the {@link com.bumptech.glide.load.model.StringLoader} class. */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class StringLoaderTest {
   // Not a magic number, just an arbitrary non zero value.
   private static final int IMAGE_SIDE = 100;

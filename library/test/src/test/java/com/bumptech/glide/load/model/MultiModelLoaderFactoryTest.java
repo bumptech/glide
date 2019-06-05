@@ -26,7 +26,7 @@ import org.robolectric.annotation.Config;
 // containsExactly produces a spurious warning.
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class MultiModelLoaderFactoryTest {
   @Mock private ModelLoaderFactory<String, String> firstFactory;
   @Mock private ModelLoader<String, String> firstModelLoader;
