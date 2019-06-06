@@ -4,9 +4,9 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.util.Log;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.VisibleForTesting;
-import android.util.Log;
 import java.io.File;
 
 /**

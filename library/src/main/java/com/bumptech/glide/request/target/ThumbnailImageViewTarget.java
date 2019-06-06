@@ -1,9 +1,9 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
-import androidx.annotation.Nullable;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import androidx.annotation.Nullable;
 
 /**
  * Avoids extra calls to {@link android.view.View#requestLayout} when loading more than once image

@@ -1,8 +1,8 @@
 package com.bumptech.glide.request.target;
 
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
 import android.view.View;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.util.Util;
 
 /**

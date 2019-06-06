@@ -1,10 +1,10 @@
 package com.bumptech.glide.integration.recyclerview;
 
+import android.widget.AbsListView;
+import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.widget.AbsListView;
-import android.widget.ListView;
 
 /**
  * Converts {@link androidx.recyclerview.widget.RecyclerView.OnScrollListener} events to {@link

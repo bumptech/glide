@@ -6,9 +6,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.util.Base64;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Base64;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;

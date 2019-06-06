@@ -1,9 +1,9 @@
 package com.bumptech.glide.samples.flickr;
 
 import android.content.Context;
-import androidx.appcompat.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+import androidx.appcompat.widget.AppCompatImageView;
 
 /** An always square {@link ImageView}. */
 public final class SquareImageView extends AppCompatImageView {

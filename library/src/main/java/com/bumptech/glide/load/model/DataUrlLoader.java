@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.model;
 
-import androidx.annotation.NonNull;
 import android.util.Base64;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;

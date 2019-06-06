@@ -2,8 +2,8 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
 import android.widget.ImageView;
+import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.manager.Lifecycle;

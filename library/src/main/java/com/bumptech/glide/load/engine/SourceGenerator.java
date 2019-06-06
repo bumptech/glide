@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.engine;
 
-import androidx.annotation.NonNull;
 import android.util.Log;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;

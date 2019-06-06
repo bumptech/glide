@@ -1,9 +1,9 @@
 package com.bumptech.glide;
 
 import android.graphics.drawable.Drawable;
+import android.widget.AbsListView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.widget.AbsListView;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;

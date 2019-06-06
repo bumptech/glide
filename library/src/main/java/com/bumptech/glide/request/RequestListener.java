@@ -1,8 +1,8 @@
 package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
-import androidx.annotation.Nullable;
 import android.widget.ImageView;
+import androidx.annotation.Nullable;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;

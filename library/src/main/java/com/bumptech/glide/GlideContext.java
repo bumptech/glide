@@ -2,11 +2,11 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.widget.ImageView;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import android.widget.ImageView;
 import com.bumptech.glide.Glide.RequestOptionsFactory;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;

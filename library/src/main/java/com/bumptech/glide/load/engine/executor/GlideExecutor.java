@@ -2,9 +2,9 @@ package com.bumptech.glide.load.engine.executor;
 
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
-import android.util.Log;
 import com.bumptech.glide.util.Synthetic;
 import java.util.Collection;
 import java.util.List;

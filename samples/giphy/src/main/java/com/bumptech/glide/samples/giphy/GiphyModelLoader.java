@@ -1,7 +1,7 @@
 package com.bumptech.glide.samples.giphy;
 
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;

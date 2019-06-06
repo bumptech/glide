@@ -1,9 +1,9 @@
 package com.bumptech.glide.manager;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import android.util.Log;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Util;
 import java.util.ArrayList;

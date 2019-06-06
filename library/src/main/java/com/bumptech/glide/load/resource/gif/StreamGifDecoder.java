@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
-import androidx.annotation.NonNull;
 import android.util.Log;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.ImageHeaderParserUtils;

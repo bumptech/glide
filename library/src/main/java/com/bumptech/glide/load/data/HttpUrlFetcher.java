@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.data;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.HttpException;

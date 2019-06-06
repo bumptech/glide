@@ -2,8 +2,8 @@ package com.bumptech.glide.request.target;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
 import android.widget.ImageView;
+import androidx.annotation.NonNull;
 
 /**
  * A factory responsible for producing the correct type of {@link

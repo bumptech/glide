@@ -2,9 +2,9 @@ package com.bumptech.glide.manager;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import android.util.Log;
 
 /**
  * A factory class that produces a functional {@link com.bumptech.glide.manager.ConnectivityMonitor}

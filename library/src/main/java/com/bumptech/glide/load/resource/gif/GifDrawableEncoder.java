@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.resource.gif;
 
-import androidx.annotation.NonNull;
 import android.util.Log;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;

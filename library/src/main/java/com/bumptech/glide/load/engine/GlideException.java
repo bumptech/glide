@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.engine;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Log;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import java.io.IOException;

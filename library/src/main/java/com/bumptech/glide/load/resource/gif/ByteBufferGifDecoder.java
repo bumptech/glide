@@ -2,10 +2,10 @@ package com.bumptech.glide.load.resource.gif;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import android.util.Log;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;

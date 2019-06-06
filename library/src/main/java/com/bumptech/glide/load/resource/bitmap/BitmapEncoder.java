@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.util.Log;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;

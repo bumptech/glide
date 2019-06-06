@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.model;
 
 import android.net.Uri;
+import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.text.TextUtils;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.util.Preconditions;
 import java.net.MalformedURLException;

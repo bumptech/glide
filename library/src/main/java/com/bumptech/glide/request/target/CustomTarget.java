@@ -2,10 +2,10 @@ package com.bumptech.glide.request.target;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.view.View;
 import android.widget.ImageView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Util;

@@ -1,10 +1,10 @@
 package com.bumptech.glide.util.pool;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.util.Pools.Pool;
 import androidx.core.util.Pools.SimplePool;
 import androidx.core.util.Pools.SynchronizedPool;
-import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,8 +1,8 @@
 package com.bumptech.glide.request.transition;
 
 import android.graphics.drawable.Drawable;
-import androidx.annotation.Nullable;
 import android.view.View;
+import androidx.annotation.Nullable;
 
 /**
  * An interface that allows a transition to be applied to {@link android.view.View}s in {@link

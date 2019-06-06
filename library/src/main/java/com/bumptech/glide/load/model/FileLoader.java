@@ -1,8 +1,8 @@
 package com.bumptech.glide.load.model;
 
 import android.os.ParcelFileDescriptor;
-import androidx.annotation.NonNull;
 import android.util.Log;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;

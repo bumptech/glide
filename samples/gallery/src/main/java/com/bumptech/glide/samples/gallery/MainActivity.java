@@ -4,13 +4,13 @@ import android.Manifest.permission;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.core.content.ContextCompat;
-import android.widget.Toast;
 import com.bumptech.glide.MemoryCategory;
 
 /** Displays a {@link HorizontalGalleryFragment}. */
