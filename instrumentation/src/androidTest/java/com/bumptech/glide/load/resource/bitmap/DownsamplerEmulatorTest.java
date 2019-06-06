@@ -19,6 +19,8 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import androidx.annotation.Nullable;
 import android.util.DisplayMetrics;
+import androidx.exifinterface.media.ExifInterface;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.Options;
@@ -26,10 +28,17 @@ import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
+import com.bumptech.glide.util.Preconditions;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +57,9 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withAtMost() throws IOException {
     new Tester(DownsampleStrategy.AT_MOST)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(3024, 4032, onAllApisAndAllFormatsExpect(1512, 2016))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
@@ -104,6 +116,9 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withAtLeast() throws IOException {
     new Tester(DownsampleStrategy.AT_LEAST)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(3024, 4032, onAllApisAndAllFormatsExpect(3024, 4032))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
@@ -124,6 +139,14 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withCenterInside() throws IOException {
     new Tester(DownsampleStrategy.CENTER_INSIDE)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(
+            3024,
+            4032,
+            atAndAbove(KITKAT).with(allFormats().expect(1977, 2636)),
+            // TODO(b/134182995): This shouldn't be preserving quality.
+            below(KITKAT).with(allFormats().expect(3024, 4032)))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(400, onAllApisAndAllFormatsExpect(100, 100))
@@ -180,6 +203,13 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withCenterOutside() throws IOException {
     new Tester(DownsampleStrategy.CENTER_OUTSIDE)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(
+            3024,
+            4032,
+            atAndAbove(KITKAT).with(allFormats().expect(1977, 2636)),
+            below(KITKAT).with(allFormats().expect(3024, 4032)))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
@@ -219,6 +249,9 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withNone() throws IOException {
     new Tester(DownsampleStrategy.NONE)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(3024, 4032, onAllApisAndAllFormatsExpect(3024, 4032))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(200, 200))
@@ -239,6 +272,14 @@ public class DownsamplerEmulatorTest {
   @Test
   public void calculateScaling_withFitCenter() throws IOException {
     new Tester(DownsampleStrategy.FIT_CENTER)
+        // See #3673
+        .setTargetDimensions(1977, 2636)
+        .givenImageWithDimensionsOf(
+            3024,
+            4032,
+            atAndAbove(KITKAT).with(allFormats().expect(1977, 2636)),
+            // TODO(b/134182995): This shouldn't be preserving quality.
+            below(KITKAT).with(allFormats().expect(3024, 4032)))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(100, 100))
@@ -347,15 +388,38 @@ public class DownsamplerEmulatorTest {
       int initialHeight,
       int targetWidth,
       int targetHeight,
+      int exifOrientation,
       DownsampleStrategy strategy,
       int expectedWidth,
       int expectedHeight)
       throws IOException {
     Downsampler downsampler = buildDownsampler();
 
-    InputStream is = openBitmapStream(format, initialWidth, initialHeight);
+    InputStream is = openBitmapStream(format, initialWidth, initialHeight, exifOrientation);
     Options options = new Options().set(DownsampleStrategy.OPTION, strategy);
-    Bitmap bitmap = downsampler.decode(is, targetWidth, targetHeight, options).get();
+    Bitmap bitmap;
+    try {
+      bitmap = downsampler.decode(is, targetWidth, targetHeight, options).get();
+    } catch (OutOfMemoryError e) {
+      return "API: "
+          + Build.VERSION.SDK_INT
+          + ", os: "
+          + Build.VERSION.RELEASE
+          + ", format: "
+          + format
+          + ", strategy: "
+          + strategy
+          + ", orientation: "
+          + exifOrientation
+          + " -"
+          + " Initial "
+          + readableDimens(initialWidth, initialHeight)
+          + " Target "
+          + readableDimens(targetWidth, targetHeight)
+          + " Expected "
+          + readableDimens(expectedWidth, expectedHeight)
+          + " but threw OutOfMemoryError";
+    }
     try {
       if (bitmap.getWidth() != expectedWidth || bitmap.getHeight() != expectedHeight) {
         return "API: "
@@ -366,6 +430,8 @@ public class DownsamplerEmulatorTest {
             + format
             + ", strategy: "
             + strategy
+            + ", orientation: "
+            + exifOrientation
             + " -"
             + " Initial "
             + readableDimens(initialWidth, initialHeight)
@@ -397,7 +463,67 @@ public class DownsamplerEmulatorTest {
     return new Downsampler(parsers, displayMetrics, bitmapPool, arrayPool);
   }
 
-  private static InputStream openBitmapStream(CompressFormat format, int width, int height) {
+  private static InputStream openBitmapStream(
+      CompressFormat format, int width, int height, int exifOrientation) {
+    Preconditions.checkArgument(
+        format == CompressFormat.JPEG || exifOrientation == ExifInterface.ORIENTATION_UNDEFINED,
+        "Can only orient JPEGs, but asked for orientation: "
+            + exifOrientation
+            + " with format: "
+            + format);
+
+    // TODO: support orientations for formats other than JPEG.
+    if (format == CompressFormat.JPEG) {
+      return openFileStream(width, height, exifOrientation);
+    } else {
+      return openInMemoryStream(format, width, height);
+    }
+  }
+
+  private static InputStream openFileStream(int width, int height, int exifOrientation) {
+    int rotationDegrees = TransformationUtils.getExifOrientationDegrees(exifOrientation);
+    if (rotationDegrees == 270 || rotationDegrees == 90) {
+      int temp = width;
+      width = height;
+      height = temp;
+    }
+
+    Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+
+    OutputStream os = null;
+    try {
+      File tempFile =
+          File.createTempFile(
+              "ds-" + width + "-" + height + "-" + exifOrientation,
+              ".jpeg",
+              ApplicationProvider.getApplicationContext().getCacheDir());
+      os = new BufferedOutputStream(new FileOutputStream(tempFile));
+      bitmap.compress(CompressFormat.JPEG, /*quality=*/ 100, os);
+      bitmap.recycle();
+      os.close();
+
+      ExifInterface exifInterface = new ExifInterface(tempFile.getAbsolutePath());
+      exifInterface.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(exifOrientation));
+      exifInterface.saveAttributes();
+
+      InputStream result = new BufferedInputStream(new FileInputStream(tempFile));
+      if (!tempFile.delete()) {
+        throw new IllegalStateException("Failed to delete: " + tempFile);
+      }
+      return result;
+    } catch (IOException e) {
+      throw new IllegalStateException(e);
+    } finally {
+      if (os != null) {
+        try {
+          os.close();
+        } catch (IOException e) {
+        }
+      }
+    }
+  }
+
+  private static InputStream openInMemoryStream(CompressFormat format, int width, int height) {
     Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     bitmap.compress(format, 100 /*quality*/, os);
@@ -549,6 +675,20 @@ public class DownsamplerEmulatorTest {
     private final int expectedWidth;
     private final int expectedHeight;
     private final CompressFormat[] formats;
+    private static final int[] ALL_EXIF_ORIENTATIONS =
+        new int[] {
+          ExifInterface.ORIENTATION_UNDEFINED,
+          ExifInterface.ORIENTATION_NORMAL,
+          ExifInterface.ORIENTATION_FLIP_HORIZONTAL,
+          ExifInterface.ORIENTATION_ROTATE_180,
+          ExifInterface.ORIENTATION_FLIP_VERTICAL,
+          ExifInterface.ORIENTATION_TRANSPOSE,
+          ExifInterface.ORIENTATION_ROTATE_90,
+          ExifInterface.ORIENTATION_TRANSVERSE,
+          ExifInterface.ORIENTATION_ROTATE_270
+        };
+    private static final int[] UNDEFINED_EXIF_ORIENTATIONS =
+        new int[] {ExifInterface.ORIENTATION_UNDEFINED};
 
     static final class Builder {
       private final CompressFormat[] formats;
@@ -585,18 +725,23 @@ public class DownsamplerEmulatorTest {
         throws IOException {
       List<String> result = new ArrayList<>();
       for (CompressFormat format : formats) {
-        String testResult =
-            runScaleTest(
-                format,
-                sourceWidth,
-                sourceHeight,
-                targetWidth,
-                targetHeight,
-                strategy,
-                expectedWidth,
-                expectedHeight);
-        if (testResult != null) {
-          result.add(testResult);
+        int[] exifOrientations =
+            format == CompressFormat.JPEG ? ALL_EXIF_ORIENTATIONS : UNDEFINED_EXIF_ORIENTATIONS;
+        for (int exifOrientation : exifOrientations) {
+          String testResult =
+              runScaleTest(
+                  format,
+                  sourceWidth,
+                  sourceHeight,
+                  targetWidth,
+                  targetHeight,
+                  exifOrientation,
+                  strategy,
+                  expectedWidth,
+                  expectedHeight);
+          if (testResult != null) {
+            result.add(testResult);
+          }
         }
       }
       return result;

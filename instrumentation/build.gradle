@@ -16,6 +16,8 @@ dependencies {
     androidTestImplementation "androidx.test:core:${ANDROIDX_TEST_VERSION}"
     androidTestImplementation "com.google.truth:truth:${TRUTH_VERSION}"
     androidTestImplementation "junit:junit:${JUNIT_VERSION}"
+    androidTestImplementation "androidx.exifinterface:exifinterface:${ANDROID_X_VERSION}"
+
     // Not totally clear why this is required, but it seems to be missing when tests are run on
     // 4.1.2 and 4.2.0 emulators.
     androidTestImplementation 'com.google.code.findbugs:jsr305:3.0.2'
