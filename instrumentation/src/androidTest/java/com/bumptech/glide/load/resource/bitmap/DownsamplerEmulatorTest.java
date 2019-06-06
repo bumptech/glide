@@ -87,6 +87,17 @@ public class DownsamplerEmulatorTest {
                 .with(formats(JPEG, WEBP).expect(13, 100), formats(PNG).expect(12, 100)),
             below(VERSION_CODES.N)
                 .with(formats(JPEG).expect(13, 100), formats(PNG, WEBP).expect(12, 100)))
+        .givenImageWithDimensionsOf(
+            801,
+            100,
+            below(KITKAT)
+                .with(
+                    // JPEG is correct because CENTER_INSIDE wants to give a subsequent
+                    // transformation an image that is greater in size than the requested size. On
+                    // Api > VERSION_CODES.KITKAT, CENTER_INSIDE can do the transformation itself.
+                    // On < VERSION_CODES.KITKAT, it has to assume a subsequent transformation will
+                    // be called.
+                    formats(JPEG).expect(50, 6), formats(PNG, WEBP).expect(50, 6)))
         .givenImageWithDimensionsOf(87, 78, onAllApisAndAllFormatsExpect(87, 78))
         // This set of examples demonstrate that webp uses round on N+ and floor < N.
         .setTargetDimensions(13, 13)
@@ -145,7 +156,6 @@ public class DownsamplerEmulatorTest {
             3024,
             4032,
             atAndAbove(KITKAT).with(allFormats().expect(1977, 2636)),
-            // TODO(b/134182995): This shouldn't be preserving quality.
             below(KITKAT).with(allFormats().expect(3024, 4032)))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
@@ -164,7 +174,7 @@ public class DownsamplerEmulatorTest {
             800,
             100,
             atAndAbove(KITKAT).with(allFormats().expect(100, 13)),
-            below(KITKAT).with(allFormats().expect(200, 25)))
+            below(KITKAT).with(formats(JPEG).expect(100, 13), formats(PNG, WEBP).expect(100, 12)))
         .givenImageWithDimensionsOf(
             801,
             100,
@@ -184,7 +194,7 @@ public class DownsamplerEmulatorTest {
             100,
             800,
             atAndAbove(KITKAT).with(allFormats().expect(13, 100)),
-            below(KITKAT).with(allFormats().expect(25, 200)))
+            below(KITKAT).with(formats(JPEG).expect(13, 100), formats(PNG, WEBP).expect(12, 100)))
         .givenImageWithDimensionsOf(87, 78, onAllApisAndAllFormatsExpect(87, 78))
         .setTargetDimensions(897, 897)
         .givenImageWithDimensionsOf(
@@ -278,7 +288,6 @@ public class DownsamplerEmulatorTest {
             3024,
             4032,
             atAndAbove(KITKAT).with(allFormats().expect(1977, 2636)),
-            // TODO(b/134182995): This shouldn't be preserving quality.
             below(KITKAT).with(allFormats().expect(3024, 4032)))
         .setTargetDimensions(100, 100)
         .givenSquareImageWithDimensionOf(100, onAllApisAndAllFormatsExpect(100, 100))
@@ -298,7 +307,7 @@ public class DownsamplerEmulatorTest {
             800,
             100,
             atAndAbove(KITKAT).with(allFormats().expect(100, 13)),
-            below(KITKAT).with(allFormats().expect(200, 25)))
+            below(KITKAT).with(formats(JPEG).expect(100, 13), formats(PNG, WEBP).expect(100, 12)))
         .givenImageWithDimensionsOf(
             801,
             100,
@@ -318,7 +327,7 @@ public class DownsamplerEmulatorTest {
             100,
             800,
             atAndAbove(KITKAT).with(allFormats().expect(13, 100)),
-            below(KITKAT).with(allFormats().expect(25, 200)))
+            below(KITKAT).with(formats(JPEG).expect(13, 100), formats(PNG, WEBP).expect(12, 100)))
         .givenImageWithDimensionsOf(
             87,
             78,

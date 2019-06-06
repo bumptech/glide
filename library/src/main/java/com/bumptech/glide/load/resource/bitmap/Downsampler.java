@@ -430,6 +430,9 @@ public final class Downsampler {
     int widthScaleFactor = orientedSourceWidth / outWidth;
     int heightScaleFactor = orientedSourceHeight / outHeight;
 
+    // TODO: This isn't really right for both CenterOutside and CenterInside. Consider allowing
+    // DownsampleStrategy to pick, or trying to do something more sophisticated like picking the
+    // scale factor that leads to an exact match.
     int scaleFactor =
         rounding == SampleSizeRounding.MEMORY
             ? Math.max(widthScaleFactor, heightScaleFactor)

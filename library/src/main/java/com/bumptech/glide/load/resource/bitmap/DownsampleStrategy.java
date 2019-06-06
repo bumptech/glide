@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import android.os.Build;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.util.Synthetic;
 
@@ -17,38 +18,17 @@ import com.bumptech.glide.util.Synthetic;
  * com.bumptech.glide.load.ResourceDecoder}s are listed below, but the list is not comprehensive
  * because {@link DownsampleStrategy} only controls it's output scale value, not how that output
  * value is used.
+ *
+ * <p>On some versions of Android, precise scaling is not possible. In those cases, the strategies
+ * can only pick between downsampling to between 1x the requested size and 2x the requested size and
+ * between 0.5x the requested size and 1x the requested size because only power of two downsampling
+ * is supported. To preserve the potential for a {@link com.bumptech.glide.load.Transformation} to
+ * scale precisely without a loss in quality, all but {@link #AT_MOST} will prefer to downsample to
+ * between 1x and 2x the requested size.
  */
 // Public API.
 @SuppressWarnings("WeakerAccess")
 public abstract class DownsampleStrategy {
-
-  /**
-   * Scales, maintaining the original aspect ratio, so that one of the image's dimensions is exactly
-   * equal to the requested size and the other dimension is less than or equal to the requested
-   * size.
-   *
-   * <p>This method will upscale if the requested width and height are greater than the source width
-   * and height. To avoid upscaling, use {@link #AT_LEAST}, {@link #AT_MOST} or {@link
-   * #CENTER_INSIDE}.
-   *
-   * <p>On pre-KitKat devices, {@link Downsampler} treats this as equivalent to {@link #AT_MOST}
-   * because only power of two downsampling can be used.
-   */
-  public static final DownsampleStrategy FIT_CENTER = new FitCenter();
-
-  /**
-   * Scales, maintaining the original aspect ratio, so that one of the image's dimensions is exactly
-   * equal to the requested size and the other dimension is greater than or equal to the requested
-   * size.
-   *
-   * <p>This method will upscale if the requested width and height are greater than the source width
-   * and height. To avoid upscaling, use {@link #AT_LEAST}, {@link #AT_MOST}, or {@link
-   * #CENTER_INSIDE}.
-   *
-   * <p>On pre-KitKat devices, {@link Downsampler} treats this as equivalent to {@link #AT_LEAST}
-   * because only power of two downsampling can be used.
-   */
-  public static final DownsampleStrategy CENTER_OUTSIDE = new CenterOutside();
 
   /**
    * Downsamples so the image's smallest dimension is between the given dimensions and 2x the given
@@ -67,13 +47,38 @@ public abstract class DownsampleStrategy {
   public static final DownsampleStrategy AT_MOST = new AtMost();
 
   /**
-   * Returns the original image if it is smaller than the target, otherwise it will be downscaled
-   * maintaining its original aspect ratio, so that one of the image's dimensions is exactly equal
-   * to the requested size and the other is less or equal than the requested size.
+   * Scales, maintaining the original aspect ratio, so that one of the image's dimensions is exactly
+   * equal to the requested size and the other dimension is less than or equal to the requested
+   * size.
    *
-   * <p>Does not upscale if the requested dimensions are larger than the original dimensions.
+   * <p>This method will upscale if the requested width and height are greater than the source width
+   * and height. To avoid upscaling, use {@link #AT_LEAST}, {@link #AT_MOST} or {@link
+   * #CENTER_INSIDE}.
+   *
+   * <p>On pre-KitKat devices, {@code FIT_CENTER} will downsample by a power of two only so that one
+   * of the image's dimensions is greater than or equal to the requested size. No guarantees are
+   * made about the second dimensions. This is <em>NOT</em> the same as {@link #AT_LEAST} because
+   * only one dimension, not both, are greater than or equal to the requested dimensions, the other
+   * may be smaller.
    */
+  public static final DownsampleStrategy FIT_CENTER = new FitCenter();
+
+  /** Identical to {@link #FIT_CENTER}, but never upscales. */
   public static final DownsampleStrategy CENTER_INSIDE = new CenterInside();
+
+  /**
+   * Scales, maintaining the original aspect ratio, so that one of the image's dimensions is exactly
+   * equal to the requested size and the other dimension is greater than or equal to the requested
+   * size.
+   *
+   * <p>This method will upscale if the requested width and height are greater than the source width
+   * and height. To avoid upscaling, use {@link #AT_LEAST}, {@link #AT_MOST}, or {@link
+   * #CENTER_INSIDE}.
+   *
+   * <p>On pre-KitKat devices, {@link Downsampler} treats this as equivalent to {@link #AT_LEAST}
+   * because only power of two downsampling can be used.
+   */
+  public static final DownsampleStrategy CENTER_OUTSIDE = new CenterOutside();
 
   /** Performs no downsampling or scaling. */
   public static final DownsampleStrategy NONE = new None();
@@ -91,6 +96,10 @@ public abstract class DownsampleStrategy {
   public static final Option<DownsampleStrategy> OPTION =
       Option.memory(
           "com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy", DEFAULT);
+
+  @Synthetic
+  static final boolean IS_BITMAP_FACTORY_SCALING_SUPPORTED =
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 
   /**
    * Returns a float (0, +infinity) indicating a scale factor to apply to the source width and
@@ -133,15 +142,31 @@ public abstract class DownsampleStrategy {
     @Override
     public float getScaleFactor(
         int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight) {
-      float widthPercentage = requestedWidth / (float) sourceWidth;
-      float heightPercentage = requestedHeight / (float) sourceHeight;
-      return Math.min(widthPercentage, heightPercentage);
+      if (IS_BITMAP_FACTORY_SCALING_SUPPORTED) {
+        float widthPercentage = requestedWidth / (float) sourceWidth;
+        float heightPercentage = requestedHeight / (float) sourceHeight;
+
+        return Math.min(widthPercentage, heightPercentage);
+      } else {
+        // Similar to AT_LEAST, but only require one dimension or the other to be >= requested
+        // rather than both.
+        int maxIntegerFactor =
+            Math.max(sourceHeight / requestedHeight, sourceWidth / requestedWidth);
+        return maxIntegerFactor == 0 ? 1f : 1f / Integer.highestOneBit(maxIntegerFactor);
+      }
     }
 
     @Override
     public SampleSizeRounding getSampleSizeRounding(
         int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight) {
-      return SampleSizeRounding.QUALITY;
+      if (IS_BITMAP_FACTORY_SCALING_SUPPORTED) {
+        return SampleSizeRounding.QUALITY;
+      } else {
+        // TODO: This doesn't seem right, but otherwise we can skip a sample size because QUALITY
+        // prefers the smaller of the the width and height scale factor. MEMORY is a hack that
+        // lets us prefer the larger of the two.
+        return SampleSizeRounding.MEMORY;
+      }
     }
   }
 
@@ -246,7 +271,10 @@ public abstract class DownsampleStrategy {
     @Override
     public SampleSizeRounding getSampleSizeRounding(
         int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight) {
-      return SampleSizeRounding.QUALITY;
+      return getScaleFactor(sourceWidth, sourceHeight, requestedWidth, requestedHeight) == 1.f
+          ? SampleSizeRounding.QUALITY
+          : FIT_CENTER.getSampleSizeRounding(
+              sourceWidth, sourceHeight, requestedWidth, requestedHeight);
     }
   }
 
