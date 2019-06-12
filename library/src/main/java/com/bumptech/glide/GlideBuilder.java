@@ -61,6 +61,7 @@ public final class GlideBuilder {
   private boolean isActiveResourceRetentionAllowed;
   @Nullable private List<RequestListener<Object>> defaultRequestListeners;
   private boolean isLoggingRequestOriginsEnabled;
+  private boolean isImageDecoderEnabledForBitmaps;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -449,6 +450,33 @@ public final class GlideBuilder {
     return this;
   }
 
+  /**
+   * Set to {@code true} to make Glide use {@link android.graphics.ImageDecoder} when decoding
+   * {@link Bitmap}s on Android P and higher.
+   *
+   * <p>Specifically {@link android.graphics.ImageDecoder} will be used in place of {@link
+   * com.bumptech.glide.load.resource.bitmap.Downsampler} and {@link android.graphics.BitmapFactory}
+   * to decode {@link Bitmap}s. GIFs, resources, and all other types of {@link
+   * android.graphics.drawable.Drawable}s are not affected by this flag.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   *
+   * <p>When this flag is enabled, Bitmap's will not be re-used when decoding images, though they
+   * may still be used as part of {@link com.bumptech.glide.load.Transformation}s because {@link
+   * android.graphics.ImageDecoder} does not support Bitmap re-use.
+   *
+   * <p>When this flag is enabled {@link
+   * com.bumptech.glide.load.resource.bitmap.Downsampler#FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS} is
+   * ignored. All other {@link com.bumptech.glide.load.resource.bitmap.Downsampler} flags are
+   * obeyed, although there may be subtle behavior differences because many options are subject to
+   * the whims of {@link android.graphics.BitmapFactory} and {@link android.graphics.ImageDecoder}
+   * which may not agree.
+   */
+  public GlideBuilder setImageDecoderEnabledForBitmaps(boolean isEnabled) {
+    isImageDecoderEnabledForBitmaps = isEnabled;
+    return this;
+  }
+
   void setRequestManagerFactory(@Nullable RequestManagerFactory factory) {
     this.requestManagerFactory = factory;
   }
@@ -535,6 +563,7 @@ public final class GlideBuilder {
         defaultRequestOptionsFactory,
         defaultTransitionOptions,
         defaultRequestListeners,
-        isLoggingRequestOriginsEnabled);
+        isLoggingRequestOriginsEnabled,
+        isImageDecoderEnabledForBitmaps);
   }
 }

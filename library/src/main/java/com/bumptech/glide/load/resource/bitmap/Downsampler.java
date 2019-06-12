@@ -34,7 +34,10 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-/** Downsamples, decodes, and rotates images according to their exif orientation. */
+/**
+ * Downsamples, decodes, and rotates images according to their exif orientation using {@link
+ * BitmapFactory}.
+ */
 public final class Downsampler {
   static final String TAG = "Downsampler";
   /**

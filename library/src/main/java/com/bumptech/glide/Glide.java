@@ -57,9 +57,11 @@ import com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
 import com.bumptech.glide.load.resource.bitmap.ByteBufferBitmapDecoder;
+import com.bumptech.glide.load.resource.bitmap.ByteBufferBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.ExifInterfaceImageHeaderParser;
+import com.bumptech.glide.load.resource.bitmap.InputStreamBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
@@ -342,7 +344,8 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull RequestOptionsFactory defaultRequestOptionsFactory,
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
-      boolean isLoggingRequestOriginsEnabled) {
+      boolean isLoggingRequestOriginsEnabled,
+      boolean isImageDecoderEnabledForBitmaps) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
@@ -362,14 +365,28 @@ public class Glide implements ComponentCallbacks2 {
     }
 
     List<ImageHeaderParser> imageHeaderParsers = registry.getImageHeaderParsers();
-    Downsampler downsampler =
-        new Downsampler(imageHeaderParsers, resources.getDisplayMetrics(), bitmapPool, arrayPool);
+
     ByteBufferGifDecoder byteBufferGifDecoder =
         new ByteBufferGifDecoder(context, imageHeaderParsers, bitmapPool, arrayPool);
     ResourceDecoder<ParcelFileDescriptor, Bitmap> parcelFileDescriptorVideoDecoder =
         VideoDecoder.parcel(bitmapPool);
-    ByteBufferBitmapDecoder byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
-    StreamBitmapDecoder streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
+
+    ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
+    ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
+    if (isImageDecoderEnabledForBitmaps && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      streamBitmapDecoder = new InputStreamBitmapImageDecoderResourceDecoder();
+      byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
+    } else {
+      Downsampler downsampler =
+          new Downsampler(
+              registry.getImageHeaderParsers(),
+              resources.getDisplayMetrics(),
+              bitmapPool,
+              arrayPool);
+      byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
+      streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
+    }
+
     ResourceDrawableDecoder resourceDrawableDecoder = new ResourceDrawableDecoder(context);
     ResourceLoader.StreamFactory resourceLoaderStreamFactory =
         new ResourceLoader.StreamFactory(resources);

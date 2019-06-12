@@ -13,7 +13,7 @@ import java.io.File;
  * State and constants for interacting with {@link android.graphics.Bitmap.Config#HARDWARE} on
  * Android O+.
  */
-final class HardwareConfigState {
+public final class HardwareConfigState {
   /**
    * The minimum size in pixels a {@link Bitmap} must be in both dimensions to be created with the
    * {@link Bitmap.Config#HARDWARE} configuration.
@@ -62,7 +62,7 @@ final class HardwareConfigState {
   @GuardedBy("this")
   private boolean isFdSizeBelowHardwareLimit = true;
 
-  static HardwareConfigState getInstance() {
+  public static HardwareConfigState getInstance() {
     if (instance == null) {
       synchronized (HardwareConfigState.class) {
         if (instance == null) {
@@ -79,11 +79,9 @@ final class HardwareConfigState {
     // Singleton constructor.
   }
 
-  @TargetApi(Build.VERSION_CODES.O)
-  boolean setHardwareConfigIfAllowed(
+  public boolean isHardwareConfigAllowed(
       int targetWidth,
       int targetHeight,
-      BitmapFactory.Options optionsWithScaling,
       boolean isHardwareConfigAllowed,
       boolean isExifOrientationRequired) {
     if (!isHardwareConfigAllowed
@@ -93,12 +91,22 @@ final class HardwareConfigState {
       return false;
     }
 
-    boolean result =
-        targetWidth >= MIN_HARDWARE_DIMENSION
-            && targetHeight >= MIN_HARDWARE_DIMENSION
-            // Make sure to call isFdSizeBelowHardwareLimit last because it has side affects.
-            && isFdSizeBelowHardwareLimit();
+    return targetWidth >= MIN_HARDWARE_DIMENSION
+        && targetHeight >= MIN_HARDWARE_DIMENSION
+        // Make sure to call isFdSizeBelowHardwareLimit last because it has side affects.
+        && isFdSizeBelowHardwareLimit();
+  }
 
+  @TargetApi(Build.VERSION_CODES.O)
+  boolean setHardwareConfigIfAllowed(
+      int targetWidth,
+      int targetHeight,
+      BitmapFactory.Options optionsWithScaling,
+      boolean isHardwareConfigAllowed,
+      boolean isExifOrientationRequired) {
+    boolean result =
+        isHardwareConfigAllowed(
+            targetWidth, targetHeight, isHardwareConfigAllowed, isExifOrientationRequired);
     if (result) {
       optionsWithScaling.inPreferredConfig = Bitmap.Config.HARDWARE;
       optionsWithScaling.inMutable = false;
