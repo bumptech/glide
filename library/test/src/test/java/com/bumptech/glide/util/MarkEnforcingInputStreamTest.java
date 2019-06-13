@@ -8,10 +8,8 @@ import java.io.IOException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE)
 public class MarkEnforcingInputStreamTest {
   // An arbitrary number > 0.
   private static final int MARK_LIMIT = 5;

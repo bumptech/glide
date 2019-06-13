@@ -19,7 +19,7 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class RequestManagerFragmentTest {
   private static final String TAG = "tag";
   private Harness[] harnesses;

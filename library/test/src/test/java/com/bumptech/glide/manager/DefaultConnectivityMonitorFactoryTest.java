@@ -12,7 +12,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class DefaultConnectivityMonitorFactoryTest {
   private ConnectivityMonitorFactory factory;
 

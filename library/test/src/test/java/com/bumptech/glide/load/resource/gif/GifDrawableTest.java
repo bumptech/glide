@@ -55,7 +55,6 @@ import org.robolectric.shadows.ShadowCanvas;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
     sdk = 18,
     shadows = {GlideShadowLooper.class, BitmapTrackingShadowCanvas.class})
 public class GifDrawableTest {

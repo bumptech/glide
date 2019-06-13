@@ -21,7 +21,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class StreamGifDecoderTest {
   private static final byte[] GIF_HEADER = new byte[] {0x47, 0x49, 0x46};
 

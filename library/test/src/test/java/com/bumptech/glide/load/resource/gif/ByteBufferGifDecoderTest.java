@@ -33,7 +33,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18, shadows = GlideShadowLooper.class)
+@Config(sdk = 18, shadows = GlideShadowLooper.class)
 public class ByteBufferGifDecoderTest {
   private static final byte[] GIF_HEADER = new byte[] {0x47, 0x49, 0x46};
   private static final int ARRAY_POOL_SIZE_BYTES = 4 * 1024 * 1024;

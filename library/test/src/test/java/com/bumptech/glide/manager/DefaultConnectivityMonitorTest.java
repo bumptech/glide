@@ -29,7 +29,7 @@ import org.robolectric.shadows.ShadowConnectivityManager;
 import org.robolectric.shadows.ShadowNetworkInfo;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18, shadows = PermissionConnectivityManager.class)
+@Config(sdk = 18, shadows = PermissionConnectivityManager.class)
 public class DefaultConnectivityMonitorTest {
   @Mock private ConnectivityMonitor.ConnectivityListener listener;
   private DefaultConnectivityMonitor monitor;

@@ -36,7 +36,7 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18, shadows = GlideShadowLooper.class)
+@Config(sdk = 18, shadows = GlideShadowLooper.class)
 public class RequestManagerRetrieverTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
