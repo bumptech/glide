@@ -43,7 +43,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class BitmapPreFillRunnerTest {
   @Mock private BitmapPreFillRunner.Clock clock;
   @Mock private BitmapPool pool;

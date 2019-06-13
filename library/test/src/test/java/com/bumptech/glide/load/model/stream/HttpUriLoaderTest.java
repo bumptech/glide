@@ -19,7 +19,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class HttpUriLoaderTest {
   private static final int IMAGE_SIDE = 100;
   private static final Options OPTIONS = new Options();

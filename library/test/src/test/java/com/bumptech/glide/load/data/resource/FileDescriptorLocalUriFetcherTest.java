@@ -28,7 +28,6 @@ import org.robolectric.shadow.api.Shadow;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
     sdk = 18,
     shadows = {ContentResolverShadow.class})
 public class FileDescriptorLocalUriFetcherTest {

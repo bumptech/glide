@@ -20,11 +20,9 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowBitmap;
 
-/**
- * Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}.
- */
+/** Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}. */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(sdk = 18)
 public class GifDecoderTest {
 
   private MockProvider provider;

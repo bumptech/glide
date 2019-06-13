@@ -24,7 +24,7 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowActivityManager;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 19, shadows = LowRamActivityManager.class)
+@Config(sdk = 19, shadows = LowRamActivityManager.class)
 public class MemorySizeCalculatorTest {
   private MemorySizeHarness harness;
   private int initialSdkVersion;
