@@ -172,9 +172,10 @@ public class Glide implements ComponentCallbacks2 {
   @NonNull
   public static Glide get(@NonNull Context context) {
     if (glide == null) {
+      GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
       synchronized (Glide.class) {
         if (glide == null) {
-          checkAndInitializeGlide(context);
+          checkAndInitializeGlide(context, annotationGeneratedModule);
         }
       }
     }
@@ -182,7 +183,9 @@ public class Glide implements ComponentCallbacks2 {
     return glide;
   }
 
-  private static void checkAndInitializeGlide(@NonNull Context context) {
+  @GuardedBy("Glide.class")
+  private static void checkAndInitializeGlide(
+      @NonNull Context context, @Nullable GeneratedAppGlideModule generatedAppGlideModule) {
     // In the thread running initGlide(), one or more classes may call Glide.get(context).
     // Without this check, those calls could trigger infinite recursion.
     if (isInitializing) {
@@ -191,7 +194,7 @@ public class Glide implements ComponentCallbacks2 {
               + " use the provided Glide instance instead");
     }
     isInitializing = true;
-    initializeGlide(context);
+    initializeGlide(context, generatedAppGlideModule);
     isInitializing = false;
   }
 
@@ -210,11 +213,14 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @VisibleForTesting
-  public static synchronized void init(@NonNull Context context, @NonNull GlideBuilder builder) {
-    if (Glide.glide != null) {
-      tearDown();
+  public static void init(@NonNull Context context, @NonNull GlideBuilder builder) {
+    GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
+    synchronized (Glide.class) {
+      if (Glide.glide != null) {
+        tearDown();
+      }
+      initializeGlide(context, builder, annotationGeneratedModule);
     }
-    initializeGlide(context, builder);
   }
 
   @VisibleForTesting
@@ -226,14 +232,19 @@ public class Glide implements ComponentCallbacks2 {
     glide = null;
   }
 
-  private static void initializeGlide(@NonNull Context context) {
-    initializeGlide(context, new GlideBuilder());
+  @GuardedBy("Glide.class")
+  private static void initializeGlide(
+      @NonNull Context context, @Nullable GeneratedAppGlideModule generatedAppGlideModule) {
+    initializeGlide(context, new GlideBuilder(), generatedAppGlideModule);
   }
 
+  @GuardedBy("Glide.class")
   @SuppressWarnings("deprecation")
-  private static void initializeGlide(@NonNull Context context, @NonNull GlideBuilder builder) {
+  private static void initializeGlide(
+      @NonNull Context context,
+      @NonNull GlideBuilder builder,
+      @Nullable GeneratedAppGlideModule annotationGeneratedModule) {
     Context applicationContext = context.getApplicationContext();
-    GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
     List<com.bumptech.glide.module.GlideModule> manifestModules = Collections.emptyList();
     if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
       manifestModules = new ManifestParser(applicationContext).parse();
