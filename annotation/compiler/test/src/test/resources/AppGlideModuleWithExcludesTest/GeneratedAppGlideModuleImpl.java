@@ -11,7 +11,7 @@ import java.util.Set;
 final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   private final AppModuleWithExcludes appGlideModule;
 
-  GeneratedAppGlideModuleImpl() {
+  GeneratedAppGlideModuleImpl(Context context) {
     appGlideModule = new AppModuleWithExcludes();
     if (Log.isLoggable("Glide", Log.DEBUG)) {
       Log.d("Glide", "Discovered AppGlideModule from annotation: com.bumptech.glide.test.AppModuleWithExcludes");
