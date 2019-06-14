@@ -208,17 +208,6 @@ public class ActiveResourcesTest {
   }
 
   @Test
-  public void get_withQueuedReference_doesNotNotifyListener() {
-    EngineResource<Object> engineResource = newCacheableEngineResource();
-    resources.activate(key, engineResource);
-
-    ResourceWeakReference weakRef = resources.activeEngineResources.get(key);
-    weakRef.enqueue();
-
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
-  }
-
-  @Test
   public void queueIdle_withQueuedReferenceRetrievedFromGet_notifiesListener() {
     EngineResource<Object> engineResource = newCacheableEngineResource();
     resources.activate(key, engineResource);
