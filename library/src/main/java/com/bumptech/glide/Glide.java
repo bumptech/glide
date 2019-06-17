@@ -172,8 +172,7 @@ public class Glide implements ComponentCallbacks2 {
   @NonNull
   public static Glide get(@NonNull Context context) {
     if (glide == null) {
-      GeneratedAppGlideModule annotationGeneratedModule =
-          getAnnotationGeneratedGlideModules(context.getApplicationContext());
+      GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
       synchronized (Glide.class) {
         if (glide == null) {
           checkAndInitializeGlide(context, annotationGeneratedModule);
@@ -215,7 +214,7 @@ public class Glide implements ComponentCallbacks2 {
 
   @VisibleForTesting
   public static void init(@NonNull Context context, @NonNull GlideBuilder builder) {
-    GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules(context);
+    GeneratedAppGlideModule annotationGeneratedModule = getAnnotationGeneratedGlideModules();
     synchronized (Glide.class) {
       if (Glide.glide != null) {
         tearDown();
@@ -306,15 +305,14 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @Nullable
-  @SuppressWarnings({"unchecked", "TryWithIdenticalCatches"})
-  private static GeneratedAppGlideModule getAnnotationGeneratedGlideModules(Context context) {
+  @SuppressWarnings({"unchecked", "deprecation", "TryWithIdenticalCatches"})
+  private static GeneratedAppGlideModule getAnnotationGeneratedGlideModules() {
     GeneratedAppGlideModule result = null;
     try {
       Class<GeneratedAppGlideModule> clazz =
           (Class<GeneratedAppGlideModule>)
               Class.forName("com.bumptech.glide.GeneratedAppGlideModuleImpl");
-      result =
-          clazz.getDeclaredConstructor(Context.class).newInstance(context.getApplicationContext());
+      result = clazz.getDeclaredConstructor().newInstance();
     } catch (ClassNotFoundException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(
