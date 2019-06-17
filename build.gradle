@@ -174,5 +174,11 @@ subprojects { project ->
                 }
             }
         }
+
+        if (project.plugins.hasPlugin('com.android.library')) {
+            android.libraryVariants.all {
+                it.generateBuildConfigProvider.configure { enabled = false }
+            }
+        }
     }
 }

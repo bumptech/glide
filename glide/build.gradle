@@ -70,7 +70,7 @@ static def getAndroidLibraryVariants(projects, variantName) {
 def getSourceFilesForVariantJar(variantName) {
     getAndroidLibraryVariantsForJar(variantName).collect { variant -> 
         variant.getJavaCompileProvider().get().source.findAll { 
-            return !it.getName().equals("R.java") && !it.getName().equals("BuildConfig.java")
+            return !it.getName().equals("R.java")
         }
     }
 }
@@ -123,7 +123,6 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
                     "${getAndroidSdkDirectory()}/docs/reference")
         }
 
-        exclude '**/BuildConfig.java'
         exclude '**/R.java'
     }
 
@@ -145,7 +144,6 @@ jar {
             }
     )
     exclude "**/R.class"
-    exclude "**/BuildConfig.class"
     exclude "**/R\$*.class"
     exclude "android/**"
 }

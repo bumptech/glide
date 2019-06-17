@@ -181,7 +181,6 @@ afterEvaluate { project ->
                         "${getAndroidSdkDirectory}/docs/reference")
             }
 
-            exclude '**/BuildConfig.java'
             exclude '**/R.java'
         }
 
@@ -205,7 +204,6 @@ afterEvaluate { project ->
         task androidLibraryJar(type: Jar, dependsOn: compileDebugJavaWithJavac /* == variant.javaCompile */) {
             from compileDebugJavaWithJavac.destinationDir
             exclude '**/R.class'
-            exclude '**/BuildConfig.class'
             exclude '**/R$*.class'
             baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
         }
