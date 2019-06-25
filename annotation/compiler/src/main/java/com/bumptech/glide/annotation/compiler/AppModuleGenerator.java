@@ -16,8 +16,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 
 /**
  * Generates a new implementation of a AppGlideModule that calls all included LibraryGlideModules
@@ -80,9 +86,11 @@ final class AppModuleGenerator {
   private static final String GENERATED_APP_MODULE_IMPL_SIMPLE_NAME = "GeneratedAppGlideModuleImpl";
   private static final String GENERATED_ROOT_MODULE_SIMPLE_NAME = "GeneratedAppGlideModule";
 
+  private final ProcessingEnvironment processingEnv;
   private final ProcessorUtil processorUtil;
 
-  AppModuleGenerator(ProcessorUtil processorUtil) {
+  AppModuleGenerator(ProcessingEnvironment processingEnv, ProcessorUtil processorUtil) {
+    this.processingEnv = processingEnv;
     this.processorUtil = processorUtil;
   }
 
@@ -231,12 +239,53 @@ final class AppModuleGenerator {
     return registerComponents.build();
   }
 
+  private boolean doesAppGlideModuleConstructorAcceptContext(ClassName appGlideModule) {
+    TypeElement appGlideModuleType =
+        processingEnv.getElementUtils().getTypeElement(appGlideModule.reflectionName());
+
+    for (Element enclosed : appGlideModuleType.getEnclosedElements()) {
+      if (enclosed.getKind() == ElementKind.CONSTRUCTOR) {
+        ExecutableElement constructor = (ExecutableElement) enclosed;
+        List<? extends VariableElement> parameters = constructor.getParameters();
+        if (parameters.isEmpty()) {
+          return false;
+        } else if (parameters.size() > 1) {
+          throw new IllegalStateException(
+              "Constructor for "
+                  + appGlideModule
+                  + " accepts too many parameters"
+                  + ", it should accept no parameters, or a single Context");
+        } else {
+          VariableElement parameter = parameters.get(0);
+          TypeMirror parameterType = parameter.asType();
+          TypeMirror contextType =
+              processingEnv.getElementUtils().getTypeElement("android.content.Context").asType();
+          if (!processingEnv.getTypeUtils().isSameType(parameterType, contextType)) {
+            throw new IllegalStateException("Unrecognized type: " + parameterType);
+          }
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   private MethodSpec generateConstructor(
       ClassName appGlideModule,
       Collection<String> libraryGlideModuleClassNames,
       Collection<String> excludedGlideModuleClassNames) {
-    MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder();
-    constructorBuilder.addStatement("appGlideModule = new $T()", appGlideModule);
+    MethodSpec.Builder constructorBuilder =
+        MethodSpec.constructorBuilder()
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(
+                ParameterSpec.builder(ClassName.get("android.content", "Context"), "context")
+                    .build());
+
+    if (doesAppGlideModuleConstructorAcceptContext(appGlideModule)) {
+      constructorBuilder.addStatement("appGlideModule = new $T(context)", appGlideModule);
+    } else {
+      constructorBuilder.addStatement("appGlideModule = new $T()", appGlideModule);
+    }
 
     ClassName androidLogName = ClassName.get("android.util", "Log");
 

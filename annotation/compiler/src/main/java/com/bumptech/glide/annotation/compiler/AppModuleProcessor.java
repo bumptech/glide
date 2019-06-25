@@ -36,7 +36,7 @@ final class AppModuleProcessor {
     this.processingEnv = processingEnv;
     this.processorUtil = processorUtil;
 
-    appModuleGenerator = new AppModuleGenerator(processorUtil);
+    appModuleGenerator = new AppModuleGenerator(processingEnv, processorUtil);
     requestOptionsGenerator = new RequestOptionsGenerator(processingEnv, processorUtil);
     requestManagerGenerator = new RequestManagerGenerator(processingEnv, processorUtil);
     requestManagerFactoryGenerator =
