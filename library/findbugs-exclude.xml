@@ -60,4 +60,10 @@
       <Bug pattern="IS2_INCONSISTENT_SYNC" />
     </Match>
 
+     <!-- Inconsistent synchronization is due to synchronizing on Engine/listener to avoid deadlock only. -->
+    <Match>
+      <Class name="com.bumptech.glide.load.engine.EngineJob" />
+      <Bug pattern="IS2_INCONSISTENT_SYNC" />
+    </Match>
+
 </FindBugsFilter>
