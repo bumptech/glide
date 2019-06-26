@@ -76,22 +76,25 @@ public final class Downsampler {
    * Indicates that it's safe or unsafe to decode {@link Bitmap}s with {@link
    * Bitmap.Config#HARDWARE}.
    *
-   * <p>Callers should almost never set this value to {@code true} manually. Glide will already do
-   * so when Glide believes it's safe to do (when no transformations are applied). Instead, callers
-   * can set this value to {@code false} to prevent Glide from decoding hardware bitmaps if Glide is
-   * unable to detect that hardware bitmaps are unsafe. For example, you should set this to {@code
-   * false} if you plan to draw it to a software {@link android.graphics.Canvas} or if you plan to
-   * inspect the {@link Bitmap}s pixels with {@link Bitmap#getPixel(int, int)} or {@link
+   * <p>Callers can set this value to {@code false} to prevent Glide from decoding hardware bitmaps
+   * if Glide is unable to detect that hardware bitmaps are unsafe. For example, you should set this
+   * to {@code false} if you plan to draw it to a software {@link android.graphics.Canvas} or if you
+   * plan to inspect the {@link Bitmap}s pixels with {@link Bitmap#getPixel(int, int)} or {@link
    * Bitmap#getPixels(int[], int, int, int, int, int, int)}.
    *
    * <p>Callers can disable hardware {@link Bitmap}s for all loads using {@link
-   * com.bumptech.glide.GlideBuilder#setDefaultRequestOptions(RequestOptions)}.
+   * com.bumptech.glide.GlideBuilder#setDefaultRequestOptions(RequestOptions)} and {@link
+   * com.bumptech.glide.request.BaseRequestOptions#disallowHardwareConfig()}.
+   *
+   * <p>This option may be ignored by Glide when it can't be used, even if callers set this value to
+   * {@code true}. For example, if a transformation is requested and required, Glide needs a
+   * software Bitmap to run the transformation and so will not produce a hardware Bitmap.
    *
    * <p>This option is ignored unless we're on Android O+.
    */
   public static final Option<Boolean> ALLOW_HARDWARE_CONFIG =
       Option.memory(
-          "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", false);
+          "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", true);
 
   private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
   private static final String ICO_MIME_TYPE = "image/x-ico";
