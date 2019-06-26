@@ -152,7 +152,7 @@ public class Engine
    * @param height The target height in pixels of the desired resource.
    * @param cb The callback that will be called when the load completes.
    */
-  public synchronized <R> LoadStatus load(
+  public <R> LoadStatus load(
       GlideContext glideContext,
       Object model,
       Key signature,
@@ -185,23 +185,64 @@ public class Engine
             transcodeClass,
             options);
 
-    EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
-    if (active != null) {
-      cb.onResourceReady(active, DataSource.MEMORY_CACHE);
-      if (VERBOSE_IS_LOGGABLE) {
-        logWithTimeAndKey("Loaded resource from active resources", startTime, key);
+    EngineResource<?> memoryResource;
+    synchronized (this) {
+      memoryResource = loadFromMemory(key, isMemoryCacheable, startTime);
+
+      if (memoryResource == null) {
+        return waitForExistingOrStartNewJob(
+            glideContext,
+            model,
+            signature,
+            width,
+            height,
+            resourceClass,
+            transcodeClass,
+            priority,
+            diskCacheStrategy,
+            transformations,
+            isTransformationRequired,
+            isScaleOnlyOrNoTransform,
+            options,
+            isMemoryCacheable,
+            useUnlimitedSourceExecutorPool,
+            useAnimationPool,
+            onlyRetrieveFromCache,
+            cb,
+            callbackExecutor,
+            key,
+            startTime);
       }
-      return null;
     }
 
-    EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
-    if (cached != null) {
-      cb.onResourceReady(cached, DataSource.MEMORY_CACHE);
-      if (VERBOSE_IS_LOGGABLE) {
-        logWithTimeAndKey("Loaded resource from cache", startTime, key);
-      }
-      return null;
-    }
+    // Avoid calling back while holding the engine lock, doing so makes it easier for callers to
+    // deadlock.
+    cb.onResourceReady(memoryResource, DataSource.MEMORY_CACHE);
+    return null;
+  }
+
+  private <R> LoadStatus waitForExistingOrStartNewJob(
+      GlideContext glideContext,
+      Object model,
+      Key signature,
+      int width,
+      int height,
+      Class<?> resourceClass,
+      Class<R> transcodeClass,
+      Priority priority,
+      DiskCacheStrategy diskCacheStrategy,
+      Map<Class<?>, Transformation<?>> transformations,
+      boolean isTransformationRequired,
+      boolean isScaleOnlyOrNoTransform,
+      Options options,
+      boolean isMemoryCacheable,
+      boolean useUnlimitedSourceExecutorPool,
+      boolean useAnimationPool,
+      boolean onlyRetrieveFromCache,
+      ResourceCallback cb,
+      Executor callbackExecutor,
+      EngineKey key,
+      long startTime) {
 
     EngineJob<?> current = jobs.get(key, onlyRetrieveFromCache);
     if (current != null) {
@@ -250,15 +291,38 @@ public class Engine
     return new LoadStatus(cb, engineJob);
   }
 
+  @Nullable
+  private EngineResource<?> loadFromMemory(
+      EngineKey key, boolean isMemoryCacheable, long startTime) {
+    if (!isMemoryCacheable) {
+      return null;
+    }
+
+    EngineResource<?> active = loadFromActiveResources(key);
+    if (active != null) {
+      if (VERBOSE_IS_LOGGABLE) {
+        logWithTimeAndKey("Loaded resource from active resources", startTime, key);
+      }
+      return active;
+    }
+
+    EngineResource<?> cached = loadFromCache(key);
+    if (cached != null) {
+      if (VERBOSE_IS_LOGGABLE) {
+        logWithTimeAndKey("Loaded resource from cache", startTime, key);
+      }
+      return cached;
+    }
+
+    return null;
+  }
+
   private static void logWithTimeAndKey(String log, long startTime, Key key) {
     Log.v(TAG, log + " in " + LogTime.getElapsedMillis(startTime) + "ms, key: " + key);
   }
 
   @Nullable
-  private EngineResource<?> loadFromActiveResources(Key key, boolean isMemoryCacheable) {
-    if (!isMemoryCacheable) {
-      return null;
-    }
+  private EngineResource<?> loadFromActiveResources(Key key) {
     EngineResource<?> active = activeResources.get(key);
     if (active != null) {
       active.acquire();
@@ -267,11 +331,7 @@ public class Engine
     return active;
   }
 
-  private EngineResource<?> loadFromCache(Key key, boolean isMemoryCacheable) {
-    if (!isMemoryCacheable) {
-      return null;
-    }
-
+  private EngineResource<?> loadFromCache(Key key) {
     EngineResource<?> cached = getEngineResourceFromCache(key);
     if (cached != null) {
       cached.acquire();
