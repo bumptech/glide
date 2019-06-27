@@ -306,7 +306,7 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @Nullable
-  @SuppressWarnings({"unchecked", "TryWithIdenticalCatches"})
+  @SuppressWarnings({"unchecked", "TryWithIdenticalCatches", "PMD.UnusedFormalParameter"})
   private static GeneratedAppGlideModule getAnnotationGeneratedGlideModules(Context context) {
     GeneratedAppGlideModule result = null;
     try {
@@ -345,6 +345,7 @@ public class Glide implements ComponentCallbacks2 {
         e);
   }
 
+  @SuppressWarnings("PMD.UnusedFormalParameter")
   Glide(
       @NonNull Context context,
       @NonNull Engine engine,
@@ -358,7 +359,8 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
       boolean isLoggingRequestOriginsEnabled,
-      boolean isImageDecoderEnabledForBitmaps) {
+      boolean isImageDecoderEnabledForBitmaps,
+      int hardwareBitmapFdLimit) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;

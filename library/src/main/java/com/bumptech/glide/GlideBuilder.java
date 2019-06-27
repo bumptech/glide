@@ -21,6 +21,7 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.load.resource.bitmap.HardwareConfigState;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 /** A builder class for setting default structural classes for Glide to use. */
+@SuppressWarnings("PMD.ImmutableField")
 public final class GlideBuilder {
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions = new ArrayMap<>();
   private Engine engine;
@@ -61,7 +63,10 @@ public final class GlideBuilder {
   private boolean isActiveResourceRetentionAllowed;
   @Nullable private List<RequestListener<Object>> defaultRequestListeners;
   private boolean isLoggingRequestOriginsEnabled;
+
   private boolean isImageDecoderEnabledForBitmaps;
+
+  private int hardwareBitmapFdLimit = HardwareConfigState.DEFAULT_MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -564,6 +569,7 @@ public final class GlideBuilder {
         defaultTransitionOptions,
         defaultRequestListeners,
         isLoggingRequestOriginsEnabled,
-        isImageDecoderEnabledForBitmaps);
+        isImageDecoderEnabledForBitmaps,
+        hardwareBitmapFdLimit);
   }
 }

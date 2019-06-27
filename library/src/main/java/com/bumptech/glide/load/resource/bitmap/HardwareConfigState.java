@@ -49,8 +49,15 @@ public final class HardwareConfigState {
   /**
    * 700 with an error of 50 Bitmaps in between at two FDs each lets us use up to 800 FDs for
    * hardware Bitmaps.
+   *
+   * <p>Prior to P, the limit per process was 1024 FDs. In P, the limit was updated to 32k FDs per
+   * process.
+   *
+   * <p>Access to this variable will be removed in a future version without deprecation.
    */
-  private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS = 700;
+  public static final int DEFAULT_MAXIMUM_FDS_FOR_HARDWARE_CONFIGS = 700;
+
+  private static volatile int fdSizeLimit = DEFAULT_MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
 
   private static volatile HardwareConfigState instance;
 
@@ -143,7 +150,7 @@ public final class HardwareConfigState {
     if (++decodesSinceLastFdCheck >= MINIMUM_DECODES_BETWEEN_FD_CHECKS) {
       decodesSinceLastFdCheck = 0;
       int currentFds = FD_SIZE_LIST.list().length;
-      isFdSizeBelowHardwareLimit = currentFds < MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
+      isFdSizeBelowHardwareLimit = currentFds < fdSizeLimit;
 
       if (!isFdSizeBelowHardwareLimit && Log.isLoggable(Downsampler.TAG, Log.WARN)) {
         Log.w(
@@ -152,7 +159,7 @@ public final class HardwareConfigState {
                 + ", file descriptors "
                 + currentFds
                 + ", limit "
-                + MAXIMUM_FDS_FOR_HARDWARE_CONFIGS);
+                + fdSizeLimit);
       }
     }
 
