@@ -2,11 +2,11 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
+import androidx.core.os.BuildCompat;
 import com.bumptech.glide.Glide.RequestOptionsFactory;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.Engine;
@@ -460,8 +460,8 @@ public final class GlideBuilder {
    * Set to {@code true} to make Glide use {@link android.graphics.ImageDecoder} when decoding
    * {@link Bitmap}s on Android P and higher.
    *
-   * <p>Calls to this method on versions of Android less than P are ignored. Although ImageDecoder
-   * was added in Android O a bug prevents it from scaling images with exif orientations until P.
+   * <p>Calls to this method on versions of Android less than Q are ignored. Although ImageDecoder
+   * was added in Android O a bug prevents it from scaling images with exif orientations until Q.
    * See b/136096254.
    *
    * <p>Specifically {@link android.graphics.ImageDecoder} will be used in place of {@link
@@ -483,7 +483,7 @@ public final class GlideBuilder {
    * which may not agree.
    */
   public GlideBuilder setImageDecoderEnabledForBitmaps(boolean isEnabled) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+    if (!BuildCompat.isAtLeastQ()) {
       return this;
     }
     isImageDecoderEnabledForBitmaps = isEnabled;
