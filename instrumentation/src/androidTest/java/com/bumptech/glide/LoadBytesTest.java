@@ -4,8 +4,8 @@ import static com.bumptech.glide.test.GlideOptions.skipMemoryCacheOf;
 import static com.bumptech.glide.test.Matchers.anyDrawable;
 import static com.bumptech.glide.test.Matchers.anyDrawableTarget;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 

@@ -97,13 +97,6 @@
             <message key="import.illegal" value="Import from illegal package - {0}. Use org.mockito.Matchers to instantiate argument matchers." />
         </module>
 
-        <!-- ArgumentMatchers isn't available internally, the same methods are available on org.mockito.Mockito. -->
-        <module name="IllegalImport">
-            <property name="illegalClasses" value="org\.mockito\.ArgumentMatchers.*" />
-            <property name="regexp" value="true" />
-            <message key="import.illegal" value="Import from illegal class - {0}. Use org.mockito.Mockito to statically import matcher methods." />
-        </module>
-
         <!-- Modifier Checks. -->
         <!-- See http://checkstyle.sourceforge.net/config_modifier.html -->
         <module name="ModifierOrder" />
