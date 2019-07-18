@@ -50,9 +50,13 @@ public class ViewAnimationTest {
   @Test
   public void testStartsAnimationOnAnimate() {
     Animation animation = mock(Animation.class);
-    when(viewTransitionAnimationFactory.build(any(Context.class))).thenReturn(animation);
+    when(viewTransitionAnimationFactory.build(anyContextOrNull())).thenReturn(animation);
     viewAnimation.transition(null, adapter);
     verify(view).clearAnimation();
     verify(view).startAnimation(eq(animation));
+  }
+
+  private static Context anyContextOrNull() {
+    return any();
   }
 }

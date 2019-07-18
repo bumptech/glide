@@ -50,7 +50,7 @@ public class ViewTransitionAnimationFactoryTest {
         factory.build(DataSource.DATA_DISK_CACHE, true /*isFirstResource*/);
 
     Animation animation = mock(Animation.class);
-    when(viewTransitionAnimationFactory.build(any(Context.class))).thenReturn(animation);
+    when(viewTransitionAnimationFactory.build(anyContextOrNull())).thenReturn(animation);
 
     Transition.ViewAdapter adapter = mock(Transition.ViewAdapter.class);
     View view = mock(View.class);
@@ -58,5 +58,9 @@ public class ViewTransitionAnimationFactoryTest {
     transition.transition(new Object(), adapter);
 
     verify(view).startAnimation(eq(animation));
+  }
+
+  private static Context anyContextOrNull() {
+    return any();
   }
 }
