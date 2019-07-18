@@ -109,7 +109,10 @@ public class RequestManagerRetriever implements Handler.Callback {
       } else if (context instanceof Activity) {
         return get((Activity) context);
       } else if (context instanceof ContextWrapper) {
-        return get(((ContextWrapper) context).getBaseContext());
+        Context baseContext = ((ContextWrapper) context).getBaseContext();
+        if (baseContext.getApplicationContext() != null) {
+          return get(baseContext);
+        }
       }
     }
 
@@ -130,13 +133,13 @@ public class RequestManagerRetriever implements Handler.Callback {
   @NonNull
   public RequestManager get(@NonNull Fragment fragment) {
     Preconditions.checkNotNull(
-        fragment.getActivity(),
+        fragment.getContext(),
         "You cannot start a load on a fragment before it is attached or after it is destroyed");
     if (Util.isOnBackgroundThread()) {
-      return get(fragment.getActivity().getApplicationContext());
+      return get(fragment.getContext().getApplicationContext());
     } else {
       FragmentManager fm = fragment.getChildFragmentManager();
-      return supportFragmentGet(fragment.getActivity(), fm, fragment, fragment.isVisible());
+      return supportFragmentGet(fragment.getContext(), fm, fragment, fragment.isVisible());
     }
   }
 

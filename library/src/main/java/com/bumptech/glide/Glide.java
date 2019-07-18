@@ -769,7 +769,7 @@ public class Glide implements ComponentCallbacks2 {
    */
   @NonNull
   public static RequestManager with(@NonNull Fragment fragment) {
-    return getRetriever(fragment.getActivity()).get(fragment);
+    return getRetriever(fragment.getContext()).get(fragment);
   }
 
   /**
