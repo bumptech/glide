@@ -859,6 +859,9 @@ public final class Downsampler {
     decodeBitmapOptions.inJustDecodeBounds = false;
     decodeBitmapOptions.inDensity = 0;
     decodeBitmapOptions.inTargetDensity = 0;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      decodeBitmapOptions.outConfig = null;
+    }
     decodeBitmapOptions.outWidth = 0;
     decodeBitmapOptions.outHeight = 0;
     decodeBitmapOptions.outMimeType = null;
