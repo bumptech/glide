@@ -166,7 +166,7 @@ public class SingleRequestTest {
     SingleRequest<List> request = builder.build();
     request.clear();
 
-    verify(builder.target).onLoadCleared(any(Drawable.class));
+    verify(builder.target).onLoadCleared(anyDrawableOrNull());
   }
 
   @Test
@@ -175,7 +175,7 @@ public class SingleRequestTest {
     request.clear();
     request.clear();
 
-    verify(builder.target, times(1)).onLoadCleared(any(Drawable.class));
+    verify(builder.target, times(1)).onLoadCleared(anyDrawableOrNull());
   }
 
   @Test
@@ -1015,6 +1015,10 @@ public class SingleRequestTest {
     }
   }
 
+  private static Drawable anyDrawableOrNull() {
+    return any();
+  }
+
   // TODO do we want to move these to Util?
   @SuppressWarnings("unchecked")
   private static <T> Transition<T> mockTransition() {
@@ -1032,7 +1036,7 @@ public class SingleRequestTest {
 
   @SuppressWarnings("unchecked")
   private static <T> Transition<T> anyTransition() {
-    return any(Transition.class);
+    return any();
   }
 
   private static Executor anyExecutor() {

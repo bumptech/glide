@@ -71,7 +71,7 @@ public class ReEncodingGifResourceEncoderTest {
     when(factory.buildDecoder(any(GifDecoder.BitmapProvider.class))).thenReturn(decoder);
     when(factory.buildParser()).thenReturn(parser);
     when(factory.buildEncoder()).thenReturn(gifEncoder);
-    when(factory.buildFrameResource(any(Bitmap.class), any(BitmapPool.class)))
+    when(factory.buildFrameResource(anyBitmapOrNull(), any(BitmapPool.class)))
         .thenReturn(frameResource);
 
     // TODO Util.anyResource once Util is moved to testutil module (remove unchecked above!)
@@ -178,7 +178,7 @@ public class ReEncodingGifResourceEncoderTest {
   @Test
   public void testSetsDelayOnEncoderAfterAddingFrame() {
     when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
-    when(gifEncoder.addFrame(any(Bitmap.class))).thenReturn(true);
+    when(gifEncoder.addFrame(anyBitmapOrNull())).thenReturn(true);
 
     when(decoder.getFrameCount()).thenReturn(1);
     when(decoder.getNextFrame()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565));
@@ -191,7 +191,7 @@ public class ReEncodingGifResourceEncoderTest {
 
     InOrder order = inOrder(gifEncoder, decoder);
     order.verify(decoder).advance();
-    order.verify(gifEncoder).addFrame(any(Bitmap.class));
+    order.verify(gifEncoder).addFrame(anyBitmapOrNull());
     order.verify(gifEncoder).setDelay(eq(expectedDelay));
     order.verify(decoder).advance();
   }
@@ -218,7 +218,7 @@ public class ReEncodingGifResourceEncoderTest {
     when(decoder.getNextFrame()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
 
     when(gifEncoder.start(any(OutputStream.class))).thenReturn(true);
-    when(gifEncoder.addFrame(any(Bitmap.class))).thenReturn(false);
+    when(gifEncoder.addFrame(anyBitmapOrNull())).thenReturn(false);
 
     assertFalse(encoder.encode(resource, file, options));
   }
@@ -332,5 +332,9 @@ public class ReEncodingGifResourceEncoderTest {
 
   private static Context anyContext() {
     return any(Context.class);
+  }
+
+  private static Bitmap anyBitmapOrNull() {
+    return any();
   }
 }

@@ -142,7 +142,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.job, never()).start(any(DecodeJob.class));
+    verify(harness.job, never()).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -250,7 +250,7 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.job, never()).start(any(DecodeJob.class));
+    verify(harness.job, never()).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -460,7 +460,7 @@ public class EngineTest {
               }
             })
         .when(harness.job)
-        .start(any(DecodeJob.class));
+        .start(anyDecodeJobOrNull());
     harness.doLoad();
     harness.doLoad();
     verify(harness.cb).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE));
@@ -479,7 +479,7 @@ public class EngineTest {
               }
             })
         .when(harness.job)
-        .start(any(DecodeJob.class));
+        .start(anyDecodeJobOrNull());
     harness.doLoad();
     harness.getEngine().onResourceReleased(harness.cacheKey, harness.resource);
     harness.doLoad();
@@ -495,8 +495,8 @@ public class EngineTest {
     harness.onlyRetrieveFromCache = true;
     harness.doLoad();
 
-    verify(first).start(any(DecodeJob.class));
-    verify(second).start(any(DecodeJob.class));
+    verify(first).start(anyDecodeJobOrNull());
+    verify(second).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -509,8 +509,8 @@ public class EngineTest {
     harness.onlyRetrieveFromCache = false;
     harness.doLoad();
 
-    verify(first).start(any(DecodeJob.class));
-    verify(second).start(any(DecodeJob.class));
+    verify(first).start(anyDecodeJobOrNull());
+    verify(second).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -528,8 +528,8 @@ public class EngineTest {
     harness.onlyRetrieveFromCache = false;
     harness.doLoad();
 
-    verify(firstNormal).start(any(DecodeJob.class));
-    verify(secondNormal, never()).start(any(DecodeJob.class));
+    verify(firstNormal).start(anyDecodeJobOrNull());
+    verify(secondNormal, never()).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -547,8 +547,8 @@ public class EngineTest {
     harness.onlyRetrieveFromCache = false;
     harness.doLoad();
 
-    verify(firstNormal).start(any(DecodeJob.class));
-    verify(secondNormal, never()).start(any(DecodeJob.class));
+    verify(firstNormal).start(anyDecodeJobOrNull());
+    verify(secondNormal, never()).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -560,7 +560,7 @@ public class EngineTest {
     harness.job = second;
     harness.doLoad();
 
-    verify(second, never()).start(any(DecodeJob.class));
+    verify(second, never()).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -573,7 +573,7 @@ public class EngineTest {
     harness.job = second;
     harness.doLoad();
 
-    verify(second).start(any(DecodeJob.class));
+    verify(second).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -586,7 +586,7 @@ public class EngineTest {
     harness.job = second;
     harness.doLoad();
 
-    verify(second).start(any(DecodeJob.class));
+    verify(second).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -599,7 +599,7 @@ public class EngineTest {
     harness.job = mock(EngineJob.class);
     harness.doLoad();
 
-    verify(harness.job, never()).start(any(DecodeJob.class));
+    verify(harness.job, never()).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -610,7 +610,7 @@ public class EngineTest {
     harness.job = mock(EngineJob.class);
     harness.doLoad();
 
-    verify(harness.job, never()).start(any(DecodeJob.class));
+    verify(harness.job, never()).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -624,7 +624,7 @@ public class EngineTest {
     harness.job = mock(EngineJob.class);
     harness.doLoad();
 
-    verify(harness.job, never()).start(any(DecodeJob.class));
+    verify(harness.job, never()).start(anyDecodeJobOrNull());
   }
 
   @Test
@@ -636,7 +636,12 @@ public class EngineTest {
     harness.job = mock(EngineJob.class);
     harness.doLoad();
 
-    verify(harness.job, never()).start(any(DecodeJob.class));
+    verify(harness.job, never()).start(anyDecodeJobOrNull());
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private static DecodeJob anyDecodeJobOrNull() {
+    return any();
   }
 
   private static class EngineTestHarness {
