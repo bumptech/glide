@@ -17,6 +17,7 @@ import android.os.Looper;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil.BackgroundTester;
 import com.bumptech.glide.tests.GlideShadowLooper;
@@ -30,7 +31,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
@@ -41,12 +41,15 @@ public class RequestManagerRetrieverTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
   private static final String PARENT_TAG = "parent";
+  private Context appContext;
   private RetrieverHarness[] harnesses;
   private RequestManagerRetriever retriever;
   private int initialSdkVersion;
 
   @Before
   public void setUp() {
+    appContext = ApplicationProvider.getApplicationContext();
+
     retriever = new RequestManagerRetriever(null /*factory*/);
 
     harnesses =
@@ -271,28 +274,53 @@ public class RequestManagerRetrieverTest {
 
   @Test
   public void testHandlesContextWrappersForApplication() {
-    ContextWrapper contextWrapper = new ContextWrapper(RuntimeEnvironment.application);
-    RequestManager requestManager = retriever.get(RuntimeEnvironment.application);
+    ContextWrapper contextWrapper = new ContextWrapper(appContext);
+    RequestManager requestManager = retriever.get(appContext);
 
     assertEquals(requestManager, retriever.get(contextWrapper));
   }
 
   @Test
+  public void testHandlesContextWrapperWithoutApplication() throws Exception {
+    // Create a Context which is not associated with an Application instance.
+    Context baseContext =
+        appContext.createPackageContext(appContext.getPackageName(), /*flags=*/ 0);
+
+    // Sanity-check that Robolectric behaves the same as the framework.
+    assertThat(baseContext.getApplicationContext()).isNull();
+
+    // If a wrapper provides a non-null application Context, unwrapping should terminate at this
+    // wrapper so that the returned Context has a non-null #getApplicationContext.
+    Context contextWithApplicationContext =
+        new ContextWrapper(baseContext) {
+          @Override
+          public Context getApplicationContext() {
+            return this;
+          }
+        };
+
+    Context wrappedContext = new ContextWrapper(contextWithApplicationContext);
+    RequestManager requestManager = retriever.get(appContext);
+
+    assertEquals(requestManager, retriever.get(wrappedContext));
+  }
+
+  @Test
   public void testReturnsNonNullManagerIfGivenApplicationContext() {
-    assertNotNull(retriever.get(RuntimeEnvironment.application));
+    assertNotNull(retriever.get(appContext));
   }
 
   @Test
   public void testApplicationRequestManagerIsNotPausedWhenRetrieved() {
-    RequestManager manager = retriever.get(RuntimeEnvironment.application);
+    RequestManager manager = retriever.get(appContext);
     assertFalse(manager.isPaused());
   }
 
   @Test
   public void testApplicationRequestManagerIsNotReResumedAfterFirstRetrieval() {
-    RequestManager manager = retriever.get(RuntimeEnvironment.application);
+    RequestManager manager = retriever.get(appContext);
     manager.pauseRequests();
-    manager = retriever.get(RuntimeEnvironment.application);
+    manager = retriever.get(appContext);
     assertTrue(manager.isPaused());
   }
 
@@ -303,7 +331,7 @@ public class RequestManagerRetrieverTest {
         new BackgroundTester() {
           @Override
           public void runTest() {
-            retriever.get(RuntimeEnvironment.application);
+            retriever.get(appContext);
           }
         });
   }

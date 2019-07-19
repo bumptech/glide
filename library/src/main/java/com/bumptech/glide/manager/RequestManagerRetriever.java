@@ -108,7 +108,11 @@ public class RequestManagerRetriever implements Handler.Callback {
         return get((FragmentActivity) context);
       } else if (context instanceof Activity) {
         return get((Activity) context);
-      } else if (context instanceof ContextWrapper) {
+      } else if (context instanceof ContextWrapper
+          // Only unwrap a ContextWrapper if the baseContext has a non-null application context.
+          // Context#createPackageContext may return a Context without an Application instance,
+          // in which case a ContextWrapper may be used to attach one.
+          && ((ContextWrapper) context).getBaseContext().getApplicationContext() != null) {
         return get(((ContextWrapper) context).getBaseContext());
       }
     }
