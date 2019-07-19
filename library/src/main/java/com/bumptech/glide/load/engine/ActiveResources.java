@@ -63,6 +63,21 @@ final class ActiveResources {
         });
   }
 
+  synchronized long calculateActiveResourceByteSize() {
+    long result = 0;
+    synchronized (this) {
+      for (ResourceWeakReference resourceWeakReference : activeEngineResources.values()) {
+        EngineResource<?> resource = resourceWeakReference.get();
+        if (resource == null) {
+          continue;
+        }
+
+        result += resource.getSize();
+      }
+    }
+    return result;
+  }
+
   void setListener(ResourceListener listener) {
     synchronized (listener) {
       synchronized (this) {

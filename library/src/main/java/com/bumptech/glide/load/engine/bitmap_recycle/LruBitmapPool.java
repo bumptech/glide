@@ -72,6 +72,11 @@ public class LruBitmapPool implements BitmapPool {
     return maxSize;
   }
 
+  /** Returns the current byte size of the pool. */
+  public synchronized long getCurrentSize() {
+    return currentSize;
+  }
+
   @Override
   public synchronized void setSizeMultiplier(float sizeMultiplier) {
     maxSize = Math.round(initialMaxSize * sizeMultiplier);

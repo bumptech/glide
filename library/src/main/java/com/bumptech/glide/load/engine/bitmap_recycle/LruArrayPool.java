@@ -53,6 +53,16 @@ public final class LruArrayPool implements ArrayPool {
     put(array);
   }
 
+  /** Returns the maximum size in bytes that this pool can contain. */
+  public int getMaxSize() {
+    return maxSize;
+  }
+
+  /** Returns the current byte size of all arrays in the pool. */
+  public synchronized int getCurrentSize() {
+    return currentSize;
+  }
+
   @Override
   public synchronized <T> void put(T array) {
     @SuppressWarnings("unchecked")
@@ -206,8 +216,8 @@ public final class LruArrayPool implements ArrayPool {
     return (ArrayAdapterInterface<T>) adapter;
   }
 
-  // VisibleForTesting
-  int getCurrentSize() {
+  @VisibleForTesting
+  int calculateCurrentSize() {
     int currentSize = 0;
     for (Class<?> type : sortedSizes.keySet()) {
       for (Integer size : sortedSizes.get(type).keySet()) {

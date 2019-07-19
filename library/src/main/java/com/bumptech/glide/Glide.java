@@ -577,6 +577,17 @@ public class Glide implements ComponentCallbacks2 {
     return arrayPool;
   }
 
+  // Exposing this outside of Glide's package could lead to unexpected behavior if the cache is
+  // manipulated by callers.
+  @NonNull
+  MemoryCache getMemoryCache() {
+    return memoryCache;
+  }
+
+  long calculateActiveResourceByteSize() {
+    return engine.calculateActiveResourceByteSize();
+  }
+
   /** @return The context associated with this instance. */
   @NonNull
   public Context getContext() {

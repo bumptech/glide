@@ -34,7 +34,7 @@ public class LruArrayPoolTest {
 
   @Test
   public void testNewPoolIsEmpty() {
-    assertEquals(pool.getCurrentSize(), 0);
+    assertEquals(pool.calculateCurrentSize(), 0);
   }
 
   @Test
@@ -53,21 +53,21 @@ public class LruArrayPoolTest {
   @Test
   public void testItIsSizeLimited() {
     fillPool(pool, MAX_SIZE / ADAPTER.getElementSizeInBytes() + 1, 1);
-    assertTrue(pool.getCurrentSize() <= MAX_SIZE);
+    assertTrue(pool.calculateCurrentSize() <= MAX_SIZE);
   }
 
   @Test
   public void testArrayLargerThanPoolIsNotAdded() {
     pool = new LruArrayPool(MAX_SIZE);
     pool.put(createArray(ARRAY_CLASS, MAX_SIZE / ADAPTER.getElementSizeInBytes() + 1, 0));
-    assertEquals(0, pool.getCurrentSize());
+    assertEquals(0, pool.calculateCurrentSize());
   }
 
   @Test
   public void testClearMemoryRemovesAllArrays() {
     fillPool(pool, MAX_SIZE / ADAPTER.getElementSizeInBytes() + 1, 0);
     pool.clearMemory();
-    assertEquals(0, pool.getCurrentSize());
+    assertEquals(0, pool.calculateCurrentSize());
   }
 
   @Test
@@ -173,7 +173,7 @@ public class LruArrayPoolTest {
     int targetSize = (MAX_SIZE / 2) + 1;
     byte[] toPut = new byte[targetSize];
     pool.put(toPut);
-    assertThat(pool.getCurrentSize()).isEqualTo(0);
+    assertThat(pool.calculateCurrentSize()).isEqualTo(0);
     assertThat(pool.get(targetSize, byte[].class)).isNotSameInstanceAs(toPut);
   }
 
@@ -181,7 +181,7 @@ public class LruArrayPoolTest {
     pool = new LruArrayPool(MAX_SIZE);
     fillPool(pool, fillSize / ADAPTER.getElementSizeInBytes(), 1);
     pool.trimMemory(trimLevel);
-    assertEquals("Failed level=" + trimLevel, expectedSize, pool.getCurrentSize());
+    assertEquals("Failed level=" + trimLevel, expectedSize, pool.calculateCurrentSize());
   }
 
   private void fillPool(LruArrayPool pool, int arrayCount, int arrayLength) {

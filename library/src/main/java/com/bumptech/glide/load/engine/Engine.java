@@ -126,6 +126,17 @@ public class Engine
   }
 
   /**
+   * Calculates an estimated size of all currently referenced active resources, typically those that
+   * are shown in views.
+   *
+   * <p>Because active resources are tracked using WeakReferences, this is only an estimate. Some
+   * dereferenced resources that are eligible for garbage collection may still be counted.
+   */
+  public long calculateActiveResourceByteSize() {
+    return activeResources.calculateActiveResourceByteSize();
+  }
+
+  /**
    * Starts a load for the given arguments.
    *
    * <p>Must be called on the main thread.
