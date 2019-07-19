@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.util.Synthetic;
@@ -111,9 +111,22 @@ public class SupportRequestManagerFragment extends Fragment {
    */
   void setParentFragmentHint(@Nullable Fragment parentFragmentHint) {
     this.parentFragmentHint = parentFragmentHint;
-    if (parentFragmentHint != null && parentFragmentHint.getActivity() != null) {
-      registerFragmentWithRoot(parentFragmentHint.getActivity());
+    if (parentFragmentHint == null || parentFragmentHint.getContext() == null) {
+      return;
     }
+    FragmentManager rootFragmentManager = getRootFragmentManager(parentFragmentHint);
+    if (rootFragmentManager == null) {
+      return;
+    }
+    registerFragmentWithRoot(parentFragmentHint.getContext(), rootFragmentManager);
+  }
+
+  @Nullable
+  private static FragmentManager getRootFragmentManager(@NonNull Fragment fragment) {
+    while (fragment.getParentFragment() != null) {
+      fragment = fragment.getParentFragment();
+    }
+    return fragment.getFragmentManager();
   }
 
   @Nullable
@@ -135,10 +148,13 @@ public class SupportRequestManagerFragment extends Fragment {
     return false;
   }
 
-  private void registerFragmentWithRoot(@NonNull FragmentActivity activity) {
+  private void registerFragmentWithRoot(
+      @NonNull Context context, @NonNull FragmentManager fragmentManager) {
     unregisterFragmentWithRoot();
     rootRequestManagerFragment =
-        Glide.get(activity).getRequestManagerRetriever().getSupportRequestManagerFragment(activity);
+        Glide.get(context)
+            .getRequestManagerRetriever()
+            .getSupportRequestManagerFragment(context, fragmentManager);
     if (!equals(rootRequestManagerFragment)) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
     }
@@ -154,8 +170,18 @@ public class SupportRequestManagerFragment extends Fragment {
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
+
+    FragmentManager rootFragmentManager = getRootFragmentManager(this);
+    if (rootFragmentManager == null) {
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        // Not expected to occur; ancestor fragments should be attached before descendants.
+        Log.w(TAG, "Unable to register fragment with root, ancestor detached");
+      }
+      return;
+    }
+
     try {
-      registerFragmentWithRoot(getActivity());
+      registerFragmentWithRoot(getContext(), rootFragmentManager);
     } catch (IllegalStateException e) {
       // OnAttach can be called after the activity is destroyed, see #497.
       if (Log.isLoggable(TAG, Log.WARN)) {

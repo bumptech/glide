@@ -13,10 +13,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Looper;
+import android.view.LayoutInflater;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentController;
+import androidx.fragment.app.FragmentHostCallback;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil.BackgroundTester;
@@ -50,7 +55,7 @@ public class RequestManagerRetrieverTest {
   public void setUp() {
     appContext = ApplicationProvider.getApplicationContext();
 
-    retriever = new RequestManagerRetriever(null /*factory*/);
+    retriever = new RequestManagerRetriever(/*factory=*/ null);
 
     harnesses =
         new RetrieverHarness[] {new DefaultRetrieverHarness(), new SupportRetrieverHarness()};
@@ -156,6 +161,23 @@ public class RequestManagerRetrieverTest {
     Fragment fragment = new Fragment();
     activity.getSupportFragmentManager().beginTransaction().add(fragment, PARENT_TAG).commit();
     activity.getSupportFragmentManager().executePendingTransactions();
+
+    RequestManager manager = retriever.get(fragment);
+    assertEquals(manager, retriever.get(fragment));
+  }
+
+  @Test
+  public void testSupportCanGetRequestManagerFromFragment_nonActivityController() {
+    FragmentController controller =
+        FragmentController.createController(new NonActivityHostCallback(appContext));
+    controller.attachHost(/*fragment=*/ null);
+    controller.dispatchCreate();
+    controller.dispatchStart();
+    controller.dispatchResume();
+
+    Fragment fragment = new Fragment();
+    controller.getSupportFragmentManager().beginTransaction().add(fragment, PARENT_TAG).commit();
+    controller.getSupportFragmentManager().executePendingTransactions();
 
     RequestManager manager = retriever.get(fragment);
     assertEquals(manager, retriever.get(fragment));
@@ -486,6 +508,29 @@ public class RequestManagerRetrieverTest {
           .add(fragment, RequestManagerRetriever.FRAGMENT_TAG)
           .commitAllowingStateLoss();
       controller.get().getSupportFragmentManager().executePendingTransactions();
+    }
+  }
+
+  /** Simple callback for creating an Activity-less Fragment host. */
+  private final class NonActivityHostCallback
+      extends FragmentHostCallback<RequestManagerRetrieverTest> {
+
+    private final Context context;
+
+    NonActivityHostCallback(Context context) {
+      super(context, new Handler(Looper.getMainLooper()), /*windowAnimations=*/ 0);
+      this.context = context;
+    }
+
+    @Override
+    public LayoutInflater onGetLayoutInflater() {
+      return LayoutInflater.from(context).cloneInContext(context);
+    }
+
+    @Nullable
+    @Override
+    public RequestManagerRetrieverTest onGetHost() {
+      return RequestManagerRetrieverTest.this;
     }
   }
 }
