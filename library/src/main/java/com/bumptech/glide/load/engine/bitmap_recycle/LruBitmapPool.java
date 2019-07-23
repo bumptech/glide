@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.ComponentCallbacks2;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
@@ -224,10 +225,12 @@ public class LruBitmapPool implements BitmapPool {
     if (Log.isLoggable(TAG, Log.DEBUG)) {
       Log.d(TAG, "trimMemory, level=" + level);
     }
-    if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
+    if ((level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
+        || ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            && (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN))) {
       clearMemory();
-    } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
-        || level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+    } else if ((level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+        || (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)) {
       trimToSize(getMaxSize() / 2);
     }
   }

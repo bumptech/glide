@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
+import android.os.Build;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,9 +99,16 @@ public class LruBitmapPoolTest {
     }
   }
 
+  @Config(sdk = Build.VERSION_CODES.KITKAT)
   @Test
-  public void testTrimMemoryUiHiddenOrLessRemovesHalfOfBitmaps() {
+  public void testTrimMemoryUiHiddenOrLessRemovesHalfOfBitmaps_preM() {
     testTrimMemory(MAX_SIZE, TRIM_MEMORY_UI_HIDDEN, MAX_SIZE / 2);
+  }
+
+  @Config(sdk = Build.VERSION_CODES.M)
+  @Test
+  public void testTrimMemoryUiHiddenOrLessRemovesHalfOfBitmaps_postM() {
+    testTrimMemory(MAX_SIZE, TRIM_MEMORY_UI_HIDDEN, 0);
   }
 
   @Test
@@ -109,14 +117,14 @@ public class LruBitmapPoolTest {
   }
 
   @Test
-  public void testTrimMemoryUiHiddenOrLessRemovesNoBitmapsIfPoolLessThanHalfFull() {
-    testTrimMemory(MAX_SIZE / 2, TRIM_MEMORY_UI_HIDDEN, 0);
+  public void testTrimMemoryRunningCriticalOrLessRemovesNoBitmapsIfPoolLessThanHalfFull() {
+    testTrimMemory(MAX_SIZE / 2, TRIM_MEMORY_RUNNING_CRITICAL, MAX_SIZE / 2);
   }
 
   @Test
   public void testTrimMemoryBackgroundOrGreaterRemovesAllBitmaps() {
     for (int trimLevel : new int[] {TRIM_MEMORY_BACKGROUND, TRIM_MEMORY_COMPLETE}) {
-      testTrimMemory(MAX_SIZE, trimLevel, MAX_SIZE);
+      testTrimMemory(MAX_SIZE, trimLevel, 0);
     }
   }
 
@@ -161,7 +169,7 @@ public class LruBitmapPoolTest {
     LruBitmapPool pool = new LruBitmapPool(MAX_SIZE, strategy, ALLOWED_CONFIGS);
     fillPool(pool, fillSize);
     pool.trimMemory(trimLevel);
-    assertEquals("Failed level=" + trimLevel, expectedSize, strategy.numRemoves);
+    assertEquals("Failed level=" + trimLevel, expectedSize, strategy.bitmaps.size());
   }
 
   @Test
