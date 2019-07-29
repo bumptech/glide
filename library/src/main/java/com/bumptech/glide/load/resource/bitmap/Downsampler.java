@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.ColorSpace;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -14,6 +15,7 @@ import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.ImageHeaderParserUtils;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
+import com.bumptech.glide.load.PreferredColorSpace;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -48,6 +50,18 @@ public final class Downsampler {
   public static final Option<DecodeFormat> DECODE_FORMAT =
       Option.memory(
           "com.bumptech.glide.load.resource.bitmap.Downsampler.DecodeFormat", DecodeFormat.DEFAULT);
+
+  /**
+   * Sets the {@link PreferredColorSpace} that will be used along with the version of Android and
+   * color space of the requested image to determine the final color space used to decode the image.
+   *
+   * <p>Refer to {@link PreferredColorSpace} for details on how this option works and its various
+   * limitations.
+   */
+  public static final Option<PreferredColorSpace> PREFERRED_COLOR_SPACE =
+      Option.memory(
+          "com.bumptech.glide.load.resource.bitmap.Downsampler.PreferredColorSpace",
+          PreferredColorSpace.SRGB);
   /**
    * Indicates the {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option that
    * will be used to calculate the sample size to use to downsample an image given the original and
@@ -199,6 +213,7 @@ public final class Downsampler {
     bitmapFactoryOptions.inTempStorage = bytesForOptions;
 
     DecodeFormat decodeFormat = options.get(DECODE_FORMAT);
+    PreferredColorSpace preferredColorSpace = options.get(PREFERRED_COLOR_SPACE);
     DownsampleStrategy downsampleStrategy = options.get(DownsampleStrategy.OPTION);
     boolean fixBitmapToRequestedDimensions = options.get(FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS);
     boolean isHardwareConfigAllowed =
@@ -211,6 +226,7 @@ public final class Downsampler {
               bitmapFactoryOptions,
               downsampleStrategy,
               decodeFormat,
+              preferredColorSpace,
               isHardwareConfigAllowed,
               requestedWidth,
               requestedHeight,
@@ -228,6 +244,7 @@ public final class Downsampler {
       BitmapFactory.Options options,
       DownsampleStrategy downsampleStrategy,
       DecodeFormat decodeFormat,
+      PreferredColorSpace preferredColorSpace,
       boolean isHardwareConfigAllowed,
       int requestedWidth,
       int requestedHeight,
@@ -328,6 +345,18 @@ public final class Downsampler {
         setInBitmap(options, bitmapPool, expectedWidth, expectedHeight);
       }
     }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      boolean isP3Eligible =
+          preferredColorSpace == PreferredColorSpace.DISPLAY_P3
+              && options.outColorSpace != null
+              && options.outColorSpace.isWideGamut();
+      options.inPreferredColorSpace =
+          ColorSpace.get(isP3Eligible ? ColorSpace.Named.DISPLAY_P3 : ColorSpace.Named.SRGB);
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      options.inPreferredColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+    }
+
     Bitmap downsampled = decodeStream(is, options, callbacks, bitmapPool);
     callbacks.onDecodeComplete(bitmapPool, downsampled);
 
@@ -860,6 +889,7 @@ public final class Downsampler {
     decodeBitmapOptions.inDensity = 0;
     decodeBitmapOptions.inTargetDensity = 0;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      decodeBitmapOptions.outColorSpace = null;
       decodeBitmapOptions.outConfig = null;
     }
     decodeBitmapOptions.outWidth = 0;
