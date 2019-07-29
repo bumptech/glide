@@ -1,7 +1,7 @@
 package com.bumptech.glide.manager;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
