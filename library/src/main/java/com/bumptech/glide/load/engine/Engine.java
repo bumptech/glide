@@ -388,7 +388,7 @@ public class Engine
   }
 
   @Override
-  public synchronized void onResourceReleased(Key cacheKey, EngineResource<?> resource) {
+  public void onResourceReleased(Key cacheKey, EngineResource<?> resource) {
     activeResources.deactivate(cacheKey);
     if (resource.isMemoryCacheable()) {
       cache.put(cacheKey, resource);

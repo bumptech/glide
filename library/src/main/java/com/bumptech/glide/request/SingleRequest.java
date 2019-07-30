@@ -307,22 +307,30 @@ public final class SingleRequest<R>
    * @see #cancel()
    */
   @Override
-  public synchronized void clear() {
-    assertNotCallingCallbacks();
-    stateVerifier.throwIfRecycled();
-    if (status == Status.CLEARED) {
-      return;
-    }
-    cancel();
-    // Resource must be released before canNotifyStatusChanged is called.
-    if (resource != null) {
-      releaseResource(resource);
-    }
-    if (canNotifyCleared()) {
-      target.onLoadCleared(getPlaceholderDrawable());
+  public void clear() {
+    Resource<R> toRelease = null;
+    synchronized (this) {
+      assertNotCallingCallbacks();
+      stateVerifier.throwIfRecycled();
+      if (status == Status.CLEARED) {
+        return;
+      }
+      cancel();
+      // Resource must be released before canNotifyStatusChanged is called.
+      if (resource != null) {
+        toRelease = resource;
+        resource = null;
+      }
+      if (canNotifyCleared()) {
+        target.onLoadCleared(getPlaceholderDrawable());
+      }
+
+      status = Status.CLEARED;
     }
 
-    status = Status.CLEARED;
+    if (toRelease != null) {
+      engine.release(toRelease);
+    }
   }
 
   @Override
@@ -330,11 +338,6 @@ public final class SingleRequest<R>
     if (isRunning()) {
       clear();
     }
-  }
-
-  private void releaseResource(Resource<?> resource) {
-    engine.release(resource);
-    this.resource = null;
   }
 
   @Override
@@ -506,53 +509,64 @@ public final class SingleRequest<R>
   @SuppressWarnings("unchecked")
   @Override
   public synchronized void onResourceReady(Resource<?> resource, DataSource dataSource) {
-    stateVerifier.throwIfRecycled();
-    loadStatus = null;
-    if (resource == null) {
-      GlideException exception =
-          new GlideException(
-              "Expected to receive a Resource<R> with an "
-                  + "object of "
-                  + transcodeClass
-                  + " inside, but instead got null.");
-      onLoadFailed(exception);
-      return;
-    }
+    Resource<?> toRelease = null;
+    try {
+      synchronized (this) {
+        stateVerifier.throwIfRecycled();
+        loadStatus = null;
+        if (resource == null) {
+          GlideException exception =
+              new GlideException(
+                  "Expected to receive a Resource<R> with an "
+                      + "object of "
+                      + transcodeClass
+                      + " inside, but instead got null.");
+          onLoadFailed(exception);
+          return;
+        }
 
-    Object received = resource.get();
-    if (received == null || !transcodeClass.isAssignableFrom(received.getClass())) {
-      releaseResource(resource);
-      GlideException exception =
-          new GlideException(
-              "Expected to receive an object of "
-                  + transcodeClass
-                  + " but instead"
-                  + " got "
-                  + (received != null ? received.getClass() : "")
-                  + "{"
-                  + received
-                  + "} inside"
-                  + " "
-                  + "Resource{"
-                  + resource
-                  + "}."
-                  + (received != null
-                      ? ""
-                      : " "
-                          + "To indicate failure return a null Resource "
-                          + "object, rather than a Resource object containing null data."));
-      onLoadFailed(exception);
-      return;
-    }
+        Object received = resource.get();
+        if (received == null || !transcodeClass.isAssignableFrom(received.getClass())) {
+          toRelease = resource;
+          this.resource = null;
+          GlideException exception =
+              new GlideException(
+                  "Expected to receive an object of "
+                      + transcodeClass
+                      + " but instead"
+                      + " got "
+                      + (received != null ? received.getClass() : "")
+                      + "{"
+                      + received
+                      + "} inside"
+                      + " "
+                      + "Resource{"
+                      + resource
+                      + "}."
+                      + (received != null
+                          ? ""
+                          : " "
+                              + "To indicate failure return a null Resource "
+                              + "object, rather than a Resource object containing null data."));
+          onLoadFailed(exception);
+          return;
+        }
 
-    if (!canSetResource()) {
-      releaseResource(resource);
-      // We can't put the status to complete before asking canSetResource().
-      status = Status.COMPLETE;
-      return;
-    }
+        if (!canSetResource()) {
+          toRelease = resource;
+          this.resource = null;
+          // We can't put the status to complete before asking canSetResource().
+          status = Status.COMPLETE;
+          return;
+        }
 
-    onResourceReady((Resource<R>) resource, (R) received, dataSource);
+        onResourceReady((Resource<R>) resource, (R) received, dataSource);
+      }
+    } finally {
+      if (toRelease != null) {
+        engine.release(toRelease);
+      }
+    }
   }
 
   /**

@@ -106,25 +106,18 @@ final class ActiveResources {
   @SuppressWarnings({"WeakerAccess", "SynchronizeOnNonFinalField"})
   @Synthetic
   void cleanupActiveReference(@NonNull ResourceWeakReference ref) {
-    // Fixes a deadlock where we normally acquire the Engine lock and then the ActiveResources lock
-    // but reverse that order in this one particular test. This is definitely a bit of a hack...
-    synchronized (listener) {
-      synchronized (this) {
-        activeEngineResources.remove(ref.key);
+    synchronized (this) {
+      activeEngineResources.remove(ref.key);
 
-        if (!ref.isCacheable || ref.resource == null) {
-          return;
-        }
-        EngineResource<?> newResource =
-            new EngineResource<>(
-                ref.resource,
-                /*isMemoryCacheable=*/ true,
-                /*isRecyclable=*/ false,
-                ref.key,
-                listener);
-        listener.onResourceReleased(ref.key, newResource);
+      if (!ref.isCacheable || ref.resource == null) {
+        return;
       }
     }
+
+    EngineResource<?> newResource =
+        new EngineResource<>(
+            ref.resource, /*isMemoryCacheable=*/ true, /*isRecyclable=*/ false, ref.key, listener);
+    listener.onResourceReleased(ref.key, newResource);
   }
 
   @SuppressWarnings("WeakerAccess")

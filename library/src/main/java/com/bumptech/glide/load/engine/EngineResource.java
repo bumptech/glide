@@ -103,18 +103,17 @@ class EngineResource<Z> implements Resource<Z> {
   // listener is effectively final.
   @SuppressWarnings("SynchronizeOnNonFinalField")
   void release() {
-    // To avoid deadlock, always acquire the listener lock before our lock so that the locking
-    // scheme is consistent (Engine -> EngineResource). Violating this order leads to deadlock
-    // (b/123646037).
-    synchronized (listener) {
-      synchronized (this) {
-        if (acquired <= 0) {
-          throw new IllegalStateException("Cannot release a recycled or not yet acquired resource");
-        }
-        if (--acquired == 0) {
-          listener.onResourceReleased(key, this);
-        }
+    boolean release = false;
+    synchronized (this) {
+      if (acquired <= 0) {
+        throw new IllegalStateException("Cannot release a recycled or not yet acquired resource");
       }
+      if (--acquired == 0) {
+        release = true;
+      }
+    }
+    if (release) {
+      listener.onResourceReleased(key, this);
     }
   }
 

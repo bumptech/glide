@@ -274,17 +274,22 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
 
   @SuppressWarnings("WeakerAccess")
   @Synthetic
-  synchronized void decrementPendingCallbacks() {
-    stateVerifier.throwIfRecycled();
-    Preconditions.checkArgument(isDone(), "Not yet complete!");
-    int decremented = pendingCallbacks.decrementAndGet();
-    Preconditions.checkArgument(decremented >= 0, "Can't decrement below 0");
-    if (decremented == 0) {
-      if (engineResource != null) {
-        engineResource.release();
-      }
+  void decrementPendingCallbacks() {
+    EngineResource<?> toRelease = null;
+    synchronized (this) {
+      stateVerifier.throwIfRecycled();
+      Preconditions.checkArgument(isDone(), "Not yet complete!");
+      int decremented = pendingCallbacks.decrementAndGet();
+      Preconditions.checkArgument(decremented >= 0, "Can't decrement below 0");
+      if (decremented == 0) {
+        toRelease = engineResource;
 
-      release();
+        release();
+      }
+    }
+
+    if (toRelease != null) {
+      toRelease.release();
     }
   }
 
