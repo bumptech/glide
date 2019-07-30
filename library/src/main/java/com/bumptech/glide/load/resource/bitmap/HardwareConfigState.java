@@ -23,7 +23,7 @@ public final class HardwareConfigState {
    *
    * @see #FD_SIZE_LIST
    */
-  @VisibleForTesting static final int MIN_HARDWARE_DIMENSION = 128;
+  public static final int DEFAULT_MIN_HARDWARE_DIMENSION = 128;
 
   /**
    * Allows us to check to make sure we're not exceeding the FD limit for a process with hardware
@@ -58,6 +58,7 @@ public final class HardwareConfigState {
   public static final int DEFAULT_MAXIMUM_FDS_FOR_HARDWARE_CONFIGS = 700;
 
   private static volatile int fdSizeLimit = DEFAULT_MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
+  private static volatile int minHardwareDimension = DEFAULT_MIN_HARDWARE_DIMENSION;
 
   private static volatile HardwareConfigState instance;
 
@@ -98,8 +99,8 @@ public final class HardwareConfigState {
       return false;
     }
 
-    return targetWidth >= MIN_HARDWARE_DIMENSION
-        && targetHeight >= MIN_HARDWARE_DIMENSION
+    return targetWidth >= minHardwareDimension
+        && targetHeight >= minHardwareDimension
         // Make sure to call isFdSizeBelowHardwareLimit last because it has side affects.
         && isFdSizeBelowHardwareLimit();
   }

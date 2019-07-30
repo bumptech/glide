@@ -68,6 +68,7 @@ public final class GlideBuilder {
   private boolean isImageDecoderEnabledForBitmaps;
 
   private int hardwareBitmapFdLimit = HardwareConfigState.DEFAULT_MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
+  private int minHardwareDimension = HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -578,6 +579,7 @@ public final class GlideBuilder {
         defaultRequestListeners,
         isLoggingRequestOriginsEnabled,
         isImageDecoderEnabledForBitmaps,
-        hardwareBitmapFdLimit);
+        hardwareBitmapFdLimit,
+        minHardwareDimension);
   }
 }

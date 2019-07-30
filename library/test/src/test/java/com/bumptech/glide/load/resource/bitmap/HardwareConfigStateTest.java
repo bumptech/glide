@@ -24,8 +24,8 @@ public class HardwareConfigStateTest {
     BitmapFactory.Options options = new BitmapFactory.Options();
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
+            /*targetWidth=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
+            /*targetHeight=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
             options,
             /*isHardwareConfigAllowed=*/ true,
             /*isExifOrientationRequired=*/ false);
@@ -45,8 +45,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION - 1,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
+            /*targetWidth=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION - 1,
+            /*targetHeight=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
             options,
             /*isHardwareConfigAllowed=*/ true,
             /*isExifOrientationRequired=*/ false);
@@ -66,8 +66,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION - 1,
+            /*targetWidth=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
+            /*targetHeight=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION - 1,
             options,
             /*isHardwareConfigAllowed=*/ true,
             /*isExifOrientationRequired=*/ false);
@@ -88,8 +88,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
+            /*targetWidth=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
+            /*targetHeight=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
             options,
             /*isHardwareConfigAllowed=*/ false,
             /*isExifOrientationRequired=*/ false);
@@ -110,8 +110,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
+            /*targetWidth=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
+            /*targetHeight=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
             options,
             /*isHardwareConfigAllowed=*/ true,
             /*isExifOrientationRequired=*/ true);
@@ -131,8 +131,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
+            /*targetWidth=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
+            /*targetHeight=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
             options,
             /*isHardwareConfigAllowed=*/ true,
             /*isExifOrientationRequired=*/ false);
@@ -158,8 +158,8 @@ public class HardwareConfigStateTest {
 
       boolean result =
           state.setHardwareConfigIfAllowed(
-              /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
-              /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
+              /*targetWidth=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
+              /*targetHeight=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
               options,
               /*isHardwareConfigAllowed=*/ true,
               /*isExifOrientationRequired=*/ false);
@@ -185,8 +185,8 @@ public class HardwareConfigStateTest {
 
       boolean result =
           state.setHardwareConfigIfAllowed(
-              /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
-              /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
+              /*targetWidth=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
+              /*targetHeight=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
               options,
               /*isHardwareConfigAllowed=*/ true,
               /*isExifOrientationRequired=*/ false);
@@ -212,8 +212,8 @@ public class HardwareConfigStateTest {
 
       boolean result =
           state.setHardwareConfigIfAllowed(
-              /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
-              /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION,
+              /*targetWidth=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
+              /*targetHeight=*/ HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION,
               options,
               /*isHardwareConfigAllowed=*/ true,
               /*isExifOrientationRequired=*/ false);
