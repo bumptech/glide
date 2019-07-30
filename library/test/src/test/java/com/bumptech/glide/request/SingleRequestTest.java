@@ -225,6 +225,55 @@ public class SingleRequestTest {
   }
 
   @Test
+  public void pause_whenRequestIsWaitingForASize_clearsRequest() {
+    SingleRequest<List> request = builder.build();
+
+    request.begin();
+    request.pause();
+    assertThat(request.isRunning()).isFalse();
+    assertThat(request.isCleared()).isTrue();
+  }
+
+  @Test
+  public void pause_whenRequestIsWaitingForAResource_clearsRequest() {
+    SingleRequest<List> request = builder.build();
+
+    request.begin();
+    request.onSizeReady(100, 100);
+    request.pause();
+    assertThat(request.isRunning()).isFalse();
+    assertThat(request.isCleared()).isTrue();
+  }
+
+  @Test
+  public void pause_whenComplete_doesNotClearRequest() {
+    SingleRequest<List> request = builder.build();
+
+    request.onResourceReady(builder.resource, DataSource.REMOTE);
+    request.pause();
+    assertThat(request.isComplete()).isTrue();
+  }
+
+  @Test
+  public void pause_whenFailed_doesNotClearRequest() {
+    SingleRequest<List> request = builder.build();
+
+    request.onLoadFailed(new GlideException("test"));
+    request.pause();
+    assertThat(request.isFailed()).isTrue();
+  }
+
+  @Test
+  public void pause_whenCleared_doesNotClearRequest() {
+    SingleRequest<List> request = builder.build();
+
+    request.clear();
+    request.pause();
+
+    verify(builder.target, times(1)).onLoadCleared(anyDrawableOrNull());
+  }
+
+  @Test
   public void testIgnoresOnSizeReadyIfNotWaitingForSize() {
     SingleRequest<List> request = builder.build();
     request.begin();

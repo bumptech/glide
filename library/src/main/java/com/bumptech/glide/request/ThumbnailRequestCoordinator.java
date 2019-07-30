@@ -13,6 +13,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   private Request full;
   private Request thumb;
   private boolean isRunning;
+  private boolean isPaused;
 
   @VisibleForTesting
   ThumbnailRequestCoordinator() {
@@ -56,7 +57,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
 
   @Override
   public boolean canNotifyCleared(Request request) {
-    return parentCanNotifyCleared() && request.equals(full);
+    return parentCanNotifyCleared() && request.equals(full) && !isPaused;
   }
 
   private boolean parentCanNotifyCleared() {
@@ -106,6 +107,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   /** Starts first the thumb request and then the full request. */
   @Override
   public void begin() {
+    isPaused = false;
     isRunning = true;
     // If the request has completed previously, there's no need to restart both the full and the
     // thumb, we can just restart the full.
@@ -119,9 +121,18 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
 
   @Override
   public void clear() {
+    isPaused = false;
     isRunning = false;
     thumb.clear();
     full.clear();
+  }
+
+  @Override
+  public void pause() {
+    isPaused = true;
+    isRunning = false;
+    thumb.pause();
+    full.pause();
   }
 
   /** Returns true if the full request is still running. */
@@ -133,7 +144,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   /** Returns true if the full request is complete. */
   @Override
   public boolean isComplete() {
-    return full.isComplete() || thumb.isComplete();
+    return full.isComplete();
   }
 
   @Override

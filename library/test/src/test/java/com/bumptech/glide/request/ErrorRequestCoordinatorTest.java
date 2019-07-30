@@ -77,6 +77,72 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
+  public void pause_whenPrimaryIsRunning_pausesPrimary() {
+    when(primary.isRunning()).thenReturn(true);
+    coordinator.pause();
+
+    verify(primary).pause();
+  }
+
+  // Rely on the underlying implementation to ignore the pause call. It's somewhat more efficient
+  // because we don't need an additional lock.
+  @Test
+  public void pause_whenPrimaryIsComplete_doesNotPausePrimary() {
+    when(primary.isComplete()).thenReturn(true);
+    coordinator.pause();
+
+    verify(primary).pause();
+  }
+
+  // Rely on the underlying implementation to ignore the pause call. It's somewhat more efficient
+  // because we don't need an additional lock.
+  @Test
+  public void pause_whenPrimaryIsFailed_pausesPrimary() {
+    when(primary.isFailed()).thenReturn(true);
+    coordinator.pause();
+
+    verify(primary).pause();
+  }
+
+  // Rely on the underlying implementation to ignore the pause call. It's somewhat more efficient
+  // because we don't need an additional lock.
+  @Test
+  public void pause_whenErrorIsNotRunning_pausesError() {
+    when(error.isRunning()).thenReturn(false);
+    coordinator.pause();
+
+    verify(error).pause();
+  }
+
+  // Rely on the underlying implementation to ignore the pause call. It's somewhat more efficient
+  // because we don't need an additional lock.
+  @Test
+  public void pause_whenErrorIsComplete_pausesError() {
+    when(error.isComplete()).thenReturn(true);
+    coordinator.pause();
+
+    verify(error).pause();
+  }
+
+  // Rely on the underlying implementation to ignore the pause call. It's somewhat more efficient
+  // because we don't need an additional lock.
+  @Test
+  public void pause_whenErrorIsFailed_pausesError() {
+    when(error.isFailed()).thenReturn(true);
+    coordinator.pause();
+
+    verify(error).pause();
+  }
+
+  @Test
+  public void pause_whenErrorIsRunning_pausesError() {
+    when(error.isRunning()).thenReturn(true);
+    coordinator.pause();
+
+    verify(error).pause();
+  }
+
+  @Test
   public void isRunning_primaryNotFailed_primaryNotRunning_returnsFalse() {
     assertThat(coordinator.isRunning()).isFalse();
   }

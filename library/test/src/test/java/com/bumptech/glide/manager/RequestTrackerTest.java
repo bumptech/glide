@@ -117,18 +117,40 @@ public class RequestTrackerTest {
 
     tracker.pauseRequests();
 
-    assertThat(request.isCleared()).isTrue();
+    assertThat(request.isPaused()).isTrue();
   }
 
   @Test
-  public void pauseRequests_withCompletedRequest_doesNotClearRequest() {
+  public void pauseRequests_withCompletedRequest_doesNotPauseRequest() {
     FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
 
     request.setIsComplete();
     tracker.pauseRequests();
 
-    assertThat(request.isCleared()).isFalse();
+    assertThat(request.isPaused()).isFalse();
+  }
+
+  @Test
+  public void pauseRequests_withFailedRequest_doesNotPauseRequest() {
+    FakeRequest request = new FakeRequest();
+    tracker.addRequest(request);
+
+    request.setIsFailed();
+    tracker.pauseRequests();
+
+    assertThat(request.isPaused()).isFalse();
+  }
+
+  @Test
+  public void pauseRequests_withClearedRequest_doesNotPauseRequest() {
+    FakeRequest request = new FakeRequest();
+    tracker.addRequest(request);
+
+    request.clear();
+    tracker.pauseRequests();
+
+    assertThat(request.isPaused()).isFalse();
   }
 
   @Test
@@ -352,6 +374,27 @@ public class RequestTrackerTest {
   }
 
   @Test
+  public void pauseRequests_pausesRunningRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsRunning();
+    tracker.addRequest(request);
+    tracker.pauseRequests();
+
+    assertThat(request.isCleared()).isTrue();
+  }
+
+  @Test
+  public void pauseRequest_doesNotPauseCompletedRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsComplete();
+    tracker.addRequest(request);
+    tracker.pauseRequests();
+
+    assertThat(request.isComplete()).isTrue();
+    assertThat(request.isCleared()).isFalse();
+  }
+
+  @Test
   public void testReturnsFalseFromIsPausedWhenResumed() {
     tracker.resumeRequests();
     assertFalse(tracker.isPaused());
@@ -381,6 +424,17 @@ public class RequestTrackerTest {
   }
 
   private static final class FakeRequest implements Request {
+
+    private boolean isPaused;
+
+    @Override
+    public void pause() {
+      isPaused = true;
+      if (isRunning) {
+        clear();
+      }
+    }
+
     private boolean isRunning;
     private boolean isFailed;
     private boolean isCleared;
@@ -405,6 +459,10 @@ public class RequestTrackerTest {
 
     boolean isRecycled() {
       return isRecycled;
+    }
+
+    boolean isPaused() {
+      return isPaused;
     }
 
     @Override

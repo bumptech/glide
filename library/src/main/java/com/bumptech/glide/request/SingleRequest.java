@@ -325,6 +325,13 @@ public final class SingleRequest<R>
     status = Status.CLEARED;
   }
 
+  @Override
+  public synchronized void pause() {
+    if (isRunning()) {
+      clear();
+    }
+  }
+
   private void releaseResource(Resource<?> resource) {
     engine.release(resource);
     this.resource = null;

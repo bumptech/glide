@@ -39,6 +39,12 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
   }
 
   @Override
+  public void pause() {
+    primary.pause();
+    error.pause();
+  }
+
+  @Override
   public boolean isRunning() {
     return primary.isFailed() ? error.isRunning() : primary.isRunning();
   }

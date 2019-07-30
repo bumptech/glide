@@ -2,7 +2,6 @@ package com.bumptech.glide.request;
 
 /** A request that loads a resource for an {@link com.bumptech.glide.request.target.Target}. */
 public interface Request {
-
   /** Starts an asynchronous load. */
   void begin();
 
@@ -12,6 +11,17 @@ public interface Request {
    * been cancelled.
    */
   void clear();
+
+  /**
+   * Similar to {@link #clear} for in progress requests (or portions of a request), but does nothing
+   * if the request is already complete.
+   *
+   * <p>Unlike {@link #clear()}, this method allows implementations to act differently on subparts
+   * of a request. For example if a Request has both a thumbnail and a primary request and the
+   * thumbnail portion of the request is complete, this method allows only the primary portion of
+   * the request to be paused without clearing the previously completed thumbnail portion.
+   */
+  void pause();
 
   /** Returns true if this request is running and has not completed or failed. */
   boolean isRunning();

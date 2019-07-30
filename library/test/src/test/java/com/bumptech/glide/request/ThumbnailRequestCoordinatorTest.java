@@ -140,6 +140,14 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
+  public void pause_pausesThumbAndFullInOrder() {
+    coordinator.pause();
+    InOrder order = inOrder(thumb, full);
+    order.verify(thumb).pause();
+    order.verify(full).pause();
+  }
+
+  @Test
   public void testRecyclesRequestsWhenRecycled() {
     coordinator.recycle();
     verify(thumb).recycle();
@@ -282,9 +290,9 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testIsCompleteIfThumbIsComplete() {
+  public void isComplete_withOnlyThumbComplete_returnsFalse() {
     when(thumb.isComplete()).thenReturn(true);
-    assertTrue(coordinator.isComplete());
+    assertThat(coordinator.isComplete()).isFalse();
   }
 
   @Test
@@ -372,6 +380,26 @@ public class ThumbnailRequestCoordinatorTest {
     coordinator.setRequests(full, thumb);
     when(parent.canNotifyCleared(coordinator)).thenReturn(false);
     assertThat(coordinator.canNotifyCleared(full)).isFalse();
+  }
+
+  @Test
+  public void canNotifyCleared_withFullRequest_afterPause_returnsFalse() {
+    coordinator.pause();
+    assertThat(coordinator.canNotifyCleared(full)).isFalse();
+  }
+
+  @Test
+  public void canNotifyCleared_withFullRequest_afterPauseAndResume_returnsTrue() {
+    coordinator.pause();
+    coordinator.begin();
+    assertThat(coordinator.canNotifyCleared(full)).isTrue();
+  }
+
+  @Test
+  public void canNotifyCleared_withFullRequest_afterPauseAndClear_returnsTrue() {
+    coordinator.pause();
+    coordinator.clear();
+    assertThat(coordinator.canNotifyCleared(full)).isTrue();
   }
 
   @Test
