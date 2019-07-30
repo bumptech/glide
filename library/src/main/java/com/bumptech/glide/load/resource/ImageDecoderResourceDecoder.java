@@ -1,12 +1,14 @@
 package com.bumptech.glide.load.resource;
 
 import android.annotation.SuppressLint;
+import android.graphics.ColorSpace;
 import android.graphics.ImageDecoder;
 import android.graphics.ImageDecoder.DecodeException;
 import android.graphics.ImageDecoder.ImageInfo;
 import android.graphics.ImageDecoder.OnHeaderDecodedListener;
 import android.graphics.ImageDecoder.OnPartialImageListener;
 import android.graphics.ImageDecoder.Source;
+import android.os.Build;
 import android.util.Log;
 import android.util.Size;
 import androidx.annotation.NonNull;
@@ -14,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Options;
+import com.bumptech.glide.load.PreferredColorSpace;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
@@ -58,6 +61,7 @@ public abstract class ImageDecoderResourceDecoder<T> implements ResourceDecoder<
     final boolean isHardwareConfigAllowed =
         options.get(Downsampler.ALLOW_HARDWARE_CONFIG) != null
             && options.get(Downsampler.ALLOW_HARDWARE_CONFIG);
+    final PreferredColorSpace preferredColorSpace = options.get(Downsampler.PREFERRED_COLOR_SPACE);
 
     return decode(
         source,
@@ -125,6 +129,18 @@ public abstract class ImageDecoderResourceDecoder<T> implements ResourceDecoder<
             }
 
             decoder.setTargetSize(resizeWidth, resizeHeight);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+              boolean isP3Eligible =
+                  preferredColorSpace == PreferredColorSpace.DISPLAY_P3
+                      && info.getColorSpace() != null
+                      && info.getColorSpace().isWideGamut();
+              decoder.setTargetColorSpace(
+                  ColorSpace.get(
+                      isP3Eligible ? ColorSpace.Named.DISPLAY_P3 : ColorSpace.Named.SRGB));
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+              decoder.setTargetColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
+            }
           }
         });
   }
