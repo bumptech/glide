@@ -590,7 +590,7 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
    *
    * @param target The Target to cancel loads for.
    */
-  public synchronized void clear(@Nullable final Target<?> target) {
+  public void clear(@Nullable final Target<?> target) {
     if (target == null) {
       return;
     }
@@ -617,8 +617,8 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
     // the corresponding Activity or Fragment is destroyed because retaining any reference to the
     // RequestManager leaks memory. It's possible that there's some brief period of time during or
     // immediately after onDestroy where this is reasonable, but I can't think of why.
-    if (!isOwnedByUs && !glide.removeFromManagers(target) && target.getRequest() != null) {
-      Request request = target.getRequest();
+    Request request = target.getRequest();
+    if (!isOwnedByUs && !glide.removeFromManagers(target) && request != null) {
       target.setRequest(null);
       request.clear();
     }
