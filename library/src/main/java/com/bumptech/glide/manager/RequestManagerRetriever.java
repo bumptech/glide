@@ -178,7 +178,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     // prefer to just fall back to the Activity directly.
     if (activity instanceof FragmentActivity) {
       Fragment fragment = findSupportFragment(view, (FragmentActivity) activity);
-      return fragment != null ? get(fragment) : get((FragmentActivity) activity);
+      return fragment != null ? get(fragment) : get(activity);
     }
 
     // Standard Fragments.
