@@ -53,5 +53,10 @@ public abstract class BitmapContainerTransitionFactory<R> implements TransitionF
       Drawable currentBitmap = new BitmapDrawable(resources, getBitmap(current));
       return transition.transition(currentBitmap, adapter);
     }
+
+    @Override
+    public void cancel() {
+      transition.cancel();
+    }
   }
 }

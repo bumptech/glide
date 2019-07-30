@@ -14,6 +14,7 @@ import android.view.animation.Animation;
 public class ViewTransition<R> implements Transition<R> {
 
   private final ViewTransitionAnimationFactory viewTransitionAnimationFactory;
+  private ViewAdapter viewAdapter;
 
   /**
    * Constructs a new ViewAnimation that will start the given {@link android.view.animation
@@ -38,12 +39,24 @@ public class ViewTransition<R> implements Transition<R> {
   public boolean transition(R current, ViewAdapter adapter) {
     View view = adapter.getView();
     if (view != null) {
+      viewAdapter = adapter;
       view.clearAnimation();
       Animation animation = viewTransitionAnimationFactory.build(view.getContext());
       view.startAnimation(animation);
     }
 
     return false;
+  }
+
+  @Override
+  public void cancel() {
+    if (viewAdapter != null) {
+      View view = viewAdapter.getView();
+      if (view != null) {
+        view.clearAnimation();
+      }
+      viewAdapter = null;
+    }
   }
 
   interface ViewTransitionAnimationFactory {
