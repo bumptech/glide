@@ -351,18 +351,8 @@ public final class SingleRequest<R>
   }
 
   @Override
-  public synchronized boolean isResourceSet() {
-    return isComplete();
-  }
-
-  @Override
   public synchronized boolean isCleared() {
     return status == Status.CLEARED;
-  }
-
-  @Override
-  public synchronized boolean isFailed() {
-    return status == Status.FAILED;
   }
 
   private Drawable getErrorDrawable() {
@@ -668,23 +658,23 @@ public final class SingleRequest<R>
     notifyLoadFailed();
   }
 
-  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
   @Override
-  public synchronized boolean isEquivalentTo(Request o) {
+  public boolean isEquivalentTo(Request o) {
+    // If there's ever a case where synchronization matters for these values, something else has
+    // gone wrong. It indicates that we'er comparing at least one recycled object, which has to be
+    // protected against via other means. None of these values changes aside from object re-use.
     if (o instanceof SingleRequest) {
       SingleRequest<?> that = (SingleRequest<?>) o;
-      synchronized (that) {
-        return overrideWidth == that.overrideWidth
-            && overrideHeight == that.overrideHeight
-            && Util.bothModelsNullEquivalentOrEquals(model, that.model)
-            && transcodeClass.equals(that.transcodeClass)
-            && requestOptions.equals(that.requestOptions)
-            && priority == that.priority
-            // We do not want to require that RequestListeners implement equals/hashcode, so we
-            // don't compare them using equals(). We can however, at least assert that the same
-            // amount of request listeners are present in both requests.
-            && listenerCountEquals(that);
-      }
+      return overrideWidth == that.overrideWidth
+          && overrideHeight == that.overrideHeight
+          && Util.bothModelsNullEquivalentOrEquals(model, that.model)
+          && transcodeClass.equals(that.transcodeClass)
+          && requestOptions.equals(that.requestOptions)
+          && priority == that.priority
+          // We do not want to require that RequestListeners implement equals/hashcode, so we
+          // don't compare them using equals(). We can however, at least assert that the same
+          // amount of request listeners are present in both requests.
+          && listenerCountEquals(that);
     }
     return false;
   }

@@ -8,6 +8,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,21 +42,27 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testIsRunningIsTrueIfFullIsRunning() {
-    when(full.isRunning()).thenReturn(true);
+  public void isRunning_withThumbAndFullRunning_isTrue() {
+    coordinator.begin();
     assertTrue(coordinator.isRunning());
   }
 
   @Test
-  public void testIsNotRunningIfFullIsNotRunningButThumbIs() {
-    when(full.isRunning()).thenReturn(false);
-    when(thumb.isRunning()).thenReturn(true);
+  public void isRunning_withFullRunning_isTrue() {
+    coordinator.begin();
+    coordinator.onRequestSuccess(thumb);
+    assertTrue(coordinator.isRunning());
+  }
+
+  @Test
+  public void isRunning_withThumbRunning_fullComplete_isFalse() {
+    coordinator.begin();
+    coordinator.onRequestSuccess(full);
     assertFalse(coordinator.isRunning());
   }
 
   @Test
   public void testStartsFullOnRunIfNotRunning() {
-    when(full.isRunning()).thenReturn(false);
     coordinator.begin();
 
     verify(full).begin();
@@ -63,7 +70,6 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void testStartsThumbOnRunIfNotRunning() {
-    when(thumb.isRunning()).thenReturn(false);
     coordinator.begin();
 
     verify(thumb).begin();
@@ -71,23 +77,23 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void testDoesNotStartFullOnRunIfRunning() {
-    when(full.isRunning()).thenReturn(true);
+    coordinator.begin();
     coordinator.begin();
 
-    verify(full, never()).begin();
+    verify(full, times(1)).begin();
   }
 
   @Test
   public void testDoesNotStartThumbOnRunIfRunning() {
-    when(thumb.isRunning()).thenReturn(true);
+    coordinator.begin();
     coordinator.begin();
 
-    verify(thumb, never()).begin();
+    verify(thumb, times(1)).begin();
   }
 
   @Test
   public void begin_whenFullIsComplete_startsFull() {
-    when(full.isComplete()).thenReturn(true);
+    coordinator.onRequestSuccess(full);
 
     coordinator.begin();
 
@@ -96,20 +102,11 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void begin_whenFullIsComplete_doesNotBeginThumb() {
-    when(full.isComplete()).thenReturn(true);
+    coordinator.onRequestSuccess(full);
 
     coordinator.begin();
 
     verify(thumb, never()).begin();
-  }
-
-  @Test
-  public void begin_whenFullIsComplete_doesNotSetRunning() {
-    when(full.isComplete()).thenReturn(true);
-
-    coordinator.begin();
-
-    assertThat(coordinator.isRunning()).isFalse();
   }
 
   @Test
@@ -141,6 +138,7 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void pause_pausesThumbAndFullInOrder() {
+    coordinator.begin();
     coordinator.pause();
     InOrder order = inOrder(thumb, full);
     order.verify(thumb).pause();
@@ -178,24 +176,30 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void
-      testCanSetImageReturnsTrueForThumbRequestIfParentIsNullAndFullDoesNotHaveResourceSet() {
-    when(full.isResourceSet()).thenReturn(false);
+  public void canSetImage_forThumb_withNullParent_fullNotComplete_returnsTrue() {
     assertTrue(coordinator.canSetImage(thumb));
   }
 
   @Test
-  public void testCanSetImageReturnsFalseForThumbRequestIfParentIsNullAndFullHasResourceSet() {
-    when(full.isResourceSet()).thenReturn(true);
+  public void canSetImage_forThumb_withNullParent_fullComplete_returnsFalse() {
+    coordinator.onRequestSuccess(full);
     assertFalse(coordinator.canSetImage(thumb));
   }
 
   @Test
-  public void testCanNotSetImageForThumbIfNotAllowedByParentAndFullDoesNotHaveResourceSet() {
+  public void canSetImage_forThumb_whenDisallowedByParent_fullNotComplete_returnsFalse() {
     coordinator = new ThumbnailRequestCoordinator(parent);
     coordinator.setRequests(full, thumb);
     when(parent.canSetImage(eq(coordinator))).thenReturn(false);
-    when(full.isResourceSet()).thenReturn(false);
+    assertFalse(coordinator.canSetImage(thumb));
+  }
+
+  @Test
+  public void canSetImage_forThumb_whenDisallowedByParent_fullComplete_returnsFalse() {
+    coordinator = new ThumbnailRequestCoordinator(parent);
+    coordinator.setRequests(full, thumb);
+    when(parent.canSetImage(eq(coordinator))).thenReturn(false);
+    coordinator.onRequestSuccess(full);
     assertFalse(coordinator.canSetImage(thumb));
   }
 
@@ -210,14 +214,14 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testCanNotNotifyStatusChangedIfFullHasResourceSet() {
-    when(full.isResourceSet()).thenReturn(true);
+  public void canNotNotifyStatusChanged_forFull_whenFullComplete_isFalse() {
+    coordinator.onRequestSuccess(full);
     assertFalse(coordinator.canNotifyStatusChanged(full));
   }
 
   @Test
-  public void testCanNotNotifyStatusChangedIfThumbHasResourceSet() {
-    when(thumb.isResourceSet()).thenReturn(true);
+  public void canNotNotifyStatusChanged_forFull_whenIfThumbComplete_isFalse() {
+    coordinator.onRequestSuccess(thumb);
     assertFalse(coordinator.canNotifyStatusChanged(full));
   }
 
@@ -246,34 +250,28 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testIsAnyResourceSetIsFalseIfNeitherRequestHasResourceSet() {
-    when(full.isResourceSet()).thenReturn(false);
-    when(thumb.isResourceSet()).thenReturn(false);
+  public void isAnyResourceSet_withIncompleteThumbAndFull_isFalse() {
     assertFalse(coordinator.isAnyResourceSet());
   }
 
   @Test
-  public void testIsAnyResourceSetIsTrueIfFullHasResourceSet() {
-    when(full.isResourceSet()).thenReturn(true);
-    when(thumb.isResourceSet()).thenReturn(false);
+  public void isAnyResourceSet_withCompleteFull_isTrue() {
+    coordinator.onRequestSuccess(full);
     assertTrue(coordinator.isAnyResourceSet());
   }
 
   @Test
-  public void testIsAnyResourceSetIsTrueIfThumbHasResourceSet() {
-    when(full.isResourceSet()).thenReturn(false);
-    when(thumb.isResourceSet()).thenReturn(true);
+  public void isAnyResourceSet_withCompleteThumb_isTrue() {
+    coordinator.onRequestSuccess(thumb);
     assertTrue(coordinator.isAnyResourceSet());
   }
 
   @Test
-  public void testIsAnyResourceSetIsTrueIfParentIsNonNullAndParentHasResourceSet() {
+  public void isAnyResourceSet_withParentResourceSet_isTrue() {
     coordinator = new ThumbnailRequestCoordinator(parent);
     coordinator.setRequests(full, thumb);
 
     when(parent.isAnyResourceSet()).thenReturn(true);
-    when(full.isResourceSet()).thenReturn(false);
-    when(thumb.isResourceSet()).thenReturn(false);
 
     assertTrue(coordinator.isAnyResourceSet());
   }
@@ -284,32 +282,15 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testIsCompleteIfFullIsComplete() {
-    when(full.isComplete()).thenReturn(true);
+  public void isComplete_withFullComplete_isTrue() {
+    coordinator.onRequestSuccess(full);
     assertTrue(coordinator.isComplete());
   }
 
   @Test
   public void isComplete_withOnlyThumbComplete_returnsFalse() {
-    when(thumb.isComplete()).thenReturn(true);
+    coordinator.onRequestSuccess(thumb);
     assertThat(coordinator.isComplete()).isFalse();
-  }
-
-  @Test
-  public void testIsResourceSetIsFalseIfNeitherRequestHasResourceSet() {
-    assertFalse(coordinator.isResourceSet());
-  }
-
-  @Test
-  public void testIsResourceSetIsTrueIfFullRequestHasResourceSet() {
-    when(full.isResourceSet()).thenReturn(true);
-    assertTrue(coordinator.isResourceSet());
-  }
-
-  @Test
-  public void testIsResourceSetIsTrueIfThumbRequestHasResourceSet() {
-    when(thumb.isResourceSet()).thenReturn(true);
-    assertTrue(coordinator.isResourceSet());
   }
 
   @Test
@@ -342,7 +323,7 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void testDoesNotClearThumbOnFullComplete_whenThumbIsComplete() {
-    when(thumb.isComplete()).thenReturn(true);
+    coordinator.onRequestSuccess(thumb);
     coordinator.onRequestSuccess(full);
     verify(thumb, never()).clear();
   }

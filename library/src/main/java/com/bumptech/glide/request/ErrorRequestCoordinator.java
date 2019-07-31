@@ -5,12 +5,19 @@ import androidx.annotation.Nullable;
 /**
  * Runs a single primary {@link Request} until it completes and then a fallback error request only
  * if the single primary request fails.
+ *
+ * <p>TODO: The locking here isn't really correct. We should be able lock only to check/change
+ * states in the coordinator without holding the lock while calling the requests.
  */
 public final class ErrorRequestCoordinator implements RequestCoordinator, Request {
 
   @Nullable private final RequestCoordinator parent;
+  // Effectively final x2.
   private Request primary;
   private Request error;
+
+  private volatile RequestState primaryState = RequestState.CLEARED;
+  private volatile RequestState errorState = RequestState.CLEARED;
 
   public ErrorRequestCoordinator(@Nullable RequestCoordinator parent) {
     this.parent = parent;
@@ -23,50 +30,49 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
 
   @Override
   public void begin() {
-    if (!primary.isRunning()) {
+    if (primaryState != RequestState.RUNNING) {
+      primaryState = RequestState.RUNNING;
       primary.begin();
     }
   }
 
   @Override
   public void clear() {
+    primaryState = RequestState.CLEARED;
     primary.clear();
-    // Don't check primary.isFailed() here because it will have been reset by the clear call
+    // Don't check primary's failed state here because it will have been reset by the clear call
     // immediately before this.
-    if (error.isRunning()) {
+    if (errorState != RequestState.CLEARED) {
+      errorState = RequestState.CLEARED;
       error.clear();
     }
   }
 
   @Override
   public void pause() {
-    primary.pause();
-    error.pause();
+    if (primaryState == RequestState.RUNNING) {
+      primaryState = RequestState.PAUSED;
+      primary.pause();
+    }
+    if (errorState == RequestState.RUNNING) {
+      errorState = RequestState.PAUSED;
+      error.pause();
+    }
   }
 
   @Override
   public boolean isRunning() {
-    return primary.isFailed() ? error.isRunning() : primary.isRunning();
+    return primaryState == RequestState.RUNNING || errorState == RequestState.RUNNING;
   }
 
   @Override
   public boolean isComplete() {
-    return primary.isFailed() ? error.isComplete() : primary.isComplete();
-  }
-
-  @Override
-  public boolean isResourceSet() {
-    return primary.isFailed() ? error.isResourceSet() : primary.isResourceSet();
+    return primaryState == RequestState.SUCCESS || errorState == RequestState.SUCCESS;
   }
 
   @Override
   public boolean isCleared() {
-    return primary.isFailed() ? error.isCleared() : primary.isCleared();
-  }
-
-  @Override
-  public boolean isFailed() {
-    return primary.isFailed() && error.isFailed();
+    return primaryState == RequestState.CLEARED && errorState == RequestState.CLEARED;
   }
 
   @Override
@@ -112,12 +118,13 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
   }
 
   private boolean isValidRequest(Request request) {
-    return request.equals(primary) || (primary.isFailed() && request.equals(error));
+    return request.equals(primary)
+        || (primaryState == RequestState.FAILED && request.equals(error));
   }
 
   @Override
   public boolean isAnyResourceSet() {
-    return parentIsAnyResourceSet() || isResourceSet();
+    return parentIsAnyResourceSet() || isComplete();
   }
 
   private boolean parentIsAnyResourceSet() {
@@ -126,6 +133,11 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
 
   @Override
   public void onRequestSuccess(Request request) {
+    if (request == primary) {
+      primaryState = RequestState.SUCCESS;
+    } else if (request == error) {
+      errorState = RequestState.SUCCESS;
+    }
     if (parent != null) {
       parent.onRequestSuccess(this);
     }
@@ -134,11 +146,15 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
   @Override
   public void onRequestFailed(Request request) {
     if (!request.equals(error)) {
-      if (!error.isRunning()) {
+      primaryState = RequestState.FAILED;
+      if (errorState != RequestState.RUNNING) {
+        errorState = RequestState.RUNNING;
         error.begin();
       }
       return;
     }
+
+    errorState = RequestState.FAILED;
 
     if (parent != null) {
       parent.onRequestFailed(this);

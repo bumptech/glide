@@ -6,14 +6,21 @@ import androidx.annotation.VisibleForTesting;
 /**
  * A coordinator that coordinates two individual {@link Request}s that load a small thumbnail
  * version of an image and the full size version of the image at the same time.
+ *
+ * <p>TODO: The locking here isn't really correct. We should be able lock only to check/change
+ * states in the coordinator without holding the lock while calling the requests.
  */
 public class ThumbnailRequestCoordinator implements RequestCoordinator, Request {
   @Nullable private final RequestCoordinator parent;
 
+  // Effectively final x2.
   private Request full;
   private Request thumb;
-  private boolean isRunning;
-  private boolean isPaused;
+
+  private volatile RequestState fullState = RequestState.CLEARED;
+  private volatile RequestState thumbState = RequestState.CLEARED;
+  // Only used to check if the full request is cleared by the thumbnail request.
+  private volatile boolean isRunningDuringBegin;
 
   @VisibleForTesting
   ThumbnailRequestCoordinator() {
@@ -37,7 +44,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
    */
   @Override
   public boolean canSetImage(Request request) {
-    return parentCanSetImage() && (request.equals(full) || !full.isResourceSet());
+    return parentCanSetImage() && (request.equals(full) || fullState != RequestState.SUCCESS);
   }
 
   private boolean parentCanSetImage() {
@@ -52,12 +59,12 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
    */
   @Override
   public boolean canNotifyStatusChanged(Request request) {
-    return parentCanNotifyStatusChanged() && request.equals(full) && !isAnyResourceSet();
+    return parentCanNotifyStatusChanged() && request.equals(full) && !isResourceSet();
   }
 
   @Override
   public boolean canNotifyCleared(Request request) {
-    return parentCanNotifyCleared() && request.equals(full) && !isPaused;
+    return parentCanNotifyCleared() && request.equals(full) && fullState != RequestState.PAUSED;
   }
 
   private boolean parentCanNotifyCleared() {
@@ -76,15 +83,17 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   @Override
   public void onRequestSuccess(Request request) {
     if (request.equals(thumb)) {
+      thumbState = RequestState.SUCCESS;
       return;
     }
+    fullState = RequestState.SUCCESS;
     if (parent != null) {
       parent.onRequestSuccess(this);
     }
     // Clearing the thumb is not necessarily safe if the thumb is being displayed in the Target,
     // as a layer in a cross fade for example. The only way we know the thumb is not being
     // displayed and is therefore safe to clear is if the thumb request has not yet completed.
-    if (!thumb.isComplete()) {
+    if (!thumbState.isComplete()) {
       thumb.clear();
     }
   }
@@ -92,8 +101,10 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   @Override
   public void onRequestFailed(Request request) {
     if (!request.equals(full)) {
+      thumbState = RequestState.FAILED;
       return;
     }
+    fullState = RequestState.FAILED;
 
     if (parent != null) {
       parent.onRequestFailed(this);
@@ -107,60 +118,61 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   /** Starts first the thumb request and then the full request. */
   @Override
   public void begin() {
-    isPaused = false;
-    isRunning = true;
-    // If the request has completed previously, there's no need to restart both the full and the
-    // thumb, we can just restart the full.
-    if (!full.isComplete() && !thumb.isRunning()) {
-      thumb.begin();
-    }
-    if (isRunning && !full.isRunning()) {
-      full.begin();
+    isRunningDuringBegin = true;
+    try {
+      // If the request has completed previously, there's no need to restart both the full and the
+      // thumb, we can just restart the full.
+      if (fullState != RequestState.SUCCESS && thumbState != RequestState.RUNNING) {
+        thumbState = RequestState.RUNNING;
+        thumb.begin();
+      }
+      if (isRunningDuringBegin && fullState != RequestState.RUNNING) {
+        fullState = RequestState.RUNNING;
+        full.begin();
+      }
+    } finally {
+      isRunningDuringBegin = false;
     }
   }
 
   @Override
   public void clear() {
-    isPaused = false;
-    isRunning = false;
+    isRunningDuringBegin = false;
+    fullState = RequestState.CLEARED;
+    thumbState = RequestState.CLEARED;
     thumb.clear();
     full.clear();
   }
 
   @Override
   public void pause() {
-    isPaused = true;
-    isRunning = false;
-    thumb.pause();
-    full.pause();
+    if (!thumbState.isComplete()) {
+      thumbState = RequestState.PAUSED;
+      thumb.pause();
+    }
+    if (!fullState.isComplete()) {
+      fullState = RequestState.PAUSED;
+      full.pause();
+    }
   }
 
-  /** Returns true if the full request is still running. */
   @Override
   public boolean isRunning() {
-    return full.isRunning();
+    return fullState == RequestState.RUNNING;
   }
 
-  /** Returns true if the full request is complete. */
   @Override
   public boolean isComplete() {
-    return full.isComplete();
+    return fullState == RequestState.SUCCESS;
   }
 
-  @Override
-  public boolean isResourceSet() {
-    return full.isResourceSet() || thumb.isResourceSet();
+  private boolean isResourceSet() {
+    return fullState == RequestState.SUCCESS || thumbState == RequestState.SUCCESS;
   }
 
   @Override
   public boolean isCleared() {
-    return full.isCleared();
-  }
-
-  /** Returns true if the full request has failed. */
-  @Override
-  public boolean isFailed() {
-    return full.isFailed();
+    return fullState == RequestState.CLEARED;
   }
 
   @Override
