@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
@@ -475,6 +476,49 @@ public final class TransformationUtils {
       @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int roundingRadius) {
     Preconditions.checkArgument(roundingRadius > 0, "roundingRadius must be greater than 0.");
 
+    return roundedCorners(
+        pool,
+        inBitmap,
+        new DrawBitmapFn() {
+          @Override
+          public void drawBitmap(Canvas canvas, Paint paint, RectF rect) {
+            canvas.drawRoundRect(rect, roundingRadius, roundingRadius, paint);
+          }
+        });
+  }
+
+  /**
+   * Creates a bitmap from a source bitmap and rounds the corners, applying a potentially different
+   * [X, Y] radius to each corner.
+   *
+   * <p>This method does <em>NOT</em> resize the given {@link Bitmap}, it only rounds it's corners.
+   * To both resize and round the corners of an image, consider {@link
+   * com.bumptech.glide.request.RequestOptions#transform(Transformation[])} and/or {@link
+   * com.bumptech.glide.load.MultiTransformation}.
+   *
+   * @param inBitmap the source bitmap to use as a basis for the created bitmap.
+   * @param roundingRadii the corner [X, Y] radii to be applied (in device-specific pixels) in the
+   *     order top-left, top-right, bottom-right and bottom-left (2 values for each).
+   * @return a {@link Bitmap} similar to inBitmap but with rounded corners.
+   */
+  public static Bitmap roundedCorners(
+      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, float[] roundingRadii) {
+    return roundedCorners(
+        pool,
+        inBitmap,
+        new DrawBitmapFn() {
+          @Override
+          public void drawBitmap(Canvas canvas, Paint paint, RectF rect) {
+            Path path = new Path();
+            path.addRoundRect(rect, roundingRadii, Path.Direction.CW);
+            canvas.drawPath(path, paint);
+          }
+        });
+  }
+
+  private static Bitmap roundedCorners(
+      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, DrawBitmapFn drawBitmapFn) {
+
     // Alpha is required for this transformation.
     Bitmap.Config safeConfig = getAlphaSafeConfig(inBitmap);
     Bitmap toTransform = getAlphaSafeBitmap(pool, inBitmap);
@@ -492,7 +536,7 @@ public final class TransformationUtils {
     try {
       Canvas canvas = new Canvas(result);
       canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-      canvas.drawRoundRect(rect, roundingRadius, roundingRadius, paint);
+      drawBitmapFn.drawBitmap(canvas, paint, rect);
       clear(canvas);
     } finally {
       BITMAP_DRAWABLE_LOCK.unlock();
@@ -557,6 +601,12 @@ public final class TransformationUtils {
       default:
         // Do nothing.
     }
+  }
+
+  /** Convenience function for drawing a rounded bitmap. */
+  private interface DrawBitmapFn {
+
+    void drawBitmap(Canvas canvas, Paint paint, RectF rect);
   }
 
   private static final class NoLock implements Lock {
