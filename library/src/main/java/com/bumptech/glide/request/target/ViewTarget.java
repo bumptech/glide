@@ -51,7 +51,7 @@ public abstract class ViewTarget<T extends View, Z> extends BaseTarget<Z> {
   private static boolean isTagUsedAtLeastOnce;
   private static int tagId = R.id.glide_custom_view_target_tag;
 
-  protected final T view;
+  @NonNull protected final T view;
   private final SizeDeterminer sizeDeterminer;
   @Nullable private OnAttachStateChangeListener attachStateListener;
   private boolean isClearedByUs;
