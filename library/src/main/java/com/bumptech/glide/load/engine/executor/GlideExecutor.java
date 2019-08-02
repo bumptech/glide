@@ -215,7 +215,7 @@ public final class GlideExecutor implements ExecutorService {
   }
 
   /**
-   * Returns a new cached thread pool that defaults to either one or two threads depending on the
+   * Returns a new fixed thread pool that defaults to either one or two threads depending on the
    * number of available cores to use when loading frames of animations.
    */
   public static GlideExecutor newAnimationExecutor() {
@@ -231,7 +231,7 @@ public final class GlideExecutor implements ExecutorService {
   }
 
   /**
-   * Returns a new cached thread pool with the given thread count and {@link
+   * Returns a new fixed thread pool with the given thread count and {@link
    * UncaughtThrowableStrategy} to use when loading frames of animations.
    */
   // Public API.
@@ -240,9 +240,9 @@ public final class GlideExecutor implements ExecutorService {
       int threadCount, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
     return new GlideExecutor(
         new ThreadPoolExecutor(
-            0 /* corePoolSize */,
             threadCount,
-            KEEP_ALIVE_TIME_MS,
+            threadCount,
+            0,
             TimeUnit.MILLISECONDS,
             new PriorityBlockingQueue<Runnable>(),
             new DefaultThreadFactory(ANIMATION_EXECUTOR_NAME, uncaughtThrowableStrategy, true)));
