@@ -240,9 +240,9 @@ public final class GlideExecutor implements ExecutorService {
       int threadCount, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
     return new GlideExecutor(
         new ThreadPoolExecutor(
-            0 /* corePoolSize */,
             threadCount,
-            KEEP_ALIVE_TIME_MS,
+            threadCount,
+            0,
             TimeUnit.MILLISECONDS,
             new PriorityBlockingQueue<Runnable>(),
             new DefaultThreadFactory(ANIMATION_EXECUTOR_NAME, uncaughtThrowableStrategy, true)));
