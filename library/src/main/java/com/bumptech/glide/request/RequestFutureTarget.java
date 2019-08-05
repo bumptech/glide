@@ -1,6 +1,7 @@
 package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -57,12 +58,26 @@ public class RequestFutureTarget<R> implements FutureTarget<R>, RequestListener<
   private final boolean assertBackgroundThread;
   private final Waiter waiter;
 
-  @Nullable private R resource;
-  @Nullable private Request request;
+  @GuardedBy("this")
+  @Nullable
+  private R resource;
+
+  @GuardedBy("this")
+  @Nullable
+  private Request request;
+
+  @GuardedBy("this")
   private boolean isCancelled;
+
+  @GuardedBy("this")
   private boolean resultReceived;
+
+  @GuardedBy("this")
   private boolean loadFailed;
-  @Nullable private GlideException exception;
+
+  @GuardedBy("this")
+  @Nullable
+  private GlideException exception;
 
   /** Constructor for a RequestFutureTarget. Should not be used directly. */
   public RequestFutureTarget(int width, int height) {
@@ -77,15 +92,24 @@ public class RequestFutureTarget<R> implements FutureTarget<R>, RequestListener<
   }
 
   @Override
-  public synchronized boolean cancel(boolean mayInterruptIfRunning) {
-    if (isDone()) {
-      return false;
+  public boolean cancel(boolean mayInterruptIfRunning) {
+    Request toClear = null;
+    synchronized (this) {
+      if (isDone()) {
+        return false;
+      }
+
+      isCancelled = true;
+      waiter.notifyAll(this);
+      if (mayInterruptIfRunning) {
+        toClear = request;
+        request = null;
+      }
     }
-    isCancelled = true;
-    waiter.notifyAll(this);
-    if (mayInterruptIfRunning && request != null) {
-      request.clear();
-      request = null;
+
+    // Avoid deadlock by clearing outside of the lock (b/138335419)
+    if (toClear != null) {
+      toClear.clear();
     }
     return true;
   }
