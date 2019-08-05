@@ -83,7 +83,6 @@ public class SingleRequestTest {
 
     request.onResourceReady(null, DataSource.LOCAL);
 
-    assertTrue(request.isFailed());
     verify(listener1)
         .onLoadFailed(isAGlideException(), isA(Number.class), eq(builder.target), anyBoolean());
   }
@@ -95,7 +94,6 @@ public class SingleRequestTest {
 
     request.onResourceReady(builder.resource, DataSource.REMOTE);
 
-    assertTrue(request.isFailed());
     verify(builder.engine).release(eq(builder.resource));
     verify(listener1)
         .onLoadFailed(isAGlideException(), any(Number.class), eq(builder.target), anyBoolean());
@@ -109,30 +107,9 @@ public class SingleRequestTest {
 
     request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
 
-    assertTrue(request.isFailed());
     verify(builder.engine).release(eq(builder.resource));
     verify(listener1)
         .onLoadFailed(isAGlideException(), any(Number.class), eq(builder.target), anyBoolean());
-  }
-
-  @Test
-  public void testIsNotFailedAfterClear() {
-    SingleRequest<List> request = builder.build();
-
-    request.onResourceReady(null, DataSource.DATA_DISK_CACHE);
-    request.clear();
-
-    assertFalse(request.isFailed());
-  }
-
-  @Test
-  public void testIsNotFailedAfterBegin() {
-    SingleRequest<List> request = builder.build();
-
-    request.onResourceReady(null, DataSource.DATA_DISK_CACHE);
-    request.begin();
-
-    assertFalse(request.isFailed());
   }
 
   @Test
@@ -210,21 +187,6 @@ public class SingleRequestTest {
   }
 
   @Test
-  public void testIsNotFailedWithoutException() {
-    SingleRequest<List> request = builder.build();
-
-    assertFalse(request.isFailed());
-  }
-
-  @Test
-  public void testIsFailedAfterException() {
-    SingleRequest<List> request = builder.build();
-
-    request.onLoadFailed(new GlideException("test"));
-    assertTrue(request.isFailed());
-  }
-
-  @Test
   public void pause_whenRequestIsWaitingForASize_clearsRequest() {
     SingleRequest<List> request = builder.build();
 
@@ -252,15 +214,6 @@ public class SingleRequestTest {
     request.onResourceReady(builder.resource, DataSource.REMOTE);
     request.pause();
     assertThat(request.isComplete()).isTrue();
-  }
-
-  @Test
-  public void pause_whenFailed_doesNotClearRequest() {
-    SingleRequest<List> request = builder.build();
-
-    request.onLoadFailed(new GlideException("test"));
-    request.pause();
-    assertThat(request.isFailed()).isTrue();
   }
 
   @Test
@@ -301,14 +254,6 @@ public class SingleRequestTest {
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
-  }
-
-  @Test
-  public void testIsFailedAfterNoResultAndNullException() {
-    SingleRequest<List> request = builder.build();
-
-    request.onLoadFailed(new GlideException("test"));
-    assertTrue(request.isFailed());
   }
 
   @Test
@@ -1048,6 +993,7 @@ public class SingleRequestTest {
       return SingleRequest.obtain(
           /*context=*/ glideContext,
           /*glideContext=*/ glideContext,
+          /*requestLock=*/ new Object(),
           model,
           transcodeClass,
           requestOptions,

@@ -1,5 +1,6 @@
 package com.bumptech.glide.request;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.Nullable;
 
 /**
@@ -8,11 +9,20 @@ import androidx.annotation.Nullable;
  */
 public final class ErrorRequestCoordinator implements RequestCoordinator, Request {
 
+  private final Object requestLock;
   @Nullable private final RequestCoordinator parent;
-  private Request primary;
-  private Request error;
 
-  public ErrorRequestCoordinator(@Nullable RequestCoordinator parent) {
+  private volatile Request primary;
+  private volatile Request error;
+
+  @GuardedBy("requestLock")
+  private RequestState primaryState = RequestState.CLEARED;
+
+  @GuardedBy("requestLock")
+  private RequestState errorState = RequestState.CLEARED;
+
+  public ErrorRequestCoordinator(Object requestLock, @Nullable RequestCoordinator parent) {
+    this.requestLock = requestLock;
     this.parent = parent;
   }
 
@@ -23,56 +33,69 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
 
   @Override
   public void begin() {
-    if (!primary.isRunning()) {
-      primary.begin();
+    synchronized (requestLock) {
+      if (primaryState != RequestState.RUNNING) {
+        primaryState = RequestState.RUNNING;
+        primary.begin();
+      }
     }
   }
 
   @Override
   public void clear() {
-    primary.clear();
-    // Don't check primary.isFailed() here because it will have been reset by the clear call
-    // immediately before this.
-    if (error.isRunning()) {
-      error.clear();
+    synchronized (requestLock) {
+      primaryState = RequestState.CLEARED;
+      primary.clear();
+      // Don't check primary's failed state here because it will have been reset by the clear call
+      // immediately before this.
+      if (errorState != RequestState.CLEARED) {
+        errorState = RequestState.CLEARED;
+        error.clear();
+      }
     }
   }
 
   @Override
   public void pause() {
-    primary.pause();
-    error.pause();
+    synchronized (requestLock) {
+      if (primaryState == RequestState.RUNNING) {
+        primaryState = RequestState.PAUSED;
+        primary.pause();
+      }
+      if (errorState == RequestState.RUNNING) {
+        errorState = RequestState.PAUSED;
+        error.pause();
+      }
+    }
   }
 
   @Override
   public boolean isRunning() {
-    return primary.isFailed() ? error.isRunning() : primary.isRunning();
+    synchronized (requestLock) {
+      return primaryState == RequestState.RUNNING || errorState == RequestState.RUNNING;
+    }
   }
 
   @Override
   public boolean isComplete() {
-    return primary.isFailed() ? error.isComplete() : primary.isComplete();
-  }
-
-  @Override
-  public boolean isResourceSet() {
-    return primary.isFailed() ? error.isResourceSet() : primary.isResourceSet();
+    synchronized (requestLock) {
+      return primaryState == RequestState.SUCCESS || errorState == RequestState.SUCCESS;
+    }
   }
 
   @Override
   public boolean isCleared() {
-    return primary.isFailed() ? error.isCleared() : primary.isCleared();
-  }
-
-  @Override
-  public boolean isFailed() {
-    return primary.isFailed() && error.isFailed();
+    synchronized (requestLock) {
+      return primaryState == RequestState.CLEARED && errorState == RequestState.CLEARED;
+    }
   }
 
   @Override
   public void recycle() {
-    primary.recycle();
-    error.recycle();
+    synchronized (requestLock) {
+      primary.recycle();
+      error.recycle();
+    }
   }
 
   @Override
@@ -86,62 +109,89 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
 
   @Override
   public boolean canSetImage(Request request) {
-    return parentCanSetImage() && isValidRequest(request);
+    synchronized (requestLock) {
+      return parentCanSetImage() && isValidRequest(request);
+    }
   }
 
+  @GuardedBy("requestLock")
   private boolean parentCanSetImage() {
     return parent == null || parent.canSetImage(this);
   }
 
   @Override
   public boolean canNotifyStatusChanged(Request request) {
-    return parentCanNotifyStatusChanged() && isValidRequest(request);
+    synchronized (requestLock) {
+      return parentCanNotifyStatusChanged() && isValidRequest(request);
+    }
   }
 
   @Override
   public boolean canNotifyCleared(Request request) {
-    return parentCanNotifyCleared() && isValidRequest(request);
+    synchronized (requestLock) {
+      return parentCanNotifyCleared() && isValidRequest(request);
+    }
   }
 
+  @GuardedBy("requestLock")
   private boolean parentCanNotifyCleared() {
     return parent == null || parent.canNotifyCleared(this);
   }
 
+  @GuardedBy("requestLock")
   private boolean parentCanNotifyStatusChanged() {
     return parent == null || parent.canNotifyStatusChanged(this);
   }
 
+  @GuardedBy("requestLock")
   private boolean isValidRequest(Request request) {
-    return request.equals(primary) || (primary.isFailed() && request.equals(error));
+    return request.equals(primary)
+        || (primaryState == RequestState.FAILED && request.equals(error));
   }
 
   @Override
   public boolean isAnyResourceSet() {
-    return parentIsAnyResourceSet() || isResourceSet();
+    synchronized (requestLock) {
+      return parentIsAnyResourceSet() || isComplete();
+    }
   }
 
+  @GuardedBy("requestLock")
   private boolean parentIsAnyResourceSet() {
     return parent != null && parent.isAnyResourceSet();
   }
 
   @Override
   public void onRequestSuccess(Request request) {
-    if (parent != null) {
-      parent.onRequestSuccess(this);
+    synchronized (requestLock) {
+      if (request.equals(primary)) {
+        primaryState = RequestState.SUCCESS;
+      } else if (request.equals(error)) {
+        errorState = RequestState.SUCCESS;
+      }
+      if (parent != null) {
+        parent.onRequestSuccess(this);
+      }
     }
   }
 
   @Override
   public void onRequestFailed(Request request) {
-    if (!request.equals(error)) {
-      if (!error.isRunning()) {
-        error.begin();
+    synchronized (requestLock) {
+      if (!request.equals(error)) {
+        primaryState = RequestState.FAILED;
+        if (errorState != RequestState.RUNNING) {
+          errorState = RequestState.RUNNING;
+          error.begin();
+        }
+        return;
       }
-      return;
-    }
 
-    if (parent != null) {
-      parent.onRequestFailed(this);
+      errorState = RequestState.FAILED;
+
+      if (parent != null) {
+        parent.onRequestFailed(this);
+      }
     }
   }
 }

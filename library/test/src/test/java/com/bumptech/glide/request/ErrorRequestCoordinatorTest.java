@@ -3,9 +3,11 @@ package com.bumptech.glide.request;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import androidx.annotation.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +26,7 @@ public class ErrorRequestCoordinatorTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    coordinator = new ErrorRequestCoordinator(/*parent=*/ null);
+    coordinator = newCoordinator();
     coordinator.setRequests(primary, error);
   }
 
@@ -36,9 +38,9 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void begin_whenPrimaryIsAlreadyRunning_doesNotStartPrimaryAgain() {
-    when(primary.isRunning()).thenReturn(true);
     coordinator.begin();
-    verify(primary, never()).begin();
+    coordinator.begin();
+    verify(primary, times(1)).begin();
   }
 
   @Test
@@ -55,22 +57,21 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void clear_whenPrimaryHasFailed_errorIsRunning_clearsError() {
-    when(primary.isFailed()).thenReturn(true);
-    when(error.isRunning()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
     coordinator.clear();
     verify(error).clear();
   }
 
   @Test
   public void clear_whenPrimaryHasFailed_clearsPrimary() {
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
     coordinator.clear();
     verify(primary).clear();
   }
 
   @Test
   public void clear_whenErrorIsRunning_clearsError() {
-    when(error.isRunning()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
     coordinator.clear();
 
     verify(error).clear();
@@ -78,65 +79,54 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void pause_whenPrimaryIsRunning_pausesPrimary() {
-    when(primary.isRunning()).thenReturn(true);
+    coordinator.begin();
     coordinator.pause();
 
     verify(primary).pause();
   }
 
-  // Rely on the underlying implementation to ignore the pause call. It's somewhat more efficient
-  // because we don't need an additional lock.
   @Test
   public void pause_whenPrimaryIsComplete_doesNotPausePrimary() {
-    when(primary.isComplete()).thenReturn(true);
+    coordinator.onRequestSuccess(primary);
     coordinator.pause();
 
-    verify(primary).pause();
+    verify(primary, never()).pause();
   }
 
-  // Rely on the underlying implementation to ignore the pause call. It's somewhat more efficient
-  // because we don't need an additional lock.
   @Test
-  public void pause_whenPrimaryIsFailed_pausesPrimary() {
-    when(primary.isFailed()).thenReturn(true);
+  public void pause_whenPrimaryIsFailed_doesNotPausePrimary() {
+    coordinator.onRequestFailed(primary);
     coordinator.pause();
 
-    verify(primary).pause();
+    verify(primary, never()).pause();
   }
 
-  // Rely on the underlying implementation to ignore the pause call. It's somewhat more efficient
-  // because we don't need an additional lock.
   @Test
-  public void pause_whenErrorIsNotRunning_pausesError() {
-    when(error.isRunning()).thenReturn(false);
+  public void pause_whenErrorIsNotRunning_doesNotPauseError() {
     coordinator.pause();
 
-    verify(error).pause();
+    verify(error, never()).pause();
   }
 
-  // Rely on the underlying implementation to ignore the pause call. It's somewhat more efficient
-  // because we don't need an additional lock.
   @Test
-  public void pause_whenErrorIsComplete_pausesError() {
-    when(error.isComplete()).thenReturn(true);
+  public void pause_whenErrorIsComplete_doesNotPauseError() {
+    coordinator.onRequestSuccess(error);
     coordinator.pause();
 
-    verify(error).pause();
+    verify(error, never()).pause();
   }
 
-  // Rely on the underlying implementation to ignore the pause call. It's somewhat more efficient
-  // because we don't need an additional lock.
   @Test
-  public void pause_whenErrorIsFailed_pausesError() {
-    when(error.isFailed()).thenReturn(true);
+  public void pause_whenErrorIsFailed_doesNotPauseError() {
+    coordinator.onRequestFailed(error);
     coordinator.pause();
 
-    verify(error).pause();
+    verify(error, never()).pause();
   }
 
   @Test
   public void pause_whenErrorIsRunning_pausesError() {
-    when(error.isRunning()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
     coordinator.pause();
 
     verify(error).pause();
@@ -149,20 +139,14 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void isRunning_primaryNotFailed_primaryRunning_returnsTrue() {
-    when(primary.isRunning()).thenReturn(true);
+    coordinator.begin();
     assertThat(coordinator.isRunning()).isTrue();
   }
 
   @Test
-  public void isRunning_primaryFailed_errorNotRunning_returnsFalse() {
-    when(primary.isFailed()).thenReturn(true);
-    assertThat(coordinator.isRunning()).isFalse();
-  }
-
-  @Test
-  public void isRunning_primaryFailed_errorRunning_returnsTrue() {
-    when(primary.isFailed()).thenReturn(true);
-    when(error.isRunning()).thenReturn(true);
+  public void isRunning_primaryFailed_returnsTrue() {
+    coordinator.onRequestFailed(primary);
+    // A failed primary request starts the error request.
     assertThat(coordinator.isRunning()).isTrue();
   }
 
@@ -173,93 +157,47 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void isComplete_primaryNotFailed_primaryComplete_returnsTrue() {
-    when(primary.isComplete()).thenReturn(true);
+    coordinator.onRequestSuccess(primary);
     assertThat(coordinator.isComplete()).isTrue();
   }
 
   @Test
   public void isComplete_primaryFailed_errorNotComplete_returnsFalse() {
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
     assertThat(coordinator.isComplete()).isFalse();
   }
 
   @Test
   public void isComplete_primaryFailed_errorComplete_returnsTrue() {
-    when(primary.isFailed()).thenReturn(true);
-    when(error.isComplete()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
+    coordinator.onRequestSuccess(error);
     assertThat(coordinator.isComplete()).isTrue();
   }
 
   @Test
-  public void isResourceSet_primaryNotFailed_primaryNotResourceSet_returnsFalse() {
-    assertThat(coordinator.isResourceSet()).isFalse();
-  }
-
-  @Test
-  public void isResourceSet_primaryNotFailed_primaryResourceSet_returnsTrue() {
-    when(primary.isResourceSet()).thenReturn(true);
-    assertThat(coordinator.isResourceSet()).isTrue();
-  }
-
-  @Test
-  public void isResourceSet_primaryFailed_errorNotResourceSet_returnsFalse() {
-    when(primary.isFailed()).thenReturn(true);
-    assertThat(coordinator.isResourceSet()).isFalse();
-  }
-
-  @Test
-  public void isResourceSet_primaryFailed_errorResourceSet_returnsTrue() {
-    when(primary.isFailed()).thenReturn(true);
-    when(error.isResourceSet()).thenReturn(true);
-    assertThat(coordinator.isResourceSet()).isTrue();
-  }
-
-  @Test
-  public void isCancelled_primaryNotFailed_primaryNotCancelled_returnsFalse() {
+  public void isCleared_primaryNotFailed_primaryNotCancelled_returnsFalse() {
+    coordinator.begin();
     assertThat(coordinator.isCleared()).isFalse();
   }
 
   @Test
-  public void isCancelled_primaryNotFailed_primaryCancelled_returnsTrue() {
-    when(primary.isCleared()).thenReturn(true);
+  public void isCleared_primaryNotFailed_primaryCancelled_returnsTrue() {
+    coordinator.begin();
+    coordinator.clear();
     assertThat(coordinator.isCleared()).isTrue();
   }
 
   @Test
-  public void isCancelled_primaryFailed_errorNotCancelled_returnsFalse() {
-    when(primary.isFailed()).thenReturn(true);
+  public void isCleared_primaryFailed_errorNotCancelled_returnsFalse() {
+    coordinator.onRequestFailed(primary);
     assertThat(coordinator.isCleared()).isFalse();
   }
 
   @Test
-  public void isCancelled_primaryFailed_errorCancelled_returnsTrue() {
-    when(primary.isFailed()).thenReturn(true);
-    when(error.isCleared()).thenReturn(true);
+  public void isCleared_primaryFailed_errorCancelled_returnsTrue() {
+    coordinator.onRequestFailed(primary);
+    coordinator.clear();
     assertThat(coordinator.isCleared()).isTrue();
-  }
-
-  @Test
-  public void isFailed_primaryNotFailed_errorNotFailed_returnsFalse() {
-    assertThat(coordinator.isFailed()).isFalse();
-  }
-
-  @Test
-  public void isFailed_primaryFailed_errorNotFailed_returnsFalse() {
-    when(primary.isFailed()).thenReturn(true);
-    assertThat(coordinator.isFailed()).isFalse();
-  }
-
-  @Test
-  public void isFailed_primaryNotFailed_errorFailed_returnsFalse() {
-    when(error.isFailed()).thenReturn(true);
-    assertThat(coordinator.isFailed()).isFalse();
-  }
-
-  @Test
-  public void isFailed_primaryFailed_andErrorFailed_returnsTrue() {
-    when(primary.isFailed()).thenReturn(true);
-    when(error.isFailed()).thenReturn(true);
-    assertThat(coordinator.isFailed()).isTrue();
   }
 
   @Test
@@ -273,7 +211,7 @@ public class ErrorRequestCoordinatorTest {
   public void isEquivalentTo() {
     assertThat(coordinator.isEquivalentTo(primary)).isFalse();
 
-    ErrorRequestCoordinator other = new ErrorRequestCoordinator(/*parent=*/ null);
+    ErrorRequestCoordinator other = newCoordinator(/*parent=*/ null);
     assertThat(coordinator.isEquivalentTo(other)).isFalse();
 
     other.setRequests(primary, primary);
@@ -287,13 +225,13 @@ public class ErrorRequestCoordinatorTest {
     other.setRequests(primary, error);
     assertThat(coordinator.isEquivalentTo(other)).isTrue();
 
-    other = new ErrorRequestCoordinator(parent);
+    other = newCoordinator(parent);
     other.setRequests(primary, error);
     assertThat(coordinator.isEquivalentTo(other)).isTrue();
 
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
-    other = new ErrorRequestCoordinator(parent);
+    other = newCoordinator(parent);
     other.setRequests(primary, error);
     assertThat(coordinator.isEquivalentTo(other)).isTrue();
   }
@@ -310,7 +248,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void canSetImage_withNotFailedPrimary_parentCanSetImage_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.canSetImage(coordinator)).thenReturn(true);
 
@@ -319,7 +257,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void canSetImage_withNotFailedPrimary_parentCanNotSetImage_returnsFalse() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
 
     assertThat(coordinator.canSetImage(primary)).isFalse();
@@ -327,25 +265,25 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void canSetImage_withError_andFailedPrimary_nullParent_returnsTrue() {
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
     assertThat(coordinator.canSetImage(error)).isTrue();
   }
 
   @Test
   public void canSetImage_withError_andFailedPrimary_nonNullParentCanSetImage_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.canSetImage(coordinator)).thenReturn(true);
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
 
     assertThat(coordinator.canSetImage(error)).isTrue();
   }
 
   @Test
   public void canSetImage_withError_andFailedPrimary_nonNullParentCanNotSetImage_returnsFalse() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
 
     assertThat(coordinator.canSetImage(error)).isFalse();
   }
@@ -357,7 +295,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void canNotifyStatusChanged_withNotFailedPrimary_nonNullParentCantNotify_returnsFalse() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
 
     assertThat(coordinator.canNotifyStatusChanged(primary)).isFalse();
@@ -365,7 +303,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void canNotifyStatusChanged_withNotFailedPrimary_nonNullParentCanNotify_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.canNotifyStatusChanged(coordinator)).thenReturn(true);
 
@@ -379,25 +317,25 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void canNotifyStatusChanged_withError_failedPrimary_nullParent_returnsTrue() {
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
 
     assertThat(coordinator.canNotifyStatusChanged(error)).isTrue();
   }
 
   @Test
   public void canNotifyStatusChanged_withError_failedPrimary_nonNullParentCantNotify_false() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
 
     assertThat(coordinator.canNotifyStatusChanged(error)).isFalse();
   }
 
   @Test
   public void canNotifyStatusChanged_withError_failedPrimary_nonNullParentCanNotify_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
     when(parent.canNotifyStatusChanged(coordinator)).thenReturn(true);
 
     assertThat(coordinator.canNotifyStatusChanged(primary)).isTrue();
@@ -410,24 +348,24 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void isAnyResourceSet_primarySet_nullParent_returnsTrue() {
-    when(primary.isResourceSet()).thenReturn(true);
+    coordinator.onRequestSuccess(primary);
     assertThat(coordinator.isAnyResourceSet()).isTrue();
   }
 
   @Test
   public void isAnyResourceSet_primarySet_parentResourceNotSet_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
-    when(primary.isResourceSet()).thenReturn(true);
+    coordinator.onRequestSuccess(primary);
 
     assertThat(coordinator.isAnyResourceSet()).isTrue();
   }
 
   @Test
   public void isAnyResourceSet_primarySet_parentSet_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
-    when(primary.isResourceSet()).thenReturn(true);
+    coordinator.onRequestSuccess(primary);
     when(parent.isAnyResourceSet()).thenReturn(true);
 
     assertThat(coordinator.isAnyResourceSet()).isTrue();
@@ -435,7 +373,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void isAnyResourceSet_parentSet_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.isAnyResourceSet()).thenReturn(true);
 
@@ -443,50 +381,35 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void isAnyResourceSet_errorSet_notFailedPrimary_nullParent_returnsFalse() {
-    when(error.isResourceSet()).thenReturn(true);
-    assertThat(coordinator.isAnyResourceSet()).isFalse();
-  }
-
-  @Test
   public void isAnyResourceSet_errorSet_failedPrimary_nullParent_returnsTrue() {
-    when(error.isResourceSet()).thenReturn(true);
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
+    coordinator.onRequestSuccess(error);
     assertThat(coordinator.isAnyResourceSet()).isTrue();
   }
 
   @Test
-  public void isAnyResourceSet_errorSet_notFailedPrimary_nonNullParentNotSet_returnsFalse() {
-    coordinator = new ErrorRequestCoordinator(parent);
-    coordinator.setRequests(primary, error);
-    when(error.isResourceSet()).thenReturn(true);
-
-    assertThat(coordinator.isAnyResourceSet()).isFalse();
-  }
-
-  @Test
   public void isAnyResourceSet_errorSet_failedPrimary_nonNullParentNotSet_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
-    when(primary.isFailed()).thenReturn(true);
-    when(error.isResourceSet()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
+    coordinator.onRequestSuccess(error);
 
     assertThat(coordinator.isAnyResourceSet()).isTrue();
   }
 
   @Test
   public void isAnyResourceSet_errorSet_nonNullParentSet_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.isAnyResourceSet()).thenReturn(true);
-    when(error.isResourceSet()).thenReturn(true);
+    coordinator.onRequestSuccess(error);
 
     assertThat(coordinator.isAnyResourceSet()).isTrue();
   }
 
   @Test
   public void isAnyResourceSet_primaryNotSet_errorNotSet_nonNullParentNotSet_returnsFalse() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
 
     assertThat(coordinator.isAnyResourceSet()).isFalse();
@@ -494,7 +417,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void isAnyResourceSet_primaryNotSet_errorNotSet_nonNullParentSet_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
 
     when(parent.isAnyResourceSet()).thenReturn(true);
@@ -509,7 +432,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void onRequestSuccess_nonNullParent_callsParent() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.onRequestSuccess(primary);
     verify(parent).onRequestSuccess(coordinator);
   }
@@ -521,14 +444,6 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void onRequestFailed_primaryRequest_runningError_doesNotBeginError() {
-    when(error.isRunning()).thenReturn(true);
-    coordinator.onRequestFailed(primary);
-
-    verify(error, never()).begin();
-  }
-
-  @Test
   public void onRequestFailed_errorRequest_doesNotBeginError() {
     coordinator.onRequestFailed(error);
     verify(error, never()).begin();
@@ -536,7 +451,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void onRequestFailed_primaryRequest_notRunningError_nonNullParent_doesNotNotifyParent() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
 
     coordinator.onRequestFailed(primary);
@@ -545,7 +460,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void onRequestFailed_errorRequest_nonNullParent_notifiesParent() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
 
     coordinator.onRequestFailed(error);
@@ -555,9 +470,9 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void onRequestFailed_primaryRequest_runningError_nonNullParent_doesNotNotifyParent() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
-    when(error.isRunning()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
 
     coordinator.onRequestFailed(primary);
 
@@ -571,7 +486,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void canNotifyCleared_primaryRequest_parentCanNotNotify_returnsFalse() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
 
     assertThat(coordinator.canNotifyCleared(primary)).isFalse();
@@ -579,7 +494,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void canNotifyCleared_primaryRequest_parentCanNotify_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.canNotifyCleared(coordinator)).thenReturn(true);
 
@@ -588,26 +503,26 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void canNotifyCleared_primaryRequestFailed_parentCanNotify_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.canNotifyCleared(coordinator)).thenReturn(true);
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
 
     assertThat(coordinator.canNotifyCleared(primary)).isTrue();
   }
 
   @Test
   public void canNotifyCleared_primaryRequestFailed_parentCanNotNotify_returnsFalse() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
-    when(primary.isFailed()).thenReturn(false);
+    coordinator.onRequestFailed(primary);
 
     assertThat(coordinator.canNotifyCleared(primary)).isFalse();
   }
 
   @Test
   public void canNotifyCleared_primaryRequestFailed_nullParent_returnsTrue() {
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
 
     assertThat(coordinator.canNotifyCleared(primary)).isTrue();
   }
@@ -619,27 +534,35 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void canNotifyCleared_errorRequest_primaryFailed_nullParent_returnsTrue() {
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
     assertThat(coordinator.canNotifyCleared(error)).isTrue();
   }
 
   @Test
   public void canNotifyCleared_errorRequest_primaryFailed_nonNullParentCanNotNotify_returnsFalse() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.canNotifyCleared(coordinator)).thenReturn(false);
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
 
     assertThat(coordinator.canNotifyCleared(error)).isFalse();
   }
 
   @Test
   public void canNotifyCleared_errorRequest_primaryFailed_nonNullParentCanNotify_returnsTrue() {
-    coordinator = new ErrorRequestCoordinator(parent);
+    coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.canNotifyCleared(coordinator)).thenReturn(true);
-    when(primary.isFailed()).thenReturn(true);
+    coordinator.onRequestFailed(primary);
 
     assertThat(coordinator.canNotifyCleared(error)).isTrue();
+  }
+
+  private static ErrorRequestCoordinator newCoordinator() {
+    return newCoordinator(/*parent=*/ null);
+  }
+
+  private static ErrorRequestCoordinator newCoordinator(@Nullable RequestCoordinator parent) {
+    return new ErrorRequestCoordinator(/*requestLock=*/ new Object(), parent);
   }
 }

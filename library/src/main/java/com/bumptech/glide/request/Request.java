@@ -29,17 +29,8 @@ public interface Request {
   /** Returns true if the request has completed successfully. */
   boolean isComplete();
 
-  /**
-   * Returns true if a non-placeholder resource is put. For Requests that load more than one
-   * resource, isResourceSet may return true even if {@link #isComplete()}} returns false.
-   */
-  boolean isResourceSet();
-
   /** Returns true if the request has been cleared. */
   boolean isCleared();
-
-  /** Returns true if the request has failed. */
-  boolean isFailed();
 
   /** Recycles the request object and releases its resources. */
   void recycle();

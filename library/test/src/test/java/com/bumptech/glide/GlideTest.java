@@ -61,7 +61,6 @@ import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.testutil.TestResourceUtil;
-import com.bumptech.glide.util.Preconditions;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -689,13 +688,10 @@ public class GlideTest {
                   }
                 });
 
-    Request request = Preconditions.checkNotNull(target.getRequest());
-
     requestManager.onDestroy();
     requestManager.clear(target);
 
     assertThat(target.getRequest()).isNull();
-    assertThat(request.isCleared()).isTrue();
   }
 
   @Test

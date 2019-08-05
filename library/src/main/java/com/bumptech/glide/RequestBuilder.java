@@ -849,6 +849,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       BaseRequestOptions<?> requestOptions,
       Executor callbackExecutor) {
     return buildRequestRecursive(
+        /*requestLock=*/ new Object(),
         target,
         targetListener,
         /*parentCoordinator=*/ null,
@@ -861,6 +862,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   }
 
   private Request buildRequestRecursive(
+      Object requestLock,
       Target<TranscodeType> target,
       @Nullable RequestListener<TranscodeType> targetListener,
       @Nullable RequestCoordinator parentCoordinator,
@@ -874,12 +876,13 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     // Build the ErrorRequestCoordinator first if necessary so we can update parentCoordinator.
     ErrorRequestCoordinator errorRequestCoordinator = null;
     if (errorBuilder != null) {
-      errorRequestCoordinator = new ErrorRequestCoordinator(parentCoordinator);
+      errorRequestCoordinator = new ErrorRequestCoordinator(requestLock, parentCoordinator);
       parentCoordinator = errorRequestCoordinator;
     }
 
     Request mainRequest =
         buildThumbnailRequestRecursive(
+            requestLock,
             target,
             targetListener,
             parentCoordinator,
@@ -903,6 +906,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
 
     Request errorRequest =
         errorBuilder.buildRequestRecursive(
+            requestLock,
             target,
             targetListener,
             errorRequestCoordinator,
@@ -917,6 +921,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   }
 
   private Request buildThumbnailRequestRecursive(
+      Object requestLock,
       Target<TranscodeType> target,
       RequestListener<TranscodeType> targetListener,
       @Nullable RequestCoordinator parentCoordinator,
@@ -956,9 +961,11 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
         thumbOverrideHeight = requestOptions.getOverrideHeight();
       }
 
-      ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
+      ThumbnailRequestCoordinator coordinator =
+          new ThumbnailRequestCoordinator(requestLock, parentCoordinator);
       Request fullRequest =
           obtainRequest(
+              requestLock,
               target,
               targetListener,
               requestOptions,
@@ -972,6 +979,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       // Recursively generate thumbnail requests.
       Request thumbRequest =
           thumbnailBuilder.buildRequestRecursive(
+              requestLock,
               target,
               targetListener,
               coordinator,
@@ -986,9 +994,11 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       return coordinator;
     } else if (thumbSizeMultiplier != null) {
       // Base case: thumbnail multiplier generates a thumbnail request, but cannot recurse.
-      ThumbnailRequestCoordinator coordinator = new ThumbnailRequestCoordinator(parentCoordinator);
+      ThumbnailRequestCoordinator coordinator =
+          new ThumbnailRequestCoordinator(requestLock, parentCoordinator);
       Request fullRequest =
           obtainRequest(
+              requestLock,
               target,
               targetListener,
               requestOptions,
@@ -1003,6 +1013,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
 
       Request thumbnailRequest =
           obtainRequest(
+              requestLock,
               target,
               targetListener,
               thumbnailOptions,
@@ -1018,6 +1029,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     } else {
       // Base case: no thumbnail.
       return obtainRequest(
+          requestLock,
           target,
           targetListener,
           requestOptions,
@@ -1031,6 +1043,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   }
 
   private Request obtainRequest(
+      Object requestLock,
       Target<TranscodeType> target,
       RequestListener<TranscodeType> targetListener,
       BaseRequestOptions<?> requestOptions,
@@ -1043,6 +1056,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     return SingleRequest.obtain(
         context,
         glideContext,
+        requestLock,
         model,
         transcodeClass,
         requestOptions,
