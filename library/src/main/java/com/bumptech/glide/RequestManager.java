@@ -4,7 +4,9 @@ import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
 import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
 import static com.bumptech.glide.request.RequestOptions.skipMemoryCacheOf;
 
+import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -54,7 +56,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @see Glide#with(androidx.fragment.app.Fragment)
  * @see Glide#with(Context)
  */
-public class RequestManager implements LifecycleListener, ModelTypes<RequestBuilder<Drawable>> {
+public class RequestManager
+    implements ComponentCallbacks2, LifecycleListener, ModelTypes<RequestBuilder<Drawable>> {
   private static final RequestOptions DECODE_TYPE_BITMAP = decodeTypeOf(Bitmap.class).lock();
   private static final RequestOptions DECODE_TYPE_GIF = decodeTypeOf(GifDrawable.class).lock();
   private static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
@@ -92,6 +95,8 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
 
   @GuardedBy("this")
   private RequestOptions requestOptions;
+
+  private TrimMemoryStrategy trimStrategy = TrimMemoryStrategy.DEFAULT;
 
   public RequestManager(
       @NonNull Glide glide,
@@ -221,6 +226,11 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
     return this;
   }
 
+  /** Controls how to respond to {@code onTrimMemory} events sent by the platform. */
+  public void setTrimStrategy(TrimMemoryStrategy trimStrategy) {
+    this.trimStrategy = trimStrategy;
+  }
+
   /**
    * Returns true if loads for this {@link RequestManager} are currently paused.
    *
@@ -263,6 +273,22 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
    */
   public synchronized void pauseAllRequests() {
     requestTracker.pauseAllRequests();
+  }
+
+  /**
+   * Performs {@link #pauseAllRequests()} recursively for all managers that are contextually
+   * descendant to this manager based on the Activity/Fragment hierarchy.
+   *
+   * <p>Similar to {@link #pauseRequestsRecursive()} with the exception that it also clears
+   * resources of completed loads.
+   */
+  // Public API.
+  @SuppressWarnings({"WeakerAccess", "unused"})
+  public synchronized void pauseAllRequestsRecursive() {
+    pauseAllRequests();
+    for (RequestManager requestManager : treeNode.getDescendants()) {
+      requestManager.pauseAllRequests();
+    }
   }
 
   /**
@@ -662,6 +688,22 @@ public class RequestManager implements LifecycleListener, ModelTypes<RequestBuil
   public synchronized String toString() {
     return super.toString() + "{tracker=" + requestTracker + ", treeNode=" + treeNode + "}";
   }
+
+  @Override
+  public void onTrimMemory(int level) {
+    if (level == TRIM_MEMORY_MODERATE
+        && TrimMemoryStrategy.PAUSE_ALL_ON_TRIM_MODERATE.equals(trimStrategy)) {
+      pauseAllRequestsRecursive();
+    }
+  }
+
+  @Override
+  public void onLowMemory() {
+    // Nothing to add conditionally. See Glide#onTrimMemory for unconditional behavior.
+  }
+
+  @Override
+  public void onConfigurationChanged(Configuration newConfig) {}
 
   private class RequestManagerConnectivityListener
       implements ConnectivityMonitor.ConnectivityListener {

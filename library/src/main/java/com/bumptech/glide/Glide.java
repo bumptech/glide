@@ -648,6 +648,9 @@ public class Glide implements ComponentCallbacks2 {
   public void trimMemory(int level) {
     // Engine asserts this anyway when removing resources, fail faster and consistently
     Util.assertMainThread();
+    for (RequestManager manager : managers) {
+      manager.onTrimMemory(level);
+    }
     // memory cache needs to be trimmed before bitmap pool to trim re-pooled Bitmaps too. See #687.
     memoryCache.trimMemory(level);
     bitmapPool.trimMemory(level);
