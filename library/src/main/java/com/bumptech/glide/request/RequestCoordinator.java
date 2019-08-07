@@ -3,11 +3,6 @@ package com.bumptech.glide.request;
 /**
  * An interface for coordinating multiple requests with the same {@link
  * com.bumptech.glide.request.target.Target}.
- *
- * <p>To avoid deadlock, implemenations must <em>not</em> call into individual {@link Request}s to
- * determine their state (ie do not call {@link Request#isCleared()} or {@link Request#isRunning()}
- * etc). Instead use {@link RequestState} and the various methods available on this interface and
- * {@link Request} to track states manually.
  */
 public interface RequestCoordinator {
 
@@ -43,24 +38,4 @@ public interface RequestCoordinator {
 
   /** Must be called when a {@link Request} coordinated by this object fails. */
   void onRequestFailed(Request request);
-
-  /** A simple state enum to keep track of the states of individual subrequests. */
-  enum RequestState {
-    RUNNING(false),
-    PAUSED(false),
-    CLEARED(false),
-    SUCCESS(true),
-    FAILED(true);
-
-    private final boolean isComplete;
-
-    RequestState(boolean isComplete) {
-
-      this.isComplete = isComplete;
-    }
-
-    boolean isComplete() {
-      return isComplete;
-    }
-  }
 }

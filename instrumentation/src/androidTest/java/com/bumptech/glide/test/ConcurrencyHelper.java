@@ -16,7 +16,6 @@ import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.Preconditions;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -198,7 +197,9 @@ public class ConcurrencyHelper {
                   public void onResourceReady(
                       @NonNull T resource, @Nullable Transition<? super T> transition) {
                     target.onResourceReady(resource, transition);
-                    checkRequestAndMaybeReleaseLatch();
+                    if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
+                      latch.countDown();
+                    }
                   }
 
                   @Override
@@ -214,7 +215,9 @@ public class ConcurrencyHelper {
                   @Override
                   public void onLoadFailed(@Nullable Drawable errorDrawable) {
                     target.onLoadFailed(errorDrawable);
-                    checkRequestAndMaybeReleaseLatch();
+                    if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
+                      latch.countDown();
+                    }
                   }
 
                   @Override
@@ -236,22 +239,6 @@ public class ConcurrencyHelper {
                   @Override
                   public Request getRequest() {
                     return target.getRequest();
-                  }
-
-                  // We can't guarantee the ordering of when this callback is called and when the
-                  // request's state is updated, so it's safer to post the check back to the UI
-                  // thread.
-                  private void checkRequestAndMaybeReleaseLatch() {
-                    Executors.mainThreadExecutor()
-                        .execute(
-                            new Runnable() {
-                              @Override
-                              public void run() {
-                                if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
-                                  latch.countDown();
-                                }
-                              }
-                            });
                   }
                 });
             return target;

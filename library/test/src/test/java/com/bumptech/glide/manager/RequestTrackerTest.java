@@ -132,6 +132,17 @@ public class RequestTrackerTest {
   }
 
   @Test
+  public void pauseRequests_withFailedRequest_doesNotPauseRequest() {
+    FakeRequest request = new FakeRequest();
+    tracker.addRequest(request);
+
+    request.setIsFailed();
+    tracker.pauseRequests();
+
+    assertThat(request.isPaused()).isFalse();
+  }
+
+  @Test
   public void pauseRequests_withClearedRequest_doesNotPauseRequest() {
     FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
@@ -179,6 +190,17 @@ public class RequestTrackerTest {
   }
 
   @Test
+  public void pauseRequests_withFailedRequest_doesNotClearRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsFailed();
+    tracker.addRequest(request);
+
+    tracker.pauseRequests();
+
+    assertThat(request.isCleared()).isFalse();
+  }
+
+  @Test
   public void resumeRequests_withRequestAddedWhilePaused_startsRequest() {
     FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
@@ -197,6 +219,17 @@ public class RequestTrackerTest {
     tracker.resumeRequests();
 
     assertThat(request.isRunning()).isFalse();
+  }
+
+  @Test
+  public void resumeRequests_withFailedRequest_restartsRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsFailed();
+    tracker.addRequest(request);
+
+    tracker.resumeRequests();
+
+    assertThat(request.isRunning()).isTrue();
   }
 
   @Test
@@ -268,6 +301,17 @@ public class RequestTrackerTest {
   }
 
   @Test
+  public void restartRequests_withFailedRequest_restartsRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsFailed();
+    tracker.addRequest(request);
+
+    tracker.restartRequests();
+
+    assertThat(request.isRunning()).isTrue();
+  }
+
+  @Test
   public void restartRequests_withIncompleteRequest_restartsRequest() {
     FakeRequest request = new FakeRequest();
     tracker.addRequest(request);
@@ -280,13 +324,25 @@ public class RequestTrackerTest {
   @Test
   public void restartRequests_whenPaused_doesNotRestartRequests() {
     FakeRequest request = new FakeRequest();
-    request.setIsComplete();
+    request.setIsFailed();
     tracker.pauseRequests();
     tracker.addRequest(request);
 
     tracker.restartRequests();
 
     assertThat(request.isRunning()).isFalse();
+  }
+
+  @Test
+  public void restartRequests_withFailedRequestAddedWhilePaused_clearsFailedRequest() {
+    FakeRequest request = new FakeRequest();
+    request.setIsFailed();
+
+    tracker.pauseRequests();
+    tracker.addRequest(request);
+
+    tracker.restartRequests();
+    assertThat(request.isCleared()).isTrue();
   }
 
   @Test
@@ -380,6 +436,7 @@ public class RequestTrackerTest {
     }
 
     private boolean isRunning;
+    private boolean isFailed;
     private boolean isCleared;
     private boolean isComplete;
     private boolean isRecycled;
@@ -390,6 +447,10 @@ public class RequestTrackerTest {
 
     void setIsComplete(boolean isComplete) {
       this.isComplete = isComplete;
+    }
+
+    void setIsFailed() {
+      isFailed = true;
     }
 
     void setIsRunning() {
@@ -418,6 +479,7 @@ public class RequestTrackerTest {
         throw new IllegalStateException();
       }
       isRunning = false;
+      isFailed = false;
       isCleared = true;
     }
 
@@ -432,8 +494,18 @@ public class RequestTrackerTest {
     }
 
     @Override
+    public boolean isResourceSet() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isCleared() {
       return isCleared;
+    }
+
+    @Override
+    public boolean isFailed() {
+      return isFailed;
     }
 
     @Override
