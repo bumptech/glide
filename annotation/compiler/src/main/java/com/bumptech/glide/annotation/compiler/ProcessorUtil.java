@@ -48,7 +48,6 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
@@ -63,18 +62,12 @@ final class ProcessorUtil {
       GLIDE_MODULE_PACKAGE_NAME + "." + LIBRARY_GLIDE_MODULE_SIMPLE_NAME;
   private static final String COMPILER_PACKAGE_NAME =
       GlideAnnotationProcessor.class.getPackage().getName();
-  private static final ClassName SUPPORT_NONNULL_ANNOTATION =
-      ClassName.get("android.support.annotation", "NonNull");
   private static final ClassName JETBRAINS_NOTNULL_ANNOTATION =
       ClassName.get("org.jetbrains.annotations", "NotNull");
   private static final ClassName ANDROIDX_NONNULL_ANNOTATION =
       ClassName.get("androidx.annotation", "NonNull");
-  private static final ClassName SUPPORT_CHECK_RESULT_ANNOTATION =
-      ClassName.get("android.support.annotation", "CheckResult");
   private static final ClassName ANDROIDX_CHECK_RESULT_ANNOTATION =
       ClassName.get("androidx.annotation", "CheckResult");
-  private static final ClassName SUPPORT_VISIBLE_FOR_TESTING =
-      ClassName.get("android.support.annotation", "VisibleForTesting");
   private static final ClassName ANDROIDX_VISIBLE_FOR_TESTING =
       ClassName.get("androidx.annotation", "VisibleForTesting");
 
@@ -459,32 +452,19 @@ final class ProcessorUtil {
   }
 
   ClassName visibleForTesting() {
-    return findAnnotationClassName(ANDROIDX_VISIBLE_FOR_TESTING, SUPPORT_VISIBLE_FOR_TESTING);
+    return ANDROIDX_VISIBLE_FOR_TESTING;
   }
 
   ClassName nonNull() {
-    return findAnnotationClassName(ANDROIDX_NONNULL_ANNOTATION, SUPPORT_NONNULL_ANNOTATION);
+    return ANDROIDX_NONNULL_ANNOTATION;
   }
 
   ClassName checkResult() {
-    return findAnnotationClassName(
-        ANDROIDX_CHECK_RESULT_ANNOTATION, SUPPORT_CHECK_RESULT_ANNOTATION);
+    return ANDROIDX_CHECK_RESULT_ANNOTATION;
   }
 
   static List<ClassName> nonNulls() {
-    return ImmutableList.of(
-        SUPPORT_NONNULL_ANNOTATION, JETBRAINS_NOTNULL_ANNOTATION, ANDROIDX_NONNULL_ANNOTATION);
-  }
-
-  private ClassName findAnnotationClassName(ClassName androidxName, ClassName supportName) {
-    Elements elements = processingEnv.getElementUtils();
-    TypeElement visibleForTestingTypeElement =
-        elements.getTypeElement(androidxName.reflectionName());
-    if (visibleForTestingTypeElement != null) {
-      return androidxName;
-    }
-
-    return supportName;
+    return ImmutableList.of(JETBRAINS_NOTNULL_ANNOTATION, ANDROIDX_NONNULL_ANNOTATION);
   }
 
   List<ExecutableElement> findInstanceMethodsReturning(TypeElement clazz, TypeMirror returnType) {
