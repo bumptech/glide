@@ -15,7 +15,7 @@ public enum DecodeFormat {
    * android.graphics.Bitmap.Config#ARGB_8888} for {@link android.graphics.Bitmap#getConfig()} when
    * possible.
    *
-   * <p>On Android O+, this format will will use ARGB_8888 only when it's not possible to use {@link
+   * <p>On Android O+, this format will use ARGB_8888 only when it's not possible to use {@link
    * android.graphics.Bitmap.Config#HARDWARE}. More information is available about hardware Bitmaps
    * here: https://goo.gl/tn2A6k. If you need to disable hardware Bitmaps for a particular request,
    * use {@link com.bumptech.glide.request.RequestOptions#disallowHardwareConfig()}.
@@ -34,7 +34,7 @@ public enum DecodeFormat {
    * alpha should return {@link android.graphics.Bitmap.Config#RGB_565} for {@link
    * android.graphics.Bitmap#getConfig()}.
    *
-   * <p>On Android O+, this format will will use ARGB_8888 only when it's not possible to use {@link
+   * <p>On Android O+, this format will use ARGB_8888 only when it's not possible to use {@link
    * android.graphics.Bitmap.Config#HARDWARE}.
    */
   PREFER_RGB_565;
