@@ -5,6 +5,8 @@ import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.LayoutManager;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 /**
  * Converts {@link androidx.recyclerview.widget.RecyclerView.OnScrollListener} events to {@link
@@ -47,10 +49,23 @@ public final class RecyclerToListViewScrollListener extends RecyclerView.OnScrol
 
   @Override
   public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+    LayoutManager layoutManager = recyclerView.getLayoutManager();
+    int firstVisible;
+    int lastVisible;
+    if (layoutManager instanceof LinearLayoutManager) {
+      LinearLayoutManager llm = (LinearLayoutManager) layoutManager;
+      firstVisible = llm.findFirstVisibleItemPosition();
+      lastVisible = llm.findLastVisibleItemPosition();
+    } else if (layoutManager instanceof StaggeredGridLayoutManager) {
+      StaggeredGridLayoutManager sglm = (StaggeredGridLayoutManager) layoutManager;
+      firstVisible = StaggeredGridLayoutHelper.findFirstVisibleItemPosition(sglm);
+      lastVisible = StaggeredGridLayoutHelper.findLastVisibleItemPosition(sglm);
+    } else {
+      throw new UnsupportedOperationException(
+          "Only LinearLayoutManager and StaggeredGridLayoutManager types are supported!");
+    }
 
-    int firstVisible = layoutManager.findFirstVisibleItemPosition();
-    int visibleCount = Math.abs(firstVisible - layoutManager.findLastVisibleItemPosition());
+    int visibleCount = Math.abs(firstVisible - lastVisible);
     int itemCount = recyclerView.getAdapter().getItemCount();
 
     if (firstVisible != lastFirstVisible
@@ -60,6 +75,46 @@ public final class RecyclerToListViewScrollListener extends RecyclerView.OnScrol
       lastFirstVisible = firstVisible;
       lastVisibleCount = visibleCount;
       lastItemCount = itemCount;
+    }
+  }
+
+  static class StaggeredGridLayoutHelper {
+    private static int[] itemPositionsHolder;
+
+    static int findFirstVisibleItemPosition(
+        StaggeredGridLayoutManager staggeredGridLayoutManager) {
+      if (itemPositionsHolder == null) {
+        itemPositionsHolder = new int[staggeredGridLayoutManager.getSpanCount()];
+      }
+      return min(staggeredGridLayoutManager.findFirstVisibleItemPositions(itemPositionsHolder));
+    }
+
+    static int findLastVisibleItemPosition(
+        StaggeredGridLayoutManager staggeredGridLayoutManager) {
+      if (itemPositionsHolder == null) {
+        itemPositionsHolder = new int[staggeredGridLayoutManager.getSpanCount()];
+      }
+      return max(staggeredGridLayoutManager.findLastVisibleItemPositions(itemPositionsHolder));
+    }
+
+    private static int min(int[] a) {
+      int min = Integer.MAX_VALUE;
+      for (int i : a) {
+        if (i < min) {
+          min = i;
+        }
+      }
+      return min;
+    }
+
+    private static int max(int[] a) {
+      int max = Integer.MIN_VALUE;
+      for (int i : a) {
+        if (i > max) {
+          max = i;
+        }
+      }
+      return max;
     }
   }
 }
