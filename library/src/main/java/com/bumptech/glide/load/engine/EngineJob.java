@@ -383,20 +383,16 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   private class CallLoadFailed implements Runnable {
 
     private final ResourceCallback cb;
-    private final Object lock;
 
     CallLoadFailed(ResourceCallback cb) {
       this.cb = cb;
-      // The lock may be reset if the callback is removed while our Runnable is pending, so memoize
-      // it here. We're assuming that the lock is never re-used.
-      this.lock = Preconditions.checkNotNull(cb.getLock());
     }
 
     @Override
     public void run() {
       // Make sure we always acquire the request lock, then the EngineJob lock to avoid deadlock
       // (b/136032534).
-      synchronized (lock) {
+      synchronized (cb.getLock()) {
         synchronized (EngineJob.this) {
           if (cbs.contains(cb)) {
             callCallbackOnLoadFailed(cb);
@@ -411,20 +407,16 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   private class CallResourceReady implements Runnable {
 
     private final ResourceCallback cb;
-    private final Object lock;
 
     CallResourceReady(ResourceCallback cb) {
       this.cb = cb;
-      // The lock may be reset if the callback is removed while our Runnable is pending, so memoize
-      // it here. We're assuming that the lock is never re-used.
-      this.lock = Preconditions.checkNotNull(cb.getLock());
     }
 
     @Override
     public void run() {
       // Make sure we always acquire the request lock, then the EngineJob lock to avoid deadlock
       // (b/136032534).
-      synchronized (lock) {
+      synchronized (cb.getLock()) {
         synchronized (EngineJob.this) {
           if (cbs.contains(cb)) {
             // Acquire for this particular callback.

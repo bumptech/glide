@@ -8,7 +8,6 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.util.Pools;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -21,10 +20,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.util.LogTime;
-import com.bumptech.glide.util.Preconditions;
-import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
-import com.bumptech.glide.util.pool.FactoryPools;
 import com.bumptech.glide.util.pool.StateVerifier;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -35,23 +31,11 @@ import java.util.concurrent.Executor;
  *
  * @param <R> The type of the resource that will be transcoded from the loaded resource.
  */
-@SuppressWarnings("SynchronizeOnNonFinalField")
-public final class SingleRequest<R>
-    implements Request, SizeReadyCallback, ResourceCallback, FactoryPools.Poolable {
+public final class SingleRequest<R> implements Request, SizeReadyCallback, ResourceCallback {
   /** Tag for logging internal events, not generally suitable for public use. */
   private static final String TAG = "Request";
   /** Tag for logging externally useful events (request completion, timing etc). */
   private static final String GLIDE_TAG = "Glide";
-
-  private static final Pools.Pool<SingleRequest<?>> POOL =
-      FactoryPools.threadSafe(
-          150,
-          new FactoryPools.Factory<SingleRequest<?>>() {
-            @Override
-            public SingleRequest<?> create() {
-              return new SingleRequest<Object>();
-            }
-          });
 
   private static final boolean IS_VERBOSE_LOGGABLE = Log.isLoggable(TAG, Log.VERBOSE);
 
@@ -76,52 +60,35 @@ public final class SingleRequest<R>
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
 
   /* Variables mutated only when a request is initialized or returned to the object pool. */
-  private volatile Object requestLock;
+  private final Object requestLock;
 
-  @GuardedBy("requestLock")
-  @Nullable
-  private RequestListener<R> targetListener;
+  @Nullable private final RequestListener<R> targetListener;
 
-  @GuardedBy("requestLock")
-  private RequestCoordinator requestCoordinator;
+  private final RequestCoordinator requestCoordinator;
 
-  @GuardedBy("requestLock")
-  private Context context;
+  private final Context context;
 
-  @GuardedBy("requestLock")
-  private GlideContext glideContext;
+  private final GlideContext glideContext;
 
-  @GuardedBy("requestLock")
-  @Nullable
-  private Object model;
+  @Nullable private final Object model;
 
-  @GuardedBy("requestLock")
-  private Class<R> transcodeClass;
+  private final Class<R> transcodeClass;
 
-  @GuardedBy("requestLock")
-  private BaseRequestOptions<?> requestOptions;
+  private final BaseRequestOptions<?> requestOptions;
 
-  @GuardedBy("requestLock")
-  private int overrideWidth;
+  private final int overrideWidth;
 
-  @GuardedBy("requestLock")
-  private int overrideHeight;
+  private final int overrideHeight;
 
-  @GuardedBy("requestLock")
-  private Priority priority;
+  private final Priority priority;
 
-  @GuardedBy("requestLock")
-  private Target<R> target;
+  private final Target<R> target;
 
-  @GuardedBy("requestLock")
-  @Nullable
-  private List<RequestListener<R>> requestListeners;
+  @Nullable private final List<RequestListener<R>> requestListeners;
 
-  @GuardedBy("requestLock")
-  private TransitionFactory<? super R> animationFactory;
+  private final TransitionFactory<? super R> animationFactory;
 
-  @GuardedBy("requestLock")
-  private Executor callbackExecutor;
+  private final Executor callbackExecutor;
 
   @GuardedBy("requestLock")
   private Resource<R> resource;
@@ -141,12 +108,15 @@ public final class SingleRequest<R>
   private Status status;
 
   @GuardedBy("requestLock")
+  @Nullable
   private Drawable errorDrawable;
 
   @GuardedBy("requestLock")
+  @Nullable
   private Drawable placeholderDrawable;
 
   @GuardedBy("requestLock")
+  @Nullable
   private Drawable fallbackDrawable;
 
   @GuardedBy("requestLock")
@@ -163,7 +133,7 @@ public final class SingleRequest<R>
   public static <R> SingleRequest<R> obtain(
       Context context,
       GlideContext glideContext,
-      @Nullable Object requestLock,
+      Object requestLock,
       Object model,
       Class<R> transcodeClass,
       BaseRequestOptions<?> requestOptions,
@@ -177,15 +147,7 @@ public final class SingleRequest<R>
       Engine engine,
       TransitionFactory<? super R> animationFactory,
       Executor callbackExecutor) {
-    @SuppressWarnings("unchecked")
-    SingleRequest<R> request = (SingleRequest<R>) POOL.acquire();
-    if (request == null) {
-      request = new SingleRequest<>();
-    }
-    if (requestLock == null) {
-      requestLock = request;
-    }
-    request.init(
+    return new SingleRequest<>(
         context,
         glideContext,
         requestLock,
@@ -202,91 +164,48 @@ public final class SingleRequest<R>
         engine,
         animationFactory,
         callbackExecutor);
-    return request;
-  }
-
-  @SuppressWarnings("WeakerAccess")
-  @Synthetic
-  SingleRequest() {
-    // just create, instances are reused with recycle/init
   }
 
   // We are in fact locking on the same lock that will be used for all subsequent method calls.
   @SuppressWarnings("GuardedBy")
-  private void init(
+  private SingleRequest(
       Context context,
       GlideContext glideContext,
       @NonNull Object requestLock,
-      Object model,
+      @Nullable Object model,
       Class<R> transcodeClass,
       BaseRequestOptions<?> requestOptions,
       int overrideWidth,
       int overrideHeight,
       Priority priority,
       Target<R> target,
-      RequestListener<R> targetListener,
+      @Nullable RequestListener<R> targetListener,
       @Nullable List<RequestListener<R>> requestListeners,
       RequestCoordinator requestCoordinator,
       Engine engine,
       TransitionFactory<? super R> animationFactory,
       Executor callbackExecutor) {
-    this.requestLock = Preconditions.checkNotNull(requestLock);
-    synchronized (this.requestLock) {
-      this.context = context;
-      this.glideContext = glideContext;
-      this.model = model;
-      this.transcodeClass = transcodeClass;
-      this.requestOptions = requestOptions;
-      this.overrideWidth = overrideWidth;
-      this.overrideHeight = overrideHeight;
-      this.priority = priority;
-      this.target = target;
-      this.targetListener = targetListener;
-      this.requestListeners = requestListeners;
-      this.requestCoordinator = requestCoordinator;
-      this.engine = engine;
-      this.animationFactory = animationFactory;
-      this.callbackExecutor = callbackExecutor;
-      status = Status.PENDING;
+    this.requestLock = requestLock;
+    this.context = context;
+    this.glideContext = glideContext;
+    this.model = model;
+    this.transcodeClass = transcodeClass;
+    this.requestOptions = requestOptions;
+    this.overrideWidth = overrideWidth;
+    this.overrideHeight = overrideHeight;
+    this.priority = priority;
+    this.target = target;
+    this.targetListener = targetListener;
+    this.requestListeners = requestListeners;
+    this.requestCoordinator = requestCoordinator;
+    this.engine = engine;
+    this.animationFactory = animationFactory;
+    this.callbackExecutor = callbackExecutor;
+    status = Status.PENDING;
 
-      if (requestOrigin == null && glideContext.isLoggingRequestOriginsEnabled()) {
-        requestOrigin = new RuntimeException("Glide request origin trace");
-      }
+    if (requestOrigin == null && glideContext.isLoggingRequestOriginsEnabled()) {
+      requestOrigin = new RuntimeException("Glide request origin trace");
     }
-  }
-
-  @NonNull
-  @Override
-  public StateVerifier getVerifier() {
-    return stateVerifier;
-  }
-
-  @Override
-  public void recycle() {
-    synchronized (requestLock) {
-      assertNotCallingCallbacks();
-      context = null;
-      glideContext = null;
-      model = null;
-      transcodeClass = null;
-      requestOptions = null;
-      overrideWidth = -1;
-      overrideHeight = -1;
-      target = null;
-      requestListeners = null;
-      targetListener = null;
-      requestCoordinator = null;
-      animationFactory = null;
-      loadStatus = null;
-      errorDrawable = null;
-      placeholderDrawable = null;
-      fallbackDrawable = null;
-      width = -1;
-      height = -1;
-      requestOrigin = null;
-      POOL.release(this);
-    }
-    requestLock = null;
   }
 
   @Override
@@ -436,6 +355,11 @@ public final class SingleRequest<R>
     synchronized (requestLock) {
       return status == Status.CLEARED;
     }
+  }
+
+  @Override
+  public void recycle() {
+    // TODO: remove this method, it's a no-op.
   }
 
   @GuardedBy("requestLock")
