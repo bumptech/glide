@@ -188,7 +188,7 @@ public class EngineJobTest {
   @Test
   public void removingSomeCallbacksDoesNotCancelRunner() {
     EngineJob<Object> job = harness.getJob();
-    job.addCallback(mock(ResourceCallback.class), Executors.directExecutor());
+    job.addCallback(mockResourceCallback(), Executors.directExecutor());
     job.removeCallback(harness.cb);
 
     assertFalse(job.isCancelled());
@@ -261,8 +261,8 @@ public class EngineJobTest {
   @Test
   public void testNotifiesNewCallbackOfResourceIfCallbackIsAddedDuringOnResourceReady() {
     final EngineJob<Object> job = harness.getJob();
-    final ResourceCallback existingCallback = mock(ResourceCallback.class);
-    final ResourceCallback newCallback = mock(ResourceCallback.class);
+    final ResourceCallback existingCallback = mockResourceCallback();
+    final ResourceCallback newCallback = mockResourceCallback();
 
     doAnswer(
             new Answer<Void>() {
@@ -286,8 +286,8 @@ public class EngineJobTest {
   public void testNotifiesNewCallbackOfExceptionIfCallbackIsAddedDuringOnException() {
     harness = new EngineJobHarness();
     final EngineJob<Object> job = harness.getJob();
-    final ResourceCallback existingCallback = mock(ResourceCallback.class);
-    final ResourceCallback newCallback = mock(ResourceCallback.class);
+    final ResourceCallback existingCallback = mockResourceCallback();
+    final ResourceCallback newCallback = mockResourceCallback();
 
     doAnswer(
             new Answer<Void>() {
@@ -311,7 +311,7 @@ public class EngineJobTest {
   @Test
   public void testRemovingCallbackDuringOnResourceReadyIsIgnoredIfCallbackHasAlreadyBeenCalled() {
     final EngineJob<Object> job = harness.getJob();
-    final ResourceCallback cb = mock(ResourceCallback.class);
+    final ResourceCallback cb = mockResourceCallback();
 
     doAnswer(
             new Answer<Void>() {
@@ -335,7 +335,7 @@ public class EngineJobTest {
   public void testRemovingCallbackDuringOnExceptionIsIgnoredIfCallbackHasAlreadyBeenCalled() {
     harness = new EngineJobHarness();
     final EngineJob<Object> job = harness.getJob();
-    final ResourceCallback cb = mock(ResourceCallback.class);
+    final ResourceCallback cb = mockResourceCallback();
 
     doAnswer(
             new Answer<Void>() {
@@ -360,7 +360,7 @@ public class EngineJobTest {
   public void
       testRemovingCallbackDuringOnResourceReadyPreventsCallbackFromBeingCalledIfNotYetCalled() {
     final EngineJob<Object> job = harness.getJob();
-    final ResourceCallback notYetCalled = mock(ResourceCallback.class);
+    final ResourceCallback notYetCalled = mockResourceCallback();
 
     doAnswer(
             new Answer<Void>() {
@@ -384,7 +384,7 @@ public class EngineJobTest {
   public void
       testRemovingCallbackDuringOnResourceReadyPreventsResourceFromBeingAcquiredForCallback() {
     final EngineJob<Object> job = harness.getJob();
-    final ResourceCallback notYetCalled = mock(ResourceCallback.class);
+    final ResourceCallback notYetCalled = mockResourceCallback();
 
     doAnswer(
             new Answer<Void>() {
@@ -410,8 +410,8 @@ public class EngineJobTest {
   public void testRemovingCallbackDuringOnExceptionPreventsCallbackFromBeingCalledIfNotYetCalled() {
     harness = new EngineJobHarness();
     final EngineJob<Object> job = harness.getJob();
-    final ResourceCallback called = mock(ResourceCallback.class);
-    final ResourceCallback notYetCalled = mock(ResourceCallback.class);
+    final ResourceCallback called = mockResourceCallback();
+    final ResourceCallback notYetCalled = mockResourceCallback();
 
     doAnswer(
             new Answer<Void>() {
@@ -482,6 +482,12 @@ public class EngineJobTest {
     verify(harness.decodeJob).run();
   }
 
+  private static ResourceCallback mockResourceCallback() {
+    ResourceCallback result = mock(ResourceCallback.class);
+    when(result.getLock()).thenReturn(result);
+    return result;
+  }
+
   @SuppressWarnings("unchecked")
   private static class MultiCbHarness {
     final Key key = mock(Key.class);
@@ -524,7 +530,7 @@ public class EngineJobTest {
           useAnimationPool,
           onlyRetrieveFromCache);
       for (int i = 0; i < numCbs; i++) {
-        cbs.add(mock(ResourceCallback.class));
+        cbs.add(mockResourceCallback());
       }
       for (ResourceCallback cb : cbs) {
         job.addCallback(cb, Executors.directExecutor());
@@ -537,7 +543,7 @@ public class EngineJobTest {
     final EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
     final Key key = mock(Key.class);
     final Handler mainHandler = new Handler();
-    final ResourceCallback cb = mock(ResourceCallback.class);
+    final ResourceCallback cb = mockResourceCallback();
     final Resource<Object> resource = mockResource();
     final EngineResource<Object> engineResource = mock(EngineResource.class);
     final EngineJobListener engineJobListener = mock(EngineJobListener.class);

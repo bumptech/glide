@@ -21,6 +21,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.util.LogTime;
+import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
@@ -229,7 +230,7 @@ public final class SingleRequest<R>
       Engine engine,
       TransitionFactory<? super R> animationFactory,
       Executor callbackExecutor) {
-    this.requestLock = requestLock;
+    this.requestLock = Preconditions.checkNotNull(requestLock);
     synchronized (this.requestLock) {
       this.context = context;
       this.glideContext = glideContext;
@@ -714,6 +715,12 @@ public final class SingleRequest<R>
   @Override
   public void onLoadFailed(GlideException e) {
     onLoadFailed(e, Log.WARN);
+  }
+
+  @Override
+  public Object getLock() {
+    stateVerifier.throwIfRecycled();
+    return requestLock;
   }
 
   private void onLoadFailed(GlideException e, int maxLogLevel) {

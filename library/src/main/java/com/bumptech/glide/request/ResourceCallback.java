@@ -23,4 +23,7 @@ public interface ResourceCallback {
    * @param e a non-null {@link GlideException}.
    */
   void onLoadFailed(GlideException e);
+
+  /** Returns the lock to use when notifying individual requests. */
+  Object getLock();
 }
