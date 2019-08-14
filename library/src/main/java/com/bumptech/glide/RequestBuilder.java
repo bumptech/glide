@@ -30,7 +30,7 @@ import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.target.PreloadTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
-import com.bumptech.glide.signature.ApplicationVersionSignature;
+import com.bumptech.glide.signature.AndroidResourceSignature;
 import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
@@ -495,12 +495,12 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * load the image represented by the given {@link Integer} resource id. Defaults to {@link
    * com.bumptech.glide.load.model.ResourceLoader} to load resource id models.
    *
-   * <p>By default this method adds a version code based signature to the cache key used to cache
-   * this resource in Glide. This signature is sufficient to guarantee that end users will see the
-   * most up to date versions of your Drawables, but during development if you do not increment your
-   * version code before each install and you replace a Drawable with different data without
-   * changing the Drawable name, you may see inconsistent cached data. To get around this, consider
-   * using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} via {@link
+   * <p>By default this method adds a version code and night mode based signature to the cache key
+   * used to cache this resource in Glide. This signature is sufficient to guarantee that end users
+   * will see the most up to date versions of your Drawables, but during development if you do not
+   * increment your version code before each install and you replace a Drawable with different data
+   * without changing the Drawable name, you may see inconsistent cached data. To get around this,
+   * consider using {@link com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} via {@link
    * RequestOptions#diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy)} during
    * development, and re-enabling the default {@link
    * com.bumptech.glide.load.engine.DiskCacheStrategy#RESOURCE} for release builds.
@@ -519,13 +519,13 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * caution for non-{@link Bitmap} {@link Drawable}s.
    *
    * @see #load(Integer)
-   * @see com.bumptech.glide.signature.ApplicationVersionSignature
+   * @see com.bumptech.glide.signature.AndroidResourceSignature
    */
   @NonNull
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@RawRes @DrawableRes @Nullable Integer resourceId) {
-    return loadGeneric(resourceId).apply(signatureOf(ApplicationVersionSignature.obtain(context)));
+    return loadGeneric(resourceId).apply(signatureOf(AndroidResourceSignature.obtain(context)));
   }
 
   /**
