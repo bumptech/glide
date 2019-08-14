@@ -81,16 +81,14 @@ public final class RecyclerToListViewScrollListener extends RecyclerView.OnScrol
   static class StaggeredGridLayoutHelper {
     private static int[] itemPositionsHolder;
 
-    static int findFirstVisibleItemPosition(
-        StaggeredGridLayoutManager staggeredGridLayoutManager) {
+    static int findFirstVisibleItemPosition(StaggeredGridLayoutManager staggeredGridLayoutManager) {
       if (itemPositionsHolder == null) {
         itemPositionsHolder = new int[staggeredGridLayoutManager.getSpanCount()];
       }
       return min(staggeredGridLayoutManager.findFirstVisibleItemPositions(itemPositionsHolder));
     }
 
-    static int findLastVisibleItemPosition(
-        StaggeredGridLayoutManager staggeredGridLayoutManager) {
+    static int findLastVisibleItemPosition(StaggeredGridLayoutManager staggeredGridLayoutManager) {
       if (itemPositionsHolder == null) {
         itemPositionsHolder = new int[staggeredGridLayoutManager.getSpanCount()];
       }
