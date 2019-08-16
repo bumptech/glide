@@ -91,14 +91,6 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
   }
 
   @Override
-  public void recycle() {
-    synchronized (requestLock) {
-      primary.recycle();
-      error.recycle();
-    }
-  }
-
-  @Override
   public boolean isEquivalentTo(Request o) {
     if (o instanceof ErrorRequestCoordinator) {
       ErrorRequestCoordinator other = (ErrorRequestCoordinator) o;

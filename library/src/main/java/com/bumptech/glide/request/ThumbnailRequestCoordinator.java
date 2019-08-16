@@ -203,14 +203,6 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   }
 
   @Override
-  public void recycle() {
-    synchronized (requestLock) {
-      full.recycle();
-      thumb.recycle();
-    }
-  }
-
-  @Override
   public boolean isEquivalentTo(Request o) {
     if (o instanceof ThumbnailRequestCoordinator) {
       ThumbnailRequestCoordinator that = (ThumbnailRequestCoordinator) o;

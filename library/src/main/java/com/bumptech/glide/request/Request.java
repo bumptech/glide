@@ -32,9 +32,6 @@ public interface Request {
   /** Returns true if the request has been cleared. */
   boolean isCleared();
 
-  /** Recycles the request object and releases its resources. */
-  void recycle();
-
   /**
    * Returns {@code true} if this {@link Request} is equivalent to the given {@link Request} (has
    * all of the same options and sizes).

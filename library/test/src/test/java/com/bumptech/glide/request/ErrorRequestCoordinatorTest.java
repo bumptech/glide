@@ -201,13 +201,6 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void recycle_recyclesPrimaryAndError() {
-    coordinator.recycle();
-    verify(primary).recycle();
-    verify(error).recycle();
-  }
-
-  @Test
   public void isEquivalentTo() {
     assertThat(coordinator.isEquivalentTo(primary)).isFalse();
 

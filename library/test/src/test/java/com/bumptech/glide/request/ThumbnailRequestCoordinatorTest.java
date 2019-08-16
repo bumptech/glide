@@ -146,13 +146,6 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testRecyclesRequestsWhenRecycled() {
-    coordinator.recycle();
-    verify(thumb).recycle();
-    verify(full).recycle();
-  }
-
-  @Test
   public void testCanSetImageReturnsTrueForFullRequestIfCoordinatorIsNull() {
     coordinator = newCoordinator();
     coordinator.setRequests(full, thumb);

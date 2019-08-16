@@ -623,7 +623,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     Request previous = target.getRequest();
     if (request.isEquivalentTo(previous)
         && !isSkipMemoryCacheWithCompletePreviousRequest(options, previous)) {
-      request.recycle();
       // If the request is completed, beginning again will ensure the result is re-delivered,
       // triggering RequestListeners and Targets. If the request is failed, beginning again will
       // restart the request, giving it another chance to complete. If the request is already

@@ -357,11 +357,6 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     }
   }
 
-  @Override
-  public void recycle() {
-    // TODO: remove this method, it's a no-op.
-  }
-
   @GuardedBy("requestLock")
   private Drawable getErrorDrawable() {
     if (errorDrawable == null) {

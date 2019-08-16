@@ -660,7 +660,7 @@ public class RequestManager
       return true;
     }
 
-    if (requestTracker.clearRemoveAndRecycle(request)) {
+    if (requestTracker.clearAndRemove(request)) {
       targetTracker.untrack(target);
       target.setRequest(null);
       return true;
