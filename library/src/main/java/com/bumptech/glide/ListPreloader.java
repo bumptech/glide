@@ -219,7 +219,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   }
 
   private void cancelAll() {
-    for (int i = 0; i < maxPreload; i++) {
+    for (int i = 0; i < preloadTargetQueue.queue.size(); i++) {
       requestManager.clear(preloadTargetQueue.next(0, 0));
     }
   }
