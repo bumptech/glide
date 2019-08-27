@@ -219,13 +219,13 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   }
 
   private void cancelAll() {
-    for (int i = 0; i < maxPreload; i++) {
+    for (int i = 0; i < preloadTargetQueue.queue.size(); i++) {
       requestManager.clear(preloadTargetQueue.next(0, 0));
     }
   }
 
   private static final class PreloadTargetQueue {
-    private final Queue<PreloadTarget> queue;
+    @Synthetic final Queue<PreloadTarget> queue;
 
     // The loop is short and the only point is to create the objects.
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
