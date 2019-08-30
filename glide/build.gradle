@@ -10,11 +10,12 @@ static def getAndroidPathsForJar() {
 // The paths of Android projects that should be included only in Javadoc, not in the jar.
 static def getAndroidPathsForJavadoc() {
     [
+            ':integration:concurrent',
+            ':integration:gifencoder',
             ':integration:okhttp',
             ':integration:okhttp3',
-            ':integration:volley',
-            ':integration:gifencoder',
             ':integration:recyclerview',
+            ':integration:volley',
     ]
 }
 
