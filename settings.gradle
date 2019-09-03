@@ -27,5 +27,6 @@ include ':integration:okhttp3'
 include ':integration:recyclerview'
 include ':integration:volley'
 include ':testutil'
+include ':mocks'
 
 rootProject.name = 'glide-parent'

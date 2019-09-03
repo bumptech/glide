@@ -16,6 +16,7 @@ static def getAndroidPathsForJavadoc() {
             ':integration:okhttp3',
             ':integration:recyclerview',
             ':integration:volley',
+            ':mocks',
     ]
 }
 

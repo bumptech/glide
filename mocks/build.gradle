@@ -1,0 +1,25 @@
+apply plugin: 'com.android.library'
+
+dependencies {
+    implementation project(':library')
+    implementation "androidx.annotation:annotation:${ANDROID_X_VERSION}"
+    implementation "com.google.guava:guava:${GUAVA_VERSION}"
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+
+        versionName = VERSION_NAME as String
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"

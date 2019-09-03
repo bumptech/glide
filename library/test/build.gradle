@@ -3,6 +3,7 @@ apply plugin: 'com.android.library'
 dependencies {
     testImplementation "androidx.appcompat:appcompat:${ANDROID_X_VERSION}"
     testImplementation project(':library')
+    testImplementation project(':mocks')
     testImplementation project(':testutil')
     testImplementation 'com.google.guava:guava-testlib:18.0'
     testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
