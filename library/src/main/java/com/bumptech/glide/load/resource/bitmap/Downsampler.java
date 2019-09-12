@@ -9,6 +9,7 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import androidx.annotation.Nullable;
+import androidx.core.os.BuildCompat;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ImageHeaderParser.ImageType;
@@ -105,7 +106,8 @@ public final class Downsampler {
    */
   public static final Option<Boolean> ALLOW_HARDWARE_CONFIG =
       Option.memory(
-          "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", false);
+          "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode",
+          BuildCompat.isAtLeastP());
 
   private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
   private static final String ICO_MIME_TYPE = "image/x-ico";
