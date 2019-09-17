@@ -270,8 +270,14 @@ public final class Downsampler {
     int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
     boolean isExifOrientationRequired = TransformationUtils.isExifOrientationRequired(orientation);
 
-    int targetWidth = requestedWidth == Target.SIZE_ORIGINAL ? sourceWidth : requestedWidth;
-    int targetHeight = requestedHeight == Target.SIZE_ORIGINAL ? sourceHeight : requestedHeight;
+    int targetWidth =
+        requestedWidth == Target.SIZE_ORIGINAL
+            ? (isRotationRequired(degreesToRotate) ? sourceHeight : sourceWidth)
+            : requestedWidth;
+    int targetHeight =
+        requestedHeight == Target.SIZE_ORIGINAL
+            ? (isRotationRequired(degreesToRotate) ? sourceWidth : sourceHeight)
+            : requestedHeight;
 
     ImageType imageType = ImageHeaderParserUtils.getType(parsers, is, byteArrayPool);
 
@@ -422,7 +428,7 @@ public final class Downsampler {
     // width is decreased to near our target's height and the image height is decreased to near
     // our target width.
     //noinspection SuspiciousNameCombination
-    if (degreesToRotate == 90 || degreesToRotate == 270) {
+    if (isRotationRequired(degreesToRotate)) {
       orientedSourceWidth = sourceHeight;
       orientedSourceHeight = sourceWidth;
     }
@@ -905,5 +911,9 @@ public final class Downsampler {
     void onObtainBounds();
 
     void onDecodeComplete(BitmapPool bitmapPool, Bitmap downsampled) throws IOException;
+  }
+
+  private static boolean isRotationRequired(int degreesToRotate) {
+    return degreesToRotate == 90 || degreesToRotate == 270;
   }
 }

@@ -28,6 +28,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPoolAdapter;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Preconditions;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -121,6 +122,9 @@ public class DownsamplerEmulatorTest {
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(200, 200))
         .givenSquareImageWithDimensionOf(450, onAllApisAndAllFormatsExpect(450, 450))
         .givenImageWithDimensionsOf(200, 450, onAllApisAndAllFormatsExpect(200, 450))
+        // Original scaling
+        .setTargetDimensions(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+        .givenImageWithDimensionsOf(1821, 2634, onAllApisAndAllFormatsExpect(1821, 2634))
         .run();
   }
 
@@ -144,6 +148,9 @@ public class DownsamplerEmulatorTest {
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(200, 200))
         .givenSquareImageWithDimensionOf(450, onAllApisAndAllFormatsExpect(450, 450))
         .givenImageWithDimensionsOf(200, 450, onAllApisAndAllFormatsExpect(200, 450))
+        // Original scaling
+        .setTargetDimensions(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+        .givenImageWithDimensionsOf(1821, 2634, onAllApisAndAllFormatsExpect(1821, 2634))
         .run();
   }
 
@@ -207,6 +214,9 @@ public class DownsamplerEmulatorTest {
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(200, 200))
         .givenSquareImageWithDimensionOf(450, onAllApisAndAllFormatsExpect(450, 450))
         .givenImageWithDimensionsOf(200, 450, onAllApisAndAllFormatsExpect(200, 450))
+        // Original scaling
+        .setTargetDimensions(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+        .givenImageWithDimensionsOf(1821, 2634, onAllApisAndAllFormatsExpect(1821, 2634))
         .run();
   }
 
@@ -253,6 +263,9 @@ public class DownsamplerEmulatorTest {
             450,
             atAndAbove(KITKAT).with(allFormats().expect(500, 1125)),
             below(KITKAT).with(allFormats().expect(200, 450)))
+        // Original scaling
+        .setTargetDimensions(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+        .givenImageWithDimensionsOf(1821, 2634, onAllApisAndAllFormatsExpect(1821, 2634))
         .run();
   }
 
@@ -276,6 +289,9 @@ public class DownsamplerEmulatorTest {
         .givenSquareImageWithDimensionOf(200, onAllApisAndAllFormatsExpect(200, 200))
         .givenSquareImageWithDimensionOf(450, onAllApisAndAllFormatsExpect(450, 450))
         .givenImageWithDimensionsOf(200, 450, onAllApisAndAllFormatsExpect(200, 450))
+        // Original scaling
+        .setTargetDimensions(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+        .givenImageWithDimensionsOf(1821, 2634, onAllApisAndAllFormatsExpect(1821, 2634))
         .run();
   }
 
@@ -386,6 +402,9 @@ public class DownsamplerEmulatorTest {
             450,
             atAndAbove(KITKAT).with(allFormats().expect(222, 500)),
             below(KITKAT).with(allFormats().expect(200, 450)))
+        // Original scaling
+        .setTargetDimensions(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+        .givenImageWithDimensionsOf(1821, 2634, onAllApisAndAllFormatsExpect(1821, 2634))
         .run();
   }
 
