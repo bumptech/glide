@@ -194,7 +194,7 @@ public final class ByteBufferUtil {
       if (!byteBuffer.hasRemaining()) {
         return -1;
       }
-      return byteBuffer.get();
+      return byteBuffer.get() & 0xFF;
     }
 
     @Override
