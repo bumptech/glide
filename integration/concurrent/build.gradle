@@ -5,10 +5,12 @@ dependencies {
     implementation "com.google.guava:guava:${GUAVA_VERSION}"
     implementation "androidx.concurrent:concurrent-futures:${ANDROID_X_FUTURES_VERSION}"
 
+    testImplementation project(':mocks')
+    testImplementation "androidx.legacy:legacy-support-v4:${ANDROID_X_VERSION}"
+    testImplementation "androidx.test:core:${ANDROIDX_TEST_VERSION}"
     testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
     testImplementation "junit:junit:${JUNIT_VERSION}"
     testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testImplementation "androidx.legacy:legacy-support-v4:${ANDROID_X_VERSION}"
 }
 
 android {
