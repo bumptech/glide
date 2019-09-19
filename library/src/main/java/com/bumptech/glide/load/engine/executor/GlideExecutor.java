@@ -2,7 +2,9 @@ package com.bumptech.glide.load.engine.executor;
 
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
+import android.text.TextUtils;
 import android.util.Log;
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Synthetic;
@@ -116,14 +118,11 @@ public final class GlideExecutor implements ExecutorService {
   @SuppressWarnings("WeakerAccess")
   public static GlideExecutor newDiskCacheExecutor(
       int threadCount, String name, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    return new GlideExecutor(
-        new ThreadPoolExecutor(
-            threadCount /* corePoolSize */,
-            threadCount /* maximumPoolSize */,
-            0 /* keepAliveTime */,
-            TimeUnit.MILLISECONDS,
-            new PriorityBlockingQueue<Runnable>(),
-            new DefaultThreadFactory(name, uncaughtThrowableStrategy, true)));
+    return new Builder(/*preventNetworkOperations=*/ true)
+        .setName(name)
+        .setThreadCount(threadCount)
+        .setUncaughtThrowableStrategy(uncaughtThrowableStrategy)
+        .build();
   }
 
   /**
@@ -179,14 +178,12 @@ public final class GlideExecutor implements ExecutorService {
   @SuppressWarnings("WeakerAccess")
   public static GlideExecutor newSourceExecutor(
       int threadCount, String name, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    return new GlideExecutor(
-        new ThreadPoolExecutor(
-            threadCount /* corePoolSize */,
-            threadCount /* maximumPoolSize */,
-            0 /* keepAliveTime */,
-            TimeUnit.MILLISECONDS,
-            new PriorityBlockingQueue<Runnable>(),
-            new DefaultThreadFactory(name, uncaughtThrowableStrategy, false)));
+    return new Builder(/*preventNetworkOperations=*/ false)
+        .setName(name)
+        .setThreadCount(threadCount)
+        .setUncaughtThrowableStrategy(uncaughtThrowableStrategy)
+        .setName(name)
+        .build();
   }
 
   /**
@@ -238,14 +235,11 @@ public final class GlideExecutor implements ExecutorService {
   @SuppressWarnings("WeakerAccess")
   public static GlideExecutor newAnimationExecutor(
       int threadCount, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
-    return new GlideExecutor(
-        new ThreadPoolExecutor(
-            threadCount,
-            threadCount,
-            0,
-            TimeUnit.MILLISECONDS,
-            new PriorityBlockingQueue<Runnable>(),
-            new DefaultThreadFactory(ANIMATION_EXECUTOR_NAME, uncaughtThrowableStrategy, true)));
+    return new Builder(/*preventNetworkOperations=*/ true)
+        .setName(ANIMATION_EXECUTOR_NAME)
+        .setThreadCount(threadCount)
+        .setUncaughtThrowableStrategy(uncaughtThrowableStrategy)
+        .build();
   }
 
   @VisibleForTesting
@@ -436,6 +430,54 @@ public final class GlideExecutor implements ExecutorService {
           };
       threadNum++;
       return result;
+    }
+  }
+
+  @Synthetic
+  static final class Builder {
+    private final boolean preventNetworkOperations;
+    private int corePoolSize;
+    private int maximumPoolSize;
+
+    @NonNull
+    private UncaughtThrowableStrategy uncaughtThrowableStrategy = UncaughtThrowableStrategy.DEFAULT;
+
+    private String name;
+
+    @Synthetic
+    Builder(boolean preventNetworkOperations) {
+      this.preventNetworkOperations = preventNetworkOperations;
+    }
+
+    Builder setThreadCount(@IntRange(from = 1) int threadCount) {
+      corePoolSize = threadCount;
+      maximumPoolSize = threadCount;
+      return this;
+    }
+
+    Builder setUncaughtThrowableStrategy(@NonNull UncaughtThrowableStrategy strategy) {
+      this.uncaughtThrowableStrategy = strategy;
+      return this;
+    }
+
+    Builder setName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    GlideExecutor build() {
+      if (TextUtils.isEmpty(name)) {
+        throw new IllegalArgumentException(
+            "Name must be non-null and non-empty, but given: " + name);
+      }
+      return new GlideExecutor(
+          new ThreadPoolExecutor(
+              corePoolSize,
+              maximumPoolSize,
+              /*keepAliveTime=*/ 0L,
+              TimeUnit.MILLISECONDS,
+              new PriorityBlockingQueue<Runnable>(),
+              new DefaultThreadFactory(name, uncaughtThrowableStrategy, preventNetworkOperations)));
     }
   }
 }
