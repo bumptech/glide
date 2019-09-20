@@ -403,18 +403,37 @@ public final class GlideExecutor implements ExecutorService {
 
   /** A builder for {@link GlideExecutor}s. */
   public static final class Builder {
+    /**
+     * Prevents core and non-core threads from timing out ever if provided to {@link
+     * #setThreadTimeoutMillis(long)}.
+     */
+    public static final long NO_THREAD_TIMEOUT = 0L;
+
+    private final boolean preventNetworkOperations;
+
     private int corePoolSize;
     private int maximumPoolSize;
-    private final boolean preventNetworkOperations;
 
     @NonNull
     private UncaughtThrowableStrategy uncaughtThrowableStrategy = UncaughtThrowableStrategy.DEFAULT;
 
     private String name;
+    private long threadTimeoutMillis;
 
     @Synthetic
     Builder(boolean preventNetworkOperations) {
       this.preventNetworkOperations = preventNetworkOperations;
+    }
+
+    /**
+     * Allows both core and non-core threads in the executor to be terminated if no tasks arrive for
+     * at least the given timeout milliseconds.
+     *
+     * <p>Use {@link #NO_THREAD_TIMEOUT} to remove a previously set timeout.
+     */
+    public Builder setThreadTimeoutMillis(long threadTimeoutMillis) {
+      this.threadTimeoutMillis = threadTimeoutMillis;
+      return this;
     }
 
     /** Sets the maximum number of threads to use. */
@@ -448,14 +467,20 @@ public final class GlideExecutor implements ExecutorService {
         throw new IllegalArgumentException(
             "Name must be non-null and non-empty, but given: " + name);
       }
-      return new GlideExecutor(
+      ThreadPoolExecutor executor =
           new ThreadPoolExecutor(
               corePoolSize,
               maximumPoolSize,
-              /*keepAliveTime=*/ 0L,
+              /*keepAliveTime=*/ threadTimeoutMillis,
               TimeUnit.MILLISECONDS,
               new PriorityBlockingQueue<Runnable>(),
-              new DefaultThreadFactory(name, uncaughtThrowableStrategy, preventNetworkOperations)));
+              new DefaultThreadFactory(name, uncaughtThrowableStrategy, preventNetworkOperations));
+
+      if (threadTimeoutMillis != NO_THREAD_TIMEOUT) {
+        executor.allowCoreThreadTimeOut(true);
+      }
+
+      return new GlideExecutor(executor);
     }
   }
 }
