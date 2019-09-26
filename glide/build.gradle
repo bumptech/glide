@@ -2,11 +2,6 @@ import com.android.build.gradle.api.LibraryVariant
 
 apply plugin: 'java'
 
-// The paths of Android projects that should be included in the jar and javadoc.
-static def getAndroidPathsForJar() {
-    [':third_party:gif_decoder', ':library', ':third_party:disklrucache' ]
-}
-
 // The paths of Android projects that should be included only in Javadoc, not in the jar.
 static def getAndroidPathsForJavadoc() {
     [
@@ -16,7 +11,10 @@ static def getAndroidPathsForJavadoc() {
             ':integration:okhttp3',
             ':integration:recyclerview',
             ':integration:volley',
+            ':library',
             ':mocks',
+            ':third_party:disklrucache',
+            ':third_party:gif_decoder',
     ]
 }
 
@@ -25,7 +23,7 @@ static def getJavaPathsForJavadoc() {
     [':annotation']
 }
 
-(getAndroidPathsForJavadoc() + getAndroidPathsForJar() + getJavaPathsForJavadoc()).each {
+(getAndroidPathsForJavadoc() + getJavaPathsForJavadoc()).each {
     evaluationDependsOn(it)
 }
 
@@ -41,45 +39,21 @@ def getAndroidCompileSdkVersion() {
     project(':library').android.compileSdkVersion
 }
 
-def getInternalAndroidProjectsForJar() {
-    asProjects(getAndroidPathsForJar())
-}
-
-def getInternalAndroidProjectsForJavadoc() {
+def getAndroidProjectsForJavadoc() {
     asProjects(getAndroidPathsForJavadoc())
 }
 
-def getAndroidProjectsForJar() {
-    getAndroidLibraryVariantsForJar('debug')
-}
-
-def getAndroidLibraryVariantsForJar(variantName) {
-    getAndroidLibraryVariants(getInternalAndroidProjectsForJar(), variantName)
-}
-
-def getAndroidLibraryVariantsForJavadoc(variantName) {
-    getAndroidLibraryVariants(getInternalAndroidProjectsForJavadoc(), variantName)
-}
-
-static def getAndroidLibraryVariants(projects, variantName) {
-    projects.collect { project ->
+def getAndroidLibraryVariantsForJavadoc() {
+    getAndroidProjectsForJavadoc().collect { project ->
         project.android.libraryVariants.findAll { type ->
-            type.buildType.name.equalsIgnoreCase(variantName)
+            type.buildType.name.equalsIgnoreCase("debug")
         }
     }.sum()
 }
 
-def getSourceFilesForVariantJar(variantName) {
-    getAndroidLibraryVariantsForJar(variantName).collect { variant -> 
-        variant.getJavaCompileProvider().get().source.findAll { 
-            return !it.getName().equals("R.java")
-        }
-    }
-}
-
-def getSourceFilesForVariantJavadoc(variantName) {
-    getAndroidLibraryVariantsForJavadoc(variantName).collect { 
-        it.getJavaCompileProvider().get().source 
+def getSourceFilesForJavadoc() {
+    getAndroidProjectsForJavadoc().collect { project ->
+      project.android.sourceSets.main.java.srcDirs
     }
 }
 
@@ -91,57 +65,57 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 
 // Generate javadocs and sources containing batched documentation and sources for all internal
 // projects.
-['debug'].each { variantName ->
+def javadocTask = tasks.create("debugJavadoc", Javadoc) {
+    source = getSourceFilesForJavadoc()
 
-    def javadocTask = tasks.create("${variantName}Javadoc", Javadoc) {
-        source = getSourceFilesForVariantJar(variantName)
-        source += getSourceFilesForVariantJavadoc(variantName)
-      
-        doFirst {
-            it.classpath =
-                    project.files(
-                            getAndroidJar(),
-                            getAndroidLibraryVariantsForJar(variantName).collect {
-                                LibraryVariant lib ->
-                                    lib.getJavaCompileProvider().get().classpath.files
-                            },
-                            getAndroidLibraryVariantsForJavadoc(variantName).collect {
-                                LibraryVariant lib ->
-                                    lib.getJavaCompileProvider().get().classpath.files
-                            },
-                            // Finds dependencies of Android packages that would otherwise be
-                            // ignored (Volley in particular)
-                            getInternalAndroidProjectsForJavadoc().collect { Project project ->
-                                project.file('build/intermediates/classes/debug')
-                            }
-            )
-        }
-
-        options {
-            links("http://docs.oracle.com/javase/7/docs/api/")
-            links("https://square.github.io/okhttp/3.x/okhttp/")
-            links("https://square.github.io/okhttp/2.x/okhttp/")
-            linksOffline("http://d.android.com/reference",
-                    "${getAndroidSdkDirectory()}/docs/reference")
-        }
-
-        exclude '**/R.java'
+    doFirst {
+        it.classpath =
+                project.files(
+                        getAndroidJar(),
+                        getAndroidLibraryVariantsForJavadoc().collect {
+                            LibraryVariant lib ->
+                                lib.getJavaCompileProvider().get().classpath.files
+                        },
+                        // Finds dependencies of Android packages that would otherwise be
+                        // ignored (Volley in particular)
+                        getAndroidProjectsForJavadoc().collect { Project project ->
+                            project.file('build/intermediates/classes/debug')
+                        }
+        )
     }
 
-    def cleanJavadocTask = task("clean${variantName.capitalize()}Javadoc", type: Delete) {
-        delete javadocTask.destinationDir
-    } as Task
-    clean.dependsOn(cleanJavadocTask)
+    options {
+        links("http://docs.oracle.com/javase/7/docs/api/")
+        links("https://square.github.io/okhttp/3.x/okhttp/")
+        links("https://square.github.io/okhttp/2.x/okhttp/")
+        linksOffline("http://d.android.com/reference",
+                "${getAndroidSdkDirectory()}/docs/reference")
+    }
 
-    def javadocJarTask = task("${variantName}JavadocJar", type: Jar) {
-        from javadocTask.destinationDir
-    } as Task
-    javadocJarTask.dependsOn(javadocTask)
+    exclude '**/R.java'
 }
+
+def cleanJavadocTask = task("cleanDebugJavadoc", type: Delete) {
+    delete javadocTask.destinationDir
+} as Task
+clean.dependsOn(cleanJavadocTask)
+
+def javadocJarTask = task("debugJavadocJar", type: Jar) {
+    from javadocTask.destinationDir
+} as Task
+
+javadocJarTask.dependsOn(javadocTask)
+
+(getAndroidProjectsForJavadoc()).each {
+    project ->
+        debugJavadoc.dependsOn(project.tasks.compileDebugSources)
+        jar.dependsOn(project.tasks.compileDebugSources)
+}
+
 
 jar {
     from files(
-            getAndroidProjectsForJar().collect { LibraryVariant variant ->
+            getAndroidLibraryVariantsForJavadoc().collect { LibraryVariant variant ->
                 variant.getJavaCompileProvider().get().destinationDir
             }
     )
@@ -149,12 +123,8 @@ jar {
     exclude "**/R\$*.class"
     exclude "android/**"
 }
+ 
 
-(getInternalAndroidProjectsForJar() + getInternalAndroidProjectsForJavadoc()).each {
-    project ->
-        debugJavadoc.dependsOn(project.tasks.compileDebugSources)
-        jar.dependsOn(project.tasks.compileDebugSources)
-}
 
 artifacts {
     archives debugJavadocJar {
