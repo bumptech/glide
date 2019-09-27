@@ -1,8 +1,8 @@
 com.bumptech.glide
-com.bumptech.glide.annotation
 com.bumptech.glide.disklrucache
 com.bumptech.glide.gifdecoder
 com.bumptech.glide.gifencoder
+com.bumptech.glide.integration.concurrent
 com.bumptech.glide.integration.gifencoder
 com.bumptech.glide.integration.okhttp
 com.bumptech.glide.integration.okhttp3
