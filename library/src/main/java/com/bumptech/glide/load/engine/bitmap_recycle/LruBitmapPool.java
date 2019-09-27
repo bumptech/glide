@@ -68,6 +68,26 @@ public class LruBitmapPool implements BitmapPool {
     this(maxSize, getDefaultStrategy(), allowedConfigs);
   }
 
+  /** Returns the number of cache hits for bitmaps in the pool. */
+  public long hitCount() {
+    return hits;
+  }
+
+  /** Returns the number of cache misses for bitmaps in the pool. */
+  public long missCount() {
+    return misses;
+  }
+
+  /** Returns the number of bitmaps that have been evicted from the pool. */
+  public long evictionCount() {
+    return evictions;
+  }
+
+  /** Returns the current size of the pool in bytes. */
+  public long getCurrentSize() {
+    return currentSize;
+  }
+
   @Override
   public long getMaxSize() {
     return maxSize;
