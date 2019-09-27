@@ -167,6 +167,7 @@ public class SingleRequestTest {
   @Test
   public void testResourceIsNotCompleteWhenAskingCoordinatorIfCanSetImage() {
     RequestCoordinator requestCoordinator = mock(RequestCoordinator.class);
+    when(requestCoordinator.getRoot()).thenReturn(requestCoordinator);
     doAnswer(
             new Answer() {
               @Override
@@ -626,6 +627,21 @@ public class SingleRequestTest {
   }
 
   @Test
+  public void
+      testRequestListenerIsCalledWithNotIsFirstRequestIfRequestCoordinatorParentReturnsResourceSet() {
+    SingleRequest<List> request = builder.addRequestListener(listener1).build();
+    RequestCoordinator rootRequestCoordinator = mock(RequestCoordinator.class);
+    when(rootRequestCoordinator.isAnyResourceSet()).thenReturn(true);
+    when(builder.requestCoordinator.isAnyResourceSet()).thenReturn(false);
+    when(builder.requestCoordinator.getRoot()).thenReturn(rootRequestCoordinator);
+    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(false));
+  }
+
+  @Test
   public void testTargetIsCalledWithAnimationFromFactory() {
     SingleRequest<List> request = builder.build();
     Transition<List> transition = mockTransition();
@@ -903,6 +919,7 @@ public class SingleRequestTest {
     private final Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
 
     SingleRequestBuilder() {
+      when(requestCoordinator.getRoot()).thenReturn(requestCoordinator);
       when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
       when(requestCoordinator.canNotifyCleared(any(Request.class))).thenReturn(true);
       when(requestCoordinator.canNotifyStatusChanged(any(Request.class))).thenReturn(true);

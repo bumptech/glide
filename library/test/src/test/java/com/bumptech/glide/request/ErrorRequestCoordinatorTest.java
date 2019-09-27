@@ -341,6 +341,7 @@ public class ErrorRequestCoordinatorTest {
 
   @Test
   public void isAnyResourceSet_primarySet_nullParent_returnsTrue() {
+    when(primary.isAnyResourceSet()).thenReturn(true);
     coordinator.onRequestSuccess(primary);
     assertThat(coordinator.isAnyResourceSet()).isTrue();
   }
@@ -349,6 +350,7 @@ public class ErrorRequestCoordinatorTest {
   public void isAnyResourceSet_primarySet_parentResourceNotSet_returnsTrue() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
+    when(primary.isAnyResourceSet()).thenReturn(true);
     coordinator.onRequestSuccess(primary);
 
     assertThat(coordinator.isAnyResourceSet()).isTrue();
@@ -358,6 +360,7 @@ public class ErrorRequestCoordinatorTest {
   public void isAnyResourceSet_primarySet_parentSet_returnsTrue() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
+    when(primary.isAnyResourceSet()).thenReturn(true);
     coordinator.onRequestSuccess(primary);
     when(parent.isAnyResourceSet()).thenReturn(true);
 
@@ -365,17 +368,18 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void isAnyResourceSet_parentSet_returnsTrue() {
+  public void isAnyResourceSet_parentSet_returnsFalse() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.isAnyResourceSet()).thenReturn(true);
 
-    assertThat(coordinator.isAnyResourceSet()).isTrue();
+    assertThat(coordinator.isAnyResourceSet()).isFalse();
   }
 
   @Test
   public void isAnyResourceSet_errorSet_failedPrimary_nullParent_returnsTrue() {
     coordinator.onRequestFailed(primary);
+    when(error.isAnyResourceSet()).thenReturn(true);
     coordinator.onRequestSuccess(error);
     assertThat(coordinator.isAnyResourceSet()).isTrue();
   }
@@ -385,6 +389,7 @@ public class ErrorRequestCoordinatorTest {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     coordinator.onRequestFailed(primary);
+    when(error.isAnyResourceSet()).thenReturn(true);
     coordinator.onRequestSuccess(error);
 
     assertThat(coordinator.isAnyResourceSet()).isTrue();
@@ -395,6 +400,7 @@ public class ErrorRequestCoordinatorTest {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.isAnyResourceSet()).thenReturn(true);
+    when(error.isAnyResourceSet()).thenReturn(true);
     coordinator.onRequestSuccess(error);
 
     assertThat(coordinator.isAnyResourceSet()).isTrue();
@@ -409,13 +415,13 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void isAnyResourceSet_primaryNotSet_errorNotSet_nonNullParentSet_returnsTrue() {
+  public void isAnyResourceSet_primaryNotSet_errorNotSet_nonNullParentSet_returnsFalse() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
 
     when(parent.isAnyResourceSet()).thenReturn(true);
 
-    assertThat(coordinator.isAnyResourceSet()).isTrue();
+    assertThat(coordinator.isAnyResourceSet()).isFalse();
   }
 
   @Test

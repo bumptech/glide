@@ -32,7 +32,7 @@ echo "Setting version to $version"
 echo -n "Is this a correct? (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ; then
-  echo "Updating gradle.properties..."
+  echo "Updating gradle.properties"
 else
   echo "Cancelling"
   exit 1
@@ -43,45 +43,37 @@ sed -i '' "s/VERSION_MAJOR=.*/VERSION_MAJOR=$(echo $version | cut -d '.' -f 1)/"
 sed -i '' "s/VERSION_MINOR=.*/VERSION_MINOR=$(echo $version | cut -d '.' -f 2)/" gradle.properties
 sed -i '' "s/VERSION_PATCH=.*/VERSION_PATCH=$(echo $version | cut -d '.' -f 3 | sed 's/-.*//')/" gradle.properties
 
+if [[ $version != *"SNAPSHOT"* ]]; then
+  echo "Found release version, update README"
+  sed -i '' "s:<version>.*</version>:<version>${version}</version>:" README.md
+  sed -i '' "s/'com.github.bumptech.glide:glide:.*'/'com.github.bumptech.glide:glide:${version}'/" README.md
+  sed -i '' "s/'com.github.bumptech.glide:compiler:.*'/'com.github.bumptech.glide:compiler:${version}'/" README.md
+fi
+
 git diff
 
-echo "Updated gradle.properties, is this correct? (y/n)?"
+echo "Updated files, is this correct? (y/n)?"
 read answer
 if echo "$answer" | grep -iq "^y" ; then
-  echo "Committing..."
+  echo "Committing and pushing..."
 else
   echo "Cancelling"
   exit 1
 fi
 
-version_tag="v${version}"
+branchname="bump_version_to_${version}"
+
+git checkout -b $branchname
 git add gradle.properties
+git add README.md
 git commit -m "Bump version to ${version}"
-if [[ $version != *"SNAPSHOT"* ]]; then
-  echo "Found release version, adding tag, building and uploading"
-  git tag $version_tag
+git push origin $branchname
 
-  echo "Building... and uploading"
-  ./gradlew clean build --parallel
-  ./gradlew uploadArchives 
-
-  echo "Upload complete, please verify the output and upload the jars to the GitHub release."
-fi
-
-echo -n "Ready to push, continue? (y/n)? "
-read answer
-if echo "$answer" | grep -iq "^y" ; then
-  echo "Pushing commits"
-else
-  echo "Cancelling"
-  exit 1
-fi
-
-git push origin master
-git push bump master
-if [[ $version != *"SNAPSHOT"* ]]; then
-  echo "Found release version, pushing tags"
-  git push origin $version_tag
-  git push bump $version_tag
-fi
-
+echo "Now submit a PR and get it submitted internally."
+echo "Then tag the new commit with the new version (e.g. v4.10.0)."
+echo "And upload them:"
+echo "git push origin v4.10.0"
+echo "git push bump v4.10.0"
+echo "Then upload the build with:"
+echo "./gradlew clean build --parallel"
+echo "./gradlew uploadArchives"
