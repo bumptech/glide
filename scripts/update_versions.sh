@@ -19,5 +19,7 @@ echo "updating versions from ${from} to ${to}"
 
 # Update references from the old version to the new version in pages (outside of javadocs.md)
 find _posts -type f -name '*.md' | grep -v "javadocs.md" | xargs sed -i '' "s/$from_for_sed/$to_for_sed/g"
+# Revert the reference in configuration back to 4.9.0
+sed -i '' "s/Starting in Glide ${to_for_sed}/Starting in Glide 4.9.0/" _posts/2017-03-14-configuration.md
 # Update references to the new version SNAPSHOT to one more than the new version SNAPSHOT
 find _posts -type f -name '*.md' | grep -v "javadocs.md" | xargs sed -i '' "s/${to}-SNAPSHOT/${snapshot_next_version}-SNAPSHOT/g"
