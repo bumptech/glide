@@ -23,3 +23,15 @@ find _posts -type f -name '*.md' | grep -v "javadocs.md" | xargs sed -i '' "s/$f
 sed -i '' "s/Starting in Glide ${to_for_sed}/Starting in Glide 4.9.0/" _posts/2017-03-14-configuration.md
 # Update references to the new version SNAPSHOT to one more than the new version SNAPSHOT
 find _posts -type f -name '*.md' | grep -v "javadocs.md" | xargs sed -i '' "s/${to}-SNAPSHOT/${snapshot_next_version}-SNAPSHOT/g"
+
+# Update the javadocs page
+# First grab the next reference number:
+next_reference_number=$(sed -E "s:^\[([0-9]*)\].*:\1:" _posts/2015-05-17-javadocs.md | grep -e "^[0-9]" | tail -1 | xargs expr 1 +)
+# Then prepend a line with the new snapshot version
+echo _posts/2015-05-17-javadocs.md | xargs sed -i '' '/-SNAPSHOT/i \
+* [Glide '"${snapshot_next_version}-SNAPSHOT][${next_reference_number}]
+"
+# Then remove the -SNAPSHOT from the old version
+sed -i '' "s/${to_for_sed}-SNAPSHOT/${to_for_sed}/" _posts/2015-05-17-javadocs.md
+# And append the correct reference with the new versions javadoc directory.
+echo "[${next_reference_number}]:{{ site.baseurl }}{% link /javadocs/$(echo $snapshot_next_version | sed 's/\.//g')/index.html %}" >> _posts/2015-05-17-javadocs.md
