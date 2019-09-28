@@ -50,11 +50,11 @@ public class DrawableCrossFadeTransition implements Transition<Drawable> {
     if (previous == null) {
       previous = new ColorDrawable(Color.TRANSPARENT);
     }
-    TransitionDrawable transitionDrawable =
-        new TransitionDrawable(new Drawable[] {previous, current});
-    transitionDrawable.setCrossFadeEnabled(isCrossFadeEnabled);
-    transitionDrawable.startTransition(duration);
-    adapter.setDrawable(transitionDrawable);
+    CrossFadeDrawable crossFadeDrawable =
+        new CrossFadeDrawable(previous, current);
+    crossFadeDrawable.setCrossFadeEnabled(isCrossFadeEnabled);
+    crossFadeDrawable.startTransition(duration);
+    adapter.setDrawable(crossFadeDrawable);
     return true;
   }
 }
