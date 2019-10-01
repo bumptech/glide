@@ -582,11 +582,7 @@ public class Registry {
 
   @NonNull
   public <Model> List<ModelLoader<Model, ?>> getModelLoaders(@NonNull Model model) {
-    List<ModelLoader<Model, ?>> result = modelLoaderRegistry.getModelLoaders(model);
-    if (result.isEmpty()) {
-      throw new NoModelLoaderAvailableException(model);
-    }
-    return result;
+    return modelLoaderRegistry.getModelLoaders(model);
   }
 
   @NonNull
@@ -605,8 +601,18 @@ public class Registry {
   // Never serialized by Glide.
   @SuppressWarnings("serial")
   public static class NoModelLoaderAvailableException extends MissingComponentException {
+
     public NoModelLoaderAvailableException(@NonNull Object model) {
-      super("Failed to find any ModelLoaders for model: " + model);
+      super("Failed to find any ModelLoaders registered for model class: " + model.getClass());
+    }
+
+    public <M> NoModelLoaderAvailableException(
+        @NonNull M model, @NonNull List<ModelLoader<M, ?>> matchingButNotHandlingModelLoaders) {
+      super(
+          "Found ModelLoaders for model class: "
+              + matchingButNotHandlingModelLoaders
+              + ", but none that handle this specific model instance: "
+              + model);
     }
 
     public NoModelLoaderAvailableException(
