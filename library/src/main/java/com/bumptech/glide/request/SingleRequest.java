@@ -357,6 +357,13 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     }
   }
 
+  @Override
+  public boolean isAnyResourceSet() {
+    synchronized (requestLock) {
+      return status == Status.COMPLETE;
+    }
+  }
+
   @GuardedBy("requestLock")
   private Drawable getErrorDrawable() {
     if (errorDrawable == null) {
@@ -493,7 +500,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
 
   @GuardedBy("requestLock")
   private boolean isFirstReadyResource() {
-    return requestCoordinator == null || !requestCoordinator.isAnyResourceSet();
+    return requestCoordinator == null || !requestCoordinator.getRoot().isAnyResourceSet();
   }
 
   @GuardedBy("requestLock")

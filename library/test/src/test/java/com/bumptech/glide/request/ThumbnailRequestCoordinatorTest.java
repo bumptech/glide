@@ -208,12 +208,14 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void canNotNotifyStatusChanged_forFull_whenFullComplete_isFalse() {
+    when(full.isAnyResourceSet()).thenReturn(true);
     coordinator.onRequestSuccess(full);
     assertFalse(coordinator.canNotifyStatusChanged(full));
   }
 
   @Test
   public void canNotNotifyStatusChanged_forFull_whenIfThumbComplete_isFalse() {
+    when(thumb.isAnyResourceSet()).thenReturn(true);
     coordinator.onRequestSuccess(thumb);
     assertFalse(coordinator.canNotifyStatusChanged(full));
   }
@@ -249,24 +251,26 @@ public class ThumbnailRequestCoordinatorTest {
 
   @Test
   public void isAnyResourceSet_withCompleteFull_isTrue() {
+    when(full.isAnyResourceSet()).thenReturn(true);
     coordinator.onRequestSuccess(full);
     assertTrue(coordinator.isAnyResourceSet());
   }
 
   @Test
   public void isAnyResourceSet_withCompleteThumb_isTrue() {
+    when(thumb.isAnyResourceSet()).thenReturn(true);
     coordinator.onRequestSuccess(thumb);
     assertTrue(coordinator.isAnyResourceSet());
   }
 
   @Test
-  public void isAnyResourceSet_withParentResourceSet_isTrue() {
+  public void isAnyResourceSet_withParentResourceSet_isFalse() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(full, thumb);
 
     when(parent.isAnyResourceSet()).thenReturn(true);
 
-    assertTrue(coordinator.isAnyResourceSet());
+    assertThat(coordinator.isAnyResourceSet()).isFalse();
   }
 
   @Test

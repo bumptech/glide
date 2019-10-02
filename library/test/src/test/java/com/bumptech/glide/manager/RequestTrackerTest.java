@@ -417,6 +417,11 @@ public class RequestTrackerTest {
     }
 
     @Override
+    public boolean isAnyResourceSet() {
+      return isComplete;
+    }
+
+    @Override
     public boolean isEquivalentTo(Request other) {
       throw new UnsupportedOperationException();
     }

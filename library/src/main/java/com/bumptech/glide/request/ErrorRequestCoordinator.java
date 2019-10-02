@@ -144,13 +144,8 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
   @Override
   public boolean isAnyResourceSet() {
     synchronized (requestLock) {
-      return parentIsAnyResourceSet() || isComplete();
+      return primary.isAnyResourceSet() || error.isAnyResourceSet();
     }
-  }
-
-  @GuardedBy("requestLock")
-  private boolean parentIsAnyResourceSet() {
-    return parent != null && parent.isAnyResourceSet();
   }
 
   @Override
@@ -184,6 +179,13 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
       if (parent != null) {
         parent.onRequestFailed(this);
       }
+    }
+  }
+
+  @Override
+  public RequestCoordinator getRoot() {
+    synchronized (requestLock) {
+      return parent != null ? parent.getRoot() : this;
     }
   }
 }

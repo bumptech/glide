@@ -33,6 +33,12 @@ public interface Request {
   boolean isCleared();
 
   /**
+   * Returns true if a resource is set, even if the request is not yet complete or the primary
+   * request has failed.
+   */
+  boolean isAnyResourceSet();
+
+  /**
    * Returns {@code true} if this {@link Request} is equivalent to the given {@link Request} (has
    * all of the same options and sizes).
    *

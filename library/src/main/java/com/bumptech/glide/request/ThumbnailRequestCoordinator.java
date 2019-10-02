@@ -60,7 +60,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   @Override
   public boolean canNotifyStatusChanged(Request request) {
     synchronized (requestLock) {
-      return parentCanNotifyStatusChanged() && request.equals(full) && !isResourceSet();
+      return parentCanNotifyStatusChanged() && request.equals(full) && !isAnyResourceSet();
     }
   }
 
@@ -84,7 +84,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   @Override
   public boolean isAnyResourceSet() {
     synchronized (requestLock) {
-      return parentIsAnyResourceSet() || isResourceSet();
+      return thumb.isAnyResourceSet() || full.isAnyResourceSet();
     }
   }
 
@@ -123,9 +123,11 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
     }
   }
 
-  @GuardedBy("requestLock")
-  private boolean parentIsAnyResourceSet() {
-    return parent != null && parent.isAnyResourceSet();
+  @Override
+  public RequestCoordinator getRoot() {
+    synchronized (requestLock) {
+      return parent != null ? parent.getRoot() : this;
+    }
   }
 
   /** Starts first the thumb request and then the full request. */
@@ -186,12 +188,6 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   public boolean isComplete() {
     synchronized (requestLock) {
       return fullState == RequestState.SUCCESS;
-    }
-  }
-
-  private boolean isResourceSet() {
-    synchronized (requestLock) {
-      return fullState == RequestState.SUCCESS || thumbState == RequestState.SUCCESS;
     }
   }
 
