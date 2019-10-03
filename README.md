@@ -14,7 +14,7 @@ that allows developers to plug in to almost any network stack. By default Glide 
 stack, but also includes utility libraries plug in to Google's Volley project or Square's OkHttp library instead.
 
 Glide's primary focus is on making scrolling any kind of a list of images as smooth and fast as possible, but Glide is
-also effective for almost any case where you need to fetch, resize, and display a remote image.
+also effective for almost any case where you need to fetch, resize and display a remote image.
 
 Download
 --------
