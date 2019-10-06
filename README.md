@@ -76,6 +76,17 @@ Check out the [documentation][20] for pages on a variety of topics, and see the 
 
 For Glide v3, see the [wiki][2].
 
+Before Implementaion, you will need to add the following storage permissions to your application's manifest. For Android SDK version 23(M) and above, you will also need to explicitly request these permissions from the user.
+```xml
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+```
+Also don't forget to add this line for Internet Access permission.
+```xml
+<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+```
+
 Simple use cases will look something like this:
 
 ```java
