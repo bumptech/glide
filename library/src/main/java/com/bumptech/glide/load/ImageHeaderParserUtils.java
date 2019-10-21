@@ -14,7 +14,7 @@ import java.util.List;
 public final class ImageHeaderParserUtils {
   // 5MB. This is the max image header size we can handle, we preallocate a much smaller buffer but
   // will resize up to this amount if necessary.
-  private static final int MARK_POSITION = 5 * 1024 * 1024;
+  private static final int MARK_READ_LIMIT = 5 * 1024 * 1024;
 
   private ImageHeaderParserUtils() {}
 
@@ -33,7 +33,7 @@ public final class ImageHeaderParserUtils {
       is = new RecyclableBufferedInputStream(is, byteArrayPool);
     }
 
-    is.mark(MARK_POSITION);
+    is.mark(MARK_READ_LIMIT);
     //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0, size = parsers.size(); i < size; i++) {
       ImageHeaderParser parser = parsers.get(i);
@@ -84,7 +84,7 @@ public final class ImageHeaderParserUtils {
       is = new RecyclableBufferedInputStream(is, byteArrayPool);
     }
 
-    is.mark(MARK_POSITION);
+    is.mark(MARK_READ_LIMIT);
     //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0, size = parsers.size(); i < size; i++) {
       ImageHeaderParser parser = parsers.get(i);
