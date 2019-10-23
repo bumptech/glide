@@ -52,6 +52,7 @@ import com.bumptech.glide.load.model.stream.HttpGlideUrlLoader;
 import com.bumptech.glide.load.model.stream.HttpUriLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreImageThumbLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreVideoThumbLoader;
+import com.bumptech.glide.load.model.stream.QMediaStoreUriLoader;
 import com.bumptech.glide.load.model.stream.UrlLoader;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
@@ -506,7 +507,16 @@ public class Glide implements ComponentCallbacks2 {
             ParcelFileDescriptor.class,
             new AssetUriLoader.FileDescriptorFactory(context.getAssets()))
         .append(Uri.class, InputStream.class, new MediaStoreImageThumbLoader.Factory(context))
-        .append(Uri.class, InputStream.class, new MediaStoreVideoThumbLoader.Factory(context))
+        .append(Uri.class, InputStream.class, new MediaStoreVideoThumbLoader.Factory(context));
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      registry.append(
+          Uri.class, InputStream.class, new QMediaStoreUriLoader.InputStreamFactory(context));
+      registry.append(
+          Uri.class,
+          ParcelFileDescriptor.class,
+          new QMediaStoreUriLoader.FileDescriptorFactory(context));
+    }
+    registry
         .append(Uri.class, InputStream.class, new UriLoader.StreamFactory(contentResolver))
         .append(
             Uri.class,

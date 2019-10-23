@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /** Loads metadata from the media store for images and videos. */
+@SuppressWarnings("InlinedApi")
 public class MediaStoreDataLoader extends AsyncTaskLoader<List<MediaStoreData>> {
   private static final String[] IMAGE_PROJECTION =
       new String[] {
