@@ -20,7 +20,11 @@ public class ResourceDecoderRegistry {
   public synchronized void setBucketPriorityList(@NonNull List<String> buckets) {
     List<String> previousBuckets = new ArrayList<>(bucketPriorityList);
     bucketPriorityList.clear();
-    bucketPriorityList.addAll(buckets);
+    // new ArrayList(List) and ArrayList#addAll(List) are both broken on some verisons of Android,
+    // see #3296
+    for (String bucket : buckets) {
+      bucketPriorityList.add(bucket);
+    }
     for (String previousBucket : previousBuckets) {
       if (!buckets.contains(previousBucket)) {
         // Keep any buckets from the previous list that aren't included here, but but them at the
