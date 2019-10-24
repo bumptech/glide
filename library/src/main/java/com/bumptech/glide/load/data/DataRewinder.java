@@ -31,8 +31,8 @@ public interface DataRewinder<T> {
   }
 
   /**
-   * Rewinds the wrapped data back to the position it was at when this object was instantiated and
-   * returns the re-wound data (or a wrapper for the re-wound data).
+   * Rewinds the wrapped data back to the beginning and returns the re-wound data (or a wrapper for
+   * the re-wound data).
    *
    * @return An object pointing to the wrapped data.
    */
