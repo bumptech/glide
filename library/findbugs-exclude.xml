@@ -20,12 +20,6 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match>
 
-    <!-- RewindableInputStream safely extends FileInputStream -->
-    <Match>
-        <Class name="com.bumptech.glide.load.resource.bitmap.ImageReader$ParcelFileDescriptorImageReader$RewindableInputStream"/>
-        <Bug pattern="OBL_UNSATISFIED_OBLIGATION"/>
-    </Match>
-
     <!-- RecyclableBufferedInputStream safely re-uses pooled byte arrays -->
     <Match>
         <Class name="com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream"/>
