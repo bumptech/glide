@@ -35,9 +35,16 @@ public final class ExifInterfaceImageHeaderParser implements ImageHeaderParser {
   }
 
   @Override
-  public int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool)
-      throws IOException {
-    ExifInterface exifInterface = new ExifInterface(is);
+  public int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool) {
+    ExifInterface exifInterface;
+    try {
+      exifInterface = new ExifInterface(is);
+    } catch (IOException e) {
+      // ExifInterface throws an exception on image formats such as PNG, which also do not have an
+      // orientation returned by DefaultImageHeaderParser.
+      return ImageHeaderParser.UNKNOWN_ORIENTATION;
+    }
+
     int result =
         exifInterface.getAttributeInt(
             ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
