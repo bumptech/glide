@@ -23,7 +23,9 @@ public final class HardwareConfigState {
    *
    * @see #FD_SIZE_LIST
    */
-  public static final int DEFAULT_MIN_HARDWARE_DIMENSION = 128;
+  @VisibleForTesting static final int MIN_HARDWARE_DIMENSION_O = 128;
+
+  private static final int MIN_HARDWARE_DIMENSION_P = 0;
 
   /**
    * Allows us to check to make sure we're not exceeding the FD limit for a process with hardware
@@ -55,14 +57,15 @@ public final class HardwareConfigState {
    *
    * <p>Access to this variable will be removed in a future version without deprecation.
    */
-  public static final int DEFAULT_MAXIMUM_FDS_FOR_HARDWARE_CONFIGS = 700;
-
-  private static volatile int fdSizeLimit = DEFAULT_MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
-  private static volatile int minHardwareDimension = DEFAULT_MIN_HARDWARE_DIMENSION;
+  private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_O = 700;
+  // 20k.
+  private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P = 20000;
 
   private static volatile HardwareConfigState instance;
 
   private final boolean isHardwareConfigAllowedByDeviceModel;
+  private final int fdCountLimit;
+  private final int minHardwareDimension;
 
   @GuardedBy("this")
   private int decodesSinceLastFdCheck;
@@ -84,7 +87,13 @@ public final class HardwareConfigState {
   @VisibleForTesting
   HardwareConfigState() {
     isHardwareConfigAllowedByDeviceModel = isHardwareConfigAllowedByDeviceModel();
-    // Singleton constructor.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      fdCountLimit = MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P;
+      minHardwareDimension = MIN_HARDWARE_DIMENSION_P;
+    } else {
+      fdCountLimit = MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_O;
+      minHardwareDimension = MIN_HARDWARE_DIMENSION_O;
+    }
   }
 
   public boolean isHardwareConfigAllowed(
@@ -151,7 +160,7 @@ public final class HardwareConfigState {
     if (++decodesSinceLastFdCheck >= MINIMUM_DECODES_BETWEEN_FD_CHECKS) {
       decodesSinceLastFdCheck = 0;
       int currentFds = FD_SIZE_LIST.list().length;
-      isFdSizeBelowHardwareLimit = currentFds < fdSizeLimit;
+      isFdSizeBelowHardwareLimit = currentFds < fdCountLimit;
 
       if (!isFdSizeBelowHardwareLimit && Log.isLoggable(Downsampler.TAG, Log.WARN)) {
         Log.w(
@@ -160,7 +169,7 @@ public final class HardwareConfigState {
                 + ", file descriptors "
                 + currentFds
                 + ", limit "
-                + fdSizeLimit);
+                + fdCountLimit);
       }
     }
 
