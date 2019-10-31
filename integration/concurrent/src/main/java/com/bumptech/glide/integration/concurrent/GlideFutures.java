@@ -36,7 +36,7 @@ public final class GlideFutures {
           @Override
           public Object attachCompleter(@NonNull Completer<T> completer) {
             GlideLoadingListener<T> listener = new GlideLoadingListener<>(completer);
-            final FutureTarget<T> futureTarget = requestBuilder.listener(listener).submit();
+            final FutureTarget<T> futureTarget = requestBuilder.addListener(listener).submit();
             completer.addCancellationListener(
                 new Runnable() {
                   @Override
