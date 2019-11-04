@@ -133,7 +133,7 @@ final class GlideGenerator {
   }
 
   private MethodSpec overrideGlideStaticMethod(ExecutableElement methodToOverride) {
-    List<ParameterSpec> parameters = ProcessorUtil.getParameters(methodToOverride);
+    List<ParameterSpec> parameters = processorUtil.getParameters(methodToOverride);
 
     TypeElement element =
         (TypeElement) processingEnv.getTypeUtils().asElement(methodToOverride.getReturnType());
@@ -204,7 +204,7 @@ final class GlideGenerator {
       String packageName, TypeSpec generatedRequestManager, ExecutableElement methodToOverride) {
     ClassName generatedRequestManagerClassName =
         ClassName.get(packageName, generatedRequestManager.name);
-    List<ParameterSpec> parameters = ProcessorUtil.getParameters(methodToOverride);
+    List<ParameterSpec> parameters = processorUtil.getParameters(methodToOverride);
     Preconditions.checkArgument(
         parameters.size() == 1, "Expected size of 1, but got %s", methodToOverride);
     ParameterSpec parameter = parameters.iterator().next();

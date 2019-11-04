@@ -377,7 +377,7 @@ final class RequestBuilderGenerator {
         ParameterizedTypeName.get(generatedRequestBuilderClassName, ClassName.get(typeArgument));
 
     MethodSpec.Builder builder =
-        ProcessorUtil.overriding(methodToOverride).returns(generatedRequestBuilderOfType);
+        processorUtil.overriding(methodToOverride).returns(generatedRequestBuilderOfType);
     builder.addCode(
         CodeBlock.builder()
             .add(

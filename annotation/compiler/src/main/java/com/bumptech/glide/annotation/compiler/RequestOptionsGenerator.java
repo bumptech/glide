@@ -270,7 +270,7 @@ final class RequestOptionsGenerator {
 
     StringBuilder createNewOptionAndCall =
         createNewOptionAndCall(
-            memoize, methodSpecBuilder, "new $T().$N(", ProcessorUtil.getParameters(staticMethod));
+            memoize, methodSpecBuilder, "new $T().$N(", processorUtil.getParameters(staticMethod));
 
     FieldSpec requiredStaticField = null;
     if (memoize) {
@@ -390,7 +390,7 @@ final class RequestOptionsGenerator {
 
     StringBuilder createNewOptionAndCall =
         createNewOptionAndCall(
-            memoize, methodSpecBuilder, "new $T().$L(", ProcessorUtil.getParameters(parameters));
+            memoize, methodSpecBuilder, "new $T().$L(", processorUtil.getParameters(parameters));
 
     FieldSpec requiredStaticField = null;
     if (memoize) {

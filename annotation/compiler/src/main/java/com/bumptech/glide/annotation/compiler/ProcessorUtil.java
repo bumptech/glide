@@ -8,6 +8,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
@@ -54,6 +55,8 @@ import javax.tools.Diagnostic;
 
 /** Utilities for writing classes and logging. */
 final class ProcessorUtil {
+  // TODO: Remove this once we convert Glide's internal classes to AndroidX.
+  private static final boolean REQUIRE_SUPPORT_ANNOTATIONS = false;
   private static final String GLIDE_MODULE_PACKAGE_NAME = "com.bumptech.glide.module";
   private static final String APP_GLIDE_MODULE_SIMPLE_NAME = "AppGlideModule";
   private static final String LIBRARY_GLIDE_MODULE_SIMPLE_NAME = "LibraryGlideModule";
@@ -289,7 +292,7 @@ final class ProcessorUtil {
         .build();
   }
 
-  static MethodSpec.Builder overriding(ExecutableElement method) {
+  MethodSpec.Builder overriding(ExecutableElement method) {
     String methodName = method.getSimpleName().toString();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder(methodName).addAnnotation(Override.class);
@@ -326,11 +329,11 @@ final class ProcessorUtil {
     return builder;
   }
 
-  static List<ParameterSpec> getParameters(ExecutableElement method) {
+  List<ParameterSpec> getParameters(ExecutableElement method) {
     return getParameters(method.getParameters());
   }
 
-  static List<ParameterSpec> getParameters(List<? extends VariableElement> parameters) {
+  List<ParameterSpec> getParameters(List<? extends VariableElement> parameters) {
     List<ParameterSpec> result = new ArrayList<>();
     for (VariableElement parameter : parameters) {
       result.add(getParameter(parameter));
@@ -366,7 +369,7 @@ final class ProcessorUtil {
     return parameters;
   }
 
-  private static ParameterSpec getParameter(VariableElement parameter) {
+  private ParameterSpec getParameter(VariableElement parameter) {
     TypeName type = TypeName.get(parameter.asType());
     return ParameterSpec.builder(type, computeParameterName(parameter, type))
         .addModifiers(parameter.getModifiers())
@@ -450,12 +453,35 @@ final class ProcessorUtil {
     return name;
   }
 
-  private static List<AnnotationSpec> getAnnotations(VariableElement element) {
+  private List<AnnotationSpec> getAnnotations(VariableElement element) {
     List<AnnotationSpec> result = new ArrayList<>();
     for (AnnotationMirror mirror : element.getAnnotationMirrors()) {
-      result.add(AnnotationSpec.get(mirror));
+      result.add(maybeConvertSupportLibraryAnnotation(mirror));
     }
     return result;
+  }
+
+  private AnnotationSpec maybeConvertSupportLibraryAnnotation(AnnotationMirror mirror) {
+    String annotationName = mirror.getAnnotationType().asElement().toString();
+    boolean preferAndroidX = visibleForTesting().equals(ANDROIDX_VISIBLE_FOR_TESTING);
+    ImmutableBiMap<ClassName, ClassName> map =
+        ImmutableBiMap.<ClassName, ClassName>builder()
+            .put(SUPPORT_NONNULL_ANNOTATION, ANDROIDX_NONNULL_ANNOTATION)
+            .put(SUPPORT_CHECK_RESULT_ANNOTATION, ANDROIDX_CHECK_RESULT_ANNOTATION)
+            .put(SUPPORT_VISIBLE_FOR_TESTING, ANDROIDX_VISIBLE_FOR_TESTING)
+            .build();
+
+    ClassName remapped = null;
+    if (preferAndroidX && annotationName.startsWith("android.support.annotation")) {
+      remapped = ClassName.get((TypeElement) mirror.getAnnotationType().asElement());
+    } else if (!preferAndroidX && annotationName.startsWith("androidx.annotation")) {
+      remapped = ClassName.get((TypeElement) mirror.getAnnotationType().asElement());
+    }
+    if (remapped != null && map.containsKey(remapped)) {
+      return AnnotationSpec.builder(map.get(remapped)).build();
+    } else {
+      return AnnotationSpec.get(mirror);
+    }
   }
 
   ClassName visibleForTesting() {
@@ -477,6 +503,9 @@ final class ProcessorUtil {
   }
 
   private ClassName findAnnotationClassName(ClassName androidxName, ClassName supportName) {
+    if (REQUIRE_SUPPORT_ANNOTATIONS) {
+      return supportName;
+    }
     Elements elements = processingEnv.getElementUtils();
     TypeElement visibleForTestingTypeElement =
         elements.getTypeElement(androidxName.reflectionName());
