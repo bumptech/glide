@@ -85,72 +85,58 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
 
   @NonNull
   private ImageType getType(Reader reader) throws IOException {
-    try {
-      final int firstTwoBytes = reader.getUInt16();
-      // JPEG.
-      if (firstTwoBytes == EXIF_MAGIC_NUMBER) {
-        return JPEG;
-      }
+    final int firstTwoBytes = reader.getUInt16();
 
-      final int firstThreeBytes = (firstTwoBytes << 8) | reader.getUInt8();
-      if (firstThreeBytes == GIF_HEADER) {
-        return GIF;
-      }
+    // JPEG.
+    if (firstTwoBytes == EXIF_MAGIC_NUMBER) {
+      return JPEG;
+    }
 
-      final int firstFourBytes = (firstThreeBytes << 8) | reader.getUInt8();
-      // PNG.
-      if (firstFourBytes == PNG_HEADER) {
-        // See: http://stackoverflow.com/questions/2057923/how-to-check-a-png-for-grayscale-alpha
-        // -color-type
-        reader.skip(25 - 4);
-        try {
-          int alpha = reader.getUInt8();
-          // A RGB indexed PNG can also have transparency. Better safe than sorry!
-          return alpha >= 3 ? PNG_A : PNG;
-        } catch (Reader.EndOfFileException e) {
-          if (Log.isLoggable(TAG, Log.ERROR)) {
-            Log.e(TAG, "Unexpected EOF, assuming no alpha", e);
-          }
-          return PNG;
-        }
-      }
+    final int firstFourBytes = (firstTwoBytes << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
+    // PNG.
+    if (firstFourBytes == PNG_HEADER) {
+      // See: http://stackoverflow.com/questions/2057923/how-to-check-a-png-for-grayscale-alpha
+      // -color-type
+      reader.skip(25 - 4);
+      int alpha = reader.getByte();
+      // A RGB indexed PNG can also have transparency. Better safe than sorry!
+      return alpha >= 3 ? PNG_A : PNG;
+    }
 
-      // WebP (reads up to 21 bytes).
-      // See https://developers.google.com/speed/webp/docs/riff_container for details.
-      if (firstFourBytes != RIFF_HEADER) {
-        return UNKNOWN;
-      }
+    // GIF from first 3 bytes.
+    if (firstFourBytes >> 8 == GIF_HEADER) {
+      return GIF;
+    }
 
-      // Bytes 4 - 7 contain length information. Skip these.
-      reader.skip(4);
-      final int thirdFourBytes = (reader.getUInt16() << 16) | reader.getUInt16();
-      if (thirdFourBytes != WEBP_HEADER) {
-        return UNKNOWN;
-      }
-      final int fourthFourBytes = (reader.getUInt16() << 16) | reader.getUInt16();
-      if ((fourthFourBytes & VP8_HEADER_MASK) != VP8_HEADER) {
-        return UNKNOWN;
-      }
-      if ((fourthFourBytes & VP8_HEADER_TYPE_MASK) == VP8_HEADER_TYPE_EXTENDED) {
-        // Skip some more length bytes and check for transparency/alpha flag.
-        reader.skip(4);
-        short flags = reader.getUInt8();
-        return (flags & WEBP_EXTENDED_ALPHA_FLAG) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
-      }
-      if ((fourthFourBytes & VP8_HEADER_TYPE_MASK) == VP8_HEADER_TYPE_LOSSLESS) {
-        // See chromium.googlesource.com/webm/libwebp/+/master/doc/webp-lossless-bitstream-spec.txt
-        // for more info.
-        reader.skip(4);
-        short flags = reader.getUInt8();
-        return (flags & WEBP_LOSSLESS_ALPHA_FLAG) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
-      }
-      return ImageType.WEBP;
-    } catch (Reader.EndOfFileException e) {
-      if (Log.isLoggable(TAG, Log.ERROR)) {
-        Log.e(TAG, "Unexpected EOF", e);
-      }
+    // WebP (reads up to 21 bytes). See https://developers.google.com/speed/webp/docs/riff_container
+    // for details.
+    if (firstFourBytes != RIFF_HEADER) {
       return UNKNOWN;
     }
+    // Bytes 4 - 7 contain length information. Skip these.
+    reader.skip(4);
+    final int thirdFourBytes =
+        (reader.getUInt16() << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
+    if (thirdFourBytes != WEBP_HEADER) {
+      return UNKNOWN;
+    }
+    final int fourthFourBytes =
+        (reader.getUInt16() << 16 & 0xFFFF0000) | (reader.getUInt16() & 0xFFFF);
+    if ((fourthFourBytes & VP8_HEADER_MASK) != VP8_HEADER) {
+      return UNKNOWN;
+    }
+    if ((fourthFourBytes & VP8_HEADER_TYPE_MASK) == VP8_HEADER_TYPE_EXTENDED) {
+      // Skip some more length bytes and check for transparency/alpha flag.
+      reader.skip(4);
+      return (reader.getByte() & WEBP_EXTENDED_ALPHA_FLAG) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
+    }
+    if ((fourthFourBytes & VP8_HEADER_TYPE_MASK) == VP8_HEADER_TYPE_LOSSLESS) {
+      // See chromium.googlesource.com/webm/libwebp/+/master/doc/webp-lossless-bitstream-spec.txt
+      // for more info.
+      reader.skip(4);
+      return (reader.getByte() & WEBP_LOSSLESS_ALPHA_FLAG) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
+    }
+    return ImageType.WEBP;
   }
 
   /**
@@ -161,35 +147,28 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
    *     contain an orientation
    */
   private int getOrientation(Reader reader, ArrayPool byteArrayPool) throws IOException {
-    try {
-      final int magicNumber = reader.getUInt16();
+    final int magicNumber = reader.getUInt16();
 
-      if (!handles(magicNumber)) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Parser doesn't handle magic number: " + magicNumber);
-        }
-        return UNKNOWN_ORIENTATION;
-      } else {
-        int exifSegmentLength = moveToExifSegmentAndGetLength(reader);
-        if (exifSegmentLength == -1) {
-          if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "Failed to parse exif segment length, or exif segment not found");
-          }
-          return UNKNOWN_ORIENTATION;
-        }
-
-        byte[] exifData = byteArrayPool.get(exifSegmentLength, byte[].class);
-        try {
-          return parseExifSegment(reader, exifData, exifSegmentLength);
-        } finally {
-          byteArrayPool.put(exifData);
-        }
-      }
-    } catch (Reader.EndOfFileException e) {
-      if (Log.isLoggable(TAG, Log.ERROR)) {
-        Log.e(TAG, "Unexpected EOF", e);
+    if (!handles(magicNumber)) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Parser doesn't handle magic number: " + magicNumber);
       }
       return UNKNOWN_ORIENTATION;
+    } else {
+      int exifSegmentLength = moveToExifSegmentAndGetLength(reader);
+      if (exifSegmentLength == -1) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Failed to parse exif segment length, or exif segment not found");
+        }
+        return UNKNOWN_ORIENTATION;
+      }
+
+      byte[] exifData = byteArrayPool.get(exifSegmentLength, byte[].class);
+      try {
+        return parseExifSegment(reader, exifData, exifSegmentLength);
+      } finally {
+        byteArrayPool.put(exifData);
+      }
     }
   }
 
@@ -258,12 +237,11 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         return -1;
       }
 
-      int segmentLength = reader.getUInt16();
-      // A segment includes the bytes that specify its length.
-      int segmentContentsLength = segmentLength - 2;
+      // Segment length includes bytes for segment length.
+      int segmentLength = reader.getUInt16() - 2;
       if (segmentType != EXIF_SEGMENT_TYPE) {
-        long skipped = reader.skip(segmentContentsLength);
-        if (skipped != segmentContentsLength) {
+        long skipped = reader.skip(segmentLength);
+        if (skipped != segmentLength) {
           if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(
                 TAG,
@@ -271,14 +249,14 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
                     + ", type: "
                     + segmentType
                     + ", wanted to skip: "
-                    + segmentContentsLength
+                    + segmentLength
                     + ", but actually skipped: "
                     + skipped);
           }
           return -1;
         }
       } else {
-        return segmentContentsLength;
+        return segmentLength;
       }
     }
   }
@@ -415,39 +393,15 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   }
 
   private interface Reader {
-
-    /**
-     * Reads and returns a 8-bit unsigned integer.
-     *
-     * <p>Throws an {@link EndOfFileException} if an EOF is reached.
-     */
-    short getUInt8() throws IOException;
-
-    /**
-     * Reads and returns a 16-bit unsigned integer.
-     *
-     * <p>Throws an {@link EndOfFileException} if an EOF is reached.
-     */
     int getUInt16() throws IOException;
 
-    /**
-     * Reads and returns a byte array.
-     *
-     * <p>Throws an {@link EndOfFileException} if an EOF is reached before anything was read.
-     */
-    int read(byte[] buffer, int byteCount) throws IOException;
+    short getUInt8() throws IOException;
 
     long skip(long total) throws IOException;
 
-    // TODO(timurrrr): Stop inheriting from IOException, and make sure all attempts to read from
-    //   a Reader correctly handle EOFs.
-    final class EndOfFileException extends IOException {
-      private static final long serialVersionUID = 1L;
+    int read(byte[] buffer, int byteCount) throws IOException;
 
-      EndOfFileException() {
-        super("Unexpectedly reached end of a file");
-      }
-    }
+    int getByte() throws IOException;
   }
 
   private static final class ByteBufferReader implements Reader {
@@ -460,16 +414,20 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     @Override
-    public short getUInt8() throws EndOfFileException {
-      if (byteBuffer.remaining() < 1) {
-        throw new EndOfFileException();
-      }
-      return (short) (byteBuffer.get() & 0xFF);
+    public int getUInt16() {
+      return (getByte() << 8 & 0xFF00) | (getByte() & 0xFF);
     }
 
     @Override
-    public int getUInt16() throws EndOfFileException {
-      return ((int) getUInt8() << 8) | getUInt8();
+    public short getUInt8() {
+      return (short) (getByte() & 0xFF);
+    }
+
+    @Override
+    public long skip(long total) {
+      int toSkip = (int) Math.min(byteBuffer.remaining(), total);
+      byteBuffer.position(byteBuffer.position() + toSkip);
+      return toSkip;
     }
 
     @Override
@@ -483,10 +441,11 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     @Override
-    public long skip(long total) {
-      int toSkip = (int) Math.min(byteBuffer.remaining(), total);
-      byteBuffer.position(byteBuffer.position() + toSkip);
-      return toSkip;
+    public int getByte() {
+      if (byteBuffer.remaining() < 1) {
+        return -1;
+      }
+      return byteBuffer.get();
     }
   }
 
@@ -499,34 +458,13 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     @Override
-    public short getUInt8() throws IOException {
-      int readResult = is.read();
-      if (readResult == -1) {
-        throw new EndOfFileException();
-      }
-
-      return (short) readResult;
-    }
-
-    @Override
     public int getUInt16() throws IOException {
-      return ((int) getUInt8() << 8) | getUInt8();
+      return (is.read() << 8 & 0xFF00) | (is.read() & 0xFF);
     }
 
     @Override
-    public int read(byte[] buffer, int byteCount) throws IOException {
-      int numBytesRead = 0;
-      int lastReadResult = 0;
-      while (numBytesRead < byteCount
-          && ((lastReadResult = is.read(buffer, numBytesRead, byteCount - numBytesRead)) != -1)) {
-        numBytesRead += lastReadResult;
-      }
-
-      if (numBytesRead == 0 && lastReadResult == -1) {
-        throw new EndOfFileException();
-      }
-
-      return numBytesRead;
+    public short getUInt8() throws IOException {
+      return (short) (is.read() & 0xFF);
     }
 
     @Override
@@ -554,6 +492,21 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         }
       }
       return total - toSkip;
+    }
+
+    @Override
+    public int read(byte[] buffer, int byteCount) throws IOException {
+      int toRead = byteCount;
+      int read;
+      while (toRead > 0 && ((read = is.read(buffer, byteCount - toRead, toRead)) != -1)) {
+        toRead -= read;
+      }
+      return byteCount - toRead;
+    }
+
+    @Override
+    public int getByte() throws IOException {
+      return is.read();
     }
   }
 }
