@@ -18,7 +18,7 @@ public final class InputStreamRewinder implements DataRewinder<InputStream> {
   private final RecyclableBufferedInputStream bufferedStream;
 
   @Synthetic
-  InputStreamRewinder(InputStream is, ArrayPool byteArrayPool) {
+  public InputStreamRewinder(InputStream is, ArrayPool byteArrayPool) {
     // We don't check is.markSupported() here because RecyclableBufferedInputStream allows resetting
     // after exceeding MARK_READ_LIMIT, which other InputStreams don't guarantee.
     bufferedStream = new RecyclableBufferedInputStream(is, byteArrayPool);
@@ -35,6 +35,10 @@ public final class InputStreamRewinder implements DataRewinder<InputStream> {
   @Override
   public void cleanup() {
     bufferedStream.release();
+  }
+
+  public void fixMarkLimits() {
+    bufferedStream.fixMarkLimit();
   }
 
   /**
