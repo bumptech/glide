@@ -137,7 +137,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   @Override
   public boolean handles(@NonNull T data, @NonNull Options options) {
     // Calling setDataSource is expensive so avoid doing so unless we're actually called.
-    // For non-videos this isn't any cheaper, but for videos it safes the redundant call and
+    // For non-videos this isn't any cheaper, but for videos it saves the redundant call and
     // 50-100ms.
     return true;
   }
