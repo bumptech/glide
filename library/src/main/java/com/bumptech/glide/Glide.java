@@ -27,7 +27,6 @@ import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.data.InputStreamRewinder;
-import com.bumptech.glide.load.data.ParcelFileDescriptorRewinder;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -64,7 +63,6 @@ import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.ExifInterfaceImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.InputStreamBitmapImageDecoderResourceDecoder;
-import com.bumptech.glide.load.resource.bitmap.ParcelFileDescriptorBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
@@ -388,17 +386,18 @@ public class Glide implements ComponentCallbacks2 {
     ResourceDecoder<ParcelFileDescriptor, Bitmap> parcelFileDescriptorVideoDecoder =
         VideoDecoder.parcel(bitmapPool);
 
-    // TODO(judds): Make ParcelFileDescriptorBitmapDecoder work with ImageDecoder.
-    Downsampler downsampler =
-        new Downsampler(
-            registry.getImageHeaderParsers(), resources.getDisplayMetrics(), bitmapPool, arrayPool);
-
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
     if (isImageDecoderEnabledForBitmaps && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       streamBitmapDecoder = new InputStreamBitmapImageDecoderResourceDecoder();
       byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
     } else {
+      Downsampler downsampler =
+          new Downsampler(
+              registry.getImageHeaderParsers(),
+              resources.getDisplayMetrics(),
+              bitmapPool,
+              arrayPool);
       byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
       streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
     }
@@ -423,17 +422,7 @@ public class Glide implements ComponentCallbacks2 {
         .append(InputStream.class, new StreamEncoder(arrayPool))
         /* Bitmaps */
         .append(Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class, byteBufferBitmapDecoder)
-        .append(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, streamBitmapDecoder);
-
-    if (ParcelFileDescriptorRewinder.isSupported()) {
-      registry.append(
-          Registry.BUCKET_BITMAP,
-          ParcelFileDescriptor.class,
-          Bitmap.class,
-          new ParcelFileDescriptorBitmapDecoder(downsampler));
-    }
-
-    registry
+        .append(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, streamBitmapDecoder)
         .append(
             Registry.BUCKET_BITMAP,
             ParcelFileDescriptor.class,
@@ -494,13 +483,7 @@ public class Glide implements ComponentCallbacks2 {
         // Compilation with Gradle requires the type to be specified for UnitModelLoader here.
         .append(File.class, File.class, UnitModelLoader.Factory.<File>getInstance())
         /* Models */
-        .register(new InputStreamRewinder.Factory(arrayPool));
-
-    if (ParcelFileDescriptorRewinder.isSupported()) {
-      registry.register(new ParcelFileDescriptorRewinder.Factory());
-    }
-
-    registry
+        .register(new InputStreamRewinder.Factory(arrayPool))
         .append(int.class, InputStream.class, resourceLoaderStreamFactory)
         .append(int.class, ParcelFileDescriptor.class, resourceLoaderFileDescriptorFactory)
         .append(Integer.class, InputStream.class, resourceLoaderStreamFactory)
