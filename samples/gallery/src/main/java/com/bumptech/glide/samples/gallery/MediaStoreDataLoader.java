@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import androidx.loader.content.AsyncTaskLoader;
 import java.util.ArrayList;
@@ -14,6 +15,10 @@ import java.util.List;
 /** Loads metadata from the media store for images and videos. */
 @SuppressWarnings("InlinedApi")
 public class MediaStoreDataLoader extends AsyncTaskLoader<List<MediaStoreData>> {
+  private static final String VIDEO_ORIENTATION_COLUMN =
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+          ? MediaStore.Video.VideoColumns.ORIENTATION
+          : "0 AS " + MediaStore.Images.ImageColumns.ORIENTATION;
   private static final String[] IMAGE_PROJECTION =
       new String[] {
         MediaStore.Images.ImageColumns._ID,
@@ -29,7 +34,7 @@ public class MediaStoreDataLoader extends AsyncTaskLoader<List<MediaStoreData>> 
         MediaStore.Video.VideoColumns.DATE_TAKEN,
         MediaStore.Video.VideoColumns.DATE_MODIFIED,
         MediaStore.Video.VideoColumns.MIME_TYPE,
-        "0 AS " + MediaStore.Images.ImageColumns.ORIENTATION,
+        VIDEO_ORIENTATION_COLUMN,
       };
 
   private List<MediaStoreData> cached;
