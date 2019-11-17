@@ -10,7 +10,13 @@ import android.os.SystemClock;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+/**
+ * A Drawable that is intended to cross-fade between two drawables. It makes sure the image isn't
+ * stretched when the images have different aspect ratio's. To start the transition, call {@link
+ * #startTransition()} or {@link #startTransition(float)} if you want to change the duration.
+ */
 public class CrossFadeDrawable extends Drawable implements Drawable.Callback {
+
   private Drawable previousDrawable;
   private Drawable currentDrawable;
 
@@ -20,6 +26,12 @@ public class CrossFadeDrawable extends Drawable implements Drawable.Callback {
   private int alpha = 0xFF;
   private boolean crossFade = false;
 
+  /**
+   * Create a new CrossFadeDrawable with two drawables to cross fade.
+   *
+   * @param previousDrawable The first drawable which will be animated away.
+   * @param currentDrawable The second drawable which will be animated in
+   */
   public CrossFadeDrawable(Drawable previousDrawable, Drawable currentDrawable) {
     this.previousDrawable = previousDrawable;
     this.currentDrawable = currentDrawable;
@@ -28,17 +40,31 @@ public class CrossFadeDrawable extends Drawable implements Drawable.Callback {
     currentDrawable.setCallback(this);
   }
 
+  /**
+   * Start the cross fade transition with a specific duration
+   *
+   * @param duration The duration of the transition in milliseconds
+   */
   public void startTransition(float duration) {
     fadeDuration = duration;
     startTransition();
   }
 
+  /**
+   * Start the cross fade transition
+   */
   public void startTransition() {
     animating = true;
     startTimeMillis = SystemClock.uptimeMillis();
     invalidateSelf();
   }
 
+  /**
+   * Get the time of the ongoing animation and normalize it so it can't go above or below their
+   * maximum and minimum
+   *
+   * @return The normalized time of the ongoing animation or 0 if it hasn't started yet.
+   */
   private float getNormalizedTime() {
     if (startTimeMillis == 0L) {
       return 0f;
