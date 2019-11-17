@@ -6,10 +6,11 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-public class CrossFadeDrawable extends Drawable {
+public class CrossFadeDrawable extends Drawable implements Drawable.Callback {
   private Drawable previousDrawable;
   private Drawable currentDrawable;
 
@@ -22,6 +23,9 @@ public class CrossFadeDrawable extends Drawable {
   public CrossFadeDrawable(Drawable previousDrawable, Drawable currentDrawable) {
     this.previousDrawable = previousDrawable;
     this.currentDrawable = currentDrawable;
+
+    previousDrawable.setCallback(this);
+    currentDrawable.setCallback(this);
   }
 
   public void startTransition(float duration) {
@@ -53,6 +57,8 @@ public class CrossFadeDrawable extends Drawable {
     } else {
       float normalized = getNormalizedTime();
       if (normalized >= 1f) {
+        previousDrawable.setCallback(null);
+
         animating = false;
         previousDrawable = null;
         currentDrawable.draw(canvas);
@@ -124,7 +130,7 @@ public class CrossFadeDrawable extends Drawable {
 
   @Override
   public int getOpacity() {
-    return PixelFormat.OPAQUE;
+    return PixelFormat.TRANSPARENT;
   }
 
   /**
@@ -145,5 +151,20 @@ public class CrossFadeDrawable extends Drawable {
    */
   public boolean isCrossFadeEnabled() {
     return crossFade;
+  }
+
+  @Override
+  public void invalidateDrawable(@NonNull Drawable who) {
+    invalidateSelf();
+  }
+
+  @Override
+  public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
+    scheduleSelf(what, when);
+  }
+
+  @Override
+  public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
+    unscheduleSelf(what);
   }
 }
