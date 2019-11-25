@@ -7,7 +7,7 @@ import com.bumptech.glide.util.Util;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
-/** A {@link BitmapTransformation} which has a different raddius for each corner of a bitmap. */
+/** A {@link BitmapTransformation} which has a different radius for each corner of a bitmap. */
 public final class GranularRoundedCorners extends BitmapTransformation {
   private static final String ID = "com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners";
   private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
