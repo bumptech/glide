@@ -32,7 +32,7 @@ public class CrossFadeDrawable extends Drawable implements Drawable.Callback {
    * @param previousDrawable The first drawable which will be animated away.
    * @param currentDrawable The second drawable which will be animated in
    */
-  public CrossFadeDrawable(Drawable previousDrawable, Drawable currentDrawable) {
+  public CrossFadeDrawable(@NonNull Drawable previousDrawable, @NonNull Drawable currentDrawable) {
     this.previousDrawable = previousDrawable;
     this.currentDrawable = currentDrawable;
 
@@ -132,8 +132,12 @@ public class CrossFadeDrawable extends Drawable implements Drawable.Callback {
   protected void onBoundsChange(Rect bounds) {
     super.onBoundsChange(bounds);
 
-    previousDrawable.setBounds(bounds);
-    currentDrawable.setBounds(bounds);
+    if (previousDrawable != null) {
+      previousDrawable.setBounds(bounds);
+    }
+    if (currentDrawable != null) {
+      currentDrawable.setBounds(bounds);
+    }
   }
 
   @Override
