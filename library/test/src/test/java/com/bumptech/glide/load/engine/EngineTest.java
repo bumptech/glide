@@ -351,7 +351,7 @@ public class EngineTest {
   public void testResourceIsRecycledIfNotCacheableWhenReleased() {
     when(harness.resource.isMemoryCacheable()).thenReturn(false);
     harness.getEngine().onResourceReleased(harness.cacheKey, harness.resource);
-    verify(harness.resourceRecycler).recycle(eq(harness.resource));
+    verify(harness.resourceRecycler).recycle(eq(harness.resource), eq(false));
   }
 
   @Test
@@ -372,7 +372,7 @@ public class EngineTest {
   @Test
   public void testResourceIsRecycledWhenRemovedFromCache() {
     harness.getEngine().onResourceRemoved(harness.resource);
-    verify(harness.resourceRecycler).recycle(eq(harness.resource));
+    verify(harness.resourceRecycler).recycle(eq(harness.resource), eq(true));
   }
 
   @Test

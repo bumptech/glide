@@ -27,10 +27,20 @@ public class ResourceRecyclerTest {
   }
 
   @Test
-  public void testRecyclesResourceSynchronouslyIfNotAlreadyRecyclingResource() {
+  public void recycle_withoutForceNextFrame_recyclesResourceSynchronously() {
     Resource<?> resource = mockResource();
     Shadows.shadowOf(Looper.getMainLooper()).pause();
-    recycler.recycle(resource);
+    recycler.recycle(resource, /*forceNextFrame=*/ false);
+    verify(resource).recycle();
+  }
+
+  @Test
+  public void recycle_withForceNextFrame_postsRecycle() {
+    Resource<?> resource = mockResource();
+    Shadows.shadowOf(Looper.getMainLooper()).pause();
+    recycler.recycle(resource, /*forceNextFrame=*/ true);
+    verify(resource, never()).recycle();
+    Shadows.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
     verify(resource).recycle();
   }
 
@@ -42,7 +52,7 @@ public class ResourceRecyclerTest {
             new Answer<Void>() {
               @Override
               public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-                recycler.recycle(child);
+                recycler.recycle(child, /*forceNextFrame=*/ false);
                 return null;
               }
             })
@@ -51,7 +61,7 @@ public class ResourceRecyclerTest {
 
     Shadows.shadowOf(Looper.getMainLooper()).pause();
 
-    recycler.recycle(parent);
+    recycler.recycle(parent, /*forceNextFrame=*/ false);
 
     verify(parent).recycle();
     verify(child, never()).recycle();

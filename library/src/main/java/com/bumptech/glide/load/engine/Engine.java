@@ -384,7 +384,9 @@ public class Engine
 
   @Override
   public void onResourceRemoved(@NonNull final Resource<?> resource) {
-    resourceRecycler.recycle(resource);
+    // Avoid deadlock with RequestManagers when recycling triggers recursive clear() calls.
+    // See b/145519760.
+    resourceRecycler.recycle(resource, /*forceNextFrame=*/ true);
   }
 
   @Override
@@ -393,7 +395,7 @@ public class Engine
     if (resource.isMemoryCacheable()) {
       cache.put(cacheKey, resource);
     } else {
-      resourceRecycler.recycle(resource);
+      resourceRecycler.recycle(resource, /*forceNextFrame=*/ false);
     }
   }
 
