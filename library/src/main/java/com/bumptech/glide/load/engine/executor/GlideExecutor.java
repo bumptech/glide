@@ -121,6 +121,11 @@ public final class GlideExecutor implements ExecutorService {
         .setName(DEFAULT_SOURCE_EXECUTOR_NAME);
   }
 
+  /** Returns a new {@link Builder} with the custom {@link ExecutorService} */
+  public static GlideExecutor.Builder newCustomExecutorServiceBuilder(ExecutorService service) {
+    return new GlideExecutor.Builder(false).setCustomExecutorService(service);
+  }
+
   /** Shortcut for calling {@link Builder#build()} on {@link #newSourceBuilder()}. */
   public static GlideExecutor newSourceExecutor() {
     return newSourceBuilder().build();
@@ -419,6 +424,7 @@ public final class GlideExecutor implements ExecutorService {
 
     private String name;
     private long threadTimeoutMillis;
+    private ExecutorService customExecutorService;
 
     @Synthetic
     Builder(boolean preventNetworkOperations) {
@@ -452,6 +458,11 @@ public final class GlideExecutor implements ExecutorService {
       return this;
     }
 
+    public Builder setCustomExecutorService(ExecutorService customExecutorService) {
+      this.customExecutorService = customExecutorService;
+      return this;
+    }
+
     /**
      * Sets the prefix to use for each thread name created by any {@link GlideExecutor}s built by
      * this {@code Builder}.
@@ -467,20 +478,24 @@ public final class GlideExecutor implements ExecutorService {
         throw new IllegalArgumentException(
             "Name must be non-null and non-empty, but given: " + name);
       }
-      ThreadPoolExecutor executor =
-          new ThreadPoolExecutor(
-              corePoolSize,
-              maximumPoolSize,
-              /*keepAliveTime=*/ threadTimeoutMillis,
-              TimeUnit.MILLISECONDS,
-              new PriorityBlockingQueue<Runnable>(),
-              new DefaultThreadFactory(name, uncaughtThrowableStrategy, preventNetworkOperations));
+      if (this.customExecutorService == null) {
+        ThreadPoolExecutor executor =
+            new ThreadPoolExecutor(
+                corePoolSize,
+                maximumPoolSize,
+                /*keepAliveTime=*/ threadTimeoutMillis,
+                TimeUnit.MILLISECONDS,
+                new PriorityBlockingQueue<Runnable>(),
+                new DefaultThreadFactory(
+                    name, uncaughtThrowableStrategy, preventNetworkOperations));
 
-      if (threadTimeoutMillis != NO_THREAD_TIMEOUT) {
-        executor.allowCoreThreadTimeOut(true);
+        if (threadTimeoutMillis != NO_THREAD_TIMEOUT) {
+          executor.allowCoreThreadTimeOut(true);
+        }
+        return new GlideExecutor(executor);
+      } else {
+        return new GlideExecutor(customExecutorService);
       }
-
-      return new GlideExecutor(executor);
     }
   }
 }
