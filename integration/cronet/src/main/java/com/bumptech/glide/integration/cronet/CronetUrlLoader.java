@@ -18,7 +18,7 @@ import org.chromium.net.RequestFinishedInfo;
 import org.chromium.net.RequestFinishedInfo.Listener;
 import org.chromium.net.UrlResponseInfo;
 
-/** A simple model loader for fetching media over http/https using OkHttp. */
+/** A simple model loader for fetching media over http/https using Cronet. */
 public class CronetUrlLoader implements ModelLoader<GlideUrl, InputStream> {
 
   private static final String TAG = "CronetUrlLoader";
