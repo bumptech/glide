@@ -1,0 +1,37 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+
+        versionName VERSION_NAME as String
+
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+
+        sourceSets {
+            main {
+                jniLibs.srcDirs =['libs']
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation project(':library')
+    annotationProcessor project(':annotation:compiler')
+
+    api fileTree(dir: 'libs', include: ['*.jar'])
+    api "androidx.annotation:annotation:${ANDROID_X_VERSION}"
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"
