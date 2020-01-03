@@ -560,6 +560,16 @@ public class Glide implements ComponentCallbacks2 {
                 bitmapPool, bitmapBytesTranscoder, gifDrawableBytesTranscoder))
         .register(GifDrawable.class, byte[].class, gifDrawableBytesTranscoder);
 
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      ResourceDecoder<ByteBuffer, Bitmap> byteBufferVideoDecoder =
+          VideoDecoder.byteBuffer(bitmapPool);
+      registry.append(ByteBuffer.class, Bitmap.class, byteBufferVideoDecoder);
+      registry.append(
+          ByteBuffer.class,
+          BitmapDrawable.class,
+          new BitmapDrawableDecoder<>(resources, byteBufferVideoDecoder));
+    }
+
     ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     glideContext =
         new GlideContext(
