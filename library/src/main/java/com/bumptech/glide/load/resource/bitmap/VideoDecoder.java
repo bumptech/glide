@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.annotation.TargetApi;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.media.MediaDataSource;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -10,6 +11,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
@@ -118,6 +120,11 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
 
   public static ResourceDecoder<ParcelFileDescriptor, Bitmap> parcel(BitmapPool bitmapPool) {
     return new VideoDecoder<>(bitmapPool, new ParcelFileDescriptorInitializer());
+  }
+
+  @RequiresApi(api = VERSION_CODES.M)
+  public static ResourceDecoder<ByteBuffer, Bitmap> byteBuffer(BitmapPool bitmapPool) {
+    return new VideoDecoder<>(bitmapPool, new ByteBufferInitializer());
   }
 
   VideoDecoder(BitmapPool bitmapPool, MediaMetadataRetrieverInitializer<T> initializer) {
@@ -297,6 +304,36 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     @Override
     public void initialize(MediaMetadataRetriever retriever, ParcelFileDescriptor data) {
       retriever.setDataSource(data.getFileDescriptor());
+    }
+  }
+
+  @RequiresApi(Build.VERSION_CODES.M)
+  static final class ByteBufferInitializer
+      implements MediaMetadataRetrieverInitializer<ByteBuffer> {
+
+    @Override
+    public void initialize(MediaMetadataRetriever retriever, final ByteBuffer data) {
+      retriever.setDataSource(
+          new MediaDataSource() {
+            @Override
+            public int readAt(long position, byte[] buffer, int offset, int size) {
+              if (position >= data.limit()) {
+                return -1;
+              }
+              data.position((int) position);
+              int numBytesRead = Math.min(size, data.remaining());
+              data.get(buffer, offset, numBytesRead);
+              return numBytesRead;
+            }
+
+            @Override
+            public long getSize() {
+              return data.limit();
+            }
+
+            @Override
+            public void close() {}
+          });
     }
   }
 }
