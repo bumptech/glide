@@ -20,7 +20,7 @@ If you need or would prefer to use a different version of the support library yo
 
 ```groovy
 dependencies {
-  implementation ("com.github.bumptech.glide:glide:4.10.0") {
+  implementation ("com.github.bumptech.glide:glide:4.11.0") {
     exclude group: "com.android.support"
   }
   implementation "com.android.support:support-fragment:26.1.0"
@@ -57,9 +57,9 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.bumptech.glide:glide:4.10.0'
+    compile 'com.github.bumptech.glide:glide:4.11.0'
     // Skip this if you don't want to use integration libraries or configure Glide.
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 }
 ```
 
@@ -67,7 +67,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation ("com.github.bumptech.glide:glide:4.10.0@aar") {
+    implementation ("com.github.bumptech.glide:glide:4.11.0@aar") {
         transitive = true
     }
 }
@@ -99,7 +99,7 @@ If you use Maven you can add a dependency on Glide as well. Again, you will also
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.10.0</version>
+  <version>4.11.0</version>
   <type>aar</type>
 </dependency>
 <dependency>
@@ -110,7 +110,7 @@ If you use Maven you can add a dependency on Glide as well. Again, you will also
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>compiler</artifactId>
-  <version>4.10.0</version>
+  <version>4.11.0</version>
   <optional>true</optional>
 </dependency>
 ```
@@ -235,7 +235,7 @@ If you use Glide's annotations on classes implemented in Kotlin, you need to inc
 
 ```groovy
 dependencies {
-  kapt 'com.github.bumptech.glide:compiler:4.10.0'
+  kapt 'com.github.bumptech.glide:compiler:4.11.0'
 }
 ```
 Note that you must also include the ``kotlin-kapt`` plugin in your ``build.gradle`` file:
