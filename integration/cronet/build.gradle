@@ -1,0 +1,28 @@
+package com.bumptech.glide.integration.cronet
+
+apply plugin: 'com.android.library'
+
+dependencies {
+    implementation project(':library')
+    annotationProcessor project(':annotation:compiler')
+
+    api "androidx.annotation:annotation:${ANDROID_X_VERSION}"
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+
+        versionName VERSION_NAME as String
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"
