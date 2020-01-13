@@ -23,39 +23,46 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.load.model.LazyHeaders.Builder;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.net.HttpURLConnection;
 import java.nio.ByteBuffer;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 import org.chromium.net.CronetEngine;
 import org.chromium.net.CronetException;
 import org.chromium.net.UrlRequest;
 import org.chromium.net.UrlRequest.Callback;
 import org.chromium.net.UrlResponseInfo;
-import org.chromium.net.impl.UrlResponseInfoImpl;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 
 /** Tests for {@link ChromiumUrlFetcher}. */
 @RunWith(RobolectricTestRunner.class)
 public class ChromiumUrlFetcherTest {
+
+  @Rule public final MockitoRule mocks = MockitoJUnit.rule();
   @Mock private DataCallback<ByteBuffer> callback;
   @Mock private CronetEngine cronetEngine;
   @Mock private UrlRequest request;
   @Mock private UrlRequest.Builder mockUrlRequestBuilder;
   @Mock private ByteBufferParser<ByteBuffer> parser;
   @Mock private CronetRequestFactory cronetRequestFactory;
+  @Mock private DataCallback<ByteBuffer> firstCallback;
+  @Mock private DataCallback<ByteBuffer> secondCallback;
 
   private UrlRequest.Builder builder;
   private GlideUrl glideUrl;
@@ -65,7 +72,6 @@ public class ChromiumUrlFetcherTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
     when(parser.getDataClass()).thenReturn(ByteBuffer.class);
     when(parser.parse(any(ByteBuffer.class)))
         .thenAnswer(
@@ -144,7 +150,7 @@ public class ChromiumUrlFetcherTest {
         .newRequest(
             Matchers.eq(glideUrl.toStringUrl()),
             anyInt(),
-            anyMap(),
+            ArgumentMatchers.<String, String>anyMap(),
             any(UrlRequest.Callback.class));
   }
 
@@ -155,28 +161,74 @@ public class ChromiumUrlFetcherTest {
     ChromiumUrlFetcher<ByteBuffer> secondFetcher =
         new ChromiumUrlFetcher<>(serializer, parser, glideUrl);
 
-    DataCallback<ByteBuffer> firstCb = mock(DataCallback.class);
-    DataCallback<ByteBuffer> secondCb = mock(DataCallback.class);
-    firstFetcher.loadData(Priority.LOW, firstCb);
-    secondFetcher.loadData(Priority.HIGH, secondCb);
+    firstFetcher.loadData(Priority.LOW, firstCallback);
+    secondFetcher.loadData(Priority.HIGH, secondCallback);
 
     succeed(getInfo(10, 200), urlRequestListenerCaptor.getValue(), ByteBuffer.allocateDirect(10));
 
-    verify(firstCb, timeout(1000)).onDataReady(isA(ByteBuffer.class));
-    verify(secondCb, timeout(1000)).onDataReady(isA(ByteBuffer.class));
+    verify(firstCallback, timeout(1000)).onDataReady(isA(ByteBuffer.class));
+    verify(secondCallback, timeout(1000)).onDataReady(isA(ByteBuffer.class));
   }
 
   @NonNull
-  private UrlResponseInfo getInfo(int contentLength, int statusCode) {
-    return new UrlResponseInfoImpl(
-        ImmutableList.of(glideUrl.toStringUrl()),
-        statusCode,
-        "OK",
-        ImmutableList.<Entry<String, String>>of(
-            new SimpleImmutableEntry<>("Content-Length", Integer.toString(contentLength))),
-        false,
-        "",
-        "");
+  private UrlResponseInfo getInfo(final int contentLength, final int statusCode) {
+    return new UrlResponseInfo() {
+
+      @Override
+      public String getUrl() {
+        return glideUrl.toStringUrl();
+      }
+
+      @Override
+      public List<String> getUrlChain() {
+        return ImmutableList.of(getUrl());
+      }
+
+      @Override
+      public int getHttpStatusCode() {
+        return statusCode;
+      }
+
+      @Override
+      public String getHttpStatusText() {
+        return "OK";
+      }
+
+      @Override
+      public List<Map.Entry<String, String>> getAllHeadersAsList() {
+        return ImmutableList.<Map.Entry<String, String>>of(
+            new SimpleImmutableEntry<>("Content-Length", Integer.toString(contentLength)));
+      }
+
+      @Override
+      public Map<String, List<String>> getAllHeaders() {
+        ImmutableMap.Builder<String, List<String>> builder = ImmutableMap.builder();
+        for (Map.Entry<String, String> entry : getAllHeadersAsList()) {
+          builder.put(entry.getKey(), ImmutableList.copyOf(entry.getValue().split(",")));
+        }
+        return builder.build();
+      }
+
+      @Override
+      public boolean wasCached() {
+        return false;
+      }
+
+      @Override
+      public String getNegotiatedProtocol() {
+        return "";
+      }
+
+      @Override
+      public String getProxyServer() {
+        return "";
+      }
+
+      @Override
+      public long getReceivedByteCount() {
+        return 0;
+      }
+    };
   }
 
   @Test
@@ -226,7 +278,10 @@ public class ChromiumUrlFetcherTest {
 
   @Test
   public void testRequestComplete_withNonNullException_callsCallbackWithException() {
-    CronetException expected = new CronetException("test", /*cause=*/ null) {};
+    CronetException expected =
+        new CronetException("test", /*cause=*/ null) {
+          static final long serialVersionUID = 1;
+        };
     fetcher.loadData(Priority.LOW, callback);
     urlRequestListenerCaptor.getValue().onFailed(request, null, expected);
 

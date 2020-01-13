@@ -6,24 +6,30 @@ import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.module.GlideModule;
-import com.google.android.apps.common.proguard.UsedByReflection;
+import com.google.common.base.Supplier;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import org.chromium.net.CronetEngine;
 
 /**
  * A {@link GlideModule} that registers components allowing remote image fetching to be done using
  * Cronet.
  */
-@UsedByReflection("meta-data")
 public final class CronetGlideModule implements GlideModule {
 
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {}
 
   @Override
-  public void registerComponents(Context context, Glide glide, Registry registry) {
+  public void registerComponents(final Context context, Glide glide, Registry registry) {
     CronetRequestFactory factory =
-        new CronetRequestFactoryImpl(() -> CronetEngineSingleton.getSingleton(context));
+        new CronetRequestFactoryImpl(
+            new Supplier<CronetEngine>() {
+              @Override
+              public CronetEngine get() {
+                return CronetEngineSingleton.getSingleton(context);
+              }
+            });
     registry.replace(
         GlideUrl.class, InputStream.class, new ChromiumUrlLoader.StreamFactory(factory, null));
     registry.prepend(

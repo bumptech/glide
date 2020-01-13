@@ -35,13 +35,17 @@ import org.chromium.net.UrlResponseInfo;
  *     <ul>
  *       A new request is made to cronet if a url is requested and no cronet request for that url is
  *       in progress
- *       <ul>
- *         Subsequent requests for in progress urls do not make new requests to cronet, but are
- *         notified when the existing cronet request completes.
- *         <ul>
- *           Cancelling a single request does not cancel the cronet request if multiple requests for
- *           the url have been made, but cancelling all requests for a url does cancel the cronet
- *           request.
+ * </ul>
+ *
+ * <ul>
+ *   Subsequent requests for in progress urls do not make new requests to cronet, but are notified
+ *   when the existing cronet request completes.
+ * </ul>
+ *
+ * <ul>
+ *   Cancelling a single request does not cancel the cronet request if multiple requests for the url
+ *   have been made, but cancelling all requests for a url does cancel the cronet request.
+ * </ul>
  */
 final class ChromiumRequestSerializer {
   private static final String TAG = "ChromiumSerializer";
@@ -50,7 +54,7 @@ final class ChromiumRequestSerializer {
       new EnumMap<>(Priority.class);
   // Memoized so that all callers can share an instance.
   // Suppliers.memoize() is thread safe. See google3/java/com/google/common/base/Suppliers.java
-  private static final Supplier<Executor> glideExecutorSupplier =
+  private static final Supplier<Executor> GLIDE_EXECUTOR_SUPPLIER =
       Suppliers.memoize(
           new Supplier<Executor>() {
             @Override
@@ -229,7 +233,7 @@ final class ChromiumRequestSerializer {
 
     @Override
     public void onSucceeded(UrlRequest request, final UrlResponseInfo info) {
-      glideExecutorSupplier
+      GLIDE_EXECUTOR_SUPPLIER
           .get()
           .execute(
               new PriorityRunnable(priority) {
@@ -247,7 +251,7 @@ final class ChromiumRequestSerializer {
     @Override
     public void onFailed(
         UrlRequest urlRequest, final UrlResponseInfo urlResponseInfo, final CronetException e) {
-      glideExecutorSupplier
+      GLIDE_EXECUTOR_SUPPLIER
           .get()
           .execute(
               new PriorityRunnable(priority) {
@@ -260,7 +264,7 @@ final class ChromiumRequestSerializer {
 
     @Override
     public void onCanceled(UrlRequest urlRequest, @Nullable final UrlResponseInfo urlResponseInfo) {
-      glideExecutorSupplier
+      GLIDE_EXECUTOR_SUPPLIER
           .get()
           .execute(
               new PriorityRunnable(priority) {
