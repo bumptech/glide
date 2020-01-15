@@ -596,6 +596,13 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     return set(BitmapEncoder.COMPRESSION_QUALITY, quality);
   }
 
+  /** Sets the value for key {@link Downsampler#IGNORE_EXIF_ORIENTATION} */
+  @NonNull
+  @CheckResult
+  public T ignoreExifOrientation(boolean ignoreExifOrientation) {
+    return set(Downsampler.IGNORE_EXIF_ORIENTATION, ignoreExifOrientation);
+  }
+
   /**
    * Sets the time position of the frame to extract from a video.
    *

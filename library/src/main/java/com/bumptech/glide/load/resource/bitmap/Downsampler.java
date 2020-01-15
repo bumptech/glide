@@ -11,6 +11,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.exifinterface.media.ExifInterface;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ImageHeaderParser.ImageType;
@@ -109,6 +110,14 @@ public final class Downsampler {
   public static final Option<Boolean> ALLOW_HARDWARE_CONFIG =
       Option.memory(
           "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", false);
+
+  /**
+   * Indicates if the {@link androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION} should be
+   * ignored and load the bitmap without rotating the decoded image
+   */
+  public static final Option<Boolean> IGNORE_EXIF_ORIENTATION =
+      Option.memory(
+          "com.bumptech.glide.load.resource.bitmap.Downsampler.IgnoreExifOrientation", false);
 
   private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
   private static final String ICO_MIME_TYPE = "image/x-ico";
@@ -242,6 +251,7 @@ public final class Downsampler {
     boolean fixBitmapToRequestedDimensions = options.get(FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS);
     boolean isHardwareConfigAllowed =
         options.get(ALLOW_HARDWARE_CONFIG) != null && options.get(ALLOW_HARDWARE_CONFIG);
+    boolean ignoreExifOrientation = options.get(IGNORE_EXIF_ORIENTATION);
 
     try {
       Bitmap result =
@@ -252,6 +262,7 @@ public final class Downsampler {
               decodeFormat,
               preferredColorSpace,
               isHardwareConfigAllowed,
+              ignoreExifOrientation,
               requestedWidth,
               requestedHeight,
               fixBitmapToRequestedDimensions,
@@ -270,6 +281,7 @@ public final class Downsampler {
       DecodeFormat decodeFormat,
       PreferredColorSpace preferredColorSpace,
       boolean isHardwareConfigAllowed,
+      boolean ignoreExifOrientation,
       int requestedWidth,
       int requestedHeight,
       boolean fixBitmapToRequestedDimensions,
@@ -290,9 +302,13 @@ public final class Downsampler {
       isHardwareConfigAllowed = false;
     }
 
-    int orientation = imageReader.getImageOrientation();
-    int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
-    boolean isExifOrientationRequired = TransformationUtils.isExifOrientationRequired(orientation);
+    int orientation =
+        ignoreExifOrientation ? ExifInterface.ORIENTATION_NORMAL
+            : imageReader.getImageOrientation();
+    int degreesToRotate =
+        ignoreExifOrientation ? 0 : TransformationUtils.getExifOrientationDegrees(orientation);
+    boolean isExifOrientationRequired =
+        !ignoreExifOrientation && TransformationUtils.isExifOrientationRequired(orientation);
 
     int targetWidth =
         requestedWidth == Target.SIZE_ORIGINAL
