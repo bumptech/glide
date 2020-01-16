@@ -112,8 +112,8 @@ public final class Downsampler {
           "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", false);
 
   /**
-   * Indicates if the {@link androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION} should be
-   * ignored and load the bitmap without rotating the decoded image
+   * Indicates if {@link androidx.exifinterface.media.ExifInterface.TAG_ORIENTATION} should be
+   * ignored and load the bitmap without rotating the decoded image.
    */
   public static final Option<Boolean> IGNORE_EXIF_ORIENTATION =
       Option.memory(
@@ -303,7 +303,8 @@ public final class Downsampler {
     }
 
     int orientation =
-        ignoreExifOrientation ? ExifInterface.ORIENTATION_NORMAL
+        ignoreExifOrientation
+            ? ExifInterface.ORIENTATION_NORMAL
             : imageReader.getImageOrientation();
     int degreesToRotate =
         ignoreExifOrientation ? 0 : TransformationUtils.getExifOrientationDegrees(orientation);

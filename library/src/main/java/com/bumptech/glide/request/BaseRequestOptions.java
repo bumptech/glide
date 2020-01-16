@@ -596,7 +596,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     return set(BitmapEncoder.COMPRESSION_QUALITY, quality);
   }
 
-  /** Sets the value for key {@link Downsampler#IGNORE_EXIF_ORIENTATION} */
+  /** Sets the value for key {@link Downsampler#IGNORE_EXIF_ORIENTATION}. */
   @NonNull
   @CheckResult
   public T ignoreExifOrientation(boolean ignoreExifOrientation) {
