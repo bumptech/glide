@@ -675,6 +675,11 @@ public class Glide implements ComponentCallbacks2 {
     arrayPool.clearMemory();
   }
 
+  /** Returns true if Glide has been statically initialized. */
+  public static boolean isInitialized() {
+    return glide != null;
+  }
+
   /**
    * Clears some memory with the exact amount depending on the given level.
    *
