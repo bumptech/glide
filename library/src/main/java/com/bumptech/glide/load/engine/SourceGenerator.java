@@ -73,6 +73,8 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
           @Override
           public void onDataReady(@Nullable Object data) {
             if (isCurrentRequest(toStart)) {
+              // Try to catch cases where a request calls us back more than once.
+              loadData = null;
               onDataReadyInternal(toStart, data);
             }
           }
@@ -80,6 +82,8 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
           @Override
           public void onLoadFailed(@NonNull Exception e) {
             if (isCurrentRequest(toStart)) {
+              // Try to catch cases where a request calls us back more than once.
+              loadData = null;
               onLoadFailedInternal(toStart, e);
             }
           }
