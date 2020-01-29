@@ -2,8 +2,8 @@ package com.bumptech.glide.integration.volley;
 
 import static com.bumptech.glide.testutil.TestUtil.assertStreamOf;
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
