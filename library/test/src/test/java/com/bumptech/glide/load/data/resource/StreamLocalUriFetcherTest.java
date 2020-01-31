@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.data.resource;
 
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Matchers.isNotNull;
+import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.verify;
 
 import android.content.ContentResolver;

@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.model.stream;
 
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.net.Uri;
