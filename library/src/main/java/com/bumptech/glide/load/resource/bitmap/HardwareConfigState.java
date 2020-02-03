@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.VisibleForTesting;
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * State and constants for interacting with {@link android.graphics.Bitmap.Config#HARDWARE} on
@@ -132,8 +133,44 @@ public final class HardwareConfigState {
   }
 
   private static boolean isHardwareConfigAllowedByDeviceModel() {
+    return !isHardwareConfigDisallowedByB112551574() && !isHardwareConfigDisallowedByB147430447();
+  }
+
+  private static boolean isHardwareConfigDisallowedByB147430447() {
+    if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O_MR1) {
+      return false;
+    }
+    // This method will only be called once, so simple iteration is reasonable.
+    return Arrays.asList(
+            "ILA X1",
+            "LG-M250",
+            "LG-M320",
+            "LG-Q710AL",
+            "LG-Q710PL",
+            "LGM-K121K",
+            "LGM-K121L",
+            "LGM-K121S",
+            "LGM-X320K",
+            "LGM-X320L",
+            "LGM-X320S",
+            "LGM-X401L",
+            "LGM-X401S",
+            "LM-Q610.FG",
+            "LM-Q610.FGN",
+            "LM-Q617.FG",
+            "LM-Q617.FGN",
+            "LM-Q710.FG",
+            "LM-Q710.FGN",
+            "LM-X220PM",
+            "LM-X220QMA",
+            "LM-X410PM",
+            "SGINO")
+        .contains(Build.MODEL);
+  }
+
+  private static boolean isHardwareConfigDisallowedByB112551574() {
     if (Build.MODEL == null || Build.MODEL.length() < 7) {
-      return true;
+      return false;
     }
     switch (Build.MODEL.substring(0, 7)) {
       case "SM-N935":
@@ -150,9 +187,9 @@ public final class HardwareConfigState {
         // Fall through
       case "SM-A520":
         // Fall through
-        return Build.VERSION.SDK_INT != Build.VERSION_CODES.O;
+        return Build.VERSION.SDK_INT == Build.VERSION_CODES.O;
       default:
-        return true;
+        return false;
     }
   }
 
