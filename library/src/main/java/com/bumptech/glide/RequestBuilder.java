@@ -571,8 +571,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    *
    * <p>This method returns a "deep" copy in that all non-immutable arguments are copied such that
    * changes to one builder will not affect the other builder. However, in addition to immutable
-   * arguments, the current model is not copied copied so changes to the model will affect both
-   * builders.
+   * arguments, the current model is not copied so changes to the model will affect both builders.
    */
   @SuppressWarnings({
     "unchecked",
