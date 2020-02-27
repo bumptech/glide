@@ -3,6 +3,7 @@ package com.bumptech.glide.request.target;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.Request;
@@ -13,7 +14,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.LooperMode;
 
+@LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 18)
 public class PreloadTargetTest {
