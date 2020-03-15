@@ -1,6 +1,8 @@
 package com.bumptech.glide.load.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
@@ -47,4 +49,50 @@ public class StreamEncoderTest {
 
     assertEquals(fakeData, new String(data, "UTF-8"));
   }
+
+
+  /****************************
+   *
+   * Writer of test case #testFileNullException(): UCI MSWE 2020 team: Duo Chai, Soobin Choi
+   *
+   * **************************/
+  @Test(expected = NullPointerException.class)
+  public void testFileNullException() throws IOException {
+    String fakeData = "SomeRandomFakeData";
+    ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes("UTF-8"));
+    boolean success = false;
+
+    // Write some data to #file making sure file.delete() executes properly
+    encoder.encode(is, file, new Options());
+
+    success = encoder.encode(is, null, new Options());
+    // method should end here, since null file exception
+
+    // If #encoder.encode() does not throw exception, encoding process should be successful, assert true
+    assertTrue(success);
+  }
+
+  /****************************
+   *
+   * Writer of test case #testImportanceOfOptionsArgument(): UCI MSWE 2020 team: Duo Chai, Soobin Choi
+   *
+   * **************************/
+  @Test
+  public void testImportanceOfOptionsArgument() throws IOException {
+    // testing the importance of Options argument in #encode() method
+    String fakeData = "SomeRandomFakeData";
+    ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes("UTF-8"));
+    boolean success = false;
+
+    // Pass null as Option argument
+    success = encoder.encode(is, file, null);
+
+    // Encoding process successful
+    assertTrue(success);
+
+    byte[] data = ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
+
+    assertEquals(fakeData, new String(data, "UTF-8"));
+  }
+
 }
