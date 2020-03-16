@@ -50,12 +50,6 @@ public class StreamEncoderTest {
     assertEquals(fakeData, new String(data, "UTF-8"));
   }
 
-
-  /****************************
-   *
-   * Writer of test case #testFileNullException(): UCI MSWE 2020 team: Duo Chai, Soobin Choi
-   *
-   * **************************/
   @Test(expected = NullPointerException.class)
   public void testFileNullException() throws IOException {
     String fakeData = "SomeRandomFakeData";
@@ -72,11 +66,6 @@ public class StreamEncoderTest {
     assertTrue(success);
   }
 
-  /****************************
-   *
-   * Writer of test case #testImportanceOfOptionsArgument(): UCI MSWE 2020 team: Duo Chai, Soobin Choi
-   *
-   * **************************/
   @Test
   public void testImportanceOfOptionsArgument() throws IOException {
     // testing the importance of Options argument in #encode() method
@@ -94,5 +83,4 @@ public class StreamEncoderTest {
 
     assertEquals(fakeData, new String(data, "UTF-8"));
   }
-
 }
