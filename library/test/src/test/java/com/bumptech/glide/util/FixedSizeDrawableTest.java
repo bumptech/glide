@@ -1,11 +1,4 @@
 package com.bumptech.glide.util;
-
-/****************************
- *
- * Writer of test file #FixedSizeDrawableTest: UCI MSWE 2020 team: Duo Chai, Soobin Choi, Marc Andrada
- *
- * **************************/
-
 import static org.junit.Assert.assertEquals;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.request.target.FixedSizeDrawable;
