@@ -11,7 +11,6 @@ import com.bumptech.glide.util.ByteBufferUtil;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Executable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +58,7 @@ public class StreamEncoderTest {
     final ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes("UTF-8"));
     final boolean[] success = {false};
 
-      class Test implements ThrowingRunnable{
+      class EncodeNPETest implements ThrowingRunnable{
         @Override
         public void run() throws Throwable {
           success[0] = encoder.encode(is, null, new Options());
@@ -71,7 +70,7 @@ public class StreamEncoderTest {
 
 
     // Assert a NullPointerException is thrown here.
-    assertThrows(NullPointerException.class, new Test());
+    assertThrows(NullPointerException.class, new EncodeNPETest());
 
     // Assert encoding process failed.
     assertFalse(success[0]);
