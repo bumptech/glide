@@ -69,7 +69,7 @@ public final class Api {
 
     boolean isFirstLargest = true;
     List<String> result = new ArrayList<>();
-    int size = result.size();
+    int size = SORTED_SIZE_KEYS.size();
     for (int i = 0; i < size; i++) {
       int edge = SORTED_SIZE_KEYS.get(i);
       if (largestEdge <= edge) {
