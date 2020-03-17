@@ -77,6 +77,37 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
     return new RequestOptions().placeholder(placeholderId);
   }
 
+  /**
+   * Sets an {@link Drawable} to display while a resource is loading.
+   *
+   * <p>Replaces any previous calls to this method or {@link #placeholder(int)}.
+   *
+   * @param drawable The drawable to display as a placeholder.
+   * @return This request builder.
+   */
+  @Override
+  @NonNull
+  @CheckResult
+  public RequestOptions placeholder(@Nullable Drawable drawable) {
+    return super.placeholder(drawable);
+  }
+
+  /**
+   * Sets an Android resource id for a {@link Drawable} resource to
+   * display while a resource is loading.
+   *
+   * <p>Replaces any previous calls to this method or {@link #placeholder(Drawable)}
+   *
+   * @param resourceId The id of the resource to use as a placeholder
+   * @return This request builder.
+   */
+  @Override
+  @NonNull
+  @CheckResult
+  public RequestOptions placeholder(@DrawableRes int resourceId) {
+    return super.placeholder(resourceId);
+  }
+
   /** Returns a {@link RequestOptions} object with {@link #error(Drawable)} set. */
   @NonNull
   @CheckResult
