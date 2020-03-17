@@ -50,29 +50,37 @@ public class StreamEncoderTest {
     assertEquals(fakeData, new String(data, "UTF-8"));
   }
 
-  @Test
-  public void testImportanceOfOptionsArgument() throws IOException {
-    String fakeData = "SomeRandomFakeData";
-    ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes("UTF-8"));
-    boolean success = false;
-
-    success = encoder.encode(is, file, null);
-
-    byte[] data = ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
-
-    assertTrue(success);
-    assertEquals(fakeData, new String(data, "UTF-8"));
-  }
-
   @Test(expected = NullPointerException.class)
   public void testFileNullException() throws IOException {
     String fakeData = "SomeRandomFakeData";
     ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes("UTF-8"));
     boolean success = false;
+
+    // Write some data to #file making sure file.delete() executes properly
     encoder.encode(is, file, new Options());
 
     success = encoder.encode(is, null, new Options());
+    // method should end here, since null file exception
 
+    // If #encoder.encode() does not throw exception, encoding process should be successful, assert true
     assertTrue(success);
+  }
+
+  @Test
+  public void testImportanceOfOptionsArgument() throws IOException {
+    // testing the importance of Options argument in #encode() method
+    String fakeData = "SomeRandomFakeData";
+    ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes("UTF-8"));
+    boolean success = false;
+
+    // Pass null as Option argument
+    success = encoder.encode(is, file, null);
+
+    // Encoding process successful
+    assertTrue(success);
+
+    byte[] data = ByteBufferUtil.toBytes(ByteBufferUtil.fromFile(file));
+
+    assertEquals(fakeData, new String(data, "UTF-8"));
   }
 }
