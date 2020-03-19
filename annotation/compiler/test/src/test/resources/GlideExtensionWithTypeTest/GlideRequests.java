@@ -18,6 +18,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import java.io.File;
 import java.net.URL;
+import javax.annotation.Generated;
 
 /**
  * Includes all additions from methods in {@link com.bumptech.glide.annotation.GlideExtension}s
@@ -25,6 +26,7 @@ import java.net.URL;
  *
  * <p>Generated code, do not modify
  */
+@Generated("com.bumptech.glide.annotation.compiler.RequestManagerGenerator")
 @SuppressWarnings("deprecation")
 public class GlideRequests extends RequestManager {
   public GlideRequests(@NonNull Glide glide, @NonNull Lifecycle lifecycle,

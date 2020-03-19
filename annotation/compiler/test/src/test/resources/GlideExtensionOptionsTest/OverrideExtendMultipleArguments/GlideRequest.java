@@ -27,23 +27,23 @@ import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestListener;
 import java.io.File;
 import java.net.URL;
+import javax.annotation.Generated;
 
 /**
- * Contains all public methods from {@link RequestBuilder<TranscodeType>}, all options from
- * {@link com.bumptech.glide.request.RequestOptions} and all generated options from
- * {@link com.bumptech.glide.annotation.GlideOption} in annotated methods in
- * {@link com.bumptech.glide.annotation.GlideExtension} annotated classes.
+ * Contains all public methods from {@link RequestBuilder<TranscodeType>}, all options from {@link
+ * com.bumptech.glide.request.RequestOptions} and all generated options from {@link
+ * com.bumptech.glide.annotation.GlideOption} in annotated methods in {@link
+ * com.bumptech.glide.annotation.GlideExtension} annotated classes.
  *
  * <p>Generated code, do not modify.
  *
  * @see RequestBuilder<TranscodeType>
  * @see com.bumptech.glide.request.RequestOptions
  */
-@SuppressWarnings({
-    "unused",
-    "deprecation"
-})
-public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> implements Cloneable {
+@Generated("com.bumptech.glide.annotation.compiler.RequestBuilderGenerator")
+@SuppressWarnings({"unused", "deprecation"})
+public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType>
+    implements Cloneable {
   GlideRequest(@NonNull Class<TranscodeType> transcodeClass, @NonNull RequestBuilder<?> other) {
     super(transcodeClass, other);
   }

@@ -24,6 +24,7 @@ import com.squareup.javapoet.TypeVariableName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Generated;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.ExecutableElement;
@@ -173,6 +174,10 @@ final class RequestOptionsGenerator {
 
     TypeSpec.Builder classBuilder =
         TypeSpec.classBuilder(GENERATED_REQUEST_OPTIONS_SIMPLE_NAME)
+            .addAnnotation(
+                AnnotationSpec.builder(Generated.class)
+                    .addMember("value", "$S", getClass().getName())
+                    .build())
             .addAnnotation(
                 AnnotationSpec.builder(SuppressWarnings.class)
                     .addMember("value", "$S", "deprecation")

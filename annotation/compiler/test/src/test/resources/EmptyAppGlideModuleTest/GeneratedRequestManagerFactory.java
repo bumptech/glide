@@ -6,11 +6,12 @@ import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.test.GlideRequests;
+import javax.annotation.Generated;
 
-/**
- * Generated code, do not modify
- */
-final class GeneratedRequestManagerFactory implements RequestManagerRetriever.RequestManagerFactory {
+/** Generated code, do not modify */
+@Generated("com.bumptech.glide.annotation.compiler.RequestManagerFactoryGenerator")
+final class GeneratedRequestManagerFactory
+    implements RequestManagerRetriever.RequestManagerFactory {
   @Override
   @NonNull
   public RequestManager build(@NonNull Glide glide, @NonNull Lifecycle lifecycle,

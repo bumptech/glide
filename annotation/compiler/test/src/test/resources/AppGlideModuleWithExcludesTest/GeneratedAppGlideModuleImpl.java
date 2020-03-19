@@ -6,7 +6,9 @@ import android.util.Log;
 import com.bumptech.glide.test.AppModuleWithExcludes;
 import java.util.HashSet;
 import java.util.Set;
+import javax.annotation.Generated;
 
+@Generated("com.bumptech.glide.annotation.compiler.AppModuleGenerator")
 @SuppressWarnings("deprecation")
 final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   private final AppModuleWithExcludes appGlideModule;
@@ -14,8 +16,14 @@ final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   public GeneratedAppGlideModuleImpl(Context context) {
     appGlideModule = new AppModuleWithExcludes();
     if (Log.isLoggable("Glide", Log.DEBUG)) {
-      Log.d("Glide", "Discovered AppGlideModule from annotation: com.bumptech.glide.test.AppModuleWithExcludes");
-      Log.d("Glide", "AppGlideModule excludes LibraryGlideModule from annotation: com.bumptech.glide.test.EmptyLibraryModule");
+      Log.d(
+          "Glide",
+          "Discovered AppGlideModule from annotation:"
+              + " com.bumptech.glide.test.AppModuleWithExcludes");
+      Log.d(
+          "Glide",
+          "AppGlideModule excludes LibraryGlideModule from annotation:"
+              + " com.bumptech.glide.test.EmptyLibraryModule");
     }
   }
 

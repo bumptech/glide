@@ -18,6 +18,7 @@ import com.squareup.javapoet.TypeVariableName;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Generated;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -105,6 +106,10 @@ final class RequestManagerGenerator {
                 + "<p>Generated code, do not modify\n",
             GlideExtension.class,
             GlideType.class)
+        .addAnnotation(
+            AnnotationSpec.builder(Generated.class)
+                .addMember("value", "$S", getClass().getName())
+                .build())
         .addAnnotation(
             AnnotationSpec.builder(SuppressWarnings.class)
                 .addMember("value", "$S", "deprecation")

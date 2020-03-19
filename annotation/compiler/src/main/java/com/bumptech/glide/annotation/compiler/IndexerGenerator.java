@@ -9,6 +9,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.annotation.Generated;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
@@ -109,6 +110,10 @@ final class IndexerGenerator {
     }
 
     return TypeSpec.classBuilder(indexerName)
+        .addAnnotation(
+            AnnotationSpec.builder(Generated.class)
+                .addMember("value", "$S", IndexerGenerator.class.getName())
+                .build())
         .addAnnotation(annotationBuilder.build())
         .addModifiers(Modifier.PUBLIC)
         .build();

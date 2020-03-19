@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Generated;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -168,6 +169,10 @@ final class RequestBuilderGenerator {
         .addJavadoc("\n")
         .addJavadoc("@see $T\n", requestBuilderType)
         .addJavadoc("@see $T\n", requestOptionsType)
+        .addAnnotation(
+            AnnotationSpec.builder(Generated.class)
+                .addMember("value", "$S", getClass().getName())
+                .build())
         .addAnnotation(
             AnnotationSpec.builder(SuppressWarnings.class)
                 .addMember("value", "$S", "unused")

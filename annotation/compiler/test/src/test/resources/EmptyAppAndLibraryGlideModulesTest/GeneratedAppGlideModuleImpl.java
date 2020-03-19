@@ -7,7 +7,9 @@ import com.bumptech.glide.test.EmptyAppModule;
 import com.bumptech.glide.test.EmptyLibraryModule;
 import java.util.Collections;
 import java.util.Set;
+import javax.annotation.Generated;
 
+@Generated("com.bumptech.glide.annotation.compiler.AppModuleGenerator")
 @SuppressWarnings("deprecation")
 final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   private final EmptyAppModule appGlideModule;
@@ -15,8 +17,13 @@ final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   public GeneratedAppGlideModuleImpl(Context context) {
     appGlideModule = new EmptyAppModule();
     if (Log.isLoggable("Glide", Log.DEBUG)) {
-      Log.d("Glide", "Discovered AppGlideModule from annotation: com.bumptech.glide.test.EmptyAppModule");
-      Log.d("Glide", "Discovered LibraryGlideModule from annotation: com.bumptech.glide.test.EmptyLibraryModule");
+      Log.d(
+          "Glide",
+          "Discovered AppGlideModule from annotation: com.bumptech.glide.test.EmptyAppModule");
+      Log.d(
+          "Glide",
+          "Discovered LibraryGlideModule from annotation:"
+              + " com.bumptech.glide.test.EmptyLibraryModule");
     }
   }
 
