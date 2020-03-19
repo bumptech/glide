@@ -19,11 +19,7 @@ public final class HttpException extends IOException {
   private final int statusCode;
 
   public HttpException(int statusCode) {
-    this("Http request failed with status code: " + statusCode, statusCode);
-  }
-
-  public HttpException(String message) {
-    this(message, UNKNOWN);
+    this("Http request failed", statusCode);
   }
 
   public HttpException(String message, int statusCode) {
@@ -31,7 +27,7 @@ public final class HttpException extends IOException {
   }
 
   public HttpException(String message, int statusCode, @Nullable Throwable cause) {
-    super(message, cause);
+    super(message + ", status code: " + statusCode, cause);
     this.statusCode = statusCode;
   }
 
