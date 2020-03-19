@@ -36,6 +36,9 @@ public class StreamEncoderTest {
   public void tearDown() {
     // GC before delete() to release files on Windows (https://stackoverflow.com/a/4213208/253468)
     System.gc();
+
+    // file.delete() method requires actual file existing in the system.
+    // Make sure file exists in your method
     if (!file.delete()) {
       throw new IllegalStateException("Failed to delete: " + file);
     }
@@ -55,6 +58,10 @@ public class StreamEncoderTest {
   @Test
   public void testFileNullException() throws IOException {
     String fakeData = "SomeRandomFakeData";
+
+    // create an actual file in system to make sure file.delete() executes properly
+    file.createNewFile();
+
     final ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes("UTF-8"));
     final boolean[] success = {false};
 
@@ -65,15 +72,8 @@ public class StreamEncoderTest {
         }
       }
 
-    // Write some data to #file making sure file.delete() executes properly
-    encoder.encode(is, file, new Options());
-
-
     // Assert a NullPointerException is thrown here.
     assertThrows(NullPointerException.class, new EncodeNPETest());
-
-    // Assert encoding process failed.
-    assertFalse(success[0]);
   }
 
   @Test
