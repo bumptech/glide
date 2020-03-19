@@ -299,7 +299,7 @@ public class ChromiumUrlFetcherTest {
     verify(callback, timeout(1000)).onLoadFailed(captor.capture());
     assertThat(captor.getValue())
         .hasMessageThat()
-        .isEqualTo("Http request failed, status code: 500");
+        .isEqualTo("Http request failed with status code: 500");
   }
 
   private void succeed(UrlResponseInfo info, Callback urlCallback, ByteBuffer byteBuffer)
