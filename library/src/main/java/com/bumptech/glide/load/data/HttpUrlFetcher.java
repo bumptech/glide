@@ -14,6 +14,7 @@ import com.bumptech.glide.util.Synthetic;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
@@ -22,12 +23,13 @@ import java.util.Map;
 public class HttpUrlFetcher implements DataFetcher<InputStream> {
   private static final String TAG = "HttpUrlFetcher";
   private static final int MAXIMUM_REDIRECTS = 5;
+  @VisibleForTesting static final String REDIRECT_HEADER_FIELD = "Location";
 
   @VisibleForTesting
   static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY =
       new DefaultHttpUrlConnectionFactory();
   /** Returned when a connection error prevented us from receiving an http error. */
-  private static final int INVALID_STATUS_CODE = -1;
+  @VisibleForTesting static final int INVALID_STATUS_CODE = -1;
 
   private final GlideUrl glideUrl;
   private final int timeout;
@@ -68,50 +70,52 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   }
 
   private InputStream loadDataWithRedirects(
-      URL url, int redirects, URL lastUrl, Map<String, String> headers) throws IOException {
+      URL url, int redirects, URL lastUrl, Map<String, String> headers) throws HttpException {
     if (redirects >= MAXIMUM_REDIRECTS) {
-      throw new HttpException("Too many (> " + MAXIMUM_REDIRECTS + ") redirects!");
+      throw new HttpException(
+          "Too many (> " + MAXIMUM_REDIRECTS + ") redirects!", INVALID_STATUS_CODE);
     } else {
       // Comparing the URLs using .equals performs additional network I/O and is generally broken.
       // See http://michaelscharf.blogspot.com/2006/11/javaneturlequals-and-hashcode-make.html.
       try {
         if (lastUrl != null && url.toURI().equals(lastUrl.toURI())) {
-          throw new HttpException("In re-direct loop");
+          throw new HttpException("In re-direct loop", INVALID_STATUS_CODE);
         }
       } catch (URISyntaxException e) {
         // Do nothing, this is best effort.
       }
     }
 
-    urlConnection = connectionFactory.build(url);
-    for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
-      urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());
+    urlConnection = buildAndConfigureConnection(url, headers);
+
+    try {
+      // Connect explicitly to avoid errors in decoders if connection fails.
+      urlConnection.connect();
+      // Set the stream so that it's closed in cleanup to avoid resource leaks. See #2352.
+      stream = urlConnection.getInputStream();
+    } catch (IOException e) {
+      throw new HttpException(
+          "Failed to connect or obtain data", getHttpStatusCodeOrInvalid(urlConnection), e);
     }
-    urlConnection.setConnectTimeout(timeout);
-    urlConnection.setReadTimeout(timeout);
-    urlConnection.setUseCaches(false);
-    urlConnection.setDoInput(true);
 
-    // Stop the urlConnection instance of HttpUrlConnection from following redirects so that
-    // redirects will be handled by recursive calls to this method, loadDataWithRedirects.
-    urlConnection.setInstanceFollowRedirects(false);
-
-    // Connect explicitly to avoid errors in decoders if connection fails.
-    urlConnection.connect();
-    // Set the stream so that it's closed in cleanup to avoid resource leaks. See #2352.
-    stream = urlConnection.getInputStream();
     if (isCancelled) {
       return null;
     }
-    final int statusCode = urlConnection.getResponseCode();
+
+    final int statusCode = getHttpStatusCodeOrInvalid(urlConnection);
     if (isHttpOk(statusCode)) {
       return getStreamForSuccessfulRequest(urlConnection);
     } else if (isHttpRedirect(statusCode)) {
-      String redirectUrlString = urlConnection.getHeaderField("Location");
+      String redirectUrlString = urlConnection.getHeaderField(REDIRECT_HEADER_FIELD);
       if (TextUtils.isEmpty(redirectUrlString)) {
-        throw new HttpException("Received empty or null redirect url");
+        throw new HttpException("Received empty or null redirect url", statusCode);
       }
-      URL redirectUrl = new URL(url, redirectUrlString);
+      URL redirectUrl;
+      try {
+        redirectUrl = new URL(url, redirectUrlString);
+      } catch (MalformedURLException e) {
+        throw new HttpException("Bad redirect url: " + redirectUrlString, statusCode, e);
+      }
       // Closing the stream specifically is required to avoid leaking ResponseBodys in addition
       // to disconnecting the url connection below. See #2352.
       cleanup();
@@ -119,8 +123,44 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     } else if (statusCode == INVALID_STATUS_CODE) {
       throw new HttpException(statusCode);
     } else {
-      throw new HttpException(urlConnection.getResponseMessage(), statusCode);
+      try {
+        throw new HttpException(urlConnection.getResponseMessage(), statusCode);
+      } catch (IOException e) {
+        throw new HttpException("Failed to get a response message", statusCode, e);
+      }
     }
+  }
+
+  private static int getHttpStatusCodeOrInvalid(HttpURLConnection urlConnection) {
+    try {
+      return urlConnection.getResponseCode();
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to get a response code", e);
+      }
+    }
+    return INVALID_STATUS_CODE;
+  }
+
+  private HttpURLConnection buildAndConfigureConnection(URL url, Map<String, String> headers)
+      throws HttpException {
+    HttpURLConnection urlConnection;
+    try {
+      urlConnection = connectionFactory.build(url);
+    } catch (IOException e) {
+      throw new HttpException("URL.openConnection threw", /*statusCode=*/ 0, e);
+    }
+    for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
+      urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());
+    }
+    urlConnection.setConnectTimeout(timeout);
+    urlConnection.setReadTimeout(timeout);
+    urlConnection.setUseCaches(false);
+    urlConnection.setDoInput(true);
+    // Stop the urlConnection instance of HttpUrlConnection from following redirects so that
+    // redirects will be handled by recursive calls to this method, loadDataWithRedirects.
+    urlConnection.setInstanceFollowRedirects(false);
+    return urlConnection;
   }
 
   // Referencing constants is less clear than a simple static method.
@@ -134,15 +174,20 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   }
 
   private InputStream getStreamForSuccessfulRequest(HttpURLConnection urlConnection)
-      throws IOException {
-    if (TextUtils.isEmpty(urlConnection.getContentEncoding())) {
-      int contentLength = urlConnection.getContentLength();
-      stream = ContentLengthInputStream.obtain(urlConnection.getInputStream(), contentLength);
-    } else {
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Got non empty content encoding: " + urlConnection.getContentEncoding());
+      throws HttpException {
+    try {
+      if (TextUtils.isEmpty(urlConnection.getContentEncoding())) {
+        int contentLength = urlConnection.getContentLength();
+        stream = ContentLengthInputStream.obtain(urlConnection.getInputStream(), contentLength);
+      } else {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Got non empty content encoding: " + urlConnection.getContentEncoding());
+        }
+        stream = urlConnection.getInputStream();
       }
-      stream = urlConnection.getInputStream();
+    } catch (IOException e) {
+      throw new HttpException(
+          "Failed to obtain InputStream", getHttpStatusCodeOrInvalid(urlConnection), e);
     }
     return stream;
   }

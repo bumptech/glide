@@ -19,9 +19,14 @@ public final class HttpException extends IOException {
   private final int statusCode;
 
   public HttpException(int statusCode) {
-    this("Http request failed with status code: " + statusCode, statusCode);
+    this("Http request failed", statusCode);
   }
 
+  /**
+   * @deprecated You should always include a status code, default to {@link #UNKNOWN} if you can't
+   *     come up with a reasonable one. This method will be removed in a future version.
+   */
+  @Deprecated
   public HttpException(String message) {
     this(message, UNKNOWN);
   }
@@ -31,7 +36,7 @@ public final class HttpException extends IOException {
   }
 
   public HttpException(String message, int statusCode, @Nullable Throwable cause) {
-    super(message, cause);
+    super(message + ", status code: " + statusCode, cause);
     this.statusCode = statusCode;
   }
 
