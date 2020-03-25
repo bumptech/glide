@@ -23,8 +23,7 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class LruCacheTest {
-  // 1MB
-  private static final int SIZE = 2;
+  private static final int SIZE = 10;
   private LruCache<String, Object> cache;
   private CacheListener listener;
   private String currentKey;
@@ -127,8 +126,9 @@ public class LruCacheTest {
   public void testLeastRecentlyAddKeyEvictedFirstIfGetsAreEqual() {
     Object first = new Object();
     cache.put(getKey(), first);
-    cache.put(getKey(), new Object());
-    cache.put(getKey(), new Object());
+    for (int i = 0; i < SIZE; i++) {
+      cache.put(getKey(), new Object());
+    }
 
     verify(listener).onItemRemoved(eq(first));
     verify(listener, times(1)).onItemRemoved(any(Object.class));
@@ -145,7 +145,9 @@ public class LruCacheTest {
     cache.put(leastRecentlyUsedKey, leastRecentlyUsedObject);
 
     cache.get(mostRecentlyUsedKey);
-    cache.put(getKey(), new Object());
+    for (int i = 0; i < SIZE - 1; i++) {
+      cache.put(getKey(), new Object());
+    }
 
     verify(listener).onItemRemoved(eq(leastRecentlyUsedObject));
     verify(listener, times(1)).onItemRemoved(any(Object.class));
@@ -242,9 +244,11 @@ public class LruCacheTest {
     }
     verify(listener, never()).onItemRemoved(any());
 
-    cache.setSizeMultiplier(0.5f);
+    float smallerMultiplier = 0.4f;
 
-    verify(listener).onItemRemoved(any());
+    cache.setSizeMultiplier(smallerMultiplier);
+
+    verify(listener, times((int) (SIZE * (1 - smallerMultiplier)))).onItemRemoved(any());
   }
 
   @Test
@@ -257,7 +261,7 @@ public class LruCacheTest {
 
     cache.setSizeMultiplier(1);
 
-    verify(listener, times(sizeMultiplier)).onItemRemoved(any());
+    verify(listener, times((sizeMultiplier * SIZE) - SIZE)).onItemRemoved(any());
   }
 
   @Test(expected = IllegalArgumentException.class)
