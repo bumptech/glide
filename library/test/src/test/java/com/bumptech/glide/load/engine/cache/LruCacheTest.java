@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.cache;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -199,7 +200,7 @@ public class LruCacheTest {
   }
 
   @Test
-  public void put_withSameValueTwice_doesNotEvictItems() {
+  public void put_withSameKeyAndValueTwice_doesNotEvictItems() {
     String key = getKey();
     Object value = new Object();
     cache.put(key, value);
@@ -316,6 +317,58 @@ public class LruCacheTest {
   @Test
   public void testGetMaxSizeReturnsCurrentMaxSizeOfCache() {
     assertEquals(SIZE, cache.getMaxSize());
+  }
+
+  @Test
+  public void setSizeMultiplier_withItemWhoseSizeDecreasesAfterAdd_doesNotCrash() {
+    Object itemWhoseSizeWillChange = new Object();
+    when(listener.getSize(itemWhoseSizeWillChange)).thenReturn(SIZE - 1).thenReturn(SIZE / 2);
+    cache.put(getKey(), itemWhoseSizeWillChange);
+    cache.setSizeMultiplier(0);
+  }
+
+  @Test
+  public void getCurrentSize_afterRemovingItemWhoseSizeChanged_returnsZero() {
+    Object itemWhoseSizeWillChange = new Object();
+    when(listener.getSize(itemWhoseSizeWillChange)).thenReturn(SIZE - 1).thenReturn(SIZE / 2);
+    String key = getKey();
+    cache.put(key, itemWhoseSizeWillChange);
+    cache.remove(key);
+
+    assertThat(cache.getCurrentSize()).isEqualTo(0);
+  }
+
+  @Test
+  public void clearMemory_afterRemovingItemWhoseSizeChanged_doesNotCrash() {
+    Object itemWhoseSizeWillChange = new Object();
+    when(listener.getSize(itemWhoseSizeWillChange)).thenReturn(SIZE - 1).thenReturn((SIZE / 2) - 1);
+    String key = getKey();
+    cache.put(key, itemWhoseSizeWillChange);
+    cache.remove(key);
+
+    cache.clearMemory();
+  }
+
+  @Test
+  public void getCurrentSize_afterUpdatingItemWhoseSizeChanged_returnsTheNewSize() {
+    Object itemWhoseSizeWillChange = new Object();
+    when(listener.getSize(itemWhoseSizeWillChange)).thenReturn(SIZE - 1).thenReturn((SIZE / 2) - 1);
+    String key = getKey();
+    cache.put(key, itemWhoseSizeWillChange);
+    cache.put(key, new Object());
+
+    assertThat(cache.getCurrentSize()).isEqualTo(1);
+  }
+
+  @Test
+  public void clearMemory_afterUpdatingItemWhoseSizeChanged_doesNotCrash() {
+    Object itemWhoseSizeWillChange = new Object();
+    when(listener.getSize(itemWhoseSizeWillChange)).thenReturn(SIZE - 1).thenReturn((SIZE / 2) - 1);
+    String key = getKey();
+    cache.put(key, itemWhoseSizeWillChange);
+    cache.put(key, new Object());
+
+    cache.clearMemory();
   }
 
   @Test
