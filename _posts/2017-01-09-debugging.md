@@ -36,21 +36,6 @@ The [``Engine``][9] log tag provides details on how a request will be fulfilled 
 
 For each started request, the ``Engine`` tag will log that the request will be completed from cache, active resources, an existing load, or a new load. Cache means that the resource wasn't in use, but was available in the in memory cache. Active resources means that the resource was actively being used by another ``Target``, typically in a ``View``. An existing load means that the resource wasn't available in memory, but another ``Target`` had previously requested the same resource and the load is already in progress. Finally a new load means that the resource was neither in memory nor already being loaded so our request triggered a new load.
 
-#### Missing images and local logs
-In some cases you may see that an image never loads and that no logs with either the ``Glide`` tag or the ``Engine`` tag are ever logged for your request. There are a few possible causes.
-
-##### Failing to start the request.
-Verify that you're calling [``into()``][2] or [``submit()``][3] for your request. If you don't call either method, you're never asking Glide to start your load.
-
-##### Missing Size
-If you verify that you are in fact calling [``into()``][2] or [``submit()``][3] and you're still not seeing logs, the most likely explanation is that Glide is unable to determine the size of the ``View`` or ``Target`` you're attempting to load your resource into.
-
-###### Custom Targets
-If you're using a custom ``Target``, make sure you've either implemented [``getSize``][4] and are calling the given callback with a non-zero width and height or are subclassing a ``Target`` like [``ViewTarget``][5] that implements the method for you.
-
-###### Views
-If you're just loading a resource into a ``View``, the most likely explanation is that your view is either not going through layout or is being given a 0 width or height. Views may not go through layout if their visibility is set to ``View.GONE`` or if they are never attached. Views may receive invalid or 0 widths and heights if they and/or their parents have certain combinations of ``wrap_content`` and ``match_parent`` for their widths and heights. You can experiment by giving your views fixed non-zero dimensions or passing in an specific size to Glide to use for the request with the [``override(int, int)`` API][6].
-
 #### RequestListener and custom logs
 If you'd like to programmatically keep track of errors and successful loads, track the overall cache hit ratio of images in your application, or have more control over local logs, you can use the [``RequestListener``][7] interface. ``RequestListener`` can be added to an individual load using [``RequestBuilder#listener()``][8]. Sample usage looks like this:
 
@@ -101,6 +86,21 @@ for (Throwable t : e.getRootCauses()) {
 You can use a similar process involving iteration and ``instanceof`` to try to detect other types of exceptions if you're interested in more than HTTP errors.
 
 To save object allocations, you can re-use the same ``RequestListener`` for multiple loads.
+
+### Missing images and local logs
+In some cases you may see that an image never loads and that no logs with either the ``Glide`` tag or the ``Engine`` tag are ever logged for your request. There are a few possible causes.
+
+#### Failing to start the request.
+Verify that you're calling [``into()``][2] or [``submit()``][3] for your request. If you don't call either method, you're never asking Glide to start your load.
+
+#### Missing Size
+If you verify that you are in fact calling [``into()``][2] or [``submit()``][3] and you're still not seeing logs, the most likely explanation is that Glide is unable to determine the size of the ``View`` or ``Target`` you're attempting to load your resource into.
+
+##### Custom Targets
+If you're using a custom ``Target``, make sure you've either implemented [``getSize``][4] and are calling the given callback with a non-zero width and height or are subclassing a ``Target`` like [``ViewTarget``][5] that implements the method for you.
+
+##### Views
+If you're just loading a resource into a ``View``, the most likely explanation is that your view is either not going through layout or is being given a 0 width or height. Views may not go through layout if their visibility is set to ``View.GONE`` or if they are never attached. Views may receive invalid or 0 widths and heights if they and/or their parents have certain combinations of ``wrap_content`` and ``match_parent`` for their widths and heights. You can experiment by giving your views fixed non-zero dimensions or passing in an specific size to Glide to use for the request with the [``override(int, int)`` API][6].
 
 ### Out of memory errors
 Almost all OOM errors are due to issues with the hosting application and not with Glide.
