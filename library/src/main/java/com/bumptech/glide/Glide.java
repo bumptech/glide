@@ -111,7 +111,10 @@ import java.util.Set;
 public class Glide implements ComponentCallbacks2 {
   private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
   private static final String TAG = "Glide";
+
+  @GuardedBy("Glide.class")
   private static volatile Glide glide;
+
   private static volatile boolean isInitializing;
 
   private final Engine engine;
@@ -122,7 +125,10 @@ public class Glide implements ComponentCallbacks2 {
   private final ArrayPool arrayPool;
   private final RequestManagerRetriever requestManagerRetriever;
   private final ConnectivityMonitorFactory connectivityMonitorFactory;
+
+  @GuardedBy("managers")
   private final List<RequestManager> managers = new ArrayList<>();
+
   private final RequestOptionsFactory defaultRequestOptionsFactory;
   private MemoryCategory memoryCategory = MemoryCategory.NORMAL;
 
@@ -173,6 +179,8 @@ public class Glide implements ComponentCallbacks2 {
    * @return the singleton
    */
   @NonNull
+  // Double checked locking is safe here.
+  @SuppressWarnings("GuardedBy")
   public static Glide get(@NonNull Context context) {
     if (glide == null) {
       GeneratedAppGlideModule annotationGeneratedModule =
@@ -228,12 +236,14 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @VisibleForTesting
-  public static synchronized void tearDown() {
-    if (glide != null) {
-      glide.getContext().getApplicationContext().unregisterComponentCallbacks(glide);
-      glide.engine.shutdown();
+  public static void tearDown() {
+    synchronized (Glide.class) {
+      if (glide != null) {
+        glide.getContext().getApplicationContext().unregisterComponentCallbacks(glide);
+        glide.engine.shutdown();
+      }
+      glide = null;
     }
-    glide = null;
   }
 
   @GuardedBy("Glide.class")
@@ -685,8 +695,10 @@ public class Glide implements ComponentCallbacks2 {
     Util.assertMainThread();
     // Request managers need to be trimmed before the caches and pools, in order for the latter to
     // have the most benefit.
-    for (RequestManager manager : managers) {
-      manager.onTrimMemory(level);
+    synchronized (managers) {
+      for (RequestManager manager : managers) {
+        manager.onTrimMemory(level);
+      }
     }
     // memory cache needs to be trimmed before bitmap pool to trim re-pooled Bitmaps too. See #687.
     memoryCache.trimMemory(level);
