@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.model;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
@@ -65,12 +64,12 @@ public class StreamEncoderTest {
     final ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes("UTF-8"));
     final boolean[] success = {false};
 
-      class EncodeNPETest implements ThrowingRunnable{
-        @Override
-        public void run() throws Throwable {
-          success[0] = encoder.encode(is, null, new Options());
-        }
+    class EncodeNPETest implements ThrowingRunnable {
+      @Override
+      public void run() throws Throwable {
+        success[0] = encoder.encode(is, null, new Options());
       }
+    }
 
     // Assert a NullPointerException is thrown here.
     assertThrows(NullPointerException.class, new EncodeNPETest());
