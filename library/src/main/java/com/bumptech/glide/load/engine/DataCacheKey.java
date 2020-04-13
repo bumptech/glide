@@ -15,6 +15,11 @@ final class DataCacheKey implements Key {
     this.signature = signature;
   }
 
+  @Override
+  public Key getSignature() {
+    return signature;
+  }
+
   Key getSourceKey() {
     return sourceKey;
   }

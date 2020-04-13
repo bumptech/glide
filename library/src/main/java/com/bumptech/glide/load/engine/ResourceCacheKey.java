@@ -57,6 +57,11 @@ final class ResourceCacheKey implements Key {
   }
 
   @Override
+  public Key getSignature() {
+    return signature;
+  }
+
+  @Override
   public int hashCode() {
     int result = sourceKey.hashCode();
     result = 31 * result + signature.hashCode();
