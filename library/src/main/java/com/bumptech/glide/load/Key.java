@@ -1,6 +1,7 @@
 package com.bumptech.glide.load;
 
 import androidx.annotation.NonNull;
+import com.bumptech.glide.signature.EmptySignature;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
@@ -16,13 +17,27 @@ public interface Key {
   String STRING_CHARSET_NAME = "UTF-8";
   Charset CHARSET = Charset.forName(STRING_CHARSET_NAME);
 
+
+  /**
+   * Additional identifying information.
+   * @return signature
+   */
+  @NonNull
+  default Key getSignature(){
+    return EmptySignature.obtain();
+  }
+
+
   /**
    * Adds all uniquely identifying information to the given digest.
    *
    * <p>Note - Using {@link java.security.MessageDigest#reset()} inside of this method will result
    * in undefined behavior.
    */
-  void updateDiskCacheKey(@NonNull MessageDigest messageDigest);
+  default void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
+    getSignature().updateDiskCacheKey(messageDigest);
+  }
+
 
   /**
    * For caching to work correctly, implementations <em>must</em> implement this method and {@link
