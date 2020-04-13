@@ -46,7 +46,6 @@ final class ResourceCacheKey implements Key {
     return signature;
   }
 
-
   @Override
   public boolean equals(Object o) {
     if (o instanceof ResourceCacheKey) {

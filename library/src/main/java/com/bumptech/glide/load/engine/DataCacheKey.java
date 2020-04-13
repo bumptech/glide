@@ -20,7 +20,6 @@ final class DataCacheKey implements Key {
     return signature;
   }
 
-
   Key getSourceKey() {
     return sourceKey;
   }

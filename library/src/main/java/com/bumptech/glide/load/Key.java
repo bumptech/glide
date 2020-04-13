@@ -17,16 +17,14 @@ public interface Key {
   String STRING_CHARSET_NAME = "UTF-8";
   Charset CHARSET = Charset.forName(STRING_CHARSET_NAME);
 
-
   /**
    * Additional identifying information.
    * @return signature
    */
   @NonNull
-  default Key getSignature(){
+  default Key getSignature() {
     return EmptySignature.obtain();
   }
-
 
   /**
    * Adds all uniquely identifying information to the given digest.
@@ -37,7 +35,6 @@ public interface Key {
   default void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
     getSignature().updateDiskCacheKey(messageDigest);
   }
-
 
   /**
    * For caching to work correctly, implementations <em>must</em> implement this method and {@link
