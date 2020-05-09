@@ -63,7 +63,7 @@ Or with the shortcut method:
 ```java
 Glide.with(fragment)
   .load(url)
-  .transform(new FitCenter(), new YourCustomTransformation())
+  .transforms(new FitCenter(), new YourCustomTransformation())
   .into(imageView);
 ```
 
