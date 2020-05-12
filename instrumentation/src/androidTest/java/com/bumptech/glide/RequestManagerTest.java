@@ -6,8 +6,11 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle.State;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ActivityScenario.ActivityAction;
@@ -21,6 +24,7 @@ import com.bumptech.glide.manager.SupportRequestManagerFragment;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideWithAsDifferentSupertypesActivity;
+import com.bumptech.glide.test.GlideWithBeforeSuperOnCreateActivity;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.test.ResourceIds.raw;
 import com.bumptech.glide.test.TearDownGlide;
@@ -106,6 +110,60 @@ public class RequestManagerTest {
           @Override
           public void run() {
             Glide.with(context).clear(target);
+          }
+        });
+  }
+
+  @Test
+  public void with_beforeActivitySuperOnCreate_onlyAddsOneRequestManagerFragment() {
+    ActivityScenario<GlideWithBeforeSuperOnCreateActivity> scenario =
+        ActivityScenario.launch(GlideWithBeforeSuperOnCreateActivity.class);
+    scenario.moveToState(State.RESUMED);
+    scenario.onActivity(
+        new ActivityAction<GlideWithBeforeSuperOnCreateActivity>() {
+          @Override
+          public void perform(GlideWithBeforeSuperOnCreateActivity activity) {
+            List<Fragment> fragments = activity.getSupportFragmentManager().getFragments();
+            List<Fragment> glideFragments = new ArrayList<>();
+            for (Fragment fragment : fragments) {
+              if (fragment instanceof SupportRequestManagerFragment) {
+                glideFragments.add(fragment);
+              }
+            }
+            // Ideally this would be exactly 1, but it's a bit tricky to implement. For now we're
+            // content making sure that we're not adding multiple fragments.
+            assertThat(glideFragments.size()).isAtMost(1);
+          }
+        });
+    scenario.onActivity(
+        new ActivityAction<GlideWithBeforeSuperOnCreateActivity>() {
+          @Override
+          public void perform(final GlideWithBeforeSuperOnCreateActivity activity) {
+            new Handler(Looper.getMainLooper())
+                .post(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        Glide.with(activity);
+                      }
+                    });
+          }
+        });
+    scenario.onActivity(
+        new ActivityAction<GlideWithBeforeSuperOnCreateActivity>() {
+          @Override
+          public void perform(GlideWithBeforeSuperOnCreateActivity activity) {
+            List<Fragment> fragments = activity.getSupportFragmentManager().getFragments();
+            List<Fragment> glideFragments = new ArrayList<>();
+            for (Fragment fragment : fragments) {
+              if (fragment instanceof SupportRequestManagerFragment) {
+                glideFragments.add(fragment);
+              }
+            }
+            // Now that we've called Glide.with() after commitAllowingStateLoss will actually add
+            // the
+            // fragment, ie after onCreate, we can expect exactly one Fragment instance.
+            assertThat(glideFragments.size()).isEqualTo(1);
           }
         });
   }
