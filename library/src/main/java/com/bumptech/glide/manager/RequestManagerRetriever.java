@@ -149,6 +149,8 @@ public class RequestManagerRetriever implements Handler.Callback {
   public RequestManager get(@NonNull Activity activity) {
     if (Util.isOnBackgroundThread()) {
       return get(activity.getApplicationContext());
+    } else if (activity instanceof FragmentActivity) {
+      return get((FragmentActivity) activity);
     } else {
       assertNotDestroyed(activity);
       android.app.FragmentManager fm = activity.getFragmentManager();

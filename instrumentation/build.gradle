@@ -29,7 +29,7 @@ android {
 
     defaultConfig {
         applicationId 'com.bumptech.glide.instrumentation'
-        minSdkVersion MIN_SDK_VERSION as int
+        minSdkVersion 16 as int
         targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 1
         versionName '1.0'
