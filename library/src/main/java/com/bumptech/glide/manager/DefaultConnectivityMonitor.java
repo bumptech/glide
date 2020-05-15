@@ -122,8 +122,7 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       ConnectivityManager connectivityManager =
-          Preconditions.checkNotNull(
-              (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
+          Preconditions.checkNotNull((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
       connectivityManager.unregisterNetworkCallback(callback);
     }else {
       context.unregisterReceiver(connectivityReceiver);
