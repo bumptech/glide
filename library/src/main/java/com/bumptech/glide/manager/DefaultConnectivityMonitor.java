@@ -38,9 +38,9 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
   DefaultConnectivityMonitor(@NonNull Context context, @NonNull ConnectivityListener listener) {
     this.context = context.getApplicationContext();
     this.listener = listener;
-    if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
-      connectivityReceiver=null;
-      callback=new ConnectivityManager.NetworkCallback(){
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      connectivityReceiver = null;
+      callback = new ConnectivityManager.NetworkCallback() {
         @Override
         public void onAvailable(@NonNull Network network) {
         }
@@ -52,12 +52,16 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
         }
 
         @Override
-        public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
-          boolean connected=networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)&&networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        public void onCapabilitiesChanged(@NonNull Network network,
+            @NonNull NetworkCapabilities networkCapabilities) {
+          boolean connected =
+              networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                  && networkCapabilities
+                  .hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
           onConnectivityChanged(connected);
         }
       };
-    }else {
+    } else {
       connectivityReceiver =
           new BroadcastReceiver() {
             @Override
@@ -65,11 +69,11 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
               onConnectivityChanged(isConnected(context));
             }
           };
-      callback=null;
+      callback = null;
     }
   }
 
-  private void onConnectivityChanged(boolean connected){
+  private void onConnectivityChanged(boolean connected) {
     boolean wasConnected = isConnected;
     isConnected = connected;
     if (wasConnected != isConnected) {
@@ -96,12 +100,12 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
               (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         connectivityManager.registerDefaultNetworkCallback(callback);
-      }else {
-        NetworkRequest request=new NetworkRequest.Builder().build();
-        connectivityManager.registerNetworkCallback(request,callback);
+      } else {
+        NetworkRequest request = new NetworkRequest.Builder().build();
+        connectivityManager.registerNetworkCallback(request, callback);
       }
-      isRegistered=true;
-    }else {
+      isRegistered = true;
+    } else {
       try {
         // See #1405
         context.registerReceiver(
@@ -122,9 +126,10 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       ConnectivityManager connectivityManager =
-          Preconditions.checkNotNull((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
+          Preconditions.checkNotNull(
+              (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
       connectivityManager.unregisterNetworkCallback(callback);
-    }else {
+    } else {
       context.unregisterReceiver(connectivityReceiver);
     }
     isRegistered = false;
@@ -138,19 +143,22 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
     ConnectivityManager connectivityManager =
         Preconditions.checkNotNull(
             (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
-    if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.M) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       NetworkCapabilities networkCapabilities;
       try {
-        networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
-      }catch (RuntimeException e){
+        networkCapabilities = connectivityManager
+            .getNetworkCapabilities(connectivityManager.getActiveNetwork());
+      } catch (RuntimeException e) {
         if (Log.isLoggable(TAG, Log.WARN)) {
           Log.w(TAG, "Failed to determine connectivity status when connectivity changed", e);
         }
         // Default to true;
         return true;
       }
-      return networkCapabilities!=null&&networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)&&networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
-    }else {
+      return networkCapabilities != null && networkCapabilities
+          .hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) && networkCapabilities
+          .hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+    } else {
       NetworkInfo networkInfo;
       try {
         networkInfo = connectivityManager.getActiveNetworkInfo();
