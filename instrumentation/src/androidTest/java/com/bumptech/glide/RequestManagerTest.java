@@ -1,19 +1,32 @@
 package com.bumptech.glide;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.os.Bundle;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle.State;
+import androidx.test.core.app.ActivityScenario;
+import androidx.test.core.app.ActivityScenario.ActivityAction;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.LifecycleListener;
+import com.bumptech.glide.manager.RequestManagerFragment;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
+import com.bumptech.glide.manager.SupportRequestManagerFragment;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.ConcurrencyHelper;
+import com.bumptech.glide.test.GlideWithAsDifferentSupertypesActivity;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.test.ResourceIds.raw;
 import com.bumptech.glide.test.TearDownGlide;
+import com.google.common.collect.Iterables;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -77,7 +90,7 @@ public class RequestManagerTest {
 
   /** Tests b/69361054. */
   @Test
-  public void clear_withNonOwningRequestManager_onBackgroundTHread_doesNotThrow() {
+  public void clear_withNonOwningRequestManager_onBackgroundThread_doesNotThrow() {
     concurrency.runOnMainThread(
         new Runnable() {
           @Override
@@ -95,5 +108,58 @@ public class RequestManagerTest {
             Glide.with(context).clear(target);
           }
         });
+  }
+
+  @Test
+  public void with_asDifferentSuperTypes_doesNotAddMultipleFragments() {
+    ActivityScenario<GlideWithAsDifferentSupertypesActivity> scenario =
+        ActivityScenario.launch(GlideWithAsDifferentSupertypesActivity.class);
+    scenario.moveToState(State.RESUMED);
+    scenario.onActivity(
+        new ActivityAction<GlideWithAsDifferentSupertypesActivity>() {
+          @Override
+          public void perform(GlideWithAsDifferentSupertypesActivity activity) {
+            Iterable<SupportRequestManagerFragment> glideSupportFragments =
+                Iterables.filter(
+                    activity.getSupportFragmentManager().getFragments(),
+                    SupportRequestManagerFragment.class);
+            Iterable<RequestManagerFragment> normalFragments =
+                Iterables.filter(
+                    getAllFragments(activity.getFragmentManager()), RequestManagerFragment.class);
+            assertThat(normalFragments).hasSize(0);
+            assertThat(glideSupportFragments).hasSize(1);
+          }
+        });
+  }
+
+  private List<android.app.Fragment> getAllFragments(android.app.FragmentManager fragmentManager) {
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        ? fragmentManager.getFragments()
+        : getAllFragmentsPreO(fragmentManager);
+  }
+
+  // Hacks based on the implementation of FragmentManagerImpl in the non-support libraries that
+  // allow us to iterate over and retrieve all active Fragments in a FragmentManager.
+  private static final String FRAGMENT_INDEX_KEY = "key";
+
+  private List<android.app.Fragment> getAllFragmentsPreO(
+      android.app.FragmentManager fragmentManager) {
+    Bundle tempBundle = new Bundle();
+    int index = 0;
+    List<android.app.Fragment> result = new ArrayList<>();
+    while (true) {
+      tempBundle.putInt(FRAGMENT_INDEX_KEY, index++);
+      android.app.Fragment fragment = null;
+      try {
+        fragment = fragmentManager.getFragment(tempBundle, FRAGMENT_INDEX_KEY);
+      } catch (Exception e) {
+        // This generates log spam from FragmentManager anyway.
+      }
+      if (fragment == null) {
+        break;
+      }
+      result.add(fragment);
+    }
+    return result;
   }
 }
