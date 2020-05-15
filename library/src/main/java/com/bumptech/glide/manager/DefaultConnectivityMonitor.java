@@ -71,7 +71,9 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
     }
   }
 
-  private void onConnectivityChanged(boolean connected) {
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic
+  void onConnectivityChanged(boolean connected) {
     boolean wasConnected = isConnected;
     isConnected = connected;
     if (wasConnected != isConnected) {
