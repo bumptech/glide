@@ -1,5 +1,7 @@
 package com.bumptech.glide.samples.svg;
 
+import static com.bumptech.glide.request.target.Target.SIZE_ORIGINAL;
+
 import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -24,6 +26,12 @@ public class SvgDecoder implements ResourceDecoder<InputStream, SVG> {
       throws IOException {
     try {
       SVG svg = SVG.getFromInputStream(source);
+      if (width != SIZE_ORIGINAL) {
+        svg.setDocumentWidth(width);
+      }
+      if (height != SIZE_ORIGINAL) {
+        svg.setDocumentHeight(height);
+      }
       return new SimpleResource<>(svg);
     } catch (SVGParseException ex) {
       throw new IOException("Cannot load SVG from stream", ex);
