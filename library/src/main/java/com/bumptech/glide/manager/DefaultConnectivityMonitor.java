@@ -34,32 +34,31 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
   private final BroadcastReceiver connectivityReceiver;
   private final ConnectivityManager.NetworkCallback callback;
 
-
   DefaultConnectivityMonitor(@NonNull Context context, @NonNull ConnectivityListener listener) {
     this.context = context.getApplicationContext();
     this.listener = listener;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       connectivityReceiver = null;
-      callback = new ConnectivityManager.NetworkCallback() {
-        @Override
-        public void onAvailable(@NonNull Network network) {
-        }
+      callback =
+          new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable(@NonNull Network network) {}
 
-        @Override
-        public void onLost(@NonNull Network network) {
-          onConnectivityChanged(false);
-        }
+            @Override
+            public void onLost(@NonNull Network network) {
+              onConnectivityChanged(false);
+            }
 
-        @Override
-        public void onCapabilitiesChanged(@NonNull Network network,
-            @NonNull NetworkCapabilities networkCapabilities) {
-          boolean connected =
-              networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                  && networkCapabilities
-                  .hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
-          onConnectivityChanged(connected);
-        }
-      };
+            @Override
+            public void onCapabilitiesChanged(
+                @NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+              boolean connected =
+                  networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                      && networkCapabilities.hasCapability(
+                          NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+              onConnectivityChanged(connected);
+            }
+          };
     } else {
       connectivityReceiver =
           new BroadcastReceiver() {
@@ -136,7 +135,7 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
       try {
         connectivityManager.unregisterNetworkCallback(callback);
       } catch (RuntimeException e) {
-        //callback was registered more than once
+        // callback was registered more than once
         if (Log.isLoggable(TAG, Log.WARN)) {
           Log.w(TAG, "already unregister", e);
         }
@@ -158,8 +157,8 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       NetworkCapabilities networkCapabilities;
       try {
-        networkCapabilities = connectivityManager
-            .getNetworkCapabilities(connectivityManager.getActiveNetwork());
+        networkCapabilities =
+            connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
       } catch (RuntimeException e) {
         if (Log.isLoggable(TAG, Log.WARN)) {
           Log.w(TAG, "Failed to determine connectivity status when connectivity changed", e);
@@ -167,9 +166,9 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
         // Default to true;
         return true;
       }
-      return networkCapabilities != null && networkCapabilities
-          .hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) && networkCapabilities
-          .hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+      return networkCapabilities != null
+          && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+          && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
     } else {
       NetworkInfo networkInfo;
       try {
