@@ -35,7 +35,9 @@ public class PostMConnectivityStrategyImpl implements ConnectivityStrategy {
 
   private boolean isRegistered;
 
-  private final ConnectivityManager.NetworkCallback callback;
+  @SuppressWarnings("WeakerAccess")
+  @Synthetic
+  final ConnectivityManager.NetworkCallback callback;
 
   PostMConnectivityStrategyImpl(@NonNull Context context, @NonNull ConnectivityListener listener) {
     this.context = context.getApplicationContext();
