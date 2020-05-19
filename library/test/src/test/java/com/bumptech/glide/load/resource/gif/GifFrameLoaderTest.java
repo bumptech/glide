@@ -339,6 +339,18 @@ public class GifFrameLoaderTest {
   }
 
   @Test
+  public void onFrameReady_whenInvisible_setVisibleLater() {
+    loader = createGifFrameLoader(/*handler=*/ null);
+    // The target is invisible at this point.
+    loader.unsubscribe(callback);
+    loader.setNextStartFromFirstFrame();
+    DelayTarget loaded = mock(DelayTarget.class);
+    when(loaded.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
+    loader.onFrameReady(loaded);
+    loader.subscribe(callback);
+  }
+
+  @Test
   public void startFromFirstFrame_withPendingFrame_clearsPendingFrame() {
     loader = createGifFrameLoader(/*handler=*/ null);
     DelayTarget loaded = mock(DelayTarget.class);
