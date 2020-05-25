@@ -12,16 +12,16 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import com.bumptech.glide.manager.ConnectivityMonitor.ConnectivityListener;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 
 /**
- * A strategy that use {@link ConnectivityManager.NetworkCallback} and {@link
- * ConnectivityManager#getNetworkCapabilities} to perceive connectivity changes.
+ * A {@link com.bumptech.glide.manager.ConnectivityMonitor} implementation that use {@link
+ * ConnectivityManager.NetworkCallback} and {@link ConnectivityManager#getNetworkCapabilities} to
+ * perceive connectivity changes.
  */
 @RequiresApi(api = VERSION_CODES.M)
-public class PostMConnectivityStrategyImpl implements ConnectivityStrategy {
+public class PostMConnectivityMonitor implements ConnectivityMonitor {
   private static final String TAG = "ConnectivityStrategy";
   private final Context context;
 
@@ -39,7 +39,7 @@ public class PostMConnectivityStrategyImpl implements ConnectivityStrategy {
   @Synthetic
   final ConnectivityManager.NetworkCallback callback;
 
-  PostMConnectivityStrategyImpl(@NonNull Context context, @NonNull ConnectivityListener listener) {
+  PostMConnectivityMonitor(@NonNull Context context, @NonNull ConnectivityListener listener) {
     this.context = context.getApplicationContext();
     this.listener = listener;
     callback =
@@ -77,7 +77,6 @@ public class PostMConnectivityStrategyImpl implements ConnectivityStrategy {
     }
   }
 
-  @Override
   @SuppressLint("MissingPermission")
   public void register() {
     if (isRegistered) {
@@ -104,7 +103,6 @@ public class PostMConnectivityStrategyImpl implements ConnectivityStrategy {
     }
   }
 
-  @Override
   public void unregister() {
     if (!isRegistered) {
       return;
@@ -147,4 +145,17 @@ public class PostMConnectivityStrategyImpl implements ConnectivityStrategy {
         && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
   }
+
+  @Override
+  public void onStart() {
+    register();
+  }
+
+  @Override
+  public void onStop() {
+    unregister();
+  }
+
+  @Override
+  public void onDestroy() {}
 }

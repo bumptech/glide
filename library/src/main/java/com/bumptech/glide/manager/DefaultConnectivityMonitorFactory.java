@@ -32,16 +32,16 @@ public class DefaultConnectivityMonitorFactory implements ConnectivityMonitorFac
               : "ACCESS_NETWORK_STATE permission missing, cannot register connectivity monitor");
     }
 
-    ConnectivityStrategy strategy;
+    ConnectivityMonitor connectivityMonitor;
     if (hasPermission) {
       if (VERSION.SDK_INT >= VERSION_CODES.M) {
-        strategy = new PostMConnectivityStrategyImpl(context, listener);
+        connectivityMonitor = new PostMConnectivityMonitor(context, listener);
       } else {
-        strategy = new PreMConnectivityStrategyImpl(context, listener);
+        connectivityMonitor = new DefaultConnectivityMonitor(context, listener);
       }
     } else {
-      strategy = new NullConnectivityStrategyImpl();
+      connectivityMonitor = new NullConnectivityMonitor();
     }
-    return new DefaultConnectivityMonitor(strategy);
+    return connectivityMonitor;
   }
 }

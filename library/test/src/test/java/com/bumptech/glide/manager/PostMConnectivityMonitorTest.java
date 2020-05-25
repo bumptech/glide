@@ -7,7 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import com.bumptech.glide.manager.PostMConnectivityStrategyImplTest.PermissionConnectivityManager;
+import com.bumptech.glide.manager.PostMConnectivityMonitorTest.PermissionConnectivityManager;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,15 +24,15 @@ import org.robolectric.shadows.ShadowConnectivityManager;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 23, shadows = PermissionConnectivityManager.class)
-public class PostMConnectivityStrategyImplTest {
+public class PostMConnectivityMonitorTest {
   @Mock private ConnectivityMonitor.ConnectivityListener listener;
-  private PostMConnectivityStrategyImpl monitor;
+  private PostMConnectivityMonitor monitor;
   private ConnectivityHarness harness;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    monitor = new PostMConnectivityStrategyImpl(RuntimeEnvironment.application, listener);
+    monitor = new PostMConnectivityMonitor(RuntimeEnvironment.application, listener);
     harness = new ConnectivityHarness();
   }
 
