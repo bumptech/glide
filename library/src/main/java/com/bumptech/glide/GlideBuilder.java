@@ -22,6 +22,7 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.load.resource.bitmap.HardwareConfigState;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
@@ -66,6 +67,7 @@ public final class GlideBuilder {
 
   private boolean isImageDecoderEnabledForBitmaps;
   private boolean waitForFirstFrameBeforeEnablingHardwareBitmaps;
+  private int manualOverrideHardwareBitmapMaxFdCount = HardwareConfigState.NO_MAX_FD_COUNT;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -577,6 +579,7 @@ public final class GlideBuilder {
         defaultRequestListeners,
         isLoggingRequestOriginsEnabled,
         isImageDecoderEnabledForBitmaps,
-        waitForFirstFrameBeforeEnablingHardwareBitmaps);
+        waitForFirstFrameBeforeEnablingHardwareBitmaps,
+        manualOverrideHardwareBitmapMaxFdCount);
   }
 }

@@ -62,11 +62,15 @@ public final class HardwareConfigState {
   // 20k.
   private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P = 20000;
 
+  /** This constant will be removed in a future version without deprecation, avoid using it. */
+  public static final int NO_MAX_FD_COUNT = -1;
+
   private static volatile HardwareConfigState instance;
   private static volatile boolean waitForFirstFrame;
+  private static volatile int manualOverrideMaxFdCount = NO_MAX_FD_COUNT;
 
   private final boolean isHardwareConfigAllowedByDeviceModel;
-  private final int fdCountLimit;
+  private final int sdkBasedMaxFdCount;
   private final int minHardwareDimension;
 
   @GuardedBy("this")
@@ -92,10 +96,10 @@ public final class HardwareConfigState {
   HardwareConfigState() {
     isHardwareConfigAllowedByDeviceModel = isHardwareConfigAllowedByDeviceModel();
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-      fdCountLimit = MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P;
+      sdkBasedMaxFdCount = MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P;
       minHardwareDimension = MIN_HARDWARE_DIMENSION_P;
     } else {
-      fdCountLimit = MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_O;
+      sdkBasedMaxFdCount = MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_O;
       minHardwareDimension = MIN_HARDWARE_DIMENSION_O;
     }
   }
@@ -197,11 +201,18 @@ public final class HardwareConfigState {
     }
   }
 
+  private int getMaxFdCount() {
+    return manualOverrideMaxFdCount != NO_MAX_FD_COUNT
+        ? manualOverrideMaxFdCount
+        : sdkBasedMaxFdCount;
+  }
+
   private synchronized boolean isFdSizeBelowHardwareLimit() {
     if (++decodesSinceLastFdCheck >= MINIMUM_DECODES_BETWEEN_FD_CHECKS) {
       decodesSinceLastFdCheck = 0;
       int currentFds = FD_SIZE_LIST.list().length;
-      isFdSizeBelowHardwareLimit = currentFds < fdCountLimit;
+      long maxFdCount = getMaxFdCount();
+      isFdSizeBelowHardwareLimit = currentFds < maxFdCount;
 
       if (!isFdSizeBelowHardwareLimit && Log.isLoggable(Downsampler.TAG, Log.WARN)) {
         Log.w(
@@ -210,7 +221,7 @@ public final class HardwareConfigState {
                 + ", file descriptors "
                 + currentFds
                 + ", limit "
-                + fdCountLimit);
+                + maxFdCount);
       }
     }
 
