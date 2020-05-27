@@ -65,6 +65,7 @@ public final class GlideBuilder {
   private boolean isLoggingRequestOriginsEnabled;
 
   private boolean isImageDecoderEnabledForBitmaps;
+  private boolean waitForFirstFrameBeforeEnablingHardwareBitmaps;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -559,7 +560,8 @@ public final class GlideBuilder {
     }
 
     RequestManagerRetriever requestManagerRetriever =
-        new RequestManagerRetriever(requestManagerFactory);
+        new RequestManagerRetriever(
+            requestManagerFactory, waitForFirstFrameBeforeEnablingHardwareBitmaps);
 
     return new Glide(
         context,
@@ -574,6 +576,7 @@ public final class GlideBuilder {
         defaultTransitionOptions,
         defaultRequestListeners,
         isLoggingRequestOriginsEnabled,
-        isImageDecoderEnabledForBitmaps);
+        isImageDecoderEnabledForBitmaps,
+        waitForFirstFrameBeforeEnablingHardwareBitmaps);
   }
 }

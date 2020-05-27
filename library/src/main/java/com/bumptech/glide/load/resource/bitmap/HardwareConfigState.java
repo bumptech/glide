@@ -63,6 +63,7 @@ public final class HardwareConfigState {
   private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P = 20000;
 
   private static volatile HardwareConfigState instance;
+  private static volatile boolean waitForFirstFrame;
 
   private final boolean isHardwareConfigAllowedByDeviceModel;
   private final int fdCountLimit;
@@ -73,6 +74,8 @@ public final class HardwareConfigState {
 
   @GuardedBy("this")
   private boolean isFdSizeBelowHardwareLimit = true;
+
+  private volatile boolean isFirstFrameDrawn;
 
   public static HardwareConfigState getInstance() {
     if (instance == null) {
@@ -105,6 +108,7 @@ public final class HardwareConfigState {
     if (!isHardwareConfigAllowed
         || !isHardwareConfigAllowedByDeviceModel
         || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+        || (waitForFirstFrame && !isFirstFrameDrawn)
         || isExifOrientationRequired) {
       return false;
     }

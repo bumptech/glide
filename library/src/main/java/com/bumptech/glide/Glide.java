@@ -372,7 +372,8 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
       boolean isLoggingRequestOriginsEnabled,
-      boolean isImageDecoderEnabledForBitmaps) {
+      boolean isImageDecoderEnabledForBitmaps,
+      boolean waitForFirstFrameBeforeEnablingHardwareBitmaps) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
