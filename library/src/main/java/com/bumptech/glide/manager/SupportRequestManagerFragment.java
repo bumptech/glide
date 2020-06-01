@@ -154,7 +154,7 @@ public class SupportRequestManagerFragment extends Fragment {
     rootRequestManagerFragment =
         Glide.get(context)
             .getRequestManagerRetriever()
-            .getSupportRequestManagerFragment(context, fragmentManager);
+            .getSupportRequestManagerFragment(fragmentManager);
     if (!equals(rootRequestManagerFragment)) {
       rootRequestManagerFragment.addChildRequestManagerFragment(this);
     }
