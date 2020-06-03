@@ -131,6 +131,7 @@ public class PostMConnectivityMonitor implements ConnectivityMonitor {
       networkCapabilities =
           connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
     } catch (RuntimeException e) {
+      // getNetworkCapabilities may throw RemoteException that is wrapped by RuntimeException
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Failed to determine connectivity status when connectivity changed", e);
       }

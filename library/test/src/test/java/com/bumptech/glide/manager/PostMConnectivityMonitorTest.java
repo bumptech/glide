@@ -46,7 +46,7 @@ public class PostMConnectivityMonitorTest {
   public void testDoesNotRegisterTwiceOnRegister() {
     monitor.register();
     monitor.register();
-    assertThat(harness.getNetworkCall()).contains(monitor.callback);
+    assertThat(harness.getNetworkCall()).containsExactly(monitor.callback);
   }
 
   @Test
