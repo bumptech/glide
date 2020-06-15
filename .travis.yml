@@ -20,7 +20,6 @@ jdk:
 env:
   matrix:
     - COMPONENT=unit
-    - COMPONENT=samples
 
 before_script:
   - ./scripts/travis_before_script.sh
