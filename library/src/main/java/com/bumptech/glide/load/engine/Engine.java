@@ -217,7 +217,8 @@ public class Engine
 
     // Avoid calling back while holding the engine lock, doing so makes it easier for callers to
     // deadlock.
-    cb.onResourceReady(memoryResource, DataSource.MEMORY_CACHE);
+    cb.onResourceReady(
+        memoryResource, DataSource.MEMORY_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
     return null;
   }
 

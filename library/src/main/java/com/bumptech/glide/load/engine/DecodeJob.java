@@ -76,6 +76,7 @@ class DecodeJob<R>
   private volatile DataFetcherGenerator currentGenerator;
   private volatile boolean isCallbackNotified;
   private volatile boolean isCancelled;
+  private boolean isLoadingFromAlternateCacheKey;
 
   DecodeJob(DiskCacheProvider diskCacheProvider, Pools.Pool<DecodeJob<?>> pool) {
     this.diskCacheProvider = diskCacheProvider;
@@ -332,9 +333,10 @@ class DecodeJob<R>
     onLoadFailed();
   }
 
-  private void notifyComplete(Resource<R> resource, DataSource dataSource) {
+  private void notifyComplete(
+      Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     setNotifiedOrThrow();
-    callback.onResourceReady(resource, dataSource);
+    callback.onResourceReady(resource, dataSource, isLoadedFromAlternateCacheKey);
   }
 
   private void setNotifiedOrThrow() {
@@ -381,6 +383,8 @@ class DecodeJob<R>
     this.currentFetcher = fetcher;
     this.currentDataSource = dataSource;
     this.currentAttemptingKey = attemptedKey;
+    this.isLoadingFromAlternateCacheKey = sourceKey != decodeHelper.getCacheKeys().get(0);
+
     if (Thread.currentThread() != currentThread) {
       runReason = RunReason.DECODE_DATA;
       callback.reschedule(this);
@@ -429,13 +433,14 @@ class DecodeJob<R>
       throwables.add(e);
     }
     if (resource != null) {
-      notifyEncodeAndRelease(resource, currentDataSource);
+      notifyEncodeAndRelease(resource, currentDataSource, isLoadingFromAlternateCacheKey);
     } else {
       runGenerators();
     }
   }
 
-  private void notifyEncodeAndRelease(Resource<R> resource, DataSource dataSource) {
+  private void notifyEncodeAndRelease(
+      Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     if (resource instanceof Initializable) {
       ((Initializable) resource).initialize();
     }
@@ -447,7 +452,7 @@ class DecodeJob<R>
       result = lockedResource;
     }
 
-    notifyComplete(result, dataSource);
+    notifyComplete(result, dataSource, isLoadedFromAlternateCacheKey);
 
     stage = Stage.ENCODE;
     try {
@@ -710,7 +715,8 @@ class DecodeJob<R>
 
   interface Callback<R> {
 
-    void onResourceReady(Resource<R> resource, DataSource dataSource);
+    void onResourceReady(
+        Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey);
 
     void onLoadFailed(GlideException e);
 

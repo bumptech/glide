@@ -237,7 +237,8 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       // that the view size has changed will need to explicitly clear the View or Target before
       // starting the new load.
       if (status == Status.COMPLETE) {
-        onResourceReady(resource, DataSource.MEMORY_CACHE);
+        onResourceReady(
+            resource, DataSource.MEMORY_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
         return;
       }
 
@@ -520,7 +521,8 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   /** A callback method that should never be invoked directly. */
   @SuppressWarnings("unchecked")
   @Override
-  public void onResourceReady(Resource<?> resource, DataSource dataSource) {
+  public void onResourceReady(
+      Resource<?> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     stateVerifier.throwIfRecycled();
     Resource<?> toRelease = null;
     try {
@@ -572,7 +574,8 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
           return;
         }
 
-        onResourceReady((Resource<R>) resource, (R) received, dataSource);
+        onResourceReady(
+            (Resource<R>) resource, (R) received, dataSource, isLoadedFromAlternateCacheKey);
       }
     } finally {
       if (toRelease != null) {
@@ -582,14 +585,18 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   }
 
   /**
-   * Internal {@link #onResourceReady(Resource, DataSource)} where arguments are known to be safe.
+   * Internal {@link #onResourceReady(Resource, DataSource, boolean)} where arguments are known to
+   * be safe.
    *
    * @param resource original {@link Resource}, never <code>null</code>
    * @param result object returned by {@link Resource#get()}, checked for type and never <code>null
    *     </code>
    */
+  // We're using experimental APIs...
+  @SuppressWarnings({"deprecation", "PMD.UnusedFormalParameter"})
   @GuardedBy("requestLock")
-  private void onResourceReady(Resource<R> resource, R result, DataSource dataSource) {
+  private void onResourceReady(
+      Resource<R> resource, R result, DataSource dataSource, boolean isAlternateCacheKey) {
     // We must call isFirstReadyResource before setting status.
     boolean isFirstResource = isFirstReadyResource();
     status = Status.COMPLETE;

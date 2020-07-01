@@ -128,7 +128,12 @@ public class RequestBuilderTest {
   public void testMultipleRequestListeners() {
     getNullModelRequest().addListener(listener1).addListener(listener2).into(target);
     verify(requestManager).track(any(Target.class), requestCaptor.capture());
-    requestCaptor.getValue().onResourceReady(new SimpleResource<>(new Object()), DataSource.LOCAL);
+    requestCaptor
+        .getValue()
+        .onResourceReady(
+            new SimpleResource<>(new Object()),
+            DataSource.LOCAL,
+            /*isLoadedFromAlternateCacheKey=*/ false);
 
     verify(listener1)
         .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
@@ -140,7 +145,12 @@ public class RequestBuilderTest {
   public void testListenerApiOverridesListeners() {
     getNullModelRequest().addListener(listener1).listener(listener2).into(target);
     verify(requestManager).track(any(Target.class), requestCaptor.capture());
-    requestCaptor.getValue().onResourceReady(new SimpleResource<>(new Object()), DataSource.LOCAL);
+    requestCaptor
+        .getValue()
+        .onResourceReady(
+            new SimpleResource<>(new Object()),
+            DataSource.LOCAL,
+            /*isLoadedFromAlternateCacheKey=*/ false);
 
     // The #listener API removes any previous listeners, so the first listener should not be called.
     verify(listener1, never())

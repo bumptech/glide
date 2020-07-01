@@ -6,6 +6,7 @@ import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
@@ -53,17 +54,21 @@ public class EngineJobTest {
   public void testOnResourceReadyPassedToCallbacks() {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.cb).onResourceReady(eq(harness.engineResource), eq(harness.dataSource));
+    verify(harness.cb)
+        .onResourceReady(
+            harness.engineResource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
   }
 
   @Test
   public void testListenerNotifiedJobCompleteOnOnResourceReady() {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     ShadowLooper.runUiThreadTasks();
 
@@ -75,9 +80,12 @@ public class EngineJobTest {
   public void testNotifiesAllCallbacksOnReady() {
     MultiCbHarness harness = new MultiCbHarness();
     harness.job.start(harness.decodeJob);
-    harness.job.onResourceReady(harness.resource, harness.dataSource);
+    harness.job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
     for (ResourceCallback cb : harness.cbs) {
-      verify(cb).onResourceReady(eq(harness.engineResource), eq(harness.dataSource));
+      verify(cb)
+          .onResourceReady(
+              harness.engineResource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
     }
   }
 
@@ -96,7 +104,8 @@ public class EngineJobTest {
   public void testAcquiresResourceOncePerCallback() {
     MultiCbHarness harness = new MultiCbHarness();
     harness.job.start(harness.decodeJob);
-    harness.job.onResourceReady(harness.resource, harness.dataSource);
+    harness.job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     // Acquired once and then released while notifying.
     InOrder order = inOrder(harness.engineResource);
@@ -120,7 +129,8 @@ public class EngineJobTest {
     harness.isCacheable = true;
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     ShadowLooper.runUiThreadTasks();
     verify(harness.factory)
@@ -133,7 +143,8 @@ public class EngineJobTest {
     harness.isCacheable = false;
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     ShadowLooper.runUiThreadTasks();
     verify(harness.factory)
@@ -156,10 +167,11 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.cancel();
 
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     ShadowLooper.runUiThreadTasks();
-    verify(harness.cb, never()).onResourceReady(anyResource(), isADataSource());
+    verify(harness.cb, never()).onResourceReady(anyResource(), isADataSource(), anyBoolean());
   }
 
   @Test
@@ -198,7 +210,8 @@ public class EngineJobTest {
   public void testResourceIsAcquiredOncePerConsumerAndOnceForCache() {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     // Once while notifying and once for single callback.
     verify(harness.engineResource, times(2)).acquire();
@@ -208,7 +221,8 @@ public class EngineJobTest {
   public void testDoesNotNotifyCancelledIfCompletes() {
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     verify(harness.engineJobListener, never()).onEngineJobCancelled(eq(job), eq(harness.key));
   }
@@ -243,7 +257,8 @@ public class EngineJobTest {
     final EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
     job.cancel();
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     verify(harness.resource).recycle();
   }
@@ -253,7 +268,8 @@ public class EngineJobTest {
     harness.isCacheable = false;
     EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     verify(harness.engineResource, times(2)).acquire();
   }
@@ -273,13 +289,16 @@ public class EngineJobTest {
               }
             })
         .when(existingCallback)
-        .onResourceReady(anyResource(), isADataSource());
+        .onResourceReady(anyResource(), isADataSource(), anyBoolean());
 
     job.addCallback(existingCallback, Executors.directExecutor());
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
-    verify(newCallback).onResourceReady(eq(harness.engineResource), eq(harness.dataSource));
+    verify(newCallback)
+        .onResourceReady(
+            harness.engineResource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
   }
 
   @Test
@@ -322,13 +341,14 @@ public class EngineJobTest {
               }
             })
         .when(cb)
-        .onResourceReady(anyResource(), isADataSource());
+        .onResourceReady(anyResource(), isADataSource(), anyBoolean());
 
     job.addCallback(cb, Executors.directExecutor());
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
-    verify(cb, times(1)).onResourceReady(anyResource(), isADataSource());
+    verify(cb, times(1)).onResourceReady(anyResource(), isADataSource(), anyBoolean());
   }
 
   @Test
@@ -371,13 +391,14 @@ public class EngineJobTest {
               }
             })
         .when(harness.cb)
-        .onResourceReady(anyResource(), isADataSource());
+        .onResourceReady(anyResource(), isADataSource(), anyBoolean());
 
     job.addCallback(notYetCalled, Executors.directExecutor());
     job.start(harness.decodeJob);
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
-    verify(notYetCalled, never()).onResourceReady(anyResource(), isADataSource());
+    verify(notYetCalled, never()).onResourceReady(anyResource(), isADataSource(), anyBoolean());
   }
 
   @Test
@@ -395,12 +416,13 @@ public class EngineJobTest {
               }
             })
         .when(harness.cb)
-        .onResourceReady(anyResource(), isADataSource());
+        .onResourceReady(anyResource(), isADataSource(), anyBoolean());
 
     job.addCallback(notYetCalled, Executors.directExecutor());
     job.start(harness.decodeJob);
 
-    job.onResourceReady(harness.resource, harness.dataSource);
+    job.onResourceReady(
+        harness.resource, harness.dataSource, harness.isLoadedFromAlternateCacheKey);
 
     // Once for notifying, once for called.
     verify(harness.engineResource, times(2)).acquire();
@@ -429,7 +451,7 @@ public class EngineJobTest {
     job.start(harness.decodeJob);
     job.onLoadFailed(new GlideException("test"));
 
-    verify(notYetCalled, never()).onResourceReady(anyResource(), isADataSource());
+    verify(notYetCalled, never()).onResourceReady(anyResource(), isADataSource(), anyBoolean());
   }
 
   @Test
@@ -510,8 +532,9 @@ public class EngineJobTest {
     final Pools.Pool<EngineJob<?>> pool = new Pools.SimplePool<>(1);
     final DecodeJob<Object> decodeJob = mock(DecodeJob.class);
     final DataSource dataSource = DataSource.LOCAL;
+    final boolean isLoadedFromAlternateCacheKey = true;
 
-    public MultiCbHarness() {
+    MultiCbHarness() {
       when(factory.build(resource, isCacheable, key, resourceListener)).thenReturn(engineResource);
       job =
           new EngineJob<>(
@@ -559,6 +582,7 @@ public class EngineJobTest {
     final DecodeJob<Object> decodeJob = mock(DecodeJob.class);
     final Pools.Pool<EngineJob<?>> pool = new Pools.SynchronizedPool<>(1);
     final DataSource dataSource = DataSource.DATA_DISK_CACHE;
+    final boolean isLoadedFromAlternateCacheKey = true;
 
     EngineJob<Object> getJob() {
       when(factory.build(resource, isCacheable, key, resourceListener)).thenReturn(engineResource);

@@ -61,7 +61,7 @@ import org.robolectric.annotation.Config;
 public class SingleRequestTest {
 
   private SingleRequestBuilder builder;
-  @Mock private RequestListener<List> listener1;
+  @Mock private ExperimentalRequestListener<List> listener1;
   @Mock private RequestListener<List> listener2;
 
   @Before
@@ -81,7 +81,7 @@ public class SingleRequestTest {
   public void testCanHandleNullResources() {
     SingleRequest<List> request = builder.addRequestListener(listener1).build();
 
-    request.onResourceReady(null, DataSource.LOCAL);
+    request.onResourceReady(null, DataSource.LOCAL, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(listener1)
         .onLoadFailed(isAGlideException(), isA(Number.class), eq(builder.target), anyBoolean());
@@ -92,7 +92,8 @@ public class SingleRequestTest {
     SingleRequest<List> request = builder.addRequestListener(listener1).build();
     when(builder.resource.get()).thenReturn(null);
 
-    request.onResourceReady(builder.resource, DataSource.REMOTE);
+    request.onResourceReady(
+        builder.resource, DataSource.REMOTE, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(builder.engine).release(eq(builder.resource));
     verify(listener1)
@@ -105,7 +106,8 @@ public class SingleRequestTest {
     when(((Resource) (builder.resource)).get())
         .thenReturn("Invalid mocked String, this should be a List");
 
-    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ true);
 
     verify(builder.engine).release(eq(builder.resource));
     verify(listener1)
@@ -116,7 +118,8 @@ public class SingleRequestTest {
   public void testIsCompleteAfterReceivingResource() {
     SingleRequest<List> request = builder.build();
 
-    request.onResourceReady(builder.resource, DataSource.LOCAL);
+    request.onResourceReady(
+        builder.resource, DataSource.LOCAL, /* isLoadedFromAlternateCacheKey= */ false);
 
     assertTrue(request.isComplete());
   }
@@ -124,7 +127,8 @@ public class SingleRequestTest {
   @Test
   public void testIsNotCompleteAfterClear() {
     SingleRequest<List> request = builder.build();
-    request.onResourceReady(builder.resource, DataSource.REMOTE);
+    request.onResourceReady(
+        builder.resource, DataSource.REMOTE, /* isLoadedFromAlternateCacheKey= */ false);
     request.clear();
 
     assertFalse(request.isComplete());
@@ -182,7 +186,8 @@ public class SingleRequestTest {
 
     SingleRequest<List> request = builder.setRequestCoordinator(requestCoordinator).build();
 
-    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(requestCoordinator).canSetImage(eq(request));
   }
@@ -212,7 +217,8 @@ public class SingleRequestTest {
   public void pause_whenComplete_doesNotClearRequest() {
     SingleRequest<List> request = builder.build();
 
-    request.onResourceReady(builder.resource, DataSource.REMOTE);
+    request.onResourceReady(
+        builder.resource, DataSource.REMOTE, /* isLoadedFromAlternateCacheKey= */ false);
     request.pause();
     assertThat(request.isComplete()).isTrue();
   }
@@ -296,7 +302,8 @@ public class SingleRequestTest {
   public void testResourceIsRecycledOnClear() {
     SingleRequest<List> request = builder.build();
 
-    request.onResourceReady(builder.resource, DataSource.REMOTE);
+    request.onResourceReady(
+        builder.resource, DataSource.REMOTE, /* isLoadedFromAlternateCacheKey= */ false);
     request.clear();
 
     verify(builder.engine).release(eq(builder.resource));
@@ -398,7 +405,8 @@ public class SingleRequestTest {
   public void testIsNotRunningAfterComplete() {
     SingleRequest<List> request = builder.build();
     request.begin();
-    request.onResourceReady(builder.resource, DataSource.REMOTE);
+    request.onResourceReady(
+        builder.resource, DataSource.REMOTE, /* isLoadedFromAlternateCacheKey= */ false);
 
     assertFalse(request.isRunning());
   }
@@ -424,7 +432,8 @@ public class SingleRequestTest {
   @Test
   public void testCallsTargetOnResourceReadyIfNoRequestListener() {
     SingleRequest<List> request = builder.build();
-    request.onResourceReady(builder.resource, DataSource.LOCAL);
+    request.onResourceReady(
+        builder.resource, DataSource.LOCAL, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(builder.target).onResourceReady(eq(builder.result), anyTransition());
   }
@@ -440,7 +449,8 @@ public class SingleRequestTest {
     when(listener2.onResourceReady(
             any(List.class), any(Number.class), eq(builder.target), isADataSource(), anyBoolean()))
         .thenReturn(false);
-    request.onResourceReady(builder.resource, DataSource.LOCAL);
+    request.onResourceReady(
+        builder.resource, DataSource.LOCAL, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(builder.target).onResourceReady(eq(builder.result), anyTransition());
   }
@@ -456,7 +466,8 @@ public class SingleRequestTest {
     when(listener1.onResourceReady(
             any(List.class), any(Number.class), eq(builder.target), isADataSource(), anyBoolean()))
         .thenReturn(true);
-    request.onResourceReady(builder.resource, DataSource.REMOTE);
+    request.onResourceReady(
+        builder.resource, DataSource.REMOTE, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(builder.target, never()).onResourceReady(any(List.class), anyTransition());
   }
@@ -505,7 +516,9 @@ public class SingleRequestTest {
   @Test
   public void testRequestListenerIsCalledWithResourceResult() {
     SingleRequest<List> request = builder.addRequestListener(listener1).build();
-    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+    boolean isLoadedFromAlternateCacheKey = true;
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, isLoadedFromAlternateCacheKey);
 
     verify(listener1)
         .onResourceReady(
@@ -515,7 +528,8 @@ public class SingleRequestTest {
   @Test
   public void testRequestListenerIsCalledWithModel() {
     SingleRequest<List> request = builder.addRequestListener(listener1).build();
-    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(listener1)
         .onResourceReady(
@@ -525,7 +539,8 @@ public class SingleRequestTest {
   @Test
   public void testRequestListenerIsCalledWithTarget() {
     SingleRequest<List> request = builder.addRequestListener(listener1).build();
-    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(listener1)
         .onResourceReady(
@@ -560,7 +575,10 @@ public class SingleRequestTest {
             new Answer<Object>() {
               @Override
               public Object answer(InvocationOnMock invocation) {
-                request.onResourceReady(builder.resource, DataSource.MEMORY_CACHE);
+                request.onResourceReady(
+                    builder.resource,
+                    DataSource.MEMORY_CACHE,
+                    /* isLoadedFromAlternateCacheKey= */ false);
                 return null;
               }
             });
@@ -581,7 +599,8 @@ public class SingleRequestTest {
       testRequestListenerIsCalledWithNotLoadedFromMemoryCacheIfLoadCompletesAsynchronously() {
     SingleRequest<List> request = builder.addRequestListener(listener1).build();
     request.onSizeReady(100, 100);
-    request.onResourceReady(builder.resource, DataSource.LOCAL);
+    request.onResourceReady(
+        builder.resource, DataSource.LOCAL, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(listener1)
         .onResourceReady(
@@ -596,7 +615,8 @@ public class SingleRequestTest {
   public void testRequestListenerIsCalledWithIsFirstResourceIfNoRequestCoordinator() {
     SingleRequest<List> request =
         builder.setRequestCoordinator(null).addRequestListener(listener1).build();
-    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(listener1)
         .onResourceReady(
@@ -607,7 +627,8 @@ public class SingleRequestTest {
   public void testRequestListenerIsCalledWithFirstImageIfRequestCoordinatorReturnsNoResourceSet() {
     SingleRequest<List> request = builder.addRequestListener(listener1).build();
     when(builder.requestCoordinator.isAnyResourceSet()).thenReturn(false);
-    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(listener1)
         .onResourceReady(
@@ -619,7 +640,8 @@ public class SingleRequestTest {
       testRequestListenerIsCalledWithNotIsFirstRequestIfRequestCoordinatorReturnsResourceSet() {
     SingleRequest<List> request = builder.addRequestListener(listener1).build();
     when(builder.requestCoordinator.isAnyResourceSet()).thenReturn(true);
-    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(listener1)
         .onResourceReady(
@@ -634,7 +656,8 @@ public class SingleRequestTest {
     when(rootRequestCoordinator.isAnyResourceSet()).thenReturn(true);
     when(builder.requestCoordinator.isAnyResourceSet()).thenReturn(false);
     when(builder.requestCoordinator.getRoot()).thenReturn(rootRequestCoordinator);
-    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ true);
 
     verify(listener1)
         .onResourceReady(
@@ -647,7 +670,8 @@ public class SingleRequestTest {
     Transition<List> transition = mockTransition();
     when(builder.transitionFactory.build(any(DataSource.class), anyBoolean()))
         .thenReturn(transition);
-    request.onResourceReady(builder.resource, DataSource.DATA_DISK_CACHE);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(builder.target).onResourceReady(eq(builder.result), eq(transition));
   }
@@ -752,7 +776,8 @@ public class SingleRequestTest {
   @Test
   public void testResourceOnlyReceivesOneGetOnResourceReady() {
     SingleRequest<List> request = builder.build();
-    request.onResourceReady(builder.resource, DataSource.LOCAL);
+    request.onResourceReady(
+        builder.resource, DataSource.LOCAL, /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(builder.resource, times(1)).get();
   }
@@ -1068,7 +1093,7 @@ public class SingleRequestTest {
       ResourceCallback cb =
           (ResourceCallback)
               invocationOnMock.getArguments()[invocationOnMock.getArguments().length - 2];
-      cb.onResourceReady(resource, DataSource.REMOTE);
+      cb.onResourceReady(resource, DataSource.REMOTE, /* isLoadedFromAlternateCacheKey= */ false);
       return null;
     }
   }
