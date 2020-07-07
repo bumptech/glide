@@ -38,6 +38,7 @@ import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -286,14 +287,52 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       return thumbnail((RequestBuilder<TranscodeType>) null);
     }
 
+    return thumbnail(Arrays.asList(thumbnails));
+  }
+
+  /**
+   * Recursively applies {@link #thumbnail(RequestBuilder)} so that the {@link RequestBuilder}s are
+   * loaded as thumbnails in the given priority order.
+   *
+   * <p>{@link #thumbnail(RequestBuilder)} is applied in the order given so that the {@link
+   * RequestBuilder} at position 0 has the {@link RequestBuilder} at position 1 applied as using its
+   * thumbnail method, the {@link RequestBuilder} at position 1 has the {@link RequestBuilder} at
+   * position 2 applied using its thumbnail method and so on.
+   *
+   * <p>Calling this method with a {@code null} list of {@link RequestBuilder} thumbnails or an
+   * empty list of {@link RequestBuilder} thumbnails is equivalent to calling {@link
+   * #thumbnail(RequestBuilder)} with {@code null}.
+   *
+   * <p>Any individual {@link RequestBuilder} in the list of thumbnails provided here may be {@code
+   * null}. {@code null} {@link RequestBuilder}s are ignored and excluded from the recursive chain.
+   *
+   * <p>The {@link RequestBuilder} objects provided here may be mutated and have any previous calls
+   * to this method or {@link #thumbnail(RequestBuilder)} methods overridden.
+   *
+   * <p>Overrides any previous calls to {@link #thumbnail(RequestBuilder)}, {@link
+   * #thumbnail(float)} and this method.
+   *
+   * @see #thumbnail(float)
+   * @see #thumbnail(RequestBuilder)
+   * @return This request builder.
+   */
+  @SuppressWarnings({"CheckResult", "unchecked"})
+  @NonNull
+  @CheckResult
+  public RequestBuilder<TranscodeType> thumbnail(
+      @Nullable List<RequestBuilder<TranscodeType>> thumbnails) {
+    if (thumbnails == null || thumbnails.isEmpty()) {
+      return thumbnail((RequestBuilder<TranscodeType>) null);
+    }
+
     RequestBuilder<TranscodeType> previous = null;
 
     // Start with the lowest priority thumbnail so that we can safely handle mutations if
     // autoClone() is enabled by assigning the result of calling thumbnail() during the iteration.
     // Starting with the highest priority thumbnail would prevent us from assigning the result of
     // thumbnail because the mutated request wouldn't be used in the next iteration.
-    for (int i = thumbnails.length - 1; i >= 0; i--) {
-      RequestBuilder<TranscodeType> current = thumbnails[i];
+    for (int i = thumbnails.size() - 1; i >= 0; i--) {
+      RequestBuilder<TranscodeType> current = thumbnails.get(i);
       // Ignore null thumbnails.
       if (current == null) {
         continue;

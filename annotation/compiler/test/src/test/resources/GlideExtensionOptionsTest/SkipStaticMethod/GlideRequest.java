@@ -27,6 +27,7 @@ import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestListener;
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 
 /**
  * Contains all public methods from {@link RequestBuilder<TranscodeType>}, all options from
@@ -497,6 +498,13 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   @SuppressWarnings("varargs")
   public final GlideRequest<TranscodeType> thumbnail(@Nullable RequestBuilder<TranscodeType>... builders) {
     return (GlideRequest<TranscodeType>) super.thumbnail(builders);
+  }
+
+  @Override
+  @NonNull
+  @CheckResult
+  public GlideRequest<TranscodeType> thumbnail(@Nullable List<RequestBuilder<TranscodeType>> list) {
+    return (GlideRequest<TranscodeType>) super.thumbnail(list);
   }
 
   @Override
