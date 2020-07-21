@@ -68,6 +68,7 @@ public final class GlideBuilder {
   private boolean isImageDecoderEnabledForBitmaps;
   private boolean waitForFirstFrameBeforeEnablingHardwareBitmaps;
   private int manualOverrideHardwareBitmapMaxFdCount = HardwareConfigState.NO_MAX_FD_COUNT;
+  private boolean waitForCallBeforeEnablingHardwareBitmaps;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -565,6 +566,9 @@ public final class GlideBuilder {
         new RequestManagerRetriever(
             requestManagerFactory, waitForFirstFrameBeforeEnablingHardwareBitmaps);
 
+    boolean blockHardwareBitmaps =
+        waitForFirstFrameBeforeEnablingHardwareBitmaps || waitForCallBeforeEnablingHardwareBitmaps;
+
     return new Glide(
         context,
         engine,
@@ -579,7 +583,7 @@ public final class GlideBuilder {
         defaultRequestListeners,
         isLoggingRequestOriginsEnabled,
         isImageDecoderEnabledForBitmaps,
-        waitForFirstFrameBeforeEnablingHardwareBitmaps,
+        blockHardwareBitmaps,
         manualOverrideHardwareBitmapMaxFdCount);
   }
 }

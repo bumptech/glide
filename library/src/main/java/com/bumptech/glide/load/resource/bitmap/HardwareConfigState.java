@@ -66,7 +66,7 @@ public final class HardwareConfigState {
   public static final int NO_MAX_FD_COUNT = -1;
 
   private static volatile HardwareConfigState instance;
-  private static volatile boolean waitForFirstFrame;
+  private static volatile boolean blockHardwareBitmapsByDefault;
   private static volatile int manualOverrideMaxFdCount = NO_MAX_FD_COUNT;
 
   private final boolean isHardwareConfigAllowedByDeviceModel;
@@ -79,7 +79,7 @@ public final class HardwareConfigState {
   @GuardedBy("this")
   private boolean isFdSizeBelowHardwareLimit = true;
 
-  private volatile boolean isFirstFrameDrawn;
+  private volatile boolean areHardwareBitmapsUnblocked;
 
   public static HardwareConfigState getInstance() {
     if (instance == null) {
@@ -112,7 +112,7 @@ public final class HardwareConfigState {
     if (!isHardwareConfigAllowed
         || !isHardwareConfigAllowedByDeviceModel
         || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
-        || (waitForFirstFrame && !isFirstFrameDrawn)
+        || (blockHardwareBitmapsByDefault && !areHardwareBitmapsUnblocked)
         || isExifOrientationRequired) {
       return false;
     }
