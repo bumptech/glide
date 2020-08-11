@@ -261,8 +261,11 @@ public class Registry {
   public final Registry setResourceDecoderBucketPriorityList(@NonNull List<String> buckets) {
     // See #3296 and https://bugs.openjdk.java.net/browse/JDK-6260652.
     List<String> modifiedBuckets = new ArrayList<>(buckets.size());
-    modifiedBuckets.addAll(buckets);
-    modifiedBuckets.add(0, BUCKET_PREPEND_ALL);
+    modifiedBuckets.add(BUCKET_PREPEND_ALL);
+    // See https://github.com/bumptech/glide/issues/4309.
+    for (String bucket : buckets) {
+      modifiedBuckets.add(bucket);
+    }
     modifiedBuckets.add(BUCKET_APPEND_ALL);
     decoderRegistry.setBucketPriorityList(modifiedBuckets);
     return this;
