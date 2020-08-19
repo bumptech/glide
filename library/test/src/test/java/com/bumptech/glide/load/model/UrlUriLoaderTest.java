@@ -1,4 +1,4 @@
-package com.bumptech.glide.load.model.stream;
+package com.bumptech.glide.load.model;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -6,8 +6,6 @@ import static org.mockito.Mockito.verify;
 
 import android.net.Uri;
 import com.bumptech.glide.load.Options;
-import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.load.model.ModelLoader;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import org.junit.Before;
@@ -20,18 +18,18 @@ import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 18)
-public class HttpUriLoaderTest {
+public class UrlUriLoaderTest {
   private static final int IMAGE_SIDE = 100;
   private static final Options OPTIONS = new Options();
 
   @Mock private ModelLoader<GlideUrl, InputStream> urlLoader;
-  private HttpUriLoader loader;
+  private UrlUriLoader<InputStream> loader;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    loader = new HttpUriLoader(urlLoader);
+    loader = new UrlUriLoader<>(urlLoader);
   }
 
   @Test
