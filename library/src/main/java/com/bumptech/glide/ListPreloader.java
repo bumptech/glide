@@ -158,8 +158,7 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     preload(start, start + (increasing ? maxPreload : -maxPreload));
   }
 
-  private void preload(int from, int to) {
-    // Slice
+  private int getStart(int from, int to) {
     int start;
     if (from < to) {
       start = Math.max(lastEnd, from);
@@ -167,8 +166,10 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
       start = to;
     }
     start = Math.min(totalItemCount, Math.max(0, start));
+    return start;
+  }
 
-    // Co-Slice
+  private int getEnd(int from, int to) {
     int end;
     if (from < to) {
       end = to;
@@ -176,6 +177,12 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
       end = Math.min(lastStart, from);
     }
     end = Math.min(totalItemCount, end);
+    return end;
+  }
+
+  private void preload(int from, int to) {
+    int start = getStart(from, to);
+    int end = getEnd(from, to);
     if (from < to) {
       int i = start;
       while (i < end) {
