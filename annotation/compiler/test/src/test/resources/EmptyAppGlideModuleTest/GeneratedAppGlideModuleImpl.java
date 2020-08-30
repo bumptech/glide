@@ -1,8 +1,10 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import android.util.Log;
+import androidx.annotation.NonNull;
+import com.bumptech.glide.integration.okhttp.OkHttpLibraryGlideModule;
+import com.bumptech.glide.integration.volley.VolleyLibraryGlideModule;
 import com.bumptech.glide.test.EmptyAppModule;
 import java.util.Collections;
 import java.util.Set;
@@ -15,6 +17,9 @@ final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
     appGlideModule = new EmptyAppModule();
     if (Log.isLoggable("Glide", Log.DEBUG)) {
       Log.d("Glide", "Discovered AppGlideModule from annotation: com.bumptech.glide.test.EmptyAppModule");
+      Log.d("Glide", "Discovered LibraryGlideModule from annotation: com.bumptech.glide.integration.okhttp.OkHttpLibraryGlideModule");
+      Log.d("Glide", "Discovered LibraryGlideModule from annotation: com.bumptech.glide.integration.okhttp3.OkHttpLibraryGlideModule");
+      Log.d("Glide", "Discovered LibraryGlideModule from annotation: com.bumptech.glide.integration.volley.VolleyLibraryGlideModule");
     }
   }
 
@@ -26,6 +31,9 @@ final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   @Override
   public void registerComponents(@NonNull Context context, @NonNull Glide glide,
       @NonNull Registry registry) {
+    new OkHttpLibraryGlideModule().registerComponents(context, glide, registry);
+    new com.bumptech.glide.integration.okhttp3.OkHttpLibraryGlideModule().registerComponents(context, glide, registry);
+    new VolleyLibraryGlideModule().registerComponents(context, glide, registry);
     appGlideModule.registerComponents(context, glide, registry);
   }
 
