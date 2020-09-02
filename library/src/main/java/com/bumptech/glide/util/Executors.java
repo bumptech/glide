@@ -1,7 +1,5 @@
 package com.bumptech.glide.util;
 
-import android.os.Handler;
-import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import java.util.concurrent.Executor;
@@ -16,11 +14,9 @@ public final class Executors {
 
   private static final Executor MAIN_THREAD_EXECUTOR =
       new Executor() {
-        private final Handler handler = new Handler(Looper.getMainLooper());
-
         @Override
         public void execute(@NonNull Runnable command) {
-          handler.post(command);
+          Util.postOnUiThread(command);
         }
       };
   private static final Executor DIRECT_EXECUTOR =

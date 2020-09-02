@@ -3,6 +3,7 @@ package com.bumptech.glide.util;
 import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +22,7 @@ public final class Util {
   private static final char[] HEX_CHAR_ARRAY = "0123456789abcdef".toCharArray();
   // 32 bytes from sha-256 -> 64 hex chars.
   private static final char[] SHA_256_CHARS = new char[64];
+  @Nullable private static volatile Handler mainThreadHandler;
 
   private Util() {
     // Utility class.
@@ -132,6 +134,27 @@ public final class Util {
 
   private static boolean isValidDimension(int dimen) {
     return dimen > 0 || dimen == Target.SIZE_ORIGINAL;
+  }
+
+  /** Posts the given {@code runnable} to the UI thread using a shared {@link Handler}. */
+  public static void postOnUiThread(Runnable runnable) {
+    getUiThreadHandler().post(runnable);
+  }
+
+  /** Removes the given {@code runnable} from the UI threads queue if it is still queued. */
+  public static void removeCallbacksOnUiThread(Runnable runnable) {
+    getUiThreadHandler().removeCallbacks(runnable);
+  }
+
+  private static Handler getUiThreadHandler() {
+    if (mainThreadHandler == null) {
+      synchronized (Util.class) {
+        if (mainThreadHandler == null) {
+          mainThreadHandler = new Handler(Looper.getMainLooper());
+        }
+      }
+    }
+    return mainThreadHandler;
   }
 
   /**

@@ -10,8 +10,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 import androidx.annotation.CheckResult;
 import androidx.annotation.DrawableRes;
@@ -86,7 +84,6 @@ public class RequestManager
           lifecycle.addListener(RequestManager.this);
         }
       };
-  private final Handler mainHandler = new Handler(Looper.getMainLooper());
   private final ConnectivityMonitor connectivityMonitor;
   // Adding default listeners should be much less common than starting new requests. We want
   // some way of making sure that requests don't mutate our listeners without creating a new copy of
@@ -137,7 +134,7 @@ public class RequestManager
     // issue by delaying adding ourselves as a lifecycle listener by posting to the main thread.
     // This should be entirely safe.
     if (Util.isOnBackgroundThread()) {
-      mainHandler.post(addSelfToLifecycle);
+      Util.postOnUiThread(addSelfToLifecycle);
     } else {
       lifecycle.addListener(this);
     }
@@ -377,7 +374,7 @@ public class RequestManager
     requestTracker.clearRequests();
     lifecycle.removeListener(this);
     lifecycle.removeListener(connectivityMonitor);
-    mainHandler.removeCallbacks(addSelfToLifecycle);
+    Util.removeCallbacksOnUiThread(addSelfToLifecycle);
     glide.unregisterRequestManager(this);
   }
 
