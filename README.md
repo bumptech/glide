@@ -2,18 +2,19 @@ Glide
 =====
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.bumptech.glide/glide/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.bumptech.glide/glide) [![Build Status](https://travis-ci.org/bumptech/glide.svg?branch=master)](https://travis-ci.org/bumptech/glide)
-| [View Glide's documentation][20] | [简体中文文档][22] | [Report an issue with Glide][5]
+
+ [View Glide's documentation][20] | [简体中文文档][22] | [Report an issue with Glide][5]
 
 Glide is a fast and efficient open source media management and image loading framework for Android that wraps media
 decoding, memory and disk caching, and resource pooling into a simple and easy to use interface.
 
 ![](static/glide_logo.png)
 
-Glide supports fetching, decoding, and displaying video stills, images, and animated GIFs. Glide includes a flexible API
+Glide supports **fetching**, **decoding**, and **displaying** video stills, images, and animated GIFs. Glide includes a flexible API
 that allows developers to plug in to almost any network stack. By default Glide uses a custom `HttpUrlConnection` based
 stack, but also includes utility libraries plug in to Google's Volley project or Square's OkHttp library instead.
 
-Glide's primary focus is on making scrolling any kind of a list of images as smooth and fast as possible, but Glide is
+Glide's primary focus is on making scrolling any kind of a list of images as **smooth** and **fast** as possible, but Glide is
 also effective for almost any case where you need to fetch, resize, and display a remote image.
 
 Download
