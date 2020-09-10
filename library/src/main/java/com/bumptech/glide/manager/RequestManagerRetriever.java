@@ -70,12 +70,10 @@ public class RequestManagerRetriever implements Handler.Callback {
   // This is really misplaced here, but to put it anywhere else means duplicating all of the
   // Fragment/Activity extraction logic that already exists here. It's gross, but less likely to
   // break.
-  @Nullable private final FirstFrameWaiter firstFrameWaiter;
+  private final FirstFrameWaiter firstFrameWaiter = new FirstFrameWaiter();
 
-  public RequestManagerRetriever(
-      @Nullable RequestManagerFactory factory, boolean addFirstFrameWaiter) {
+  public RequestManagerRetriever(@Nullable RequestManagerFactory factory) {
     this.factory = factory != null ? factory : DEFAULT_FACTORY;
-    firstFrameWaiter = addFirstFrameWaiter ? new FirstFrameWaiter() : null;
     handler = new Handler(Looper.getMainLooper(), this /* Callback */);
   }
 
@@ -126,19 +124,13 @@ public class RequestManagerRetriever implements Handler.Callback {
     return getApplicationManager(context);
   }
 
-  private void maybeRegisterFirstFrameWaiter(@NonNull Activity activity) {
-    if (firstFrameWaiter != null) {
-      firstFrameWaiter.registerSelf(activity);
-    }
-  }
-
   @NonNull
   public RequestManager get(@NonNull FragmentActivity activity) {
     if (Util.isOnBackgroundThread()) {
       return get(activity.getApplicationContext());
     } else {
       assertNotDestroyed(activity);
-      maybeRegisterFirstFrameWaiter(activity);
+      firstFrameWaiter.registerSelf(activity);
       FragmentManager fm = activity.getSupportFragmentManager();
       return supportFragmentGet(activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
     }
@@ -152,7 +144,13 @@ public class RequestManagerRetriever implements Handler.Callback {
     if (Util.isOnBackgroundThread()) {
       return get(fragment.getContext().getApplicationContext());
     } else {
-      maybeRegisterFirstFrameWaiter(fragment.getActivity());
+      // In some unusual cases, it's possible to have a Fragment not hosted by an activity. There's
+      // not all that much we can do here. Most apps will be started with a standard activity. If
+      // we manage not to register the first frame waiter for a while, the consequences are not
+      // catastrophic, we'll just use some extra memory.
+      if (fragment.getActivity() != null) {
+        firstFrameWaiter.registerSelf(fragment.getActivity());
+      }
       FragmentManager fm = fragment.getChildFragmentManager();
       return supportFragmentGet(fragment.getContext(), fm, fragment, fragment.isVisible());
     }
@@ -167,7 +165,7 @@ public class RequestManagerRetriever implements Handler.Callback {
       return get((FragmentActivity) activity);
     } else {
       assertNotDestroyed(activity);
-      maybeRegisterFirstFrameWaiter(activity);
+      firstFrameWaiter.registerSelf(activity);
       android.app.FragmentManager fm = activity.getFragmentManager();
       return fragmentGet(activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
     }
@@ -347,7 +345,13 @@ public class RequestManagerRetriever implements Handler.Callback {
     if (Util.isOnBackgroundThread() || Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
       return get(fragment.getActivity().getApplicationContext());
     } else {
-      maybeRegisterFirstFrameWaiter(fragment.getActivity());
+      // In some unusual cases, it's possible to have a Fragment not hosted by an activity. There's
+      // not all that much we can do here. Most apps will be started with a standard activity. If
+      // we manage not to register the first frame waiter for a while, the consequences are not
+      // catastrophic, we'll just use some extra memory.
+      if (fragment.getActivity() != null) {
+        firstFrameWaiter.registerSelf(fragment.getActivity());
+      }
       android.app.FragmentManager fm = fragment.getChildFragmentManager();
       return fragmentGet(fragment.getActivity(), fm, fragment, fragment.isVisible());
     }

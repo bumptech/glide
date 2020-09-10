@@ -21,6 +21,7 @@ public class HardwareConfigStateTest {
   public void
       setHardwareConfigIfAllowed_withAllowedState_setsInPreferredConfigAndMutable_returnsFalse() {
     HardwareConfigState state = new HardwareConfigState();
+    state.unblockHardwareBitmaps();
     BitmapFactory.Options options = new BitmapFactory.Options();
     boolean result =
         state.setHardwareConfigIfAllowed(
@@ -39,6 +40,7 @@ public class HardwareConfigStateTest {
   @Test
   public void setHardwareConfigIfAllowed_withSmallerThanMinWidth_returnsFalse_doesNotSetValues() {
     HardwareConfigState state = new HardwareConfigState();
+    state.unblockHardwareBitmaps();
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inPreferredConfig = null;
     options.inMutable = true;
@@ -60,6 +62,7 @@ public class HardwareConfigStateTest {
   @Test
   public void setHardwareConfigIfAllowed_withSmallerThanMinHeight_returnsFalse_doesNotSetValues() {
     HardwareConfigState state = new HardwareConfigState();
+    state.unblockHardwareBitmaps();
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inPreferredConfig = null;
     options.inMutable = true;
@@ -82,6 +85,7 @@ public class HardwareConfigStateTest {
   public void
       setHardwareConfigIfAllowed_withHardwareConfigDisallowed_returnsFalse_doesNotSetValues() {
     HardwareConfigState state = new HardwareConfigState();
+    state.unblockHardwareBitmaps();
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inPreferredConfig = null;
     options.inMutable = true;
@@ -104,6 +108,7 @@ public class HardwareConfigStateTest {
   public void
       setHardwareConfigIfAllowed_withExifOrientationRequired_returnsFalse_doesNotSetValues() {
     HardwareConfigState state = new HardwareConfigState();
+    state.unblockHardwareBitmaps();
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inPreferredConfig = null;
     options.inMutable = true;
@@ -124,6 +129,29 @@ public class HardwareConfigStateTest {
   @Config(sdk = Build.VERSION_CODES.N_MR1)
   @Test
   public void setHardwareConfigIfAllowed_withOsLessThanO_returnsFalse_doesNotSetValues() {
+    HardwareConfigState state = new HardwareConfigState();
+    state.unblockHardwareBitmaps();
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inPreferredConfig = null;
+    options.inMutable = true;
+
+    boolean result =
+        state.setHardwareConfigIfAllowed(
+            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            options,
+            /*isHardwareConfigAllowed=*/ true,
+            /*isExifOrientationRequired=*/ false);
+
+    assertThat(result).isFalse();
+    assertThat(options.inMutable).isTrue();
+    assertThat(options.inPreferredConfig).isNull();
+  }
+
+  @Config(sdk = Build.VERSION_CODES.P)
+  @Test
+  public void
+      setHardwareConfigIfAllowed_withOsLessThanQ_beforeUnblockingHardwareBitmaps_returnsFalseAndDoesNotSetValues() {
     HardwareConfigState state = new HardwareConfigState();
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inPreferredConfig = null;
@@ -152,6 +180,7 @@ public class HardwareConfigStateTest {
         }) {
       ShadowBuild.setModel(model);
       HardwareConfigState state = new HardwareConfigState();
+      state.unblockHardwareBitmaps();
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inPreferredConfig = null;
       options.inMutable = true;
@@ -179,6 +208,7 @@ public class HardwareConfigStateTest {
         }) {
       ShadowBuild.setModel(model);
       HardwareConfigState state = new HardwareConfigState();
+      state.unblockHardwareBitmaps();
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inPreferredConfig = null;
       options.inMutable = true;
@@ -206,6 +236,7 @@ public class HardwareConfigStateTest {
         new String[] {null, ".", "-", "", "S", "SM", "SM-", "SM-G", "SM-G9.", "SM-G93"}) {
       ShadowBuild.setModel(model);
       HardwareConfigState state = new HardwareConfigState();
+      state.unblockHardwareBitmaps();
       BitmapFactory.Options options = new BitmapFactory.Options();
       options.inPreferredConfig = null;
       options.inMutable = true;
