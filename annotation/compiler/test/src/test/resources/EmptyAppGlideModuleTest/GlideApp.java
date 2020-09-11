@@ -70,15 +70,6 @@ public final class GlideApp {
   }
 
   /**
-   * @see Glide#enableHardwareBitmaps()
-   */
-  @VisibleForTesting
-  @SuppressLint("VisibleForTests")
-  public static void enableHardwareBitmaps() {
-    Glide.enableHardwareBitmaps();
-  }
-
-  /**
    * @see Glide#tearDown()
    */
   @VisibleForTesting

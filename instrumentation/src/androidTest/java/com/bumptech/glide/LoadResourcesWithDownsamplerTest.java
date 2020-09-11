@@ -121,7 +121,6 @@ public class LoadResourcesWithDownsamplerTest {
     assumeTrue(
         "Hardware Bitmaps are only supported on O+",
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.O);
-    Glide.enableHardwareBitmaps();
 
     Glide.get(context)
         .getRegistry()
