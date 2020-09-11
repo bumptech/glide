@@ -58,7 +58,7 @@ public class RequestManagerRetrieverTest {
   public void setUp() {
     appContext = ApplicationProvider.getApplicationContext();
 
-    retriever = new RequestManagerRetriever(/*factory=*/ null);
+    retriever = new RequestManagerRetriever(/*factory=*/ null, /* addFirstFrameWaiter= */ false);
 
     harnesses =
         new RetrieverHarness[] {new DefaultRetrieverHarness(), new SupportRetrieverHarness()};
