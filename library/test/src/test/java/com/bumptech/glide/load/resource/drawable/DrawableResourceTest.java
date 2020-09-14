@@ -50,6 +50,7 @@ public class DrawableResourceTest {
     assertNotEquals(drawable, resource.get());
   }
 
+  @SuppressWarnings("TruthIncompatibleType")
   @Test
   public void testReturnsNewDrawableOnGet() {
     GifDrawable expected = mock(GifDrawable.class);
@@ -57,7 +58,8 @@ public class DrawableResourceTest {
     when(constantState.newDrawable()).thenReturn(expected);
     when(drawable.getConstantState()).thenReturn(constantState);
 
-    assertThat(resource.get()).isEqualTo(expected);
+    assertThat(resource.get())
+        .isEqualTo(/* expected: TestDrawable, actual: GifDrawable */ expected);
 
     verify(drawable).getConstantState();
     verify(constantState).newDrawable();

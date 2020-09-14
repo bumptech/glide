@@ -159,11 +159,14 @@ public class MultiModelLoaderFactoryTest {
     assertThat(modelLoaders).containsExactly(otherLoader, firstModelLoader);
   }
 
+  @SuppressWarnings("TruthIncompatibleType")
   @Test
   public void testBuild_withModelClass_excludesModelLoadersForOtherModelClasses() {
     multiFactory.append(String.class, String.class, firstFactory);
     List<ModelLoader<Integer, ?>> modelLoaders = multiFactory.build(Integer.class);
-    assertThat(modelLoaders).doesNotContain(firstModelLoader);
+    assertThat(modelLoaders)
+        .doesNotContain(
+            /* expected: ModelLoader<Integer, ?>, actual: ModelLoader<String, String> */ firstModelLoader);
   }
 
   @Test
