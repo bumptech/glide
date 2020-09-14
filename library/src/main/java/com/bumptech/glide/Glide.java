@@ -63,6 +63,7 @@ import com.bumptech.glide.load.resource.bitmap.ByteBufferBitmapImageDecoderResou
 import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.ExifInterfaceImageHeaderParser;
+import com.bumptech.glide.load.resource.bitmap.HardwareConfigState;
 import com.bumptech.glide.load.resource.bitmap.InputStreamBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.ParcelFileDescriptorBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder;
@@ -235,6 +236,19 @@ public class Glide implements ComponentCallbacks2 {
     }
   }
 
+  /**
+   * Allows hardware Bitmaps to be used prior to the first frame in the app being drawn as soon as
+   * this method is called.
+   *
+   * <p>If you use this method in non-test code, your app will experience native crashes on some
+   * versions of Android if you try to decode a hardware Bitmap. This method is only useful for
+   * testing.
+   */
+  @VisibleForTesting
+  public static void enableHardwareBitmaps() {
+    HardwareConfigState.getInstance().unblockHardwareBitmaps();
+  }
+
   @VisibleForTesting
   public static void tearDown() {
     synchronized (Glide.class) {
@@ -373,7 +387,6 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
       boolean isLoggingRequestOriginsEnabled,
       boolean isImageDecoderEnabledForBitmaps,
-      boolean blockHardwareBitmaps,
       int manualOverrideHardwareBitmapMaxFdCount) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;

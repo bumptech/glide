@@ -16,6 +16,15 @@ import java.util.Arrays;
  */
 public final class HardwareConfigState {
   /**
+   * Force the state to wait until a call to allow hardware Bitmaps to be used when they'd otherwise
+   * be eligible to work around a framework issue pre Q that can cause a native crash when
+   * allocating a hardware Bitmap in this specific circumstance. See b/126573603#comment12 for
+   * details.
+   */
+  private static final boolean BLOCK_HARDWARE_BITMAPS_BY_DEFAULT =
+      Build.VERSION.SDK_INT < Build.VERSION_CODES.Q;
+
+  /**
    * The minimum size in pixels a {@link Bitmap} must be in both dimensions to be created with the
    * {@link Bitmap.Config#HARDWARE} configuration.
    *
@@ -66,7 +75,6 @@ public final class HardwareConfigState {
   public static final int NO_MAX_FD_COUNT = -1;
 
   private static volatile HardwareConfigState instance;
-  private static volatile boolean blockHardwareBitmapsByDefault;
   private static volatile int manualOverrideMaxFdCount = NO_MAX_FD_COUNT;
 
   private final boolean isHardwareConfigAllowedByDeviceModel;
@@ -104,6 +112,10 @@ public final class HardwareConfigState {
     }
   }
 
+  public void unblockHardwareBitmaps() {
+    areHardwareBitmapsUnblocked = true;
+  }
+
   public boolean isHardwareConfigAllowed(
       int targetWidth,
       int targetHeight,
@@ -112,7 +124,7 @@ public final class HardwareConfigState {
     if (!isHardwareConfigAllowed
         || !isHardwareConfigAllowedByDeviceModel
         || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
-        || (blockHardwareBitmapsByDefault && !areHardwareBitmapsUnblocked)
+        || areHardwareBitmapsBlockedByAppState()
         || isExifOrientationRequired) {
       return false;
     }
@@ -121,6 +133,10 @@ public final class HardwareConfigState {
         && targetHeight >= minHardwareDimension
         // Make sure to call isFdSizeBelowHardwareLimit last because it has side affects.
         && isFdSizeBelowHardwareLimit();
+  }
+
+  private boolean areHardwareBitmapsBlockedByAppState() {
+    return BLOCK_HARDWARE_BITMAPS_BY_DEFAULT && !areHardwareBitmapsUnblocked;
   }
 
   @TargetApi(Build.VERSION_CODES.O)
