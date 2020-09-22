@@ -37,11 +37,11 @@ Glide takes a number of steps to ensure image loading is both as fast and as smo
 
 * Smart and automatic downsampling and caching minimize storage overhead and decode times.
 * Aggressive re-use of resources like byte arrays and Bitmaps minimizes expensive garbage collections and heap fragmentation.
-* Deep lifecycle integration ensures that only requests for active Fragments and Activities are prioritized and that Applications release resources when neccessary to avoid being killed when backgrounded.
+* Deep lifecycle integration ensures that only requests for active Fragments and Activities are prioritized and that Applications release resources when necessary to avoid being killed when backgrounded.
 
 ### Getting Started
 
-Start by vising the [Download and Setup][1] page to learn how to integrate Glide in to your app. Then take a look at the [Getting Started][2] page to learn the basics. For more help and examples, continue on through the rest of the Documentation section, or take a look at one of our many [sample apps][3].
+Start by visiting the [Download and Setup][1] page to learn how to integrate Glide in to your app. Then take a look at the [Getting Started][2] page to learn the basics. For more help and examples, continue on through the rest of the Documentation section, or take a look at one of our many [sample apps][3].
 
 ### Requirements
 
