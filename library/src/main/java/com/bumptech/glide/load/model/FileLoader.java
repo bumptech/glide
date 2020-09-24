@@ -69,14 +69,13 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       try {
         data = opener.open(file);
+        callback.onDataReady(data);
       } catch (FileNotFoundException e) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Failed to open file", e);
         }
         callback.onLoadFailed(e);
-        return;
       }
-      callback.onDataReady(data);
     }
 
     @Override
