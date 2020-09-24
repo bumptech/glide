@@ -59,15 +59,13 @@ public class ByteBufferFileLoader implements ModelLoader<File, ByteBuffer> {
       ByteBuffer result;
       try {
         result = ByteBufferUtil.fromFile(file);
+        callback.onDataReady(result);
       } catch (IOException e) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Failed to obtain ByteBuffer for file", e);
         }
         callback.onLoadFailed(e);
-        return;
       }
-
-      callback.onDataReady(result);
     }
 
     @Override

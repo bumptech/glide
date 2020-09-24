@@ -59,15 +59,13 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
       @NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
     try {
       inputStream = openThumbInputStream();
+      callback.onDataReady(inputStream);
     } catch (FileNotFoundException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Failed to find thumbnail file", e);
       }
       callback.onLoadFailed(e);
-      return;
     }
-
-    callback.onDataReady(inputStream);
   }
 
   private InputStream openThumbInputStream() throws FileNotFoundException {
