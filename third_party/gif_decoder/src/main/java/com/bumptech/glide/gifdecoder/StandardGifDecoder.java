@@ -106,6 +106,7 @@ public class StandardGifDecoder implements GifDecoder {
   private int[] mainScratch;
 
   private int framePointer;
+  private Boolean frameBackward;
   private GifHeader header;
   private Bitmap previousImage;
   private boolean savePrevious;
@@ -162,7 +163,14 @@ public class StandardGifDecoder implements GifDecoder {
 
   @Override
   public void advance() {
-    framePointer = (framePointer + 1) % header.frameCount;
+    framePointer = (framePointer + (frameBackward == true ? -1 : 1)) % header.frameCount;
+    
+    if (framePointer == header.frameCount - 1) {
+      frameBackward = true;
+    }
+    if (framePointer == 0) {
+      frameBackward = false;
+    }
   }
 
   @Override
