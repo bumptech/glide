@@ -163,11 +163,6 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   @VisibleForTesting
   static class GifDecoderFactory {
     GifDecoder build(
-        GifDecoder.BitmapProvider provider, GifHeader header, ByteBuffer data, int sampleSize) {
-      return new StandardGifDecoder(provider, header, data, sampleSize, false);
-    }
-
-    GifDecoder build(
         GifDecoder.BitmapProvider provider,
         GifHeader header,
         ByteBuffer data,

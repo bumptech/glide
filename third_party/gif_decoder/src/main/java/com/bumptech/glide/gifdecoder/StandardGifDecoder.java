@@ -124,18 +124,6 @@ public class StandardGifDecoder implements GifDecoder {
   // Public API.
   @SuppressWarnings("unused")
   public StandardGifDecoder(
-      @NonNull GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData) {
-    this(provider, gifHeader, rawData, 1 /*sampleSize*/);
-  }
-
-  public StandardGifDecoder(
-      @NonNull GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData,
-      int sampleSize) {
-    this(provider);
-    setData(gifHeader, rawData, sampleSize);
-  }
-
-  public StandardGifDecoder(
       @NonNull GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData,
       int sampleSize, boolean bounce) {
     this(provider);

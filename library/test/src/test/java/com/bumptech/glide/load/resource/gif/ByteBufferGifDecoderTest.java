@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.gif;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -60,7 +61,11 @@ public class ByteBufferGifDecoderTest {
     when(parserPool.obtain(isA(ByteBuffer.class))).thenReturn(parser);
 
     when(decoderFactory.build(
-            isA(GifDecoder.BitmapProvider.class), eq(gifHeader), isA(ByteBuffer.class), anyInt()))
+            isA(GifDecoder.BitmapProvider.class),
+            eq(gifHeader),
+            isA(ByteBuffer.class),
+            anyInt(),
+            anyBoolean()))
         .thenReturn(gifDecoder);
 
     List<ImageHeaderParser> parsers = new ArrayList<>();
