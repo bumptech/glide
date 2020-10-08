@@ -111,7 +111,8 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
 
       int sampleSize = getSampleSize(header, width, height);
       boolean bounce = options.get(GifOptions.BOUNCE);
-      GifDecoder gifDecoder = gifDecoderFactory.build(provider, header, byteBuffer, sampleSize, bounce);
+      GifDecoder gifDecoder =
+          gifDecoderFactory.build(provider, header, byteBuffer, sampleSize, bounce);
       gifDecoder.setDefaultBitmapConfig(config);
       gifDecoder.advance();
       Bitmap firstFrame = gifDecoder.getNextFrame();
@@ -162,7 +163,11 @@ public class ByteBufferGifDecoder implements ResourceDecoder<ByteBuffer, GifDraw
   @VisibleForTesting
   static class GifDecoderFactory {
     GifDecoder build(
-        GifDecoder.BitmapProvider provider, GifHeader header, ByteBuffer data, int sampleSize, boolean bounce) {
+        GifDecoder.BitmapProvider provider,
+        GifHeader header,
+        ByteBuffer data,
+        int sampleSize,
+        boolean bounce) {
       return new StandardGifDecoder(provider, header, data, sampleSize, bounce);
     }
   }
