@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
+import com.bumptech.glide.load.resource.gif.GifOptions;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import java.util.Collections;
@@ -136,9 +138,11 @@ public class MainActivity extends Activity implements Api.Monitor {
             }
           });
 
+      RequestOptions options = new RequestOptions().set(GifOptions.BOUNCE, true);
+
       // clearOnDetach let's us stop animating GifDrawables that RecyclerView hasn't yet recycled
       // but that are currently off screen.
-      requestBuilder.load(result).into(holder.gifView).clearOnDetach();
+      requestBuilder.load(result).apply(options).into(holder.gifView).clearOnDetach();
 
       preloadSizeProvider.setView(holder.gifView);
     }

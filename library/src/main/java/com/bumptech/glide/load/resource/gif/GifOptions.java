@@ -25,6 +25,13 @@ public final class GifOptions {
   public static final Option<Boolean> DISABLE_ANIMATION =
       Option.memory("com.bumptech.glide.load.resource.gif.GifOptions.DisableAnimation", false);
 
+  /**
+   * If set to {@code true}, the GIF will play from the first frame to the last frame, and vice versa.
+   * Defaults to {@code false}
+   */
+  public static final Option<Boolean> BOUNCE =
+      Option.memory("com.bumptech.glide.load.resource.gif.GifOptions.Bounce", false);
+
   private GifOptions() {
     // Utility class.
   }

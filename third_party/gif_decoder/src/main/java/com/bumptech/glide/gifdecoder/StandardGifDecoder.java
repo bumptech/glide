@@ -106,6 +106,8 @@ public class StandardGifDecoder implements GifDecoder {
   private int[] mainScratch;
 
   private int framePointer;
+  private boolean bounce = false;
+  private boolean frameBackward = false;
   private GifHeader header;
   private Bitmap previousImage;
   private boolean savePrevious;
@@ -130,6 +132,14 @@ public class StandardGifDecoder implements GifDecoder {
       @NonNull GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData,
       int sampleSize) {
     this(provider);
+    setData(gifHeader, rawData, sampleSize);
+  }
+
+  public StandardGifDecoder(
+      @NonNull GifDecoder.BitmapProvider provider, GifHeader gifHeader, ByteBuffer rawData,
+      int sampleSize, boolean bounce) {
+    this(provider);
+    this.bounce = bounce;
     setData(gifHeader, rawData, sampleSize);
   }
 
@@ -162,7 +172,17 @@ public class StandardGifDecoder implements GifDecoder {
 
   @Override
   public void advance() {
-    framePointer = (framePointer + 1) % header.frameCount;
+    int nextPointer = bounce && frameBackward && framePointer > 0 ? -1 : 1;
+    framePointer = (framePointer + nextPointer) % header.frameCount;
+
+    if (bounce) {
+      if (framePointer == header.frameCount - 1) {
+        frameBackward = true;
+      }
+      if (framePointer == 0) {
+        frameBackward = false;
+      }
+    }
   }
 
   @Override
