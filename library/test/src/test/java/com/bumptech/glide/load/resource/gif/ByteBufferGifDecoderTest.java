@@ -60,7 +60,11 @@ public class ByteBufferGifDecoderTest {
     when(parserPool.obtain(isA(ByteBuffer.class))).thenReturn(parser);
 
     when(decoderFactory.build(
-            isA(GifDecoder.BitmapProvider.class), eq(gifHeader), isA(ByteBuffer.class), anyInt(), false))
+            isA(GifDecoder.BitmapProvider.class),
+            eq(gifHeader),
+            isA(ByteBuffer.class),
+            anyInt(),
+            false))
         .thenReturn(gifDecoder);
 
     List<ImageHeaderParser> parsers = new ArrayList<>();
