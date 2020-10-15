@@ -22,6 +22,7 @@ import java.util.Map.Entry;
  * Global context for all loads in Glide containing and exposing the various registries and classes
  * required to load resources.
  */
+@SuppressWarnings("PMD.DataClass")
 public class GlideContext extends ContextWrapper {
   @VisibleForTesting
   static final TransitionOptions<?, ?> DEFAULT_TRANSITION_OPTIONS =
@@ -34,7 +35,7 @@ public class GlideContext extends ContextWrapper {
   private final List<RequestListener<Object>> defaultRequestListeners;
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions;
   private final Engine engine;
-  private final boolean isLoggingRequestOriginsEnabled;
+  private final GlideExperiments experiments;
   private final int logLevel;
 
   @Nullable
@@ -50,7 +51,7 @@ public class GlideContext extends ContextWrapper {
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
       @NonNull Engine engine,
-      boolean isLoggingRequestOriginsEnabled,
+      @NonNull GlideExperiments experiments,
       int logLevel) {
     super(context.getApplicationContext());
     this.arrayPool = arrayPool;
@@ -60,7 +61,7 @@ public class GlideContext extends ContextWrapper {
     this.defaultRequestListeners = defaultRequestListeners;
     this.defaultTransitionOptions = defaultTransitionOptions;
     this.engine = engine;
-    this.isLoggingRequestOriginsEnabled = isLoggingRequestOriginsEnabled;
+    this.experiments = experiments;
     this.logLevel = logLevel;
   }
 
@@ -118,13 +119,7 @@ public class GlideContext extends ContextWrapper {
     return arrayPool;
   }
 
-  /**
-   * Returns {@code true} if Glide should populate {@link
-   * com.bumptech.glide.load.engine.GlideException#setOrigin(Exception)} for failed requests.
-   *
-   * <p>This is an experimental API that may be removed in the future.
-   */
-  public boolean isLoggingRequestOriginsEnabled() {
-    return isLoggingRequestOriginsEnabled;
+  public GlideExperiments getExperiments() {
+    return experiments;
   }
 }

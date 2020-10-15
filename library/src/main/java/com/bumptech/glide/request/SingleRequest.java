@@ -8,6 +8,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.bumptech.glide.GlideBuilder.LogRequestOrigins;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -203,7 +204,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     this.callbackExecutor = callbackExecutor;
     status = Status.PENDING;
 
-    if (requestOrigin == null && glideContext.isLoggingRequestOriginsEnabled()) {
+    if (requestOrigin == null && glideContext.getExperiments().isEnabled(LogRequestOrigins.class)) {
       requestOrigin = new RuntimeException("Glide request origin trace");
     }
   }

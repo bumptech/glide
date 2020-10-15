@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import com.bumptech.glide.GlideBuilder.EnableImageDecoderForBitmaps;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ImageHeaderParser;
@@ -384,9 +385,7 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull RequestOptionsFactory defaultRequestOptionsFactory,
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
-      boolean isLoggingRequestOriginsEnabled,
-      boolean isImageDecoderEnabledForBitmaps,
-      int manualOverrideHardwareBitmapMaxFdCount) {
+      GlideExperiments experiments) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
@@ -419,7 +418,8 @@ public class Glide implements ComponentCallbacks2 {
 
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
-    if (isImageDecoderEnabledForBitmaps && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    if (experiments.isEnabled(EnableImageDecoderForBitmaps.class)
+        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       streamBitmapDecoder = new InputStreamBitmapImageDecoderResourceDecoder();
       byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
     } else {
@@ -604,7 +604,7 @@ public class Glide implements ComponentCallbacks2 {
             defaultTransitionOptions,
             defaultRequestListeners,
             engine,
-            isLoggingRequestOriginsEnabled,
+            experiments,
             logLevel);
   }
 
