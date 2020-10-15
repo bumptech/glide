@@ -147,9 +147,8 @@ public abstract class DownsampleStrategy {
         float heightPercentage = requestedHeight / (float) sourceHeight;
 
         return Math.min(
-          adjustToNotProduceZeroDimensionBitmap(heightPercentage, sourceWidth),
-          adjustToNotProduceZeroDimensionBitmap(widthPercentage, sourceHeight)
-        );
+            adjustToNotProduceZeroDimensionBitmap(heightPercentage, sourceWidth),
+            adjustToNotProduceZeroDimensionBitmap(widthPercentage, sourceHeight));
       } else {
         // Similar to AT_LEAST, but only require one dimension or the other to be >= requested
         // rather than both.
@@ -159,7 +158,8 @@ public abstract class DownsampleStrategy {
       }
     }
 
-    private float adjustToNotProduceZeroDimensionBitmap(float dimensionPercentage, int sourceOtherDimension) {
+    private float adjustToNotProduceZeroDimensionBitmap(
+        float dimensionPercentage, int sourceOtherDimension) {
       if (dimensionPercentage * sourceOtherDimension < 0.5f) {
         return 0.5f / (float) sourceOtherDimension;
       } else {
