@@ -295,6 +295,21 @@ public class DownsamplerEmulatorTest {
         .run();
   }
 
+  // fixes issues #3420 #3421
+  @Test
+  public void calculateScaling_shouldNotProduceBitmapWithZeroDimension() throws IOException {
+    new Tester(DownsampleStrategy.FIT_CENTER)
+        .setTargetDimensions(100, 100)
+        .givenImageWithDimensionsOf(10, 1000, atAndAbove(KITKAT).with(formats(JPEG).expect(2, 100)))
+        .givenImageWithDimensionsOf(6, 1000, atAndAbove(KITKAT).with(formats(JPEG).expect(1, 100)))
+        .givenImageWithDimensionsOf(5, 1000, atAndAbove(KITKAT).with(formats(JPEG).expect(1, 100)))
+        .givenImageWithDimensionsOf(4, 1000, atAndAbove(KITKAT).with(allFormats().expect(1, 125)))
+        .givenImageWithDimensionsOf(2, 1000, atAndAbove(KITKAT).with(allFormats().expect(1, 250)))
+        .givenImageWithDimensionsOf(1, 1000, atAndAbove(KITKAT).with(allFormats().expect(1, 500)))
+        .givenImageWithDimensionsOf(1000, 2, atAndAbove(KITKAT).with(allFormats().expect(250, 1)))
+        .run();
+  }
+
   @Test
   public void calculateScaling_withFitCenter() throws IOException {
     new Tester(DownsampleStrategy.FIT_CENTER)

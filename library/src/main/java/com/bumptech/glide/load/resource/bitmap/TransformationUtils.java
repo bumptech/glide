@@ -178,8 +178,8 @@ public final class TransformationUtils {
     // Take the floor of the target width/height, not round. If the matrix
     // passed into drawBitmap rounds differently, we want to slightly
     // overdraw, not underdraw, to avoid artifacts from bitmap reuse.
-    targetWidth = (int) (minPercentage * inBitmap.getWidth());
-    targetHeight = (int) (minPercentage * inBitmap.getHeight());
+    targetWidth = Math.max((int) (minPercentage * inBitmap.getWidth()), 1);
+    targetHeight = Math.max((int) (minPercentage * inBitmap.getHeight()), 1);
 
     Bitmap.Config config = getNonNullConfig(inBitmap);
     Bitmap toReuse = pool.get(targetWidth, targetHeight, config);

@@ -98,6 +98,21 @@ public class DownsampleStrategyTest {
     assertThat(DownsampleStrategy.FIT_CENTER.getScaleFactor(100, 100, 100, 100)).isEqualTo(1f);
   }
 
+  // fixes issues #3420 #3421
+  @Test
+  public void testCenterInside_adjustScaleTypeToAvoidProducingBitmapWithZeroDimension() {
+    assertThat(DownsampleStrategy.FIT_CENTER.getScaleFactor(5, 1000, 100, 100))
+        .isEqualTo(0.1f);
+    assertThat(DownsampleStrategy.FIT_CENTER.getScaleFactor(4, 1000, 100, 100))
+        .isEqualTo(0.125f);
+    assertThat(DownsampleStrategy.FIT_CENTER.getScaleFactor(2, 1000, 100, 100))
+        .isEqualTo(0.25f);
+    assertThat(DownsampleStrategy.FIT_CENTER.getScaleFactor(1, 1000, 100, 100))
+        .isEqualTo(0.5f);
+    assertThat(DownsampleStrategy.FIT_CENTER.getScaleFactor(2000, 1, 100, 100))
+        .isEqualTo(0.5f);
+  }
+
   @Test
   public void testCenterOutside_scalesImageToFitAroundRequestedBounds() {
     assertThat(DownsampleStrategy.CENTER_OUTSIDE.getScaleFactor(100, 200, 300, 300))
