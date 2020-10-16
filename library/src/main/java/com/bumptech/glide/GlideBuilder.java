@@ -2,12 +2,13 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
-import androidx.core.os.BuildCompat;
 import com.bumptech.glide.Glide.RequestOptionsFactory;
+import com.bumptech.glide.GlideExperiments.Experiment;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.GlideException;
@@ -22,7 +23,6 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
-import com.bumptech.glide.load.resource.bitmap.HardwareConfigState;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
@@ -41,6 +41,7 @@ import java.util.Map;
 @SuppressWarnings("PMD.ImmutableField")
 public final class GlideBuilder {
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions = new ArrayMap<>();
+  private final GlideExperiments.Builder glideExperiments = new GlideExperiments.Builder();
   private Engine engine;
   private BitmapPool bitmapPool;
   private ArrayPool arrayPool;
@@ -63,10 +64,6 @@ public final class GlideBuilder {
   private GlideExecutor animationExecutor;
   private boolean isActiveResourceRetentionAllowed;
   @Nullable private List<RequestListener<Object>> defaultRequestListeners;
-  private boolean isLoggingRequestOriginsEnabled;
-
-  private boolean isImageDecoderEnabledForBitmaps;
-  private int manualOverrideHardwareBitmapMaxFdCount = HardwareConfigState.NO_MAX_FD_COUNT;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -451,7 +448,7 @@ public final class GlideBuilder {
    * <p>This is an experimental API that may be removed in the future.
    */
   public GlideBuilder setLogRequestOrigins(boolean isEnabled) {
-    isLoggingRequestOriginsEnabled = isEnabled;
+    glideExperiments.update(new LogRequestOrigins(), isEnabled);
     return this;
   }
 
@@ -482,10 +479,9 @@ public final class GlideBuilder {
    * which may not agree.
    */
   public GlideBuilder setImageDecoderEnabledForBitmaps(boolean isEnabled) {
-    if (!BuildCompat.isAtLeastQ()) {
-      return this;
-    }
-    isImageDecoderEnabledForBitmaps = isEnabled;
+    glideExperiments.update(
+        new EnableImageDecoderForBitmaps(),
+        /*isEnabled=*/ isEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
     return this;
   }
 
@@ -575,8 +571,20 @@ public final class GlideBuilder {
         defaultRequestOptionsFactory,
         defaultTransitionOptions,
         defaultRequestListeners,
-        isLoggingRequestOriginsEnabled,
-        isImageDecoderEnabledForBitmaps,
-        manualOverrideHardwareBitmapMaxFdCount);
+        glideExperiments.build());
   }
+
+  static final class ManualOverrideHardwareBitmapMaxFdCount implements Experiment {
+
+    final int fdCount;
+
+    ManualOverrideHardwareBitmapMaxFdCount(int fdCount) {
+      this.fdCount = fdCount;
+    }
+  }
+
+  static final class EnableImageDecoderForBitmaps implements Experiment {}
+
+  /** See {@link #setLogRequestOrigins(boolean)}. */
+  public static final class LogRequestOrigins implements Experiment {}
 }

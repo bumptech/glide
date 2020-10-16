@@ -52,7 +52,7 @@ public final class GlideContextTest {
             transitionOptions,
             /*defaultRequestListeners=*/ Collections.<RequestListener<Object>>emptyList(),
             mock(Engine.class),
-            /*isLoggingRequestOriginsEnabled=*/ false,
+            mock(GlideExperiments.class),
             Log.DEBUG);
   }
 

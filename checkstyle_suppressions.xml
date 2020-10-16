@@ -5,6 +5,7 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
+    <suppress files=".*[/\\]library[/\\]src[/\\]main[/\\]java[/\\]com[/\\]bumptech[/\\]glide[/\\]GlideExperiments.java" checks="FinalClass"/>
     <suppress files=".*[/\\]library[/\\]src[/\\]main[/\\]java[/\\]com[/\\]bumptech[/\\]glide[/\\]util[/\\]CachedHashCodeArrayMap.java" checks="EqualsHashCodeCheck"/>
     <suppress files=".*[/\\]library[/\\]test[/\\]src[/\\]test[/\\].*" checks="Javadoc.*"/>
     <suppress files=".*[/\\]annotation[/\\]compiler[/\\]test[/\\]src[/\\]test[/\\]resources[/\\].*" checks=".*"/>
