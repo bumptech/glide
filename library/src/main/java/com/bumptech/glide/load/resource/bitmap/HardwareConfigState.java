@@ -226,7 +226,6 @@ public final class HardwareConfigState {
     }
     // This method will only be called once, so simple iteration is reasonable.
     return Arrays.asList(
-            "ILA X1",
             "LG-M250",
             "LG-M320",
             "LG-Q710AL",
@@ -247,8 +246,7 @@ public final class HardwareConfigState {
             "LM-Q710.FGN",
             "LM-X220PM",
             "LM-X220QMA",
-            "LM-X410PM",
-            "SGINO")
+            "LM-X410PM")
         .contains(Build.MODEL);
   }
 
