@@ -25,6 +25,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder.WaitForFramesAfterTrimMemory;
 import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.load.resource.bitmap.HardwareConfigState;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
 import java.util.Collection;
@@ -83,7 +84,8 @@ public class RequestManagerRetriever implements Handler.Callback {
   }
 
   private static FrameWaiter buildFrameWaiter(GlideExperiments experiments) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+    if (!HardwareConfigState.HARDWARE_BITMAPS_SUPPORTED
+        || !HardwareConfigState.BLOCK_HARDWARE_BITMAPS_WHEN_GL_CONTEXT_MIGHT_NOT_BE_INITIALIZED) {
       return new DoNothingFirstFrameWaiter();
     }
     return experiments.isEnabled(WaitForFramesAfterTrimMemory.class)

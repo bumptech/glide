@@ -25,8 +25,12 @@ public final class HardwareConfigState {
    * allocating a hardware Bitmap in this specific circumstance. See b/126573603#comment12 for
    * details.
    */
-  private static final boolean BLOCK_HARDWARE_BITMAPS_WHEN_GL_CONTEXT_MIGHT_NOT_BE_INITIALIZED =
+  public static final boolean BLOCK_HARDWARE_BITMAPS_WHEN_GL_CONTEXT_MIGHT_NOT_BE_INITIALIZED =
       Build.VERSION.SDK_INT < Build.VERSION_CODES.Q;
+
+  /** Support for the hardware bitmap config was added in Android O. */
+  public static final boolean HARDWARE_BITMAPS_SUPPORTED =
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
 
   /**
    * The minimum size in pixels a {@link Bitmap} must be in both dimensions to be created with the
@@ -149,7 +153,7 @@ public final class HardwareConfigState {
       }
       return false;
     }
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+    if (!HARDWARE_BITMAPS_SUPPORTED) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Hardware config disallowed by sdk");
       }
