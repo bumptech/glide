@@ -28,11 +28,14 @@ import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.test.TearDownGlide;
+import com.bumptech.glide.util.Util;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -117,11 +120,22 @@ public class LoadResourcesWithDownsamplerTest {
   }
 
   @Test
-  public void loadTransparentGifResource_asHardware_withNoOtherLoaders_decodesResource() {
+  public void loadTransparentGifResource_asHardware_withNoOtherLoaders_decodesResource()
+      throws InterruptedException {
     assumeTrue(
         "Hardware Bitmaps are only supported on O+",
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.O);
-    Glide.enableHardwareBitmaps();
+    // enableHardwareBitmaps must be called on the main thread.
+    final CountDownLatch latch = new CountDownLatch(1);
+    Util.postOnUiThread(
+        new Runnable() {
+          @Override
+          public void run() {
+            Glide.enableHardwareBitmaps();
+            latch.countDown();
+          }
+        });
+    latch.await(5, TimeUnit.SECONDS);
 
     Glide.get(context)
         .getRegistry()

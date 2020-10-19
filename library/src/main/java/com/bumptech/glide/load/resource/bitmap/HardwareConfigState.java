@@ -7,21 +7,25 @@ import android.os.Build;
 import android.util.Log;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.VisibleForTesting;
+import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * State and constants for interacting with {@link android.graphics.Bitmap.Config#HARDWARE} on
  * Android O+.
  */
 public final class HardwareConfigState {
+  private static final String TAG = "HardwareConfig";
+
   /**
    * Force the state to wait until a call to allow hardware Bitmaps to be used when they'd otherwise
    * be eligible to work around a framework issue pre Q that can cause a native crash when
    * allocating a hardware Bitmap in this specific circumstance. See b/126573603#comment12 for
    * details.
    */
-  private static final boolean BLOCK_HARDWARE_BITMAPS_BY_DEFAULT =
+  private static final boolean BLOCK_HARDWARE_BITMAPS_WHEN_GL_CONTEXT_MIGHT_NOT_BE_INITIALIZED =
       Build.VERSION.SDK_INT < Build.VERSION_CODES.Q;
 
   /**
@@ -87,7 +91,13 @@ public final class HardwareConfigState {
   @GuardedBy("this")
   private boolean isFdSizeBelowHardwareLimit = true;
 
-  private volatile boolean areHardwareBitmapsUnblocked;
+  /**
+   * Only mutated on the main thread. Read by any number of background threads concurrently.
+   *
+   * <p>Defaults to {@code false} because we need to wait for the GL context to be initialized and
+   * it defaults to not initialized (https://b.corp.google.com/issues/126573603#comment12).
+   */
+  private final AtomicBoolean isHardwareConfigAllowedByAppState = new AtomicBoolean(false);
 
   public static HardwareConfigState getInstance() {
     if (instance == null) {
@@ -112,8 +122,14 @@ public final class HardwareConfigState {
     }
   }
 
-  public void unblockHardwareBitmaps() {
-    areHardwareBitmapsUnblocked = true;
+  public synchronized void blockHardwareBitmaps() {
+    Util.assertMainThread();
+    isHardwareConfigAllowedByAppState.set(false);
+  }
+
+  public synchronized void unblockHardwareBitmaps() {
+    Util.assertMainThread();
+    isHardwareConfigAllowedByAppState.set(true);
   }
 
   public boolean isHardwareConfigAllowed(
@@ -121,22 +137,62 @@ public final class HardwareConfigState {
       int targetHeight,
       boolean isHardwareConfigAllowed,
       boolean isExifOrientationRequired) {
-    if (!isHardwareConfigAllowed
-        || !isHardwareConfigAllowedByDeviceModel
-        || Build.VERSION.SDK_INT < Build.VERSION_CODES.O
-        || areHardwareBitmapsBlockedByAppState()
-        || isExifOrientationRequired) {
+    if (!isHardwareConfigAllowed) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Hardware config disallowed by caller");
+      }
+      return false;
+    }
+    if (!isHardwareConfigAllowedByDeviceModel) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Hardware config disallowed by device model");
+      }
+      return false;
+    }
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Hardware config disallowed by sdk");
+      }
+      return false;
+    }
+    if (areHardwareBitmapsBlockedByAppState()) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Hardware config disallowed by app state");
+      }
+      return false;
+    }
+    if (isExifOrientationRequired) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Hardware config disallowed because exif orientation is required");
+      }
+      return false;
+    }
+    if (targetWidth < minHardwareDimension) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Hardware config disallowed because width is too small");
+      }
+      return false;
+    }
+    if (targetHeight < minHardwareDimension) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Hardware config disallowed because height is too small");
+      }
+      return false;
+    }
+    // Make sure to call isFdSizeBelowHardwareLimit last because it has side affects.
+    if (!isFdSizeBelowHardwareLimit()) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Hardware config disallowed because there are insufficient FDs");
+      }
       return false;
     }
 
-    return targetWidth >= minHardwareDimension
-        && targetHeight >= minHardwareDimension
-        // Make sure to call isFdSizeBelowHardwareLimit last because it has side affects.
-        && isFdSizeBelowHardwareLimit();
+    return true;
   }
 
   private boolean areHardwareBitmapsBlockedByAppState() {
-    return BLOCK_HARDWARE_BITMAPS_BY_DEFAULT && !areHardwareBitmapsUnblocked;
+    return BLOCK_HARDWARE_BITMAPS_WHEN_GL_CONTEXT_MIGHT_NOT_BE_INITIALIZED
+        && !isHardwareConfigAllowedByAppState.get();
   }
 
   @TargetApi(Build.VERSION_CODES.O)

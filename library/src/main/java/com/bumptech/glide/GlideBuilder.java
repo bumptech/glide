@@ -41,7 +41,7 @@ import java.util.Map;
 @SuppressWarnings("PMD.ImmutableField")
 public final class GlideBuilder {
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions = new ArrayMap<>();
-  private final GlideExperiments.Builder glideExperiments = new GlideExperiments.Builder();
+  private final GlideExperiments.Builder glideExperimentsBuilder = new GlideExperiments.Builder();
   private Engine engine;
   private BitmapPool bitmapPool;
   private ArrayPool arrayPool;
@@ -448,7 +448,7 @@ public final class GlideBuilder {
    * <p>This is an experimental API that may be removed in the future.
    */
   public GlideBuilder setLogRequestOrigins(boolean isEnabled) {
-    glideExperiments.update(new LogRequestOrigins(), isEnabled);
+    glideExperimentsBuilder.update(new LogRequestOrigins(), isEnabled);
     return this;
   }
 
@@ -479,7 +479,7 @@ public final class GlideBuilder {
    * which may not agree.
    */
   public GlideBuilder setImageDecoderEnabledForBitmaps(boolean isEnabled) {
-    glideExperiments.update(
+    glideExperimentsBuilder.update(
         new EnableImageDecoderForBitmaps(),
         /*isEnabled=*/ isEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
     return this;
@@ -556,8 +556,9 @@ public final class GlideBuilder {
       defaultRequestListeners = Collections.unmodifiableList(defaultRequestListeners);
     }
 
+    GlideExperiments experiments = glideExperimentsBuilder.build();
     RequestManagerRetriever requestManagerRetriever =
-        new RequestManagerRetriever(requestManagerFactory);
+        new RequestManagerRetriever(requestManagerFactory, experiments);
 
     return new Glide(
         context,
@@ -571,7 +572,7 @@ public final class GlideBuilder {
         defaultRequestOptionsFactory,
         defaultTransitionOptions,
         defaultRequestListeners,
-        glideExperiments.build());
+        experiments);
   }
 
   static final class ManualOverrideHardwareBitmapMaxFdCount implements Experiment {
@@ -581,6 +582,11 @@ public final class GlideBuilder {
     ManualOverrideHardwareBitmapMaxFdCount(int fdCount) {
       this.fdCount = fdCount;
     }
+  }
+
+  /** See {@link #setWaitForFramesAfterTrimMemory(boolean)}. */
+  public static final class WaitForFramesAfterTrimMemory implements Experiment {
+    private WaitForFramesAfterTrimMemory() {}
   }
 
   static final class EnableImageDecoderForBitmaps implements Experiment {}

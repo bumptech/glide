@@ -19,7 +19,7 @@ public class HardwareConfigStateTest {
   @Config(sdk = Build.VERSION_CODES.O)
   @Test
   public void
-      setHardwareConfigIfAllowed_withAllowedState_setsInPreferredConfigAndMutable_returnsFalse() {
+      setHardwareConfigIfAllowed_withAllowedState_setsInPreferredConfigAndMutable_returnsTrue() {
     HardwareConfigState state = new HardwareConfigState();
     state.unblockHardwareBitmaps();
     BitmapFactory.Options options = new BitmapFactory.Options();
@@ -32,8 +32,27 @@ public class HardwareConfigStateTest {
             /*isExifOrientationRequired=*/ false);
 
     assertThat(result).isTrue();
-    assertThat(options.inMutable).isFalse();
     assertThat(options.inPreferredConfig).isEqualTo(Bitmap.Config.HARDWARE);
+  }
+
+  @Config(sdk = Build.VERSION_CODES.O)
+  @Test
+  public void
+      setHardwareConfigIfAllowed_withAllowedState_afterReblock_returnsFalseAndDoesNotSetValues() {
+    HardwareConfigState state = new HardwareConfigState();
+    state.unblockHardwareBitmaps();
+    state.blockHardwareBitmaps();
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    boolean result =
+        state.setHardwareConfigIfAllowed(
+            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            options,
+            /*isHardwareConfigAllowed=*/ true,
+            /*isExifOrientationRequired=*/ false);
+
+    assertThat(result).isFalse();
+    assertThat(options.inPreferredConfig).isNotEqualTo(Bitmap.Config.HARDWARE);
   }
 
   @Config(sdk = Build.VERSION_CODES.O)
