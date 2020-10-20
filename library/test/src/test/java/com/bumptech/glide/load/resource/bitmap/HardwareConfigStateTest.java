@@ -250,9 +250,8 @@ public class HardwareConfigStateTest {
 
   @Config(sdk = Build.VERSION_CODES.O)
   @Test
-  public void setHardwareConfigIfAllowed_withShortEmptyOrNullModelNames_returnsTrue() {
-    for (String model :
-        new String[] {null, ".", "-", "", "S", "SM", "SM-", "SM-G", "SM-G9.", "SM-G93"}) {
+  public void setHardwareConfigIfAllowed_withShortOrEmptyModelNames_returnsTrue() {
+    for (String model : new String[] {".", "-", "", "S", "SM", "SM-", "SM-G", "SM-G9.", "SM-G93"}) {
       ShadowBuild.setModel(model);
       HardwareConfigState state = new HardwareConfigState();
       state.unblockHardwareBitmaps();

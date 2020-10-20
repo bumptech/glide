@@ -251,28 +251,38 @@ public final class HardwareConfigState {
   }
 
   private static boolean isHardwareConfigDisallowedByB112551574() {
-    if (Build.MODEL == null || Build.MODEL.length() < 7) {
+    if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
       return false;
     }
-    switch (Build.MODEL.substring(0, 7)) {
-      case "SM-N935":
-        // Fall through
-      case "SM-J720":
-        // Fall through
-      case "SM-G960":
-        // Fall through
-      case "SM-G965":
-        // Fall through
-      case "SM-G935":
-        // Fall through
-      case "SM-G930":
-        // Fall through
-      case "SM-A520":
-        // Fall through
-        return Build.VERSION.SDK_INT == Build.VERSION_CODES.O;
-      default:
-        return false;
+    // This method will only be called once, so simple iteration is reasonable.
+    for (String prefixOrModelName :
+        // This is sadly a list of prefixes, not models. We no longer have the data that shows us
+        // all the explicit models, so we have to live with the prefixes.
+        Arrays.asList(
+            // Samsung
+            "SC-04J",
+            "SM-N935",
+            "SM-J720",
+            "SM-G570F",
+            "SM-G570M",
+            "SM-G960",
+            "SM-G965",
+            "SM-G935",
+            "SM-G930",
+            "SM-A520",
+            "SM-A720F",
+            // Moto
+            "moto e5",
+            "moto e5 play",
+            "moto e5 plus",
+            "moto e5 cruise",
+            "moto g(6) forge",
+            "moto g(6) play")) {
+      if (Build.MODEL.startsWith(prefixOrModelName)) {
+        return true;
+      }
     }
+    return false;
   }
 
   private int getMaxFdCount() {
