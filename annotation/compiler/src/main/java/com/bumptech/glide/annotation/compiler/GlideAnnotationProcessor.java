@@ -117,12 +117,12 @@ public final class GlideAnnotationProcessor extends AbstractProcessor {
       if (isGeneratedAppGlideModuleWritten) {
         throw new IllegalStateException("Cannot process annotations after writing AppGlideModule");
       }
-      return true;
+      return false;
     }
 
     if (!isGeneratedAppGlideModuleWritten) {
       isGeneratedAppGlideModuleWritten = appModuleProcessor.maybeWriteAppModule();
     }
-    return true;
+    return false;
   }
 }
