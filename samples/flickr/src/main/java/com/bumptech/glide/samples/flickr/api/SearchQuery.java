@@ -18,9 +18,19 @@ public final class SearchQuery implements Query {
       };
 
   private final String queryString;
+  private boolean requireSafeOverQuality;
 
   public SearchQuery(String queryString) {
     this.queryString = queryString;
+  }
+
+  /**
+   * Requires the search to be as safe as possible, evne if it substantially limits the results in a
+   * way that might otherwise be unexpected.
+   */
+  public SearchQuery requireSafeOverQuality() {
+    requireSafeOverQuality = true;
+    return this;
   }
 
   private SearchQuery(Parcel in) {
@@ -44,7 +54,7 @@ public final class SearchQuery implements Query {
 
   @Override
   public String getUrl() {
-    return Api.getSearchUrl(queryString);
+    return Api.getSearchUrl(queryString, requireSafeOverQuality);
   }
 
   @Override

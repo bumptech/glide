@@ -26,6 +26,13 @@ public final class Api {
   private static final LruCache<UrlCacheKey, String> CACHED_URLS =
       new LruCache<>(MAX_URLS_TO_CACHE);
   private static final int MAX_ITEMS_PER_PAGE = 300;
+  /**
+   * Safe search is on by default in Flickr's API and/or enabling it isn't very effective. Instead
+   * we'll force all images to be from Flickr's commons project, which tends to be historic images.
+   * Those appear much safer than a standard search.
+   */
+  private static final String SAFE_SEARCH = "&is_commons=1";
+
   private static final String PER_PAGE = "&per_page=" + MAX_ITEMS_PER_PAGE;
 
   private static final SparseArray<String> EDGE_TO_SIZE_KEY =
@@ -114,8 +121,12 @@ public final class Api {
     return result;
   }
 
-  static String getSearchUrl(String text) {
-    return getUrlForMethod("flickr.photos.search") + "&text=" + text + PER_PAGE;
+  static String getSearchUrl(String text, boolean requireSafeOverQuality) {
+    return getUrlForMethod("flickr.photos.search")
+        + "&text="
+        + text
+        + PER_PAGE
+        + (requireSafeOverQuality ? SAFE_SEARCH : "");
   }
 
   static String getRecentUrl() {

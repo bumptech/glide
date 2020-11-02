@@ -44,7 +44,7 @@ public class FlickrSearchActivity extends AppCompatActivity
     implements SearchView.OnQueryTextListener {
   private static final String TAG = "FlickrSearchActivity";
   private static final String STATE_QUERY = "state_search_string";
-  private static final Query DEFAULT_QUERY = new SearchQuery("kitten");
+  private static final Query DEFAULT_QUERY = new SearchQuery("airplane").requireSafeOverQuality();
 
   private final QueryListener queryListener = new QueryListener();
   private final Set<PhotoViewer> photoViewers = new HashSet<>();
