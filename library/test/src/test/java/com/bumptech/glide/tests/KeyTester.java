@@ -141,7 +141,14 @@ public final class KeyTester implements TestRule {
     protected boolean doEquivalent(@NonNull Key a, @NonNull Key b) {
       byte[] aDigest = sha256.getDigest(a);
       byte[] bDigest = sha256.getDigest(b);
-      return a.equals(b) && Arrays.equals(aDigest, bDigest);
+      Object object = new Object();
+      return a.equals(b)
+          && b.equals(a)
+          && !a.equals(null)
+          && !b.equals(null)
+          && !a.equals(object)
+          && !b.equals(object)
+          && Arrays.equals(aDigest, bDigest);
     }
 
     @Override
