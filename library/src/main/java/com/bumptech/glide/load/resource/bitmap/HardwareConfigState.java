@@ -126,12 +126,17 @@ public final class HardwareConfigState {
     }
   }
 
-  public synchronized void blockHardwareBitmaps() {
+  public boolean areHardwareBitmapsBlocked() {
+    Util.assertMainThread();
+    return !isHardwareConfigAllowedByAppState.get();
+  }
+
+  public void blockHardwareBitmaps() {
     Util.assertMainThread();
     isHardwareConfigAllowedByAppState.set(false);
   }
 
-  public synchronized void unblockHardwareBitmaps() {
+  public void unblockHardwareBitmaps() {
     Util.assertMainThread();
     isHardwareConfigAllowedByAppState.set(true);
   }

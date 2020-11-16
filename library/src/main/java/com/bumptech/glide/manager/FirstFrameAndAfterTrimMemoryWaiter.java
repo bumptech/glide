@@ -20,5 +20,7 @@ final class FirstFrameAndAfterTrimMemoryWaiter implements FrameWaiter, Component
   public void onConfigurationChanged(@NonNull Configuration newConfig) {}
 
   @Override
-  public void onLowMemory() {}
+  public void onLowMemory() {
+    onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
+  }
 }
