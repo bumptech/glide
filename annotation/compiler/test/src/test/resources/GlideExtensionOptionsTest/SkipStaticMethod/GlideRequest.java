@@ -487,6 +487,13 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   @Override
   @NonNull
   @CheckResult
+  public GlideRequest<TranscodeType> error(Object o) {
+    return (GlideRequest<TranscodeType>) super.error(o);
+  }
+
+  @Override
+  @NonNull
+  @CheckResult
   public GlideRequest<TranscodeType> thumbnail(@Nullable RequestBuilder<TranscodeType> builder) {
     return (GlideRequest<TranscodeType>) super.thumbnail(builder);
   }
