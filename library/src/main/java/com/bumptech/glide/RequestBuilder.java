@@ -231,29 +231,65 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * RequestBuilders}
    *
    * <p>You can only call this method on a {@code RequestBuilder} that has previously had {@code
-   * load()} called on it with a non-null model. .
+   * load()} called on it with a non-null model. We need this restriction to make sure any
+   * additional options provided by the various type specific {@code load()} methods are consistent.
+   * If the types don't match, then we might copy the wrong type specific options from the primary
+   * request to the error request, or we might fail to apply important type specific options for the
+   * error request, or both.
    *
    * <p>Other than thumbnail and error {@code RequestBuilder}s, which are removed, all other options
    * are retained from the primary request. However, <b>order matters!</b> Any options applied after
-   * this method is called will not be applied to the error {@code RequestBuilder}. We should move
+   * this method is called will not be applied to the error {@code RequestBuilder}.
+   *
+   * <p>If the restrictions for this method won't work, use {@link #error(RequestBuilder)} directly
+   * instead. This is merely a convenience method for an expected common case where the error and
+   * primary request types match and the primary model is non-null.
    */
   @NonNull
   @CheckResult
-  public RequestBuilder<TranscodeType> error(Object model) {
-    if (model == null) {
+  public RequestBuilder<TranscodeType> error(Object errorModel) {
+    // Check this early to make the error message more consistent. We don't want to let through
+    // a call to .error() before .load() if the model happens to be null.
+    if (!isModelSet) {
+      throw new IllegalArgumentException("You can only call #error(Object) after calling #load()");
+    }
+
+    // We can't verify the type.
+    if (this.model == null && errorModel != null) {
+      throw new IllegalArgumentException(
+          "You can only call #error(Object) with a type that matches the model passed to #load(),"
+              + " but you passed a null model to #load() and a non-null model to #error(), so we"
+              + " can't verify the types match. If you expect this to happen sometimes, use"
+              + " #error(RequestBuilder) instead of this helper method.");
+    }
+
+    // If both are null, we can either disallow a case where both are null and the types match, or
+    // we can be lenient when both are null and the types don't match. To avoid disallowing a valid
+    // both-null and types match case, we'll let this slide.
+    if (errorModel == null) {
       return error((RequestBuilder<TranscodeType>) null);
     }
-    if (this.model == null) {
+
+    // If they're not the same type of model, then we have two potential problems:
+    // 1. We might be copying some type specific options added by the type specific load methods to
+    // the error request even though the options don't apply to the error model.
+    // 2. We might not be applying some type specific options to the error model that would normally
+    // be applied by the type specific load options.
+    // We can solve #2 without too much trouble, but #1 is much more difficult. We'd have to keep
+    // track both of which options were applied via the type specific load methods and which had
+    // subsequently been overridden so that we could only undo those that were applied automatically
+    // and that were not then replaced.
+    // Since this is a convenience method anyway, it's simpler to add restrictions and point people
+    // to the RequestBuilder variant if the restrictions are too onerous for someone's use case.
+    if (!this.model.getClass().isAssignableFrom(errorModel.getClass())) {
       throw new IllegalArgumentException(
-          "Call this method after calling #load() with a non-null" + " model.");
+          "You can only call #error(Object) with the same type of model that you provided to"
+              + " #load(). If you need to pass a different type to #load() and #error(Object), use"
+              + " the somewhat more verbose #error(RequestBuilder) method instead of this"
+              + " helper method");
     }
-    if (!this.model.getClass().isAssignableFrom(model.getClass())) {
-      throw new IllegalArgumentException(
-          "You can only call #error(Object) with the same type of"
-              + " model that you provided to #load(). If you need to load a different type, use the"
-              + " somewhat more verbose #error(RequestBuilder) method instead of this shortcut");
-    }
-    return error(cloneWithNullErrorAndThumbnail().load(model));
+
+    return error(cloneWithNullErrorAndThumbnail().load(errorModel));
   }
 
   private RequestBuilder<TranscodeType> cloneWithNullErrorAndThumbnail() {
