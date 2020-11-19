@@ -226,6 +226,43 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   }
 
   /**
+   * Identical to calling {@link #error(RequestBuilder)} where the {@code RequestBuilder} is the
+   * result of calling {@link #clone()} and removing any existing thumbnail and error {@code
+   * RequestBuilders}
+   *
+   * <p>You can only call this method on a {@code RequestBuilder} that has previously had {@code
+   * load()} called on it with a non-null model. .
+   *
+   * <p>Other than thumbnail and error {@code RequestBuilder}s, which are removed, all other options
+   * are retained from the primary request. However, <b>order matters!</b> Any options applied after
+   * this method is called will not be applied to the error {@code RequestBuilder}. We should move
+   */
+  @NonNull
+  @CheckResult
+  public RequestBuilder<TranscodeType> error(Object model) {
+    if (model == null) {
+      return error((RequestBuilder<TranscodeType>) null);
+    }
+    if (this.model == null) {
+      throw new IllegalArgumentException(
+          "Call this method after calling #load() with a non-null" + " model.");
+    }
+    if (!this.model.getClass().isAssignableFrom(model.getClass())) {
+      throw new IllegalArgumentException(
+          "You can only call #error(Object) with the same type of"
+              + " model that you provided to #load(). If you need to load a different type, use the"
+              + " somewhat more verbose #error(RequestBuilder) method instead of this shortcut");
+    }
+    return error(cloneWithNullErrorAndThumbnail().load(model));
+  }
+
+  private RequestBuilder<TranscodeType> cloneWithNullErrorAndThumbnail() {
+    return clone()
+        .error((RequestBuilder<TranscodeType>) null)
+        .thumbnail((RequestBuilder<TranscodeType>) null);
+  }
+
+  /**
    * Loads and displays the resource retrieved by the given thumbnail request if it finishes before
    * this request. Best used for loading thumbnail resources that are smaller and will be loaded
    * more quickly than the full size resource. There are no guarantees about the order in which the
