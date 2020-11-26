@@ -18,6 +18,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestOptions;
+import javax.annotation.Generated;
 
 /**
  * Automatically generated from {@link com.bumptech.glide.annotation.GlideExtension} annotated classes.
@@ -26,6 +27,7 @@ import com.bumptech.glide.request.RequestOptions;
  * @see Extension
  */
 @SuppressWarnings("deprecation")
+@Generated("com.bumptech.glide.annotation.compiler.RequestOptionsGenerator")
 public final class GlideOptions extends RequestOptions implements Cloneable {
   private static GlideOptions fitCenterTransform1;
 

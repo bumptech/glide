@@ -8,6 +8,7 @@ apply plugin: 'com.android.application'
 dependencies {
     annotationProcessor project(":annotation:compiler")
     implementation project(":library")
+    implementation "javax.annotation:javax.annotation-api:1.3.2"
 
     androidTestImplementation project(':library')
     androidTestImplementation project(':mocks')

@@ -12,6 +12,7 @@ import android.view.View;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import java.io.File;
+import javax.annotation.Generated;
 
 /**
  * The entry point for interacting with Glide for Applications
@@ -22,6 +23,7 @@ import java.io.File;
  * <p>This class is generated and should not be modified
  * @see Glide
  */
+@Generated("com.bumptech.glide.annotation.compiler.GlideGenerator")
 public final class GlideApp {
   private GlideApp() {
   }

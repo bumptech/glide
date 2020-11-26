@@ -1,9 +1,11 @@
 package com.bumptech.glide.annotation.compiler;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import javax.annotation.Generated;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -71,6 +73,10 @@ final class RequestManagerFactoryGenerator {
         .addModifiers(Modifier.FINAL)
         .addSuperinterface(ClassName.get(requestManagerFactoryInterface))
         .addJavadoc("Generated code, do not modify\n")
+        .addAnnotation(
+            AnnotationSpec.builder(Generated.class)
+                .addMember("value", "$S", getClass().getName())
+                .build())
         .addMethod(
             MethodSpec.methodBuilder("build")
                 .addModifiers(Modifier.PUBLIC)

@@ -7,8 +7,10 @@ import com.bumptech.glide.test.EmptyAppModule;
 import com.bumptech.glide.test.EmptyLibraryModule;
 import java.util.Collections;
 import java.util.Set;
+import javax.annotation.Generated;
 
 @SuppressWarnings("deprecation")
+@Generated("com.bumptech.glide.annotation.compiler.AppModuleGenerator")
 final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   private final EmptyAppModule appGlideModule;
 

@@ -6,8 +6,10 @@ import android.util.Log;
 import com.bumptech.glide.test.AppModuleWithExcludes;
 import java.util.HashSet;
 import java.util.Set;
+import javax.annotation.Generated;
 
 @SuppressWarnings("deprecation")
+@Generated("com.bumptech.glide.annotation.compiler.AppModuleGenerator")
 final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   private final AppModuleWithExcludes appGlideModule;
 

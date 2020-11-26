@@ -12,6 +12,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Generated;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
@@ -108,6 +109,10 @@ final class GlideGenerator {
                 + "@see $T\n",
             GlideExtension.class,
             glideType)
+        .addAnnotation(
+            AnnotationSpec.builder(Generated.class)
+                .addMember("value", "$S", getClass().getName())
+                .build())
         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
         .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
         .addMethods(

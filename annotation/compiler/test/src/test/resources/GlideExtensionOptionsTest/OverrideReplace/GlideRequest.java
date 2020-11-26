@@ -28,6 +28,7 @@ import com.bumptech.glide.request.RequestListener;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
+import javax.annotation.Generated;
 
 /**
  * Contains all public methods from {@link RequestBuilder<TranscodeType>}, all options from
@@ -44,6 +45,7 @@ import java.util.List;
     "unused",
     "deprecation"
 })
+@Generated("com.bumptech.glide.annotation.compiler.RequestBuilderGenerator")
 public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> implements Cloneable {
   GlideRequest(@NonNull Class<TranscodeType> transcodeClass, @NonNull RequestBuilder<?> other) {
     super(transcodeClass, other);

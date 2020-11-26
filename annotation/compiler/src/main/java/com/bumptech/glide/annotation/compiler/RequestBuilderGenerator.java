@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Generated;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -172,6 +173,10 @@ final class RequestBuilderGenerator {
             AnnotationSpec.builder(SuppressWarnings.class)
                 .addMember("value", "$S", "unused")
                 .addMember("value", "$S", "deprecation")
+                .build())
+        .addAnnotation(
+            AnnotationSpec.builder(Generated.class)
+                .addMember("value", "$S", getClass().getName())
                 .build())
         .addModifiers(Modifier.PUBLIC)
         .addTypeVariable(transcodeTypeName)
