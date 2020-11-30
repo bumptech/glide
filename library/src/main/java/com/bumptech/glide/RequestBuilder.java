@@ -251,7 +251,11 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       throw new IllegalArgumentException(
           "You can only call #error(Object) with the same type of"
               + " model that you provided to #load(). If you need to load a different type, use the"
-              + " somewhat more verbose #error(RequestBuilder) method instead of this shortcut");
+              + " somewhat more verbose #error(RequestBuilder) method instead of this shortcut."
+              + " Given: "
+              + model.getClass()
+              + ", but expected some subtype of "
+              + this.model.getClass());
     }
     return error(cloneWithNullErrorAndThumbnail().load(model));
   }
