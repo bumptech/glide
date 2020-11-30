@@ -166,9 +166,9 @@ public final class GlideException extends Exception {
     if (rootCauses.isEmpty()) {
       return result.toString();
     } else if (rootCauses.size() == 1) {
-      result.append("\nThere was 1 cause:");
+      result.append("\nThere was 1 root cause:");
     } else {
-      result.append("\nThere were ").append(rootCauses.size()).append(" causes:");
+      result.append("\nThere were ").append(rootCauses.size()).append(" root causes:");
     }
     for (Throwable cause : rootCauses) {
       result

@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -70,9 +72,16 @@ public class VideoDecoderTest {
   }
 
   @Test
-  public void testReleasesMediaMetadataRetriever() throws IOException {
+  public void testReleasesMediaMetadataRetriever() {
     Util.setSdkVersionInt(19);
-    decoder.decode(resource, 1, 2, options);
+    assertThrows(
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws IOException {
+            decoder.decode(resource, 1, 2, options);
+          }
+        });
 
     verify(retriever).release();
   }
@@ -85,22 +94,36 @@ public class VideoDecoderTest {
   }
 
   @Test
-  public void testSpecifiesThumbnailFrameIfICalledWithFrameNumber() throws IOException {
+  public void testSpecifiesThumbnailFrameIfICalledWithFrameNumber() {
     Util.setSdkVersionInt(19);
     long frame = 5;
     options.set(VideoDecoder.TARGET_FRAME, frame);
     decoder = new VideoDecoder<>(bitmapPool, initializer, factory);
 
-    decoder.decode(resource, 100, 100, options);
+    assertThrows(
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws IOException {
+            decoder.decode(resource, 1, 2, options);
+          }
+        });
 
     verify(retriever).getFrameAtTime(frame, VideoDecoder.DEFAULT_FRAME_OPTION);
   }
 
   @Test
-  public void testDoesNotSpecifyThumbnailFrameIfCalledWithoutFrameNumber() throws IOException {
+  public void testDoesNotSpecifyThumbnailFrameIfCalledWithoutFrameNumber() {
     Util.setSdkVersionInt(19);
     decoder = new VideoDecoder<>(bitmapPool, initializer, factory);
-    decoder.decode(resource, 100, 100, options);
+    assertThrows(
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() throws IOException {
+            decoder.decode(resource, 100, 100, options);
+          }
+        });
 
     verify(retriever).getFrameAtTime(VideoDecoder.DEFAULT_FRAME, VideoDecoder.DEFAULT_FRAME_OPTION);
   }
