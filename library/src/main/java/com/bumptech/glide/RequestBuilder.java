@@ -228,30 +228,25 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   /**
    * Identical to calling {@link #error(RequestBuilder)} where the {@code RequestBuilder} is the
    * result of calling {@link #clone()} and removing any existing thumbnail and error {@code
-   * RequestBuilders}
-   *
-   * <p>You can only call this method on a {@code RequestBuilder} that has previously had {@code
-   * load()} called on it with a non-null model. .
+   * RequestBuilders}.
    *
    * <p>Other than thumbnail and error {@code RequestBuilder}s, which are removed, all other options
    * are retained from the primary request. However, <b>order matters!</b> Any options applied after
-   * this method is called will not be applied to the error {@code RequestBuilder}. We should move
+   * this method is called will not be applied to the error {@code RequestBuilder}.
+   *
+   * <p>WARNING: Calling this method with a {@code model} whose type does not match the type of the
+   * model passed to {@code load()} may be dangerous! Any options that were applied by the various
+   * type specific {@code load()} methods, like {@link #load(byte[])} will be copied to the error
+   * request here even if the {@code model} you pass to this method doesn't match. Similary, options
+   * that would be normally applied by type specific {@code load()} methods will <em>not</em> be
+   * applied to this request. If this behavior is confusing or unexpected, use {@link
+   * #error(RequestBuilder)} instead.
    */
   @NonNull
   @CheckResult
   public RequestBuilder<TranscodeType> error(Object model) {
     if (model == null) {
       return error((RequestBuilder<TranscodeType>) null);
-    }
-    if (this.model == null) {
-      throw new IllegalArgumentException(
-          "Call this method after calling #load() with a non-null" + " model.");
-    }
-    if (!this.model.getClass().isAssignableFrom(model.getClass())) {
-      throw new IllegalArgumentException(
-          "You can only call #error(Object) with the same type of"
-              + " model that you provided to #load(). If you need to load a different type, use the"
-              + " somewhat more verbose #error(RequestBuilder) method instead of this shortcut");
     }
     return error(cloneWithNullErrorAndThumbnail().load(model));
   }
