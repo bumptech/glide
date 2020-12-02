@@ -179,10 +179,6 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
               outWidth,
               outHeight,
               downsampleStrategy);
-
-    } catch (RuntimeException e) {
-      // MediaMetadataRetriever APIs throw generic runtime exceptions when given invalid data.
-      throw new IOException(e);
     } finally {
       mediaMetadataRetriever.release();
     }
@@ -218,9 +214,18 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       result = decodeOriginalFrame(mediaMetadataRetriever, frameTimeMicros, frameOption);
     }
 
+    // Throwing an exception works better in our error logging than returning null. It shouldn't
+    // be expensive because video decoders are attempted after image loads. Video errors are often
+    // logged by the framework, so we can also use this error to suggest callers look for the
+    // appropriate tags in adb.
+    if (result == null) {
+      throw new VideoDecoderException();
+    }
+
     return result;
   }
 
+  @Nullable
   @TargetApi(Build.VERSION_CODES.O_MR1)
   private static Bitmap decodeScaledFrame(
       MediaMetadataRetriever mediaMetadataRetriever,
@@ -264,7 +269,10 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       // just from decoding the frame, then it will be thrown and exposed to callers by the method
       // below.
       if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Exception trying to decode frame on oreo+", t);
+        Log.d(
+            TAG,
+            "Exception trying to decode a scaled frame on oreo+, falling back to a fullsize frame",
+            t);
       }
 
       return null;
@@ -334,6 +342,17 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
             @Override
             public void close() {}
           });
+    }
+  }
+
+  private static final class VideoDecoderException extends RuntimeException {
+
+    private static final long serialVersionUID = -2556382523004027815L;
+
+    VideoDecoderException() {
+      super(
+          "MediaMetadataRetriever failed to retrieve a frame without throwing, check the adb logs"
+              + " for .*MetadataRetriever.* prior to this exception for details");
     }
   }
 }
