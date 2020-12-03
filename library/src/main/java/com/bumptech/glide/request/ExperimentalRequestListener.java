@@ -33,4 +33,7 @@ public abstract class ExperimentalRequestListener<ResourceT> implements RequestL
       DataSource dataSource,
       boolean isFirstResource,
       boolean isAlternateCacheKey);
+
+  /** Called before the {@code model} starts. */
+  public abstract boolean onLoadStarted(Object model, Target<ResourceT> target);
 }

@@ -447,6 +447,10 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       if (IS_VERBOSE_LOGGABLE) {
         logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
       }
+
+      if (requestListeners != null) {
+        for (RequestListener<R> listener : requestListeners) {}
+      }
       loadStatus =
           engine.load(
               glideContext,
