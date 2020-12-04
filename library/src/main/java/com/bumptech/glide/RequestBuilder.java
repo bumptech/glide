@@ -152,9 +152,12 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @CheckResult
   public RequestBuilder<TranscodeType> transition(
       @NonNull TransitionOptions<?, ? super TranscodeType> transitionOptions) {
+    if (isAutoCloneEnabled()) {
+      return clone().transition(transitionOptions);
+    }
     this.transitionOptions = Preconditions.checkNotNull(transitionOptions);
     isDefaultTransitionOptionsSet = false;
-    return this;
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -173,6 +176,9 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> listener(
       @Nullable RequestListener<TranscodeType> requestListener) {
+    if (isAutoCloneEnabled()) {
+      return clone().listener(requestListener);
+    }
     this.requestListeners = null;
     return addListener(requestListener);
   }
@@ -188,13 +194,16 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @CheckResult
   public RequestBuilder<TranscodeType> addListener(
       @Nullable RequestListener<TranscodeType> requestListener) {
+    if (isAutoCloneEnabled()) {
+      return clone().addListener(requestListener);
+    }
     if (requestListener != null) {
       if (this.requestListeners == null) {
         this.requestListeners = new ArrayList<>();
       }
       this.requestListeners.add(requestListener);
     }
-    return this;
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -221,8 +230,11 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    */
   @NonNull
   public RequestBuilder<TranscodeType> error(@Nullable RequestBuilder<TranscodeType> errorBuilder) {
+    if (isAutoCloneEnabled()) {
+      return clone().error(errorBuilder);
+    }
     this.errorBuilder = errorBuilder;
-    return this;
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -279,9 +291,12 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> thumbnail(
       @Nullable RequestBuilder<TranscodeType> thumbnailRequest) {
+    if (isAutoCloneEnabled()) {
+      return clone().thumbnail(thumbnailRequest);
+    }
     this.thumbnailBuilder = thumbnailRequest;
 
-    return this;
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -413,12 +428,15 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @CheckResult
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> thumbnail(float sizeMultiplier) {
+    if (isAutoCloneEnabled()) {
+      return clone().thumbnail(sizeMultiplier);
+    }
     if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
       throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
     }
     this.thumbSizeMultiplier = sizeMultiplier;
 
-    return this;
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -437,9 +455,12 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
 
   @NonNull
   private RequestBuilder<TranscodeType> loadGeneric(@Nullable Object model) {
+    if (isAutoCloneEnabled()) {
+      return clone().loadGeneric(model);
+    }
     this.model = model;
     isModelSet = true;
-    return this;
+    return selfOrThrowIfLocked();
   }
   /**
    * Returns an object to load the given {@link Bitmap}.
@@ -654,6 +675,9 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   public RequestBuilder<TranscodeType> clone() {
     RequestBuilder<TranscodeType> result = super.clone();
     result.transitionOptions = result.transitionOptions.clone();
+    result.requestListeners = new ArrayList<>(result.requestListeners);
+    result.thumbnailBuilder = result.thumbnailBuilder.clone();
+    result.errorBuilder = result.errorBuilder.clone();
     return result;
   }
 
