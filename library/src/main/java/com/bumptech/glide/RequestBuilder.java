@@ -645,7 +645,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * arguments, the current model is not copied so changes to the model will affect both builders.
    */
   @SuppressWarnings({
-    "unchecked",
     // we don't want to throw to be user friendly
     "PMD.CloneThrowsCloneNotSupportedException"
   })
@@ -654,6 +653,15 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   public RequestBuilder<TranscodeType> clone() {
     RequestBuilder<TranscodeType> result = super.clone();
     result.transitionOptions = result.transitionOptions.clone();
+    if (result.requestListeners != null) {
+      result.requestListeners = new ArrayList<>(result.requestListeners);
+    }
+    if (result.thumbnailBuilder != null) {
+      result.thumbnailBuilder = result.thumbnailBuilder.clone();
+    }
+    if (result.errorBuilder != null) {
+      result.errorBuilder = result.errorBuilder.clone();
+    }
     return result;
   }
 
