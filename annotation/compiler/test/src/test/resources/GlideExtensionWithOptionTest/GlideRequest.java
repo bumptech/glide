@@ -450,6 +450,22 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
     return (GlideRequest<TranscodeType>) super.dontAnimate();
   }
 
+  /**
+   * @see GlideOptions#lock()
+   */
+  @NonNull
+  public GlideRequest<TranscodeType> lock() {
+    return (GlideRequest<TranscodeType>) super.lock();
+  }
+
+  /**
+   * @see GlideOptions#autoClone()
+   */
+  @NonNull
+  public GlideRequest<TranscodeType> autoClone() {
+    return (GlideRequest<TranscodeType>) super.autoClone();
+  }
+
   @Override
   @NonNull
   @CheckResult
