@@ -180,7 +180,7 @@ Applications can change the location to external storage if the media they displ
 public class YourAppGlideModule extends AppGlideModule {
   @Override
   public void applyOptions(Context context, GlideBuilder builder) {
-    builder.setDiskCache(new ExternalCacheDiskCacheFactory(context));
+    builder.setDiskCache(new ExternalPreferredCacheDiskCacheFactory(context));
   }
 }
 ```
