@@ -1,4 +1,5 @@
-package com.bumptech.glide.samples.flickr;
+منصةشليله 
+حزمة  كوم . بومبتك . ينزلق . عينات . فليكر .
 
 import android.content.Context;
 import androidx.annotation.NonNull;
