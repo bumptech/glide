@@ -13,7 +13,12 @@ import java.util.Queue;
  * android.graphics.BitmapFactory} can return partially decoded bitmaps.
  *
  * <p>See https://github.com/bumptech/glide/issues/126.
+ *
+ * @deprecated In some cases, callers may not handle getting 0 or -1 return values from methods,
+ *     which can lead to infinite loops (see #4438). Use {@link ExceptionPassthroughInputStream}
+ *     instead. This class will be deleted in a future version of Glide.
  */
+@Deprecated
 public class ExceptionCatchingInputStream extends InputStream {
 
   private static final Queue<ExceptionCatchingInputStream> QUEUE = Util.createQueue(0);
