@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.view.View;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.gif.GifDrawableTest.BitmapTrackingShadowCanvas;
@@ -47,7 +48,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -86,7 +86,7 @@ public class GifDrawableTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
     frameWidth = 120;
     frameHeight = 450;
     firstFrame = Bitmap.createBitmap(frameWidth, frameHeight, Bitmap.Config.RGB_565);
@@ -350,7 +350,7 @@ public class GifDrawableTest {
     Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     drawable =
         new GifDrawable(
-            RuntimeEnvironment.application,
+            ApplicationProvider.getApplicationContext(),
             mock(GifDecoder.class),
             transformation,
             100,
@@ -359,7 +359,9 @@ public class GifDrawableTest {
 
     assertNotNull(Preconditions.checkNotNull(drawable.getConstantState()).newDrawable());
     assertNotNull(
-        drawable.getConstantState().newDrawable(RuntimeEnvironment.application.getResources()));
+        drawable
+            .getConstantState()
+            .newDrawable(ApplicationProvider.getApplicationContext().getResources()));
   }
 
   @Test
@@ -542,7 +544,12 @@ public class GifDrawableTest {
   @Test(expected = NullPointerException.class)
   public void testThrowsIfConstructedWithNullFirstFrame() {
     new GifDrawable(
-        RuntimeEnvironment.application, mock(GifDecoder.class), transformation, 100, 100, null);
+        ApplicationProvider.getApplicationContext(),
+        mock(GifDecoder.class),
+        transformation,
+        100,
+        100,
+        null);
   }
 
   @Test

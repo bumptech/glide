@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
@@ -30,7 +31,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.LooperMode;
 
@@ -69,7 +69,7 @@ public class ByteBufferGifDecoderTest {
     options = new Options();
     decoder =
         new ByteBufferGifDecoder(
-            RuntimeEnvironment.application,
+            ApplicationProvider.getApplicationContext(),
             parsers,
             bitmapPool,
             new LruArrayPool(ARRAY_POOL_SIZE_BYTES),

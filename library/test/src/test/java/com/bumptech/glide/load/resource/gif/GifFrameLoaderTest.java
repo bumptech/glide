@@ -18,6 +18,7 @@ import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
 import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
@@ -40,7 +41,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.LooperMode;
 
@@ -92,7 +92,7 @@ public class GifFrameLoaderTest {
   }
 
   private static Glide getGlideSingleton() {
-    return Glide.get(RuntimeEnvironment.application);
+    return Glide.get(ApplicationProvider.getApplicationContext());
   }
 
   @SuppressWarnings("unchecked")

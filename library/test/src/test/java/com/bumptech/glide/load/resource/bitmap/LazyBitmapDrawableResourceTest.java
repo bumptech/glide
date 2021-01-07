@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.engine.Initializable;
 import com.bumptech.glide.load.engine.Resource;
 import org.junit.Before;
@@ -16,7 +17,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class LazyBitmapDrawableResourceTest {
@@ -32,7 +32,7 @@ public class LazyBitmapDrawableResourceTest {
     bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     when(bitmapResource.get()).thenReturn(bitmap);
 
-    resources = RuntimeEnvironment.application.getResources();
+    resources = ApplicationProvider.getApplicationContext().getResources();
     resource =
         (LazyBitmapDrawableResource) LazyBitmapDrawableResource.obtain(resources, bitmapResource);
   }

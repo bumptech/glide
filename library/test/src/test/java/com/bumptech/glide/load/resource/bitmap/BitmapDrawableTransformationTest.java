@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.Transformation;
@@ -33,7 +34,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -56,7 +56,7 @@ public class BitmapDrawableTransformationTest {
     bitmapToTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     BitmapDrawable drawableToTransform = new BitmapDrawable(bitmapToTransform);
 
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
     Glide.init(context, new GlideBuilder().setBitmapPool(bitmapPool));
     when(drawableResourceToTransform.get()).thenReturn(drawableToTransform);
     transformation = new BitmapDrawableTransformation(wrapped);
