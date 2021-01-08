@@ -2,6 +2,7 @@ package com.bumptech.glide.load.model;
 
 import static org.junit.Assert.assertEquals;
 
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.util.ByteBufferUtil;
@@ -13,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -25,7 +25,7 @@ public class StreamEncoderTest {
   @Before
   public void setUp() {
     encoder = new StreamEncoder(new LruArrayPool());
-    file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
+    file = new File(ApplicationProvider.getApplicationContext().getCacheDir(), "test");
   }
 
   @After

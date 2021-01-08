@@ -7,6 +7,7 @@ import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 
 import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.signature.ObjectKey;
 import com.bumptech.glide.tests.Util;
@@ -17,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -30,7 +30,7 @@ public class DiskLruCacheWrapperTest {
 
   @Before
   public void setUp() {
-    dir = RuntimeEnvironment.application.getCacheDir();
+    dir = ApplicationProvider.getApplicationContext().getCacheDir();
     cache = DiskLruCacheWrapper.create(dir, 10 * 1024 * 1024);
     key = new ObjectKey("test" + Math.random());
     data = new byte[] {1, 2, 3, 4, 5, 6};

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Application;
 import android.widget.ImageView;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.resource.SimpleResource;
 import com.bumptech.glide.request.Request;
@@ -31,7 +32,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @SuppressWarnings("unchecked")
@@ -52,8 +52,8 @@ public class RequestBuilderTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    glide = Glide.get(RuntimeEnvironment.application);
-    context = RuntimeEnvironment.application;
+    glide = Glide.get(ApplicationProvider.getApplicationContext());
+    context = ApplicationProvider.getApplicationContext();
   }
 
   @Test(expected = NullPointerException.class)
@@ -102,7 +102,7 @@ public class RequestBuilderTest {
 
   @Test(expected = RuntimeException.class)
   public void testThrowsIfIntoViewCalledOnBackgroundThread() throws InterruptedException {
-    final ImageView imageView = new ImageView(RuntimeEnvironment.application);
+    final ImageView imageView = new ImageView(ApplicationProvider.getApplicationContext());
     testInBackground(
         new BackgroundTester() {
           @Override

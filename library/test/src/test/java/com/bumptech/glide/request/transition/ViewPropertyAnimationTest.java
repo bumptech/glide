@@ -11,11 +11,11 @@ import static org.mockito.Mockito.when;
 
 import android.view.View;
 import android.widget.ImageView;
+import androidx.test.core.app.ApplicationProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -37,7 +37,7 @@ public class ViewPropertyAnimationTest {
 
   @Test
   public void testCallsAnimatorWithGivenView() {
-    ImageView view = new ImageView(RuntimeEnvironment.application);
+    ImageView view = new ImageView(ApplicationProvider.getApplicationContext());
     ViewAdapter adapter = mock(ViewAdapter.class);
     when(adapter.getView()).thenReturn(view);
     animation.transition(new Object(), adapter);

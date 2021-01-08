@@ -34,6 +34,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
@@ -80,7 +81,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -127,7 +127,7 @@ public class GlideTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
 
     // Run all tasks on the main thread so they complete synchronously.
     GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();

@@ -16,6 +16,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitor.ConnectivityListener;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
@@ -40,7 +41,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.LooperMode;
 
@@ -63,7 +63,7 @@ public class RequestManagerTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
     connectivityMonitor = mock(ConnectivityMonitor.class);
     ConnectivityMonitorFactory factory = mock(ConnectivityMonitorFactory.class);
     when(factory.build(isA(Context.class), isA(ConnectivityMonitor.ConnectivityListener.class)))
@@ -91,7 +91,7 @@ public class RequestManagerTest {
     requestTracker = mock(RequestTracker.class);
     manager =
         new RequestManager(
-            Glide.get(RuntimeEnvironment.application),
+            Glide.get(ApplicationProvider.getApplicationContext()),
             lifecycle,
             treeNode,
             requestTracker,

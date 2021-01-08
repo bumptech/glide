@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.tests.KeyTester;
 import java.io.UnsupportedEncodingException;
@@ -17,7 +18,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -28,7 +28,7 @@ public class ApplicationVersionSignatureTest {
 
   @Before
   public void setUp() {
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
   }
 
   @After

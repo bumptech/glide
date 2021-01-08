@@ -14,6 +14,7 @@ import android.content.ContentResolver;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
@@ -28,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboCursor;
@@ -86,7 +86,7 @@ public class ThumbnailStreamOpenerTest {
   @Test
   public void testReturnsOpenedInputStreamWhenFileFound() throws FileNotFoundException {
     InputStream expected = new ByteArrayInputStream(new byte[0]);
-    Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver())
+    Shadows.shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
         .registerInputStream(harness.uri, expected);
     assertEquals(expected, harness.get().open(harness.uri));
   }
@@ -103,7 +103,7 @@ public class ThumbnailStreamOpenerTest {
     ThumbFetcher.VideoThumbnailQuery query =
         new ThumbFetcher.VideoThumbnailQuery(getContentResolver());
     RoboCursor testCursor = new RoboCursor();
-    Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver())
+    Shadows.shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
         .setCursor(queryUri, testCursor);
     assertEquals(testCursor, query.query(harness.uri));
   }
@@ -114,13 +114,13 @@ public class ThumbnailStreamOpenerTest {
     ThumbFetcher.ImageThumbnailQuery query =
         new ThumbFetcher.ImageThumbnailQuery(getContentResolver());
     RoboCursor testCursor = new RoboCursor();
-    Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver())
+    Shadows.shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
         .setCursor(queryUri, testCursor);
     assertEquals(testCursor, query.query(harness.uri));
   }
 
   private static ContentResolver getContentResolver() {
-    return RuntimeEnvironment.application.getContentResolver();
+    return ApplicationProvider.getApplicationContext().getContentResolver();
   }
 
   private static class Harness {

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.AssetManager;
 import android.net.Uri;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.util.Preconditions;
@@ -17,7 +18,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -32,7 +32,7 @@ public class AssetUriLoaderTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    loader = new AssetUriLoader<>(RuntimeEnvironment.application.getAssets(), factory);
+    loader = new AssetUriLoader<>(ApplicationProvider.getApplicationContext().getAssets(), factory);
   }
 
   @Test

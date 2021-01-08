@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.StreamLocalUriFetcher;
@@ -20,7 +21,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
@@ -38,7 +38,7 @@ public class StreamLocalUriFetcherTest {
 
   @Test
   public void testLoadResource_returnsInputStream() throws Exception {
-    Context context = RuntimeEnvironment.application;
+    Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();
@@ -52,7 +52,7 @@ public class StreamLocalUriFetcherTest {
 
   @Test
   public void testLoadResource_withNullInputStream_callsLoadFailed() {
-    Context context = RuntimeEnvironment.application;
+    Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();

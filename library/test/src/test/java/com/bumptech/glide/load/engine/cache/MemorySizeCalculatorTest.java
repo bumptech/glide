@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculatorTest.LowRamActivityManager;
 import com.bumptech.glide.tests.Util;
 import com.google.common.collect.Range;
@@ -15,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -164,14 +164,15 @@ public class MemorySizeCalculatorTest {
     final float sizeMultiplier = MemorySizeCalculator.Builder.MAX_SIZE_MULTIPLIER;
     int byteArrayPoolSizeBytes = MemorySizeCalculator.Builder.ARRAY_POOL_SIZE_BYTES;
     final ActivityManager activityManager =
-        (ActivityManager) RuntimeEnvironment.application.getSystemService(Context.ACTIVITY_SERVICE);
+        (ActivityManager)
+            ApplicationProvider.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
     final MemorySizeCalculator.ScreenDimensions screenDimensions =
         mock(MemorySizeCalculator.ScreenDimensions.class);
 
     MemorySizeCalculator getCalculator() {
       when(screenDimensions.getWidthPixels()).thenReturn(pixelSize);
       when(screenDimensions.getHeightPixels()).thenReturn(pixelSize);
-      return new MemorySizeCalculator.Builder(RuntimeEnvironment.application)
+      return new MemorySizeCalculator.Builder(ApplicationProvider.getApplicationContext())
           .setMemoryCacheScreens(memoryCacheScreens)
           .setBitmapPoolScreens(bitmapPoolScreens)
           .setMaxSizeMultiplier(sizeMultiplier)
