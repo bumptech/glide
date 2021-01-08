@@ -5,10 +5,8 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
-import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +26,7 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.LooperMode;
 import org.robolectric.shadow.api.Shadow;
+import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowConnectivityManager;
 import org.robolectric.shadows.ShadowNetworkInfo;
 
@@ -157,8 +156,7 @@ public class DefaultConnectivityMonitorTest {
 
   private List<BroadcastReceiver> getConnectivityReceivers() {
     Intent connectivity = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
-    return shadowOf((Application) ApplicationProvider.getApplicationContext())
-        .getReceiversForIntent(connectivity);
+    return ShadowApplication.getInstance().getReceiversForIntent(connectivity);
   }
 
   private static class ConnectivityHarness {

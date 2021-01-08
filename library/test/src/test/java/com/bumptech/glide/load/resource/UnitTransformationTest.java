@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import android.app.Application;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.tests.KeyTester;
@@ -18,7 +19,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.robolectric.RuntimeEnvironment;
 
 @RunWith(JUnit4.class)
 public class UnitTransformationTest {
@@ -28,7 +28,7 @@ public class UnitTransformationTest {
 
   @Before
   public void setUp() {
-    app = RuntimeEnvironment.application;
+    app = ApplicationProvider.getApplicationContext();
   }
 
   @Test
