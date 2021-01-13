@@ -804,9 +804,7 @@ public final class DiskLruCache implements Closeable {
             written[index] = true;
         }
         File dirtyFile = entry.getDirtyFile(index);
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
+        directory.mkdirs();
         return dirtyFile;
       }
     }
