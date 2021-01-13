@@ -162,11 +162,11 @@ public class Glide implements ComponentCallbacks2 {
     File cacheDir = context.getCacheDir();
     if (cacheDir != null) {
       File result = new File(cacheDir, cacheName);
-      if (!result.mkdirs() && (!result.exists() || !result.isDirectory())) {
-        // File wasn't able to create a directory, or the result exists but not a directory
-        return null;
+      if (result.isDirectory() || result.mkdirs()) {
+        return result;
       }
-      return result;
+      // File wasn't able to create a directory, or the result exists but not a directory
+      return null;
     }
     if (Log.isLoggable(TAG, Log.ERROR)) {
       Log.e(TAG, "default disk cache dir is null");
