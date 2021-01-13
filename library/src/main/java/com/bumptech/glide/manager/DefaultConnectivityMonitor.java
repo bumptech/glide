@@ -108,11 +108,11 @@ final class DefaultConnectivityMonitor implements ConnectivityMonitor {
 
   @Override
   public void onStop() {
-    unregister();
+    // Do nothing.
   }
 
   @Override
   public void onDestroy() {
-    // Do nothing.
+    unregister();
   }
 }
