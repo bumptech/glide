@@ -196,6 +196,29 @@ public class Glide implements ComponentCallbacks2 {
     return glide;
   }
 
+    /**
+     * Get the singleton.
+     *
+     * @return the singleton
+     */
+    @NonNull
+    // Double checked locking is safe here.
+    @SuppressWarnings("GuardedBy")
+    public static Glide get() {
+        if (glide == null) {
+            Context context = GlideProvider.contextWeakReference.get();
+            GeneratedAppGlideModule annotationGeneratedModule =
+                    getAnnotationGeneratedGlideModules(context.getApplicationContext());
+            synchronized (Glide.class) {
+                if (glide == null) {
+                    checkAndInitializeGlide(context, annotationGeneratedModule);
+                }
+            }
+        }
+
+        return glide;
+    }
+
   @GuardedBy("Glide.class")
   private static void checkAndInitializeGlide(
       @NonNull Context context, @Nullable GeneratedAppGlideModule generatedAppGlideModule) {
@@ -774,7 +797,42 @@ public class Glide implements ComponentCallbacks2 {
     return Glide.get(context).getRequestManagerRetriever();
   }
 
-  /**
+    /**
+     * Begin a load with Glide without passing in a context.
+     *
+     * <p>Any requests started using a context will only have the application level options applied
+     * and will not be started or stopped based on lifecycle events. In general, loads should be
+     * started at the level the result will be used in. If the resource will be used in a view in a
+     * child fragment, the load should be started with {@link #with(android.app.Fragment)}} using that
+     * child fragment. Similarly, if the resource will be used in a view in the parent fragment, the
+     * load should be started with {@link #with(android.app.Fragment)} using the parent fragment. In
+     * the same vein, if the resource will be used in a view in an activity, the load should be
+     * started with {@link #with(android.app.Activity)}}.
+     *
+     * <p>This method is appropriate for resources that will be used outside of the normal fragment or
+     * activity lifecycle (For example in services, or for notification thumbnails).
+     *
+     * @return A RequestManager for the top level application that can be used to start a load.
+     * @see #with(android.app.Activity)
+     * @see #with(android.app.Fragment)
+     * @see #with(androidx.fragment.app.Fragment)
+     * @see #with(androidx.fragment.app.FragmentActivity)
+     */
+    @NonNull
+    public static RequestManager with() {
+        synchronized (Glide.class) {
+            Context context = GlideProvider.contextWeakReference.get();
+            if (context == null) {
+                throw new IllegalStateException("context is null");
+            }
+            return getRetriever(context).get(context);
+
+        }
+    }
+
+
+
+    /**
    * Begin a load with Glide by passing in a context.
    *
    * <p>Any requests started using a context will only have the application level options applied
