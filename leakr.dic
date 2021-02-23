@@ -1,0 +1,23 @@
+confidential;1;confidentialit,confidentiality
+dogfood;1;
+fishfood;1;
+catfood;1;
+teamfood;1;
+droidfood;1;
+//go/;1;
+//sites/;1;
+a/google.com;1;
+corp.google.com;1;
+.googleplex.com;1;
+sandbox.;1;wallet-web.sandbox.,sandbox.google.com/checkout, sandbox.,paymentssandbox
+suck;1;suckle
+fuck;1;6FUcky,sfuck
+caution:;1;
+internal only;2;
+internal_only;2;
+backdoor;2;
+STOPSHIP;2;
+ridiculous;1;
+notasecret;1;
+@google.com;1;noreply@google.com
+$RE:chmod [0-9]?777;3;chmod (0)777

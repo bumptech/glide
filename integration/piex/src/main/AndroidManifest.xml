@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.bumptech.glide.integration.piex">
+
+    <application>
+        <meta-data
+            android:name="com.bumptech.glide.integration.piex.PiexGlideModule"
+            android:value="GlideModule" />
+    </application>
+</manifest>
