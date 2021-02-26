@@ -1,6 +1,8 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Build;
+import android.os.StrictMode;
+import android.os.StrictMode.ThreadPolicy;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.util.Pools;
@@ -220,6 +222,9 @@ class DecodeJob<R>
   @SuppressWarnings("PMD.AvoidRethrowingException")
   @Override
   public void run() {
+    ThreadPolicy oldThreadPolicy = StrictMode.getThreadPolicy();
+    StrictMode.setThreadPolicy(new ThreadPolicy.Builder(oldThreadPolicy).permitNetwork().build());
+
     // This should be much more fine grained, but since Java's thread pool implementation silently
     // swallows all otherwise fatal exceptions, this will at least make it obvious to developers
     // that something is failing.
@@ -267,6 +272,7 @@ class DecodeJob<R>
       }
       GlideTrace.endSection();
     }
+    StrictMode.setThreadPolicy(oldThreadPolicy);
   }
 
   private void runWrapped() {
