@@ -376,7 +376,7 @@ public final class Downsampler {
       }
     }
 
-    if(preferredColorSpace != PreferredColorSpace.NULL) {
+    if (preferredColorSpace != PreferredColorSpace.NULL) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         boolean isP3Eligible =
             preferredColorSpace == PreferredColorSpace.DISPLAY_P3
