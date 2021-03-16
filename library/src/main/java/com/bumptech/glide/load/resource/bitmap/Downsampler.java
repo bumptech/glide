@@ -178,6 +178,21 @@ public final class Downsampler {
   }
 
   /**
+   * Identical to {@link #decode(InputStream, int, int, Options)}, except that it accepts a {@link
+   * ByteBuffer} in place of an {@link InputStream}.
+   */
+  public Resource<Bitmap> decode(
+      ByteBuffer buffer, int requestedWidth, int requestedHeight, Options options)
+      throws IOException {
+    return decode(
+        new ImageReader.ByteBufferReader(buffer, parsers, byteArrayPool),
+        requestedWidth,
+        requestedHeight,
+        options,
+        EMPTY_CALLBACKS);
+  }
+
+  /**
    * Returns a Bitmap decoded from the given {@link InputStream} that is rotated to match any EXIF
    * data present in the stream and that is downsampled according to the given dimensions and any
    * provided {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option.
