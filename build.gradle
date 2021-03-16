@@ -4,13 +4,14 @@ import se.bjurr.violations.gradle.plugin.ViolationsTask
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
         maven {
             url "https://plugins.gradle.org/m2/"
         }
+        gradlePluginPortal()
     }
 
     dependencies {
@@ -36,10 +37,11 @@ subprojects { project ->
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
+        gradlePluginPortal()
     }
 
     tasks.withType(JavaCompile) {
