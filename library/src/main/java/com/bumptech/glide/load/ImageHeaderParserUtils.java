@@ -123,6 +123,32 @@ public final class ImageHeaderParserUtils {
     return ImageType.UNKNOWN;
   }
 
+  /**
+   * Returns the result from the first of {@code parsers} that returns something other than {@link
+   * ImageHeaderParser#UNKNOWN_ORIENTATION}.
+   *
+   * <p>If {@code buffer} is null, the parers list is empty, or none of the parsers returns a valid
+   * value, {@link ImageHeaderParser#UNKNOWN_ORIENTATION} is returned.
+   */
+  public static int getOrientation(
+      @NonNull List<ImageHeaderParser> parsers,
+      @Nullable final ByteBuffer buffer,
+      @NonNull final ArrayPool arrayPool)
+      throws IOException {
+    if (buffer == null) {
+      return ImageHeaderParser.UNKNOWN_ORIENTATION;
+    }
+
+    return getOrientationInternal(
+        parsers,
+        new OrientationReader() {
+          @Override
+          public int getOrientation(ImageHeaderParser parser) throws IOException {
+            return parser.getOrientation(buffer, arrayPool);
+          }
+        });
+  }
+
   /** Returns the orientation for the given InputStream. */
   public static int getOrientation(
       @NonNull List<ImageHeaderParser> parsers,

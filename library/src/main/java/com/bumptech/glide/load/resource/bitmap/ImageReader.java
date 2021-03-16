@@ -2,19 +2,23 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.bumptech.glide.load.ImageHeaderParser;
+import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.ImageHeaderParserUtils;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.data.InputStreamRewinder;
 import com.bumptech.glide.load.data.ParcelFileDescriptorRewinder;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+import com.bumptech.glide.util.ByteBufferUtil;
 import com.bumptech.glide.util.Preconditions;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -30,6 +34,43 @@ interface ImageReader {
   int getImageOrientation() throws IOException;
 
   void stopGrowingBuffers();
+
+  final class ByteBufferReader implements ImageReader {
+
+    private final ByteBuffer buffer;
+    private final List<ImageHeaderParser> parsers;
+    private final ArrayPool byteArrayPool;
+
+    ByteBufferReader(ByteBuffer buffer, List<ImageHeaderParser> parsers, ArrayPool byteArrayPool) {
+      this.buffer = buffer;
+      this.parsers = parsers;
+      this.byteArrayPool = byteArrayPool;
+    }
+
+    @Nullable
+    @Override
+    public Bitmap decodeBitmap(Options options) {
+      return BitmapFactory.decodeStream(stream(), /* outPadding= */ null, options);
+    }
+
+    @Override
+    public ImageType getImageType() throws IOException {
+      return ImageHeaderParserUtils.getType(parsers, ByteBufferUtil.rewind(buffer));
+    }
+
+    @Override
+    public int getImageOrientation() throws IOException {
+      return ImageHeaderParserUtils.getOrientation(
+          parsers, ByteBufferUtil.rewind(buffer), byteArrayPool);
+    }
+
+    @Override
+    public void stopGrowingBuffers() {}
+
+    private InputStream stream() {
+      return ByteBufferUtil.toStream(ByteBufferUtil.rewind(buffer));
+    }
+  }
 
   final class InputStreamImageReader implements ImageReader {
     private final InputStreamRewinder dataRewinder;
