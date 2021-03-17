@@ -12,7 +12,7 @@ dependencies {
     api project(':third_party:gif_decoder')
     api project(':third_party:disklrucache')
     api project(':annotation')
-    api "androidx.fragment:fragment:${ANDROID_X_VERSION}"
+    api "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
     api "androidx.vectordrawable:vectordrawable-animated:${ANDROID_X_VERSION}"
     api "androidx.exifinterface:exifinterface:${EXIF_INTERFACE_VERSION}"
     compileOnly "androidx.appcompat:appcompat:${ANDROID_X_VERSION}"
@@ -48,7 +48,6 @@ android {
     }
 }
 
-check.dependsOn(':library:findbugs:findbugs')
 check.dependsOn(':library:pmd:pmd')
 check.dependsOn(':library:test:check')
 

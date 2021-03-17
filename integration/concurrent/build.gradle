@@ -7,7 +7,7 @@ dependencies {
 
     testImplementation project(':mocks')
     testImplementation "androidx.legacy:legacy-support-v4:${ANDROID_X_VERSION}"
-    testImplementation "androidx.test:core:${ANDROIDX_TEST_VERSION}"
+    testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
     testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
     testImplementation "junit:junit:${JUNIT_VERSION}"
     testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"

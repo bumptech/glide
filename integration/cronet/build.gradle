@@ -6,7 +6,7 @@ dependencies {
     implementation "com.google.guava:guava:${GUAVA_VERSION}"
     implementation project(':annotation')
 
-    api "androidx.annotation:annotation:${ANDROID_X_VERSION}"
+    api "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
 
     testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
     testImplementation "junit:junit:${JUNIT_VERSION}"

@@ -4,7 +4,7 @@ dependencies {
     implementation project(':library')
     annotationProcessor project(':annotation:compiler')
     implementation 'com.caverock:androidsvg:1.2.1'
-    implementation "androidx.fragment:fragment:${ANDROID_X_VERSION}"
+    implementation "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
 }
 
 android {

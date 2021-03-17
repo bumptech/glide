@@ -1,10 +1,10 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    implementation "androidx.annotation:annotation:${ANDROID_X_VERSION}"
+    implementation "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
 
     testImplementation project(':testutil')
-    testImplementation "androidx.annotation:annotation:${ANDROID_X_VERSION}"
+    testImplementation "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
     testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
     testImplementation "junit:junit:${JUNIT_VERSION}"
     testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
