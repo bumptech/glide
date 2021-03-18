@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 dependencies {
     implementation project(':library')
-    implementation "androidx.annotation:annotation:${ANDROID_X_VERSION}"
+    implementation "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
     implementation "com.google.guava:guava:${GUAVA_VERSION}"
     implementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
 }

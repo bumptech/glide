@@ -7,7 +7,7 @@ dependencies {
     }
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation "androidx.recyclerview:recyclerview:${ANDROID_X_VERSION}"
-    implementation "androidx.fragment:fragment:${ANDROID_X_VERSION}"
+    implementation "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
     annotationProcessor project(':annotation:compiler')
 }
 

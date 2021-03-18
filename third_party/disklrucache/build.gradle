@@ -13,7 +13,7 @@ checkstyle {
 }
 
 dependencies {
-    def junitVersion = hasProperty('JUNIT_VERSION') ? JUNIT_VERSION : '4.11';
+    def junitVersion = hasProperty('JUNIT_VERSION') ? JUNIT_VERSION : '4.13.2';
     testImplementation "junit:junit:${junitVersion}"
     testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
 }

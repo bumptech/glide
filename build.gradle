@@ -8,9 +8,6 @@ buildscript {
         maven {
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
         gradlePluginPortal()
     }
 
@@ -20,7 +17,8 @@ buildscript {
             classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_PLUGIN_VERSION}"
         }
         classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:3.23.0"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.11.0"
+        classpath 'androidx.benchmark:benchmark-gradle-plugin:1.1.0-alpha01'
     }
 }
 
@@ -96,9 +94,9 @@ subprojects { project ->
     }
 
     def isDisallowedProject =
-            project.name in ["third_party", "gif_decoder", "gif_encoder", "disklrucache"]
+            project.name in ["third_party", "gif_decoder", "gif_encoder", "disklrucache", "glide"]
     if (!isDisallowedProject) {
-        apply plugin: "com.diffplug.gradle.spotless"
+        apply plugin: "com.diffplug.spotless"
 
         spotless {
             java {
@@ -145,7 +143,6 @@ subprojects { project ->
         // Formats are listed here: https://github.com/tomasbjerre/violations-lib
         def dir = projectDir.absolutePath
         violations = [
-                ["FINDBUGS",    dir, ".*/findbugs/.*\\.xml\$",   "Findbugs"],
                 ["PMD",         dir, ".*/pmd/.*\\.xml\$",        "PMD"],
                 ["ANDROIDLINT", dir, ".*/lint-results\\.xml\$",  "AndroidLint"],
                 ["CHECKSTYLE",  dir, ".*/checkstyle/.*\\.xml\$", "Checkstyle"],
@@ -153,14 +150,9 @@ subprojects { project ->
     }
 
     afterEvaluate {
-        if (project.tasks.findByName('check')) {
-            check.dependsOn('checkstyle')
-            check.finalizedBy violations
-        }
 
         if (project.hasProperty("android")
-                && project.name != 'pmd'
-                && project.name != 'findbugs') {
+                && project.name != 'pmd' ) {
             android {
                 lintOptions {
                     warningsAsErrors true
@@ -176,6 +168,12 @@ subprojects { project ->
                 }
             }
         }
+
+        if (project.tasks.findByName('check')) {
+            check.dependsOn('checkstyle')
+            check.finalizedBy violations
+        }
+
 
         if (project.plugins.hasPlugin('com.android.library')) {
             android.libraryVariants.all {
