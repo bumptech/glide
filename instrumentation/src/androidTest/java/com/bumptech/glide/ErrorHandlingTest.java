@@ -1,7 +1,5 @@
 package com.bumptech.glide;
 
-import static com.bumptech.glide.test.Matchers.anyDrawable;
-import static com.bumptech.glide.test.Matchers.anyDrawableTarget;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -25,17 +23,19 @@ import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.test.ConcurrencyHelper;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.ResourceIds;
-import com.bumptech.glide.test.TearDownGlide;
 import com.bumptech.glide.test.WaitModelLoader;
 import com.bumptech.glide.test.WaitModelLoader.WaitModel;
+import com.bumptech.glide.testutil.ConcurrencyHelper;
+import com.bumptech.glide.testutil.TearDownGlide;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -76,7 +76,11 @@ public class ErrorHandlingTest {
     assertThat(strategy.error).isEqualTo(FailEncoder.TO_THROW);
 
     verify(requestListener, never())
-        .onLoadFailed(any(GlideException.class), any(), anyDrawableTarget(), anyBoolean());
+        .onLoadFailed(
+            any(GlideException.class),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            anyBoolean());
   }
 
   @Test
@@ -95,9 +99,17 @@ public class ErrorHandlingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), any(DataSource.class), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            any(DataSource.class),
+            anyBoolean());
     verify(requestListener, never())
-        .onLoadFailed(any(GlideException.class), any(), anyDrawableTarget(), anyBoolean());
+        .onLoadFailed(
+            any(GlideException.class),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            anyBoolean());
   }
 
   @Test

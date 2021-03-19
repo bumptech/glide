@@ -2,20 +2,25 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import android.app.Application;
 import android.os.ParcelFileDescriptor;
-import androidx.annotation.Nullable;
 import androidx.benchmark.BenchmarkState;
 import androidx.benchmark.junit4.BenchmarkRule;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.benchmark.R;
+import com.bumptech.glide.benchmark.data.DataOpener;
+import com.bumptech.glide.benchmark.data.DataOpener.ByteArrayBufferOpener;
+import com.bumptech.glide.benchmark.data.DataOpener.ByteArrayOpener;
+import com.bumptech.glide.benchmark.data.DataOpener.FileOpener;
+import com.bumptech.glide.benchmark.data.DataOpener.InputStreamOverByteArrayBufferOpener;
+import com.bumptech.glide.benchmark.data.DataOpener.MemoryMappedByteBufferOpener;
+import com.bumptech.glide.benchmark.data.DataOpener.ParcelFileDescriptorOpener;
+import com.bumptech.glide.benchmark.data.DataOpener.StreamOpener;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.util.ByteBufferUtil;
 import com.google.common.collect.ImmutableList;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,11 +29,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-/** Benchmarks to compare the performance of the various data types supported byDownsampler. */
+/** Benchmarks to compare the performance of the various data types supported by Downsampler. */
 @RunWith(AndroidJUnit4.class)
 public class BenchmarkDownsampler {
   private static final int SIZE = Target.SIZE_ORIGINAL;
-  private static final int RESOURCE_ID = R.raw.canonical;
+  private static final int RESOURCE_ID = R.raw.pixel3a_portrait;
   private final Application app = ApplicationProvider.getApplicationContext();
 
   @Rule public BenchmarkRule mBenchmarkRule = new BenchmarkRule();
@@ -75,7 +80,7 @@ public class BenchmarkDownsampler {
       state.pauseTiming();
       T data = null;
       try {
-        data = opener.acquire();
+        data = opener.acquire(RESOURCE_ID);
         Downsampler downsampler = newDownsampler();
         state.resumeTiming();
 
@@ -84,160 +89,6 @@ public class BenchmarkDownsampler {
         state.pauseTiming();
         opener.close(data);
         state.resumeTiming();
-      }
-    }
-  }
-
-  private interface DataOpener<T> {
-    T acquire() throws IOException;
-
-    void close(T data) throws IOException;
-  }
-
-  private static final class StreamOpener implements DataOpener<InputStream> {
-
-    @Override
-    public InputStream acquire() {
-      return ApplicationProvider.getApplicationContext()
-          .getResources()
-          .openRawResource(RESOURCE_ID);
-    }
-
-    @Override
-    public void close(InputStream data) throws IOException {
-      data.close();
-    }
-  }
-
-  private static final class ByteArrayBufferOpener implements DataOpener<ByteBuffer> {
-
-    @Override
-    public ByteBuffer acquire() throws IOException {
-      InputStream is = null;
-      try {
-        is = new StreamOpener().acquire();
-        return ByteBufferUtil.fromStream(is);
-      } finally {
-        if (is != null) {
-          try {
-            is.close();
-          } catch (IOException e) {
-            // Ignored.
-          }
-        }
-      }
-    }
-
-    @Override
-    public void close(ByteBuffer data) {}
-  }
-
-  private static final class InputStreamOverByteArrayBufferOpener
-      implements DataOpener<InputStream> {
-
-    private final ByteArrayBufferOpener byteArrayBufferOpener = new ByteArrayBufferOpener();
-    @Nullable private ByteBuffer buffer;
-
-    @Override
-    public InputStream acquire() throws IOException {
-      buffer = byteArrayBufferOpener.acquire();
-      return ByteBufferUtil.toStream(buffer);
-    }
-
-    @Override
-    public void close(InputStream data) throws IOException {
-      data.close();
-      if (buffer != null) {
-        byteArrayBufferOpener.close(buffer);
-      }
-    }
-  }
-
-  private static final class FileOpener implements DataOpener<File> {
-
-    @Override
-    public File acquire() throws IOException {
-      ByteBuffer byteBuffer = new ByteArrayBufferOpener().acquire();
-      File tempFile =
-          File.createTempFile(
-              "memory_mapped", "jpg", ApplicationProvider.getApplicationContext().getCacheDir());
-      ByteBufferUtil.toFile(byteBuffer, tempFile);
-      return tempFile;
-    }
-
-    @Override
-    public void close(File data) {
-      if (!data.delete()) {
-        throw new IllegalStateException("Failed to delete: " + data);
-      }
-    }
-  }
-
-  private static final class ByteArrayOpener implements DataOpener<byte[]> {
-
-    @Override
-    public byte[] acquire() throws IOException {
-      InputStream is = null;
-      try {
-        is = new StreamOpener().acquire();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024 * 1024];
-        int read;
-        while ((read = is.read(buffer, /* off= */ 0, buffer.length)) != -1) {
-          outputStream.write(buffer, /* off= */ 0, read);
-        }
-        return outputStream.toByteArray();
-      } finally {
-        if (is != null) {
-          try {
-            is.close();
-          } catch (IOException e) {
-            // Ignored.
-          }
-        }
-      }
-    }
-
-    @Override
-    public void close(byte[] data) {}
-  }
-
-  private static final class ParcelFileDescriptorOpener
-      implements DataOpener<ParcelFileDescriptor> {
-
-    private final FileOpener fileOpener = new FileOpener();
-    @Nullable private File file;
-
-    @Override
-    public ParcelFileDescriptor acquire() throws IOException {
-      file = fileOpener.acquire();
-      return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-    }
-
-    @Override
-    public void close(ParcelFileDescriptor data) throws IOException {
-      data.close();
-      if (file != null) {
-        fileOpener.close(file);
-      }
-    }
-  }
-
-  private static final class MemoryMappedByteBufferOpener implements DataOpener<ByteBuffer> {
-
-    private final FileOpener fileOpener = new FileOpener();
-    @Nullable private File file;
-
-    @Override
-    public ByteBuffer acquire() throws IOException {
-      file = fileOpener.acquire();
-      return ByteBufferUtil.fromFile(file);
-    }
-
-    @Override
-    public void close(ByteBuffer data) {
-      if (file != null) {
-        fileOpener.close(file);
       }
     }
   }

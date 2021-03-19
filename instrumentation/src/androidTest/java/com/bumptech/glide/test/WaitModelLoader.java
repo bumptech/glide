@@ -2,7 +2,7 @@ package com.bumptech.glide.test;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -12,6 +12,7 @@ import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.test.WaitModelLoader.WaitModel;
+import com.bumptech.glide.testutil.ConcurrencyHelper;
 import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 
@@ -76,7 +77,7 @@ public final class WaitModelLoader<Model, Data> implements ModelLoader<WaitModel
       @SuppressWarnings("unchecked")
       ModelLoaderFactory<WaitModel<T>, InputStream> streamFactory =
           new Factory<>((Class<T>) model.getClass(), InputStream.class);
-      Glide.get(InstrumentationRegistry.getTargetContext())
+      Glide.get(ApplicationProvider.getApplicationContext())
           .getRegistry()
           .replace(WaitModel.class, InputStream.class, streamFactory);
 

@@ -36,7 +36,8 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_VERSION}"
     androidTestImplementation "junit:junit:{$JUNIT_VERSION}"
 
-    androidTestImplementation "androidx.benchmark:benchmark-junit4:${ANDROID_X_BENCHMARK_VERSION}"
     androidTestImplementation project(':library')
+    androidTestImplementation project(':testutil')
+    androidTestImplementation "androidx.benchmark:benchmark-junit4:${ANDROID_X_BENCHMARK_VERSION}"
     androidTestImplementation "com.google.guava:guava:${GUAVA_VERSION}"
 }

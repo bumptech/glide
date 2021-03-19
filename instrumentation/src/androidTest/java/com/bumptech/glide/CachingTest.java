@@ -1,8 +1,6 @@
 package com.bumptech.glide;
 
-import static com.bumptech.glide.test.Matchers.anyDrawable;
-import static com.bumptech.glide.test.Matchers.anyDrawableTarget;
-import static com.google.common.truth.Truth.assertThat;
+import static com.bumptech.glide.testutil.BitmapSubject.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.mockito.AdditionalMatchers.not;
@@ -30,14 +28,14 @@ import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.test.BitmapSubject;
-import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.test.ResourceIds.raw;
-import com.bumptech.glide.test.TearDownGlide;
 import com.bumptech.glide.test.WaitModelLoader;
 import com.bumptech.glide.test.WaitModelLoader.WaitModel;
+import com.bumptech.glide.testutil.ConcurrencyHelper;
+import com.bumptech.glide.testutil.TearDownGlide;
+import com.google.common.truth.Truth;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -48,6 +46,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -87,7 +86,11 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -139,9 +142,9 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             not(eq(DataSource.MEMORY_CACHE)),
             anyBoolean());
   }
@@ -178,9 +181,9 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.DATA_DISK_CACHE),
             anyBoolean());
   }
@@ -209,7 +212,11 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -240,7 +247,7 @@ public class CachingTest {
 
     clearMemoryCacheOnMainThread();
 
-    BitmapSubject.assertThat(bitmap).isNotRecycled();
+    assertThat(bitmap).isNotRecycled();
   }
 
   @Test
@@ -291,9 +298,9 @@ public class CachingTest {
     // request).
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.DATA_DISK_CACHE),
             anyBoolean());
   }
@@ -317,7 +324,7 @@ public class CachingTest {
     }
     waitModel.countDown();
 
-    assertThat(concurrency.get(loadFromSourceFuture)).isNotNull();
+    Truth.assertThat(concurrency.get(loadFromSourceFuture)).isNotNull();
   }
 
   // Tests #2428.
@@ -351,7 +358,7 @@ public class CachingTest {
     blockMainThread.countDown();
 
     // Verify that the request that didn't have retrieve from cache succeeds
-    assertThat(concurrency.get(expectedFuture)).isNotNull();
+    Truth.assertThat(concurrency.get(expectedFuture)).isNotNull();
     // The first request only from cache should fail because the item is not in cache.
     assertThrows(
         RuntimeException.class,
@@ -397,7 +404,11 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -436,7 +447,11 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -471,9 +486,9 @@ public class CachingTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             not(eq(DataSource.MEMORY_CACHE)),
             anyBoolean());
   }
