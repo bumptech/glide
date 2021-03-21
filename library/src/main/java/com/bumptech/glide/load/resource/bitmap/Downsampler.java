@@ -62,9 +62,7 @@ public final class Downsampler {
    * limitations.
    */
   public static final Option<PreferredColorSpace> PREFERRED_COLOR_SPACE =
-      Option.memory(
-          "com.bumptech.glide.load.resource.bitmap.Downsampler.PreferredColorSpace",
-          PreferredColorSpace.SRGB);
+      Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.PreferredColorSpace");
   /**
    * Indicates the {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option that
    * will be used to calculate the sample size to use to downsample an image given the original and
@@ -376,7 +374,7 @@ public final class Downsampler {
       }
     }
 
-    if (preferredColorSpace != PreferredColorSpace.NULL) {
+    if (preferredColorSpace != null) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         boolean isP3Eligible =
             preferredColorSpace == PreferredColorSpace.DISPLAY_P3

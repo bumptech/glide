@@ -129,17 +129,18 @@ public abstract class ImageDecoderResourceDecoder<T> implements ResourceDecoder<
             }
 
             decoder.setTargetSize(resizeWidth, resizeHeight);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-              boolean isP3Eligible =
-                  preferredColorSpace == PreferredColorSpace.DISPLAY_P3
-                      && info.getColorSpace() != null
-                      && info.getColorSpace().isWideGamut();
-              decoder.setTargetColorSpace(
-                  ColorSpace.get(
-                      isP3Eligible ? ColorSpace.Named.DISPLAY_P3 : ColorSpace.Named.SRGB));
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-              decoder.setTargetColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
+            if (preferredColorSpace != null) {
+              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                boolean isP3Eligible =
+                    preferredColorSpace == PreferredColorSpace.DISPLAY_P3
+                        && info.getColorSpace() != null
+                        && info.getColorSpace().isWideGamut();
+                decoder.setTargetColorSpace(
+                    ColorSpace.get(
+                        isP3Eligible ? ColorSpace.Named.DISPLAY_P3 : ColorSpace.Named.SRGB));
+              } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                decoder.setTargetColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
+              }
             }
           }
         });

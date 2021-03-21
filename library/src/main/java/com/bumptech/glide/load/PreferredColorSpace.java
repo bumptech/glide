@@ -29,8 +29,6 @@ package com.bumptech.glide.load;
  * Bitmap will actually use the requested color space.
  */
 public enum PreferredColorSpace {
-  /** don't set prefer ColorSpace. */
-  NULL,
   /** Prefers to decode images using {@link android.graphics.ColorSpace.Named#SRGB}. */
   SRGB,
   /** Prefers to decode images using {@link android.graphics.ColorSpace.Named#DISPLAY_P3}. */
