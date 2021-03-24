@@ -16,6 +16,9 @@ import com.bumptech.glide.load.data.ParcelFileDescriptorRewinder;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.util.ByteBufferUtil;
 import com.bumptech.glide.util.Preconditions;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -34,6 +37,106 @@ interface ImageReader {
   int getImageOrientation() throws IOException;
 
   void stopGrowingBuffers();
+
+  final class ByteArrayReader implements ImageReader {
+
+    private final byte[] bytes;
+    private final List<ImageHeaderParser> parsers;
+    private final ArrayPool byteArrayPool;
+
+    ByteArrayReader(byte[] bytes, List<ImageHeaderParser> parsers, ArrayPool byteArrayPool) {
+      this.bytes = bytes;
+      this.parsers = parsers;
+      this.byteArrayPool = byteArrayPool;
+    }
+
+    @Nullable
+    @Override
+    public Bitmap decodeBitmap(Options options) {
+      return BitmapFactory.decodeByteArray(bytes, /* offset= */ 0, bytes.length, options);
+    }
+
+    @Override
+    public ImageType getImageType() throws IOException {
+      return ImageHeaderParserUtils.getType(parsers, ByteBuffer.wrap(bytes));
+    }
+
+    @Override
+    public int getImageOrientation() throws IOException {
+      return ImageHeaderParserUtils.getOrientation(parsers, ByteBuffer.wrap(bytes), byteArrayPool);
+    }
+
+    @Override
+    public void stopGrowingBuffers() {}
+  }
+
+  final class FileReader implements ImageReader {
+
+    private final File file;
+    private final List<ImageHeaderParser> parsers;
+    private final ArrayPool byteArrayPool;
+
+    FileReader(File file, List<ImageHeaderParser> parsers, ArrayPool byteArrayPool) {
+      this.file = file;
+      this.parsers = parsers;
+      this.byteArrayPool = byteArrayPool;
+    }
+
+    @Nullable
+    @Override
+    public Bitmap decodeBitmap(Options options) throws FileNotFoundException {
+      InputStream is = null;
+      try {
+        is = new RecyclableBufferedInputStream(new FileInputStream(file), byteArrayPool);
+        return BitmapFactory.decodeStream(is, /* outPadding= */ null, options);
+      } finally {
+        if (is != null) {
+          try {
+            is.close();
+          } catch (IOException e) {
+            // Ignored.
+          }
+        }
+      }
+    }
+
+    @Override
+    public ImageType getImageType() throws IOException {
+      InputStream is = null;
+      try {
+        is = new RecyclableBufferedInputStream(new FileInputStream(file), byteArrayPool);
+        return ImageHeaderParserUtils.getType(parsers, is, byteArrayPool);
+      } finally {
+        if (is != null) {
+          try {
+            is.close();
+          } catch (IOException e) {
+            // Ignored.
+          }
+        }
+      }
+    }
+
+    @Override
+    public int getImageOrientation() throws IOException {
+      InputStream is = null;
+      try {
+        is = new RecyclableBufferedInputStream(new FileInputStream(file), byteArrayPool);
+        return ImageHeaderParserUtils.getOrientation(parsers, is, byteArrayPool);
+      } finally {
+        if (is != null) {
+          try {
+            is.close();
+          } catch (IOException e) {
+            // Ignored.
+          }
+        }
+      }
+    }
+
+    @Override
+    public void stopGrowingBuffers() {}
+  }
 
   final class ByteBufferReader implements ImageReader {
 

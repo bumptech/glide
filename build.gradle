@@ -18,7 +18,7 @@ buildscript {
         }
         classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
         classpath "com.diffplug.spotless:spotless-plugin-gradle:5.11.0"
-        classpath 'androidx.benchmark:benchmark-gradle-plugin:1.1.0-alpha01'
+        classpath "androidx.benchmark:benchmark-gradle-plugin:${ANDROID_X_BENCHMARK_VERSION}"
     }
 }
 

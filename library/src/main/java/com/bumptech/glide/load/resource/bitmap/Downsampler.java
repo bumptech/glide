@@ -11,6 +11,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ImageHeaderParser.ImageType;
@@ -27,6 +28,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -225,6 +227,28 @@ public final class Downsampler {
         requestedHeight,
         options,
         callbacks);
+  }
+
+  @VisibleForTesting
+  void decode(byte[] bytes, int requestedWidth, int requestedHeight, Options options)
+      throws IOException {
+    decode(
+        new ImageReader.ByteArrayReader(bytes, parsers, byteArrayPool),
+        requestedWidth,
+        requestedHeight,
+        options,
+        EMPTY_CALLBACKS);
+  }
+
+  @VisibleForTesting
+  void decode(File file, int requestedWidth, int requestedHeight, Options options)
+      throws IOException {
+    decode(
+        new ImageReader.FileReader(file, parsers, byteArrayPool),
+        requestedWidth,
+        requestedHeight,
+        options,
+        EMPTY_CALLBACKS);
   }
 
   @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
