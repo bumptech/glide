@@ -7,11 +7,11 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.widget.ImageView;
 import androidx.test.core.app.ApplicationProvider;
-import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.GlideRequests;
 import com.bumptech.glide.test.ResourceIds;
-import com.bumptech.glide.test.TearDownGlide;
+import com.bumptech.glide.testutil.ConcurrencyHelper;
+import com.bumptech.glide.testutil.TearDownGlide;
 import org.junit.Rule;
 import org.junit.Test;
 

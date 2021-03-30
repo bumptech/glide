@@ -1,5 +1,7 @@
 package com.bumptech.glide.test;
 
+import static com.bumptech.glide.testutil.BitmapSubject.assertThat;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -7,7 +9,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
 import androidx.annotation.Nullable;
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.RequestBuilder;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -41,7 +43,7 @@ public final class BitmapRegressionTester {
 
   private final Class<?> testClass;
   private final TestName testName;
-  private final Context context = InstrumentationRegistry.getTargetContext();
+  private final Context context = ApplicationProvider.getApplicationContext();
 
   public BitmapRegressionTester(Class<?> testClass, TestName testName) {
     this.testClass = testClass;
@@ -60,7 +62,7 @@ public final class BitmapRegressionTester {
       writeBitmap(result);
     }
     Bitmap expected = decodeExpected();
-    BitmapSubject.assertThat(result).sameAs(expected);
+    assertThat(result).sameAs(expected);
     return result;
   }
 
@@ -99,7 +101,6 @@ public final class BitmapRegressionTester {
     return result;
   }
 
-  @SuppressWarnings("deprecation")
   private String getCpuString() {
     return splitByCpu() ? SEPARATOR + Build.CPU_ABI.replace("-", "_") : "";
   }

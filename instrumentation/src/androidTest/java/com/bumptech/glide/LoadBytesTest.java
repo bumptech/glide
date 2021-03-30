@@ -1,8 +1,7 @@
 package com.bumptech.glide;
 
 import static com.bumptech.glide.test.GlideOptions.skipMemoryCacheOf;
-import static com.bumptech.glide.test.Matchers.anyDrawable;
-import static com.bumptech.glide.test.Matchers.anyDrawableTarget;
+import static com.bumptech.glide.testutil.BitmapSubject.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -27,22 +26,21 @@ import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.test.BitmapSubject;
-import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
-import com.bumptech.glide.test.TearDownGlide;
+import com.bumptech.glide.testutil.ConcurrencyHelper;
+import com.bumptech.glide.testutil.TearDownGlide;
 import com.google.common.io.ByteStreams;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -82,7 +80,7 @@ public class LoadBytesTest {
 
   @Test
   public void loadFromRequestManager_intoImageView_withDifferentByteArrays_loadsDifferentImages()
-      throws IOException, ExecutionException, InterruptedException {
+      throws IOException {
     final byte[] canonicalBytes = getCanonicalBytes();
     final byte[] modifiedBytes = getModifiedBytes();
 
@@ -94,20 +92,20 @@ public class LoadBytesTest {
 
     // This assertion alone doesn't catch the case where the second Bitmap is loaded from the result
     // cache of the data from the first Bitmap.
-    BitmapSubject.assertThat(firstBitmap).isNotSameInstanceAs(secondBitmap);
+    assertThat(firstBitmap).isNotSameInstanceAs(secondBitmap);
 
     Bitmap expectedCanonicalBitmap =
         BitmapFactory.decodeByteArray(canonicalBytes, /*offset=*/ 0, canonicalBytes.length);
-    BitmapSubject.assertThat(firstBitmap).sameAs(expectedCanonicalBitmap);
+    assertThat(firstBitmap).sameAs(expectedCanonicalBitmap);
 
     Bitmap expectedModifiedBitmap =
         BitmapFactory.decodeByteArray(modifiedBytes, /*offset=*/ 0, modifiedBytes.length);
-    BitmapSubject.assertThat(secondBitmap).sameAs(expectedModifiedBitmap);
+    assertThat(secondBitmap).sameAs(expectedModifiedBitmap);
   }
 
   @Test
   public void loadFromRequestBuilder_intoImageView_withDifferentByteArrays_loadsDifferentImages()
-      throws IOException, ExecutionException, InterruptedException {
+      throws IOException {
     final byte[] canonicalBytes = getCanonicalBytes();
     final byte[] modifiedBytes = getModifiedBytes();
 
@@ -121,15 +119,15 @@ public class LoadBytesTest {
 
     // This assertion alone doesn't catch the case where the second Bitmap is loaded from the result
     // cache of the data from the first Bitmap.
-    BitmapSubject.assertThat(firstBitmap).isNotSameInstanceAs(secondBitmap);
+    assertThat(firstBitmap).isNotSameInstanceAs(secondBitmap);
 
     Bitmap expectedCanonicalBitmap =
         BitmapFactory.decodeByteArray(canonicalBytes, /*offset=*/ 0, canonicalBytes.length);
-    BitmapSubject.assertThat(firstBitmap).sameAs(expectedCanonicalBitmap);
+    assertThat(firstBitmap).sameAs(expectedCanonicalBitmap);
 
     Bitmap expectedModifiedBitmap =
         BitmapFactory.decodeByteArray(modifiedBytes, /*offset=*/ 0, modifiedBytes.length);
-    BitmapSubject.assertThat(secondBitmap).sameAs(expectedModifiedBitmap);
+    assertThat(secondBitmap).sameAs(expectedModifiedBitmap);
   }
 
   @Test
@@ -150,7 +148,11 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -173,7 +175,11 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -205,9 +211,9 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.RESOURCE_DISK_CACHE),
             anyBoolean());
   }
@@ -243,9 +249,9 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.RESOURCE_DISK_CACHE),
             anyBoolean());
   }
@@ -267,7 +273,11 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -289,7 +299,11 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -302,7 +316,11 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.LOCAL),
+            anyBoolean());
   }
 
   @Test
@@ -317,7 +335,11 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.LOCAL),
+            anyBoolean());
   }
 
   @Test
@@ -339,7 +361,11 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.LOCAL),
+            anyBoolean());
   }
 
   @Test
@@ -363,7 +389,11 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.LOCAL), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.LOCAL),
+            anyBoolean());
   }
 
   @Test
@@ -395,9 +425,9 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.RESOURCE_DISK_CACHE),
             anyBoolean());
   }
@@ -427,7 +457,11 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(), any(), anyDrawableTarget(), eq(DataSource.MEMORY_CACHE), anyBoolean());
+            ArgumentMatchers.<Drawable>any(),
+            any(),
+            ArgumentMatchers.<Target<Drawable>>any(),
+            eq(DataSource.MEMORY_CACHE),
+            anyBoolean());
   }
 
   @Test
@@ -452,9 +486,9 @@ public class LoadBytesTest {
 
     verify(requestListener)
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.DATA_DISK_CACHE),
             anyBoolean());
   }

@@ -1,5 +1,24 @@
-apply plugin: 'java'
+apply plugin: 'com.android.library'
 
 dependencies {
-    compile "com.google.truth:truth:${TRUTH_VERSION}"
+    implementation "com.google.truth:truth:${TRUTH_VERSION}"
+    implementation project(":library")
+    api "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
+    api "androidx.core:core:${ANDROID_X_VERSION}"
+    api "androidx.test:core:${ANDROID_X_TEST_VERSION}"
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+        versionName VERSION_NAME as String
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }

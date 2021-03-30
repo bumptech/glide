@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import static com.bumptech.glide.testutil.BitmapSubject.assertThat;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -20,8 +21,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.test.BitmapSubject;
 import com.bumptech.glide.test.GlideApp;
+import com.google.common.truth.Truth;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +58,7 @@ public class DrawableTransformationTest {
             .submit()
             .get();
 
-    assertThat(result).isInstanceOf(ColorDrawable.class);
+    Truth.assertThat(result).isInstanceOf(ColorDrawable.class);
     assertThat(((ColorDrawable) result).getColor()).isEqualTo(Color.RED);
   }
 
@@ -74,7 +75,7 @@ public class DrawableTransformationTest {
             .submit(100, 100)
             .get();
 
-    assertThat(result).isInstanceOf(ColorDrawable.class);
+    Truth.assertThat(result).isInstanceOf(ColorDrawable.class);
     assertThat(((ColorDrawable) result).getColor()).isEqualTo(Color.RED);
   }
 
@@ -103,7 +104,7 @@ public class DrawableTransformationTest {
         .thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
     Bitmap expected = TransformationUtils.circleCrop(bitmapPool, redSquare, 100, 100);
 
-    assertThat(result).isInstanceOf(BitmapDrawable.class);
+    Truth.assertThat(result).isInstanceOf(BitmapDrawable.class);
     Bitmap bitmap = ((BitmapDrawable) result).getBitmap();
     assertThat(bitmap.getWidth()).isEqualTo(100);
     assertThat(bitmap.getHeight()).isEqualTo(100);
@@ -169,7 +170,7 @@ public class DrawableTransformationTest {
             .submit()
             .get();
 
-    BitmapSubject.assertThat(result).isNotRecycled();
+    assertThat(result).isNotRecycled();
   }
 
   @Test
@@ -186,7 +187,7 @@ public class DrawableTransformationTest {
             .submit()
             .get();
 
-    BitmapSubject.assertThat(result).isNotRecycled();
+    assertThat(result).isNotRecycled();
   }
 
   @Test
@@ -223,7 +224,7 @@ public class DrawableTransformationTest {
             .submit()
             .get();
 
-    BitmapSubject.assertThat(result).isNotRecycled();
+    assertThat(result).isNotRecycled();
 
     BitmapPool bitmapPool = Glide.get(context).getBitmapPool();
     // Make sure we didn't put the same Bitmap twice.

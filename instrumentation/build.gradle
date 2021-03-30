@@ -11,6 +11,7 @@ dependencies {
 
     androidTestImplementation project(':library')
     androidTestImplementation project(':mocks')
+    androidTestImplementation project(':testutil')
     androidTestImplementation "org.mockito:mockito-android:${MOCKITO_ANDROID_VERSION}"
     androidTestImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_VERSION}"
     androidTestImplementation "androidx.test:rules:${ANDROID_X_TEST_VERSION}"
