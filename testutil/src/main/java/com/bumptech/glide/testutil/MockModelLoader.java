@@ -8,30 +8,42 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.data.DataFetcher.DataCallback;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.signature.ObjectKey;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 
 public final class MockModelLoader<ModelT, DataT> implements ModelLoader<ModelT, DataT> {
   private final ModelT model;
-  private final DataT data;
+  private final Class<DataT> dataClass;
+  private final ListenableFuture<DataT> dataFuture;
 
   @SuppressWarnings("unchecked")
   public static <ModelT, DataT> void mock(final ModelT model, final DataT data) {
+    mockAsync(model, (Class<DataT>) data.getClass(), Futures.immediateFuture(data));
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <ModelT, DataT> void mockAsync(
+      final ModelT model, final Class<DataT> dataClass, final ListenableFuture<DataT> dataFuture) {
     Context context = ApplicationProvider.getApplicationContext();
 
     Glide.get(context)
         .getRegistry()
         .replace(
             (Class<ModelT>) model.getClass(),
-            (Class<DataT>) data.getClass(),
+            dataClass,
             new ModelLoaderFactory<ModelT, DataT>() {
               @NonNull
               @Override
               public ModelLoader<ModelT, DataT> build(
                   @NonNull MultiModelLoaderFactory multiFactory) {
-                return new MockModelLoader<>(model, data);
+                return new MockModelLoader<>(model, dataClass, dataFuture);
               }
 
               @Override
@@ -41,15 +53,17 @@ public final class MockModelLoader<ModelT, DataT> implements ModelLoader<ModelT,
             });
   }
 
-  private MockModelLoader(ModelT model, DataT data) {
+  private MockModelLoader(
+      ModelT model, Class<DataT> dataClass, ListenableFuture<DataT> dataFuture) {
     this.model = model;
-    this.data = data;
+    this.dataClass = dataClass;
+    this.dataFuture = dataFuture;
   }
 
   @Override
   public LoadData<DataT> buildLoadData(
       @NonNull ModelT modelT, int width, int height, @NonNull Options options) {
-    return new LoadData<>(new ObjectKey(modelT), new MockDataFetcher<>(data));
+    return new LoadData<>(new ObjectKey(modelT), new MockDataFetcher<>(dataClass, dataFuture));
   }
 
   @Override
@@ -59,16 +73,35 @@ public final class MockModelLoader<ModelT, DataT> implements ModelLoader<ModelT,
 
   private static final class MockDataFetcher<DataT> implements DataFetcher<DataT> {
 
-    private final DataT data;
+    private final ListenableFuture<DataT> dataFuture;
+    private final Class<DataT> dataClass;
 
-    MockDataFetcher(DataT data) {
-      this.data = data;
+    MockDataFetcher(Class<DataT> dataClass, ListenableFuture<DataT> dataFuture) {
+      this.dataClass = dataClass;
+      this.dataFuture = dataFuture;
     }
 
     @Override
     public void loadData(
-        @NonNull Priority priority, @NonNull DataCallback<? super DataT> callback) {
-      callback.onDataReady(data);
+        @NonNull Priority priority, final @NonNull DataCallback<? super DataT> callback) {
+      Futures.addCallback(
+          dataFuture,
+          new FutureCallback<DataT>() {
+            @Override
+            public void onSuccess(DataT data) {
+              callback.onDataReady(data);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+              if (t instanceof Exception) {
+                callback.onLoadFailed((Exception) t);
+              } else {
+                callback.onLoadFailed(new Exception(t));
+              }
+            }
+          },
+          MoreExecutors.directExecutor());
     }
 
     @Override
@@ -78,14 +111,13 @@ public final class MockModelLoader<ModelT, DataT> implements ModelLoader<ModelT,
 
     @Override
     public void cancel() {
-      // Do nothing.
+      dataFuture.cancel(true);
     }
 
     @NonNull
     @Override
-    @SuppressWarnings("unchecked")
     public Class<DataT> getDataClass() {
-      return (Class<DataT>) data.getClass();
+      return dataClass;
     }
 
     @NonNull

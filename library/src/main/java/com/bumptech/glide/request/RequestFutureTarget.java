@@ -258,6 +258,29 @@ public class RequestFutureTarget<R> implements FutureTarget<R>, RequestListener<
     return false;
   }
 
+  @Override
+  public String toString() {
+    String toString = super.toString() + "[status=";
+    final String status;
+    Request pendingRequest = null;
+    synchronized (this) {
+      if (isCancelled) {
+        status = "CANCELLED";
+      } else if (loadFailed) {
+        status = "FAILURE";
+      } else if (resultReceived) {
+        status = "SUCCESS";
+      } else {
+        status = "PENDING";
+        pendingRequest = request;
+      }
+    }
+    if (pendingRequest != null) {
+      return toString + status + ", request=[" + pendingRequest + "]]";
+    }
+    return toString + status + "]";
+  }
+
   @VisibleForTesting
   static class Waiter {
     // This is a simple wrapper class that is used to enable testing. The call to the wrapping class

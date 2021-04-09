@@ -129,6 +129,8 @@ public final class GlideFutures {
       final RequestBuilder<T> requestBuilder) {
     return CallbackToFutureAdapter.getFuture(
         new Resolver<TargetAndResult<T>>() {
+          // Only used for toString
+          @SuppressWarnings("FutureReturnValueIgnored")
           @Override
           public Object attachCompleter(@NonNull Completer<TargetAndResult<T>> completer) {
             GlideLoadingListener<T> listener = new GlideLoadingListener<>(completer);
@@ -141,7 +143,7 @@ public final class GlideFutures {
                   }
                 },
                 MoreExecutors.directExecutor());
-            return listener;
+            return futureTarget;
           }
         });
   }
