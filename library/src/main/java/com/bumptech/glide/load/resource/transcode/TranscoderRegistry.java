@@ -60,6 +60,7 @@ public class TranscoderRegistry {
   }
 
   @NonNull
+  @SuppressWarnings("unchecked")
   public synchronized <Z, R> List<Class<R>> getTranscodeClasses(
       @NonNull Class<Z> resourceClass, @NonNull Class<R> transcodeClass) {
     List<Class<R>> transcodeClasses = new ArrayList<>();
@@ -70,8 +71,9 @@ public class TranscoderRegistry {
     }
 
     for (Entry<?, ?> entry : transcoders) {
-      if (entry.handles(resourceClass, transcodeClass)) {
-        transcodeClasses.add(transcodeClass);
+      if (entry.handles(resourceClass, transcodeClass)
+          && !transcodeClasses.contains((Class<R>) entry.toClass)) {
+        transcodeClasses.add((Class<R>) entry.toClass);
       }
     }
 
