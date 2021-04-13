@@ -8,10 +8,13 @@ import com.bumptech.glide.load.Encoder;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcher.DataCallback;
+import com.bumptech.glide.load.data.DataRewinder;
+import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoader.LoadData;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Synthetic;
+import java.io.IOException;
 import java.util.Collections;
 
 /**
@@ -21,6 +24,9 @@ import java.util.Collections;
  *
  * <p>Depending on the disk cache strategy, source data may first be written to disk and then loaded
  * from the cache file rather than returned directly.
+ *
+ * <p>This object may be used by multiple threads, but only one at a time. It is not safe to access
+ * this object on multiple threads concurrently.
  */
 class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.FetcherReadyCallback {
   private static final String TAG = "SourceGenerator";
@@ -28,23 +34,42 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
   private final DecodeHelper<?> helper;
   private final FetcherReadyCallback cb;
 
-  private int loadDataListIndex;
-  private DataCacheGenerator sourceCacheGenerator;
-  private Object dataToCache;
+  private volatile int loadDataListIndex;
+  private volatile DataCacheGenerator sourceCacheGenerator;
+  private volatile Object dataToCache;
   private volatile ModelLoader.LoadData<?> loadData;
-  private DataCacheKey originalKey;
+  private volatile DataCacheKey originalKey;
 
   SourceGenerator(DecodeHelper<?> helper, FetcherReadyCallback cb) {
     this.helper = helper;
     this.cb = cb;
   }
 
+  // Concurrent access isn't supported.
+  @SuppressWarnings({"NonAtomicOperationOnVolatileField", "NonAtomicVolatileUpdate"})
   @Override
   public boolean startNext() {
     if (dataToCache != null) {
       Object data = dataToCache;
       dataToCache = null;
-      cacheData(data);
+      try {
+        boolean isDataInCache = cacheData(data);
+        // If we failed to write the data to cache, the cacheData method will try to decode the
+        // original data directly instead of going through the disk cache. Since cacheData has
+        // already called our callback at this point, there's nothing more to do but return.
+        if (!isDataInCache) {
+          return true;
+        }
+        // If we were able to write the data to cache successfully, we now need to proceed to call
+        // the sourceCacheGenerator below to load the data from cache.
+      } catch (IOException e) {
+        // An IOException means we weren't able to write data to cache or we weren't able to rewind
+        // it after a disk cache write failed. In either case we can just move on and try the next
+        // fetch below.
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Failed to properly rewind or write data to cache", e);
+        }
+      }
     }
 
     if (sourceCacheGenerator != null && sourceCacheGenerator.startNext()) {
@@ -98,20 +123,28 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
     return loadDataListIndex < helper.getLoadData().size();
   }
 
-  private void cacheData(Object dataToCache) {
+  /**
+   * Returns {@code true} if we were able to cache the data and should try to decode the data
+   * directly from cache and {@code false} if we were unable to cache the data and should make an
+   * attempt to decode from source.
+   */
+  private boolean cacheData(Object dataToCache) throws IOException {
     long startTime = LogTime.getLogTime();
+    boolean isLoadingFromSourceData = false;
     try {
-      Encoder<Object> encoder = helper.getSourceEncoder(dataToCache);
-      DataCacheWriter<Object> writer =
-          new DataCacheWriter<>(encoder, dataToCache, helper.getOptions());
-      originalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
-      helper.getDiskCache().put(originalKey, writer);
+      DataRewinder<Object> rewinder = helper.getRewinder(dataToCache);
+      Object data = rewinder.rewindAndGet();
+      Encoder<Object> encoder = helper.getSourceEncoder(data);
+      DataCacheWriter<Object> writer = new DataCacheWriter<>(encoder, data, helper.getOptions());
+      DataCacheKey newOriginalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
+      DiskCache diskCache = helper.getDiskCache();
+      diskCache.put(newOriginalKey, writer);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(
             TAG,
             "Finished encoding source to cache"
                 + ", key: "
-                + originalKey
+                + newOriginalKey
                 + ", data: "
                 + dataToCache
                 + ", encoder: "
@@ -119,12 +152,41 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
                 + ", duration: "
                 + LogTime.getElapsedMillis(startTime));
       }
-    } finally {
-      loadData.fetcher.cleanup();
-    }
 
-    sourceCacheGenerator =
-        new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), helper, this);
+      if (diskCache.get(newOriginalKey) != null) {
+        originalKey = newOriginalKey;
+        sourceCacheGenerator =
+            new DataCacheGenerator(Collections.singletonList(loadData.sourceKey), helper, this);
+        // We were able to write the data to cache.
+        return true;
+      } else {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(
+              TAG,
+              "Attempt to write: "
+                  + originalKey
+                  + ", data: "
+                  + dataToCache
+                  + " to the disk"
+                  + " cache failed, maybe the disk cache is disabled?"
+                  + " Trying to decode the data directly...");
+        }
+
+        isLoadingFromSourceData = true;
+        cb.onDataFetcherReady(
+            loadData.sourceKey,
+            rewinder.rewindAndGet(),
+            loadData.fetcher,
+            loadData.fetcher.getDataSource(),
+            loadData.sourceKey);
+      }
+      // We failed to write the data to cache.
+      return false;
+    } finally {
+      if (!isLoadingFromSourceData) {
+        loadData.fetcher.cleanup();
+      }
+    }
   }
 
   @Override
