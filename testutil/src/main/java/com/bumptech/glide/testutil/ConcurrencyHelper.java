@@ -89,6 +89,9 @@ public class ConcurrencyHelper {
     runOnMainThread(
         new Runnable() {
           @Override
+          // Required to avoid a weird emulator issue where the Application passed here is otherwise
+          // cast to a FragmentActivity...
+          @SuppressWarnings("cast")
           public void run() {
             Glide.with((Context) ApplicationProvider.getApplicationContext()).clear(imageView);
           }
