@@ -1,8 +1,8 @@
 package com.bumptech.glide;
 
 import android.content.Context;
-import androidx.annotation.NonNull;
 import android.util.Log;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.test.EmptyAppModule;
 import com.bumptech.glide.test.EmptyLibraryModule;
 import java.util.Collections;

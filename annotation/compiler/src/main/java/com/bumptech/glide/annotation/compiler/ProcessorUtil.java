@@ -55,8 +55,6 @@ import javax.tools.Diagnostic;
 
 /** Utilities for writing classes and logging. */
 final class ProcessorUtil {
-  // TODO: Remove this once we convert Glide's internal classes to AndroidX.
-  private static final boolean REQUIRE_SUPPORT_ANNOTATIONS = false;
   private static final String GLIDE_MODULE_PACKAGE_NAME = "com.bumptech.glide.module";
   private static final String APP_GLIDE_MODULE_SIMPLE_NAME = "AppGlideModule";
   private static final String LIBRARY_GLIDE_MODULE_SIMPLE_NAME = "LibraryGlideModule";
@@ -503,9 +501,6 @@ final class ProcessorUtil {
   }
 
   private ClassName findAnnotationClassName(ClassName androidxName, ClassName supportName) {
-    if (REQUIRE_SUPPORT_ANNOTATIONS) {
-      return supportName;
-    }
     Elements elements = processingEnv.getElementUtils();
     TypeElement visibleForTestingTypeElement =
         elements.getTypeElement(androidxName.reflectionName());
