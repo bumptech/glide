@@ -707,7 +707,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     int localOverrideWidth;
     int localOverrideHeight;
     Object localModel;
-    Class<?> localTransocdeClass;
+    Class<?> localTranscodeClass;
     BaseRequestOptions<?> localRequestOptions;
     Priority localPriority;
     int localListenerCount;
@@ -715,7 +715,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       localOverrideWidth = overrideWidth;
       localOverrideHeight = overrideHeight;
       localModel = model;
-      localTransocdeClass = transcodeClass;
+      localTranscodeClass = transcodeClass;
       localRequestOptions = requestOptions;
       localPriority = priority;
       localListenerCount = requestListeners != null ? requestListeners.size() : 0;
@@ -725,7 +725,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     int otherLocalOverrideWidth;
     int otherLocalOverrideHeight;
     Object otherLocalModel;
-    Class<?> otherLocalTransocdeClass;
+    Class<?> otherLocalTranscodeClass;
     BaseRequestOptions<?> otherLocalRequestOptions;
     Priority otherLocalPriority;
     int otherLocalListenerCount;
@@ -733,7 +733,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       otherLocalOverrideWidth = other.overrideWidth;
       otherLocalOverrideHeight = other.overrideHeight;
       otherLocalModel = other.model;
-      otherLocalTransocdeClass = other.transcodeClass;
+      otherLocalTranscodeClass = other.transcodeClass;
       otherLocalRequestOptions = other.requestOptions;
       otherLocalPriority = other.priority;
       otherLocalListenerCount = other.requestListeners != null ? other.requestListeners.size() : 0;
@@ -745,7 +745,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     return localOverrideWidth == otherLocalOverrideWidth
         && localOverrideHeight == otherLocalOverrideHeight
         && Util.bothModelsNullEquivalentOrEquals(localModel, otherLocalModel)
-        && localTransocdeClass.equals(otherLocalTransocdeClass)
+        && localTranscodeClass.equals(otherLocalTranscodeClass)
         && localRequestOptions.equals(otherLocalRequestOptions)
         && localPriority == otherLocalPriority
         // We do not want to require that RequestListeners implement equals/hashcode, so we
@@ -756,5 +756,21 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
 
   private void logV(String message) {
     Log.v(TAG, message + " this: " + tag);
+  }
+
+  @Override
+  public String toString() {
+    Object localModel;
+    Class<?> localTranscodeClass;
+    synchronized (requestLock) {
+      localModel = model;
+      localTranscodeClass = transcodeClass;
+    }
+    return super.toString()
+        + "[model="
+        + localModel
+        + ", transcodeClass="
+        + localTranscodeClass
+        + "]";
   }
 }
