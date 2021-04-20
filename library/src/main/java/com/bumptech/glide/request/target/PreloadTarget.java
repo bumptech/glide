@@ -8,6 +8,7 @@ import android.os.Message;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Synthetic;
 
@@ -53,7 +54,17 @@ public final class PreloadTarget<Z> extends CustomTarget<Z> {
 
   @Override
   public void onResourceReady(@NonNull Z resource, @Nullable Transition<? super Z> transition) {
-    HANDLER.obtainMessage(MESSAGE_CLEAR, this).sendToTarget();
+    // If a thumbnail request is set and the thumbnail completes, we don't want to cancel the
+    // primary load. Instead we wait until the primary request (the one set on the target) says
+    // that it is complete.
+    // Note - Any thumbnail request that does not complete before the primary request will be
+    // cancelled and may not be preloaded successfully. Cancellation of outstanding thumbnails after
+    // the primary request succeeds is a common behavior of all Glide requests and we're not trying
+    // to override it here.
+    Request request = getRequest();
+    if (request != null && request.isComplete()) {
+      HANDLER.obtainMessage(MESSAGE_CLEAR, this).sendToTarget();
+    }
   }
 
   @Override

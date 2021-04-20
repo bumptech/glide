@@ -859,6 +859,13 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * <p>Pre-loading is useful for making sure that resources you are going to to want in the near
    * future are available quickly.
    *
+   * <p>Note - Any thumbnail request that does not complete before the primary request will be
+   * cancelled and may not be preloaded successfully. Cancellation of outstanding thumbnails after
+   * the primary request succeeds is a common behavior of all Glide requests. We do not try to
+   * prevent that behavior here. If you absolutely need all thumbnails to be preloaded individually,
+   * make separate preload() requests for each thumbnail (you can still combine them into one call
+   * when loading the image(s) into the UI in a subsequent request).
+   *
    * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
    *     overridden by {@link com.bumptech.glide.request.RequestOptions#override(int, int)} if
    *     previously called.
