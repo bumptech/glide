@@ -7,6 +7,7 @@ import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoader.LoadData;
+import com.bumptech.glide.util.pool.GlideTrace;
 import java.io.File;
 import java.util.List;
 
@@ -41,69 +42,74 @@ class ResourceCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCa
   @SuppressWarnings("PMD.CollapsibleIfStatements")
   @Override
   public boolean startNext() {
-    List<Key> sourceIds = helper.getCacheKeys();
-    if (sourceIds.isEmpty()) {
-      return false;
-    }
-    List<Class<?>> resourceClasses = helper.getRegisteredResourceClasses();
-    if (resourceClasses.isEmpty()) {
-      if (File.class.equals(helper.getTranscodeClass())) {
+    GlideTrace.beginSection("ResourceCacheGenerator.startNext");
+    try {
+      List<Key> sourceIds = helper.getCacheKeys();
+      if (sourceIds.isEmpty()) {
         return false;
       }
-      throw new IllegalStateException(
-          "Failed to find any load path from "
-              + helper.getModelClass()
-              + " to "
-              + helper.getTranscodeClass());
-    }
-    while (modelLoaders == null || !hasNextModelLoader()) {
-      resourceClassIndex++;
-      if (resourceClassIndex >= resourceClasses.size()) {
-        sourceIdIndex++;
-        if (sourceIdIndex >= sourceIds.size()) {
+      List<Class<?>> resourceClasses = helper.getRegisteredResourceClasses();
+      if (resourceClasses.isEmpty()) {
+        if (File.class.equals(helper.getTranscodeClass())) {
           return false;
         }
-        resourceClassIndex = 0;
+        throw new IllegalStateException(
+            "Failed to find any load path from "
+                + helper.getModelClass()
+                + " to "
+                + helper.getTranscodeClass());
+      }
+      while (modelLoaders == null || !hasNextModelLoader()) {
+        resourceClassIndex++;
+        if (resourceClassIndex >= resourceClasses.size()) {
+          sourceIdIndex++;
+          if (sourceIdIndex >= sourceIds.size()) {
+            return false;
+          }
+          resourceClassIndex = 0;
+        }
+
+        Key sourceId = sourceIds.get(sourceIdIndex);
+        Class<?> resourceClass = resourceClasses.get(resourceClassIndex);
+        Transformation<?> transformation = helper.getTransformation(resourceClass);
+        // PMD.AvoidInstantiatingObjectsInLoops Each iteration is comparatively expensive anyway,
+        // we only run until the first one succeeds, the loop runs for only a limited
+        // number of iterations on the order of 10-20 in the worst case.
+        currentKey =
+            new ResourceCacheKey( // NOPMD AvoidInstantiatingObjectsInLoops
+                helper.getArrayPool(),
+                sourceId,
+                helper.getSignature(),
+                helper.getWidth(),
+                helper.getHeight(),
+                transformation,
+                resourceClass,
+                helper.getOptions());
+        cacheFile = helper.getDiskCache().get(currentKey);
+        if (cacheFile != null) {
+          sourceKey = sourceId;
+          modelLoaders = helper.getModelLoaders(cacheFile);
+          modelLoaderIndex = 0;
+        }
       }
 
-      Key sourceId = sourceIds.get(sourceIdIndex);
-      Class<?> resourceClass = resourceClasses.get(resourceClassIndex);
-      Transformation<?> transformation = helper.getTransformation(resourceClass);
-      // PMD.AvoidInstantiatingObjectsInLoops Each iteration is comparatively expensive anyway,
-      // we only run until the first one succeeds, the loop runs for only a limited
-      // number of iterations on the order of 10-20 in the worst case.
-      currentKey =
-          new ResourceCacheKey( // NOPMD AvoidInstantiatingObjectsInLoops
-              helper.getArrayPool(),
-              sourceId,
-              helper.getSignature(),
-              helper.getWidth(),
-              helper.getHeight(),
-              transformation,
-              resourceClass,
-              helper.getOptions());
-      cacheFile = helper.getDiskCache().get(currentKey);
-      if (cacheFile != null) {
-        sourceKey = sourceId;
-        modelLoaders = helper.getModelLoaders(cacheFile);
-        modelLoaderIndex = 0;
+      loadData = null;
+      boolean started = false;
+      while (!started && hasNextModelLoader()) {
+        ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
+        loadData =
+            modelLoader.buildLoadData(
+                cacheFile, helper.getWidth(), helper.getHeight(), helper.getOptions());
+        if (loadData != null && helper.hasLoadPath(loadData.fetcher.getDataClass())) {
+          started = true;
+          loadData.fetcher.loadData(helper.getPriority(), this);
+        }
       }
+
+      return started;
+    } finally {
+      GlideTrace.endSection();
     }
-
-    loadData = null;
-    boolean started = false;
-    while (!started && hasNextModelLoader()) {
-      ModelLoader<File, ?> modelLoader = modelLoaders.get(modelLoaderIndex++);
-      loadData =
-          modelLoader.buildLoadData(
-              cacheFile, helper.getWidth(), helper.getHeight(), helper.getOptions());
-      if (loadData != null && helper.hasLoadPath(loadData.fetcher.getDataClass())) {
-        started = true;
-        loadData.fetcher.loadData(helper.getPriority(), this);
-      }
-    }
-
-    return started;
   }
 
   private boolean hasNextModelLoader() {
