@@ -223,7 +223,7 @@ class DecodeJob<R>
     // This should be much more fine grained, but since Java's thread pool implementation silently
     // swallows all otherwise fatal exceptions, this will at least make it obvious to developers
     // that something is failing.
-    GlideTrace.beginSectionFormat("DecodeJob#run(model=%s)", model);
+    GlideTrace.beginSectionFormat("DecodeJob#run(reason=%s, model=%s)", runReason, model);
     // Methods in the try statement can invalidate currentFetcher, so set a local variable here to
     // ensure that the fetcher is cleaned up either way.
     DataFetcher<?> localFetcher = currentFetcher;
@@ -441,32 +441,38 @@ class DecodeJob<R>
 
   private void notifyEncodeAndRelease(
       Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
-    if (resource instanceof Initializable) {
-      ((Initializable) resource).initialize();
-    }
-
-    Resource<R> result = resource;
-    LockedResource<R> lockedResource = null;
-    if (deferredEncodeManager.hasResourceToEncode()) {
-      lockedResource = LockedResource.obtain(resource);
-      result = lockedResource;
-    }
-
-    notifyComplete(result, dataSource, isLoadedFromAlternateCacheKey);
-
-    stage = Stage.ENCODE;
+    GlideTrace.beginSection("DecodeJob.notifyEncodeAndRelease");
     try {
+      if (resource instanceof Initializable) {
+        ((Initializable) resource).initialize();
+      }
+
+      Resource<R> result = resource;
+      LockedResource<R> lockedResource = null;
       if (deferredEncodeManager.hasResourceToEncode()) {
-        deferredEncodeManager.encode(diskCacheProvider, options);
+        lockedResource = LockedResource.obtain(resource);
+        result = lockedResource;
       }
+
+      notifyComplete(result, dataSource, isLoadedFromAlternateCacheKey);
+
+      stage = Stage.ENCODE;
+      try {
+        if (deferredEncodeManager.hasResourceToEncode()) {
+          deferredEncodeManager.encode(diskCacheProvider, options);
+        }
+      } finally {
+        if (lockedResource != null) {
+          lockedResource.unlock();
+        }
+      }
+      // Call onEncodeComplete outside the finally block so that it's not called if the encode
+      // process
+      // throws.
+      onEncodeComplete();
     } finally {
-      if (lockedResource != null) {
-        lockedResource.unlock();
-      }
+      GlideTrace.endSection();
     }
-    // Call onEncodeComplete outside the finally block so that it's not called if the encode process
-    // throws.
-    onEncodeComplete();
   }
 
   private <Data> Resource<R> decodeFromData(

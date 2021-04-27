@@ -15,6 +15,7 @@ dependencies {
     api "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
     api "androidx.vectordrawable:vectordrawable-animated:${ANDROID_X_VERSION}"
     api "androidx.exifinterface:exifinterface:${EXIF_INTERFACE_VERSION}"
+    api "androidx.tracing:tracing:${ANDROID_X_TRACING_VERSION}"
     compileOnly "androidx.appcompat:appcompat:${ANDROID_X_VERSION}"
 
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
