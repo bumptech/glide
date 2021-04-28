@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
@@ -39,7 +40,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 /** Tests for {@link com.bumptech.glide.integration.gifencoder.ReEncodingGifResourceEncoder}. */
@@ -64,7 +64,7 @@ public class ReEncodingGifResourceEncoderTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    Application context = RuntimeEnvironment.application;
+    Application context = ApplicationProvider.getApplicationContext();
 
     ReEncodingGifResourceEncoder.Factory factory = mock(ReEncodingGifResourceEncoder.Factory.class);
     when(decoder.getNextFrame()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));

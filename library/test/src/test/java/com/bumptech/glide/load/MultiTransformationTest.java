@@ -13,6 +13,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Application;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.tests.KeyTester;
 import com.bumptech.glide.tests.Util;
@@ -22,12 +24,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RuntimeEnvironment;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 @SuppressWarnings("unchecked")
 public class MultiTransformationTest {
   @Rule public final KeyTester keyTester = new KeyTester();
@@ -43,7 +43,7 @@ public class MultiTransformationTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
 
     doAnswer(new Util.WriteDigest("first"))
         .when(first)

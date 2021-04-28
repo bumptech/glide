@@ -27,6 +27,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
@@ -41,7 +42,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
@@ -472,7 +472,8 @@ public class CustomViewTargetTest {
 
   private void setDisplayDimens(Integer width, Integer height) {
     WindowManager windowManager =
-        (WindowManager) RuntimeEnvironment.application.getSystemService(Context.WINDOW_SERVICE);
+        (WindowManager)
+            ApplicationProvider.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
     Display display = Preconditions.checkNotNull(windowManager).getDefaultDisplay();
     if (width != null) {
       Shadows.shadowOf(display).setWidth(width);

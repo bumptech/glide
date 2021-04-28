@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
+import androidx.test.core.app.ApplicationProvider;
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
@@ -35,7 +36,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -66,7 +66,7 @@ public class VolleyStreamFetcherServerTest {
     waitForResponseLatch = new CountDownLatch(1);
     doAnswer(new CountDown()).when(callback).onDataReady(any(InputStream.class));
     doAnswer(new CountDown()).when(callback).onLoadFailed(any(Exception.class));
-    requestQueue = Volley.newRequestQueue(RuntimeEnvironment.application);
+    requestQueue = Volley.newRequestQueue(ApplicationProvider.getApplicationContext());
     mockWebServer = new MockWebServer();
     mockWebServer.start();
 
