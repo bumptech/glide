@@ -136,10 +136,11 @@ public final class KeyTester implements TestRule {
       byte[] aDigest = sha256.getDigest(a);
       byte[] bDigest = sha256.getDigest(b);
       Object object = new Object();
+      Object sentinel = null;
       return a.equals(b)
           && b.equals(a)
-          && !a.equals(null)
-          && !b.equals(null)
+          && !a.equals(sentinel)
+          && !b.equals(sentinel)
           && !a.equals(object)
           && !b.equals(object)
           && Arrays.equals(aDigest, bDigest);
