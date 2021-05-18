@@ -180,7 +180,11 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
               outHeight,
               downsampleStrategy);
     } finally {
-      mediaMetadataRetriever.release();
+      if (Build.VERSION.SDK_INT >= VERSION_CODES.Q) {
+        mediaMetadataRetriever.close();
+      } else {
+        mediaMetadataRetriever.release();
+      }
     }
 
     return BitmapResource.obtain(result, bitmapPool);
