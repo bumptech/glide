@@ -131,7 +131,7 @@ Compatibility
  * **OkHttp 3.x**: There is an optional dependency available called `okhttp3-integration`, see the [docs page][23].
  * **Volley**: There is an optional dependency available called `volley-integration`, see the [docs page][24].
  * **Round Pictures**: `CircleImageView`/`CircularImageView`/`RoundedImageView` are known to have [issues][18] with `TransitionDrawable` (`.crossFade()` with `.thumbnail()` or `.placeholder()`) and animated GIFs, use a [`BitmapTransformation`][19] (`.circleCrop()` will be available in v4) or `.dontAnimate()` to fix the issue.
- * **Huge Images** (maps, comic strips): Glide can load huge images by downsampling them, but does not support zooming and panning `ImageView`s as they require special resource optimizations (such as tiling) to work without `OutOfMemoryError`s.
+ * **Huge Images** (maps, comic strips): Glide can load huge images by downsampling them, but does not support zooming and panning `ImageView` as they require special resource optimizations (such as tiling) to work without `OutOfMemoryError`.
 
 Build
 -----
