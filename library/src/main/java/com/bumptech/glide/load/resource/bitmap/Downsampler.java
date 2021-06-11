@@ -64,9 +64,7 @@ public final class Downsampler {
    * limitations.
    */
   public static final Option<PreferredColorSpace> PREFERRED_COLOR_SPACE =
-      Option.memory(
-          "com.bumptech.glide.load.resource.bitmap.Downsampler.PreferredColorSpace",
-          PreferredColorSpace.SRGB);
+      Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.PreferredColorSpace");
   /**
    * Indicates the {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option that
    * will be used to calculate the sample size to use to downsample an image given the original and
@@ -415,15 +413,17 @@ public final class Downsampler {
       }
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-      boolean isP3Eligible =
-          preferredColorSpace == PreferredColorSpace.DISPLAY_P3
-              && options.outColorSpace != null
-              && options.outColorSpace.isWideGamut();
-      options.inPreferredColorSpace =
-          ColorSpace.get(isP3Eligible ? ColorSpace.Named.DISPLAY_P3 : ColorSpace.Named.SRGB);
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      options.inPreferredColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+    if (preferredColorSpace != null) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        boolean isP3Eligible =
+            preferredColorSpace == PreferredColorSpace.DISPLAY_P3
+                && options.outColorSpace != null
+                && options.outColorSpace.isWideGamut();
+        options.inPreferredColorSpace =
+            ColorSpace.get(isP3Eligible ? ColorSpace.Named.DISPLAY_P3 : ColorSpace.Named.SRGB);
+      } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        options.inPreferredColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+      }
     }
 
     Bitmap downsampled = decodeStream(imageReader, options, callbacks, bitmapPool);

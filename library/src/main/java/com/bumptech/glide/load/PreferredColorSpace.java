@@ -1,7 +1,7 @@
 package com.bumptech.glide.load;
 
 /**
- * Glide's supported handling of color spaces on Android O+, defaults to {@link #SRGB}.
+ * Glide's supported handling of color spaces on Android O+, defaults to null.
  *
  * <p>On Android O, Glide will always request SRGB and will ignore this option if set. A bug on
  * Android O prevents P3 images from being compressed correctly and can result in color distortion.
