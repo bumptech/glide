@@ -1,5 +1,9 @@
 package com.bumptech.glide.load.data;
 
+import android.net.TrafficStats;
+import android.os.Process;
+import android.os.StrictMode;
+import android.os.StrictMode.ThreadPolicy;
 import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -53,6 +57,11 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   @Override
   public void loadData(
       @NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
+    TrafficStats.setThreadStatsTag(Process.myPid());
+
+    ThreadPolicy oldThreadPolicy = StrictMode.getThreadPolicy();
+    StrictMode.setThreadPolicy(new ThreadPolicy.Builder(oldThreadPolicy).permitNetwork().build());
+
     long startTime = LogTime.getLogTime();
     try {
       InputStream result = loadDataWithRedirects(glideUrl.toURL(), 0, null, glideUrl.getHeaders());
@@ -67,6 +76,9 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
         Log.v(TAG, "Finished http url fetcher fetch in " + LogTime.getElapsedMillis(startTime));
       }
     }
+
+    StrictMode.setThreadPolicy(oldThreadPolicy);
+    TrafficStats.clearThreadStatsTag();
   }
 
   private InputStream loadDataWithRedirects(
