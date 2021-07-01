@@ -16,6 +16,7 @@ import com.bumptech.glide.load.DataSource;
 // Public API.
 @SuppressWarnings("WeakerAccess")
 public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
+
   private final int duration;
   private final boolean isCrossFadeEnabled;
   private DrawableCrossFadeTransition resourceTransition;
@@ -39,9 +40,12 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
     return resourceTransition;
   }
 
-  /** A Builder for {@link DrawableCrossFadeFactory}. */
+  /**
+   * A Builder for {@link DrawableCrossFadeFactory}.
+   */
   @SuppressWarnings("unused")
   public static class Builder {
+
     private static final int DEFAULT_DURATION_MS = 300;
     private final int durationMillis;
     private boolean isCrossFadeEnabled;
@@ -50,7 +54,9 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
       this(DEFAULT_DURATION_MS);
     }
 
-    /** @param durationMillis The duration of the cross fade animation in milliseconds. */
+    /**
+     * @param durationMillis The duration of the cross fade animation in milliseconds.
+     */
     public Builder(int durationMillis) {
       this.durationMillis = durationMillis;
     }
@@ -62,10 +68,9 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
      * <p>Defaults to {@code false}.
      *
      * @param isCrossFadeEnabled If {@code true} the previous {@link Drawable}'s alpha will be
-     *     animated from 100 to 0 while the new {@link Drawable}'s alpha is animated from 0 to 100.
-     *     Otherwise the previous {@link Drawable}'s alpha will remain at 100 throughout the
-     *     animation. See {@link
-     *     android.graphics.drawable.TransitionDrawable#setCrossFadeEnabled(boolean)}
+     * animated from 100 to 0 while the new {@link Drawable}'s alpha is animated from 0 to 100.
+     * Otherwise the previous {@link Drawable}'s alpha will remain at 100 throughout the animation.
+     * See {@link android.graphics.drawable.TransitionDrawable#setCrossFadeEnabled(boolean)}
      */
     public Builder setCrossFadeEnabled(boolean isCrossFadeEnabled) {
       this.isCrossFadeEnabled = isCrossFadeEnabled;
