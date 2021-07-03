@@ -535,6 +535,34 @@ public final class TransformationUtils {
         });
   }
 
+  /**
+   * Scale the image to fill specified width/height
+   *
+   * @param pool The BitmapPool to obtain a bitmap from.
+   * @param inBitmap The Bitmap to resize.
+   * @param width The width in pixels of the final Bitmap.
+   * @param height The height in pixels of the final Bitmap.
+   * @return The resized Bitmap (will be recycled if recycled is not null).
+   */
+  public static Bitmap fitXY(
+      @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, int width, int height) {
+    if (inBitmap.getWidth() == width && inBitmap.getHeight() == height) {
+      return inBitmap;
+    }
+    // From ImageView/Bitmap.createScaledBitmap.
+    float scaleX = (float) width / (float) inBitmap.getWidth();
+    float scaleY = (float) height / (float) inBitmap.getHeight();
+    Matrix m = new Matrix();
+    m.setScale(scaleX, scaleY);
+    Bitmap result = pool.get(width, height, getNonNullConfig(inBitmap));
+
+    // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
+    TransformationUtils.setAlpha(inBitmap, result);
+
+    applyMatrix(inBitmap, result, m);
+    return result;
+  }
+
   private static Bitmap roundedCorners(
       @NonNull BitmapPool pool, @NonNull Bitmap inBitmap, DrawRoundedCornerFn drawRoundedCornerFn) {
 
