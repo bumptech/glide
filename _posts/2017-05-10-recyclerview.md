@@ -3,8 +3,8 @@ layout: page
 title: "RecyclerView"
 category: int
 date: 2017-05-10 07:47:20
-order: 4
-disqus: 1
+order: 5
+tdisqus: 1
 ---
 
 * TOC
