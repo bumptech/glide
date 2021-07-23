@@ -12,3 +12,4 @@ _site/*
 build
 
 *.swp
+.jekyll-cache
