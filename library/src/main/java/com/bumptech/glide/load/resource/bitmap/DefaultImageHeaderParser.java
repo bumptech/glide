@@ -67,22 +67,6 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     return getType(new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)));
   }
 
-  @Override
-  public int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool)
-      throws IOException {
-    return getOrientation(
-        new StreamReader(Preconditions.checkNotNull(is)),
-        Preconditions.checkNotNull(byteArrayPool));
-  }
-
-  @Override
-  public int getOrientation(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
-      throws IOException {
-    return getOrientation(
-        new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)),
-        Preconditions.checkNotNull(byteArrayPool));
-  }
-
   @NonNull
   private ImageType getType(Reader reader) throws IOException {
     try {
@@ -155,6 +139,22 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
   }
 
+  @Override
+  public int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
+    return getOrientation(
+        new StreamReader(Preconditions.checkNotNull(is)),
+        Preconditions.checkNotNull(byteArrayPool));
+  }
+
+  @Override
+  public int getOrientation(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
+    return getOrientation(
+        new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)),
+        Preconditions.checkNotNull(byteArrayPool));
+  }
+
   /**
    * Parse the orientation from the image header. If it doesn't handle this image type (or this is
    * not an image) it will return a default value rather than throwing an exception.
@@ -220,69 +220,6 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         Log.d(TAG, "Missing jpeg exif preamble");
       }
       return UNKNOWN_ORIENTATION;
-    }
-  }
-
-  private boolean hasJpegExifPreamble(byte[] exifData, int exifSegmentLength) {
-    boolean result =
-        exifData != null && exifSegmentLength > JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length;
-    if (result) {
-      for (int i = 0; i < JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length; i++) {
-        if (exifData[i] != JPEG_EXIF_SEGMENT_PREAMBLE_BYTES[i]) {
-          result = false;
-          break;
-        }
-      }
-    }
-    return result;
-  }
-
-  /**
-   * Moves reader to the start of the exif segment and returns the length of the exif segment or
-   * {@code -1} if no exif segment is found.
-   */
-  private int moveToExifSegmentAndGetLength(Reader reader) throws IOException {
-    while (true) {
-      short segmentId = reader.getUInt8();
-      if (segmentId != SEGMENT_START_ID) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Unknown segmentId=" + segmentId);
-        }
-        return -1;
-      }
-
-      short segmentType = reader.getUInt8();
-      if (segmentType == SEGMENT_SOS) {
-        return -1;
-      } else if (segmentType == MARKER_EOI) {
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Found MARKER_EOI in exif segment");
-        }
-        return -1;
-      }
-
-      int segmentLength = reader.getUInt16();
-      // A segment includes the bytes that specify its length.
-      int segmentContentsLength = segmentLength - 2;
-      if (segmentType != EXIF_SEGMENT_TYPE) {
-        long skipped = reader.skip(segmentContentsLength);
-        if (skipped != segmentContentsLength) {
-          if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(
-                TAG,
-                "Unable to skip enough data"
-                    + ", type: "
-                    + segmentType
-                    + ", wanted to skip: "
-                    + segmentContentsLength
-                    + ", but actually skipped: "
-                    + skipped);
-          }
-          return -1;
-        }
-      } else {
-        return segmentContentsLength;
-      }
     }
   }
 
@@ -377,6 +314,69 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     return -1;
+  }
+
+  private boolean hasJpegExifPreamble(byte[] exifData, int exifSegmentLength) {
+    boolean result =
+        exifData != null && exifSegmentLength > JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length;
+    if (result) {
+      for (int i = 0; i < JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length; i++) {
+        if (exifData[i] != JPEG_EXIF_SEGMENT_PREAMBLE_BYTES[i]) {
+          result = false;
+          break;
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Moves reader to the start of the exif segment and returns the length of the exif segment or
+   * {@code -1} if no exif segment is found.
+   */
+  private int moveToExifSegmentAndGetLength(Reader reader) throws IOException {
+    while (true) {
+      short segmentId = reader.getUInt8();
+      if (segmentId != SEGMENT_START_ID) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Unknown segmentId=" + segmentId);
+        }
+        return -1;
+      }
+
+      short segmentType = reader.getUInt8();
+      if (segmentType == SEGMENT_SOS) {
+        return -1;
+      } else if (segmentType == MARKER_EOI) {
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+          Log.d(TAG, "Found MARKER_EOI in exif segment");
+        }
+        return -1;
+      }
+
+      int segmentLength = reader.getUInt16();
+      // A segment includes the bytes that specify its length.
+      int segmentContentsLength = segmentLength - 2;
+      if (segmentType != EXIF_SEGMENT_TYPE) {
+        long skipped = reader.skip(segmentContentsLength);
+        if (skipped != segmentContentsLength) {
+          if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(
+                TAG,
+                "Unable to skip enough data"
+                    + ", type: "
+                    + segmentType
+                    + ", wanted to skip: "
+                    + segmentContentsLength
+                    + ", but actually skipped: "
+                    + skipped);
+          }
+          return -1;
+        }
+      } else {
+        return segmentContentsLength;
+      }
+    }
   }
 
   private static int calcTagOffset(int ifdOffset, int tagIndex) {

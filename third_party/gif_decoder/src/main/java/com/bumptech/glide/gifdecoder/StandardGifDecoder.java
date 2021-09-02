@@ -324,6 +324,17 @@ public class StandardGifDecoder implements GifDecoder {
   }
 
   @Override
+  @GifDecodeStatus
+  public synchronized int read(@Nullable byte[] data) {
+    this.header = getHeaderParser().setData(data).parseHeader();
+    if (data != null) {
+      setData(header, data);
+    }
+
+    return status;
+  }
+
+  @Override
   public void clear() {
     header = null;
     if (mainPixels != null) {
@@ -393,17 +404,6 @@ public class StandardGifDecoder implements GifDecoder {
       parser = new GifHeaderParser();
     }
     return parser;
-  }
-
-  @Override
-  @GifDecodeStatus
-  public synchronized int read(@Nullable byte[] data) {
-    this.header = getHeaderParser().setData(data).parseHeader();
-    if (data != null) {
-      setData(header, data);
-    }
-
-    return status;
   }
 
   @Override

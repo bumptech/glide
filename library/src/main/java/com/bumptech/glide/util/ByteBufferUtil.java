@@ -109,6 +109,11 @@ public final class ByteBufferUtil {
     }
   }
 
+  @NonNull
+  public static InputStream toStream(@NonNull ByteBuffer buffer) {
+    return new ByteBufferStream(buffer);
+  }
+
   // We check the appropriate offsets, so this is a spurious warning.
   @SuppressWarnings("ByteBufferBackingArray")
   @NonNull
@@ -124,11 +129,6 @@ public final class ByteBufferUtil {
       toCopy.get(result);
     }
     return result;
-  }
-
-  @NonNull
-  public static InputStream toStream(@NonNull ByteBuffer buffer) {
-    return new ByteBufferStream(buffer);
   }
 
   @NonNull
@@ -202,16 +202,6 @@ public final class ByteBufferUtil {
     }
 
     @Override
-    public synchronized void mark(int readLimit) {
-      markPos = byteBuffer.position();
-    }
-
-    @Override
-    public boolean markSupported() {
-      return true;
-    }
-
-    @Override
     public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) {
       if (!byteBuffer.hasRemaining()) {
         return -1;
@@ -219,6 +209,16 @@ public final class ByteBufferUtil {
       int toRead = Math.min(byteCount, available());
       byteBuffer.get(buffer, byteOffset, toRead);
       return toRead;
+    }
+
+    @Override
+    public synchronized void mark(int readLimit) {
+      markPos = byteBuffer.position();
+    }
+
+    @Override
+    public boolean markSupported() {
+      return true;
     }
 
     @Override

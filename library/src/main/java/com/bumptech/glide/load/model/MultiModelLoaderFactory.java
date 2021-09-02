@@ -114,17 +114,6 @@ public class MultiModelLoaderFactory {
   }
 
   @NonNull
-  synchronized List<Class<?>> getDataClasses(@NonNull Class<?> modelClass) {
-    List<Class<?>> result = new ArrayList<>();
-    for (Entry<?, ?> entry : entries) {
-      if (!result.contains(entry.dataClass) && entry.handles(modelClass)) {
-        result.add(entry.dataClass);
-      }
-    }
-    return result;
-  }
-
-  @NonNull
   public synchronized <Model, Data> ModelLoader<Model, Data> build(
       @NonNull Class<Model> modelClass, @NonNull Class<Data> dataClass) {
     try {
@@ -168,14 +157,25 @@ public class MultiModelLoaderFactory {
 
   @NonNull
   @SuppressWarnings("unchecked")
-  private <Model, Data> ModelLoaderFactory<Model, Data> getFactory(@NonNull Entry<?, ?> entry) {
-    return (ModelLoaderFactory<Model, Data>) entry.factory;
+  private <Model, Data> ModelLoader<Model, Data> build(@NonNull Entry<?, ?> entry) {
+    return (ModelLoader<Model, Data>) Preconditions.checkNotNull(entry.factory.build(this));
+  }
+
+  @NonNull
+  synchronized List<Class<?>> getDataClasses(@NonNull Class<?> modelClass) {
+    List<Class<?>> result = new ArrayList<>();
+    for (Entry<?, ?> entry : entries) {
+      if (!result.contains(entry.dataClass) && entry.handles(modelClass)) {
+        result.add(entry.dataClass);
+      }
+    }
+    return result;
   }
 
   @NonNull
   @SuppressWarnings("unchecked")
-  private <Model, Data> ModelLoader<Model, Data> build(@NonNull Entry<?, ?> entry) {
-    return (ModelLoader<Model, Data>) Preconditions.checkNotNull(entry.factory.build(this));
+  private <Model, Data> ModelLoaderFactory<Model, Data> getFactory(@NonNull Entry<?, ?> entry) {
+    return (ModelLoaderFactory<Model, Data>) entry.factory;
   }
 
   @NonNull

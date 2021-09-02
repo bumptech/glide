@@ -15,7 +15,7 @@ import com.google.common.truth.Subject;
 import com.google.common.truth.Truth;
 
 /** Truth assertions for comparing {@link Bitmap}s. */
-@SuppressWarnings({"WeakerAccess", "unused", "rawtypes", "unchecked"})
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class BitmapSubject extends Subject {
 
   private static final Subject.Factory<BitmapSubject, Bitmap> FACTORY =
@@ -69,6 +69,19 @@ public final class BitmapSubject extends Subject {
     sameAs(drawable);
   }
 
+  public void sameAs(Drawable other) {
+    if (!(other instanceof BitmapDrawable)) {
+      failWithoutActual(simpleFact("The given expected value was not a BitmapDrawable."));
+    }
+    sameAs(((BitmapDrawable) other).getBitmap());
+  }
+
+  public void sameAs(Bitmap other) {
+    if (!actual.sameAs(other)) {
+      failWithActual("expected to be the same as", getDisplayString(other));
+    }
+  }
+
   public void hasDimensions(int expectedWidth, int expectedHeight) {
     int actualWidth = actual.getWidth();
     int actualHeight = actual.getHeight();
@@ -96,19 +109,6 @@ public final class BitmapSubject extends Subject {
   public void isNotRecycled() {
     if (actual.isRecycled()) {
       failWithActual(simpleFact("expected not to be recycled"));
-    }
-  }
-
-  public void sameAs(Drawable other) {
-    if (!(other instanceof BitmapDrawable)) {
-      failWithoutActual(simpleFact("The given expected value was not a BitmapDrawable."));
-    }
-    sameAs(((BitmapDrawable) other).getBitmap());
-  }
-
-  public void sameAs(Bitmap other) {
-    if (!actual.sameAs(other)) {
-      failWithActual("expected to be the same as", getDisplayString(other));
     }
   }
 

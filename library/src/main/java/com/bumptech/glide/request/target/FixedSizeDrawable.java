@@ -102,6 +102,11 @@ public class FixedSizeDrawable extends Drawable {
   }
 
   @Override
+  public void setColorFilter(ColorFilter colorFilter) {
+    wrapped.setColorFilter(colorFilter);
+  }
+
+  @Override
   public void clearColorFilter() {
     wrapped.clearColorFilter();
   }
@@ -171,11 +176,6 @@ public class FixedSizeDrawable extends Drawable {
   @Override
   public void setAlpha(int i) {
     wrapped.setAlpha(i);
-  }
-
-  @Override
-  public void setColorFilter(ColorFilter colorFilter) {
-    wrapped.setColorFilter(colorFilter);
   }
 
   @Override

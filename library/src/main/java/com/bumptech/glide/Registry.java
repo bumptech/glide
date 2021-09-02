@@ -90,6 +90,68 @@ public class Registry {
   }
 
   /**
+   * Appends the given {@link ResourceEncoder} into the list of available {@link ResourceEncoder}s
+   * so that it is attempted after all earlier and default {@link ResourceEncoder}s for the given
+   * data type.
+   *
+   * <p>The {@link ResourceEncoder} will be used both for the exact resource class and any subtypes.
+   * For example, registering an {@link ResourceEncoder} for {@link
+   * android.graphics.drawable.Drawable} (not recommended) will result in the {@link
+   * ResourceEncoder} being used for {@link android.graphics.drawable.BitmapDrawable} and {@link
+   * com.bumptech.glide.load.resource.gif.GifDrawable} and any other subclass.
+   *
+   * <p>If multiple {@link ResourceEncoder}s are registered for the same type or super type, the
+   * {@link ResourceEncoder} that is registered first will be used.
+   *
+   * @deprecated Use the equivalent {@link #append(Class, ResourceEncoder)} method instead.
+   */
+  @NonNull
+  @Deprecated
+  public <TResource> Registry register(
+      @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
+    return append(resourceClass, encoder);
+  }
+
+  /**
+   * Registers a new {@link com.bumptech.glide.load.data.DataRewinder.Factory} to handle a
+   * non-default data type that can be rewind to allow for efficient reads of file headers.
+   */
+  @NonNull
+  public Registry register(@NonNull DataRewinder.Factory<?> factory) {
+    dataRewinderRegistry.register(factory);
+    return this;
+  }
+
+  /**
+   * Registers the given {@link ResourceTranscoder} to convert from the given resource {@link Class}
+   * to the given transcode {@link Class}.
+   *
+   * @param resourceClass The class that will be transcoded from (e.g. {@link
+   *     android.graphics.Bitmap}).
+   * @param transcodeClass The class that will be transcoded to (e.g. {@link
+   *     android.graphics.drawable.BitmapDrawable}).
+   * @param transcoder The {@link ResourceTranscoder} to register.
+   */
+  @NonNull
+  public <TResource, Transcode> Registry register(
+      @NonNull Class<TResource> resourceClass,
+      @NonNull Class<Transcode> transcodeClass,
+      @NonNull ResourceTranscoder<TResource, Transcode> transcoder) {
+    transcoderRegistry.register(resourceClass, transcodeClass, transcoder);
+    return this;
+  }
+
+  /**
+   * Registers a new {@link ImageHeaderParser} that can obtain some basic metadata from an image
+   * header (orientation, type etc).
+   */
+  @NonNull
+  public Registry register(@NonNull ImageHeaderParser parser) {
+    imageHeaderParserRegistry.add(parser);
+    return this;
+  }
+
+  /**
    * Appends the given {@link Encoder} onto the list of available {@link Encoder}s so that it is
    * attempted after all earlier and default {@link Encoder}s for the given data class.
    *
@@ -107,22 +169,6 @@ public class Registry {
   @NonNull
   public <Data> Registry append(@NonNull Class<Data> dataClass, @NonNull Encoder<Data> encoder) {
     encoderRegistry.append(dataClass, encoder);
-    return this;
-  }
-
-  /**
-   * Prepends the given {@link Encoder} into the list of available {@link Encoder}s so that it is
-   * attempted before all later and default {@link Encoder}s for the given data class.
-   *
-   * <p>This method allows you to replace the default {@link Encoder} because it ensures the
-   * registered {@link Encoder} will run first. If multiple {@link Encoder}s are registered for the
-   * same type or super type, the {@link Encoder} that is registered first will be used.
-   *
-   * @see #append(Class, Encoder)
-   */
-  @NonNull
-  public <Data> Registry prepend(@NonNull Class<Data> dataClass, @NonNull Encoder<Data> encoder) {
-    encoderRegistry.prepend(dataClass, encoder);
     return this;
   }
 
@@ -185,6 +231,74 @@ public class Registry {
   }
 
   /**
+   * Appends the given {@link ResourceEncoder} into the list of available {@link ResourceEncoder}s
+   * so that it is attempted after all earlier and default {@link ResourceEncoder}s for the given
+   * data type.
+   *
+   * <p>The {@link ResourceEncoder} will be used both for the exact resource class and any subtypes.
+   * For example, registering an {@link ResourceEncoder} for {@link
+   * android.graphics.drawable.Drawable} (not recommended) will result in the {@link
+   * ResourceEncoder} being used for {@link android.graphics.drawable.BitmapDrawable} and {@link
+   * com.bumptech.glide.load.resource.gif.GifDrawable} and any other subclass.
+   *
+   * <p>If multiple {@link ResourceEncoder}s are registered for the same type or super type, the
+   * {@link ResourceEncoder} that is registered first will be used.
+   *
+   * @see #prepend(Class, ResourceEncoder)
+   */
+  @NonNull
+  public <TResource> Registry append(
+      @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
+    resourceEncoderRegistry.append(resourceClass, encoder);
+    return this;
+  }
+
+  /**
+   * Appends a new {@link ModelLoaderFactory} onto the end of the existing set so that the
+   * constructed {@link ModelLoader} will be tried after all default and previously registered
+   * {@link ModelLoader}s for the given model and data classes.
+   *
+   * <p>If you're attempting to replace an existing {@link ModelLoader}, use {@link #prepend(Class,
+   * Class, ModelLoaderFactory)}. This method is best for new types of models and/or data or as a
+   * way to add an additional fallback loader for an existing type of model/data.
+   *
+   * <p>If multiple {@link ModelLoaderFactory}s are registered for the same model and/or data
+   * classes, the {@link ModelLoader}s they produce will be attempted in the order the {@link
+   * ModelLoaderFactory}s were registered. Only if all {@link ModelLoader}s fail will the entire
+   * request fail.
+   *
+   * @see #prepend(Class, Class, ModelLoaderFactory)
+   * @see #replace(Class, Class, ModelLoaderFactory)
+   * @param modelClass The model class (e.g. URL, file path).
+   * @param dataClass the data class (e.g. {@link java.io.InputStream}, {@link
+   *     java.io.FileDescriptor}).
+   */
+  @NonNull
+  public <Model, Data> Registry append(
+      @NonNull Class<Model> modelClass,
+      @NonNull Class<Data> dataClass,
+      @NonNull ModelLoaderFactory<Model, Data> factory) {
+    modelLoaderRegistry.append(modelClass, dataClass, factory);
+    return this;
+  }
+
+  /**
+   * Prepends the given {@link Encoder} into the list of available {@link Encoder}s so that it is
+   * attempted before all later and default {@link Encoder}s for the given data class.
+   *
+   * <p>This method allows you to replace the default {@link Encoder} because it ensures the
+   * registered {@link Encoder} will run first. If multiple {@link Encoder}s are registered for the
+   * same type or super type, the {@link Encoder} that is registered first will be used.
+   *
+   * @see #append(Class, Encoder)
+   */
+  @NonNull
+  public <Data> Registry prepend(@NonNull Class<Data> dataClass, @NonNull Encoder<Data> encoder) {
+    encoderRegistry.prepend(dataClass, encoder);
+    return this;
+  }
+
+  /**
    * Prepends the given {@link ResourceDecoder} into the list of all available {@link
    * ResourceDecoder}s so that it is attempted before all later and default {@link ResourceDecoder}s
    * for the given types.
@@ -242,82 +356,6 @@ public class Registry {
   }
 
   /**
-   * Overrides the default ordering of resource decoder buckets. You may also add custom buckets
-   * which are identified as a unique string. Glide will attempt to decode using decoders in the
-   * highest priority bucket before moving on to the next one.
-   *
-   * <p>The default order is [{@link #BUCKET_GIF}, {@link #BUCKET_BITMAP}, {@link
-   * #BUCKET_BITMAP_DRAWABLE}].
-   *
-   * <p>When registering decoders, you can use these buckets to specify the ordering relative only
-   * to other decoders in that bucket.
-   *
-   * @see #append(String, Class, Class, ResourceDecoder)
-   * @see #prepend(String, Class, Class, ResourceDecoder)
-   * @param buckets The list of bucket identifiers in order from highest priority to least priority.
-   */
-  // Final to avoid a PMD error.
-  @NonNull
-  public final Registry setResourceDecoderBucketPriorityList(@NonNull List<String> buckets) {
-    // See #3296 and https://bugs.openjdk.java.net/browse/JDK-6260652.
-    List<String> modifiedBuckets = new ArrayList<>(buckets.size());
-    modifiedBuckets.add(BUCKET_PREPEND_ALL);
-    // See https://github.com/bumptech/glide/issues/4309.
-    for (String bucket : buckets) {
-      modifiedBuckets.add(bucket);
-    }
-    modifiedBuckets.add(BUCKET_APPEND_ALL);
-    decoderRegistry.setBucketPriorityList(modifiedBuckets);
-    return this;
-  }
-
-  /**
-   * Appends the given {@link ResourceEncoder} into the list of available {@link ResourceEncoder}s
-   * so that it is attempted after all earlier and default {@link ResourceEncoder}s for the given
-   * data type.
-   *
-   * <p>The {@link ResourceEncoder} will be used both for the exact resource class and any subtypes.
-   * For example, registering an {@link ResourceEncoder} for {@link
-   * android.graphics.drawable.Drawable} (not recommended) will result in the {@link
-   * ResourceEncoder} being used for {@link android.graphics.drawable.BitmapDrawable} and {@link
-   * com.bumptech.glide.load.resource.gif.GifDrawable} and any other subclass.
-   *
-   * <p>If multiple {@link ResourceEncoder}s are registered for the same type or super type, the
-   * {@link ResourceEncoder} that is registered first will be used.
-   *
-   * @deprecated Use the equivalent {@link #append(Class, ResourceEncoder)} method instead.
-   */
-  @NonNull
-  @Deprecated
-  public <TResource> Registry register(
-      @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
-    return append(resourceClass, encoder);
-  }
-
-  /**
-   * Appends the given {@link ResourceEncoder} into the list of available {@link ResourceEncoder}s
-   * so that it is attempted after all earlier and default {@link ResourceEncoder}s for the given
-   * data type.
-   *
-   * <p>The {@link ResourceEncoder} will be used both for the exact resource class and any subtypes.
-   * For example, registering an {@link ResourceEncoder} for {@link
-   * android.graphics.drawable.Drawable} (not recommended) will result in the {@link
-   * ResourceEncoder} being used for {@link android.graphics.drawable.BitmapDrawable} and {@link
-   * com.bumptech.glide.load.resource.gif.GifDrawable} and any other subclass.
-   *
-   * <p>If multiple {@link ResourceEncoder}s are registered for the same type or super type, the
-   * {@link ResourceEncoder} that is registered first will be used.
-   *
-   * @see #prepend(Class, ResourceEncoder)
-   */
-  @NonNull
-  public <TResource> Registry append(
-      @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
-    resourceEncoderRegistry.append(resourceClass, encoder);
-    return this;
-  }
-
-  /**
    * Prepends the given {@link ResourceEncoder} into the list of available {@link ResourceEncoder}s
    * so that it is attempted before all later and default {@link ResourceEncoder}s for the given
    * data type.
@@ -333,74 +371,6 @@ public class Registry {
   public <TResource> Registry prepend(
       @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
     resourceEncoderRegistry.prepend(resourceClass, encoder);
-    return this;
-  }
-
-  /**
-   * Registers a new {@link com.bumptech.glide.load.data.DataRewinder.Factory} to handle a
-   * non-default data type that can be rewind to allow for efficient reads of file headers.
-   */
-  @NonNull
-  public Registry register(@NonNull DataRewinder.Factory<?> factory) {
-    dataRewinderRegistry.register(factory);
-    return this;
-  }
-
-  /**
-   * Registers the given {@link ResourceTranscoder} to convert from the given resource {@link Class}
-   * to the given transcode {@link Class}.
-   *
-   * @param resourceClass The class that will be transcoded from (e.g. {@link
-   *     android.graphics.Bitmap}).
-   * @param transcodeClass The class that will be transcoded to (e.g. {@link
-   *     android.graphics.drawable.BitmapDrawable}).
-   * @param transcoder The {@link ResourceTranscoder} to register.
-   */
-  @NonNull
-  public <TResource, Transcode> Registry register(
-      @NonNull Class<TResource> resourceClass,
-      @NonNull Class<Transcode> transcodeClass,
-      @NonNull ResourceTranscoder<TResource, Transcode> transcoder) {
-    transcoderRegistry.register(resourceClass, transcodeClass, transcoder);
-    return this;
-  }
-
-  /**
-   * Registers a new {@link ImageHeaderParser} that can obtain some basic metadata from an image
-   * header (orientation, type etc).
-   */
-  @NonNull
-  public Registry register(@NonNull ImageHeaderParser parser) {
-    imageHeaderParserRegistry.add(parser);
-    return this;
-  }
-
-  /**
-   * Appends a new {@link ModelLoaderFactory} onto the end of the existing set so that the
-   * constructed {@link ModelLoader} will be tried after all default and previously registered
-   * {@link ModelLoader}s for the given model and data classes.
-   *
-   * <p>If you're attempting to replace an existing {@link ModelLoader}, use {@link #prepend(Class,
-   * Class, ModelLoaderFactory)}. This method is best for new types of models and/or data or as a
-   * way to add an additional fallback loader for an existing type of model/data.
-   *
-   * <p>If multiple {@link ModelLoaderFactory}s are registered for the same model and/or data
-   * classes, the {@link ModelLoader}s they produce will be attempted in the order the {@link
-   * ModelLoaderFactory}s were registered. Only if all {@link ModelLoader}s fail will the entire
-   * request fail.
-   *
-   * @see #prepend(Class, Class, ModelLoaderFactory)
-   * @see #replace(Class, Class, ModelLoaderFactory)
-   * @param modelClass The model class (e.g. URL, file path).
-   * @param dataClass the data class (e.g. {@link java.io.InputStream}, {@link
-   *     java.io.FileDescriptor}).
-   */
-  @NonNull
-  public <Model, Data> Registry append(
-      @NonNull Class<Model> modelClass,
-      @NonNull Class<Data> dataClass,
-      @NonNull ModelLoaderFactory<Model, Data> factory) {
-    modelLoaderRegistry.append(modelClass, dataClass, factory);
     return this;
   }
 
@@ -432,6 +402,36 @@ public class Registry {
       @NonNull Class<Data> dataClass,
       @NonNull ModelLoaderFactory<Model, Data> factory) {
     modelLoaderRegistry.prepend(modelClass, dataClass, factory);
+    return this;
+  }
+
+  /**
+   * Overrides the default ordering of resource decoder buckets. You may also add custom buckets
+   * which are identified as a unique string. Glide will attempt to decode using decoders in the
+   * highest priority bucket before moving on to the next one.
+   *
+   * <p>The default order is [{@link #BUCKET_GIF}, {@link #BUCKET_BITMAP}, {@link
+   * #BUCKET_BITMAP_DRAWABLE}].
+   *
+   * <p>When registering decoders, you can use these buckets to specify the ordering relative only
+   * to other decoders in that bucket.
+   *
+   * @see #append(String, Class, Class, ResourceDecoder)
+   * @see #prepend(String, Class, Class, ResourceDecoder)
+   * @param buckets The list of bucket identifiers in order from highest priority to least priority.
+   */
+  // Final to avoid a PMD error.
+  @NonNull
+  public final Registry setResourceDecoderBucketPriorityList(@NonNull List<String> buckets) {
+    // See #3296 and https://bugs.openjdk.java.net/browse/JDK-6260652.
+    List<String> modifiedBuckets = new ArrayList<>(buckets.size());
+    modifiedBuckets.add(BUCKET_PREPEND_ALL);
+    // See https://github.com/bumptech/glide/issues/4309.
+    for (String bucket : buckets) {
+      modifiedBuckets.add(bucket);
+    }
+    modifiedBuckets.add(BUCKET_APPEND_ALL);
+    decoderRegistry.setBucketPriorityList(modifiedBuckets);
     return this;
   }
 

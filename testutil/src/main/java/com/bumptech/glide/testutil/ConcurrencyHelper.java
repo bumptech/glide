@@ -58,6 +58,27 @@ public class ConcurrencyHelper {
     return future;
   }
 
+  private static void wait(Waiter waiter) {
+    boolean isFinished = false;
+    do {
+      try {
+        try {
+          isFinished = waiter.await(TIMEOUT_SECONDS, TIMEOUT_UNIT);
+          if (!isFinished) {
+            throw new WaiterException("Timed out while waiting");
+          }
+        } catch (InterruptedException e) {
+          throw new WaiterException(e);
+        }
+      } catch (WaiterException e) {
+        if (Debug.isDebuggerConnected()) {
+          continue;
+        }
+        throw e;
+      }
+    } while (Debug.isDebuggerConnected() && !isFinished);
+  }
+
   public void loadOnOtherThread(final Runnable runnable) {
     final AtomicBoolean isDone = new AtomicBoolean();
     final Thread thread =
@@ -83,6 +104,95 @@ public class ConcurrencyHelper {
 
   public void loadOnMainThread(final RequestBuilder<Drawable> builder, ImageView imageView) {
     loadOnMainThread(builder, new DrawableImageViewTarget(imageView));
+  }
+
+  private <T> void loadOnMainThread(final RequestBuilder<T> builder, final Target<T> target) {
+    final CountDownLatch latch = new CountDownLatch(1);
+    callOnMainThread(
+        new Callable<Target<T>>() {
+          @Override
+          public Target<T> call() {
+            builder.into(
+                new Target<T>() {
+                  @Override
+                  public void onStart() {
+                    target.onStart();
+                  }
+
+                  @Override
+                  public void onStop() {
+                    target.onStop();
+                  }
+
+                  @Override
+                  public void onDestroy() {
+                    target.onDestroy();
+                  }
+
+                  @Override
+                  public void onResourceReady(
+                      @NonNull T resource, @Nullable Transition<? super T> transition) {
+                    target.onResourceReady(resource, transition);
+                    checkRequestAndMaybeReleaseLatch();
+                  }
+
+                  @Override
+                  public void onLoadCleared(@Nullable Drawable placeholder) {
+                    target.onLoadCleared(placeholder);
+                  }
+
+                  @Override
+                  public void onLoadStarted(@Nullable Drawable placeholder) {
+                    target.onLoadStarted(placeholder);
+                  }
+
+                  @Override
+                  public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                    target.onLoadFailed(errorDrawable);
+                    checkRequestAndMaybeReleaseLatch();
+                  }
+
+                  @Override
+                  public void getSize(@NonNull SizeReadyCallback cb) {
+                    target.getSize(cb);
+                  }
+
+                  @Override
+                  public void removeCallback(@NonNull SizeReadyCallback cb) {
+                    target.removeCallback(cb);
+                  }
+
+                  @Override
+                  public void setRequest(@Nullable Request request) {
+                    target.setRequest(request);
+                  }
+
+                  @Nullable
+                  @Override
+                  public Request getRequest() {
+                    return target.getRequest();
+                  }
+
+                  // We can't guarantee the ordering of when this callback is called and when the
+                  // request's state is updated, so it's safer to post the check back to the UI
+                  // thread.
+                  private void checkRequestAndMaybeReleaseLatch() {
+                    Executors.mainThreadExecutor()
+                        .execute(
+                            new Runnable() {
+                              @Override
+                              public void run() {
+                                if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
+                                  latch.countDown();
+                                }
+                              }
+                            });
+                  }
+                });
+            return target;
+          }
+        });
+    waitOnLatch(latch);
   }
 
   public void clearOnMainThread(final ImageView imageView) {
@@ -175,95 +285,6 @@ public class ConcurrencyHelper {
     waitOnLatch(latch);
   }
 
-  private <T> void loadOnMainThread(final RequestBuilder<T> builder, final Target<T> target) {
-    final CountDownLatch latch = new CountDownLatch(1);
-    callOnMainThread(
-        new Callable<Target<T>>() {
-          @Override
-          public Target<T> call() {
-            builder.into(
-                new Target<T>() {
-                  @Override
-                  public void onStart() {
-                    target.onStart();
-                  }
-
-                  @Override
-                  public void onStop() {
-                    target.onStop();
-                  }
-
-                  @Override
-                  public void onDestroy() {
-                    target.onDestroy();
-                  }
-
-                  @Override
-                  public void onResourceReady(
-                      @NonNull T resource, @Nullable Transition<? super T> transition) {
-                    target.onResourceReady(resource, transition);
-                    checkRequestAndMaybeReleaseLatch();
-                  }
-
-                  @Override
-                  public void onLoadCleared(@Nullable Drawable placeholder) {
-                    target.onLoadCleared(placeholder);
-                  }
-
-                  @Override
-                  public void onLoadStarted(@Nullable Drawable placeholder) {
-                    target.onLoadStarted(placeholder);
-                  }
-
-                  @Override
-                  public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                    target.onLoadFailed(errorDrawable);
-                    checkRequestAndMaybeReleaseLatch();
-                  }
-
-                  @Override
-                  public void getSize(@NonNull SizeReadyCallback cb) {
-                    target.getSize(cb);
-                  }
-
-                  @Override
-                  public void removeCallback(@NonNull SizeReadyCallback cb) {
-                    target.removeCallback(cb);
-                  }
-
-                  @Override
-                  public void setRequest(@Nullable Request request) {
-                    target.setRequest(request);
-                  }
-
-                  @Nullable
-                  @Override
-                  public Request getRequest() {
-                    return target.getRequest();
-                  }
-
-                  // We can't guarantee the ordering of when this callback is called and when the
-                  // request's state is updated, so it's safer to post the check back to the UI
-                  // thread.
-                  private void checkRequestAndMaybeReleaseLatch() {
-                    Executors.mainThreadExecutor()
-                        .execute(
-                            new Runnable() {
-                              @Override
-                              public void run() {
-                                if (!Preconditions.checkNotNull(getRequest()).isRunning()) {
-                                  latch.countDown();
-                                }
-                              }
-                            });
-                  }
-                });
-            return target;
-          }
-        });
-    waitOnLatch(latch);
-  }
-
   public void pokeMainThread() {
     runOnMainThread(
         new Runnable() {
@@ -314,27 +335,6 @@ public class ConcurrencyHelper {
 
   private interface Waiter {
     boolean await(long timeout, TimeUnit timeUnit) throws InterruptedException;
-  }
-
-  private static void wait(Waiter waiter) {
-    boolean isFinished = false;
-    do {
-      try {
-        try {
-          isFinished = waiter.await(TIMEOUT_SECONDS, TIMEOUT_UNIT);
-          if (!isFinished) {
-            throw new WaiterException("Timed out while waiting");
-          }
-        } catch (InterruptedException e) {
-          throw new WaiterException(e);
-        }
-      } catch (WaiterException e) {
-        if (Debug.isDebuggerConnected()) {
-          continue;
-        }
-        throw e;
-      }
-    } while (Debug.isDebuggerConnected() && !isFinished);
   }
 
   private static final class WaiterException extends RuntimeException {

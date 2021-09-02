@@ -47,10 +47,14 @@ public interface GifDecoder {
     @NonNull
     Bitmap obtain(int width, int height, @NonNull Bitmap.Config config);
 
-    /**
-     * Releases the given Bitmap back to the pool.
-     */
+    /** Releases the given Bitmap back to the pool. */
     void release(@NonNull Bitmap bitmap);
+
+    /** Releases the given byte array back to the pool. */
+    void release(@NonNull byte[] bytes);
+
+    /** Release the given array back to the pool. */
+    void release(@NonNull int[] array);
 
     /**
      * Returns a byte array used for decoding and generating the frame bitmap.
@@ -61,20 +65,10 @@ public interface GifDecoder {
     byte[] obtainByteArray(int size);
 
     /**
-     * Releases the given byte array back to the pool.
-     */
-    void release(@NonNull byte[] bytes);
-
-    /**
      * Returns an int array used for decoding/generating the frame bitmaps.
      */
     @NonNull
     int[] obtainIntArray(int size);
-
-    /**
-     * Release the given array back to the pool.
-     */
-    void release(@NonNull int[] array);
   }
 
   int getWidth();
@@ -205,14 +199,6 @@ public interface GifDecoder {
   @GifDecodeStatus
   int read(@Nullable InputStream is, int contentLength);
 
-  void clear();
-
-  void setData(@NonNull GifHeader header, @NonNull byte[] data);
-
-  void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer);
-
-  void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer, int sampleSize);
-
   /**
    * Reads GIF image from byte array.
    *
@@ -221,6 +207,14 @@ public interface GifDecoder {
    */
   @GifDecodeStatus
   int read(@Nullable byte[] data);
+
+  void clear();
+
+  void setData(@NonNull GifHeader header, @NonNull byte[] data);
+
+  void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer);
+
+  void setData(@NonNull GifHeader header, @NonNull ByteBuffer buffer, int sampleSize);
 
 
   /**

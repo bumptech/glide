@@ -50,14 +50,14 @@ public final class Options implements Key {
     }
   }
 
-  @Override
-  public String toString() {
-    return "Options{" + "values=" + values + '}';
-  }
-
   @SuppressWarnings("unchecked")
   private static <T> void updateDiskCacheKey(
       @NonNull Option<T> option, @NonNull Object value, @NonNull MessageDigest md) {
     option.update((T) value, md);
+  }
+
+  @Override
+  public String toString() {
+    return "Options{" + "values=" + values + '}';
   }
 }

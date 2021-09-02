@@ -42,30 +42,12 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
     bitmapPool.put(bitmap);
   }
 
-  @NonNull
-  @Override
-  public byte[] obtainByteArray(int size) {
-    if (arrayPool == null) {
-      return new byte[size];
-    }
-    return arrayPool.get(size, byte[].class);
-  }
-
   @Override
   public void release(@NonNull byte[] bytes) {
     if (arrayPool == null) {
       return;
     }
     arrayPool.put(bytes);
-  }
-
-  @NonNull
-  @Override
-  public int[] obtainIntArray(int size) {
-    if (arrayPool == null) {
-      return new int[size];
-    }
-    return arrayPool.get(size, int[].class);
   }
 
   @SuppressWarnings("PMD.UseVarargs")
@@ -75,5 +57,23 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
       return;
     }
     arrayPool.put(array);
+  }
+
+  @NonNull
+  @Override
+  public byte[] obtainByteArray(int size) {
+    if (arrayPool == null) {
+      return new byte[size];
+    }
+    return arrayPool.get(size, byte[].class);
+  }
+
+  @NonNull
+  @Override
+  public int[] obtainIntArray(int size) {
+    if (arrayPool == null) {
+      return new int[size];
+    }
+    return arrayPool.get(size, int[].class);
   }
 }

@@ -110,13 +110,6 @@ public final class BitmapTransitionOptions
     return transitionUsing(drawableCrossFadeFactory);
   }
 
-  /** Enables a any Drawable based animation to run on Bitmaps as well. */
-  @NonNull
-  public BitmapTransitionOptions transitionUsing(
-      @NonNull TransitionFactory<Drawable> drawableCrossFadeFactory) {
-    return transition(new BitmapTransitionFactory(drawableCrossFadeFactory));
-  }
-
   /**
    * Enables a cross fade animation between both the placeholder and the first resource and between
    * subsequent resources (if thumbnails are used).
@@ -124,5 +117,12 @@ public final class BitmapTransitionOptions
   @NonNull
   public BitmapTransitionOptions crossFade(@NonNull DrawableCrossFadeFactory.Builder builder) {
     return transitionUsing(builder.build());
+  }
+
+  /** Enables a any Drawable based animation to run on Bitmaps as well. */
+  @NonNull
+  public BitmapTransitionOptions transitionUsing(
+      @NonNull TransitionFactory<Drawable> drawableCrossFadeFactory) {
+    return transition(new BitmapTransitionFactory(drawableCrossFadeFactory));
   }
 }

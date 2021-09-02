@@ -220,6 +220,30 @@ public class RequestManagerRetriever implements Handler.Callback {
     return get(fragment);
   }
 
+  @SuppressWarnings("deprecation")
+  @Deprecated
+  @NonNull
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+  public RequestManager get(@NonNull android.app.Fragment fragment) {
+    if (fragment.getActivity() == null) {
+      throw new IllegalArgumentException(
+          "You cannot start a load on a fragment before it is attached");
+    }
+    if (Util.isOnBackgroundThread() || Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+      return get(fragment.getActivity().getApplicationContext());
+    } else {
+      // In some unusual cases, it's possible to have a Fragment not hosted by an activity. There's
+      // not all that much we can do here. Most apps will be started with a standard activity. If
+      // we manage not to register the first frame waiter for a while, the consequences are not
+      // catastrophic, we'll just use some extra memory.
+      if (fragment.getActivity() != null) {
+        frameWaiter.registerSelf(fragment.getActivity());
+      }
+      android.app.FragmentManager fm = fragment.getChildFragmentManager();
+      return fragmentGet(fragment.getActivity(), fm, fragment, fragment.isVisible());
+    }
+  }
+
   private static void findAllSupportFragmentsWithViews(
       @Nullable Collection<Fragment> topLevelFragments, @NonNull Map<View, Fragment> result) {
     if (topLevelFragments == null) {
@@ -352,30 +376,6 @@ public class RequestManagerRetriever implements Handler.Callback {
   @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
-  @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-  public RequestManager get(@NonNull android.app.Fragment fragment) {
-    if (fragment.getActivity() == null) {
-      throw new IllegalArgumentException(
-          "You cannot start a load on a fragment before it is attached");
-    }
-    if (Util.isOnBackgroundThread() || Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-      return get(fragment.getActivity().getApplicationContext());
-    } else {
-      // In some unusual cases, it's possible to have a Fragment not hosted by an activity. There's
-      // not all that much we can do here. Most apps will be started with a standard activity. If
-      // we manage not to register the first frame waiter for a while, the consequences are not
-      // catastrophic, we'll just use some extra memory.
-      if (fragment.getActivity() != null) {
-        frameWaiter.registerSelf(fragment.getActivity());
-      }
-      android.app.FragmentManager fm = fragment.getChildFragmentManager();
-      return fragmentGet(fragment.getActivity(), fm, fragment, fragment.isVisible());
-    }
-  }
-
-  @SuppressWarnings("deprecation")
-  @Deprecated
-  @NonNull
   RequestManagerFragment getRequestManagerFragment(Activity activity) {
     return getRequestManagerFragment(activity.getFragmentManager(), /*parentHint=*/ null);
   }
@@ -430,13 +430,6 @@ public class RequestManagerRetriever implements Handler.Callback {
     return getSupportRequestManagerFragment(fragmentManager, /*parentHint=*/ null);
   }
 
-  private static boolean isActivityVisible(Context context) {
-    // This is a poor heuristic, but it's about all we have. We'd rather err on the side of visible
-    // and start requests than on the side of invisible and ignore valid requests.
-    Activity activity = findActivity(context);
-    return activity == null || !activity.isFinishing();
-  }
-
   @NonNull
   private SupportRequestManagerFragment getSupportRequestManagerFragment(
       @NonNull final FragmentManager fm, @Nullable Fragment parentHint) {
@@ -453,6 +446,13 @@ public class RequestManagerRetriever implements Handler.Callback {
       }
     }
     return current;
+  }
+
+  private static boolean isActivityVisible(Context context) {
+    // This is a poor heuristic, but it's about all we have. We'd rather err on the side of visible
+    // and start requests than on the side of invisible and ignore valid requests.
+    Activity activity = findActivity(context);
+    return activity == null || !activity.isFinishing();
   }
 
   @NonNull

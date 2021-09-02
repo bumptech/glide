@@ -134,13 +134,13 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
     }
 
     @Override
-    public void teardown() {
-      // Do nothing.
+    public DataFetcher<AssetFileDescriptor> build(Uri uri) {
+      return new AssetFileDescriptorLocalUriFetcher(contentResolver, uri);
     }
 
     @Override
-    public DataFetcher<AssetFileDescriptor> build(Uri uri) {
-      return new AssetFileDescriptorLocalUriFetcher(contentResolver, uri);
+    public void teardown() {
+      // Do nothing.
     }
   }
 }

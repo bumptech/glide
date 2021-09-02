@@ -103,6 +103,10 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     return (fields & flag) != 0;
   }
 
+  private boolean isSet(int flag) {
+    return isSet(fields, flag);
+  }
+
   /**
    * Applies a multiplier to the {@link com.bumptech.glide.request.target.Target}'s size before
    * loading the resource. Useful for loading thumbnails or trying to avoid loading huge resources
@@ -817,6 +821,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
 
   // calling optionalTransform() on the result of clone() requires greater access.
   // calling downsample is guaranteed to modify the current object by the isAutoCloneEnabledCheck.
+
   @SuppressWarnings({"WeakerAccess", "CheckResult"})
   @NonNull
   final T optionalTransform(
@@ -830,8 +835,52 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     return transform(transformation, /*isRequired=*/ false);
   }
 
+  /**
+   * Applies the given {@link Transformation} for {@link Bitmap Bitmaps} to the default types
+   * ({@link Bitmap}, {@link android.graphics.drawable.BitmapDrawable}, and {@link
+   * com.bumptech.glide.load.resource.gif.GifDrawable}) and ignores unknown types.
+   *
+   * <p>This will override previous calls to {@link #dontTransform()}.
+   *
+   * @param transformation Any {@link Transformation} for {@link Bitmap}s.
+   * @see #transform(Transformation)
+   * @see #transform(Class, Transformation)
+   */
+  // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
+  @SuppressWarnings("CheckResult")
+  @NonNull
+  @CheckResult
+  public T optionalTransform(@NonNull Transformation<Bitmap> transformation) {
+    return transform(transformation, /*isRequired=*/ false);
+  }
+
+  /**
+   * Applies the given {@link Transformation} for any decoded resource of the given type and allows
+   * unknown resource types to be ignored.
+   *
+   * <p>Users can apply different transformations for each resource class. Applying a {@link
+   * Transformation} for a resource type that already has a {@link Transformation} will override the
+   * previous call.
+   *
+   * <p>If any calls are made to the non-optional transform methods, then attempting to transform an
+   * unknown resource class will throw an exception. To allow unknown types, users must always call
+   * the optional version of each method.
+   *
+   * <p>This will override previous calls to {@link #dontTransform()}.
+   *
+   * @param resourceClass The type of resource to transform.
+   * @param transformation The {@link Transformation} to apply.
+   */
+  @NonNull
+  @CheckResult
+  public <Y> T optionalTransform(
+      @NonNull Class<Y> resourceClass, @NonNull Transformation<Y> transformation) {
+    return transform(resourceClass, transformation, /*isRequired=*/ false);
+  }
+
   // calling transform() on the result of clone() requires greater access.
   // calling downsample is guaranteed to modify the current object by the isAutoCloneEnabledCheck.
+
   @SuppressWarnings({"WeakerAccess", "CheckResult"})
   @NonNull
   @CheckResult
@@ -844,33 +893,6 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
 
     downsample(downsampleStrategy);
     return transform(transformation);
-  }
-
-  @NonNull
-  private T scaleOnlyTransform(
-      @NonNull DownsampleStrategy strategy, @NonNull Transformation<Bitmap> transformation) {
-    return scaleOnlyTransform(strategy, transformation, true /*isTransformationRequired*/);
-  }
-
-  @NonNull
-  private T optionalScaleOnlyTransform(
-      @NonNull DownsampleStrategy strategy, @NonNull Transformation<Bitmap> transformation) {
-    return scaleOnlyTransform(strategy, transformation, false /*isTransformationRequired*/);
-  }
-
-  // We know that result will always be T since we created result.
-  @SuppressWarnings("unchecked")
-  @NonNull
-  private T scaleOnlyTransform(
-      @NonNull DownsampleStrategy strategy,
-      @NonNull Transformation<Bitmap> transformation,
-      boolean isTransformationRequired) {
-    BaseRequestOptions<T> result =
-        isTransformationRequired
-            ? transform(strategy, transformation)
-            : optionalTransform(strategy, transformation);
-    result.isScaleOnlyOrNoTransform = true;
-    return (T) result;
   }
 
   /**
@@ -919,47 +941,6 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     }
   }
 
-  /**
-   * Applies the given {@link Transformation}s in the given order for {@link Bitmap Bitmaps} to the
-   * default types ({@link Bitmap}, {@link android.graphics.drawable.BitmapDrawable}, and {@link
-   * com.bumptech.glide.load.resource.gif.GifDrawable}) and throws an exception if asked to
-   * transform an unknown type.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()}.
-   *
-   * @deprecated Deprecated due to api update, use {@link #transform(Transformation[])} instead
-   * @param transformations One or more {@link Transformation}s for {@link Bitmap}s.
-   * @see #optionalTransform(Transformation)
-   * @see #optionalTransform(Class, Transformation)
-   */
-  // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings({"unchecked", "varargs", "CheckResult"})
-  @NonNull
-  @CheckResult
-  @Deprecated
-  public T transforms(@NonNull Transformation<Bitmap>... transformations) {
-    return transform(new MultiTransformation<>(transformations), /*isRequired=*/ true);
-  }
-
-  /**
-   * Applies the given {@link Transformation} for {@link Bitmap Bitmaps} to the default types
-   * ({@link Bitmap}, {@link android.graphics.drawable.BitmapDrawable}, and {@link
-   * com.bumptech.glide.load.resource.gif.GifDrawable}) and ignores unknown types.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()}.
-   *
-   * @param transformation Any {@link Transformation} for {@link Bitmap}s.
-   * @see #transform(Transformation)
-   * @see #transform(Class, Transformation)
-   */
-  // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings("CheckResult")
-  @NonNull
-  @CheckResult
-  public T optionalTransform(@NonNull Transformation<Bitmap> transformation) {
-    return transform(transformation, /*isRequired=*/ false);
-  }
-
   @NonNull
   T transform(@NonNull Transformation<Bitmap> transformation, boolean isRequired) {
     if (isAutoCloneEnabled) {
@@ -977,30 +958,6 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     transform(BitmapDrawable.class, drawableTransformation.asBitmapDrawable(), isRequired);
     transform(GifDrawable.class, new GifDrawableTransformation(transformation), isRequired);
     return selfOrThrowIfLocked();
-  }
-
-  /**
-   * Applies the given {@link Transformation} for any decoded resource of the given type and allows
-   * unknown resource types to be ignored.
-   *
-   * <p>Users can apply different transformations for each resource class. Applying a {@link
-   * Transformation} for a resource type that already has a {@link Transformation} will override the
-   * previous call.
-   *
-   * <p>If any calls are made to the non-optional transform methods, then attempting to transform an
-   * unknown resource class will throw an exception. To allow unknown types, users must always call
-   * the optional version of each method.
-   *
-   * <p>This will override previous calls to {@link #dontTransform()}.
-   *
-   * @param resourceClass The type of resource to transform.
-   * @param transformation The {@link Transformation} to apply.
-   */
-  @NonNull
-  @CheckResult
-  public <Y> T optionalTransform(
-      @NonNull Class<Y> resourceClass, @NonNull Transformation<Y> transformation) {
-    return transform(resourceClass, transformation, /*isRequired=*/ false);
   }
 
   @NonNull
@@ -1045,6 +1002,55 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   public <Y> T transform(
       @NonNull Class<Y> resourceClass, @NonNull Transformation<Y> transformation) {
     return transform(resourceClass, transformation, /*isRequired=*/ true);
+  }
+
+  @NonNull
+  private T scaleOnlyTransform(
+      @NonNull DownsampleStrategy strategy, @NonNull Transformation<Bitmap> transformation) {
+    return scaleOnlyTransform(strategy, transformation, true /*isTransformationRequired*/);
+  }
+
+  // We know that result will always be T since we created result.
+  @SuppressWarnings("unchecked")
+  @NonNull
+  private T scaleOnlyTransform(
+      @NonNull DownsampleStrategy strategy,
+      @NonNull Transformation<Bitmap> transformation,
+      boolean isTransformationRequired) {
+    BaseRequestOptions<T> result =
+        isTransformationRequired
+            ? transform(strategy, transformation)
+            : optionalTransform(strategy, transformation);
+    result.isScaleOnlyOrNoTransform = true;
+    return (T) result;
+  }
+
+  @NonNull
+  private T optionalScaleOnlyTransform(
+      @NonNull DownsampleStrategy strategy, @NonNull Transformation<Bitmap> transformation) {
+    return scaleOnlyTransform(strategy, transformation, false /*isTransformationRequired*/);
+  }
+
+  /**
+   * Applies the given {@link Transformation}s in the given order for {@link Bitmap Bitmaps} to the
+   * default types ({@link Bitmap}, {@link android.graphics.drawable.BitmapDrawable}, and {@link
+   * com.bumptech.glide.load.resource.gif.GifDrawable}) and throws an exception if asked to
+   * transform an unknown type.
+   *
+   * <p>This will override previous calls to {@link #dontTransform()}.
+   *
+   * @deprecated Deprecated due to api update, use {@link #transform(Transformation[])} instead
+   * @param transformations One or more {@link Transformation}s for {@link Bitmap}s.
+   * @see #optionalTransform(Transformation)
+   * @see #optionalTransform(Class, Transformation)
+   */
+  // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
+  @SuppressWarnings({"unchecked", "varargs", "CheckResult"})
+  @NonNull
+  @CheckResult
+  @Deprecated
+  public T transforms(@NonNull Transformation<Bitmap>... transformations) {
+    return transform(new MultiTransformation<>(transformations), /*isRequired=*/ true);
   }
 
   /**
@@ -1402,10 +1408,6 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
 
   boolean isScaleOnlyOrNoTransform() {
     return isScaleOnlyOrNoTransform;
-  }
-
-  private boolean isSet(int flag) {
-    return isSet(fields, flag);
   }
 
   // get is just as clear.

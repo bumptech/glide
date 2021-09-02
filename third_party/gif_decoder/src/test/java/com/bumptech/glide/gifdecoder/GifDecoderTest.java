@@ -214,26 +214,26 @@ public class GifDecoderTest {
       // Do nothing.
     }
 
+    @Override
+    public void release(@NonNull byte[] bytes) {
+      // Do nothing.
+    }
+
+    @Override
+    public void release(@NonNull int[] array) {
+      // Do Nothing
+    }
+
     @NonNull
     @Override
     public byte[] obtainByteArray(int size) {
       return new byte[size];
     }
 
-    @Override
-    public void release(@NonNull byte[] bytes) {
-      // Do nothing.
-    }
-
     @NonNull
     @Override
     public int[] obtainIntArray(int size) {
       return new int[size];
-    }
-
-    @Override
-    public void release(@NonNull int[] array) {
-      // Do Nothing
     }
 
   }

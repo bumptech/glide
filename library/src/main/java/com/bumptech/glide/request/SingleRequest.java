@@ -657,12 +657,6 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     onLoadFailed(e, Log.WARN);
   }
 
-  @Override
-  public Object getLock() {
-    stateVerifier.throwIfRecycled();
-    return requestLock;
-  }
-
   private void onLoadFailed(GlideException e, int maxLogLevel) {
     stateVerifier.throwIfRecycled();
     synchronized (requestLock) {
@@ -703,6 +697,12 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       notifyLoadFailed();
       GlideTrace.endSectionAsync(TAG, cookie);
     }
+  }
+
+  @Override
+  public Object getLock() {
+    stateVerifier.throwIfRecycled();
+    return requestLock;
   }
 
   @Override

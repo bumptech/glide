@@ -99,6 +99,18 @@ public class ExceptionCatchingInputStream extends InputStream {
   }
 
   @Override
+  public int read() {
+    int result;
+    try {
+      result = wrapped.read();
+    } catch (IOException e) {
+      exception = e;
+      result = -1;
+    }
+    return result;
+  }
+
+  @Override
   public synchronized void reset() throws IOException {
     wrapped.reset();
   }
@@ -113,18 +125,6 @@ public class ExceptionCatchingInputStream extends InputStream {
       skipped = 0;
     }
     return skipped;
-  }
-
-  @Override
-  public int read() {
-    int result;
-    try {
-      result = wrapped.read();
-    } catch (IOException e) {
-      exception = e;
-      result = -1;
-    }
-    return result;
   }
 
   @Nullable

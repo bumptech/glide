@@ -452,16 +452,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   public RequestBuilder<TranscodeType> load(@Nullable Object model) {
     return loadGeneric(model);
   }
-
-  @NonNull
-  private RequestBuilder<TranscodeType> loadGeneric(@Nullable Object model) {
-    if (isAutoCloneEnabled()) {
-      return clone().loadGeneric(model);
-    }
-    this.model = model;
-    isModelSet = true;
-    return selfOrThrowIfLocked();
-  }
   /**
    * Returns an object to load the given {@link Bitmap}.
    *
@@ -658,6 +648,16 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     return result;
   }
 
+  @NonNull
+  private RequestBuilder<TranscodeType> loadGeneric(@Nullable Object model) {
+    if (isAutoCloneEnabled()) {
+      return clone().loadGeneric(model);
+    }
+    this.model = model;
+    isModelSet = true;
+    return selfOrThrowIfLocked();
+  }
+
   /**
    * Returns a copy of this request builder with all of the options put so far on this builder.
    *
@@ -742,16 +742,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     return target;
   }
 
-  // If the caller is using skipMemoryCache and the previous request is finished, calling begin on
-  // the previous request will complete from memory because it will just use the resource that had
-  // already been loaded. If the previous request isn't complete, we can wait for it to finish
-  // because the previous request must also be using skipMemoryCache for the requests to be
-  // equivalent. See #2663 for additional context.
-  private boolean isSkipMemoryCacheWithCompletePreviousRequest(
-      BaseRequestOptions<?> options, Request previous) {
-    return !options.isMemoryCacheable() && previous.isComplete();
-  }
-
   /**
    * Sets the {@link ImageView} the resource will be loaded into, cancels any existing loads into
    * the view, and frees any resources Glide may have previously loaded into the view so they may be
@@ -818,6 +808,16 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @Deprecated
   public FutureTarget<TranscodeType> into(int width, int height) {
     return submit(width, height);
+  }
+
+  // If the caller is using skipMemoryCache and the previous request is finished, calling begin on
+  // the previous request will complete from memory because it will just use the resource that had
+  // already been loaded. If the previous request isn't complete, we can wait for it to finish
+  // because the previous request must also be using skipMemoryCache for the requests to be
+  // equivalent. See #2663 for additional context.
+  private boolean isSkipMemoryCacheWithCompletePreviousRequest(
+      BaseRequestOptions<?> options, Request previous) {
+    return !options.isMemoryCacheable() && previous.isComplete();
   }
 
   /**

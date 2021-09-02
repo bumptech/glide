@@ -179,11 +179,30 @@ public class RequestFutureTarget<R> implements FutureTarget<R>, RequestListener<
     // Ignored, synchronized for backwards compatibility.
   }
 
+  @Override
+  public synchronized boolean onLoadFailed(
+      @Nullable GlideException e, Object model, Target<R> target, boolean isFirstResource) {
+    loadFailed = true;
+    exception = e;
+    waiter.notifyAll(this);
+    return false;
+  }
+
   /** A callback that should never be invoked directly. */
   @Override
   public synchronized void onResourceReady(
       @NonNull R resource, @Nullable Transition<? super R> transition) {
     // Ignored, synchronized for backwards compatibility.
+  }
+
+  @Override
+  public synchronized boolean onResourceReady(
+      R resource, Object model, Target<R> target, DataSource dataSource, boolean isFirstResource) {
+    // We might get a null result.
+    resultReceived = true;
+    this.resource = resource;
+    waiter.notifyAll(this);
+    return false;
   }
 
   private synchronized R doGet(Long timeoutMillis)
@@ -237,25 +256,6 @@ public class RequestFutureTarget<R> implements FutureTarget<R>, RequestListener<
   @Override
   public void onDestroy() {
     // Do nothing.
-  }
-
-  @Override
-  public synchronized boolean onLoadFailed(
-      @Nullable GlideException e, Object model, Target<R> target, boolean isFirstResource) {
-    loadFailed = true;
-    exception = e;
-    waiter.notifyAll(this);
-    return false;
-  }
-
-  @Override
-  public synchronized boolean onResourceReady(
-      R resource, Object model, Target<R> target, DataSource dataSource, boolean isFirstResource) {
-    // We might get a null result.
-    resultReceived = true;
-    this.resource = resource;
-    waiter.notifyAll(this);
-    return false;
   }
 
   @Override

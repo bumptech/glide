@@ -228,6 +228,17 @@ public final class GlideExecutor implements ExecutorService {
 
   @NonNull
   @Override
+  public <T> Future<T> submit(@NonNull Runnable task, T result) {
+    return delegate.submit(task, result);
+  }
+
+  @Override
+  public <T> Future<T> submit(@NonNull Callable<T> task) {
+    return delegate.submit(task);
+  }
+
+  @NonNull
+  @Override
   public <T> List<Future<T>> invokeAll(@NonNull Collection<? extends Callable<T>> tasks)
       throws InterruptedException {
     return delegate.invokeAll(tasks);
@@ -253,17 +264,6 @@ public final class GlideExecutor implements ExecutorService {
       @NonNull Collection<? extends Callable<T>> tasks, long timeout, @NonNull TimeUnit unit)
       throws InterruptedException, ExecutionException, TimeoutException {
     return delegate.invokeAny(tasks, timeout, unit);
-  }
-
-  @NonNull
-  @Override
-  public <T> Future<T> submit(@NonNull Runnable task, T result) {
-    return delegate.submit(task, result);
-  }
-
-  @Override
-  public <T> Future<T> submit(@NonNull Callable<T> task) {
-    return delegate.submit(task);
   }
 
   @Override

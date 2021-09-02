@@ -51,6 +51,29 @@ public class DiskLruCacheWrapper implements DiskCache {
     return wrapper;
   }
 
+  @Override
+  public File get(Key key) {
+    String safeKey = safeKeyGenerator.getSafeKey(key);
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.v(TAG, "Get: Obtained: " + safeKey + " for for Key: " + key);
+    }
+    File result = null;
+    try {
+      // It is possible that the there will be a put in between these two gets. If so that shouldn't
+      // be a problem because we will always put the same value at the same key so our input streams
+      // will still represent the same data.
+      final DiskLruCache.Value value = getDiskCache().get(safeKey);
+      if (value != null) {
+        result = value.getFile(0);
+      }
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Unable to get from disk cache", e);
+      }
+    }
+    return result;
+  }
+
   /**
    * Create a new DiskCache in the given directory with a specified max size.
    *
@@ -78,29 +101,6 @@ public class DiskLruCacheWrapper implements DiskCache {
       diskLruCache = DiskLruCache.open(directory, APP_VERSION, VALUE_COUNT, maxSize);
     }
     return diskLruCache;
-  }
-
-  @Override
-  public File get(Key key) {
-    String safeKey = safeKeyGenerator.getSafeKey(key);
-    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      Log.v(TAG, "Get: Obtained: " + safeKey + " for for Key: " + key);
-    }
-    File result = null;
-    try {
-      // It is possible that the there will be a put in between these two gets. If so that shouldn't
-      // be a problem because we will always put the same value at the same key so our input streams
-      // will still represent the same data.
-      final DiskLruCache.Value value = getDiskCache().get(safeKey);
-      if (value != null) {
-        result = value.getFile(0);
-      }
-    } catch (IOException e) {
-      if (Log.isLoggable(TAG, Log.WARN)) {
-        Log.w(TAG, "Unable to get from disk cache", e);
-      }
-    }
-    return result;
   }
 
   @Override

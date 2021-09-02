@@ -24,6 +24,10 @@ public final class SearchQuery implements Query {
     this.queryString = queryString;
   }
 
+  private SearchQuery(Parcel in) {
+    queryString = in.readString();
+  }
+
   /**
    * Requires the search to be as safe as possible, evne if it substantially limits the results in a
    * way that might otherwise be unexpected.
@@ -31,10 +35,6 @@ public final class SearchQuery implements Query {
   public SearchQuery requireSafeOverQuality() {
     requireSafeOverQuality = true;
     return this;
-  }
-
-  private SearchQuery(Parcel in) {
-    queryString = in.readString();
   }
 
   @Override
