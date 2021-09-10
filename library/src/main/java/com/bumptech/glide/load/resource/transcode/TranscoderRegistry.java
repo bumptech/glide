@@ -81,8 +81,8 @@ public class TranscoderRegistry {
   }
 
   private static final class Entry<Z, R> {
-    private final Class<Z> fromClass;
-    private final Class<R> toClass;
+    @Synthetic final Class<Z> fromClass;
+    @Synthetic final Class<R> toClass;
     @Synthetic final ResourceTranscoder<Z, R> transcoder;
 
     Entry(
