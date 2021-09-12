@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
  * Converts {@link androidx.recyclerview.widget.RecyclerView.OnScrollListener} events to {@link
  * AbsListView} scroll events.
  *
- * <p>Requires that the the recycler view be using a {@link LinearLayoutManager} subclass.
+ * <p>Requires that the recycler view be using a {@link LinearLayoutManager} subclass.
  */
 // Public API.
 @SuppressWarnings("WeakerAccess")
