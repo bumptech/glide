@@ -15,8 +15,10 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.ErrorRequestCoordinator;
 import com.bumptech.glide.request.FutureTarget;
@@ -30,6 +32,7 @@ import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.target.PreloadTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.signature.AndroidResourceSignature;
 import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.Preconditions;
@@ -161,12 +164,11 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   }
 
   /**
-   * Sets a {@link RequestListener} to monitor the resource load. It's best to create a single
-   * instance of an exception handler per type of request (usually activity/fragment) rather than
-   * pass one in per request to avoid some redundant object allocation.
+   * Sets a {@link RequestListener} to monitor the resource load and removes all previously set
+   * listeners (either via this method or from {@link #addListener(RequestListener)} .
    *
-   * <p>Subsequent calls to this method will replace previously set listeners. To set multiple
-   * listeners, use {@link #addListener} instead.
+   * <p>Calls to this method will replace previously set listeners. To set multiple listeners, use
+   * {@link #addListener} instead.
    *
    * @param requestListener The request listener to use.
    * @return This request builder.
@@ -184,8 +186,68 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   }
 
   /**
-   * Adds a {@link RequestListener}. If called multiple times, all passed {@link RequestListener
-   * listeners} will be called in order.
+   * Adds a {@link RequestListener} to the list that will be called in the order they were added
+   * when the request ends.
+   *
+   * <p>Multiple calls to this method append additional listeners. Previous listeners are not
+   * removed. If you want to replace any previously added listeners, use {@link
+   * #listener(RequestListener)}.
+   *
+   * <p>Listeners track the state of the request started by this particular {@code builder}. When
+   * used with the thumbnail APIs ({@link #thumbnail(RequestBuilder)}) this can start to seem
+   * confusing because multiple requests are running and each may succeed or fail, independent of
+   * each other. As a rule, Glide does not add {@link RequestListener}s to thumbnail requests
+   * automatically. That means that {@link RequestListener}s track the state of exactly one request
+   * in the chain. For example, if you start a primary request with a single nested thumbnail and
+   * you add a {@link RequestListener} only to the primary request, then the {@link RequestListener}
+   * will only be notified when the primary request succeeds or fails. If the thumbnail succeeds,
+   * but the primary request fails, the {@link RequestListener} added to the primary request will
+   * still be called with {@link RequestListener#onLoadFailed(GlideException, Object, Target,
+   * boolean)}. In the same scenario, the {@link RequestListener} added only to the primary request
+   * will not have {@link RequestListener#onResourceReady(Object, Object, Target, DataSource,
+   * boolean)} called when the thumbnail request finishes successfully. Similarly, if you add a
+   * {@link RequestListener} only to a thumbnail request, but not the primary request, that {@code
+   * listener} will only be called for changes related to the thumbnail request. If the thumbnail
+   * request fails, the {@code listener} added to the thumbnail request will be immediately called
+   * via {@link RequestListener#onLoadFailed(GlideException, Object, Target, boolean)}, even though
+   * the primary request may eventually succeed. It is perfectly possible to add a {@link
+   * RequestListener} to both the primary and a thumbnail request. If you do so, the {@link
+   * RequestListener} will be called independently for each request when it finishes. Keep in mind
+   * that if any parent request finishes before its thumbnail request(s), it will attempt to cancel
+   * those requests. As a result there's no guarantee that a {@link RequestListener} added to a
+   * thumbnail request will actually be called with either success or failure. These same patterns
+   * hold for arbitrarily nested thumbnails. The {@code listener} is only called for the requests it
+   * is added to and may not be called for every thumbnail request if those requests are cancelled
+   * due to the completion of a parent request.
+   *
+   * <p>The one exception to the rules about thumbnails is {@link #thumbnail(float)}. In this case
+   * we appear to be passing {@link RequestListener}s added to the parent request to the generated
+   * thumbnail requests. To try to reduce confusion, the {@link #thumbnail(float)} method has been
+   * deprecated. It can be easily replicated using {@link #thumbnail(RequestBuilder)} and {@link
+   * BaseRequestOptions#sizeMultiplier(float)}.
+   *
+   * <p>Often in UIs it's desirable to try to track the overall status of a request, including the
+   * thumbnails. For example, you might want to load an image, start an animation if the
+   * asynchronous image load succeeds and perform some fallback action if it fails. If you're using
+   * a single primary request, {@link RequestListener} will work for this. However, if you then
+   * decide to try to make things more performant by adding a thumbnail (or multiple thumbnails),
+   * {@link RequestListener} is awkward because either you only add it to the main request and it's
+   * not called when the thumbnails complete (which defeats the purpose) or it's called for every
+   * request and it's hard to keep track of when the overall request has failed. A better option
+   * than using {@link RequestListener} to track the state of the UI then is to use {@link Target}
+   * instead. {@link Target#onResourceReady(Object, Transition)} will be called when any thumbnail
+   * finishes, which you can use to trigger your animation starting. {@link
+   * Target#onLoadFailed(Drawable)} will only be called if every request in the chain, including the
+   * primary request, fails, which you can use to trigger your fallback behavior. Be sure to pick an
+   * appropriate {@link Target} subclass when possible, like {@link
+   * com.bumptech.glide.request.target.BitmapImageViewTarget} or {@link
+   * com.bumptech.glide.request.target.DrawableImageViewTarget} when loading into {@link ImageView}
+   * or {@link com.bumptech.glide.request.target.CustomTarget} when using custom rendering. Don't
+   * forget to call {@code super()} in the {@code ImageViewTarget}s.
+   *
+   * <p>It's best to create a single instance of an exception handler per type of request (usually
+   * activity/fragment) rather than pass one in per request to avoid some redundant object
+   * allocation.
    *
    * @param requestListener The request listener to use. If {@code null}, this method is a noop.
    * @return This request builder.
@@ -423,10 +485,21 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading
    *     the thumbnail.
    * @return This request builder.
+   * @deprecated The behavior differences between this method and {@link #thumbnail(RequestBuilder)}
+   *     are subtle, hard to understand for users and hard to maintain for developers. See the
+   *     javadoc on {@link #listener(RequestListener)} for one concrete example of the behavior
+   *     differences and complexity introduced by this method. Better consistency and readability
+   *     can be obtained by calling {@link #thumbnail(RequestBuilder)} with a duplicate {@code
+   *     RequestBuilder} on which you have called {@link BaseRequestOptions#sizeMultiplier(float)}.
+   *     In practice this method also isn't especially useful. It's much more common to want to
+   *     specify a number of different attributes for thumbnails than just a simple percentage
+   *     modifier on the target size, so there's little justification for keeping this method. This
+   *     method will be removed in a future version of Glide.
    */
   @NonNull
   @CheckResult
   @SuppressWarnings("unchecked")
+  @Deprecated
   public RequestBuilder<TranscodeType> thumbnail(float sizeMultiplier) {
     if (isAutoCloneEnabled()) {
       return clone().thumbnail(sizeMultiplier);
