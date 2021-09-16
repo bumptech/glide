@@ -20,6 +20,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** A prioritized {@link ThreadPoolExecutor} for running jobs in Glide. */
 public final class GlideExecutor implements ExecutorService {
@@ -365,7 +366,7 @@ public final class GlideExecutor implements ExecutorService {
     private final String name;
     @Synthetic final UncaughtThrowableStrategy uncaughtThrowableStrategy;
     @Synthetic final boolean preventNetworkOperations;
-    private int threadNum;
+    private final AtomicInteger threadNum = new AtomicInteger();
 
     DefaultThreadFactory(
         String name,
@@ -377,27 +378,23 @@ public final class GlideExecutor implements ExecutorService {
     }
 
     @Override
-    public synchronized Thread newThread(@NonNull Runnable runnable) {
-      final Thread result =
-          new Thread(runnable, "glide-" + name + "-thread-" + threadNum) {
-            @Override
-            public void run() {
-              // why PMD suppression is needed: https://github.com/pmd/pmd/issues/808
-              android.os.Process.setThreadPriority(
-                  DEFAULT_PRIORITY); // NOPMD AccessorMethodGeneration
-              if (preventNetworkOperations) {
-                StrictMode.setThreadPolicy(
-                    new ThreadPolicy.Builder().detectNetwork().penaltyDeath().build());
-              }
-              try {
-                super.run();
-              } catch (Throwable t) {
-                uncaughtThrowableStrategy.handle(t);
-              }
-            }
-          };
-      threadNum++;
-      return result;
+    public Thread newThread(@NonNull Runnable runnable) {
+      return new Thread(runnable, "glide-" + name + "-thread-" + threadNum.getAndIncrement()) {
+        @Override
+        public void run() {
+          // why PMD suppression is needed: https://github.com/pmd/pmd/issues/808
+          android.os.Process.setThreadPriority(DEFAULT_PRIORITY); // NOPMD AccessorMethodGeneration
+          if (preventNetworkOperations) {
+            StrictMode.setThreadPolicy(
+                new ThreadPolicy.Builder().detectNetwork().penaltyDeath().build());
+          }
+          try {
+            super.run();
+          } catch (Throwable t) {
+            uncaughtThrowableStrategy.handle(t);
+          }
+        }
+      };
     }
   }
 
