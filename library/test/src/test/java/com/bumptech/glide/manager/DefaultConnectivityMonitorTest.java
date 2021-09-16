@@ -17,6 +17,7 @@ import android.net.NetworkInfo;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorTest.PermissionConnectivityManager;
 import java.util.List;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +45,11 @@ public class DefaultConnectivityMonitorTest {
     MockitoAnnotations.initMocks(this);
     monitor = new DefaultConnectivityMonitor(ApplicationProvider.getApplicationContext(), listener);
     harness = new ConnectivityHarness();
+  }
+
+  @After
+  public void tearDown() {
+    SingletonConnectivityReceiver.reset();
   }
 
   @Test
@@ -106,7 +112,7 @@ public class DefaultConnectivityMonitorTest {
     harness.connect();
     harness.broadcast();
 
-    verify(listener).onConnectivityChanged(eq(true));
+    verify(listener).onConnectivityChanged(true);
   }
 
   @Test
