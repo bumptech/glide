@@ -171,7 +171,10 @@ public final class GlideExecutor implements ExecutorService {
             TimeUnit.MILLISECONDS,
             new SynchronousQueue<Runnable>(),
             new DefaultThreadFactory(
-                DEFAULT_SOURCE_UNLIMITED_EXECUTOR_NAME, UncaughtThrowableStrategy.DEFAULT, false)));
+                new DefaultPriorityThreadFactory(),
+                DEFAULT_SOURCE_UNLIMITED_EXECUTOR_NAME,
+                UncaughtThrowableStrategy.DEFAULT,
+                false)));
   }
 
   /**
@@ -354,47 +357,67 @@ public final class GlideExecutor implements ExecutorService {
     void handle(Throwable t);
   }
 
+  private static final class DefaultPriorityThreadFactory implements ThreadFactory {
+    private static final int DEFAULT_PRIORITY =
+        android.os.Process.THREAD_PRIORITY_BACKGROUND
+            + android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
+
+    @Override
+    public Thread newThread(@NonNull Runnable runnable) {
+      return new Thread(runnable) {
+        @Override
+        public void run() {
+          // why PMD suppression is needed: https://github.com/pmd/pmd/issues/808
+          android.os.Process.setThreadPriority(DEFAULT_PRIORITY); // NOPMD AccessorMethodGeneration
+          super.run();
+        }
+      };
+    }
+  }
+
   /**
    * A {@link java.util.concurrent.ThreadFactory} that builds threads slightly above priority {@link
    * android.os.Process#THREAD_PRIORITY_BACKGROUND}.
    */
   private static final class DefaultThreadFactory implements ThreadFactory {
-    private static final int DEFAULT_PRIORITY =
-        android.os.Process.THREAD_PRIORITY_BACKGROUND
-            + android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
+    private final ThreadFactory delegate;
     private final String name;
     @Synthetic final UncaughtThrowableStrategy uncaughtThrowableStrategy;
     @Synthetic final boolean preventNetworkOperations;
     private final AtomicInteger threadNum = new AtomicInteger();
 
     DefaultThreadFactory(
+        ThreadFactory delegate,
         String name,
         UncaughtThrowableStrategy uncaughtThrowableStrategy,
         boolean preventNetworkOperations) {
+      this.delegate = delegate;
       this.name = name;
       this.uncaughtThrowableStrategy = uncaughtThrowableStrategy;
       this.preventNetworkOperations = preventNetworkOperations;
     }
 
     @Override
-    public Thread newThread(@NonNull Runnable runnable) {
-      return new Thread(runnable, "glide-" + name + "-thread-" + threadNum.getAndIncrement()) {
-        @Override
-        public void run() {
-          // why PMD suppression is needed: https://github.com/pmd/pmd/issues/808
-          android.os.Process.setThreadPriority(DEFAULT_PRIORITY); // NOPMD AccessorMethodGeneration
-          if (preventNetworkOperations) {
-            StrictMode.setThreadPolicy(
-                new ThreadPolicy.Builder().detectNetwork().penaltyDeath().build());
-          }
-          try {
-            super.run();
-          } catch (Throwable t) {
-            uncaughtThrowableStrategy.handle(t);
-          }
-        }
-      };
+    public Thread newThread(@NonNull final Runnable runnable) {
+      Thread newThread =
+          delegate.newThread(
+              new Runnable() {
+                @Override
+                public void run() {
+                  if (preventNetworkOperations) {
+                    StrictMode.setThreadPolicy(
+                        new ThreadPolicy.Builder().detectNetwork().penaltyDeath().build());
+                  }
+                  try {
+                    runnable.run();
+                  } catch (Throwable t) {
+                    uncaughtThrowableStrategy.handle(t);
+                  }
+                }
+              });
+      newThread.setName("glide-" + name + "-thread-" + threadNum.getAndIncrement());
+      return newThread;
     }
   }
 
@@ -410,6 +433,8 @@ public final class GlideExecutor implements ExecutorService {
 
     private int corePoolSize;
     private int maximumPoolSize;
+
+    @NonNull private final ThreadFactory threadFactory = new DefaultPriorityThreadFactory();
 
     @NonNull
     private UncaughtThrowableStrategy uncaughtThrowableStrategy = UncaughtThrowableStrategy.DEFAULT;
@@ -471,7 +496,8 @@ public final class GlideExecutor implements ExecutorService {
               /*keepAliveTime=*/ threadTimeoutMillis,
               TimeUnit.MILLISECONDS,
               new PriorityBlockingQueue<Runnable>(),
-              new DefaultThreadFactory(name, uncaughtThrowableStrategy, preventNetworkOperations));
+              new DefaultThreadFactory(
+                  threadFactory, name, uncaughtThrowableStrategy, preventNetworkOperations));
 
       if (threadTimeoutMillis != NO_THREAD_TIMEOUT) {
         executor.allowCoreThreadTimeOut(true);
