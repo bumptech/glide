@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.data.mediastore;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -13,6 +12,7 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -42,7 +42,7 @@ public class ThumbFetcherTest {
     when(opener.open(eq(uri))).thenReturn(expected);
 
     fetcher.loadData(Priority.LOW, callback);
-    verify(callback).onDataReady(isNotNull(InputStream.class));
+    verify(callback).onDataReady(ArgumentMatchers.<InputStream>isNotNull());
   }
 
   @Test

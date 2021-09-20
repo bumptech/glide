@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -32,6 +31,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -121,7 +121,8 @@ public class EngineJobTest {
     job.onLoadFailed(new GlideException("test"));
     ShadowLooper.runUiThreadTasks();
     verify(harness.engineJobListener)
-        .onEngineJobComplete(eq(job), eq(harness.key), isNull(EngineResource.class));
+        .onEngineJobComplete(
+            eq(job), eq(harness.key), ArgumentMatchers.<EngineResource<?>>isNull());
   }
 
   @Test
@@ -244,7 +245,8 @@ public class EngineJobTest {
     job.onLoadFailed(new GlideException("test"));
 
     verify(harness.engineJobListener)
-        .onEngineJobComplete(eq(job), eq(harness.key), isNull(EngineResource.class));
+        .onEngineJobComplete(
+            eq(job), eq(harness.key), ArgumentMatchers.<EngineResource<?>>isNull());
     verify(harness.engineJobListener, never())
         .onEngineJobCancelled(any(EngineJob.class), any(Key.class));
   }

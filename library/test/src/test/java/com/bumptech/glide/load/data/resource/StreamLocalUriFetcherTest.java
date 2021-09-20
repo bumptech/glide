@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.data.resource;
 
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.verify;
 
 import android.content.ContentResolver;
@@ -18,6 +17,7 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -47,7 +47,7 @@ public class StreamLocalUriFetcherTest {
 
     StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context.getContentResolver(), uri);
     fetcher.loadData(Priority.NORMAL, callback);
-    verify(callback).onDataReady(isNotNull(InputStream.class));
+    verify(callback).onDataReady(ArgumentMatchers.<InputStream>isNotNull());
   }
 
   @Test

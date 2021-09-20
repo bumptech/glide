@@ -58,7 +58,7 @@ public class ApplicationVersionSignatureTest {
 
   @Test
   public void testUnresolvablePackageInfo() throws NameNotFoundException {
-    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS.get());
+    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS);
     String packageName = "my.package";
     when(context.getPackageName()).thenReturn(packageName);
     when(context.getPackageManager().getPackageInfo(packageName, 0))
@@ -71,7 +71,7 @@ public class ApplicationVersionSignatureTest {
 
   @Test
   public void testMissingPackageInfo() throws NameNotFoundException {
-    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS.get());
+    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS);
     String packageName = "my.package";
     when(context.getPackageName()).thenReturn(packageName);
     when(context.getPackageManager().getPackageInfo(packageName, 0)).thenReturn(null);

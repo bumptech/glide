@@ -76,6 +76,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
@@ -710,7 +711,8 @@ public class GlideTest {
     firstRequest.clone().apply(placeholderOf(new ColorDrawable(Color.RED))).into(secondTarget);
 
     verify(firstTarget).onResourceReady(isA(Drawable.class), isA(Transition.class));
-    verify(secondTarget).onResourceReady(notNull(Drawable.class), isA(Transition.class));
+    verify(secondTarget)
+        .onResourceReady(ArgumentMatchers.<Drawable>notNull(), isA(Transition.class));
   }
 
   @SuppressWarnings("unchecked")
