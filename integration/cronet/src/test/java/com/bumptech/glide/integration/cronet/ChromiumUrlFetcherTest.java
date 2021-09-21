@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
@@ -42,7 +41,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnit;
@@ -128,9 +126,9 @@ public class ChromiumUrlFetcherTest {
 
     verify(cronetRequestFactory)
         .newRequest(
-            Matchers.eq(glideUrl.toStringUrl()),
+            ArgumentMatchers.eq(glideUrl.toStringUrl()),
             anyInt(),
-            Matchers.eq(headers.getHeaders()),
+            ArgumentMatchers.eq(headers.getHeaders()),
             any(UrlRequest.Callback.class));
 
     verify(request).start();
@@ -148,7 +146,7 @@ public class ChromiumUrlFetcherTest {
 
     verify(cronetRequestFactory, times(1))
         .newRequest(
-            Matchers.eq(glideUrl.toStringUrl()),
+            ArgumentMatchers.eq(glideUrl.toStringUrl()),
             anyInt(),
             ArgumentMatchers.<String, String>anyMap(),
             any(UrlRequest.Callback.class));
@@ -330,7 +328,7 @@ public class ChromiumUrlFetcherTest {
     urlCallback.onResponseStarted(request, info);
     urlCallback.onCanceled(request, info);
 
-    verify(callback, timeout(1000)).onLoadFailed(isNull(Exception.class));
+    verify(callback, timeout(1000)).onLoadFailed(ArgumentMatchers.<Exception>isNull());
   }
 
   private void verifyAuthError() {
@@ -349,7 +347,7 @@ public class ChromiumUrlFetcherTest {
     urlCallback.onResponseStarted(request, info);
     urlCallback.onCanceled(request, info);
 
-    verify(callback, timeout(1000)).onLoadFailed(isNull(Exception.class));
+    verify(callback, timeout(1000)).onLoadFailed(ArgumentMatchers.<Exception>isNull());
   }
 
   @Test

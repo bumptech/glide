@@ -2,7 +2,6 @@ package com.bumptech.glide.load.data;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -23,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -133,7 +133,7 @@ public class HttpUrlFetcherTest {
 
     fetcher.cancel();
     fetcher.loadData(Priority.LOW, callback);
-    verify(callback).onDataReady(isNull(InputStream.class));
+    verify(callback).onDataReady(ArgumentMatchers.<InputStream>isNull());
   }
 
   @Test
