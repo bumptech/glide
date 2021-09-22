@@ -89,7 +89,7 @@ Simple use cases will look something like this:
   ...
   ImageView imageView = (ImageView) findViewById(R.id.my_image_view);
 
-  Glide.with(this).load("http://goo.gl/gEgYUd").into(imageView);
+  Glide.with(this).load("https://goo.gl/gEgYUd").into(imageView);
 }
 
 // For a simple image list:
