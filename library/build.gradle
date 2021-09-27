@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish' 
 
 if (!hasProperty('DISABLE_ERROR_PRONE')) {
     apply plugin: "net.ltgt.errorprone"
@@ -65,4 +66,17 @@ def classPathForQuality() {
     )
 }
 
-apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+afterEvaluate {
+    publishing {
+        publications {
+            library(MavenPublication) {
+                groupId = 'streem.bumptech.glide'
+                artifactId = 'library'
+                version = '1.0.0'
+
+                from component
+            }
+        }
+    }
+}
+
