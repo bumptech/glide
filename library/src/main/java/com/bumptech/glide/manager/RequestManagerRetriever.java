@@ -419,11 +419,8 @@ public class RequestManagerRetriever implements Handler.Callback {
       requestManager =
           factory.build(
               glide, current.getGlideLifecycle(), current.getRequestManagerTreeNode(), context);
-      // This is a bit of hack, we're going to start the RequestManager, but not the
-      // corresponding Lifecycle. It's safe to start the RequestManager, but starting the
-      // Lifecycle might trigger memory leaks. See b/154405040
       if (isParentVisible) {
-        requestManager.onStart();
+        current.getGlideLifecycle().onStart();
       }
       current.setRequestManager(requestManager);
     }
@@ -474,11 +471,8 @@ public class RequestManagerRetriever implements Handler.Callback {
       requestManager =
           factory.build(
               glide, current.getGlideLifecycle(), current.getRequestManagerTreeNode(), context);
-      // This is a bit of hack, we're going to start the RequestManager, but not the
-      // corresponding Lifecycle. It's safe to start the RequestManager, but starting the
-      // Lifecycle might trigger memory leaks. See b/154405040
       if (isParentVisible) {
-        requestManager.onStart();
+        current.getGlideLifecycle().onStart();
       }
       current.setRequestManager(requestManager);
     }
