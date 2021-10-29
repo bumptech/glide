@@ -13,7 +13,7 @@ class PrettyPrintTreeMap<K, V> extends TreeMap<K, V> {
       sb.append('{').append(entry.getKey()).append(':').append(entry.getValue()).append("}, ");
     }
     if (!isEmpty()) {
-      sb.replace(sb.length() - 2, sb.length(), "");
+      sb.delete(sb.length() - 2, sb.length());
     }
     return sb.append(" )").toString();
   }
