@@ -16,6 +16,12 @@ import java.io.IOException;
 public final class ParcelFileDescriptorBitmapDecoder
     implements ResourceDecoder<ParcelFileDescriptor, Bitmap> {
 
+  // 512MB. While I don't have data on the number of valid image files > 512mb, I have determined
+  // that virtually all crashes related to Huawei/Honor's DRM checker go away when we don't attempt
+  // to decode files larger than this. We could increase this to 1GB safely, but it seems like 512MB
+  // might be a little better from a crash reduction perspective. See b/201464175.
+  private static final int MAXIMUM_FILE_BYTE_SIZE_FOR_FILE_DESCRIPTOR_DECODER = 512 * 1024 * 1024;
+
   private final Downsampler downsampler;
 
   public ParcelFileDescriptorBitmapDecoder(Downsampler downsampler) {
@@ -24,7 +30,15 @@ public final class ParcelFileDescriptorBitmapDecoder
 
   @Override
   public boolean handles(@NonNull ParcelFileDescriptor source, @NonNull Options options) {
-    return downsampler.handles(source);
+    return isSafeToTryDecoding(source) && downsampler.handles(source);
+  }
+
+  private boolean isSafeToTryDecoding(@NonNull ParcelFileDescriptor source) {
+    if ("HUAWEI".equalsIgnoreCase(Build.MANUFACTURER)
+        || "HONOR".equalsIgnoreCase(Build.MANUFACTURER)) {
+      return source.getStatSize() <= MAXIMUM_FILE_BYTE_SIZE_FOR_FILE_DESCRIPTOR_DECODER;
+    }
+    return true;
   }
 
   @Nullable
