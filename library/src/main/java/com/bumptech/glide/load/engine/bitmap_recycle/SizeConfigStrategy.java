@@ -173,7 +173,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
       sb.append(entry.getKey()).append('[').append(entry.getValue()).append("], ");
     }
     if (!sortedSizes.isEmpty()) {
-      sb.replace(sb.length() - 2, sb.length(), "");
+      sb.delete(sb.length() - 2, sb.length());
     }
     return sb.append(")}").toString();
   }
