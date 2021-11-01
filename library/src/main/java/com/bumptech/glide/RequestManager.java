@@ -56,6 +56,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class RequestManager
     implements ComponentCallbacks2, LifecycleListener, ModelTypes<RequestBuilder<Drawable>> {
+
   private static final RequestOptions DECODE_TYPE_BITMAP = decodeTypeOf(Bitmap.class).lock();
   private static final RequestOptions DECODE_TYPE_GIF = decodeTypeOf(GifDrawable.class).lock();
   private static final RequestOptions DOWNLOAD_ONLY_OPTIONS =
@@ -94,7 +95,7 @@ public class RequestManager
   private RequestOptions requestOptions;
 
   private boolean pauseAllRequestsOnTrimMemoryModerate;
-
+  // TODO: Glide源码-Glide.with(context)-->RequestManager的创建
   public RequestManager(
       @NonNull Glide glide,
       @NonNull Lifecycle lifecycle,
@@ -109,7 +110,7 @@ public class RequestManager
         context);
   }
 
-  // Our usage is safe here.
+  // TODO: Glide源码-Glide.with(context)-->RequestManager的创建
   @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
   RequestManager(
       Glide glide,
@@ -133,17 +134,20 @@ public class RequestManager
     // In that case we cannot risk synchronously pausing or resuming requests, so we hack around the
     // issue by delaying adding ourselves as a lifecycle listener by posting to the main thread.
     // This should be entirely safe.
+    //子线程通过主线程 post添加到lifecycle中
     if (Util.isOnBackgroundThread()) {
       Util.postOnUiThread(addSelfToLifecycle);
     } else {
+      //将rm添加到lifecycle，该lifecycle在frag中
       lifecycle.addListener(this);
     }
+    //添加了一个网络变化监听
     lifecycle.addListener(connectivityMonitor);
 
     defaultRequestListeners =
         new CopyOnWriteArrayList<>(glide.getGlideContext().getDefaultRequestListeners());
     setRequestOptions(glide.getGlideContext().getDefaultRequestOptions());
-
+    //最后将rm添加到glide的managers集合中--用于内存管理 ，onDestroy时，清除
     glide.registerRequestManager(this);
   }
 
@@ -169,8 +173,8 @@ public class RequestManager
    *
    * <p>The modified options will only be applied to loads started after this method is called.
    *
-   * @see RequestBuilder#apply(BaseRequestOptions)
    * @return This request manager.
+   * @see RequestBuilder#apply(BaseRequestOptions)
    */
   @NonNull
   public synchronized RequestManager applyDefaultRequestOptions(
@@ -191,8 +195,8 @@ public class RequestManager
    * {@link RequestOptions} provided here. Instead the manager will create a clone of these options
    * and mutate the clone.
    *
-   * @see #applyDefaultRequestOptions(RequestOptions)
    * @return This request manager.
+   * @see #applyDefaultRequestOptions(RequestOptions)
    */
   @NonNull
   public synchronized RequestManager setDefaultRequestOptions(
@@ -263,10 +267,9 @@ public class RequestManager
    * automatically resume onStart().
    *
    * <p>This will release the memory used by completed bitmaps but leaves them in any configured
-   * caches. When an #{@link android.app.Activity} receives #{@link
-   * android.app.Activity#onTrimMemory(int)} at a level of #{@link
-   * android.content.ComponentCallbacks2#TRIM_MEMORY_BACKGROUND} this is desirable in order to keep
-   * your process alive longer.
+   * caches. When an #{@link android.app.Activity} receives #{@link android.app.Activity#onTrimMemory(int)}
+   * at a level of #{@link android.content.ComponentCallbacks2#TRIM_MEMORY_BACKGROUND} this is
+   * desirable in order to keep your process alive longer.
    *
    * @see #isPaused()
    * @see #resumeRequests()
@@ -391,8 +394,7 @@ public class RequestManager
   }
 
   /**
-   * Attempts to always load the resource as a {@link
-   * com.bumptech.glide.load.resource.gif.GifDrawable}.
+   * Attempts to always load the resource as a {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
    *
    * <p>If the underlying data is not a GIF, this will fail. As a result, this should only be used
    * if the model represents an animated GIF and the caller wants to interact with the GifDrawable
@@ -400,8 +402,7 @@ public class RequestManager
    * whether or not the given data represents an animated GIF and return the appropriate {@link
    * Drawable}, animated or not, automatically.
    *
-   * @return A new request builder for loading a {@link
-   *     com.bumptech.glide.load.resource.gif.GifDrawable}.
+   * @return A new request builder for loading a {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
    */
   @NonNull
   @CheckResult
@@ -542,7 +543,8 @@ public class RequestManager
    *
    * <p>This method is designed to work for remote data that is or will be cached using {@link
    * com.bumptech.glide.load.engine.DiskCacheStrategy#DATA}. As a result, specifying a {@link
-   * com.bumptech.glide.load.engine.DiskCacheStrategy} on this request is generally not recommended.
+   * com.bumptech.glide.load.engine.DiskCacheStrategy} on this request is generally not
+   * recommended.
    *
    * @return A new request builder for downloading content to cache and returning the cache File.
    */
@@ -580,9 +582,8 @@ public class RequestManager
   }
 
   /**
-   * Attempts to load the resource using any registered {@link
-   * com.bumptech.glide.load.ResourceDecoder}s that can decode the given resource class or any
-   * subclass of the given resource class.
+   * Attempts to load the resource using any registered {@link com.bumptech.glide.load.ResourceDecoder}s
+   * that can decode the given resource class or any subclass of the given resource class.
    *
    * @param resourceClass The resource to decode.
    * @return A new request builder for loading the given resource class.
@@ -603,7 +604,7 @@ public class RequestManager
    *
    * @param view The view to cancel loads and free resources for.
    * @throws IllegalArgumentException if an object other than Glide's metadata is put as the view's
-   *     tag.
+   *                                  tag.
    * @see #clear(Target)
    */
   public void clear(@NonNull View view) {
