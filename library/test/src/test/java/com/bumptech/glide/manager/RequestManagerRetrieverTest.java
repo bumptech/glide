@@ -27,7 +27,6 @@ import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil.BackgroundTester;
-import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util;
 import org.junit.After;
@@ -45,7 +44,7 @@ import org.robolectric.annotation.LooperMode;
 
 @LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18, shadows = GlideShadowLooper.class)
+@Config(sdk = 18)
 public class RequestManagerRetrieverTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 

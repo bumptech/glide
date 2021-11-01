@@ -13,7 +13,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.app.Application;
 import android.graphics.Bitmap;
@@ -33,7 +32,6 @@ import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.resource.gif.GifDrawableTest.BitmapTrackingShadowCanvas;
-import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
@@ -51,15 +49,13 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.annotation.LooperMode;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowCanvas;
 
-@LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
 @Config(
     sdk = 18,
-    shadows = {GlideShadowLooper.class, BitmapTrackingShadowCanvas.class})
+    shadows = {BitmapTrackingShadowCanvas.class})
 public class GifDrawableTest {
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
 

@@ -17,7 +17,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
@@ -32,7 +31,6 @@ import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.tests.BackgroundUtil;
-import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.util.Executors;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,13 +42,9 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.LooperMode;
 
-@LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    sdk = 18,
-    shadows = {GlideShadowLooper.class})
+@Config(sdk = 18)
 @SuppressWarnings("unchecked")
 public class EngineTest {
   private EngineTestHarness harness;

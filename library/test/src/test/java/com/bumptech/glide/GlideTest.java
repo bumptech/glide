@@ -59,7 +59,6 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.testutil.TestResourceUtil;
@@ -99,7 +98,6 @@ import org.robolectric.shadows.ShadowBitmap;
     shadows = {
       GlideTest.ShadowFileDescriptorContentResolver.class,
       GlideTest.ShadowMediaMetadataRetriever.class,
-      GlideShadowLooper.class,
       GlideTest.MutableShadowBitmap.class
     })
 @SuppressWarnings("unchecked")

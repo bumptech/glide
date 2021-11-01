@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.app.Application;
 import android.content.Context;
@@ -26,7 +25,6 @@ import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.tests.BackgroundUtil;
-import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.TearDownGlide;
 import java.io.File;
 import java.util.Collections;
@@ -42,11 +40,9 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.LooperMode;
 
-@LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18, shadows = GlideShadowLooper.class)
+@Config(sdk = 18)
 public class RequestManagerTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
