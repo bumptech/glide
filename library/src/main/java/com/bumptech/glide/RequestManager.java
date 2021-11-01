@@ -388,6 +388,7 @@ public class RequestManager
    * @return A new request builder for loading a {@link android.graphics.Bitmap}
    */
   @NonNull
+  // TODO: Glide源码-load：先.asBitmap()再.load("url")-使用Bitmap的RequestOptions
   @CheckResult
   public RequestBuilder<Bitmap> asBitmap() {
     return as(Bitmap.class).apply(DECODE_TYPE_BITMAP);
@@ -406,6 +407,7 @@ public class RequestManager
    */
   @NonNull
   @CheckResult
+  // TODO: Glide源码-load：先.asGif()再.load("url")-使用GifDrawable的RequestOptions
   public RequestBuilder<GifDrawable> asGif() {
     return as(GifDrawable.class).apply(DECODE_TYPE_GIF);
   }
@@ -423,6 +425,7 @@ public class RequestManager
   @NonNull
   @CheckResult
   public RequestBuilder<Drawable> asDrawable() {
+    // TODO: Glide源码-load--创建RequestBuilder
     return as(Drawable.class);
   }
 
@@ -457,9 +460,13 @@ public class RequestManager
    */
   @NonNull
   @CheckResult
+  // TODO: Glide源码-load：默认Drawable-使用默认的 new RequestOptions
   @Override
   public RequestBuilder<Drawable> load(@Nullable String string) {
-    return asDrawable().load(string);
+// TODO: Glide源码-load--创建RequestBuilder-默认情况使用asDrawable()
+    return asDrawable()
+        //设置 model
+        .load(string);
   }
 
   /**
@@ -592,6 +599,7 @@ public class RequestManager
   @CheckResult
   public <ResourceType> RequestBuilder<ResourceType> as(
       @NonNull Class<ResourceType> resourceClass) {
+    // TODO: Glide源码-load--创建RequestBuilder-传入glide,rm,context,resourceClass(drawable,bitmap，GifDrawable,File)
     return new RequestBuilder<>(glide, this, resourceClass, context);
   }
 
