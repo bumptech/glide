@@ -779,17 +779,20 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       Executor callbackExecutor) {
     return into(target, targetListener, /*options=*/ this, callbackExecutor);
   }
-
+  // TODO: Glide源码-into流程
   private <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
       @Nullable RequestListener<TranscodeType> targetListener,
       BaseRequestOptions<?> options,
       Executor callbackExecutor) {
     Preconditions.checkNotNull(target);
+    //这里的 isModelSet 是在 load 的时候赋值为 true 的，所以不会抛异常
+    //调用load设置modle后isModeSet为true
     if (!isModelSet) {
       throw new IllegalArgumentException("You must call #load() before calling #into()");
     }
-
+    //构建Request    target=DrawableImageViewTarget
+    //最终返回了SingleRequest子类
     Request request = buildRequest(target, targetListener, options, callbackExecutor);
 
     Request previous = target.getRequest();
@@ -836,10 +839,11 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    *     ImageView}.
    */
   @NonNull
+  // TODO: Glide源码-into流程
   public ViewTarget<ImageView, TranscodeType> into(@NonNull ImageView view) {
     Util.assertMainThread();
     Preconditions.checkNotNull(view);
-
+    // 根据 ImageView 布局中的 scaleType 来重构 requestOptions
     BaseRequestOptions<?> requestOptions = this;
     if (!requestOptions.isTransformationSet()
         && requestOptions.isTransformationAllowed()
@@ -847,6 +851,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       // Clone in this method so that if we use this RequestBuilder to load into a View and then
       // into a different target, we don't retain the transformation applied based on the previous
       // View's scale type.
+      //如果在 xml ImageView 节点中 没有设置 scaleType 那么默认在构造函数中进行了初始化为   mScaleType = ScaleType.FIT_CENTER;
       switch (view.getScaleType()) {
         case CENTER_CROP:
           requestOptions = requestOptions.clone().optionalCenterCrop();
@@ -868,11 +873,14 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
           // Do nothing.
       }
     }
-
+    //调用 into 重载函数，创建一个 ViewTarget
     return into(
+        //调用 buildImageViewTarget 构建一个 ImageView 类型的 Target(Bitmap/Drawable(GifDrawable))
+        //这里我们使用Drawable.class 返回 DrawableImageViewTarget
         glideContext.buildImageViewTarget(view, transcodeClass),
         /*targetListener=*/ null,
         requestOptions,
+        //在主线程运动runnable的线程池
         Executors.mainThreadExecutor());
   }
 
@@ -1020,12 +1028,13 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
         throw new IllegalArgumentException("unknown priority: " + getPriority());
     }
   }
-
+  //构建Request
   private Request buildRequest(
       Target<TranscodeType> target,
       @Nullable RequestListener<TranscodeType> targetListener,
       BaseRequestOptions<?> requestOptions,
       Executor callbackExecutor) {
+    //构建Request
     return buildRequestRecursive(
         /*requestLock=*/ new Object(),
         target,
@@ -1057,7 +1066,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       errorRequestCoordinator = new ErrorRequestCoordinator(requestLock, parentCoordinator);
       parentCoordinator = errorRequestCoordinator;
     }
-
+  //构建Request
     Request mainRequest =
         buildThumbnailRequestRecursive(
             requestLock,
@@ -1097,7 +1106,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     errorRequestCoordinator.setRequests(mainRequest, errorRequest);
     return errorRequestCoordinator;
   }
-
+  //构建Request
   private Request buildThumbnailRequestRecursive(
       Object requestLock,
       Target<TranscodeType> target,
@@ -1109,6 +1118,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       int overrideHeight,
       BaseRequestOptions<?> requestOptions,
       Executor callbackExecutor) {
+    //缩略图，分支先不看
     if (thumbnailBuilder != null) {
       // Recursive case: contains a potentially recursive thumbnail request builder.
       if (isThumbnailBuilt) {
@@ -1206,6 +1216,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       return coordinator;
     } else {
       // Base case: no thumbnail.
+      //构建Request
       return obtainRequest(
           requestLock,
           target,
@@ -1219,7 +1230,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
           callbackExecutor);
     }
   }
-
+  //构建Request
   private Request obtainRequest(
       Object requestLock,
       Target<TranscodeType> target,
@@ -1231,6 +1242,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       int overrideWidth,
       int overrideHeight,
       Executor callbackExecutor) {
+    //构建Request
     return SingleRequest.obtain(
         context,
         glideContext,
