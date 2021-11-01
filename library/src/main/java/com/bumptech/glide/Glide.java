@@ -153,7 +153,7 @@ public class Glide implements ComponentCallbacks2 {
    * Returns a directory with the given name in the private cache directory of the application to
    * use to store retrieved media and thumbnails.
    *
-   * @param context A context.
+   * @param context   A context.
    * @param cacheName The name of the subdirectory in which to store the cache.
    * @see #getPhotoCacheDir(android.content.Context)
    */
@@ -181,13 +181,16 @@ public class Glide implements ComponentCallbacks2 {
    */
   @NonNull
   // Double checked locking is safe here.
+  // TODO: Glide源码-Glide.with(context)--获取单例Glide
   @SuppressWarnings("GuardedBy")
   public static Glide get(@NonNull Context context) {
+    //双重检查锁DCL
     if (glide == null) {
       GeneratedAppGlideModule annotationGeneratedModule =
           getAnnotationGeneratedGlideModules(context.getApplicationContext());
       synchronized (Glide.class) {
         if (glide == null) {
+          //检查并初始化Glide
           checkAndInitializeGlide(context, annotationGeneratedModule);
         }
       }
@@ -196,6 +199,7 @@ public class Glide implements ComponentCallbacks2 {
     return glide;
   }
 
+  // TODO: Glide源码-Glide.with(context)--获取单例Glide
   @GuardedBy("Glide.class")
   private static void checkAndInitializeGlide(
       @NonNull Context context, @Nullable GeneratedAppGlideModule generatedAppGlideModule) {
@@ -207,14 +211,15 @@ public class Glide implements ComponentCallbacks2 {
               + " use the provided Glide instance instead");
     }
     isInitializing = true;
+    // TODO: Glide源码-Glide.with(context)--获取单例Glide-初始化
     initializeGlide(context, generatedAppGlideModule);
     isInitializing = false;
   }
 
   /**
    * @deprecated Use {@link #init(Context, GlideBuilder)} to get a singleton compatible with Glide's
-   *     generated API.
-   *     <p>This method will be removed in a future version of Glide.
+   * generated API.
+   * <p>This method will be removed in a future version of Glide.
    */
   @VisibleForTesting
   @Deprecated
@@ -260,12 +265,15 @@ public class Glide implements ComponentCallbacks2 {
     }
   }
 
+  // TODO: Glide源码-Glide.with(context)--获取单例Glide-初始化
   @GuardedBy("Glide.class")
   private static void initializeGlide(
       @NonNull Context context, @Nullable GeneratedAppGlideModule generatedAppGlideModule) {
+    //使用 GlideBuilder 建造者模式创建glide
     initializeGlide(context, new GlideBuilder(), generatedAppGlideModule);
   }
 
+  // TODO: Glide源码-Glide.with(context)--获取单例Glide-初始化
   @GuardedBy("Glide.class")
   @SuppressWarnings("deprecation")
   private static void initializeGlide(
@@ -304,6 +312,7 @@ public class Glide implements ComponentCallbacks2 {
         annotationGeneratedModule != null
             ? annotationGeneratedModule.getRequestManagerFactory()
             : null;
+    //设置RequestManagerFactory工厂
     builder.setRequestManagerFactory(factory);
     for (com.bumptech.glide.module.GlideModule module : manifestModules) {
       module.applyOptions(applicationContext, builder);
@@ -311,6 +320,7 @@ public class Glide implements ComponentCallbacks2 {
     if (annotationGeneratedModule != null) {
       annotationGeneratedModule.applyOptions(applicationContext, builder);
     }
+    // TODO: Glide源码-Glide.with(context)--获取单例Glide-建造者模式->build
     Glide glide = builder.build(applicationContext);
     for (com.bumptech.glide.module.GlideModule module : manifestModules) {
       try {
@@ -372,6 +382,7 @@ public class Glide implements ComponentCallbacks2 {
         e);
   }
 
+  // TODO: Glide源码-Glide.with(context)--获取单例Glide-构造函数
   @SuppressWarnings("PMD.UnusedFormalParameter")
   Glide(
       @NonNull Context context,
@@ -395,7 +406,7 @@ public class Glide implements ComponentCallbacks2 {
     this.defaultRequestOptionsFactory = defaultRequestOptionsFactory;
 
     final Resources resources = context.getResources();
-
+    //组件注册
     registry = new Registry();
     registry.register(new DefaultImageHeaderParser());
     // Right now we're only using this parser for HEIF images, which are only supported on OMR1+.
@@ -443,10 +454,19 @@ public class Glide implements ComponentCallbacks2 {
     ContentResolver contentResolver = context.getContentResolver();
 
     registry
+        //encoderRegistry
+        //byte写入文件File
         .append(ByteBuffer.class, new ByteBufferEncoder())
+        //encoderRegistry
+        //将流写入磁盘的Encoder
         .append(InputStream.class, new StreamEncoder(arrayPool))
+
         /* Bitmaps */
+        //decoderRegistry
+        //byte->Bitmap
         .append(Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class, byteBufferBitmapDecoder)
+        //decoderRegistry
+        //Stream->Bitmap
         .append(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, streamBitmapDecoder);
 
     if (ParcelFileDescriptorRewinder.isSupported()) {
@@ -525,6 +545,7 @@ public class Glide implements ComponentCallbacks2 {
     }
 
     registry
+        //用于从 Android 资源 ID 加载InputStream的工厂
         .append(int.class, InputStream.class, resourceLoaderStreamFactory)
         .append(int.class, ParcelFileDescriptor.class, resourceLoaderFileDescriptorFactory)
         .append(Integer.class, InputStream.class, resourceLoaderStreamFactory)
@@ -533,8 +554,10 @@ public class Glide implements ComponentCallbacks2 {
         .append(int.class, AssetFileDescriptor.class, resourceLoaderAssetFileDescriptorFactory)
         .append(Integer.class, AssetFileDescriptor.class, resourceLoaderAssetFileDescriptorFactory)
         .append(int.class, Uri.class, resourceLoaderUriFactory)
+        //从Uri加载
         .append(String.class, InputStream.class, new DataUrlLoader.StreamFactory<String>())
         .append(Uri.class, InputStream.class, new DataUrlLoader.StreamFactory<Uri>())
+        //从String加载InputStream
         .append(String.class, InputStream.class, new StringLoader.StreamFactory())
         .append(String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory())
         .append(
@@ -567,6 +590,7 @@ public class Glide implements ComponentCallbacks2 {
         .append(Uri.class, InputStream.class, new UrlUriLoader.StreamFactory())
         .append(URL.class, InputStream.class, new UrlLoader.StreamFactory())
         .append(Uri.class, File.class, new MediaStoreFileLoader.Factory(context))
+        //用于平移GlideUrl （HTTP / HTTPS URLS）到InputStream数据。
         .append(GlideUrl.class, InputStream.class, new HttpGlideUrlLoader.Factory())
         .append(byte[].class, ByteBuffer.class, new ByteArrayLoader.ByteBufferFactory())
         .append(byte[].class, InputStream.class, new ByteArrayLoader.StreamFactory())
@@ -592,8 +616,9 @@ public class Glide implements ComponentCallbacks2 {
           BitmapDrawable.class,
           new BitmapDrawableDecoder<>(resources, byteBufferVideoDecoder));
     }
-
+    //创建了一个ImageViewTargetFactory
     ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
+    //创建了一个GlideContext对象
     glideContext =
         new GlideContext(
             context,
@@ -636,7 +661,9 @@ public class Glide implements ComponentCallbacks2 {
     return arrayPool;
   }
 
-  /** @return The context associated with this instance. */
+  /**
+   * @return The context associated with this instance.
+   */
   @NonNull
   public Context getContext() {
     return glideContext.getBaseContext();
@@ -669,7 +696,7 @@ public class Glide implements ComponentCallbacks2 {
    * every rotation.
    *
    * @param bitmapAttributeBuilders The list of {@link Builder Builders} representing individual
-   *     sizes and configurations of {@link Bitmap}s to be pre-filled.
+   *                                sizes and configurations of {@link Bitmap}s to be pre-filled.
    */
   @SuppressWarnings("unused") // Public API
   public synchronized void preFillBitmapPool(
@@ -731,7 +758,9 @@ public class Glide implements ComponentCallbacks2 {
     engine.clearDiskCache();
   }
 
-  /** Internal method. */
+  /**
+   * Internal method.
+   */
   @NonNull
   public RequestManagerRetriever getRequestManagerRetriever() {
     return requestManagerRetriever;
@@ -762,6 +791,7 @@ public class Glide implements ComponentCallbacks2 {
     return oldCategory;
   }
 
+  // TODO: Glide源码-Glide.with(context)--获取RequestManagerRetriever
   @NonNull
   private static RequestManagerRetriever getRetriever(@Nullable Context context) {
     // Context could be null for other reasons (ie the user passes in null), but in practice it will
@@ -771,6 +801,7 @@ public class Glide implements ComponentCallbacks2 {
         "You cannot start a load on a not yet attached View or a Fragment where getActivity() "
             + "returns null (which usually occurs when getActivity() is called before the Fragment "
             + "is attached or after the Fragment is destroyed).");
+    // TODO: Glide源码-Glide.with(context)--获取单例Glide并且获取其对应的retriever
     return Glide.get(context).getRequestManagerRetriever();
   }
 
@@ -786,7 +817,8 @@ public class Glide implements ComponentCallbacks2 {
    * the same vein, if the resource will be used in a view in an activity, the load should be
    * started with {@link #with(android.app.Activity)}}.
    *
-   * <p>This method is appropriate for resources that will be used outside of the normal fragment or
+   * <p>This method is appropriate for resources that will be used outside of the normal fragment
+   * or
    * activity lifecycle (For example in services, or for notification thumbnails).
    *
    * @param context Any context, will not be retained.
@@ -796,6 +828,7 @@ public class Glide implements ComponentCallbacks2 {
    * @see #with(androidx.fragment.app.Fragment)
    * @see #with(androidx.fragment.app.FragmentActivity)
    */
+  // TODO: Glide源码-Glide.with(context)返回RequestManager流程
   @NonNull
   public static RequestManager with(@NonNull Context context) {
     return getRetriever(context).get(context);
@@ -808,15 +841,20 @@ public class Glide implements ComponentCallbacks2 {
    * @param activity The activity to use.
    * @return A RequestManager for the given activity that can be used to start a load.
    */
+
+  // TODO: Glide源码-Glide.with(context)--返回RequestManager流程
   @NonNull
   public static RequestManager with(@NonNull Activity activity) {
-    return getRetriever(activity).get(activity);
+    // TODO: Glide源码-Glide.with(context)--获取RequestManagerRetriever，然后获取RequestManager
+    return getRetriever(activity)
+        // TODO: Glide源码-Glide.with(context)--调用RequestManagerRetriever.get()获取RequestManager
+        .get(activity);
   }
 
   /**
-   * Begin a load with Glide that will tied to the give {@link
-   * androidx.fragment.app.FragmentActivity}'s lifecycle and that uses the given {@link
-   * androidx.fragment.app.FragmentActivity}'s default options.
+   * Begin a load with Glide that will tied to the give {@link androidx.fragment.app.FragmentActivity}'s
+   * lifecycle and that uses the given {@link androidx.fragment.app.FragmentActivity}'s default
+   * options.
    *
    * @param activity The activity to use.
    * @return A RequestManager for the given FragmentActivity that can be used to start a load.
@@ -845,8 +883,7 @@ public class Glide implements ComponentCallbacks2 {
    * @param fragment The fragment to use.
    * @return A RequestManager for the given Fragment that can be used to start a load.
    * @deprecated Prefer support Fragments and {@link #with(Fragment)} instead, {@link
-   *     android.app.Fragment} will be deprecated. See
-   *     https://github.com/android/android-ktx/pull/161#issuecomment-363270555.
+   * android.app.Fragment} will be deprecated. See https://github.com/android/android-ktx/pull/161#issuecomment-363270555.
    */
   @SuppressWarnings("deprecation")
   @Deprecated
@@ -935,10 +972,14 @@ public class Glide implements ComponentCallbacks2 {
     clearMemory();
   }
 
-  /** Creates a new instance of {@link RequestOptions}. */
+  /**
+   * Creates a new instance of {@link RequestOptions}.
+   */
   public interface RequestOptionsFactory {
 
-    /** Returns a non-null {@link RequestOptions} object. */
+    /**
+     * Returns a non-null {@link RequestOptions} object.
+     */
     @NonNull
     RequestOptions build();
   }
