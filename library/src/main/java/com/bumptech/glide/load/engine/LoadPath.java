@@ -44,7 +44,7 @@ public class LoadPath<Data, ResourceType, Transcode> {
             + transcodeClass.getSimpleName()
             + "}";
   }
-
+  // TODO: Glide源码-into流程-解析资源
   public Resource<Transcode> load(
       DataRewinder<Data> rewinder,
       @NonNull Options options,
@@ -54,12 +54,13 @@ public class LoadPath<Data, ResourceType, Transcode> {
       throws GlideException {
     List<Throwable> throwables = Preconditions.checkNotNull(listPool.acquire());
     try {
+      //这里
       return loadWithExceptionList(rewinder, options, width, height, decodeCallback, throwables);
     } finally {
       listPool.release(throwables);
     }
   }
-
+  // TODO: Glide源码-into流程-解析资源
   private Resource<Transcode> loadWithExceptionList(
       DataRewinder<Data> rewinder,
       @NonNull Options options,
@@ -70,9 +71,11 @@ public class LoadPath<Data, ResourceType, Transcode> {
       throws GlideException {
     Resource<Transcode> result = null;
     //noinspection ForLoopReplaceableByForEach to improve perf
+    //遍历内部存储的 DecodePath 集合，通过他们来解析数据
     for (int i = 0, size = decodePaths.size(); i < size; i++) {
       DecodePath<Data, ResourceType, Transcode> path = decodePaths.get(i);
       try {
+        //这里才是真正解析数据的地方
         result = path.decode(rewinder, width, height, options, decodeCallback);
       } catch (GlideException e) {
         exceptions.add(e);

@@ -48,7 +48,7 @@ public class DecodePath<DataType, ResourceType, Transcode> {
             + transcodeClass.getSimpleName()
             + "}";
   }
-
+  // TODO: Glide源码-into流程-解析资源
   public Resource<Transcode> decode(
       DataRewinder<DataType> rewinder,
       int width,
@@ -56,12 +56,16 @@ public class DecodePath<DataType, ResourceType, Transcode> {
       @NonNull Options options,
       DecodeCallback<ResourceType> callback)
       throws GlideException {
+    //调用 decodeResource 将数据解析成中间资源
     Resource<ResourceType> decoded = decodeResource(rewinder, width, height, options);
+    //解析完数据回调出去DecodeJob
     Resource<ResourceType> transformed = callback.onResourceDecoded(decoded);
+    //转换资源为目标资源BitmapDrawableTranscoder--最后往上返回到DecodeJob#decodeFromRetrievedData 方法中
     return transcoder.transcode(transformed, options);
   }
 
   @NonNull
+  // TODO: Glide源码-into流程-解析资源
   private Resource<ResourceType> decodeResource(
       DataRewinder<DataType> rewinder, int width, int height, @NonNull Options options)
       throws GlideException {
@@ -74,6 +78,7 @@ public class DecodePath<DataType, ResourceType, Transcode> {
   }
 
   @NonNull
+  // TODO: Glide源码-into流程-解析资源
   private Resource<ResourceType> decodeResourceWithList(
       DataRewinder<DataType> rewinder,
       int width,
@@ -89,6 +94,7 @@ public class DecodePath<DataType, ResourceType, Transcode> {
         DataType data = rewinder.rewindAndGet();
         if (decoder.handles(data, options)) {
           data = rewinder.rewindAndGet();
+          // 调用 ResourceDrawableDecoder.decode 解析数据StreamBitmapDecoder
           result = decoder.decode(data, width, height, options);
         }
         // Some decoders throw unexpectedly. If they do, we shouldn't fail the entire load path, but

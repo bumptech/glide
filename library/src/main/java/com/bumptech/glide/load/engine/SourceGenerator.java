@@ -48,11 +48,13 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
   // Concurrent access isn't supported.
   @SuppressWarnings({"NonAtomicOperationOnVolatileField", "NonAtomicVolatileUpdate"})
   @Override
+  // TODO: Glide源码-into流程
   public boolean startNext() {
     if (dataToCache != null) {
       Object data = dataToCache;
       dataToCache = null;
       try {
+        //写入磁盘缓存
         boolean isDataInCache = cacheData(data);
         // If we failed to write the data to cache, the cacheData method will try to decode the
         // original data directly instead of going through the disk cache. Since cacheData has
@@ -71,7 +73,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
         }
       }
     }
-
+    //如果命中DataCacheGenerator直接返回
     if (sourceCacheGenerator != null && sourceCacheGenerator.startNext()) {
       return true;
     }
@@ -80,6 +82,8 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
     loadData = null;
     boolean started = false;
     while (!started && hasNextModelLoader()) {
+      //获取一个 ModelLoad 加载器--这里是 HttpGlideUrlLoader.buildLoadData获取
+      //new LoadData<>(url, new HttpUrlFetcher(url, timeout))
       loadData = helper.getLoadData().get(loadDataListIndex++);
       if (loadData != null
           && (helper.getDiskCacheStrategy().isDataCacheable(loadData.fetcher.getDataSource())
@@ -92,9 +96,11 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
   }
 
   private void startNextLoad(final LoadData<?> toStart) {
+    //使用加载器中的 fetcher 根据优先级加载数据HttpUrlFetcher->loadData()方法
     loadData.fetcher.loadData(
         helper.getPriority(),
         new DataCallback<Object>() {
+          //从HttpUrlFetcher回调回来-data:InputStream
           @Override
           public void onDataReady(@Nullable Object data) {
             if (isCurrentRequest(toStart)) {
@@ -138,6 +144,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
       DataCacheWriter<Object> writer = new DataCacheWriter<>(encoder, data, helper.getOptions());
       DataCacheKey newOriginalKey = new DataCacheKey(loadData.sourceKey, helper.getSignature());
       DiskCache diskCache = helper.getDiskCache();
+      //写入DataCache缓存
       diskCache.put(newOriginalKey, writer);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(
@@ -173,6 +180,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
         }
 
         isLoadingFromSourceData = true;
+        //回调出去
         cb.onDataFetcherReady(
             loadData.sourceKey,
             rewinder.rewindAndGet(),
@@ -201,12 +209,14 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
   @Synthetic
   void onDataReadyInternal(LoadData<?> loadData, Object data) {
     DiskCacheStrategy diskCacheStrategy = helper.getDiskCacheStrategy();
+    //这里会走 else 因为我们没有配置缓存,继续回调。
     if (data != null && diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) {
       dataToCache = data;
       // We might be being called back on someone else's thread. Before doing anything, we should
       // reschedule to get back onto Glide's thread.
       cb.reschedule();
     } else {
+      //DecodeJob回调
       cb.onDataFetcherReady(
           loadData.sourceKey,
           data,

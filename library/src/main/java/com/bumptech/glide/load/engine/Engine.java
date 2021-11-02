@@ -152,6 +152,7 @@ public class Engine
    * @param height The target height in pixels of the desired resource.
    * @param cb The callback that will be called when the load completes.
    */
+  // TODO: Glide源码-into流程
   public <R> LoadStatus load(
       GlideContext glideContext,
       Object model,
@@ -173,7 +174,7 @@ public class Engine
       ResourceCallback cb,
       Executor callbackExecutor) {
     long startTime = VERBOSE_IS_LOGGABLE ? LogTime.getLogTime() : 0;
-
+    //构建key，用于缓存策略和请求
     EngineKey key =
         keyFactory.buildKey(
             model,
@@ -187,9 +188,11 @@ public class Engine
 
     EngineResource<?> memoryResource;
     synchronized (this) {
+      //根据 key 拿到活动缓存，内存缓存中的资源
       memoryResource = loadFromMemory(key, isMemoryCacheable, startTime);
 
       if (memoryResource == null) {
+        //等待现有工作或开始新工作
         return waitForExistingOrStartNewJob(
             glideContext,
             model,
@@ -215,13 +218,13 @@ public class Engine
       }
     }
 
-    // Avoid calling back while holding the engine lock, doing so makes it easier for callers to
-    // deadlock.
+    // Avoid calling back while holding the engine lock, doing so makes it easier for callers to deadlock.
+    // 缓存中有资源返回
     cb.onResourceReady(
         memoryResource, DataSource.MEMORY_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
     return null;
   }
-
+  // TODO: Glide源码-into流程
   private <R> LoadStatus waitForExistingOrStartNewJob(
       GlideContext glideContext,
       Object model,
@@ -244,9 +247,10 @@ public class Engine
       Executor callbackExecutor,
       EngineKey key,
       long startTime) {
-
+    //根据 Key 看看缓存中是否正在执行
     EngineJob<?> current = jobs.get(key, onlyRetrieveFromCache);
     if (current != null) {
+      //如果正在执行，把数据回调出去
       current.addCallback(cb, callbackExecutor);
       if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Added to existing load", startTime, key);
@@ -254,6 +258,8 @@ public class Engine
       return new LoadStatus(cb, current);
     }
 
+    // --------------   走到这里说明是一个新的任务  ---------------
+    // --------------   构建新的请求任务  ---------------
     EngineJob<R> engineJob =
         engineJobFactory.build(
             key,
@@ -261,7 +267,7 @@ public class Engine
             useUnlimitedSourceExecutorPool,
             useAnimationPool,
             onlyRetrieveFromCache);
-
+    //构造decodeJob实现了runnable，放到engineJob中执行
     DecodeJob<R> decodeJob =
         decodeJobFactory.build(
             glideContext,
@@ -280,10 +286,11 @@ public class Engine
             onlyRetrieveFromCache,
             options,
             engineJob);
-
+    //把当前需要执行的引擎工作添加到集合中
     jobs.put(key, engineJob);
-
+    //添加回调
     engineJob.addCallback(cb, callbackExecutor);
+    //开始执行。
     engineJob.start(decodeJob);
 
     if (VERBOSE_IS_LOGGABLE) {
@@ -292,13 +299,14 @@ public class Engine
     return new LoadStatus(cb, engineJob);
   }
 
+  // TODO: Glide源码-into流程
   @Nullable
   private EngineResource<?> loadFromMemory(
       EngineKey key, boolean isMemoryCacheable, long startTime) {
     if (!isMemoryCacheable) {
       return null;
     }
-
+    // 从活动缓存中获取资源
     EngineResource<?> active = loadFromActiveResources(key);
     if (active != null) {
       if (VERBOSE_IS_LOGGABLE) {
@@ -306,7 +314,7 @@ public class Engine
       }
       return active;
     }
-
+    // 从内存缓存中获取资源--如果内存缓存中有取出并从内存缓存中删除，放入活动缓存
     EngineResource<?> cached = loadFromCache(key);
     if (cached != null) {
       if (VERBOSE_IS_LOGGABLE) {
@@ -333,9 +341,12 @@ public class Engine
   }
 
   private EngineResource<?> loadFromCache(Key key) {
+    //从内存中取出，调用的remove方法
     EngineResource<?> cached = getEngineResourceFromCache(key);
     if (cached != null) {
+      //引用计数++
       cached.acquire();
+      //放入活动缓存
       activeResources.activate(key, cached);
     }
     return cached;
@@ -368,13 +379,15 @@ public class Engine
 
   @SuppressWarnings("unchecked")
   @Override
+  // TODO: Glide源码-into流程
   public synchronized void onEngineJobComplete(
       EngineJob<?> engineJob, Key key, EngineResource<?> resource) {
     // A null resource indicates that the load failed, usually due to an exception.
+    //收到下游返回回来的资源，添加到活动缓存中
     if (resource != null && resource.isMemoryCacheable()) {
       activeResources.activate(key, resource);
     }
-
+    //删除任务
     jobs.removeIfCurrent(key, engineJob);
   }
 

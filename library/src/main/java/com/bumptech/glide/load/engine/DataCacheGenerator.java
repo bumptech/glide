@@ -43,6 +43,7 @@ class DataCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCallba
   }
 
   @Override
+  // TODO: Glide源码-into流程
   public boolean startNext() {
     GlideTrace.beginSection("DataCacheGenerator.startNext");
     try {
@@ -57,6 +58,7 @@ class DataCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCallba
         // and the actions it performs are much more expensive than a single allocation.
         @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
         Key originalKey = new DataCacheKey(sourceId, helper.getSignature());
+        //从磁盘缓存中获取
         cacheFile = helper.getDiskCache().get(originalKey);
         if (cacheFile != null) {
           this.sourceKey = sourceId;

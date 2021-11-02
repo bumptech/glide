@@ -35,9 +35,12 @@ public class RequestTracker {
   private boolean isPaused;
 
   /** Starts tracking the given request. */
+  // TODO: Glide源码-into流程
   public void runRequest(@NonNull Request request) {
     requests.add(request);
     if (!isPaused) {
+      //没有暂停，开始调用 Request begin 执行
+      //这里调用的是SignalRequest.begin
       request.begin();
     } else {
       request.clear();

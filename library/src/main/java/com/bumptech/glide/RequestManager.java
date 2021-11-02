@@ -674,9 +674,11 @@ public class RequestManager
       return false;
     }
   }
-
+  // TODO: Glide源码-into流程
   synchronized void track(@NonNull Target<?> target, @NonNull Request request) {
+    //添加一个目标任务
     targetTracker.track(target);
+    //执行 Glide request
     requestTracker.runRequest(request);
   }
 

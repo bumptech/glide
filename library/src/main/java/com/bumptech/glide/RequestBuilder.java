@@ -795,6 +795,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     //最终返回了SingleRequest子类
     Request request = buildRequest(target, targetListener, options, callbackExecutor);
 
+    //下面的几行说明是否与上一个请求冲突，一般不用管 直接看下面 else 判断
     Request previous = target.getRequest();
     if (request.isEquivalentTo(previous)
         && !isSkipMemoryCacheWithCompletePreviousRequest(options, previous)) {
@@ -810,9 +811,11 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       }
       return target;
     }
-
+    //清理掉目标请求管理
     requestManager.clear(target);
+    //将request作为tag设置给imageview-在父类ViewTarget中设置的
     target.setRequest(request);
+    //最后是调用 RequestManager 的 track 来执行目标的 Glide request 请求
     requestManager.track(target, request);
 
     return target;

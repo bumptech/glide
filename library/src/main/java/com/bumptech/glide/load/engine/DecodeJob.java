@@ -219,6 +219,7 @@ class DecodeJob<R>
   // We need to rethrow only CallbackException, but not other types of Throwables.
   @SuppressWarnings("PMD.AvoidRethrowingException")
   @Override
+  // TODO: Glide源码-into流程
   public void run() {
     // This should be much more fine grained, but since Java's thread pool implementation silently
     // swallows all otherwise fatal exceptions, this will at least make it obvious to developers
@@ -228,10 +229,12 @@ class DecodeJob<R>
     // ensure that the fetcher is cleaned up either way.
     DataFetcher<?> localFetcher = currentFetcher;
     try {
+      //是否取消了当前请求
       if (isCancelled) {
         notifyFailed();
         return;
       }
+      //执行
       runWrapped();
     } catch (CallbackException e) {
       // If a callback not controlled by Glide throws an exception, we should avoid the Glide
@@ -268,14 +271,18 @@ class DecodeJob<R>
       GlideTrace.endSection();
     }
   }
-
+  // TODO: Glide源码-into流程
   private void runWrapped() {
     switch (runReason) {
       case INITIALIZE:
+        //循环取RESOURCE_CACHE，DATA_CACHE和SOURCE
         stage = getNextStage(Stage.INITIALIZE);
+        //对应的ResourceCacheGenerator（资源转换后的磁盘缓存），DataCacheGenerator（原始数据的磁盘缓存），SourceGenerator
         currentGenerator = getNextGenerator();
+        //执行 Generator
         runGenerators();
         break;
+        //切换线程池后重新执行这里
       case SWITCH_TO_SOURCE_SERVICE:
         runGenerators();
         break;
@@ -301,17 +308,23 @@ class DecodeJob<R>
         throw new IllegalStateException("Unrecognized stage: " + stage);
     }
   }
-
+  // TODO: Glide源码-into流程
   private void runGenerators() {
     currentThread = Thread.currentThread();
     startFetchTime = LogTime.getLogTime();
     boolean isStarted = false;
+    //判断是否取消，是否开始
+    //调用 Generator.startNext() 判断是否是属于开始执行的任务
     while (!isCancelled
         && currentGenerator != null
+        //currentGenerator.startNext()返回true代表命中Generator
         && !(isStarted = currentGenerator.startNext())) {
+      //如果没有命中，则下一状态
       stage = getNextStage(stage);
+      //获取下个Generator继续判断是否命中
       currentGenerator = getNextGenerator();
 
+      //磁盘缓存没有命中的话直接从网络上获取
       if (stage == Stage.SOURCE) {
         reschedule();
         return;
@@ -332,10 +345,11 @@ class DecodeJob<R>
     callback.onLoadFailed(e);
     onLoadFailed();
   }
-
+  // TODO: Glide源码-into流程
   private void notifyComplete(
       Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     setNotifiedOrThrow();
+    // 在 DecodeJob 的构建中, 我们知道这个 Callback 是 EngineJob
     callback.onResourceReady(resource, dataSource, isLoadedFromAlternateCacheKey);
   }
 
@@ -368,29 +382,32 @@ class DecodeJob<R>
         throw new IllegalArgumentException("Unrecognized stage: " + current);
     }
   }
-
+  // TODO: Glide源码-into流程
   @Override
   public void reschedule() {
     runReason = RunReason.SWITCH_TO_SOURCE_SERVICE;
+    //这里切换线程池重新执行任务
     callback.reschedule(this);
   }
 
+  // TODO: Glide源码-into流程-从SourceGenerator回调回来
   @Override
   public void onDataFetcherReady(
       Key sourceKey, Object data, DataFetcher<?> fetcher, DataSource dataSource, Key attemptedKey) {
-    this.currentSourceKey = sourceKey;
-    this.currentData = data;
-    this.currentFetcher = fetcher;
-    this.currentDataSource = dataSource;
+    this.currentSourceKey = sourceKey;//当前返回数据的 key
+    this.currentData = data;//返回的数据
+    this.currentFetcher = fetcher;//返回的数据执行器，这里可以理解为 HttpUrlFetcher
+    this.currentDataSource = dataSource;//数据来源 url
     this.currentAttemptingKey = attemptedKey;
     this.isLoadingFromAlternateCacheKey = sourceKey != decodeHelper.getCacheKeys().get(0);
-
+    //线程不一致时会通过回调返回
     if (Thread.currentThread() != currentThread) {
       runReason = RunReason.DECODE_DATA;
       callback.reschedule(this);
     } else {
       GlideTrace.beginSection("DecodeJob.decodeFromRetrievedData");
       try {
+        //解析返回回来的数据
         decodeFromRetrievedData();
       } finally {
         GlideTrace.endSection();
@@ -412,7 +429,7 @@ class DecodeJob<R>
       runGenerators();
     }
   }
-
+  // TODO: Glide源码-into流程
   private void decodeFromRetrievedData() {
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logWithTimeAndKey(
@@ -427,18 +444,20 @@ class DecodeJob<R>
     }
     Resource<R> resource = null;
     try {
+      // 调用 decodeFrom 解析 数据；HttpUrlFetcher , InputStream ,  currentDataSource
       resource = decodeFromData(currentFetcher, currentData, currentDataSource);
     } catch (GlideException e) {
       e.setLoggingDetails(currentAttemptingKey, currentDataSource);
       throwables.add(e);
     }
+    //解析完成后，通知下去
     if (resource != null) {
       notifyEncodeAndRelease(resource, currentDataSource, isLoadingFromAlternateCacheKey);
     } else {
       runGenerators();
     }
   }
-
+  // TODO: Glide源码-into流程
   private void notifyEncodeAndRelease(
       Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     GlideTrace.beginSection("DecodeJob.notifyEncodeAndRelease");
@@ -453,11 +472,12 @@ class DecodeJob<R>
         lockedResource = LockedResource.obtain(resource);
         result = lockedResource;
       }
-
+      //通知调用层数据已经装备好了
       notifyComplete(result, dataSource, isLoadedFromAlternateCacheKey);
 
       stage = Stage.ENCODE;
       try {
+        //这里就是将资源磁盘缓存
         if (deferredEncodeManager.hasResourceToEncode()) {
           deferredEncodeManager.encode(diskCacheProvider, options);
         }
@@ -469,12 +489,13 @@ class DecodeJob<R>
       // Call onEncodeComplete outside the finally block so that it's not called if the encode
       // process
       // throws.
+      //完成
       onEncodeComplete();
     } finally {
       GlideTrace.endSection();
     }
   }
-
+  // TODO: Glide源码-into流程-解析资源
   private <Data> Resource<R> decodeFromData(
       DataFetcher<?> fetcher, Data data, DataSource dataSource) throws GlideException {
     try {
@@ -482,6 +503,7 @@ class DecodeJob<R>
         return null;
       }
       long startTime = LogTime.getLogTime();
+      //解析
       Resource<R> result = decodeFromFetcher(data, dataSource);
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         logWithTimeAndKey("Decoded result " + result, startTime);
@@ -493,9 +515,12 @@ class DecodeJob<R>
   }
 
   @SuppressWarnings("unchecked")
+  // TODO: Glide源码-into流程-解析资源
   private <Data> Resource<R> decodeFromFetcher(Data data, DataSource dataSource)
       throws GlideException {
+    //获取当前数据类的解析器 LoadPath
     LoadPath<Data, ?, R> path = decodeHelper.getLoadPath((Class<Data>) data.getClass());
+    //通过 LoadPath 解析器来解析数据
     return runLoadPath(data, dataSource, path);
   }
 
@@ -524,14 +549,16 @@ class DecodeJob<R>
 
     return options;
   }
-
+  // TODO: Glide源码-into流程-解析资源
   private <Data, ResourceType> Resource<R> runLoadPath(
       Data data, DataSource dataSource, LoadPath<Data, ResourceType, R> path)
       throws GlideException {
     Options options = getOptionsWithHardwareConfig(dataSource);
+    //因为这里返回的是一个 InputStream 所以 这里拿到的是 InputStreamRewinder
     DataRewinder<Data> rewinder = glideContext.getRegistry().getRewinder(data);
     try {
       // ResourceType in DecodeCallback below is required for compilation to work with gradle.
+      //将解析资源的任务转移到 Load.path 方法中
       return path.load(
           rewinder, options, width, height, new DecodeCallback<ResourceType>(dataSource));
     } finally {
@@ -564,6 +591,7 @@ class DecodeJob<R>
 
   @Synthetic
   @NonNull
+    // TODO: Glide源码-into流程-回调
   <Z> Resource<Z> onResourceDecoded(DataSource dataSource, @NonNull Resource<Z> decoded) {
     @SuppressWarnings("unchecked")
     Class<Z> resourceSubClass = (Class<Z>) decoded.get().getClass();
@@ -634,6 +662,7 @@ class DecodeJob<R>
 
     @NonNull
     @Override
+    // TODO: Glide源码-into流程-回调
     public Resource<Z> onResourceDecoded(@NonNull Resource<Z> decoded) {
       return DecodeJob.this.onResourceDecoded(dataSource, decoded);
     }

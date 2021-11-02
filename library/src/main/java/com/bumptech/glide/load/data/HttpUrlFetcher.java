@@ -49,13 +49,15 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     this.timeout = timeout;
     this.connectionFactory = connectionFactory;
   }
-
+  // TODO: Glide源码-into流程
   @Override
   public void loadData(
       @NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
     long startTime = LogTime.getLogTime();
     try {
+      //http 请求，返回一个 InputStream 输入流
       InputStream result = loadDataWithRedirects(glideUrl.toURL(), 0, null, glideUrl.getHeaders());
+      //将 InputStream 以回调形式回调出去-->SourceGenerator#startNextLoad方法中的DataCallback
       callback.onDataReady(result);
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {

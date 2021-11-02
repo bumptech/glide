@@ -96,8 +96,10 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
   }
 
   @Override
+  // TODO: Glide源码-into流程
   public void onResourceReady(@NonNull Z resource, @Nullable Transition<? super Z> transition) {
     if (transition == null || !transition.transition(resource, this)) {
+      //这
       setResourceInternal(resource);
     } else {
       maybeUpdateAnimatable(resource);
@@ -117,10 +119,11 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z>
       animatable.stop();
     }
   }
-
+  // TODO: Glide源码-into流程
   private void setResourceInternal(@Nullable Z resource) {
     // Order matters here. Set the resource first to make sure that the Drawable has a valid and
     // non-null Callback before starting it.
+    //DrawableImageViewTarget 设置给imageview
     setResource(resource);
     maybeUpdateAnimatable(resource);
   }

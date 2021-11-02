@@ -212,6 +212,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   }
 
   @Override
+  // TODO: Glide源码-into流程
   public void begin() {
     synchronized (requestLock) {
       assertNotCallingCallbacks();
@@ -240,6 +241,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       // that the view size has changed will need to explicitly clear the View or Target before
       // starting the new load.
       if (status == Status.COMPLETE) {
+        //表示资源准备好了
         onResourceReady(
             resource, DataSource.MEMORY_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
         return;
@@ -250,14 +252,20 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
 
       cookie = GlideTrace.beginSectionAsync(TAG);
       status = Status.WAITING_FOR_SIZE;
+      //这里表示大小已经准备好了
       if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
+
+        //开始
         onSizeReady(overrideWidth, overrideHeight);
       } else {
+        //获取size,ViewTarget中获取，获取后会调用cb.onSizeReady(),即该类的onSizeReady()
         target.getSize(this);
       }
 
+      //这里是刚刚开始执行的回调，相当于显示开始的进度
       if ((status == Status.RUNNING || status == Status.WAITING_FOR_SIZE)
           && canNotifyStatusChanged()) {
+        //显示占位图
         target.onLoadStarted(getPlaceholderDrawable());
       }
       if (IS_VERBOSE_LOGGABLE) {
@@ -432,9 +440,11 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   }
 
   /** A callback method that should never be invoked directly. */
+  // TODO: Glide源码-into流程
   @Override
   public void onSizeReady(int width, int height) {
     stateVerifier.throwIfRecycled();
+    //都是一些初始化状态，配置属性，我们不用管。
     synchronized (requestLock) {
       if (IS_VERBOSE_LOGGABLE) {
         logV("Got onSizeReady in " + LogTime.getElapsedMillis(startTime));
@@ -452,6 +462,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
         logV("finished setup for calling load in " + LogTime.getElapsedMillis(startTime));
       }
       loadStatus =
+          //引擎加载
           engine.load(
               glideContext,
               model,
@@ -526,6 +537,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   /** A callback method that should never be invoked directly. */
   @SuppressWarnings("unchecked")
   @Override
+  // TODO: Glide源码-into流程
   public void onResourceReady(
       Resource<?> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     stateVerifier.throwIfRecycled();
@@ -579,7 +591,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
           GlideTrace.endSectionAsync(TAG, cookie);
           return;
         }
-
+        //当资源准备好的时候
         onResourceReady(
             (Resource<R>) resource, (R) received, dataSource, isLoadedFromAlternateCacheKey);
       }
@@ -601,6 +613,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   // We're using experimental APIs...
   @SuppressWarnings({"deprecation", "PMD.UnusedFormalParameter"})
   @GuardedBy("requestLock")
+  // TODO: Glide源码-into流程
   private void onResourceReady(
       Resource<R> resource, R result, DataSource dataSource, boolean isAlternateCacheKey) {
     // We must call isFirstReadyResource before setting status.
@@ -641,12 +654,13 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
 
       if (!anyListenerHandledUpdatingTarget) {
         Transition<? super R> animation = animationFactory.build(dataSource, isFirstResource);
+        //回调给目标 ImageViewTarget 资源准备好了
         target.onResourceReady(result, animation);
       }
     } finally {
       isCallingCallbacks = false;
     }
-
+    //加载成功
     notifyLoadSuccess();
     GlideTrace.endSectionAsync(TAG, cookie);
   }

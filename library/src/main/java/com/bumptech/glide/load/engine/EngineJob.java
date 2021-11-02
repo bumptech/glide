@@ -124,11 +124,18 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     this.onlyRetrieveFromCache = onlyRetrieveFromCache;
     return this;
   }
-
+  // TODO: Glide源码-into流程
   public synchronized void start(DecodeJob<R> decodeJob) {
     this.decodeJob = decodeJob;
     GlideExecutor executor =
+        //RESOURCE_CACHE或DATA_CACHE使用diskCacheExecutor 本地缓存线程池
+        //否则使用ActiveSourceExecutor
         decodeJob.willDecodeFromCache() ? diskCacheExecutor : getActiveSourceExecutor();
+    //开始执行
+    /**
+     * 通过 DecodeJob 源码得知，它是实现的 Runnable 接口，这里 GlideExecutor 线程池开始执行，
+     * 就会启动 DecodeJob 的 run 函数，我们跟踪 run 的实现。
+     */
     executor.execute(decodeJob);
   }
 
@@ -151,11 +158,13 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   @SuppressWarnings("WeakerAccess")
   @Synthetic
   @GuardedBy("this")
+    // TODO: Glide源码-into流程
   void callCallbackOnResourceReady(ResourceCallback cb) {
     try {
       // This is overly broad, some Glide code is actually called here, but it's much
       // simpler to encapsulate here than to do so at the actual call point in the
       // Request implementation.
+      //回调给 SingleRequest
       cb.onResourceReady(engineResource, dataSource, isLoadedFromAlternateCacheKey);
     } catch (Throwable t) {
       throw new CallbackException(t);
@@ -225,6 +234,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     "PMD.AvoidInstantiatingObjectsInLoops",
     "PMD.AccessorMethodGeneration"
   })
+  // TODO: Glide源码-into流程
   @Synthetic
   void notifyCallbacksOfResult() {
     ResourceCallbacksAndExecutors copy;
@@ -255,10 +265,11 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
       localKey = key;
       localResource = engineResource;
     }
-
+    //回调上层 Engine 任务完成了
     engineJobListener.onEngineJobComplete(this, localKey, localResource);
-
+    //遍历资源回调给 ImageViewTarget
     for (final ResourceCallbackAndExecutor entry : copy) {
+      //进入CallResourceReady的run
       entry.executor.execute(new CallResourceReady(entry.cb));
     }
     decrementPendingCallbacks();
@@ -314,6 +325,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   }
 
   @Override
+  // TODO: Glide源码-into流程
   public void onResourceReady(
       Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     synchronized (this) {
@@ -321,6 +333,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
       this.dataSource = dataSource;
       this.isLoadedFromAlternateCacheKey = isLoadedFromAlternateCacheKey;
     }
+    //这
     notifyCallbacksOfResult();
   }
 
@@ -333,6 +346,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   }
 
   @Override
+  // TODO: Glide源码-into流程
   public void reschedule(DecodeJob<?> job) {
     // Even if the job is cancelled here, it still needs to be scheduled so that it can clean itself
     // up.
@@ -417,6 +431,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     }
 
     @Override
+    // TODO: Glide源码-into流程
     public void run() {
       // Make sure we always acquire the request lock, then the EngineJob lock to avoid deadlock
       // (b/136032534).
@@ -425,6 +440,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
           if (cbs.contains(cb)) {
             // Acquire for this particular callback.
             engineResource.acquire();
+            //返回准备好的资源
             callCallbackOnResourceReady(cb);
             removeCallback(cb);
           }

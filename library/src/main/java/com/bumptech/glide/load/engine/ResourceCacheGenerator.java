@@ -41,6 +41,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCa
   // See TODO below.
   @SuppressWarnings("PMD.CollapsibleIfStatements")
   @Override
+  // TODO: Glide源码-into流程
   public boolean startNext() {
     GlideTrace.beginSection("ResourceCacheGenerator.startNext");
     try {
@@ -85,9 +86,11 @@ class ResourceCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCa
                 transformation,
                 resourceClass,
                 helper.getOptions());
+        //从磁盘缓存中获取
         cacheFile = helper.getDiskCache().get(currentKey);
         if (cacheFile != null) {
           sourceKey = sourceId;
+          //根据文件类型从注册组件里获取类型加载器
           modelLoaders = helper.getModelLoaders(cacheFile);
           modelLoaderIndex = 0;
         }
