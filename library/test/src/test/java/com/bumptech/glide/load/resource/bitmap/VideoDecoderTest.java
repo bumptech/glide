@@ -84,7 +84,7 @@ public class VideoDecoderTest {
         });
     try {
       verify(retriever).release();
-    } catch (IOException e) {
+    } catch (Exception e) {
       // Ignore failures while cleaning up.
     }
   }
