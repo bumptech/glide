@@ -76,6 +76,7 @@ class DataCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCallba
                 cacheFile, helper.getWidth(), helper.getHeight(), helper.getOptions());
         if (loadData != null && helper.hasLoadPath(loadData.fetcher.getDataClass())) {
           started = true;
+          //从File转换成Stream--FileOpener
           loadData.fetcher.loadData(helper.getPriority(), this);
         }
       }

@@ -68,6 +68,7 @@ public class FileLoader<Data> implements ModelLoader<File, Data> {
     @Override
     public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super Data> callback) {
       try {
+        //从File到InputStream，调用StreamFactory.open
         data = opener.open(file);
         callback.onDataReady(data);
       } catch (FileNotFoundException e) {
