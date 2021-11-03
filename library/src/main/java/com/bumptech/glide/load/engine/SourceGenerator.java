@@ -22,8 +22,8 @@ import java.util.Collections;
  * using registered {@link com.bumptech.glide.load.model.ModelLoader ModelLoaders} and the model
  * provided for the load.
  *
- * <p>Depending on the disk cache strategy, source data may first be written to disk and then loaded
- * from the cache file rather than returned directly.
+ * <p>Depending on the disk cache strategy, source data may first be written to disk and then
+ * loaded from the cache file rather than returned directly.
  *
  * <p>This object may be used by multiple threads, but only one at a time. It is not safe to access
  * this object on multiple threads concurrently.
@@ -50,6 +50,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
   @Override
   // TODO: Glide源码-into流程
   public boolean startNext() {
+    //重新走进来后进行缓存
     if (dataToCache != null) {
       Object data = dataToCache;
       dataToCache = null;
@@ -87,7 +88,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
       loadData = helper.getLoadData().get(loadDataListIndex++);
       if (loadData != null
           && (helper.getDiskCacheStrategy().isDataCacheable(loadData.fetcher.getDataSource())
-              || helper.hasLoadPath(loadData.fetcher.getDataClass()))) {
+          || helper.hasLoadPath(loadData.fetcher.getDataClass()))) {
         started = true;
         startNextLoad(loadData);
       }
@@ -134,6 +135,12 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
    * directly from cache and {@code false} if we were unable to cache the data and should make an
    * attempt to decode from source.
    */
+  /**
+   * 缓存成功则从缓存中取数据进行解码，如果缓存失败则直接回调出去源数据进行解码
+   * @param dataToCache
+   * @return
+   * @throws IOException
+   */
   private boolean cacheData(Object dataToCache) throws IOException {
     long startTime = LogTime.getLogTime();
     boolean isLoadingFromSourceData = false;
@@ -159,7 +166,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
                 + ", duration: "
                 + LogTime.getElapsedMillis(startTime));
       }
-
+      //磁盘缓存中有此key，说明缓存成功，创建磁盘缓存处理器，从磁盘缓存中获取
       if (diskCache.get(newOriginalKey) != null) {
         originalKey = newOriginalKey;
         sourceCacheGenerator =
@@ -180,7 +187,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
         }
 
         isLoadingFromSourceData = true;
-        //回调出去
+        //没有就回调出去
         cb.onDataFetcherReady(
             loadData.sourceKey,
             rewinder.rewindAndGet(),
@@ -209,11 +216,12 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
   @Synthetic
   void onDataReadyInternal(LoadData<?> loadData, Object data) {
     DiskCacheStrategy diskCacheStrategy = helper.getDiskCacheStrategy();
-    //这里会走 else 因为我们没有配置缓存,继续回调。
+    //如果有配置磁盘缓存走这里，没有走else
     if (data != null && diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) {
       dataToCache = data;
       // We might be being called back on someone else's thread. Before doing anything, we should
       // reschedule to get back onto Glide's thread.
+      //重新切换线程池，重新走进该类里
       cb.reschedule();
     } else {
       //DecodeJob回调

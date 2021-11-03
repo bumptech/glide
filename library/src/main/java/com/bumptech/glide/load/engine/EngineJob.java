@@ -258,6 +258,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
       // middle of notifying if it synchronously released by one of the callbacks. Acquire it under
       // a lock here so that any newly added callback that executes before the next locked section
       // below can't recycle the resource before we call the callbacks.
+      //hasResource标为true
       hasResource = true;
       copy = cbs.copy();
       incrementPendingCallbacks(copy.size() + 1);
