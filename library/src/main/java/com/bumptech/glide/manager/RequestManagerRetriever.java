@@ -40,6 +40,10 @@ public class RequestManagerRetriever implements Handler.Callback {
   @VisibleForTesting static final String FRAGMENT_TAG = "com.bumptech.glide.manager";
   private static final String TAG = "RMRetriever";
 
+  // Indicates that we've tried to add a RequestManagerFragment twice previously and is used as a
+  // signal to give up and tear down the fragment.
+  private static final int HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE = 1;
+
   private static final int ID_REMOVE_FRAGMENT_MANAGER = 1;
   private static final int ID_REMOVE_SUPPORT_FRAGMENT_MANAGER = 2;
 
@@ -480,28 +484,164 @@ public class RequestManagerRetriever implements Handler.Callback {
     return requestManager;
   }
 
+  // We care about the instance specifically.
+  @SuppressWarnings({"ReferenceEquality", "PMD.CompareObjectsWithEquals"})
+  private boolean verifyOurFragmentWasAddedOrCantBeAdded(
+      android.app.FragmentManager fm, boolean hasAttemptedToAddFragmentTwice) {
+    RequestManagerFragment newlyAddedRequestManagerFragment =
+        pendingRequestManagerFragments.get(fm);
+
+    RequestManagerFragment actualFragment =
+        (RequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+    if (actualFragment == newlyAddedRequestManagerFragment) {
+      return true;
+    }
+
+    if (actualFragment != null) {
+      throw new IllegalStateException(
+          "We've added two fragments!"
+              + " Old: "
+              + actualFragment
+              + " New: "
+              + newlyAddedRequestManagerFragment);
+    }
+
+    // If our parent was destroyed, we're never going to be able to add our fragment, so we should
+    // just clean it up and abort.
+    // Similarly if we've already tried to add the fragment, waited a frame, then tried to add the
+    // fragment a second time and still the fragment isn't present, we're unlikely to be able to do
+    // so if we retry a third time. This is easy to reproduce in Robolectric by obtaining an
+    // Activity but not creating it. If we continue to loop forever, we break tests and, if it
+    // happens in the real world, might leak memory and waste a bunch of CPU/battery.
+    if (hasAttemptedToAddFragmentTwice || fm.isDestroyed()) {
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        if (fm.isDestroyed()) {
+          Log.w(TAG, "Parent was destroyed before our Fragment could be added");
+        } else {
+          Log.w(TAG, "Tried adding Fragment twice and failed twice, giving up!");
+        }
+      }
+      newlyAddedRequestManagerFragment.getGlideLifecycle().onDestroy();
+      return true;
+    }
+
+    // Otherwise we should make another attempt to commit the fragment and loop back again in the
+    // next frame to verify.
+    fm.beginTransaction()
+        .add(newlyAddedRequestManagerFragment, FRAGMENT_TAG)
+        .commitAllowingStateLoss();
+    handler
+        .obtainMessage(
+            ID_REMOVE_FRAGMENT_MANAGER, HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE, /* arg2= */ 0, fm)
+        .sendToTarget();
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+      Log.d(TAG, "We failed to add our Fragment the first time around, trying again...");
+    }
+    return false;
+  }
+
+  // We care about the instance specifically.
+  @SuppressWarnings({"ReferenceEquality", "PMD.CompareObjectsWithEquals"})
+  private boolean verifyOurSupportFragmentWasAddedOrCantBeAdded(
+      FragmentManager supportFm, boolean hasAttemptedToAddFragmentTwice) {
+    SupportRequestManagerFragment newlyAddedSupportRequestManagerFragment =
+        pendingSupportRequestManagerFragments.get(supportFm);
+
+    SupportRequestManagerFragment actualFragment =
+        (SupportRequestManagerFragment) supportFm.findFragmentByTag(FRAGMENT_TAG);
+    if (actualFragment == newlyAddedSupportRequestManagerFragment) {
+      return true;
+    }
+
+    if (actualFragment != null) {
+      throw new IllegalStateException(
+          "We've added two fragments!"
+              + " Old: "
+              + actualFragment
+              + " New: "
+              + newlyAddedSupportRequestManagerFragment);
+    }
+    // If our parent was destroyed, we're never going to be able to add our fragment, so we should
+    // just clean it up and abort.
+    // Similarly if we've already tried to add the fragment, waited a frame, then tried to add the
+    // fragment a second time and still the fragment isn't present, we're unlikely to be able to do
+    // so if we retry a third time. This is easy to reproduce in Robolectric by obtaining an
+    // Activity but not creating it. If we continue to loop forever, we break tests and, if it
+    // happens in the real world, might leak memory and waste a bunch of CPU/battery.
+    if (hasAttemptedToAddFragmentTwice || supportFm.isDestroyed()) {
+      if (supportFm.isDestroyed()) {
+        if (Log.isLoggable(TAG, Log.WARN)) {
+          Log.w(
+              TAG,
+              "Parent was destroyed before our Fragment could be added, all requests for the"
+                  + " destroyed parent are cancelled");
+        }
+      } else {
+        if (Log.isLoggable(TAG, Log.ERROR)) {
+          Log.e(
+              TAG,
+              "ERROR: Tried adding Fragment twice and failed twice, giving up and cancelling all"
+                  + " associated requests! This probably means you're starting loads in a unit test"
+                  + " with an Activity that you haven't created and never create. If you're using"
+                  + " Robolectric, create the Activity as part of your test setup");
+        }
+      }
+      newlyAddedSupportRequestManagerFragment.getGlideLifecycle().onDestroy();
+      return true;
+    }
+
+    // Otherwise we should make another attempt to commit the fragment and loop back again in the
+    // next frame to verify.
+    supportFm
+        .beginTransaction()
+        .add(newlyAddedSupportRequestManagerFragment, FRAGMENT_TAG)
+        .commitAllowingStateLoss();
+    handler
+        .obtainMessage(
+            ID_REMOVE_SUPPORT_FRAGMENT_MANAGER,
+            HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE,
+            /*arg2=*/ 0,
+            supportFm)
+        .sendToTarget();
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+      Log.d(TAG, "We failed to add our Fragment the first time around, trying again...");
+    }
+    return false;
+  }
+
+  @SuppressWarnings("PMD.CollapsibleIfStatements")
   @Override
   public boolean handleMessage(Message message) {
     boolean handled = true;
+    boolean attemptedRemoval = false;
     Object removed = null;
     Object key = null;
+    boolean hasAttemptedBefore = message.arg1 == HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE;
     switch (message.what) {
       case ID_REMOVE_FRAGMENT_MANAGER:
         android.app.FragmentManager fm = (android.app.FragmentManager) message.obj;
-        key = fm;
-        removed = pendingRequestManagerFragments.remove(fm);
+        if (verifyOurFragmentWasAddedOrCantBeAdded(fm, hasAttemptedBefore)) {
+          attemptedRemoval = true;
+          key = fm;
+          removed = pendingRequestManagerFragments.remove(fm);
+        }
         break;
       case ID_REMOVE_SUPPORT_FRAGMENT_MANAGER:
         FragmentManager supportFm = (FragmentManager) message.obj;
-        key = supportFm;
-        removed = pendingSupportRequestManagerFragments.remove(supportFm);
+        if (verifyOurSupportFragmentWasAddedOrCantBeAdded(supportFm, hasAttemptedBefore)) {
+          attemptedRemoval = true;
+          key = supportFm;
+          removed = pendingSupportRequestManagerFragments.remove(supportFm);
+        }
         break;
       default:
         handled = false;
         break;
     }
-    if (handled && removed == null && Log.isLoggable(TAG, Log.WARN)) {
-      Log.w(TAG, "Failed to remove expected request manager fragment, manager: " + key);
+    if (Log.isLoggable(TAG, Log.WARN)) {
+      if (attemptedRemoval && removed == null) {
+        Log.w(TAG, "Failed to remove expected request manager fragment, manager: " + key);
+      }
     }
     return handled;
   }

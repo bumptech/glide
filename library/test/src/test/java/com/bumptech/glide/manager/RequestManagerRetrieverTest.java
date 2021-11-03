@@ -24,6 +24,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentController;
 import androidx.fragment.app.FragmentHostCallback;
 import androidx.test.core.app.ApplicationProvider;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil.BackgroundTester;
@@ -41,6 +42,7 @@ import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.LooperMode;
+import org.robolectric.shadows.ShadowLooper;
 
 @LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
@@ -397,6 +399,58 @@ public class RequestManagerRetrieverTest {
     when(spyFragment.getChildFragmentManager()).thenThrow(new NoSuchMethodError());
 
     assertNotNull(retriever.get(spyFragment));
+  }
+
+  @Test
+  public void get_beforeActivityIsCreated_returnsSameRequestManagerAsAfterActivityIsCreated() {
+    ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
+    shadowLooper.pause();
+    ActivityController<FragmentActivity> controller =
+        Robolectric.buildActivity(FragmentActivity.class);
+    RequestManager beforeCreateRequestManager = Glide.with(controller.get());
+    // Make sure that the activity makes it one frame without being created.
+    controller.create().start();
+    // Simulate finishing at least one frame before the next attempt to get a RequestManager
+    shadowLooper.runOneTask();
+
+    // Try to get the request manager again. If we've successfully retained the Fragment we wanted
+    // to add, then we should get the same instance. If we added a new Fragment instance, the
+    // RequestManager won't match and things will be broken.
+    RequestManager afterCreateRequestManager = Glide.with(controller.get());
+    assertThat(afterCreateRequestManager).isEqualTo(beforeCreateRequestManager);
+  }
+
+  @Test
+  public void get_onDetachedFragment_returnsSameRequestManagerAsAfterFragmentIsAttached() {
+    ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
+    shadowLooper.pause();
+    ActivityController<FragmentActivity> controller =
+        Robolectric.buildActivity(FragmentActivity.class);
+    controller.create();
+
+    FragmentActivity fragmentActivity = controller.get();
+    Fragment childFragment = new Fragment();
+    fragmentActivity
+        .getSupportFragmentManager()
+        .beginTransaction()
+        .add(childFragment, "TEST_TAG")
+        .commitNow();
+    fragmentActivity
+        .getSupportFragmentManager()
+        .beginTransaction()
+        .detach(childFragment)
+        .commitNow();
+
+    RequestManager beforeAttachRequestManager = Glide.with(childFragment);
+    shadowLooper.runOneTask();
+    fragmentActivity
+        .getSupportFragmentManager()
+        .beginTransaction()
+        .attach(childFragment)
+        .commitNow();
+
+    RequestManager afterAttachRequestManager = Glide.with(childFragment);
+    assertThat(afterAttachRequestManager).isEqualTo(beforeAttachRequestManager);
   }
 
   private interface RetrieverHarness {
