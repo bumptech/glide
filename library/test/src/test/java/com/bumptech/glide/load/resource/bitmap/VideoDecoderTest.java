@@ -82,8 +82,11 @@ public class VideoDecoderTest {
             decoder.decode(resource, 1, 2, options);
           }
         });
-
-    verify(retriever).release();
+    try {
+      verify(retriever).release();
+    } catch (IOException e) {
+      // Ignore failures while cleaning up.
+    }
   }
 
   @Test(expected = IllegalArgumentException.class)
