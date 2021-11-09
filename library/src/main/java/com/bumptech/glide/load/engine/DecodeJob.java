@@ -33,13 +33,13 @@ import java.util.Map;
  * <p>Note: this class has a natural ordering that is inconsistent with equals.
  *
  * @param <R> The type of resource that will be transcoded from the decoded and transformed
- *     resource.
+ *            resource.
  */
 class DecodeJob<R>
     implements DataFetcherGenerator.FetcherReadyCallback,
-        Runnable,
-        Comparable<DecodeJob<?>>,
-        Poolable {
+    Runnable,
+    Comparable<DecodeJob<?>>,
+    Poolable {
   private static final String TAG = "DecodeJob";
 
   private final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
@@ -145,7 +145,7 @@ class DecodeJob<R>
    * Called when this object is no longer in use externally.
    *
    * @param isRemovedFromQueue {@code true} if we've been removed from the queue and {@link #run} is
-   *     neither in progress nor will ever be called again.
+   *                           neither in progress nor will ever be called again.
    */
   void release(boolean isRemovedFromQueue) {
     if (releaseManager.release(isRemovedFromQueue)) {
@@ -163,7 +163,9 @@ class DecodeJob<R>
     }
   }
 
-  /** Called when the load has failed due to a an error or a series of errors. */
+  /**
+   * Called when the load has failed due to a an error or a series of errors.
+   */
   private void onLoadFailed() {
     if (releaseManager.onFailed()) {
       releaseInternal();
@@ -271,6 +273,7 @@ class DecodeJob<R>
       GlideTrace.endSection();
     }
   }
+
   // TODO: Glide源码-into流程
   private void runWrapped() {
     switch (runReason) {
@@ -282,7 +285,7 @@ class DecodeJob<R>
         //执行 Generator
         runGenerators();
         break;
-        //切换线程池后重新执行这里
+      //切换线程池后重新执行这里
       case SWITCH_TO_SOURCE_SERVICE:
         runGenerators();
         break;
@@ -308,6 +311,7 @@ class DecodeJob<R>
         throw new IllegalStateException("Unrecognized stage: " + stage);
     }
   }
+
   // TODO: Glide源码-into流程
   private void runGenerators() {
     currentThread = Thread.currentThread();
@@ -345,6 +349,7 @@ class DecodeJob<R>
     callback.onLoadFailed(e);
     onLoadFailed();
   }
+
   // TODO: Glide源码-into流程
   private void notifyComplete(
       Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
@@ -382,6 +387,7 @@ class DecodeJob<R>
         throw new IllegalArgumentException("Unrecognized stage: " + current);
     }
   }
+
   // TODO: Glide源码-into流程
   @Override
   public void reschedule() {
@@ -400,7 +406,7 @@ class DecodeJob<R>
     this.currentDataSource = dataSource;//数据来源 url
     this.currentAttemptingKey = attemptedKey;
     this.isLoadingFromAlternateCacheKey = sourceKey != decodeHelper.getCacheKeys().get(0);
-    //线程不一致时会通过回调返回
+    //线程不一致时切换线程池重新执行DecodeJob的run()方法再调用 decodeFromRetrievedData()方法。
     if (Thread.currentThread() != currentThread) {
       runReason = RunReason.DECODE_DATA;
       callback.reschedule(this);
@@ -429,7 +435,8 @@ class DecodeJob<R>
       runGenerators();
     }
   }
-  // TODO: Glide源码-into流程
+
+  // TODO: Glide源码-into流程--返回数据
   private void decodeFromRetrievedData() {
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logWithTimeAndKey(
@@ -444,7 +451,7 @@ class DecodeJob<R>
     }
     Resource<R> resource = null;
     try {
-      // 调用 decodeFrom 解析 数据；HttpUrlFetcher , InputStream ,  currentDataSource
+      // 调用 decodeFrom 解析 数据；HttpUrlFetcher , InputStream ,  DataSource.REMOTE
       resource = decodeFromData(currentFetcher, currentData, currentDataSource);
     } catch (GlideException e) {
       e.setLoggingDetails(currentAttemptingKey, currentDataSource);
@@ -457,6 +464,7 @@ class DecodeJob<R>
       runGenerators();
     }
   }
+
   // TODO: Glide源码-into流程
   private void notifyEncodeAndRelease(
       Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
@@ -477,7 +485,7 @@ class DecodeJob<R>
 
       stage = Stage.ENCODE;
       try {
-        //这里就是将资源磁盘缓存
+        //这里就是Resource磁盘缓存
         if (deferredEncodeManager.hasResourceToEncode()) {
           deferredEncodeManager.encode(diskCacheProvider, options);
         }
@@ -495,6 +503,7 @@ class DecodeJob<R>
       GlideTrace.endSection();
     }
   }
+
   // TODO: Glide源码-into流程-解析资源
   private <Data> Resource<R> decodeFromData(
       DataFetcher<?> fetcher, Data data, DataSource dataSource) throws GlideException {
@@ -549,6 +558,7 @@ class DecodeJob<R>
 
     return options;
   }
+
   // TODO: Glide源码-into流程-解析资源
   private <Data, ResourceType> Resource<R> runLoadPath(
       Data data, DataSource dataSource, LoadPath<Data, ResourceType, R> path)
@@ -597,8 +607,10 @@ class DecodeJob<R>
     Class<Z> resourceSubClass = (Class<Z>) decoded.get().getClass();
     Transformation<Z> appliedTransformation = null;
     Resource<Z> transformed = decoded;
+    //如果不是Resource缓存
     if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
       appliedTransformation = decodeHelper.getTransformation(resourceSubClass);
+      //执行 transform
       transformed = appliedTransformation.transform(glideContext, decoded, width, height);
     }
     // TODO: Make this the responsibility of the Transformation.
@@ -618,6 +630,7 @@ class DecodeJob<R>
 
     Resource<Z> result = transformed;
     boolean isFromAlternateCacheKey = !decodeHelper.isSourceKey(currentSourceKey);
+    //是否Resource磁盘缓存
     if (diskCacheStrategy.isResourceCacheable(
         isFromAlternateCacheKey, dataSource, encodeStrategy)) {
       if (encoder == null) {
@@ -728,6 +741,7 @@ class DecodeJob<R>
     void encode(DiskCacheProvider diskCacheProvider, Options options) {
       GlideTrace.beginSection("DecodeJob.encode");
       try {
+        //磁盘缓存
         diskCacheProvider
             .getDiskCache()
             .put(key, new DataCacheWriter<>(encoder, toEncode, options));
@@ -762,11 +776,17 @@ class DecodeJob<R>
     DiskCache getDiskCache();
   }
 
-  /** Why we're being executed again. */
+  /**
+   * Why we're being executed again.
+   */
   private enum RunReason {
-    /** The first time we've been submitted. */
+    /**
+     * The first time we've been submitted.
+     */
     INITIALIZE,
-    /** We want to switch from the disk cache service to the source executor. */
+    /**
+     * We want to switch from the disk cache service to the source executor.
+     */
     SWITCH_TO_SOURCE_SERVICE,
     /**
      * We retrieved some data on a thread we don't own and want to switch back to our thread to
@@ -775,19 +795,33 @@ class DecodeJob<R>
     DECODE_DATA,
   }
 
-  /** Where we're trying to decode data from. */
+  /**
+   * Where we're trying to decode data from.
+   */
   private enum Stage {
-    /** The initial stage. */
+    /**
+     * The initial stage.
+     */
     INITIALIZE,
-    /** Decode from a cached resource. */
+    /**
+     * Decode from a cached resource.
+     */
     RESOURCE_CACHE,
-    /** Decode from cached source data. */
+    /**
+     * Decode from cached source data.
+     */
     DATA_CACHE,
-    /** Decode from retrieved source. */
+    /**
+     * Decode from retrieved source.
+     */
     SOURCE,
-    /** Encoding transformed resources after a successful load. */
+    /**
+     * Encoding transformed resources after a successful load.
+     */
     ENCODE,
-    /** No more viable stages. */
+    /**
+     * No more viable stages.
+     */
     FINISHED,
   }
 }

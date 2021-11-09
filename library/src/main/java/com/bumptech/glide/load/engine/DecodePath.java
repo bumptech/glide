@@ -94,7 +94,8 @@ public class DecodePath<DataType, ResourceType, Transcode> {
         DataType data = rewinder.rewindAndGet();
         if (decoder.handles(data, options)) {
           data = rewinder.rewindAndGet();
-          // 调用 ResourceDrawableDecoder.decode 解析数据StreamBitmapDecoder
+          //如果从磁盘缓存调用
+          // 调用 StreamBitmapDecoder.decode 解析数据 StreamBitmapDecoder
           result = decoder.decode(data, width, height, options);
         }
         // Some decoders throw unexpectedly. If they do, we shouldn't fail the entire load path, but

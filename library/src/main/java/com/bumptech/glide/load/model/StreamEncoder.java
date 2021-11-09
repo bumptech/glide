@@ -23,6 +23,7 @@ public class StreamEncoder implements Encoder<InputStream> {
   }
 
   @Override
+  //InputStream->File
   public boolean encode(@NonNull InputStream data, @NonNull File file, @NonNull Options options) {
     byte[] buffer = byteArrayPool.get(ArrayPool.STANDARD_BUFFER_SIZE_BYTES, byte[].class);
     boolean success = false;

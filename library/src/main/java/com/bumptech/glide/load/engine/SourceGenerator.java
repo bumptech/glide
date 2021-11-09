@@ -60,6 +60,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
         // If we failed to write the data to cache, the cacheData method will try to decode the
         // original data directly instead of going through the disk cache. Since cacheData has
         // already called our callback at this point, there's nothing more to do but return.
+        //这里在cacheData()中写入磁盘失败的时候通过DecodeJob.onDataFetcherReady()回调出去了，按命中返回true
         if (!isDataInCache) {
           return true;
         }
@@ -74,7 +75,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
         }
       }
     }
-    //如果命中DataCacheGenerator直接返回
+    //写入磁盘缓存成功后，执行DataCacheGenerator.startNext()策略，如果命中这里也返回true，表示命中
     if (sourceCacheGenerator != null && sourceCacheGenerator.startNext()) {
       return true;
     }
@@ -82,6 +83,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
 
     loadData = null;
     boolean started = false;
+    //循环加载器
     while (!started && hasNextModelLoader()) {
       //获取一个 ModelLoad 加载器--这里是 HttpGlideUrlLoader.buildLoadData获取
       //new LoadData<>(url, new HttpUrlFetcher(url, timeout))
@@ -93,6 +95,7 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
         startNextLoad(loadData);
       }
     }
+    //否则返回false表示未命中
     return started;
   }
 

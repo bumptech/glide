@@ -34,7 +34,7 @@ public final class MemorySizeCalculator {
   // Package private to avoid PMD warning.
   MemorySizeCalculator(MemorySizeCalculator.Builder builder) {
     this.context = builder.context;
-
+    //默认4M，低内存2M
     arrayPoolSize =
         isLowMemoryDevice(builder.activityManager)
             ? builder.arrayPoolSizeBytes / LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR

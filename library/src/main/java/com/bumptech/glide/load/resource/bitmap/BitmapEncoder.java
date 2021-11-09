@@ -63,14 +63,17 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
   }
 
   @Override
+  //Bitmap->File
   public boolean encode(
       @NonNull Resource<Bitmap> resource, @NonNull File file, @NonNull Options options) {
     final Bitmap bitmap = resource.get();
+    //压缩格式CompressFormat，无透明度JPEG，有透明度PNG
     Bitmap.CompressFormat format = getFormat(bitmap, options);
     GlideTrace.beginSectionFormat(
         "encode: [%dx%d] %s", bitmap.getWidth(), bitmap.getHeight(), format);
     try {
       long start = LogTime.getLogTime();
+      //压缩质量0-100，默认90
       int quality = options.get(COMPRESSION_QUALITY);
 
       boolean success = false;
@@ -118,6 +121,7 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
   }
 
   private Bitmap.CompressFormat getFormat(Bitmap bitmap, Options options) {
+    //压缩格式CompressFormat，无透明度JPEG，有透明度PNG
     Bitmap.CompressFormat format = options.get(COMPRESSION_FORMAT);
     if (format != null) {
       return format;
@@ -131,6 +135,7 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
   @NonNull
   @Override
   public EncodeStrategy getEncodeStrategy(@NonNull Options options) {
+    //将资源的解码、下采样和转换数据写入磁盘。
     return EncodeStrategy.TRANSFORMED;
   }
 }
