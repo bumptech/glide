@@ -11,14 +11,17 @@ class ResourceRecycler {
   private final Handler handler =
       new Handler(Looper.getMainLooper(), new ResourceRecyclerCallback());
 
+  // TODO Glide生命周期变化时调用-onStop()
   synchronized void recycle(Resource<?> resource, boolean forceNextFrame) {
+    //正在释放或有子资源，发送handler进行释放
     if (isRecycling || forceNextFrame) {
-      // If a resource has sub-resources, releasing a sub resource can cause it's parent to be
+      // If a resource has sub-resources, releasing a sub resource can cause it's parent to be synchronously evicted which leads to a recycle loop when the parent releases it's children.
       // synchronously evicted which leads to a recycle loop when the parent releases it's children.
       // Posting breaks this loop.
       handler.obtainMessage(ResourceRecyclerCallback.RECYCLE_RESOURCE, resource).sendToTarget();
     } else {
       isRecycling = true;
+      //释放-bitmap的话使用BitmapResource放在BitmapPool
       resource.recycle();
       isRecycling = false;
     }

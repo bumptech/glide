@@ -255,6 +255,7 @@ public class RequestManager
    * @see #isPaused()
    * @see #resumeRequests()
    */
+  // TODO Glide生命周期变化时调用-onStop()
   public synchronized void pauseRequests() {
     requestTracker.pauseRequests();
   }
@@ -323,6 +324,8 @@ public class RequestManager
    * @see #isPaused()
    * @see #pauseRequests()
    */
+  // TODO Glide生命周期变化时调用-onStart()
+
   public synchronized void resumeRequests() {
     requestTracker.resumeRequests();
   }
@@ -347,9 +350,12 @@ public class RequestManager
    * android.permission.ACCESS_NETWORK_STATE permission is present) and restarts failed or paused
    * requests.
    */
+  // TODO Glide生命周期变化时调用-onStart()
   @Override
   public synchronized void onStart() {
+    //开始请求
     resumeRequests();
+    //开启动画用
     targetTracker.onStart();
   }
 
@@ -357,9 +363,12 @@ public class RequestManager
    * Lifecycle callback that unregisters for connectivity events (if the
    * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads.
    */
+  // TODO Glide生命周期变化时调用-onStop()
   @Override
   public synchronized void onStop() {
+    //停止
     pauseRequests();
+    //停止动画用
     targetTracker.onStop();
   }
 
@@ -367,17 +376,22 @@ public class RequestManager
    * Lifecycle callback that cancels all in progress requests and clears and recycles resources for
    * all completed requests.
    */
+  // TODO Glide生命周期变化时调用-onDestroy()
   @Override
   public synchronized void onDestroy() {
     targetTracker.onDestroy();
     for (Target<?> target : targetTracker.getAll()) {
+      //clear每个target,会调用request.clear()
       clear(target);
     }
     targetTracker.clear();
+    //从Requests中移除request,也,会调用request.clear()
     requestTracker.clearRequests();
+    //移除监听
     lifecycle.removeListener(this);
     lifecycle.removeListener(connectivityMonitor);
     Util.removeCallbacksOnUiThread(addSelfToLifecycle);
+    //glide移除RequestManager
     glide.unregisterRequestManager(this);
   }
 
@@ -625,6 +639,7 @@ public class RequestManager
    *
    * @param target The Target to cancel loads for.
    */
+  // TODO Glide生命周期变化时调用-onDestroy()
   public void clear(@Nullable final Target<?> target) {
     if (target == null) {
       return;
@@ -632,7 +647,7 @@ public class RequestManager
 
     untrackOrDelegate(target);
   }
-
+  // TODO Glide生命周期变化时调用-onDestroy()
   private void untrackOrDelegate(@NonNull Target<?> target) {
     boolean isOwnedByUs = untrack(target);
     // We'll end up here if the Target was cleared after the RequestManager that started the request
@@ -655,6 +670,7 @@ public class RequestManager
     Request request = target.getRequest();
     if (!isOwnedByUs && !glide.removeFromManagers(target) && request != null) {
       target.setRequest(null);
+      //调用request.clear(),和Stop流程一致
       request.clear();
     }
   }
@@ -667,7 +683,9 @@ public class RequestManager
     }
 
     if (requestTracker.clearAndRemove(request)) {
+      //target移除
       targetTracker.untrack(target);
+      //target移除request,imageview的Tag设置为null
       target.setRequest(null);
       return true;
     } else {

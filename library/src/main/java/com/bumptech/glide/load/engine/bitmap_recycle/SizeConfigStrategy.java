@@ -74,6 +74,7 @@ public class SizeConfigStrategy implements LruPoolStrategy {
   @Override
   @Nullable
   public Bitmap get(int width, int height, Bitmap.Config config) {
+    //获取Bitmap的大小
     int size = Util.getBitmapByteSize(width, height, config);
     Key bestKey = findBestKey(size, config);
 

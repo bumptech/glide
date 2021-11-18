@@ -313,6 +313,8 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
    *
    * @see #cancel()
    */
+  // TODO Glide生命周期变化时调用-onStop()
+  // TODO Glide生命周期变化时调用-onDestroy()
   @Override
   public void clear() {
     Resource<R> toRelease = null;
@@ -335,16 +337,19 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       GlideTrace.endSectionAsync(TAG, cookie);
       status = Status.CLEARED;
     }
-
+    //图片资源释放
     if (toRelease != null) {
+      //活动到内存
       engine.release(toRelease);
     }
   }
 
   @Override
+  // TODO Glide生命周期变化时调用-onStop()
   public void pause() {
     synchronized (requestLock) {
       if (isRunning()) {
+        //clear操作
         clear();
       }
     }

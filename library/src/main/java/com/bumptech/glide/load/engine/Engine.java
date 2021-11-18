@@ -368,9 +368,10 @@ public class Engine
     }
     return result;
   }
-
+  // TODO Glide生命周期变化时调用-onStop()
   public void release(Resource<?> resource) {
     if (resource instanceof EngineResource) {
+      //活动到内存
       ((EngineResource<?>) resource).release();
     } else {
       throw new IllegalArgumentException("Cannot release anything but an EngineResource");
@@ -403,12 +404,17 @@ public class Engine
     resourceRecycler.recycle(resource, /*forceNextFrame=*/ true);
   }
 
+  // TODO Glide生命周期变化时调用-onStop()
   @Override
   public void onResourceReleased(Key cacheKey, EngineResource<?> resource) {
+    //活动缓存删除
     activeResources.deactivate(cacheKey);
+    //支持内存缓存
     if (resource.isMemoryCacheable()) {
+      //放入内存缓存
       cache.put(cacheKey, resource);
     } else {
+      //不支持的话，释放
       resourceRecycler.recycle(resource, /*forceNextFrame=*/ false);
     }
   }

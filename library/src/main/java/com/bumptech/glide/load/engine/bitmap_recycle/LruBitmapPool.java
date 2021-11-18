@@ -25,6 +25,9 @@ public class LruBitmapPool implements BitmapPool {
   private static final String TAG = "LruBitmapPool";
   private static final Bitmap.Config DEFAULT_CONFIG = Bitmap.Config.ARGB_8888;
 
+  /**
+   * 策略模式
+   */
   private final LruPoolStrategy strategy;
   private final Set<Bitmap.Config> allowedConfigs;
   private final long initialMaxSize;
@@ -51,6 +54,7 @@ public class LruBitmapPool implements BitmapPool {
    *
    * @param maxSize The initial maximum size of the pool in bytes.
    */
+  //在GlideBuilder中创建时设置的大小
   public LruBitmapPool(long maxSize) {
     this(maxSize, getDefaultStrategy(), getDefaultAllowedConfigs());
   }
@@ -58,9 +62,10 @@ public class LruBitmapPool implements BitmapPool {
   /**
    * Constructor for LruBitmapPool.
    *
-   * @param maxSize The initial maximum size of the pool in bytes.
+   * @param maxSize        The initial maximum size of the pool in bytes.
    * @param allowedConfigs A white listed put of {@link android.graphics.Bitmap.Config} that are
-   *     allowed to be put into the pool. Configs not in the allowed put will be rejected.
+   *                       allowed to be put into the pool. Configs not in the allowed put will be
+   *                       rejected.
    */
   // Public API.
   @SuppressWarnings("unused")
@@ -68,22 +73,30 @@ public class LruBitmapPool implements BitmapPool {
     this(maxSize, getDefaultStrategy(), allowedConfigs);
   }
 
-  /** Returns the number of cache hits for bitmaps in the pool. */
+  /**
+   * Returns the number of cache hits for bitmaps in the pool.
+   */
   public long hitCount() {
     return hits;
   }
 
-  /** Returns the number of cache misses for bitmaps in the pool. */
+  /**
+   * Returns the number of cache misses for bitmaps in the pool.
+   */
   public long missCount() {
     return misses;
   }
 
-  /** Returns the number of bitmaps that have been evicted from the pool. */
+  /**
+   * Returns the number of bitmaps that have been evicted from the pool.
+   */
   public long evictionCount() {
     return evictions;
   }
 
-  /** Returns the current size of the pool in bytes. */
+  /**
+   * Returns the current size of the pool in bytes.
+   */
   public long getCurrentSize() {
     return currentSize;
   }
@@ -99,6 +112,7 @@ public class LruBitmapPool implements BitmapPool {
     evict();
   }
 
+  //图片放入LruBitmapPool
   @Override
   public synchronized void put(Bitmap bitmap) {
     if (bitmap == null) {
@@ -124,22 +138,29 @@ public class LruBitmapPool implements BitmapPool {
       bitmap.recycle();
       return;
     }
-
+    //获取图片大小
     final int size = strategy.getSize(bitmap);
     strategy.put(bitmap);
+    //用于调试不用管
     tracker.add(bitmap);
 
+    //添加的数量++
     puts++;
+    //总使用内存的大小
     currentSize += size;
 
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       Log.v(TAG, "Put bitmap in pool=" + strategy.logBitmap(bitmap));
     }
+    //debug会
     dump();
 
     evict();
   }
 
+  /**
+   * 判断内存是否需要移除了
+   */
   private void evict() {
     trimToSize(maxSize);
   }
@@ -152,8 +173,10 @@ public class LruBitmapPool implements BitmapPool {
       // Bitmaps in the pool contain random data that in some cases must be cleared for an image
       // to be rendered correctly. we shouldn't force all consumers to independently erase the
       // contents individually, so we do so here. See issue #131.
+      //擦除位图中的数据
       result.eraseColor(Color.TRANSPARENT);
     } else {
+      //创建位图
       result = createBitmap(width, height, config);
     }
 
@@ -197,6 +220,7 @@ public class LruBitmapPool implements BitmapPool {
     assertNotHardwareConfig(config);
     // Config will be null for non public config types, which can lead to transformations naively
     // passing in null as the requested config here. See issue #194.
+    //策略中获取位图
     final Bitmap result = strategy.get(width, height, config != null ? config : DEFAULT_CONFIG);
     if (result == null) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -205,6 +229,7 @@ public class LruBitmapPool implements BitmapPool {
       misses++;
     } else {
       hits++;
+      //更新总大小
       currentSize -= strategy.getSize(result);
       tracker.remove(result);
       normalize(result);
@@ -217,8 +242,10 @@ public class LruBitmapPool implements BitmapPool {
     return result;
   }
 
-  // Setting these two values provides Bitmaps that are essentially equivalent to those returned
-  // from Bitmap.createBitmap.
+  /**
+   * Setting these two values provides Bitmaps that are essentially equivalent to those returned from Bitmap.createBitmap.
+   * @param bitmap
+   */
   private static void normalize(Bitmap bitmap) {
     bitmap.setHasAlpha(true);
     maybeSetPreMultiplied(bitmap);
@@ -247,7 +274,7 @@ public class LruBitmapPool implements BitmapPool {
     }
     if ((level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
         || ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            && (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN))) {
+        && (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN))) {
       clearMemory();
     } else if ((level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
         || (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)) {
@@ -256,7 +283,9 @@ public class LruBitmapPool implements BitmapPool {
   }
 
   private synchronized void trimToSize(long size) {
+    //当前使用内存大于最大内存了
     while (currentSize > size) {
+      //移除尾部
       final Bitmap removed = strategy.removeLast();
       // TODO: This shouldn't ever happen, see #331.
       if (removed == null) {
@@ -264,16 +293,19 @@ public class LruBitmapPool implements BitmapPool {
           Log.w(TAG, "Size mismatch, resetting");
           dumpUnchecked();
         }
+        //BitmapPool为空了
         currentSize = 0;
         return;
       }
       tracker.remove(removed);
+      //减去尾部位图的大小
       currentSize -= strategy.getSize(removed);
       evictions++;
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Evicting bitmap=" + strategy.logBitmap(removed));
       }
       dump();
+      //位图回收
       removed.recycle();
     }
   }
@@ -303,8 +335,14 @@ public class LruBitmapPool implements BitmapPool {
             + strategy);
   }
 
+  /**
+   * 默认策略
+   *
+   * @return
+   */
   private static LruPoolStrategy getDefaultStrategy() {
     final LruPoolStrategy strategy;
+    //大于等于19，4.4时使用SizeConfigStrategy，之前使用AttributeStrategy
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       strategy = new SizeConfigStrategy();
     } else {
@@ -313,7 +351,7 @@ public class LruBitmapPool implements BitmapPool {
     return strategy;
   }
 
-  @TargetApi(Build.VERSION_CODES.O)
+  @TargetApi(Build.VERSION_CODES.O)//8.0
   private static Set<Bitmap.Config> getDefaultAllowedConfigs() {
     Set<Bitmap.Config> configs = new HashSet<>(Arrays.asList(Bitmap.Config.values()));
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

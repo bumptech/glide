@@ -212,6 +212,7 @@ public final class Downsampler {
    * @return A new bitmap containing the image from the given InputStream, or recycle if recycle is
    *     not null.
    */
+  //从StreamBitmapDecoder中解析时调用到这里
   public Resource<Bitmap> decode(
       InputStream is,
       int requestedWidth,
@@ -279,7 +280,7 @@ public final class Downsampler {
     boolean fixBitmapToRequestedDimensions = options.get(FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS);
     boolean isHardwareConfigAllowed =
         options.get(ALLOW_HARDWARE_CONFIG) != null && options.get(ALLOW_HARDWARE_CONFIG);
-
+    //最终都是这在这个方法中转换成Bitmap的 decodeFromWrappedStreams
     try {
       Bitmap result =
           decodeFromWrappedStreams(
@@ -300,6 +301,7 @@ public final class Downsampler {
     }
   }
 
+  // TODO: 2021/11/18 转换成Bitmap关键类
   private Bitmap decodeFromWrappedStreams(
       ImageReader imageReader,
       BitmapFactory.Options options,
@@ -313,7 +315,7 @@ public final class Downsampler {
       DecodeCallbacks callbacks)
       throws IOException {
     long startTime = LogTime.getLogTime();
-
+    // 通过设置 inJustDecodeBounds 读取图片的原始尺寸信息
     int[] sourceDimensions = getDimensions(imageReader, options, callbacks, bitmapPool);
     int sourceWidth = sourceDimensions[0];
     int sourceHeight = sourceDimensions[1];
@@ -327,6 +329,7 @@ public final class Downsampler {
       isHardwareConfigAllowed = false;
     }
 
+    // 读取图片的 exif 信息，如果需要的话，先对图片进行旋转
     int orientation = imageReader.getImageOrientation();
     int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
     boolean isExifOrientationRequired = TransformationUtils.isExifOrientationRequired(orientation);
@@ -341,7 +344,7 @@ public final class Downsampler {
             : requestedHeight;
 
     ImageType imageType = imageReader.getImageType();
-
+    // 根据要求计算需要记载的图片大小和 config，计算结果直接设置给 options 即可
     calculateScaling(
         imageType,
         imageReader,
@@ -408,6 +411,7 @@ public final class Downsampler {
       }
       // If this isn't an image, or BitmapFactory was unable to parse the size, width and height
       // will be -1 here.
+      // 根据图片的期望尺寸到 BitmapPool 中获取一个 Bitmap 以复用
       if (expectedWidth > 0 && expectedHeight > 0) {
         setInBitmap(options, bitmapPool, expectedWidth, expectedHeight);
       }
@@ -425,7 +429,7 @@ public final class Downsampler {
         options.inPreferredColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
       }
     }
-
+// 开始执行 decode 逻辑
     Bitmap downsampled = decodeStream(imageReader, options, callbacks, bitmapPool);
     callbacks.onDecodeComplete(bitmapPool, downsampled);
 
@@ -441,6 +445,7 @@ public final class Downsampler {
           startTime);
     }
 
+    // ... 图片旋转等后续逻辑
     Bitmap rotated = null;
     if (downsampled != null) {
       // If we scaled, the Bitmap density will be our inTargetDensity. Here we correct it back to
@@ -778,8 +783,15 @@ public final class Downsampler {
     final Bitmap result;
     TransformationUtils.getBitmapDrawableLock().lock();
     try {
+      // 数据加载
       result = imageReader.decodeBitmap(options);
     } catch (IllegalArgumentException e) {
+      // TODO: Glide 首先会通过设置 inBitmap 复用的方式加载图片。
+      //  如果这个过程中出现了异常，因为此时 inBitmap 不为空，所以将会进入异常处理流程，此
+      //  时会清理掉 inBitmap，再次调用 decodeStream 方法二次加载，这个时候就不是 Bitmap 复用的了。
+      //  所以，Glide 内部会通过错误重试机制进行 Bitmap 复用，当复用并出现错误的时候，会降级为非复用的方式第二次进行加载。
+      //作者：shouheng
+      //链接：https://juejin.cn/post/6951585628890857480
       IOException bitmapAssertionException =
           newIoExceptionForInBitmapAssertion(e, sourceWidth, sourceHeight, outMimeType, options);
       if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -790,8 +802,11 @@ public final class Downsampler {
       }
       if (options.inBitmap != null) {
         try {
+          // TODO: 2021/11/18 这里没看到  is.reset(); 输入流重置。而是使用了ImageReader
           bitmapPool.put(options.inBitmap);
+          // 清理掉 inBitmap 并进行第二次加载
           options.inBitmap = null;
+          // 再次调用进行加载
           return decodeStream(imageReader, options, callbacks, bitmapPool);
         } catch (IOException resetException) {
           throw bitmapAssertionException;

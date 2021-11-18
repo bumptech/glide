@@ -102,17 +102,20 @@ class EngineResource<Z> implements Resource<Z> {
    */
   // listener is effectively final.
   @SuppressWarnings("SynchronizeOnNonFinalField")
+  // TODO Glide生命周期变化时调用-onStop()
   void release() {
     boolean release = false;
     synchronized (this) {
       if (acquired <= 0) {
         throw new IllegalStateException("Cannot release a recycled or not yet acquired resource");
       }
+      //为0表示活动缓存没有使用的地方了
       if (--acquired == 0) {
         release = true;
       }
     }
     if (release) {
+      //活动到内存
       listener.onResourceReleased(key, this);
     }
   }

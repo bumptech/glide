@@ -81,6 +81,7 @@ public class RequestTracker {
   }
 
   /** Stops any in progress requests. */
+  // TODO Glide生命周期变化时调用-onStop()
   public void pauseRequests() {
     isPaused = true;
     for (Request request : Util.getSnapshot(requests)) {
@@ -88,6 +89,7 @@ public class RequestTracker {
         // Avoid clearing parts of requests that may have completed (thumbnails) to avoid blinking
         // in the UI, while still making sure that any in progress parts of requests are immediately
         // stopped.
+        //request停止操作 SingleRequest
         request.pause();
         pendingRequests.add(request);
       }
@@ -106,6 +108,8 @@ public class RequestTracker {
   }
 
   /** Starts any not yet completed or failed requests. */
+  // TODO Glide生命周期变化时调用-onStart()
+
   public void resumeRequests() {
     isPaused = false;
     for (Request request : Util.getSnapshot(requests)) {
@@ -113,6 +117,7 @@ public class RequestTracker {
       // Request from the tracker, so the only way we'd find a cleared request here is if we cleared
       // it. As a result it should be safe for us to resume cleared requests.
       if (!request.isComplete() && !request.isRunning()) {
+        //开始begin()--后续流程和into流程一致
         request.begin();
       }
     }

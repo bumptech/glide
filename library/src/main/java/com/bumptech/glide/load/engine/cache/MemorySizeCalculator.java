@@ -39,17 +39,19 @@ public final class MemorySizeCalculator {
         isLowMemoryDevice(builder.activityManager)
             ? builder.arrayPoolSizeBytes / LOW_MEMORY_BYTE_ARRAY_POOL_DIVISOR
             : builder.arrayPoolSizeBytes;
+    //大内存设备0.4的堆大小，小内存则0.3的堆大小
     int maxSize =
-        getMaxSize(
+        getMaxSize(//activityManager,0.4f,0.3f
             builder.activityManager, builder.maxSizeMultiplier, builder.lowMemoryMaxSizeMultiplier);
 
     int widthPixels = builder.screenDimensions.getWidthPixels();
     int heightPixels = builder.screenDimensions.getHeightPixels();
     int screenSize = widthPixels * heightPixels * BYTES_PER_ARGB_8888_PIXEL;
-
+    //一屏的大小（长*宽*4）*bitmapPoolScreens（26前为4，26和26后为1）
     int targetBitmapPoolSize = Math.round(screenSize * builder.bitmapPoolScreens);
-
+    //一屏大小 * 2
     int targetMemoryCacheSize = Math.round(screenSize * builder.memoryCacheScreens);
+    //可用大小=最大大小-数组池大小
     int availableSize = maxSize - arrayPoolSize;
 
     if (targetMemoryCacheSize + targetBitmapPoolSize <= availableSize) {
@@ -82,24 +84,32 @@ public final class MemorySizeCalculator {
     }
   }
 
-  /** Returns the recommended memory cache size for the device it is run on in bytes. */
+  /**
+   * Returns the recommended memory cache size for the device it is run on in bytes.
+   */
   public int getMemoryCacheSize() {
     return memoryCacheSize;
   }
 
-  /** Returns the recommended bitmap pool size for the device it is run on in bytes. */
+  /**
+   * Returns the recommended bitmap pool size for the device it is run on in bytes.
+   */
   public int getBitmapPoolSize() {
     return bitmapPoolSize;
   }
 
-  /** Returns the recommended array pool size for the device it is run on in bytes. */
+  /**
+   * Returns the recommended array pool size for the device it is run on in bytes.
+   */
   public int getArrayPoolSizeInBytes() {
     return arrayPoolSize;
   }
 
   private static int getMaxSize(
       ActivityManager activityManager, float maxSizeMultiplier, float lowMemoryMaxSizeMultiplier) {
+    //堆大小（M）*1024（K）*1024（Byte）
     final int memoryClassBytes = activityManager.getMemoryClass() * 1024 * 1024;
+    //1G或更小的设备为小内存设备
     final boolean isLowMemoryDevice = isLowMemoryDevice(activityManager);
     return Math.round(
         memoryClassBytes * (isLowMemoryDevice ? lowMemoryMaxSizeMultiplier : maxSizeMultiplier));
@@ -172,9 +182,8 @@ public final class MemorySizeCalculator {
     }
 
     /**
-     * Sets the number of device screens worth of pixels the {@link
-     * com.bumptech.glide.load.engine.cache.MemoryCache} should be able to hold and returns this
-     * Builder.
+     * Sets the number of device screens worth of pixels the {@link com.bumptech.glide.load.engine.cache.MemoryCache}
+     * should be able to hold and returns this Builder.
      */
     public Builder setMemoryCacheScreens(float memoryCacheScreens) {
       Preconditions.checkArgument(
@@ -184,9 +193,8 @@ public final class MemorySizeCalculator {
     }
 
     /**
-     * Sets the number of device screens worth of pixels the {@link
-     * com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} should be able to hold and returns
-     * this Builder.
+     * Sets the number of device screens worth of pixels the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool}
+     * should be able to hold and returns this Builder.
      */
     public Builder setBitmapPoolScreens(float bitmapPoolScreens) {
       Preconditions.checkArgument(

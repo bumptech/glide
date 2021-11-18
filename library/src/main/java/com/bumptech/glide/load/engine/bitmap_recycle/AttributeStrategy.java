@@ -64,6 +64,7 @@ class AttributeStrategy implements LruPoolStrategy {
 
   @VisibleForTesting
   static class KeyPool extends BaseKeyPool<Key> {
+
     Key get(int width, int height, Bitmap.Config config) {
       Key result = get();
       result.init(width, height, config);

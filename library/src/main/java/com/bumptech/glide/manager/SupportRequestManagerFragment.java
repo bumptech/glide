@@ -197,22 +197,28 @@ public class SupportRequestManagerFragment extends Fragment {
     unregisterFragmentWithRoot();
   }
 
+  // TODO Glide生命周期变化时调用-onStart()
   @Override
   public void onStart() {
     super.onStart();
+    //调用到ActivityFragmentLifecycle中
     lifecycle.onStart();
   }
 
+  // TODO Glide生命周期变化时调用-onStop()
   @Override
   public void onStop() {
     super.onStop();
+    //调用到ActivityFragmentLifecycle中
     lifecycle.onStop();
   }
-
+  // TODO Glide生命周期变化时调用-onDestroy()
   @Override
   public void onDestroy() {
     super.onDestroy();
+    //调用到ActivityFragmentLifecycle中
     lifecycle.onDestroy();
+    //fragment的释放
     unregisterFragmentWithRoot();
   }
 

@@ -520,6 +520,7 @@ public final class GlideBuilder {
     if (bitmapPool == null) {
       int size = memorySizeCalculator.getBitmapPoolSize();
       if (size > 0) {
+        //TODO BitmapPool-图片缓存池
         bitmapPool = new LruBitmapPool(size);
       } else {
         bitmapPool = new BitmapPoolAdapter();

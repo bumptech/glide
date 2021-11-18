@@ -423,6 +423,7 @@ public class Glide implements ComponentCallbacks2 {
         VideoDecoder.parcel(bitmapPool);
 
     // TODO(judds): Make ParcelFileDescriptorBitmapDecoder work with ImageDecoder.
+    //文件，流等转Bitmap操作
     Downsampler downsampler =
         new Downsampler(
             registry.getImageHeaderParsers(), resources.getDisplayMetrics(), bitmapPool, arrayPool);

@@ -44,24 +44,27 @@ class ActivityFragmentLifecycle implements Lifecycle {
   public void removeListener(@NonNull LifecycleListener listener) {
     lifecycleListeners.remove(listener);
   }
-
+  // TODO Glide生命周期变化时调用-onStart()
   void onStart() {
     isStarted = true;
     for (LifecycleListener lifecycleListener : Util.getSnapshot(lifecycleListeners)) {
+      //这里跳转到RequestManager的onStart()方法
       lifecycleListener.onStart();
     }
   }
-
+  // TODO Glide生命周期变化时调用-onStop()
   void onStop() {
     isStarted = false;
     for (LifecycleListener lifecycleListener : Util.getSnapshot(lifecycleListeners)) {
+      //这里跳转到RequestManager的 onStop()方法
       lifecycleListener.onStop();
     }
   }
-
+  // TODO Glide生命周期变化时调用-onDestroy()
   void onDestroy() {
     isDestroyed = true;
     for (LifecycleListener lifecycleListener : Util.getSnapshot(lifecycleListeners)) {
+      //这里跳转到RequestManager的 onDestroy()方法
       lifecycleListener.onDestroy();
     }
   }

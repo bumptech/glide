@@ -60,6 +60,7 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
     UntrustedCallbacks callbacks = new UntrustedCallbacks(bufferedStream, exceptionStream);
     try {
       // 根据请求配置来对数据进行采样压缩，获取一个 Resource<Bitmap>
+      //Downsampler.decode中解析
       return downsampler.decode(invalidatingStream, width, height, options, callbacks);
     } finally {
       exceptionStream.release();
