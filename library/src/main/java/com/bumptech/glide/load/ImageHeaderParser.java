@@ -30,6 +30,8 @@ public interface ImageHeaderParser {
     WEBP_A(true),
     /** WebP type without alpha. */
     WEBP(false),
+    /** Avif type (may contain alpha). */
+    AVIF(true),
     /** Unrecognized type. */
     UNKNOWN(false);
 

@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.bitmap;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import androidx.annotation.NonNull;
 import com.bumptech.glide.load.ImageHeaderParser;
@@ -280,6 +281,223 @@ public class DefaultImageHeaderParserTest {
               DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
               throws IOException {
             assertEquals(ImageType.WEBP, parser.getType(byteBuffer));
+          }
+        });
+  }
+
+  @Test
+  public void testCanParseAvifMajorBrand() throws IOException {
+    byte[] data =
+        new byte[] {
+          // Box Size.
+          0x00,
+          0x00,
+          0x00,
+          0x1C,
+          // ftyp.
+          0x66,
+          0x74,
+          0x79,
+          0x70,
+          // avif (major brand).
+          0x61,
+          0x76,
+          0x69,
+          0x66,
+          // minor version.
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          // other minor brands (mif1, miaf, MA1B).
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          0x6d,
+          0x69,
+          0x61,
+          0x66,
+          0x4d,
+          0x41,
+          0x31,
+          0x42
+        };
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.AVIF, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.AVIF, parser.getType(byteBuffer));
+          }
+        });
+    // Change the brand from 'avif' to 'avis'.
+    data[11] = 0x73;
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.AVIF, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.AVIF, parser.getType(byteBuffer));
+          }
+        });
+  }
+
+  @Test
+  public void testCanParseAvifMinorBrand() throws IOException {
+    byte[] data =
+        new byte[] {
+          // Box Size.
+          0x00,
+          0x00,
+          0x00,
+          0x1C,
+          // ftyp.
+          0x66,
+          0x74,
+          0x79,
+          0x70,
+          // mif1 (major brand).
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          // minor version.
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          // other minor brands (miaf, avif, MA1B).
+          0x6d,
+          0x69,
+          0x61,
+          0x66,
+          0x61,
+          0x76,
+          0x69,
+          0x66,
+          0x4d,
+          0x41,
+          0x31,
+          0x42
+        };
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.AVIF, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.AVIF, parser.getType(byteBuffer));
+          }
+        });
+    // Change the brand from 'avif' to 'avis'.
+    data[13] = 0x73;
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.AVIF, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.AVIF, parser.getType(byteBuffer));
+          }
+        });
+  }
+
+  @Test
+  public void testCannotParseAvifMoreThanFiveMinorBrands() throws IOException {
+    byte[] data =
+        new byte[] {
+          // Box Size.
+          0x00,
+          0x00,
+          0x00,
+          0x28,
+          // ftyp.
+          0x66,
+          0x74,
+          0x79,
+          0x70,
+          // mif1 (major brand).
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          // minor version.
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          // more than five minor brands with the sixth one being avif (mif1, miaf, MA1B, mif1,
+          // miab, avif).
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          0x6d,
+          0x69,
+          0x61,
+          0x66,
+          0x4d,
+          0x41,
+          0x31,
+          0x42,
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          0x6d,
+          0x69,
+          0x61,
+          0x66,
+          0x61,
+          0x76,
+          0x69,
+          0x66,
+        };
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertNotEquals(ImageType.AVIF, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertNotEquals(ImageType.AVIF, parser.getType(byteBuffer));
           }
         });
   }

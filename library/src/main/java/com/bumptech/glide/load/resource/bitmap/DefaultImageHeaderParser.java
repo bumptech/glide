@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.load.ImageHeaderParser.ImageType.AVIF;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.GIF;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.JPEG;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG;
@@ -54,6 +55,13 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   private static final int VP8_HEADER_TYPE_LOSSLESS = 0x0000004C;
   private static final int WEBP_EXTENDED_ALPHA_FLAG = 1 << 4;
   private static final int WEBP_LOSSLESS_ALPHA_FLAG = 1 << 3;
+  // Avif-related
+  // "ftyp"
+  private static final int FTYP_HEADER = 0x66747970;
+  // "avif"
+  private static final int AVIF_BRAND = 0x61766966;
+  // "avis"
+  private static final int AVIS_BRAND = 0x61766973;
 
   @NonNull
   @Override
@@ -116,12 +124,14 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         }
       }
 
-      // WebP (reads up to 21 bytes).
-      // See https://developers.google.com/speed/webp/docs/riff_container for details.
       if (firstFourBytes != RIFF_HEADER) {
-        return UNKNOWN;
+        // Check for AVIF (reads up to 32 bytes). If it is a valid AVIF stream, then the
+        // firstFourBytes will be the size of the FTYP box.
+        return sniffAvif(reader, /* boxSize= */ firstFourBytes) ? AVIF : UNKNOWN;
       }
 
+      // WebP (reads up to 21 bytes).
+      // See https://developers.google.com/speed/webp/docs/riff_container for details.
       // Bytes 4 - 7 contain length information. Skip these.
       reader.skip(4);
       final int thirdFourBytes = (reader.getUInt16() << 16) | reader.getUInt16();
@@ -153,6 +163,40 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       // }
       return UNKNOWN;
     }
+  }
+
+  /**
+   * Check if the bits look like an AVIF Image. AVIF Specification:
+   * https://aomediacodec.github.io/av1-avif/
+   *
+   * @return true if the first few bytes looks like it could be an AVIF Image, false otherwise.
+   */
+  private boolean sniffAvif(Reader reader, int boxSize) throws IOException {
+    int chunkType = (reader.getUInt16() << 16) | reader.getUInt16();
+    if (chunkType != FTYP_HEADER) {
+      return false;
+    }
+    // majorBrand.
+    int brand = (reader.getUInt16() << 16) | reader.getUInt16();
+    if (brand == AVIF_BRAND || brand == AVIS_BRAND) {
+      return true;
+    }
+    // Skip the minor version.
+    reader.skip(4);
+    // Check the first five minor brands. While there could theoretically be more than five minor
+    // brands, it is rare in practice. This way we stop the loop from running several times on a
+    // blob that just happened to look like an ftyp box.
+    int sizeRemaining = boxSize - 16;
+    if (sizeRemaining % 4 != 0) {
+      return false;
+    }
+    for (int i = 0; i < 5 && sizeRemaining > 0; ++i, sizeRemaining -= 4) {
+      brand = (reader.getUInt16() << 16) | reader.getUInt16();
+      if (brand == AVIF_BRAND || brand == AVIS_BRAND) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
