@@ -21,6 +21,7 @@ import androidx.collection.ArrayMap;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder.WaitForFramesAfterTrimMemory;
 import com.bumptech.glide.GlideExperiments;
@@ -39,6 +40,10 @@ import java.util.Map;
 public class RequestManagerRetriever implements Handler.Callback {
   @VisibleForTesting static final String FRAGMENT_TAG = "com.bumptech.glide.manager";
   private static final String TAG = "RMRetriever";
+
+  // Indicates that we've tried to add a RequestManagerFragment twice previously and is used as a
+  // signal to give up and tear down the fragment.
+  private static final int HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE = 1;
 
   private static final int ID_REMOVE_FRAGMENT_MANAGER = 1;
   private static final int ID_REMOVE_SUPPORT_FRAGMENT_MANAGER = 2;
@@ -384,9 +389,13 @@ public class RequestManagerRetriever implements Handler.Callback {
   @NonNull
   private RequestManagerFragment getRequestManagerFragment(
       @NonNull final android.app.FragmentManager fm, @Nullable android.app.Fragment parentHint) {
-    RequestManagerFragment current = (RequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+    // If we have a pending Fragment, we need to continue to use the pending Fragment. Otherwise
+    // there's a race where an old Fragment could be added and retrieved here before our logic to
+    // add our pending Fragment notices. That can then result in both the pending Fragmeng and the
+    // old Fragment having requests running for them, which is impossible to safely unwind.
+    RequestManagerFragment current = pendingRequestManagerFragments.get(fm);
     if (current == null) {
-      current = pendingRequestManagerFragments.get(fm);
+      current = (RequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
       if (current == null) {
         current = new RequestManagerFragment();
         current.setParentFragmentHint(parentHint);
@@ -440,10 +449,13 @@ public class RequestManagerRetriever implements Handler.Callback {
   @NonNull
   private SupportRequestManagerFragment getSupportRequestManagerFragment(
       @NonNull final FragmentManager fm, @Nullable Fragment parentHint) {
-    SupportRequestManagerFragment current =
-        (SupportRequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+    // If we have a pending Fragment, we need to continue to use the pending Fragment. Otherwise
+    // there's a race where an old Fragment could be added and retrieved here before our logic to
+    // add our pending Fragment notices. That can then result in both the pending Fragmeng and the
+    // old Fragment having requests running for them, which is impossible to safely unwind.
+    SupportRequestManagerFragment current = pendingSupportRequestManagerFragments.get(fm);
     if (current == null) {
-      current = pendingSupportRequestManagerFragments.get(fm);
+      current = (SupportRequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
       if (current == null) {
         current = new SupportRequestManagerFragment();
         current.setParentFragmentHint(parentHint);
@@ -480,28 +492,190 @@ public class RequestManagerRetriever implements Handler.Callback {
     return requestManager;
   }
 
+  // We care about the instance specifically.
+  @SuppressWarnings({"ReferenceEquality", "PMD.CompareObjectsWithEquals"})
+  private boolean verifyOurFragmentWasAddedOrCantBeAdded(
+      android.app.FragmentManager fm, boolean hasAttemptedToAddFragmentTwice) {
+    RequestManagerFragment newlyAddedRequestManagerFragment =
+        pendingRequestManagerFragments.get(fm);
+
+    RequestManagerFragment actualFragment =
+        (RequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+    if (actualFragment == newlyAddedRequestManagerFragment) {
+      return true;
+    }
+
+    if (actualFragment != null && actualFragment.getRequestManager() != null) {
+      throw new IllegalStateException(
+          "We've added two fragments with requests!"
+              + " Old: "
+              + actualFragment
+              + " New: "
+              + newlyAddedRequestManagerFragment);
+    }
+
+    // If our parent was destroyed, we're never going to be able to add our fragment, so we should
+    // just clean it up and abort.
+    // Similarly if we've already tried to add the fragment, waited a frame, then tried to add the
+    // fragment a second time and still the fragment isn't present, we're unlikely to be able to do
+    // so if we retry a third time. This is easy to reproduce in Robolectric by obtaining an
+    // Activity but not creating it. If we continue to loop forever, we break tests and, if it
+    // happens in the real world, might leak memory and waste a bunch of CPU/battery.
+    if (hasAttemptedToAddFragmentTwice || fm.isDestroyed()) {
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        if (fm.isDestroyed()) {
+          Log.w(TAG, "Parent was destroyed before our Fragment could be added");
+        } else {
+          Log.w(TAG, "Tried adding Fragment twice and failed twice, giving up!");
+        }
+      }
+      newlyAddedRequestManagerFragment.getGlideLifecycle().onDestroy();
+      return true;
+    }
+
+    // Otherwise we should make another attempt to commit the fragment and loop back again in the
+    // next frame to verify.
+    android.app.FragmentTransaction transaction =
+        fm.beginTransaction().add(newlyAddedRequestManagerFragment, FRAGMENT_TAG);
+    // If the Activity is re-created and a Glide request was started for that Activity prior to the
+    // re-creation, then there will be an old RequestManagerFragment that is re-created as well.
+    // Under normal circumstances we find and re-use that Fragment rather than creating a new one.
+    // However, if the first Glide request for the re-created Activity occurs before the Activity is
+    // created, then we will have been unable to find the old RequestManagerFragment and will have
+    // created a new one instead. We don't want to keep adding new Fragments infinitely as the
+    // Activity is re-created, so we need to pick one. If we pick the old Fragment, then we will
+    // drop any requests that had been started after re-creation and are associated with the new
+    // Fragment. So here we drop the old Fragment if it exists.
+    if (actualFragment != null) {
+      transaction.remove(actualFragment);
+    }
+    transaction.commitAllowingStateLoss();
+
+    handler
+        .obtainMessage(
+            ID_REMOVE_FRAGMENT_MANAGER, HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE, /* arg2= */ 0, fm)
+        .sendToTarget();
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+      Log.d(TAG, "We failed to add our Fragment the first time around, trying again...");
+    }
+    return false;
+  }
+
+  // We care about the instance specifically.
+  @SuppressWarnings({"ReferenceEquality", "PMD.CompareObjectsWithEquals"})
+  private boolean verifyOurSupportFragmentWasAddedOrCantBeAdded(
+      FragmentManager supportFm, boolean hasAttemptedToAddFragmentTwice) {
+    SupportRequestManagerFragment newlyAddedSupportRequestManagerFragment =
+        pendingSupportRequestManagerFragments.get(supportFm);
+
+    SupportRequestManagerFragment actualFragment =
+        (SupportRequestManagerFragment) supportFm.findFragmentByTag(FRAGMENT_TAG);
+    if (actualFragment == newlyAddedSupportRequestManagerFragment) {
+      return true;
+    }
+
+    if (actualFragment != null && actualFragment.getRequestManager() != null) {
+      throw new IllegalStateException(
+          "We've added two fragments with requests!"
+              + " Old: "
+              + actualFragment
+              + " New: "
+              + newlyAddedSupportRequestManagerFragment);
+    }
+    // If our parent was destroyed, we're never going to be able to add our fragment, so we should
+    // just clean it up and abort.
+    // Similarly if we've already tried to add the fragment, waited a frame, then tried to add the
+    // fragment a second time and still the fragment isn't present, we're unlikely to be able to do
+    // so if we retry a third time. This is easy to reproduce in Robolectric by obtaining an
+    // Activity but not creating it. If we continue to loop forever, we break tests and, if it
+    // happens in the real world, might leak memory and waste a bunch of CPU/battery.
+    if (hasAttemptedToAddFragmentTwice || supportFm.isDestroyed()) {
+      if (supportFm.isDestroyed()) {
+        if (Log.isLoggable(TAG, Log.WARN)) {
+          Log.w(
+              TAG,
+              "Parent was destroyed before our Fragment could be added, all requests for the"
+                  + " destroyed parent are cancelled");
+        }
+      } else {
+        if (Log.isLoggable(TAG, Log.ERROR)) {
+          Log.e(
+              TAG,
+              "ERROR: Tried adding Fragment twice and failed twice, giving up and cancelling all"
+                  + " associated requests! This probably means you're starting loads in a unit test"
+                  + " with an Activity that you haven't created and never create. If you're using"
+                  + " Robolectric, create the Activity as part of your test setup");
+        }
+      }
+      newlyAddedSupportRequestManagerFragment.getGlideLifecycle().onDestroy();
+      return true;
+    }
+
+    // Otherwise we should make another attempt to commit the fragment and loop back again in the
+    // next frame to verify.
+    FragmentTransaction transaction =
+        supportFm.beginTransaction().add(newlyAddedSupportRequestManagerFragment, FRAGMENT_TAG);
+
+    // If the Activity is re-created and a Glide request was started for that Activity prior to the
+    // re-creation, then there will be an old RequestManagerFragment that is re-created as well.
+    // Under normal circumstances we find and re-use that Fragment rather than creating a new one.
+    // However, if the first Glide request for the re-created Activity occurs before the Activity is
+    // created, then we will have been unable to find the old RequestManagerFragment and will have
+    // created a new one instead. We don't want to keep adding new Fragments infinitely as the
+    // Activity is re-created, so we need to pick one. If we pick the old Fragment, then we will
+    // drop any requests that had been started after re-creation and are associated with the new
+    // Fragment. So here we drop the old Fragment if it exists.
+    if (actualFragment != null) {
+      transaction.remove(actualFragment);
+    }
+    transaction.commitNowAllowingStateLoss();
+
+    handler
+        .obtainMessage(
+            ID_REMOVE_SUPPORT_FRAGMENT_MANAGER,
+            HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE,
+            /*arg2=*/ 0,
+            supportFm)
+        .sendToTarget();
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+      Log.d(TAG, "We failed to add our Fragment the first time around, trying again...");
+    }
+    return false;
+  }
+
+  @SuppressWarnings("PMD.CollapsibleIfStatements")
   @Override
   public boolean handleMessage(Message message) {
     boolean handled = true;
+    boolean attemptedRemoval = false;
     Object removed = null;
     Object key = null;
+    boolean hasAttemptedBefore = message.arg1 == HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE;
     switch (message.what) {
       case ID_REMOVE_FRAGMENT_MANAGER:
         android.app.FragmentManager fm = (android.app.FragmentManager) message.obj;
-        key = fm;
-        removed = pendingRequestManagerFragments.remove(fm);
+        if (verifyOurFragmentWasAddedOrCantBeAdded(fm, hasAttemptedBefore)) {
+          attemptedRemoval = true;
+          key = fm;
+          removed = pendingRequestManagerFragments.remove(fm);
+        }
         break;
       case ID_REMOVE_SUPPORT_FRAGMENT_MANAGER:
         FragmentManager supportFm = (FragmentManager) message.obj;
-        key = supportFm;
-        removed = pendingSupportRequestManagerFragments.remove(supportFm);
+        if (verifyOurSupportFragmentWasAddedOrCantBeAdded(supportFm, hasAttemptedBefore)) {
+          attemptedRemoval = true;
+          key = supportFm;
+          removed = pendingSupportRequestManagerFragments.remove(supportFm);
+        }
         break;
       default:
         handled = false;
         break;
     }
-    if (handled && removed == null && Log.isLoggable(TAG, Log.WARN)) {
-      Log.w(TAG, "Failed to remove expected request manager fragment, manager: " + key);
+    if (Log.isLoggable(TAG, Log.WARN)) {
+      if (attemptedRemoval && removed == null) {
+        Log.w(TAG, "Failed to remove expected request manager fragment, manager: " + key);
+      }
     }
     return handled;
   }
