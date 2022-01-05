@@ -1,30 +1,30 @@
 package com.bumptech.glide.load.data;
 
+import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
-import android.os.ParcelFileDescriptor;
 import androidx.annotation.NonNull;
 import java.io.IOException;
 
-/** Fetches an {@link android.os.ParcelFileDescriptor} for an asset path. */
-public class FileDescriptorAssetPathFetcher extends AssetPathFetcher<ParcelFileDescriptor> {
+/** Fetches an {@link android.content.res.AssetFileDescriptor} for an asset path. */
+public class FileDescriptorAssetPathFetcher extends AssetPathFetcher<AssetFileDescriptor> {
   public FileDescriptorAssetPathFetcher(AssetManager assetManager, String assetPath) {
     super(assetManager, assetPath);
   }
 
   @Override
-  protected ParcelFileDescriptor loadResource(AssetManager assetManager, String path)
+  protected AssetFileDescriptor loadResource(AssetManager assetManager, String path)
       throws IOException {
-    return assetManager.openFd(path).getParcelFileDescriptor();
+    return assetManager.openFd(path);
   }
 
   @Override
-  protected void close(ParcelFileDescriptor data) throws IOException {
+  protected void close(AssetFileDescriptor data) throws IOException {
     data.close();
   }
 
   @NonNull
   @Override
-  public Class<ParcelFileDescriptor> getDataClass() {
-    return ParcelFileDescriptor.class;
+  public Class<AssetFileDescriptor> getDataClass() {
+    return AssetFileDescriptor.class;
   }
 }

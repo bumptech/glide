@@ -14,7 +14,6 @@ import com.bumptech.glide.testutil.TearDownGlide;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +39,6 @@ public class LoadAssetUriTest {
   }
 
   @Test
-  @Ignore("b/213227559")
   public void loadVideoAssetUri_decodesFrame() {
     Uri uri = Uri.parse(assetNameToUri(VIDEO_ASSET_NAME));
 
@@ -50,7 +48,6 @@ public class LoadAssetUriTest {
   }
 
   @Test
-  @Ignore("b/213227559")
   public void loadVideoAssetUri_asBitmap_decodesFrame() {
     Uri uri = Uri.parse(assetNameToUri(VIDEO_ASSET_NAME));
 
@@ -60,7 +57,6 @@ public class LoadAssetUriTest {
   }
 
   @Test
-  @Ignore("b/213227559")
   public void loadVideoAssetUri_withFrame_decodesFrame() {
     Uri uri = Uri.parse(assetNameToUri(VIDEO_ASSET_NAME));
 
@@ -76,7 +72,6 @@ public class LoadAssetUriTest {
   }
 
   @Test
-  @Ignore("b/213227559")
   public void loadVideoAssetUriString_decodesFrame() {
     Uri uri = Uri.parse(assetNameToUri(VIDEO_ASSET_NAME));
 
@@ -86,7 +81,6 @@ public class LoadAssetUriTest {
   }
 
   @Test
-  @Ignore("b/213227559")
   public void loadVideoAssetUriString_withFrame_decodesFrame() {
     Uri uri = Uri.parse(assetNameToUri(VIDEO_ASSET_NAME));
 
