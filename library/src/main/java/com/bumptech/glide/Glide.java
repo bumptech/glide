@@ -542,7 +542,7 @@ public class Glide implements ComponentCallbacks2 {
         .append(Uri.class, InputStream.class, new AssetUriLoader.StreamFactory(context.getAssets()))
         .append(
             Uri.class,
-            ParcelFileDescriptor.class,
+            AssetFileDescriptor.class,
             new AssetUriLoader.FileDescriptorFactory(context.getAssets()))
         .append(Uri.class, InputStream.class, new MediaStoreImageThumbLoader.Factory(context))
         .append(Uri.class, InputStream.class, new MediaStoreVideoThumbLoader.Factory(context));
