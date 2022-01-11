@@ -16,6 +16,8 @@ import com.bumptech.glide.request.target.Target;
 @Deprecated
 public abstract class ExperimentalRequestListener<ResourceT> implements RequestListener<ResourceT> {
 
+  public void onRequestStarted(Object model) {}
+
   /**
    * Identical to {@link #onResourceReady(Object, Object, Target, DataSource, boolean)} except that
    * {@code isAlternateCacheKey} is provided.
