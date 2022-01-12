@@ -248,6 +248,8 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       // Restarts for requests that are neither complete nor running can be treated as new requests
       // and can run again from the beginning.
 
+      experimentalNotifyRequestStarted(model);
+
       cookie = GlideTrace.beginSectionAsync(TAG);
       status = Status.WAITING_FOR_SIZE;
       if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
@@ -262,6 +264,17 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       }
       if (IS_VERBOSE_LOGGABLE) {
         logV("finished run method in " + LogTime.getElapsedMillis(startTime));
+      }
+    }
+  }
+
+  private void experimentalNotifyRequestStarted(Object model) {
+    if (requestListeners == null) {
+      return;
+    }
+    for (RequestListener<?> requestListener : requestListeners) {
+      if (requestListener instanceof ExperimentalRequestListener) {
+        ((ExperimentalRequestListener<?>) requestListener).onRequestStarted(model);
       }
     }
   }
