@@ -176,7 +176,7 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseWebpWithAlpha() throws IOException {
+  public void testCanParseLosslessWebpWithAlpha() throws IOException {
     byte[] data =
         new byte[] {
           0x52,
@@ -194,12 +194,12 @@ public class DefaultImageHeaderParserTest {
           0x56,
           0x50,
           0x38,
-          0x4c,
+          0x4c, // Lossless
           0x30,
           0x50,
           0x00,
           0x00,
-          0x2f,
+          0x2f, // Flags
           (byte) 0xef,
           (byte) 0x80,
           0x15,
@@ -231,15 +231,15 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
-  public void testCanParseWebpWithoutAlpha() throws IOException {
+  public void testCanParseLosslessWebpWithoutAlpha() throws IOException {
     byte[] data =
         new byte[] {
           0x52,
           0x49,
           0x46,
           0x46,
-          0x72,
-          0x1c,
+          0x3c,
+          0x50,
           0x00,
           0x00,
           0x57,
@@ -249,23 +249,23 @@ public class DefaultImageHeaderParserTest {
           0x56,
           0x50,
           0x38,
-          0x20,
-          0x66,
-          0x1c,
-          0x00,
-          0x00,
+          0x4c, // Lossless
           0x30,
-          0x3c,
-          0x01,
-          (byte) 0x9d,
-          0x01,
-          0x2a,
-          0x52,
-          0x02,
-          (byte) 0x94,
-          0x03,
+          0x50,
           0x00,
-          (byte) 0xc7
+          0x00,
+          0x00, // Flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
         };
     runTest(
         data,
@@ -281,6 +281,247 @@ public class DefaultImageHeaderParserTest {
               DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
               throws IOException {
             assertEquals(ImageType.WEBP, parser.getType(byteBuffer));
+          }
+        });
+  }
+
+  @Test
+  public void testCanParseExtendedWebpWithAlpha() throws IOException {
+    byte[] data =
+        new byte[] {
+          0x52,
+          0x49,
+          0x46,
+          0x46,
+          0x3c,
+          0x50,
+          0x00,
+          0x00,
+          0x57,
+          0x45,
+          0x42,
+          0x50,
+          0x56,
+          0x50,
+          0x38,
+          0x58, // Extended
+          0x30,
+          0x50,
+          0x00,
+          0x00,
+          0x10, // flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
+        };
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.WEBP_A, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.WEBP_A, parser.getType(byteBuffer));
+          }
+        });
+  }
+
+  @Test
+  public void testCanParseExtendedWebpWithoutAlpha() throws IOException {
+    byte[] data =
+        new byte[] {
+          0x52,
+          0x49,
+          0x46,
+          0x46,
+          0x3c,
+          0x50,
+          0x00,
+          0x00,
+          0x57,
+          0x45,
+          0x42,
+          0x50,
+          0x56,
+          0x50,
+          0x38,
+          0x58, // Extended
+          0x30,
+          0x50,
+          0x00,
+          0x00,
+          0x00, // flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
+        };
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.WEBP, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.WEBP, parser.getType(byteBuffer));
+          }
+        });
+  }
+
+  @Test
+  public void testCanParseExtendedWebpWithoutAlphaAndWithAnimation() throws IOException {
+    byte[] data =
+        new byte[] {
+          0x52,
+          0x49,
+          0x46,
+          0x46,
+          0x3c,
+          0x50,
+          0x00,
+          0x00,
+          0x57,
+          0x45,
+          0x42,
+          0x50,
+          0x56,
+          0x50,
+          0x38,
+          0x58, // Extended
+          0x30,
+          0x50,
+          0x00,
+          0x00,
+          0x02, // Flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
+        };
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.ANIMATED_WEBP, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.ANIMATED_WEBP, parser.getType(byteBuffer));
+          }
+        });
+  }
+
+  @Test
+  public void testCanParseExtendedWebpWithAlphaAndAnimation() throws IOException {
+    byte[] data =
+        new byte[] {
+          0x52,
+          0x49,
+          0x46,
+          0x46,
+          0x3c,
+          0x50,
+          0x00,
+          0x00,
+          0x57,
+          0x45,
+          0x42,
+          0x50,
+          0x56,
+          0x50,
+          0x38,
+          0x58, // Extended
+          0x30,
+          0x50,
+          0x00,
+          0x00,
+          (byte) 0x12, // Flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
+        };
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.ANIMATED_WEBP, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.ANIMATED_WEBP, parser.getType(byteBuffer));
+          }
+        });
+  }
+
+  @Test
+  public void testCanParseRealAnimatedWebpFile() throws IOException {
+    byte[] data = Util.readBytes(TestResourceUtil.openResource(getClass(), "animated_webp.webp"));
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertThat(parser.getType(is)).isEqualTo(ImageType.ANIMATED_WEBP);
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertThat(parser.getType(byteBuffer)).isEqualTo(ImageType.ANIMATED_WEBP);
           }
         });
   }

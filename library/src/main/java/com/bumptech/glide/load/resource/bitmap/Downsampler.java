@@ -575,7 +575,7 @@ public final class Downsampler {
     } else if (imageType == ImageType.PNG || imageType == ImageType.PNG_A) {
       powerOfTwoWidth = (int) Math.floor(orientedSourceWidth / (float) powerOfTwoSampleSize);
       powerOfTwoHeight = (int) Math.floor(orientedSourceHeight / (float) powerOfTwoSampleSize);
-    } else if (imageType == ImageType.WEBP || imageType == ImageType.WEBP_A) {
+    } else if (imageType.isWebp()) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         powerOfTwoWidth = Math.round(orientedSourceWidth / (float) powerOfTwoSampleSize);
         powerOfTwoHeight = Math.round(orientedSourceHeight / (float) powerOfTwoSampleSize);
