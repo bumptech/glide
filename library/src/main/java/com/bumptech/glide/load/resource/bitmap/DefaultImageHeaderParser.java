@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.load.ImageHeaderParser.ImageType.ANIMATED_WEBP;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.AVIF;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.GIF;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.JPEG;
@@ -53,6 +54,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   private static final int VP8_HEADER_TYPE_EXTENDED = 0x00000058;
   // 'L'
   private static final int VP8_HEADER_TYPE_LOSSLESS = 0x0000004C;
+  private static final int WEBP_EXTENDED_ANIMATION_FLAG = 1 << 1;
   private static final int WEBP_EXTENDED_ALPHA_FLAG = 1 << 4;
   private static final int WEBP_LOSSLESS_ALPHA_FLAG = 1 << 3;
   // Avif-related
@@ -146,7 +148,13 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         // Skip some more length bytes and check for transparency/alpha flag.
         reader.skip(4);
         short flags = reader.getUInt8();
-        return (flags & WEBP_EXTENDED_ALPHA_FLAG) != 0 ? ImageType.WEBP_A : ImageType.WEBP;
+        if ((flags & WEBP_EXTENDED_ANIMATION_FLAG) != 0) {
+          return ANIMATED_WEBP;
+        } else if ((flags & WEBP_EXTENDED_ALPHA_FLAG) != 0) {
+          return ImageType.WEBP_A;
+        } else {
+          return ImageType.WEBP;
+        }
       }
       if ((fourthFourBytes & VP8_HEADER_TYPE_MASK) == VP8_HEADER_TYPE_LOSSLESS) {
         // See chromium.googlesource.com/webm/libwebp/+/master/doc/webp-lossless-bitstream-spec.txt
