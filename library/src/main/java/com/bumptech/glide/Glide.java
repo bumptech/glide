@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import com.bumptech.glide.GlideBuilder.EnableImageDecoderForAnimatedWebp;
 import com.bumptech.glide.GlideBuilder.EnableImageDecoderForBitmaps;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.DecodeFormat;
@@ -71,6 +72,7 @@ import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoDecoder;
 import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
+import com.bumptech.glide.load.resource.drawable.AnimatedWebpDecoder;
 import com.bumptech.glide.load.resource.drawable.ResourceDrawableDecoder;
 import com.bumptech.glide.load.resource.drawable.UnitDrawableDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
@@ -418,13 +420,27 @@ public class Glide implements ComponentCallbacks2 {
 
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
-    if (experiments.isEnabled(EnableImageDecoderForBitmaps.class)
-        && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+        && experiments.isEnabled(EnableImageDecoderForBitmaps.class)) {
       streamBitmapDecoder = new InputStreamBitmapImageDecoderResourceDecoder();
       byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
     } else {
       byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
       streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+        && experiments.isEnabled(EnableImageDecoderForAnimatedWebp.class)) {
+      registry.append(
+          Registry.BUCKET_ANIMATION,
+          InputStream.class,
+          Drawable.class,
+          AnimatedWebpDecoder.streamDecoder(imageHeaderParsers, arrayPool));
+      registry.append(
+          Registry.BUCKET_ANIMATION,
+          ByteBuffer.class,
+          Drawable.class,
+          AnimatedWebpDecoder.byteBufferDecoder(imageHeaderParsers, arrayPool));
     }
 
     ResourceDrawableDecoder resourceDrawableDecoder = new ResourceDrawableDecoder(context);
@@ -490,11 +506,12 @@ public class Glide implements ComponentCallbacks2 {
         .append(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, bitmapEncoder))
         /* GIFs */
         .append(
-            Registry.BUCKET_GIF,
+            Registry.BUCKET_ANIMATION,
             InputStream.class,
             GifDrawable.class,
             new StreamGifDecoder(imageHeaderParsers, byteBufferGifDecoder, arrayPool))
-        .append(Registry.BUCKET_GIF, ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
+        .append(
+            Registry.BUCKET_ANIMATION, ByteBuffer.class, GifDrawable.class, byteBufferGifDecoder)
         .append(GifDrawable.class, new GifDrawableEncoder())
         /* GIF Frames */
         // Compilation with Gradle requires the type to be specified for UnitModelLoader here.

@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.graphics.ImageDecoder.Source;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -25,7 +24,6 @@ public final class InputStreamBitmapImageDecoderResourceDecoder
     return true;
   }
 
-  @Nullable
   @Override
   public Resource<Bitmap> decode(
       @NonNull InputStream stream, int width, int height, @NonNull Options options)
