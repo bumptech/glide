@@ -101,7 +101,13 @@ public final class Util {
     return width * height * getBytesPerPixel(config);
   }
 
-  private static int getBytesPerPixel(@Nullable Bitmap.Config config) {
+  /**
+   * Returns the number of bytes required to store each pixel of a {@link Bitmap} with the given
+   * {@code config}.
+   *
+   * <p>Defaults to {@link Bitmap.Config#ARGB_8888} if {@code config} is {@code null}.
+   */
+  public static int getBytesPerPixel(@Nullable Bitmap.Config config) {
     // A bitmap by decoding a GIF has null "config" in certain environments.
     if (config == null) {
       config = Bitmap.Config.ARGB_8888;
