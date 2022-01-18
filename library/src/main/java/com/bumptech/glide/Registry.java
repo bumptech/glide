@@ -37,7 +37,13 @@ import java.util.List;
 // Public API.
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Registry {
-  public static final String BUCKET_GIF = "Gif";
+  public static final String BUCKET_ANIMATION = "Animation";
+  /**
+   * @deprecated Identical to {@link #BUCKET_ANIMATION}, just with a more confusing name. This
+   *     bucket can be used for all animation types (including webp).
+   */
+  @Deprecated public static final String BUCKET_GIF = BUCKET_ANIMATION;
+
   public static final String BUCKET_BITMAP = "Bitmap";
   public static final String BUCKET_BITMAP_DRAWABLE = "BitmapDrawable";
   private static final String BUCKET_PREPEND_ALL = "legacy_prepend_all";
@@ -65,7 +71,7 @@ public class Registry {
     this.transcoderRegistry = new TranscoderRegistry();
     this.imageHeaderParserRegistry = new ImageHeaderParserRegistry();
     setResourceDecoderBucketPriorityList(
-        Arrays.asList(BUCKET_GIF, BUCKET_BITMAP, BUCKET_BITMAP_DRAWABLE));
+        Arrays.asList(BUCKET_ANIMATION, BUCKET_BITMAP, BUCKET_BITMAP_DRAWABLE));
   }
 
   /**
@@ -246,7 +252,7 @@ public class Registry {
    * which are identified as a unique string. Glide will attempt to decode using decoders in the
    * highest priority bucket before moving on to the next one.
    *
-   * <p>The default order is [{@link #BUCKET_GIF}, {@link #BUCKET_BITMAP}, {@link
+   * <p>The default order is [{@link #BUCKET_ANIMATION}, {@link #BUCKET_BITMAP}, {@link
    * #BUCKET_BITMAP_DRAWABLE}].
    *
    * <p>When registering decoders, you can use these buckets to specify the ordering relative only
