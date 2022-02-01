@@ -204,7 +204,7 @@ public class ChromiumUrlFetcherTest {
         for (Map.Entry<String, String> entry : getAllHeadersAsList()) {
           builder.put(entry.getKey(), ImmutableList.copyOf(entry.getValue().split(",")));
         }
-        return builder.build();
+        return builder.buildOrThrow();
       }
 
       @Override
