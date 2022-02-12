@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import com.bumptech.glide.GlideBuilder.EnableLazyGlideRegistry;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -26,11 +27,14 @@ import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.HardwareConfigState;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
+import com.bumptech.glide.module.AppGlideModule;
+import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.module.ManifestParser;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
 import java.io.File;
@@ -210,7 +214,7 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull GlideBuilder builder,
       @Nullable GeneratedAppGlideModule annotationGeneratedModule) {
     Context applicationContext = context.getApplicationContext();
-    List<com.bumptech.glide.module.GlideModule> manifestModules = Collections.emptyList();
+    List<GlideModule> manifestModules = Collections.emptyList();
     if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
       manifestModules = new ManifestParser(applicationContext).parse();
     }
@@ -218,9 +222,9 @@ public class Glide implements ComponentCallbacks2 {
     if (annotationGeneratedModule != null
         && !annotationGeneratedModule.getExcludedModuleClasses().isEmpty()) {
       Set<Class<?>> excludedModuleClasses = annotationGeneratedModule.getExcludedModuleClasses();
-      Iterator<com.bumptech.glide.module.GlideModule> iterator = manifestModules.iterator();
+      Iterator<GlideModule> iterator = manifestModules.iterator();
       while (iterator.hasNext()) {
-        com.bumptech.glide.module.GlideModule current = iterator.next();
+        GlideModule current = iterator.next();
         if (!excludedModuleClasses.contains(current.getClass())) {
           continue;
         }
@@ -232,7 +236,7 @@ public class Glide implements ComponentCallbacks2 {
     }
 
     if (Log.isLoggable(TAG, Log.DEBUG)) {
-      for (com.bumptech.glide.module.GlideModule glideModule : manifestModules) {
+      for (GlideModule glideModule : manifestModules) {
         Log.d(TAG, "Discovered GlideModule from manifest: " + glideModule.getClass());
       }
     }
@@ -242,31 +246,20 @@ public class Glide implements ComponentCallbacks2 {
             ? annotationGeneratedModule.getRequestManagerFactory()
             : null;
     builder.setRequestManagerFactory(factory);
-    for (com.bumptech.glide.module.GlideModule module : manifestModules) {
+    for (GlideModule module : manifestModules) {
       module.applyOptions(applicationContext, builder);
     }
     if (annotationGeneratedModule != null) {
       annotationGeneratedModule.applyOptions(applicationContext, builder);
     }
-    Glide glide = builder.build(applicationContext);
-    for (com.bumptech.glide.module.GlideModule module : manifestModules) {
-      try {
-        module.registerComponents(applicationContext, glide, glide.glideContext.getRegistry());
-      } catch (AbstractMethodError e) {
-        throw new IllegalStateException(
-            "Attempting to register a Glide v3 module. If you see this, you or one of your"
-                + " dependencies may be including Glide v3 even though you're using Glide v4."
-                + " You'll need to find and remove (or update) the offending dependency."
-                + " The v3 module name is: "
-                + module.getClass().getName(),
-            e);
-      }
-    }
-    if (annotationGeneratedModule != null) {
-      annotationGeneratedModule.registerComponents(
-          applicationContext, glide, glide.glideContext.getRegistry());
-    }
+    Glide glide = builder.build(applicationContext, manifestModules, annotationGeneratedModule);
     applicationContext.registerComponentCallbacks(glide);
+
+    // Trigger the registry initialization eagerly, similar to the codepath prior to the experiment.
+    if (!glide.getGlideContext().getExperiments().isEnabled(EnableLazyGlideRegistry.class)) {
+      glide.getGlideContext().getRegistry();
+    }
+
     Glide.glide = glide;
   }
 
@@ -323,7 +316,9 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull RequestOptionsFactory defaultRequestOptionsFactory,
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
-      GlideExperiments experiments) {
+      @NonNull List<GlideModule> manifestModules,
+      @Nullable AppGlideModule annotationGeneratedModule,
+      @NonNull GlideExperiments experiments) {
     this.engine = engine;
     this.bitmapPool = bitmapPool;
     this.arrayPool = arrayPool;
@@ -332,9 +327,12 @@ public class Glide implements ComponentCallbacks2 {
     this.connectivityMonitorFactory = connectivityMonitorFactory;
     this.defaultRequestOptionsFactory = defaultRequestOptionsFactory;
 
-    Registry registry =
-        RegistryFactory.createRegistryAndInitializeDefaults(
-            context, bitmapPool, arrayPool, experiments);
+    // This has a circular relationship with Glide and GlideContext in that it depends on both,
+    // but it's created by Glide's constructor. In practice this shouldn't matter because the
+    // supplier holding the registry should never be initialized before this constructor finishes.
+    GlideSupplier<Registry> registry =
+        RegistryFactory.lazilyCreateAndInitializeRegistry(
+            this, manifestModules, annotationGeneratedModule);
 
     ImageViewTargetFactory imageViewTargetFactory = new ImageViewTargetFactory();
     glideContext =
