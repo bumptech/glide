@@ -9,6 +9,7 @@ import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.util.Log;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /** Uses {@link android.net.ConnectivityManager} to identify connectivity changes. */
 final class SingletonConnectivityReceiver {
@@ -69,6 +71,7 @@ final class SingletonConnectivityReceiver {
         new ConnectivityListener() {
           @Override
           public void onConnectivityChanged(boolean isConnected) {
+            Util.assertMainThread();
             List<ConnectivityListener> toNotify;
             synchronized (SingletonConnectivityReceiver.this) {
               toNotify = new ArrayList<>(listeners);
@@ -92,7 +95,7 @@ final class SingletonConnectivityReceiver {
   }
 
   /**
-   * To avoid holding a lock while notifying listeners, the unregisterd listener may still be
+   * To avoid holding a lock while notifying listeners, the unregistered listener may still be
    * notified about a connectivity change after this method completes if this method is called on a
    * thread other than the main thread and if a connectivity broadcast is racing with this method.
    * Callers must handle this case.
@@ -203,26 +206,39 @@ final class SingletonConnectivityReceiver {
     }
   }
 
+  /**
+   * All interactions with connectivity manager and registering/unregistering broadcast receivers
+   * are punted to a background thread. We use serial execution to make sure that they still happen
+   * in the correct order. The system calls required to register/unregister the receiver and to
+   * determine connectivity status are expensive to run on the main thread. isConnected and
+   * isRegistered should only be used on the serial background thread. Listeners should only be
+   * notified on the main thread. Because of the delays caused by punting threads, listeners may be
+   * notified with the incorrect state. Howeve the strict ordering means that they will shortly
+   * after be notified with the correct state.
+   */
   private static final class FrameworkConnectivityMonitorPreApi24
       implements FrameworkConnectivityMonitor {
-    private final Context context;
+    // Using AsyncTasks's executor is a hack. We need a background thread, but it's not trivial to
+    // pass one through to this point. We could make a breaking API change, which upsets external
+    // users. Or we could try to add an API to expose one of Glide's executors via the singleton,
+    // but that could allow Glide's executors to be misused as general purpose executors. Given that
+    // this code is deprecated anyway, using some pre-existing general purpose executor doesn't seem
+    // wildly unreasonable.
+    @Synthetic static final Executor EXECUTOR = AsyncTask.SERIAL_EXECUTOR;
+    @Synthetic final Context context;
     @Synthetic final ConnectivityListener listener;
     private final GlideSupplier<ConnectivityManager> connectivityManager;
-    @Synthetic boolean isConnected;
+    // These are only manipulated serially, but the executor might use separate threads to do so,
+    // so we use volatile.
+    @Synthetic volatile boolean isConnected;
+    @Synthetic volatile boolean isRegistered;
 
-    private final BroadcastReceiver connectivityReceiver =
+    @Synthetic
+    final BroadcastReceiver connectivityReceiver =
         new BroadcastReceiver() {
           @Override
           public void onReceive(@NonNull Context context, Intent intent) {
-            boolean wasConnected = isConnected;
-            isConnected = isConnected();
-            if (wasConnected != isConnected) {
-              if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "connectivity changed, isConnected: " + isConnected);
-              }
-
-              listener.onConnectivityChanged(isConnected);
-            }
+            onConnectivityChange();
           }
         };
 
@@ -237,25 +253,94 @@ final class SingletonConnectivityReceiver {
 
     @Override
     public boolean register() {
-      // Initialize isConnected so that we notice the first time around when there's a broadcast.
-      isConnected = isConnected();
-      try {
-        // See #1405
-        context.registerReceiver(
-            connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        return true;
-      } catch (SecurityException e) {
-        // See #1417, registering the receiver can throw SecurityException.
-        if (Log.isLoggable(TAG, Log.WARN)) {
-          Log.w(TAG, "Failed to register", e);
-        }
-        return false;
-      }
+      EXECUTOR.execute(
+          new Runnable() {
+            @Override
+            public void run() {
+              // Initialize isConnected so that we notice the first time around when there's a
+              // broadcast.
+              // TODO(judds): This causes a race where:
+              // 1. Connectivity is disconnected
+              // 2. Register is called, but punted to a background thread and not run yet
+              // 3. Some network requiring request is started, runs and fails due to connectivity
+              // 4. Connectivity is re-established
+              // 5. This code finally runs on the background thread.
+              // In step 5, we'll think that we're currently connected and won't trigger a retry for
+              // any previously failed requests.
+              // In the long run it might be nice to define some explicit initialization step for
+              // Glide where we do this and other expensive things on a background thread prior to
+              // starting the first request. For now it seems better to just accept this race than
+              // either take the latency hit of the IPC on the main thread, or try something like
+              // always notifying all listeners once right after this logic runs just in case
+              // something failed.
+              isConnected = isConnected();
+              try {
+                // See #1405
+                context.registerReceiver(
+                    connectivityReceiver,
+                    new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+                isRegistered = true;
+              } catch (SecurityException e) {
+                // See #1417, registering the receiver can throw SecurityException.
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                  Log.w(TAG, "Failed to register", e);
+                }
+                isRegistered = false;
+              }
+            }
+          });
+
+      // We track our registration status internally, so we always need to be called to unregister.
+      return true;
     }
 
     @Override
     public void unregister() {
-      context.unregisterReceiver(connectivityReceiver);
+      // Always post to the executor to make sure everything runs in the correct order. If we short
+      // circuit that by checking isConnected on this thread, we might leak a receiver.
+      EXECUTOR.execute(
+          new Runnable() {
+            @Override
+            public void run() {
+              if (!isRegistered) {
+                return;
+              }
+              isRegistered = false;
+              context.unregisterReceiver(connectivityReceiver);
+            }
+          });
+    }
+
+    @Synthetic
+    void onConnectivityChange() {
+      EXECUTOR.execute(
+          new Runnable() {
+            @Override
+            public void run() {
+              boolean wasConnected = isConnected;
+              isConnected = isConnected();
+              if (wasConnected != isConnected) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                  Log.d(TAG, "connectivity changed, isConnected: " + isConnected);
+                }
+
+                notifyChangeOnUiThread(isConnected);
+              }
+            }
+          });
+    }
+
+    // Pass through the boolean because the instance variable could change while we're waiting for
+    // the runnable to be executed on the main thread.
+    @Synthetic
+    void notifyChangeOnUiThread(final boolean isConnected) {
+      Util.postOnUiThread(
+          new Runnable() {
+            @Override
+            public void run() {
+              listener.onConnectivityChanged(isConnected);
+            }
+          });
     }
 
     @SuppressWarnings("WeakerAccess")
