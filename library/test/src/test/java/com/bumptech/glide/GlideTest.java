@@ -52,7 +52,6 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
-import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -69,7 +68,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
@@ -173,7 +171,8 @@ public class GlideTest {
   @Test
   public void testCanSetMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
-    Glide glide = buildGlideWithFakePools();
+    Glide glide =
+        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -183,7 +182,8 @@ public class GlideTest {
   @Test
   public void testCanIncreaseMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
-    Glide glide = buildGlideWithFakePools();
+    Glide glide =
+        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -201,7 +201,8 @@ public class GlideTest {
   @Test
   public void testCanDecreaseMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
-    Glide glide = buildGlideWithFakePools();
+    Glide glide =
+        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -218,7 +219,8 @@ public class GlideTest {
 
   @Test
   public void testClearMemory() {
-    Glide glide = buildGlideWithFakePools();
+    Glide glide =
+        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
 
     glide.clearMemory();
 
@@ -228,7 +230,8 @@ public class GlideTest {
 
   @Test
   public void testTrimMemory() {
-    Glide glide = buildGlideWithFakePools();
+    Glide glide =
+        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
 
     final int level = 123;
 
@@ -236,16 +239,6 @@ public class GlideTest {
 
     verify(bitmapPool).trimMemory(eq(level));
     verify(memoryCache).trimMemory(eq(level));
-  }
-
-  private Glide buildGlideWithFakePools() {
-    return new GlideBuilder()
-        .setBitmapPool(bitmapPool)
-        .setMemoryCache(memoryCache)
-        .build(
-            context,
-            Collections.<GlideModule>emptyList(),
-            /* annotationGeneratedGlideModule=*/ null);
   }
 
   @Test

@@ -14,8 +14,6 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.ViewTarget;
-import com.bumptech.glide.util.GlideSuppliers;
-import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,7 +29,7 @@ public class GlideContext extends ContextWrapper {
       new GenericTransitionOptions<>();
 
   private final ArrayPool arrayPool;
-  private final GlideSupplier<Registry> registry;
+  private final Registry registry;
   private final ImageViewTargetFactory imageViewTargetFactory;
   private final RequestOptionsFactory defaultRequestOptionsFactory;
   private final List<RequestListener<Object>> defaultRequestListeners;
@@ -47,7 +45,7 @@ public class GlideContext extends ContextWrapper {
   public GlideContext(
       @NonNull Context context,
       @NonNull ArrayPool arrayPool,
-      @NonNull GlideSupplier<Registry> registry,
+      @NonNull Registry registry,
       @NonNull ImageViewTargetFactory imageViewTargetFactory,
       @NonNull RequestOptionsFactory defaultRequestOptionsFactory,
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
@@ -57,6 +55,7 @@ public class GlideContext extends ContextWrapper {
       int logLevel) {
     super(context.getApplicationContext());
     this.arrayPool = arrayPool;
+    this.registry = registry;
     this.imageViewTargetFactory = imageViewTargetFactory;
     this.defaultRequestOptionsFactory = defaultRequestOptionsFactory;
     this.defaultRequestListeners = defaultRequestListeners;
@@ -64,8 +63,6 @@ public class GlideContext extends ContextWrapper {
     this.engine = engine;
     this.experiments = experiments;
     this.logLevel = logLevel;
-
-    this.registry = GlideSuppliers.memorize(registry);
   }
 
   public List<RequestListener<Object>> getDefaultRequestListeners() {
@@ -110,7 +107,7 @@ public class GlideContext extends ContextWrapper {
 
   @NonNull
   public Registry getRegistry() {
-    return registry.get();
+    return registry;
   }
 
   public int getLogLevel() {
