@@ -10,6 +10,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import androidx.annotation.Nullable;
+import androidx.tracing.Trace;
 import com.bumptech.glide.GlideBuilder.EnableImageDecoderForAnimatedWebp;
 import com.bumptech.glide.GlideBuilder.EnableImageDecoderForBitmaps;
 import com.bumptech.glide.gifdecoder.GifDecoder;
@@ -66,6 +68,10 @@ import com.bumptech.glide.load.resource.transcode.BitmapBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.BitmapDrawableTranscoder;
 import com.bumptech.glide.load.resource.transcode.DrawableBytesTranscoder;
 import com.bumptech.glide.load.resource.transcode.GifDrawableBytesTranscoder;
+import com.bumptech.glide.module.AppGlideModule;
+import com.bumptech.glide.module.GlideModule;
+import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
+import com.bumptech.glide.util.Synthetic;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
@@ -76,9 +82,57 @@ final class RegistryFactory {
 
   private RegistryFactory() {}
 
-  static Registry createRegistryAndInitializeDefaults(
-      Context context, BitmapPool bitmapPool, ArrayPool arrayPool, GlideExperiments experiments) {
+  static GlideSupplier<Registry> lazilyCreateAndInitializeRegistry(
+      final Glide glide,
+      final List<GlideModule> manifestModules,
+      @Nullable final AppGlideModule annotationGeneratedModule) {
+    return new GlideSupplier<Registry>() {
+      private boolean isInitializingOrInitialized;
+
+      @Override
+      public Registry get() {
+        if (isInitializingOrInitialized) {
+          throw new IllegalStateException(
+              "Recursive Registry initialization! In your"
+                  + " AppGlideModule and LibraryGlideModules, Make sure you're using the provided "
+                  + "Registry rather calling glide.getRegistry()!");
+        }
+        isInitializingOrInitialized = true;
+
+        Trace.beginSection("Glide registry");
+        try {
+          return createAndInitRegistry(glide, manifestModules, annotationGeneratedModule);
+        } finally {
+          Trace.endSection();
+        }
+      }
+    };
+  }
+
+  @Synthetic
+  static Registry createAndInitRegistry(
+      Glide glide,
+      List<GlideModule> manifestModules,
+      @Nullable AppGlideModule annotationGeneratedModule) {
+
+    BitmapPool bitmapPool = glide.getBitmapPool();
+    ArrayPool arrayPool = glide.getArrayPool();
+    Context context = glide.getGlideContext().getApplicationContext();
+
+    GlideExperiments experiments = glide.getGlideContext().getExperiments();
+
     Registry registry = new Registry();
+    initializeDefaults(context, registry, bitmapPool, arrayPool, experiments);
+    initializeModules(context, glide, registry, manifestModules, annotationGeneratedModule);
+    return registry;
+  }
+
+  private static void initializeDefaults(
+      Context context,
+      Registry registry,
+      BitmapPool bitmapPool,
+      ArrayPool arrayPool,
+      GlideExperiments experiments) {
     registry.register(new DefaultImageHeaderParser());
     // Right now we're only using this parser for HEIF images, which are only supported on OMR1+.
     // If we need this for other file types, we should consider removing this restriction.
@@ -290,7 +344,29 @@ final class RegistryFactory {
           BitmapDrawable.class,
           new BitmapDrawableDecoder<>(resources, byteBufferVideoDecoder));
     }
+  }
 
-    return registry;
+  private static void initializeModules(
+      Context context,
+      Glide glide,
+      Registry registry,
+      List<GlideModule> manifestModules,
+      @Nullable AppGlideModule annotationGeneratedModule) {
+    for (GlideModule module : manifestModules) {
+      try {
+        module.registerComponents(context, glide, registry);
+      } catch (AbstractMethodError e) {
+        throw new IllegalStateException(
+            "Attempting to register a Glide v3 module. If you see this, you or one of your"
+                + " dependencies may be including Glide v3 even though you're using Glide v4."
+                + " You'll need to find and remove (or update) the offending dependency."
+                + " The v3 module name is: "
+                + module.getClass().getName(),
+            e);
+      }
+    }
+    if (annotationGeneratedModule != null) {
+      annotationGeneratedModule.registerComponents(context, glide, registry);
+    }
   }
 }

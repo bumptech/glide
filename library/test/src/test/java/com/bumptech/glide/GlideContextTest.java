@@ -18,6 +18,7 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
+import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +41,12 @@ public final class GlideContextTest {
         new GlideContext(
             app,
             new LruArrayPool(),
-            new Registry(),
+            new GlideSupplier<Registry>() {
+              @Override
+              public Registry get() {
+                return new Registry();
+              }
+            },
             new ImageViewTargetFactory(),
             new RequestOptionsFactory() {
               @NonNull
