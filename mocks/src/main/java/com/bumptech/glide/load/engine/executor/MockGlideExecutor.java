@@ -27,7 +27,9 @@ public final class MockGlideExecutor {
     return newTestExecutor(new DirectExecutorService());
   }
 
-  /** @deprecated Use {@link #newMainThreadExecutor} instead. */
+  /**
+   * @deprecated Use {@link #newMainThreadExecutor} instead.
+   */
   @Deprecated
   public static GlideExecutor newMainThreadUnlimitedExecutor() {
     return newMainThreadExecutor();

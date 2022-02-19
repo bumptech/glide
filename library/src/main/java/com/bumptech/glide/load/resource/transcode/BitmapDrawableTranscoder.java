@@ -25,7 +25,9 @@ public class BitmapDrawableTranscoder implements ResourceTranscoder<Bitmap, Bitm
     this(context.getResources());
   }
 
-  /** @deprecated Use {@link #BitmapDrawableTranscoder(Resources)}, {@code bitmapPool} is unused. */
+  /**
+   * @deprecated Use {@link #BitmapDrawableTranscoder(Resources)}, {@code bitmapPool} is unused.
+   */
   @Deprecated
   public BitmapDrawableTranscoder(
       @NonNull Resources resources, @SuppressWarnings("unused") BitmapPool bitmapPool) {

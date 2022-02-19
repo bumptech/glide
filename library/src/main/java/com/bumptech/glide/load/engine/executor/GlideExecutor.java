@@ -94,7 +94,9 @@ public final class GlideExecutor implements ExecutorService {
     return newDiskCacheBuilder().setUncaughtThrowableStrategy(uncaughtThrowableStrategy).build();
   }
 
-  /** @deprecated Use {@link #newDiskCacheBuilder()} instead. */
+  /**
+   * @deprecated Use {@link #newDiskCacheBuilder()} instead.
+   */
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @Deprecated
@@ -127,7 +129,9 @@ public final class GlideExecutor implements ExecutorService {
     return newSourceBuilder().build();
   }
 
-  /** @deprecated Use {@link #newSourceBuilder()} instead. */
+  /**
+   * @deprecated Use {@link #newSourceBuilder()} instead.
+   */
   // Public API.
   @SuppressWarnings("unused")
   @Deprecated
@@ -136,7 +140,9 @@ public final class GlideExecutor implements ExecutorService {
     return newSourceBuilder().setUncaughtThrowableStrategy(uncaughtThrowableStrategy).build();
   }
 
-  /** @deprecated Use {@link #newSourceBuilder()} instead. */
+  /**
+   * @deprecated Use {@link #newSourceBuilder()} instead.
+   */
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @Deprecated
@@ -202,7 +208,9 @@ public final class GlideExecutor implements ExecutorService {
     return newAnimationBuilder().build();
   }
 
-  /** @deprecated Use {@link #newAnimationBuilder()} instead. */
+  /**
+   * @deprecated Use {@link #newAnimationBuilder()} instead.
+   */
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @Deprecated

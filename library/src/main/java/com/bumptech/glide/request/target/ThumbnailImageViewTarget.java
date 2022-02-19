@@ -27,7 +27,9 @@ public abstract class ThumbnailImageViewTarget<T> extends ImageViewTarget<T> {
     super(view);
   }
 
-  /** @deprecated Use {@link #waitForLayout()} insetad. */
+  /**
+   * @deprecated Use {@link #waitForLayout()} insetad.
+   */
   @Deprecated
   @SuppressWarnings({"deprecation"})
   public ThumbnailImageViewTarget(ImageView view, boolean waitForLayout) {

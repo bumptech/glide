@@ -17,7 +17,6 @@ buildscript {
             classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_PLUGIN_VERSION}"
         }
         classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.11.0"
         classpath "androidx.benchmark:benchmark-gradle-plugin:${ANDROID_X_BENCHMARK_VERSION}"
     }
 }
@@ -91,23 +90,6 @@ subprojects { project ->
     // Avoid issues like #2452.
     tasks.withType(Jar) {
         duplicatesStrategy = DuplicatesStrategy.FAIL
-    }
-
-    def isDisallowedProject =
-            project.name in ["third_party", "gif_decoder", "gif_encoder", "disklrucache", "glide"]
-    if (!isDisallowedProject) {
-        apply plugin: "com.diffplug.spotless"
-
-        spotless {
-            java {
-                target fileTree('.') {
-                    include '**/*.java'
-                    exclude '**/resources/**'
-                    exclude '**/build/**'
-                }
-                googleJavaFormat()
-            }
-        }
     }
 
     apply plugin: 'checkstyle'

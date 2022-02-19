@@ -56,7 +56,9 @@ public class BitmapEncoder implements ResourceEncoder<Bitmap> {
     this.arrayPool = arrayPool;
   }
 
-  /** @deprecated Use {@link #BitmapEncoder(ArrayPool)} instead. */
+  /**
+   * @deprecated Use {@link #BitmapEncoder(ArrayPool)} instead.
+   */
   @Deprecated
   public BitmapEncoder() {
     arrayPool = null;

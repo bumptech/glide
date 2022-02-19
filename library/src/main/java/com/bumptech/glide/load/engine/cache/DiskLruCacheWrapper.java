@@ -63,7 +63,9 @@ public class DiskLruCacheWrapper implements DiskCache {
     return new DiskLruCacheWrapper(directory, maxSize);
   }
 
-  /** @deprecated Do not extend this class. */
+  /**
+   * @deprecated Do not extend this class.
+   */
   @Deprecated
   // Deprecated public API.
   @SuppressWarnings({"WeakerAccess", "DeprecatedIsStillUsed"})

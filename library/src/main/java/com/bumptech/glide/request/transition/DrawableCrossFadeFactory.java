@@ -50,7 +50,9 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
       this(DEFAULT_DURATION_MS);
     }
 
-    /** @param durationMillis The duration of the cross fade animation in milliseconds. */
+    /**
+     * @param durationMillis The duration of the cross fade animation in milliseconds.
+     */
     public Builder(int durationMillis) {
       this.durationMillis = durationMillis;
     }
