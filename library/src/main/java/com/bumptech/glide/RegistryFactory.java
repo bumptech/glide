@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import androidx.annotation.Nullable;
 import androidx.tracing.Trace;
-import com.bumptech.glide.GlideBuilder.EnableImageDecoderForAnimatedWebp;
 import com.bumptech.glide.GlideBuilder.EnableImageDecoderForBitmaps;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.ImageHeaderParser;
@@ -164,8 +163,7 @@ final class RegistryFactory {
       streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
-        && experiments.isEnabled(EnableImageDecoderForAnimatedWebp.class)) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
       registry.append(
           Registry.BUCKET_ANIMATION,
           InputStream.class,

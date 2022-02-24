@@ -487,14 +487,6 @@ public final class GlideBuilder {
     return this;
   }
 
-  /** This is an experimental method, it may be removed or changed at any future version. */
-  public GlideBuilder setEnableImageDecoderForAnimatedWebp(
-      boolean enableImageDecoderForAnimatedWebp) {
-    glideExperimentsBuilder.update(
-        new EnableImageDecoderForAnimatedWebp(), enableImageDecoderForAnimatedWebp);
-    return this;
-  }
-
   void setRequestManagerFactory(@Nullable RequestManagerFactory factory) {
     this.requestManagerFactory = factory;
   }
@@ -605,8 +597,6 @@ public final class GlideBuilder {
   }
 
   static final class EnableImageDecoderForBitmaps implements Experiment {}
-
-  static final class EnableImageDecoderForAnimatedWebp implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
