@@ -42,6 +42,8 @@ public class BitmapEncoderTest {
 
   @Test
   public void testBitmapIsEncoded() throws IOException {
+    harness.bitmap.setHasAlpha(false);
+
     assertThat(harness.encode()).isEqualTo(harness.expectedData(CompressFormat.JPEG, 90));
   }
 
@@ -49,6 +51,7 @@ public class BitmapEncoderTest {
   public void testBitmapIsEncodedWithGivenQuality() throws IOException {
     int quality = 7;
     harness.setQuality(quality);
+    harness.bitmap.setHasAlpha(false);
 
     assertThat(harness.encode()).isEqualTo(harness.expectedData(CompressFormat.JPEG, quality));
   }
