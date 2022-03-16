@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import com.bumptech.glide.gifdecoder.test.GifBytesTestUtil;
@@ -307,10 +308,9 @@ public class GifHeaderParserTest {
     assertFalse(parser.isAnimated());
   }
 
-
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testThrowsIfParseHeaderCalledBeforeSetData() {
     GifHeaderParser parser = new GifHeaderParser();
-    parser.parseHeader();
+    assertThrows(IllegalStateException.class, () -> parser.parseHeader());
   }
 }

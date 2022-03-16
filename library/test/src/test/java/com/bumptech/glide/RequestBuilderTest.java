@@ -1,6 +1,7 @@
 package com.bumptech.glide;
 
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -56,15 +57,17 @@ public class RequestBuilderTest {
     context = ApplicationProvider.getApplicationContext();
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfContextIsNull() {
-    new RequestBuilder<>(null /*context*/, requestManager, Object.class, context);
+    assertThrows(
+        NullPointerException.class,
+        () -> new RequestBuilder<>(null /*context*/, requestManager, Object.class, context));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsWhenTransitionsOptionsIsNull() {
     //noinspection ConstantConditions testing if @NonNull is enforced
-    getNullModelRequest().transition(null);
+    assertThrows(NullPointerException.class, () -> getNullModelRequest().transition(null));
   }
 
   @Test
@@ -89,26 +92,31 @@ public class RequestBuilderTest {
     verify(requestManager).clear(eq(target));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfGivenNullTarget() {
     //noinspection ConstantConditions testing if @NonNull is enforced
-    getNullModelRequest().into((Target<Object>) null);
+    assertThrows(
+        NullPointerException.class, () -> getNullModelRequest().into((Target<Object>) null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfGivenNullView() {
-    getNullModelRequest().into((ImageView) null);
+    assertThrows(NullPointerException.class, () -> getNullModelRequest().into((ImageView) null));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testThrowsIfIntoViewCalledOnBackgroundThread() throws InterruptedException {
     final ImageView imageView = new ImageView(ApplicationProvider.getApplicationContext());
-    testInBackground(
-        new BackgroundTester() {
-          @Override
-          public void runTest() {
-            getNullModelRequest().into(imageView);
-          }
+    assertThrows(
+        RuntimeException.class,
+        () -> {
+          testInBackground(
+              new BackgroundTester() {
+                @Override
+                public void runTest() {
+                  getNullModelRequest().into(imageView);
+                }
+              });
         });
   }
 

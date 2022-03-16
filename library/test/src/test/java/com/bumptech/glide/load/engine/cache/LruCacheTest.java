@@ -4,6 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -265,9 +266,9 @@ public class LruCacheTest {
     verify(listener, times((sizeMultiplier * SIZE) - SIZE)).onItemRemoved(any());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfMultiplierLessThanZero() {
-    cache.setSizeMultiplier(-1);
+    assertThrows(IllegalArgumentException.class, () -> cache.setSizeMultiplier(-1));
   }
 
   @Test

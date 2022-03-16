@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -243,35 +244,51 @@ public class RequestManagerRetrieverTest {
   }
 
   @SuppressWarnings("deprecation")
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfFragmentNotAttached() {
     android.app.Fragment fragment = new android.app.Fragment();
-    retriever.get(fragment);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          retriever.get(fragment);
+        });
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfSupportFragmentNotAttached() {
     Fragment fragment = new Fragment();
-    retriever.get(fragment);
+    assertThrows(
+        NullPointerException.class,
+        () -> {
+          retriever.get(fragment);
+        });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfActivityDestroyed() {
     RetrieverHarness harness = new DefaultRetrieverHarness();
     harness.getController().pause().stop().destroy();
-    harness.doGet();
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          harness.doGet();
+        });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfFragmentActivityDestroyed() {
     RetrieverHarness harness = new SupportRetrieverHarness();
     harness.getController().pause().stop().destroy();
-    harness.doGet();
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          harness.doGet();
+        });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfGivenNullContext() {
-    retriever.get((Context) null);
+    assertThrows(IllegalArgumentException.class, () -> retriever.get((Context) null));
   }
 
   @Test

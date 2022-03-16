@@ -1,6 +1,7 @@
 package com.bumptech.glide.module;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -82,25 +83,24 @@ public class ManifestParserTest {
     assertThat(parser.parse()).isEmpty();
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testThrows_whenModuleNameNotFound() {
     addToManifest("fakeClassName");
 
-    parser.parse();
+    assertThrows(RuntimeException.class, () -> parser.parse());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testThrows_whenClassInManifestIsNotAModule() {
     addModuleToManifest(InvalidClass.class);
 
-    parser.parse();
+    assertThrows(RuntimeException.class, () -> parser.parse());
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testThrows_whenPackageNameNotFound() {
     when(context.getPackageName()).thenReturn("fakePackageName");
-
-    parser.parse();
+    assertThrows(RuntimeException.class, () -> parser.parse());
   }
 
   private void addModuleToManifest(Class<?> moduleClass) {

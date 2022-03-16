@@ -4,6 +4,7 @@ import static android.view.ViewGroup.LayoutParams;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -402,9 +403,9 @@ public class CustomViewTargetTest {
     verify(cb).onSizeReady(eq(width), eq(height));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfGivenNullView() {
-    new TestViewTarget(null);
+    assertThrows(NullPointerException.class, () -> new TestViewTarget(null));
   }
 
   @Test

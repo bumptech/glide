@@ -6,6 +6,7 @@ import static com.bumptech.glide.request.RequestOptions.placeholderOf;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -504,10 +505,15 @@ public class GlideTest {
     assertNotNull(imageView.getDrawable());
   }
 
-  @Test(expected = Exception.class)
+  @Test
   public void testUnregisteredModelThrowsException() {
     Float unregistered = 0.5f;
-    requestManager.load(unregistered).into(target);
+
+    assertThrows(
+        Exception.class,
+        () -> {
+          requestManager.load(unregistered).into(target);
+        });
   }
 
   @Test

@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -53,19 +54,22 @@ public class BitmapResourceTest {
     verify(harness.bitmapPool).put(eq(harness.bitmap));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfBitmapIsNull() {
-    new BitmapResource(null, mock(BitmapPool.class));
+    assertThrows(
+        NullPointerException.class, () -> new BitmapResource(null, mock(BitmapPool.class)));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfBitmapPoolIsNull() {
-    new BitmapResource(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565), null);
+    assertThrows(
+        NullPointerException.class,
+        () -> new BitmapResource(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565), null));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfBitmapAndBitmapPoolAreNull() {
-    new BitmapResource(null, null);
+    assertThrows(NullPointerException.class, () -> new BitmapResource(null, null));
   }
 
   private static class BitmapResourceHarness {

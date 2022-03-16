@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.drawable;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,23 +73,26 @@ public class DrawableResourceTest {
     assertThat(resource.get()).isEqualTo(drawable);
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfDrawableIsNull() {
-    new DrawableResource<TestDrawable>(null) {
-      @NonNull
-      @Override
-      public Class<TestDrawable> getResourceClass() {
-        return TestDrawable.class;
-      }
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new DrawableResource<TestDrawable>(null) {
+              @NonNull
+              @Override
+              public Class<TestDrawable> getResourceClass() {
+                return TestDrawable.class;
+              }
 
-      @Override
-      public int getSize() {
-        return 0;
-      }
+              @Override
+              public int getSize() {
+                return 0;
+              }
 
-      @Override
-      public void recycle() {}
-    };
+              @Override
+              public void recycle() {}
+            });
   }
 
   /** Just to have a type to test with which is not directly Drawable */

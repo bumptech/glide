@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -239,54 +240,82 @@ public class RecyclableBufferedInputStreamTest {
     assertEquals(DATA_SIZE - 1, stream.available());
   }
 
-  @Test(expected = IOException.class)
+  @Test
   public void testCloseThrowsIfWrappedStreamThrowsOnClose() throws IOException {
     InputStream wrapped = mock(InputStream.class);
     doThrow(new IOException()).when(wrapped).close();
     stream = new RecyclableBufferedInputStream(wrapped, byteArrayPool);
-    stream.close();
+    assertThrows(
+        IOException.class,
+        () -> {
+          stream.close();
+        });
   }
 
-  @Test(expected = IOException.class)
+  @Test
   public void testAvailableThrowsIfStreamIsClosed() throws IOException {
     stream.close();
-    stream.available();
+    assertThrows(
+        IOException.class,
+        () -> {
+          stream.available();
+        });
   }
 
-  @Test(expected = IOException.class)
+  @Test
   public void testReadThrowsIfStreamIsClosed() throws IOException {
     stream.close();
-    stream.read();
+    assertThrows(
+        IOException.class,
+        () -> {
+          stream.read();
+        });
   }
 
-  @Test(expected = IOException.class)
+  @Test
   public void testReadBulkThrowsIfStreamIsClosed() throws IOException {
     stream.close();
-    stream.read(new byte[1], 0, 1);
+    assertThrows(
+        IOException.class,
+        () -> {
+          stream.read(new byte[1], 0, 1);
+        });
   }
 
-  @Test(expected = IOException.class)
+  @Test
   public void testResetThrowsIfStreamIsClosed() throws IOException {
     stream.close();
-    stream.reset();
+    assertThrows(
+        IOException.class,
+        () -> {
+          stream.reset();
+        });
   }
 
-  @Test(expected = IOException.class)
+  @Test
   public void testSkipThrowsIfStreamIsClosed() throws IOException {
     stream.close();
-    stream.skip(10);
+    assertThrows(
+        IOException.class,
+        () -> {
+          stream.skip(10);
+        });
   }
 
-  @Test(expected = RecyclableBufferedInputStream.InvalidMarkException.class)
+  @Test
   public void testResetThrowsIfMarkNotSet() throws IOException {
-    stream.reset();
+    assertThrows(RecyclableBufferedInputStream.InvalidMarkException.class, () -> stream.reset());
   }
 
-  @Test(expected = RecyclableBufferedInputStream.InvalidMarkException.class)
+  @Test
   public void testResetThrowsIfMarkIsInvalid() throws IOException {
     stream.mark(1);
     stream.read(new byte[BUFFER_SIZE], 0, BUFFER_SIZE);
     stream.read();
-    stream.reset();
+    assertThrows(
+        RecyclableBufferedInputStream.InvalidMarkException.class,
+        () -> {
+          stream.reset();
+        });
   }
 }

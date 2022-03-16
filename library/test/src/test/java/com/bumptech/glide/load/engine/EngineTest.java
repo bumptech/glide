@@ -7,6 +7,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -433,9 +434,9 @@ public class EngineTest {
     verify(engineResource).release();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfAskedToReleaseNonEngineResource() {
-    harness.getEngine().release(mockResource());
+    assertThrows(IllegalArgumentException.class, () -> harness.getEngine().release(mockResource()));
   }
 
   @Test

@@ -2,6 +2,7 @@ package com.bumptech.glide.request;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -177,52 +178,76 @@ public class RequestFutureTargetTest {
     assertEquals(expected, future.get(1, TimeUnit.MILLISECONDS));
   }
 
-  @Test(expected = CancellationException.class)
+  @Test
   public void testThrowsCancellationExceptionIfCancelledBeforeGet()
       throws ExecutionException, InterruptedException {
     future.cancel(true);
-    future.get();
+    assertThrows(
+        CancellationException.class,
+        () -> {
+          future.get();
+        });
   }
 
-  @Test(expected = CancellationException.class)
+  @Test
   public void testThrowsCancellationExceptionIfCancelledBeforeGetWithTimeout()
       throws InterruptedException, ExecutionException, TimeoutException {
     future.cancel(true);
-    future.get(100, TimeUnit.MILLISECONDS);
+    assertThrows(
+        CancellationException.class,
+        () -> {
+          future.get(100, TimeUnit.MILLISECONDS);
+        });
   }
 
-  @Test(expected = ExecutionException.class)
+  @Test
   public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGet()
       throws ExecutionException, InterruptedException {
     future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
-    future.get();
+    assertThrows(
+        ExecutionException.class,
+        () -> {
+          future.get();
+        });
   }
 
-  @Test(expected = ExecutionException.class)
+  @Test
   public void testThrowsExecutionExceptionOnGetIfExceptionWithNullValueBeforeGet()
       throws ExecutionException, InterruptedException, TimeoutException {
     future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
-    future.get(100, TimeUnit.MILLISECONDS);
+    assertThrows(
+        ExecutionException.class,
+        () -> {
+          future.get(100, TimeUnit.MILLISECONDS);
+        });
   }
 
-  @Test(expected = ExecutionException.class)
+  @Test
   public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout()
       throws ExecutionException, InterruptedException, TimeoutException {
     future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
-    future.get(100, TimeUnit.MILLISECONDS);
+    assertThrows(
+        ExecutionException.class,
+        () -> {
+          future.get(100, TimeUnit.MILLISECONDS);
+        });
   }
 
-  @Test(expected = TimeoutException.class)
+  @Test
   public void testThrowsTimeoutExceptionOnGetIfFailedToReceiveResourceInTime()
       throws InterruptedException, ExecutionException, TimeoutException {
-    future.get(1, TimeUnit.MILLISECONDS);
+    assertThrows(TimeoutException.class, () -> future.get(1, TimeUnit.MILLISECONDS));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsExceptionIfGetCalledOnMainThread()
       throws ExecutionException, InterruptedException {
     future = new RequestFutureTarget<>(width, height, true, waiter);
-    future.get();
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          future.get();
+        });
   }
 
   @Test
@@ -237,7 +262,7 @@ public class RequestFutureTargetTest {
     future.get();
   }
 
-  @Test(expected = InterruptedException.class)
+  @Test
   public void testThrowsInterruptedExceptionIfThreadInterruptedWhenDoneWaiting()
       throws InterruptedException, ExecutionException {
     doAnswer(
@@ -250,11 +275,14 @@ public class RequestFutureTargetTest {
             })
         .when(waiter)
         .waitForTimeout(eq(future), anyLong());
-
-    future.get();
+    assertThrows(
+        InterruptedException.class,
+        () -> {
+          future.get();
+        });
   }
 
-  @Test(expected = ExecutionException.class)
+  @Test
   public void testThrowsExecutionExceptionIfLoadFailsWhileWaiting()
       throws ExecutionException, InterruptedException {
     doAnswer(
@@ -268,10 +296,14 @@ public class RequestFutureTargetTest {
             })
         .when(waiter)
         .waitForTimeout(eq(future), anyLong());
-    future.get();
+    assertThrows(
+        ExecutionException.class,
+        () -> {
+          future.get();
+        });
   }
 
-  @Test(expected = CancellationException.class)
+  @Test
   public void testThrowsCancellationExceptionIfCancelledWhileWaiting()
       throws ExecutionException, InterruptedException {
     doAnswer(
@@ -284,19 +316,23 @@ public class RequestFutureTargetTest {
             })
         .when(waiter)
         .waitForTimeout(eq(future), anyLong());
-    future.get();
+    assertThrows(
+        CancellationException.class,
+        () -> {
+          future.get();
+        });
   }
 
-  @Test(expected = TimeoutException.class)
+  @Test
   public void testThrowsTimeoutExceptionIfFinishesWaitingWithTimeoutAndDoesNotReceiveResult()
       throws ExecutionException, InterruptedException, TimeoutException {
-    future.get(1, TimeUnit.MILLISECONDS);
+    assertThrows(TimeoutException.class, () -> future.get(1, TimeUnit.MILLISECONDS));
   }
 
-  @Test(expected = AssertionError.class)
+  @Test
   public void testThrowsAssertionErrorIfFinishesWaitingWithoutTimeoutAndDoesNotReceiveResult()
       throws ExecutionException, InterruptedException {
-    future.get();
+    assertThrows(AssertionError.class, () -> future.get());
   }
 
   @Test

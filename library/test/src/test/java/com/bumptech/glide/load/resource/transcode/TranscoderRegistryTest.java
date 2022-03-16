@@ -2,6 +2,7 @@ package com.bumptech.glide.load.resource.transcode;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
@@ -41,8 +42,8 @@ public class TranscoderRegistryTest {
     assertNotNull(factories.get(Integer.class, Integer.class));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfNoTranscoderRegistered() {
-    factories.get(File.class, Integer.class);
+    assertThrows(IllegalArgumentException.class, () -> factories.get(File.class, Integer.class));
   }
 }

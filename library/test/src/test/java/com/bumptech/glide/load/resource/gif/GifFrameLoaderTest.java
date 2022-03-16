@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.gif;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -105,9 +106,9 @@ public class GifFrameLoaderTest {
     verify(requestBuilder, times(3)).apply(isA(RequestOptions.class));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testSetFrameTransformationThrowsIfGivenNullTransformation() {
-    loader.setFrameTransformation(null, null);
+    assertThrows(NullPointerException.class, () -> loader.setFrameTransformation(null, null));
   }
 
   @Test

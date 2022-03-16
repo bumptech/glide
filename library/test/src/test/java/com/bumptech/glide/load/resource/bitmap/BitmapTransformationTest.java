@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
 import android.app.Application;
@@ -106,7 +107,7 @@ public class BitmapTransformationTest {
     transformation.transform(context, resource, expectedWidth, expectedHeight);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfGivenInvalidWidth() {
     BitmapTransformation transformation =
         new BitmapTransformation() {
@@ -123,10 +124,12 @@ public class BitmapTransformationTest {
             return null;
           }
         };
-    transformation.transform(context, mockResource(1, 1), -1, 100);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> transformation.transform(context, mockResource(1, 1), -1, 100));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfGivenInvalidHeight() {
     BitmapTransformation transformation =
         new BitmapTransformation() {
@@ -143,7 +146,9 @@ public class BitmapTransformationTest {
             return null;
           }
         };
-    transformation.transform(context, mockResource(1, 1), 100, -1);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> transformation.transform(context, mockResource(1, 1), 100, -1));
   }
 
   @Test

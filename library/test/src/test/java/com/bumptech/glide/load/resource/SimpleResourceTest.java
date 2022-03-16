@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.resource;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,9 +31,9 @@ public class SimpleResourceTest {
     assertEquals(object, resource.get());
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfGivenNullData() {
-    new SimpleResource<>(null);
+    assertThrows(NullPointerException.class, () -> new SimpleResource<>(null));
   }
 
   private static class Anything {}
