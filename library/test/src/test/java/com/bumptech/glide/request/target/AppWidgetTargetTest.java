@@ -2,6 +2,7 @@ package com.bumptech.glide.request.target;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -90,46 +91,72 @@ public class AppWidgetTargetTest {
     assertEquals(views, shadowManager.updatedRemoteViews);
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsWhenGivenNullContextWithWidgetIds() {
-    new AppWidgetTarget(null /*context*/, 1234 /*viewId*/, views, 1 /*widgetIds*/);
+    assertThrows(
+        NullPointerException.class,
+        () -> new AppWidgetTarget(null /*context*/, 1234 /*viewId*/, views, 1 /*widgetIds*/));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsWhenGivenNullContextWithComponentName() {
-    new AppWidgetTarget(null /*context*/, 1234 /*viewId*/, views, mock(ComponentName.class));
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new AppWidgetTarget(
+                null /*context*/, 1234 /*viewId*/, views, mock(ComponentName.class)));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsWhenGivenNullRemoteViewsWithWidgetIds() {
-    new AppWidgetTarget(
-        ApplicationProvider.getApplicationContext(), viewId, null /*remoteViews*/, 1 /*widgetIds*/);
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new AppWidgetTarget(
+                ApplicationProvider.getApplicationContext(),
+                viewId,
+                null /*remoteViews*/,
+                1 /*widgetIds*/));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsWhenGivenNullRemoteViewsWithComponentName() {
-    new AppWidgetTarget(
-        ApplicationProvider.getApplicationContext(),
-        viewId,
-        null /*remoteViews*/,
-        mock(ComponentName.class));
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new AppWidgetTarget(
+                ApplicationProvider.getApplicationContext(),
+                viewId,
+                null /*remoteViews*/,
+                mock(ComponentName.class)));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsWhenGivenNullWidgetIds() {
-    new AppWidgetTarget(
-        ApplicationProvider.getApplicationContext(), viewId, views, (int[]) null /*widgetIds*/);
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new AppWidgetTarget(
+                ApplicationProvider.getApplicationContext(),
+                viewId,
+                views,
+                (int[]) null /*widgetIds*/));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsWhenGivenEmptyWidgetIds() {
-    new AppWidgetTarget(ApplicationProvider.getApplicationContext(), viewId, views);
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new AppWidgetTarget(ApplicationProvider.getApplicationContext(), viewId, views));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsWhenGivenNullComponentName() {
-    new AppWidgetTarget(
-        ApplicationProvider.getApplicationContext(), viewId, views, (ComponentName) null);
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new AppWidgetTarget(
+                ApplicationProvider.getApplicationContext(), viewId, views, (ComponentName) null));
   }
 
   @Implements(AppWidgetManager.class)

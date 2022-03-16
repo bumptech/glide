@@ -5,6 +5,7 @@ import static android.view.ViewTreeObserver.OnPreDrawListener;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -370,9 +371,9 @@ public class ViewTargetTest {
     verify(cb).onSizeReady(eq(width), eq(height));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfGivenNullView() {
-    new TestViewTarget(null);
+    assertThrows(NullPointerException.class, () -> new TestViewTarget(null));
   }
 
   @Test

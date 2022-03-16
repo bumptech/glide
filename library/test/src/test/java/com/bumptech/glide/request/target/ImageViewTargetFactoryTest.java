@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -54,8 +55,8 @@ public class ImageViewTargetFactoryTest {
     assertThat(target).isInstanceOf(DrawableImageViewTarget.class);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsForUnknownType() {
-    factory.buildTarget(view, Object.class);
+    assertThrows(IllegalArgumentException.class, () -> factory.buildTarget(view, Object.class));
   }
 }
