@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import com.bumptech.glide.GlideBuilder.EnableLazyGlideRegistry;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -254,12 +253,6 @@ public class Glide implements ComponentCallbacks2 {
     }
     Glide glide = builder.build(applicationContext, manifestModules, annotationGeneratedModule);
     applicationContext.registerComponentCallbacks(glide);
-
-    // Trigger the registry initialization eagerly, similar to the codepath prior to the experiment.
-    if (!glide.getGlideContext().getExperiments().isEnabled(EnableLazyGlideRegistry.class)) {
-      glide.getGlideContext().getRegistry();
-    }
-
     Glide.glide = glide;
   }
 
