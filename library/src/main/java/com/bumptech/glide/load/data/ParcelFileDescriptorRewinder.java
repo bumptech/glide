@@ -18,8 +18,9 @@ public final class ParcelFileDescriptorRewinder implements DataRewinder<ParcelFi
   private final InternalRewinder rewinder;
 
   public static boolean isSupported() {
-    // Os.lseek() is only supported on API 21+.
-    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    // Os.lseek() is only supported on API 21+ and does not work in Robolectric.
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+        && !"robolectric".equals(Build.FINGERPRINT);
   }
 
   @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
