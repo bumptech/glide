@@ -8,6 +8,7 @@ import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.data.ParcelFileDescriptorRewinder;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream;
+import com.bumptech.glide.util.ByteBufferUtil;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +44,7 @@ public final class ImageHeaderParserUtils {
         parsers,
         new TypeReader() {
           @Override
-          public ImageType getType(ImageHeaderParser parser) throws IOException {
+          public ImageType getTypeAndRewind(ImageHeaderParser parser) throws IOException {
             try {
               return parser.getType(finalIs);
             } finally {
@@ -66,8 +67,12 @@ public final class ImageHeaderParserUtils {
         parsers,
         new TypeReader() {
           @Override
-          public ImageType getType(ImageHeaderParser parser) throws IOException {
-            return parser.getType(buffer);
+          public ImageType getTypeAndRewind(ImageHeaderParser parser) throws IOException {
+            try {
+              return parser.getType(buffer);
+            } finally {
+              ByteBufferUtil.rewind(buffer);
+            }
           }
         });
   }
@@ -83,10 +88,10 @@ public final class ImageHeaderParserUtils {
         parsers,
         new TypeReader() {
           @Override
-          public ImageType getType(ImageHeaderParser parser) throws IOException {
+          public ImageType getTypeAndRewind(ImageHeaderParser parser) throws IOException {
             // Wrap the FileInputStream into a RecyclableBufferedInputStream to optimize I/O
             // performance
-            InputStream is = null;
+            RecyclableBufferedInputStream is = null;
             try {
               is =
                   new RecyclableBufferedInputStream(
@@ -95,12 +100,11 @@ public final class ImageHeaderParserUtils {
                       byteArrayPool);
               return parser.getType(is);
             } finally {
-              try {
-                if (is != null) {
-                  is.close();
-                }
-              } catch (IOException e) {
-                // Ignored.
+              // If we close the stream, we'll close the file descriptor as well, so we can't do
+              // that. We do however want to make sure we release any buffers we used back to the
+              // pool so we call release instead of close.
+              if (is != null) {
+                is.release();
               }
               parcelFileDescriptorRewinder.rewindAndGet();
             }
@@ -114,7 +118,7 @@ public final class ImageHeaderParserUtils {
     //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0, size = parsers.size(); i < size; i++) {
       ImageHeaderParser parser = parsers.get(i);
-      ImageType type = reader.getType(parser);
+      ImageType type = reader.getTypeAndRewind(parser);
       if (type != ImageType.UNKNOWN) {
         return type;
       }
@@ -143,8 +147,12 @@ public final class ImageHeaderParserUtils {
         parsers,
         new OrientationReader() {
           @Override
-          public int getOrientation(ImageHeaderParser parser) throws IOException {
-            return parser.getOrientation(buffer, arrayPool);
+          public int getOrientationAndRewind(ImageHeaderParser parser) throws IOException {
+            try {
+              return parser.getOrientation(buffer, arrayPool);
+            } finally {
+              ByteBufferUtil.rewind(buffer);
+            }
           }
         });
   }
@@ -169,7 +177,7 @@ public final class ImageHeaderParserUtils {
         parsers,
         new OrientationReader() {
           @Override
-          public int getOrientation(ImageHeaderParser parser) throws IOException {
+          public int getOrientationAndRewind(ImageHeaderParser parser) throws IOException {
             try {
               return parser.getOrientation(finalIs, byteArrayPool);
             } finally {
@@ -189,10 +197,10 @@ public final class ImageHeaderParserUtils {
         parsers,
         new OrientationReader() {
           @Override
-          public int getOrientation(ImageHeaderParser parser) throws IOException {
+          public int getOrientationAndRewind(ImageHeaderParser parser) throws IOException {
             // Wrap the FileInputStream into a RecyclableBufferedInputStream to optimize I/O
             // performance
-            InputStream is = null;
+            RecyclableBufferedInputStream is = null;
             try {
               is =
                   new RecyclableBufferedInputStream(
@@ -201,12 +209,11 @@ public final class ImageHeaderParserUtils {
                       byteArrayPool);
               return parser.getOrientation(is, byteArrayPool);
             } finally {
-              try {
-                if (is != null) {
-                  is.close();
-                }
-              } catch (IOException e) {
-                // Ignored.
+              // If we close the stream, we'll close the file descriptor as well, so we can't do
+              // that. We do however want to make sure we release any buffers we used back to the
+              // pool so we call release instead of close.
+              if (is != null) {
+                is.release();
               }
               parcelFileDescriptorRewinder.rewindAndGet();
             }
@@ -219,7 +226,7 @@ public final class ImageHeaderParserUtils {
     //noinspection ForLoopReplaceableByForEach to improve perf
     for (int i = 0, size = parsers.size(); i < size; i++) {
       ImageHeaderParser parser = parsers.get(i);
-      int orientation = reader.getOrientation(parser);
+      int orientation = reader.getOrientationAndRewind(parser);
       if (orientation != ImageHeaderParser.UNKNOWN_ORIENTATION) {
         return orientation;
       }
@@ -229,10 +236,10 @@ public final class ImageHeaderParserUtils {
   }
 
   private interface TypeReader {
-    ImageType getType(ImageHeaderParser parser) throws IOException;
+    ImageType getTypeAndRewind(ImageHeaderParser parser) throws IOException;
   }
 
   private interface OrientationReader {
-    int getOrientation(ImageHeaderParser parser) throws IOException;
+    int getOrientationAndRewind(ImageHeaderParser parser) throws IOException;
   }
 }
