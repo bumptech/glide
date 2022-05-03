@@ -683,7 +683,9 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       int logLevel = glideContext.getLogLevel();
       if (logLevel <= maxLogLevel) {
         Log.w(
-            GLIDE_TAG, "Load failed for " + model + " with size [" + width + "x" + height + "]", e);
+            GLIDE_TAG,
+            "Load failed for [" + model + "] with dimensions [" + width + "x" + height + "]",
+            e);
         if (logLevel <= Log.INFO) {
           e.logRootCauses(GLIDE_TAG);
         }
