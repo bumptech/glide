@@ -48,7 +48,7 @@ public class DrawableCrossFadeFactory implements TransitionFactory<Drawable> {
 
     private static final int DEFAULT_DURATION_MS = 300;
     private final int durationMillis;
-    private boolean isCrossFadeEnabled;
+    private boolean isCrossFadeEnabled = true;
 
     public Builder() {
       this(DEFAULT_DURATION_MS);
