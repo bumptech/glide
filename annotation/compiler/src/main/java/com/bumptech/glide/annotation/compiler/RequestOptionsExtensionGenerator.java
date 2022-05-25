@@ -86,7 +86,7 @@ final class RequestOptionsExtensionGenerator {
     // The 0th element is expected to be a RequestOptions object.
     List<? extends VariableElement> paramElements =
         element.getParameters().subList(1, element.getParameters().size());
-    List<ParameterSpec> parameters = ProcessorUtil.getParameters(paramElements);
+    List<ParameterSpec> parameters = processorUtil.getParameters(paramElements);
     builder.addParameters(parameters);
 
     String extensionRequestOptionsArgument;

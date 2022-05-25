@@ -12,8 +12,10 @@ dependencies {
     api project(':third_party:gif_decoder')
     api project(':third_party:disklrucache')
     api project(':annotation')
-    api "androidx.fragment:fragment:${ANDROID_X_VERSION}"
+    api "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
     api "androidx.vectordrawable:vectordrawable-animated:${ANDROID_X_VERSION}"
+    api "androidx.exifinterface:exifinterface:${EXIF_INTERFACE_VERSION}"
+    api "androidx.tracing:tracing:${ANDROID_X_TRACING_VERSION}"
     compileOnly "androidx.appcompat:appcompat:${ANDROID_X_VERSION}"
 
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
@@ -29,6 +31,9 @@ dependencies {
     testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
     testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
     testImplementation "androidx.legacy:legacy-support-v4:${ANDROID_X_VERSION}"
+    testImplementation "androidx.test:core:${ANDROID_X_TEST_VERSION}"
+    testImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
+    testImplementation "androidx.test:runner:${ANDROID_X_TEST_VERSION}"
 }
 
 android {
@@ -47,7 +52,6 @@ android {
     }
 }
 
-check.dependsOn(':library:findbugs:findbugs')
 check.dependsOn(':library:pmd:pmd')
 check.dependsOn(':library:test:check')
 

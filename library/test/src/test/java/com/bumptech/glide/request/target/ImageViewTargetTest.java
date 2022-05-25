@@ -4,7 +4,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -16,6 +16,7 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.request.transition.Transition;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +26,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -41,7 +41,7 @@ public class ImageViewTargetTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    view = new ImageView(RuntimeEnvironment.application);
+    view = new ImageView(ApplicationProvider.getApplicationContext());
     target = new TestTarget(view);
     drawable = new ColorDrawable(Color.RED);
   }

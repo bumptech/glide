@@ -11,13 +11,14 @@ dependencies {
 
     androidTestImplementation project(':library')
     androidTestImplementation project(':mocks')
+    androidTestImplementation project(':testutil')
     androidTestImplementation "org.mockito:mockito-android:${MOCKITO_ANDROID_VERSION}"
-    androidTestImplementation "androidx.test.ext:junit:${ANDROIDX_TEST_VERSION}"
-    androidTestImplementation "androidx.test:rules:${ANDROIDX_TEST_VERSION}"
-    androidTestImplementation "androidx.test:core:${ANDROIDX_TEST_VERSION}"
+    androidTestImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_VERSION}"
+    androidTestImplementation "androidx.test:rules:${ANDROID_X_TEST_VERSION}"
+    androidTestImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
     androidTestImplementation "com.google.truth:truth:${TRUTH_VERSION}"
     androidTestImplementation "junit:junit:${JUNIT_VERSION}"
-    androidTestImplementation "androidx.exifinterface:exifinterface:${ANDROID_X_VERSION}"
+    androidTestImplementation "androidx.exifinterface:exifinterface:${EXIF_INTERFACE_VERSION}"
 
     // Not totally clear why this is required, but it seems to be missing when tests are run on
     // 4.1.2 and 4.2.0 emulators.
@@ -29,7 +30,7 @@ android {
 
     defaultConfig {
         applicationId 'com.bumptech.glide.instrumentation'
-        minSdkVersion MIN_SDK_VERSION as int
+        minSdkVersion 16 as int
         targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 1
         versionName '1.0'

@@ -8,6 +8,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.bumptech.glide.GlideBuilder.LogRequestOrigins;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -21,6 +22,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.request.transition.TransitionFactory;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Util;
+import com.bumptech.glide.util.pool.GlideTrace;
 import com.bumptech.glide.util.pool.StateVerifier;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -33,11 +35,12 @@ import java.util.concurrent.Executor;
  */
 public final class SingleRequest<R> implements Request, SizeReadyCallback, ResourceCallback {
   /** Tag for logging internal events, not generally suitable for public use. */
-  private static final String TAG = "Request";
+  private static final String TAG = "GlideRequest";
   /** Tag for logging externally useful events (request completion, timing etc). */
   private static final String GLIDE_TAG = "Glide";
 
   private static final boolean IS_VERBOSE_LOGGABLE = Log.isLoggable(TAG, Log.VERBOSE);
+  private int cookie;
 
   private enum Status {
     /** Created but not yet running. */
@@ -203,7 +206,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     this.callbackExecutor = callbackExecutor;
     status = Status.PENDING;
 
-    if (requestOrigin == null && glideContext.isLoggingRequestOriginsEnabled()) {
+    if (requestOrigin == null && glideContext.getExperiments().isEnabled(LogRequestOrigins.class)) {
       requestOrigin = new RuntimeException("Glide request origin trace");
     }
   }
@@ -237,13 +240,17 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       // that the view size has changed will need to explicitly clear the View or Target before
       // starting the new load.
       if (status == Status.COMPLETE) {
-        onResourceReady(resource, DataSource.MEMORY_CACHE);
+        onResourceReady(
+            resource, DataSource.MEMORY_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
         return;
       }
 
       // Restarts for requests that are neither complete nor running can be treated as new requests
       // and can run again from the beginning.
 
+      experimentalNotifyRequestStarted(model);
+
+      cookie = GlideTrace.beginSectionAsync(TAG);
       status = Status.WAITING_FOR_SIZE;
       if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
         onSizeReady(overrideWidth, overrideHeight);
@@ -257,6 +264,17 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       }
       if (IS_VERBOSE_LOGGABLE) {
         logV("finished run method in " + LogTime.getElapsedMillis(startTime));
+      }
+    }
+  }
+
+  private void experimentalNotifyRequestStarted(Object model) {
+    if (requestListeners == null) {
+      return;
+    }
+    for (RequestListener<?> requestListener : requestListeners) {
+      if (requestListener instanceof ExperimentalRequestListener) {
+        ((ExperimentalRequestListener<?>) requestListener).onRequestStarted(model);
       }
     }
   }
@@ -319,6 +337,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
         target.onLoadCleared(getPlaceholderDrawable());
       }
 
+      GlideTrace.endSectionAsync(TAG, cookie);
       status = Status.CLEARED;
     }
 
@@ -354,6 +373,13 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   public boolean isCleared() {
     synchronized (requestLock) {
       return status == Status.CLEARED;
+    }
+  }
+
+  @Override
+  public boolean isAnyResourceSet() {
+    synchronized (requestLock) {
+      return status == Status.COMPLETE;
     }
   }
 
@@ -493,7 +519,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
 
   @GuardedBy("requestLock")
   private boolean isFirstReadyResource() {
-    return requestCoordinator == null || !requestCoordinator.isAnyResourceSet();
+    return requestCoordinator == null || !requestCoordinator.getRoot().isAnyResourceSet();
   }
 
   @GuardedBy("requestLock")
@@ -513,7 +539,8 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   /** A callback method that should never be invoked directly. */
   @SuppressWarnings("unchecked")
   @Override
-  public void onResourceReady(Resource<?> resource, DataSource dataSource) {
+  public void onResourceReady(
+      Resource<?> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     stateVerifier.throwIfRecycled();
     Resource<?> toRelease = null;
     try {
@@ -562,10 +589,12 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
           this.resource = null;
           // We can't put the status to complete before asking canSetResource().
           status = Status.COMPLETE;
+          GlideTrace.endSectionAsync(TAG, cookie);
           return;
         }
 
-        onResourceReady((Resource<R>) resource, (R) received, dataSource);
+        onResourceReady(
+            (Resource<R>) resource, (R) received, dataSource, isLoadedFromAlternateCacheKey);
       }
     } finally {
       if (toRelease != null) {
@@ -575,14 +604,18 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   }
 
   /**
-   * Internal {@link #onResourceReady(Resource, DataSource)} where arguments are known to be safe.
+   * Internal {@link #onResourceReady(Resource, DataSource, boolean)} where arguments are known to
+   * be safe.
    *
    * @param resource original {@link Resource}, never <code>null</code>
    * @param result object returned by {@link Resource#get()}, checked for type and never <code>null
    *     </code>
    */
+  // We're using experimental APIs...
+  @SuppressWarnings({"deprecation", "PMD.UnusedFormalParameter"})
   @GuardedBy("requestLock")
-  private void onResourceReady(Resource<R> resource, R result, DataSource dataSource) {
+  private void onResourceReady(
+      Resource<R> resource, R result, DataSource dataSource, boolean isAlternateCacheKey) {
     // We must call isFirstReadyResource before setting status.
     boolean isFirstResource = isFirstReadyResource();
     status = Status.COMPLETE;
@@ -628,6 +661,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     }
 
     notifyLoadSuccess();
+    GlideTrace.endSectionAsync(TAG, cookie);
   }
 
   /** A callback method that should never be invoked directly. */
@@ -649,7 +683,9 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       int logLevel = glideContext.getLogLevel();
       if (logLevel <= maxLogLevel) {
         Log.w(
-            GLIDE_TAG, "Load failed for " + model + " with size [" + width + "x" + height + "]", e);
+            GLIDE_TAG,
+            "Load failed for [" + model + "] with dimensions [" + width + "x" + height + "]",
+            e);
         if (logLevel <= Log.INFO) {
           e.logRootCauses(GLIDE_TAG);
         }
@@ -680,6 +716,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       }
 
       notifyLoadFailed();
+      GlideTrace.endSectionAsync(TAG, cookie);
     }
   }
 
@@ -692,7 +729,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     int localOverrideWidth;
     int localOverrideHeight;
     Object localModel;
-    Class<?> localTransocdeClass;
+    Class<?> localTranscodeClass;
     BaseRequestOptions<?> localRequestOptions;
     Priority localPriority;
     int localListenerCount;
@@ -700,7 +737,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       localOverrideWidth = overrideWidth;
       localOverrideHeight = overrideHeight;
       localModel = model;
-      localTransocdeClass = transcodeClass;
+      localTranscodeClass = transcodeClass;
       localRequestOptions = requestOptions;
       localPriority = priority;
       localListenerCount = requestListeners != null ? requestListeners.size() : 0;
@@ -710,7 +747,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     int otherLocalOverrideWidth;
     int otherLocalOverrideHeight;
     Object otherLocalModel;
-    Class<?> otherLocalTransocdeClass;
+    Class<?> otherLocalTranscodeClass;
     BaseRequestOptions<?> otherLocalRequestOptions;
     Priority otherLocalPriority;
     int otherLocalListenerCount;
@@ -718,7 +755,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       otherLocalOverrideWidth = other.overrideWidth;
       otherLocalOverrideHeight = other.overrideHeight;
       otherLocalModel = other.model;
-      otherLocalTransocdeClass = other.transcodeClass;
+      otherLocalTranscodeClass = other.transcodeClass;
       otherLocalRequestOptions = other.requestOptions;
       otherLocalPriority = other.priority;
       otherLocalListenerCount = other.requestListeners != null ? other.requestListeners.size() : 0;
@@ -730,7 +767,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
     return localOverrideWidth == otherLocalOverrideWidth
         && localOverrideHeight == otherLocalOverrideHeight
         && Util.bothModelsNullEquivalentOrEquals(localModel, otherLocalModel)
-        && localTransocdeClass.equals(otherLocalTransocdeClass)
+        && localTranscodeClass.equals(otherLocalTranscodeClass)
         && localRequestOptions.equals(otherLocalRequestOptions)
         && localPriority == otherLocalPriority
         // We do not want to require that RequestListeners implement equals/hashcode, so we
@@ -741,5 +778,21 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
 
   private void logV(String message) {
     Log.v(TAG, message + " this: " + tag);
+  }
+
+  @Override
+  public String toString() {
+    Object localModel;
+    Class<?> localTranscodeClass;
+    synchronized (requestLock) {
+      localModel = model;
+      localTranscodeClass = transcodeClass;
+    }
+    return super.toString()
+        + "[model="
+        + localModel
+        + ", transcodeClass="
+        + localTranscodeClass
+        + "]";
   }
 }

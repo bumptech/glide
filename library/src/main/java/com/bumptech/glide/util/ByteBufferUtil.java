@@ -60,7 +60,7 @@ public final class ByteBufferUtil {
   }
 
   public static void toFile(@NonNull ByteBuffer buffer, @NonNull File file) throws IOException {
-    buffer.position(0);
+    rewind(buffer);
     RandomAccessFile raf = null;
     FileChannel channel = null;
     try {
@@ -120,7 +120,7 @@ public final class ByteBufferUtil {
     } else {
       ByteBuffer toCopy = byteBuffer.asReadOnlyBuffer();
       result = new byte[toCopy.limit()];
-      toCopy.position(0);
+      rewind(toCopy);
       toCopy.get(result);
     }
     return result;
@@ -150,7 +150,11 @@ public final class ByteBufferUtil {
     byte[] bytes = outStream.toByteArray();
 
     // Some resource decoders require a direct byte buffer. Prefer allocateDirect() over wrap()
-    return (ByteBuffer) ByteBuffer.allocateDirect(bytes.length).put(bytes).position(0);
+    return rewind(ByteBuffer.allocateDirect(bytes.length).put(bytes));
+  }
+
+  public static ByteBuffer rewind(ByteBuffer buffer) {
+    return (ByteBuffer) buffer.position(0);
   }
 
   @Nullable
@@ -208,7 +212,7 @@ public final class ByteBufferUtil {
     }
 
     @Override
-    public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) throws IOException {
+    public int read(@NonNull byte[] buffer, int byteOffset, int byteCount) {
       if (!byteBuffer.hasRemaining()) {
         return -1;
       }
@@ -227,7 +231,7 @@ public final class ByteBufferUtil {
     }
 
     @Override
-    public long skip(long byteCount) throws IOException {
+    public long skip(long byteCount) {
       if (!byteBuffer.hasRemaining()) {
         return -1;
       }

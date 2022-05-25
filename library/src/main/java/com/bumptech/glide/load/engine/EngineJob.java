@@ -69,6 +69,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
 
   // Checked primarily on the main thread, but also on other threads in reschedule.
   private volatile boolean isCancelled;
+  private boolean isLoadedFromAlternateCacheKey;
 
   EngineJob(
       GlideExecutor diskCacheExecutor,
@@ -155,7 +156,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
       // This is overly broad, some Glide code is actually called here, but it's much
       // simpler to encapsulate here than to do so at the actual call point in the
       // Request implementation.
-      cb.onResourceReady(engineResource, dataSource);
+      cb.onResourceReady(engineResource, dataSource, isLoadedFromAlternateCacheKey);
     } catch (Throwable t) {
       throw new CallbackException(t);
     }
@@ -304,6 +305,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     hasLoadFailed = false;
     isCancelled = false;
     hasResource = false;
+    isLoadedFromAlternateCacheKey = false;
     decodeJob.release(/*isRemovedFromQueue=*/ false);
     decodeJob = null;
     exception = null;
@@ -312,10 +314,12 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   }
 
   @Override
-  public void onResourceReady(Resource<R> resource, DataSource dataSource) {
+  public void onResourceReady(
+      Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     synchronized (this) {
       this.resource = resource;
       this.dataSource = dataSource;
+      this.isLoadedFromAlternateCacheKey = isLoadedFromAlternateCacheKey;
     }
     notifyCallbacksOfResult();
   }

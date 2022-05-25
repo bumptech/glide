@@ -1,6 +1,6 @@
 package com.bumptech.glide;
 
-import static com.bumptech.glide.test.BitmapSubject.assertThat;
+import static com.bumptech.glide.testutil.BitmapSubject.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
@@ -10,10 +10,10 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.test.ConcurrencyHelper;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
-import com.bumptech.glide.test.TearDownGlide;
+import com.bumptech.glide.testutil.ConcurrencyHelper;
+import com.bumptech.glide.testutil.TearDownGlide;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide.RequestOptionsFactory;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
@@ -17,6 +18,7 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
+import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public final class GlideContextTest {
@@ -33,14 +34,19 @@ public final class GlideContextTest {
 
   @Before
   public void setUp() {
-    Application app = RuntimeEnvironment.application;
+    Application app = ApplicationProvider.getApplicationContext();
 
     transitionOptions = new HashMap<>();
     context =
         new GlideContext(
             app,
             new LruArrayPool(),
-            new Registry(),
+            new GlideSupplier<Registry>() {
+              @Override
+              public Registry get() {
+                return new Registry();
+              }
+            },
             new ImageViewTargetFactory(),
             new RequestOptionsFactory() {
               @NonNull
@@ -52,7 +58,7 @@ public final class GlideContextTest {
             transitionOptions,
             /*defaultRequestListeners=*/ Collections.<RequestListener<Object>>emptyList(),
             mock(Engine.class),
-            /*isLoggingRequestOriginsEnabled=*/ false,
+            mock(GlideExperiments.class),
             Log.DEBUG);
   }
 

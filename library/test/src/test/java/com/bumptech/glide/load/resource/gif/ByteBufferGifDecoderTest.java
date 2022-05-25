@@ -4,11 +4,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.gifdecoder.GifHeader;
 import com.bumptech.glide.gifdecoder.GifHeaderParser;
@@ -17,7 +18,6 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
-import com.bumptech.glide.tests.GlideShadowLooper;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -29,11 +29,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18, shadows = GlideShadowLooper.class)
+@Config(sdk = 18)
 public class ByteBufferGifDecoderTest {
   private static final byte[] GIF_HEADER = new byte[] {0x47, 0x49, 0x46};
   private static final int ARRAY_POOL_SIZE_BYTES = 4 * 1024 * 1024;
@@ -66,7 +65,7 @@ public class ByteBufferGifDecoderTest {
     options = new Options();
     decoder =
         new ByteBufferGifDecoder(
-            RuntimeEnvironment.application,
+            ApplicationProvider.getApplicationContext(),
             parsers,
             bitmapPool,
             new LruArrayPool(ARRAY_POOL_SIZE_BYTES),

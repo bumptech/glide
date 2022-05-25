@@ -6,13 +6,13 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -22,7 +22,8 @@ public class BitmapDrawableTranscoderTest {
 
   @Before
   public void setUp() {
-    transcoder = new BitmapDrawableTranscoder(RuntimeEnvironment.application.getResources());
+    transcoder =
+        new BitmapDrawableTranscoder(ApplicationProvider.getApplicationContext().getResources());
   }
 
   @Test

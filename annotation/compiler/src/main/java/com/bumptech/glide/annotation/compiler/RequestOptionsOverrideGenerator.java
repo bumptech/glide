@@ -67,7 +67,7 @@ final class RequestOptionsOverrideGenerator {
   private MethodSpec generateRequestOptionOverride(
       TypeName typeToOverrideIn, ExecutableElement methodToOverride) {
     MethodSpec.Builder result =
-        ProcessorUtil.overriding(methodToOverride).returns(typeToOverrideIn);
+        processorUtil.overriding(methodToOverride).returns(typeToOverrideIn);
     result.addCode(
         CodeBlock.builder()
             .add("return ($T) super.$N(", typeToOverrideIn, methodToOverride.getSimpleName())

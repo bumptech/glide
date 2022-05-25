@@ -1,7 +1,7 @@
 package com.bumptech.glide.load.data.resource;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
@@ -22,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
@@ -41,7 +41,7 @@ public class FileDescriptorLocalUriFetcherTest {
 
   @Test
   public void testLoadResource_returnsFileDescriptor() throws Exception {
-    Context context = RuntimeEnvironment.application;
+    Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();
@@ -60,7 +60,7 @@ public class FileDescriptorLocalUriFetcherTest {
 
   @Test
   public void testLoadResource_withNullFileDescriptor_callsLoadFailed() {
-    Context context = RuntimeEnvironment.application;
+    Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();

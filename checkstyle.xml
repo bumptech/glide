@@ -71,11 +71,6 @@
         <module name="StaticVariableName" />
         <module name="TypeName" />
 
-        <!-- Allow common trailing comments used to describe suppressions -->
-        <module name="TrailingComment">
-            <property name="legalComment" value="^Public API.?$|^NOPMD.*$" />
-        </module>
-
         <!-- Checks for imports. -->
         <!-- See http://checkstyle.sourceforge.net/config_imports.html -->
         <module name="AvoidStarImport"/>

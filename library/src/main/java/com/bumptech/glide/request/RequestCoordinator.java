@@ -44,6 +44,9 @@ public interface RequestCoordinator {
   /** Must be called when a {@link Request} coordinated by this object fails. */
   void onRequestFailed(Request request);
 
+  /** Returns the top most parent {@code RequestCoordinator}. */
+  RequestCoordinator getRoot();
+
   /** A simple state enum to keep track of the states of individual subrequests. */
   enum RequestState {
     RUNNING(false),

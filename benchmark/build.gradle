@@ -1,0 +1,43 @@
+plugins {
+    id 'com.android.library'
+    id 'androidx.benchmark'
+}
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    compileOptions {
+        sourceCompatibility = 1.7
+        targetCompatibility = 1.7
+    }
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner 'androidx.benchmark.junit4.AndroidBenchmarkRunner'
+    }
+
+    buildTypes {
+        debug {
+            // Since debuggable can"t be modified by gradle for library modules,
+            // it must be done in a manifest - see src/androidTest/AndroidManifest.xml
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "benchmark-proguard-rules.pro"
+        }
+    }
+}
+
+dependencies {
+    androidTestImplementation "androidx.test:runner:${ANDROID_X_TEST_VERSION}"
+    androidTestImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_VERSION}"
+    androidTestImplementation "junit:junit:{$JUNIT_VERSION}"
+
+    androidTestImplementation project(':library')
+    androidTestImplementation project(':testutil')
+    androidTestImplementation "androidx.benchmark:benchmark-junit4:${ANDROID_X_BENCHMARK_VERSION}"
+    androidTestImplementation "com.google.guava:guava:${GUAVA_VERSION}"
+}

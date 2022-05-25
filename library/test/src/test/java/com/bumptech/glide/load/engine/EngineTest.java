@@ -10,7 +10,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -31,7 +31,6 @@ import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
 import com.bumptech.glide.tests.BackgroundUtil;
-import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.util.Executors;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,9 +44,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    sdk = 18,
-    shadows = {GlideShadowLooper.class})
+@Config(sdk = 18)
 @SuppressWarnings("unchecked")
 public class EngineTest {
   private EngineTestHarness harness;
@@ -124,7 +121,8 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
+    verify(harness.cb)
+        .onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE), eq(false));
   }
 
   @Test
@@ -158,7 +156,8 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
+    verify(harness.cb)
+        .onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE), eq(false));
     verify(harness.cache, never()).remove(any(Key.class));
   }
 
@@ -179,7 +178,8 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
+    verify(harness.cb)
+        .onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE), eq(false));
   }
 
   @Test
@@ -198,7 +198,8 @@ public class EngineTest {
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE));
+    verify(harness.cb)
+        .onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE), eq(false));
   }
 
   @Test
@@ -219,11 +220,11 @@ public class EngineTest {
               }
             })
         .when(harness.cb)
-        .onResourceReady(anyResource(), isADataSource());
+        .onResourceReady(anyResource(), isADataSource(), anyBoolean());
 
     harness.doLoad();
 
-    verify(harness.cb).onResourceReady(anyResource(), isADataSource());
+    verify(harness.cb).onResourceReady(anyResource(), isADataSource(), anyBoolean());
   }
 
   @Test
@@ -351,7 +352,7 @@ public class EngineTest {
   public void testResourceIsRecycledIfNotCacheableWhenReleased() {
     when(harness.resource.isMemoryCacheable()).thenReturn(false);
     harness.getEngine().onResourceReleased(harness.cacheKey, harness.resource);
-    verify(harness.resourceRecycler).recycle(eq(harness.resource));
+    verify(harness.resourceRecycler).recycle(eq(harness.resource), eq(false));
   }
 
   @Test
@@ -372,7 +373,7 @@ public class EngineTest {
   @Test
   public void testResourceIsRecycledWhenRemovedFromCache() {
     harness.getEngine().onResourceRemoved(harness.resource);
-    verify(harness.resourceRecycler).recycle(eq(harness.resource));
+    verify(harness.resourceRecycler).recycle(eq(harness.resource), eq(true));
   }
 
   @Test
@@ -463,7 +464,7 @@ public class EngineTest {
         .start(anyDecodeJobOrNull());
     harness.doLoad();
     harness.doLoad();
-    verify(harness.cb).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE));
+    verify(harness.cb).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE), eq(false));
   }
 
   @Test
@@ -483,7 +484,7 @@ public class EngineTest {
     harness.doLoad();
     harness.getEngine().onResourceReleased(harness.cacheKey, harness.resource);
     harness.doLoad();
-    verify(harness.cb).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE));
+    verify(harness.cb).onResourceReady(any(Resource.class), eq(DataSource.MEMORY_CACHE), eq(false));
   }
 
   @Test

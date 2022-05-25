@@ -1,14 +1,12 @@
 package com.bumptech.glide.load.data;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
-import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.Priority;
 import java.io.IOException;
 import org.junit.Before;
@@ -25,25 +23,22 @@ public class FileDescriptorAssetPathFetcherTest {
 
   @Mock private AssetManager assetManager;
   @Mock private AssetFileDescriptor assetFileDescriptor;
-  @Mock private DataFetcher.DataCallback<ParcelFileDescriptor> callback;
+  @Mock private DataFetcher.DataCallback<AssetFileDescriptor> callback;
 
   private FileDescriptorAssetPathFetcher fetcher;
-  private ParcelFileDescriptor expected;
 
   @Before
   public void setUp() throws IOException {
     MockitoAnnotations.initMocks(this);
     String assetPath = "/some/asset/path";
     fetcher = new FileDescriptorAssetPathFetcher(assetManager, assetPath);
-    expected = mock(ParcelFileDescriptor.class);
-    when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(expected);
     when(assetManager.openFd(eq(assetPath))).thenReturn(assetFileDescriptor);
   }
 
   @Test
   public void testOpensInputStreamForPathWithAssetManager() throws Exception {
     fetcher.loadData(Priority.NORMAL, callback);
-    verify(callback).onDataReady(eq(expected));
+    verify(callback).onDataReady(eq(assetFileDescriptor));
   }
 
   @Test
@@ -51,19 +46,19 @@ public class FileDescriptorAssetPathFetcherTest {
     fetcher.loadData(Priority.NORMAL, callback);
     fetcher.cleanup();
 
-    verify(expected).close();
+    verify(assetFileDescriptor).close();
   }
 
   @Test
   public void testDoesNothingOnCleanupIfNoDataLoaded() throws IOException {
     fetcher.cleanup();
-    verify(expected, never()).close();
+    verify(assetFileDescriptor, never()).close();
   }
 
   @Test
   public void testDoesNothingOnCancel() throws Exception {
     fetcher.loadData(Priority.NORMAL, callback);
     fetcher.cancel();
-    verify(expected, never()).close();
+    verify(assetFileDescriptor, never()).close();
   }
 }

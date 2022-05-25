@@ -14,8 +14,8 @@ public interface Encoder<T> {
    * successfully and should be committed.
    *
    * @param data The data to write.
-   * @param file The File to write the data to.
-   * @param options The put of options to apply when encoding.
+   * @param file The file to write the data to.
+   * @param options The set of options to apply when encoding.
    */
   boolean encode(@NonNull T data, @NonNull File file, @NonNull Options options);
 }

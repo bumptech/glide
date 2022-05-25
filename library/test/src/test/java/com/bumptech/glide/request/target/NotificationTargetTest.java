@@ -1,7 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -10,11 +10,11 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.widget.RemoteViews;
+import androidx.test.core.app.ApplicationProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -36,7 +36,8 @@ public class NotificationTargetTest {
   public void setUp() {
     NotificationManager notificationManager =
         (NotificationManager)
-            RuntimeEnvironment.application.getSystemService(Context.NOTIFICATION_SERVICE);
+            ApplicationProvider.getApplicationContext()
+                .getSystemService(Context.NOTIFICATION_SERVICE);
     shadowManager = Shadow.extract(notificationManager);
 
     remoteViews = mock(RemoteViews.class);
@@ -47,7 +48,7 @@ public class NotificationTargetTest {
 
     target =
         new NotificationTarget(
-            RuntimeEnvironment.application,
+            ApplicationProvider.getApplicationContext(),
             100 /*width*/,
             100 /*height*/,
             viewId,
@@ -91,7 +92,7 @@ public class NotificationTargetTest {
   @Test(expected = NullPointerException.class)
   public void testThrowsIfNotificationIsNull() {
     new NotificationTarget(
-        RuntimeEnvironment.application,
+        ApplicationProvider.getApplicationContext(),
         100 /*width*/,
         100 /*height*/,
         123 /*viewId*/,
@@ -104,7 +105,7 @@ public class NotificationTargetTest {
   @Test(expected = NullPointerException.class)
   public void testThrowsIfRemoteViewsIsNull() {
     new NotificationTarget(
-        RuntimeEnvironment.application,
+        ApplicationProvider.getApplicationContext(),
         100 /*width*/,
         100 /*height*/,
         123 /*viewId*/,

@@ -217,7 +217,8 @@ public class Engine
 
     // Avoid calling back while holding the engine lock, doing so makes it easier for callers to
     // deadlock.
-    cb.onResourceReady(memoryResource, DataSource.MEMORY_CACHE);
+    cb.onResourceReady(
+        memoryResource, DataSource.MEMORY_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
     return null;
   }
 
@@ -384,7 +385,9 @@ public class Engine
 
   @Override
   public void onResourceRemoved(@NonNull final Resource<?> resource) {
-    resourceRecycler.recycle(resource);
+    // Avoid deadlock with RequestManagers when recycling triggers recursive clear() calls.
+    // See b/145519760.
+    resourceRecycler.recycle(resource, /*forceNextFrame=*/ true);
   }
 
   @Override
@@ -393,7 +396,7 @@ public class Engine
     if (resource.isMemoryCacheable()) {
       cache.put(cacheKey, resource);
     } else {
-      resourceRecycler.recycle(resource);
+      resourceRecycler.recycle(resource, /*forceNextFrame=*/ false);
     }
   }
 

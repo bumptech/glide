@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.annotation.TargetApi;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.media.MediaDataSource;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
@@ -10,6 +11,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
@@ -120,6 +122,11 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     return new VideoDecoder<>(bitmapPool, new ParcelFileDescriptorInitializer());
   }
 
+  @RequiresApi(api = VERSION_CODES.M)
+  public static ResourceDecoder<ByteBuffer, Bitmap> byteBuffer(BitmapPool bitmapPool) {
+    return new VideoDecoder<>(bitmapPool, new ByteBufferInitializer());
+  }
+
   VideoDecoder(BitmapPool bitmapPool, MediaMetadataRetrieverInitializer<T> initializer) {
     this(bitmapPool, initializer, DEFAULT_FACTORY);
   }
@@ -137,7 +144,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   @Override
   public boolean handles(@NonNull T data, @NonNull Options options) {
     // Calling setDataSource is expensive so avoid doing so unless we're actually called.
-    // For non-videos this isn't any cheaper, but for videos it safes the redundant call and
+    // For non-videos this isn't any cheaper, but for videos it saves the redundant call and
     // 50-100ms.
     return true;
   }
@@ -172,12 +179,12 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
               outWidth,
               outHeight,
               downsampleStrategy);
-
-    } catch (RuntimeException e) {
-      // MediaMetadataRetriever APIs throw generic runtime exceptions when given invalid data.
-      throw new IOException(e);
     } finally {
-      mediaMetadataRetriever.release();
+      if (Build.VERSION.SDK_INT >= VERSION_CODES.Q) {
+        mediaMetadataRetriever.close();
+      } else {
+        mediaMetadataRetriever.release();
+      }
     }
 
     return BitmapResource.obtain(result, bitmapPool);
@@ -211,9 +218,18 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       result = decodeOriginalFrame(mediaMetadataRetriever, frameTimeMicros, frameOption);
     }
 
+    // Throwing an exception works better in our error logging than returning null. It shouldn't
+    // be expensive because video decoders are attempted after image loads. Video errors are often
+    // logged by the framework, so we can also use this error to suggest callers look for the
+    // appropriate tags in adb.
+    if (result == null) {
+      throw new VideoDecoderException();
+    }
+
     return result;
   }
 
+  @Nullable
   @TargetApi(Build.VERSION_CODES.O_MR1)
   private static Bitmap decodeScaledFrame(
       MediaMetadataRetriever mediaMetadataRetriever,
@@ -257,7 +273,10 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       // just from decoding the frame, then it will be thrown and exposed to callers by the method
       // below.
       if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "Exception trying to decode frame on oreo+", t);
+        Log.d(
+            TAG,
+            "Exception trying to decode a scaled frame on oreo+, falling back to a fullsize frame",
+            t);
       }
 
       return null;
@@ -297,6 +316,47 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     @Override
     public void initialize(MediaMetadataRetriever retriever, ParcelFileDescriptor data) {
       retriever.setDataSource(data.getFileDescriptor());
+    }
+  }
+
+  @RequiresApi(Build.VERSION_CODES.M)
+  static final class ByteBufferInitializer
+      implements MediaMetadataRetrieverInitializer<ByteBuffer> {
+
+    @Override
+    public void initialize(MediaMetadataRetriever retriever, final ByteBuffer data) {
+      retriever.setDataSource(
+          new MediaDataSource() {
+            @Override
+            public int readAt(long position, byte[] buffer, int offset, int size) {
+              if (position >= data.limit()) {
+                return -1;
+              }
+              data.position((int) position);
+              int numBytesRead = Math.min(size, data.remaining());
+              data.get(buffer, offset, numBytesRead);
+              return numBytesRead;
+            }
+
+            @Override
+            public long getSize() {
+              return data.limit();
+            }
+
+            @Override
+            public void close() {}
+          });
+    }
+  }
+
+  private static final class VideoDecoderException extends RuntimeException {
+
+    private static final long serialVersionUID = -2556382523004027815L;
+
+    VideoDecoderException() {
+      super(
+          "MediaMetadataRetriever failed to retrieve a frame without throwing, check the adb logs"
+              + " for .*MetadataRetriever.* prior to this exception for details");
     }
   }
 }

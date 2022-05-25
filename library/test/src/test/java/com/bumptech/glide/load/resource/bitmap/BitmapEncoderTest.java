@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
@@ -22,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -42,6 +42,8 @@ public class BitmapEncoderTest {
 
   @Test
   public void testBitmapIsEncoded() throws IOException {
+    harness.bitmap.setHasAlpha(false);
+
     assertThat(harness.encode()).isEqualTo(harness.expectedData(CompressFormat.JPEG, 90));
   }
 
@@ -49,6 +51,7 @@ public class BitmapEncoderTest {
   public void testBitmapIsEncodedWithGivenQuality() throws IOException {
     int quality = 7;
     harness.setQuality(quality);
+    harness.bitmap.setHasAlpha(false);
 
     assertThat(harness.encode()).isEqualTo(harness.expectedData(CompressFormat.JPEG, quality));
   }
@@ -93,7 +96,7 @@ public class BitmapEncoderTest {
     final Resource<Bitmap> resource = mockResource();
     final Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     final Options options = new Options();
-    final File file = new File(RuntimeEnvironment.application.getCacheDir(), "test");
+    final File file = new File(ApplicationProvider.getApplicationContext().getCacheDir(), "test");
     final ArrayPool arrayPool = new LruArrayPool();
 
     EncoderHarness() {

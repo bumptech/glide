@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.tests.KeyTester;
 import java.io.UnsupportedEncodingException;
@@ -17,7 +18,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -28,7 +28,7 @@ public class ApplicationVersionSignatureTest {
 
   @Before
   public void setUp() {
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
   }
 
   @After
@@ -58,7 +58,7 @@ public class ApplicationVersionSignatureTest {
 
   @Test
   public void testUnresolvablePackageInfo() throws NameNotFoundException {
-    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS.get());
+    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS);
     String packageName = "my.package";
     when(context.getPackageName()).thenReturn(packageName);
     when(context.getPackageManager().getPackageInfo(packageName, 0))
@@ -71,7 +71,7 @@ public class ApplicationVersionSignatureTest {
 
   @Test
   public void testMissingPackageInfo() throws NameNotFoundException {
-    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS.get());
+    Context context = mock(Context.class, Answers.RETURNS_DEEP_STUBS);
     String packageName = "my.package";
     when(context.getPackageName()).thenReturn(packageName);
     when(context.getPackageManager().getPackageInfo(packageName, 0)).thenReturn(null);

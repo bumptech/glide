@@ -26,13 +26,13 @@ Or use Gradle:
 
 ```gradle
 repositories {
-  mavenCentral()
   google()
+  mavenCentral()
 }
 
 dependencies {
-  implementation 'com.github.bumptech.glide:glide:4.10.0'
-  annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
+  implementation 'com.github.bumptech.glide:glide:4.13.0'
+  annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
 }
 ```
 
@@ -42,12 +42,12 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.10.0</version>
+  <version>4.13.0</version>
 </dependency>
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>compiler</artifactId>
-  <version>4.10.0</version>
+  <version>4.13.0</version>
   <optional>true</optional>
 </dependency>
 ```
@@ -60,10 +60,15 @@ Depending on your ProGuard (DexGuard) config and usage, you may need to include 
 
 ```pro
 -keep public class * implements com.bumptech.glide.module.GlideModule
--keep public class * extends com.bumptech.glide.module.AppGlideModule
+-keep class * extends com.bumptech.glide.module.AppGlideModule {
+ <init>(...);
+}
 -keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
   **[] $VALUES;
   public *;
+}
+-keep class com.bumptech.glide.load.data.ParcelFileDescriptorRewinder$InternalRewinder {
+  *** rewind();
 }
 
 # for DexGuard only

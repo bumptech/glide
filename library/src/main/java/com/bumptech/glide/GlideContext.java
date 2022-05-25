@@ -14,6 +14,8 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.ViewTarget;
+import com.bumptech.glide.util.GlideSuppliers;
+import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,19 +24,20 @@ import java.util.Map.Entry;
  * Global context for all loads in Glide containing and exposing the various registries and classes
  * required to load resources.
  */
+@SuppressWarnings("PMD.DataClass")
 public class GlideContext extends ContextWrapper {
   @VisibleForTesting
   static final TransitionOptions<?, ?> DEFAULT_TRANSITION_OPTIONS =
       new GenericTransitionOptions<>();
 
   private final ArrayPool arrayPool;
-  private final Registry registry;
+  private final GlideSupplier<Registry> registry;
   private final ImageViewTargetFactory imageViewTargetFactory;
   private final RequestOptionsFactory defaultRequestOptionsFactory;
   private final List<RequestListener<Object>> defaultRequestListeners;
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions;
   private final Engine engine;
-  private final boolean isLoggingRequestOriginsEnabled;
+  private final GlideExperiments experiments;
   private final int logLevel;
 
   @Nullable
@@ -44,24 +47,25 @@ public class GlideContext extends ContextWrapper {
   public GlideContext(
       @NonNull Context context,
       @NonNull ArrayPool arrayPool,
-      @NonNull Registry registry,
+      @NonNull GlideSupplier<Registry> registry,
       @NonNull ImageViewTargetFactory imageViewTargetFactory,
       @NonNull RequestOptionsFactory defaultRequestOptionsFactory,
       @NonNull Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions,
       @NonNull List<RequestListener<Object>> defaultRequestListeners,
       @NonNull Engine engine,
-      boolean isLoggingRequestOriginsEnabled,
+      @NonNull GlideExperiments experiments,
       int logLevel) {
     super(context.getApplicationContext());
     this.arrayPool = arrayPool;
-    this.registry = registry;
     this.imageViewTargetFactory = imageViewTargetFactory;
     this.defaultRequestOptionsFactory = defaultRequestOptionsFactory;
     this.defaultRequestListeners = defaultRequestListeners;
     this.defaultTransitionOptions = defaultTransitionOptions;
     this.engine = engine;
-    this.isLoggingRequestOriginsEnabled = isLoggingRequestOriginsEnabled;
+    this.experiments = experiments;
     this.logLevel = logLevel;
+
+    this.registry = GlideSuppliers.memorize(registry);
   }
 
   public List<RequestListener<Object>> getDefaultRequestListeners() {
@@ -106,7 +110,7 @@ public class GlideContext extends ContextWrapper {
 
   @NonNull
   public Registry getRegistry() {
-    return registry;
+    return registry.get();
   }
 
   public int getLogLevel() {
@@ -118,13 +122,7 @@ public class GlideContext extends ContextWrapper {
     return arrayPool;
   }
 
-  /**
-   * Returns {@code true} if Glide should populate {@link
-   * com.bumptech.glide.load.engine.GlideException#setOrigin(Exception)} for failed requests.
-   *
-   * <p>This is an experimental API that may be removed in the future.
-   */
-  public boolean isLoggingRequestOriginsEnabled() {
-    return isLoggingRequestOriginsEnabled;
+  public GlideExperiments getExperiments() {
+    return experiments;
   }
 }

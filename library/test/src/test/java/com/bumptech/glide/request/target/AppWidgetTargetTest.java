@@ -2,7 +2,7 @@ package com.bumptech.glide.request.target;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -10,11 +10,11 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.graphics.Bitmap;
 import android.widget.RemoteViews;
+import androidx.test.core.app.ApplicationProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -30,7 +30,8 @@ public class AppWidgetTargetTest {
 
   @Before
   public void setUp() {
-    shadowManager = Shadow.extract(AppWidgetManager.getInstance(RuntimeEnvironment.application));
+    shadowManager =
+        Shadow.extract(AppWidgetManager.getInstance(ApplicationProvider.getApplicationContext()));
     viewId = 1234;
     views = mock(RemoteViews.class);
   }
@@ -39,7 +40,8 @@ public class AppWidgetTargetTest {
   public void testSetsBitmapOnRemoteViewsWithViewIdWhenCreatedWithComponentName() {
     ComponentName componentName = mock(ComponentName.class);
     AppWidgetTarget target =
-        new AppWidgetTarget(RuntimeEnvironment.application, viewId, views, componentName);
+        new AppWidgetTarget(
+            ApplicationProvider.getApplicationContext(), viewId, views, componentName);
 
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     target.onResourceReady(bitmap, null /*glideAnimation*/);
@@ -51,7 +53,8 @@ public class AppWidgetTargetTest {
   public void testUpdatesAppWidgetWhenCreatedWithComponentName() {
     ComponentName componentName = mock(ComponentName.class);
     AppWidgetTarget target =
-        new AppWidgetTarget(RuntimeEnvironment.application, viewId, views, componentName);
+        new AppWidgetTarget(
+            ApplicationProvider.getApplicationContext(), viewId, views, componentName);
 
     target.onResourceReady(
         Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), null
@@ -65,7 +68,7 @@ public class AppWidgetTargetTest {
   public void testSetsBitmapOnRemoteViewsWithViewIdWhenCreatedWithWidgetIds() {
     int[] widgetIds = new int[] {1};
     AppWidgetTarget target =
-        new AppWidgetTarget(RuntimeEnvironment.application, viewId, views, widgetIds);
+        new AppWidgetTarget(ApplicationProvider.getApplicationContext(), viewId, views, widgetIds);
 
     Bitmap bitmap = Bitmap.createBitmap(100, 200, Bitmap.Config.RGB_565);
     target.onResourceReady(bitmap, null /*glideAnimation*/);
@@ -77,7 +80,7 @@ public class AppWidgetTargetTest {
   public void testUpdatesAppWidgetWhenCreatedWithWidgetIds() {
     int[] widgetIds = new int[] {1};
     AppWidgetTarget target =
-        new AppWidgetTarget(RuntimeEnvironment.application, viewId, views, widgetIds);
+        new AppWidgetTarget(ApplicationProvider.getApplicationContext(), viewId, views, widgetIds);
 
     target.onResourceReady(
         Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888), null
@@ -100,28 +103,33 @@ public class AppWidgetTargetTest {
   @Test(expected = NullPointerException.class)
   public void testThrowsWhenGivenNullRemoteViewsWithWidgetIds() {
     new AppWidgetTarget(
-        RuntimeEnvironment.application, viewId, null /*remoteViews*/, 1 /*widgetIds*/);
+        ApplicationProvider.getApplicationContext(), viewId, null /*remoteViews*/, 1 /*widgetIds*/);
   }
 
   @Test(expected = NullPointerException.class)
   public void testThrowsWhenGivenNullRemoteViewsWithComponentName() {
     new AppWidgetTarget(
-        RuntimeEnvironment.application, viewId, null /*remoteViews*/, mock(ComponentName.class));
+        ApplicationProvider.getApplicationContext(),
+        viewId,
+        null /*remoteViews*/,
+        mock(ComponentName.class));
   }
 
   @Test(expected = NullPointerException.class)
   public void testThrowsWhenGivenNullWidgetIds() {
-    new AppWidgetTarget(RuntimeEnvironment.application, viewId, views, (int[]) null /*widgetIds*/);
+    new AppWidgetTarget(
+        ApplicationProvider.getApplicationContext(), viewId, views, (int[]) null /*widgetIds*/);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testThrowsWhenGivenEmptyWidgetIds() {
-    new AppWidgetTarget(RuntimeEnvironment.application, viewId, views);
+    new AppWidgetTarget(ApplicationProvider.getApplicationContext(), viewId, views);
   }
 
   @Test(expected = NullPointerException.class)
   public void testThrowsWhenGivenNullComponentName() {
-    new AppWidgetTarget(RuntimeEnvironment.application, viewId, views, (ComponentName) null);
+    new AppWidgetTarget(
+        ApplicationProvider.getApplicationContext(), viewId, views, (ComponentName) null);
   }
 
   @Implements(AppWidgetManager.class)

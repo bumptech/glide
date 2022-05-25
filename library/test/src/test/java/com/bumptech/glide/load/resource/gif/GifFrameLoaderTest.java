@@ -4,19 +4,21 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
 import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
@@ -39,9 +41,10 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.LooperMode;
 
+@LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 18)
 public class GifFrameLoaderTest {
@@ -89,7 +92,7 @@ public class GifFrameLoaderTest {
   }
 
   private static Glide getGlideSingleton() {
-    return Glide.get(RuntimeEnvironment.application);
+    return Glide.get(ApplicationProvider.getApplicationContext());
   }
 
   @SuppressWarnings("unchecked")
@@ -333,6 +336,18 @@ public class GifFrameLoaderTest {
     loader.subscribe(callback);
     verify(callback, times(2)).onFrameReady();
     assertThat(loader.getCurrentFrame()).isEqualTo(expected);
+  }
+
+  @Test
+  public void onFrameReady_whenInvisible_setVisibleLater() {
+    loader = createGifFrameLoader(/*handler=*/ null);
+    // The target is invisible at this point.
+    loader.unsubscribe(callback);
+    loader.setNextStartFromFirstFrame();
+    DelayTarget loaded = mock(DelayTarget.class);
+    when(loaded.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
+    loader.onFrameReady(loaded);
+    loader.subscribe(callback);
   }
 
   @Test

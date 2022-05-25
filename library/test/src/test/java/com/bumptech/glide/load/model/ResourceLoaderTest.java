@@ -5,12 +5,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.net.Uri;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -21,7 +22,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 /** Tests for the {@link com.bumptech.glide.load.model.ResourceLoader} class. */
@@ -41,7 +41,8 @@ public class ResourceLoaderTest {
     MockitoAnnotations.initMocks(this);
     options = new Options();
 
-    loader = new ResourceLoader<>(RuntimeEnvironment.application.getResources(), uriLoader);
+    loader =
+        new ResourceLoader<>(ApplicationProvider.getApplicationContext().getResources(), uriLoader);
   }
 
   @Test

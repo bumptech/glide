@@ -22,7 +22,9 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
     return (UnitModelLoader<T>) INSTANCE;
   }
 
-  /** @deprecated Use {@link #getInstance()} instead. */
+  /**
+   * @deprecated Use {@link #getInstance()} instead.
+   */
   // Need constructor to document deprecation, will be removed, when constructor is privatized.
   @SuppressWarnings({"PMD.UnnecessaryConstructor", "DeprecatedIsStillUsed"})
   @Deprecated
@@ -95,7 +97,9 @@ public class UnitModelLoader<Model> implements ModelLoader<Model, Model> {
       return (Factory<T>) FACTORY;
     }
 
-    /** @deprecated Use {@link #getInstance()} instead. */
+    /**
+     * @deprecated Use {@link #getInstance()} instead.
+     */
     // Need constructor to document deprecation, will be removed, when constructor is privatized.
     @SuppressWarnings("PMD.UnnecessaryConstructor")
     @Deprecated

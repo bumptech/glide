@@ -1,12 +1,12 @@
 package com.bumptech.glide.load.data.resource;
 
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Matchers.isNotNull;
 import static org.mockito.Mockito.verify;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.StreamLocalUriFetcher;
@@ -17,10 +17,10 @@ import java.io.InputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadow.api.Shadow;
 
@@ -38,7 +38,7 @@ public class StreamLocalUriFetcherTest {
 
   @Test
   public void testLoadResource_returnsInputStream() throws Exception {
-    Context context = RuntimeEnvironment.application;
+    Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();
@@ -47,12 +47,12 @@ public class StreamLocalUriFetcherTest {
 
     StreamLocalUriFetcher fetcher = new StreamLocalUriFetcher(context.getContentResolver(), uri);
     fetcher.loadData(Priority.NORMAL, callback);
-    verify(callback).onDataReady(isNotNull(InputStream.class));
+    verify(callback).onDataReady(ArgumentMatchers.<InputStream>isNotNull());
   }
 
   @Test
   public void testLoadResource_withNullInputStream_callsLoadFailed() {
-    Context context = RuntimeEnvironment.application;
+    Context context = ApplicationProvider.getApplicationContext();
     Uri uri = Uri.parse("file://nothing");
 
     ContentResolver contentResolver = context.getContentResolver();

@@ -1,7 +1,5 @@
 package com.bumptech.glide;
 
-import static com.bumptech.glide.test.Matchers.anyDrawable;
-import static com.bumptech.glide.test.Matchers.anyDrawableTarget;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -17,16 +15,18 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.test.ConcurrencyHelper;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
-import com.bumptech.glide.test.TearDownGlide;
 import com.bumptech.glide.test.WaitModelLoader;
 import com.bumptech.glide.test.WaitModelLoader.WaitModel;
+import com.bumptech.glide.testutil.ConcurrencyHelper;
+import com.bumptech.glide.testutil.TearDownGlide;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -180,16 +180,16 @@ public class RequestTest {
 
     verify(requestListener, never())
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.DATA_DISK_CACHE),
             anyBoolean());
     verify(requestListener, never())
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.RESOURCE_DISK_CACHE),
             anyBoolean());
     assertThat(imageView.getDrawable()).isNull();
@@ -220,16 +220,16 @@ public class RequestTest {
 
     verify(requestListener, never())
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.DATA_DISK_CACHE),
             anyBoolean());
     verify(requestListener, never())
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.RESOURCE_DISK_CACHE),
             anyBoolean());
     assertThat(imageView.getDrawable()).isNotNull();
@@ -260,16 +260,16 @@ public class RequestTest {
 
     verify(requestListener, never())
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.DATA_DISK_CACHE),
             anyBoolean());
     verify(requestListener, never())
         .onResourceReady(
-            anyDrawable(),
+            ArgumentMatchers.<Drawable>any(),
             any(),
-            anyDrawableTarget(),
+            ArgumentMatchers.<Target<Drawable>>any(),
             eq(DataSource.RESOURCE_DISK_CACHE),
             anyBoolean());
 

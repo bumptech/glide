@@ -5,11 +5,11 @@ import static org.junit.Assert.assertNull;
 
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.test.core.app.ApplicationProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -21,7 +21,7 @@ public class ViewPreloadSizeProviderTest {
 
   @Before
   public void setUp() {
-    view = new View(RuntimeEnvironment.application);
+    view = new View(ApplicationProvider.getApplicationContext());
     provider = new ViewPreloadSizeProvider<>();
   }
 
@@ -71,7 +71,7 @@ public class ViewPreloadSizeProviderTest {
   public void testIgnoresNewViewIfAlreadyWaitingOnSizeOfAnotherView() {
     provider.setView(view);
 
-    View newView = new View(RuntimeEnvironment.application);
+    View newView = new View(ApplicationProvider.getApplicationContext());
     newView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
     provider.setView(newView);
 

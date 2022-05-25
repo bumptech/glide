@@ -76,6 +76,7 @@ class DecodeJob<R>
   private volatile DataFetcherGenerator currentGenerator;
   private volatile boolean isCallbackNotified;
   private volatile boolean isCancelled;
+  private boolean isLoadingFromAlternateCacheKey;
 
   DecodeJob(DiskCacheProvider diskCacheProvider, Pools.Pool<DecodeJob<?>> pool) {
     this.diskCacheProvider = diskCacheProvider;
@@ -222,7 +223,7 @@ class DecodeJob<R>
     // This should be much more fine grained, but since Java's thread pool implementation silently
     // swallows all otherwise fatal exceptions, this will at least make it obvious to developers
     // that something is failing.
-    GlideTrace.beginSectionFormat("DecodeJob#run(model=%s)", model);
+    GlideTrace.beginSectionFormat("DecodeJob#run(reason=%s, model=%s)", runReason, model);
     // Methods in the try statement can invalidate currentFetcher, so set a local variable here to
     // ensure that the fetcher is cleaned up either way.
     DataFetcher<?> localFetcher = currentFetcher;
@@ -332,9 +333,10 @@ class DecodeJob<R>
     onLoadFailed();
   }
 
-  private void notifyComplete(Resource<R> resource, DataSource dataSource) {
+  private void notifyComplete(
+      Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
     setNotifiedOrThrow();
-    callback.onResourceReady(resource, dataSource);
+    callback.onResourceReady(resource, dataSource, isLoadedFromAlternateCacheKey);
   }
 
   private void setNotifiedOrThrow() {
@@ -381,6 +383,8 @@ class DecodeJob<R>
     this.currentFetcher = fetcher;
     this.currentDataSource = dataSource;
     this.currentAttemptingKey = attemptedKey;
+    this.isLoadingFromAlternateCacheKey = sourceKey != decodeHelper.getCacheKeys().get(0);
+
     if (Thread.currentThread() != currentThread) {
       runReason = RunReason.DECODE_DATA;
       callback.reschedule(this);
@@ -429,39 +433,46 @@ class DecodeJob<R>
       throwables.add(e);
     }
     if (resource != null) {
-      notifyEncodeAndRelease(resource, currentDataSource);
+      notifyEncodeAndRelease(resource, currentDataSource, isLoadingFromAlternateCacheKey);
     } else {
       runGenerators();
     }
   }
 
-  private void notifyEncodeAndRelease(Resource<R> resource, DataSource dataSource) {
-    if (resource instanceof Initializable) {
-      ((Initializable) resource).initialize();
-    }
-
-    Resource<R> result = resource;
-    LockedResource<R> lockedResource = null;
-    if (deferredEncodeManager.hasResourceToEncode()) {
-      lockedResource = LockedResource.obtain(resource);
-      result = lockedResource;
-    }
-
-    notifyComplete(result, dataSource);
-
-    stage = Stage.ENCODE;
+  private void notifyEncodeAndRelease(
+      Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
+    GlideTrace.beginSection("DecodeJob.notifyEncodeAndRelease");
     try {
+      if (resource instanceof Initializable) {
+        ((Initializable) resource).initialize();
+      }
+
+      Resource<R> result = resource;
+      LockedResource<R> lockedResource = null;
       if (deferredEncodeManager.hasResourceToEncode()) {
-        deferredEncodeManager.encode(diskCacheProvider, options);
+        lockedResource = LockedResource.obtain(resource);
+        result = lockedResource;
       }
+
+      notifyComplete(result, dataSource, isLoadedFromAlternateCacheKey);
+
+      stage = Stage.ENCODE;
+      try {
+        if (deferredEncodeManager.hasResourceToEncode()) {
+          deferredEncodeManager.encode(diskCacheProvider, options);
+        }
+      } finally {
+        if (lockedResource != null) {
+          lockedResource.unlock();
+        }
+      }
+      // Call onEncodeComplete outside the finally block so that it's not called if the encode
+      // process
+      // throws.
+      onEncodeComplete();
     } finally {
-      if (lockedResource != null) {
-        lockedResource.unlock();
-      }
+      GlideTrace.endSection();
     }
-    // Call onEncodeComplete outside the finally block so that it's not called if the encode process
-    // throws.
-    onEncodeComplete();
   }
 
   private <Data> Resource<R> decodeFromData(
@@ -710,7 +721,8 @@ class DecodeJob<R>
 
   interface Callback<R> {
 
-    void onResourceReady(Resource<R> resource, DataSource dataSource);
+    void onResourceReady(
+        Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey);
 
     void onLoadFailed(GlideException e);
 

@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.Option;
@@ -25,7 +26,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class RequestOptionsTest {
@@ -39,7 +39,7 @@ public class RequestOptionsTest {
     MockitoAnnotations.initMocks(this);
     options = new RequestOptions();
 
-    app = RuntimeEnvironment.application;
+    app = ApplicationProvider.getApplicationContext();
   }
 
   @Test

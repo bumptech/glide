@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.model;
 
 import android.content.ContentResolver;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.net.Uri;
-import android.os.ParcelFileDescriptor;
 import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -83,10 +83,10 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
     }
   }
 
-  /** Factory for loading {@link ParcelFileDescriptor}s from asset manager Uris. */
+  /** Factory for loading {@link AssetFileDescriptor}s from asset manager Uris. */
   public static class FileDescriptorFactory
-      implements ModelLoaderFactory<Uri, ParcelFileDescriptor>,
-          AssetFetcherFactory<ParcelFileDescriptor> {
+      implements ModelLoaderFactory<Uri, AssetFileDescriptor>,
+          AssetFetcherFactory<AssetFileDescriptor> {
 
     private final AssetManager assetManager;
 
@@ -96,7 +96,7 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
 
     @NonNull
     @Override
-    public ModelLoader<Uri, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
+    public ModelLoader<Uri, AssetFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
       return new AssetUriLoader<>(assetManager, this);
     }
 
@@ -106,7 +106,7 @@ public class AssetUriLoader<Data> implements ModelLoader<Uri, Data> {
     }
 
     @Override
-    public DataFetcher<ParcelFileDescriptor> buildFetcher(
+    public DataFetcher<AssetFileDescriptor> buildFetcher(
         AssetManager assetManager, String assetPath) {
       return new FileDescriptorAssetPathFetcher(assetManager, assetPath);
     }

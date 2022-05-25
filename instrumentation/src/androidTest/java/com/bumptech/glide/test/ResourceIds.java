@@ -16,6 +16,7 @@ public final class ResourceIds {
   public interface raw {
     int dl_world_anim = getResourceId("raw", "dl_world_anim");
     int canonical = getResourceId("raw", "canonical");
+    int canonical_large = getResourceId("raw", "canonical_large");
     int canonical_png = getResourceId("raw", "canonical_png");
     int canonical_transparent_png = getResourceId("raw", "canonical_transparent_png");
     int interlaced_transparent_gif = getResourceId("raw", "interlaced_transparent_gif");

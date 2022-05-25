@@ -8,11 +8,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
+import androidx.test.core.app.ApplicationProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -24,7 +24,7 @@ public class ImageViewTargetFactoryTest {
   @Before
   public void setUp() {
     factory = new ImageViewTargetFactory();
-    view = new ImageView(RuntimeEnvironment.application);
+    view = new ImageView(ApplicationProvider.getApplicationContext());
   }
 
   @Test
@@ -39,7 +39,7 @@ public class ImageViewTargetFactoryTest {
   public void testReturnsTargetForBitmapDrawables() {
     BitmapDrawable drawable =
         new BitmapDrawable(
-            RuntimeEnvironment.application.getResources(),
+            ApplicationProvider.getApplicationContext().getResources(),
             Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444));
 
     Target<BitmapDrawable> target = factory.buildTarget(view, BitmapDrawable.class);

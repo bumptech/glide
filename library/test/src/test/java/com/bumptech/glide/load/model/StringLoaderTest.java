@@ -5,10 +5,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.net.Uri;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -21,7 +22,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 /** Tests for the {@link com.bumptech.glide.load.model.StringLoader} class. */
@@ -52,7 +52,7 @@ public class StringLoaderTest {
     // TODO fix drive letter parsing somehow
     assumeTrue("it will fail with schema being the drive letter (C:\\... -> C)", !Util.isWindows());
 
-    File f = RuntimeEnvironment.application.getCacheDir();
+    File f = ApplicationProvider.getApplicationContext().getCacheDir();
     Uri expected = Uri.fromFile(f);
     when(uriLoader.buildLoadData(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE), eq(options)))
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
@@ -83,7 +83,7 @@ public class StringLoaderTest {
 
   @Test
   public void testHandlesFileUris() {
-    File f = RuntimeEnvironment.application.getCacheDir();
+    File f = ApplicationProvider.getApplicationContext().getCacheDir();
 
     Uri expected = Uri.fromFile(f);
     when(uriLoader.buildLoadData(eq(expected), eq(IMAGE_SIDE), eq(IMAGE_SIDE), eq(options)))

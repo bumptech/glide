@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.util.Preconditions;
 
 public final class CanonicalBitmap {
@@ -35,7 +35,7 @@ public final class CanonicalBitmap {
   }
 
   private Bitmap decodeBitmap() {
-    Context context = InstrumentationRegistry.getTargetContext();
+    Context context = ApplicationProvider.getApplicationContext();
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inScaled = false;
     int resourceId = ResourceIds.raw.canonical;

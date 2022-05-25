@@ -13,7 +13,7 @@ import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.RegressionTest;
 import com.bumptech.glide.test.SplitByCpu;
 import com.bumptech.glide.test.SplitBySdk;
-import com.bumptech.glide.test.TearDownGlide;
+import com.bumptech.glide.testutil.TearDownGlide;
 import java.util.concurrent.ExecutionException;
 import org.junit.Before;
 import org.junit.Rule;

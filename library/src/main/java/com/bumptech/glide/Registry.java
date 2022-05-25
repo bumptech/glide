@@ -37,7 +37,13 @@ import java.util.List;
 // Public API.
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Registry {
-  public static final String BUCKET_GIF = "Gif";
+  public static final String BUCKET_ANIMATION = "Animation";
+  /**
+   * @deprecated Identical to {@link #BUCKET_ANIMATION}, just with a more confusing name. This
+   *     bucket can be used for all animation types (including webp).
+   */
+  @Deprecated public static final String BUCKET_GIF = BUCKET_ANIMATION;
+
   public static final String BUCKET_BITMAP = "Bitmap";
   public static final String BUCKET_BITMAP_DRAWABLE = "BitmapDrawable";
   private static final String BUCKET_PREPEND_ALL = "legacy_prepend_all";
@@ -65,7 +71,7 @@ public class Registry {
     this.transcoderRegistry = new TranscoderRegistry();
     this.imageHeaderParserRegistry = new ImageHeaderParserRegistry();
     setResourceDecoderBucketPriorityList(
-        Arrays.asList(BUCKET_GIF, BUCKET_BITMAP, BUCKET_BITMAP_DRAWABLE));
+        Arrays.asList(BUCKET_ANIMATION, BUCKET_BITMAP, BUCKET_BITMAP_DRAWABLE));
   }
 
   /**
@@ -246,7 +252,7 @@ public class Registry {
    * which are identified as a unique string. Glide will attempt to decode using decoders in the
    * highest priority bucket before moving on to the next one.
    *
-   * <p>The default order is [{@link #BUCKET_GIF}, {@link #BUCKET_BITMAP}, {@link
+   * <p>The default order is [{@link #BUCKET_ANIMATION}, {@link #BUCKET_BITMAP}, {@link
    * #BUCKET_BITMAP_DRAWABLE}].
    *
    * <p>When registering decoders, you can use these buckets to specify the ordering relative only
@@ -261,8 +267,11 @@ public class Registry {
   public final Registry setResourceDecoderBucketPriorityList(@NonNull List<String> buckets) {
     // See #3296 and https://bugs.openjdk.java.net/browse/JDK-6260652.
     List<String> modifiedBuckets = new ArrayList<>(buckets.size());
-    modifiedBuckets.addAll(buckets);
-    modifiedBuckets.add(0, BUCKET_PREPEND_ALL);
+    modifiedBuckets.add(BUCKET_PREPEND_ALL);
+    // See https://github.com/bumptech/glide/issues/4309.
+    for (String bucket : buckets) {
+      modifiedBuckets.add(bucket);
+    }
     modifiedBuckets.add(BUCKET_APPEND_ALL);
     decoderRegistry.setBucketPriorityList(modifiedBuckets);
     return this;
@@ -582,11 +591,7 @@ public class Registry {
 
   @NonNull
   public <Model> List<ModelLoader<Model, ?>> getModelLoaders(@NonNull Model model) {
-    List<ModelLoader<Model, ?>> result = modelLoaderRegistry.getModelLoaders(model);
-    if (result.isEmpty()) {
-      throw new NoModelLoaderAvailableException(model);
-    }
-    return result;
+    return modelLoaderRegistry.getModelLoaders(model);
   }
 
   @NonNull
@@ -605,8 +610,18 @@ public class Registry {
   // Never serialized by Glide.
   @SuppressWarnings("serial")
   public static class NoModelLoaderAvailableException extends MissingComponentException {
+
     public NoModelLoaderAvailableException(@NonNull Object model) {
-      super("Failed to find any ModelLoaders for model: " + model);
+      super("Failed to find any ModelLoaders registered for model class: " + model.getClass());
+    }
+
+    public <M> NoModelLoaderAvailableException(
+        @NonNull M model, @NonNull List<ModelLoader<M, ?>> matchingButNotHandlingModelLoaders) {
+      super(
+          "Found ModelLoaders for model class: "
+              + matchingButNotHandlingModelLoaders
+              + ", but none that handle this specific model instance: "
+              + model);
     }
 
     public NoModelLoaderAvailableException(

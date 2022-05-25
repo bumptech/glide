@@ -6,9 +6,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.util.Util;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -31,8 +30,7 @@ public class RequestTracker {
   // A set of requests that have not completed and are queued to be run again. We use this list to
   // maintain hard references to these requests to ensure that they are not garbage collected
   // before they start running or while they are paused. See #346.
-  @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-  private final List<Request> pendingRequests = new ArrayList<>();
+  private final Set<Request> pendingRequests = new HashSet<>();
 
   private boolean isPaused;
 

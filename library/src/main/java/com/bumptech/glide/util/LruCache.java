@@ -15,7 +15,7 @@ import java.util.Map;
  * @param <Y> The type of the values.
  */
 public class LruCache<T, Y> {
-  private final Map<T, Y> cache = new LinkedHashMap<>(100, 0.75f, true);
+  private final Map<T, Entry<Y>> cache = new LinkedHashMap<>(100, 0.75f, true);
   private final long initialMaxSize;
   private long maxSize;
   private long currentSize;
@@ -98,7 +98,8 @@ public class LruCache<T, Y> {
    */
   @Nullable
   public synchronized Y get(@NonNull T key) {
-    return cache.get(key);
+    Entry<Y> entry = cache.get(key);
+    return entry != null ? entry.value : null;
   }
 
   /**
@@ -108,6 +109,19 @@ public class LruCache<T, Y> {
    * <p>If the size of the item is larger than the total cache size, the item will not be added to
    * the cache and instead {@link #onItemEvicted(Object, Object)} will be called synchronously with
    * the given key and item.
+   *
+   * <p>The size of the item is determined by the {@link #getSize(Object)} method. To avoid errors
+   * where {@link #getSize(Object)} returns different values for the same object when called at
+   * different times, the size value is acquired in {@code put} and retained until the item is
+   * evicted, replaced or removed.
+   *
+   * <p>If {@code item} is null the behavior here is a little odd. For the most part it's similar to
+   * simply calling {@link #remove(Object)} with the given key. The difference is that calling this
+   * method with a null {@code item} will result in an entry remaining in the cache with a null
+   * value and 0 size. The only real consequence is that at some point {@link #onItemEvicted(Object,
+   * Object)} may be called with the given {@code key} and a null value. Ideally we'd make calling
+   * this method with a null {@code item} identical to {@link #remove(Object)} but we're preserving
+   * this odd behavior to match older versions :(.
    *
    * @param key The key to add the item at.
    * @param item The item to add.
@@ -123,17 +137,17 @@ public class LruCache<T, Y> {
     if (item != null) {
       currentSize += itemSize;
     }
-    @Nullable final Y old = cache.put(key, item);
+    @Nullable Entry<Y> old = cache.put(key, item == null ? null : new Entry<>(item, itemSize));
     if (old != null) {
-      currentSize -= getSize(old);
+      currentSize -= old.size;
 
-      if (!old.equals(item)) {
-        onItemEvicted(key, old);
+      if (!old.value.equals(item)) {
+        onItemEvicted(key, old.value);
       }
     }
     evict();
 
-    return old;
+    return old != null ? old.value : null;
   }
 
   /**
@@ -143,11 +157,12 @@ public class LruCache<T, Y> {
    */
   @Nullable
   public synchronized Y remove(@NonNull T key) {
-    final Y value = cache.remove(key);
-    if (value != null) {
-      currentSize -= getSize(value);
+    Entry<Y> entry = cache.remove(key);
+    if (entry == null) {
+      return null;
     }
-    return value;
+    currentSize -= entry.size;
+    return entry.value;
   }
 
   /** Clears all items in the cache. */
@@ -162,20 +177,32 @@ public class LruCache<T, Y> {
    * @param size The size the cache should be less than.
    */
   protected synchronized void trimToSize(long size) {
-    Map.Entry<T, Y> last;
-    Iterator<Map.Entry<T, Y>> cacheIterator;
+    Map.Entry<T, Entry<Y>> last;
+    Iterator<Map.Entry<T, Entry<Y>>> cacheIterator;
     while (currentSize > size) {
       cacheIterator = cache.entrySet().iterator();
       last = cacheIterator.next();
-      final Y toRemove = last.getValue();
-      currentSize -= getSize(toRemove);
+      final Entry<Y> toRemove = last.getValue();
+      currentSize -= toRemove.size;
       final T key = last.getKey();
       cacheIterator.remove();
-      onItemEvicted(key, toRemove);
+      onItemEvicted(key, toRemove.value);
     }
   }
 
   private void evict() {
     trimToSize(maxSize);
+  }
+
+  @Synthetic
+  static final class Entry<Y> {
+    final Y value;
+    final int size;
+
+    @Synthetic
+    Entry(Y value, int size) {
+      this.value = value;
+      this.size = size;
+    }
   }
 }

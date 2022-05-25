@@ -2,7 +2,7 @@ package com.bumptech.glide.request.transition;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -11,12 +11,12 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.view.View;
 import android.view.animation.Animation;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.DataSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class ViewTransitionAnimationFactoryTest {
@@ -33,7 +33,8 @@ public class ViewTransitionAnimationFactoryTest {
   public void testFactoryReturnsNoAnimationIfFromMemoryCache() {
     Transition<Object> animation = factory.build(DataSource.MEMORY_CACHE, true /*isFirstResource*/);
     assertEquals(NoTransition.get(), animation);
-    verify(viewTransitionAnimationFactory, never()).build(RuntimeEnvironment.application);
+    verify(viewTransitionAnimationFactory, never())
+        .build(ApplicationProvider.getApplicationContext());
   }
 
   @Test
@@ -41,7 +42,8 @@ public class ViewTransitionAnimationFactoryTest {
     Transition<Object> animation =
         factory.build(DataSource.DATA_DISK_CACHE, false /*isFirstResource*/);
     assertEquals(NoTransition.get(), animation);
-    verify(viewTransitionAnimationFactory, never()).build(RuntimeEnvironment.application);
+    verify(viewTransitionAnimationFactory, never())
+        .build(ApplicationProvider.getApplicationContext());
   }
 
   @Test

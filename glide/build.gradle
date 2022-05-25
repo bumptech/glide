@@ -122,10 +122,9 @@ jar {
     exclude "**/R.class"
     exclude "**/R\$*.class"
     exclude "android/**"
+    exclude "**/BuildConfig.class"
 }
  
-
-
 artifacts {
     archives debugJavadocJar {
         classifier 'javadoc'

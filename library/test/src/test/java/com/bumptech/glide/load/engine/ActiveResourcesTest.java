@@ -2,9 +2,8 @@ package com.bumptech.glide.load.engine;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
@@ -13,7 +12,6 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.ActiveResources.DequeuedResourceCallback;
 import com.bumptech.glide.load.engine.ActiveResources.ResourceWeakReference;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
-import com.bumptech.glide.tests.GlideShadowLooper;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -28,10 +26,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
-import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(shadows = GlideShadowLooper.class)
 public class ActiveResourcesTest {
 
   @Mock private ResourceListener listener;
@@ -45,8 +41,6 @@ public class ActiveResourcesTest {
     MockitoAnnotations.initMocks(this);
     resources = new ActiveResources(/*isActiveResourceRetentionAllowed=*/ true);
     resources.setListener(listener);
-
-    reset(GlideShadowLooper.queue);
   }
 
   @After

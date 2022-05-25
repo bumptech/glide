@@ -65,10 +65,10 @@ public class DiskLruCacheFactory implements DiskCache.Factory {
       return null;
     }
 
-    if (!cacheDir.mkdirs() && (!cacheDir.exists() || !cacheDir.isDirectory())) {
-      return null;
+    if (cacheDir.isDirectory() || cacheDir.mkdirs()) {
+      return DiskLruCacheWrapper.create(cacheDir, diskCacheSize);
     }
 
-    return DiskLruCacheWrapper.create(cacheDir, diskCacheSize);
+    return null;
   }
 }

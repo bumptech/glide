@@ -3,12 +3,12 @@ package com.bumptech.glide.test;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import android.view.View;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import java.io.File;
@@ -67,6 +67,15 @@ public final class GlideApp {
   @SuppressLint("VisibleForTests")
   public static void init(@NonNull Context context, @NonNull GlideBuilder builder) {
     Glide.init(context, builder);
+  }
+
+  /**
+   * @see Glide#enableHardwareBitmaps()
+   */
+  @VisibleForTesting
+  @SuppressLint("VisibleForTests")
+  public static void enableHardwareBitmaps() {
+    Glide.enableHardwareBitmaps();
   }
 
   /**

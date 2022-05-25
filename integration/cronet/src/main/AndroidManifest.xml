@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.bumptech.glide.integration.cronet">
+    <application>
+        <meta-data
+            android:name="com.bumptech.glide.integration.cronet.CronetGlideModule"
+            android:value="GlideModule" />
+    </application>
+</manifest>

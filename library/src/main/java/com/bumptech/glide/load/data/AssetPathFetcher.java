@@ -30,14 +30,13 @@ public abstract class AssetPathFetcher<T> implements DataFetcher<T> {
   public void loadData(@NonNull Priority priority, @NonNull DataCallback<? super T> callback) {
     try {
       data = loadResource(assetManager, assetPath);
+      callback.onDataReady(data);
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Failed to load data from asset manager", e);
       }
       callback.onLoadFailed(e);
-      return;
     }
-    callback.onDataReady(data);
   }
 
   @Override

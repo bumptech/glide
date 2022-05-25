@@ -20,7 +20,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.test.ResourceIds;
-import com.bumptech.glide.test.TearDownGlide;
+import com.bumptech.glide.testutil.TearDownGlide;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import android.app.Application;
 import android.graphics.Bitmap;
 import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.load.engine.Resource;
@@ -22,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -35,7 +35,7 @@ public class BitmapTransformationTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
 
     Glide.init(context, new GlideBuilder().setBitmapPool(bitmapPool));
   }

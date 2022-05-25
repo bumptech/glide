@@ -27,6 +27,7 @@ import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestListener;
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 
 /**
  * Contains all public methods from {@link RequestBuilder<TranscodeType>}, all options from
@@ -398,7 +399,8 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
       "unchecked",
       "varargs"
   })
-  public GlideRequest<TranscodeType> transforms(@NonNull Transformation<Bitmap>... transformations) {
+  public GlideRequest<TranscodeType> transforms(
+      @NonNull Transformation<Bitmap>... transformations) {
     return (GlideRequest<TranscodeType>) super.transforms(transformations);
   }
 
@@ -407,7 +409,8 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
    */
   @NonNull
   @CheckResult
-  public GlideRequest<TranscodeType> optionalTransform(@NonNull Transformation<Bitmap> transformation) {
+  public GlideRequest<TranscodeType> optionalTransform(
+      @NonNull Transformation<Bitmap> transformation) {
     return (GlideRequest<TranscodeType>) super.optionalTransform(transformation);
   }
 
@@ -449,6 +452,22 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
     return (GlideRequest<TranscodeType>) super.dontAnimate();
   }
 
+  /**
+   * @see GlideOptions#lock()
+   */
+  @NonNull
+  public GlideRequest<TranscodeType> lock() {
+    return (GlideRequest<TranscodeType>) super.lock();
+  }
+
+  /**
+   * @see GlideOptions#autoClone()
+   */
+  @NonNull
+  public GlideRequest<TranscodeType> autoClone() {
+    return (GlideRequest<TranscodeType>) super.autoClone();
+  }
+
   @Override
   @NonNull
   @CheckResult
@@ -459,7 +478,8 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   @Override
   @NonNull
   @CheckResult
-  public GlideRequest<TranscodeType> transition(@NonNull TransitionOptions<?, ? super TranscodeType> options) {
+  public GlideRequest<TranscodeType> transition(
+      @NonNull TransitionOptions<?, ? super TranscodeType> options) {
     return (GlideRequest<TranscodeType>) super.transition(options);
   }
 
@@ -473,7 +493,8 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   @Override
   @NonNull
   @CheckResult
-  public GlideRequest<TranscodeType> addListener(@Nullable RequestListener<TranscodeType> listener) {
+  public GlideRequest<TranscodeType> addListener(
+      @Nullable RequestListener<TranscodeType> listener) {
     return (GlideRequest<TranscodeType>) super.addListener(listener);
   }
 
@@ -481,6 +502,13 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   @NonNull
   public GlideRequest<TranscodeType> error(@Nullable RequestBuilder<TranscodeType> builder) {
     return (GlideRequest<TranscodeType>) super.error(builder);
+  }
+
+  @Override
+  @NonNull
+  @CheckResult
+  public GlideRequest<TranscodeType> error(Object o) {
+    return (GlideRequest<TranscodeType>) super.error(o);
   }
 
   @Override
@@ -495,11 +523,20 @@ public class GlideRequest<TranscodeType> extends RequestBuilder<TranscodeType> i
   @CheckResult
   @SafeVarargs
   @SuppressWarnings("varargs")
-  public final GlideRequest<TranscodeType> thumbnail(@Nullable RequestBuilder<TranscodeType>... builders) {
+  public final GlideRequest<TranscodeType> thumbnail(
+      @Nullable RequestBuilder<TranscodeType>... builders) {
     return (GlideRequest<TranscodeType>) super.thumbnail(builders);
   }
 
   @Override
+  @NonNull
+  @CheckResult
+  public GlideRequest<TranscodeType> thumbnail(@Nullable List<RequestBuilder<TranscodeType>> list) {
+    return (GlideRequest<TranscodeType>) super.thumbnail(list);
+  }
+
+  @Override
+  @Deprecated
   @NonNull
   @CheckResult
   public GlideRequest<TranscodeType> thumbnail(float sizeMultiplier) {

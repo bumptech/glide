@@ -8,6 +8,7 @@ import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.DecodeJob.DiskCacheProvider;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.cache.DiskCache;
@@ -97,6 +98,10 @@ final class DecodeHelper<Transcode> {
 
   DiskCacheStrategy getDiskCacheStrategy() {
     return diskCacheStrategy;
+  }
+
+  <T> DataRewinder<T> getRewinder(T data) {
+    return glideContext.getRegistry().getRewinder(data);
   }
 
   Priority getPriority() {

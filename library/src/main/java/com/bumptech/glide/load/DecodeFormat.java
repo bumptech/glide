@@ -34,7 +34,7 @@ public enum DecodeFormat {
    * alpha should return {@link android.graphics.Bitmap.Config#RGB_565} for {@link
    * android.graphics.Bitmap#getConfig()}.
    *
-   * <p>On Android O+, this format will use ARGB_8888 only when it's not possible to use {@link
+   * <p>On Android O+, this format will use RGB_565 only when it's not possible to use {@link
    * android.graphics.Bitmap.Config#HARDWARE}.
    */
   PREFER_RGB_565;

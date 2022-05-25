@@ -7,7 +7,7 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.util.ExceptionCatchingInputStream;
+import com.bumptech.glide.util.ExceptionPassthroughInputStream;
 import com.bumptech.glide.util.MarkEnforcingInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,8 +49,8 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
     // Use to retrieve exceptions thrown while reading.
     // TODO(#126): when the framework no longer returns partially decoded Bitmaps or provides a
     // way to determine if a Bitmap is partially decoded, consider removing.
-    ExceptionCatchingInputStream exceptionStream =
-        ExceptionCatchingInputStream.obtain(bufferedStream);
+    ExceptionPassthroughInputStream exceptionStream =
+        ExceptionPassthroughInputStream.obtain(bufferedStream);
 
     // Use to read data.
     // Ensures that we can always reset after reading an image header so that we can still
@@ -74,11 +74,11 @@ public class StreamBitmapDecoder implements ResourceDecoder<InputStream, Bitmap>
    */
   static class UntrustedCallbacks implements Downsampler.DecodeCallbacks {
     private final RecyclableBufferedInputStream bufferedStream;
-    private final ExceptionCatchingInputStream exceptionStream;
+    private final ExceptionPassthroughInputStream exceptionStream;
 
     UntrustedCallbacks(
         RecyclableBufferedInputStream bufferedStream,
-        ExceptionCatchingInputStream exceptionStream) {
+        ExceptionPassthroughInputStream exceptionStream) {
       this.bufferedStream = bufferedStream;
       this.exceptionStream = exceptionStream;
     }

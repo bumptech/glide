@@ -12,15 +12,17 @@ import java.io.InputStream;
  * stream.
  */
 public final class InputStreamRewinder implements DataRewinder<InputStream> {
-  // 5mb.
-  private static final int MARK_LIMIT = 5 * 1024 * 1024;
+  // 5MB.
+  private static final int MARK_READ_LIMIT = 5 * 1024 * 1024;
 
   private final RecyclableBufferedInputStream bufferedStream;
 
   @Synthetic
-  InputStreamRewinder(InputStream is, ArrayPool byteArrayPool) {
+  public InputStreamRewinder(InputStream is, ArrayPool byteArrayPool) {
+    // We don't check is.markSupported() here because RecyclableBufferedInputStream allows resetting
+    // after exceeding MARK_READ_LIMIT, which other InputStreams don't guarantee.
     bufferedStream = new RecyclableBufferedInputStream(is, byteArrayPool);
-    bufferedStream.mark(MARK_LIMIT);
+    bufferedStream.mark(MARK_READ_LIMIT);
   }
 
   @NonNull
@@ -33,6 +35,10 @@ public final class InputStreamRewinder implements DataRewinder<InputStream> {
   @Override
   public void cleanup() {
     bufferedStream.release();
+  }
+
+  public void fixMarkLimits() {
+    bufferedStream.fixMarkLimit();
   }
 
   /**

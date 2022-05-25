@@ -1283,14 +1283,14 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
 
   @NonNull
   @SuppressWarnings("unchecked")
-  private T selfOrThrowIfLocked() {
+  protected final T selfOrThrowIfLocked() {
     if (isLocked) {
       throw new IllegalStateException("You cannot modify locked T, consider clone()");
     }
     return self();
   }
 
-  protected boolean isAutoCloneEnabled() {
+  protected final boolean isAutoCloneEnabled() {
     return isAutoCloneEnabled;
   }
 

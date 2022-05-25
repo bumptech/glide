@@ -3,8 +3,8 @@ package com.bumptech.glide;
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Application;
 import android.widget.ImageView;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.resource.SimpleResource;
 import com.bumptech.glide.request.Request;
@@ -31,7 +32,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @SuppressWarnings("unchecked")
@@ -52,8 +52,8 @@ public class RequestBuilderTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    glide = Glide.get(RuntimeEnvironment.application);
-    context = RuntimeEnvironment.application;
+    glide = Glide.get(ApplicationProvider.getApplicationContext());
+    context = ApplicationProvider.getApplicationContext();
   }
 
   @Test(expected = NullPointerException.class)
@@ -102,7 +102,7 @@ public class RequestBuilderTest {
 
   @Test(expected = RuntimeException.class)
   public void testThrowsIfIntoViewCalledOnBackgroundThread() throws InterruptedException {
-    final ImageView imageView = new ImageView(RuntimeEnvironment.application);
+    final ImageView imageView = new ImageView(ApplicationProvider.getApplicationContext());
     testInBackground(
         new BackgroundTester() {
           @Override
@@ -128,7 +128,12 @@ public class RequestBuilderTest {
   public void testMultipleRequestListeners() {
     getNullModelRequest().addListener(listener1).addListener(listener2).into(target);
     verify(requestManager).track(any(Target.class), requestCaptor.capture());
-    requestCaptor.getValue().onResourceReady(new SimpleResource<>(new Object()), DataSource.LOCAL);
+    requestCaptor
+        .getValue()
+        .onResourceReady(
+            new SimpleResource<>(new Object()),
+            DataSource.LOCAL,
+            /*isLoadedFromAlternateCacheKey=*/ false);
 
     verify(listener1)
         .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
@@ -140,7 +145,12 @@ public class RequestBuilderTest {
   public void testListenerApiOverridesListeners() {
     getNullModelRequest().addListener(listener1).listener(listener2).into(target);
     verify(requestManager).track(any(Target.class), requestCaptor.capture());
-    requestCaptor.getValue().onResourceReady(new SimpleResource<>(new Object()), DataSource.LOCAL);
+    requestCaptor
+        .getValue()
+        .onResourceReady(
+            new SimpleResource<>(new Object()),
+            DataSource.LOCAL,
+            /*isLoadedFromAlternateCacheKey=*/ false);
 
     // The #listener API removes any previous listeners, so the first listener should not be called.
     verify(listener1, never())

@@ -70,8 +70,8 @@ dependencies {
         // confusing.
         exclude group: "com.google.auto.value", module: "auto-value"
     }
-    testImplementation "androidx.annotation:annotation:${ANDROID_X_VERSION}"
-    testImplementation "androidx.fragment:fragment:${ANDROID_X_VERSION}"
+    testImplementation "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
+    testImplementation "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
     testImplementation "androidx.legacy:legacy-support-v4:${ANDROID_X_VERSION}"
     // TODO: this seems excessive, but it works...
     testImplementation files(Jvm.current().getJre().homeDir.getAbsolutePath()+'/lib/rt.jar')

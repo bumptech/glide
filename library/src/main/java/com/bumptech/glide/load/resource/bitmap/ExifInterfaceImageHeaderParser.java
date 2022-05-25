@@ -1,9 +1,9 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import android.media.ExifInterface;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.exifinterface.media.ExifInterface;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.util.ByteBufferUtil;
@@ -24,13 +24,13 @@ public final class ExifInterfaceImageHeaderParser implements ImageHeaderParser {
 
   @NonNull
   @Override
-  public ImageType getType(@NonNull InputStream is) throws IOException {
+  public ImageType getType(@NonNull InputStream is) {
     return ImageType.UNKNOWN;
   }
 
   @NonNull
   @Override
-  public ImageType getType(@NonNull ByteBuffer byteBuffer) throws IOException {
+  public ImageType getType(@NonNull ByteBuffer byteBuffer) {
     return ImageType.UNKNOWN;
   }
 

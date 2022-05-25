@@ -2,7 +2,7 @@ package com.bumptech.glide.load.model;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -159,11 +159,14 @@ public class MultiModelLoaderFactoryTest {
     assertThat(modelLoaders).containsExactly(otherLoader, firstModelLoader);
   }
 
+  @SuppressWarnings("TruthIncompatibleType")
   @Test
   public void testBuild_withModelClass_excludesModelLoadersForOtherModelClasses() {
     multiFactory.append(String.class, String.class, firstFactory);
     List<ModelLoader<Integer, ?>> modelLoaders = multiFactory.build(Integer.class);
-    assertThat(modelLoaders).doesNotContain(firstModelLoader);
+    assertThat(modelLoaders)
+        .doesNotContain(
+            /* expected: ModelLoader<Integer, ?>, actual: ModelLoader<String, String> */ firstModelLoader);
   }
 
   @Test

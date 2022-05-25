@@ -2,12 +2,13 @@ package com.bumptech.glide;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
-import androidx.core.os.BuildCompat;
 import com.bumptech.glide.Glide.RequestOptionsFactory;
+import com.bumptech.glide.GlideExperiments.Experiment;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.GlideException;
@@ -22,11 +23,12 @@ import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculator;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
-import com.bumptech.glide.load.resource.bitmap.HardwareConfigState;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
 import com.bumptech.glide.manager.DefaultConnectivityMonitorFactory;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory;
+import com.bumptech.glide.module.AppGlideModule;
+import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -41,6 +43,7 @@ import java.util.Map;
 @SuppressWarnings("PMD.ImmutableField")
 public final class GlideBuilder {
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions = new ArrayMap<>();
+  private final GlideExperiments.Builder glideExperimentsBuilder = new GlideExperiments.Builder();
   private Engine engine;
   private BitmapPool bitmapPool;
   private ArrayPool arrayPool;
@@ -63,12 +66,6 @@ public final class GlideBuilder {
   private GlideExecutor animationExecutor;
   private boolean isActiveResourceRetentionAllowed;
   @Nullable private List<RequestListener<Object>> defaultRequestListeners;
-  private boolean isLoggingRequestOriginsEnabled;
-
-  private boolean isImageDecoderEnabledForBitmaps;
-
-  private int hardwareBitmapFdLimit = HardwareConfigState.DEFAULT_MAXIMUM_FDS_FOR_HARDWARE_CONFIGS;
-  private int minHardwareDimension = HardwareConfigState.DEFAULT_MIN_HARDWARE_DIMENSION;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -453,7 +450,7 @@ public final class GlideBuilder {
    * <p>This is an experimental API that may be removed in the future.
    */
   public GlideBuilder setLogRequestOrigins(boolean isEnabled) {
-    isLoggingRequestOriginsEnabled = isEnabled;
+    glideExperimentsBuilder.update(new LogRequestOrigins(), isEnabled);
     return this;
   }
 
@@ -484,10 +481,9 @@ public final class GlideBuilder {
    * which may not agree.
    */
   public GlideBuilder setImageDecoderEnabledForBitmaps(boolean isEnabled) {
-    if (!BuildCompat.isAtLeastQ()) {
-      return this;
-    }
-    isImageDecoderEnabledForBitmaps = isEnabled;
+    glideExperimentsBuilder.update(
+        new EnableImageDecoderForBitmaps(),
+        /*isEnabled=*/ isEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
     return this;
   }
 
@@ -502,7 +498,10 @@ public final class GlideBuilder {
   }
 
   @NonNull
-  Glide build(@NonNull Context context) {
+  Glide build(
+      @NonNull Context context,
+      List<GlideModule> manifestModules,
+      AppGlideModule annotationGeneratedGlideModule) {
     if (sourceExecutor == null) {
       sourceExecutor = GlideExecutor.newSourceExecutor();
     }
@@ -562,8 +561,9 @@ public final class GlideBuilder {
       defaultRequestListeners = Collections.unmodifiableList(defaultRequestListeners);
     }
 
+    GlideExperiments experiments = glideExperimentsBuilder.build();
     RequestManagerRetriever requestManagerRetriever =
-        new RequestManagerRetriever(requestManagerFactory);
+        new RequestManagerRetriever(requestManagerFactory, experiments);
 
     return new Glide(
         context,
@@ -577,9 +577,29 @@ public final class GlideBuilder {
         defaultRequestOptionsFactory,
         defaultTransitionOptions,
         defaultRequestListeners,
-        isLoggingRequestOriginsEnabled,
-        isImageDecoderEnabledForBitmaps,
-        hardwareBitmapFdLimit,
-        minHardwareDimension);
+        manifestModules,
+        annotationGeneratedGlideModule,
+        experiments);
   }
+
+  static final class ManualOverrideHardwareBitmapMaxFdCount implements Experiment {
+
+    final int fdCount;
+
+    ManualOverrideHardwareBitmapMaxFdCount(int fdCount) {
+      this.fdCount = fdCount;
+    }
+  }
+
+  /** See {@link #setWaitForFramesAfterTrimMemory(boolean)}. */
+  public static final class WaitForFramesAfterTrimMemory implements Experiment {
+    private WaitForFramesAfterTrimMemory() {}
+  }
+
+  static final class EnableImageDecoderForBitmaps implements Experiment {}
+
+  /** See {@link #setLogRequestOrigins(boolean)}. */
+  public static final class LogRequestOrigins implements Experiment {}
+
+  static final class EnableLazyGlideRegistry implements Experiment {}
 }

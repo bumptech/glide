@@ -6,7 +6,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -24,6 +24,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.tests.Util;
@@ -40,7 +41,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
@@ -70,7 +70,7 @@ public class ViewTargetTest {
   public void setUp() {
     sdkVersion = Build.VERSION.SDK_INT;
     MockitoAnnotations.initMocks(this);
-    view = new View(RuntimeEnvironment.application);
+    view = new View(ApplicationProvider.getApplicationContext());
     target = new TestViewTarget(view);
     attachStateTarget = new AttachStateTarget(view);
 
@@ -441,7 +441,8 @@ public class ViewTargetTest {
 
   private void setDisplayDimens(Integer width, Integer height) {
     WindowManager windowManager =
-        (WindowManager) RuntimeEnvironment.application.getSystemService(Context.WINDOW_SERVICE);
+        (WindowManager)
+            ApplicationProvider.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
     Display display = Preconditions.checkNotNull(windowManager).getDefaultDisplay();
     if (width != null) {
       Shadows.shadowOf(display).setWidth(width);

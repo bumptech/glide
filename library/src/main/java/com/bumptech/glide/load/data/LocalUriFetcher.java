@@ -42,14 +42,13 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
       @NonNull Priority priority, @NonNull DataCallback<? super T> callback) {
     try {
       data = loadResource(uri, contentResolver);
+      callback.onDataReady(data);
     } catch (FileNotFoundException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(TAG, "Failed to open Uri", e);
       }
       callback.onLoadFailed(e);
-      return;
     }
-    callback.onDataReady(data);
   }
 
   @Override

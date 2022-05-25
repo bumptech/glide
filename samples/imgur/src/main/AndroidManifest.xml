@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   package="com.bumptech.glide.samples.imgur">
   <uses-permission android:name="android.permission.INTERNET" />
   <!--
@@ -14,7 +15,9 @@
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
     android:theme="@style/AppTheme"
-    android:name="com.bumptech.glide.samples.imgur.ImgurApplication">
+    android:networkSecurityConfig="@xml/network_security_config"
+    android:name="com.bumptech.glide.samples.imgur.ImgurApplication"
+    tools:targetApi="n">
     <activity android:name="com.bumptech.glide.samples.imgur.MainActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>

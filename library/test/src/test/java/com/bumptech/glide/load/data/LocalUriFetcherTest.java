@@ -9,6 +9,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Priority;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
@@ -19,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -31,7 +31,9 @@ public class LocalUriFetcherTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    fetcher = new TestLocalUriFetcher(RuntimeEnvironment.application, Uri.parse("content://empty"));
+    fetcher =
+        new TestLocalUriFetcher(
+            ApplicationProvider.getApplicationContext(), Uri.parse("content://empty"));
   }
 
   @Test

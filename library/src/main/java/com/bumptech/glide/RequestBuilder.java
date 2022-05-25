@@ -15,8 +15,10 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.ErrorRequestCoordinator;
 import com.bumptech.glide.request.FutureTarget;
@@ -30,6 +32,7 @@ import com.bumptech.glide.request.ThumbnailRequestCoordinator;
 import com.bumptech.glide.request.target.PreloadTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.signature.AndroidResourceSignature;
 import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.Preconditions;
@@ -38,6 +41,7 @@ import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -151,18 +155,20 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @CheckResult
   public RequestBuilder<TranscodeType> transition(
       @NonNull TransitionOptions<?, ? super TranscodeType> transitionOptions) {
+    if (isAutoCloneEnabled()) {
+      return clone().transition(transitionOptions);
+    }
     this.transitionOptions = Preconditions.checkNotNull(transitionOptions);
     isDefaultTransitionOptionsSet = false;
-    return this;
+    return selfOrThrowIfLocked();
   }
 
   /**
-   * Sets a {@link RequestListener} to monitor the resource load. It's best to create a single
-   * instance of an exception handler per type of request (usually activity/fragment) rather than
-   * pass one in per request to avoid some redundant object allocation.
+   * Sets a {@link RequestListener} to monitor the resource load and removes all previously set
+   * listeners (either via this method or from {@link #addListener(RequestListener)} .
    *
-   * <p>Subsequent calls to this method will replace previously set listeners. To set multiple
-   * listeners, use {@link #addListener} instead.
+   * <p>Calls to this method will replace previously set listeners. To set multiple listeners, use
+   * {@link #addListener} instead.
    *
    * @param requestListener The request listener to use.
    * @return This request builder.
@@ -172,13 +178,76 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> listener(
       @Nullable RequestListener<TranscodeType> requestListener) {
+    if (isAutoCloneEnabled()) {
+      return clone().listener(requestListener);
+    }
     this.requestListeners = null;
     return addListener(requestListener);
   }
 
   /**
-   * Adds a {@link RequestListener}. If called multiple times, all passed {@link RequestListener
-   * listeners} will be called in order.
+   * Adds a {@link RequestListener} to the list that will be called in the order they were added
+   * when the request ends.
+   *
+   * <p>Multiple calls to this method append additional listeners. Previous listeners are not
+   * removed. If you want to replace any previously added listeners, use {@link
+   * #listener(RequestListener)}.
+   *
+   * <p>Listeners track the state of the request started by this particular {@code builder}. When
+   * used with the thumbnail APIs ({@link #thumbnail(RequestBuilder)}) this can start to seem
+   * confusing because multiple requests are running and each may succeed or fail, independent of
+   * each other. As a rule, Glide does not add {@link RequestListener}s to thumbnail requests
+   * automatically. That means that {@link RequestListener}s track the state of exactly one request
+   * in the chain. For example, if you start a primary request with a single nested thumbnail and
+   * you add a {@link RequestListener} only to the primary request, then the {@link RequestListener}
+   * will only be notified when the primary request succeeds or fails. If the thumbnail succeeds,
+   * but the primary request fails, the {@link RequestListener} added to the primary request will
+   * still be called with {@link RequestListener#onLoadFailed(GlideException, Object, Target,
+   * boolean)}. In the same scenario, the {@link RequestListener} added only to the primary request
+   * will not have {@link RequestListener#onResourceReady(Object, Object, Target, DataSource,
+   * boolean)} called when the thumbnail request finishes successfully. Similarly, if you add a
+   * {@link RequestListener} only to a thumbnail request, but not the primary request, that {@code
+   * listener} will only be called for changes related to the thumbnail request. If the thumbnail
+   * request fails, the {@code listener} added to the thumbnail request will be immediately called
+   * via {@link RequestListener#onLoadFailed(GlideException, Object, Target, boolean)}, even though
+   * the primary request may eventually succeed. It is perfectly possible to add a {@link
+   * RequestListener} to both the primary and a thumbnail request. If you do so, the {@link
+   * RequestListener} will be called independently for each request when it finishes. Keep in mind
+   * that if any parent request finishes before its thumbnail request(s), it will attempt to cancel
+   * those requests. As a result there's no guarantee that a {@link RequestListener} added to a
+   * thumbnail request will actually be called with either success or failure. These same patterns
+   * hold for arbitrarily nested thumbnails. The {@code listener} is only called for the requests it
+   * is added to and may not be called for every thumbnail request if those requests are cancelled
+   * due to the completion of a parent request.
+   *
+   * <p>The one exception to the rules about thumbnails is {@link #thumbnail(float)}. In this case
+   * we appear to be passing {@link RequestListener}s added to the parent request to the generated
+   * thumbnail requests. To try to reduce confusion, the {@link #thumbnail(float)} method has been
+   * deprecated. It can be easily replicated using {@link #thumbnail(RequestBuilder)} and {@link
+   * BaseRequestOptions#sizeMultiplier(float)}.
+   *
+   * <p>Often in UIs it's desirable to try to track the overall status of a request, including the
+   * thumbnails. For example, you might want to load an image, start an animation if the
+   * asynchronous image load succeeds and perform some fallback action if it fails. If you're using
+   * a single primary request, {@link RequestListener} will work for this. However, if you then
+   * decide to try to make things more performant by adding a thumbnail (or multiple thumbnails),
+   * {@link RequestListener} is awkward because either you only add it to the main request and it's
+   * not called when the thumbnails complete (which defeats the purpose) or it's called for every
+   * request and it's hard to keep track of when the overall request has failed. A better option
+   * than using {@link RequestListener} to track the state of the UI then is to use {@link Target}
+   * instead. {@link Target#onResourceReady(Object, Transition)} will be called when any thumbnail
+   * finishes, which you can use to trigger your animation starting. {@link
+   * Target#onLoadFailed(Drawable)} will only be called if every request in the chain, including the
+   * primary request, fails, which you can use to trigger your fallback behavior. Be sure to pick an
+   * appropriate {@link Target} subclass when possible, like {@link
+   * com.bumptech.glide.request.target.BitmapImageViewTarget} or {@link
+   * com.bumptech.glide.request.target.DrawableImageViewTarget} when loading into {@link ImageView}
+   * or {@link com.bumptech.glide.request.target.CustomTarget} when using custom rendering. Don't
+   * forget to call {@code super()} in the {@code ImageViewTarget}s.
+   *
+   * <p>It's best to create a single instance of an exception handler per type of request (usually
+   * activity/fragment) rather than pass one in per request to avoid some redundant object
+   * allocation.
    *
    * @param requestListener The request listener to use. If {@code null}, this method is a noop.
    * @return This request builder.
@@ -187,13 +256,16 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @CheckResult
   public RequestBuilder<TranscodeType> addListener(
       @Nullable RequestListener<TranscodeType> requestListener) {
+    if (isAutoCloneEnabled()) {
+      return clone().addListener(requestListener);
+    }
     if (requestListener != null) {
       if (this.requestListeners == null) {
         this.requestListeners = new ArrayList<>();
       }
       this.requestListeners.add(requestListener);
     }
-    return this;
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -220,8 +292,43 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    */
   @NonNull
   public RequestBuilder<TranscodeType> error(@Nullable RequestBuilder<TranscodeType> errorBuilder) {
+    if (isAutoCloneEnabled()) {
+      return clone().error(errorBuilder);
+    }
     this.errorBuilder = errorBuilder;
-    return this;
+    return selfOrThrowIfLocked();
+  }
+
+  /**
+   * Identical to calling {@link #error(RequestBuilder)} where the {@code RequestBuilder} is the
+   * result of calling {@link #clone()} and removing any existing thumbnail and error {@code
+   * RequestBuilders}.
+   *
+   * <p>Other than thumbnail and error {@code RequestBuilder}s, which are removed, all other options
+   * are retained from the primary request. However, <b>order matters!</b> Any options applied after
+   * this method is called will not be applied to the error {@code RequestBuilder}.
+   *
+   * <p>WARNING: Calling this method with a {@code model} whose type does not match the type of the
+   * model passed to {@code load()} may be dangerous! Any options that were applied by the various
+   * type specific {@code load()} methods, like {@link #load(byte[])} will be copied to the error
+   * request here even if the {@code model} you pass to this method doesn't match. Similary, options
+   * that would be normally applied by type specific {@code load()} methods will <em>not</em> be
+   * applied to this request. If this behavior is confusing or unexpected, use {@link
+   * #error(RequestBuilder)} instead.
+   */
+  @NonNull
+  @CheckResult
+  public RequestBuilder<TranscodeType> error(Object model) {
+    if (model == null) {
+      return error((RequestBuilder<TranscodeType>) null);
+    }
+    return error(cloneWithNullErrorAndThumbnail().load(model));
+  }
+
+  private RequestBuilder<TranscodeType> cloneWithNullErrorAndThumbnail() {
+    return clone()
+        .error((RequestBuilder<TranscodeType>) null)
+        .thumbnail((RequestBuilder<TranscodeType>) null);
   }
 
   /**
@@ -246,9 +353,12 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> thumbnail(
       @Nullable RequestBuilder<TranscodeType> thumbnailRequest) {
+    if (isAutoCloneEnabled()) {
+      return clone().thumbnail(thumbnailRequest);
+    }
     this.thumbnailBuilder = thumbnailRequest;
 
-    return this;
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -286,14 +396,52 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       return thumbnail((RequestBuilder<TranscodeType>) null);
     }
 
+    return thumbnail(Arrays.asList(thumbnails));
+  }
+
+  /**
+   * Recursively applies {@link #thumbnail(RequestBuilder)} so that the {@link RequestBuilder}s are
+   * loaded as thumbnails in the given priority order.
+   *
+   * <p>{@link #thumbnail(RequestBuilder)} is applied in the order given so that the {@link
+   * RequestBuilder} at position 0 has the {@link RequestBuilder} at position 1 applied as using its
+   * thumbnail method, the {@link RequestBuilder} at position 1 has the {@link RequestBuilder} at
+   * position 2 applied using its thumbnail method and so on.
+   *
+   * <p>Calling this method with a {@code null} list of {@link RequestBuilder} thumbnails or an
+   * empty list of {@link RequestBuilder} thumbnails is equivalent to calling {@link
+   * #thumbnail(RequestBuilder)} with {@code null}.
+   *
+   * <p>Any individual {@link RequestBuilder} in the list of thumbnails provided here may be {@code
+   * null}. {@code null} {@link RequestBuilder}s are ignored and excluded from the recursive chain.
+   *
+   * <p>The {@link RequestBuilder} objects provided here may be mutated and have any previous calls
+   * to this method or {@link #thumbnail(RequestBuilder)} methods overridden.
+   *
+   * <p>Overrides any previous calls to {@link #thumbnail(RequestBuilder)}, {@link
+   * #thumbnail(float)} and this method.
+   *
+   * @see #thumbnail(float)
+   * @see #thumbnail(RequestBuilder)
+   * @return This request builder.
+   */
+  @SuppressWarnings({"CheckResult", "unchecked"})
+  @NonNull
+  @CheckResult
+  public RequestBuilder<TranscodeType> thumbnail(
+      @Nullable List<RequestBuilder<TranscodeType>> thumbnails) {
+    if (thumbnails == null || thumbnails.isEmpty()) {
+      return thumbnail((RequestBuilder<TranscodeType>) null);
+    }
+
     RequestBuilder<TranscodeType> previous = null;
 
     // Start with the lowest priority thumbnail so that we can safely handle mutations if
     // autoClone() is enabled by assigning the result of calling thumbnail() during the iteration.
     // Starting with the highest priority thumbnail would prevent us from assigning the result of
     // thumbnail because the mutated request wouldn't be used in the next iteration.
-    for (int i = thumbnails.length - 1; i >= 0; i--) {
-      RequestBuilder<TranscodeType> current = thumbnails[i];
+    for (int i = thumbnails.size() - 1; i >= 0; i--) {
+      RequestBuilder<TranscodeType> current = thumbnails.get(i);
       // Ignore null thumbnails.
       if (current == null) {
         continue;
@@ -337,17 +485,31 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * @param sizeMultiplier The multiplier to apply to the {@link Target}'s dimensions when loading
    *     the thumbnail.
    * @return This request builder.
+   * @deprecated The behavior differences between this method and {@link #thumbnail(RequestBuilder)}
+   *     are subtle, hard to understand for users and hard to maintain for developers. See the
+   *     javadoc on {@link #listener(RequestListener)} for one concrete example of the behavior
+   *     differences and complexity introduced by this method. Better consistency and readability
+   *     can be obtained by calling {@link #thumbnail(RequestBuilder)} with a duplicate {@code
+   *     RequestBuilder} on which you have called {@link BaseRequestOptions#sizeMultiplier(float)}.
+   *     In practice this method also isn't especially useful. It's much more common to want to
+   *     specify a number of different attributes for thumbnails than just a simple percentage
+   *     modifier on the target size, so there's little justification for keeping this method. This
+   *     method will be removed in a future version of Glide.
    */
   @NonNull
   @CheckResult
   @SuppressWarnings("unchecked")
+  @Deprecated
   public RequestBuilder<TranscodeType> thumbnail(float sizeMultiplier) {
+    if (isAutoCloneEnabled()) {
+      return clone().thumbnail(sizeMultiplier);
+    }
     if (sizeMultiplier < 0f || sizeMultiplier > 1f) {
       throw new IllegalArgumentException("sizeMultiplier must be between 0 and 1");
     }
     this.thumbSizeMultiplier = sizeMultiplier;
 
-    return this;
+    return selfOrThrowIfLocked();
   }
 
   /**
@@ -366,9 +528,12 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
 
   @NonNull
   private RequestBuilder<TranscodeType> loadGeneric(@Nullable Object model) {
+    if (isAutoCloneEnabled()) {
+      return clone().loadGeneric(model);
+    }
     this.model = model;
     isModelSet = true;
-    return this;
+    return selfOrThrowIfLocked();
   }
   /**
    * Returns an object to load the given {@link Bitmap}.
@@ -571,11 +736,9 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    *
    * <p>This method returns a "deep" copy in that all non-immutable arguments are copied such that
    * changes to one builder will not affect the other builder. However, in addition to immutable
-   * arguments, the current model is not copied copied so changes to the model will affect both
-   * builders.
+   * arguments, the current model is not copied so changes to the model will affect both builders.
    */
   @SuppressWarnings({
-    "unchecked",
     // we don't want to throw to be user friendly
     "PMD.CloneThrowsCloneNotSupportedException"
   })
@@ -584,6 +747,15 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   public RequestBuilder<TranscodeType> clone() {
     RequestBuilder<TranscodeType> result = super.clone();
     result.transitionOptions = result.transitionOptions.clone();
+    if (result.requestListeners != null) {
+      result.requestListeners = new ArrayList<>(result.requestListeners);
+    }
+    if (result.thumbnailBuilder != null) {
+      result.thumbnailBuilder = result.thumbnailBuilder.clone();
+    }
+    if (result.errorBuilder != null) {
+      result.errorBuilder = result.errorBuilder.clone();
+    }
     return result;
   }
 
@@ -759,6 +931,13 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    *
    * <p>Pre-loading is useful for making sure that resources you are going to to want in the near
    * future are available quickly.
+   *
+   * <p>Note - Any thumbnail request that does not complete before the primary request will be
+   * cancelled and may not be preloaded successfully. Cancellation of outstanding thumbnails after
+   * the primary request succeeds is a common behavior of all Glide requests. We do not try to
+   * prevent that behavior here. If you absolutely need all thumbnails to be preloaded individually,
+   * make separate preload() requests for each thumbnail (you can still combine them into one call
+   * when loading the image(s) into the UI in a subsequent request).
    *
    * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
    *     overridden by {@link com.bumptech.glide.request.RequestOptions#override(int, int)} if

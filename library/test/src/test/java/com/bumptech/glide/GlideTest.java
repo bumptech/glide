@@ -8,14 +8,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.notNull;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -33,6 +34,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.Options;
@@ -50,6 +52,7 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.Lifecycle;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
+import com.bumptech.glide.module.GlideModule;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -57,7 +60,6 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.tests.GlideShadowLooper;
 import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.testutil.TestResourceUtil;
@@ -67,6 +69,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;
@@ -74,28 +77,29 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
+import org.robolectric.annotation.LooperMode;
 import org.robolectric.annotation.Resetter;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowBitmap;
 
 /** Tests for the {@link Glide} interface and singleton. */
+@LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
 @Config(
     sdk = 18,
     shadows = {
       GlideTest.ShadowFileDescriptorContentResolver.class,
       GlideTest.ShadowMediaMetadataRetriever.class,
-      GlideShadowLooper.class,
       GlideTest.MutableShadowBitmap.class
     })
 @SuppressWarnings("unchecked")
@@ -124,7 +128,7 @@ public class GlideTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    context = RuntimeEnvironment.application;
+    context = ApplicationProvider.getApplicationContext();
 
     // Run all tasks on the main thread so they complete synchronously.
     GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
@@ -169,8 +173,7 @@ public class GlideTest {
   @Test
   public void testCanSetMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
-    Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
+    Glide glide = buildGlideWithFakePools();
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -180,8 +183,7 @@ public class GlideTest {
   @Test
   public void testCanIncreaseMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
-    Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
+    Glide glide = buildGlideWithFakePools();
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -199,8 +201,7 @@ public class GlideTest {
   @Test
   public void testCanDecreaseMemoryCategory() {
     MemoryCategory memoryCategory = MemoryCategory.NORMAL;
-    Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
+    Glide glide = buildGlideWithFakePools();
     glide.setMemoryCategory(memoryCategory);
 
     verify(memoryCache).setSizeMultiplier(eq(memoryCategory.getMultiplier()));
@@ -217,8 +218,7 @@ public class GlideTest {
 
   @Test
   public void testClearMemory() {
-    Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
+    Glide glide = buildGlideWithFakePools();
 
     glide.clearMemory();
 
@@ -228,8 +228,7 @@ public class GlideTest {
 
   @Test
   public void testTrimMemory() {
-    Glide glide =
-        new GlideBuilder().setBitmapPool(bitmapPool).setMemoryCache(memoryCache).build(context);
+    Glide glide = buildGlideWithFakePools();
 
     final int level = 123;
 
@@ -237,6 +236,16 @@ public class GlideTest {
 
     verify(bitmapPool).trimMemory(eq(level));
     verify(memoryCache).trimMemory(eq(level));
+  }
+
+  private Glide buildGlideWithFakePools() {
+    return new GlideBuilder()
+        .setBitmapPool(bitmapPool)
+        .setMemoryCache(memoryCache)
+        .build(
+            context,
+            Collections.<GlideModule>emptyList(),
+            /* annotationGeneratedGlideModule=*/ null);
   }
 
   @Test
@@ -707,7 +716,8 @@ public class GlideTest {
     firstRequest.clone().apply(placeholderOf(new ColorDrawable(Color.RED))).into(secondTarget);
 
     verify(firstTarget).onResourceReady(isA(Drawable.class), isA(Transition.class));
-    verify(secondTarget).onResourceReady(notNull(Drawable.class), isA(Transition.class));
+    verify(secondTarget)
+        .onResourceReady(ArgumentMatchers.<Drawable>notNull(), isA(Transition.class));
   }
 
   @SuppressWarnings("unchecked")

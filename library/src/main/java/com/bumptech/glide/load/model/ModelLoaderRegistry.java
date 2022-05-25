@@ -3,6 +3,7 @@ package com.bumptech.glide.load.model;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pools.Pool;
+import com.bumptech.glide.Registry.NoModelLoaderAvailableException;
 import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,6 +73,9 @@ public class ModelLoaderRegistry {
   @NonNull
   public <A> List<ModelLoader<A, ?>> getModelLoaders(@NonNull A model) {
     List<ModelLoader<A, ?>> modelLoaders = getModelLoadersForClass(getClass(model));
+    if (modelLoaders.isEmpty()) {
+      throw new NoModelLoaderAvailableException(model);
+    }
     int size = modelLoaders.size();
     boolean isEmpty = true;
     List<ModelLoader<A, ?>> filteredLoaders = Collections.emptyList();
@@ -85,6 +89,9 @@ public class ModelLoaderRegistry {
         }
         filteredLoaders.add(loader);
       }
+    }
+    if (filteredLoaders.isEmpty()) {
+      throw new NoModelLoaderAvailableException(model, modelLoaders);
     }
     return filteredLoaders;
   }

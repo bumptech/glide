@@ -195,7 +195,8 @@ final class RequestManagerGenerator {
     ClassName generatedRequestManagerName =
         ClassName.get(generatedPackageName, GENERATED_REQUEST_MANAGER_SIMPLE_NAME);
     Builder returns =
-        ProcessorUtil.overriding(method)
+        processorUtil
+            .overriding(method)
             .addAnnotation(processorUtil.nonNull())
             .returns(generatedRequestManagerName);
     return returns
@@ -247,7 +248,7 @@ final class RequestManagerGenerator {
         ParameterizedTypeName.get(generatedRequestBuilderClassName, ClassName.get(typeArgument));
 
     MethodSpec.Builder builder =
-        ProcessorUtil.overriding(methodToOverride).returns(generatedRequestBuilderOfType);
+        processorUtil.overriding(methodToOverride).returns(generatedRequestBuilderOfType);
     builder.addCode(
         ProcessorUtil.generateCastingSuperCall(generatedRequestBuilderOfType, builder.build()));
 

@@ -11,10 +11,9 @@ import com.google.common.base.Equivalence;
 import com.google.common.testing.EquivalenceTester;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -22,8 +21,7 @@ import org.junit.runners.model.Statement;
 public final class KeyTester implements TestRule {
   private static final String EMPTY_DIGEST_STRING =
       "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
-  // Use LinkedHashMap to keep iteration based on insertion order.
-  private final Map<Key, String> regressionTests = new LinkedHashMap<>();
+  private final List<KeyAndHash> regressionTests = new ArrayList<>();
   private final Sha256 sha256 = new Sha256();
   private final EquivalenceTester<Key> tester = EquivalenceTester.of(new KeyEquivalence(sha256));
   private boolean isUsedWithoutCallingTest;
@@ -77,11 +75,7 @@ public final class KeyTester implements TestRule {
 
   private KeyTester addRegressionTestInternal(Key key, String expectedDigest) {
     isUsedWithoutCallingTest = true;
-    String oldValue = regressionTests.put(key, expectedDigest);
-    if (oldValue != null) {
-      throw new IllegalArgumentException(
-          "Given multiple values for: " + key + " old: " + oldValue + " new: " + expectedDigest);
-    }
+    regressionTests.add(new KeyAndHash(key, expectedDigest));
     return this;
   }
 
@@ -92,12 +86,12 @@ public final class KeyTester implements TestRule {
 
     assertThat(regressionTests).isNotEmpty();
     int i = 1;
-    for (Entry<Key, String> entry : regressionTests.entrySet()) {
+    for (KeyAndHash keyAndHash : regressionTests) {
       assert_()
           .withMessage(
-              "Unexpected digest for regression test [" + i + "]: with key: " + entry.getKey())
-          .that(sha256.getStringDigest(entry.getKey()))
-          .isEqualTo(entry.getValue());
+              "Unexpected digest for regression test [" + i + "]: with key: " + keyAndHash.key)
+          .that(sha256.getStringDigest(keyAndHash.key))
+          .isEqualTo(keyAndHash.hash);
       i++;
     }
   }
@@ -141,12 +135,30 @@ public final class KeyTester implements TestRule {
     protected boolean doEquivalent(@NonNull Key a, @NonNull Key b) {
       byte[] aDigest = sha256.getDigest(a);
       byte[] bDigest = sha256.getDigest(b);
-      return a.equals(b) && Arrays.equals(aDigest, bDigest);
+      Object object = new Object();
+      Object sentinel = null;
+      return a.equals(b)
+          && b.equals(a)
+          && !a.equals(sentinel)
+          && !b.equals(sentinel)
+          && !a.equals(object)
+          && !b.equals(object)
+          && Arrays.equals(aDigest, bDigest);
     }
 
     @Override
     protected int doHash(@NonNull Key key) {
       return key.hashCode();
+    }
+  }
+
+  private static final class KeyAndHash {
+    private final Key key;
+    private final String hash;
+
+    KeyAndHash(Key key, String hash) {
+      this.key = key;
+      this.hash = hash;
     }
   }
 }
