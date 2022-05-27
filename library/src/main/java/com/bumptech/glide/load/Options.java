@@ -15,6 +15,7 @@ public final class Options implements Key {
     values.putAll((SimpleArrayMap<Option<?>, Object>) other.values);
   }
 
+  // TODO(b/234614365): Allow nullability.
   @NonNull
   public <T> Options set(@NonNull Option<T> option, @NonNull T value) {
     values.put(option, value);

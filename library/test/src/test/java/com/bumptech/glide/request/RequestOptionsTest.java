@@ -582,7 +582,6 @@ public class RequestOptionsTest {
         .addEqualityGroup(
             new RequestOptions(),
             new RequestOptions().skipMemoryCache(false),
-            new RequestOptions().theme(null),
             new RequestOptions().onlyRetrieveFromCache(false),
             new RequestOptions().useUnlimitedSourceGeneratorsPool(false))
         .addEqualityGroup(
