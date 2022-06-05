@@ -32,8 +32,8 @@ android {
 }
 
 dependencies {
-    androidTestImplementation "androidx.test:runner:${ANDROID_X_TEST_VERSION}"
-    androidTestImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_VERSION}"
+    androidTestImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
+    androidTestImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
     androidTestImplementation "junit:junit:{$JUNIT_VERSION}"
 
     androidTestImplementation project(':library')

@@ -3,11 +3,10 @@ apply plugin: 'com.android.library'
 dependencies {
     implementation project(':library')
     implementation "com.google.guava:guava:${GUAVA_VERSION}"
-    implementation "androidx.concurrent:concurrent-futures:${ANDROID_X_FUTURES_VERSION}"
+    implementation "androidx.concurrent:concurrent-futures:${ANDROID_X_CONCURRENT_FUTURES_VERSION}"
 
     testImplementation project(':mocks')
     testImplementation project(':testutil')
-    testImplementation "androidx.legacy:legacy-support-v4:${ANDROID_X_VERSION}"
     testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
     testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
     testImplementation "junit:junit:${JUNIT_VERSION}"

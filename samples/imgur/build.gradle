@@ -44,9 +44,9 @@ dependencies {
     implementation 'io.reactivex:rxandroid:1.2.1'
     implementation 'io.reactivex:rxjava:1.3.4'
 
-    implementation "androidx.appcompat:appcompat:${ANDROID_X_VERSION}"
-    implementation "androidx.cardview:cardview:${ANDROID_X_VERSION}"
-    implementation "androidx.recyclerview:recyclerview:${ANDROID_X_VERSION}"
+    implementation "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
+    implementation "androidx.cardview:cardview:${ANDROID_X_CARDVIEW_VERSION}"
+    implementation "androidx.recyclerview:recyclerview:${ANDROID_X_RECYCLERVIEW_VERSION}"
 
     // Fixes a compilation warning related to dagger, see
     // https://github.com/google/guava/issues/2721.
