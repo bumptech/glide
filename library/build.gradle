@@ -24,7 +24,7 @@ dependencies {
 
     testImplementation "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
     testImplementation project(':testutil')
-    testImplementation 'com.google.guava:guava-testlib:18.0'
+    testImplementation "com.google.guava:guava-testlib:${GUAVA_TESTLIB_VERSION}"
     testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
     testImplementation "junit:junit:${JUNIT_VERSION}"
     testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"

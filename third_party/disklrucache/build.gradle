@@ -1,9 +1,5 @@
 apply plugin: 'com.android.library'
 
-repositories {
-  jcenter()
-}
-
 checkstyle {
     toolVersion = "6.6"
 }
@@ -13,8 +9,7 @@ checkstyle {
 }
 
 dependencies {
-    def junitVersion = hasProperty('JUNIT_VERSION') ? JUNIT_VERSION : '4.13.2';
-    testImplementation "junit:junit:${junitVersion}"
+    testImplementation "junit:junit:${JUNIT_VERSION}"
     testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
 }
 
