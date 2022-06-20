@@ -1,29 +1,46 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 
 dependencies {
     implementation project(':library')
     implementation(project(':integration:recyclerview')) {
         transitive = false
     }
-    implementation "androidx.recyclerview:recyclerview:${ANDROID_X_RECYCLERVIEW_VERSION}"
-    implementation "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
-    annotationProcessor project(':annotation:compiler')
+
+    implementation "androidx.recyclerview:recyclerview:$ANDROID_X_RECYCLERVIEW_VERSION"
+    implementation "androidx.fragment:fragment-ktx:$ANDROID_X_FRAGMENT_VERSION"
+    implementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$ANDROID_X_LIFECYCLE_KTX_VERSION"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$ANDROID_X_LIFECYCLE_KTX_VERSION"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$JETBRAINS_KOTLIN_VERSION"
+
+    kapt project(':annotation:compiler')
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
 }
 
 android {
-    compileSdkVersion COMPILE_SDK_VERSION as int
+    compileSdkVersion 32
 
     defaultConfig {
         applicationId 'com.bumptech.glide.samples.gallery'
-        minSdkVersion MIN_SDK_VERSION as int
-        targetSdkVersion TARGET_SDK_VERSION as int
+        minSdkVersion 29
+        targetSdkVersion 32
         versionCode 1
         versionName '1.0'
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 }
 
