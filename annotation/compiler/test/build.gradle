@@ -1,5 +1,3 @@
-import org.gradle.internal.jvm.Jvm
-
 apply plugin: 'com.android.library'
 
 android {
@@ -72,8 +70,8 @@ dependencies {
     }
     testImplementation "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
     testImplementation "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
-    // TODO: this seems excessive, but it works...
-    testImplementation files(Jvm.current().getJre().homeDir.getAbsolutePath()+'/lib/rt.jar')
+    // TODO: Find some way to include a similar dependency on java 9+ and re-enable these tests in gradle.
+//    testImplementation files(Jvm.current().getJre().homeDir.getAbsolutePath()+'/lib/rt.jar')
 
     testAnnotationProcessor project(':annotation:compiler')
     testAnnotationProcessor "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
