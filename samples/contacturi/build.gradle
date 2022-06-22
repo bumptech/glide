@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 dependencies {
     implementation project(':library')
-    implementation "androidx.appcompat:appcompat:${ANDROID_X_VERSION}"
+    implementation "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
     annotationProcessor project(':annotation:compiler')
 }
 

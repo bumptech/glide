@@ -12,9 +12,9 @@ dependencies {
     testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
     testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
     testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
-    testImplementation "androidx.test:core:${ANDROID_X_TEST_VERSION}"
+    testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
     testImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
-    testImplementation "androidx.test:runner:${ANDROID_X_TEST_VERSION}"
+    testImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
 }
 
 android {
