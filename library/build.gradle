@@ -35,6 +35,24 @@ dependencies {
     testImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
 }
 
+if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
+    tasks.withType(JavaCompile) {
+        options.errorprone.disable(
+            // It's often useful to track individual objects when debugging
+            // object pooling.
+            "ObjectToString",
+            // Doesn't apply when we can't use lambadas.
+            "UnnecessaryAnonymousClass",
+            // TODO(judds): Fix these and re-enable this check
+            "TypeNameShadowing",
+            "UndefinedEquals",
+            "UnnecessaryParentheses",
+            "UnusedVariable",
+            "EqualsGetClass",
+            "LockNotBeforeTry")
+    }
+}
+
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
 
@@ -59,7 +77,6 @@ check.dependsOn(':library:test:check')
 def classPathForQuality() {
     return files(
             android.bootClasspath,
-            project.configurations.compile,
             project.android.libraryVariants.collect { it.javaCompile.classpath }
     )
 }

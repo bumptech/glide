@@ -23,7 +23,7 @@
  * For faster runs add: -x check when building Glide.
  */
 
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 version = VERSION_NAME
@@ -62,29 +62,23 @@ afterEvaluate { project ->
     def isAndroidProject = project.plugins.hasPlugin('com.android.application') || project.plugins.hasPlugin('com.android.library')
     // To avoid uploading the default empty jar artifact in the project root directory, we use a custom
     // configuration to specify which artifacts we want to upload.
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                // allow uploading through FTP protocol with the following command:
-                // gradle uploadArchives -PSNAPSHOT_REPOSITORY_URL=ftp://host/repo/path -PUSERNAME=uname -PPASSWORD=passwd
-                configuration = configurations.create('deployerJars')
-                configuration.dependencies.add dependencies.create('org.apache.maven.wagon:wagon-ftp:2.2')
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                groupId = GROUP
+                artifactId = POM_ARTIFACT_ID
+                version = VERSION_NAME
 
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                repositories {
+                    maven {
+                        url = isReleaseBuild() ? getReleaseRepositoryUrl() : getSnapshotRepositoryUrl()
 
-                pom.groupId = GROUP
-                pom.artifactId = POM_ARTIFACT_ID
-                pom.version = VERSION_NAME
+                        credentials {
+                            username = getRepositoryUsername()
+                            password = getRepositoryPassword()
 
-                repository(url: getReleaseRepositoryUrl()) {
-                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
-                }
-                snapshotRepository(url: getSnapshotRepositoryUrl()) {
-                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
-                }
-
-                pom.whenConfigured { pom ->
-                    pom.packaging = POM_PACKAGING
+                        }
+                    }
                 }
 
                 // Dependencies are only automatically included by the release plugin if the release
@@ -115,15 +109,16 @@ afterEvaluate { project ->
                     }
                 }
 
-                pom.project {
+                pom {
                     name = POM_NAME
+                    packaging = POM_PACKAGING
                     description = POM_DESCRIPTION
                     url = POM_URL
 
                     scm {
-                        url POM_SCM_URL
-                        connection POM_SCM_CONNECTION
-                        developerConnection POM_SCM_DEV_CONNECTION
+                        connection = POM_SCM_CONNECTION
+                        developerConnection = POM_SCM_DEV_CONNECTION
+                        url = POM_SCM_URL
                     }
 
                     licenses {
@@ -147,93 +142,86 @@ afterEvaluate { project ->
                         }
                     }
                 }
+
+                if (isAndroidProject) {
+                    def variants = project.android.libraryVariants.findAll {
+                        it.buildType.name.equalsIgnoreCase('debug')
+                    }
+
+                    def getAndroidSdkDirectory = project.android.sdkDirectory
+
+                    def getAndroidJar = "${getAndroidSdkDirectory}/platforms/${project.android.compileSdkVersion}/android.jar"
+
+                    task androidJavadocs(type: Javadoc, dependsOn: assembleDebug) {
+                        source = variants.collect { it.getJavaCompileProvider().get().source }
+                        classpath = files(
+                                getAndroidJar,
+                                project.file("build/intermediates/classes/debug")
+                        )
+                        doFirst {
+                            classpath += files(variants.collect { it.getJavaCompileProvider().get().classpath.files })
+                        }
+                        options {
+                            links("http://docs.oracle.com/javase/7/docs/api/")
+                            links("http://d.android.com/reference")
+                        }
+
+                        exclude '**/R.java'
+                    }
+
+                    def cleanJavadocTask = task("cleanJavadocTask", type: Delete) {
+                        delete androidJavadocs.destinationDir
+                    } as Task
+                    project.clean.dependsOn(cleanJavadocTask)
+
+                    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+                        classifier = 'javadoc'
+                        from androidJavadocs.destinationDir
+                        baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
+                    }
+
+                    task androidSourcesJar(type: Jar) {
+                        classifier = 'sources'
+                        from project.android.sourceSets.main.java.source
+                        baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
+                    }
+
+                    task androidLibraryJar(type: Jar, dependsOn: compileDebugJavaWithJavac /* == variant.javaCompile */) {
+                        from compileDebugJavaWithJavac.destinationDir
+                        exclude '**/R.class'
+                        exclude '**/R$*.class'
+                        baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
+                    }
+
+                    artifact androidLibraryJar
+                    artifact androidSourcesJar
+                    artifact androidJavadocsJar
+                    // This is unnecessary with a release variant because by default the release variant
+                    // includes the release aar in archives. Since we've disabled our release variants and
+                    // want to include an aar, we need to manually specify the task that produces the aar
+                    // here.
+                    artifact project.tasks.bundleDebugAar
+                } else if (project.plugins.hasPlugin('java')) {
+                    task sourcesJar(type: Jar, dependsOn: classes) {
+                        classifier = 'sources'
+                        from sourceSets.main.allSource
+                    }
+
+                    task javadocsJar(type: Jar, dependsOn: javadoc) {
+                        classifier = 'javadoc'
+                        from javadoc.destinationDir
+                    }
+
+                    from components.java
+                    artifact sourcesJar
+                    artifact javadocsJar
+                }
             }
         }
     }
 
     signing {
         required { isReleaseBuild() && gradle.taskGraph.hasTask('uploadArchives') }
-        sign configurations.archives
+        sign publishing.publications.mavenJava
     }
-
-
-    if (isAndroidProject) {
-        def variants = project.android.libraryVariants.findAll {
-            it.buildType.name.equalsIgnoreCase('debug')
-        }
-
-        def getAndroidSdkDirectory = project.android.sdkDirectory
-
-        def getAndroidJar = "${getAndroidSdkDirectory}/platforms/${project.android.compileSdkVersion}/android.jar"
-
-        task androidJavadocs(type: Javadoc, dependsOn: assembleDebug) {
-            source = variants.collect { it.getJavaCompileProvider().get().source }
-            classpath = files(
-                    getAndroidJar,
-                    project.file("build/intermediates/classes/debug")
-            )
-            doFirst {
-                classpath += files(variants.collect { it.javaCompile.classpath.files })
-            }
-            options {
-                links("http://docs.oracle.com/javase/7/docs/api/")
-                linksOffline("http://d.android.com/reference",
-                        "${getAndroidSdkDirectory}/docs/reference")
-            }
-
-            exclude '**/R.java'
-        }
-
-        def cleanJavadocTask = task("cleanJavadocTask", type: Delete) {
-            delete androidJavadocs.destinationDir
-        } as Task
-        project.clean.dependsOn(cleanJavadocTask)
-
-        task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-            classifier = 'javadoc'
-            from androidJavadocs.destinationDir
-            baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
-        }
-
-        task androidSourcesJar(type: Jar) {
-            classifier = 'sources'
-            from project.android.sourceSets.main.java.source
-            baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
-        }
-
-        task androidLibraryJar(type: Jar, dependsOn: compileDebugJavaWithJavac /* == variant.javaCompile */) {
-            from compileDebugJavaWithJavac.destinationDir
-            exclude '**/R.class'
-            exclude '**/R$*.class'
-            baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
-        }
-
-        artifacts {
-            archives androidLibraryJar
-            archives androidSourcesJar
-            archives androidJavadocsJar
-            // This is unnecessary with a release variant because by default the release variant
-            // includes the release aar in archives. Since we've disabled our release variants and
-            // want to include an aar, we need to manually specify the task that produces the aar
-            // here.
-            archives project.tasks.bundleDebugAar
-        }
-    } else if (project.plugins.hasPlugin('java')) {
-        task sourcesJar(type: Jar, dependsOn: classes) {
-            classifier = 'sources'
-            from sourceSets.main.allSource
-        }
-
-        task javadocsJar(type: Jar, dependsOn: javadoc) {
-            classifier = 'javadoc'
-            from javadoc.destinationDir
-        }
-
-        artifacts {
-            archives sourcesJar
-            archives javadocsJar
-        }
-    }
-    logger.info("Published artifacts in ${configurations.archives}:")
-    configurations.archives.artifacts.files.files.each { logger.info("\t$it") }
 }

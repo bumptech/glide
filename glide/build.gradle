@@ -88,8 +88,7 @@ def javadocTask = tasks.create("debugJavadoc", Javadoc) {
         links("http://docs.oracle.com/javase/7/docs/api/")
         links("https://square.github.io/okhttp/3.x/okhttp/")
         links("https://square.github.io/okhttp/2.x/okhttp/")
-        linksOffline("http://d.android.com/reference",
-                "${getAndroidSdkDirectory()}/docs/reference")
+        links("http://d.android.com/reference")
     }
 
     exclude '**/R.java'

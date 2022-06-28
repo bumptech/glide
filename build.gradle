@@ -16,6 +16,7 @@ buildscript {
         if (!hasProperty('DISABLE_ERROR_PRONE')) {
             classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_PLUGIN_VERSION}"
         }
+        classpath 'com.guardsquare:proguard-gradle:7.1.0'
         classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
         classpath "androidx.benchmark:benchmark-gradle-plugin:${ANDROID_X_BENCHMARK_VERSION}"
     }
@@ -45,7 +46,6 @@ subprojects { project ->
         sourceCompatibility = 1.7
         targetCompatibility = 1.7
 
-        options.setBootstrapClasspath(files("${System.getProperty('java.home')}/lib/rt.jar"))
         // gifencoder is a legacy project that has a ton of warnings and is basically never
         // modified, so we're not going to worry about cleaning it up.
         // Imgur uses generated code from dagger that has warnings.
@@ -74,10 +74,7 @@ subprojects { project ->
                  */ \
                 << "-Xlint:-deprecation"
 
-            if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
-                // It's often useful to track individual objects when debugging object pooling.
-                options.compilerArgs << "-Xep:ObjectToString:OFF"
-            }
+
         }
     }
 
