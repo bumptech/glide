@@ -181,6 +181,15 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
 
   /**
    * If set to true, will only load an item if found in the cache, and will not fetch from source.
+   *
+   * <p>By 'cache' we mean both the in memory cache and both types of disk cache ({@link
+   * DiskCacheStrategy#DATA} and {@link DiskCacheStrategy#RESOURCE}). If this flag is set to {@code
+   * true} and the item is not in the memory cache, but it is in one of the disk caches, the load
+   * will complete asynchronously.
+   *
+   * <p>If you'd like to only load an item from the memory cache. You can call this method with
+   * {@code true} and also call {@link #diskCacheStrategy(DiskCacheStrategy)} with {@link
+   * DiskCacheStrategy#NONE}
    */
   @NonNull
   @CheckResult
