@@ -19,6 +19,7 @@ buildscript {
         classpath 'com.guardsquare:proguard-gradle:7.1.0'
         classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
         classpath "androidx.benchmark:benchmark-gradle-plugin:${ANDROID_X_BENCHMARK_VERSION}"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${JETBRAINS_KOTLIN_VERSION}"
     }
 }
 
