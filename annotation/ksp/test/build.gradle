@@ -1,0 +1,24 @@
+plugins {
+    id 'org.jetbrains.kotlin.android'
+    id 'com.android.library'
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+        versionName VERSION_NAME as String
+    }
+}
+
+dependencies {
+    implementation "junit:junit:$JUNIT_VERSION"
+    testImplementation project(":annotation:ksp")
+    testImplementation project(":annotation")
+    testImplementation project(":glide")
+    testImplementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:${KOTLIN_COMPILE_TESTING_VERSION}"
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:${JETBRAINS_KOTLIN_TEST_VERSION}"
+}
