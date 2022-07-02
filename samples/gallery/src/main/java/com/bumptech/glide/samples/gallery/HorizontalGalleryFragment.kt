@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.GridLayoutManager
+import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
 import kotlinx.coroutines.launch
 
@@ -40,7 +41,7 @@ class HorizontalGalleryFragment : Fragment() {
     recyclerView.layoutManager = layoutManager
     recyclerView.setHasFixedSize(true)
 
-    val glideRequests = GlideApp.with(this)
+    val glideRequests = Glide.with(this)
     adapter = RecyclerAdapter(requireContext(), glideRequests)
     val preloader = RecyclerViewPreloader(glideRequests, adapter, adapter, 3)
     recyclerView.addOnScrollListener(preloader)

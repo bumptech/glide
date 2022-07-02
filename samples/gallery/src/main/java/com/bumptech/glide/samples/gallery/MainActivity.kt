@@ -8,6 +8,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import com.bumptech.glide.Glide
 import com.bumptech.glide.MemoryCategory
 
 /** Displays a [HorizontalGalleryFragment].  */
@@ -15,7 +16,7 @@ class MainActivity : FragmentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.main_activity)
-    GlideApp.get(this).setMemoryCategory(MemoryCategory.HIGH)
+    Glide.get(this).setMemoryCategory(MemoryCategory.HIGH)
     if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
       != PackageManager.PERMISSION_GRANTED
     ) {

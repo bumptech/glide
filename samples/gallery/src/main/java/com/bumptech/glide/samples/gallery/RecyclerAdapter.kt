@@ -15,6 +15,7 @@ import com.bumptech.glide.samples.gallery.RecyclerAdapter.ListViewHolder
 import com.bumptech.glide.ListPreloader.PreloadSizeProvider
 import com.bumptech.glide.ListPreloader.PreloadModelProvider
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.Key
 import com.bumptech.glide.signature.MediaStoreSignature
 import com.bumptech.glide.util.Preconditions
@@ -22,12 +23,12 @@ import com.bumptech.glide.util.Preconditions
 /** Displays [com.bumptech.glide.samples.gallery.MediaStoreData] in a recycler view.  */
 internal class RecyclerAdapter(
   context: Context,
-  glideRequests: GlideRequests,
+  glideRequests: RequestManager,
 ) : RecyclerView.Adapter<ListViewHolder?>(), PreloadSizeProvider<MediaStoreData?>,
     PreloadModelProvider<MediaStoreData?> {
   private var data: List<MediaStoreData> = emptyList()
   private val screenWidth: Int
-  private val requestBuilder: GlideRequest<Drawable>
+  private val requestBuilder: RequestBuilder<Drawable>
   private var actualDimensions: IntArray? = null
 
   override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ListViewHolder {
