@@ -87,7 +87,7 @@ public class FlickrPhotoList extends Fragment implements PhotoViewer {
             .override(Api.SQUARE_THUMB_SIZE)
             .transition(withCrossFade());
 
-    list.setRecyclerListener(
+    list.addRecyclerListener(
         new RecyclerView.RecyclerListener() {
           @Override
           public void onViewRecycled(RecyclerView.ViewHolder holder) {
