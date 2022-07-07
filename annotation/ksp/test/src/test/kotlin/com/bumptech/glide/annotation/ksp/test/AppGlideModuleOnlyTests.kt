@@ -284,9 +284,11 @@ package com.bumptech.glide
 import Module
 import android.content.Context
 import kotlin.Boolean
+import kotlin.Suppress
 import kotlin.Unit
 
 internal class GeneratedAppGlideModuleImpl(
+  @Suppress("UNUSED_VARIABLE")
   context: Context,
 ) : GeneratedAppGlideModule() {
   private val appGlideModule: Module

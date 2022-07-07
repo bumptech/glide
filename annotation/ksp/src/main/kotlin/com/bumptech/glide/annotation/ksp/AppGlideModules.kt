@@ -9,10 +9,12 @@ import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.TypeSpec
 import kotlin.reflect.KClass
 
@@ -66,7 +68,7 @@ internal class AppGlideModuleParser(
     environment.logger.logging(
       "Found excludes annotation arguments: ${excludesAnnotation?.arguments}"
     )
-    return listOf()
+    return emptyList()
   }
 
   private fun parseAppGlideModuleConstructorOrThrow(): AppGlideModuleData.Constructor {
@@ -110,7 +112,7 @@ internal class AppGlideModuleParser(
   private fun extractGlideModulesFromIndexAnnotation(
     index: KSDeclaration,
   ): List<String> {
-    val indexAnnotation: KSAnnotation = index.atMostOneIndexAnnotation() ?: return listOf()
+    val indexAnnotation: KSAnnotation = index.atMostOneIndexAnnotation() ?: return emptyList()
     environment.logger.info("Found index annotation: $indexAnnotation")
     return indexAnnotation.getModuleArgumentValues().toList()
   }
@@ -142,7 +144,7 @@ internal class AppGlideModuleParser(
         .toList()
     if (matchingAnnotations.size > 1) {
       throw InvalidGlideSourceException(
-        """Expected 0 or 1 $annotation annotations on the Index class, but found: 
+        """Expected 0 or 1 $annotation annotations on ${this.qualifiedName}, but found: 
           ${matchingAnnotations.size}"""
       )
     }
@@ -175,8 +177,18 @@ internal class AppGlideModuleGenerator(private val appGlideModuleData: AppGlideM
   }
 
   private fun generateConstructor(data: AppGlideModuleData): FunSpec {
+    val contextParameterBuilder = ParameterSpec.builder("context", CONTEXT_CLASS_NAME)
+    if (!data.constructor.hasContext) {
+      contextParameterBuilder
+        .addAnnotation(
+          AnnotationSpec.builder(ClassName("kotlin", "Suppress"))
+            .addMember("%S", "UNUSED_VARIABLE")
+            .build()
+        )
+    }
+
     return FunSpec.constructorBuilder()
-      .addParameter("context", CONTEXT_CLASS_NAME)
+      .addParameter(contextParameterBuilder.build())
       .addStatement(
         "appGlideModule = %T(${if (data.constructor.hasContext) "context" else ""})", data.name
       )

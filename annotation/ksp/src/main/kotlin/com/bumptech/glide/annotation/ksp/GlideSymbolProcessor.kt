@@ -24,11 +24,11 @@ private const val LIBRARY_MODULE_QUALIFIED_NAME =
   "com.bumptech.glide.module.LibraryGlideModule"
 
 class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) : SymbolProcessor {
+  var isAppGlideModuleGenerated = false
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val symbols = resolver.getSymbolsWithAnnotation("com.bumptech.glide.annotation.GlideModule")
-    val invalidSymbols = symbols.filter { !it.validate() }.toList()
-    val validSymbols = symbols.filter { it.validate() }.toList()
+    val (validSymbols, invalidSymbols) = symbols.partition{ it.validate() }.toList()
     return try {
       processChecked(resolver, symbols, validSymbols, invalidSymbols)
     } catch (e: InvalidGlideSourceException) {
@@ -68,9 +68,14 @@ class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) 
       "Found AppGlideModules: $appGlideModules, LibraryGlideModules: $libraryGlideModules"
     )
 
-    // TODO(judds): Consider what happens if a LibraryGlideModule is discovered after we've already
-    //  written the GeneratedAppGldieModule below.
     if (libraryGlideModules.isNotEmpty()) {
+      if (isAppGlideModuleGenerated) {
+        throw InvalidGlideSourceException(
+          """Found $libraryGlideModules LibraryGlideModules after processing the AppGlideModule.
+            If you generated these LibraryGlideModules via another annotation processing, either
+            don't or also generate the AppGlideModule and do so in the same round as the 
+            LibraryGlideModules or in a subsequent round""")
+      }
       parseLibraryModulesAndWriteIndex(libraryGlideModules)
       return invalidSymbols + appGlideModules
     }
@@ -115,7 +120,8 @@ class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) 
         sources = sources.toTypedArray(),
       ),
       file.packageName,
-      file.name)
+      file.name
+    )
       .writer()
       .use { file.writeTo(it) }
 
@@ -137,7 +143,7 @@ class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) 
         }
 
     val (appModules, libraryModules) =
-      appAndLibraryModuleNames.map { modulesBySuperType[it] ?: listOf() }
+      appAndLibraryModuleNames.map { modulesBySuperType[it] ?: emptyList() }
     return GlideModules(appModules, libraryModules)
   }
 

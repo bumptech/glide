@@ -338,9 +338,11 @@ import AppModule
 import android.content.Context
 import first_package.LibraryModule
 import kotlin.Boolean
+import kotlin.Suppress
 import kotlin.Unit
 
 internal class GeneratedAppGlideModuleImpl(
+  @Suppress("UNUSED_VARIABLE")
   context: Context,
 ) : GeneratedAppGlideModule() {
   private val appGlideModule: AppModule
@@ -375,9 +377,11 @@ import AppModule
 import LibraryModule
 import android.content.Context
 import kotlin.Boolean
+import kotlin.Suppress
 import kotlin.Unit
 
 internal class GeneratedAppGlideModuleImpl(
+  @Suppress("UNUSED_VARIABLE")
   context: Context,
 ) : GeneratedAppGlideModule() {
   private val appGlideModule: AppModule
@@ -413,9 +417,11 @@ import LibraryModule1
 import LibraryModule2
 import android.content.Context
 import kotlin.Boolean
+import kotlin.Suppress
 import kotlin.Unit
 
 internal class GeneratedAppGlideModuleImpl(
+  @Suppress("UNUSED_VARIABLE")
   context: Context,
 ) : GeneratedAppGlideModule() {
   private val appGlideModule: AppModule
