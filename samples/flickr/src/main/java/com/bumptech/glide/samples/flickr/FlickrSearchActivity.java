@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SearchView;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -164,7 +165,7 @@ public class FlickrSearchActivity extends AppCompatActivity
   }
 
   @Override
-  protected void onSaveInstanceState(Bundle outState) {
+  protected void onSaveInstanceState(@NonNull Bundle outState) {
     super.onSaveInstanceState(outState);
     if (currentQuery != null) {
       outState.putParcelable(STATE_QUERY, currentQuery);

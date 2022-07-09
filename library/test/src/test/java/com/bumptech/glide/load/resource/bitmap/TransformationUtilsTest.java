@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;

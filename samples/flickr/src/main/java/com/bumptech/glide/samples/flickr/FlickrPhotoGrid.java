@@ -86,7 +86,7 @@ public class FlickrPhotoGrid extends Fragment implements PhotoViewer {
             outRect.set(gridMargin, gridMargin, gridMargin, gridMargin);
           }
         });
-    grid.setRecyclerListener(
+    grid.addRecyclerListener(
         new RecyclerView.RecyclerListener() {
           @Override
           public void onViewRecycled(RecyclerView.ViewHolder holder) {
