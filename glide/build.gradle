@@ -35,8 +35,8 @@ def getAndroidSdkDirectory() {
     project(':library').android.sdkDirectory
 }
 
-def getAndroidCompileSdkVersion() {
-    project(':library').android.compileSdkVersion
+def getAndroidCompileSdk() {
+    project(':library').android.compileSdk
 }
 
 def getAndroidProjectsForJavadoc() {
@@ -58,7 +58,7 @@ def getSourceFilesForJavadoc() {
 }
 
 def getAndroidJar() {
-    "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdkVersion()}/android.jar"
+    "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdk()}/android.jar"
 }
 
 project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"

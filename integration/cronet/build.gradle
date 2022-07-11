@@ -15,11 +15,11 @@ dependencies {
 }
 
 android {
-    compileSdkVersion COMPILE_SDK_VERSION as int
+    compileSdk COMPILE_SDK_VERSION as int
 
     defaultConfig {
-        minSdkVersion 16 as int
-        targetSdkVersion TARGET_SDK_VERSION as int
+        minSdk 16 as int
+        targetSdk TARGET_SDK_VERSION as int
 
         versionName VERSION_NAME as String
     }

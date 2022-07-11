@@ -134,7 +134,7 @@ subprojects { project ->
         if (project.hasProperty("android")
                 && project.name != 'pmd' ) {
             android {
-                lintOptions {
+                lint {
                     warningsAsErrors true
                     quiet true
                     // Caught by the violations plugin.

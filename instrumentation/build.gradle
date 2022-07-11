@@ -26,12 +26,12 @@ dependencies {
 }
 
 android {
-    compileSdkVersion COMPILE_SDK_VERSION as int
+    compileSdk COMPILE_SDK_VERSION as int
 
     defaultConfig {
         applicationId 'com.bumptech.glide.instrumentation'
-        minSdkVersion 16 as int
-        targetSdkVersion TARGET_SDK_VERSION as int
+        minSdk 16 as int
+        targetSdk TARGET_SDK_VERSION as int
         versionCode 1
         versionName '1.0'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
