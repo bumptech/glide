@@ -32,8 +32,8 @@ tasks.create('pmd', Pmd) {
     ignoreFailures = true
 
     reports {
-        xml.enabled = true
-        html.enabled = false
+        xml.required.set(true)
+        html.required.set(false)
     }
 }
 

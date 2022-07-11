@@ -115,8 +115,8 @@ subprojects { project ->
     apply plugin: "se.bjurr.violations.violations-gradle-plugin"
 
     task violations(type: ViolationsTask) {
-        minSeverity 'INFO'
-        detailLevel 'VERBOSE'
+        minSeverity = 'INFO'
+        detailLevel = 'VERBOSE'
         maxViolations = 0
         diffMaxViolations = 0
 

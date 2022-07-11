@@ -115,7 +115,7 @@ javadocJarTask.dependsOn(javadocTask)
 jar {
     from files(
             getAndroidLibraryVariantsForJavadoc().collect { LibraryVariant variant ->
-                variant.getJavaCompileProvider().get().destinationDir
+                variant.getJavaCompileProvider().get().destinationDirectory
             }
     )
     exclude "**/R.class"
