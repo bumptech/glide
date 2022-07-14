@@ -69,16 +69,31 @@ class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) 
     environment.logger.logging(
       "Found AppGlideModules: $appGlideModules, LibraryGlideModules: $libraryGlideModules"
     )
-    // TODO(judds): Add support for parsing LibraryGlideModules here.
+
+    if (libraryGlideModules.isNotEmpty()) {
+      if (isAppGlideModuleGenerated) {
+        throw InvalidGlideSourceException(
+          """Found $libraryGlideModules LibraryGlideModules after processing the AppGlideModule.
+            If you generated these LibraryGlideModules via another annotation processing, either
+            don't or also generate the AppGlideModule and do so in the same round as the 
+            LibraryGlideModules or in a subsequent round"""
+        )
+      }
+      parseLibraryModulesAndWriteIndex(libraryGlideModules)
+      return invalidSymbols + appGlideModules
+    }
 
     if (appGlideModules.isNotEmpty()) {
-      parseAppGlideModuleAndWriteGeneratedAppGlideModule(resolver, appGlideModules.single())
+      parseAppGlideModuleAndIndexesAndWriteGeneratedAppGlideModule(
+        resolver,
+        appGlideModules.single()
+      )
     }
 
     return invalidSymbols
   }
 
-  private fun parseAppGlideModuleAndWriteGeneratedAppGlideModule(
+  private fun parseAppGlideModuleAndIndexesAndWriteGeneratedAppGlideModule(
     resolver: Resolver,
     appGlideModule: KSClassDeclaration,
   ) {
@@ -86,10 +101,24 @@ class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) 
       AppGlideModuleParser(environment, resolver, appGlideModule).parseAppGlideModule()
     val appGlideModuleGenerator = AppGlideModuleGenerator(appGlideModuleData)
     val appGlideModuleFileSpec: FileSpec = appGlideModuleGenerator.generateAppGlideModule()
+    val sources = appGlideModuleData.sources.mapNotNull { it.containingFile }.toMutableList()
+    if (appGlideModule.containingFile != null) {
+      sources.add(appGlideModule.containingFile!!)
+    }
     writeFile(
       appGlideModuleFileSpec,
-      listOfNotNull(appGlideModule.containingFile),
+      sources,
     )
+  }
+
+  private fun parseLibraryModulesAndWriteIndex(
+    libraryGlideModuleClassDeclarations: List<KSClassDeclaration>,
+  ) {
+    val libraryGlideModulesParser =
+      LibraryGlideModulesParser(environment, libraryGlideModuleClassDeclarations)
+    val uniqueLibraryGlideModules = libraryGlideModulesParser.parseUnique()
+    val index: FileSpec = IndexGenerator.generate(uniqueLibraryGlideModules.map { it.name })
+    writeFile(index, uniqueLibraryGlideModules.mapNotNull { it.containingFile })
   }
 
   private fun writeFile(file: FileSpec, sources: List<KSFile>) {
