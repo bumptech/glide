@@ -150,7 +150,7 @@ afterEvaluate { project ->
 
                     def getAndroidSdkDirectory = project.android.sdkDirectory
 
-                    def getAndroidJar = "${getAndroidSdkDirectory}/platforms/${project.android.compileSdkVersion}/android.jar"
+                    def getAndroidJar = "${getAndroidSdkDirectory}/platforms/${project.android.compileSdk}/android.jar"
 
                     task androidJavadocs(type: Javadoc, dependsOn: assembleDebug) {
                         source = variants.collect { it.getJavaCompileProvider().get().source }
@@ -175,22 +175,22 @@ afterEvaluate { project ->
                     project.clean.dependsOn(cleanJavadocTask)
 
                     task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-                        classifier = 'javadoc'
+                        archiveClassifier.set('javadoc')
                         from androidJavadocs.destinationDir
-                        baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
+                        archiveBaseName.set("${JAR_PREFIX}${project.name}${JAR_POSTFIX}")
                     }
 
                     task androidSourcesJar(type: Jar) {
-                        classifier = 'sources'
+                        archiveClassifier.set('sources')
                         from project.android.sourceSets.main.java.source
-                        baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
+                        archiveBaseName.set("${JAR_PREFIX}${project.name}${JAR_POSTFIX}")
                     }
 
                     task androidLibraryJar(type: Jar, dependsOn: compileDebugJavaWithJavac /* == variant.javaCompile */) {
                         from compileDebugJavaWithJavac.destinationDir
                         exclude '**/R.class'
                         exclude '**/R$*.class'
-                        baseName "${JAR_PREFIX}${project.name}${JAR_POSTFIX}"
+                        archiveBaseName.set("${JAR_PREFIX}${project.name}${JAR_POSTFIX}")
                     }
 
                     artifact androidLibraryJar
@@ -203,12 +203,12 @@ afterEvaluate { project ->
                     artifact project.tasks.bundleDebugAar
                 } else if (project.plugins.hasPlugin('java')) {
                     task sourcesJar(type: Jar, dependsOn: classes) {
-                        classifier = 'sources'
+                        archiveClassifier.set('sources')
                         from sourceSets.main.allSource
                     }
 
                     task javadocsJar(type: Jar, dependsOn: javadoc) {
-                        classifier = 'javadoc'
+                        archiveClassifier.set('javadoc')
                         from javadoc.destinationDir
                     }
 

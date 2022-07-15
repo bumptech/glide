@@ -115,8 +115,8 @@ subprojects { project ->
     apply plugin: "se.bjurr.violations.violations-gradle-plugin"
 
     task violations(type: ViolationsTask) {
-        minSeverity 'INFO'
-        detailLevel 'VERBOSE'
+        minSeverity = 'INFO'
+        detailLevel = 'VERBOSE'
         maxViolations = 0
         diffMaxViolations = 0
 
@@ -134,7 +134,7 @@ subprojects { project ->
         if (project.hasProperty("android")
                 && project.name != 'pmd' ) {
             android {
-                lintOptions {
+                lint {
                     warningsAsErrors true
                     quiet true
                     // Caught by the violations plugin.

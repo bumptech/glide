@@ -31,8 +31,8 @@ def repackagedJar = file("${packagingFolder}/repackaged.jar")
 def proguardedJar = file("${packagingFolder}/proguarded.jar")
 
 task compiledJar(type: Jar, dependsOn: classes) {
-    destinationDir = packagingFolder
-    archiveName = 'compiled.jar'
+    destinationDirectory.set(packagingFolder)
+    archiveFileName.set('compiled.jar')
     from sourceSets.main.output
 }
 
