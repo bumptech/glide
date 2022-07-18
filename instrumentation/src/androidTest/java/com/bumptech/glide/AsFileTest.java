@@ -8,12 +8,12 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.test.GlideApp;
+import com.bumptech.glide.test.ModelGeneratorRule;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.testutil.ConcurrencyHelper;
 import com.bumptech.glide.testutil.MockModelLoader;
 import com.bumptech.glide.testutil.TearDownGlide;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +25,10 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class AsFileTest {
   private static final String URL = "https://imgs.xkcd.com/comics/mc_hammer_age.png";
+
+  @Rule public final ModelGeneratorRule modelGeneratorRule = new ModelGeneratorRule();
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
+
   private final ConcurrencyHelper concurrency = new ConcurrencyHelper();
   private final Context context = ApplicationProvider.getApplicationContext();
 
@@ -95,27 +98,10 @@ public class AsFileTest {
   }
 
   private InputStream getData() {
-    InputStream is = null;
     try {
-      is = context.getResources().openRawResource(ResourceIds.raw.canonical);
-      byte[] buffer = new byte[1024 * 1024];
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      int read;
-      while ((read = is.read(buffer)) != -1) {
-        outputStream.write(buffer, 0, read);
-      }
-      byte[] data = outputStream.toByteArray();
-      return new ByteArrayInputStream(data);
+      return new ByteArrayInputStream(modelGeneratorRule.asByteArray(ResourceIds.raw.canonical));
     } catch (IOException e) {
       throw new RuntimeException(e);
-    } finally {
-      if (is != null) {
-        try {
-          is.close();
-        } catch (IOException e) {
-          // Ignored.
-        }
-      }
     }
   }
 }
