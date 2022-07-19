@@ -11,4 +11,5 @@ set -e
   -x :samples:svg:build \
   :instrumentation:assembleAndroidTest \
   :benchmark:assembleAndroidTest \
+  :glide:debugJavadoc \
   --parallel

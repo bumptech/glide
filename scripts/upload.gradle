@@ -146,7 +146,7 @@ afterEvaluate { project ->
 
                     def getAndroidSdkDirectory = project.android.sdkDirectory
 
-                    def getAndroidJar = "${getAndroidSdkDirectory}/platforms/${project.android.compileSdk}/android.jar"
+                    def getAndroidJar = "${getAndroidSdkDirectory}/platforms/${project.android.compileSdkVersion}/android.jar"
 
                     task androidJavadocs(type: Javadoc, dependsOn: assembleDebug) {
                         source = variants.collect { it.getJavaCompileProvider().get().source }
