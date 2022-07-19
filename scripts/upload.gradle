@@ -16,10 +16,6 @@
  *
  * Based on: https://github.com/mcxiaoke/gradle-mvn-push/blob/master/gradle-mvn-push.gradle.
  *
- * To install in a local maven repo:
- * 1. In the project you want to test (not Glide), add mavenLocal() to the repositories list.
- * 2. In Glide, run: ./gradlew uploadArchives -PLOCAL
- *
  * For faster runs add: -x check when building Glide.
  */
 
@@ -221,7 +217,7 @@ afterEvaluate { project ->
     }
 
     signing {
-        required { isReleaseBuild() && gradle.taskGraph.hasTask('uploadArchives') }
+        required { isReleaseBuild() && gradle.taskGraph.hasTask('publish') }
         sign publishing.publications.mavenJava
     }
 }
