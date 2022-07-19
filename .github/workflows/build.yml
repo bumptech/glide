@@ -22,5 +22,5 @@ jobs:
               NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
               NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
             if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'bumptech/glide' }}
-            run: ./gradlew uploadArchives -PNEXUS_USERNAME="${NEXUS_USERNAME}" -PNEXUS_PASSWORD="${NEXUS_PASSWORD}"
+            run: ./gradlew publish -PNEXUS_USERNAME="${NEXUS_USERNAME}" -PNEXUS_PASSWORD="${NEXUS_PASSWORD}"
 
