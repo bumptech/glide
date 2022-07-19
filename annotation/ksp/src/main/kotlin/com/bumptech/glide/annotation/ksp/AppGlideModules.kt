@@ -1,6 +1,7 @@
 package com.bumptech.glide.annotation.ksp
 
 import com.bumptech.glide.annotation.Excludes
+import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getConstructors
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
@@ -38,6 +39,8 @@ object AppGlideModuleConstants {
 internal data class AppGlideModuleData(
   val name: ClassName,
   val constructor: Constructor,
+  val allowedLibraryGlideModuleNames: List<String>,
+  val sources: List<KSDeclaration>,
 ) {
   internal data class Constructor(val hasContext: Boolean)
 }
@@ -57,7 +60,26 @@ internal class AppGlideModuleParser(
     val constructor = parseAppGlideModuleConstructorOrThrow()
     val name = ClassName.bestGuess(appGlideModuleClass.qualifiedName!!.asString())
 
-    return AppGlideModuleData(name = name, constructor = constructor)
+    val (indexFiles, allLibraryModuleNames) = getIndexesAndLibraryGlideModuleNames()
+    val excludedGlideModuleClassNames = getExcludedGlideModuleClassNames()
+    val filteredGlideModuleClassNames =
+      allLibraryModuleNames.filterNot { excludedGlideModuleClassNames.contains(it) }
+
+    return AppGlideModuleData(
+      name = name,
+      constructor = constructor,
+      allowedLibraryGlideModuleNames = filteredGlideModuleClassNames,
+      sources = indexFiles
+    )
+  }
+
+  private fun getExcludedGlideModuleClassNames(): Set<String> {
+    val excludesAnnotation = appGlideModuleClass.atMostOneExcludesAnnotation()
+    // TODO(judds): Implement support for the excludes annotation.
+    environment.logger.logging(
+      "Found excludes annotation arguments: ${excludesAnnotation?.arguments}"
+    )
+    return emptySet()
   }
 
   private fun parseAppGlideModuleConstructorOrThrow(): AppGlideModuleData.Constructor {
@@ -79,6 +101,22 @@ internal class AppGlideModuleParser(
     val indexFiles: List<KSDeclaration>,
     val libraryModuleNames: List<String>,
   )
+
+  @OptIn(KspExperimental::class)
+  private fun getIndexesAndLibraryGlideModuleNames(): IndexFilesAndLibraryModuleNames {
+    val allIndexFiles: MutableList<KSDeclaration> = mutableListOf()
+    val allLibraryGlideModuleNames: MutableList<String> = mutableListOf()
+    resolver.getDeclarationsFromPackage(GlideSymbolProcessorConstants.PACKAGE_NAME).forEach {
+      index: KSDeclaration ->
+      val libraryGlideModuleNames = extractGlideModulesFromIndexAnnotation(index)
+      if (libraryGlideModuleNames.isNotEmpty()) {
+        allIndexFiles.add(index)
+        allLibraryGlideModuleNames.addAll(libraryGlideModuleNames)
+      }
+    }
+
+    return IndexFilesAndLibraryModuleNames(allIndexFiles, allLibraryGlideModuleNames)
+  }
 
   private fun extractGlideModulesFromIndexAnnotation(
     index: KSDeclaration,
@@ -155,7 +193,7 @@ internal class AppGlideModuleGenerator(private val appGlideModuleData: AppGlideM
       .addModifiers(KModifier.INTERNAL)
       .addProperty("appGlideModule", data.name, KModifier.PRIVATE)
       .primaryConstructor(generateConstructor(data))
-      .addFunction(generateRegisterComponents())
+      .addFunction(generateRegisterComponents(data.allowedLibraryGlideModuleNames))
       .addFunction(generateApplyOptions())
       .addFunction(generateManifestParsingDisabled())
       .build()
@@ -183,13 +221,17 @@ internal class AppGlideModuleGenerator(private val appGlideModuleData: AppGlideM
     // TODO(judds): Log the discovered modules here.
   }
 
-  // TODO(judds): call registerComponents on LibraryGlideModules here.
-  private fun generateRegisterComponents() =
+  private fun generateRegisterComponents(allowedGlideModuleNames: List<String>) =
     FunSpec.builder("registerComponents")
       .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
       .addParameter("context", AppGlideModuleConstants.CONTEXT_CLASS_NAME)
       .addParameter("glide", ClassName(AppGlideModuleConstants.GLIDE_PACKAGE_NAME, "Glide"))
       .addParameter("registry", ClassName(AppGlideModuleConstants.GLIDE_PACKAGE_NAME, "Registry"))
+      .apply {
+        allowedGlideModuleNames.forEach {
+          addStatement("%T().registerComponents(context, glide, registry)", ClassName.bestGuess(it))
+        }
+      }
       .addStatement("appGlideModule.registerComponents(context, glide, registry)")
       .build()
 
