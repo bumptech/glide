@@ -20,6 +20,7 @@ buildscript {
         classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
         classpath "androidx.benchmark:benchmark-gradle-plugin:${ANDROID_X_BENCHMARK_VERSION}"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${JETBRAINS_KOTLIN_VERSION}"
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$KSP_GRADLE_PLUGIN_VERSION"
     }
 }
 
@@ -41,11 +42,21 @@ subprojects { project ->
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
         gradlePluginPortal()
+
     }
 
+    afterEvaluate {
+        if (!project.plugins.hasPlugin("org.jetbrains.kotlin.jvm")) {
+            tasks.withType(JavaCompile) {
+                sourceCompatibility = 1.7
+                targetCompatibility = 1.7
+            }
+        }
+    }
+
+
     tasks.withType(JavaCompile) {
-        sourceCompatibility = 1.7
-        targetCompatibility = 1.7
+
 
         // gifencoder is a legacy project that has a ton of warnings and is basically never
         // modified, so we're not going to worry about cleaning it up.

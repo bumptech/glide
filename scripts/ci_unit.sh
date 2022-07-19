@@ -2,6 +2,8 @@
 
 set -e
 
+# TODO(judds): Remove the KSP tests when support is available to run them in
+# Google3
 ./gradlew build \
   -x :samples:flickr:build \
   -x :samples:giphy:build \
@@ -12,4 +14,5 @@ set -e
   :instrumentation:assembleAndroidTest \
   :benchmark:assembleAndroidTest \
   :glide:debugJavadoc \
+  :annotation:ksp:test:test \
   --parallel

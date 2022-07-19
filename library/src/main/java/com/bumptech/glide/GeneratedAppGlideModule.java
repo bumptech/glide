@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.manager.RequestManagerRetriever;
 import com.bumptech.glide.module.AppGlideModule;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -15,7 +16,9 @@ import java.util.Set;
 abstract class GeneratedAppGlideModule extends AppGlideModule {
   /** This method can be removed when manifest parsing is no longer supported. */
   @NonNull
-  abstract Set<Class<?>> getExcludedModuleClasses();
+  Set<Class<?>> getExcludedModuleClasses() {
+    return new HashSet<>();
+  }
 
   @Nullable
   RequestManagerRetriever.RequestManagerFactory getRequestManagerFactory() {

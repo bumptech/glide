@@ -1,0 +1,15 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'com.google.devtools.ksp'
+}
+
+dependencies {
+    implementation("com.squareup:kotlinpoet:1.12.0")
+    implementation project(":annotation")
+    implementation project(":glide")
+    implementation 'com.google.devtools.ksp:symbol-processing-api:1.7.0-1.0.6'
+    ksp("dev.zacsweers.autoservice:auto-service-ksp:1.0.0")
+    implementation("com.google.auto.service:auto-service-annotations:1.0.1")
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"
