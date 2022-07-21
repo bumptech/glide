@@ -52,22 +52,22 @@ class OnlyAppGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
   fun compile_withGlideModuleOnValidAppGlideModule_generatedGeneratedAppGlideModule() {
     val kotlinModule =
       KotlinSourceFile(
-        "Module.kt",
+        "AppModule.kt",
         """
         import com.bumptech.glide.annotation.GlideModule
         import com.bumptech.glide.module.AppGlideModule
 
-        @GlideModule class Module : AppGlideModule()
+        @GlideModule class AppModule : AppGlideModule()
         """
       )
     val javaModule =
       JavaSourceFile(
-        "Module.java",
+        "AppModule.java",
         """
           import com.bumptech.glide.annotation.GlideModule;
           import com.bumptech.glide.module.AppGlideModule;
           
-          @GlideModule public class Module extends AppGlideModule {}
+          @GlideModule public class AppModule extends AppGlideModule {}
         """.trimIndent()
       )
 
@@ -81,26 +81,26 @@ class OnlyAppGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
   fun compile_withAppGlideModuleConstructorAcceptingOnlyContext_generatesGeneratedAppGlideModule() {
     val kotlinModule =
       KotlinSourceFile(
-        "Module.kt",
+        "AppModule.kt",
         """
         import android.content.Context
         import com.bumptech.glide.annotation.GlideModule
         import com.bumptech.glide.module.AppGlideModule
 
-        @GlideModule class Module(context: Context) : AppGlideModule()
+        @GlideModule class AppModule(context: Context) : AppGlideModule()
         """
       )
 
     val javaModule =
       JavaSourceFile(
-        "Module.java",
+        "AppModule.java",
         """
           import android.content.Context;
           import com.bumptech.glide.annotation.GlideModule;
           import com.bumptech.glide.module.AppGlideModule;
           
-          @GlideModule public class Module extends AppGlideModule {
-            public Module(Context context) {}
+          @GlideModule public class AppModule extends AppGlideModule {
+            public AppModule(Context context) {}
           }
         """
       )
@@ -115,23 +115,23 @@ class OnlyAppGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
   fun compile_withAppGlideModuleConstructorRequiringOtherThanContext_fails() {
     val kotlinModule =
       KotlinSourceFile(
-        "Module.kt",
+        "AppModule.kt",
         """
         import com.bumptech.glide.annotation.GlideModule
         import com.bumptech.glide.module.AppGlideModule
 
-        @GlideModule class Module(value: Int) : AppGlideModule()
+        @GlideModule class AppModule(value: Int) : AppGlideModule()
         """
       )
     val javaModule =
       JavaSourceFile(
-        "Module.java",
+        "AppModule.java",
         """
           import com.bumptech.glide.annotation.GlideModule;
           import com.bumptech.glide.module.AppGlideModule;
           
-          @GlideModule public class Module extends AppGlideModule {
-            public Module(Integer value) {}
+          @GlideModule public class AppModule extends AppGlideModule {
+            public AppModule(Integer value) {}
           }
         """
       )
@@ -146,25 +146,25 @@ class OnlyAppGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
   fun compile_withAppGlideModuleConstructorRequiringMultipleArguments_fails() {
     val kotlinModule =
       KotlinSourceFile(
-        "Module.kt",
+        "AppModule.kt",
         """
         import android.content.Context
         import com.bumptech.glide.annotation.GlideModule
         import com.bumptech.glide.module.AppGlideModule
 
-        @GlideModule class Module(value: Context, otherValue: Int) : AppGlideModule()
+        @GlideModule class AppModule(value: Context, otherValue: Int) : AppGlideModule()
         """
       )
     val javaModule =
       JavaSourceFile(
-        "Module.java",
+        "AppModule.java",
         """
           import android.content.Context;
           import com.bumptech.glide.annotation.GlideModule;
           import com.bumptech.glide.module.AppGlideModule;
           
-          @GlideModule public class Module extends AppGlideModule {
-            public Module(Context value, int otherValue) {}
+          @GlideModule public class AppModule extends AppGlideModule {
+            public AppModule(Context value, int otherValue) {}
           }
         """
       )
@@ -180,13 +180,13 @@ class OnlyAppGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
   fun compile_withAppGlideModuleWithOneEmptyrConstructor_andOneContextOnlyConstructor_usesTheContextOnlyConstructor() {
     val kotlinModule =
       KotlinSourceFile(
-        "Module.kt",
+        "AppModule.kt",
         """
         import android.content.Context
         import com.bumptech.glide.annotation.GlideModule
         import com.bumptech.glide.module.AppGlideModule
 
-        @GlideModule class Module(context: Context?) : AppGlideModule() {
+        @GlideModule class AppModule(context: Context?) : AppGlideModule() {
           constructor() : this(null)
         }
         
@@ -194,16 +194,16 @@ class OnlyAppGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
       )
     val javaModule =
       JavaSourceFile(
-        "Module.java",
+        "AppModule.java",
         """
           import android.content.Context;
           import com.bumptech.glide.annotation.GlideModule;
           import com.bumptech.glide.module.AppGlideModule;
           import javax.annotation.Nullable;
           
-          @GlideModule public class Module extends AppGlideModule {
-            public Module() {}
-            public Module(@Nullable Context context) {}
+          @GlideModule public class AppModule extends AppGlideModule {
+            public AppModule() {}
+            public AppModule(@Nullable Context context) {}
           }
         """
       )
@@ -279,7 +279,7 @@ const val simpleAppGlideModule =
   """
 package com.bumptech.glide
 
-import Module
+import AppModule
 import android.content.Context
 import kotlin.Boolean
 import kotlin.Suppress
@@ -289,9 +289,9 @@ internal class GeneratedAppGlideModuleImpl(
   @Suppress("UNUSED_VARIABLE")
   context: Context,
 ) : GeneratedAppGlideModule() {
-  private val appGlideModule: Module
+  private val appGlideModule: AppModule
   init {
-    appGlideModule = Module()
+    appGlideModule = AppModule()
   }
 
   public override fun registerComponents(
@@ -315,7 +315,7 @@ const val appGlideModuleWithContext =
   """
 package com.bumptech.glide
 
-import Module
+import AppModule
 import android.content.Context
 import kotlin.Boolean
 import kotlin.Unit
@@ -323,9 +323,9 @@ import kotlin.Unit
 internal class GeneratedAppGlideModuleImpl(
   context: Context,
 ) : GeneratedAppGlideModule() {
-  private val appGlideModule: Module
+  private val appGlideModule: AppModule
   init {
-    appGlideModule = Module(context)
+    appGlideModule = AppModule(context)
   }
 
   public override fun registerComponents(

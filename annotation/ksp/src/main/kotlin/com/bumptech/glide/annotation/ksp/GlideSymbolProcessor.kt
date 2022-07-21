@@ -46,7 +46,7 @@ class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) 
   ): List<KSAnnotated> {
     environment.logger.logging("Found symbols, valid: $validSymbols, invalid: $invalidSymbols")
 
-    val (appGlideModules, libraryGlideModules) = extractGlideModules(validSymbols)
+    val (appGlideModules, libraryGlideModules) = ModuleParser.extractGlideModules(validSymbols)
 
     if (libraryGlideModules.size + appGlideModules.size != validSymbols.count()) {
       val invalidModules =
@@ -136,28 +136,6 @@ class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) 
 
     environment.logger.logging("Wrote file: $file")
   }
-
-  internal data class GlideModules(
-    val appModules: List<KSClassDeclaration>,
-    val libraryModules: List<KSClassDeclaration>,
-  )
-
-  private fun extractGlideModules(annotatedModules: List<KSAnnotated>): GlideModules {
-    val appAndLibraryModuleNames = listOf(APP_MODULE_QUALIFIED_NAME, LIBRARY_MODULE_QUALIFIED_NAME)
-    val modulesBySuperType: Map<String?, List<KSClassDeclaration>> =
-      annotatedModules.filterIsInstance<KSClassDeclaration>().groupBy { classDeclaration ->
-        appAndLibraryModuleNames.singleOrNull { classDeclaration.hasSuperType(it) }
-      }
-
-    val (appModules, libraryModules) =
-      appAndLibraryModuleNames.map { modulesBySuperType[it] ?: emptyList() }
-    return GlideModules(appModules, libraryModules)
-  }
-
-  private fun KSClassDeclaration.hasSuperType(superTypeQualifiedName: String) =
-    superTypes
-      .map { superType -> superType.resolve().declaration.qualifiedName!!.asString() }
-      .contains(superTypeQualifiedName)
 }
 
 // This class is visible only for testing
@@ -175,5 +153,3 @@ object GlideSymbolProcessorConstants {
 
 internal class InvalidGlideSourceException(val userMessage: String) : Exception(userMessage)
 
-private const val APP_MODULE_QUALIFIED_NAME = "com.bumptech.glide.module.AppGlideModule"
-private const val LIBRARY_MODULE_QUALIFIED_NAME = "com.bumptech.glide.module.LibraryGlideModule"
