@@ -241,4 +241,5 @@ public class RequestManagerFragment extends Fragment {
       return super.toString() + "{fragment=" + RequestManagerFragment.this + "}";
     }
   }
+
 }

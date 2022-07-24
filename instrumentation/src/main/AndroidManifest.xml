@@ -6,10 +6,12 @@
   <application tools:ignore="MissingApplicationIcon">
     <activity
         android:name="com.bumptech.glide.test.GlideWithBeforeSuperOnCreateActivity"
-        android:exported="false"/>
+        android:exported="false" />
     <activity
         android:name="com.bumptech.glide.test.GlideWithAsDifferentSupertypesActivity"
-        android:exported="false"
-        />
+        android:exported="false" />
+    <activity
+        android:name="com.bumptech.glide.test.DefaultFragmentActivity"
+        android:exported="false" />
   </application>
 </manifest>
