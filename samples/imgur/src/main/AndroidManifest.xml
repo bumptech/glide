@@ -18,7 +18,9 @@
     android:networkSecurityConfig="@xml/network_security_config"
     android:name="com.bumptech.glide.samples.imgur.ImgurApplication"
     tools:targetApi="n">
-    <activity android:name="com.bumptech.glide.samples.imgur.MainActivity">
+    <activity
+        android:exported="true"
+        android:name="com.bumptech.glide.samples.imgur.MainActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>

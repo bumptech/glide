@@ -26,11 +26,11 @@ dependencies {
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdk 30 as int
 
     defaultConfig {
         applicationId 'com.bumptech.glide.instrumentation'
-        minSdk 16 as int
+        minSdk MIN_SDK_VERSION as int
         targetSdk TARGET_SDK_VERSION as int
         versionCode 1
         versionName '1.0'
@@ -38,8 +38,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 }
 
