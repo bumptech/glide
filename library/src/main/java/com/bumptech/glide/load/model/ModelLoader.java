@@ -86,7 +86,7 @@ public interface ModelLoader<Model, Data> {
   /**
    * Returns true if the given model is a of a recognized type that this loader can probably load.
    *
-   * <p>For example, you may want multiple Uri -> InputStream loaders. One might handle media store
+   * <p>For example, you may want multiple Uri to InputStream loaders. One might handle media store
    * Uris, another might handle asset Uris, and a third might handle file Uris etc.
    *
    * <p>This method is generally expected to do no I/O and complete quickly, so best effort results

@@ -591,7 +591,10 @@ public final class GlideBuilder {
     }
   }
 
-  /** See {@link #setWaitForFramesAfterTrimMemory(boolean)}. */
+  /**
+   * This is an internal only class that may be deleted at any time without notice. For internal
+   * users of glide, see the {@code setWaitForFramesAfterTrimMemory(boolean)} method above.
+   */
   public static final class WaitForFramesAfterTrimMemory implements Experiment {
     private WaitForFramesAfterTrimMemory() {}
   }
