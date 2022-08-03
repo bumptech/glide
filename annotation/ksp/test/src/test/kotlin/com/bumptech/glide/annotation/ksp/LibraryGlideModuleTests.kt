@@ -1,7 +1,9 @@
 package com.bumptech.glide.annotation.ksp.test
 
+import com.bumptech.glide.annotation.ksp.AppGlideModuleConstants
 import com.bumptech.glide.annotation.ksp.GlideSymbolProcessorConstants
 import com.google.common.truth.Truth.assertThat
+import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import java.io.FileNotFoundException
 import kotlin.test.assertFailsWith
@@ -325,6 +327,275 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
       assertThat(it.generatedAppGlideModuleContents())
         .hasSourceEqualTo(appGlideModuleWithPackagePrefixedLibraryModules)
       assertThat(it.exitCode).isEqualTo(ExitCode.OK)
+    }
+  }
+
+  @Test
+  fun compile_withLibraryModuleInExcludes_producesGeneratedAppGlideModuleThatDoesNotCallExcludedLibraryModule() {
+    val kotlinLibraryModule1 =
+      KotlinSourceFile(
+        "LibraryModule.kt",
+        """
+        import com.bumptech.glide.annotation.GlideModule
+        import com.bumptech.glide.module.LibraryGlideModule
+
+        @GlideModule class LibraryModule : LibraryGlideModule()
+        """
+      )
+    val kotlinLibraryModule2 =
+      KotlinSourceFile(
+        "ExcludedLibraryModule.kt",
+        """
+        import com.bumptech.glide.annotation.GlideModule
+        import com.bumptech.glide.module.LibraryGlideModule
+
+        @GlideModule class ExcludedLibraryModule : LibraryGlideModule()
+        """
+      )
+    val kotlinAppModule =
+      KotlinSourceFile(
+        "AppModule.kt",
+        """
+        import com.bumptech.glide.annotation.Excludes
+        import com.bumptech.glide.annotation.GlideModule
+        import com.bumptech.glide.module.AppGlideModule
+
+        @GlideModule 
+        @Excludes(ExcludedLibraryModule::class) 
+        class AppModule : AppGlideModule()
+        """
+      )
+
+    val javaLibraryModule1 =
+      JavaSourceFile(
+        "LibraryModule.java",
+        """
+        import com.bumptech.glide.annotation.GlideModule;
+        import com.bumptech.glide.module.LibraryGlideModule;
+        
+        @GlideModule
+        public class LibraryModule extends LibraryGlideModule {}
+        """
+      )
+    val javaLibraryModule2 =
+      JavaSourceFile(
+        "ExcludedLibraryModule.java",
+        """
+        import com.bumptech.glide.annotation.GlideModule;
+        import com.bumptech.glide.module.LibraryGlideModule;
+        
+        @GlideModule
+        public class ExcludedLibraryModule extends LibraryGlideModule {}
+        """
+      )
+    val javaAppModule =
+      JavaSourceFile(
+        "AppModule.java",
+        """
+        import com.bumptech.glide.annotation.Excludes;
+        import com.bumptech.glide.annotation.GlideModule;
+        import com.bumptech.glide.module.AppGlideModule;
+        
+        @GlideModule 
+        @Excludes(ExcludedLibraryModule.class)
+        public class AppModule extends AppGlideModule {
+          public AppModule() {}
+        }
+        """
+      )
+    compileCurrentSourceType(
+      kotlinAppModule,
+      kotlinLibraryModule1,
+      kotlinLibraryModule2,
+      javaAppModule,
+      javaLibraryModule1,
+      javaLibraryModule2,
+    ) {
+      assertThat(it.generatedAppGlideModuleContents())
+        .hasSourceEqualTo(appGlideModuleWithLibraryModule)
+      assertThat(it.exitCode).isEqualTo(ExitCode.OK)
+    }
+  }
+
+  @Test
+  fun compile_withMultipleLibraryModulesInExcludes_producesGeneratedAppGlideModuleThatDoesNotCallExcludedLibraryModules() {
+    val kotlinLibraryModule1 =
+      KotlinSourceFile(
+        "LibraryModule.kt",
+        """
+        import com.bumptech.glide.annotation.GlideModule
+        import com.bumptech.glide.module.LibraryGlideModule
+
+        @GlideModule class LibraryModule : LibraryGlideModule()
+        """
+      )
+    val kotlinLibraryModule2 =
+      KotlinSourceFile(
+        "ExcludedLibraryModule.kt",
+        """
+        import com.bumptech.glide.annotation.GlideModule
+        import com.bumptech.glide.module.LibraryGlideModule
+
+        @GlideModule class ExcludedLibraryModule : LibraryGlideModule()
+        """
+      )
+    val kotlinAppModule =
+      KotlinSourceFile(
+        "AppModule.kt",
+        """
+        import com.bumptech.glide.annotation.Excludes
+        import com.bumptech.glide.annotation.GlideModule
+        import com.bumptech.glide.module.AppGlideModule
+
+        @GlideModule 
+        @Excludes(LibraryModule::class, ExcludedLibraryModule::class) 
+        class AppModule : AppGlideModule()
+        """
+      )
+
+    val javaLibraryModule1 =
+      JavaSourceFile(
+        "LibraryModule.java",
+        """
+        import com.bumptech.glide.annotation.GlideModule;
+        import com.bumptech.glide.module.LibraryGlideModule;
+        
+        @GlideModule
+        public class LibraryModule extends LibraryGlideModule {}
+        """
+      )
+    val javaLibraryModule2 =
+      JavaSourceFile(
+        "ExcludedLibraryModule.java",
+        """
+        import com.bumptech.glide.annotation.GlideModule;
+        import com.bumptech.glide.module.LibraryGlideModule;
+        
+        @GlideModule
+        public class ExcludedLibraryModule extends LibraryGlideModule {}
+        """
+      )
+    val javaAppModule =
+      JavaSourceFile(
+        "AppModule.java",
+        """
+        import com.bumptech.glide.annotation.Excludes;
+        import com.bumptech.glide.annotation.GlideModule;
+        import com.bumptech.glide.module.AppGlideModule;
+        
+        @GlideModule 
+        @Excludes({LibraryModule.class, ExcludedLibraryModule.class})
+        public class AppModule extends AppGlideModule {
+          public AppModule() {}
+        }
+        """
+      )
+    compileCurrentSourceType(
+      kotlinAppModule,
+      kotlinLibraryModule1,
+      kotlinLibraryModule2,
+      javaAppModule,
+      javaLibraryModule1,
+      javaLibraryModule2,
+    ) {
+      assertThat(it.generatedAppGlideModuleContents())
+        .hasSourceEqualTo(simpleAppGlideModule)
+      assertThat(it.exitCode).isEqualTo(ExitCode.OK)
+    }
+  }
+
+  @Test
+  fun compile_withAppModuleWithEmptyExcludes_fails() {
+    val kotlinAppModule =
+      KotlinSourceFile(
+        "AppModule.kt",
+        """
+        import com.bumptech.glide.annotation.Excludes
+        import com.bumptech.glide.annotation.GlideModule
+        import com.bumptech.glide.module.AppGlideModule
+
+        @GlideModule 
+        @Excludes
+        class AppModule : AppGlideModule()
+        """
+      )
+    val javaAppModule =
+      JavaSourceFile(
+        "AppModule.java",
+        """
+        import com.bumptech.glide.annotation.Excludes;
+        import com.bumptech.glide.annotation.GlideModule;
+        import com.bumptech.glide.module.AppGlideModule;
+        
+        @GlideModule 
+        @Excludes
+        public class AppModule extends AppGlideModule {
+          public AppModule() {}
+        }
+        """
+      )
+    compileCurrentSourceType(
+      kotlinAppModule,
+      javaAppModule,
+    ) {
+      assertThat(it.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+      assertThat(it.messages)
+        .contains(AppGlideModuleConstants.INVALID_EXCLUDES_ANNOTATION_MESSAGE.format("AppModule"))
+    }
+  }
+
+  @Test
+  fun compile_withAppModuleWithExcludes_pointingToAppModules_fails() {
+    val kotlinAppModule =
+      KotlinSourceFile(
+        "AppModule.kt",
+        """
+        import com.bumptech.glide.annotation.Excludes
+        import com.bumptech.glide.annotation.GlideModule
+        import com.bumptech.glide.module.AppGlideModule
+
+        class SomeOtherAppModule: AppGlideModule()
+
+        @GlideModule 
+        @Excludes(SomeOtherAppModule::class)
+        class AppModule : AppGlideModule()
+        """
+      )
+    val otherJavaAppModule =
+      JavaSourceFile(
+        "SomeOtherAppModule.java",
+        """
+        import com.bumptech.glide.module.AppGlideModule;
+        
+        public class SomeOtherAppModule extends AppGlideModule {
+          public SomeOtherAppModule() {}
+        }
+        """
+
+      )
+    val javaAppModule =
+      JavaSourceFile(
+        "AppModule.java",
+        """
+        import com.bumptech.glide.annotation.Excludes;
+        import com.bumptech.glide.annotation.GlideModule;
+        import com.bumptech.glide.module.AppGlideModule;
+        
+        @GlideModule 
+        @Excludes(SomeOtherAppModule.class)
+        public class AppModule extends AppGlideModule {
+          public AppModule() {}
+        }
+        """
+      )
+    compileCurrentSourceType(
+      kotlinAppModule,
+      otherJavaAppModule,
+      javaAppModule,
+    ) {
+      assertThat(it.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
+      assertThat(it.messages)
+        .contains(AppGlideModuleConstants.INVALID_EXCLUDES_ANNOTATION_MESSAGE.format("AppModule"))
     }
   }
 }
