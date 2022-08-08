@@ -59,7 +59,7 @@ final class ResourceCacheKey implements Key {
   @Override
   public int hashCode() {
     int result = sourceKey.hashCode();
-    result = 31 * result + signature.hashCode();
+    result = 31 * result + (signature != null ? signature.hashCode() : result);
     result = 31 * result + width;
     result = 31 * result + height;
     if (transformation != null) {
