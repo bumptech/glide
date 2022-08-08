@@ -61,7 +61,7 @@ class EngineKey implements Key {
   public int hashCode() {
     if (hashCode == 0) {
       hashCode = model.hashCode();
-      hashCode = 31 * hashCode + signature.hashCode();
+      hashCode = 31 * hashCode + (signature != null ? signature.hashCode() : hashCode);
       hashCode = 31 * hashCode + width;
       hashCode = 31 * hashCode + height;
       hashCode = 31 * hashCode + transformations.hashCode();
