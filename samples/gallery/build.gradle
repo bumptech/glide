@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
+apply plugin: 'com.google.devtools.ksp'
 
 dependencies {
     implementation project(':library')
@@ -18,7 +18,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$JETBRAINS_KOTLIN_VERSION"
 
-    kapt project(':annotation:compiler')
+    ksp project(':annotation:ksp')
 }
 
 kotlin {
