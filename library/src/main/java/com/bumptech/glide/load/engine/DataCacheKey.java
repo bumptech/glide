@@ -31,7 +31,7 @@ final class DataCacheKey implements Key {
   @Override
   public int hashCode() {
     int result = sourceKey.hashCode();
-    result = 31 * result + signature.hashCode();
+    result = 31 * result + (signature != null ? signature.hashCode() : result);
     return result;
   }
 
