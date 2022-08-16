@@ -13,7 +13,8 @@ dependencies {
     testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
     testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
     testImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
-    testImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"}
+    testImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
+}
 
 tasks.withType(JavaCompile) {
     options.fork = true

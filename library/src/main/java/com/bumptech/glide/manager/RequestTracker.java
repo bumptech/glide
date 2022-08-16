@@ -95,6 +95,8 @@ public class RequestTracker {
   public void pauseAllRequests() {
     isPaused = true;
     for (Request request : Util.getSnapshot(requests)) {
+      // TODO(judds): Failed requests return false from isComplete(). They're still restarted in
+      //  resumeRequests, but they're not cleared here. We should probably clear all requests here?
       if (request.isRunning() || request.isComplete()) {
         request.clear();
         pendingRequests.add(request);

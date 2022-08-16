@@ -1,0 +1,54 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    compileSdk COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdk MIN_SDK_VERSION as int
+        targetSdk TARGET_SDK_VERSION as int
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+// Enable strict mode, but exclude tests.
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+    if (!it.name.contains("Test")) {
+        kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
+    }
+}
+
+dependencies {
+    api project(":library")
+    implementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
+    implementation "androidx.test:core-ktx:$ANDROID_X_TEST_CORE_KTX_VERSION"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
+    testImplementation "androidx.test.ext:junit-ktx:$ANDROID_X_TEST_JUNIT_KTX_VERSION"
+    testImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
+    testImplementation "org.robolectric:robolectric:$ROBOLECTRIC_VERSION"
+    testImplementation "androidx.test:runner:$ANDROID_X_TEST_RUNNER_VERSION"
+    testImplementation "junit:junit:$JUNIT_VERSION"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$JETBRAINS_KOTLINX_COROUTINES_TEST_VERSION"
+    testImplementation "com.google.truth:truth:$TRUTH_VERSION"
+    androidTestImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"
