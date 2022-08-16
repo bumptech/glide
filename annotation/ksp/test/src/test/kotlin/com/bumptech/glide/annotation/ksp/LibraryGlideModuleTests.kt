@@ -613,7 +613,7 @@ import kotlin.Suppress
 import kotlin.Unit
 
 internal class GeneratedAppGlideModuleImpl(
-  @Suppress("UNUSED_VARIABLE")
+  @Suppress("UNUSED_PARAMETER")
   context: Context,
 ) : GeneratedAppGlideModule() {
   private val appGlideModule: AppModule
@@ -652,7 +652,7 @@ import kotlin.Suppress
 import kotlin.Unit
 
 internal class GeneratedAppGlideModuleImpl(
-  @Suppress("UNUSED_VARIABLE")
+  @Suppress("UNUSED_PARAMETER")
   context: Context,
 ) : GeneratedAppGlideModule() {
   private val appGlideModule: AppModule
@@ -691,7 +691,7 @@ import kotlin.Suppress
 import kotlin.Unit
 
 internal class GeneratedAppGlideModuleImpl(
-  @Suppress("UNUSED_VARIABLE")
+  @Suppress("UNUSED_PARAMETER")
   context: Context,
 ) : GeneratedAppGlideModule() {
   private val appGlideModule: AppModule

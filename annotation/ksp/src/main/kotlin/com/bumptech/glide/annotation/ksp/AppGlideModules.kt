@@ -290,7 +290,7 @@ internal class AppGlideModuleGenerator(private val appGlideModuleData: AppGlideM
     if (!data.constructor.hasContext) {
       contextParameterBuilder.addAnnotation(
         AnnotationSpec.builder(ClassName("kotlin", "Suppress"))
-          .addMember("%S", "UNUSED_VARIABLE")
+          .addMember("%S", "UNUSED_PARAMETER")
           .build()
       )
     }
