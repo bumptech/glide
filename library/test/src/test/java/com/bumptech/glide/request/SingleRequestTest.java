@@ -33,6 +33,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
@@ -46,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -647,6 +649,89 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(false));
+  }
+
+  @Test
+  public void onResourceReady_notifiesRequestCoordinator_beforeCallingRequestListeners() {
+    AtomicBoolean isRequestCoordinatorVerified = new AtomicBoolean();
+    SingleRequest<List> request =
+        builder
+            .setTarget(new DoNothingTarget())
+            .addRequestListener(
+                new RequestListener<>() {
+                  @Override
+                  public boolean onLoadFailed(
+                      @Nullable GlideException e,
+                      Object model,
+                      Target<List> target,
+                      boolean isFirstResource) {
+                    return false;
+                  }
+
+                  @Override
+                  public boolean onResourceReady(
+                      List resource,
+                      Object model,
+                      Target<List> target,
+                      DataSource dataSource,
+                      boolean isFirstResource) {
+                    verify(builder.requestCoordinator).onRequestSuccess(target.getRequest());
+                    isRequestCoordinatorVerified.set(true);
+                    return false;
+                  }
+                })
+            .build();
+    builder.target.setRequest(request);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
+
+    assertThat(isRequestCoordinatorVerified.get()).isTrue();
+  }
+
+  @Test
+  public void onLoadFailed_notifiesRequestCoordinator_beforeCallingRequestListeners() {
+    AtomicBoolean isRequestCoordinatorVerified = new AtomicBoolean();
+    SingleRequest<List> request =
+        builder
+            .setTarget(new DoNothingTarget())
+            .addRequestListener(
+                new RequestListener<>() {
+                  @Override
+                  public boolean onLoadFailed(
+                      @Nullable GlideException e,
+                      Object model,
+                      Target<List> target,
+                      boolean isFirstResource) {
+                    verify(builder.requestCoordinator).onRequestFailed(target.getRequest());
+                    isRequestCoordinatorVerified.set(true);
+                    return false;
+                  }
+
+                  @Override
+                  public boolean onResourceReady(
+                      List resource,
+                      Object model,
+                      Target<List> target,
+                      DataSource dataSource,
+                      boolean isFirstResource) {
+                    return false;
+                  }
+                })
+            .build();
+    builder.target.setRequest(request);
+    request.onLoadFailed(new GlideException("test"));
+
+    assertThat(isRequestCoordinatorVerified.get()).isTrue();
+  }
+
+  // We don't need to clear a resource since we're not using it to being with.
+  private static final class DoNothingTarget extends CustomTarget<List> {
+    @Override
+    public void onResourceReady(
+        @NonNull List resource, @Nullable Transition<? super List> transition) {}
+
+    @Override
+    public void onLoadCleared(@Nullable Drawable placeholder) {}
   }
 
   @Test

@@ -523,14 +523,14 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   }
 
   @GuardedBy("requestLock")
-  private void notifyLoadSuccess() {
+  private void notifyRequestCoordinatorLoadSucceeded() {
     if (requestCoordinator != null) {
       requestCoordinator.onRequestSuccess(this);
     }
   }
 
   @GuardedBy("requestLock")
-  private void notifyLoadFailed() {
+  private void notifyRequestCoordinatorLoadFailed() {
     if (requestCoordinator != null) {
       requestCoordinator.onRequestFailed(this);
     }
@@ -639,6 +639,8 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
               + " ms");
     }
 
+    notifyRequestCoordinatorLoadSucceeded();
+
     isCallingCallbacks = true;
     try {
       boolean anyListenerHandledUpdatingTarget = false;
@@ -660,7 +662,6 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       isCallingCallbacks = false;
     }
 
-    notifyLoadSuccess();
     GlideTrace.endSectionAsync(TAG, cookie);
   }
 
@@ -694,6 +695,8 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
       loadStatus = null;
       status = Status.FAILED;
 
+      notifyRequestCoordinatorLoadFailed();
+
       isCallingCallbacks = true;
       try {
         // TODO: what if this is a thumbnail request?
@@ -715,7 +718,6 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
         isCallingCallbacks = false;
       }
 
-      notifyLoadFailed();
       GlideTrace.endSectionAsync(TAG, cookie);
     }
   }
