@@ -26,7 +26,7 @@ public interface ArrayPool {
   <T> void put(T array);
 
   /**
-   * Returns a non-null array of the given type with a length >= to the given size.
+   * Returns a non-null array of the given type with a length {@code >=} to the given size.
    *
    * <p>If an array of the given size isn't in the pool, a new one will be allocated.
    *

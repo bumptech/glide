@@ -158,7 +158,7 @@ public final class GlideExecutor implements ExecutorService {
   /**
    * Returns a new unlimited thread pool with zero core thread count to make sure no threads are
    * created by default, {@link #KEEP_ALIVE_TIME_MS} keep alive time, the {@link
-   * #SOURCE_UNLIMITED_EXECUTOR_NAME} thread name prefix, the {@link
+   * #DEFAULT_SOURCE_UNLIMITED_EXECUTOR_NAME} thread name prefix, the {@link
    * com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy#DEFAULT}
    * uncaught throwable strategy, and the {@link SynchronousQueue} since using default unbounded
    * blocking queue, for example, {@link PriorityBlockingQueue} effectively won't create more than

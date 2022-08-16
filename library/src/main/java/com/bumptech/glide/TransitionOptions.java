@@ -35,8 +35,8 @@ public abstract class TransitionOptions<
    * load finishes. Will only be run if the resource was loaded asynchronously (i.e. was not in the
    * memory cache).
    *
-   * @param viewAnimationId The resource id of the {@link android.view.animation} to use as the
-   *     transition.
+   * @param viewAnimationId The resource id of the {@link android.view.animation.Animation} to use
+   *     as the transition.
    * @return This request builder.
    */
   @NonNull

@@ -133,7 +133,10 @@ public final class Util {
     return bytesPerPixel;
   }
 
-  /** Returns true if width and height are both > 0 and/or equal to {@link Target#SIZE_ORIGINAL}. */
+  /**
+   * Returns {@code true} if {@code width} and {@code height} are both {@code > 0} and/or equal to
+   * {@link Target#SIZE_ORIGINAL}.
+   */
   public static boolean isValidDimensions(int width, int height) {
     return isValidDimension(width) && isValidDimension(height);
   }

@@ -20,7 +20,7 @@ import com.bumptech.glide.request.transition.Transition;
  *   <li>onLoadFailed
  * </ul>
  *
- * The typical lifecycle is onLoadStarted -> onResourceReady or onLoadFailed -> onLoadCleared.
+ * The typical lifecycle is onLoadStarted, then onResourceReady or onLoadFailed, then onLoadCleared.
  * However, there are no guarantees. onLoadStarted may not be called if the resource is in memory or
  * if the load will fail because of a null model object. onLoadCleared similarly may never be called
  * if the target is never cleared. See the docs for the individual methods for details.
