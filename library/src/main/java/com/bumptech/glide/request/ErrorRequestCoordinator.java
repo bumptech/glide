@@ -102,7 +102,9 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
   @Override
   public boolean canSetImage(Request request) {
     synchronized (requestLock) {
-      return parentCanSetImage() && isValidRequest(request);
+      // Only one of primary or error runs at a time, so if we've reached this point and nothing
+      // else is broken, we should have nothing else to enforce.
+      return parentCanSetImage();
     }
   }
 
@@ -114,14 +116,14 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
   @Override
   public boolean canNotifyStatusChanged(Request request) {
     synchronized (requestLock) {
-      return parentCanNotifyStatusChanged() && isValidRequest(request);
+      return parentCanNotifyStatusChanged() && isValidRequestForStatusChanged(request);
     }
   }
 
   @Override
   public boolean canNotifyCleared(Request request) {
     synchronized (requestLock) {
-      return parentCanNotifyCleared() && isValidRequest(request);
+      return parentCanNotifyCleared() && request.equals(primary);
     }
   }
 
@@ -136,9 +138,17 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
   }
 
   @GuardedBy("requestLock")
-  private boolean isValidRequest(Request request) {
-    return request.equals(primary)
-        || (primaryState == RequestState.FAILED && request.equals(error));
+  private boolean isValidRequestForStatusChanged(Request request) {
+    if (primaryState != RequestState.FAILED) {
+      return request.equals(primary);
+    } else {
+      return request.equals(error)
+          // We don't want to call onLoadStarted once for the primary request and then again
+          // if it fails and the error request starts. It's already running, so we might as well
+          // avoid the duplicate notification by only notifying about the error state when it's
+          // final.
+          && (errorState == RequestState.SUCCESS || errorState == RequestState.FAILED);
+    }
   }
 
   @Override

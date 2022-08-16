@@ -235,11 +235,6 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void canSetImage_withError_andNullParent_andNotFailedPrimary_returnsFalse() {
-    assertThat(coordinator.canSetImage(error)).isFalse();
-  }
-
-  @Test
   public void canSetImage_withNotFailedPrimary_parentCanSetImage_returnsTrue() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
@@ -309,8 +304,18 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void canNotifyStatusChanged_withError_failedPrimary_nullParent_returnsTrue() {
+  public void
+      canNotifyStatusChanged_withErrorRequest_failedPrimary_nullParent_errorIsNotFailed_returnsFalse() {
     coordinator.onRequestFailed(primary);
+
+    assertThat(coordinator.canNotifyStatusChanged(error)).isFalse();
+  }
+
+  @Test
+  public void
+      canNotifyStatusChanged_withErrorRequest_failedPrimary_nullParent_failedError_returnsTrue() {
+    coordinator.onRequestFailed(primary);
+    coordinator.onRequestFailed(error);
 
     assertThat(coordinator.canNotifyStatusChanged(error)).isTrue();
   }
@@ -325,13 +330,26 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void canNotifyStatusChanged_withError_failedPrimary_nonNullParentCanNotify_returnsTrue() {
+  public void
+      canNotifyStatusChanged_withError_failedPrimary_notFailedError_nonNullParentCanNotify_returnsFalse() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     coordinator.onRequestFailed(primary);
     when(parent.canNotifyStatusChanged(coordinator)).thenReturn(true);
 
-    assertThat(coordinator.canNotifyStatusChanged(primary)).isTrue();
+    assertThat(coordinator.canNotifyStatusChanged(error)).isFalse();
+  }
+
+  @Test
+  public void
+      canNotifyStatusChanged_withError_failedPrimary_failedError_nonNullParentCanNotify_returnsTrue() {
+    coordinator = newCoordinator(parent);
+    coordinator.setRequests(primary, error);
+    coordinator.onRequestFailed(primary);
+    when(parent.canNotifyStatusChanged(coordinator)).thenReturn(true);
+    coordinator.onRequestFailed(error);
+
+    assertThat(coordinator.canNotifyStatusChanged(error)).isTrue();
   }
 
   @Test
@@ -532,9 +550,20 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void canNotifyCleared_errorRequest_primaryFailed_nullParent_returnsTrue() {
+  public void canNotifyCleared_errorRequest_primaryFailed_nullParent_returnsFalse() {
     coordinator.onRequestFailed(primary);
-    assertThat(coordinator.canNotifyCleared(error)).isTrue();
+    assertThat(coordinator.canNotifyCleared(error)).isFalse();
+  }
+
+  @Test
+  public void
+      canNotifyCleared_primaryRequest_primaryFailed_nonNullParentCanNotNotify_returnsFalse() {
+    coordinator = newCoordinator(parent);
+    coordinator.setRequests(primary, error);
+    when(parent.canNotifyCleared(coordinator)).thenReturn(false);
+    coordinator.onRequestFailed(primary);
+
+    assertThat(coordinator.canNotifyCleared(primary)).isFalse();
   }
 
   @Test
@@ -548,13 +577,23 @@ public class ErrorRequestCoordinatorTest {
   }
 
   @Test
-  public void canNotifyCleared_errorRequest_primaryFailed_nonNullParentCanNotify_returnsTrue() {
+  public void canNotifyCleared_errorRequest_primaryFailed_nonNullParentCanNotify_returnsFalse() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(primary, error);
     when(parent.canNotifyCleared(coordinator)).thenReturn(true);
     coordinator.onRequestFailed(primary);
 
-    assertThat(coordinator.canNotifyCleared(error)).isTrue();
+    assertThat(coordinator.canNotifyCleared(error)).isFalse();
+  }
+
+  @Test
+  public void canNotifyCleared_primaryRequest_primaryFailed_nonNullParentCanNotify_returnsTrue() {
+    coordinator = newCoordinator(parent);
+    coordinator.setRequests(primary, error);
+    when(parent.canNotifyCleared(coordinator)).thenReturn(true);
+    coordinator.onRequestFailed(primary);
+
+    assertThat(coordinator.canNotifyCleared(primary)).isTrue();
   }
 
   private static ErrorRequestCoordinator newCoordinator() {
