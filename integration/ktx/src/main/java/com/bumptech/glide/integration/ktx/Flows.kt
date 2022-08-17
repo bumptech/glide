@@ -12,6 +12,7 @@ import com.bumptech.glide.request.target.SizeReadyCallback
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.requestManager
+import com.bumptech.glide.util.Util
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -52,12 +53,58 @@ public enum class Status {
 }
 
 /**
+ * Identical to [flow] with [Target.SIZE_ORIGINAL] as the dimensions
+ *
+ * This isn't generally a good idea, [Target.SIZE_ORIGINAL] is often much larger than you need.
+ * Using it unnecessarily will waste memory and cache space. It will also slow down future loads
+ * from the disk cache.
+ *
+ * Use this method only if you you expect the request and all of the subrequests (
+ * [RequestBuilder.override] and [RequestBuilder.error] to have specific sizes set). Validation is
+ * only performed on the top level request because we cannot reliably verify all possible
+ * subrequests.
+ */
+@OptIn(InternalGlideApi::class)
+@ExperimentGlideFlows
+public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(): Flow<GlideFlowInstant<ResourceT>> {
+  require(isValidOverride) {
+    "At least your primary request is missing override dimensions. If you want to use" +
+      " Target.SIZE_ORIGINAL, do so explicitly"
+  }
+  return flow(Target.SIZE_ORIGINAL)
+}
+
+/**
  * Identical to `flow(dimension, dimension)`
  */
 @ExperimentGlideFlows
 public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
   dimension: Int
 ): Flow<GlideFlowInstant<ResourceT>> = flow(dimension, dimension)
+
+/**
+ * Identical to [flow] with dimensions, except that the size is resolved asynchronously using
+ * [waitForSize].
+ *
+ * If an override size has been set using [RequestBuilder.override], that size will be used instead
+ * and [waitForSize] may never be called.
+ *
+ * [Placeholder] values may be emitted prior to [waitForSize] returning. Similarly if
+ * [RequestBuilder.thumbnail] requests are present and have overridden sizes, [Resource] values
+ * for those thumbnails may also be emitted. [waitForSize] will only be used for requests where
+ * no [RequestBuilder.override] size is available.
+ *
+ * If [waitForSize] does not return, this flow may never return values other than placeholders.
+ *
+ * This function is internal only, intended primarily for Compose. The Target API provides similar
+ * functionality for traditional Views. We could consider expanding the visibility if there are
+ * use cases for asynchronous size resolution outside of Glide's Compose integration.
+ */
+@InternalGlideApi
+@ExperimentGlideFlows
+public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
+  waitForSize: suspend () -> Size,
+): Flow<GlideFlowInstant<ResourceT>> = flow(AsyncGlideSize(waitForSize))
 
 /**
  * Convert a load in Glide into a flow that emits placeholders and resources in the order they'd
@@ -80,12 +127,29 @@ public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
  * by creating and keeping active a coroutine context that collects from the flow while the resource
  * is in use. If this restriction is limiting for you, please file an issue on Github so we can
  * think of alternative options.
+ *
+ * If there have been any previous calls to this [RequestBuilder]'s
+ * [com.bumptech.glide.request.RequestOptions.override] method, the size specified in that method
+ * will be used instead of the size provided here. This includes calls where override sizes may have
+ * been copied from other option sets via [RequestBuilder.apply].
  */
 @ExperimentGlideFlows
+@OptIn(InternalGlideApi::class)
 public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
   width: Int, height: Int
-): Flow<GlideFlowInstant<ResourceT>> =
-  flow(ImmediateGlideSize(Size(width = width, height = height)))
+): Flow<GlideFlowInstant<ResourceT>> {
+  require(Util.isValidDimensions(width, height))
+  return flow(Size(width = width, height = height))
+}
+
+// We're not asserting on size here because it might come from RequestBuilder.override. Assertions
+// for provided sizes belong in those methods, assertions for overrides belong in the override
+// method.
+@InternalGlideApi
+@ExperimentGlideFlows
+private fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
+  size: Size
+): Flow<GlideFlowInstant<ResourceT>> = flow(ImmediateGlideSize(size))
 
 /**
  * A [Status] and value pair, where the value is either a [Placeholder] or a [Resource] depending
@@ -144,6 +208,7 @@ public data class Resource<ResourceT>(
   }
 }
 
+@InternalGlideApi
 @ExperimentGlideFlows
 private fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
   size: ResolvableGlideSize,
@@ -185,6 +250,7 @@ private fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
  * so the value may be updated from different threads even if it's not concurrent.
  */
 @ExperimentGlideFlows
+@InternalGlideApi
 private class FlowTarget<ResourceT : Any>(
   private val scope: ProducerScope<GlideFlowInstant<ResourceT>>,
   private val size: ResolvableGlideSize,
@@ -304,8 +370,11 @@ private class FlowTarget<ResourceT : Any>(
   }
 }
 
-private data class Size(val width: Int, val height: Int)
+@InternalGlideApi
+public data class Size(val width: Int, val height: Int)
 
 private sealed class ResolvableGlideSize
+@InternalGlideApi
 private data class ImmediateGlideSize(val size: Size) : ResolvableGlideSize()
+@InternalGlideApi
 private data class AsyncGlideSize(val asyncSize: suspend () -> Size) : ResolvableGlideSize()

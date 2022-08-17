@@ -43,6 +43,7 @@ dependencies {
     implementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
     implementation "androidx.test:core-ktx:$ANDROID_X_TEST_CORE_KTX_VERSION"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$JETBRAINS_KOTLIN_VERSION"
     testImplementation "androidx.test.ext:junit-ktx:$ANDROID_X_TEST_JUNIT_KTX_VERSION"
     testImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
     testImplementation "org.robolectric:robolectric:$ROBOLECTRIC_VERSION"
