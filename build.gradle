@@ -21,7 +21,14 @@ buildscript {
         classpath "androidx.benchmark:benchmark-gradle-plugin:${ANDROID_X_BENCHMARK_VERSION}"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${JETBRAINS_KOTLIN_VERSION}"
         classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$KSP_GRADLE_PLUGIN_VERSION"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.11.0"
     }
+}
+
+apply plugin: 'binary-compatibility-validator'
+
+apiValidation {
+    ignoredProjects += ["ksp", "test", "gallery"]
 }
 
 // See http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html.
@@ -165,10 +172,11 @@ subprojects { project ->
             check.finalizedBy violations
         }
 
-
         if (project.plugins.hasPlugin('com.android.library')) {
-            android.libraryVariants.all {
-                it.generateBuildConfigProvider.configure { enabled = false }
+            android {
+                buildFeatures {
+                    buildConfig = false
+                }
             }
         }
     }
