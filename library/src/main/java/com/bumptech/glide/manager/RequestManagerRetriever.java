@@ -23,6 +23,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.GlideBuilder.WaitForFramesAfterTrimMemory;
 import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.RequestManager;
@@ -70,6 +71,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   private final Handler handler;
 
   private final RequestManagerFactory factory;
+  private final GlideExperiments experiments;
 
   // Objects used to find Fragments and Activities containing views.
   private final ArrayMap<View, Fragment> tempViewToSupportFragment = new ArrayMap<>();
@@ -79,12 +81,14 @@ public class RequestManagerRetriever implements Handler.Callback {
   // Fragment/Activity extraction logic that already exists here. It's gross, but less likely to
   // break.
   private final FrameWaiter frameWaiter;
+  private final LifecycleRequestManagerRetriever lifecycleRequestManagerRetriever;
 
   public RequestManagerRetriever(
       @Nullable RequestManagerFactory factory, GlideExperiments experiments) {
     this.factory = factory != null ? factory : DEFAULT_FACTORY;
+    this.experiments = experiments;
     handler = new Handler(Looper.getMainLooper(), this /* Callback */);
-
+    lifecycleRequestManagerRetriever = new LifecycleRequestManagerRetriever(this.factory);
     frameWaiter = buildFrameWaiter(experiments);
   }
 
@@ -149,12 +153,27 @@ public class RequestManagerRetriever implements Handler.Callback {
   public RequestManager get(@NonNull FragmentActivity activity) {
     if (Util.isOnBackgroundThread()) {
       return get(activity.getApplicationContext());
-    } else {
-      assertNotDestroyed(activity);
-      frameWaiter.registerSelf(activity);
-      FragmentManager fm = activity.getSupportFragmentManager();
-      return supportFragmentGet(activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
     }
+    assertNotDestroyed(activity);
+    frameWaiter.registerSelf(activity);
+    FragmentManager fm = activity.getSupportFragmentManager();
+    boolean isActivityVisible = isActivityVisible(activity);
+    if (useLifecycleInsteadOfInjectingFragments()) {
+      Context context = activity.getApplicationContext();
+      Glide glide = Glide.get(context);
+      return lifecycleRequestManagerRetriever.getOrCreate(
+          context,
+          glide,
+          activity.getLifecycle(),
+          activity.getSupportFragmentManager(),
+          isActivityVisible);
+    } else {
+      return supportFragmentGet(activity, fm, /*parentHint=*/ null, isActivityVisible);
+    }
+  }
+
+  private boolean useLifecycleInsteadOfInjectingFragments() {
+    return experiments.isEnabled(GlideBuilder.UseLifecycleInsteadOfInjectingFragments.class);
   }
 
   @NonNull
@@ -164,19 +183,30 @@ public class RequestManagerRetriever implements Handler.Callback {
         "You cannot start a load on a fragment before it is attached or after it is destroyed");
     if (Util.isOnBackgroundThread()) {
       return get(fragment.getContext().getApplicationContext());
+    }
+    // In some unusual cases, it's possible to have a Fragment not hosted by an activity. There's
+    // not all that much we can do here. Most apps will be started with a standard activity. If
+    // we manage not to register the first frame waiter for a while, the consequences are not
+    // catastrophic, we'll just use some extra memory.
+    if (fragment.getActivity() != null) {
+      frameWaiter.registerSelf(fragment.getActivity());
+    }
+    FragmentManager fm = fragment.getChildFragmentManager();
+    Context context = fragment.getContext();
+    if (useLifecycleInsteadOfInjectingFragments()) {
+      Glide glide = Glide.get(context.getApplicationContext());
+      return lifecycleRequestManagerRetriever.getOrCreate(
+          context, glide, fragment.getLifecycle(), fm, fragment.isVisible());
     } else {
-      // In some unusual cases, it's possible to have a Fragment not hosted by an activity. There's
-      // not all that much we can do here. Most apps will be started with a standard activity. If
-      // we manage not to register the first frame waiter for a while, the consequences are not
-      // catastrophic, we'll just use some extra memory.
-      if (fragment.getActivity() != null) {
-        frameWaiter.registerSelf(fragment.getActivity());
-      }
-      FragmentManager fm = fragment.getChildFragmentManager();
-      return supportFragmentGet(fragment.getContext(), fm, fragment, fragment.isVisible());
+      return supportFragmentGet(context, fm, fragment, fragment.isVisible());
     }
   }
 
+  /**
+   * @deprecated Use androidx Activities instead (ie {@link FragmentActivity}, or {@link
+   *     androidx.appcompat.app.AppCompatActivity}).
+   */
+  @Deprecated
   @SuppressWarnings("deprecation")
   @NonNull
   public RequestManager get(@NonNull Activity activity) {
@@ -354,6 +384,9 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
+  /**
+   * @deprecated Use androidx fragments instead: {@link Fragment}.
+   */
   @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
@@ -378,6 +411,10 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
   }
 
+  /**
+   * @deprecated Use androidx activities like {@link FragmentActivity} or {@link
+   *     androidx.appcompat.app.AppCompatActivity} instead.
+   */
   @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
@@ -407,7 +444,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     return current;
   }
 
-  @SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
+  @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
   private RequestManager fragmentGet(

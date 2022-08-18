@@ -98,6 +98,7 @@ public final class GlideApp {
   /**
    * @see Glide#with(Activity)
    */
+  @Deprecated
   @NonNull
   public static GlideRequests with(@NonNull Activity activity) {
     return (GlideRequests) Glide.with(activity);

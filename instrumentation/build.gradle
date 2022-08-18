@@ -6,6 +6,7 @@ tasks.whenTaskAdded { task ->
 apply plugin: 'com.android.application'
 
 dependencies {
+    debugImplementation 'androidx.fragment:fragment-testing:1.5.0'
     annotationProcessor project(":annotation:compiler")
     implementation project(":library")
 
@@ -26,7 +27,7 @@ dependencies {
 }
 
 android {
-    compileSdk 30 as int
+    compileSdk COMPILE_SDK_VERSION as int
 
     defaultConfig {
         applicationId 'com.bumptech.glide.instrumentation'
