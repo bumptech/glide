@@ -23,7 +23,7 @@ android {
 
 afterEvaluate {
     lint.enabled = false
-    compileDebugJavaWithJavac.enabled = false
+    compileReleaseJavaWithJavac.enabled = false
 }
 
 android {
@@ -92,6 +92,6 @@ task regenerateTestResources {
 }
 
 afterEvaluate {
-    regenerateTestResources.finalizedBy(testDebugUnitTest)
+    regenerateTestResources.finalizedBy(testReleaseUnitTest)
 }
 

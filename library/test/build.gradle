@@ -22,7 +22,7 @@ tasks.withType(JavaCompile) {
 
 afterEvaluate {
     lint.enabled = false
-    compileDebugJavaWithJavac.enabled = false
+    compileReleaseJavaWithJavac.enabled = false
 }
 
 android.testOptions.unitTests.all { Test testTask ->
