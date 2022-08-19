@@ -908,17 +908,23 @@ public final class Downsampler {
       }
       // On API 26 outConfig may be null for some images even if the image is valid, can be decoded
       // and outWidth/outHeight/outColorSpace are populated (see b/71513049).
-      expectedConfig = options.outConfig;
+      // expectedConfig = options.outConfig;
+    }
+    
+    expectedConfig = options.inPreferredConfig;
+    
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && expectedConfig == null){
+      expectedConfig = options.outConfig;    
     }
 
-    if (expectedConfig == null) {
+    //if (expectedConfig == null) {
       // We're going to guess that BitmapFactory will return us the config we're requesting. This
       // isn't always the case, even though our guesses tend to be conservative and prefer configs
       // of larger sizes so that the Bitmap will fit our image anyway. If we're wrong here and the
       // config we choose is too small, our initial decode will fail, but we will retry with no
       // inBitmap which will succeed so if we're wrong here, we're less efficient but still correct.
-      expectedConfig = options.inPreferredConfig;
-    }
+      //expectedConfig = options.inPreferredConfig;
+    //}
     // BitmapFactory will clear out the Bitmap before writing to it, so getDirty is safe.
     options.inBitmap = bitmapPool.getDirty(width, height, expectedConfig);
   }
