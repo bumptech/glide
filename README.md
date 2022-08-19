@@ -54,26 +54,9 @@ Or Maven:
 
 For info on using the bleeding edge, see the [Snapshots][17] docs page.
 
-ProGuard
+R8 / Proguard
 --------
-Depending on your ProGuard (DexGuard) config and usage, you may need to include the following lines in your proguard.cfg (see the [Download and Setup docs page][25] for more details):
-
-```pro
--keep public class * implements com.bumptech.glide.module.GlideModule
--keep class * extends com.bumptech.glide.module.AppGlideModule {
- <init>(...);
-}
--keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
-  **[] $VALUES;
-  public *;
-}
--keep class com.bumptech.glide.load.data.ParcelFileDescriptorRewinder$InternalRewinder {
-  *** rewind();
-}
-
-# for DexGuard only
--keepresourcexmlelements manifest/application/meta-data@value=GlideModule
-```
+The specific rules are [already bundled](library/proguard-rules.txt) into the aar which can be interpreted by R8 automatically
 
 How do I use Glide?
 -------------------
