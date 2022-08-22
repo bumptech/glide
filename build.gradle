@@ -61,10 +61,7 @@ subprojects { project ->
         }
     }
 
-
     tasks.withType(JavaCompile) {
-
-
         // gifencoder is a legacy project that has a ton of warnings and is basically never
         // modified, so we're not going to worry about cleaning it up.
         // Imgur uses generated code from dagger that has warnings.
@@ -92,8 +89,6 @@ subprojects { project ->
                  * Disable deprecation warnings for ViewTarget/BaseTarget for now.
                  */ \
                 << "-Xlint:-deprecation"
-
-
         }
     }
 
@@ -148,7 +143,6 @@ subprojects { project ->
     }
 
     afterEvaluate {
-
         if (project.hasProperty("android")
                 && project.name != 'pmd' ) {
             android {
@@ -158,26 +152,33 @@ subprojects { project ->
                     // Caught by the violations plugin.
                     abortOnError false
                 }
-            }
 
-            android.variantFilter { variant ->
-                if(variant.buildType.name == 'debug') {
-                    variant.setIgnore(true)
+                buildFeatures {
+                    buildConfig = false
                 }
+
+                // Signing isn't relevant to a library. Our signing is done via
+                // a GPG key at upload time, there's no APK to sign.
+                buildTypes {
+                    release {
+                        signingConfig signingConfigs.debug
+                    }
+                }
+
+                // It's faster to build only one variant, and debug / release
+                // are identical for Glide.
+                variantFilter { variant ->
+                    if(variant.buildType.name == 'debug') {
+                        variant.setIgnore(true)
+                    }
+                }
+
             }
         }
 
         if (project.tasks.findByName('check')) {
             check.dependsOn('checkstyle')
             check.finalizedBy violations
-        }
-
-        if (project.plugins.hasPlugin('com.android.library')) {
-            android {
-                buildFeatures {
-                    buildConfig = false
-                }
-            }
         }
     }
 }
