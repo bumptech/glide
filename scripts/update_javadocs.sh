@@ -43,7 +43,7 @@ fi
 
 git checkout master
 GIT_COMMIT_SHA="$(git rev-parse HEAD)"
-./gradlew clean debugJavadocJar javadoc
+./gradlew clean releaseJavadocJar javadoc
 rm -rf $TEMP_DIR
 cp -r glide/build/docs/javadoc $TEMP_DIR
 

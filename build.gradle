@@ -154,7 +154,7 @@ subprojects { project ->
             }
 
             android.variantFilter { variant ->
-                if(variant.buildType.name == 'release') {
+                if(variant.buildType.name == 'debug') {
                     variant.setIgnore(true)
                 }
             }

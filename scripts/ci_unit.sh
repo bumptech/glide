@@ -13,6 +13,6 @@ set -e
   -x :samples:svg:build \
   :instrumentation:assembleAndroidTest \
   :benchmark:assembleAndroidTest \
-  :glide:debugJavadoc \
+  :glide:releaseJavadoc \
   :annotation:ksp:test:test \
   --parallel

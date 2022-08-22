@@ -46,7 +46,7 @@ def getAndroidProjectsForJavadoc() {
 def getAndroidLibraryVariantsForJavadoc() {
     getAndroidProjectsForJavadoc().collect { project ->
         project.android.libraryVariants.findAll { type ->
-            type.buildType.name.equalsIgnoreCase("debug")
+            type.buildType.name.equalsIgnoreCase("release")
         }
     }.sum()
 }
@@ -65,7 +65,7 @@ project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 
 // Generate javadocs and sources containing batched documentation and sources for all internal
 // projects.
-def javadocTask = tasks.create("debugJavadoc", Javadoc) {
+def javadocTask = tasks.create("releaseJavadoc", Javadoc) {
     source = getSourceFilesForJavadoc()
 
     doFirst {
@@ -79,7 +79,7 @@ def javadocTask = tasks.create("debugJavadoc", Javadoc) {
                         // Finds dependencies of Android packages that would otherwise be
                         // ignored (Volley in particular)
                         getAndroidProjectsForJavadoc().collect { Project project ->
-                            project.file('build/intermediates/classes/debug')
+                            project.file('build/intermediates/javac/release/classes')
                         }
         )
     }
@@ -94,12 +94,12 @@ def javadocTask = tasks.create("debugJavadoc", Javadoc) {
     exclude '**/R.java'
 }
 
-def cleanJavadocTask = task("cleanDebugJavadoc", type: Delete) {
+def cleanJavadocTask = task("cleanReleaseJavadoc", type: Delete) {
     delete javadocTask.destinationDir
 } as Task
 clean.dependsOn(cleanJavadocTask)
 
-def javadocJarTask = task("debugJavadocJar", type: Jar) {
+def javadocJarTask = task("releaseJavadocJar", type: Jar) {
     from javadocTask.destinationDir
 } as Task
 
@@ -107,8 +107,8 @@ javadocJarTask.dependsOn(javadocTask)
 
 (getAndroidProjectsForJavadoc()).each {
     project ->
-        debugJavadoc.dependsOn(project.tasks.compileDebugSources)
-        jar.dependsOn(project.tasks.compileDebugSources)
+        releaseJavadoc.dependsOn(project.tasks.compileReleaseSources)
+        jar.dependsOn(project.tasks.compileReleaseSources)
 }
 
 
@@ -125,7 +125,7 @@ jar {
 }
  
 artifacts {
-    archives debugJavadocJar {
+    archives releaseJavadocJar {
         classifier 'javadoc'
     }
 }

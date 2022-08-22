@@ -141,18 +141,18 @@ afterEvaluate { project ->
 
                 if (isAndroidProject) {
                     def variants = project.android.libraryVariants.findAll {
-                        it.buildType.name.equalsIgnoreCase('debug')
+                        it.buildType.name.equalsIgnoreCase('release')
                     }
 
                     def getAndroidSdkDirectory = project.android.sdkDirectory
 
                     def getAndroidJar = "${getAndroidSdkDirectory}/platforms/${project.android.compileSdkVersion}/android.jar"
 
-                    task androidJavadocs(type: Javadoc, dependsOn: assembleDebug) {
+                    task androidJavadocs(type: Javadoc, dependsOn: assembleRelease) {
                         source = variants.collect { it.getJavaCompileProvider().get().source }
                         classpath = files(
                                 getAndroidJar,
-                                project.file("build/intermediates/classes/debug")
+                                project.file("build/intermediates/javac/release/classes")
                         )
                         doFirst {
                             classpath += files(variants.collect { it.getJavaCompileProvider().get().classpath.files })
@@ -182,8 +182,8 @@ afterEvaluate { project ->
                         archiveBaseName.set("${JAR_PREFIX}${project.name}${JAR_POSTFIX}")
                     }
 
-                    task androidLibraryJar(type: Jar, dependsOn: compileDebugJavaWithJavac /* == variant.javaCompile */) {
-                        from compileDebugJavaWithJavac.destinationDir
+                    task androidLibraryJar(type: Jar, dependsOn: compileReleaseJavaWithJavac /* == variant.javaCompile */) {
+                        from compileReleaseJavaWithJavac.destinationDir
                         exclude '**/R.class'
                         exclude '**/R$*.class'
                         archiveBaseName.set("${JAR_PREFIX}${project.name}${JAR_POSTFIX}")
@@ -192,11 +192,7 @@ afterEvaluate { project ->
                     artifact androidLibraryJar
                     artifact androidSourcesJar
                     artifact androidJavadocsJar
-                    // This is unnecessary with a release variant because by default the release variant
-                    // includes the release aar in archives. Since we've disabled our release variants and
-                    // want to include an aar, we need to manually specify the task that produces the aar
-                    // here.
-                    artifact project.tasks.bundleDebugAar
+                    artifact project.tasks.bundleReleaseAar
                 } else if (project.plugins.hasPlugin('java')) {
                     task sourcesJar(type: Jar, dependsOn: classes) {
                         archiveClassifier.set('sources')

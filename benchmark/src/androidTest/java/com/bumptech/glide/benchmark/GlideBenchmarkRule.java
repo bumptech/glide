@@ -51,16 +51,6 @@ final class GlideBenchmarkRule implements TestRule {
     void act(BeforeDataT beforeData) throws Exception;
   }
 
-  <T> void runBenchmark(BeforeStep<T> beforeStep, LoadStep<T> loadStep) throws Exception {
-    runBenchmark(
-        beforeStep,
-        loadStep,
-        new AfterStep<T>() {
-          @Override
-          public void act(T beforeData) {}
-        });
-  }
-
   <T> void runBenchmark(BeforeStep<T> beforeStep, AfterStep<T> afterStep) throws Exception {
     runBenchmark(
         beforeStep,

@@ -4,17 +4,17 @@ plugins {
 }
 
 android {
-    compileSdk 30
+    compileSdk COMPILE_SDK_VERSION as int
     buildToolsVersion "30.0.3"
 
     compileOptions {
-        sourceCompatibility = 1.7
-        targetCompatibility = 1.7
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
     }
 
     defaultConfig {
         minSdk 19
-        targetSdk 30
+        targetSdk TARGET_SDK_VERSION as int
         versionCode 1
         versionName "1.0"
 
