@@ -15,4 +15,5 @@ set -e
   :benchmark:assembleAndroidTest \
   :glide:releaseJavadoc \
   :annotation:ksp:test:test \
+  :integration:ktx:apiCheck \
   --parallel
