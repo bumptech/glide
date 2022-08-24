@@ -230,9 +230,19 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
 
     Preconditions.checkNotNull(view);
+    // The view.context might not be current Activity
+    View rootView = view.getRootView();
+    Preconditions.checkNotNull(rootView);
+    View contentView = rootView.findViewById(android.R.id.content);
+    if (contentView == null) {
+      contentView = rootView;
+    }
+    Preconditions.checkNotNull(contentView);
+    Context pageContext = contentView.getContext();
     Preconditions.checkNotNull(
-        view.getContext(), "Unable to obtain a request manager for a view without a Context");
-    Activity activity = findActivity(view.getContext());
+        pageContext, "Unable to obtain a request manager for a view without a Context");
+
+    Activity activity = findActivity(pageContext);
     // The view might be somewhere else, like a service.
     if (activity == null) {
       return get(view.getContext().getApplicationContext());
