@@ -154,9 +154,7 @@ private fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
     val target = FlowTarget(this, size)
     requestBuilder.intoDirect(target)
     awaitClose {
-      launch {
-        requestManager.clear(target)
-      }
+      requestManager.clear(target)
     }
   }
 }

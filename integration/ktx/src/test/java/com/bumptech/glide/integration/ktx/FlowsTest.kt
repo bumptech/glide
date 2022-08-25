@@ -13,7 +13,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.GlideBuilder
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.Key
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.engine.cache.MemoryCache
 import com.bumptech.glide.load.engine.executor.GlideExecutor
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
@@ -21,6 +23,7 @@ import com.google.common.truth.Correspondence
 import com.google.common.truth.IterableSubject
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -335,6 +338,35 @@ class FlowsTest {
           resource(Status.FAILED),
         )
     }
+
+  @Test
+  fun flow_onClose_clearsTarget() = runTest {
+    val inCache = AtomicReference<com.bumptech.glide.load.engine.Resource<*>?>()
+    Glide.init(context, GlideBuilder().setMemoryCache(object : MemoryCache {
+      override fun getCurrentSize(): Long = 0
+      override fun getMaxSize(): Long = 0
+      override fun setSizeMultiplier(multiplier: Float) {}
+      override fun remove(key: Key): com.bumptech.glide.load.engine.Resource<*>? {return null}
+      override fun setResourceRemovedListener(listener: MemoryCache.ResourceRemovedListener) {}
+      override fun clearMemory() {}
+      override fun trimMemory(level: Int) {}
+
+      override fun put(
+        key: Key,
+        resource: com.bumptech.glide.load.engine.Resource<*>?,
+      ): com.bumptech.glide.load.engine.Resource<*>? {
+        inCache.set(resource)
+        return null
+      }
+    }))
+    val data = Glide.with(context)
+      .load(newImageFile())
+      .flow(100, 100)
+      .firstLoad()
+      .toList()
+    assertThat(data).isNotEmpty()
+    assertThat(inCache.get()).isNotNull()
+  }
 
   // Avoid race conditions where the main request finishes first by making sure they execute
   // sequentially using a single threaded executor.
