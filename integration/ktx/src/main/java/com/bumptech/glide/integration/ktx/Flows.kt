@@ -65,7 +65,6 @@ public enum class Status {
  * only performed on the top level request because we cannot reliably verify all possible
  * subrequests.
  */
-@OptIn(InternalGlideApi::class)
 @ExperimentGlideFlows
 public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(): Flow<GlideFlowInstant<ResourceT>> {
   require(isValidOverride) {
@@ -149,7 +148,14 @@ public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
 @ExperimentGlideFlows
 private fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
   size: Size
-): Flow<GlideFlowInstant<ResourceT>> = flow(ImmediateGlideSize(size))
+): Flow<GlideFlowInstant<ResourceT>> = flowResolvable(ImmediateGlideSize(size))
+
+
+@OptIn(ExperimentGlideFlows::class)
+@InternalGlideApi
+public fun <ResourceT : Any> RequestBuilder<ResourceT>.flowResolvable(
+  size: ResolvableGlideSize
+): Flow<GlideFlowInstant<ResourceT>> = flow(size)
 
 /**
  * A [Status] and value pair, where the value is either a [Placeholder] or a [Resource] depending on
@@ -369,11 +375,19 @@ private class FlowTarget<ResourceT : Any>(
   }
 }
 
-@InternalGlideApi public data class Size(val width: Int, val height: Int)
+@InternalGlideApi
+public data class Size(val width: Int, val height: Int) {
+  init {
+    require(width.isValidGlideDimension())
+    require(height.isValidGlideDimension())
+  }
+}
 
-private sealed class ResolvableGlideSize
+@InternalGlideApi public sealed class ResolvableGlideSize
 
-@InternalGlideApi private data class ImmediateGlideSize(val size: Size) : ResolvableGlideSize()
+@InternalGlideApi public data class ImmediateGlideSize(val size: Size) : ResolvableGlideSize()
 
 @InternalGlideApi
-private data class AsyncGlideSize(val asyncSize: suspend () -> Size) : ResolvableGlideSize()
+public data class AsyncGlideSize(val asyncSize: suspend () -> Size) : ResolvableGlideSize()
+
+@InternalGlideApi public fun Int.isValidGlideDimension(): Boolean = Util.isValidDimension(this)

@@ -141,7 +141,7 @@ public final class Util {
     return isValidDimension(width) && isValidDimension(height);
   }
 
-  private static boolean isValidDimension(int dimen) {
+  public static boolean isValidDimension(int dimen) {
     return dimen > 0 || dimen == Target.SIZE_ORIGINAL;
   }
 

@@ -1,0 +1,63 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdk 32
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 32
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.2.0'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+// Enable strict mode, but exclude tests.
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+    if (!it.name.contains("Test")) {
+        kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
+    }
+}
+
+dependencies {
+    implementation project(':library')
+    implementation project(':integration:ktx')
+    implementation(project(':integration:recyclerview')) {
+        transitive = false
+    }
+    implementation "androidx.compose.foundation:foundation:$ANDROID_X_COMPOSE_VERSION"
+    implementation "androidx.compose.ui:ui:$ANDROID_X_COMPOSE_VERSION"
+    implementation "com.google.accompanist:accompanist-drawablepainter:$ACCOMPANIEST_VERSION"
+    implementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$ANDROID_X_COMPOSE_VERSION"
+    androidTestImplementation "junit:junit:$JUNIT_VERSION"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$ANDROID_X_COMPOSE_VERSION"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$ANDROID_X_TEST_ESPRESSO_VERSION"
+    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$ANDROID_X_TEST_ESPRESSO_VERSION"
+    androidTestImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
+}
