@@ -69,6 +69,7 @@ class MediaStoreDataSource internal constructor(
       val mimeTypeColNum = cursor.getColumnIndexOrThrow(MediaColumns.MIME_TYPE)
       val orientationColNum = cursor.getColumnIndexOrThrow(MediaColumns.ORIENTATION)
       val mediaTypeColumnIndex = cursor.getColumnIndexOrThrow(FileColumns.MEDIA_TYPE)
+      val displayNameIndex = cursor.getColumnIndexOrThrow(FileColumns.DISPLAY_NAME)
 
       while (cursor.moveToNext()) {
         val id = cursor.getLong(idColNum)
@@ -76,6 +77,7 @@ class MediaStoreDataSource internal constructor(
         val mimeType = cursor.getString(mimeTypeColNum)
         val dateModified = cursor.getLong(dateModifiedColNum)
         val orientation = cursor.getInt(orientationColNum)
+        val displayName = cursor.getString(displayNameIndex)
         val type =
           if (cursor.getInt(mediaTypeColumnIndex) == FileColumns.MEDIA_TYPE_IMAGE)
             Type.IMAGE
@@ -89,7 +91,9 @@ class MediaStoreDataSource internal constructor(
             mimeType = mimeType,
             dateModified = dateModified,
             orientation = orientation,
-            dateTaken = dateTaken))
+            dateTaken = dateTaken,
+            displayName = displayName,
+          ))
       }
     }
     return data
@@ -103,6 +107,7 @@ class MediaStoreDataSource internal constructor(
       MediaColumns.DATE_MODIFIED,
       MediaColumns.MIME_TYPE,
       MediaColumns.ORIENTATION,
+      MediaColumns.DISPLAY_NAME,
       FileColumns.MEDIA_TYPE)
   }
 }
@@ -117,6 +122,7 @@ data class MediaStoreData(
   val dateModified: Long,
   val orientation: Int,
   val dateTaken: Long,
+  val displayName: String?
 ) : Parcelable
 
 /** The type of data.  */

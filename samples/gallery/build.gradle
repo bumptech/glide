@@ -5,6 +5,7 @@ apply plugin: 'com.google.devtools.ksp'
 
 dependencies {
     implementation project(':library')
+    implementation project(':integration:compose')
     implementation(project(':integration:recyclerview')) {
         transitive = false
     }
@@ -12,11 +13,11 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:$ANDROID_X_RECYCLERVIEW_VERSION"
     implementation "androidx.fragment:fragment-ktx:$ANDROID_X_FRAGMENT_VERSION"
     implementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$ANDROID_X_LIFECYCLE_KTX_VERSION"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$ANDROID_X_LIFECYCLE_KTX_VERSION"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$JETBRAINS_KOTLIN_VERSION"
+    implementation "androidx.compose.foundation:foundation:$ANDROID_X_COMPOSE_VERSION"
+    implementation "androidx.compose.ui:ui:$ANDROID_X_COMPOSE_VERSION"
 
     ksp project(':annotation:ksp')
 }
@@ -36,6 +37,15 @@ android {
         targetSdk 32
         versionCode 1
         versionName '1.0'
+    }
+    buildFeatures {
+        compose = true
+    }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.2.0'
     }
 
     compileOptions {
