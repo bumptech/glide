@@ -1,3 +1,5 @@
+@file:OptIn(InternalGlideApi::class, ExperimentGlideFlows::class, ExperimentalCoroutinesApi::class)
+
 package com.bumptech.glide.integration.ktx
 
 import android.content.Context
@@ -14,25 +16,34 @@ import com.bumptech.glide.GlideBuilder
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.Key
+import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.engine.cache.MemoryCache
 import com.bumptech.glide.load.engine.executor.GlideExecutor
+import com.bumptech.glide.load.model.ModelLoader
+import com.bumptech.glide.load.model.ModelLoaderFactory
+import com.bumptech.glide.load.model.MultiModelLoaderFactory
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.common.truth.Correspondence
 import com.google.common.truth.IterableSubject
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import java.lang.RuntimeException
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
+import kotlin.test.assertFailsWith
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -44,7 +55,6 @@ import org.junit.runner.RunWith
 // newFile throws IOException, which triggers this warning even though there's no reasonable
 // alternative :/.
 @Suppress("BlockingMethodInNonBlockingContext")
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentGlideFlows::class)
 @RunWith(AndroidJUnit4::class)
 class FlowsTest {
   private val context = ApplicationProvider.getApplicationContext<Context>()
@@ -70,11 +80,7 @@ class FlowsTest {
 
   @Test
   fun flow_withNoPlaceholderDrawable_emitsNullPlaceholderFirst() = runTest {
-    val first =
-      Glide.with(context)
-        .load(temporaryFolder.newFile())
-        .flow(100)
-        .first()
+    val first = Glide.with(context).load(temporaryFolder.newFile()).flow(100).first()
 
     assertThat(first).isEqualTo(Placeholder<Drawable>(Status.RUNNING, placeholder = null))
   }
@@ -82,12 +88,7 @@ class FlowsTest {
   @Test
   fun flow_failingNonNullModel_emitsRunningThenFailed() = runTest {
     val missingResourceId = 123
-    val results =
-      Glide.with(context)
-        .load(missingResourceId)
-        .flow(100)
-        .firstLoad()
-        .toList()
+    val results = Glide.with(context).load(missingResourceId).flow(100).firstLoad().toList()
 
     assertThat(results)
       .containsExactly(
@@ -105,33 +106,17 @@ class FlowsTest {
     val flow =
       requestManager
         .load(missingResourceId)
-        .listener(
-          onFailure(
-            atMostOnce {
-              restartAllRequestsOnNewThread(requestManager)
-            }
-          )
-        )
+        .listener(onFailure(atMostOnce { restartAllRequestsOnNewThread(requestManager) }))
         .flow(100)
 
     assertThat(flow.take(4).toList())
       .comparingStatus()
-      .containsExactly(
-        Status.RUNNING,
-        Status.FAILED,
-        Status.RUNNING,
-        Status.FAILED
-      )
+      .containsExactly(Status.RUNNING, Status.FAILED, Status.RUNNING, Status.FAILED)
   }
 
   @Test
   fun flow_successfulNonNullModel_emitsRunningThenSuccess() = runTest {
-    val results =
-      Glide.with(context)
-        .load(newImageFile())
-        .flow(100)
-        .firstLoad()
-        .toList()
+    val results = Glide.with(context).load(newImageFile()).flow(100).firstLoad().toList()
 
     assertThat(results)
       .compareStatusAndType()
@@ -142,12 +127,7 @@ class FlowsTest {
   @Test
   fun flow_withNullModel_andFallbackDrawable_emitsFailureWithFallbackDrawable() = runTest {
     val fallbackDrawable = ColorDrawable(Color.BLUE)
-    val first =
-      Glide.with(context)
-        .load(null as Uri?)
-        .fallback(fallbackDrawable)
-        .flow(100)
-        .first()
+    val first = Glide.with(context).load(null as Uri?).fallback(fallbackDrawable).flow(100).first()
     assertThat(first).isEqualTo(Placeholder<Drawable>(Status.FAILED, fallbackDrawable))
   }
 
@@ -158,13 +138,7 @@ class FlowsTest {
     val flow =
       requestManager
         .load(newImageFile())
-        .listener(
-          onSuccess(
-            atMostOnce {
-              restartAllRequestsOnNewThread(requestManager)
-            }
-          )
-        )
+        .listener(onSuccess(atMostOnce { restartAllRequestsOnNewThread(requestManager) }))
         .flow(100)
 
     assertThat(flow.take(4).toList())
@@ -178,26 +152,25 @@ class FlowsTest {
   }
 
   @Test
-  fun flow_successfulNonNullModel_oneSuccessfulThumbnail_emitsThumbnailAndMainResources() = runTest {
-    makeGlideSingleThreadedToOrderThumbnailRequests()
+  fun flow_successfulNonNullModel_oneSuccessfulThumbnail_emitsThumbnailAndMainResources() =
+    runTest {
+      makeGlideSingleThreadedToOrderThumbnailRequests()
 
-    val output =
-      Glide.with(context)
-        .load(newImageFile())
-        .thumbnail(
-          Glide.with(context).load(newImageFile())
+      val output =
+        Glide.with(context)
+          .load(newImageFile())
+          .thumbnail(Glide.with(context).load(newImageFile()))
+          .flow(100)
+          .firstLoad()
+          .toList()
+      assertThat(output)
+        .compareStatusAndType()
+        .containsExactly(
+          placeholder(Status.RUNNING),
+          resource(Status.RUNNING),
+          resource(Status.SUCCEEDED),
         )
-        .flow(100)
-        .firstLoad()
-        .toList()
-    assertThat(output)
-      .compareStatusAndType()
-      .containsExactly(
-        placeholder(Status.RUNNING),
-        resource(Status.RUNNING),
-        resource(Status.SUCCEEDED),
-      )
-  }
+    }
 
   @Test
   fun flow_successfulNonNullModel_oneFailingThumbnail_emitMainResourceOnly() = runTest {
@@ -207,9 +180,7 @@ class FlowsTest {
     val output =
       Glide.with(context)
         .load(newImageFile())
-        .thumbnail(
-          Glide.with(context).load(missingResourceId)
-        )
+        .thumbnail(Glide.with(context).load(missingResourceId))
         .flow(100)
         .firstLoad()
         .toList()
@@ -229,9 +200,7 @@ class FlowsTest {
     val output =
       Glide.with(context)
         .load(missingResourceId)
-        .thumbnail(
-          Glide.with(context).load(newImageFile())
-        )
+        .thumbnail(Glide.with(context).load(newImageFile()))
         .flow(100)
         .firstLoad()
         .toList()
@@ -252,19 +221,14 @@ class FlowsTest {
     val output =
       Glide.with(context)
         .load(missingResourceId)
-        .thumbnail(
-          Glide.with(context).load(missingResourceId)
-        )
+        .thumbnail(Glide.with(context).load(missingResourceId))
         .flow(100)
         .firstLoad()
         .toList()
 
     assertThat(output)
       .compareStatusAndType()
-      .containsExactly(
-        placeholder(Status.RUNNING),
-        placeholder(Status.FAILED)
-      )
+      .containsExactly(placeholder(Status.RUNNING), placeholder(Status.FAILED))
   }
 
   @Test
@@ -291,7 +255,6 @@ class FlowsTest {
       )
   }
 
-
   @Test
   fun flow_failingNonNullModel_failingNonNullError_emitsRunningThenFailure() = runTest {
     makeGlideSingleThreadedToOrderThumbnailRequests()
@@ -307,10 +270,7 @@ class FlowsTest {
 
     assertThat(output)
       .compareStatusAndType()
-      .containsExactly(
-        placeholder(Status.RUNNING),
-        placeholder(Status.FAILED)
-      )
+      .containsExactly(placeholder(Status.RUNNING), placeholder(Status.FAILED))
   }
 
   @Test
@@ -323,7 +283,8 @@ class FlowsTest {
         Glide.with(context)
           .load(missingResourceId)
           .error(
-            Glide.with(context).load(missingResourceId)
+            Glide.with(context)
+              .load(missingResourceId)
               .thumbnail(Glide.with(context).load(newImageFile()))
           )
           .flow(100)
@@ -342,30 +303,280 @@ class FlowsTest {
   @Test
   fun flow_onClose_clearsTarget() = runTest {
     val inCache = AtomicReference<com.bumptech.glide.load.engine.Resource<*>?>()
-    Glide.init(context, GlideBuilder().setMemoryCache(object : MemoryCache {
-      override fun getCurrentSize(): Long = 0
-      override fun getMaxSize(): Long = 0
-      override fun setSizeMultiplier(multiplier: Float) {}
-      override fun remove(key: Key): com.bumptech.glide.load.engine.Resource<*>? {return null}
-      override fun setResourceRemovedListener(listener: MemoryCache.ResourceRemovedListener) {}
-      override fun clearMemory() {}
-      override fun trimMemory(level: Int) {}
+    Glide.init(
+      context,
+      GlideBuilder()
+        .setMemoryCache(
+          object : MemoryCache {
+            override fun getCurrentSize(): Long = 0
+            override fun getMaxSize(): Long = 0
+            override fun setSizeMultiplier(multiplier: Float) {}
+            override fun remove(key: Key): com.bumptech.glide.load.engine.Resource<*>? {
+              return null
+            }
+            override fun setResourceRemovedListener(
+              listener: MemoryCache.ResourceRemovedListener
+            ) {}
+            override fun clearMemory() {}
+            override fun trimMemory(level: Int) {}
 
-      override fun put(
-        key: Key,
-        resource: com.bumptech.glide.load.engine.Resource<*>?,
-      ): com.bumptech.glide.load.engine.Resource<*>? {
-        inCache.set(resource)
-        return null
-      }
-    }))
-    val data = Glide.with(context)
-      .load(newImageFile())
-      .flow(100, 100)
-      .firstLoad()
-      .toList()
+            override fun put(
+              key: Key,
+              resource: com.bumptech.glide.load.engine.Resource<*>?,
+            ): com.bumptech.glide.load.engine.Resource<*>? {
+              inCache.set(resource)
+              return null
+            }
+          }
+        )
+    )
+    val data = Glide.with(context).load(newImageFile()).flow(100, 100).firstLoad().toList()
     assertThat(data).isNotEmpty()
     assertThat(inCache.get()).isNotNull()
+  }
+
+  @Test
+  fun flow_withOverrideSize_andProvidedSize_prefersOverrideSize() = runTest {
+    val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+
+    Glide.with(context).load(FakeModel()).override(50, 60).flow(200, 100).firstLoad().toList()
+
+    assertThat(requestedSizeReference.get()).isEqualTo(Size(50, 60))
+  }
+
+  @Test
+  fun flow_withOnlyProvidedSize_usesProvidedSize() = runTest {
+    val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+
+    Glide.with(context).load(FakeModel()).flow(100, 200).firstLoad().toList()
+
+    assertThat(requestedSizeReference.get()).isEqualTo(Size(100, 200))
+  }
+
+  @Test
+  fun flow_withOnlySingleDimension_usesProvidedSize() = runTest {
+    val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+
+    Glide.with(context).load(FakeModel()).flow(150).firstLoad().toList()
+
+    assertThat(requestedSizeReference.get()).isEqualTo(Size(150, 150))
+  }
+
+  @Test
+  fun flow_withSizeOriginal_usesSizeOriginal() = runTest {
+    val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+
+    Glide.with(context)
+      .load(FakeModel())
+      .flow(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+      .firstLoad()
+      .toList()
+
+    assertThat(requestedSizeReference.get())
+      .isEqualTo(Size(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL))
+  }
+
+  @Test
+  fun flow_withSizeOriginalOverride_concreteProvidedSize_usesSizeOriginal() = runTest {
+    val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+
+    Glide.with(context)
+      .load(FakeModel())
+      .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+      .flow(200, 300)
+      .firstLoad()
+      .toList()
+
+    assertThat(requestedSizeReference.get())
+      .isEqualTo(Size(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL))
+  }
+
+  @Test
+  fun flow_withConcreteOverride_sizeOriginalProvidedSize_usesConcreteSize() = runTest {
+    val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+
+    Glide.with(context)
+      .load(FakeModel())
+      .override(200, 300)
+      .flow(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+      .firstLoad()
+      .toList()
+
+    assertThat(requestedSizeReference.get()).isEqualTo(Size(200, 300))
+  }
+
+  @Test
+  fun flow_withThumbnailWithOverrideSize_usesOverrideSizeForThumbnail() = runTest {
+    makeGlideSingleThreadedToOrderThumbnailRequests()
+
+    val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+
+    Glide.with(context)
+      .load(newImageFile())
+      .thumbnail(Glide.with(context).load(FakeModel()).override(100, 200))
+      .flow(Target.SIZE_ORIGINAL)
+      .firstLoad()
+      .toList()
+
+    assertThat(requestedSizeReference.get()).isEqualTo(Size(100, 200))
+  }
+
+  @Test
+  fun flow_withThumbnailWithoutOverrideSize_usesProvidedSizeForThumbnail() = runTest {
+    makeGlideSingleThreadedToOrderThumbnailRequests()
+    val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+
+    Glide.with(context)
+      .load(newImageFile())
+      .thumbnail(Glide.with(context).load(FakeModel()))
+      .flow(300, 400)
+      .firstLoad()
+      .toList()
+
+    assertThat(requestedSizeReference.get()).isEqualTo(Size(300, 400))
+  }
+
+  @Test
+  fun flow_withInvalidProvidedWith_throws() = runTest {
+    val missingResourceId = 123
+    val requestBuilder = Glide.with(context).load(missingResourceId)
+
+    assertFailsWith<IllegalArgumentException> { requestBuilder.flow(-100, 100) }
+  }
+
+  @Test
+  fun flow_withInvalidProvidedHeight_throws() {
+    val missingResourceId = 123
+    val requestBuilder = Glide.with(context).load(missingResourceId)
+
+    assertFailsWith<IllegalArgumentException> { requestBuilder.flow(100, -100) }
+  }
+
+  @Test
+  fun flow_withAsyncSize_immediatelyEmitsPlaceholder() = runTest {
+    val placeholder = ColorDrawable(Color.GREEN)
+
+    val missingResourceId = 123
+    val result =
+      Glide.with(context)
+        .load(missingResourceId)
+        .placeholder(placeholder)
+        .flow(delayForever)
+        .first()
+
+    assertThat(result).isEqualTo(Placeholder<Drawable>(Status.RUNNING, placeholder))
+  }
+
+  @Test
+  fun flow_withAsyncSizeThatNeverCompletes_andOverrideSize_finishesSuccessfully() = runTest {
+    val result =
+      Glide.with(context)
+        .load(newImageFile())
+        .override(100, 100)
+        .flow(delayForever)
+        .firstLoad()
+        .toList()
+
+    assertThat(result).comparingStatus().containsExactly(Status.RUNNING, Status.SUCCEEDED).inOrder()
+  }
+
+  @Test
+  fun flow_withAsyncSize_andOverrideSize_usesOverrideSize() = runTest {
+    val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+
+    Glide.with(context)
+      .load(FakeModel())
+      .override(200, 100)
+      .flow { Size(1, 2) }
+      .firstLoad()
+      .toList()
+
+    assertThat(requestedSizeReference.get()).isEqualTo(Size(200, 100))
+  }
+
+  @Test
+  fun flow_withAsyncSize_thumbnailWithConcreteSize_startsThumbnailWithoutWaitingForSize() =
+    runTest {
+      val result =
+        Glide.with(context)
+          .load(newImageFile())
+          .thumbnail(Glide.with(context).load(newImageFile()).override(25, 50))
+          .flow(delayForever)
+          .take(2)
+          .toList()
+
+      assertThat(result)
+        .compareStatusAndType()
+        .containsExactly(placeholder(Status.RUNNING), resource(Status.RUNNING))
+        .inOrder()
+    }
+
+  @Test
+  fun flow_withAsyncSize_concreteSizeForThumbnail_startsMainRequestWhenAsyncSizeIsAvailable() =
+    runTest {
+      val waitForThumbnailToFinishChannel = Channel<Boolean>()
+      val waitForThumbnailToFinishSize: suspend () -> Size = {
+        waitForThumbnailToFinishChannel.receive()
+        Size(100, 200)
+      }
+
+      val result =
+        Glide.with(context)
+          .load(newImageFile())
+          .thumbnail(
+            Glide.with(context)
+              .load(newImageFile())
+              .override(75, 50)
+              .listener(onSuccess { launch { waitForThumbnailToFinishChannel.send(true) } })
+          )
+          .flow(waitForThumbnailToFinishSize)
+          .firstLoad()
+          .toList()
+
+      assertThat(result)
+        .compareStatusAndType()
+        .containsExactly(
+          placeholder(Status.RUNNING),
+          resource(Status.RUNNING),
+          resource(Status.SUCCEEDED),
+        )
+    }
+
+  // TODO(judds): Consider adding a test for invalid async sizes. It doesn't seem like Glide
+  // asserts on this in the existing framework, so it's probably not super important to do for
+  // flows, but it might be nice.
+
+  @Test
+  fun flow_withNoProvidedSize_overrideSizePresent_usesOverrideSize() = runTest {
+    val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+
+    Glide.with(context).load(FakeModel()).override(4, 5).flow().firstLoad().toList()
+
+    assertThat(requestedSizeReference.get()).isEqualTo(Size(4, 5))
+  }
+
+  @Test
+  fun flow_withNoProvidedSize_overrideSizeMissing_throws() = runTest {
+    val requestBuilder = Glide.with(context).load(FakeModel())
+
+    assertFailsWith<IllegalArgumentException> { requestBuilder.flow() }
+  }
+
+  private val delayForever: suspend () -> Size = {
+    delay(kotlin.time.Duration.INFINITE)
+    throw RuntimeException()
+  }
+
+  private fun registerSizeCapturingFakeModelLoader(): AtomicReference<Size> {
+    val result = AtomicReference<Size>()
+    Glide.get(context)
+      .registry
+      .append(
+        FakeModel::class.java,
+        File::class.java,
+        SizeStealingFakeModelLoader.Factory(newImageFile(), result)
+      )
+    return result
   }
 
   // Avoid race conditions where the main request finishes first by making sure they execute
@@ -384,10 +595,41 @@ class FlowsTest {
     val bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     canvas.drawColor(Color.GREEN)
-    file.outputStream().use {
-      bitmap.compress(Bitmap.CompressFormat.JPEG, 75, it)
-    }
+    file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 75, it) }
     return file
+  }
+
+  class FakeModel
+
+  class SizeStealingFakeModelLoader(
+    private val fileLoader: ModelLoader<File, File>,
+    private val fakeResult: File,
+    private val sizeReference: AtomicReference<Size>,
+  ) : ModelLoader<FakeModel, File> {
+
+    override fun buildLoadData(
+      model: FakeModel,
+      width: Int,
+      height: Int,
+      options: Options,
+    ): ModelLoader.LoadData<File>? {
+      sizeReference.set(Size(width, height))
+      return fileLoader.buildLoadData(fakeResult, width, height, options)
+    }
+
+    override fun handles(model: FakeModel): Boolean = true
+
+    class Factory(private val fakeResult: File, private val sizeReference: AtomicReference<Size>) :
+      ModelLoaderFactory<FakeModel, File> {
+      override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<FakeModel, File> {
+        return SizeStealingFakeModelLoader(
+          multiFactory.build(File::class.java, File::class.java),
+          fakeResult,
+          sizeReference
+        )
+      }
+      override fun teardown() {}
+    }
   }
 }
 
@@ -407,8 +649,10 @@ private fun <ResourceT> onSuccess(onSuccess: () -> Unit) =
 private fun <ResourceT> onFailure(onFailure: () -> Unit) =
   simpleRequestListener<ResourceT>({}, onFailure)
 
-private fun <ResourceT> simpleRequestListener(onSuccess: () -> Unit, onFailure: () -> Unit) :
-  RequestListener<ResourceT> =
+private fun <ResourceT> simpleRequestListener(
+  onSuccess: () -> Unit,
+  onFailure: () -> Unit
+): RequestListener<ResourceT> =
   object : RequestListener<ResourceT> {
     override fun onResourceReady(
       resource: ResourceT?,
@@ -433,21 +677,20 @@ private fun <ResourceT> simpleRequestListener(onSuccess: () -> Unit, onFailure: 
   }
 
 // TODO(judds): This function may be useful in production code as well, consider exposing it.
-@OptIn(ExperimentGlideFlows::class)
 private fun <ResourceT> Flow<GlideFlowInstant<ResourceT>>.firstLoad():
-  Flow<GlideFlowInstant<ResourceT>>
-{
+  Flow<GlideFlowInstant<ResourceT>> {
   val originalFlow = this
   return flow {
     var completion: GlideFlowInstant<ResourceT>? = null
-    originalFlow.takeWhile {
-      if (it.status != Status.SUCCEEDED && it.status != Status.FAILED) {
-        true
-      } else {
-        completion = it
-        false
+    originalFlow
+      .takeWhile {
+        if (it.status != Status.SUCCEEDED && it.status != Status.FAILED) {
+          true
+        } else {
+          completion = it
+          false
+        }
       }
-    }
       .collect { emit(it) }
 
     emit(completion!!)
@@ -463,42 +706,35 @@ private fun restartAllRequestsOnNewThread(requestManager: RequestManager) =
     }
   }
 
-@OptIn(ExperimentGlideFlows::class)
 private fun placeholder(status: Status) = StatusAndType(status, Placeholder::class)
-@OptIn(ExperimentGlideFlows::class)
+
 private fun resource(status: Status) = StatusAndType(status, Resource::class)
 
-@OptIn(ExperimentGlideFlows::class)
 private data class StatusAndType(
-  val status: Status, val type: KClass<out GlideFlowInstant<*>>,
+  val status: Status,
+  val type: KClass<out GlideFlowInstant<*>>,
 )
 
-@OptIn(ExperimentGlideFlows::class)
-private fun IterableSubject.compareStatusAndType()
-  = comparingElementsUsing(statusAndType())
+private fun IterableSubject.compareStatusAndType() = comparingElementsUsing(statusAndType())
 
-@OptIn(ExperimentGlideFlows::class)
-private fun statusAndType() : Correspondence<GlideFlowInstant<*>, StatusAndType> =
+private fun statusAndType(): Correspondence<GlideFlowInstant<*>, StatusAndType> =
   ktCorrespondenceFrom("statusAndType") { actual, expected -> actual?.statusAndType() == expected }
 
-@OptIn(ExperimentGlideFlows::class)
 private fun GlideFlowInstant<*>.statusAndType() =
   StatusAndType(
     status,
-    when(this) {
+    when (this) {
       is Placeholder<*> -> Placeholder::class
       is Resource<*> -> Resource::class
     }
   )
 
-@OptIn(ExperimentGlideFlows::class)
-private fun IterableSubject.comparingStatus() =
-  comparingElementsUsing(status())
+private fun IterableSubject.comparingStatus() = comparingElementsUsing(status())
 
-@OptIn(ExperimentGlideFlows::class)
-private fun status() : Correspondence<GlideFlowInstant<*>, Status> =
+private fun status(): Correspondence<GlideFlowInstant<*>, Status> =
   ktCorrespondenceFrom("status") { actual, expected -> actual?.status == expected }
 
 private fun <A, E> ktCorrespondenceFrom(
-  description: String, predicate: Correspondence.BinaryPredicate<A, E>
+  description: String,
+  predicate: Correspondence.BinaryPredicate<A, E>
 ) = Correspondence.from(predicate, description)

@@ -12,6 +12,7 @@ import com.bumptech.glide.request.target.SizeReadyCallback
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.requestManager
+import com.bumptech.glide.util.Util
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -20,7 +21,8 @@ import kotlinx.coroutines.launch
 
 @RequiresOptIn(
   level = RequiresOptIn.Level.ERROR,
-  message = "Glide's flow integration is very experimental and subject to breaking API or behavior changes"
+  message =
+    "Glide's flow integration is very experimental and subject to breaking API or behavior changes"
 )
 @Retention(AnnotationRetention.BINARY)
 @kotlin.annotation.Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
@@ -52,16 +54,60 @@ public enum class Status {
 }
 
 /**
- * Identical to `flow(dimension, dimension)`
+ * Identical to [flow] with [Target.SIZE_ORIGINAL] as the dimensions
+ *
+ * This isn't generally a good idea, [Target.SIZE_ORIGINAL] is often much larger than you need.
+ * Using it unnecessarily will waste memory and cache space. It will also slow down future loads
+ * from the disk cache.
+ *
+ * Use this method only if you you expect the request and all of the subrequests (
+ * [RequestBuilder.override] and [RequestBuilder.error] to have specific sizes set). Validation is
+ * only performed on the top level request because we cannot reliably verify all possible
+ * subrequests.
  */
+@OptIn(InternalGlideApi::class)
+@ExperimentGlideFlows
+public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(): Flow<GlideFlowInstant<ResourceT>> {
+  require(isValidOverride) {
+    "At least your primary request is missing override dimensions. If you want to use" +
+      " Target.SIZE_ORIGINAL, do so explicitly"
+  }
+  return flow(Target.SIZE_ORIGINAL)
+}
+
+/** Identical to `flow(dimension, dimension)` */
 @ExperimentGlideFlows
 public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
   dimension: Int
 ): Flow<GlideFlowInstant<ResourceT>> = flow(dimension, dimension)
 
 /**
- * Convert a load in Glide into a flow that emits placeholders and resources in the order they'd
- * be seen by a [Target].
+ * Identical to [flow] with dimensions, except that the size is resolved asynchronously using
+ * [waitForSize].
+ *
+ * If an override size has been set using [RequestBuilder.override], that size will be used instead
+ * and [waitForSize] may never be called.
+ *
+ * [Placeholder] values may be emitted prior to [waitForSize] returning. Similarly if
+ * [RequestBuilder.thumbnail] requests are present and have overridden sizes, [Resource] values for
+ * those thumbnails may also be emitted. [waitForSize] will only be used for requests where no
+ * [RequestBuilder.override] size is available.
+ *
+ * If [waitForSize] does not return, this flow may never return values other than placeholders.
+ *
+ * This function is internal only, intended primarily for Compose. The Target API provides similar
+ * functionality for traditional Views. We could consider expanding the visibility if there are use
+ * cases for asynchronous size resolution outside of Glide's Compose integration.
+ */
+@InternalGlideApi
+@ExperimentGlideFlows
+public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
+  waitForSize: suspend () -> Size,
+): Flow<GlideFlowInstant<ResourceT>> = flow(AsyncGlideSize(waitForSize))
+
+/**
+ * Convert a load in Glide into a flow that emits placeholders and resources in the order they'd be
+ * seen by a [Target].
  *
  * Just like a [Target] there is no well defined end to a Glide request. Barring cancellation, the
  * flow should eventually reach [Status.SUCCEEDED] or [Status.FAILED] at least once. However
@@ -76,20 +122,38 @@ public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
  * sufficient as long as you avoid truncating methods like [kotlinx.coroutines.flow.take],
  * [kotlinx.coroutines.flow.takeWhile], etc. If you do use these methods, you must be sure that
  * you're no longer using or displaying the associated resource once the flow is no longer active
- * (ie [kotlinx.coroutines.flow.collect] finishes). One way to do this would be to mimic the UI
- * by creating and keeping active a coroutine context that collects from the flow while the resource
- * is in use. If this restriction is limiting for you, please file an issue on Github so we can
- * think of alternative options.
+ * (ie [kotlinx.coroutines.flow.collect] finishes). One way to do this would be to mimic the UI by
+ * creating and keeping active a coroutine context that collects from the flow while the resource is
+ * in use. If this restriction is limiting for you, please file an issue on Github so we can think
+ * of alternative options.
+ *
+ * If there have been any previous calls to this [RequestBuilder]'s
+ * [com.bumptech.glide.request.RequestOptions.override] method, the size specified in that method
+ * will be used instead of the size provided here. This includes calls where override sizes may have
+ * been copied from other option sets via [RequestBuilder.apply].
  */
 @ExperimentGlideFlows
+@OptIn(InternalGlideApi::class)
 public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
-  width: Int, height: Int
-): Flow<GlideFlowInstant<ResourceT>> =
-  flow(ImmediateGlideSize(Size(width = width, height = height)))
+  width: Int,
+  height: Int
+): Flow<GlideFlowInstant<ResourceT>> {
+  require(Util.isValidDimensions(width, height))
+  return flow(Size(width = width, height = height))
+}
+
+// We're not asserting on size here because it might come from RequestBuilder.override. Assertions
+// for provided sizes belong in those methods, assertions for overrides belong in the override
+// method.
+@InternalGlideApi
+@ExperimentGlideFlows
+private fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
+  size: Size
+): Flow<GlideFlowInstant<ResourceT>> = flow(ImmediateGlideSize(size))
 
 /**
- * A [Status] and value pair, where the value is either a [Placeholder] or a [Resource] depending
- * on how far the Glide load has progressed and/or how successful it's been.
+ * A [Status] and value pair, where the value is either a [Placeholder] or a [Resource] depending on
+ * how far the Glide load has progressed and/or how successful it's been.
  */
 @ExperimentGlideFlows
 public sealed class GlideFlowInstant<ResourceT> {
@@ -102,11 +166,12 @@ public sealed class GlideFlowInstant<ResourceT> {
  */
 @ExperimentGlideFlows
 public data class Placeholder<ResourceT>(
-  public override val status: Status, public val placeholder: Drawable?,
+  public override val status: Status,
+  public val placeholder: Drawable?,
 ) : GlideFlowInstant<ResourceT>() {
   init {
     require(
-      when(status) {
+      when (status) {
         Status.SUCCEEDED -> false
         Status.CLEARED -> true
         // Placeholder will be present prior to the first thumbnail succeeding
@@ -121,13 +186,14 @@ public data class Placeholder<ResourceT>(
  * Wraps a [Status] and a resource loaded from the primary request, a [RequestBuilder.thumbnail]
  * request, or a [RequestBuilder.error] request.
  *
- * **Status.FAILED** is a perfectly valid status with this class. If the primary request fails,
- * but at least one thumbnail succeeds, the flow will emit `Resource(FAILED, resource)` to indicate
- * both that we have some value but also that the primary request has failed.
+ * **Status.FAILED** is a perfectly valid status with this class. If the primary request fails, but
+ * at least one thumbnail succeeds, the flow will emit `Resource(FAILED, resource)` to indicate both
+ * that we have some value but also that the primary request has failed.
  */
 @ExperimentGlideFlows
 public data class Resource<ResourceT>(
-  public override val status: Status, public val resource: ResourceT,
+  public override val status: Status,
+  public val resource: ResourceT,
 ) : GlideFlowInstant<ResourceT>() {
   init {
     require(
@@ -144,6 +210,7 @@ public data class Resource<ResourceT>(
   }
 }
 
+@InternalGlideApi
 @ExperimentGlideFlows
 private fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
   size: ResolvableGlideSize,
@@ -153,9 +220,7 @@ private fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
   return callbackFlow {
     val target = FlowTarget(this, size)
     requestBuilder.intoDirect(target)
-    awaitClose {
-      requestManager.clear(target)
-    }
+    awaitClose { requestManager.clear(target) }
   }
 }
 
@@ -163,28 +228,29 @@ private fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
  * Observes a glide request using [Target] and [RequestListener] and tries to emit something
  * resembling a coherent set of placeholders and resources for it.
  *
- * Threading in this class is a bit complicated. As a general rule, the callback methods are
- * ordered by callers. So we have to handle being called from multiple threads, but we don't need
- * to try to handle callbacks being called in parallel.
+ * Threading in this class is a bit complicated. As a general rule, the callback methods are ordered
+ * by callers. So we have to handle being called from multiple threads, but we don't need to try to
+ * handle callbacks being called in parallel.
  *
- * The primary area of concern around thread is that [resolvedSize] and [sizeReadyCallbacks]
- * must be updated atomically, but can be modified on different threads.
+ * The primary area of concern around thread is that [resolvedSize] and [sizeReadyCallbacks] must be
+ * updated atomically, but can be modified on different threads.
  *
- * [currentRequest] would normally be a concern because [Target]s can be cancelled on threads
- * other than where they were started. However in our case, [currentRequest] is set once when our
- * request is started (by us) and is only cancelled when the request finishes. So we just have
- * to avoid NPEs and make sure the state is reasonably up to date.
+ * [currentRequest] would normally be a concern because [Target]s can be cancelled on threads other
+ * than where they were started. However in our case, [currentRequest] is set once when our request
+ * is started (by us) and is only cancelled when the request finishes. So we just have to avoid NPEs
+ * and make sure the state is reasonably up to date.
  *
- * [lastResource] is an unfortunate hack that tries to make sure that we emit [Status.FAILED] if
- * a thumbnail request succeeds, but then the primary request fails. In that case, we'd normally
- * already have emitted [Resource] with [Status.RUNNING] and the thumbnail value and then we'd
- * emit nothing else. That's not very satisfying for callers who expect some resolution. So instead
- * we track the last resource produced by thumbnails and emit that along with [Status.FAILED] when
- * we see that the primary request has failed. As a result we're not concerned with ordering with
+ * [lastResource] is an unfortunate hack that tries to make sure that we emit [Status.FAILED] if a
+ * thumbnail request succeeds, but then the primary request fails. In that case, we'd normally
+ * already have emitted [Resource] with [Status.RUNNING] and the thumbnail value and then we'd emit
+ * nothing else. That's not very satisfying for callers who expect some resolution. So instead we
+ * track the last resource produced by thumbnails and emit that along with [Status.FAILED] when we
+ * see that the primary request has failed. As a result we're not concerned with ordering with
  * regards to [lastResource], but it is possible the callbacks will be called on different threads,
  * so the value may be updated from different threads even if it's not concurrent.
  */
 @ExperimentGlideFlows
+@InternalGlideApi
 private class FlowTarget<ResourceT : Any>(
   private val scope: ProducerScope<GlideFlowInstant<ResourceT>>,
   private val size: ResolvableGlideSize,
@@ -193,8 +259,7 @@ private class FlowTarget<ResourceT : Any>(
   @Volatile private var currentRequest: Request? = null
   @Volatile private var lastResource: ResourceT? = null
 
-  @GuardedBy("this")
-  private val sizeReadyCallbacks = mutableListOf<SizeReadyCallback>()
+  @GuardedBy("this") private val sizeReadyCallbacks = mutableListOf<SizeReadyCallback>()
 
   init {
     when (size) {
@@ -204,18 +269,19 @@ private class FlowTarget<ResourceT : Any>(
       // requests in the chain may have a fixed size, even if the primary request does not.
       // Starting the Glide request right away allows any subrequest that has a fixed size to
       // begin immediately, shaving off some small amount of time.
-      is AsyncGlideSize -> scope.launch {
-        val localResolvedSize = size.asyncSize()
-        val callbacksToNotify: List<SizeReadyCallback>
-        synchronized(this) {
-          resolvedSize = localResolvedSize
-          callbacksToNotify = ArrayList(sizeReadyCallbacks)
-          sizeReadyCallbacks.clear()
+      is AsyncGlideSize ->
+        scope.launch {
+          val localResolvedSize = size.asyncSize()
+          val callbacksToNotify: List<SizeReadyCallback>
+          synchronized(this) {
+            resolvedSize = localResolvedSize
+            callbacksToNotify = ArrayList(sizeReadyCallbacks)
+            sizeReadyCallbacks.clear()
+          }
+          callbacksToNotify.forEach {
+            it.onSizeReady(localResolvedSize.width, localResolvedSize.height)
+          }
         }
-        callbacksToNotify.forEach {
-          it.onSizeReady(localResolvedSize.width, localResolvedSize.height)
-        }
-      }
     }
   }
 
@@ -238,7 +304,8 @@ private class FlowTarget<ResourceT : Any>(
       Resource(
         // currentRequest is the entire request state, so we can use it to figure out if this
         // resource is from a thumbnail request (isComplete is false) or the primary request.
-        if (currentRequest?.isComplete == true) Status.SUCCEEDED else Status.RUNNING, resource
+        if (currentRequest?.isComplete == true) Status.SUCCEEDED else Status.RUNNING,
+        resource
       )
     )
   }
@@ -266,9 +333,7 @@ private class FlowTarget<ResourceT : Any>(
   }
 
   override fun removeCallback(cb: SizeReadyCallback) {
-    synchronized(this) {
-      sizeReadyCallbacks.remove(cb)
-    }
+    synchronized(this) { sizeReadyCallbacks.remove(cb) }
   }
 
   override fun setRequest(request: Request?) {
@@ -304,8 +369,11 @@ private class FlowTarget<ResourceT : Any>(
   }
 }
 
-private data class Size(val width: Int, val height: Int)
+@InternalGlideApi public data class Size(val width: Int, val height: Int)
 
 private sealed class ResolvableGlideSize
-private data class ImmediateGlideSize(val size: Size) : ResolvableGlideSize()
+
+@InternalGlideApi private data class ImmediateGlideSize(val size: Size) : ResolvableGlideSize()
+
+@InternalGlideApi
 private data class AsyncGlideSize(val asyncSize: suspend () -> Size) : ResolvableGlideSize()

@@ -2,12 +2,16 @@ public abstract interface annotation class com/bumptech/glide/integration/ktx/Ex
 }
 
 public final class com/bumptech/glide/integration/ktx/FlowsKt {
+	public static final fun flow (Lcom/bumptech/glide/RequestBuilder;)Lkotlinx/coroutines/flow/Flow;
 	public static final fun flow (Lcom/bumptech/glide/RequestBuilder;I)Lkotlinx/coroutines/flow/Flow;
 	public static final fun flow (Lcom/bumptech/glide/RequestBuilder;II)Lkotlinx/coroutines/flow/Flow;
 }
 
 public abstract class com/bumptech/glide/integration/ktx/GlideFlowInstant {
 	public abstract fun getStatus ()Lcom/bumptech/glide/integration/ktx/Status;
+}
+
+public abstract interface annotation class com/bumptech/glide/integration/ktx/InternalGlideApi : java/lang/annotation/Annotation {
 }
 
 public final class com/bumptech/glide/integration/ktx/Placeholder : com/bumptech/glide/integration/ktx/GlideFlowInstant {

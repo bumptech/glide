@@ -29,6 +29,7 @@ apply plugin: 'binary-compatibility-validator'
 
 apiValidation {
     ignoredProjects += ["ksp", "test", "gallery"]
+    nonPublicMarkers += ["com.bumptech.glide.integration.ktx.InternalGlideApi"]
 }
 
 // See http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html.
