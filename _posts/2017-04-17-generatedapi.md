@@ -3,7 +3,7 @@ layout: page
 title: "Generated API"
 category: doc
 date: 2017-04-17 07:28:51
-order: 3
+order: 15
 disqus: 1
 ---
 * TOC
@@ -11,39 +11,30 @@ disqus: 1
 
 ### About
 
+**Note: The generated API is deprecated other than for configuration!**
+
 Glide v4 uses an [annotation processor][1] to generate an API that allows applications to extend Glide's API and include components provided by integration libraries.
 
 The generated API serves two purposes:
 1. Integration libraries can extend Glide's API with custom options.
 2. Applications can extend Glide's API by adding methods that bundle commonly used options.
 
-Although both of these tasks can be accomplished by hand by writing custom subclasses of [``RequestOptions``][3], doing so is challenging and produces a less fluent API.
+Glide originally added a generated API that made it easy to extend RequestOptions. Since that's now trivial to do with extension functions in Kotlin, the API extensions should be considered deprecated. The configuration options, including LibraryGlideModule and AppGlideModule are not deprecated and will continue to be used. Only the extensions mentioned on this page are targeted for eventual removal.
+
 
 ### Getting Started
 
 #### Availability
 
-The generated API is only available for applications for now. Limiting the generated API to applications allows us to have a single implementation of the API, instead of N implementations, one per library and the application. As a result, it's much simpler to manage imports and ensure that all call paths within a particular application have the correct options applied. This restriction may be lifted (experimentally or otherwise) in a future version. 
+The generated API is only available for applications. 
 
-For now the API is only generated when a properly annotated ``AppGlideModule`` is found. There can only be one ``AppGlideModule`` per application. As a result it's not possible to generate the API for a library without precluding any application that uses the library from using the generated API. 
+The API is only generated when a properly annotated ``AppGlideModule`` is found. There can only be one ``AppGlideModule`` per application. As a result it's not possible to generate the API for a library without precluding any application that uses the library from using the generated API. 
 
 #### Java
 
 To use the generated API in your application, you need to perform two steps:
 
-1. Add a dependency on Glide's annotation processor:
-
-   ```groovy
-   repositories {
-     mavenCentral()
-   }
-
-   dependencies {
-     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
-   }
-   ```
-
-   See the [download and setup page][12] for more detail.
+1. [Add a dependency on Glide's annotation processor][12]
 
 2. Include a [``AppGlideModule``][4] implementation in your application:
 
@@ -67,29 +58,8 @@ You're not required to implement any of the methods in ``AppGlideModule`` for th
 
 If you're using Kotlin you can:
 
-1. Implement all of Glide's annotated classes ([``AppGlideModule``][4], [``LibraryGlideModule``][13], and [``GlideExtension``][6]) in Java as shown above.
-2. Implement the annotated classes in Kotlin, but add a ``kapt`` dependency instead of an ``annotationProcessor`` dependency on Glide's annotation processor:
-
-   ```groovy
-   dependencies {
-     kapt 'com.github.bumptech.glide:compiler:4.11.0'
-   }
-   ```
-  Note that you must also include the ``kotlin-kapt`` plugin in your ``build.gradle`` file:
-
-   ```groovy
-   apply plugin: 'kotlin-kapt'
-   ```
-  In addition, if you have any other annotation processors, all of them must be converted from ``annotationProcessor`` to ``kapt``:
-
-   ```groovy
-   dependencies {
-     kapt "android.arch.lifecycle:compiler:1.0.0"
-     kapt 'com.github.bumptech.glide:compiler:4.11.0'
-   }
-   ```
-
-   For more details on ``kapt``, see the [official documentation][14].
+1. [Add a dependency on Glide's annotation processor][12]
+2. Implement all of Glide's annotated classes ([``AppGlideModule``][4], [``LibraryGlideModule``][13], and [``GlideExtension``][6]) in Java as shown above.
 
 
 #### Android Studio
@@ -115,6 +85,8 @@ Unlike ``Glide.with()`` options like ``fitCenter()`` and ``placeholder()`` are a
     
 ### GlideExtension
 
+NOTE: This API should be considered deprecated.
+
 Glide's generated API can be extended by both Applications and Libraries. Extensions use annotated static methods to add new options, modifying existing options, or add additional types.
 
 The [``GlideExtension``][6] annotation identifies a class that extends Glide's API. The annotation must be present on any classes that extend Glide's API. If the annotation is not present, annotations on methods will be ignored.
@@ -129,6 +101,8 @@ GlideExtension annotated classes can define two types of extension methods:
 2. [``GlideType``][8] - Adds support for a new resource type (GIFs, SVG etc).
 
 #### GlideOption
+
+NOTE: This API should be considered deprecated.
 
 [``GlideOption``][7] annotated static methods extend [``RequestOptions``][3]. ``GlideOption`` is useful to:
 
@@ -198,6 +172,8 @@ GlideApp.with(fragment)
 Methods with the ``GlideOption`` annotation are expected to be static and to return `BaseRequestOptions<?>`. Note that the generated methods will not be available on the standard ``Glide`` and ``RequestOptions`` classes, only the generated equivalents.
 
 #### GlideType
+
+NOTE: This API should be considered deprecated.
 
 [``GlideType``][8] annotated static methods extend [``RequestManager``][11]. ``GlideType`` annotated methods allow you to add support for new types, including specifying default options.
 

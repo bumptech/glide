@@ -14,37 +14,9 @@ disqus: 1
 
 **Compile SDK Version** - Glide must be compiled against SDK version **27** (Oreo MR1) or higher.
 
-**Support Library Version** - Glide uses support library version **27**.
-
-If you need or would prefer to use a different version of the support library you should exclude `"com.android.support"` from your Glide dependency in your `build.gradle` file. For example, if you'd like to use v26 of the support library:
-
-```groovy
-dependencies {
-  implementation ("com.github.bumptech.glide:glide:4.11.0") {
-    exclude group: "com.android.support"
-  }
-  implementation "com.android.support:support-fragment:26.1.0"
-}
-```
-
-Using a different support library version than the one Glide depends on can cause `RuntimeException`s like:
-
-```
-java.lang.NoSuchMethodError: No static method getFont(Landroid/content/Context;ILandroid/util/TypedValue;ILandroid/widget/TextView;)Landroid/graphics/Typeface; in class Landroid/support/v4/content/res/ResourcesCompat; or its super classes (declaration of 'android.support.v4.content.res.ResourcesCompat' 
-at android.support.v7.widget.TintTypedArray.getFont(TintTypedArray.java:119)
-```
-
-It can also lead to failures in Glide's API generator that prevent the `GlideApp` class from being generated.
-
-See [#2730][8] for more details.
-
 ### Download
 
-Glide's public releases are accessible in a number of ways.
-
-#### Jar
-
-You can download [the latest jar][1] from GitHub directly. Note that you will also need to include a jar for Android's [v4 support library][2].
+Glide's public releases are accessible via Maven and Gradle.
 
 #### Gradle
 
@@ -52,14 +24,14 @@ If you use Gradle you can add a dependency on Glide using either Maven Central o
 
 ```groovy
 repositories {
+  google()
   mavenCentral()
-  maven { url 'https://maven.google.com' }
 }
 
 dependencies {
-    compile 'com.github.bumptech.glide:glide:4.11.0'
+    compile 'com.github.bumptech.glide:glide:4.13.2'
     // Skip this if you don't want to use integration libraries or configure Glide.
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.2'
 }
 ```
 
@@ -67,7 +39,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation ("com.github.bumptech.glide:glide:4.11.0@aar") {
+    implementation ("com.github.bumptech.glide:glide:4.13.2@aar") {
         transitive = true
     }
 }
@@ -99,7 +71,7 @@ If you use Maven you can add a dependency on Glide as well. Again, you will also
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.11.0</version>
+  <version>4.13.2</version>
   <type>aar</type>
 </dependency>
 <dependency>
@@ -110,7 +82,7 @@ If you use Maven you can add a dependency on Glide as well. Again, you will also
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>compiler</artifactId>
-  <version>4.11.0</version>
+  <version>4.13.2</version>
   <optional>true</optional>
 </dependency>
 ```
@@ -199,43 +171,33 @@ To use [``ExternalPreferredCacheDiskCacheFactory``][7] to store Glide's cache on
 
 #### Proguard
 
-If you use proguard, you may need to add the following lines to your ``proguard.cfg``:
-
-```
--keep public class * implements com.bumptech.glide.module.GlideModule
--keep public class * extends com.bumptech.glide.module.AppGlideModule
--keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
-  **[] $VALUES;
-  public *;
-}
-
-If you're targeting any API level less than Android API 27, also include:
-```pro
--dontwarn com.bumptech.glide.load.resource.bitmap.VideoDecoder
-```
-VideoDecoder uses API 27 APIs which may cause proguard warnings even though the newer APIs won't be called on devices with older versions of Android.
-
-If you use DexGuard you may also want to include:
-```pro
-# for DexGuard only
--keepresourcexmlelements manifest/application/meta-data@value=GlideModule
-```
-
-#### Jack
-Glide's build configuration requires features that [Jack][3] does not currently support. Jack was recently [deprecated][4] and it's unlikely that the features Glide requires will ever be added. If you'd like to compile with Java 8, see below.
+Proguard configurations are included with the Glide library,  but if you need to customize, see [Glide's proguard file][10]
 
 #### Java 8
 Starting with Android Studio 3.0 and version 3.0 of the Android Gradle plugin, you can compile your project and Glide with Java 8. For details, see the [Use Java 8 Language Features][5] on the Android Developers website. 
 
-Glide itself does not use or require you to use Java 8 to compile or use Glide in your project. Glide will eventually require Java 8 to compile, but we will do our best to allow time for developers to update their applications first, so it's likely that Java 8 won't be a requirement for months or years (as of 11/2017).
+Glide requires Java 11 to compile, but produces Java 7 compatible source (except for tests and samples).
 
-#### Kotlin
+#### Configuring Glide / Annotation Processors
 
-If you use Glide's annotations on classes implemented in Kotlin, you need to include a ``kapt`` dependency on Glide's annotation processor instead of a ``annotationProcessor`` dependency:
+To [configure][13] Glide, you'll need to include one of Glide's annotation processing libraries.
+
+##### Java
+
+If you're using Java, including Glide’s annotation processor requires dependencies on Glide’s annotations and the annotation processor:
+
+```groovy
+compile 'com.github.bumptech.glide:annotations:4.13.2'
+annotationProcessor 'com.github.bumptech.glide:compiler:4.13.2'
+```
+
+##### Kotlin - KAPT
+
+If you use Glide's annotations on classes implemented in Kotlin, you can include a ``kapt`` dependency on Glide's annotation processor instead of a ``annotationProcessor`` dependency:
 
 ```groovy
 dependencies {
-  kapt 'com.github.bumptech.glide:compiler:4.11.0'
+  kapt 'com.github.bumptech.glide:compiler:4.13.2'
 }
 ```
 Note that you must also include the ``kotlin-kapt`` plugin in your ``build.gradle`` file:
@@ -244,7 +206,35 @@ Note that you must also include the ``kotlin-kapt`` plugin in your ``build.gradl
 apply plugin: 'kotlin-kapt'
 ```
 
-See the [generated API][6] page for details.
+
+Keep in mind that if you have any other annotation processors, all of them must be converted from ``annotationProcessor`` to ``kapt``:
+
+```groovy
+dependencies {
+  kapt "android.arch.lifecycle:compiler:1.0.0"
+  kapt 'com.github.bumptech.glide:compiler:4.13.2'
+}
+```
+For more details on ``kapt``, see the [official documentation][14].
+
+##### Kotlin - KSP
+
+If you're interested in using [ksp][11], you can depend on Glide's pre-release KSP support. Note that the KSP processor does not support Glide's deprecated generated API.
+
+To do so, add the plugin:
+
+```groovy
+apply plugin: 'com.google.devtools.ksp'
+```
+
+And depend on Glide's snapshot KSP version:
+
+```groovy
+ksp 'com.github.bumptech.glide:annotation:ksp:4.14.0-SNAPSHOT')
+```
+
+See the [Snapshots][12] page for more information on using pre-release versions
+
 
 [1]: https://github.com/bumptech/glide/releases/download/v3.6.0/glide-3.6.0.jar
 [2]: http://developer.android.com/tools/support-library/features.html#v4
@@ -255,3 +245,8 @@ See the [generated API][6] page for details.
 [7]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/load/engine/cache/ExternalPreferredCacheDiskCacheFactory.html
 [8]: https://github.com/bumptech/glide/issues/2730
 [9]: https://docs.gradle.org/current/userguide/dependency_management.html#ssub:artifact_dependencies
+[10]: https://github.com/bumptech/glide/blob/master/library/proguard-rules.txt 
+[11]: https://kotlinlang.org/docs/ksp-overview.html
+[12]: {{ site.baseurl }}/dev/snapshots.html
+[13]: {{ site.baseurl }}/doc/configuration.html
+[14]: https://kotlinlang.org/docs/reference/kapt.html

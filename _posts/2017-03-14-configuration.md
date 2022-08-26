@@ -16,7 +16,6 @@ For applications, setup is only required if the application wants to:
 
 * Use one or more integration libraries
 * Change Glide's configuration (disk cache size/location, memory cache size etc)
-* Extend Glide's API 
 
 For libraries, setup is only required if the library wants to register one or more components.
 
@@ -26,8 +25,7 @@ Applications that wish to use integration libraries and/or Glide's API extension
 1. Add exactly one [``AppGlideModule``][1] implementation
 2. Optionally add one or more [``LibraryGlideModule``][2] implementations.
 3. Add the [``@GlideModule``][5] annotation to the [``AppGlideModule``][1] implementation and all [``LibraryGlideModule``][2] implementations.
-4. Add a dependency on Glide's annotation processor.
-5. Add a proguard keep for [``AppGlideModules``][1].
+4. [Add a dependency on Glide's annotation processor.][43]
 
 An example [``AppGlideModule``][1] from Glide's [Flickr sample app][8] looks like this:
 ```java
@@ -40,17 +38,8 @@ public class FlickrGlideModule extends AppGlideModule {
 }
 ```
 
-Including Glide's annotation processor requires dependencies on Glide's annotations and the annotation processor:
-```groovy
-compile 'com.github.bumptech.glide:annotations:4.11.0'
-annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
-```
+Including Glide's annotation processor requires Glide's annotation processor. See the [Download and Setup Page][43] for details on how to set up that dependency.
 
-Finally, you should keep AppGlideModule implementations in your ``proguard.cfg``:
-```
--keep public class * extends com.bumptech.glide.module.AppGlideModule
--keep class com.bumptech.glide.GeneratedAppGlideModuleImpl
-```
 
 #### Libraries
 Libraries that do not register custom components do not need to perform any configuration steps and can skip the sections on this page entirely.
@@ -58,8 +47,8 @@ Libraries that do not register custom components do not need to perform any conf
 Libraries that do need to register a custom component, like a ``ModelLoader``, can do the following: 
 
 1. Add one or more [``LibraryGlideModule``][2] implementations that register the new components.
-2. Add the [``@GlideModule``][5] annotation to every [``LibraryGlideModule``][2] implementation
-3. Add a dependency on Glide's annotation processor.
+2. Add the [``@GlideModule``][5] annotation to every [``LibraryGlideModule``][2] implementation.
+3. [Add a dependency on Glide's annotation processor.][43]
 
 An example [``LibraryGlideModule``][2] from Glide's [OkHttp integration library][7] looks like this:
 ```java
@@ -74,7 +63,7 @@ public final class OkHttpLibraryGlideModule extends LibraryGlideModule {
 
 Using the [``@GlideModule``][5] annotation requires a dependency on Glide's annotations:
 ```groovy
-compile 'com.github.bumptech.glide:annotations:4.11.0'
+compile 'com.github.bumptech.glide:annotations:4.13.2'
 ```
 
 ##### Avoid AppGlideModule in libraries
@@ -82,7 +71,7 @@ Libraries must **not** include ``AppGlideModule`` implementations. Doing so will
 
 In addition, if two libraries include ``AppGlideModule``s, applications will be unable to compile if they depend on both and will be forced to pick one or other other. 
 
-This does mean that libraries won't be able to use Glide's generated API, but loads with the standard `RequestBuilder` and `RequestOptions` will still work just fine (see the [options page][42] for examples).
+#### Setup Glide's Annotation Processor
 
 ### Application Options
 Glide allows applications to use [``AppGlideModule``][1] implementations to completely control Glide's memory and disk cache usage. Glide tries to provide reasonable defaults for most applications, but for some applications, it will be necessary to customize these values. Be sure to measure the results of any changes to avoid performance regressions.
@@ -389,9 +378,6 @@ public class YourAppGlideModule extends AppGlideModule {
 }
 ```
 
-
-
-
 ### Module classes and annotations.
 Glide v4 relies on two classes, [``AppGlideModule``][1] and [``LibraryGlideModule``][2], to configure the Glide singleton. Both classes are allowed to register additional components, like [``ModelLoaders``][3], [``ResourceDecoders``][4] etc. Only the [``AppGlideModules``][1] are allowed to configure application specific settings, like cache implementations and sizes. 
 
@@ -485,3 +471,4 @@ public final class MyAppGlideModule extends AppGlideModule {
 [40]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/load/engine/bitmap_recycle/BitmapPool.html
 [41]: https://developer.android.com/reference/android/app/ActivityManager.html#isLowRamDevice()
 [42]: {{ site.baseurl }}/doc/options.html
+[43]: {{ site.baseurl }}/doc/download-setup.html#configuring-glide--annotation-processors
