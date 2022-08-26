@@ -50,7 +50,6 @@ subprojects { project ->
             url "https://oss.sonatype.org/content/repositories/snapshots"
         }
         gradlePluginPortal()
-
     }
 
     afterEvaluate {
@@ -154,6 +153,7 @@ subprojects { project ->
                     abortOnError false
                 }
 
+                // We don't need a BuildConfig constants class.
                 buildFeatures {
                     buildConfig = false
                 }
