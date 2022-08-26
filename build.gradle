@@ -164,15 +164,6 @@ subprojects { project ->
                         signingConfig signingConfigs.debug
                     }
                 }
-
-                // It's faster to build only one variant, and debug / release
-                // are identical for Glide.
-                variantFilter { variant ->
-                    if(variant.buildType.name == 'debug') {
-                        variant.setIgnore(true)
-                    }
-                }
-
             }
         }
 
