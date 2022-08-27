@@ -2,6 +2,7 @@ package com.bumptech.glide.samples.svg;
 
 import android.graphics.drawable.PictureDrawable;
 import android.widget.ImageView;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -25,7 +26,7 @@ public class SvgSoftwareLayerSetter implements RequestListener<PictureDrawable> 
 
   @Override
   public boolean onResourceReady(
-      PictureDrawable resource,
+      @NonNull PictureDrawable resource,
       Object model,
       Target<PictureDrawable> target,
       DataSource dataSource,

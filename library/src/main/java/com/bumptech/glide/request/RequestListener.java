@@ -2,6 +2,7 @@ package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
@@ -50,14 +51,14 @@ public interface RequestListener<R> {
    * }
    * }</pre>
    *
-   * @param e The maybe {@code null} exception containing information about why the request failed.
-   * @param model The model we were trying to load when the exception occurred.
-   * @param target The {@link Target} we were trying to load the image into.
+   * @param e               The maybe {@code null} exception containing information about why the request failed.
+   * @param model           The model we were trying to load when the exception occurred.
+   * @param target          The {@link Target} we were trying to load the image into.
    * @param isFirstResource {@code true} if this exception is for the first resource to load.
    * @return {@code true} to prevent {@link Target#onLoadFailed(Drawable)} from being called on
-   *     {@code target}, typically because the listener wants to update the {@code target} or the
-   *     object the {@code target} wraps itself or {@code false} to allow {@link
-   *     Target#onLoadFailed(Drawable)} to be called on {@code target}.
+   * {@code target}, typically because the listener wants to update the {@code target} or the
+   * object the {@code target} wraps itself or {@code false} to allow {@link
+   * Target#onLoadFailed(Drawable)} to be called on {@code target}.
    */
   boolean onLoadFailed(
       @Nullable GlideException e, Object model, Target<R> target, boolean isFirstResource);
@@ -68,18 +69,19 @@ public interface RequestListener<R> {
    *
    * <p>For threading guarantees, see the class comment.
    *
-   * @param resource The resource that was loaded for the target.
-   * @param model The specific model that was used to load the image.
-   * @param target The target the model was loaded into.
-   * @param dataSource The {@link DataSource} the resource was loaded from.
+   * @param resource        The resource that was loaded for the target.
+   * @param model           The specific model that was used to load the image.
+   * @param target          The target the model was loaded into.
+   * @param dataSource      The {@link DataSource} the resource was loaded from.
    * @param isFirstResource {@code true} if this is the first resource to in this load to be loaded
-   *     into the target. For example when loading a thumbnail and a full-sized image, this will be
-   *     {@code true} for the first image to load and {@code false} for the second.
+   *                        into the target. For example when loading a thumbnail and a full-sized image, this will be
+   *                        {@code true} for the first image to load and {@code false} for the second.
    * @return {@code true} to prevent {@link Target#onResourceReady(Object, Transition)} from being
-   *     called on {@code target}, typically because the listener wants to update the {@code target}
-   *     or the object the {@code target} wraps itself or {@code false} to allow {@link
-   *     Target#onResourceReady(Object, Transition)} to be called on {@code target}.
+   * called on {@code target}, typically because the listener wants to update the {@code target}
+   * or the object the {@code target} wraps itself or {@code false} to allow {@link
+   * Target#onResourceReady(Object, Transition)} to be called on {@code target}.
    */
   boolean onResourceReady(
-      R resource, Object model, Target<R> target, DataSource dataSource, boolean isFirstResource);
+      @NonNull R resource, Object model, Target<R> target, DataSource dataSource,
+      boolean isFirstResource);
 }

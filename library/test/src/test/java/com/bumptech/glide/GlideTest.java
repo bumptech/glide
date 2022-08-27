@@ -445,7 +445,7 @@ public class GlideTest {
 
               @Override
               public boolean onResourceReady(
-                  Drawable resource,
+                  @NonNull Drawable resource,
                   Object model,
                   Target<Drawable> target,
                   DataSource dataSource,

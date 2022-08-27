@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import androidx.annotation.NonNull;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -77,7 +78,7 @@ public class FullscreenActivity extends Activity {
 
               @Override
               public boolean onResourceReady(
-                  Drawable resource,
+                  @NonNull Drawable resource,
                   Object model,
                   Target<Drawable> target,
                   DataSource dataSource,

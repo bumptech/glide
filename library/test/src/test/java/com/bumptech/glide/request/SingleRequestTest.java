@@ -670,7 +670,7 @@ public class SingleRequestTest {
 
                   @Override
                   public boolean onResourceReady(
-                      List resource,
+                      @NonNull List resource,
                       Object model,
                       Target<List> target,
                       DataSource dataSource,
@@ -709,7 +709,7 @@ public class SingleRequestTest {
 
                   @Override
                   public boolean onResourceReady(
-                      List resource,
+                      @NonNull List resource,
                       Object model,
                       Target<List> target,
                       DataSource dataSource,

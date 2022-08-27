@@ -2,6 +2,7 @@ package com.bumptech.glide.benchmark;
 
 import android.app.Application;
 import android.graphics.Bitmap;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.benchmark.BenchmarkState;
@@ -118,7 +119,7 @@ public class BenchmarkFromCache {
 
                   @Override
                   public boolean onResourceReady(
-                      Bitmap resource,
+                      @NonNull Bitmap resource,
                       Object model,
                       Target<Bitmap> target,
                       DataSource dataSource,
