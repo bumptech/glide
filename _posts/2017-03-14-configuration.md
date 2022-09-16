@@ -10,7 +10,7 @@ disqus: 1
 {:toc}
 
 ### Setup
-Starting in Glide 4.9.0, setup is required in a couple of cases.
+Starting in Glide 4.9.0, the setup described in this page is only required in a couple of cases.
 
 For applications, setup is only required if the application wants to:
 

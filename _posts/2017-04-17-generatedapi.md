@@ -9,9 +9,32 @@ disqus: 1
 * TOC
 {:toc}
 
-### About
+## This page and the generated API are deprecated
 
-**Note: The generated API is deprecated other than for configuration!**
+The generated API is deprecated as of Glide 4.14.0. Glide's annotation processors will continue to be used for [configuration][16]. 
+
+Specifically:
+
+1. You should not add new [`Extensions`][6] as described on this page
+2. You should not use generated classes. Use the equivalent non-generated classes instead:
+
+    *  Instead of `GlideApp`, use `com.bumptech.Glide`
+    *  Instead of `GlideRequests`, use `com.bumptech.glide.RequestManager`
+    *  Instead of `GlideRequest`, use `com.bumptech.glide.RequestBuilder`
+    *  Instead of `GlideOptions`, use `com.bumptech.glide.request.RequestOptions`
+
+You should continue to use the annotation processors and `AppGlideModule` or `LibraryGlideModule` classes as necessary to [configure Glide][16]. Configuration using these classes and annotation processing is <em>NOT</em> deprecated.
+
+The generated API is deprecated because:
+
+1. Glide 4.9.0 integrated RequestOptions into RequestBuilder using inheritance instead of code gen.
+2. `Extensions`, the other functionality added by this API, seem to be rarely used.
+3. `Extensions` can be trivially replicated in Kotlin using extension functions with no additional support from Glide.
+4. Generating the classes (`GlideApp`, `GlideRequests` etc) adds build time and complexity in Glide's annotation processors.
+
+In practice there's no plan to remove support for the generated API from Glide's Java based annotation processor. However we do not plan to add support for the generated API to Glide's KSP integration or add additional related functionality in the future. 
+
+### About
 
 Glide v4 uses an [annotation processor][1] to generate an API that allows applications to extend Glide's API and include components provided by integration libraries.
 
@@ -70,6 +93,8 @@ For the most part Android Studio just works with annotation processors and the g
 2. Click Rebuild Project.
 
 ### Using the generated API
+
+<b>This API is deprecated.</b>
  
 The API is generated in the same package as the [``AppGlideModule``][4] implementation provided by the application and is named ``GlideApp`` by default. Applications can use the API by starting all loads with ``GlideApp.with()`` instead of ``Glide.with()``:
  
@@ -85,7 +110,7 @@ Unlike ``Glide.with()`` options like ``fitCenter()`` and ``placeholder()`` are a
     
 ### GlideExtension
 
-NOTE: This API should be considered deprecated.
+<b>This API is deprecated.</b>
 
 Glide's generated API can be extended by both Applications and Libraries. Extensions use annotated static methods to add new options, modifying existing options, or add additional types.
 
@@ -102,7 +127,7 @@ GlideExtension annotated classes can define two types of extension methods:
 
 #### GlideOption
 
-NOTE: This API should be considered deprecated.
+<b>This API is deprecated.</b>
 
 [``GlideOption``][7] annotated static methods extend [``RequestOptions``][3]. ``GlideOption`` is useful to:
 
@@ -173,7 +198,7 @@ Methods with the ``GlideOption`` annotation are expected to be static and to ret
 
 #### GlideType
 
-NOTE: This API should be considered deprecated.
+<b>This API is deprecated.</b>
 
 [``GlideType``][8] annotated static methods extend [``RequestManager``][11]. ``GlideType`` annotated methods allow you to add support for new types, including specifying default options.
 
@@ -234,3 +259,4 @@ Methods annotated with ``GlideType`` must take a [``RequestBuilder<T>``][2] as t
 [13]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/module/LibraryGlideModule.html
 [14]: https://kotlinlang.org/docs/reference/kapt.html
 [15]: {{ site.baseurl }}/doc/configuration.html#avoid-appglidemodule-in-libraries
+[16]: {{ site.baseurl }}/doc/configuration.html

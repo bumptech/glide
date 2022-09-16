@@ -219,7 +219,8 @@ For more details on ``kapt``, see the [official documentation][14].
 
 ##### Kotlin - KSP
 
-If you're interested in using [ksp][11], you can depend on Glide's pre-release KSP support. Note that the KSP processor does not support Glide's deprecated generated API.
+If you're interested in using [ksp][11], you can depend on Glide's pre-release KSP support. 
+
 
 To do so, add the plugin:
 
@@ -234,6 +235,8 @@ ksp 'com.github.bumptech.glide:ksp:4.14.0-SNAPSHOT'
 ```
 
 See the [Snapshots][12] page for more information on using pre-release versions
+
+<b>Note</b> - The KSP processor does not support Glide's deprecated generated API. If you reference generated classes (`GlideApp`, `GlideRequests` etc), you will need to replace them with the non-generated equivalents before you can use KSP. See the [Generated API][15] page for details. 
 
 
 [1]: https://github.com/bumptech/glide/releases/download/v3.6.0/glide-3.6.0.jar
@@ -250,3 +253,4 @@ See the [Snapshots][12] page for more information on using pre-release versions
 [12]: {{ site.baseurl }}/dev/snapshots.html
 [13]: {{ site.baseurl }}/doc/configuration.html
 [14]: https://kotlinlang.org/docs/reference/kapt.html
+[15]: {{ site.baseurl }}/doc/generatedapi.html
