@@ -61,5 +61,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ```
 
-[1]: http://bruth.github.io/jekyll-docs-template/
+[1]: https://bruth.github.io/jekyll-docs-template/
 [2]: https://github.com/bryanbraun/anchorjs

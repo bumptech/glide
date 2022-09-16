@@ -120,7 +120,7 @@ It's also worth noting the any intermediate ``Bitmap``s that any custom ``Bitmap
 [1]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/RequestBuilder.html#into-Y-
 [2]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/request/target/Target.html
 [3]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/RequestManager.html#clear-com.bumptech.glide.request.target.Target-
-[4]: http://d.android.com/reference/android/view/View.html?is-external=true
+[4]: https://d.android.com/reference/android/view/View.html?is-external=true
 [5]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/request/target/SimpleTarget.html
 [6]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/request/target/Target.html#onLoadCleared-android.graphics.drawable.Drawable-
 [7]: https://developer.android.com/reference/android/graphics/Bitmap.html#recycle()

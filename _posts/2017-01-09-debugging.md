@@ -201,9 +201,9 @@ See also:
 [9]: https://github.com/bumptech/glide/blob/6b137c2b1d4b2ab187ea2aa56834dea039daa090/library/src/main/java/com/bumptech/glide/load/engine/Engine.java#L33
 [10]: https://developer.android.com/studio/profile/investigate-ram.html
 [11]: https://developer.android.com/studio/profile/investigate-ram.html#HeapDump
-[12]: http://www.eclipse.org/mat/
+[12]: https://www.eclipse.org/mat/
 [13]: {{ site.baseurl }}/doc/caching.html
-[14]: http://bumptech.github.io/glide/javadocs/430/com/bumptech/glide/RequestBuilder.html#error-com.bumptech.glide.RequestBuilder-
-[15]: http://bumptech.github.io/glide/javadocs/430/com/bumptech/glide/RequestBuilder.html
+[14]: {{ site.baseurl }}/javadocs/430/com/bumptech/glide/RequestBuilder.html#error-com.bumptech.glide.RequestBuilder-
+[15]: {{ site.baseurl }}/javadocs/430/com/bumptech/glide/RequestBuilder.html
 [16]: https://developer.android.com/reference/android/os/Handler.html
 [17]: {{ site.baseurl }}/doc/generatedapi.html

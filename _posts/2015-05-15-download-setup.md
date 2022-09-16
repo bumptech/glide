@@ -240,7 +240,7 @@ See the [Snapshots][12] page for more information on using pre-release versions
 
 
 [1]: https://github.com/bumptech/glide/releases/download/v3.6.0/glide-3.6.0.jar
-[2]: http://developer.android.com/tools/support-library/features.html#v4
+[2]: https://developer.android.com/tools/support-library/features.html#v4
 [3]: https://source.android.com/source/jack
 [4]: https://android-developers.googleblog.com/2017/03/future-of-java-8-language-feature.html
 [5]: https://developer.android.com/studio/write/java8-support.html

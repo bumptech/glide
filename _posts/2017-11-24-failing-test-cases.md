@@ -17,7 +17,7 @@ Before writing any code, you need a few pre-requisites, several of which you'll 
 
 1. Install and setup [Android Studio](https://developer.android.com/studio/index.html)
 2. Create an [Android Emulator in Android Studio](https://developer.android.com/studio/run/managing-avds.html#createavd), using x86 and API 26 should work well.
-3. Fork and Clone Glide, then open the project in Android Studio (see [the contributing page](http://bumptech.github.io/glide/dev/contributing.html#contribution-workflow) for more details)
+3. Fork and Clone Glide, then open the project in Android Studio (see [the contributing page][1] for more details)
 
 ## Adding an Instrumentation Test
 Now that you have Glide open in Android Studio, the next step is to write an instrumentation test that will fail due to the bug you're reporting.
@@ -390,3 +390,5 @@ Then, create a pull request by:
 6. Click 'Create Pull Request`
 
 That's it! Your pull request will go out and we'll look at it as soon as we're able to.
+
+[1]: {{ site.baseurl }}/dev/contributing.html#contribution-workflow

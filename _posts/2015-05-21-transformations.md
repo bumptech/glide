@@ -177,12 +177,12 @@ Glide can apply ``Bitmap`` ``Transformations`` to ``BitmapDrawable``, ``GifDrawa
 [3]: options.html
 [4]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/resource/bitmap/CenterCrop.html
 [6]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/resource/bitmap/CircleCrop.html
-[7]: http://developer.android.com/reference/android/widget/ImageView.html
-[8]: http://developer.android.com/reference/android/widget/ImageView.ScaleType.html
+[7]: https://developer.android.com/reference/android/widget/ImageView.html
+[8]: https://developer.android.com/reference/android/widget/ImageView.ScaleType.html
 [9]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html
 [10]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html#dontTransform--
 [11]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/RequestManager.html#asDrawable--
-[12]: http://developer.android.com/reference/android/graphics/drawable/BitmapDrawable.html
+[12]: https://developer.android.com/reference/android/graphics/drawable/BitmapDrawable.html
 [13]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/load/resource/gif/GifDrawable.html
 [14]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html#transform-java.lang.Class-com.bumptech.glide.load.Transformation-
 [15]: {{ site.baseurl }}/javadocs/400/com/bumptech/glide/request/RequestOptions.html

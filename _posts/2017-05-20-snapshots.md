@@ -158,6 +158,6 @@ dependencies {
 [1]: https://travis-ci.org/bumptech/glide
 [2]: https://oss.sonatype.org/content/repositories/snapshots/
 [3]: https://oss.sonatype.org/content/repositories/snapshots/com/github/bumptech/glide/
-[4]: http://stackoverflow.com/questions/7715321/how-to-download-snapshot-version-from-maven-snapshot-repository
+[4]: https://stackoverflow.com/questions/7715321/how-to-download-snapshot-version-from-maven-snapshot-repository
 [5]: https://oss.sonatype.org/content/repositories/snapshots/com/github/bumptech/glide/glide/
 [6]: https://oss.sonatype.org/content/repositories/snapshots/com/github/bumptech/glide/glide/4.3.0-SNAPSHOT/
