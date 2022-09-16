@@ -230,7 +230,7 @@ apply plugin: 'com.google.devtools.ksp'
 And depend on Glide's snapshot KSP version:
 
 ```groovy
-ksp 'com.github.bumptech.glide:ksp:4.14.0-SNAPSHOT')
+ksp 'com.github.bumptech.glide:ksp:4.14.0-SNAPSHOT'
 ```
 
 See the [Snapshots][12] page for more information on using pre-release versions
