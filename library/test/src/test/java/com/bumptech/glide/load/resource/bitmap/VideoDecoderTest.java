@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.ParcelFileDescriptor;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
@@ -29,9 +30,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.util.ReflectionHelpers;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 27)
+@Config(sdk = VERSION_CODES.O_MR1)
 public class VideoDecoderTest {
   @Mock private ParcelFileDescriptor resource;
   @Mock private VideoDecoder.MediaMetadataRetrieverFactory factory;
@@ -41,6 +43,9 @@ public class VideoDecoderTest {
   private VideoDecoder<ParcelFileDescriptor> decoder;
   private Options options;
   private int initialSdkVersion;
+  private String initialMake;
+  private String initialModel;
+  private String initialBuildId;
 
   @Before
   public void setup() {
@@ -50,11 +55,16 @@ public class VideoDecoderTest {
     options = new Options();
 
     initialSdkVersion = Build.VERSION.SDK_INT;
+    initialMake = Build.MANUFACTURER;
+    initialModel = Build.MODEL;
+    initialBuildId = Build.ID;
   }
 
   @After
   public void tearDown() {
     Util.setSdkVersionInt(initialSdkVersion);
+    setMakeAndModel(initialMake, initialModel);
+    setBuildId(initialBuildId);
   }
 
   @Test
@@ -182,5 +192,38 @@ public class VideoDecoderTest {
     verify(retriever, never()).getScaledFrameAtTime(anyLong(), anyInt(), anyInt(), anyInt());
     assertThat(decoder.decode(resource, 100, Target.SIZE_ORIGINAL, options).get())
         .isSameInstanceAs(expected);
+  }
+
+  @Test
+  @Config(sdk = VERSION_CODES.M)
+  public void isHdr180RotationFixRequired_androidM_returnsFalse() {
+    assertThat(VideoDecoder.isHdr180RotationFixRequired()).isFalse();
+  }
+
+  @Test
+  @Config(sdk = VERSION_CODES.Q)
+  public void isHdr180RotationFixRequired_androidQ_returnsFalse() {
+    assertThat(VideoDecoder.isHdr180RotationFixRequired()).isFalse();
+  }
+
+  @Test
+  @Config(sdk = VERSION_CODES.R)
+  public void isHdr180RotationFixRequired_androidR_returnsTrue() {
+    assertThat(VideoDecoder.isHdr180RotationFixRequired()).isTrue();
+  }
+
+  @Test
+  @Config(sdk = VERSION_CODES.S)
+  public void isHdr180RotationFixRequired_androidS_returnsTrue() {
+    assertThat(VideoDecoder.isHdr180RotationFixRequired()).isTrue();
+  }
+
+  private void setMakeAndModel(String make, String model) {
+    ReflectionHelpers.setStaticField(Build.class, "MANUFACTURER", make);
+    ReflectionHelpers.setStaticField(Build.class, "MODEL", model);
+  }
+
+  private void setBuildId(String buildId) {
+    ReflectionHelpers.setStaticField(Build.class, "ID", buildId);
   }
 }
