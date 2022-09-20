@@ -574,7 +574,7 @@ class FlowsTest {
       .append(
         FakeModel::class.java,
         File::class.java,
-        SizeObservingFakeModelLoader.Factory(newImageFile(), result)
+        SizeStealingFakeModelLoader.Factory(newImageFile(), result)
       )
     return result
   }
@@ -601,7 +601,7 @@ class FlowsTest {
 
   class FakeModel
 
-  class SizeObservingFakeModelLoader(
+  class SizeStealingFakeModelLoader(
     private val fileLoader: ModelLoader<File, File>,
     private val fakeResult: File,
     private val sizeReference: AtomicReference<Size>,
@@ -622,7 +622,7 @@ class FlowsTest {
     class Factory(private val fakeResult: File, private val sizeReference: AtomicReference<Size>) :
       ModelLoaderFactory<FakeModel, File> {
       override fun build(multiFactory: MultiModelLoaderFactory): ModelLoader<FakeModel, File> {
-        return SizeObservingFakeModelLoader(
+        return SizeStealingFakeModelLoader(
           multiFactory.build(File::class.java, File::class.java),
           fakeResult,
           sizeReference
