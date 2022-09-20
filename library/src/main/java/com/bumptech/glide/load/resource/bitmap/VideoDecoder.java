@@ -3,9 +3,12 @@ package com.bumptech.glide.load.resource.bitmap;
 import android.annotation.TargetApi;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.media.MediaDataSource;
+import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
+import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -22,6 +25,9 @@ import com.bumptech.glide.request.target.Target;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Decodes video data to Bitmaps from {@link ParcelFileDescriptor}s and {@link
@@ -109,6 +115,15 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
 
   private static final MediaMetadataRetrieverFactory DEFAULT_FACTORY =
       new MediaMetadataRetrieverFactory();
+
+  /**
+   * List of Pixel Android T build id prefixes missing a fix for HDR video with 180 deg rotations
+   * having doubly-rotated thumbnails.
+   *
+   * <p>More recent Android T builds should have the fix.
+   */
+  private static final List<String> PIXEL_T_BUILD_ID_PREFIXES_REQUIRING_HDR_180_ROTATION_FIX =
+      Collections.unmodifiableList(Arrays.asList("TP1A", "TD1A.220804.031"));
 
   private final MediaMetadataRetrieverInitializer<T> initializer;
   private final BitmapPool bitmapPool;
@@ -218,6 +233,11 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       result = decodeOriginalFrame(mediaMetadataRetriever, frameTimeMicros, frameOption);
     }
 
+    // MediaMetadataRetriever has a bug where HDR videos with 180 deg rotations are rotated twice,
+    // causing the output frame to appear upside. This needs to be corrected for all versions of
+    // Android until a platform fix lands.
+    result = correctHdr180DegVideoFrameOrientation(mediaMetadataRetriever, result);
+
     // Throwing an exception works better in our error logging than returning null. It shouldn't
     // be expensive because video decoders are attempted after image loads. Video errors are often
     // logged by the framework, so we can also use this error to suggest callers look for the
@@ -227,6 +247,100 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     }
 
     return result;
+  }
+
+  /**
+   * Corrects the orientation of a bitmap extracted from an HDR video with a 180 degree rotation
+   * angle.
+   *
+   * <p>This method will only return a rotated bitmap instead of the input bitmap if
+   *
+   * <ul>
+   *   <li>The Android SDK level is >= R && < T OR the build id is one of T builds without the
+   *       platform fix.
+   *   <li>The video has a color transfer function with an HLG or ST2084 (PQ) transfer function.
+   *   <li>The video has a color standard of BT.2020.
+   *   <li>The video has a rotation angle of +/- 180 degrees.
+   * </ul>
+   */
+  private static Bitmap correctHdr180DegVideoFrameOrientation(
+      MediaMetadataRetriever mediaMetadataRetriever, Bitmap frame) {
+    if (!isHdr180RotationFixRequired()) {
+      return frame;
+    }
+    boolean requiresHdr180RotationFix = false;
+    try {
+      if (isHDR(mediaMetadataRetriever)) {
+        String rotationString =
+            mediaMetadataRetriever.extractMetadata(
+                MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
+        int rotation = Integer.parseInt(rotationString);
+        requiresHdr180RotationFix = Math.abs(rotation) == 180;
+      }
+    } catch (NumberFormatException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Exception trying to extract HDR transfer function or rotation");
+      }
+    }
+
+    if (!requiresHdr180RotationFix) {
+      return frame;
+    }
+
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+      Log.d(TAG, "Applying HDR 180 deg thumbnail correction");
+    }
+    Matrix rotationMatrix = new Matrix();
+    rotationMatrix.postRotate(
+        /* degrees= */ 180, frame.getWidth() / 2.0f, frame.getHeight() / 2.0f);
+    return Bitmap.createBitmap(
+        frame,
+        /* x= */ 0,
+        /* y= */ 0,
+        frame.getWidth(),
+        frame.getHeight(),
+        rotationMatrix,
+        /* filter= */ true);
+  }
+
+  @RequiresApi(VERSION_CODES.R)
+  private static boolean isHDR(MediaMetadataRetriever mediaMetadataRetriever)
+      throws NumberFormatException {
+    String colorTransferString =
+        mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COLOR_TRANSFER);
+    String colorStandardString =
+        mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COLOR_STANDARD);
+    int colorTransfer = Integer.parseInt(colorTransferString);
+    int colorStandard = Integer.parseInt(colorStandardString);
+    // This check needs to match the isHDR check in
+    // frameworks/av/media/libstagefright/FrameDecoder.cpp.
+    return (colorTransfer == MediaFormat.COLOR_TRANSFER_HLG
+            || colorTransfer == MediaFormat.COLOR_TRANSFER_ST2084)
+        && colorStandard == MediaFormat.COLOR_STANDARD_BT2020;
+  }
+
+  /** Returns true if the build requires a fix for the HDR 180 degree rotation bug. */
+  @VisibleForTesting
+  static boolean isHdr180RotationFixRequired() {
+    // Only pixel devices have android T builds without the framework fix.
+    if (Build.MODEL.startsWith("Pixel") && VERSION.SDK_INT == VERSION_CODES.TIRAMISU) {
+      return isTBuildRequiringRotationFix();
+    } else {
+      return VERSION.SDK_INT >= VERSION_CODES.R && VERSION.SDK_INT < VERSION_CODES.TIRAMISU;
+    }
+  }
+
+  /**
+   * Returns true if the build is an Android T build that requires a fix for the HDR 180 degree
+   * rotation bug.
+   */
+  private static boolean isTBuildRequiringRotationFix() {
+    for (String buildId : PIXEL_T_BUILD_ID_PREFIXES_REQUIRING_HDR_180_ROTATION_FIX) {
+      if (Build.ID.startsWith(buildId)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Nullable
