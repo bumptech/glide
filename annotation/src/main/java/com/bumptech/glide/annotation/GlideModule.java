@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Identifies AppGlideModules and LibraryGlideModules for Glide's annotation processor to merge at
  * compile time.
  *
- * <p>Replaces <meta-data /> tags in AndroidManifest.xml.
+ * <p>Replaces {@code <meta-data />} tags in AndroidManifest.xml.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
