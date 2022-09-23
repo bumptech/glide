@@ -5,27 +5,31 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
         gradlePluginPortal()
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:${ANDROID_GRADLE_VERSION}"
+        classpath "com.android.tools.build:gradle:$ANDROID_GRADLE_VERSION"
         if (!hasProperty('DISABLE_ERROR_PRONE')) {
-            classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_PLUGIN_VERSION}"
+            classpath "net.ltgt.gradle:gradle-errorprone-plugin:$ERROR_PRONE_PLUGIN_VERSION"
         }
         classpath 'com.guardsquare:proguard-gradle:7.1.0'
-        classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
-        classpath "androidx.benchmark:benchmark-gradle-plugin:${ANDROID_X_BENCHMARK_VERSION}"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${JETBRAINS_KOTLIN_VERSION}"
+        classpath "se.bjurr.violations:violations-gradle-plugin:$VIOLATIONS_PLUGIN_VERSION"
+        classpath "androidx.benchmark:benchmark-gradle-plugin:$ANDROID_X_BENCHMARK_VERSION"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$JETBRAINS_KOTLIN_VERSION"
         classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$KSP_GRADLE_PLUGIN_VERSION"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.11.0"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:$JETBRAINS_KOTLINX_BINARY_COMPATIBILITY_VALIDATOR_VERSION"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$JETBRAINS_DOKKA_VERSION"
     }
 }
 
+repositories {
+    google()
+    mavenCentral()
+}
+
 apply plugin: 'binary-compatibility-validator'
+apply plugin: 'org.jetbrains.dokka'
 
 apiValidation {
     ignoredProjects += ["ksp", "test", "gallery"]
@@ -41,8 +45,23 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
-subprojects { project ->
+dokkaHtmlMultiModule.configure {
+    moduleName.set("Glide")
+}
+afterEvaluate {
+    tasks.named("dokkaHtmlMultiModule") {
+        pluginsMapConfiguration.set(
+                [
+        "org.jetbrains.dokka.base.DokkaBase": """{
+          "customStyleSheets": ["${projectDir.toString()}/static/logo-styles.css"],
+          "customAssets" : ["${projectDir.toString()}/static/logo-icon.svg", "${projectDir.toString()}/static/glide_circle_logo.png"]
+         }"""
+                ]
+        )
+    }
+}
 
+subprojects { project ->
     repositories {
         google()
         mavenCentral()
@@ -57,6 +76,45 @@ subprojects { project ->
             tasks.withType(JavaCompile) {
                 sourceCompatibility = 1.7
                 targetCompatibility = 1.7
+            }
+        }
+    }
+
+    // Exclude packages not intended for public use.
+    if (![
+          "testutil",
+          "flickr",
+          "giphy",
+          "imgur",
+          "svg",
+          "gallery",
+          "contacturi",
+          "test",
+          "gif_decoder",
+          "gifencoder",
+          "compiler",
+          "benchmark",
+          "instrumentation"
+    ].contains(project.getName())) {
+        afterEvaluate {
+            project.apply plugin: 'org.jetbrains.dokka'
+
+            project.tasks.dokkaHtmlPartial.configure {
+                dokkaSourceSets {
+                    // Kotlin works out of the box
+                     if (!project.plugins.hasPlugin("kotlin-android") && project.plugins.hasPlugin("com.android.library")) {
+                        // Java Android modules
+                        register("main") {
+                            sourceRoots.from(project.android.sourceSets.main.java.srcDirs)
+
+                        }
+                    } else if (project.plugins.hasPlugin("java") && "ksp" != project.getName()) {
+                        // Java only modules (ksp is not useful and uses multiple plugins)
+                        register("main") {
+                            sourceRoots.from(sourceSets.main.java.srcDirs)
+                        }
+                    }
+                }
             }
         }
     }

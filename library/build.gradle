@@ -69,6 +69,19 @@ android {
     }
 }
 
+// Change the name to make it a little more obvious where the main library
+// documentation has gone. Using a capital letter happens to make this first in
+// the list too...
+afterEvaluate {
+    dokkaHtmlPartial.configure {
+        dokkaSourceSets {
+            named("main") {
+                moduleName.set("Glide")
+            }
+        }
+    }
+}
+
 check.dependsOn(':library:pmd:pmd')
 check.dependsOn(':library:test:check')
 
