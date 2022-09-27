@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>onLoadFailed</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Glide::com.bumptech.glide.request/RequestFutureTarget/onLoadFailed/#Drawable/PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.request</a><span class="delimiter">/</span><a href="index.html">RequestFutureTarget</a><span class="delimiter">/</span><a href="on-load-failed.html">onLoadFailed</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>on</span><wbr><span>Load</span><wbr><span><span>Failed</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-load-failed.html"><span class="token function">onLoadFailed</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">errorDrawable<span class="token operator">: </span>Drawable</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">A callback that should never be invoked directly.</p><br><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-load-failed.html"><span class="token function">onLoadFailed</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;e<span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine/-glide-exception/index.html">GlideException</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;target<span class="token operator">: </span><a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a><span class="token operator">&lt;</span><a href="../../../library/com.bumptech.glide.provider/-resource-decoder-registry/-entry/index.html">R</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;isFirstResource<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Called when an exception occurs during a load, immediately before <a href="../../com.bumptech.glide.request.target/-target/on-load-failed.html">onLoadFailed</a>. Will only be called if we currently want to display an image for the given model in the given target. It is recommended to create a single instance per activity/fragment rather than instantiate a new object for each call to <code class="lang-kotlin">
+Glide.with(fragment/activity).load()</code> to avoid object churn. </p><p class="paragraph">It is not safe to reload this or a different model in this callback. If you need to do so use <a href="../../com.bumptech.glide/-request-builder/error.html">error</a> instead. </p><p class="paragraph">Although you can't start an entirely new load, it is safe to change what is displayed in the <a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a> at this point, as long as you return <code class="lang-kotlin">true</code> from the method to prevent <a href="../../com.bumptech.glide.request.target/-target/on-load-failed.html">onLoadFailed</a> from being called. </p><p class="paragraph">For threading guarantees, see the class comment. </p><p class="paragraph">For example: </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">
+public boolean onLoadFailed(Exception e, T model, Target target, boolean isFirstResource) {
+    target.setPlaceholder(R.drawable.a_specific_error_for_my_exception);
+    return true; // Prevent onLoadFailed from being called on the Target.
+}
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h4 class="">Return</h4><p class="paragraph"><code class="lang-kotlin">true</code> to prevent <a href="../../com.bumptech.glide.request.target/-target/on-load-failed.html">onLoadFailed</a> from being called on <code class="lang-kotlin">target</code>, typically because the listener wants to update the <code class="lang-kotlin">target</code> or the object the <code class="lang-kotlin">target</code> wraps itself or <code class="lang-kotlin">false</code> to allow <a href="../../com.bumptech.glide.request.target/-target/on-load-failed.html">onLoadFailed</a> to be called on <code class="lang-kotlin">target</code>.</p><h2 class="">Parameters</h2><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>e</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The maybe <code class="lang-kotlin">null</code> exception containing information about why the request failed.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>model</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The model we were trying to load when the exception occurred.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>target</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The <a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a> we were trying to load the image into.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>is</span><wbr><span>First</span><wbr><span><span>Resource</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph"><code class="lang-kotlin">true</code> if this exception is for the first resource to load.</p></div></div></div></div></div></div></div></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

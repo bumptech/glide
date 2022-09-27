@@ -1,0 +1,260 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>DiskLruCache</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="disklrucache::com.bumptech.glide.disklrucache/DiskLruCache///PointingToDeclaration//-1742098762">
+  <div class="breadcrumbs"><a href="../../index.html">disklrucache</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.disklrucache</a><span class="delimiter">/</span><a href="index.html">DiskLruCache</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Disk</span><wbr><span>Lru</span><wbr><span><span>Cache</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">DiskLruCache</a> : <a href="https://developer.android.com/reference/kotlin/java/io/Closeable.html">Closeable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">A cache that uses a bounded amount of space on a filesystem. Each cache entry has a string key and a fixed number of values. Each key must match the regex [a-z0-9_-]{1,120}. Values are byte sequences, accessible as streams or files. Each value must be between <code class="lang-kotlin">0</code> and <code class="lang-kotlin">Integer.MAX_VALUE</code> bytes in length. </p><p class="paragraph">The cache stores its data in a directory on the filesystem. This directory must be exclusive to the cache; the cache may delete or overwrite files from its directory. It is an error for multiple processes to use the same cache directory at the same time. </p><p class="paragraph">This cache limits the number of bytes that it will store on the filesystem. When the number of stored bytes exceeds the limit, the cache will remove entries in the background until the limit is satisfied. The limit is not strict: the cache may temporarily exceed it while waiting for files to be deleted. The limit does not include filesystem overhead or the cache journal so space-sensitive applications should set a conservative limit. </p><p class="paragraph">Clients call edit to create or update the values of an entry. An entry may have only one editor at one time; if a value is not available to be edited then edit will return null. </p><ul><li>When an entry is being created it is necessary to supply a full set of values; the empty value should be used as a placeholder if necessary. </li><li>When an entry is being edited, it is not necessary to supply data for every value; values default to their previous value. </li></ul> Every edit call must be matched by a call to <a href="-editor/commit.html">commit</a> or <a href="-editor/abort.html">abort</a>. Committing is atomic: a read observes the full set of values as they were before or after the commit, but never a mix of values. <p class="paragraph">Clients call <a href="get.html">get</a> to read a snapshot of an entry. The read will observe the value at the time that <a href="get.html">get</a> was called. Updates and removals after the call do not impact ongoing reads. </p><p class="paragraph">This class is tolerant of some I/O errors. If files are missing from the filesystem, the corresponding entries will be dropped from the cache. If an error occurs while writing a cache value, the edit will fail silently. Callers should handle other problems by catching <code class="lang-kotlin">IOException</code> and responding appropriately.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="-1507646777%2FClasslikes%2F-1742098762" anchor-label="Editor" id="-1507646777%2FClasslikes%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-editor/index.html"><span><span>Editor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1507646777%2FClasslikes%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-editor/index.html">Editor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Edits the values for an entry.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="587658269%2FClasslikes%2F-1742098762" anchor-label="Value" id="587658269%2FClasslikes%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-value/index.html"><span><span>Value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="587658269%2FClasslikes%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-value/index.html">Value</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A snapshot of the values for an entry.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-1763604701%2FFunctions%2F-1742098762" anchor-label="close" id="-1763604701%2FFunctions%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="close.html"><span><span>close</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1763604701%2FFunctions%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Closes this cache.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1297741268%2FFunctions%2F-1742098762" anchor-label="delete" id="1297741268%2FFunctions%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="delete.html"><span><span>delete</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1297741268%2FFunctions%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="delete.html"><span class="token function">delete</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Closes the cache and deletes all of its stored values.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="289486544%2FFunctions%2F-1742098762" anchor-label="edit" id="289486544%2FFunctions%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="edit.html"><span><span>edit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="289486544%2FFunctions%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="edit.html"><span class="token function">edit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-editor/index.html">DiskLruCache.Editor</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns an editor for the entry named <code class="lang-kotlin">key</code>, or null if another edit is in progress.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1129951127%2FFunctions%2F-1742098762" anchor-label="flush" id="1129951127%2FFunctions%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="flush.html"><span><span>flush</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1129951127%2FFunctions%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="flush.html"><span class="token function">flush</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Force buffered operations to the filesystem.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2045740288%2FFunctions%2F-1742098762" anchor-label="get" id="-2045740288%2FFunctions%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="get.html"><span><span>get</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2045740288%2FFunctions%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get.html"><span class="token function">get</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-value/index.html">DiskLruCache.Value</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns a snapshot of the entry named <code class="lang-kotlin">key</code>, or null if it doesn't exist is not currently readable.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1139303895%2FFunctions%2F-1742098762" anchor-label="isClosed" id="-1139303895%2FFunctions%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="is-closed.html"><span>is</span><wbr><span><span>Closed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1139303895%2FFunctions%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="is-closed.html"><span class="token function">isClosed</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns true if this cache has been closed.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="637843326%2FFunctions%2F-1742098762" anchor-label="open" id="637843326%2FFunctions%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="open.html"><span><span>open</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="637843326%2FFunctions%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="open.html"><span class="token function">open</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;directory<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;appVersion<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;valueCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;maxSize<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">DiskLruCache</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Opens the cache in <code class="lang-kotlin">directory</code>, creating a cache if none exists there.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1442073878%2FFunctions%2F-1742098762" anchor-label="remove" id="1442073878%2FFunctions%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="remove.html"><span><span>remove</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1442073878%2FFunctions%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="remove.html"><span class="token function">remove</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">key<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Drops the entry for <code class="lang-kotlin">key</code> if it exists and can be removed.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-402212674%2FFunctions%2F-1742098762" anchor-label="size" id="-402212674%2FFunctions%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="size.html"><span><span>size</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-402212674%2FFunctions%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="size.html"><span class="token function">size</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns the number of bytes currently being used to store the values in this cache.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="764536142%2FProperties%2F-1742098762" anchor-label="directory" id="764536142%2FProperties%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="directory.html"><span><span>directory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="764536142%2FProperties%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><a data-name="764536142%2FProperties%2F-1742098762" anchor-label="directory" id="764536142%2FProperties%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="directory.html">directory</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1835956554%2FProperties%2F-1742098762" anchor-label="maxSize" id="-1835956554%2FProperties%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":third_party:disklrucache:dokkaHtmlPartial/main" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="max-size.html"><span>max</span><wbr><span><span>Size</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1835956554%2FProperties%2F-1742098762"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":third_party:disklrucache:dokkaHtmlPartial/main"><a data-name="-1835956554%2FProperties%2F-1742098762" anchor-label="maxSize" id="-1835956554%2FProperties%2F-1742098762" data-filterable-set=":third_party:disklrucache:dokkaHtmlPartial/main"></a><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">var </span><a href="max-size.html">maxSize</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

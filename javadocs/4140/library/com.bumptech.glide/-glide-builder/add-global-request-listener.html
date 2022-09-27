@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>addGlobalRequestListener</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Glide::com.bumptech.glide/GlideBuilder/addGlobalRequestListener/#com.bumptech.glide.request.RequestListener<java.lang.Object>/PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide</a><span class="delimiter">/</span><a href="index.html">GlideBuilder</a><span class="delimiter">/</span><a href="add-global-request-listener.html">addGlobalRequestListener</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>add</span><wbr><span>Global</span><wbr><span>Request</span><wbr><span><span>Listener</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="add-global-request-listener.html"><span class="token function">addGlobalRequestListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">listener<span class="token operator">: </span><a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">GlideBuilder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Adds a global <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> that will be added to every request started with Glide. </p><p class="paragraph">Multiple <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a>s can be added here, in <a href="../-request-manager/index.html">RequestManager</a> scopes or to individual <a href="../-request-builder/index.html">RequestBuilder</a>s. <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a>s are called in the order they're added. Even if an earlier <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> returns <code class="lang-kotlin">true</code> from <a href="../../com.bumptech.glide.request/-request-listener/on-load-failed.html">onLoadFailed</a> or <a href="../../com.bumptech.glide.request/-request-listener/on-resource-ready.html">onResourceReady</a>, it will not prevent subsequent <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a>s from being called. </p><p class="paragraph">Because Glide requests can be started for any number of individual resource types, any listener added here has to accept any generic resource type in <a href="../../com.bumptech.glide.request/-request-listener/on-resource-ready.html">onResourceReady</a>. If you must base the behavior of the listener on the resource type, you will need to use <code class="lang-kotlin">instanceof</code> to do so. It's not safe to cast resource types without first checking with <code class="lang-kotlin">instanceof</code>.</p></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

@@ -1,0 +1,487 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>RequestManager</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Glide::com.bumptech.glide/RequestManager///PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide</a><span class="delimiter">/</span><a href="index.html">RequestManager</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Request</span><wbr><span><span>Manager</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">RequestManager</a> : <a href="../../com.bumptech.glide.manager/-lifecycle-listener/index.html">LifecycleListener</a>, <a href="../../../library/com.bumptech.glide/-model-types/index.html">ModelTypes</a><span class="token operator">&lt;</span><a href="../../../library/com.bumptech.glide/-model-types/index.html">T</a><span class="token operator">&gt; </span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">A class for managing and starting requests for Glide. Can use activity, fragment and connectivity lifecycle events to intelligently stop, start, and restart requests. Retrieve either by instantiating a new object, or to take advantage built in Activity and Fragment lifecycle handling, use the static Glide.load methods with your Fragment or Activity.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="See also">See also</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">See also</h2>
+      <div data-togglable="See also">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="See also"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div data-togglable="See also"><div class="table" data-togglable="See also"><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><a href="../-glide/with.html"><span>com.</span><wbr><span>bumptech.</span><wbr><span>glide.</span><wbr><span>Glide</span></a></div></span></div><div><div class="title"><div data-togglable="See also"></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="-564277176%2FConstructors%2F-954213597" anchor-label="RequestManager" id="-564277176%2FConstructors%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-request-manager.html"><span>Request</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-564277176%2FConstructors%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="-request-manager.html"><span class="token function">RequestManager</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;glide<span class="token operator">: </span><a href="../-glide/index.html">Glide</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;lifecycle<span class="token operator">: </span><a href="../../com.bumptech.glide.manager/-lifecycle/index.html">Lifecycle</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;treeNode<span class="token operator">: </span><a href="../../com.bumptech.glide.manager/-request-manager-tree-node/index.html">RequestManagerTreeNode</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;context<span class="token operator">: </span>Context</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="707971191%2FFunctions%2F-954213597" anchor-label="addDefaultRequestListener" id="707971191%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="add-default-request-listener.html"><span>add</span><wbr><span>Default</span><wbr><span>Request</span><wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="707971191%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="add-default-request-listener.html"><span class="token function">addDefaultRequestListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestListener<span class="token operator">: </span><a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestManager</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Adds a default <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> that will be added to every request started with this <a href="index.html">RequestManager</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-881624211%2FFunctions%2F-954213597" anchor-label="applyDefaultRequestOptions" id="-881624211%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="apply-default-request-options.html"><span>apply</span><wbr><span>Default</span><wbr><span>Request</span><wbr><span><span>Options</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-881624211%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="apply-default-request-options.html"><span class="token function">applyDefaultRequestOptions</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestOptions<span class="token operator">: </span><a href="../../com.bumptech.glide.request/-request-options/index.html">RequestOptions</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestManager</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Updates the default <a href="../../com.bumptech.glide.request/-request-options/index.html">RequestOptions</a> for all loads started with this request manager with the given <a href="../../com.bumptech.glide.request/-request-options/index.html">RequestOptions</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="688827627%2FFunctions%2F-954213597" anchor-label="as" id="688827627%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="as.html"><span><span>as</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="688827627%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="as.html">ResourceType</a><span class="token operator">&gt; </span><a href="as.html"><span class="token function">as</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">resourceClass<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><a href="as.html">ResourceType</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="as.html">ResourceType</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Attempts to load the resource using any registered s that can decode the given resource class or any subclass of the given resource class.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1388915862%2FFunctions%2F-954213597" anchor-label="asBitmap" id="-1388915862%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="as-bitmap.html"><span>as</span><wbr><span><span>Bitmap</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1388915862%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="as-bitmap.html"><span class="token function">asBitmap</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Bitmap<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Attempts to always load the resource as a android.graphics.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1317380059%2FFunctions%2F-954213597" anchor-label="asDrawable" id="1317380059%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="as-drawable.html"><span>as</span><wbr><span><span>Drawable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1317380059%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="as-drawable.html"><span class="token function">asDrawable</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Drawable<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Attempts to always load the resource using any registered s that can decode any subclass of Drawable.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1852203331%2FFunctions%2F-954213597" anchor-label="asFile" id="-1852203331%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="as-file.html"><span>as</span><wbr><span><span>File</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1852203331%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="as-file.html"><span class="token function">asFile</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Attempts to always load a <a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a> containing the resource, either using a file path obtained from the media store (for local images/videos), or using Glide's disk cache (for remote images/videos).</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1125448701%2FFunctions%2F-954213597" anchor-label="asGif" id="1125448701%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="as-gif.html"><span>as</span><wbr><span><span>Gif</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1125448701%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="as-gif.html"><span class="token function">asGif</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.load.resource.gif/-gif-drawable/index.html">GifDrawable</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Attempts to always load the resource as a .</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="899038853%2FFunctions%2F-954213597" anchor-label="clear" id="899038853%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="clear.html"><span><span>clear</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="899038853%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="clear.html"><span class="token function">clear</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">view<span class="token operator">: </span>View</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Cancel any pending loads Glide may have for the view and free any resources that may have been loaded for the view.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="clear.html"><span class="token function">clear</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">target<span class="token operator">: </span><a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Cancel any pending loads Glide may have for the target and free any resources (such as s) that may have been loaded for the target so they may be reused.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="272148944%2FFunctions%2F-954213597" anchor-label="download" id="272148944%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="download.html"><span><span>download</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="272148944%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="download.html"><span class="token function">download</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A helper method equivalent to calling <a href="download-only.html">downloadOnly</a> ()} and then <a href="../-request-builder/load.html">load</a> with the given model.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-856362121%2FFunctions%2F-954213597" anchor-label="downloadOnly" id="-856362121%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="download-only.html"><span>download</span><wbr><span><span>Only</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-856362121%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="download-only.html"><span class="token function">downloadOnly</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Attempts always load the resource into the cache and return the <a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a> containing the cached source data.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1486141523%2FFunctions%2F-954213597" anchor-label="isPaused" id="1486141523%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="is-paused.html"><span>is</span><wbr><span><span>Paused</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1486141523%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="is-paused.html"><span class="token function">isPaused</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns true if loads for this <a href="index.html">RequestManager</a> are currently paused.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1341196266%2FFunctions%2F-954213597" anchor-label="load" id="-1341196266%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="load.html"><span><span>load</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1341196266%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bitmap<span class="token operator">: </span>Bitmap</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Drawable<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">drawable<span class="token operator">: </span>Drawable</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Drawable<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uri<span class="token operator">: </span>Uri</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Drawable<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-byte/index.html">Byte</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Drawable<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Drawable<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">resourceId<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Integer.html">Integer</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Drawable<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Drawable<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="symbol monospace strikethrough"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/java/lang/Deprecated.html"><span class="token annotation">Deprecated</span></a></div></div><strike><span class="token keyword">open </span></strike><strike><span class="token keyword"></span></strike><strike><span class="token keyword">fun </span></strike><a href="load.html"><strike><span class="token function">load</span></strike></a><strike><span class="token punctuation">(</span></strike><span class="parameters "><span class="parameter ">url<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/net/URL.html">URL</a></span></span><strike><span class="token punctuation">)</span></strike><strike><span class="token operator">: </span></strike><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Drawable<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Equivalent to calling <a href="as-drawable.html">asDrawable</a> and then <a href="../-request-builder/load.html">load</a>.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-request-builder/index.html">RequestBuilder</a><span class="token operator">&lt;</span>Drawable<span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A helper method equivalent to calling <a href="as-drawable.html">asDrawable</a> and then <a href="../-request-builder/load.html">load</a> with the given model.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-472842082%2FFunctions%2F-954213597" anchor-label="onConfigurationChanged" id="-472842082%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-configuration-changed.html"><span>on</span><wbr><span>Configuration</span><wbr><span><span>Changed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-472842082%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-configuration-changed.html"><span class="token function">onConfigurationChanged</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">newConfig<span class="token operator">: </span>Configuration</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-429055948%2FFunctions%2F-954213597" anchor-label="onDestroy" id="-429055948%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-destroy.html"><span>on</span><wbr><span><span>Destroy</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-429055948%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-destroy.html"><span class="token function">onDestroy</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Lifecycle callback that cancels all in progress requests and clears and recycles resources for all completed requests.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2113456857%2FFunctions%2F-954213597" anchor-label="onLowMemory" id="2113456857%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-low-memory.html"><span>on</span><wbr><span>Low</span><wbr><span><span>Memory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2113456857%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-low-memory.html"><span class="token function">onLowMemory</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1782339852%2FFunctions%2F-954213597" anchor-label="onStart" id="1782339852%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-start.html"><span>on</span><wbr><span><span>Start</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1782339852%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-start.html"><span class="token function">onStart</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Lifecycle callback that registers for connectivity events (if the android.permission.ACCESS_NETWORK_STATE permission is present) and restarts failed or paused requests.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-448206742%2FFunctions%2F-954213597" anchor-label="onStop" id="-448206742%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-stop.html"><span>on</span><wbr><span><span>Stop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-448206742%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-stop.html"><span class="token function">onStop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Lifecycle callback that unregisters for connectivity events (if the android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="234371018%2FFunctions%2F-954213597" anchor-label="onTrimMemory" id="234371018%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-trim-memory.html"><span>on</span><wbr><span>Trim</span><wbr><span><span>Memory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="234371018%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-trim-memory.html"><span class="token function">onTrimMemory</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">level<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-952268676%2FFunctions%2F-954213597" anchor-label="pauseAllRequests" id="-952268676%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="pause-all-requests.html"><span>pause</span><wbr><span>All</span><wbr><span><span>Requests</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-952268676%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="pause-all-requests.html"><span class="token function">pauseAllRequests</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Cancels any in progress loads and clears resources of completed loads.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="613644812%2FFunctions%2F-954213597" anchor-label="pauseAllRequestsRecursive" id="613644812%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="pause-all-requests-recursive.html"><span>pause</span><wbr><span>All</span><wbr><span>Requests</span><wbr><span><span>Recursive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="613644812%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="pause-all-requests-recursive.html"><span class="token function">pauseAllRequestsRecursive</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Performs <a href="pause-all-requests.html">pauseAllRequests</a> recursively for all managers that are contextually descendant to this manager based on the Activity/Fragment hierarchy.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="632064341%2FFunctions%2F-954213597" anchor-label="pauseRequests" id="632064341%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="pause-requests.html"><span>pause</span><wbr><span><span>Requests</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="632064341%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="pause-requests.html"><span class="token function">pauseRequests</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Cancels any in progress loads, but does not clear resources of completed loads.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1522180781%2FFunctions%2F-954213597" anchor-label="pauseRequestsRecursive" id="-1522180781%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="pause-requests-recursive.html"><span>pause</span><wbr><span>Requests</span><wbr><span><span>Recursive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1522180781%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="pause-requests-recursive.html"><span class="token function">pauseRequestsRecursive</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Performs <a href="pause-requests.html">pauseRequests</a> recursively for all managers that are contextually descendant to this manager based on the Activity/Fragment hierarchy: <ul><li>When pausing on an Activity all attached fragments will also get paused. </li><li>When pausing on an attached Fragment all descendant fragments will also get paused. </li><li>When pausing on a detached Fragment or the application context only the current RequestManager is paused. </li></ul>Note, on pre-Jelly Bean MR1 calling pause on a Fragment will not cause child fragments to pause, in this case either call pause on the Activity or use a support Fragment.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1981829158%2FFunctions%2F-954213597" anchor-label="resumeRequests" id="-1981829158%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="resume-requests.html"><span>resume</span><wbr><span><span>Requests</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1981829158%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="resume-requests.html"><span class="token function">resumeRequests</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Restarts any loads that have not yet completed.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="459586670%2FFunctions%2F-954213597" anchor-label="resumeRequestsRecursive" id="459586670%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="resume-requests-recursive.html"><span>resume</span><wbr><span>Requests</span><wbr><span><span>Recursive</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="459586670%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="resume-requests-recursive.html"><span class="token function">resumeRequestsRecursive</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Performs <a href="resume-requests.html">resumeRequests</a> recursively for all managers that are contextually descendant to this manager based on the Activity/Fragment hierarchy.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1440879737%2FFunctions%2F-954213597" anchor-label="setDefaultRequestOptions" id="1440879737%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-default-request-options.html"><span>set</span><wbr><span>Default</span><wbr><span>Request</span><wbr><span><span>Options</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1440879737%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-default-request-options.html"><span class="token function">setDefaultRequestOptions</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestOptions<span class="token operator">: </span><a href="../../com.bumptech.glide.request/-request-options/index.html">RequestOptions</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestManager</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Replaces the default <a href="../../com.bumptech.glide.request/-request-options/index.html">RequestOptions</a> for all loads started with this request manager with the given <a href="../../com.bumptech.glide.request/-request-options/index.html">RequestOptions</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1571537089%2FFunctions%2F-954213597" anchor-label="setPauseAllRequestsOnTrimMemoryModerate" id="1571537089%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-pause-all-requests-on-trim-memory-moderate.html"><span>set</span><wbr><span>Pause</span><wbr><span>All</span><wbr><span>Requests</span><wbr><span>On</span><wbr><span>Trim</span><wbr><span>Memory</span><wbr><span><span>Moderate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1571537089%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-pause-all-requests-on-trim-memory-moderate.html"><span class="token function">setPauseAllRequestsOnTrimMemoryModerate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">pauseAllOnTrim<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">If <code class="lang-kotlin">true</code> then clear all in-progress and completed requests when the platform sends <code class="lang-kotlin">onTrimMemory</code> with level = <code class="lang-kotlin">TRIM_MEMORY_MODERATE</code>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="284130143%2FFunctions%2F-954213597" anchor-label="toString" id="284130143%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="to-string.html"><span>to</span><wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="284130143%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

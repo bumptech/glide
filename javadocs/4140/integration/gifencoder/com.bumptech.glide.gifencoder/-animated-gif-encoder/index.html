@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>AnimatedGifEncoder</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="gifencoder::com.bumptech.glide.gifencoder/AnimatedGifEncoder///PointingToDeclaration//1425224440">
+  <div class="breadcrumbs"><a href="../../index.html">gifencoder</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.gifencoder</a><span class="delimiter">/</span><a href="index.html">AnimatedGifEncoder</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Animated</span><wbr><span>Gif</span><wbr><span><span>Encoder</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">AnimatedGifEncoder</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Class AnimatedGifEncoder - Encodes a GIF file consisting of one or more frames. </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea"> Example:
+    AnimatedGifEncoder e = new AnimatedGifEncoder();
+    e.start(outputFileName);
+    e.setDelay(1000);   // 1 frame per sec
+    e.addFrame(image1);
+    e.addFrame(image2);
+    e.addFrame(image3, 100, 100);    // set position of the frame
+    e.finish();
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div> No copyright asserted on the source code of this class. May be used for any purpose, however, refer to the Unisys LZW patent for restrictions on use of the associated LZWEncoder class. Please forward any corrections to kweiner@fmsware.com.<div class="block"></div><h4 class="">Author</h4><p class="paragraph">Kevin Weiner, FM Software</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="1614867818%2FFunctions%2F1425224440" anchor-label="addFrame" id="1614867818%2FFunctions%2F1425224440" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":integration:gifencoder:dokkaHtmlPartial/main" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="add-frame.html"><span>add</span><wbr><span><span>Frame</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1614867818%2FFunctions%2F1425224440"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="add-frame.html"><span class="token function">addFrame</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">im<span class="token operator">: </span>Bitmap</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Adds next GIF frame.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="add-frame.html"><span class="token function">addFrame</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;im<span class="token operator">: </span>Bitmap<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;x<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;y<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Adds next GIF frame to the specified position.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="2038982799%2FFunctions%2F1425224440" anchor-label="finish" id="2038982799%2FFunctions%2F1425224440" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":integration:gifencoder:dokkaHtmlPartial/main" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="finish.html"><span><span>finish</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2038982799%2FFunctions%2F1425224440"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="finish.html"><span class="token function">finish</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Flushes any pending data and closes output file.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1159205902%2FFunctions%2F1425224440" anchor-label="setDelay" id="-1159205902%2FFunctions%2F1425224440" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":integration:gifencoder:dokkaHtmlPartial/main" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-delay.html"><span>set</span><wbr><span><span>Delay</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1159205902%2FFunctions%2F1425224440"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-delay.html"><span class="token function">setDelay</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">ms<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Sets the delay time between each frame, or changes it for subsequent frames (applies to last frame added).</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1206533042%2FFunctions%2F1425224440" anchor-label="setDispose" id="-1206533042%2FFunctions%2F1425224440" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":integration:gifencoder:dokkaHtmlPartial/main" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-dispose.html"><span>set</span><wbr><span><span>Dispose</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1206533042%2FFunctions%2F1425224440"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-dispose.html"><span class="token function">setDispose</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">code<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Sets the GIF frame disposal code for the last added frame and any subsequent frames.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1310405455%2FFunctions%2F1425224440" anchor-label="setFrameRate" id="1310405455%2FFunctions%2F1425224440" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":integration:gifencoder:dokkaHtmlPartial/main" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-frame-rate.html"><span>set</span><wbr><span>Frame</span><wbr><span><span>Rate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1310405455%2FFunctions%2F1425224440"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-frame-rate.html"><span class="token function">setFrameRate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fps<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Sets frame rate in frames per second.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1843507410%2FFunctions%2F1425224440" anchor-label="setQuality" id="-1843507410%2FFunctions%2F1425224440" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":integration:gifencoder:dokkaHtmlPartial/main" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-quality.html"><span>set</span><wbr><span><span>Quality</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1843507410%2FFunctions%2F1425224440"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-quality.html"><span class="token function">setQuality</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">quality<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Sets quality of color quantization (conversion of images to the maximum 256 colors allowed by the GIF specification).</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1705766264%2FFunctions%2F1425224440" anchor-label="setRepeat" id="1705766264%2FFunctions%2F1425224440" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":integration:gifencoder:dokkaHtmlPartial/main" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-repeat.html"><span>set</span><wbr><span><span>Repeat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1705766264%2FFunctions%2F1425224440"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-repeat.html"><span class="token function">setRepeat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">iter<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Sets the number of times the set of GIF frames should be played.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1007568974%2FFunctions%2F1425224440" anchor-label="setSize" id="-1007568974%2FFunctions%2F1425224440" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":integration:gifencoder:dokkaHtmlPartial/main" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-size.html"><span>set</span><wbr><span><span>Size</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1007568974%2FFunctions%2F1425224440"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-size.html"><span class="token function">setSize</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">w<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">h<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Sets the fixed GIF frame size for all the frames.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1286999169%2FFunctions%2F1425224440" anchor-label="setTransparent" id="1286999169%2FFunctions%2F1425224440" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":integration:gifencoder:dokkaHtmlPartial/main" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="set-transparent.html"><span>set</span><wbr><span><span>Transparent</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1286999169%2FFunctions%2F1425224440"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-transparent.html"><span class="token function">setTransparent</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">color<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Sets the transparent color for the last added frame and any subsequent frames.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1441756740%2FFunctions%2F1425224440" anchor-label="start" id="1441756740%2FFunctions%2F1425224440" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":integration:gifencoder:dokkaHtmlPartial/main" data-filterable-set=":integration:gifencoder:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="start.html"><span><span>start</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1441756740%2FFunctions%2F1425224440"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:gifencoder:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="start.html"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">os<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/OutputStream.html">OutputStream</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Initiates GIF file creation on the given stream.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="start.html"><span class="token function">start</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Initiates writing of a GIF file with the specified name.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

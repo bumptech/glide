@@ -1,0 +1,256 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>BaseTarget</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Glide::com.bumptech.glide.request.target/BaseTarget///PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.request.target</a><span class="delimiter">/</span><a href="index.html">BaseTarget</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Base</span><wbr><span><span>Target</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace strikethrough"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/java/lang/Deprecated.html"><span class="token annotation">Deprecated</span></a></div></div><strike><span class="token keyword">abstract </span></strike><strike><span class="token keyword">class </span></strike><a href="index.html"><strike>BaseTarget</strike></a><strike><span class="token operator">&lt;</span></strike><span class="token keyword"></span><a href="index.html">Z</a><strike><span class="token operator">&gt;</span></strike><strike> : </strike><a href="../-target/index.html"><strike>Target</strike></a><strike><span class="token operator">&lt;</span></strike><a href="../-target/index.html"><strike>R</strike></a><strike><span class="token operator">&gt; </span></strike><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">A base <a href="../-target/index.html">Target</a> for loading <a href="../../com.bumptech.glide.load.engine/-resource/index.html">com.bumptech.glide.load.engine.Resource</a>s that provides basic or empty implementations for most methods. </p><p class="paragraph">For maximum efficiency, clear this target when you have finished using or displaying the <a href="../../com.bumptech.glide.load.engine/-resource/index.html">com.bumptech.glide.load.engine.Resource</a> loaded into it using <a href="../../com.bumptech.glide/-request-manager/clear.html">clear</a>. </p><p class="paragraph">For loading <a href="../../com.bumptech.glide.load.engine/-resource/index.html">com.bumptech.glide.load.engine.Resource</a>s into android.view.Views, <a href="../-view-target/index.html">com.bumptech.glide.request.target.ViewTarget</a> or  are preferable.</p><h4 class="">Deprecated</h4><p class="paragraph">Use <a href="../-custom-view-target/index.html">CustomViewTarget</a> if loading the content into a view, the download API if in the background (http://bumptech.github.io/glide/doc/getting-started.html#background-threads), or a a fully implemented <a href="../-target/index.html">Target</a> for any specialized use-cases. Using BaseView is unsafe if the user does not implement <a href="on-load-cleared.html">onLoadCleared</a>, resulting in recycled bitmaps being referenced from the UI and hard to root-cause crashes.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Parameters">Parameters</button><button class="section-tab" data-togglable="Inheritors">Inheritors</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Parameters</h2>
+      <div data-togglable="Parameters">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>&lt;Z&gt;</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The type of resource that will be received by this target.</p></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="1717882616%2FFunctions%2F-954213597" anchor-label="getSize" id="1717882616%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-target/get-size.html"><span>get</span><wbr><span><span>Size</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1717882616%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-target/get-size.html"><span class="token function">getSize</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cb<span class="token operator">: </span><a href="../-size-ready-callback/index.html">SizeReadyCallback</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A method to retrieve the size of this target.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1783732370%2FFunctions%2F-954213597" anchor-label="onDestroy" id="-1783732370%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-destroy.html"><span>on</span><wbr><span><span>Destroy</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1783732370%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-destroy.html"><span class="token function">onDestroy</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Callback for when onDestroy} or onDestroy is called.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1074857980%2FFunctions%2F-954213597" anchor-label="onLoadCleared" id="-1074857980%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-load-cleared.html"><span>on</span><wbr><span>Load</span><wbr><span><span>Cleared</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1074857980%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-load-cleared.html"><span class="token function">onLoadCleared</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">placeholder<span class="token operator">: </span>Drawable</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A <strong>mandatory</strong> lifecycle callback that is called when a load is cancelled and its resources are freed.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-997865071%2FFunctions%2F-954213597" anchor-label="onLoadFailed" id="-997865071%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-load-failed.html"><span>on</span><wbr><span>Load</span><wbr><span><span>Failed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-997865071%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-load-failed.html"><span class="token function">onLoadFailed</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">errorDrawable<span class="token operator">: </span>Drawable</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A <strong>mandatory</strong> lifecycle callback that is called when a load fails.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="724486607%2FFunctions%2F-954213597" anchor-label="onLoadStarted" id="724486607%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-load-started.html"><span>on</span><wbr><span>Load</span><wbr><span><span>Started</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="724486607%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-load-started.html"><span class="token function">onLoadStarted</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">placeholder<span class="token operator">: </span>Drawable</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">A lifecycle callback that is called when a load is started.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="805278770%2FFunctions%2F-954213597" anchor-label="onResourceReady" id="805278770%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-target/on-resource-ready.html"><span>on</span><wbr><span>Resource</span><wbr><span><span>Ready</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="805278770%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-target/on-resource-ready.html"><span class="token function">onResourceReady</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">resource<span class="token operator">: </span><a href="../../../library/com.bumptech.glide.provider/-resource-decoder-registry/-entry/index.html">R</a><span class="token punctuation">, </span></span><span class="parameter ">transition<span class="token operator">: </span><a href="../../com.bumptech.glide.request.transition/-transition/index.html">Transition</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">The method that will be called when the resource load has finished.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="28976838%2FFunctions%2F-954213597" anchor-label="onStart" id="28976838%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-start.html"><span>on</span><wbr><span><span>Start</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="28976838%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-start.html"><span class="token function">onStart</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Callback for when onStart} or onStart is called.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1336050832%2FFunctions%2F-954213597" anchor-label="onStop" id="-1336050832%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-stop.html"><span>on</span><wbr><span><span>Stop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1336050832%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-stop.html"><span class="token function">onStop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Callback for when onStop} or onStop} is called.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1063718076%2FFunctions%2F-954213597" anchor-label="removeCallback" id="-1063718076%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-target/remove-callback.html"><span>remove</span><wbr><span><span>Callback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1063718076%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-target/remove-callback.html"><span class="token function">removeCallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">cb<span class="token operator">: </span><a href="../-size-ready-callback/index.html">SizeReadyCallback</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Removes the given callback from the pending set if it's still retained.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="406653818%2FProperties%2F-954213597" anchor-label="request" id="406653818%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="request.html"><span><span>request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="406653818%2FProperties%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><a data-name="406653818%2FProperties%2F-954213597" anchor-label="request" id="406653818%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">var </span><a href="request.html">request</a><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-request/index.html">Request</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1487634549%2FProperties%2F-954213597" anchor-label="SIZE_ORIGINAL" id="-1487634549%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-target/-s-i-z-e_-o-r-i-g-i-n-a-l.html"><span><span>SIZE_ORIGINAL</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1487634549%2FProperties%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><a data-name="-1487634549%2FProperties%2F-954213597" anchor-label="SIZE_ORIGINAL" id="-1487634549%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="../-target/-s-i-z-e_-o-r-i-g-i-n-a-l.html">SIZE_ORIGINAL</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1487634549%2FProperties%2F-954213597" anchor-label="SIZE_ORIGINAL" id="-1487634549%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>Indicates that we want the resource in its original unmodified width and/or height.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Inheritors</h2>
+      <div class="table" data-togglable="Inheritors"><a data-name="1955090349%2FInheritors%2F-954213597" anchor-label="SimpleTarget" id="1955090349%2FInheritors%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-simple-target/index.html">SimpleTarget</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1955090349%2FInheritors%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div></div>
+          </div>
+        </div>
+<a data-name="-1753981926%2FInheritors%2F-954213597" anchor-label="ViewTarget" id="-1753981926%2FInheritors%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-view-target/index.html">ViewTarget</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1753981926%2FInheritors%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

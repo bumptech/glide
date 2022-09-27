@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>RequestListener</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Glide::com.bumptech.glide.request/RequestListener///PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.request</a><span class="delimiter">/</span><a href="index.html">RequestListener</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Request</span><wbr><span><span>Listener</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RequestListener</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">R</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">A class for monitoring the status of a request while images load. </p><p class="paragraph">All methods in this interface will be called from a background thread if the <code class="lang-kotlin">
+RequestListener</code> is added to a request that is started with <a href="../../com.bumptech.glide/-request-builder/submit.html">submit</a>, <a href="../../com.bumptech.glide/-request-builder/submit.html">submit</a>, or <a href="../../com.bumptech.glide/-request-builder/into.html">into</a>. Those methods no longer post results back to the main thread to avoid the unnecessary thread interactions and corresponding latency. As a side affect though, listeners added to those requests are no longer called on the main thread. <code class="lang-kotlin">RequestListeners</code> added to requests started with <a href="../../com.bumptech.glide/-request-builder/into.html">into</a> or <a href="../../com.bumptech.glide/-request-builder/into.html">into</a> will continue to be called back on the main thread.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Parameters">Parameters</button><button class="section-tab" data-togglable="Inheritors">Inheritors</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Parameters</h2>
+      <div data-togglable="Parameters">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span><span>&lt;R&gt;</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The type of resource being loaded.</p></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-1150245490%2FFunctions%2F-954213597" anchor-label="onLoadFailed" id="-1150245490%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-load-failed.html"><span>on</span><wbr><span>Load</span><wbr><span><span>Failed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1150245490%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-load-failed.html"><span class="token function">onLoadFailed</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;e<span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine/-glide-exception/index.html">GlideException</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;target<span class="token operator">: </span><a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a><span class="token operator">&lt;</span><a href="../../../library/com.bumptech.glide.provider/-resource-decoder-registry/-entry/index.html">R</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;isFirstResource<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Called when an exception occurs during a load, immediately before <a href="../../com.bumptech.glide.request.target/-target/on-load-failed.html">onLoadFailed</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-552311566%2FFunctions%2F-954213597" anchor-label="onResourceReady" id="-552311566%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="on-resource-ready.html"><span>on</span><wbr><span>Resource</span><wbr><span><span>Ready</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-552311566%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="on-resource-ready.html"><span class="token function">onResourceReady</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;resource<span class="token operator">: </span><a href="../../../library/com.bumptech.glide.provider/-resource-decoder-registry/-entry/index.html">R</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;target<span class="token operator">: </span><a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a><span class="token operator">&lt;</span><a href="../../../library/com.bumptech.glide.provider/-resource-decoder-registry/-entry/index.html">R</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;dataSource<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-data-source/index.html">DataSource</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;isFirstResource<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Called when a load completes successfully, immediately before <a href="../../com.bumptech.glide.request.target/-target/on-resource-ready.html">onResourceReady</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Inheritors</h2>
+      <div class="table" data-togglable="Inheritors"><a data-name="-1777424140%2FInheritors%2F-954213597" anchor-label="ExperimentalRequestListener" id="-1777424140%2FInheritors%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-experimental-request-listener/index.html">ExperimentalRequestListener</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1777424140%2FInheritors%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div></div>
+          </div>
+        </div>
+<a data-name="1148490988%2FInheritors%2F-954213597" anchor-label="RequestFutureTarget" id="1148490988%2FInheritors%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-request-future-target/index.html">RequestFutureTarget</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1148490988%2FInheritors%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

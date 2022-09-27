@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>QMediaStoreUriLoader</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Glide::com.bumptech.glide.load.model.stream/QMediaStoreUriLoader///PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.load.model.stream</a><span class="delimiter">/</span><a href="index.html">QMediaStoreUriLoader</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>QMedia</span><wbr><span>Store</span><wbr><span>Uri</span><wbr><span><span>Loader</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">QMediaStoreUriLoader</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">DataT</a><span class="token operator">&gt;</span> : <a href="../../com.bumptech.glide.load.model/-model-loader/index.html">ModelLoader</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.load.model/-model-loader/index.html">Model</a><span class="token punctuation">, </span><a href="../../com.bumptech.glide.load.model/-model-loader/index.html">Data</a><span class="token operator">&gt; </span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Best effort attempt to work around various Q storage states and bugs. </p><p class="paragraph">In particular, HEIC images on Q cannot be decoded if they've gone through Android's exif redaction, due to a bug in the implementation that corrupts the file. To avoid the issue, we need to get at the un-redacted File. There are two ways we can do so: </p><ul><li>MediaStore.setRequireOriginal </li><li>Querying for and opening the file via the underlying file path, rather than via <code class="lang-kotlin">
+      ContentResolver</code></li></ul><p class="paragraph">MediaStore.setRequireOriginal will only work for applications that target Q and request and currently have ACCESS_MEDIA_LOCATION. It's the simplest change to make, but it covers the fewest applications. </p><p class="paragraph">Querying for the file path and opening the file directly works for applications that do not target Q and for applications that do target Q but that opt in to legacy storage mode. Other options are theoretically available for applications that do not target Q, but due to other bugs, the only consistent way to get unredacted files is via the file system. </p><p class="paragraph">This class does not fix applications that target Q, do not opt in to legacy storage and that don't have ACCESS_MEDIA_LOCATION. </p><p class="paragraph">Avoid using this class directly, it may be removed in any future version of Glide.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Parameters">Parameters</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Parameters</h2>
+      <div data-togglable="Parameters">
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>&lt;Data</span><wbr><span><span>T&gt;</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The type of data this loader will load (<a href="https://developer.android.com/reference/kotlin/java/io/InputStream.html">InputStream</a>, ).</p></div></div></div></div></div></div></div></div></div>
+      </div>
+      <h2 class="">Types</h2>
+      <div class="table" data-togglable="Types"><a data-name="745686543%2FClasslikes%2F-954213597" anchor-label="FileDescriptorFactory" id="745686543%2FClasslikes%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-file-descriptor-factory/index.html"><span>File</span><wbr><span>Descriptor</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="745686543%2FClasslikes%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-file-descriptor-factory/index.html">FileDescriptorFactory</a> : <a href="../../../library/com.bumptech.glide.load.model.stream/-q-media-store-uri-loader/-factory/index.html">QMediaStoreUriLoader.Factory</a><span class="token operator">&lt;</span><a href="../../../library/com.bumptech.glide.load.model.stream/-q-media-store-uri-loader/-factory/index.html">DataT</a><span class="token operator">&gt; </span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Factory for ParcelFileDescriptor.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-570999276%2FClasslikes%2F-954213597" anchor-label="InputStreamFactory" id="-570999276%2FClasslikes%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-input-stream-factory/index.html"><span>Input</span><wbr><span>Stream</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-570999276%2FClasslikes%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="-input-stream-factory/index.html">InputStreamFactory</a> : <a href="../../../library/com.bumptech.glide.load.model.stream/-q-media-store-uri-loader/-factory/index.html">QMediaStoreUriLoader.Factory</a><span class="token operator">&lt;</span><a href="../../../library/com.bumptech.glide.load.model.stream/-q-media-store-uri-loader/-factory/index.html">DataT</a><span class="token operator">&gt; </span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Factory for <a href="https://developer.android.com/reference/kotlin/java/io/InputStream.html">InputStream</a>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-897647888%2FFunctions%2F-954213597" anchor-label="buildLoadData" id="-897647888%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="build-load-data.html"><span>build</span><wbr><span>Load</span><wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-897647888%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="build-load-data.html"><span class="token function">buildLoadData</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;uri<span class="token operator">: </span>Uri<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;width<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;height<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;options<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-options/index.html">Options</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.load.model/-model-loader/-load-data/index.html">ModelLoader.LoadData</a><span class="token operator">&lt;</span><a href="index.html">DataT</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns a <a href="../../com.bumptech.glide.load.model/-model-loader/-load-data/index.html">com.bumptech.glide.load.model.ModelLoader.LoadData</a> containing a  required to decode the resource represented by this model, as well as a set of <a href="../../com.bumptech.glide.load/-key/index.html">Keys</a> that identify the data loaded by the <a href="../../com.bumptech.glide.load.data/-data-fetcher/index.html">com.bumptech.glide.load.data.DataFetcher</a> as well as an optional list of alternate keys from which equivalent data can be loaded.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1722601466%2FFunctions%2F-954213597" anchor-label="handles" id="-1722601466%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="handles.html"><span><span>handles</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1722601466%2FFunctions%2F-954213597"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="handles.html"><span class="token function">handles</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uri<span class="token operator">: </span>Uri</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Returns true if the given model is a of a recognized type that this loader can probably load.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

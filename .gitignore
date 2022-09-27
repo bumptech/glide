@@ -1,6 +1,7 @@
 *.idea
-library/
 samples/
+/library/
+/third_party/
 *.iml
 *.DS_Store
 local.properties

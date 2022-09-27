@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>GlideImage</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="compose::com.bumptech.glide.integration.compose//GlideImage/#kotlin.Any?#kotlin.String?#androidx.compose.ui.Modifier#androidx.compose.ui.Alignment#androidx.compose.ui.layout.ContentScale#kotlin.Float#androidx.compose.ui.graphics.ColorFilter?#kotlin.Function1[com.bumptech.glide.RequestBuilder[android.graphics.drawable.Drawable],com.bumptech.glide.RequestBuilder[android.graphics.drawable.Drawable]]/PointingToDeclaration//-1291154055">
+  <div class="breadcrumbs"><a href="../index.html">compose</a><span class="delimiter">/</span><a href="index.html">com.bumptech.glide.integration.compose</a><span class="delimiter">/</span><a href="-glide-image.html">GlideImage</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Glide</span><wbr><span><span>Image</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":integration:compose:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="-glide-image.html"><span class="token function">GlideImage</span></a><span class="token punctuation">(</span><span class="parameters wrapped"><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;contentDescription<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;alignment<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Alignment.html">Alignment</a><span class="token operator"> = </span>Alignment.Center<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;contentScale<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/layout/ContentScale.html">ContentScale</a><span class="token operator"> = </span>ContentScale.Fit<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;alpha<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span>DefaultAlpha<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;colorFilter<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/ColorFilter.html">ColorFilter</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter indented">&nbsp;&nbsp;&nbsp;&nbsp;requestBuilderTransform<span class="token operator">: </span><a href="index.html#-2072453018%2FClasslikes%2F-1291154055">RequestBuilderTransform</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/android/graphics/drawable/Drawable.html">Drawable</a><span class="token operator">&gt;</span><span class="token operator"> = </span>{ it }</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Start a request by passing <a href="-glide-image.html">model</a> to <a href="../../../library/com.bumptech.glide/-request-builder/load.html">RequestBuilder.load</a> using the given requestManager and then applying the <a href="-glide-image.html">requestBuilderTransform</a> function to add options or apply mutations if the caller desires.</p><p class="paragraph"><a href="-glide-image.html">alignment</a>, <a href="-glide-image.html">contentScale</a>, <a href="-glide-image.html">alpha</a>, <a href="-glide-image.html">colorFilter</a> and <a href="-glide-image.html">contentDescription</a> have the same defaults (if any) and function identically to the parameters in <a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/package-summary.html">Image</a>.</p><p class="paragraph">If you want to restrict the size of this <a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html">Composable</a>, use the given <a href="-glide-image.html">modifier</a>. If you'd like to force the size of the pixels you load to be different than the display area, use <a href="../../../library/com.bumptech.glide/-request-builder/override.html">RequestBuilder.override</a>. Often you can get better performance by setting an explicit size so that we do not have to wait for layout to fetch the image. If the size set via the <a href="-glide-image.html">modifier</a> is dependent on the content, Glide will probably end up loading the image using <a href="../../../library/com.bumptech.glide.request.target/-target/-s-i-z-e_-o-r-i-g-i-n-a-l.html">com.bumptech.glide.request.target.Target.SIZE_ORIGINAL</a>. Avoid <code class="lang-kotlin">SIZE_ORIGINAL</code>, implicitly or explicitly if you can. You may end up loading a substantially larger image than you need, which will increase memory usage and may also increase latency.</p><p class="paragraph">If you provide your own requestManager rather than using this method's default, consider using <a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/package-summary.html">remember</a> at a higher level to avoid some amount of overhead of retrieving it each re-composition.</p><p class="paragraph">This method will inspect <a href="-glide-image.html">contentScale</a> and apply a matching transformation if one exists. Any automatically applied transformation can be overridden using <a href="-glide-image.html">requestBuilderTransform</a>. Either apply a specific transformation instead, or use <a href="../../../library/com.bumptech.glide/-request-builder/dont-transform.html">RequestBuilder.dontTransform</a>]</p><p class="paragraph">Transitions set via <a href="../../../library/com.bumptech.glide/-request-builder/transition.html">RequestBuilder.transition</a> are currently ignored.</p><p class="paragraph">Note - this method is likely to change while we work on improving the API. Transitions are one significant unexplored area. It's also possible we'll try and remove the <a href="../../../library/com.bumptech.glide/-request-builder/index.html">RequestBuilder</a> from the direct API and instead allow all options to be set directly in the method.</p></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

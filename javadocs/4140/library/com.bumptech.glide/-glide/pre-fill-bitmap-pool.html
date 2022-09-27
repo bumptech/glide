@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>preFillBitmapPool</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="Glide::com.bumptech.glide/Glide/preFillBitmapPool/#com.bumptech.glide.load.engine.prefill.PreFillType.Builder.../PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide</a><span class="delimiter">/</span><a href="index.html">Glide</a><span class="delimiter">/</span><a href="pre-fill-bitmap-pool.html">preFillBitmapPool</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>pre</span><wbr><span>Fill</span><wbr><span>Bitmap</span><wbr><span><span>Pool</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="pre-fill-bitmap-pool.html"><span class="token function">preFillBitmapPool</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bitmapAttributeBuilders<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.load.engine.prefill/-pre-fill-type/-builder/index.html">PreFillType.Builder</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Pre-fills the <a href="../../com.bumptech.glide.load.engine.bitmap_recycle/-bitmap-pool/index.html">BitmapPool</a> using the given sizes. </p><p class="paragraph">Enough Bitmaps are added to completely fill the pool, so most or all of the Bitmaps currently in the pool will be evicted. Bitmaps are allocated according to the weights of the given sizes, where each size gets (weight / prefillWeightSum) percent of the pool to fill. </p><p class="paragraph">Note - Pre-filling is done asynchronously using and IdleHandler. Any currently running pre-fill will be cancelled and replaced by a call to this method. </p><p class="paragraph">This method should be used with caution, overly aggressive pre-filling is substantially worse than not pre-filling at all. Pre-filling should only be started in onCreate to avoid constantly clearing and re-filling the <a href="../../com.bumptech.glide.load.engine.bitmap_recycle/-bitmap-pool/index.html">BitmapPool</a>. Rotation should be carefully considered as well. It may be worth calling this method only when no saved instance state exists so that pre-filling only happens when the Activity is first created, rather than on every rotation.</p><h2 class="">Parameters</h2><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>bitmap</span><wbr><span>Attribute</span><wbr><span><span>Builders</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The list of <a href="../../com.bumptech.glide.load.engine.prefill/-pre-fill-type/-builder/index.html">Builders</a> representing individual sizes and configurations of Bitmaps to be pre-filled.</p></div></div></div></div></div></div></div></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+

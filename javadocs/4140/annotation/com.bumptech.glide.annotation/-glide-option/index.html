@@ -1,0 +1,261 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>GlideOption</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageids="annotation::com.bumptech.glide.annotation/GlideOption///PointingToDeclaration//-1128337623">
+  <div class="breadcrumbs"><a href="../../index.html">annotation</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.annotation</a><span class="delimiter">/</span><a href="index.html">GlideOption</a></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Glide</span><wbr><span><span>Option</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Target.html"><span class="token annotation">Target</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/ElementType.html">ElementType.METHOD</a></span><wbr><span class="token punctuation">)</span></div><div class="block"><span class="token annotation">@</span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Retention.html"><span class="token annotation">Retention</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/RetentionPolicy.html">RetentionPolicy.CLASS</a></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">annotation class </span><a href="index.html">GlideOption</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">Identifies methods in <a href="../-glide-extension/index.html">GlideExtension</a> annotated classes that extend <code class="lang-kotlin">
+com.bumptech.glide.request.RequestOptions</code>. </p><p class="paragraph">All annotated methods will be added to a single <code class="lang-kotlin">
+com.bumptech.glide.request.RequestOptions</code> implementation generated per application. Overlapping method names in different extensions may cause errors at compile time. </p><p class="paragraph">Static equivalents of annotated methods will also be generated. </p><p class="paragraph">Methods with this annotation will only be found if they belong to classes annotated with <a href="../-glide-extension/index.html">GlideExtension</a>. </p><p class="paragraph">The preferred way of writing extension methods returns the provided <code class="lang-kotlin">
+com.bumptech.glide.request.RequestOptions</code> object with one or more methods called on it. You must not return a newly instantiated <code class="lang-kotlin">com.bumptech.glide.request.RequestOptions</code> object as doing so my cause a <code class="lang-kotlin">ClassCastException</code> at runtime. Calling either <code class="lang-kotlin">
+com.bumptech.glide.request.RequestOptions#autoClone()</code> or <code class="lang-kotlin">
+com.bumptech.glide.request.RequestOptions#lock()</code> is safe, but unnecessary and should typically be avoided. The preferred style looks like: </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">
+{@}GlideExtension
+public class MyExtension {
+  private MyExtension() {}
+
+  {@}GlideOption
+  public static RequestOptions myOption(RequestOptions options) {
+    return options
+        .optionOne()
+        .optionTwo();
+  }
+}
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">The deprecated way of writing extension methods is simply a static void method. The <code class="lang-kotlin">
+com.bumptech.glide.request.RequestOptions</code> object is cloned before it is passed to this method to avoid an option method returning a new instance, but using methods like <code class="lang-kotlin">
+com.bumptech.glide.request.RequestOptions#clone()</code> or <code class="lang-kotlin">
+com.bumptech.glide.request.RequestOptions#autoClone()</code> can result in options applied in the method being silently ignored. Prefer the new style whenever possible. </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">
+{@}GlideExtension
+public class MyExtension {
+  private MyExtension() {}
+
+  // Deprecated! Use the new style of GlideOption extensions instead.
+  {@}GlideOption
+  public static void myOption(RequestOptions options) {
+    options
+        .optionOne()
+        .optionTwo();
+  }
+}
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-2087345088%2FFunctions%2F-1128337623" anchor-label="annotationType" id="-2087345088%2FFunctions%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-glide-extension/index.html#-2087345088%2FFunctions%2F-1128337623"><span>annotation</span><wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2087345088%2FFunctions%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-glide-extension/index.html#-2087345088%2FFunctions%2F-1128337623"><span class="token function">annotationType</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/annotation/Annotation.html">Annotation</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1297283241%2FFunctions%2F-1128337623" anchor-label="equals" id="-1297283241%2FFunctions%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-glide-extension/index.html#-1297283241%2FFunctions%2F-1128337623"><span><span>equals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1297283241%2FFunctions%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-glide-extension/index.html#-1297283241%2FFunctions%2F-1128337623"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-867487634%2FFunctions%2F-1128337623" anchor-label="hashCode" id="-867487634%2FFunctions%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-glide-extension/index.html#-867487634%2FFunctions%2F-1128337623"><span>hash</span><wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-867487634%2FFunctions%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-glide-extension/index.html#-867487634%2FFunctions%2F-1128337623"><span class="token function">hashCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-467461237%2FFunctions%2F-1128337623" anchor-label="memoizeStaticMethod" id="-467461237%2FFunctions%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="memoize-static-method.html"><span>memoize</span><wbr><span>Static</span><wbr><span><span>Method</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-467461237%2FFunctions%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="memoize-static-method.html"><span class="token function">memoizeStaticMethod</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><code class="lang-kotlin">true</code> to indicate that it's safe to statically memoize the result of this method using <code class="lang-kotlin">com.bumptech.glide.request.RequestOptions#autoClone()</code>.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-538612166%2FFunctions%2F-1128337623" anchor-label="override" id="-538612166%2FFunctions%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="override.html"><span><span>override</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-538612166%2FFunctions%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="override.html"><span class="token function">override</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Determines how and whether a generated method should extend a method from it's parent.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1314608328%2FFunctions%2F-1128337623" anchor-label="skipStaticMethod" id="-1314608328%2FFunctions%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="skip-static-method.html"><span>skip</span><wbr><span>Static</span><wbr><span><span>Method</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1314608328%2FFunctions%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="skip-static-method.html"><span class="token function">skipStaticMethod</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><code class="lang-kotlin">true</code> to prevent a static builder method from being generated.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="142288044%2FFunctions%2F-1128337623" anchor-label="staticMethodName" id="142288044%2FFunctions%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="static-method-name.html"><span>static</span><wbr><span>Method</span><wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="142288044%2FFunctions%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="static-method-name.html"><span class="token function">staticMethodName</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief ">Sets the name for the generated static version of this method.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1045653699%2FFunctions%2F-1128337623" anchor-label="toString" id="-1045653699%2FFunctions%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="../-glide-extension/index.html#-1045653699%2FFunctions%2F-1128337623"><span>to</span><wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1045653699%2FFunctions%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../-glide-extension/index.html#-1045653699%2FFunctions%2F-1128337623"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="1063732359%2FProperties%2F-1128337623" anchor-label="OVERRIDE_EXTEND" id="1063732359%2FProperties%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-o-v-e-r-r-i-d-e_-e-x-t-e-n-d.html"><span><span>OVERRIDE_EXTEND</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1063732359%2FProperties%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><a data-name="1063732359%2FProperties%2F-1128337623" anchor-label="OVERRIDE_EXTEND" id="1063732359%2FProperties%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-o-v-e-r-r-i-d-e_-e-x-t-e-n-d.html">OVERRIDE_EXTEND</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1063732359%2FProperties%2F-1128337623" anchor-label="OVERRIDE_EXTEND" id="1063732359%2FProperties%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>Expects to call super and then add additional functionality to an overridden method.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1157293865%2FProperties%2F-1128337623" anchor-label="OVERRIDE_NONE" id="1157293865%2FProperties%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-o-v-e-r-r-i-d-e_-n-o-n-e.html"><span><span>OVERRIDE_NONE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1157293865%2FProperties%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><a data-name="1157293865%2FProperties%2F-1128337623" anchor-label="OVERRIDE_NONE" id="1157293865%2FProperties%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-o-v-e-r-r-i-d-e_-n-o-n-e.html">OVERRIDE_NONE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1157293865%2FProperties%2F-1128337623" anchor-label="OVERRIDE_NONE" id="1157293865%2FProperties%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>Does not intend to override a method in a super class.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1115028091%2FProperties%2F-1128337623" anchor-label="OVERRIDE_REPLACE" id="-1115028091%2FProperties%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>
+        <div class="table-row" data-filterable-current=":annotation:dokkaHtmlPartial/main" data-filterable-set=":annotation:dokkaHtmlPartial/main">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-o-v-e-r-r-i-d-e_-r-e-p-l-a-c-e.html"><span><span>OVERRIDE_REPLACE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1115028091%2FProperties%2F-1128337623"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":annotation:dokkaHtmlPartial/main"><a data-name="-1115028091%2FProperties%2F-1128337623" anchor-label="OVERRIDE_REPLACE" id="-1115028091%2FProperties%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-o-v-e-r-r-i-d-e_-r-e-p-l-a-c-e.html">OVERRIDE_REPLACE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1115028091%2FProperties%2F-1128337623" anchor-label="OVERRIDE_REPLACE" id="-1115028091%2FProperties%2F-1128337623" data-filterable-set=":annotation:dokkaHtmlPartial/main"></a>Expects to not call super and replace an overridden method.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+
+</body></html>
+
