@@ -57,6 +57,11 @@ code {
     padding-right: 0;
 }
 
+.edit_page {
+  font-size: 0.8em;
+  font-weight: normal;
+}
+
 body.rtl {
 	direction: rtl;
 }

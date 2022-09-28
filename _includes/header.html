@@ -3,8 +3,9 @@
 
     {% if site.otherlang %}
         {% for language in site.otherlang %}
-        &nbsp;&nbsp;<small><a href="{{ language[1] }}">{{ language[0] }}</a></small>
+        - <small><a href="{{ language[1] }}">{{ language[0] }}</a></small>
         {% endfor %}
     {% endif %}
-</h4>
+  - <a class=edit_page href="{{site.github.repository_url}}/blob/gh-pages/{{page.path}}">Edit this page</a>
+</h4> 
 
