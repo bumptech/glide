@@ -616,8 +616,6 @@ public final class GlideBuilder {
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
 
-  static final class EnableLazyGlideRegistry implements Experiment {}
-
   /**
    * Use the androidx lifecycle instead of injecting custom fragments when using androidx fragments
    * and activities.
