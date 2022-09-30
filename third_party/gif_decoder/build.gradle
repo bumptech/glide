@@ -18,6 +18,7 @@ android {
         minSdk MIN_SDK_VERSION as int
         targetSdk TARGET_SDK_VERSION as int
     }
+    namespace 'com.bumptech.glide.gifdecoder'
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"

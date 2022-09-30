@@ -140,6 +140,7 @@ afterEvaluate { project ->
                 }
 
                 if (isAndroidProject) {
+
                     def variants = project.android.libraryVariants.findAll {
                         it.buildType.name.equalsIgnoreCase('release')
                     }

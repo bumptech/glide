@@ -9,8 +9,8 @@ android {
     defaultConfig {
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionName VERSION_NAME as String
     }
+    namespace 'com.bumptech.glide.annotation.ksp.test'
 }
 
 dependencies {

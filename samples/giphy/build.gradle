@@ -26,6 +26,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+    namespace 'com.bumptech.glide.samples.giphy'
 }
 
 task run(type: Exec, dependsOn: 'installDebug') {

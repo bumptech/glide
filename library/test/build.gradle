@@ -45,7 +45,6 @@ android {
     defaultConfig {
         minSdk MIN_SDK_VERSION as int
         targetSdk TARGET_SDK_VERSION as int
-        versionName VERSION_NAME as String
     }
 
     compileOptions {
@@ -63,4 +62,5 @@ android {
             resources.srcDirs += ['../../exifsamples']
         }
     }
+    namespace 'com.bumptech.glide.test'
 }

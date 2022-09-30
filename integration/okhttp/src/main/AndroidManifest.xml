@@ -1,5 +1,4 @@
-<manifest
-  package="com.bumptech.glide.integration.okhttp">
+<manifest>
 
     <application />
 </manifest>

@@ -20,13 +20,13 @@ android {
         minSdk MIN_SDK_VERSION as int
         targetSdk TARGET_SDK_VERSION as int
 
-        versionName = VERSION_NAME as String
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+    namespace 'com.bumptech.glide.integration.concurrent'
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"

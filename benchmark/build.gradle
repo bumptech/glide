@@ -15,8 +15,6 @@ android {
     defaultConfig {
         minSdk 19
         targetSdk TARGET_SDK_VERSION as int
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner 'androidx.benchmark.junit4.AndroidBenchmarkRunner'
     }
@@ -29,6 +27,7 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "benchmark-proguard-rules.pro"
         }
     }
+    namespace 'com.bumptech.glide.benchmark'
 }
 
 dependencies {

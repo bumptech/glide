@@ -35,6 +35,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    namespace 'com.bumptech.glide.integration.compose'
 }
 
 // Enable strict mode, but exclude tests.
