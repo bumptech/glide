@@ -124,29 +124,20 @@ subprojects { project ->
         // modified, so we're not going to worry about cleaning it up.
         // Imgur uses generated code from dagger that has warnings.
         if ("gifencoder" != project.getName() && "imgur" != project.getName()) {
-          options.compilerArgs \
-                /*
-                 * Treat all warnings as errors.
-                 */ \
-                << "-Werror" \
-                /*
-                 * Enable all warnings.
-                 */ \
-                << "-Xlint:all" \
-                /*
-                 * Java expects every annotation to have a processor, but we use
-                 * javax.annotation.Nullable, which doesn't have one.
-                 */ \
-                << "-Xlint:-processing" \
-                /*
-                 * See https://github.com/google/dagger/issues/945
-                 * and https://bugs.openjdk.java.net/browse/JDK-8190452
-                 */ \
-                << "-Xlint:-classfile" \
-                /*
-                 * Disable deprecation warnings for ViewTarget/BaseTarget for now.
-                 */ \
-                << "-Xlint:-deprecation"
+          options.compilerArgs.addAll([
+            //Treat all warnings as errors.
+            "-Werror",
+            //Enable all warnings.
+            "-Xlint:all",
+            // Java expects every annotation to have a processor, but we use
+            // javax.annotation.Nullable, which doesn't have one.
+            "-Xlint:-processing",
+            // See https://github.com/google/dagger/issues/945
+            // and https://bugs.openjdk.java.net/browse/JDK-8190452
+            "-Xlint:-classfile",
+             // Disable deprecation warnings for ViewTarget/BaseTarget for now.
+            "-Xlint:-deprecation",
+          ])
         }
     }
 
