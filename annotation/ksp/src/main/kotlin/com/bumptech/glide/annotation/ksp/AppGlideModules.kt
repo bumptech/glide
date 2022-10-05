@@ -212,7 +212,8 @@ internal class AppGlideModuleParser(
   }
 
   private fun KSAnnotation.getModuleArgumentValues(): List<String> {
-    val result = arguments.find { it.name?.getShortName().equals("modules") }?.value
+    val result =
+      arguments.find { it.name?.getShortName().equals(IndexGenerator.INDEX_MODULES_NAME) }?.value
     if (result is List<*> && result.all { it is String }) {
       @Suppress("UNCHECKED_CAST") return result as List<String>
     }
