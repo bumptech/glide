@@ -125,4 +125,18 @@ public final class BitmapTransitionOptions
   public BitmapTransitionOptions crossFade(@NonNull DrawableCrossFadeFactory.Builder builder) {
     return transitionUsing(builder.build());
   }
+
+  // Make sure that we're not equal to any other concrete implementation of TransitionOptions.
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof BitmapTransitionOptions && super.equals(o);
+  }
+
+  // Our class doesn't include any additional properties, so we don't need to modify hashcode, but
+  // keep it here as a reminder in case we add properties.
+  @SuppressWarnings("PMD.UselessOverridingMethod")
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
 }

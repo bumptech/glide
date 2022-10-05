@@ -42,6 +42,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -80,6 +81,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @Nullable private Float thumbSizeMultiplier;
   private boolean isDefaultTransitionOptionsSet = true;
   private boolean isModelSet;
+
   private boolean isThumbnailBuilt;
 
   // We only override the method to change the return type, not the functionality.
@@ -1250,5 +1252,38 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
         glideContext.getEngine(),
         transitionOptions.getTransitionFactory(),
         callbackExecutor);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof RequestBuilder<?>) {
+      RequestBuilder<?> that = (RequestBuilder<?>) o;
+      return super.equals(that)
+          && Objects.equals(transcodeClass, that.transcodeClass)
+          && transitionOptions.equals(that.transitionOptions)
+          && Objects.equals(model, that.model)
+          && Objects.equals(requestListeners, that.requestListeners)
+          && Objects.equals(thumbnailBuilder, that.thumbnailBuilder)
+          && Objects.equals(errorBuilder, that.errorBuilder)
+          && Objects.equals(thumbSizeMultiplier, that.thumbSizeMultiplier)
+          && isDefaultTransitionOptionsSet == that.isDefaultTransitionOptionsSet
+          && isModelSet == that.isModelSet;
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    int hashCode = super.hashCode();
+    hashCode = Util.hashCode(transcodeClass, hashCode);
+    hashCode = Util.hashCode(transitionOptions, hashCode);
+    hashCode = Util.hashCode(model, hashCode);
+    hashCode = Util.hashCode(requestListeners, hashCode);
+    hashCode = Util.hashCode(thumbnailBuilder, hashCode);
+    hashCode = Util.hashCode(errorBuilder, hashCode);
+    hashCode = Util.hashCode(thumbSizeMultiplier, hashCode);
+    hashCode = Util.hashCode(isDefaultTransitionOptionsSet, hashCode);
+    hashCode = Util.hashCode(isModelSet, hashCode);
+    return hashCode;
   }
 }

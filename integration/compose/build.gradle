@@ -60,6 +60,7 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$ANDROID_X_TEST_ESPRESSO_VERSION"
     androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$ANDROID_X_TEST_ESPRESSO_VERSION"
     androidTestImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
+    androidTestImplementation "androidx.compose.material:material:$ANDROID_X_COMPOSE_VERSION"
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"

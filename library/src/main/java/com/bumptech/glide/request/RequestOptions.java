@@ -279,4 +279,18 @@ public class RequestOptions extends BaseRequestOptions<RequestOptions> {
     }
     return noAnimationOptions;
   }
+
+  // Make sure that we're not equal to any other concrete implementation of RequestOptions.
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof RequestOptions && super.equals(o);
+  }
+
+  // Our class doesn't include any additional properties, so we don't need to modify hashcode, but
+  // keep it here as a reminder in case we add properties.
+  @SuppressWarnings("PMD.UselessOverridingMethod")
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
 }
