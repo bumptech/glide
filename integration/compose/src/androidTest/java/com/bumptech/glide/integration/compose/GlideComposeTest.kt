@@ -5,8 +5,13 @@ package com.bumptech.glide.integration.compose
 import android.content.Context
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.SemanticsPropertyKey
@@ -14,6 +19,8 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import com.bumptech.glide.Glide
@@ -21,6 +28,7 @@ import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.Size
 import com.bumptech.glide.load.engine.executor.GlideIdlingResourceInit
 import java.util.concurrent.atomic.AtomicReference
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -32,6 +40,11 @@ class GlideComposeTest {
   @Before
   fun setUp() {
     GlideIdlingResourceInit.initGlide(composeRule)
+  }
+
+  @After
+  fun tearDown() {
+    Glide.tearDown()
   }
 
   @Test
@@ -66,6 +79,40 @@ class GlideComposeTest {
     composeRule
       .onNodeWithContentDescription(description)
       .assert(expectDisplayedDrawableSize(expectedSize))
+  }
+
+  @Test
+  fun glideImage_withChangingModel_refreshes() {
+    val description = "test"
+
+    val firstDrawable: Drawable = context.getDrawable(android.R.drawable.star_big_off)!!
+    val secondDrawable: Drawable = context.getDrawable(android.R.drawable.star_big_on)!!
+
+    composeRule.setContent {
+      val model = remember { mutableStateOf(firstDrawable) }
+
+      fun swapModel() {
+        model.value = secondDrawable
+      }
+
+      Column {
+        TextButton(onClick = ::swapModel) {Text(text="Swap")}
+        GlideImage(
+          model = model.value,
+          modifier = Modifier.size(100.dp),
+          contentDescription = description
+        )
+      }
+    }
+
+    composeRule.waitForIdle()
+    composeRule.onNodeWithText("Swap").performClick()
+    composeRule.waitForIdle()
+
+    val fullsizeBitmap = (secondDrawable as BitmapDrawable).bitmap
+    composeRule
+      .onNodeWithContentDescription(description)
+      .assert(expectDisplayedDrawable(fullsizeBitmap) { (it as BitmapDrawable).bitmap })
   }
 
   @Test
