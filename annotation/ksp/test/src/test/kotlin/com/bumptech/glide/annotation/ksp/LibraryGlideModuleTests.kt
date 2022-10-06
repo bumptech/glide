@@ -2,9 +2,12 @@ package com.bumptech.glide.annotation.ksp.test
 
 import com.bumptech.glide.annotation.ksp.AppGlideModuleConstants
 import com.bumptech.glide.annotation.ksp.GlideSymbolProcessorConstants
+import com.bumptech.glide.annotation.ksp.GlideSymbolProcessorProvider
 import com.google.common.truth.Truth.assertThat
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
+import com.tschuchort.compiletesting.SourceFile
+import com.tschuchort.compiletesting.symbolProcessorProviders
 import java.io.FileNotFoundException
 import kotlin.test.assertFailsWith
 import org.intellij.lang.annotations.Language
@@ -596,6 +599,66 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
       assertThat(it.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
       assertThat(it.messages)
         .contains(AppGlideModuleConstants.INVALID_EXCLUDES_ANNOTATION_MESSAGE.format("AppModule"))
+    }
+  }
+
+  @Test
+  fun compile_withLibraryGlideModule_compiledSeparately_includesLibraryGlideModule_2() {
+    val kotlinLibraryModule =
+      KotlinSourceFile(
+        "LibraryModule.kt",
+        """
+        import com.bumptech.glide.annotation.GlideModule
+        import com.bumptech.glide.module.LibraryGlideModule
+
+        @GlideModule class LibraryModule : LibraryGlideModule()
+        """
+      )
+    val javaLibraryModule =
+      JavaSourceFile(
+        "LibraryModule.java",
+        """
+          import com.bumptech.glide.annotation.GlideModule;
+          import com.bumptech.glide.module.LibraryGlideModule;
+          
+          @GlideModule public class LibraryModule extends LibraryGlideModule {}
+        """
+      )
+
+    val libraryCompilationResult = compileCurrentSourceType(kotlinLibraryModule, javaLibraryModule)
+
+    val kotlinAppModule =
+      KotlinSourceFile(
+        "AppModule.kt",
+        """
+        import com.bumptech.glide.annotation.GlideModule
+        import com.bumptech.glide.module.AppGlideModule
+
+        @GlideModule class AppModule : AppGlideModule()
+        """
+      )
+    val javaAppModule =
+      JavaSourceFile(
+        "AppModule.java",
+        """
+          import com.bumptech.glide.annotation.GlideModule;
+          import com.bumptech.glide.module.AppGlideModule;
+          
+          @GlideModule public class AppModule extends AppGlideModule {
+            public AppModule() {}
+          }
+        """
+      )
+
+    val generatedLibrarySources =
+      libraryCompilationResult.allGeneratedFiles()
+        .map { GeneratedSourceFile(it, sourceType) }
+
+    compileCurrentSourceType(
+      *(listOf(kotlinAppModule, javaAppModule) + generatedLibrarySources).toTypedArray(),
+    ) {
+      assertThat(it.generatedAppGlideModuleContents())
+        .hasSourceEqualTo(appGlideModuleWithLibraryModule)
     }
   }
 }

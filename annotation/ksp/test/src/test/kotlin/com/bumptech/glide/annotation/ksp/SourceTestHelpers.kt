@@ -19,14 +19,35 @@ internal class CompilationResult(
 
   fun generatedAppGlideModuleContents() = readFile(findAppGlideModule())
 
-  private fun readFile(file: File) = file.readLines().joinToString("\n")
+  fun allGeneratedFiles(): List<File> {
+    val allFiles = mutableListOf<File>()
+    val parentDir = generatedFilesParentDir()
+    if (parentDir != null) {
+      findAllFilesRecursive(parentDir, allFiles)
+    }
+    return allFiles
+  }
 
-  private fun findAppGlideModule(): File {
+  private fun findAllFilesRecursive(parent: File, allFiles: MutableList<File>) {
+    if (parent.isFile) {
+      allFiles.add(parent)
+      return
+    }
+    parent.listFiles()?.map { findAllFilesRecursive(it, allFiles) }
+  }
+
+  private fun generatedFilesParentDir(): File? {
     var currentDir: File? = compilation.kspSourcesDir
     listOf("kotlin", "com", "bumptech", "glide").forEach { directoryName ->
       currentDir = currentDir?.listFiles()?.find { it.name.equals(directoryName) }
     }
-    return currentDir?.listFiles()?.find { it.name.equals("GeneratedAppGlideModuleImpl.kt") }
+    return currentDir
+  }
+
+  private fun readFile(file: File) = file.readLines().joinToString("\n")
+
+  private fun findAppGlideModule(): File {
+    return generatedFilesParentDir()?.listFiles()?.find { it.name.equals("GeneratedAppGlideModuleImpl.kt") }
       ?: throw FileNotFoundException(
         "GeneratedAppGlideModuleImpl.kt was not generated or not generated in the expected" +
           "location"
@@ -42,6 +63,19 @@ enum class SourceType {
 sealed interface TypedSourceFile {
   fun sourceFile(): SourceFile
   fun sourceType(): SourceType
+}
+
+internal class GeneratedSourceFile(
+  private val file: File, private val currentSourceType: SourceType,
+) : TypedSourceFile {
+  override fun sourceFile(): SourceFile = SourceFile.fromPath(file)
+
+  // Hack alert: We use this class only for generated output of some previous compilation. We rely
+  // on the type in that previous compilation to select the proper source. The output however is
+  // always Kotlin, regardless of source. But we always want to include whatever the generated
+  // output is in the next step. That means we need our sourceType here to match the
+  //  currentSourceType in the test.
+  override fun sourceType(): SourceType = currentSourceType
 }
 
 internal class KotlinSourceFile(
@@ -65,11 +99,12 @@ internal interface PerSourceTypeTest {
 
   fun compileCurrentSourceType(
     vararg sourceFiles: TypedSourceFile,
-    test: (input: CompilationResult) -> Unit,
-  ) {
-    test(
+    test: (input: CompilationResult) -> Unit = {},
+  ) : CompilationResult {
+    val result =
       compile(sourceFiles.filter { it.sourceType() == sourceType }.map { it.sourceFile() }.toList())
-    )
+    test(result)
+    return result
   }
 }
 
