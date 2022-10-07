@@ -29,9 +29,9 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.bumptech.glide:glide:4.14.1'
+    compile 'com.github.bumptech.glide:glide:4.14.2'
     // Skip this if you don't want to use integration libraries or configure Glide.
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.14.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
 }
 ```
 
@@ -39,7 +39,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation ("com.github.bumptech.glide:glide:4.14.1@aar") {
+    implementation ("com.github.bumptech.glide:glide:4.14.2@aar") {
         transitive = true
     }
 }
@@ -71,7 +71,7 @@ If you use Maven you can add a dependency on Glide as well. Again, you will also
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.14.1</version>
+  <version>4.14.2</version>
   <type>aar</type>
 </dependency>
 <dependency>
@@ -82,7 +82,7 @@ If you use Maven you can add a dependency on Glide as well. Again, you will also
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>compiler</artifactId>
-  <version>4.14.1</version>
+  <version>4.14.2</version>
   <optional>true</optional>
 </dependency>
 ```
@@ -187,8 +187,8 @@ To [configure][13] Glide, you'll need to include one of Glide's annotation proce
 If you're using Java, including Glide’s annotation processor requires dependencies on Glide’s annotations and the annotation processor:
 
 ```groovy
-compile 'com.github.bumptech.glide:annotations:4.14.1'
-annotationProcessor 'com.github.bumptech.glide:compiler:4.14.1'
+compile 'com.github.bumptech.glide:annotations:4.14.2'
+annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
 ```
 
 ##### Kotlin - KAPT
@@ -197,7 +197,7 @@ If you use Glide's annotations on classes implemented in Kotlin, you can include
 
 ```groovy
 dependencies {
-  kapt 'com.github.bumptech.glide:compiler:4.14.1'
+  kapt 'com.github.bumptech.glide:compiler:4.14.2'
 }
 ```
 Note that you must also include the ``kotlin-kapt`` plugin in your ``build.gradle`` file:
@@ -212,7 +212,7 @@ Keep in mind that if you have any other annotation processors, all of them must 
 ```groovy
 dependencies {
   kapt "android.arch.lifecycle:compiler:1.0.0"
-  kapt 'com.github.bumptech.glide:compiler:4.14.1'
+  kapt 'com.github.bumptech.glide:compiler:4.14.2'
 }
 ```
 For more details on ``kapt``, see the [official documentation][14].
@@ -231,7 +231,7 @@ apply plugin: 'com.google.devtools.ksp'
 And depend on Glide's snapshot KSP version:
 
 ```groovy
-ksp 'com.github.bumptech.glide:ksp:4.14.1'
+ksp 'com.github.bumptech.glide:ksp:4.14.2'
 ```
 
 <b>Note</b> - The KSP processor does not support Glide's deprecated generated API. If you reference generated classes (`GlideApp`, `GlideRequests` etc), you will need to replace them with the non-generated equivalents before you can use KSP. See the [Generated API][15] page for details. 

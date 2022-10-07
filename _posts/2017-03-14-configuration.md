@@ -63,7 +63,7 @@ public final class OkHttpLibraryGlideModule extends LibraryGlideModule {
 
 Using the [``@GlideModule``][5] annotation requires a dependency on Glide's annotations:
 ```groovy
-compile 'com.github.bumptech.glide:annotations:4.14.1'
+compile 'com.github.bumptech.glide:annotations:4.14.2'
 ```
 
 ##### Avoid AppGlideModule in libraries

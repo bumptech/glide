@@ -21,7 +21,7 @@ Combined with the right image size and an effective disk cache strategy, this li
 To use the RecyclerView integration library, add a dependency on it in your ``build.gradle`` file:
 
 ```groovy
-implementation ("com.github.bumptech.glide:recyclerview-integration:4.14.1") {
+implementation ("com.github.bumptech.glide:recyclerview-integration:4.14.2") {
   // Excludes the support library because it's already included by Glide.
   transitive = false
 }
