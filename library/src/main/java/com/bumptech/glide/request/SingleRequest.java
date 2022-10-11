@@ -420,7 +420,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   private Drawable loadDrawable(@DrawableRes int resourceId) {
     Theme theme =
         requestOptions.getTheme() != null ? requestOptions.getTheme() : context.getTheme();
-    return DrawableDecoderCompat.getDrawable(glideContext, resourceId, theme);
+    return DrawableDecoderCompat.getDrawable(context, resourceId, theme);
   }
 
   @GuardedBy("requestLock")
