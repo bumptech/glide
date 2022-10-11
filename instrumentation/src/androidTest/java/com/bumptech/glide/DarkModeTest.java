@@ -4,12 +4,15 @@ import static androidx.test.espresso.Espresso.onIdle;
 import static com.bumptech.glide.testutil.BitmapSubject.assertThat;
 import static org.junit.Assume.assumeTrue;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +50,7 @@ public class DarkModeTest {
     assumeTrue(VERSION.SDK_INT >= VERSION_CODES.Q);
   }
 
-  // TODO(judds): The way we handle data loads in the background for resoures is not Theme
+  // TODO(judds): The way we handle data loads in the background for resources is not Theme
   //  compatible. In particular, the theme gets lost when we convert the resource id to a Uri and
   // we don't use the user provided theme. While ResourceBitmapDecoder and ResourceDrawableDecoder
   // will use the theme, they're not called for most resource ids because those instead go through
@@ -106,6 +109,50 @@ public class DarkModeTest {
   }
 
   @Test
+  public void loadResourceNameUri_withDarkModeActivity_darkModeTheme_usesDarkModeDrawable() {
+    runActivityTest(
+        darkModeActivity(),
+        R.raw.dog_dark,
+        activity ->
+            Glide.with(activity)
+                .load(newResourceNameUri(activity, R.drawable.dog))
+                .override(Target.SIZE_ORIGINAL)
+                .theme(activity.getTheme()));
+  }
+
+  @Test
+  public void loadResourceIdUri_withDarkModeActivity_darkModeTheme_usesDarkModeDrawable() {
+    runActivityTest(
+        darkModeActivity(),
+        R.raw.dog_dark,
+        activity ->
+            Glide.with(activity)
+                .load(newResourceIdUri(activity, R.drawable.dog))
+                .override(Target.SIZE_ORIGINAL)
+                .theme(activity.getTheme()));
+  }
+
+  private static Uri newResourceNameUri(Context context, int resourceId) {
+    Resources resources = context.getResources();
+    return newResourceUriBuilder(context)
+        .appendPath(resources.getResourceTypeName(resourceId))
+        .appendPath(resources.getResourceEntryName(resourceId))
+        .build();
+  }
+
+  private static Uri newResourceIdUri(Context context, int resourceId) {
+    return newResourceUriBuilder(context)
+        .appendPath(String.valueOf(resourceId))
+        .build();
+  }
+
+  private static Uri.Builder newResourceUriBuilder(Context context) {
+    return new Uri.Builder()
+        .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+        .authority(context.getPackageName());
+  }
+
+  @Test
   public void load_withDarkModeFragment_darkModeTheme_usesDarkModeDrawable() {
     runFragmentTest(
         darkModeActivity(),
@@ -118,6 +165,30 @@ public class DarkModeTest {
   }
 
   @Test
+  public void loadResourceNameUri_withDarkModeFragment_darkModeTheme_usesDarkModeDrawable() {
+    runFragmentTest(
+        darkModeActivity(),
+        R.raw.dog_dark,
+        fragment ->
+            Glide.with(fragment)
+                .load(newResourceNameUri(fragment.requireContext(), R.drawable.dog))
+                .override(Target.SIZE_ORIGINAL)
+                .theme(fragment.requireActivity().getTheme()));
+  }
+
+  @Test
+  public void loadResourceIdUri_withDarkModeFragment_darkModeTheme_usesDarkModeDrawable() {
+    runFragmentTest(
+        darkModeActivity(),
+        R.raw.dog_dark,
+        fragment ->
+            Glide.with(fragment)
+                .load(newResourceIdUri(fragment.requireContext(), R.drawable.dog))
+                .override(Target.SIZE_ORIGINAL)
+                .theme(fragment.requireActivity().getTheme()));
+  }
+
+  @Test
   public void load_withApplicationContext_darkTheme_usesDarkModeDrawable() {
     runActivityTest(
         darkModeActivity(),
@@ -125,6 +196,30 @@ public class DarkModeTest {
         input ->
             Glide.with(input.getApplicationContext())
                 .load(R.drawable.dog)
+                .override(Target.SIZE_ORIGINAL)
+                .theme(input.getTheme()));
+  }
+
+  @Test
+  public void loadResourceNameUri_withApplicationContext_darkTheme_usesDarkModeDrawable() {
+    runActivityTest(
+        darkModeActivity(),
+        R.raw.dog_dark,
+        input ->
+            Glide.with(input.getApplicationContext())
+                .load(newResourceNameUri(input.getApplicationContext(), R.drawable.dog))
+                .override(Target.SIZE_ORIGINAL)
+                .theme(input.getTheme()));
+  }
+
+  @Test
+  public void loadResourceIdUri_withApplicationContext_darkTheme_usesDarkModeDrawable() {
+    runActivityTest(
+        darkModeActivity(),
+        R.raw.dog_dark,
+        input ->
+            Glide.with(input.getApplicationContext())
+                .load(newResourceIdUri(input.getApplicationContext(), R.drawable.dog))
                 .override(Target.SIZE_ORIGINAL)
                 .theme(input.getTheme()));
   }
