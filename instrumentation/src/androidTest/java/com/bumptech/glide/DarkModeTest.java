@@ -29,7 +29,6 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.ForceDarkOrLightModeActivity;
 import com.google.common.base.Function;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,10 +36,8 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class DarkModeTest {
   private final Context context = ApplicationProvider.getApplicationContext();
-
-  @Rule
-  public final IdlingGlideRule idlingGlideRule =
-      IdlingGlideRule.newGlideRule(glideBuilder -> glideBuilder);
+  @Rule public final IdlingGlideRule idlingGlideRule =
+      IdlingGlideRule.newGlideRule(glideBuilder -> glideBuilder.useDirectResourceLoader(true));
 
   @Before
   public void before() {
@@ -62,7 +59,6 @@ public class DarkModeTest {
   // when it's specified by the user. Otherwise whether or not we'd obey dark mode would depend on
   // the user also providing the theme from the activity. We'd want to try to make sure that doesn't
   // leak the Activity.
-  // TODO(judds): Add tests for Fragments for load().
   @Test
   public void load_withDarkModeActivity_usesLightModeDrawable() {
     runActivityTest(
@@ -95,7 +91,6 @@ public class DarkModeTest {
         fragment -> Glide.with(fragment).load(R.drawable.dog).override(Target.SIZE_ORIGINAL));
   }
 
-  @Ignore("We do not asynchronously load resources correctly")
   @Test
   public void load_withDarkModeActivity_darkModeTheme_usesDarkModeDrawable() {
     runActivityTest(
@@ -108,7 +103,6 @@ public class DarkModeTest {
                 .theme(activity.getTheme()));
   }
 
-  @Ignore("We do not asynchronously load resources correctly")
   @Test
   public void load_withDarkModeFragment_darkModeTheme_usesDarkModeDrawable() {
     runFragmentTest(
@@ -119,6 +113,30 @@ public class DarkModeTest {
                 .load(R.drawable.dog)
                 .override(Target.SIZE_ORIGINAL)
                 .theme(fragment.requireActivity().getTheme()));
+  }
+
+  @Test
+  public void load_withApplicationContext_darkTheme_usesDarkModeDrawable() {
+    runActivityTest(
+        darkModeActivity(),
+        R.raw.dog_dark,
+        input ->
+            Glide.with(input.getApplicationContext())
+                .load(R.drawable.dog)
+                .override(Target.SIZE_ORIGINAL)
+                .theme(input.getTheme()));
+  }
+
+  @Test
+  public void load_withApplicationContext_lightTheme_usesLightModeDrawable() {
+    runActivityTest(
+        lightModeActivity(),
+        R.raw.dog_light,
+        input ->
+            Glide.with(input.getApplicationContext())
+                .load(R.drawable.dog)
+                .override(Target.SIZE_ORIGINAL)
+                .theme(input.getTheme()));
   }
 
   @Test
