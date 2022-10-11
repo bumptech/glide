@@ -121,7 +121,7 @@ class RememberGlidePreloadingDataTest {
           numberOfItemsToPreload = 1,
           fixedVisibleItemCount = 1,
         ) { data: Int, requestBuilder: RequestBuilder<Drawable> ->
-          requestBuilder.load(data)
+          requestBuilder.load(data).removeTheme()
         }
 
       TextButton(onClick = ::swapData) { Text(text = "Swap") }
@@ -196,7 +196,7 @@ class RememberGlidePreloadingDataTest {
       numberOfItemsToPreload = 1,
       fixedVisibleItemCount = 1,
     ) { model, requestBuilder ->
-      requestBuilder.load(model)
+      requestBuilder.load(model).removeTheme()
     }
   }
 
@@ -204,9 +204,15 @@ class RememberGlidePreloadingDataTest {
     // Wait for previous async image loads to finish
     glideComposeRule.waitForIdle()
     val nextPreloadModel: Drawable =
-      Glide.with(context).load(model).onlyRetrieveFromCache(true).submit().get()
+      Glide.with(context).load(model).removeTheme().onlyRetrieveFromCache(true).submit().get()
     assertThat(nextPreloadModel).isNotNull()
   }
+
+  // We're loading the same resource across two different Contexts. One is the Context from the
+  // instrumentation package, the other is the package under test. Each Context has it's own Theme,
+  // neither of which are equal to each other. So that we can verify an item is loaded into memory,
+  // we remove the themes from all requests that we need to have matching cache keys.
+  private fun <T> RequestBuilder<T>.removeTheme() = theme(null)
 
   private companion object {
     const val model = android.R.drawable.star_big_on
