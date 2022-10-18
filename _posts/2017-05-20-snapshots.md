@@ -31,7 +31,7 @@ repositories {
   jcenter()
   maven {
     name 'glide-snapshot'
-    url 'http://oss.sonatype.org/content/repositories/snapshots'
+    url 'https://oss.sonatype.org/content/repositories/snapshots'
   }
 }
 ```
