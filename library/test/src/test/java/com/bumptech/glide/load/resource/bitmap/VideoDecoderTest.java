@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -37,7 +38,7 @@ import org.robolectric.util.ReflectionHelpers;
 public class VideoDecoderTest {
   @Mock private ParcelFileDescriptor resource;
   @Mock private VideoDecoder.MediaMetadataRetrieverFactory factory;
-  @Mock private VideoDecoder.MediaMetadataRetrieverInitializer<ParcelFileDescriptor> initializer;
+  @Mock private VideoDecoder.MediaInitializer<ParcelFileDescriptor> initializer;
   @Mock private MediaMetadataRetriever retriever;
   @Mock private BitmapPool bitmapPool;
   private VideoDecoder<ParcelFileDescriptor> decoder;
@@ -46,6 +47,7 @@ public class VideoDecoderTest {
   private String initialMake;
   private String initialModel;
   private String initialBuildId;
+  private String initialDevice;
 
   @Before
   public void setup() {
@@ -58,13 +60,13 @@ public class VideoDecoderTest {
     initialMake = Build.MANUFACTURER;
     initialModel = Build.MODEL;
     initialBuildId = Build.ID;
+    initialDevice = Build.DEVICE;
   }
 
   @After
   public void tearDown() {
     Util.setSdkVersionInt(initialSdkVersion);
-    setMakeAndModel(initialMake, initialModel);
-    setBuildId(initialBuildId);
+    resetBuildInfo(initialMake, initialModel, initialBuildId, initialDevice);
   }
 
   @Test
@@ -77,7 +79,7 @@ public class VideoDecoderTest {
     Resource<Bitmap> result =
         Preconditions.checkNotNull(decoder.decode(resource, 100, 100, options));
 
-    verify(initializer).initialize(retriever, resource);
+    verify(initializer).initializeRetriever(retriever, resource);
     assertEquals(expected, result.get());
   }
 
@@ -195,6 +197,45 @@ public class VideoDecoderTest {
   }
 
   @Test
+  public void decodeFrame_notArcDeviceButWebm_doesNotInitializeMediaExtractor() throws IOException {
+    setDevice("notArc");
+    when(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE))
+        .thenReturn("video/webm");
+    when(retriever.getFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC))
+        .thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
+
+    decoder.decode(resource, Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL, options).get();
+
+    verify(initializer, never()).initializeExtractor(any(), any());
+  }
+
+  @Test
+  public void decodeFrame_arcDeviceButNotWebm_doesNotInitializeMediaExtractor() throws IOException {
+    setDevice("arc_cheets");
+    when(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE))
+        .thenReturn("video/mp4");
+    when(retriever.getFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC))
+        .thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
+
+    decoder.decode(resource, Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL, options).get();
+
+    verify(initializer, never()).initializeExtractor(any(), any());
+  }
+
+  @Test
+  public void decodeFrame_arcDeviceAndWebm_initializesMediaExtractor() throws IOException {
+    setDevice("arc_cheets");
+    when(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE))
+        .thenReturn("video/webm");
+    when(retriever.getFrameAtTime(-1, MediaMetadataRetriever.OPTION_CLOSEST_SYNC))
+        .thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
+
+    decoder.decode(resource, Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL, options).get();
+
+    verify(initializer).initializeExtractor(any(), any());
+  }
+
+  @Test
   @Config(sdk = VERSION_CODES.M)
   public void isHdr180RotationFixRequired_androidM_returnsFalse() {
     assertThat(VideoDecoder.isHdr180RotationFixRequired()).isFalse();
@@ -218,12 +259,14 @@ public class VideoDecoderTest {
     assertThat(VideoDecoder.isHdr180RotationFixRequired()).isTrue();
   }
 
-  private void setMakeAndModel(String make, String model) {
+  private void resetBuildInfo(String make, String model, String buildId, String device) {
     ReflectionHelpers.setStaticField(Build.class, "MANUFACTURER", make);
     ReflectionHelpers.setStaticField(Build.class, "MODEL", model);
+    ReflectionHelpers.setStaticField(Build.class, "ID", buildId);
+    setDevice(device);
   }
 
-  private void setBuildId(String buildId) {
-    ReflectionHelpers.setStaticField(Build.class, "ID", buildId);
+  private void setDevice(String device) {
+    ReflectionHelpers.setStaticField(Build.class, "DEVICE", device);
   }
 }

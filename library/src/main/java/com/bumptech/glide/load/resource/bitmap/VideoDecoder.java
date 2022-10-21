@@ -5,6 +5,7 @@ import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.MediaDataSource;
+import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
@@ -125,7 +126,9 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   private static final List<String> PIXEL_T_BUILD_ID_PREFIXES_REQUIRING_HDR_180_ROTATION_FIX =
       Collections.unmodifiableList(Arrays.asList("TP1A", "TD1A.220804.031"));
 
-  private final MediaMetadataRetrieverInitializer<T> initializer;
+  private static final String WEBM_MIME_TYPE = "video/webm";
+
+  private final MediaInitializer<T> initializer;
   private final BitmapPool bitmapPool;
   private final MediaMetadataRetrieverFactory factory;
 
@@ -142,14 +145,14 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     return new VideoDecoder<>(bitmapPool, new ByteBufferInitializer());
   }
 
-  VideoDecoder(BitmapPool bitmapPool, MediaMetadataRetrieverInitializer<T> initializer) {
+  VideoDecoder(BitmapPool bitmapPool, MediaInitializer<T> initializer) {
     this(bitmapPool, initializer, DEFAULT_FACTORY);
   }
 
   @VisibleForTesting
   VideoDecoder(
       BitmapPool bitmapPool,
-      MediaMetadataRetrieverInitializer<T> initializer,
+      MediaInitializer<T> initializer,
       MediaMetadataRetrieverFactory factory) {
     this.bitmapPool = bitmapPool;
     this.initializer = initializer;
@@ -185,9 +188,10 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     final Bitmap result;
     MediaMetadataRetriever mediaMetadataRetriever = factory.build();
     try {
-      initializer.initialize(mediaMetadataRetriever, resource);
+      initializer.initializeRetriever(mediaMetadataRetriever, resource);
       result =
           decodeFrame(
+              resource,
               mediaMetadataRetriever,
               frameTimeMicros,
               frameOption,
@@ -206,13 +210,18 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   }
 
   @Nullable
-  private static Bitmap decodeFrame(
+  private Bitmap decodeFrame(
+      @NonNull T resource,
       MediaMetadataRetriever mediaMetadataRetriever,
       long frameTimeMicros,
       int frameOption,
       int outWidth,
       int outHeight,
       DownsampleStrategy strategy) {
+    if (isUnsupportedFormat(resource, mediaMetadataRetriever)) {
+      throw new IllegalStateException("Cannot decode VP8 video on CrOS.");
+    }
+
     Bitmap result = null;
     // Arguably we should handle the case where just width or just height is set to
     // Target.SIZE_ORIGINAL. Up to and including OMR1, MediaMetadataRetriever defaults to setting
@@ -402,6 +411,54 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
     return mediaMetadataRetriever.getFrameAtTime(frameTimeMicros, frameOption);
   }
 
+  /** Returns true if the format type is unsupported on the device. */
+  private boolean isUnsupportedFormat(
+      @NonNull T resource, MediaMetadataRetriever mediaMetadataRetriever) {
+    // MediaFormat.KEY_MIME check below requires at least JELLY_BEAN
+    if (Build.VERSION.SDK_INT < VERSION_CODES.JELLY_BEAN) {
+      return false;
+    }
+
+    // The primary known problem is vp8 video on ChromeOS (ARC) devices.
+    boolean isArc = Build.DEVICE != null && Build.DEVICE.matches(".+_cheets|cheets_.+");
+    if (!isArc) {
+      return false;
+    }
+
+    MediaExtractor mediaExtractor = null;
+    try {
+      // Include the MediaMetadataRetriever extract in the try block out of an abundance of caution.
+      String mimeType =
+          mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+      if (!WEBM_MIME_TYPE.equals(mimeType)) {
+        return false;
+      }
+
+      // Only construct a MediaExtractor for webm files, since the constructor makes a JNI call
+      mediaExtractor = new MediaExtractor();
+      initializer.initializeExtractor(mediaExtractor, resource);
+      int numTracks = mediaExtractor.getTrackCount();
+      for (int i = 0; i < numTracks; ++i) {
+        MediaFormat mediaformat = mediaExtractor.getTrackFormat(i);
+        String trackMimeType = mediaformat.getString(MediaFormat.KEY_MIME);
+        if (MediaFormat.MIMETYPE_VIDEO_VP8.equals(trackMimeType)) {
+          return true;
+        }
+      }
+    } catch (Throwable t) {
+      // Catching everything here out of an abundance of caution
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Exception trying to extract track info for a webm video on CrOS.", t);
+      }
+    } finally {
+      if (mediaExtractor != null) {
+        mediaExtractor.release();
+      }
+    }
+
+    return false;
+  }
+
   @VisibleForTesting
   static class MediaMetadataRetrieverFactory {
     public MediaMetadataRetriever build() {
@@ -410,56 +467,78 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   }
 
   @VisibleForTesting
-  interface MediaMetadataRetrieverInitializer<T> {
-    void initialize(MediaMetadataRetriever retriever, T data);
+  interface MediaInitializer<T> {
+    void initializeRetriever(MediaMetadataRetriever retriever, T data);
+
+    void initializeExtractor(MediaExtractor extractor, T data) throws IOException;
   }
 
   private static final class AssetFileDescriptorInitializer
-      implements MediaMetadataRetrieverInitializer<AssetFileDescriptor> {
+      implements MediaInitializer<AssetFileDescriptor> {
 
     @Override
-    public void initialize(MediaMetadataRetriever retriever, AssetFileDescriptor data) {
+    public void initializeRetriever(MediaMetadataRetriever retriever, AssetFileDescriptor data) {
       retriever.setDataSource(data.getFileDescriptor(), data.getStartOffset(), data.getLength());
+    }
+
+    @Override
+    public void initializeExtractor(MediaExtractor extractor, AssetFileDescriptor data)
+        throws IOException {
+      extractor.setDataSource(data.getFileDescriptor(), data.getStartOffset(), data.getLength());
     }
   }
 
   // Visible for VideoBitmapDecoder.
   static final class ParcelFileDescriptorInitializer
-      implements MediaMetadataRetrieverInitializer<ParcelFileDescriptor> {
+      implements MediaInitializer<ParcelFileDescriptor> {
 
     @Override
-    public void initialize(MediaMetadataRetriever retriever, ParcelFileDescriptor data) {
+    public void initializeRetriever(MediaMetadataRetriever retriever, ParcelFileDescriptor data) {
       retriever.setDataSource(data.getFileDescriptor());
+    }
+
+    @Override
+    public void initializeExtractor(MediaExtractor extractor, ParcelFileDescriptor data)
+        throws IOException {
+      extractor.setDataSource(data.getFileDescriptor());
     }
   }
 
   @RequiresApi(Build.VERSION_CODES.M)
-  static final class ByteBufferInitializer
-      implements MediaMetadataRetrieverInitializer<ByteBuffer> {
+  static final class ByteBufferInitializer implements MediaInitializer<ByteBuffer> {
 
     @Override
-    public void initialize(MediaMetadataRetriever retriever, final ByteBuffer data) {
-      retriever.setDataSource(
-          new MediaDataSource() {
-            @Override
-            public int readAt(long position, byte[] buffer, int offset, int size) {
-              if (position >= data.limit()) {
-                return -1;
-              }
-              data.position((int) position);
-              int numBytesRead = Math.min(size, data.remaining());
-              data.get(buffer, offset, numBytesRead);
-              return numBytesRead;
-            }
+    public void initializeRetriever(MediaMetadataRetriever retriever, final ByteBuffer data) {
+      retriever.setDataSource(getMediaDataSource(data));
+    }
 
-            @Override
-            public long getSize() {
-              return data.limit();
-            }
+    @Override
+    public void initializeExtractor(MediaExtractor extractor, final ByteBuffer data)
+        throws IOException {
+      extractor.setDataSource(getMediaDataSource(data));
+    }
 
-            @Override
-            public void close() {}
-          });
+    private MediaDataSource getMediaDataSource(final ByteBuffer data) {
+      return new MediaDataSource() {
+        @Override
+        public int readAt(long position, byte[] buffer, int offset, int size) {
+          if (position >= data.limit()) {
+            return -1;
+          }
+          data.position((int) position);
+          int numBytesRead = Math.min(size, data.remaining());
+          data.get(buffer, offset, numBytesRead);
+          return numBytesRead;
+        }
+
+        @Override
+        public long getSize() {
+          return data.limit();
+        }
+
+        @Override
+        public void close() {}
+      };
     }
   }
 
