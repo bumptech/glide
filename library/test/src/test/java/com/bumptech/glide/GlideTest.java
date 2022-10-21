@@ -28,7 +28,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -90,7 +89,6 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.annotation.LooperMode;
 import org.robolectric.annotation.Resetter;
 import org.robolectric.shadow.api.Shadow;
-import org.robolectric.shadows.ShadowBitmap;
 
 /** Tests for the {@link Glide} interface and singleton. */
 @LooperMode(LEGACY)
@@ -100,7 +98,6 @@ import org.robolectric.shadows.ShadowBitmap;
     shadows = {
       GlideTest.ShadowFileDescriptorContentResolver.class,
       GlideTest.ShadowMediaMetadataRetriever.class,
-      GlideTest.MutableShadowBitmap.class
     })
 @SuppressWarnings("unchecked")
 public class GlideTest {
@@ -116,7 +113,6 @@ public class GlideTest {
   @Mock private DiskCache.Factory diskCacheFactory;
   @Mock private DiskCache diskCache;
   @Mock private MemoryCache memoryCache;
-  @Mock private Handler bgHandler;
   @Mock private Lifecycle lifecycle;
   @Mock private RequestManagerTreeNode treeNode;
   @Mock private BitmapPool bitmapPool;
@@ -154,17 +150,6 @@ public class GlideTest {
     imageView.setLayoutParams(new ViewGroup.LayoutParams(100, 100));
     imageView.layout(0, 0, 100, 100);
     doAnswer(new CallSizeReady()).when(target).getSize(isA(SizeReadyCallback.class));
-
-    when(bgHandler.post(isA(Runnable.class)))
-        .thenAnswer(
-            new Answer<Boolean>() {
-              @Override
-              public Boolean answer(InvocationOnMock invocation) {
-                Runnable runnable = (Runnable) invocation.getArguments()[0];
-                runnable.run();
-                return true;
-              }
-            });
 
     requestManager = new RequestManager(Glide.get(context), lifecycle, treeNode, context);
     requestManager.resumeRequests();
@@ -875,17 +860,6 @@ public class GlideTest {
             "You must first register an AssetFileDescriptor for " + "uri: " + uri);
       }
       return URI_TO_FILE_DESCRIPTOR.get(uri);
-    }
-  }
-
-  @Implements(Bitmap.class)
-  public static class MutableShadowBitmap extends ShadowBitmap {
-
-    @Implementation
-    public static Bitmap createBitmap(int width, int height, Bitmap.Config config) {
-      Bitmap bitmap = ShadowBitmap.createBitmap(width, height, config);
-      Shadows.shadowOf(bitmap).setMutable(true);
-      return bitmap;
     }
   }
 

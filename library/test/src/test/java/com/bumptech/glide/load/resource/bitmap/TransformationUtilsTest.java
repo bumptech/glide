@@ -17,7 +17,6 @@ import android.graphics.Matrix;
 import androidx.exifinterface.media.ExifInterface;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
-import com.bumptech.glide.util.Preconditions;
 import com.google.common.collect.Range;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,14 +26,9 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowBitmap;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    sdk = 28,
-    shadows = {TransformationUtilsTest.AlphaShadowBitmap.class})
+@Config(sdk = 28)
 public class TransformationUtilsTest {
 
   @Mock private BitmapPool bitmapPool;
@@ -448,17 +442,5 @@ public class TransformationUtilsTest {
     verify(matrix).setRotate(180);
     TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_ROTATE_270, matrix);
     verify(matrix).setRotate(-90);
-  }
-
-  @Implements(Bitmap.class)
-  public static class AlphaShadowBitmap extends ShadowBitmap {
-
-    @Implementation
-    public static Bitmap createBitmap(int width, int height, Bitmap.Config config) {
-      // Robolectric doesn't match the framework behavior with null configs, so we have to do so
-      // here.
-      Preconditions.checkNotNull("Config must not be null");
-      return ShadowBitmap.createBitmap(width, height, config);
-    }
   }
 }
