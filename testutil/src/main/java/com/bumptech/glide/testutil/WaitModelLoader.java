@@ -1,4 +1,4 @@
-package com.bumptech.glide.test;
+package com.bumptech.glide.testutil;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,8 +11,7 @@ import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
-import com.bumptech.glide.test.WaitModelLoader.WaitModel;
-import com.bumptech.glide.testutil.ConcurrencyHelper;
+import com.bumptech.glide.testutil.WaitModelLoader.WaitModel;
 import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 
@@ -21,6 +20,37 @@ import java.util.concurrent.CountDownLatch;
  * is called.
  */
 public final class WaitModelLoader<Model, Data> implements ModelLoader<WaitModel<Model>, Data> {
+
+  public static final class WaitModel<T> {
+    private final CountDownLatch latch = new CountDownLatch(1);
+    private final T wrapped;
+
+    WaitModel(T wrapped) {
+      this.wrapped = wrapped;
+    }
+
+    public void countDown() {
+      if (latch.getCount() != 1) {
+        throw new IllegalStateException();
+      }
+      latch.countDown();
+    }
+  }
+
+  /**
+   * Use {@link WaitModelLoaderRule#waitOn(Object)} instead
+   */
+  @Deprecated
+  public static synchronized <T> WaitModel<T> waitOn(T model) {
+    @SuppressWarnings("unchecked")
+    ModelLoaderFactory<WaitModel<T>, InputStream> streamFactory =
+        new Factory<>((Class<T>) model.getClass(), InputStream.class);
+    Glide.get(ApplicationProvider.getApplicationContext())
+        .getRegistry()
+        .replace(WaitModel.class, InputStream.class, streamFactory);
+
+    return new WaitModel<>(model);
+  }
 
   private final ModelLoader<Model, Data> wrapped;
 
@@ -46,23 +76,7 @@ public final class WaitModelLoader<Model, Data> implements ModelLoader<WaitModel
     return wrapped.handles(waitModel.wrapped);
   }
 
-  public static final class WaitModel<T> {
-    private final CountDownLatch latch = new CountDownLatch(1);
-    private final T wrapped;
-
-    WaitModel(T wrapped) {
-      this.wrapped = wrapped;
-    }
-
-    public void countDown() {
-      if (latch.getCount() != 1) {
-        throw new IllegalStateException();
-      }
-      latch.countDown();
-    }
-  }
-
-  public static final class Factory<Model, Data>
+  private static final class Factory<Model, Data>
       implements ModelLoaderFactory<WaitModel<Model>, Data> {
 
     private final Class<Model> modelClass;
@@ -71,17 +85,6 @@ public final class WaitModelLoader<Model, Data> implements ModelLoader<WaitModel
     Factory(Class<Model> modelClass, Class<Data> dataClass) {
       this.modelClass = modelClass;
       this.dataClass = dataClass;
-    }
-
-    public static synchronized <T> WaitModel<T> waitOn(T model) {
-      @SuppressWarnings("unchecked")
-      ModelLoaderFactory<WaitModel<T>, InputStream> streamFactory =
-          new Factory<>((Class<T>) model.getClass(), InputStream.class);
-      Glide.get(ApplicationProvider.getApplicationContext())
-          .getRegistry()
-          .replace(WaitModel.class, InputStream.class, streamFactory);
-
-      return new WaitModel<>(model);
     }
 
     @NonNull

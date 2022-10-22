@@ -25,8 +25,8 @@ import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.ResourceIds;
-import com.bumptech.glide.test.WaitModelLoader;
-import com.bumptech.glide.test.WaitModelLoader.WaitModel;
+import com.bumptech.glide.testutil.WaitModelLoader;
+import com.bumptech.glide.testutil.WaitModelLoader.WaitModel;
 import com.bumptech.glide.testutil.ConcurrencyHelper;
 import com.bumptech.glide.testutil.TearDownGlide;
 import java.io.File;
@@ -114,7 +114,7 @@ public class ErrorHandlingTest {
 
   @Test
   public void clearRequest_withError_afterPrimaryFails_clearsErrorRequest() {
-    WaitModel<Integer> errorModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
+    WaitModel<Integer> errorModel = WaitModelLoader.waitOn(ResourceIds.raw.canonical);
 
     FutureTarget<Drawable> target =
         Glide.with(context)
