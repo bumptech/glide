@@ -24,6 +24,7 @@ import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.Placeholder
 import com.bumptech.glide.integration.ktx.ResolvableGlideSize
 import com.bumptech.glide.integration.ktx.Resource
+import com.bumptech.glide.integration.ktx.Status
 import com.bumptech.glide.integration.ktx.flowResolvable
 import com.google.accompanist.drawablepainter.DrawablePainter
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +45,7 @@ constructor(
   private val size: ResolvableGlideSize,
   scope: CoroutineScope,
 ) : Painter(), RememberObserver {
+  @OptIn(ExperimentGlideFlows::class) internal var status: Status by mutableStateOf(Status.CLEARED)
   internal val currentDrawable: MutableState<Drawable?> = mutableStateOf(null)
   private var alpha: Float by mutableStateOf(DefaultAlpha)
   private var colorFilter: ColorFilter? by mutableStateOf(null)
@@ -81,6 +83,7 @@ constructor(
             is Placeholder -> it.placeholder
           }
         )
+        status = it.status
       }
     }
   }

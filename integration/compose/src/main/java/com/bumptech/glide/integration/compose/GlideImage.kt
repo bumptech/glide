@@ -1,7 +1,9 @@
 package com.bumptech.glide.integration.compose
 
 import android.graphics.drawable.Drawable
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
@@ -20,10 +22,12 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.integration.ktx.AsyncGlideSize
+import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
 import com.bumptech.glide.integration.ktx.ImmediateGlideSize
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.ResolvableGlideSize
 import com.bumptech.glide.integration.ktx.Size
+import com.bumptech.glide.integration.ktx.Status
 
 /** Mutates and returns the given [RequestBuilder] to apply relevant options. */
 public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuilder<T>
@@ -58,6 +62,24 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  * Note - this method is likely to change while we work on improving the API. Transitions are one
  * significant unexplored area. It's also possible we'll try and remove the [RequestBuilder] from
  * the direct API and instead allow all options to be set directly in the method.
+ *
+ * [requestBuilderTransform] is overridden by any overlapping parameter defined in this method if
+ * that parameter is non-null. For example, [loading] and [failure], if non-null will be used in
+ * place of any placeholder set by [requestBuilderTransform] using [RequestBuilder.placeholder] or
+ * [RequestBuilder.error].
+ *
+ * @param loading A [Placeholder] that will be displayed while the request is loading. Specifically
+ * it's used if the request is cleared ([com.bumptech.glide.request.target.Target.onLoadCleared]) or
+ * loading ([com.bumptech.glide.request.target.Target.onLoadStarted]. There's a subtle difference in
+ * behavior depending on which type of [Placeholder] you use. The resource and `Drawable` variants
+ * will be displayed if the request fails and no other failure handling is specified, but the
+ * `Composable` will not.
+ * @param failure A [Placeholder] that will be displayed if the request fails. Specifically it's
+ * used when [com.bumptech.glide.request.target.Target.onLoadFailed] is called. If
+ * [RequestBuilder.error] is called in [requestBuilderTransform] with a valid [RequestBuilder] (as
+ * opposed to resource id or [Drawable]), this [Placeholder] will not be used unless the `error`
+ * [RequestBuilder] also fails. This parameter does not override error [RequestBuilder]s, only error
+ * resource ids and/or [Drawable]s.
  */
 // TODO(judds): the API here is not particularly composeesque, we should consider alternatives
 // to RequestBuilder (though thumbnail() may make that a challenge).
@@ -73,12 +95,19 @@ public fun GlideImage(
   contentScale: ContentScale = ContentScale.Fit,
   alpha: Float = DefaultAlpha,
   colorFilter: ColorFilter? = null,
+  // TODO(judds): Consider using separate GlideImage* methods instead of sealed classes.
+  // See http://shortn/_x79pjkMZIH for an internal discussion.
+  loading: Placeholder? = null,
+  failure: Placeholder? = null,
   // TODO(judds): Consider defaulting to load the model here instead of always doing so below.
   requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
 ) {
   val requestManager: RequestManager = LocalContext.current.let { remember(it) { Glide.with(it) } }
   val requestBuilder =
     rememberRequestBuilderWithDefaults(model, requestManager, requestBuilderTransform, contentScale)
+      .let { loading?.apply(it::placeholder, it::placeholder) ?: it }
+      .let { failure?.apply(it::error, it::error) ?: it }
+
   val overrideSize: Size? = requestBuilder.overrideSize()
   val (size, finalModifier) = rememberSizeAndModifier(overrideSize, modifier)
 
@@ -91,7 +120,79 @@ public fun GlideImage(
     contentScale = contentScale,
     alpha = alpha,
     colorFilter = colorFilter,
+    placeholder = loading?.maybeComposable(),
+    failure = failure?.maybeComposable(),
   )
+}
+
+/**
+ * Used to specify a [Drawable] to use in conjunction with [GlideImage]'s `loading` or `failure`
+ * parameters.
+ *
+ * Ideally [drawable] is non-null, but because [android.content.Context.getDrawable] can return
+ * null, we allow it here. `placeholder(null)` has the same override behavior as if a non-null
+ * `Drawable` were provided.
+ */
+@ExperimentalGlideComposeApi
+public fun placeholder(drawable: Drawable?): Placeholder = Placeholder.OfDrawable(drawable)
+
+/**
+ * Used to specify a resource id to use in conjunction with [GlideImage]'s `loading` or `failure`
+ * parameters.
+ *
+ * In addition to being slightly simpler than manually fetching a [Drawable] and passing it to
+ * [placeholder], this method can be more efficient because the [Drawable] will only be loaded when
+ * needed.
+ */
+@ExperimentalGlideComposeApi
+public fun placeholder(@DrawableRes resourceId: Int): Placeholder =
+  Placeholder.OfResourceId(resourceId)
+
+/**
+ * Used to specify a [Composable] function to use in conjunction with [GlideImage]'s `loading` or
+ * `failure` parameter.
+ *
+ * Providing a nested [GlideImage] is not recommended. Use [RequestBuilder.thumbnail] or
+ * [RequestBuilder.error] as an alternative.
+ */
+@ExperimentalGlideComposeApi
+public fun placeholder(composable: @Composable () -> Unit): Placeholder =
+  Placeholder.OfComposable(composable)
+
+/**
+ * Content to display during a particular state of a Glide Request, for example while the request is
+ * loading or if the request fails.
+ *
+ * `of(Drawable)` and `of(resourceId)` trigger fewer recompositions than `of(@Composable () ->
+ * Unit)` so you should only use the Composable variant if you require something more complex than a
+ * simple color or a static image.
+ *
+ * `of(@Composable () -> Unit)` will display the [Composable] inside a [Box] whose modifier is the
+ * one provided to [GlideImage]. Doing so allows Glide to infer the requested size if one is not
+ * explicitly specified on the request itself.
+ */
+@ExperimentalGlideComposeApi
+public sealed class Placeholder {
+  internal class OfDrawable(internal val drawable: Drawable?) : Placeholder()
+  internal class OfResourceId(@DrawableRes internal val resourceId: Int) : Placeholder()
+  internal class OfComposable(internal val composable: @Composable () -> Unit) : Placeholder()
+
+  internal fun maybeComposable(): (@Composable () -> Unit)? =
+    when (this) {
+      is OfComposable -> this.composable
+      else -> null
+    }
+
+  internal fun <T> apply(
+    resource: (Int) -> RequestBuilder<T>,
+    drawable: (Drawable?) -> RequestBuilder<T>
+  ): RequestBuilder<T> =
+    when (this) {
+      is OfDrawable -> drawable(this.drawable)
+      is OfResourceId -> resource(this.resourceId)
+      // Clear out any previously set placeholder.
+      else -> drawable(null)
+    }
 }
 
 @OptIn(InternalGlideApi::class)
@@ -148,7 +249,7 @@ private fun RequestBuilder<Drawable>.contentScaleTransform(
   // TODO(judds): Think about how to handle the various fills
 }
 
-@OptIn(InternalGlideApi::class)
+@OptIn(InternalGlideApi::class, ExperimentGlideFlows::class)
 @Composable
 private fun SizedGlideImage(
   requestBuilder: RequestBuilder<Drawable>,
@@ -159,22 +260,41 @@ private fun SizedGlideImage(
   contentScale: ContentScale,
   alpha: Float,
   colorFilter: ColorFilter?,
+  placeholder: @Composable (() -> Unit)?,
+  failure: @Composable (() -> Unit)?,
 ) {
+  // Use a Box so we can infer the size if the request doesn't have an explicit size.
+  @Composable fun @Composable () -> Unit.boxed() = Box(modifier = modifier) { this@boxed() }
+
   val painter =
     rememberGlidePainter(
       requestBuilder = requestBuilder,
       size = size,
     )
-  Image(
-    painter = painter,
-    contentDescription = contentDescription,
-    alignment = alignment,
-    contentScale = contentScale,
-    alpha = alpha,
-    colorFilter = colorFilter,
-    modifier = modifier.then(Modifier.semantics { displayedDrawable = painter.currentDrawable }),
-  )
+  if (placeholder != null && painter.status.showPlaceholder()) {
+    placeholder.boxed()
+  } else if (failure != null && painter.status == Status.FAILED) {
+    failure.boxed()
+  } else {
+    Image(
+      painter = painter,
+      contentDescription = contentDescription,
+      alignment = alignment,
+      contentScale = contentScale,
+      alpha = alpha,
+      colorFilter = colorFilter,
+      modifier = modifier.then(Modifier.semantics { displayedDrawable = painter.currentDrawable })
+    )
+  }
 }
+
+@OptIn(ExperimentGlideFlows::class)
+private fun Status.showPlaceholder(): Boolean =
+  when (this) {
+    Status.RUNNING -> true
+    Status.CLEARED -> true
+    else -> false
+  }
 
 @OptIn(InternalGlideApi::class)
 @Composable

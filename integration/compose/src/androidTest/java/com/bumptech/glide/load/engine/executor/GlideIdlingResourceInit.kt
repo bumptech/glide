@@ -15,12 +15,14 @@ object GlideIdlingResourceInit {
     val executor =
       IdlingThreadPoolExecutor(
         "glide_test_thread",
-        /* corePoolSize= */ 1,
-        /* maximumPoolSize= */ 1,
-        /* keepAliveTime= */ 1,
+        /* corePoolSize = */ 1,
+        /* maximumPoolSize = */ 1,
+        /* keepAliveTime = */ 1,
         TimeUnit.SECONDS,
         LinkedBlockingQueue()
-      ) { Thread(it) }
+      ) {
+        Thread(it)
+      }
     composeRule.registerIdlingResource(
       object : IdlingResource {
         override val isIdleNow: Boolean

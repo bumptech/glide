@@ -18,10 +18,10 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
-import com.bumptech.glide.test.WaitModelLoader;
-import com.bumptech.glide.test.WaitModelLoader.WaitModel;
 import com.bumptech.glide.testutil.ConcurrencyHelper;
 import com.bumptech.glide.testutil.TearDownGlide;
+import com.bumptech.glide.testutil.WaitModelLoader;
+import com.bumptech.glide.testutil.WaitModelLoader.WaitModel;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -111,7 +111,7 @@ public class RequestTest {
 
   @Test
   public void onStop_withSingleRequestInProgress_nullsOutDrawableInView() {
-    final WaitModel<Integer> model = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
+    final WaitModel<Integer> model = WaitModelLoader.waitOn(ResourceIds.raw.canonical);
     concurrency.runOnMainThread(
         new Runnable() {
           @Override
@@ -132,7 +132,7 @@ public class RequestTest {
 
   @Test
   public void onStop_withRequestWithThumbnailBothInProgress_nullsOutDrawableInView() {
-    final WaitModel<Integer> model = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
+    final WaitModel<Integer> model = WaitModelLoader.waitOn(ResourceIds.raw.canonical);
     concurrency.runOnMainThread(
         new Runnable() {
           @Override
@@ -158,7 +158,7 @@ public class RequestTest {
   /** Tests #2555. */
   @Test
   public void clear_withRequestWithOnlyFullInProgress_nullsOutDrawableInView() {
-    final WaitModel<Integer> mainModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
+    final WaitModel<Integer> mainModel = WaitModelLoader.waitOn(ResourceIds.raw.canonical);
     concurrency.loadUntilFirstFinish(
         GlideApp.with(context)
             .load(mainModel)
@@ -198,7 +198,7 @@ public class RequestTest {
 
   @Test
   public void clear_withRequestWithOnlyFullInProgress_doesNotNullOutDrawableInView() {
-    final WaitModel<Integer> mainModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
+    final WaitModel<Integer> mainModel = WaitModelLoader.waitOn(ResourceIds.raw.canonical);
     concurrency.loadUntilFirstFinish(
         GlideApp.with(context)
             .load(mainModel)
@@ -238,7 +238,7 @@ public class RequestTest {
 
   @Test
   public void onStop_withRequestWithOnlyThumbnailInProgress_doesNotNullOutDrawableInView() {
-    final WaitModel<Integer> thumbModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
+    final WaitModel<Integer> thumbModel = WaitModelLoader.waitOn(ResourceIds.raw.canonical);
     concurrency.loadUntilFirstFinish(
         GlideApp.with(context)
             .load(ResourceIds.raw.canonical)
