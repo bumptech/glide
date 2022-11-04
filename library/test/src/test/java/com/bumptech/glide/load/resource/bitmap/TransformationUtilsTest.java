@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import androidx.exifinterface.media.ExifInterface;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -350,12 +351,20 @@ public class TransformationUtilsTest {
   @Test
   public void testRotateImage() {
     Bitmap toRotate = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
-
+    toRotate.setPixel(0, 0, Color.BLUE);
+    toRotate.setPixel(0, 1, Color.RED);
     Bitmap zero = TransformationUtils.rotateImage(toRotate, 0);
     assertTrue(toRotate == zero);
 
     Bitmap ninety = TransformationUtils.rotateImage(toRotate, 90);
-    assertThat(Shadows.shadowOf(ninety).getDescription()).contains("rotate=90.0");
+    // Checks if native graphics is enabled.
+    if (Boolean.getBoolean("robolectric.nativeruntime.enableGraphics")) {
+      assertThat(ninety.getPixel(0, 0)).isEqualTo(Color.RED);
+      assertThat(ninety.getPixel(1, 0)).isEqualTo(Color.BLUE);
+    } else {
+      // Use legacy shadow APIs
+      assertThat(Shadows.shadowOf(ninety).getDescription()).contains("rotate=90.0");
+    }
     assertEquals(toRotate.getWidth(), toRotate.getHeight());
   }
 
