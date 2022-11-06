@@ -23,6 +23,7 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy.SampleSizeRounding;
+import com.bumptech.glide.load.resource.bitmap.RecyclableBufferedInputStream.InvalidMarkException;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.LogTime;
@@ -327,7 +328,13 @@ public final class Downsampler {
       isHardwareConfigAllowed = false;
     }
 
-    int orientation = imageReader.getImageOrientation();
+    int orientation;
+    try {
+      orientation = imageReader.getImageOrientation();
+    } catch (InvalidMarkException e) {
+      orientation = ImageHeaderParser.UNKNOWN_ORIENTATION;
+    }
+
     int degreesToRotate = TransformationUtils.getExifOrientationDegrees(orientation);
     boolean isExifOrientationRequired = TransformationUtils.isExifOrientationRequired(orientation);
 
