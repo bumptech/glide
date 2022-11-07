@@ -45,7 +45,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.TextLayoutMode;
 import org.robolectric.util.ReflectionHelpers;
 
 /**
@@ -57,7 +56,6 @@ import org.robolectric.util.ReflectionHelpers;
  */
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = 19, manifest = "build/intermediates/manifests/full/debug/AndroidManifest.xml")
-@TextLayoutMode(value = TextLayoutMode.Mode.LEGACY, issueId = "130378660")
 public class CustomViewTargetTest {
   private ActivityController<Activity> activity;
   private View view;
@@ -212,7 +210,7 @@ public class CustomViewTargetTest {
 
     view.getViewTreeObserver().dispatchOnPreDraw();
 
-    verify(cb).onSizeReady(600, height);
+    verify(cb).onSizeReady(500, height);
   }
 
   @Test
@@ -232,7 +230,7 @@ public class CustomViewTargetTest {
     activity.visible();
     view.getViewTreeObserver().dispatchOnPreDraw();
 
-    verify(cb).onSizeReady(width, 400);
+    verify(cb).onSizeReady(width, 352);
   }
 
   @Test
