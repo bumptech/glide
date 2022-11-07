@@ -331,7 +331,7 @@ public final class Downsampler {
     int orientation;
     try {
       orientation = imageReader.getImageOrientation();
-    } catch (InvalidMarkException e) {
+    } catch (IOException e) {
       orientation = ImageHeaderParser.UNKNOWN_ORIENTATION;
     }
 
