@@ -17,8 +17,9 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * Avoids [com.bumptech.glide.load.engine.executor.GlideIdlingResourceInit] because we want to make
- * assertions about loads that have not yet completed.
+ * Avoids [com.bumptech.glide.load.engine.executor.GlideIdlingResourceInit] and
+ * [com.bumptech.glide.integration.compose.test.GlideComposeRule] because we want to make assertions
+ * about loads that have not yet completed.
  */
 class GlideImagePlaceholderTest {
   private val context: Context = ApplicationProvider.getApplicationContext()
