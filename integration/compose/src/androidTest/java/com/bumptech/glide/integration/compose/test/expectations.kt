@@ -63,3 +63,12 @@ private fun <ValueT, TransformedValueT> expectStateValue(
     }
     true
   }
+
+fun expectSameInstance(expectedDrawable: Drawable) =
+  SemanticsMatcher("${DisplayedDrawableKey.name} = '$expectedDrawable'") {
+    val actualValue: Drawable? = it.config.getOrElseNullable(DisplayedDrawableKey) { null }?.value
+    if (actualValue !== expectedDrawable) {
+      throw AssertionError("Expected: $expectedDrawable, but was: $actualValue")
+    }
+    true
+  }

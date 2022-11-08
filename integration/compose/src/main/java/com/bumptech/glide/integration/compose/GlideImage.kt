@@ -232,7 +232,7 @@ private fun RequestBuilder<Drawable>.contentScaleTransform(
 ): RequestBuilder<Drawable> {
   return when (contentScale) {
     ContentScale.Crop -> {
-      centerCrop()
+      optionalCenterCrop()
     }
     ContentScale.Inside,
     ContentScale.Fit -> {
@@ -240,7 +240,7 @@ private fun RequestBuilder<Drawable>.contentScaleTransform(
       // decision given how unimportant Bitmap re-use is relative to minimizing texture sizes now.
       // So instead we'll do something different and prefer not to upscale, which means using
       // centerInside(). The UI can still scale the view even if the Bitmap is smaller.
-      centerInside()
+      optionalCenterInside()
     }
     else -> {
       this
