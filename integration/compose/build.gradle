@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         minSdk 21
-        targetSdk 32
+        targetSdk 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,7 +50,7 @@ dependencies {
     implementation(project(':integration:recyclerview')) {
         transitive = false
     }
-    implementation "androidx.compose.foundation:foundation:$ANDROID_X_COMPOSE_VERSION"
+    implementation "androidx.compose.foundation:foundation:$ANDROID_X_COMPOSE_FOUNDATION_VERSION"
     implementation "androidx.compose.ui:ui:$ANDROID_X_COMPOSE_VERSION"
     implementation "com.google.accompanist:accompanist-drawablepainter:$ACCOMPANIEST_VERSION"
     implementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
@@ -60,7 +60,7 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$ANDROID_X_TEST_ESPRESSO_VERSION"
     androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$ANDROID_X_TEST_ESPRESSO_VERSION"
     androidTestImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
-    androidTestImplementation "androidx.compose.material:material:$ANDROID_X_COMPOSE_VERSION"
+    androidTestImplementation "androidx.compose.material:material:$ANDROID_X_COMPOSE_MATERIAL_VERSION"
     androidTestImplementation project(':testutil')
     androidTestImplementation "com.google.truth:truth:${TRUTH_VERSION}"
 }
