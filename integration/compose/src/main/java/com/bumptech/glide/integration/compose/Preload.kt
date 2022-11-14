@@ -1,5 +1,6 @@
 package com.bumptech.glide.integration.compose
 
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
@@ -37,6 +38,12 @@ import com.bumptech.glide.RequestManager
  * @param fixedVisibleItemCount The number of visible items. In some cases this can vary widely in
  * which case you can leave this value `null`. If the number of visible items is always one or two,
  * it might make sense to just set this to the larger of the two to reduce churn in the preloader.
+ * @param viewToDataPosition A function that can be used to map a view position to a position in
+ * [data]. If your `LazyRow` or `LazyColumn` contains only images so there's a 1:1 correspondence
+ * between the position in the view and the position in [data], you do not need to provide this
+ * function. Otherwise you need to provide a function that offsets the view position into [data] or
+ * returns `null` if the position corresponds to a view that isn't showing an image from [data].
+ * TODO(judds): like the TODO below, we could handle this automatically with some more wrapping.
  * @param requestBuilderTransform See [ListPreloader.PreloadModelProvider.getPreloadRequestBuilder]
  */
 // TODO(judds): Consider wrapping a LazyRow / LazyColumn and providing state instead of a separate
@@ -48,6 +55,20 @@ import com.bumptech.glide.RequestManager
 public fun <DataTypeT : Any> GlideLazyListPreloader(
   state: LazyListState,
   data: List<DataTypeT>,
+  viewToDataPosition: (Int) -> Int? =
+    viewToDataPosition@{
+      if (it >= data.size) {
+        if (Log.isLoggable(Constants.TAG, Log.WARN)) {
+          Log.w(
+            Constants.TAG,
+            "Mismatch between view size and data size, provide a viewToDataPosition to" +
+              " GlideLazyListPreloader",
+          )
+        }
+        return@viewToDataPosition null
+      }
+      it
+    },
   size: Size,
   numberOfItemsToPreload: Int,
   fixedVisibleItemCount: Int? = null,
@@ -56,6 +77,7 @@ public fun <DataTypeT : Any> GlideLazyListPreloader(
   val preloader =
     rememberGlidePreloader(
       data = data,
+      viewToDataPosition = viewToDataPosition,
       size = size,
       numberOfItemsToPreload = numberOfItemsToPreload,
       requestBuilderTransform = requestBuilderTransform,
@@ -73,7 +95,7 @@ private fun <DataTypeT : Any> LaunchPreload(
     snapshotFlow { state.lazyListVisibleInfo(fixedVisibleItemCount) }
       .collect { lazyListVisibleInfo ->
         preloader.onScroll(
-          /* absListView= */ null,
+          /* absListView = */ null,
           lazyListVisibleInfo.firstVisibleItemIndex,
           lazyListVisibleInfo.visibleItemCount,
           lazyListVisibleInfo.totalItemCount,
@@ -84,6 +106,7 @@ private fun <DataTypeT : Any> LaunchPreload(
 @Composable
 private fun <DataTypeT : Any> rememberGlidePreloader(
   data: List<DataTypeT>,
+  viewToDataPosition: (Int) -> Int?,
   size: Size,
   numberOfItemsToPreload: Int,
   requestBuilderTransform: PreloadRequestBuilderTransform<DataTypeT>,
@@ -97,20 +120,28 @@ private fun <DataTypeT : Any> rememberGlidePreloader(
   return remember(requestManager, requestBuilderTransform, numberOfItemsToPreload) {
     ListPreloader(
       requestManager,
-      PreloadModelProvider(requestManager, requestBuilderTransform, updatedData),
+      PreloadModelProvider(
+        requestManager,
+        requestBuilderTransform,
+        updatedData,
+        viewToDataPosition,
+      ),
       { _, _, _ -> intArrayOf(updatedSize.value.width.toInt(), updatedSize.value.height.toInt()) },
       numberOfItemsToPreload,
     )
   }
 }
 
+
 private class PreloadModelProvider<DataTypeT : Any>(
   private val requestManager: RequestManager,
   private val requestBuilderTransform: PreloadRequestBuilderTransform<DataTypeT>,
   private val data: State<List<DataTypeT>>,
+  private val viewToDataPosition: (Int) -> Int?,
 ) : ListPreloader.PreloadModelProvider<DataTypeT> {
-  override fun getPreloadItems(position: Int): List<DataTypeT> {
-    return listOf(this.data.value[position])
+  override fun getPreloadItems(viewPosition: Int): List<DataTypeT> {
+    val dataPosition = viewToDataPosition(viewPosition)
+    return dataPosition?.let { listOf(this.data.value[it]) } ?: listOf()
   }
 
   override fun getPreloadRequestBuilder(item: DataTypeT): RequestBuilder<*> {
@@ -134,3 +165,7 @@ private data class LazyListVisibleInfo(
 
 private typealias PreloadRequestBuilderTransform<DataTypeT> =
   (item: DataTypeT, requestBuilder: RequestBuilder<*>) -> RequestBuilder<*>
+
+private object Constants {
+  const val TAG = "GlidePreloader"
+}
