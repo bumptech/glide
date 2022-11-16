@@ -277,7 +277,7 @@ public class ChromiumUrlFetcherTest {
   @Test
   public void testRequestComplete_withNonNullException_callsCallbackWithException() {
     CronetException expected =
-        new CronetException("test", /*cause=*/ null) {
+        new CronetException("test", /* cause= */ null) {
           static final long serialVersionUID = 1;
         };
     fetcher.loadData(Priority.LOW, callback);

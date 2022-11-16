@@ -526,7 +526,7 @@ public class DownsamplerEmulatorTest {
               ".jpeg",
               ApplicationProvider.getApplicationContext().getCacheDir());
       os = new BufferedOutputStream(new FileOutputStream(tempFile));
-      bitmap.compress(CompressFormat.JPEG, /*quality=*/ 100, os);
+      bitmap.compress(CompressFormat.JPEG, /* quality= */ 100, os);
       bitmap.recycle();
       os.close();
 

@@ -93,7 +93,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   public static final Option<Integer> FRAME_OPTION =
       Option.disk(
           "com.bumptech.glide.load.resource.bitmap.VideoBitmapDecode.FrameOption",
-          /*defaultValue=*/ MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
+          /* defaultValue= */ MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
           new Option.CacheKeyUpdater<Integer>() {
             private final ByteBuffer buffer = ByteBuffer.allocate(Integer.SIZE / Byte.SIZE);
 

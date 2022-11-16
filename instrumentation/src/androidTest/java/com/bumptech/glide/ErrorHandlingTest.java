@@ -62,7 +62,8 @@ public class ErrorHandlingTest {
     Glide.init(
         context,
         new GlideBuilder()
-            .setAnimationExecutor(GlideExecutor.newAnimationExecutor(/*threadCount=*/ 1, strategy))
+            .setAnimationExecutor(
+                GlideExecutor.newAnimationExecutor(/* threadCount= */ 1, strategy))
             .setSourceExecutor(GlideExecutor.newSourceExecutor(strategy))
             .setDiskCacheExecutor(GlideExecutor.newDiskCacheExecutor(strategy)));
     Glide.get(context).getRegistry().prepend(Bitmap.class, new FailEncoder());
@@ -89,7 +90,8 @@ public class ErrorHandlingTest {
     Glide.init(
         context,
         new GlideBuilder()
-            .setAnimationExecutor(GlideExecutor.newAnimationExecutor(/*threadCount=*/ 1, strategy))
+            .setAnimationExecutor(
+                GlideExecutor.newAnimationExecutor(/* threadCount= */ 1, strategy))
             .setSourceExecutor(GlideExecutor.newSourceExecutor(strategy))
             .setDiskCacheExecutor(GlideExecutor.newDiskCacheExecutor(strategy)));
     Glide.get(context).getRegistry().prepend(Bitmap.class, new FailEncoder());

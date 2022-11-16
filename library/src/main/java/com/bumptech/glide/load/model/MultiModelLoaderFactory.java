@@ -43,14 +43,14 @@ public class MultiModelLoaderFactory {
       @NonNull Class<Model> modelClass,
       @NonNull Class<Data> dataClass,
       @NonNull ModelLoaderFactory<? extends Model, ? extends Data> factory) {
-    add(modelClass, dataClass, factory, /*append=*/ true);
+    add(modelClass, dataClass, factory, /* append= */ true);
   }
 
   synchronized <Model, Data> void prepend(
       @NonNull Class<Model> modelClass,
       @NonNull Class<Data> dataClass,
       @NonNull ModelLoaderFactory<? extends Model, ? extends Data> factory) {
-    add(modelClass, dataClass, factory, /*append=*/ false);
+    add(modelClass, dataClass, factory, /* append= */ false);
   }
 
   private <Model, Data> void add(

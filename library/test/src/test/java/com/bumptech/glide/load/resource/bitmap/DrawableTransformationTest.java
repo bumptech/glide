@@ -50,7 +50,7 @@ public class DrawableTransformationTest {
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
-    transformation = new DrawableTransformation(bitmapTransformation, /*isRequired=*/ true);
+    transformation = new DrawableTransformation(bitmapTransformation, /* isRequired= */ true);
     context = ApplicationProvider.getApplicationContext();
     bitmapPool = new BitmapPoolAdapter();
     Glide.init(context, new GlideBuilder().setBitmapPool(bitmapPool));
@@ -72,7 +72,7 @@ public class DrawableTransformationTest {
     @SuppressWarnings("unchecked")
     Resource<Drawable> input =
         (Resource<Drawable>) (Resource<?>) new BitmapDrawableResource(drawable, bitmapPool);
-    transformation.transform(context, input, /*outWidth=*/ 100, /*outHeight=*/ 200);
+    transformation.transform(context, input, /* outWidth= */ 100, /* outHeight= */ 200);
 
     assertThat(bitmap.isRecycled()).isFalse();
   }
@@ -94,7 +94,7 @@ public class DrawableTransformationTest {
     @SuppressWarnings("unchecked")
     Resource<Drawable> input =
         (Resource<Drawable>) (Resource<?>) new BitmapDrawableResource(drawable, bitmapPool);
-    transformation.transform(context, input, /*outWidth=*/ 100, /*outHeight=*/ 200);
+    transformation.transform(context, input, /* outWidth= */ 100, /* outHeight= */ 200);
 
     assertThat(bitmap.isRecycled()).isFalse();
   }
@@ -135,7 +135,7 @@ public class DrawableTransformationTest {
               }
             });
 
-    transformation.transform(context, input, /*outWidth=*/ 100, /*outHeight=*/ 200);
+    transformation.transform(context, input, /* outWidth= */ 100, /* outHeight= */ 200);
 
     verify(bitmapPool).put(isA(Bitmap.class));
   }
@@ -153,18 +153,18 @@ public class DrawableTransformationTest {
     keyTester
         .addEquivalenceGroup(
             transformation,
-            new DrawableTransformation(bitmapTransformation, /*isRequired=*/ true),
-            new DrawableTransformation(bitmapTransformation, /*isRequired=*/ false))
+            new DrawableTransformation(bitmapTransformation, /* isRequired= */ true),
+            new DrawableTransformation(bitmapTransformation, /* isRequired= */ false))
         .addEquivalenceGroup(bitmapTransformation)
         .addEquivalenceGroup(otherBitmapTransformation)
         .addEquivalenceGroup(
-            new DrawableTransformation(otherBitmapTransformation, /*isRequired=*/ true),
-            new DrawableTransformation(otherBitmapTransformation, /*isRequired=*/ false))
+            new DrawableTransformation(otherBitmapTransformation, /* isRequired= */ true),
+            new DrawableTransformation(otherBitmapTransformation, /* isRequired= */ false))
         .addRegressionTest(
-            new DrawableTransformation(bitmapTransformation, /*isRequired=*/ true),
+            new DrawableTransformation(bitmapTransformation, /* isRequired= */ true),
             "eddf60c557a6315a489b8a3a19b12439a90381256289fbe9a503afa726230bd9")
         .addRegressionTest(
-            new DrawableTransformation(otherBitmapTransformation, /*isRequired=*/ false),
+            new DrawableTransformation(otherBitmapTransformation, /* isRequired= */ false),
             "40931536ed0ec97c39d4be10c44f5b69a86030ec575317f5a0f17e15a0ea9be8")
         .test();
   }

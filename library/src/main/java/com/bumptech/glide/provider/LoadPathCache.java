@@ -27,8 +27,8 @@ public class LoadPathCache {
                   Object.class,
                   Collections.<ResourceDecoder<Object, Object>>emptyList(),
                   new UnitTranscoder<>(),
-                  /*listPool=*/ null)),
-          /*listPool=*/ null);
+                  /* listPool= */ null)),
+          /* listPool= */ null);
 
   private final ArrayMap<MultiClassKey, LoadPath<?, ?, ?>> cache = new ArrayMap<>();
   private final AtomicReference<MultiClassKey> keyRef = new AtomicReference<>();

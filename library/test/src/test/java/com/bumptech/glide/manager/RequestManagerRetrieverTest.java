@@ -60,7 +60,7 @@ public class RequestManagerRetrieverTest {
   public void setUp() {
     appContext = ApplicationProvider.getApplicationContext();
 
-    retriever = new RequestManagerRetriever(/*factory=*/ null, mock(GlideExperiments.class));
+    retriever = new RequestManagerRetriever(/* factory= */ null, mock(GlideExperiments.class));
 
     harnesses =
         new RetrieverHarness[] {new DefaultRetrieverHarness(), new SupportRetrieverHarness()};
@@ -175,7 +175,7 @@ public class RequestManagerRetrieverTest {
   public void testSupportCanGetRequestManagerFromFragment_nonActivityController() {
     FragmentController controller =
         FragmentController.createController(new NonActivityHostCallback(appContext));
-    controller.attachHost(/*fragment=*/ null);
+    controller.attachHost(/* fragment= */ null);
     controller.dispatchCreate();
     controller.dispatchStart();
     controller.dispatchResume();
@@ -311,7 +311,7 @@ public class RequestManagerRetrieverTest {
   public void testHandlesContextWrapperWithoutApplication() throws Exception {
     // Create a Context which is not associated with an Application instance.
     Context baseContext =
-        appContext.createPackageContext(appContext.getPackageName(), /*flags=*/ 0);
+        appContext.createPackageContext(appContext.getPackageName(), /* flags= */ 0);
 
     // Sanity-check that Robolectric behaves the same as the framework.
     assertThat(baseContext.getApplicationContext()).isNull();
@@ -575,7 +575,7 @@ public class RequestManagerRetrieverTest {
     private final Context context;
 
     NonActivityHostCallback(Context context) {
-      super(context, new Handler(Looper.getMainLooper()), /*windowAnimations=*/ 0);
+      super(context, new Handler(Looper.getMainLooper()), /* windowAnimations= */ 0);
       this.context = context;
     }
 

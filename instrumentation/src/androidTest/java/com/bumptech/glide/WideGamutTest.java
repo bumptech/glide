@@ -82,7 +82,7 @@ public class WideGamutTest {
   public void load_withEncodedPngWideGamutImage_decodesWideGamut() {
     Bitmap toCompress =
         Bitmap.createBitmap(
-            100, 100, Bitmap.Config.RGBA_F16, /*hasAlpha=*/ true, ColorSpace.get(Named.DCI_P3));
+            100, 100, Bitmap.Config.RGBA_F16, /* hasAlpha= */ true, ColorSpace.get(Named.DCI_P3));
 
     byte[] data = asPng(toCompress);
 
@@ -97,7 +97,7 @@ public class WideGamutTest {
     assumeTrue(Build.VERSION.SDK_INT != Build.VERSION_CODES.O_MR1);
     Bitmap toCompress =
         Bitmap.createBitmap(
-            100, 100, Bitmap.Config.RGBA_F16, /*hasAlpha=*/ true, ColorSpace.get(Named.DCI_P3));
+            100, 100, Bitmap.Config.RGBA_F16, /* hasAlpha= */ true, ColorSpace.get(Named.DCI_P3));
 
     byte[] data = asJpeg(toCompress);
 
@@ -109,7 +109,7 @@ public class WideGamutTest {
   public void load_withEncodedWebpWideGamutImage_decodesArgb8888() {
     Bitmap toCompress =
         Bitmap.createBitmap(
-            100, 100, Bitmap.Config.RGBA_F16, /*hasAlpha=*/ true, ColorSpace.get(Named.DCI_P3));
+            100, 100, Bitmap.Config.RGBA_F16, /* hasAlpha= */ true, ColorSpace.get(Named.DCI_P3));
 
     byte[] data = asWebp(toCompress);
 
@@ -152,7 +152,7 @@ public class WideGamutTest {
             GlideApp.with(context)
                 .asBitmap()
                 .load(data)
-                .transform(new RoundedCorners(/*roundingRadius=*/ 10))
+                .transform(new RoundedCorners(/* roundingRadius= */ 10))
                 .submit());
     assertThat(result).isNotNull();
     assertThat(result.getConfig()).isEqualTo(Config.RGBA_F16);

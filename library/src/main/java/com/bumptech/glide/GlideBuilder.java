@@ -483,7 +483,7 @@ public final class GlideBuilder {
   public GlideBuilder setImageDecoderEnabledForBitmaps(boolean isEnabled) {
     glideExperimentsBuilder.update(
         new EnableImageDecoderForBitmaps(),
-        /*isEnabled=*/ isEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
+        /* isEnabled= */ isEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
     return this;
   }
 

@@ -830,7 +830,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     }
 
     downsample(downsampleStrategy);
-    return transform(transformation, /*isRequired=*/ false);
+    return transform(transformation, /* isRequired= */ false);
   }
 
   // calling transform() on the result of clone() requires greater access.
@@ -893,7 +893,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @NonNull
   @CheckResult
   public T transform(@NonNull Transformation<Bitmap> transformation) {
-    return transform(transformation, /*isRequired=*/ true);
+    return transform(transformation, /* isRequired= */ true);
   }
 
   /**
@@ -914,7 +914,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @CheckResult
   public T transform(@NonNull Transformation<Bitmap>... transformations) {
     if (transformations.length > 1) {
-      return transform(new MultiTransformation<>(transformations), /*isRequired=*/ true);
+      return transform(new MultiTransformation<>(transformations), /* isRequired= */ true);
     } else if (transformations.length == 1) {
       return transform(transformations[0]);
     } else {
@@ -941,7 +941,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @CheckResult
   @Deprecated
   public T transforms(@NonNull Transformation<Bitmap>... transformations) {
-    return transform(new MultiTransformation<>(transformations), /*isRequired=*/ true);
+    return transform(new MultiTransformation<>(transformations), /* isRequired= */ true);
   }
 
   /**
@@ -960,7 +960,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @NonNull
   @CheckResult
   public T optionalTransform(@NonNull Transformation<Bitmap> transformation) {
-    return transform(transformation, /*isRequired=*/ false);
+    return transform(transformation, /* isRequired= */ false);
   }
 
   @NonNull
@@ -1003,7 +1003,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @CheckResult
   public <Y> T optionalTransform(
       @NonNull Class<Y> resourceClass, @NonNull Transformation<Y> transformation) {
-    return transform(resourceClass, transformation, /*isRequired=*/ false);
+    return transform(resourceClass, transformation, /* isRequired= */ false);
   }
 
   @NonNull
@@ -1047,7 +1047,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @CheckResult
   public <Y> T transform(
       @NonNull Class<Y> resourceClass, @NonNull Transformation<Y> transformation) {
-    return transform(resourceClass, transformation, /*isRequired=*/ true);
+    return transform(resourceClass, transformation, /* isRequired= */ true);
   }
 
   /**

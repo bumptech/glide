@@ -168,7 +168,7 @@ public class RequestManagerRetriever implements Handler.Callback {
           activity.getSupportFragmentManager(),
           isActivityVisible);
     } else {
-      return supportFragmentGet(activity, fm, /*parentHint=*/ null, isActivityVisible);
+      return supportFragmentGet(activity, fm, /* parentHint= */ null, isActivityVisible);
     }
   }
 
@@ -218,7 +218,7 @@ public class RequestManagerRetriever implements Handler.Callback {
       assertNotDestroyed(activity);
       frameWaiter.registerSelf(activity);
       android.app.FragmentManager fm = activity.getFragmentManager();
-      return fragmentGet(activity, fm, /*parentHint=*/ null, isActivityVisible(activity));
+      return fragmentGet(activity, fm, /* parentHint= */ null, isActivityVisible(activity));
     }
   }
 
@@ -419,7 +419,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   @Deprecated
   @NonNull
   RequestManagerFragment getRequestManagerFragment(Activity activity) {
-    return getRequestManagerFragment(activity.getFragmentManager(), /*parentHint=*/ null);
+    return getRequestManagerFragment(activity.getFragmentManager(), /* parentHint= */ null);
   }
 
   @SuppressWarnings("deprecation")
@@ -473,7 +473,7 @@ public class RequestManagerRetriever implements Handler.Callback {
 
   @NonNull
   SupportRequestManagerFragment getSupportRequestManagerFragment(FragmentManager fragmentManager) {
-    return getSupportRequestManagerFragment(fragmentManager, /*parentHint=*/ null);
+    return getSupportRequestManagerFragment(fragmentManager, /* parentHint= */ null);
   }
 
   private static boolean isActivityVisible(Context context) {
@@ -671,7 +671,7 @@ public class RequestManagerRetriever implements Handler.Callback {
         .obtainMessage(
             ID_REMOVE_SUPPORT_FRAGMENT_MANAGER,
             HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE,
-            /*arg2=*/ 0,
+            /* arg2= */ 0,
             supportFm)
         .sendToTarget();
     if (Log.isLoggable(TAG, Log.DEBUG)) {

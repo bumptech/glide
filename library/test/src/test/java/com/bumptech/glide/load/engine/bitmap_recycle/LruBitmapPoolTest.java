@@ -51,7 +51,7 @@ public class LruBitmapPoolTest {
   @Test
   public void testImmutableBitmapsAreNotAdded() {
     Bitmap bitmap = createMutableBitmap();
-    Bitmap immutable = bitmap.copy(Bitmap.Config.ARGB_8888, /*isMutable=*/ false);
+    Bitmap immutable = bitmap.copy(Bitmap.Config.ARGB_8888, /* isMutable= */ false);
     assertThat(immutable.isMutable()).isFalse();
     pool.put(immutable);
     assertThat(strategy.bitmaps).isEmpty();
@@ -154,13 +154,13 @@ public class LruBitmapPoolTest {
 
   @Test
   public void get_withNullConfig_andEmptyPool_returnsNewArgb8888Bitmap() {
-    Bitmap result = pool.get(100, 100, /*config=*/ null);
+    Bitmap result = pool.get(100, 100, /* config= */ null);
     assertThat(result.getConfig()).isEqualTo(Bitmap.Config.ARGB_8888);
   }
 
   @Test
   public void getDirty_withNullConfig_andEmptyPool_returnsNewArgb8888Bitmap() {
-    Bitmap result = pool.getDirty(100, 100, /*config=*/ null);
+    Bitmap result = pool.getDirty(100, 100, /* config= */ null);
     assertThat(result.getConfig()).isEqualTo(Bitmap.Config.ARGB_8888);
   }
 

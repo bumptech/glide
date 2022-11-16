@@ -402,10 +402,10 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   private static ThumbnailRequestCoordinator newCoordinator() {
-    return newCoordinator(/*parent=*/ null);
+    return newCoordinator(/* parent= */ null);
   }
 
   private static ThumbnailRequestCoordinator newCoordinator(RequestCoordinator parent) {
-    return new ThumbnailRequestCoordinator(/*requestLock=*/ new Object(), parent);
+    return new ThumbnailRequestCoordinator(/* requestLock= */ new Object(), parent);
   }
 }

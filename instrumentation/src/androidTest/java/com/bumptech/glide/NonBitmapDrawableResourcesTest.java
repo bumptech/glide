@@ -395,7 +395,7 @@ public class NonBitmapDrawableResourcesTest {
     for (String packageName : getInstalledPackages()) {
       int iconResourceId = getResourceId(packageName);
 
-      Context toUse = context.createPackageContext(packageName, /*flags=*/ 0);
+      Context toUse = context.createPackageContext(packageName, /* flags= */ 0);
       Resources resources = toUse.getResources();
       Uri uri =
           new Uri.Builder()
@@ -416,7 +416,7 @@ public class NonBitmapDrawableResourcesTest {
     for (String packageName : getInstalledPackages()) {
       int iconResourceId = getResourceId(packageName);
 
-      Context toUse = context.createPackageContext(packageName, /*flags=*/ 0);
+      Context toUse = context.createPackageContext(packageName, /* flags= */ 0);
       Resources resources = toUse.getResources();
       Uri uri =
           new Uri.Builder()
@@ -437,7 +437,7 @@ public class NonBitmapDrawableResourcesTest {
     for (String packageName : getInstalledPackages()) {
       int iconResourceId = getResourceId(packageName);
 
-      Context toUse = context.createPackageContext(packageName, /*flags=*/ 0);
+      Context toUse = context.createPackageContext(packageName, /* flags= */ 0);
       Resources resources = toUse.getResources();
       Uri uri =
           new Uri.Builder()
@@ -458,7 +458,7 @@ public class NonBitmapDrawableResourcesTest {
     for (String packageName : getInstalledPackages()) {
       int iconResourceId = getResourceId(packageName);
 
-      Context toUse = context.createPackageContext(packageName, /*flags=*/ 0);
+      Context toUse = context.createPackageContext(packageName, /* flags= */ 0);
       Resources resources = toUse.getResources();
       Uri uri =
           new Uri.Builder()
@@ -478,7 +478,8 @@ public class NonBitmapDrawableResourcesTest {
     Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
     mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
     PackageManager packageManager = context.getPackageManager();
-    List<ResolveInfo> pkgAppsList = packageManager.queryIntentActivities(mainIntent, /*flags=*/ 0);
+    List<ResolveInfo> pkgAppsList =
+        packageManager.queryIntentActivities(mainIntent, /* flags= */ 0);
     Set<String> result = new HashSet<>();
     for (ResolveInfo info : pkgAppsList) {
       String packageName = info.activityInfo.packageName;
@@ -494,7 +495,7 @@ public class NonBitmapDrawableResourcesTest {
   private int getResourceId(String packageName) {
     PackageInfo packageInfo;
     try {
-      packageInfo = context.getPackageManager().getPackageInfo(packageName, /*flags=*/ 0);
+      packageInfo = context.getPackageManager().getPackageInfo(packageName, /* flags= */ 0);
     } catch (NameNotFoundException e) {
       return 0;
     }
@@ -536,7 +537,7 @@ public class NonBitmapDrawableResourcesTest {
   private boolean doesApplicationPackageNameMatchResourcePackageName(
       String applicationPackageName, int iconResourceId) {
     try {
-      Context current = context.createPackageContext(applicationPackageName, /*flags=*/ 0);
+      Context current = context.createPackageContext(applicationPackageName, /* flags= */ 0);
       String resourcePackageName = current.getResources().getResourcePackageName(iconResourceId);
       return applicationPackageName.equals(resourcePackageName);
     } catch (NameNotFoundException e) {

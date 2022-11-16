@@ -89,7 +89,7 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
     }
 
     try {
-      return context.createPackageContext(packageName, /*flags=*/ 0);
+      return context.createPackageContext(packageName, /* flags= */ 0);
     } catch (NameNotFoundException e) {
       // The parent APK holds the correct context if the resource is located in a split
       if (packageName.contains(context.getPackageName())) {

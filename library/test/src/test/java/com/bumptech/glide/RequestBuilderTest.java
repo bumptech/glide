@@ -137,7 +137,7 @@ public class RequestBuilderTest {
         .onResourceReady(
             new SimpleResource<>(new Object()),
             DataSource.LOCAL,
-            /*isLoadedFromAlternateCacheKey=*/ false);
+            /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(listener1)
         .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
@@ -154,7 +154,7 @@ public class RequestBuilderTest {
         .onResourceReady(
             new SimpleResource<>(new Object()),
             DataSource.LOCAL,
-            /*isLoadedFromAlternateCacheKey=*/ false);
+            /* isLoadedFromAlternateCacheKey= */ false);
 
     // The #listener API removes any previous listeners, so the first listener should not be called.
     verify(listener1, never())

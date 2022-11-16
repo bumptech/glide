@@ -56,7 +56,7 @@ public final class GlideContextTest {
               }
             },
             transitionOptions,
-            /*defaultRequestListeners=*/ Collections.<RequestListener<Object>>emptyList(),
+            /* defaultRequestListeners= */ Collections.<RequestListener<Object>>emptyList(),
             mock(Engine.class),
             mock(GlideExperiments.class),
             Log.DEBUG);

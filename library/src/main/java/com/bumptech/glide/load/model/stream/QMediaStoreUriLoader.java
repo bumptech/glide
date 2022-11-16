@@ -200,9 +200,9 @@ public final class QMediaStoreUriLoader<DataT> implements ModelLoader<Uri, DataT
                 .query(
                     uri,
                     PROJECTION,
-                    /*selection=*/ null,
-                    /*selectionArgs=*/ null,
-                    /*sortOrder=*/ null);
+                    /* selection= */ null,
+                    /* selectionArgs= */ null,
+                    /* sortOrder= */ null);
         if (cursor == null || !cursor.moveToFirst()) {
           throw new FileNotFoundException("Failed to media store entry for: " + uri);
         }

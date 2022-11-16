@@ -57,12 +57,12 @@ public class Engine
         sourceExecutor,
         sourceUnlimitedExecutor,
         animationExecutor,
-        /*jobs=*/ null,
-        /*keyFactory=*/ null,
-        /*activeResources=*/ null,
-        /*engineJobFactory=*/ null,
-        /*decodeJobFactory=*/ null,
-        /*resourceRecycler=*/ null,
+        /* jobs= */ null,
+        /* keyFactory= */ null,
+        /* activeResources= */ null,
+        /* engineJobFactory= */ null,
+        /* decodeJobFactory= */ null,
+        /* resourceRecycler= */ null,
         isActiveResourceRetentionAllowed);
   }
 
@@ -107,8 +107,8 @@ public class Engine
               sourceExecutor,
               sourceUnlimitedExecutor,
               animationExecutor,
-              /*engineJobListener=*/ this,
-              /*resourceListener=*/ this);
+              /* engineJobListener= */ this,
+              /* resourceListener= */ this);
     }
     this.engineJobFactory = engineJobFactory;
 
@@ -353,7 +353,11 @@ public class Engine
     } else {
       result =
           new EngineResource<>(
-              cached, /*isMemoryCacheable=*/ true, /*isRecyclable=*/ true, key, /*listener=*/ this);
+              cached,
+              /* isMemoryCacheable= */ true,
+              /* isRecyclable= */ true,
+              key,
+              /* listener= */ this);
     }
     return result;
   }
@@ -387,7 +391,7 @@ public class Engine
   public void onResourceRemoved(@NonNull final Resource<?> resource) {
     // Avoid deadlock with RequestManagers when recycling triggers recursive clear() calls.
     // See b/145519760.
-    resourceRecycler.recycle(resource, /*forceNextFrame=*/ true);
+    resourceRecycler.recycle(resource, /* forceNextFrame= */ true);
   }
 
   @Override
@@ -396,7 +400,7 @@ public class Engine
     if (resource.isMemoryCacheable()) {
       cache.put(cacheKey, resource);
     } else {
-      resourceRecycler.recycle(resource, /*forceNextFrame=*/ false);
+      resourceRecycler.recycle(resource, /* forceNextFrame= */ false);
     }
   }
 

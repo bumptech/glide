@@ -139,7 +139,7 @@ public final class GlideFutures {
                 new Runnable() {
                   @Override
                   public void run() {
-                    futureTarget.cancel(/*mayInterruptIfRunning=*/ true);
+                    futureTarget.cancel(/* mayInterruptIfRunning= */ true);
                   }
                 },
                 MoreExecutors.directExecutor());

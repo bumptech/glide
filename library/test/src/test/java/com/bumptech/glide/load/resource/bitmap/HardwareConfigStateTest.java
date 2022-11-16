@@ -25,11 +25,11 @@ public class HardwareConfigStateTest {
     BitmapFactory.Options options = new BitmapFactory.Options();
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
             options,
-            /*isHardwareConfigAllowed=*/ true,
-            /*isExifOrientationRequired=*/ false);
+            /* isHardwareConfigAllowed= */ true,
+            /* isExifOrientationRequired= */ false);
 
     assertThat(result).isTrue();
     assertThat(options.inPreferredConfig).isEqualTo(Bitmap.Config.HARDWARE);
@@ -45,11 +45,11 @@ public class HardwareConfigStateTest {
     BitmapFactory.Options options = new BitmapFactory.Options();
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
             options,
-            /*isHardwareConfigAllowed=*/ true,
-            /*isExifOrientationRequired=*/ false);
+            /* isHardwareConfigAllowed= */ true,
+            /* isExifOrientationRequired= */ false);
 
     assertThat(result).isFalse();
     assertThat(options.inPreferredConfig).isNotEqualTo(Bitmap.Config.HARDWARE);
@@ -66,11 +66,11 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O - 1,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O - 1,
+            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
             options,
-            /*isHardwareConfigAllowed=*/ true,
-            /*isExifOrientationRequired=*/ false);
+            /* isHardwareConfigAllowed= */ true,
+            /* isExifOrientationRequired= */ false);
 
     assertThat(result).isFalse();
     assertThat(options.inMutable).isTrue();
@@ -88,11 +88,11 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O - 1,
+            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O - 1,
             options,
-            /*isHardwareConfigAllowed=*/ true,
-            /*isExifOrientationRequired=*/ false);
+            /* isHardwareConfigAllowed= */ true,
+            /* isExifOrientationRequired= */ false);
 
     assertThat(result).isFalse();
     assertThat(options.inMutable).isTrue();
@@ -111,11 +111,11 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
             options,
-            /*isHardwareConfigAllowed=*/ false,
-            /*isExifOrientationRequired=*/ false);
+            /* isHardwareConfigAllowed= */ false,
+            /* isExifOrientationRequired= */ false);
 
     assertThat(result).isFalse();
     assertThat(options.inMutable).isTrue();
@@ -134,11 +134,11 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
             options,
-            /*isHardwareConfigAllowed=*/ true,
-            /*isExifOrientationRequired=*/ true);
+            /* isHardwareConfigAllowed= */ true,
+            /* isExifOrientationRequired= */ true);
 
     assertThat(result).isFalse();
     assertThat(options.inMutable).isTrue();
@@ -156,11 +156,11 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
             options,
-            /*isHardwareConfigAllowed=*/ true,
-            /*isExifOrientationRequired=*/ false);
+            /* isHardwareConfigAllowed= */ true,
+            /* isExifOrientationRequired= */ false);
 
     assertThat(result).isFalse();
     assertThat(options.inMutable).isTrue();
@@ -178,11 +178,11 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
             options,
-            /*isHardwareConfigAllowed=*/ true,
-            /*isExifOrientationRequired=*/ false);
+            /* isHardwareConfigAllowed= */ true,
+            /* isExifOrientationRequired= */ false);
 
     assertThat(result).isFalse();
     assertThat(options.inMutable).isTrue();
@@ -206,11 +206,11 @@ public class HardwareConfigStateTest {
 
       boolean result =
           state.setHardwareConfigIfAllowed(
-              /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-              /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+              /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+              /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
               options,
-              /*isHardwareConfigAllowed=*/ true,
-              /*isExifOrientationRequired=*/ false);
+              /* isHardwareConfigAllowed= */ true,
+              /* isExifOrientationRequired= */ false);
 
       assertWithMessage("model: " + model).that(result).isFalse();
       assertWithMessage("model: " + model).that(options.inMutable).isTrue();
@@ -234,11 +234,11 @@ public class HardwareConfigStateTest {
 
       boolean result =
           state.setHardwareConfigIfAllowed(
-              /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-              /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+              /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+              /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
               options,
-              /*isHardwareConfigAllowed=*/ true,
-              /*isExifOrientationRequired=*/ false);
+              /* isHardwareConfigAllowed= */ true,
+              /* isExifOrientationRequired= */ false);
 
       assertWithMessage("model: " + model).that(result).isTrue();
       assertWithMessage("model: " + model).that(options.inMutable).isFalse();
@@ -261,11 +261,11 @@ public class HardwareConfigStateTest {
 
       boolean result =
           state.setHardwareConfigIfAllowed(
-              /*targetWidth=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-              /*targetHeight=*/ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+              /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+              /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
               options,
-              /*isHardwareConfigAllowed=*/ true,
-              /*isExifOrientationRequired=*/ false);
+              /* isHardwareConfigAllowed= */ true,
+              /* isExifOrientationRequired= */ false);
 
       assertWithMessage("model: " + model).that(result).isTrue();
       assertWithMessage("model: " + model).that(options.inMutable).isFalse();

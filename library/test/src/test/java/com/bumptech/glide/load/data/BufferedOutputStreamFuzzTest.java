@@ -133,13 +133,13 @@ public class BufferedOutputStreamFuzzTest {
   private Write getBufferWrite(Random random) {
     byte[] data = new byte[random.nextInt(MAX_BYTES_PER_WRITE)];
     random.nextBytes(data);
-    return new Write(data, /*length=*/ data.length, /*offset=*/ 0, WriteType.BUFFER);
+    return new Write(data, /* length= */ data.length, /* offset= */ 0, WriteType.BUFFER);
   }
 
   private Write getByteWrite(Random random) {
     byte[] data = new byte[1];
     random.nextBytes(data);
-    return new Write(data, /*length=*/ 1, /*offset=*/ 0, WriteType.BYTE);
+    return new Write(data, /* length= */ 1, /* offset= */ 0, WriteType.BYTE);
   }
 
   private WriteType getType(Random random) {

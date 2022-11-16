@@ -72,7 +72,7 @@ public final class GlideExecutor implements ExecutorService {
    * <p>Disk cache executors do not allow network operations on their threads.
    */
   public static GlideExecutor.Builder newDiskCacheBuilder() {
-    return new GlideExecutor.Builder(/*preventNetworkOperations=*/ true)
+    return new GlideExecutor.Builder(/* preventNetworkOperations= */ true)
         .setThreadCount(DEFAULT_DISK_CACHE_EXECUTOR_THREADS)
         .setName(DEFAULT_DISK_CACHE_EXECUTOR_NAME);
   }
@@ -119,7 +119,7 @@ public final class GlideExecutor implements ExecutorService {
    * <p>Source executors allow network operations on their threads.
    */
   public static GlideExecutor.Builder newSourceBuilder() {
-    return new GlideExecutor.Builder(/*preventNetworkOperations=*/ false)
+    return new GlideExecutor.Builder(/* preventNetworkOperations= */ false)
         .setThreadCount(calculateBestThreadCount())
         .setName(DEFAULT_SOURCE_EXECUTOR_NAME);
   }
@@ -198,7 +198,7 @@ public final class GlideExecutor implements ExecutorService {
     // once.
     int maximumPoolSize = bestThreadCount >= 4 ? 2 : 1;
 
-    return new GlideExecutor.Builder(/*preventNetworkOperations=*/ true)
+    return new GlideExecutor.Builder(/* preventNetworkOperations= */ true)
         .setThreadCount(maximumPoolSize)
         .setName(DEFAULT_ANIMATION_EXECUTOR_NAME);
   }
@@ -501,7 +501,7 @@ public final class GlideExecutor implements ExecutorService {
           new ThreadPoolExecutor(
               corePoolSize,
               maximumPoolSize,
-              /*keepAliveTime=*/ threadTimeoutMillis,
+              /* keepAliveTime= */ threadTimeoutMillis,
               TimeUnit.MILLISECONDS,
               new PriorityBlockingQueue<Runnable>(),
               new DefaultThreadFactory(

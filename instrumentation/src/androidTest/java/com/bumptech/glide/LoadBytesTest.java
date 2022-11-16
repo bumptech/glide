@@ -61,7 +61,7 @@ public class LoadBytesTest {
 
     imageView = new ImageView(context);
     int[] dimensions = getCanonicalDimensions();
-    imageView.setLayoutParams(new LayoutParams(/*w=*/ dimensions[0], /*h=*/ dimensions[1]));
+    imageView.setLayoutParams(new LayoutParams(/* w= */ dimensions[0], /* h= */ dimensions[1]));
 
     // Writes to the resource disk cache run in a non-blocking manner after the Target is notified.
     // Unless we enforce a single threaded executor, the encode task races with our second decode
@@ -95,11 +95,11 @@ public class LoadBytesTest {
     assertThat(firstBitmap).isNotSameInstanceAs(secondBitmap);
 
     Bitmap expectedCanonicalBitmap =
-        BitmapFactory.decodeByteArray(canonicalBytes, /*offset=*/ 0, canonicalBytes.length);
+        BitmapFactory.decodeByteArray(canonicalBytes, /* offset= */ 0, canonicalBytes.length);
     assertThat(firstBitmap).sameAs(expectedCanonicalBitmap);
 
     Bitmap expectedModifiedBitmap =
-        BitmapFactory.decodeByteArray(modifiedBytes, /*offset=*/ 0, modifiedBytes.length);
+        BitmapFactory.decodeByteArray(modifiedBytes, /* offset= */ 0, modifiedBytes.length);
     assertThat(secondBitmap).sameAs(expectedModifiedBitmap);
   }
 
@@ -122,11 +122,11 @@ public class LoadBytesTest {
     assertThat(firstBitmap).isNotSameInstanceAs(secondBitmap);
 
     Bitmap expectedCanonicalBitmap =
-        BitmapFactory.decodeByteArray(canonicalBytes, /*offset=*/ 0, canonicalBytes.length);
+        BitmapFactory.decodeByteArray(canonicalBytes, /* offset= */ 0, canonicalBytes.length);
     assertThat(firstBitmap).sameAs(expectedCanonicalBitmap);
 
     Bitmap expectedModifiedBitmap =
-        BitmapFactory.decodeByteArray(modifiedBytes, /*offset=*/ 0, modifiedBytes.length);
+        BitmapFactory.decodeByteArray(modifiedBytes, /* offset= */ 0, modifiedBytes.length);
     assertThat(secondBitmap).sameAs(expectedModifiedBitmap);
   }
 
@@ -506,7 +506,7 @@ public class LoadBytesTest {
   private int[] getCanonicalDimensions() throws IOException {
     byte[] canonicalBytes = getCanonicalBytes();
     Bitmap bitmap =
-        BitmapFactory.decodeByteArray(canonicalBytes, /*offset=*/ 0, canonicalBytes.length);
+        BitmapFactory.decodeByteArray(canonicalBytes, /* offset= */ 0, canonicalBytes.length);
     return new int[] {bitmap.getWidth(), bitmap.getHeight()};
   }
 
@@ -514,7 +514,7 @@ public class LoadBytesTest {
     int[] dimensions = getCanonicalDimensions();
     Bitmap bitmap = Bitmap.createBitmap(dimensions[0], dimensions[1], Config.ARGB_8888);
     ByteArrayOutputStream os = new ByteArrayOutputStream();
-    bitmap.compress(CompressFormat.PNG, /*quality=*/ 100, os);
+    bitmap.compress(CompressFormat.PNG, /* quality= */ 100, os);
     return os.toByteArray();
   }
 

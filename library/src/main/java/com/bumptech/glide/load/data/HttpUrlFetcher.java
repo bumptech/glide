@@ -148,7 +148,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     try {
       urlConnection = connectionFactory.build(url);
     } catch (IOException e) {
-      throw new HttpException("URL.openConnection threw", /*statusCode=*/ 0, e);
+      throw new HttpException("URL.openConnection threw", /* statusCode= */ 0, e);
     }
     for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
       urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());

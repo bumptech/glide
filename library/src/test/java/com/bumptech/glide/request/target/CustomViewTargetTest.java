@@ -78,7 +78,7 @@ public class CustomViewTargetTest {
     LinearLayout linearLayout = new LinearLayout(activity.get());
     View expandView = new View(activity.get());
     LinearLayout.LayoutParams linearLayoutParams =
-        new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, /*height=*/ 0);
+        new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, /* height= */ 0);
     linearLayoutParams.weight = 1f;
     expandView.setLayoutParams(linearLayoutParams);
     linearLayout.addView(expandView);
@@ -516,7 +516,7 @@ public class CustomViewTargetTest {
   public void clearOnDetach_onDetach_afterOnLoadCleared_removesListener() {
     activity.visible();
     attachStateTarget.clearOnDetach();
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
     attachStateTarget.setRequest(request);
     parent.removeView(view);
 
@@ -537,7 +537,7 @@ public class CustomViewTargetTest {
   public void clearOnDetach_onDetach_afterMultipleClearOnDetaches_removesListener() {
     activity.visible();
     attachStateTarget.clearOnDetach().clearOnDetach().clearOnDetach();
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
     attachStateTarget.setRequest(request);
     parent.removeView(view);
 
@@ -587,8 +587,8 @@ public class CustomViewTargetTest {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
     when(request.isCleared()).thenReturn(true);
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
-    attachStateTarget.onLoadStarted(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
+    attachStateTarget.onLoadStarted(/* placeholder= */ null);
     activity.visible();
 
     verify(request).begin();
@@ -599,7 +599,7 @@ public class CustomViewTargetTest {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
     when(request.isCleared()).thenReturn(true);
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
     activity.visible();
 
     verify(request, never()).begin();
@@ -609,7 +609,7 @@ public class CustomViewTargetTest {
   public void onLoadStarted_withoutClearOnDetach_doesNotAddListener() {
     activity.visible();
     target.setRequest(request);
-    attachStateTarget.onLoadStarted(/*placeholder=*/ null);
+    attachStateTarget.onLoadStarted(/* placeholder= */ null);
     parent.removeView(view);
 
     verify(request, never()).clear();
@@ -632,7 +632,7 @@ public class CustomViewTargetTest {
         };
     view.addOnAttachStateChangeListener(expected);
 
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
 
     activity.visible();
 

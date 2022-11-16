@@ -260,7 +260,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
@@ -570,7 +570,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor()))
@@ -808,7 +808,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
@@ -845,7 +845,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor()))
@@ -891,7 +891,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
@@ -923,7 +923,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             eq(true),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
@@ -955,7 +955,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             eq(false),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
@@ -1120,9 +1120,9 @@ public class SingleRequestTest {
               .signature(signature)
               .useUnlimitedSourceGeneratorsPool(useUnlimitedSourceGeneratorsPool);
       return SingleRequest.obtain(
-          /*context=*/ glideContext,
-          /*glideContext=*/ glideContext,
-          /*requestLock=*/ new Object(),
+          /* context= */ glideContext,
+          /* glideContext= */ glideContext,
+          /* requestLock= */ new Object(),
           model,
           transcodeClass,
           requestOptions,
@@ -1130,7 +1130,7 @@ public class SingleRequestTest {
           overrideHeight,
           priority,
           target,
-          /*targetListener=*/ null,
+          /* targetListener= */ null,
           requestListeners,
           requestCoordinator,
           engine,

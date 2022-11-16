@@ -484,7 +484,7 @@ public class ViewTargetTest {
   @Test
   public void clearOnDetach_onDetach_afterOnLoadCleared_removesListener() {
     attachStateTarget.clearOnDetach();
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
     attachStateTarget.setRequest(request);
     shadowView.callOnDetachedFromWindow();
 
@@ -501,7 +501,7 @@ public class ViewTargetTest {
   @Test
   public void clearOnDetach_onDetach_afterMultipleClearOnDetaches_removesListener() {
     attachStateTarget.clearOnDetach().clearOnDetach().clearOnDetach();
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
     attachStateTarget.setRequest(request);
     shadowView.callOnDetachedFromWindow();
 
@@ -552,8 +552,8 @@ public class ViewTargetTest {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
     when(request.isCleared()).thenReturn(true);
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
-    attachStateTarget.onLoadStarted(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
+    attachStateTarget.onLoadStarted(/* placeholder= */ null);
     shadowView.callOnAttachedToWindow();
 
     verify(request).begin();
@@ -564,7 +564,7 @@ public class ViewTargetTest {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
     when(request.isCleared()).thenReturn(true);
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
     shadowView.callOnAttachedToWindow();
 
     verify(request, never()).begin();
@@ -572,7 +572,7 @@ public class ViewTargetTest {
 
   @Test
   public void onLoadStarted_withoutClearOnDetach_doesNotAddListener() {
-    attachStateTarget.onLoadStarted(/*placeholder=*/ null);
+    attachStateTarget.onLoadStarted(/* placeholder= */ null);
 
     assertThat(shadowView.attachStateListeners).isEmpty();
   }
@@ -591,7 +591,7 @@ public class ViewTargetTest {
         };
     shadowView.addOnAttachStateChangeListener(expected);
 
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
 
     assertThat(shadowView.attachStateListeners).containsExactly(expected);
   }

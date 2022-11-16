@@ -55,20 +55,7 @@ import com.bumptech.glide.RequestManager
 public fun <DataTypeT : Any> GlideLazyListPreloader(
   state: LazyListState,
   data: List<DataTypeT>,
-  viewToDataPosition: (Int) -> Int? =
-    viewToDataPosition@{
-      if (it >= data.size) {
-        if (Log.isLoggable(Constants.TAG, Log.WARN)) {
-          Log.w(
-            Constants.TAG,
-            "Mismatch between view size and data size, provide a viewToDataPosition to" +
-              " GlideLazyListPreloader",
-          )
-        }
-        return@viewToDataPosition null
-      }
-      it
-    },
+  viewToDataPosition: ((Int) -> Int?)? = null,
   size: Size,
   numberOfItemsToPreload: Int,
   fixedVisibleItemCount: Int? = null,
@@ -106,7 +93,7 @@ private fun <DataTypeT : Any> LaunchPreload(
 @Composable
 private fun <DataTypeT : Any> rememberGlidePreloader(
   data: List<DataTypeT>,
-  viewToDataPosition: (Int) -> Int?,
+  viewToDataPosition: ((Int) -> Int?)?,
   size: Size,
   numberOfItemsToPreload: Int,
   requestBuilderTransform: PreloadRequestBuilderTransform<DataTypeT>,
@@ -116,6 +103,21 @@ private fun <DataTypeT : Any> rememberGlidePreloader(
 
   val updatedData = rememberUpdatedState(data)
   val updatedSize = rememberUpdatedState(size)
+  val actualViewToDataPosition =
+    viewToDataPosition
+      ?: actualViewToDataPosition@{
+        if (it < updatedData.value.size) {
+          return@actualViewToDataPosition it
+        }
+        if (Log.isLoggable(Constants.TAG, Log.WARN)) {
+          Log.w(
+            Constants.TAG,
+            "Mismatch between view size ($it) and data size (${updatedData.value.size}), provide a" +
+              " viewToDataPosition to GlideLazyListPreloader",
+          )
+        }
+        null
+      }
 
   return remember(requestManager, requestBuilderTransform, numberOfItemsToPreload) {
     ListPreloader(
@@ -124,7 +126,7 @@ private fun <DataTypeT : Any> rememberGlidePreloader(
         requestManager,
         requestBuilderTransform,
         updatedData,
-        viewToDataPosition,
+        actualViewToDataPosition,
       ),
       { _, _, _ -> intArrayOf(updatedSize.value.width.toInt(), updatedSize.value.height.toInt()) },
       numberOfItemsToPreload,

@@ -204,7 +204,7 @@ public class ErrorRequestCoordinatorTest {
   public void isEquivalentTo() {
     assertThat(coordinator.isEquivalentTo(primary)).isFalse();
 
-    ErrorRequestCoordinator other = newCoordinator(/*parent=*/ null);
+    ErrorRequestCoordinator other = newCoordinator(/* parent= */ null);
     assertThat(coordinator.isEquivalentTo(other)).isFalse();
 
     other.setRequests(primary, primary);
@@ -597,10 +597,10 @@ public class ErrorRequestCoordinatorTest {
   }
 
   private static ErrorRequestCoordinator newCoordinator() {
-    return newCoordinator(/*parent=*/ null);
+    return newCoordinator(/* parent= */ null);
   }
 
   private static ErrorRequestCoordinator newCoordinator(@Nullable RequestCoordinator parent) {
-    return new ErrorRequestCoordinator(/*requestLock=*/ new Object(), parent);
+    return new ErrorRequestCoordinator(/* requestLock= */ new Object(), parent);
   }
 }

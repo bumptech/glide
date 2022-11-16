@@ -24,7 +24,7 @@ public class BitmapDrawableTransformation implements Transformation<BitmapDrawab
   @SuppressWarnings("WeakerAccess")
   public BitmapDrawableTransformation(Transformation<Bitmap> wrapped) {
     this.wrapped =
-        Preconditions.checkNotNull(new DrawableTransformation(wrapped, /*isRequired=*/ false));
+        Preconditions.checkNotNull(new DrawableTransformation(wrapped, /* isRequired= */ false));
   }
 
   @NonNull

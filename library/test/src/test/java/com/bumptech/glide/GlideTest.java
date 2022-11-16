@@ -230,7 +230,7 @@ public class GlideTest {
         .build(
             context,
             Collections.<GlideModule>emptyList(),
-            /* annotationGeneratedGlideModule=*/ null);
+            /* annotationGeneratedGlideModule= */ null);
   }
 
   @Test

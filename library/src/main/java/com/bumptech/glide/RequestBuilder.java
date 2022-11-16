@@ -773,7 +773,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    */
   @NonNull
   public <Y extends Target<TranscodeType>> Y into(@NonNull Y target) {
-    return into(target, /*targetListener=*/ null, Executors.mainThreadExecutor());
+    return into(target, /* targetListener= */ null, Executors.mainThreadExecutor());
   }
 
   @NonNull
@@ -781,7 +781,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       @NonNull Y target,
       @Nullable RequestListener<TranscodeType> targetListener,
       Executor callbackExecutor) {
-    return into(target, targetListener, /*options=*/ this, callbackExecutor);
+    return into(target, targetListener, /* options= */ this, callbackExecutor);
   }
 
   private <Y extends Target<TranscodeType>> Y into(
@@ -875,7 +875,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
 
     return into(
         glideContext.buildImageViewTarget(view, transcodeClass),
-        /*targetListener=*/ null,
+        /* targetListener= */ null,
         requestOptions,
         Executors.mainThreadExecutor());
   }
@@ -1031,10 +1031,10 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       BaseRequestOptions<?> requestOptions,
       Executor callbackExecutor) {
     return buildRequestRecursive(
-        /*requestLock=*/ new Object(),
+        /* requestLock= */ new Object(),
         target,
         targetListener,
-        /*parentCoordinator=*/ null,
+        /* parentCoordinator= */ null,
         transitionOptions,
         requestOptions.getPriority(),
         requestOptions.getOverrideWidth(),

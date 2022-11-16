@@ -20,7 +20,7 @@ public final class GifBitmapProvider implements GifDecoder.BitmapProvider {
    * when requested.
    */
   public GifBitmapProvider(BitmapPool bitmapPool) {
-    this(bitmapPool, /*arrayPool=*/ null);
+    this(bitmapPool, /* arrayPool= */ null);
   }
 
   /** Constructs an instance with a shared array pool. Arrays will be reused where possible. */
