@@ -420,7 +420,13 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   private Drawable loadDrawable(@DrawableRes int resourceId) {
     Theme theme =
         requestOptions.getTheme() != null ? requestOptions.getTheme() : context.getTheme();
-    return DrawableDecoderCompat.getDrawable(glideContext, resourceId, theme);
+    // If we've unwrapped the application context, prefer to use the still-wrapped application
+    // context contained in glideContext. This is hack that works around some context wrapping magic
+    // in GMS, see http://shortn/_lFONfi4l8a. A long term strategy is think about ways to avoid
+    // unwrapping the application context, which would mean having N RequestManagers at the root
+    // level rather than a singleton.
+    Context toUse = glideContext.isUnwrappedApplicationContext(context) ? glideContext : context;
+    return DrawableDecoderCompat.getDrawable(toUse, resourceId, theme);
   }
 
   @GuardedBy("requestLock")

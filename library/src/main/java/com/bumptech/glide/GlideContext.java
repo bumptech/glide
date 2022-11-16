@@ -44,6 +44,8 @@ public class GlideContext extends ContextWrapper {
   @GuardedBy("this")
   private RequestOptions defaultRequestOptions;
 
+  @Nullable private volatile Context unwrappedApplicationContext;
+
   public GlideContext(
       @NonNull Context context,
       @NonNull ArrayPool arrayPool,
@@ -124,5 +126,25 @@ public class GlideContext extends ContextWrapper {
 
   public GlideExperiments getExperiments() {
     return experiments;
+  }
+
+  public boolean isUnwrappedApplicationContext(Context context) {
+    return context == getUnwrappedApplicationContext();
+  }
+
+  private Context getUnwrappedApplicationContext() {
+    if (unwrappedApplicationContext != null) {
+      return unwrappedApplicationContext;
+    }
+    unwrappedApplicationContext = recursivelyUnwrapContext(getBaseContext());
+    return unwrappedApplicationContext;
+  }
+
+  private static Context recursivelyUnwrapContext(Context context) {
+    if (context instanceof ContextWrapper
+        && ((ContextWrapper) context).getBaseContext().getApplicationContext() != null) {
+      return recursivelyUnwrapContext(((ContextWrapper) context).getBaseContext());
+    }
+    return context;
   }
 }
