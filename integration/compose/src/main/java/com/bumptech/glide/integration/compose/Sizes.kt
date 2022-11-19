@@ -32,8 +32,12 @@ internal fun RequestBuilder<out Any?>.overrideSize(): Size? =
 internal fun RequestBuilder<out Any?>.isOverrideSizeSet(): Boolean =
   overrideWidth.isValidGlideDimension() && overrideHeight.isValidGlideDimension()
 
-internal fun Constraints.inferredGlideSize(): Size =
-  Size(
-    if (hasBoundedWidth) maxWidth else Target.SIZE_ORIGINAL,
-    if (hasBoundedHeight) maxHeight else Target.SIZE_ORIGINAL,
-  )
+internal fun Constraints.inferredGlideSize(): Size? {
+  val width = if (hasBoundedWidth) maxWidth else Target.SIZE_ORIGINAL
+  val height = if (hasBoundedHeight) maxHeight else Target.SIZE_ORIGINAL
+  if (!width.isValidGlideDimension() || !height.isValidGlideDimension()) {
+    return null
+  }
+  return Size(width, height)
+}
+

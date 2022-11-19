@@ -3,9 +3,11 @@
 package com.bumptech.glide.integration.compose.test
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.util.TypedValue
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.test.SemanticsMatcher
@@ -13,8 +15,17 @@ import androidx.test.core.app.ApplicationProvider
 import com.bumptech.glide.integration.compose.DisplayedDrawableKey
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.Size
+import kotlin.math.roundToInt
 
-fun context(): Context = ApplicationProvider.getApplicationContext()
+private fun context(): Context = ApplicationProvider.getApplicationContext()
+
+fun Int.dpToPixels() =
+  TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_DIP,
+    this.toFloat(),
+    Resources.getSystem().displayMetrics
+  )
+    .roundToInt()
 
 fun Int.bitmapSize() = context().resources.getDrawable(this, context().theme).size()
 

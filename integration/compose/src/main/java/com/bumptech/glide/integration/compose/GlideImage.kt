@@ -312,7 +312,10 @@ private fun rememberGlidePainter(
 @OptIn(InternalGlideApi::class)
 private fun Modifier.sizeObservingModifier(sizeObserver: SizeObserver): Modifier =
   this.layout { measurable, constraints ->
-    sizeObserver.setSize(constraints.inferredGlideSize())
+    val inferredSize = constraints.inferredGlideSize()
+    if (inferredSize != null) {
+      sizeObserver.setSize(inferredSize)
+    }
     val placeable = measurable.measure(constraints)
     layout(placeable.width, placeable.height) { placeable.place(0, 0) }
   }
