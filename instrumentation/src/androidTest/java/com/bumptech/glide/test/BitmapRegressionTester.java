@@ -89,7 +89,7 @@ public final class BitmapRegressionTester {
     SplitBySdk result;
     try {
       Method method =
-          testClass.getMethod(testName.getMethodName(), /* parameterTypes= */ (Class[]) null);
+          testClass.getMethod(testName.getMethodName(), /* parameterTypes...= */ (Class[]) null);
       result = method.getAnnotation(SplitBySdk.class);
     } catch (NoSuchMethodException e) {
       throw new RuntimeException(e);

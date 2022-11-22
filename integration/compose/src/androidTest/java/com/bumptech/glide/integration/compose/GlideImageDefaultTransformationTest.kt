@@ -22,6 +22,7 @@ import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.compose.test.Constants
 import com.bumptech.glide.integration.compose.test.GlideComposeRule
 import com.bumptech.glide.integration.compose.test.assertDisplays
+import com.bumptech.glide.integration.compose.test.dpToPixels
 import com.bumptech.glide.integration.compose.test.onNodeWithDefaultContentDescription
 import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
 import com.bumptech.glide.integration.ktx.Resource
@@ -161,7 +162,8 @@ class GlideImageDefaultTransformationTest {
     @DrawableRes resourceId: Int,
     transformation: (RequestBuilder<Drawable>) -> RequestBuilder<Drawable> = { it -> it },
   ): Drawable =
-    transformation(Glide.with(context).load(resourceId).override(WIDTH.px(), HEIGHT.px()))
+    transformation(
+      Glide.with(context).load(resourceId).override(WIDTH.dpToPixels(), HEIGHT.dpToPixels()))
       .loadRequiringSuccess()
 
   @Composable
@@ -186,11 +188,3 @@ class GlideImageDefaultTransformationTest {
     val SIZE_MODIFIER = Modifier.size(WIDTH.dp, HEIGHT.dp)
   }
 }
-
-fun Int.px() =
-  TypedValue.applyDimension(
-      TypedValue.COMPLEX_UNIT_DIP,
-      this.toFloat(),
-      Resources.getSystem().displayMetrics
-    )
-    .roundToInt()
