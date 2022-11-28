@@ -53,7 +53,7 @@ class GlidePreloaderTest {
       PreloadOneItemGlideLazyListPreloader(state)
     }
 
-    assertThatModelIsInMemoryCache(preloadModels[2])
+    assertThatModelIsInMemoryCache(preloadModels[1])
   }
 
   fun assertThatModelIsInMemoryCache(@DrawableRes model: Int){
