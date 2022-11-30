@@ -820,7 +820,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
 
   // calling optionalTransform() on the result of clone() requires greater access.
   // calling downsample is guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings({"WeakerAccess", "CheckResult"})
+  @SuppressWarnings({"WeakerAccess", "CheckReturnValue"})
   @NonNull
   final T optionalTransform(
       @NonNull DownsampleStrategy downsampleStrategy,
@@ -835,7 +835,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
 
   // calling transform() on the result of clone() requires greater access.
   // calling downsample is guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings({"WeakerAccess", "CheckResult"})
+  @SuppressWarnings({"WeakerAccess", "CheckReturnValue"})
   @NonNull
   @CheckResult
   final T transform(
@@ -889,7 +889,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
    * @see #optionalTransform(Class, Transformation)
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings("CheckResult")
+  @SuppressWarnings("CheckReturnValue")
   @NonNull
   @CheckResult
   public T transform(@NonNull Transformation<Bitmap> transformation) {
@@ -909,7 +909,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
    * @see #optionalTransform(Class, Transformation)
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings({"unchecked", "varargs", "CheckResult"})
+  @SuppressWarnings({"unchecked", "varargs", "CheckReturnValue"})
   @NonNull
   @CheckResult
   public T transform(@NonNull Transformation<Bitmap>... transformations) {
@@ -936,7 +936,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
    * @see #optionalTransform(Class, Transformation)
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings({"unchecked", "varargs", "CheckResult"})
+  @SuppressWarnings({"unchecked", "varargs", "CheckReturnValue"})
   @NonNull
   @CheckResult
   @Deprecated
@@ -956,7 +956,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
    * @see #transform(Class, Transformation)
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings("CheckResult")
+  @SuppressWarnings("CheckReturnValue")
   @NonNull
   @CheckResult
   public T optionalTransform(@NonNull Transformation<Bitmap> transformation) {
@@ -1042,7 +1042,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
    * @see #optionalTransform(Class, Transformation)
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings("CheckResult")
+  @SuppressWarnings("CheckReturnValue")
   @NonNull
   @CheckResult
   public <Y> T transform(
@@ -1079,7 +1079,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
    * com.bumptech.glide.TransitionOptions#dontTransition()}
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings("CheckResult")
+  @SuppressWarnings("CheckReturnValue")
   @NonNull
   @CheckResult
   public T dontAnimate() {
