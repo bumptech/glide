@@ -45,6 +45,8 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
+plugins { id "org.sonarqube" version "3.5.0.2730" } sonarqube { properties { property "sonar.projectKey", "tjlatehjr_glide" property "sonar.organization", "tjlatehjr" property "sonar.host.url", "https://sonarcloud.io" } }
+
 dokkaHtmlMultiModule.configure {
     moduleName.set("Glide")
 }
