@@ -28,19 +28,19 @@ public final class GlideExecutor implements ExecutorService {
    * The default thread name prefix for executors used to load/decode/transform data not found in
    * cache.
    */
-  private static final String DEFAULT_SOURCE_EXECUTOR_NAME = "source";
+  static final String DEFAULT_SOURCE_EXECUTOR_NAME = "source";
 
   /**
    * The default thread name prefix for executors used to load/decode/transform data found in
    * Glide's cache.
    */
-  private static final String DEFAULT_DISK_CACHE_EXECUTOR_NAME = "disk-cache";
+  static final String DEFAULT_DISK_CACHE_EXECUTOR_NAME = "disk-cache";
 
   /**
    * The default thread count for executors used to load/decode/transform data found in Glide's
    * cache.
    */
-  private static final int DEFAULT_DISK_CACHE_EXECUTOR_THREADS = 1;
+  static final int DEFAULT_DISK_CACHE_EXECUTOR_THREADS = 1;
 
   private static final String TAG = "GlideExecutor";
 
@@ -50,7 +50,7 @@ public final class GlideExecutor implements ExecutorService {
    */
   private static final String DEFAULT_SOURCE_UNLIMITED_EXECUTOR_NAME = "source-unlimited";
 
-  private static final String DEFAULT_ANIMATION_EXECUTOR_NAME = "animation";
+  static final String DEFAULT_ANIMATION_EXECUTOR_NAME = "animation";
 
   /** The default keep alive time for threads in our cached thread pools in milliseconds. */
   private static final long KEEP_ALIVE_TIME_MS = TimeUnit.SECONDS.toMillis(10);
@@ -190,17 +190,20 @@ public final class GlideExecutor implements ExecutorService {
    * <p>Animation executors do not allow network operations on their threads.
    */
   public static GlideExecutor.Builder newAnimationBuilder() {
+    int maximumPoolSize = calculateAnimationExecutorThreadCount();
+    return new GlideExecutor.Builder(/* preventNetworkOperations= */ true)
+        .setThreadCount(maximumPoolSize)
+        .setName(DEFAULT_ANIMATION_EXECUTOR_NAME);
+  }
+
+  static int calculateAnimationExecutorThreadCount() {
     int bestThreadCount = calculateBestThreadCount();
     // We don't want to add a ton of threads running animations in parallel with our source and
     // disk cache executors. Doing so adds unnecessary CPU load and can also dramatically increase
     // our maximum memory usage. Typically one thread is sufficient here, but for higher end devices
     // with more cores, two threads can provide better performance if lots of GIFs are showing at
     // once.
-    int maximumPoolSize = bestThreadCount >= 4 ? 2 : 1;
-
-    return new GlideExecutor.Builder(/* preventNetworkOperations= */ true)
-        .setThreadCount(maximumPoolSize)
-        .setName(DEFAULT_ANIMATION_EXECUTOR_NAME);
+    return bestThreadCount >= 4 ? 2 : 1;
   }
 
   /** Shortcut for calling {@link Builder#build()} on {@link #newAnimationBuilder()}. */

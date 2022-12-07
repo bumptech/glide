@@ -6,24 +6,28 @@ tasks.whenTaskAdded { task ->
 apply plugin: 'com.android.application'
 
 dependencies {
-    debugImplementation 'androidx.fragment:fragment-testing:1.5.0'
     annotationProcessor project(":annotation:compiler")
     implementation project(":library")
+    implementation "com.android.support:multidex:$ANDROID_SUPPORT_MULTIDEX_VERSION"
+    implementation "androidx.appcompat:appcompat:$ANDROID_X_APPCOMPAT_VERSION"
 
     androidTestImplementation project(':library')
     androidTestImplementation project(':mocks')
     androidTestImplementation project(':testutil')
-    androidTestImplementation "org.mockito:mockito-android:${MOCKITO_ANDROID_VERSION}"
-    androidTestImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
-    androidTestImplementation "androidx.test:rules:${ANDROID_X_TEST_RULES_VERSION}"
-    androidTestImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
-    androidTestImplementation "com.google.truth:truth:${TRUTH_VERSION}"
-    androidTestImplementation "junit:junit:${JUNIT_VERSION}"
-    androidTestImplementation "androidx.exifinterface:exifinterface:${ANDROID_X_EXIF_INTERFACE_VERSION}"
+    androidTestImplementation "org.mockito:mockito-android:$MOCKITO_ANDROID_VERSION"
+    androidTestImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
+    androidTestImplementation "androidx.test:rules:$ANDROID_X_TEST_RULES_VERSION"
+    androidTestImplementation "androidx.test:core:$ANDROID_X_TEST_CORE_VERSION"
+    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$ANDROID_X_TEST_ESPRESSO_VERSION"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$ANDROID_X_TEST_ESPRESSO_VERSION"
+    androidTestImplementation "androidx.fragment:fragment-testing:$ANDROID_X_FRAGMENT_TESTING_VERSION"
+    androidTestImplementation "com.google.truth:truth:$TRUTH_VERSION"
+    androidTestImplementation "junit:junit:$JUNIT_VERSION"
+    androidTestImplementation "androidx.exifinterface:exifinterface:$ANDROID_X_EXIF_INTERFACE_VERSION"
 
     // Not totally clear why this is required, but it seems to be missing when tests are run on
     // 4.1.2 and 4.2.0 emulators.
-    androidTestImplementation "com.google.code.findbugs:jsr305:${JSR_305_VERSION}"
+    androidTestImplementation "com.google.code.findbugs:jsr305:$JSR_305_VERSION"
 }
 
 android {
@@ -36,11 +40,18 @@ android {
         versionCode 1
         versionName '1.0'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
+    }
+
+    buildTypes {
+        debug {
+            isDefault = true
+        }
     }
 }
 
