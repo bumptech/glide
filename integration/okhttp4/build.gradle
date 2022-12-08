@@ -1,0 +1,27 @@
+apply plugin: 'com.android.library'
+
+dependencies {
+    implementation project(':library')
+    annotationProcessor project(':annotation:compiler')
+
+    api "com.squareup.okhttp3:okhttp:${OK_HTTP_4_VERSION}"
+    api "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
+}
+
+android {
+    compileSdk COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdk OK_HTTP_4_MIN_SDK_VERSION as int
+        targetSdk TARGET_SDK_VERSION as int
+
+        versionName VERSION_NAME as String
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"
