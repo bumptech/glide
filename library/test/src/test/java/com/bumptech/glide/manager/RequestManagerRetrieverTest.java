@@ -62,8 +62,7 @@ public class RequestManagerRetrieverTest {
 
     retriever = new RequestManagerRetriever(/* factory= */ null, mock(GlideExperiments.class));
 
-    harnesses =
-        new RetrieverHarness[] {new DefaultRetrieverHarness(), new SupportRetrieverHarness()};
+    harnesses = new RetrieverHarness[] {new DefaultRetrieverHarness()};
 
     initialSdkVersion = Build.VERSION.SDK_INT;
     Util.setSdkVersionInt(18);

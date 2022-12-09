@@ -16,23 +16,19 @@ import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle.State;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ActivityScenario.ActivityAction;
-import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.instrumentation.R;
 import com.bumptech.glide.test.DefaultFragmentActivity;
 import com.bumptech.glide.testutil.TearDownGlide;
-import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
 
 // This test avoids using FragmentScenario because it doesn't seem to let us to get into the common
 // created but not yet started state, only either before onCreateView or after onResume.
-@RunWith(Parameterized.class)
+@RunWith(AndroidJUnit4.class)
 public class RequestManagerLifecycleTest {
   private static final String FRAGMENT_TAG = "fragment";
   private static final String FRAGMENT_SIBLING_TAG = "fragment_sibling";
@@ -45,19 +41,8 @@ public class RequestManagerLifecycleTest {
 
   private ActivityScenario<DefaultFragmentActivity> scenario;
 
-  @Parameter public boolean useLifecycleInsteadOfInjectingFragments;
-
-  @Parameters(name = "useLifecycleInsteadOfInjectingFragments = {0}")
-  public static ImmutableList<Boolean> parameters() {
-    return ImmutableList.of(true, false);
-  }
-
   @Before
   public void setUp() {
-    Glide.init(
-        ApplicationProvider.getApplicationContext(),
-        new GlideBuilder()
-            .useLifecycleInsteadOfInjectingFragments(useLifecycleInsteadOfInjectingFragments));
     scenario = scenarioRule.getScenario();
   }
 

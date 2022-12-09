@@ -23,7 +23,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.GlideBuilder.WaitForFramesAfterTrimMemory;
 import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.RequestManager;
@@ -71,7 +70,6 @@ public class RequestManagerRetriever implements Handler.Callback {
   private final Handler handler;
 
   private final RequestManagerFactory factory;
-  private final GlideExperiments experiments;
 
   // Objects used to find Fragments and Activities containing views.
   private final ArrayMap<View, Fragment> tempViewToSupportFragment = new ArrayMap<>();
@@ -86,7 +84,6 @@ public class RequestManagerRetriever implements Handler.Callback {
   public RequestManagerRetriever(
       @Nullable RequestManagerFactory factory, GlideExperiments experiments) {
     this.factory = factory != null ? factory : DEFAULT_FACTORY;
-    this.experiments = experiments;
     handler = new Handler(Looper.getMainLooper(), this /* Callback */);
     lifecycleRequestManagerRetriever = new LifecycleRequestManagerRetriever(this.factory);
     frameWaiter = buildFrameWaiter(experiments);
@@ -156,24 +153,14 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
     assertNotDestroyed(activity);
     frameWaiter.registerSelf(activity);
-    FragmentManager fm = activity.getSupportFragmentManager();
     boolean isActivityVisible = isActivityVisible(activity);
-    if (useLifecycleInsteadOfInjectingFragments()) {
-      Context context = activity.getApplicationContext();
-      Glide glide = Glide.get(context);
-      return lifecycleRequestManagerRetriever.getOrCreate(
-          context,
-          glide,
-          activity.getLifecycle(),
-          activity.getSupportFragmentManager(),
-          isActivityVisible);
-    } else {
-      return supportFragmentGet(activity, fm, /* parentHint= */ null, isActivityVisible);
-    }
-  }
-
-  private boolean useLifecycleInsteadOfInjectingFragments() {
-    return experiments.isEnabled(GlideBuilder.UseLifecycleInsteadOfInjectingFragments.class);
+    Glide glide = Glide.get(activity.getApplicationContext());
+    return lifecycleRequestManagerRetriever.getOrCreate(
+        activity,
+        glide,
+        activity.getLifecycle(),
+        activity.getSupportFragmentManager(),
+        isActivityVisible);
   }
 
   @NonNull
@@ -193,13 +180,9 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
     FragmentManager fm = fragment.getChildFragmentManager();
     Context context = fragment.getContext();
-    if (useLifecycleInsteadOfInjectingFragments()) {
-      Glide glide = Glide.get(context.getApplicationContext());
-      return lifecycleRequestManagerRetriever.getOrCreate(
-          context, glide, fragment.getLifecycle(), fm, fragment.isVisible());
-    } else {
-      return supportFragmentGet(context, fm, fragment, fragment.isVisible());
-    }
+    Glide glide = Glide.get(context.getApplicationContext());
+    return lifecycleRequestManagerRetriever.getOrCreate(
+        context, glide, fragment.getLifecycle(), fm, fragment.isVisible());
   }
 
   /**
@@ -502,31 +485,6 @@ public class RequestManagerRetriever implements Handler.Callback {
       }
     }
     return current;
-  }
-
-  @NonNull
-  private RequestManager supportFragmentGet(
-      @NonNull Context context,
-      @NonNull FragmentManager fm,
-      @Nullable Fragment parentHint,
-      boolean isParentVisible) {
-    SupportRequestManagerFragment current = getSupportRequestManagerFragment(fm, parentHint);
-    RequestManager requestManager = current.getRequestManager();
-    if (requestManager == null) {
-      // TODO(b/27524013): Factor out this Glide.get() call.
-      Glide glide = Glide.get(context);
-      requestManager =
-          factory.build(
-              glide, current.getGlideLifecycle(), current.getRequestManagerTreeNode(), context);
-      // This is a bit of hack, we're going to start the RequestManager, but not the
-      // corresponding Lifecycle. It's safe to start the RequestManager, but starting the
-      // Lifecycle might trigger memory leaks. See b/154405040
-      if (isParentVisible) {
-        requestManager.onStart();
-      }
-      current.setRequestManager(requestManager);
-    }
-    return requestManager;
   }
 
   // We care about the instance specifically.
