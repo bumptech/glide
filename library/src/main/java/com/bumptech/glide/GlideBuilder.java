@@ -488,18 +488,6 @@ public final class GlideBuilder {
   }
 
   /**
-   * When given androidx Fragments and Activities, use {@link androidx.lifecycle.Lifecycle} to track
-   * the Activity or Fragment lifecycle instead of adding custom {@link
-   * com.bumptech.glide.manager.SupportRequestManagerFragment}s.
-   *
-   * <p>This flag is experimental and will be removed without notice in a future version.
-   */
-  public GlideBuilder useLifecycleInsteadOfInjectingFragments(boolean isEnabled) {
-    glideExperimentsBuilder.update(new UseLifecycleInsteadOfInjectingFragments(), isEnabled);
-    return this;
-  }
-
-  /**
    * Use {@link com.bumptech.glide.load.model.DirectResourceLoader} instead of {@link
    * com.bumptech.glide.load.model.ResourceLoader} so that we load drawables asynchronously with the
    * correc theme (ie light / dark mode).
@@ -632,12 +620,6 @@ public final class GlideBuilder {
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
-
-  /**
-   * Use the androidx lifecycle instead of injecting custom fragments when using androidx fragments
-   * and activities.
-   */
-  public static final class UseLifecycleInsteadOfInjectingFragments implements Experiment {}
 
   /**
    * Use {@link com.bumptech.glide.load.model.DirectResourceLoader} instead of {@link
