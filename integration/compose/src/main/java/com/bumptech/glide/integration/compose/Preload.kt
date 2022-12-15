@@ -1,15 +1,9 @@
 package com.bumptech.glide.integration.compose
 
-import android.util.Log
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
+import android.graphics.drawable.Drawable
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalContext
 import com.bumptech.glide.Glide
@@ -17,18 +11,58 @@ import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
 
+private const val DEFAULT_ITEMS_TO_PRELOAD = 10
+
 /**
- * Preloads ahead of the users current scroll position for [LazyRow] and
- * [androidx.compose.foundation.lazy.LazyColumn], similar to [ListPreloader] and
- * [com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader].
+ * Preloads ahead of the data access position on the returned [GlidePreloadingData], similar to
+ * [ListPreloader] and [com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader].
  *
  * The only time this API is useful is when your UI also loads an item with exactly the same
- * options, model and size. Be careful to make sure that your requests are identical in the
- * preloader and in the UI, or you might end up hurting performance instead of improving it.
+ * options, model and size. You can ensure you're doing so by using the [RequestBuilder] returned
+ * by [GlidePreloadingData.get]
  *
- * @param state The [LazyListState] provided to the `LazyRow` or `LazyColumn`
- * @param data The backing list of metadata that we're going to preload images for.
- * @param size The override size we'll pass to [RequestBuilder.override] .
+ * Typical usage will look something like this:
+ * ```
+ * val glidePreloadingData =
+ *   rememberGlidePreloadingData(myDataList, THUMBNAIL_SIZE) { myDataItem, requestBuilder ->
+ *     // THUMBNAIL_SIZE is applied for you, but .load() is not because determining the model from
+ *     // the underlying data isn't trivial. Don't forget to call .load()!
+ *     requestBuilder.load(myDataItem.url)
+ *   }
+ *
+ *  LazyRow(...) {
+ *    item { Text(text = "Header") }
+ *    items(glidePreloadingData.size) { index ->
+ *      val (myDataItem, preloadRequest) = glidePreloadingData[index]
+ *      GlideImage(model = item.url, contentDescription = item.description, ...) { primaryRequest ->
+ *        primaryRequest.thumbnail(preloadRequest)
+ *      }
+ *    }
+ *  }
+ *  ```
+ *
+ *  Note that preloading will not occur until the first access of `glidePreloadingData`. If you
+ *  have multiple disjoint data sets that you'd like to preload, or have some number of preceding
+ *  header rows prior to your first image, you can optionally add a few manual calls to make
+ *  preloading continue smoothly across data sets. One way you might do so is to call the next data
+ *  set toward the end of the previous data  set, e.g.:
+ *
+ *  ```
+ *  val itemsToPreload = 15
+ *  items(firstDataSet.size) { index ->
+ *    ... // Do something with first data set.
+ *
+ *    // Then as you get to the end of the first data set, start preloading the next data set
+ *    manually
+ *    if (index >= firstDataSet.size - itemsToPreload) {
+ *      nextDataSet[itemsToPreload - (firstDataSet.size - index)]
+ *    }
+ *  }
+ *  ```
+ *
+ * @param dataSize The total number of items to display and preload.
+ * @param dataGetter A getter for the item at the given index (ie [List.get].
+ * @param preloadImageSize The override size we'll pass to [RequestBuilder.override] .
  * @param numberOfItemsToPreload The number of items to preload ahead of the user's current
  * position. This should be tested for each application. If the total memory size of the preloaded
  * images exceeds the memory cache size, preloading for a lazy list is not effective. However if you
@@ -38,136 +72,179 @@ import com.bumptech.glide.RequestManager
  * @param fixedVisibleItemCount The number of visible items. In some cases this can vary widely in
  * which case you can leave this value `null`. If the number of visible items is always one or two,
  * it might make sense to just set this to the larger of the two to reduce churn in the preloader.
- * @param viewToDataPosition A function that can be used to map a view position to a position in
- * [data]. If your `LazyRow` or `LazyColumn` contains only images so there's a 1:1 correspondence
- * between the position in the view and the position in [data], you do not need to provide this
- * function. Otherwise you need to provide a function that offsets the view position into [data] or
- * returns `null` if the position corresponds to a view that isn't showing an image from [data].
- * TODO(judds): like the TODO below, we could handle this automatically with some more wrapping.
- * @param requestBuilderTransform See [ListPreloader.PreloadModelProvider.getPreloadRequestBuilder]
+ * @param requestBuilderTransform See [ListPreloader.PreloadModelProvider.getPreloadRequestBuilder].
+ * You should call [RequestBuilder.load] on the given `item` so that any type specific options
+ * applied the matching [RequestManager.load] method are applied identically to the preload request.
+ * Remember that the request produced by this transform must exactly match the request made in your
+ * non-preload request for preloading to be useful.
  */
-// TODO(judds): Consider wrapping a LazyRow / LazyColumn and providing state instead of a separate
-// function. Wrapping might also make it easier to pass through the size and request builder
-// modifications so that it's easier to make sure the preload size matches a size on the
-// GlideImage
 @Composable
-@ExperimentalGlideComposeApi
-public fun <DataTypeT : Any> GlideLazyListPreloader(
-  state: LazyListState,
-  data: List<DataTypeT>,
-  viewToDataPosition: ((Int) -> Int?)? = null,
-  size: Size,
-  numberOfItemsToPreload: Int,
+public fun <DataT : Any> rememberGlidePreloadingData(
+  dataSize: Int,
+  dataGetter: (Int) -> DataT,
+  preloadImageSize: Size,
+  numberOfItemsToPreload: Int = DEFAULT_ITEMS_TO_PRELOAD,
   fixedVisibleItemCount: Int? = null,
-  requestBuilderTransform: PreloadRequestBuilderTransform<DataTypeT>,
-) {
-  val preloader =
-    rememberGlidePreloader(
-      data = data,
-      viewToDataPosition = viewToDataPosition,
-      size = size,
-      numberOfItemsToPreload = numberOfItemsToPreload,
-      requestBuilderTransform = requestBuilderTransform,
-    )
-  LaunchPreload(preloader = preloader, state = state, fixedVisibleItemCount = fixedVisibleItemCount)
-}
-
-@Composable
-private fun <DataTypeT : Any> LaunchPreload(
-  preloader: ListPreloader<DataTypeT>,
-  state: LazyListState,
-  fixedVisibleItemCount: Int?
-) =
-  LaunchedEffect(preloader, state, fixedVisibleItemCount) {
-    snapshotFlow { state.lazyListVisibleInfo(fixedVisibleItemCount) }
-      .collect { lazyListVisibleInfo ->
-        preloader.onScroll(
-          /* absListView = */ null,
-          lazyListVisibleInfo.firstVisibleItemIndex,
-          lazyListVisibleInfo.visibleItemCount,
-          lazyListVisibleInfo.totalItemCount,
-        )
-      }
-  }
-
-@Composable
-private fun <DataTypeT : Any> rememberGlidePreloader(
-  data: List<DataTypeT>,
-  viewToDataPosition: ((Int) -> Int?)?,
-  size: Size,
-  numberOfItemsToPreload: Int,
-  requestBuilderTransform: PreloadRequestBuilderTransform<DataTypeT>,
-): ListPreloader<DataTypeT> {
-  val context = LocalContext.current
-  val requestManager = remember(context) { Glide.with(context) }
-
-  val updatedData = rememberUpdatedState(data)
-  val updatedSize = rememberUpdatedState(size)
-  val actualViewToDataPosition =
-    viewToDataPosition
-      ?: actualViewToDataPosition@{
-        if (it < updatedData.value.size) {
-          return@actualViewToDataPosition it
-        }
-        if (Log.isLoggable(Constants.TAG, Log.WARN)) {
-          Log.w(
-            Constants.TAG,
-            "Mismatch between view size ($it) and data size (${updatedData.value.size}), provide a" +
-              " viewToDataPosition to GlideLazyListPreloader",
-          )
-        }
-        null
-      }
-
-  return remember(requestManager, requestBuilderTransform, numberOfItemsToPreload) {
-    ListPreloader(
-      requestManager,
-      PreloadModelProvider(
+  requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
+): GlidePreloadingData<DataT> {
+  val requestManager = LocalContext.current.let { remember(it) { Glide.with(it) } }
+  return remember(
+    requestManager,
+    dataSize,
+    dataGetter,
+    preloadImageSize,
+    numberOfItemsToPreload,
+    fixedVisibleItemCount,
+    requestBuilderTransform,
+  ) {
+    val preloaderData =
+      PreloaderData(dataSize, dataGetter, requestBuilderTransform, preloadImageSize)
+    val preloader =
+      ListPreloader<DataT>(
         requestManager,
-        requestBuilderTransform,
-        updatedData,
-        actualViewToDataPosition,
-      ),
-      { _, _, _ -> intArrayOf(updatedSize.value.width.toInt(), updatedSize.value.height.toInt()) },
-      numberOfItemsToPreload,
+        PreloadModelProvider(
+          requestManager,
+          preloaderData,
+        ),
+        PreloadDimensionsProvider(preloaderData),
+        numberOfItemsToPreload,
+      )
+    PreloadDataImpl(
+      dataSize,
+      dataGetter,
+      requestManager,
+      preloadImageSize,
+      fixedVisibleItemCount,
+      preloader,
+      requestBuilderTransform,
     )
   }
 }
 
-
-private class PreloadModelProvider<DataTypeT : Any>(
-  private val requestManager: RequestManager,
-  private val requestBuilderTransform: PreloadRequestBuilderTransform<DataTypeT>,
-  private val data: State<List<DataTypeT>>,
-  private val viewToDataPosition: (Int) -> Int?,
-) : ListPreloader.PreloadModelProvider<DataTypeT> {
-  override fun getPreloadItems(viewPosition: Int): List<DataTypeT> {
-    val dataPosition = viewToDataPosition(viewPosition)
-    return dataPosition?.let { listOf(this.data.value[it]) } ?: listOf()
-  }
-
-  override fun getPreloadRequestBuilder(item: DataTypeT): RequestBuilder<*> {
-    return requestBuilderTransform(item, requestManager.asDrawable().load(item))
-  }
-}
-
-private fun LazyListState.lazyListVisibleInfo(fixedVisibleItemCount: Int?) =
-  LazyListVisibleInfo(
-    firstVisibleItemIndex = firstVisibleItemIndex,
-    visibleItemCount = fixedVisibleItemCount ?: layoutInfo.visibleItemsInfo.size,
-    totalItemCount = layoutInfo.totalItemsCount
+/**
+ * A helper for [rememberGlidePreloadingData] that accepts a [List]. See the more general equivalent
+ * for details.
+ */
+@Composable
+public fun <DataT : Any> rememberGlidePreloadingData(
+  data: List<DataT>,
+  preloadImageSize: Size,
+  numberOfItemsToPreload: Int = DEFAULT_ITEMS_TO_PRELOAD,
+  fixedVisibleItemCount: Int? = null,
+  requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
+): GlidePreloadingData<DataT> {
+  return rememberGlidePreloadingData(
+    dataSize = data.size,
+    dataGetter = data::get,
+    preloadImageSize = preloadImageSize,
+    numberOfItemsToPreload = numberOfItemsToPreload,
+    fixedVisibleItemCount = fixedVisibleItemCount,
+    requestBuilderTransform = requestBuilderTransform,
   )
-
-@Immutable
-private data class LazyListVisibleInfo(
-  val firstVisibleItemIndex: Int,
-  val visibleItemCount: Int,
-  val totalItemCount: Int,
-)
-
-private typealias PreloadRequestBuilderTransform<DataTypeT> =
-  (item: DataTypeT, requestBuilder: RequestBuilder<*>) -> RequestBuilder<*>
-
-private object Constants {
-  const val TAG = "GlidePreloader"
 }
+
+private data class PreloaderData<DataT>(
+  val dataSize: Int,
+  val dataAccessor: (Int) -> DataT,
+  val requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
+  val size: Size,
+)  {
+  fun preloadRequests(
+    requestManager: RequestManager,
+    item: DataT,
+  ): RequestBuilder<Drawable> {
+    return requestBuilderTransform(item, requestManager.asDrawable())
+  }
+}
+
+/**
+ * Wraps a set of data, triggers image preloads based on the positions provided to [get] and exposes
+ * the data and the preload [RequestBuilder].
+ */
+public interface GlidePreloadingData<DataT> {
+  /** The total number of items in the data set. */
+  public val size: Int
+
+  /**
+   * Returns the [DataT] at a given index in the data and a [RequestBuilder] that will trigger a
+   * request that exactly matches the preload request for this index.
+   *
+   * The returned [RequestBuilder] should always be used to display the item at the given index.
+   * Otherwise the preload request triggered by this call is likely useless work. The
+   * [RequestBuilder] can either be used as the primary request, or more likely, passed as the
+   * [RequestBuilder.thumbnail] to a higher resolution request.
+   *
+   * This method has side affects! Calling it will trigger preloads based on the given [index].
+   * Preloading assumes sequential access in a manner that matches what the user will see. If you
+   * need to look up data at indices for other reasons, use the underlying data source directly so
+   * that you do not confuse the preloader. Only use this method when obtaining data to display to
+   * the user.
+   */
+  @Composable
+  public operator fun get(index: Int): Pair<DataT, RequestBuilder<Drawable>>
+}
+
+private class PreloadDataImpl<DataT : Any>(
+  override val size: Int,
+  private val indexToData: (Int) -> DataT,
+  private val requestManager: RequestManager,
+  private val preloadImageSize: Size,
+  private val fixedVisibleItemCount: Int?,
+  private val preloader: ListPreloader<DataT>,
+  private val requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
+) : GlidePreloadingData<DataT> {
+
+  @Composable
+  override fun get(index: Int): Pair<DataT, RequestBuilder<Drawable>> {
+    val item = indexToData(index)
+    val requestBuilder =
+      requestBuilderTransform(
+        item,
+        requestManager.asDrawable()
+          .override(preloadImageSize.width.toInt(), preloadImageSize.height.toInt()),
+      )
+
+    LaunchedEffect(preloader, preloadImageSize, requestBuilderTransform, indexToData, index) {
+      preloader.onScroll(
+        /* absListView = */ null,
+        index,
+        fixedVisibleItemCount ?: 1,
+        size,
+      )
+    }
+    return item to requestBuilder
+  }
+}
+
+private class PreloadDimensionsProvider<DataT : Any>(
+  private val updatedData: PreloaderData<DataT>,
+) : ListPreloader.PreloadSizeProvider<DataT> {
+  override fun getPreloadSize(item: DataT, adapterPosition: Int, perItemPosition: Int): IntArray =
+    updatedData.size.toIntArray()
+}
+
+private fun Size.toIntArray() = intArrayOf(width.toInt(), height.toInt())
+
+private class PreloadModelProvider<DataT : Any>(
+  private val requestManager: RequestManager,
+  private val data: PreloaderData<DataT>,
+) : ListPreloader.PreloadModelProvider<DataT> {
+
+  override fun getPreloadItems(position: Int): MutableList<DataT> {
+    return mutableListOf(data.dataAccessor(position))
+  }
+
+  override fun getPreloadRequestBuilder(item: DataT): RequestBuilder<*> {
+    return data.preloadRequests(requestManager, item)
+  }
+}
+
+/**
+ * Provides the data to load and a [RequestBuilder] to load it with.
+ *
+ * You must at least call [RequestBuilder.load] with the appropriate model extracted from `item` on
+ * the given `requestBuilder`. You can also optionally call any other methods available on
+ * `requestBuilder` to customize your load.
+ */
+public typealias PreloadRequestBuilderTransform<DataTypeT> =
+  (item: DataTypeT, requestBuilder: RequestBuilder<Drawable>) -> RequestBuilder<Drawable>

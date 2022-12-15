@@ -181,12 +181,14 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     if (from < to) {
       // Increasing
       for (int i = start; i < end; i++) {
-        preloadAdapterPosition(preloadModelProvider.getPreloadItems(i), i, true);
+        preloadAdapterPosition(
+            preloadModelProvider.getPreloadItems(i), /* position= */ i, /* isIncreasing= */ true);
       }
     } else {
       // Decreasing
       for (int i = end - 1; i >= start; i--) {
-        preloadAdapterPosition(preloadModelProvider.getPreloadItems(i), i, false);
+        preloadAdapterPosition(
+            preloadModelProvider.getPreloadItems(i), /* position= */ i, /* isIncreasing= */ false);
       }
     }
 
