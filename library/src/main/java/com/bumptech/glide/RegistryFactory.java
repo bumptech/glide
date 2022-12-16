@@ -32,6 +32,7 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.MediaStoreFileLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.ResourceLoader;
+import com.bumptech.glide.load.model.ResourceUriLoader;
 import com.bumptech.glide.load.model.StreamEncoder;
 import com.bumptech.glide.load.model.StringLoader;
 import com.bumptech.glide.load.model.UnitModelLoader;
@@ -280,7 +281,12 @@ final class RegistryFactory {
           .append(int.class, InputStream.class, inputStreamFactory)
           .append(Integer.class, InputStream.class, inputStreamFactory)
           .append(int.class, AssetFileDescriptor.class, assetFileDescriptorFactory)
-          .append(Integer.class, AssetFileDescriptor.class, assetFileDescriptorFactory);
+          .append(Integer.class, AssetFileDescriptor.class, assetFileDescriptorFactory)
+          .append(Uri.class, InputStream.class, ResourceUriLoader.newStreamFactory(context))
+          .append(
+              Uri.class,
+              AssetFileDescriptor.class,
+              ResourceUriLoader.newAssetFileDescriptorFactory(context));
     } else {
       ResourceLoader.StreamFactory resourceLoaderStreamFactory =
           new ResourceLoader.StreamFactory(resources);
@@ -325,15 +331,16 @@ final class RegistryFactory {
           new QMediaStoreUriLoader.FileDescriptorFactory(context));
     }
     registry
-        .append(Uri.class, InputStream.class, new UriLoader.StreamFactory(contentResolver))
+        .append(
+            Uri.class, InputStream.class, new UriLoader.StreamFactory(contentResolver, experiments))
         .append(
             Uri.class,
             ParcelFileDescriptor.class,
-            new UriLoader.FileDescriptorFactory(contentResolver))
+            new UriLoader.FileDescriptorFactory(contentResolver, experiments))
         .append(
             Uri.class,
             AssetFileDescriptor.class,
-            new UriLoader.AssetFileDescriptorFactory(contentResolver))
+            new UriLoader.AssetFileDescriptorFactory(contentResolver, experiments))
         .append(Uri.class, InputStream.class, new UrlUriLoader.StreamFactory())
         .append(URL.class, InputStream.class, new UrlLoader.StreamFactory())
         .append(Uri.class, File.class, new MediaStoreFileLoader.Factory(context))

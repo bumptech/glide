@@ -5,6 +5,9 @@ import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import com.bumptech.glide.GlideBuilder.UseDirectResourceLoader;
+import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.AssetFileDescriptorLocalUriFetcher;
 import com.bumptech.glide.load.data.DataFetcher;
@@ -26,7 +29,8 @@ import java.util.Set;
  * @param <Data> The type of data that will be retrieved for {@link android.net.Uri}s.
  */
 public class UriLoader<Data> implements ModelLoader<Uri, Data> {
-  private static final Set<String> SCHEMES =
+
+  private static final Set<String> SCHEMES_WITH_RESOURCE =
       Collections.unmodifiableSet(
           new HashSet<>(
               Arrays.asList(
@@ -34,12 +38,23 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
                   ContentResolver.SCHEME_ANDROID_RESOURCE,
                   ContentResolver.SCHEME_CONTENT)));
 
+  private static final Set<String> SCHEMES =
+      Collections.unmodifiableSet(
+          new HashSet<>(
+              Arrays.asList(ContentResolver.SCHEME_FILE, ContentResolver.SCHEME_CONTENT)));
+
   private final LocalUriFetcherFactory<Data> factory;
+  @Nullable private final GlideExperiments glideExperiments;
+
+  UriLoader(LocalUriFetcherFactory<Data> factory, @Nullable GlideExperiments glideExperiments) {
+    this.factory = factory;
+    this.glideExperiments = glideExperiments;
+  }
 
   // Public API.
   @SuppressWarnings("WeakerAccess")
   public UriLoader(LocalUriFetcherFactory<Data> factory) {
-    this.factory = factory;
+    this(factory, /* glideExperiments= */ null);
   }
 
   @Override
@@ -50,7 +65,13 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
 
   @Override
   public boolean handles(@NonNull Uri model) {
-    return SCHEMES.contains(model.getScheme());
+    Set<String> schemesToCheck =
+        isUseDirectResourceLoaderEnabled() ? SCHEMES : SCHEMES_WITH_RESOURCE;
+    return schemesToCheck.contains(model.getScheme());
+  }
+
+  private boolean isUseDirectResourceLoaderEnabled() {
+    return glideExperiments != null && glideExperiments.isEnabled(UseDirectResourceLoader.class);
   }
 
   /**
@@ -67,9 +88,21 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
       implements ModelLoaderFactory<Uri, InputStream>, LocalUriFetcherFactory<InputStream> {
 
     private final ContentResolver contentResolver;
+    @Nullable private final GlideExperiments glideExperiments;
+
+    /**
+     * @deprecated This method is experimental and will be removed in a future version without
+     *     warning.
+     */
+    @Deprecated
+    public StreamFactory(
+        ContentResolver contentResolver, @Nullable GlideExperiments glideExperiments) {
+      this.contentResolver = contentResolver;
+      this.glideExperiments = glideExperiments;
+    }
 
     public StreamFactory(ContentResolver contentResolver) {
-      this.contentResolver = contentResolver;
+      this(contentResolver, /* glideExperiments= */ null);
     }
 
     @Override
@@ -80,7 +113,7 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
     @NonNull
     @Override
     public ModelLoader<Uri, InputStream> build(MultiModelLoaderFactory multiFactory) {
-      return new UriLoader<>(this);
+      return new UriLoader<>(this, glideExperiments);
     }
 
     @Override
@@ -95,9 +128,21 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
           LocalUriFetcherFactory<ParcelFileDescriptor> {
 
     private final ContentResolver contentResolver;
+    @Nullable private final GlideExperiments glideExperiments;
+
+    /**
+     * @deprecated This method is experimental and will be removed in a future version without
+     *     warning.
+     */
+    @Deprecated
+    public FileDescriptorFactory(
+        ContentResolver contentResolver, @Nullable GlideExperiments glideExperiments) {
+      this.contentResolver = contentResolver;
+      this.glideExperiments = glideExperiments;
+    }
 
     public FileDescriptorFactory(ContentResolver contentResolver) {
-      this.contentResolver = contentResolver;
+      this(contentResolver, /* glideExperiments= */ null);
     }
 
     @Override
@@ -108,7 +153,7 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
     @NonNull
     @Override
     public ModelLoader<Uri, ParcelFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
-      return new UriLoader<>(this);
+      return new UriLoader<>(this, glideExperiments);
     }
 
     @Override
@@ -123,14 +168,26 @@ public class UriLoader<Data> implements ModelLoader<Uri, Data> {
           LocalUriFetcherFactory<AssetFileDescriptor> {
 
     private final ContentResolver contentResolver;
+    @Nullable private final GlideExperiments glideExperiments;
+
+    /**
+     * @deprecated This method is experimental and will be removed in a future version without
+     *     warning.
+     */
+    @Deprecated
+    public AssetFileDescriptorFactory(
+        ContentResolver contentResolver, @Nullable GlideExperiments glideExperiments) {
+      this.contentResolver = contentResolver;
+      this.glideExperiments = glideExperiments;
+    }
 
     public AssetFileDescriptorFactory(ContentResolver contentResolver) {
-      this.contentResolver = contentResolver;
+      this(contentResolver, /* glideExperiments= */ null);
     }
 
     @Override
     public ModelLoader<Uri, AssetFileDescriptor> build(MultiModelLoaderFactory multiFactory) {
-      return new UriLoader<>(this);
+      return new UriLoader<>(this, glideExperiments);
     }
 
     @Override
