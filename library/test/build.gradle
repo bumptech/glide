@@ -54,13 +54,4 @@ android {
     }
 
     testOptions.unitTests.includeAndroidResources = true
-
-    sourceSets {
-        androidTest {
-            resources.srcDirs += ['../../exifsamples']
-        }
-        test {
-            resources.srcDirs += ['../../exifsamples']
-        }
-    }
 }
