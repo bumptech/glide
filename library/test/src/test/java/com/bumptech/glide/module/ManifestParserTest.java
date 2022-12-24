@@ -1,13 +1,18 @@
 package com.bumptech.glide.module;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import com.bumptech.glide.Glide;
@@ -16,6 +21,7 @@ import com.bumptech.glide.Registry;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -27,6 +33,7 @@ import org.robolectric.annotation.Config;
 @SuppressWarnings("deprecation")
 public class ManifestParserTest {
   private static final String MODULE_VALUE = "GlideModule";
+  private static final String PACKAGE_NAME = "com.bumptech.test";
 
   @Mock private Context context;
   private ManifestParser parser;
@@ -38,15 +45,25 @@ public class ManifestParserTest {
     applicationInfo = new ApplicationInfo();
     applicationInfo.metaData = new Bundle();
 
-    String packageName = "com.bumptech.test";
-    when(context.getPackageName()).thenReturn(packageName);
+    when(context.getPackageName()).thenReturn(PACKAGE_NAME);
 
     PackageManager pm = mock(PackageManager.class);
-    when(pm.getApplicationInfo(eq(packageName), eq(PackageManager.GET_META_DATA)))
+    when(pm.getApplicationInfo(eq(PACKAGE_NAME), eq(PackageManager.GET_META_DATA)))
         .thenReturn(applicationInfo);
     when(context.getPackageManager()).thenReturn(pm);
 
     parser = new ManifestParser(context);
+  }
+
+  // TODO(#4977): Remove this after the bug in Compose's previews is fixed.
+  @Test
+  public void parse_withNullApplicationInfo_doesNotThrow() throws NameNotFoundException {
+    PackageManager pm = mock(PackageManager.class);
+    when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(null);
+    when(context.getPackageManager()).thenReturn(pm);
+
+    parser = new ManifestParser(context);
+    parser.parse();
   }
 
   @Test
@@ -78,7 +95,6 @@ public class ManifestParserTest {
   @Test
   public void testParse_withValidModuleName_ignoresMetadataWithoutGlideModuleValue() {
     applicationInfo.metaData.putString(TestModule1.class.getName(), MODULE_VALUE + "test");
-
     assertThat(parser.parse()).isEmpty();
   }
 
@@ -96,11 +112,33 @@ public class ManifestParserTest {
     parser.parse();
   }
 
-  @Test(expected = RuntimeException.class)
-  public void testThrows_whenPackageNameNotFound() {
-    when(context.getPackageName()).thenReturn("fakePackageName");
+  @Test
+  public void parse_withNullMetadata_doesNotThrow() throws NameNotFoundException {
+    PackageManager pm = mock(PackageManager.class);
+    ApplicationInfo applicationInfo = new ApplicationInfo();
+    applicationInfo.metaData = null;
+    when(pm.getApplicationInfo(eq(PACKAGE_NAME), eq(PackageManager.GET_META_DATA)))
+        .thenReturn(applicationInfo);
+    when(context.getPackageManager()).thenReturn(pm);
 
     parser.parse();
+  }
+
+  @Test
+  public void parse_withMissingName_throwsRuntimeException() throws NameNotFoundException {
+    PackageManager pm = mock(PackageManager.class);
+    doThrow(new NameNotFoundException("name")).when(pm).getApplicationInfo(anyString(), anyInt());
+    when(context.getPackageManager()).thenReturn(pm);
+
+    assertThrows(
+        "Unable to find metadata to parse GlideModules",
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() {
+            parser.parse();
+          }
+        });
   }
 
   private void addModuleToManifest(Class<?> moduleClass) {
