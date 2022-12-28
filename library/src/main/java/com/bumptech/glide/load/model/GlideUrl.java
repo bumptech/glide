@@ -132,7 +132,8 @@ public class GlideUrl implements Key {
   public boolean equals(Object o) {
     if (o instanceof GlideUrl) {
       GlideUrl other = (GlideUrl) o;
-      return getCacheKey().equals(other.getCacheKey()) && headers.equals(other.headers);
+      return getCacheKey().equals(other.getCacheKey()) &&
+          headers.getHeaders().equals(other.headers.getHeaders());
     }
     return false;
   }
@@ -141,7 +142,9 @@ public class GlideUrl implements Key {
   public int hashCode() {
     if (hashCode == 0) {
       hashCode = getCacheKey().hashCode();
-      hashCode = 31 * hashCode + headers.hashCode();
+      Map<String, String> headersMap = headers.getHeaders();
+      int headersHashcode = headersMap.isEmpty() ? 0 : headersMap.hashCode();
+      hashCode = 31 * hashCode + headersHashcode;
     }
     return hashCode;
   }

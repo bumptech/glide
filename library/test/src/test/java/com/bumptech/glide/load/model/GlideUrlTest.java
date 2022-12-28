@@ -7,6 +7,8 @@ import static org.mockito.Mockito.mock;
 import com.google.common.testing.EqualsTester;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -106,15 +108,47 @@ public class GlideUrlTest {
     Headers otherHeaders = mock(Headers.class);
     String url = "http://www.google.com";
     String otherUrl = "http://mail.google.com";
+    Map<String, String> dummyHeadersMap = Map.of("HEADER_NAME", "HEADER_VALUE");
+    Map<String, String> otherDummyHeadersMap = Map.of("HEADER_NAME", "HEADER_VALUE", "HEADER_NAME_2", "HEADER_VALUE_2");
+    LazyHeaders.Builder lazyHeadersBuilder = new LazyHeaders.Builder();
+    LazyHeaders.Builder otherLazyHeadersBuilder = new LazyHeaders.Builder();
+    for (Entry<String, String> e: dummyHeadersMap.entrySet()) {
+      lazyHeadersBuilder.addHeader(e.getKey(), e.getValue());
+    }
+    for (Entry<String, String> e: otherDummyHeadersMap.entrySet()) {
+      otherLazyHeadersBuilder.addHeader(e.getKey(), e.getValue());
+    }
     new EqualsTester()
         .addEqualityGroup(
             new GlideUrl(url),
             new GlideUrl(url),
             new GlideUrl(new URL(url)),
-            new GlideUrl(new URL(url)))
-        .addEqualityGroup(new GlideUrl(otherUrl), new GlideUrl(new URL(otherUrl)))
-        .addEqualityGroup(new GlideUrl(url, headers), new GlideUrl(new URL(url), headers))
-        .addEqualityGroup(new GlideUrl(url, otherHeaders), new GlideUrl(new URL(url), otherHeaders))
+            new GlideUrl(new URL(url)),
+            new GlideUrl(url, headers),
+            new GlideUrl(new URL(url), headers),
+            new GlideUrl(url, otherHeaders),
+            new GlideUrl(new URL(url), otherHeaders),
+            new GlideUrl(url, new LazyHeaders.Builder().build()))
+        .addEqualityGroup(
+            new GlideUrl(otherUrl),
+            new GlideUrl(otherUrl),
+            new GlideUrl(new URL(otherUrl)),
+            new GlideUrl(new URL(otherUrl)),
+            new GlideUrl(otherUrl, headers),
+            new GlideUrl(new URL(otherUrl), headers),
+            new GlideUrl(otherUrl, otherHeaders),
+            new GlideUrl(new URL(otherUrl), otherHeaders),
+            new GlideUrl(otherUrl, new LazyHeaders.Builder().build()))
+        .addEqualityGroup(
+            new GlideUrl(url, () -> dummyHeadersMap),
+            new GlideUrl(url, () -> dummyHeadersMap),
+            new GlideUrl(new URL(url), () -> dummyHeadersMap),
+            new GlideUrl(url, lazyHeadersBuilder.build()))
+        .addEqualityGroup(
+            new GlideUrl(url, () -> otherDummyHeadersMap),
+            new GlideUrl(url, () -> otherDummyHeadersMap),
+            new GlideUrl(new URL(url), () -> otherDummyHeadersMap),
+            new GlideUrl(new URL(url), otherLazyHeadersBuilder.build()))
         .testEquals();
   }
 }
