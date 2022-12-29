@@ -137,18 +137,21 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @GuardedBy("Glide.class")
-  private static void checkAndInitializeGlide(
+  @VisibleForTesting
+  static void checkAndInitializeGlide(
       @NonNull Context context, @Nullable GeneratedAppGlideModule generatedAppGlideModule) {
     // In the thread running initGlide(), one or more classes may call Glide.get(context).
     // Without this check, those calls could trigger infinite recursion.
     if (isInitializing) {
       throw new IllegalStateException(
-          "You cannot call Glide.get() in registerComponents(),"
-              + " use the provided Glide instance instead");
+          "Glide has been called recursively, this is probably an internal library error!");
     }
     isInitializing = true;
-    initializeGlide(context, generatedAppGlideModule);
-    isInitializing = false;
+    try {
+      initializeGlide(context, generatedAppGlideModule);
+    } finally {
+      isInitializing = false;
+    }
   }
 
   /**
