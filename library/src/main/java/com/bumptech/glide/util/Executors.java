@@ -40,7 +40,7 @@ public final class Executors {
   @VisibleForTesting
   public static void shutdownAndAwaitTermination(ExecutorService pool) {
     long shutdownSeconds = 5;
-    pool.shutdownNow();
+    pool.shutdown();
     try {
       if (!pool.awaitTermination(shutdownSeconds, TimeUnit.SECONDS)) {
         pool.shutdownNow();
