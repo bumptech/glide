@@ -421,11 +421,14 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     if (isAutoCloneEnabled) {
       return clone().theme(theme);
     }
-    // TODO(b/234614365): Allow the theme option to be null.
-    Preconditions.checkNotNull(theme);
     this.theme = theme;
-    fields |= THEME;
-    return set(ResourceDrawableDecoder.THEME, theme);
+    if (theme != null) {
+      fields |= THEME;
+      return set(ResourceDrawableDecoder.THEME, theme);
+    } else {
+      fields &= ~THEME;
+      return removeOption(ResourceDrawableDecoder.THEME);
+    }
   }
 
   /**
@@ -555,6 +558,14 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     Preconditions.checkNotNull(option);
     Preconditions.checkNotNull(value);
     options.set(option, value);
+    return selfOrThrowIfLocked();
+  }
+
+  T removeOption(@NonNull Option<?> option) {
+    if (isAutoCloneEnabled) {
+      return clone().removeOption(option);
+    }
+    options.remove(option);
     return selfOrThrowIfLocked();
   }
 

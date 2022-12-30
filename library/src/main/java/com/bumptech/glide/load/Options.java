@@ -15,10 +15,16 @@ public final class Options implements Key {
     values.putAll((SimpleArrayMap<Option<?>, Object>) other.values);
   }
 
-  // TODO(b/234614365): Allow nullability.
   @NonNull
   public <T> Options set(@NonNull Option<T> option, @NonNull T value) {
     values.put(option, value);
+    return this;
+  }
+
+  // TODO(b/234614365): Expand usage of this method in BaseRequestOptions so that it's usable for
+  // other options.
+  public Options remove(@NonNull Option<?> option) {
+    values.remove(option);
     return this;
   }
 

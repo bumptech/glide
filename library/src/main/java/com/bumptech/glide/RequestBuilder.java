@@ -1,11 +1,12 @@
 package com.bumptech.glide;
 
 import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
-import static com.bumptech.glide.request.RequestOptions.signatureOf;
 import static com.bumptech.glide.request.RequestOptions.skipMemoryCacheOf;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -603,6 +604,11 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or {@link
    * com.bumptech.glide.request.RequestOptions#skipMemoryCache(boolean)} may be appropriate.
    *
+   * <p>If {@code string} is in fact a resource {@link Uri}, you should first parse it to a Uri
+   * using {@link Uri#parse(String)} and then pass the {@code Uri} to {@link #load(Uri)}. Doing so
+   * will ensure that we respect the appropriate theme / dark / light mode. As an alternative, you
+   * can also manually apply the current {@link Theme} using {@link #theme(Theme)}.
+   *
    * @see #load(Object)
    * @param string A file path, or a uri or url handled by {@link
    *     com.bumptech.glide.load.model.UriLoader}.
@@ -624,7 +630,20 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * signature you create based on the data at the given Uri that will invalidate the cache if that
    * data changes. Alternatively, using {@link
    * com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or {@link
-   * com.bumptech.glide.request.RequestOptions#skipMemoryCache(boolean)} may be appropriate.
+   * com.bumptech.glide.request.RequestOptions#skipMemoryCache(boolean)} may be appropriate. The
+   * only exception to this is that if we recognize the given {@code uri} as having {@link
+   * ContentResolver#SCHEME_ANDROID_RESOURCE}, then we'll apply {@link AndroidResourceSignature}
+   * automatically. If we do so, calls to other {@code load()} methods will <em>not</em> override
+   * the automatically applied signature.
+   *
+   * <p>If {@code uri} has a {@link Uri#getScheme()} of {@link
+   * android.content.ContentResolver#SCHEME_ANDROID_RESOURCE}, then this method will add the {@link
+   * android.content.res.Resources.Theme} of the {@link Context} associated with this {@code
+   * requestBuilder} so that we can respect themeable attributes and/or light / dark mode. Any call
+   * to {@link #theme(Theme)} prior to this method call will be overridden. To avoid this, call
+   * {@link #theme(Theme)} after calling this method with either {@code null} or the {@code Theme}
+   * you'd prefer to use instead. Note that even if you change the theme, the {@link
+   * AndroidResourceSignature} will still be based on the {@link Context} theme.
    *
    * @see #load(Object)
    * @param uri The Uri representing the image. Must be of a type handled by {@link
@@ -634,7 +653,22 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable Uri uri) {
-    return loadGeneric(uri);
+    return maybeApplyOptionsResourceUri(uri, loadGeneric(uri));
+  }
+
+  private RequestBuilder<TranscodeType> maybeApplyOptionsResourceUri(
+      @Nullable Uri uri, RequestBuilder<TranscodeType> requestBuilder) {
+    if (uri == null || !ContentResolver.SCHEME_ANDROID_RESOURCE.equals(uri.getScheme())) {
+      return requestBuilder;
+    }
+    return applyResourceThemeAndSignature(requestBuilder);
+  }
+
+  private RequestBuilder<TranscodeType> applyResourceThemeAndSignature(
+      RequestBuilder<TranscodeType> requestBuilder) {
+    return requestBuilder
+        .theme(context.getTheme())
+        .signature(AndroidResourceSignature.obtain(context));
   }
 
   /**
@@ -688,6 +722,13 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * method, especially in conjunction with {@link com.bumptech.glide.load.Transformation}s with
    * caution for non-{@link Bitmap} {@link Drawable}s.
    *
+   * <p>This method will add the {@link android.content.res.Resources.Theme} of the {@link Context}
+   * associated with this {@code requestBuilder} so that we can respect themeable attributes and/or
+   * light / dark mode. Any call to {@link #theme(Theme)} prior to this method call will be
+   * overridden. To avoid this, call {@link #theme(Theme)} after calling this method with either
+   * {@code null} or the {@code Theme} you'd prefer to use instead. Note that even if you change the
+   * theme, the {@link AndroidResourceSignature} will still be based on the {@link Context} theme.
+   *
    * @see #load(Integer)
    * @see com.bumptech.glide.signature.AndroidResourceSignature
    */
@@ -695,7 +736,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@RawRes @DrawableRes @Nullable Integer resourceId) {
-    return loadGeneric(resourceId).apply(signatureOf(AndroidResourceSignature.obtain(context)));
+    return applyResourceThemeAndSignature(loadGeneric(resourceId));
   }
 
   /**
