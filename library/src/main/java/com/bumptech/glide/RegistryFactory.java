@@ -90,24 +90,22 @@ final class RegistryFactory {
       final List<GlideModule> manifestModules,
       @Nullable final AppGlideModule annotationGeneratedModule) {
     return new GlideSupplier<Registry>() {
-      // Rely on callers using memoization if they want to avoid duplicate work, but
-      // rely on ourselves to verify that no recursive initialization occurs.
-      private boolean isInitializing;
+      private boolean isInitializingOrInitialized;
 
       @Override
       public Registry get() {
-        if (isInitializing) {
+        if (isInitializingOrInitialized) {
           throw new IllegalStateException(
               "Recursive Registry initialization! In your"
                   + " AppGlideModule and LibraryGlideModules, Make sure you're using the provided "
                   + "Registry rather calling glide.getRegistry()!");
         }
+        isInitializingOrInitialized = true;
+
         Trace.beginSection("Glide registry");
-        isInitializing = true;
         try {
           return createAndInitRegistry(glide, manifestModules, annotationGeneratedModule);
         } finally {
-          isInitializing = false;
           Trace.endSection();
         }
       }
