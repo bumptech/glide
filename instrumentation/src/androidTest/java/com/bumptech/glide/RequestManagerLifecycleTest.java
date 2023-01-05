@@ -2,7 +2,10 @@ package com.bumptech.glide;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +16,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.testing.FragmentScenario;
+import androidx.lifecycle.Lifecycle.Event;
 import androidx.lifecycle.Lifecycle.State;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.OnLifecycleEvent;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ActivityScenario.ActivityAction;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
@@ -21,6 +28,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.instrumentation.R;
 import com.bumptech.glide.test.DefaultFragmentActivity;
 import com.bumptech.glide.testutil.TearDownGlide;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,6 +65,70 @@ public class RequestManagerLifecycleTest {
   public void get_withActivityBeforeCreate_startsRequestManager() {
     scenario.moveToState(State.CREATED);
     scenario.onActivity(activity -> assertThat(Glide.with(activity).isPaused()).isFalse());
+  }
+
+  // See b/262668610
+  @SuppressWarnings("OnLifecycleEvent")
+  @Test
+  public void get_withActivityOnDestroy_QPlus_doesNotCrash() {
+    // Activity#isDestroyed's behavior seems to have changed in Q. On Q+, isDestroyed returns false
+    // during onDestroy, so we have to handle that case explicitly.
+    assumeTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
+    scenario.moveToState(State.CREATED);
+
+    class GetOnDestroy implements LifecycleObserver {
+      private final FragmentActivity activity;
+
+      GetOnDestroy(FragmentActivity activity) {
+        this.activity = activity;
+      }
+
+      @OnLifecycleEvent(Event.ON_DESTROY)
+      public void onDestroy(@NonNull LifecycleOwner owner) {
+        Glide.with(activity);
+      }
+    }
+    scenario.onActivity(
+        activity -> activity.getLifecycle().addObserver(new GetOnDestroy(activity)));
+    scenario.moveToState(State.DESTROYED);
+  }
+
+  @SuppressWarnings("OnLifecycleEvent")
+  @Test
+  public void get_withActivityOnDestroy_afterJellyBeanAndbeforeQ_doesNotCrash() {
+    // Activity#isDestroyed's behavior seems to have changed in Q. On <Q, isDestroyed returns true
+    // during onDestroy, triggering an assertion in Glide. < Jelly bean, isDestroyed is not
+    // available as a method.
+    assumeTrue(
+        Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN
+            && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q);
+    AtomicReference<Exception> thrownException = new AtomicReference<>();
+    scenario.moveToState(State.CREATED);
+
+    class GetOnDestroy implements LifecycleObserver {
+      private final FragmentActivity activity;
+
+      GetOnDestroy(FragmentActivity activity) {
+        this.activity = activity;
+      }
+
+      @OnLifecycleEvent(Event.ON_DESTROY)
+      public void onDestroy(@NonNull LifecycleOwner owner) {
+        try {
+          Glide.with(activity);
+          fail("Failed to throw expected exception");
+        } catch (Exception e) {
+          thrownException.set(e);
+        }
+      }
+    }
+    scenario.onActivity(
+        activity -> activity.getLifecycle().addObserver(new GetOnDestroy(activity)));
+    scenario.moveToState(State.DESTROYED);
+
+    assertThat(thrownException.get())
+        .hasMessageThat()
+        .contains("You cannot start a load for a destroyed activity");
   }
 
   @Test
