@@ -644,20 +644,20 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   void registerRequestManager(RequestManager requestManager) {
+    // TODO(b/262740328): revert cl/499929774 once root cause is found.
     synchronized (managers) {
-      if (managers.contains(requestManager)) {
-        throw new IllegalStateException("Cannot register already registered manager");
+      if (!managers.contains(requestManager)) {
+        managers.add(requestManager);
       }
-      managers.add(requestManager);
     }
   }
 
   void unregisterRequestManager(RequestManager requestManager) {
+    // TODO(b/262740328): revert cl/499929774 once root cause is found.
     synchronized (managers) {
-      if (!managers.contains(requestManager)) {
-        throw new IllegalStateException("Cannot unregister not yet registered manager");
+      if (managers.contains(requestManager)) {
+        managers.remove(requestManager);
       }
-      managers.remove(requestManager);
     }
   }
 
