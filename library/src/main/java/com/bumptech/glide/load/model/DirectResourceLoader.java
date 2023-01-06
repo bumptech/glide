@@ -62,7 +62,7 @@ public final class DirectResourceLoader<DataT> implements ModelLoader<Integer, D
         // TODO(judds): We try to apply AndroidResourceSignature for caching in RequestBuilder.
         //  Arguably we should mix in that information here instead.
         new ObjectKey(resourceId),
-        new ResourceDataFetcher<>(resources, resourceOpener, resourceId));
+        new ResourceDataFetcher<>(theme, resources, resourceOpener, resourceId));
   }
 
   @Override
@@ -73,7 +73,12 @@ public final class DirectResourceLoader<DataT> implements ModelLoader<Integer, D
   }
 
   private interface ResourceOpener<DataT> {
-    DataT open(Resources resources, int resourceId);
+
+    /**
+     * {@code resources} is expected to come from the given {@code theme}, so {@code theme} does not
+     * need to be used if it's not required.
+     */
+    DataT open(@Nullable Theme theme, Resources resources, int resourceId);
 
     void close(DataT data) throws IOException;
 
@@ -91,7 +96,7 @@ public final class DirectResourceLoader<DataT> implements ModelLoader<Integer, D
     }
 
     @Override
-    public AssetFileDescriptor open(Resources resources, int resourceId) {
+    public AssetFileDescriptor open(@Nullable Theme theme, Resources resources, int resourceId) {
       return resources.openRawResourceFd(resourceId);
     }
 
@@ -132,7 +137,7 @@ public final class DirectResourceLoader<DataT> implements ModelLoader<Integer, D
     }
 
     @Override
-    public InputStream open(Resources resources, int resourceId) {
+    public InputStream open(@Nullable Theme theme, Resources resources, int resourceId) {
       return resources.openRawResource(resourceId);
     }
 
@@ -166,8 +171,10 @@ public final class DirectResourceLoader<DataT> implements ModelLoader<Integer, D
     }
 
     @Override
-    public Drawable open(Resources resources, int resourceId) {
-      return DrawableDecoderCompat.getDrawable(context, resourceId, resources.newTheme());
+    public Drawable open(@Nullable Theme theme, Resources resources, int resourceId) {
+      // The Resources already includes the theme provided with the request, so we don't need to
+      // provide the theme separately.
+      return DrawableDecoderCompat.getDrawable(context, resourceId, theme);
     }
 
     @Override
@@ -190,12 +197,18 @@ public final class DirectResourceLoader<DataT> implements ModelLoader<Integer, D
 
   private static final class ResourceDataFetcher<DataT> implements DataFetcher<DataT> {
 
+    @Nullable private final Theme theme;
     private final Resources resources;
     private final ResourceOpener<DataT> resourceOpener;
     private final int resourceId;
-    private @Nullable DataT data;
+    @Nullable private DataT data;
 
-    ResourceDataFetcher(Resources resources, ResourceOpener<DataT> resourceOpener, int resourceId) {
+    ResourceDataFetcher(
+        @Nullable Theme theme,
+        Resources resources,
+        ResourceOpener<DataT> resourceOpener,
+        int resourceId) {
+      this.theme = theme;
       this.resources = resources;
       this.resourceOpener = resourceOpener;
       this.resourceId = resourceId;
@@ -205,7 +218,7 @@ public final class DirectResourceLoader<DataT> implements ModelLoader<Integer, D
     public void loadData(
         @NonNull Priority priority, @NonNull DataCallback<? super DataT> callback) {
       try {
-        data = resourceOpener.open(resources, resourceId);
+        data = resourceOpener.open(theme, resources, resourceId);
         callback.onDataReady(data);
       } catch (Resources.NotFoundException e) {
         callback.onLoadFailed(e);

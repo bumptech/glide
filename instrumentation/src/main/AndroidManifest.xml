@@ -17,7 +17,6 @@
         android:exported="false" />
     <activity
         android:name="com.bumptech.glide.test.ForceDarkOrLightModeActivity"
-        android:theme="@style/Theme.AppCompat.DayNight"
         android:exported="false" />
   </application>
 </manifest>
