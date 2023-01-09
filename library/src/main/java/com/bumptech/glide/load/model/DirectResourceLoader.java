@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import androidx.annotation.NonNull;
@@ -12,9 +13,9 @@ import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.resource.drawable.DrawableDecoderCompat;
 import com.bumptech.glide.load.resource.drawable.ResourceDrawableDecoder;
 import com.bumptech.glide.signature.ObjectKey;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -26,8 +27,7 @@ import java.io.InputStream;
  * @param <DataT> The type of data this {@code ModelLoader} will produce (e.g. {@link InputStream},
  *     {@link AssetFileDescriptor} etc).
  */
-public final class DirectResourceLoader<DataT extends Closeable>
-    implements ModelLoader<Integer, DataT> {
+public final class DirectResourceLoader<DataT> implements ModelLoader<Integer, DataT> {
 
   private final Context context;
   private final ResourceOpener<DataT> resourceOpener;
@@ -39,6 +39,10 @@ public final class DirectResourceLoader<DataT extends Closeable>
   public static ModelLoaderFactory<Integer, AssetFileDescriptor> assetFileDescriptorFactory(
       Context context) {
     return new AssetFileDescriptorFactory(context);
+  }
+
+  public static ModelLoaderFactory<Integer, Drawable> drawableFactory(Context context) {
+    return new DrawableFactory(context);
   }
 
   DirectResourceLoader(Context context, ResourceOpener<DataT> resourceOpener) {
@@ -71,6 +75,8 @@ public final class DirectResourceLoader<DataT extends Closeable>
   private interface ResourceOpener<DataT> {
     DataT open(Resources resources, int resourceId);
 
+    void close(DataT data) throws IOException;
+
     Class<DataT> getDataClass();
   }
 
@@ -87,6 +93,11 @@ public final class DirectResourceLoader<DataT extends Closeable>
     @Override
     public AssetFileDescriptor open(Resources resources, int resourceId) {
       return resources.openRawResourceFd(resourceId);
+    }
+
+    @Override
+    public void close(AssetFileDescriptor data) throws IOException {
+      data.close();
     }
 
     @Override
@@ -126,6 +137,11 @@ public final class DirectResourceLoader<DataT extends Closeable>
     }
 
     @Override
+    public void close(InputStream data) throws IOException {
+      data.close();
+    }
+
+    @Override
     public Class<InputStream> getDataClass() {
       return InputStream.class;
     }
@@ -134,8 +150,45 @@ public final class DirectResourceLoader<DataT extends Closeable>
     public void teardown() {}
   }
 
-  private static final class ResourceDataFetcher<DataT extends Closeable>
-      implements DataFetcher<DataT> {
+  /**
+   * Handles vectors, shapes and other resources that cannot be opened with
+   * Resources.openRawResource. Overlaps in functionality with {@link ResourceDrawableDecoder} and
+   * {@link com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder} but it's more efficient
+   * for simple resource loads within a single application.
+   */
+  private static final class DrawableFactory
+      implements ModelLoaderFactory<Integer, Drawable>, ResourceOpener<Drawable> {
+
+    private final Context context;
+
+    DrawableFactory(Context context) {
+      this.context = context;
+    }
+
+    @Override
+    public Drawable open(Resources resources, int resourceId) {
+      return DrawableDecoderCompat.getDrawable(context, resourceId, resources.newTheme());
+    }
+
+    @Override
+    public void close(Drawable data) throws IOException {}
+
+    @Override
+    public Class<Drawable> getDataClass() {
+      return Drawable.class;
+    }
+
+    @NonNull
+    @Override
+    public ModelLoader<Integer, Drawable> build(@NonNull MultiModelLoaderFactory multiFactory) {
+      return new DirectResourceLoader<>(context, this);
+    }
+
+    @Override
+    public void teardown() {}
+  }
+
+  private static final class ResourceDataFetcher<DataT> implements DataFetcher<DataT> {
 
     private final Resources resources;
     private final ResourceOpener<DataT> resourceOpener;
@@ -164,7 +217,7 @@ public final class DirectResourceLoader<DataT extends Closeable>
       DataT local = data;
       if (local != null) {
         try {
-          local.close();
+          resourceOpener.close(local);
         } catch (IOException e) {
           // Ignored.
         }

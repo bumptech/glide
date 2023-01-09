@@ -8,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -49,6 +50,45 @@ public class DarkModeTest {
   public void before() {
     // Dark mode wasn't supported prior to Q.
     assumeTrue(VERSION.SDK_INT >= VERSION_CODES.Q);
+  }
+
+  @Test
+  public void load_withDarkModeActivity_vectorDrawable_usesDarkModeColor() {
+    try (ActivityScenario<FragmentActivity> scenario = darkModeActivity()) {
+      scenario.onActivity(
+          activity -> {
+            ViewGroup container = findContainer(activity);
+            ImageView imageView = newFixedSizeImageView(activity);
+            container.addView(imageView);
+
+            Glide.with(activity)
+                .load(R.drawable.vector_drawable)
+                .override(Target.SIZE_ORIGINAL)
+                .into(imageView);
+          });
+
+      onIdle();
+      scenario.onActivity(
+          activity -> {
+            ViewGroup container = findContainer(activity);
+            ImageView imageView = (ImageView) container.getChildAt(0);
+            Bitmap result = drawToBitmap(imageView.getDrawable());
+            Bitmap expected = drawToBitmap(activity.getDrawable(R.drawable.vector_drawable_dark));
+            assertThat(result).sameAs(expected);
+          });
+    }
+  }
+
+  private static Bitmap drawToBitmap(Drawable drawable) {
+    int width = drawable.getIntrinsicWidth();
+    int height = drawable.getIntrinsicHeight();
+
+    Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    Canvas canvas = new Canvas(result);
+    drawable.setBounds(0, 0, width, height);
+    drawable.draw(canvas);
+    canvas.setBitmap(null);
+    return result;
   }
 
   @Test

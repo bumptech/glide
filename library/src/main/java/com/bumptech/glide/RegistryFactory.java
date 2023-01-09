@@ -279,11 +279,15 @@ final class RegistryFactory {
           DirectResourceLoader.inputStreamFactory(context);
       ModelLoaderFactory<Integer, AssetFileDescriptor> assetFileDescriptorFactory =
           DirectResourceLoader.assetFileDescriptorFactory(context);
+      ModelLoaderFactory<Integer, Drawable> drawableFactory =
+          DirectResourceLoader.drawableFactory(context);
       registry
           .append(int.class, InputStream.class, inputStreamFactory)
           .append(Integer.class, InputStream.class, inputStreamFactory)
           .append(int.class, AssetFileDescriptor.class, assetFileDescriptorFactory)
           .append(Integer.class, AssetFileDescriptor.class, assetFileDescriptorFactory)
+          .append(int.class, Drawable.class, drawableFactory)
+          .append(Integer.class, Drawable.class, drawableFactory)
           .append(Uri.class, InputStream.class, ResourceUriLoader.newStreamFactory(context))
           .append(
               Uri.class,
@@ -292,7 +296,6 @@ final class RegistryFactory {
     } else {
       ResourceLoader.StreamFactory resourceLoaderStreamFactory =
           new ResourceLoader.StreamFactory(resources);
-      ResourceLoader.UriFactory resourceLoaderUriFactory = new ResourceLoader.UriFactory(resources);
       ResourceLoader.FileDescriptorFactory resourceLoaderFileDescriptorFactory =
           new ResourceLoader.FileDescriptorFactory(resources);
       ResourceLoader.AssetFileDescriptorFactory resourceLoaderAssetFileDescriptorFactory =
@@ -300,17 +303,19 @@ final class RegistryFactory {
 
       registry
           .append(int.class, InputStream.class, resourceLoaderStreamFactory)
-          .append(int.class, ParcelFileDescriptor.class, resourceLoaderFileDescriptorFactory)
           .append(Integer.class, InputStream.class, resourceLoaderStreamFactory)
+          .append(int.class, ParcelFileDescriptor.class, resourceLoaderFileDescriptorFactory)
           .append(Integer.class, ParcelFileDescriptor.class, resourceLoaderFileDescriptorFactory)
-          .append(Integer.class, Uri.class, resourceLoaderUriFactory)
           .append(int.class, AssetFileDescriptor.class, resourceLoaderAssetFileDescriptorFactory)
           .append(
-              Integer.class, AssetFileDescriptor.class, resourceLoaderAssetFileDescriptorFactory)
-          .append(int.class, Uri.class, resourceLoaderUriFactory);
+              Integer.class, AssetFileDescriptor.class, resourceLoaderAssetFileDescriptorFactory);
     }
 
+    // Handles resources from other applications or converting Drawable resource types to Bitmaps.
+    ResourceLoader.UriFactory resourceLoaderUriFactory = new ResourceLoader.UriFactory(resources);
     registry
+        .append(Integer.class, Uri.class, resourceLoaderUriFactory)
+        .append(int.class, Uri.class, resourceLoaderUriFactory)
         .append(String.class, InputStream.class, new DataUrlLoader.StreamFactory<String>())
         .append(Uri.class, InputStream.class, new DataUrlLoader.StreamFactory<Uri>())
         .append(String.class, InputStream.class, new StringLoader.StreamFactory())
