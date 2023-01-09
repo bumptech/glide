@@ -546,7 +546,10 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @param activity The activity to use.
    * @return A RequestManager for the given activity that can be used to start a load.
-   * @deprecated TODO(judds): Figure out the end state and list it here.
+   * @deprecated Use androidx Activitys instead (ie {@link FragmentActivity}, or {@link
+   *     androidx.appcompat.app.AppCompatActivity}). While this method is safe if {@code activity}
+   *     is in fact a support Activity, non-support Activity's lifecycles will be ignored in future
+   *     changes.
    */
   @NonNull
   @Deprecated
