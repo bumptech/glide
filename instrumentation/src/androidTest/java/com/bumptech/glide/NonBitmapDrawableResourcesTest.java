@@ -17,10 +17,10 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import androidx.test.core.app.ApplicationProvider;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.testutil.TearDownGlide;
+import com.google.common.collect.ImmutableList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,19 +31,29 @@ import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 public class NonBitmapDrawableResourcesTest {
   @Rule public final TestName testName = new TestName();
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
+
+  @Parameter public boolean useDirectResourceLoader;
+
+  @Parameters(name = "useDirectResourceLoader = {0}")
+  public static ImmutableList<Boolean> parameters() {
+    return ImmutableList.of(true, false);
+  }
 
   private Context context;
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
     context = ApplicationProvider.getApplicationContext();
+
+    Glide.init(context, new GlideBuilder().useDirectResourceLoader(useDirectResourceLoader));
   }
 
   @Test

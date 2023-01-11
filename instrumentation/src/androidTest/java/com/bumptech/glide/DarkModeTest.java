@@ -8,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -21,6 +22,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.test.core.app.ActivityScenario;
@@ -31,6 +33,7 @@ import com.bumptech.glide.load.engine.executor.IdlingGlideRule;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.ForceDarkOrLightModeActivity;
 import com.google.common.base.Function;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -49,6 +52,72 @@ public class DarkModeTest {
   public void before() {
     // Dark mode wasn't supported prior to Q.
     assumeTrue(VERSION.SDK_INT >= VERSION_CODES.Q);
+  }
+
+  @Test
+  public void load_withDarkModeActivity_vectorDrawable_usesDarkModeColor() {
+    runActivityDrawableTest(
+        darkModeActivity(),
+        R.drawable.vector_drawable_dark,
+        activity ->
+            Glide.with(activity).load(R.drawable.vector_drawable).override(Target.SIZE_ORIGINAL));
+  }
+
+  @Test
+  public void load_withLightModeActivity_vectorDrawable_usesLightModeColor() {
+    runActivityDrawableTest(
+        lightModeActivity(),
+        R.drawable.vector_drawable_light,
+        activity ->
+            Glide.with(activity).load(R.drawable.vector_drawable).override(Target.SIZE_ORIGINAL));
+  }
+
+  private void runActivityDrawableTest(
+      ActivityScenario<? extends FragmentActivity> scenario,
+      int expectedResource,
+      Function<FragmentActivity, RequestBuilder<Drawable>> glideBuilder) {
+    AtomicReference<Bitmap> result = new AtomicReference<>();
+    try (scenario) {
+      scenario.onActivity(
+          activity -> {
+            ViewGroup container = findContainer(activity);
+            ImageView imageView = newFixedSizeImageView(activity);
+            container.addView(imageView);
+
+            glideBuilder.apply(activity).into(imageView);
+          });
+
+      // This two step process is because setting the Drawable on the ImageView modifies the
+      // drawable in a subsequent frame. If we want our Drawables to produce identical Bitmaps when
+      // drawn to a canvas, we need to set both on the ImageView for at least one frame.
+      onIdle();
+      scenario.onActivity(
+          activity -> {
+            ImageView imageView = findImageView(activity);
+            result.set(drawableToBitmap(imageView.getDrawable()));
+            Drawable expectedDrawable = AppCompatResources.getDrawable(activity, expectedResource);
+            imageView.setImageDrawable(expectedDrawable);
+          });
+      onIdle();
+      scenario.onActivity(
+          activity -> {
+            ImageView imageView = findImageView(activity);
+            Bitmap expected = drawableToBitmap(imageView.getDrawable());
+            assertThat(result.get()).sameAs(expected);
+          });
+    }
+  }
+
+  private static Bitmap drawableToBitmap(Drawable drawable) {
+    int width = drawable.getIntrinsicWidth();
+    int height = drawable.getIntrinsicHeight();
+
+    Bitmap result = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+    Canvas canvas = new Canvas(result);
+    drawable.setBounds(0, 0, width, height);
+    drawable.draw(canvas);
+    canvas.setBitmap(null);
+    return result;
   }
 
   @Test
@@ -538,11 +607,15 @@ public class DarkModeTest {
     onIdle();
     scenario.onActivity(
         activity -> {
-          ViewGroup container = findContainer(activity);
-          ImageView imageView = (ImageView) container.getChildAt(0);
+          ImageView imageView = findImageView(activity);
           Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
           assertThat(bitmap).sameAs(expectedResource);
         });
+  }
+
+  private static ImageView findImageView(FragmentActivity activity) {
+    ViewGroup container = findContainer(activity);
+    return (ImageView) container.getChildAt(0);
   }
 
   private static ViewGroup findContainer(FragmentActivity activity) {
