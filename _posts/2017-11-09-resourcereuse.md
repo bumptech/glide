@@ -44,12 +44,15 @@ The reference count is decremented when callers signal that they are done with t
 1. Calling [``clear()``][3] on the [``View``][4] or [``Target``][2] the resource was loaded in to.
 2. Calling [``into()``][1] on the [``View``][4] or [``Target``][2] with a request for a new resource.
 
+The refrence count is also decremented when the `RequestManager` associated with the request is paused or cleared. The `RequestManager` associated with the request is determined by the `Activity` or `Fragment` you pass into `Glide.with()`. The `RequestManager` can be paused or cleared manually and will also monitor the `Lifecycle` of the corresponding `Activity` or `Fragment` and automatically pause or clear requests in `onStop` and `onDestroy`. If you pass the `Application` `Context` to `Glide.with`, the `RequestManager` will not automatically pause or clear requests.
+
 #### Releasing resources.
 When the reference count reaches zero, the resource is released and returned to Glide for re-use. After the resource is returned to Glide for re-use it is no longer safe to continue using. As a result it's <strong>unsafe</strong> to:
 
 1. Retrieve a ``Bitmap`` or ``Drawable`` loaded into an ``ImageView`` using ``getImageDrawable()`` and display it (using ``setImageDrawable()``, in an animation or ``TransitionDrawable`` or any other method).
 2. Use [``SimpleTarget``][5] to load a resource into a [``View``][4] without also implementing [``onLoadCleared()``][6] and removing the resource from the [``View``][4] in that callback. 
-3. Call [``recycle()``][7] on any ``Bitmap`` loaded with Glide.
+3. Leave [``onLoadCleared()``][6] unimplemented in [``CustomTarget``][24]
+4. Call [``recycle()``][7] on any ``Bitmap`` loaded with Glide.
 
 It's unsafe to reference a resource after clearing the corresponding [``View``][4] or [``Target``][2] because that resource may be destroyed or re-used to display a different image, resulting in undefined behavior, graphical corruption, or crashes in applications that continue to use those resources. For example, after being released back to Glide, ``Bitmap``s may be stored in a ``BitmapPool`` and re-used to hold the bytes of a new image at some point in the future or they may have [``recycle()``][7] called on them (or both). In either case continuing to reference the ``Bitmap`` and expecting it to contain the original image is unsafe.
 
@@ -76,7 +79,13 @@ There are a couple of indicators that something might be going wrong with ``Bitm
 
 Glide's ``BitmapPool`` has a fixed size. When ``Bitmap``s are evicted from the pool without being re-used, Glide will call [``recycle()``][7]. If an application inadvertently continues to hold on to the ``Bitmap`` even after indicating to Glide that it is safe to recycle it, the application may then attempt to draw the ``Bitmap``, resulting in a crash in ``onDraw()``.
 
-This problem could be due to the fact that one target is being used for two ``ImageView``s, and one of the ``ImageView``s still tries to access the recycled ``Bitmap`` after it has been put into the ``BitmapPool``. This recycling error can be hard to reproduce, due to several factors: 1) when the bitmap is put into the pool, 2) when the bitmap is recycled, and 3) what the size of the ``BitmapPool`` and memory cache are that leads to the recycling of the ``Bitmap``. The following snippet can be put into your ``GlideModule`` to help making this problem easier to reproduce:
+This problem could be due to the fact that one target is being used for two ``ImageView``s, and one of the ``ImageView``s still tries to access the recycled ``Bitmap`` after it has been put into the ``BitmapPool``. This recycling error can be hard to reproduce, due to several factors: 
+
+1.  When the bitmap is put into the pool
+2.  When the bitmap is recycled, and
+3.  What the size of the ``BitmapPool`` and memory cache are that leads to the recycling of the ``Bitmap``. 
+
+The following snippet can be put into your ``GlideModule`` to help making this problem easier to reproduce:
 
 ```java
 @Override
@@ -140,3 +149,4 @@ It's also worth noting the any intermediate ``Bitmap``s that any custom ``Bitmap
 [21]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/load/Transformation.html
 [22]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/load/resource/bitmap/BitmapTransformation.html#transform-com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool-android.graphics.Bitmap-int-int-
 [23]: {{ site.baseurl }}/javadocs/431/com/bumptech/glide/load/resource/bitmap/BitmapTransformation.html
+[24]: {{ site.baseurl }}/javadocs/4140/library/com.bumptech.glide.request.target/-custom-target/index.html
