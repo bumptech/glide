@@ -358,7 +358,7 @@ public class TransformationUtilsTest {
 
     Bitmap ninety = TransformationUtils.rotateImage(toRotate, 90);
     // Checks if native graphics is enabled.
-    if (Boolean.getBoolean("robolectric.nativeruntime.enableGraphics")) {
+    if (System.getProperty("robolectric.graphicsMode", "").equals("NATIVE")) {
       assertThat(ninety.getPixel(0, 0)).isEqualTo(Color.RED);
       assertThat(ninety.getPixel(1, 0)).isEqualTo(Color.BLUE);
     } else {
