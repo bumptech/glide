@@ -487,23 +487,6 @@ public final class GlideBuilder {
     return this;
   }
 
-  /**
-   * Use {@link com.bumptech.glide.load.model.DirectResourceLoader} instead of {@link
-   * com.bumptech.glide.load.model.ResourceLoader} so that we load drawables asynchronously with the
-   * correc theme (ie light / dark mode).
-   *
-   * <p>This also removes support for loading resources as resource Uris and for loading {@link
-   * android.os.ParcelFileDescriptor}s from resource ids. I think neither of those are useful but if
-   * you have a use case or seem to find some test failing with this experiment enabled, please file
-   * an issue so we can investigate.
-   *
-   * <p>This flag is experimental and will be removed without notice in a future version.
-   */
-  public GlideBuilder useDirectResourceLoader(boolean isEnabled) {
-    glideExperimentsBuilder.update(new UseDirectResourceLoader(), isEnabled);
-    return this;
-  }
-
   void setRequestManagerFactory(@Nullable RequestManagerFactory factory) {
     this.requestManagerFactory = factory;
   }

@@ -52,19 +52,6 @@ public class UriLoaderTest {
   }
 
   @Test
-  public void testHandlesResourceUris() throws IOException {
-    Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
-    when(factory.build(eq(resourceUri))).thenReturn(localUriFetcher);
-
-    assertTrue(loader.handles(resourceUri));
-    assertEquals(
-        localUriFetcher,
-        Preconditions.checkNotNull(
-                loader.buildLoadData(resourceUri, IMAGE_SIDE, IMAGE_SIDE, options))
-            .fetcher);
-  }
-
-  @Test
   public void testHandlesContentUris() {
     Uri contentUri = Uri.parse("content://com.bumptech.glide");
     when(factory.build(eq(contentUri))).thenReturn(localUriFetcher);

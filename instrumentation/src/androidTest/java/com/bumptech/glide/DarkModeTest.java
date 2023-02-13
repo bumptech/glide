@@ -46,7 +46,7 @@ public class DarkModeTest {
 
   @Rule
   public final IdlingGlideRule idlingGlideRule =
-      IdlingGlideRule.newGlideRule(glideBuilder -> glideBuilder.useDirectResourceLoader(true));
+      IdlingGlideRule.newGlideRule(glideBuilder -> glideBuilder);
 
   @Before
   public void before() {
