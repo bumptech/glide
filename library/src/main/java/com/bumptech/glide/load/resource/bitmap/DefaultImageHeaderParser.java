@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.load.ImageHeaderParser.ImageType.ANIMATED_AVIF;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.ANIMATED_WEBP;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.AVIF;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.GIF;
@@ -129,7 +130,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       if (firstFourBytes != RIFF_HEADER) {
         // Check for AVIF (reads up to 32 bytes). If it is a valid AVIF stream, then the
         // firstFourBytes will be the size of the FTYP box.
-        return sniffAvif(reader, /* boxSize= */ firstFourBytes) ? AVIF : UNKNOWN;
+        return sniffAvif(reader, /* boxSize= */ firstFourBytes);
       }
 
       // WebP (reads up to 21 bytes).
@@ -177,34 +178,40 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
    * Check if the bits look like an AVIF Image. AVIF Specification:
    * https://aomediacodec.github.io/av1-avif/
    *
-   * @return true if the first few bytes looks like it could be an AVIF Image, false otherwise.
+   * @return AVIF or ANIMATED_AVIF if the first few bytes look like it could be an AVIF Image or an
+   *     animated AVIF Image respectively, UNKNOWN otherwise.
    */
-  private boolean sniffAvif(Reader reader, int boxSize) throws IOException {
+  private ImageType sniffAvif(Reader reader, int boxSize) throws IOException {
     int chunkType = (reader.getUInt16() << 16) | reader.getUInt16();
     if (chunkType != FTYP_HEADER) {
-      return false;
+      return UNKNOWN;
     }
     // majorBrand.
     int brand = (reader.getUInt16() << 16) | reader.getUInt16();
-    if (brand == AVIF_BRAND || brand == AVIS_BRAND) {
-      return true;
+    // The overall logic is that, if any of the brands are 'avis', then we can conclude immediately
+    // that it is an animated AVIF image. Otherwise, we conclude after seeing all the brands that if
+    // one of them is 'avif', the it is a still AVIF image.
+    if (brand == AVIS_BRAND) {
+      return ANIMATED_AVIF;
     }
+    boolean avifBrandSeen = brand == AVIF_BRAND;
     // Skip the minor version.
     reader.skip(4);
     // Check the first five minor brands. While there could theoretically be more than five minor
     // brands, it is rare in practice. This way we stop the loop from running several times on a
     // blob that just happened to look like an ftyp box.
     int sizeRemaining = boxSize - 16;
-    if (sizeRemaining % 4 != 0) {
-      return false;
-    }
-    for (int i = 0; i < 5 && sizeRemaining > 0; ++i, sizeRemaining -= 4) {
-      brand = (reader.getUInt16() << 16) | reader.getUInt16();
-      if (brand == AVIF_BRAND || brand == AVIS_BRAND) {
-        return true;
+    if (sizeRemaining % 4 == 0) {
+      for (int i = 0; i < 5 && sizeRemaining > 0; ++i, sizeRemaining -= 4) {
+        brand = (reader.getUInt16() << 16) | reader.getUInt16();
+        if (brand == AVIS_BRAND) {
+          return ANIMATED_AVIF;
+        } else if (brand == AVIF_BRAND) {
+          avifBrandSeen = true;
+        }
       }
     }
-    return false;
+    return avifBrandSeen ? AVIF : UNKNOWN;
   }
 
   /**
