@@ -105,7 +105,7 @@ Although the examples we've shown here are for RecyclerView, the same principles
 In addition to loading ``Bitmap``s and ``Drawable``s into ``View``s, you can also start asynchronous loads into your own custom ``Target``s:
 
 ```java
-Glide.with(context
+Glide.with(context)
   .load(url)
   .into(new CustomTarget<Drawable>() {
     @Override
