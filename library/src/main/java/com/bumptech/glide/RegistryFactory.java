@@ -58,7 +58,7 @@ import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoDecoder;
 import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
-import com.bumptech.glide.load.resource.drawable.AnimatedWebpDecoder;
+import com.bumptech.glide.load.resource.drawable.AnimatedImageDecoder;
 import com.bumptech.glide.load.resource.drawable.ResourceDrawableDecoder;
 import com.bumptech.glide.load.resource.drawable.UnitDrawableDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
@@ -174,12 +174,12 @@ final class RegistryFactory {
           Registry.BUCKET_ANIMATION,
           InputStream.class,
           Drawable.class,
-          AnimatedWebpDecoder.streamDecoder(imageHeaderParsers, arrayPool));
+          AnimatedImageDecoder.streamDecoder(imageHeaderParsers, arrayPool));
       registry.append(
           Registry.BUCKET_ANIMATION,
           ByteBuffer.class,
           Drawable.class,
-          AnimatedWebpDecoder.byteBufferDecoder(imageHeaderParsers, arrayPool));
+          AnimatedImageDecoder.byteBufferDecoder(imageHeaderParsers, arrayPool));
     }
 
     ResourceDrawableDecoder resourceDrawableDecoder = new ResourceDrawableDecoder(context);
