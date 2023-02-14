@@ -34,6 +34,8 @@ public interface ImageHeaderParser {
     ANIMATED_WEBP(true),
     /** Avif type (may contain alpha). */
     AVIF(true),
+    /** Animated Avif type (may contain alpha). */
+    ANIMATED_AVIF(true),
     /** Unrecognized type. */
     UNKNOWN(false);
 
