@@ -25,28 +25,27 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * Allows decoding animated webp images using {@link ImageDecoder} on Android P+. @Deprecated This
- * class has been replaced by {@link AnimatedImageDecoder} and is not used in Glide by default. It
- * will be removed in a future version.
+ * Allows decoding animated images using {@link ImageDecoder}.
+ *
+ * <p>Supported formats: WebP on Android P+.
  */
-@Deprecated
 @RequiresApi(Build.VERSION_CODES.P)
-public final class AnimatedWebpDecoder {
+public final class AnimatedImageDecoder {
   private final List<ImageHeaderParser> imageHeaderParsers;
   private final ArrayPool arrayPool;
 
   public static ResourceDecoder<InputStream, Drawable> streamDecoder(
       List<ImageHeaderParser> imageHeaderParsers, ArrayPool arrayPool) {
-    return new StreamAnimatedWebpDecoder(new AnimatedWebpDecoder(imageHeaderParsers, arrayPool));
+    return new StreamAnimatedImageDecoder(new AnimatedImageDecoder(imageHeaderParsers, arrayPool));
   }
 
   public static ResourceDecoder<ByteBuffer, Drawable> byteBufferDecoder(
       List<ImageHeaderParser> imageHeaderParsers, ArrayPool arrayPool) {
-    return new ByteBufferAnimatedWebpDecoder(
-        new AnimatedWebpDecoder(imageHeaderParsers, arrayPool));
+    return new ByteBufferAnimatedImageDecoder(
+        new AnimatedImageDecoder(imageHeaderParsers, arrayPool));
   }
 
-  private AnimatedWebpDecoder(List<ImageHeaderParser> imageHeaderParsers, ArrayPool arrayPool) {
+  private AnimatedImageDecoder(List<ImageHeaderParser> imageHeaderParsers, ArrayPool arrayPool) {
     this.imageHeaderParsers = imageHeaderParsers;
     this.arrayPool = arrayPool;
   }
@@ -115,12 +114,12 @@ public final class AnimatedWebpDecoder {
     }
   }
 
-  private static final class StreamAnimatedWebpDecoder
+  private static final class StreamAnimatedImageDecoder
       implements ResourceDecoder<InputStream, Drawable> {
 
-    private final AnimatedWebpDecoder delegate;
+    private final AnimatedImageDecoder delegate;
 
-    StreamAnimatedWebpDecoder(AnimatedWebpDecoder delegate) {
+    StreamAnimatedImageDecoder(AnimatedImageDecoder delegate) {
       this.delegate = delegate;
     }
 
@@ -139,12 +138,12 @@ public final class AnimatedWebpDecoder {
     }
   }
 
-  private static final class ByteBufferAnimatedWebpDecoder
+  private static final class ByteBufferAnimatedImageDecoder
       implements ResourceDecoder<ByteBuffer, Drawable> {
 
-    private final AnimatedWebpDecoder delegate;
+    private final AnimatedImageDecoder delegate;
 
-    ByteBufferAnimatedWebpDecoder(AnimatedWebpDecoder delegate) {
+    ByteBufferAnimatedImageDecoder(AnimatedImageDecoder delegate) {
       this.delegate = delegate;
     }
 
