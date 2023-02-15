@@ -25,6 +25,8 @@ public final class ResourceIds {
     int opaque_interlaced_gif = getResourceId("raw", "opaque_interlaced_gif");
     int webkit_logo_p3 = getResourceId("raw", "webkit_logo_p3");
     int video = getResourceId("raw", "video");
+    int animated_webp = getResourceId("raw", "dl_world_anim_webp");
+    int animated_avif = getResourceId("raw", "dl_world_anim_avif");
   }
 
   public interface drawable {

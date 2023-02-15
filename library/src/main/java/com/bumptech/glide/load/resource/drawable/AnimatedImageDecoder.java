@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Allows decoding animated images using {@link ImageDecoder}.
  *
- * <p>Supported formats: WebP on Android P+.
+ * <p>Supported formats: WebP on Android P+. AVIF on Android 12/S+.
  */
 @RequiresApi(Build.VERSION_CODES.P)
 public final class AnimatedImageDecoder {
@@ -61,7 +61,8 @@ public final class AnimatedImageDecoder {
   }
 
   private boolean isHandled(ImageType imageType) {
-    return imageType == ImageType.ANIMATED_WEBP;
+    return imageType == ImageType.ANIMATED_WEBP
+        || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && imageType == ImageType.ANIMATED_AVIF);
   }
 
   @Synthetic
