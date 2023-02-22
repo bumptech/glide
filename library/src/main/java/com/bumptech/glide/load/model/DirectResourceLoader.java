@@ -24,6 +24,10 @@ import java.io.InputStream;
  * Resources#openRawResourceFd(int)} using the theme from {@link ResourceDrawableDecoder#THEME} when
  * it's available.
  *
+ * <p>Resource ids from other packages are handled by {@link ResourceLoader} via {@link
+ * ResourceDrawableDecoder} and {@link
+ * com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder}.
+ *
  * @param <DataT> The type of data this {@code ModelLoader} will produce (e.g. {@link InputStream},
  *     {@link AssetFileDescriptor} etc).
  */

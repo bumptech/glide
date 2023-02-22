@@ -15,10 +15,18 @@ import java.util.List;
 /**
  * Converts Resource Uris to resource ids if the resource Uri points to a resource in this package.
  *
+ * <p>This class works by parsing Uris into resource ids, then delegating the resource ID load to
+ * other {@link ModelLoader}s, typically {@link DirectResourceLoader}.
+ *
  * <p>This class really shouldn't need to exist. If you need to load resources, just pass in the
  * integer resource id directly using {@link com.bumptech.glide.RequestManager#load(Integer)}
  * instead. It'll be more correct in terms of caching and more efficient to load. The only reason
  * we're supporting this case is for backwards compatibility.
+ *
+ * <p>Because this class explicitly only handles resource Uris that are from the application's
+ * package, resource uris from other packages are handled by {@link UriLoader}. {@link UriLoader} is
+ * even less preferred because it can only handle certain resources from raw resources and it will
+ * not apply appropriate theming, RTL or night mode attributes.
  *
  * @param <DataT> The type of data produced, e.g. {@link InputStream} or {@link
  *     AssetFileDescriptor}.
