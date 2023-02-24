@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
@@ -28,6 +29,7 @@ import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.ResolvableGlideSize
 import com.bumptech.glide.integration.ktx.Size
 import com.bumptech.glide.integration.ktx.Status
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 /** Mutates and returns the given [RequestBuilder] to apply relevant options. */
 public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuilder<T>
@@ -111,6 +113,14 @@ public fun GlideImage(
   val overrideSize: Size? = requestBuilder.overrideSize()
   val (size, finalModifier) = rememberSizeAndModifier(overrideSize, modifier)
 
+  // TODO(judds): It seems like we should be able to use the production paths for
+  // resource / drawables as well as Composables. It's not totally clear what part of the prod code
+  // isn't supported.
+  if (LocalInspectionMode.current && loading?.isResourceOrDrawable() == true) {
+    PreviewResourceOrDrawable(loading, contentDescription, modifier)
+    return
+  }
+
   SizedGlideImage(
     requestBuilder = requestBuilder,
     size = size,
@@ -122,6 +132,27 @@ public fun GlideImage(
     colorFilter = colorFilter,
     placeholder = loading?.maybeComposable(),
     failure = failure?.maybeComposable(),
+  )
+}
+
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+private fun PreviewResourceOrDrawable(
+  loading: Placeholder,
+  contentDescription: String?,
+  modifier: Modifier,
+) {
+  val drawable =
+    when(loading) {
+      is Placeholder.OfDrawable -> loading.drawable
+      is Placeholder.OfResourceId -> LocalContext.current.getDrawable(loading.resourceId)
+      is Placeholder.OfComposable ->
+        throw IllegalArgumentException("Composables should go through the production codepath")
+    }
+  Image(
+    painter = rememberDrawablePainter(drawable),
+    modifier = modifier,
+    contentDescription = contentDescription,
   )
 }
 
@@ -176,6 +207,13 @@ public sealed class Placeholder {
   internal class OfDrawable(internal val drawable: Drawable?) : Placeholder()
   internal class OfResourceId(@DrawableRes internal val resourceId: Int) : Placeholder()
   internal class OfComposable(internal val composable: @Composable () -> Unit) : Placeholder()
+
+  internal fun isResourceOrDrawable() =
+    when (this) {
+      is OfDrawable -> true
+      is OfResourceId -> true
+      is OfComposable -> false
+    }
 
   internal fun maybeComposable(): (@Composable () -> Unit)? =
     when (this) {
