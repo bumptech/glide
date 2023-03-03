@@ -218,8 +218,9 @@ public class AnimatedGifEncoder {
      * OutputStream, the stream is not closed.
      */
     public boolean finish() {
-        if (!started)
-            return false;
+    if (!started) {
+      return false;
+    }
         boolean ok = true;
         started = false;
         try {
@@ -268,8 +269,9 @@ public class AnimatedGifEncoder {
      * @param quality int greater than 0.
      */
     public void setQuality(int quality) {
-        if (quality < 1)
-            quality = 1;
+    if (quality < 1) {
+      quality = 1;
+    }
         sample = quality;
     }
 
@@ -321,8 +323,9 @@ public class AnimatedGifEncoder {
      * @return false if initial write failed.
      */
     public boolean start(@Nullable OutputStream os) {
-        if (os == null)
-            return false;
+    if (os == null) {
+      return false;
+    }
         boolean ok = true;
         closeStream = false;
         out = os;
@@ -393,8 +396,9 @@ public class AnimatedGifEncoder {
      *
      */
     private int findClosest(int color) {
-        if (colorTab == null)
-            return -1;
+    if (colorTab == null) {
+      return -1;
+    }
         int r = Color.red(color);
         int g = Color.green(color);
         int b = Color.blue(color);
@@ -465,7 +469,8 @@ public class AnimatedGifEncoder {
         out.write(0x21); // extension introducer
         out.write(0xf9); // GCE label
         out.write(4); // data block size
-        int transp, disp;
+    int transp;
+    int disp;
         if (transparent == null && !hasTransparentPixels) {
             transp = 0;
             disp = 0; // dispose = no action

@@ -10,7 +10,8 @@ class LZWEncoder {
 
     private static final int EOF = -1;
 
-    private int imgW, imgH;
+  private int imgW;
+  private int imgH;
 
     private byte[] pixAry;
 
@@ -99,8 +100,10 @@ class LZWEncoder {
 
     int cur_bits = 0;
 
-    int masks[] = {0x0000, 0x0001, 0x0003, 0x0007, 0x000F, 0x001F, 0x003F, 0x007F, 0x00FF, 0x01FF,
-            0x03FF, 0x07FF, 0x0FFF, 0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF};
+  int[] masks = {
+    0x0000, 0x0001, 0x0003, 0x0007, 0x000F, 0x001F, 0x003F, 0x007F, 0x00FF, 0x01FF, 0x03FF, 0x07FF,
+    0x0FFF, 0x1FFF, 0x3FFF, 0x7FFF, 0xFFFF
+  };
 
     // Number of characters so far in this 'packet'
     int a_count;
@@ -120,8 +123,9 @@ class LZWEncoder {
     // characters, flush the packet to disk.
     void char_out(byte c, OutputStream outs) throws IOException {
         accum[a_count++] = c;
-        if (a_count >= 254)
-            flush_char(outs);
+    if (a_count >= 254) {
+      flush_char(outs);
+    }
     }
 
     // Clear out the hash table
@@ -137,8 +141,9 @@ class LZWEncoder {
 
     // reset code table
     void cl_hash(int hsize) {
-        for (int i = 0; i < hsize; ++i)
-            htab[i] = -1;
+    for (int i = 0; i < hsize; ++i) {
+      htab[i] = -1;
+    }
     }
 
     void compress(int init_bits, OutputStream outs) throws IOException {
@@ -167,8 +172,9 @@ class LZWEncoder {
         ent = nextPixel();
 
         hshift = 0;
-        for (fcode = hsize; fcode < 65536; fcode *= 2)
-            ++hshift;
+    for (fcode = hsize; fcode < 65536; fcode *= 2) {
+      ++hshift;
+    }
         hshift = 8 - hshift; // set hash code range bound
 
         hsize_reg = hsize;
@@ -187,11 +193,13 @@ class LZWEncoder {
             } else if (htab[i] >= 0) // non-empty slot
             {
                 disp = hsize_reg - i; // secondary hash (after G. Knott)
-                if (i == 0)
-                    disp = 1;
+        if (i == 0) {
+          disp = 1;
+        }
                 do {
-                    if ((i -= disp) < 0)
-                        i += hsize_reg;
+          if ((i -= disp) < 0) {
+            i += hsize_reg;
+          }
 
                     if (htab[i] == fcode) {
                         ent = codetab[i];
@@ -204,8 +212,9 @@ class LZWEncoder {
             if (free_ent < maxmaxcode) {
                 codetab[i] = free_ent++; // code -> hashtable
                 htab[i] = fcode;
-            } else
-                cl_block(outs);
+      } else {
+        cl_block(outs);
+      }
         }
         // Put out the final code.
         output(ent, outs);
@@ -241,8 +250,9 @@ class LZWEncoder {
     // Return the next pixel from the image
     // ----------------------------------------------------------------------------
     private int nextPixel() {
-        if (remaining == 0)
-            return EOF;
+    if (remaining == 0) {
+      return EOF;
+    }
 
         --remaining;
 
@@ -254,10 +264,11 @@ class LZWEncoder {
     void output(int code, OutputStream outs) throws IOException {
         cur_accum &= masks[cur_bits];
 
-        if (cur_bits > 0)
-            cur_accum |= (code << cur_bits);
-        else
-            cur_accum = code;
+    if (cur_bits > 0) {
+      cur_accum |= (code << cur_bits);
+    } else {
+      cur_accum = code;
+    }
 
         cur_bits += n_bits;
 
@@ -275,10 +286,11 @@ class LZWEncoder {
                 clear_flg = false;
             } else {
                 ++n_bits;
-                if (n_bits == maxbits)
-                    maxcode = maxmaxcode;
-                else
-                    maxcode = MAXCODE(n_bits);
+        if (n_bits == maxbits) {
+          maxcode = maxmaxcode;
+        } else {
+          maxcode = MAXCODE(n_bits);
+        }
             }
         }
 
