@@ -698,8 +698,23 @@ public class StandardGifDecoder implements GifDecoder {
     }
 
     int npix = (frame == null) ? header.width * header.height : frame.iw * frame.ih;
-    int available, clear, codeMask, codeSize, endOfInformation, inCode, oldCode, bits, code, count,
-        i, datum, dataSize, first, top, bi, pi;
+    int available;
+    int clear;
+    int codeMask;
+    int codeSize;
+    int endOfInformation;
+    int inCode;
+    int oldCode;
+    int bits;
+    int code;
+    int count;
+    int i;
+    int datum;
+    int dataSize;
+    int first;
+    int top;
+    int bi;
+    int pi;
 
     if (mainPixels == null || mainPixels.length < npix) {
       // Allocate new pixel array.

@@ -52,7 +52,10 @@ class GifFrame {
   private @interface GifDisposalMethod {
   }
 
-  int ix, iy, iw, ih;
+  int ix;
+  int iy;
+  int iw;
+  int ih;
   /**
    * Control Flag.
    */
