@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine.cache;
 
-import static com.bumptech.glide.load.engine.cache.MemoryCache.ResourceRemovedListener;
 import static com.bumptech.glide.tests.Util.anyResource;
 import static com.bumptech.glide.tests.Util.mockResource;
 import static com.google.common.truth.Truth.assertThat;
@@ -17,6 +16,7 @@ import android.content.ComponentCallbacks2;
 import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.engine.cache.MemoryCache.ResourceRemovedListener;
 import com.bumptech.glide.util.LruCache;
 import java.security.MessageDigest;
 import org.junit.Test;
