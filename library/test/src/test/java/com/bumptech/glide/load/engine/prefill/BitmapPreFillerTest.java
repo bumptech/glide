@@ -184,7 +184,8 @@ public class BitmapPreFillerTest {
             .build();
     PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(smallWidth, smallHeight);
 
-    int numSmallWidth = 0, numSmallHeight = 0;
+    int numSmallWidth = 0;
+    int numSmallHeight = 0;
     while (!allocationOrder.isEmpty()) {
       PreFillType current = allocationOrder.remove();
       if (smallWidth.equals(current)) {
@@ -211,7 +212,8 @@ public class BitmapPreFillerTest {
             .build();
     PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(smallWidth, normal);
 
-    int numSmallWidth = 0, numNormal = 0;
+    int numSmallWidth = 0;
+    int numNormal = 0;
     while (!allocationOrder.isEmpty()) {
       PreFillType current = allocationOrder.remove();
       if (smallWidth.equals(current)) {
@@ -239,7 +241,8 @@ public class BitmapPreFillerTest {
             .build();
     PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(doubleWeight, normal);
 
-    int numDoubleWeight = 0, numNormal = 0;
+    int numDoubleWeight = 0;
+    int numNormal = 0;
     while (!allocationOrder.isEmpty()) {
       PreFillType current = allocationOrder.remove();
       if (doubleWeight.equals(current)) {
