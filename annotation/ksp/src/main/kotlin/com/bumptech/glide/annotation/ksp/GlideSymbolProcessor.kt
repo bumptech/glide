@@ -19,7 +19,7 @@ import com.squareup.kotlinpoet.FileSpec
  *
  * `LibraryGlideModule`s are merged into indexes, or classes generated in Glide's package. When a
  * `AppGlideModule` is found, we then generate Glide's configuration so that it calls the
- * `AppGlideModule` and anay included `LibraryGlideModules`. Using indexes allows us to process
+ * `AppGlideModule` and any included `LibraryGlideModules`. Using indexes allows us to process
  * `LibraryGlideModules` in multiple rounds and/or libraries.
  *
  * TODO(b/239086146): Finish implementing the behavior described here.
