@@ -15,8 +15,8 @@ import org.chromium.net.UrlResponseInfo;
 final class BufferQueue {
   public static final String CONTENT_LENGTH = "content-length";
   public static final String CONTENT_ENCODING = "content-encoding";
-  private final Queue<ByteBuffer> mBuffers;
-  private final AtomicBoolean mIsCoalesced = new AtomicBoolean(false);
+  private final Queue<ByteBuffer> buffers;
+  private final AtomicBoolean isCoalesced = new AtomicBoolean(false);
 
   public static Builder builder() {
     return new Builder();
@@ -32,18 +32,18 @@ final class BufferQueue {
    * request.read(builder.getNextBuffer(buffer)); } }
    */
   public static final class Builder {
-    private ArrayDeque<ByteBuffer> mBuffers = new ArrayDeque<>();
+    private ArrayDeque<ByteBuffer> buffers = new ArrayDeque<>();
     private RuntimeException whenClosed;
 
     private Builder() {}
 
     /** Returns the next buffer to write data into. */
     public ByteBuffer getNextBuffer(ByteBuffer lastBuffer) {
-      if (mBuffers == null) {
+      if (buffers == null) {
         throw new RuntimeException(whenClosed);
       }
-      if (lastBuffer != mBuffers.peekLast()) {
-        mBuffers.addLast(lastBuffer);
+      if (lastBuffer != buffers.peekLast()) {
+        buffers.addLast(lastBuffer);
       }
       if (lastBuffer.hasRemaining()) {
         return lastBuffer;
@@ -92,15 +92,15 @@ final class BufferQueue {
 
     public BufferQueue build() {
       whenClosed = new RuntimeException();
-      final ArrayDeque<ByteBuffer> buffers = mBuffers;
-      mBuffers = null;
+      final ArrayDeque<ByteBuffer> buffers = this.buffers;
+      this.buffers = null;
       return new BufferQueue(buffers);
     }
   }
 
   private BufferQueue(Queue<ByteBuffer> buffers) {
-    mBuffers = buffers;
-    for (ByteBuffer buffer : mBuffers) {
+    this.buffers = buffers;
+    for (ByteBuffer buffer : this.buffers) {
       buffer.flip();
     }
   }
@@ -108,18 +108,18 @@ final class BufferQueue {
   /** Returns the response body as a single contiguous buffer. */
   public ByteBuffer coalesceToBuffer() {
     markCoalesced();
-    if (mBuffers.size() == 0) {
+    if (buffers.size() == 0) {
       return ByteBuffer.allocateDirect(0);
-    } else if (mBuffers.size() == 1) {
-      return mBuffers.remove();
+    } else if (buffers.size() == 1) {
+      return buffers.remove();
     } else {
       int size = 0;
-      for (ByteBuffer buffer : mBuffers) {
+      for (ByteBuffer buffer : buffers) {
         size += buffer.remaining();
       }
       ByteBuffer result = ByteBuffer.allocateDirect(size);
-      while (!mBuffers.isEmpty()) {
-        result.put(mBuffers.remove());
+      while (!buffers.isEmpty()) {
+        result.put(buffers.remove());
       }
       result.flip();
       return result;
@@ -127,7 +127,7 @@ final class BufferQueue {
   }
 
   private void markCoalesced() {
-    if (!mIsCoalesced.compareAndSet(false, true)) {
+    if (!isCoalesced.compareAndSet(false, true)) {
       throw new IllegalStateException("This BufferQueue has already been consumed");
     }
   }
