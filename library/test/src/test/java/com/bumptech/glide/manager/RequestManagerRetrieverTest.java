@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
@@ -24,7 +23,6 @@ import androidx.fragment.app.FragmentController;
 import androidx.fragment.app.FragmentHostCallback;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil.BackgroundTester;
 import com.bumptech.glide.tests.TearDownGlide;
@@ -59,7 +57,7 @@ public class RequestManagerRetrieverTest {
   public void setUp() {
     appContext = ApplicationProvider.getApplicationContext();
 
-    retriever = new RequestManagerRetriever(/* factory= */ null, mock(GlideExperiments.class));
+    retriever = new RequestManagerRetriever(/* factory= */ null);
 
     harness = new SupportRetrieverHarness();
 

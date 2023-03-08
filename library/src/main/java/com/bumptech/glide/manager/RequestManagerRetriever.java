@@ -20,8 +20,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.GlideBuilder.WaitForFramesAfterTrimMemory;
-import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.resource.bitmap.HardwareConfigState;
 import com.bumptech.glide.util.Preconditions;
@@ -64,22 +62,19 @@ public class RequestManagerRetriever implements Handler.Callback {
   private final FrameWaiter frameWaiter;
   private final LifecycleRequestManagerRetriever lifecycleRequestManagerRetriever;
 
-  public RequestManagerRetriever(
-      @Nullable RequestManagerFactory factory, GlideExperiments experiments) {
+  public RequestManagerRetriever(@Nullable RequestManagerFactory factory) {
     this.factory = factory != null ? factory : DEFAULT_FACTORY;
     handler = new Handler(Looper.getMainLooper(), this /* Callback */);
     lifecycleRequestManagerRetriever = new LifecycleRequestManagerRetriever(this.factory);
-    frameWaiter = buildFrameWaiter(experiments);
+    frameWaiter = buildFrameWaiter();
   }
 
-  private static FrameWaiter buildFrameWaiter(GlideExperiments experiments) {
+  private static FrameWaiter buildFrameWaiter() {
     if (!HardwareConfigState.HARDWARE_BITMAPS_SUPPORTED
         || !HardwareConfigState.BLOCK_HARDWARE_BITMAPS_WHEN_GL_CONTEXT_MIGHT_NOT_BE_INITIALIZED) {
       return new DoNothingFirstFrameWaiter();
     }
-    return experiments.isEnabled(WaitForFramesAfterTrimMemory.class)
-        ? new FirstFrameAndAfterTrimMemoryWaiter()
-        : new FirstFrameWaiter();
+    return new FirstFrameWaiter();
   }
 
   @NonNull
