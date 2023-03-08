@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +20,7 @@ public class GlideExecutorTest {
   @Test
   public void testLoadsAreExecutedInOrder() throws InterruptedException {
     final List<Integer> resultPriorities = Collections.synchronizedList(new ArrayList<Integer>());
+    CountDownLatch latch = new CountDownLatch(1);
     GlideExecutor executor = GlideExecutor.newDiskCacheExecutor();
     for (int i = 5; i > 0; i--) {
       executor.execute(
@@ -27,10 +29,17 @@ public class GlideExecutorTest {
               new MockRunnable.OnRun() {
                 @Override
                 public void onRun(int priority) {
+                  try {
+                    latch.await();
+                  } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                  }
                   resultPriorities.add(priority);
                 }
               }));
     }
+    latch.countDown();
 
     executor.shutdown();
     executor.awaitTermination(500, TimeUnit.MILLISECONDS);
