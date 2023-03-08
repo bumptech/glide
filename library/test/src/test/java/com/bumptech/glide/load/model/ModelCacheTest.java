@@ -42,9 +42,11 @@ public class ModelCacheTest {
   @Test
   public void testCanSetAndGetMultipleResultsWithDifferentDimensionsForSameObject() {
     Object model = new Object();
-    int firstWidth = 10, firstHeight = 20;
+    int firstWidth = 10;
+    int firstHeight = 20;
     Object firstResult = new Object();
-    int secondWidth = 30, secondHeight = 40;
+    int secondWidth = 30;
+    int secondHeight = 40;
     Object secondResult = new Object();
 
     cache.put(model, firstWidth, firstHeight, firstResult);
