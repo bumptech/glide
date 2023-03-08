@@ -563,7 +563,7 @@ public final class GlideBuilder {
 
     GlideExperiments experiments = glideExperimentsBuilder.build();
     RequestManagerRetriever requestManagerRetriever =
-        new RequestManagerRetriever(requestManagerFactory, experiments);
+        new RequestManagerRetriever(requestManagerFactory);
 
     return new Glide(
         context,
@@ -589,14 +589,6 @@ public final class GlideBuilder {
     ManualOverrideHardwareBitmapMaxFdCount(int fdCount) {
       this.fdCount = fdCount;
     }
-  }
-
-  /**
-   * This is an internal only class that may be deleted at any time without notice. For internal
-   * users of glide, see the {@code setWaitForFramesAfterTrimMemory(boolean)} method above.
-   */
-  public static final class WaitForFramesAfterTrimMemory implements Experiment {
-    private WaitForFramesAfterTrimMemory() {}
   }
 
   static final class EnableImageDecoderForBitmaps implements Experiment {}
