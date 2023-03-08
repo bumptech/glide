@@ -16,4 +16,5 @@ set -e
   :glide:releaseJavadoc \
   :annotation:ksp:test:test \
   :integration:ktx:apiCheck \
+  :annotation:ksp:integrationtest:test \
   --parallel

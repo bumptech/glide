@@ -2,12 +2,8 @@ package com.bumptech.glide.annotation.ksp.test
 
 import com.bumptech.glide.annotation.ksp.AppGlideModuleConstants
 import com.bumptech.glide.annotation.ksp.GlideSymbolProcessorConstants
-import com.bumptech.glide.annotation.ksp.GlideSymbolProcessorProvider
 import com.google.common.truth.Truth.assertThat
-import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
-import com.tschuchort.compiletesting.SourceFile
-import com.tschuchort.compiletesting.symbolProcessorProviders
 import java.io.FileNotFoundException
 import kotlin.test.assertFailsWith
 import org.intellij.lang.annotations.Language
@@ -663,6 +659,8 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
   }
 }
 
+// generated code always includes public and Unit
+@Suppress("RedundantVisibilityModifier", "RedundantUnitReturnType")
 @Language("kotlin")
 const val appGlideModuleWithPackagePrefixedLibraryModules =
   """
@@ -702,6 +700,8 @@ internal class GeneratedAppGlideModuleImpl(
 }
 """
 
+// generated code always includes public and Unit
+@Suppress("RedundantVisibilityModifier", "RedundantUnitReturnType")
 @Language("kotlin")
 const val appGlideModuleWithLibraryModule =
   """
@@ -740,6 +740,8 @@ internal class GeneratedAppGlideModuleImpl(
 }
 """
 
+// generated code always includes public and Unit
+@Suppress("RedundantVisibilityModifier", "RedundantUnitReturnType")
 @Language("kotlin")
 const val appGlideModuleWithMultipleLibraryModules =
   """

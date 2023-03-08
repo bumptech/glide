@@ -1,0 +1,38 @@
+/**
+ * This package verifies that our ksp processor is able to successfully import
+ * and include LibraryGlideModules compiled in other modules. ksp:test is a more
+ * comprehensive set of unit tests for other scenarios for library tests.
+ *
+ * <p>Technically we could include these integration tests in ksp:test. However
+ * doing so would cause the dependent library to pollute every individual test
+ * because it's pulled in from the classpath. Using a separate module allows us
+ * to keep unit tests that are not concerned with dependent library modules
+ * separate.
+ */
+plugins {
+    id 'org.jetbrains.kotlin.android'
+    id 'com.android.library'
+}
+
+android {
+    compileSdkVersion COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+        versionName VERSION_NAME as String
+    }
+}
+
+dependencies {
+    implementation "junit:junit:$JUNIT_VERSION"
+    testImplementation project(":annotation:ksp:test")
+    testImplementation project(":annotation:ksp")
+    testImplementation project(":annotation")
+    testImplementation project(":glide")
+    testImplementation project(":integration:okhttp3")
+    testImplementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:${KOTLIN_COMPILE_TESTING_VERSION}"
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:${JETBRAINS_KOTLIN_TEST_VERSION}"
+    testImplementation project(path: ':annotation:ksp:test')
+}
