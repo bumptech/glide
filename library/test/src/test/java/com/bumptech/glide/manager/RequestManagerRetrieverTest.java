@@ -17,7 +17,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -52,9 +51,9 @@ public class RequestManagerRetrieverTest {
 
   private static final String PARENT_TAG = "parent";
   private Context appContext;
-  private RetrieverHarness[] harnesses;
-  private RequestManagerRetriever retriever;
   private int initialSdkVersion;
+  private SupportRetrieverHarness harness;
+  private RequestManagerRetriever retriever;
 
   @Before
   public void setUp() {
@@ -62,7 +61,7 @@ public class RequestManagerRetrieverTest {
 
     retriever = new RequestManagerRetriever(/* factory= */ null, mock(GlideExperiments.class));
 
-    harnesses = new RetrieverHarness[] {new DefaultRetrieverHarness()};
+    harness = new SupportRetrieverHarness();
 
     initialSdkVersion = Build.VERSION.SDK_INT;
     Util.setSdkVersionInt(18);
@@ -73,56 +72,28 @@ public class RequestManagerRetrieverTest {
     Util.setSdkVersionInt(initialSdkVersion);
 
     Shadows.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
-    assertThat(retriever.pendingRequestManagerFragments).isEmpty();
     assertThat(retriever.pendingSupportRequestManagerFragments).isEmpty();
   }
 
   @Test
-  public void testCreatesNewFragmentIfNoneExists() {
-    for (RetrieverHarness harness : harnesses) {
-      harness.doGet();
-
-      Shadows.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
-      assertTrue(harness.hasFragmentWithTag(RequestManagerRetriever.FRAGMENT_TAG));
-    }
-  }
-
-  @Test
   public void testReturnsNewManagerIfNoneExists() {
-    for (RetrieverHarness harness : harnesses) {
-      assertNotNull(harness.doGet());
-    }
-  }
-
-  @Test
-  public void testReturnsExistingRequestManagerIfExists() {
-    for (RetrieverHarness harness : harnesses) {
-      RequestManager requestManager = mock(RequestManager.class);
-
-      harness.addFragmentWithTag(RequestManagerRetriever.FRAGMENT_TAG, requestManager);
-
-      assertEquals(requestManager, harness.doGet());
-    }
+    assertNotNull(harness.doGet());
   }
 
   @Test
   public void testReturnsNewRequestManagerIfFragmentExistsButHasNoRequestManager() {
-    for (RetrieverHarness harness : harnesses) {
-      harness.addFragmentWithTag(RequestManagerRetriever.FRAGMENT_TAG, null);
+    harness.addFragmentWithTag(RequestManagerRetriever.FRAGMENT_TAG, null);
 
-      assertNotNull(harness.doGet());
-    }
+    assertNotNull(harness.doGet());
   }
 
   @Test
   public void testSavesNewRequestManagerToFragmentIfCreatesRequestManagerForExistingFragment() {
-    for (RetrieverHarness harness : harnesses) {
-      harness.addFragmentWithTag(RequestManagerRetriever.FRAGMENT_TAG, null);
-      RequestManager first = harness.doGet();
-      RequestManager second = harness.doGet();
+    harness.addFragmentWithTag(RequestManagerRetriever.FRAGMENT_TAG, null);
+    RequestManager first = harness.doGet();
+    RequestManager second = harness.doGet();
 
-      assertEquals(first, second);
-    }
+    assertEquals(first, second);
   }
 
   @Test
@@ -255,15 +226,8 @@ public class RequestManagerRetrieverTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfActivityDestroyed() {
-    RetrieverHarness harness = new DefaultRetrieverHarness();
-    harness.getController().pause().stop().destroy();
-    harness.doGet();
-  }
-
-  @Test(expected = IllegalArgumentException.class)
   public void testThrowsIfFragmentActivityDestroyed() {
-    RetrieverHarness harness = new SupportRetrieverHarness();
+    SupportRetrieverHarness harness = new SupportRetrieverHarness();
     harness.getController().pause().stop().destroy();
     harness.doGet();
   }
@@ -275,27 +239,10 @@ public class RequestManagerRetrieverTest {
 
   @Test
   public void testChecksIfContextIsFragmentActivity() {
-    RetrieverHarness harness = new SupportRetrieverHarness();
+    SupportRetrieverHarness harness = new SupportRetrieverHarness();
     RequestManager requestManager = harness.doGet();
 
     assertEquals(requestManager, retriever.get((Context) harness.getController().get()));
-  }
-
-  @Test
-  public void testChecksIfContextIsActivity() {
-    RetrieverHarness harness = new DefaultRetrieverHarness();
-    RequestManager requestManager = harness.doGet();
-
-    assertEquals(requestManager, retriever.get((Context) harness.getController().get()));
-  }
-
-  @Test
-  public void testHandlesContextWrappersForActivities() {
-    RetrieverHarness harness = new DefaultRetrieverHarness();
-    RequestManager requestManager = harness.doGet();
-    ContextWrapper contextWrapper = new ContextWrapper(harness.getController().get());
-
-    assertEquals(requestManager, retriever.get(contextWrapper));
   }
 
   @Test
@@ -452,76 +399,12 @@ public class RequestManagerRetrieverTest {
     assertThat(afterAttachRequestManager).isEqualTo(beforeAttachRequestManager);
   }
 
-  private interface RetrieverHarness {
-    ActivityController<?> getController();
-
-    RequestManager doGet();
-
-    boolean hasFragmentWithTag(String tag);
-
-    void addFragmentWithTag(String tag, RequestManager manager);
-  }
-
-  final class DefaultRetrieverHarness implements RetrieverHarness {
-    private final ActivityController<Activity> controller =
-        Robolectric.buildActivity(Activity.class);
-    private final android.app.Fragment parent;
-
-    DefaultRetrieverHarness() {
-      this.parent = new android.app.Fragment();
-
-      controller.create();
-      controller
-          .get()
-          .getFragmentManager()
-          .beginTransaction()
-          .add(parent, PARENT_TAG)
-          .commitAllowingStateLoss();
-      controller.get().getFragmentManager().executePendingTransactions();
-      controller.start().resume();
-    }
-
-    @Override
-    public ActivityController<?> getController() {
-      return controller;
-    }
-
-    @Override
-    public RequestManager doGet() {
-      return retriever.get(controller.get());
-    }
-
-    @Override
-    public boolean hasFragmentWithTag(String tag) {
-      return null
-          != controller
-              .get()
-              .getFragmentManager()
-              .findFragmentByTag(RequestManagerRetriever.FRAGMENT_TAG);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public void addFragmentWithTag(String tag, RequestManager requestManager) {
-      RequestManagerFragment fragment = new RequestManagerFragment();
-      fragment.setRequestManager(requestManager);
-      controller
-          .get()
-          .getFragmentManager()
-          .beginTransaction()
-          .add(fragment, RequestManagerRetriever.FRAGMENT_TAG)
-          .commitAllowingStateLoss();
-      controller.get().getFragmentManager().executePendingTransactions();
-    }
-  }
-
-  public class SupportRetrieverHarness implements RetrieverHarness {
+  final class SupportRetrieverHarness {
     private final ActivityController<FragmentActivity> controller =
         Robolectric.buildActivity(FragmentActivity.class);
-    private final Fragment parent;
 
     public SupportRetrieverHarness() {
-      this.parent = new Fragment();
+      Fragment parent = new Fragment();
 
       controller.create();
       controller
@@ -534,26 +417,18 @@ public class RequestManagerRetrieverTest {
       controller.start().resume();
     }
 
-    @Override
     public ActivityController<?> getController() {
       return controller;
     }
 
-    @Override
     public RequestManager doGet() {
       return retriever.get(controller.get());
     }
 
-    @Override
     public boolean hasFragmentWithTag(String tag) {
-      return controller
-              .get()
-              .getSupportFragmentManager()
-              .findFragmentByTag(RequestManagerRetriever.FRAGMENT_TAG)
-          != null;
+      return controller.get().getSupportFragmentManager().findFragmentByTag(tag) != null;
     }
 
-    @Override
     public void addFragmentWithTag(String tag, RequestManager manager) {
       SupportRequestManagerFragment fragment = new SupportRequestManagerFragment();
       fragment.setRequestManager(manager);
@@ -561,7 +436,7 @@ public class RequestManagerRetrieverTest {
           .get()
           .getSupportFragmentManager()
           .beginTransaction()
-          .add(fragment, RequestManagerRetriever.FRAGMENT_TAG)
+          .add(fragment, tag)
           .commitAllowingStateLoss();
       controller.get().getSupportFragmentManager().executePendingTransactions();
     }
@@ -583,7 +458,6 @@ public class RequestManagerRetrieverTest {
       return LayoutInflater.from(context).cloneInContext(context);
     }
 
-    @Nullable
     @Override
     public RequestManagerRetrieverTest onGetHost() {
       return RequestManagerRetrieverTest.this;

@@ -6,9 +6,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Build;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -41,25 +38,13 @@ public class RequestManagerRetriever implements Handler.Callback {
   @VisibleForTesting static final String FRAGMENT_TAG = "com.bumptech.glide.manager";
   private static final String TAG = "RMRetriever";
 
-  // Indicates that we've tried to add a RequestManagerFragment twice previously and is used as a
+  // Indicates that we've tried to add a fragment twice previously and is used as a
   // signal to give up and tear down the fragment.
   private static final int HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE = 1;
-
-  private static final int ID_REMOVE_FRAGMENT_MANAGER = 1;
   private static final int ID_REMOVE_SUPPORT_FRAGMENT_MANAGER = 2;
-
-  // Hacks based on the implementation of FragmentManagerImpl in the non-support libraries that
-  // allow us to iterate over and retrieve all active Fragments in a FragmentManager.
-  private static final String FRAGMENT_INDEX_KEY = "key";
 
   /** The top application level RequestManager. */
   private volatile RequestManager applicationManager;
-
-  /** Pending adds for RequestManagerFragments. */
-  @SuppressWarnings("deprecation")
-  @VisibleForTesting
-  final Map<android.app.FragmentManager, RequestManagerFragment> pendingRequestManagerFragments =
-      new HashMap<>();
 
   /** Pending adds for SupportRequestManagerFragments. */
   @VisibleForTesting
@@ -73,8 +58,6 @@ public class RequestManagerRetriever implements Handler.Callback {
 
   // Objects used to find Fragments and Activities containing views.
   private final ArrayMap<View, Fragment> tempViewToSupportFragment = new ArrayMap<>();
-  private final ArrayMap<View, android.app.Fragment> tempViewToFragment = new ArrayMap<>();
-  private final Bundle tempBundle = new Bundle();
   // This is really misplaced here, but to put it anywhere else means duplicating all of the
   // Fragment/Activity extraction logic that already exists here. It's gross, but less likely to
   // break.
@@ -132,8 +115,6 @@ public class RequestManagerRetriever implements Handler.Callback {
     } else if (Util.isOnMainThread() && !(context instanceof Application)) {
       if (context instanceof FragmentActivity) {
         return get((FragmentActivity) context);
-      } else if (context instanceof Activity) {
-        return get((Activity) context);
       } else if (context instanceof ContextWrapper
           // Only unwrap a ContextWrapper if the baseContext has a non-null application context.
           // Context#createPackageContext may return a Context without an Application instance,
@@ -186,26 +167,16 @@ public class RequestManagerRetriever implements Handler.Callback {
   }
 
   /**
-   * @deprecated Use androidx Activities instead (ie {@link FragmentActivity}, or {@link
+   * @deprecated This is identical to calling {@link #get(Context)} with the application context.
+   *     Use androidx Activities instead (ie {@link FragmentActivity}, or {@link
    *     androidx.appcompat.app.AppCompatActivity}).
    */
   @Deprecated
-  @SuppressWarnings("deprecation")
   @NonNull
   public RequestManager get(@NonNull Activity activity) {
-    if (Util.isOnBackgroundThread()) {
-      return get(activity.getApplicationContext());
-    } else if (activity instanceof FragmentActivity) {
-      return get((FragmentActivity) activity);
-    } else {
-      assertNotDestroyed(activity);
-      frameWaiter.registerSelf(activity);
-      android.app.FragmentManager fm = activity.getFragmentManager();
-      return fragmentGet(activity, fm, /* parentHint= */ null, isActivityVisible(activity));
-    }
+    return get(activity.getApplicationContext());
   }
 
-  @SuppressWarnings("deprecation")
   @NonNull
   public RequestManager get(@NonNull View view) {
     if (Util.isOnBackgroundThread()) {
@@ -231,11 +202,7 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
 
     // Standard Fragments.
-    android.app.Fragment fragment = findFragment(view, activity);
-    if (fragment == null) {
-      return get(activity);
-    }
-    return get(fragment);
+    return get(view.getContext().getApplicationContext());
   }
 
   private static void findAllSupportFragmentsWithViews(
@@ -277,78 +244,6 @@ public class RequestManagerRetriever implements Handler.Callback {
     return result;
   }
 
-  @SuppressWarnings({"deprecation", "DeprecatedIsStillUsed"})
-  @Deprecated
-  @Nullable
-  private android.app.Fragment findFragment(@NonNull View target, @NonNull Activity activity) {
-    tempViewToFragment.clear();
-    findAllFragmentsWithViews(activity.getFragmentManager(), tempViewToFragment);
-
-    android.app.Fragment result = null;
-
-    View activityRoot = activity.findViewById(android.R.id.content);
-    View current = target;
-    while (!current.equals(activityRoot)) {
-      result = tempViewToFragment.get(current);
-      if (result != null) {
-        break;
-      }
-      if (current.getParent() instanceof View) {
-        current = (View) current.getParent();
-      } else {
-        break;
-      }
-    }
-    tempViewToFragment.clear();
-    return result;
-  }
-
-  // TODO: Consider using an accessor class in the support library package to more directly retrieve
-  // non-support Fragments.
-  @SuppressWarnings("deprecation")
-  @Deprecated
-  @TargetApi(Build.VERSION_CODES.O)
-  private void findAllFragmentsWithViews(
-      @NonNull android.app.FragmentManager fragmentManager,
-      @NonNull ArrayMap<View, android.app.Fragment> result) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      for (android.app.Fragment fragment : fragmentManager.getFragments()) {
-        if (fragment.getView() != null) {
-          result.put(fragment.getView(), fragment);
-          findAllFragmentsWithViews(fragment.getChildFragmentManager(), result);
-        }
-      }
-    } else {
-      findAllFragmentsWithViewsPreO(fragmentManager, result);
-    }
-  }
-
-  @SuppressWarnings("deprecation")
-  @Deprecated
-  private void findAllFragmentsWithViewsPreO(
-      @NonNull android.app.FragmentManager fragmentManager,
-      @NonNull ArrayMap<View, android.app.Fragment> result) {
-    int index = 0;
-    while (true) {
-      tempBundle.putInt(FRAGMENT_INDEX_KEY, index++);
-      android.app.Fragment fragment = null;
-      try {
-        fragment = fragmentManager.getFragment(tempBundle, FRAGMENT_INDEX_KEY);
-      } catch (Exception e) {
-        // This generates log spam from FragmentManager anyway.
-      }
-      if (fragment == null) {
-        break;
-      }
-      if (fragment.getView() != null) {
-        result.put(fragment.getView(), fragment);
-        if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN_MR1) {
-          findAllFragmentsWithViews(fragment.getChildFragmentManager(), result);
-        }
-      }
-    }
-  }
-
   @Nullable
   private static Activity findActivity(@NonNull Context context) {
     if (context instanceof Activity) {
@@ -368,9 +263,9 @@ public class RequestManagerRetriever implements Handler.Callback {
   }
 
   /**
-   * @deprecated Use androidx fragments instead: {@link Fragment}.
+   * @deprecated This is equivalent to calling {@link #get(Context)} with the application context.
+   *     Use androidx fragments instead: {@link Fragment}.
    */
-  @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -379,79 +274,7 @@ public class RequestManagerRetriever implements Handler.Callback {
       throw new IllegalArgumentException(
           "You cannot start a load on a fragment before it is attached");
     }
-    if (Util.isOnBackgroundThread() || Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-      return get(fragment.getActivity().getApplicationContext());
-    } else {
-      // In some unusual cases, it's possible to have a Fragment not hosted by an activity. There's
-      // not all that much we can do here. Most apps will be started with a standard activity. If
-      // we manage not to register the first frame waiter for a while, the consequences are not
-      // catastrophic, we'll just use some extra memory.
-      if (fragment.getActivity() != null) {
-        frameWaiter.registerSelf(fragment.getActivity());
-      }
-      android.app.FragmentManager fm = fragment.getChildFragmentManager();
-      return fragmentGet(fragment.getActivity(), fm, fragment, fragment.isVisible());
-    }
-  }
-
-  /**
-   * @deprecated Use androidx activities like {@link FragmentActivity} or {@link
-   *     androidx.appcompat.app.AppCompatActivity} instead.
-   */
-  @SuppressWarnings("deprecation")
-  @Deprecated
-  @NonNull
-  RequestManagerFragment getRequestManagerFragment(Activity activity) {
-    return getRequestManagerFragment(activity.getFragmentManager(), /* parentHint= */ null);
-  }
-
-  @SuppressWarnings("deprecation")
-  @NonNull
-  private RequestManagerFragment getRequestManagerFragment(
-      @NonNull final android.app.FragmentManager fm, @Nullable android.app.Fragment parentHint) {
-    // If we have a pending Fragment, we need to continue to use the pending Fragment. Otherwise
-    // there's a race where an old Fragment could be added and retrieved here before our logic to
-    // add our pending Fragment notices. That can then result in both the pending Fragmeng and the
-    // old Fragment having requests running for them, which is impossible to safely unwind.
-    RequestManagerFragment current = pendingRequestManagerFragments.get(fm);
-    if (current == null) {
-      current = (RequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
-      if (current == null) {
-        current = new RequestManagerFragment();
-        current.setParentFragmentHint(parentHint);
-        pendingRequestManagerFragments.put(fm, current);
-        fm.beginTransaction().add(current, FRAGMENT_TAG).commitAllowingStateLoss();
-        handler.obtainMessage(ID_REMOVE_FRAGMENT_MANAGER, fm).sendToTarget();
-      }
-    }
-    return current;
-  }
-
-  @SuppressWarnings("deprecation")
-  @Deprecated
-  @NonNull
-  private RequestManager fragmentGet(
-      @NonNull Context context,
-      @NonNull android.app.FragmentManager fm,
-      @Nullable android.app.Fragment parentHint,
-      boolean isParentVisible) {
-    RequestManagerFragment current = getRequestManagerFragment(fm, parentHint);
-    RequestManager requestManager = current.getRequestManager();
-    if (requestManager == null) {
-      // TODO(b/27524013): Factor out this Glide.get() call.
-      Glide glide = Glide.get(context);
-      requestManager =
-          factory.build(
-              glide, current.getGlideLifecycle(), current.getRequestManagerTreeNode(), context);
-      // This is a bit of hack, we're going to start the RequestManager, but not the
-      // corresponding Lifecycle. It's safe to start the RequestManager, but starting the
-      // Lifecycle might trigger memory leaks. See b/154405040
-      if (isParentVisible) {
-        requestManager.onStart();
-      }
-      current.setRequestManager(requestManager);
-    }
-    return requestManager;
+    return get(fragment.getActivity().getApplicationContext());
   }
 
   @NonNull
@@ -485,75 +308,6 @@ public class RequestManagerRetriever implements Handler.Callback {
       }
     }
     return current;
-  }
-
-  // We care about the instance specifically.
-  @SuppressWarnings({"ReferenceEquality", "PMD.CompareObjectsWithEquals"})
-  private boolean verifyOurFragmentWasAddedOrCantBeAdded(
-      android.app.FragmentManager fm, boolean hasAttemptedToAddFragmentTwice) {
-    RequestManagerFragment newlyAddedRequestManagerFragment =
-        pendingRequestManagerFragments.get(fm);
-
-    RequestManagerFragment actualFragment =
-        (RequestManagerFragment) fm.findFragmentByTag(FRAGMENT_TAG);
-    if (actualFragment == newlyAddedRequestManagerFragment) {
-      return true;
-    }
-
-    if (actualFragment != null && actualFragment.getRequestManager() != null) {
-      throw new IllegalStateException(
-          "We've added two fragments with requests!"
-              + " Old: "
-              + actualFragment
-              + " New: "
-              + newlyAddedRequestManagerFragment);
-    }
-
-    // If our parent was destroyed, we're never going to be able to add our fragment, so we should
-    // just clean it up and abort.
-    // Similarly if we've already tried to add the fragment, waited a frame, then tried to add the
-    // fragment a second time and still the fragment isn't present, we're unlikely to be able to do
-    // so if we retry a third time. This is easy to reproduce in Robolectric by obtaining an
-    // Activity but not creating it. If we continue to loop forever, we break tests and, if it
-    // happens in the real world, might leak memory and waste a bunch of CPU/battery.
-    if (hasAttemptedToAddFragmentTwice || fm.isDestroyed()) {
-      if (Log.isLoggable(TAG, Log.WARN)) {
-        if (fm.isDestroyed()) {
-          Log.w(TAG, "Parent was destroyed before our Fragment could be added");
-        } else {
-          Log.w(TAG, "Tried adding Fragment twice and failed twice, giving up!");
-        }
-      }
-      newlyAddedRequestManagerFragment.getGlideLifecycle().onDestroy();
-      return true;
-    }
-
-    // Otherwise we should make another attempt to commit the fragment and loop back again in the
-    // next frame to verify.
-    android.app.FragmentTransaction transaction =
-        fm.beginTransaction().add(newlyAddedRequestManagerFragment, FRAGMENT_TAG);
-    // If the Activity is re-created and a Glide request was started for that Activity prior to the
-    // re-creation, then there will be an old RequestManagerFragment that is re-created as well.
-    // Under normal circumstances we find and re-use that Fragment rather than creating a new one.
-    // However, if the first Glide request for the re-created Activity occurs before the Activity is
-    // created, then we will have been unable to find the old RequestManagerFragment and will have
-    // created a new one instead. We don't want to keep adding new Fragments infinitely as the
-    // Activity is re-created, so we need to pick one. If we pick the old Fragment, then we will
-    // drop any requests that had been started after re-creation and are associated with the new
-    // Fragment. So here we drop the old Fragment if it exists.
-    if (actualFragment != null) {
-      transaction.remove(actualFragment);
-    }
-    transaction.commitAllowingStateLoss();
-
-    handler
-        .obtainMessage(
-            ID_REMOVE_FRAGMENT_MANAGER, HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE, /* arg2= */ 0, fm)
-        .sendToTarget();
-    if (Log.isLoggable(TAG, Log.DEBUG)) {
-      Log.d(TAG, "We failed to add our Fragment the first time around, trying again...");
-    }
-    return false;
   }
 
   // We care about the instance specifically.
@@ -612,14 +366,14 @@ public class RequestManagerRetriever implements Handler.Callback {
         supportFm.beginTransaction().add(newlyAddedSupportRequestManagerFragment, FRAGMENT_TAG);
 
     // If the Activity is re-created and a Glide request was started for that Activity prior to the
-    // re-creation, then there will be an old RequestManagerFragment that is re-created as well.
-    // Under normal circumstances we find and re-use that Fragment rather than creating a new one.
-    // However, if the first Glide request for the re-created Activity occurs before the Activity is
-    // created, then we will have been unable to find the old RequestManagerFragment and will have
-    // created a new one instead. We don't want to keep adding new Fragments infinitely as the
-    // Activity is re-created, so we need to pick one. If we pick the old Fragment, then we will
-    // drop any requests that had been started after re-creation and are associated with the new
-    // Fragment. So here we drop the old Fragment if it exists.
+    // re-creation, then there will be an old Fragment that is re-created as well. Under normal
+    // circumstances we find and re-use that Fragment rather than creating a new one. However, if
+    // the first Glide request for the re-created Activity occurs before the Activity is created,
+    // then we will have been unable to find the old Fragment and will have created a new one
+    // instead. We don't want to keep adding new Fragments infinitely as the Activity is re-created,
+    // so we need to pick one. If we pick the old Fragment, then we will drop any requests that had
+    // been started after re-creation and are associated with the new Fragment. So here we drop the
+    // old Fragment if it exists.
     if (actualFragment != null) {
       transaction.remove(actualFragment);
     }
@@ -646,26 +400,15 @@ public class RequestManagerRetriever implements Handler.Callback {
     Object removed = null;
     Object key = null;
     boolean hasAttemptedBefore = message.arg1 == HAS_ATTEMPTED_TO_ADD_FRAGMENT_TWICE;
-    switch (message.what) {
-      case ID_REMOVE_FRAGMENT_MANAGER:
-        android.app.FragmentManager fm = (android.app.FragmentManager) message.obj;
-        if (verifyOurFragmentWasAddedOrCantBeAdded(fm, hasAttemptedBefore)) {
-          attemptedRemoval = true;
-          key = fm;
-          removed = pendingRequestManagerFragments.remove(fm);
-        }
-        break;
-      case ID_REMOVE_SUPPORT_FRAGMENT_MANAGER:
-        FragmentManager supportFm = (FragmentManager) message.obj;
-        if (verifyOurSupportFragmentWasAddedOrCantBeAdded(supportFm, hasAttemptedBefore)) {
-          attemptedRemoval = true;
-          key = supportFm;
-          removed = pendingSupportRequestManagerFragments.remove(supportFm);
-        }
-        break;
-      default:
-        handled = false;
-        break;
+    if (message.what == ID_REMOVE_SUPPORT_FRAGMENT_MANAGER) {
+      FragmentManager supportFm = (FragmentManager) message.obj;
+      if (verifyOurSupportFragmentWasAddedOrCantBeAdded(supportFm, hasAttemptedBefore)) {
+        attemptedRemoval = true;
+        key = supportFm;
+        removed = pendingSupportRequestManagerFragments.remove(supportFm);
+      }
+    } else {
+      handled = false;
     }
     if (Log.isLoggable(TAG, Log.WARN)) {
       if (attemptedRemoval && removed == null) {

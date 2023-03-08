@@ -546,15 +546,14 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @param activity The activity to use.
    * @return A RequestManager for the given activity that can be used to start a load.
-   * @deprecated Use androidx Activitys instead (ie {@link FragmentActivity}, or {@link
-   *     androidx.appcompat.app.AppCompatActivity}). While this method is safe if {@code activity}
-   *     is in fact a support Activity, non-support Activity's lifecycles will be ignored in future
-   *     changes.
+   * @deprecated This is equivalent to calling {@link #with(Context)} using the application context.
+   *     Use the androidx Activity class instead (ie {@link FragmentActivity}, or {@link
+   *     androidx.appcompat.app.AppCompatActivity}).
    */
   @NonNull
   @Deprecated
   public static RequestManager with(@NonNull Activity activity) {
-    return getRetriever(activity).get(activity);
+    return with(activity.getApplicationContext());
   }
 
   /**
@@ -588,15 +587,14 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @param fragment The fragment to use.
    * @return A RequestManager for the given Fragment that can be used to start a load.
-   * @deprecated Prefer support Fragments and {@link #with(Fragment)} instead, {@link
-   *     android.app.Fragment} will be deprecated. See
+   * @deprecated This method is identical to calling {@link Glide#with(Context)} using the
+   *     application context. Prefer support Fragments and {@link #with(Fragment)} instead. See
    *     https://github.com/android/android-ktx/pull/161#issuecomment-363270555.
    */
-  @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
   public static RequestManager with(@NonNull android.app.Fragment fragment) {
-    return getRetriever(fragment.getActivity()).get(fragment);
+    return with(fragment.getContext().getApplicationContext());
   }
 
   /**

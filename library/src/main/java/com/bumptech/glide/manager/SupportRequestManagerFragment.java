@@ -20,7 +20,6 @@ import java.util.Set;
  * com.bumptech.glide.RequestManager} that can be used to start, stop and manage Glide requests
  * started for targets within the fragment or activity this fragment is a child of.
  *
- * @see com.bumptech.glide.manager.RequestManagerFragment
  * @see com.bumptech.glide.manager.RequestManagerRetriever
  * @see com.bumptech.glide.RequestManager
  */
@@ -83,8 +82,8 @@ public class SupportRequestManagerFragment extends Fragment {
   }
 
   /**
-   * Returns the set of fragments that this RequestManagerFragment's parent is a parent to. (i.e.
-   * our parent is the fragment that we are annotating).
+   * Returns the set of fragments that this fragment's parent is a parent to. (i.e. our parent is
+   * the fragment that we are annotating).
    */
   @Synthetic
   @NonNull
