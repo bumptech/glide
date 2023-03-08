@@ -32,7 +32,7 @@ apply plugin: 'binary-compatibility-validator'
 apply plugin: 'org.jetbrains.dokka'
 
 apiValidation {
-    ignoredProjects += ["ksp", "test", "gallery"]
+    ignoredProjects += ["ksp", "test", "gallery", "integrationtest"]
     nonPublicMarkers += ["com.bumptech.glide.integration.ktx.InternalGlideApi"]
 }
 
@@ -94,6 +94,7 @@ subprojects { project ->
           "gifencoder",
           "compiler",
           "benchmark",
+          "integrationtest",
           "instrumentation"
     ].contains(project.getName())) {
         afterEvaluate {

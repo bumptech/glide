@@ -10,7 +10,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import org.intellij.lang.annotations.Language
 
-internal class CompilationResult(
+class CompilationResult(
   private val compilation: KotlinCompilation,
   result: KotlinCompilation.Result,
 ) {
@@ -65,7 +65,7 @@ sealed interface TypedSourceFile {
   fun sourceType(): SourceType
 }
 
-internal class GeneratedSourceFile(
+class GeneratedSourceFile(
   private val file: File, private val currentSourceType: SourceType,
 ) : TypedSourceFile {
   override fun sourceFile(): SourceFile = SourceFile.fromPath(file)
@@ -78,7 +78,7 @@ internal class GeneratedSourceFile(
   override fun sourceType(): SourceType = currentSourceType
 }
 
-internal class KotlinSourceFile(
+class KotlinSourceFile(
   val name: String,
   @Language("kotlin") val content: String,
 ) : TypedSourceFile {
@@ -86,7 +86,7 @@ internal class KotlinSourceFile(
   override fun sourceType() = SourceType.KOTLIN
 }
 
-internal class JavaSourceFile(
+class JavaSourceFile(
   val name: String,
   @Language("java") val content: String,
 ) : TypedSourceFile {
@@ -94,7 +94,7 @@ internal class JavaSourceFile(
   override fun sourceType() = SourceType.JAVA
 }
 
-internal interface PerSourceTypeTest {
+interface PerSourceTypeTest {
   val sourceType: SourceType
 
   fun compileCurrentSourceType(

@@ -15,10 +15,11 @@ android {
 
 dependencies {
     implementation "junit:junit:$JUNIT_VERSION"
+    implementation project(":annotation:ksp")
+    implementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:${KOTLIN_COMPILE_TESTING_VERSION}"
+    implementation "com.google.truth:truth:${TRUTH_VERSION}"
     testImplementation project(":annotation:ksp")
     testImplementation project(":annotation")
     testImplementation project(":glide")
-    testImplementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:${KOTLIN_COMPILE_TESTING_VERSION}"
-    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
     testImplementation "org.jetbrains.kotlin:kotlin-test:${JETBRAINS_KOTLIN_TEST_VERSION}"
 }
