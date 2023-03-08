@@ -191,23 +191,58 @@ internal class AppGlideModuleParser(
   private fun getIndexesAndLibraryGlideModuleNames(): IndexFilesAndLibraryModuleNames {
     val allIndexFiles: MutableList<KSDeclaration> = mutableListOf()
     val allLibraryGlideModuleNames: MutableList<String> = mutableListOf()
-    resolver.getDeclarationsFromPackage(GlideSymbolProcessorConstants.PACKAGE_NAME).forEach {
-      index: KSDeclaration ->
-      val libraryGlideModuleNames = extractGlideModulesFromIndexAnnotation(index)
-      if (libraryGlideModuleNames.isNotEmpty()) {
-        allIndexFiles.add(index)
-        allLibraryGlideModuleNames.addAll(libraryGlideModuleNames)
-      }
+
+    val allIndexesAndLibraryModules =
+      getAllLibraryNamesFromJavaIndexes() + getAllLibraryNamesFromKspIndexes()
+    for ((index, libraryGlideModuleNames) in allIndexesAndLibraryModules) {
+      allIndexFiles.add(index)
+      allLibraryGlideModuleNames.addAll(libraryGlideModuleNames)
     }
 
     return IndexFilesAndLibraryModuleNames(allIndexFiles, allLibraryGlideModuleNames)
   }
 
-  private fun extractGlideModulesFromIndexAnnotation(
+  internal data class IndexAndLibraryModuleNames(
+    val index: KSDeclaration, val libraryModuleNames: List<String>
+  )
+
+  private fun getAllLibraryNamesFromKspIndexes(): List<IndexAndLibraryModuleNames> =
+    getAllLibraryNamesFromIndexes(GlideSymbolProcessorConstants.PACKAGE_NAME) { index ->
+      extractGlideModulesFromKspIndexAnnotation(index)
+    }
+
+  private fun getAllLibraryNamesFromJavaIndexes(): List<IndexAndLibraryModuleNames> =
+    getAllLibraryNamesFromIndexes(GlideSymbolProcessorConstants.JAVA_ANNOTATION_PACKAGE_NAME) {
+        index -> extractGlideModulesFromJavaIndexAnnotation(index)
+    }
+
+  @OptIn(KspExperimental::class)
+  private fun getAllLibraryNamesFromIndexes(
+    packageName: String, extractLibraryModuleNamesFromIndex: (KSDeclaration) -> List<String>
+  ) = buildList {
+    resolver.getDeclarationsFromPackage(packageName)
+      .forEach { index: KSDeclaration ->
+        val libraryGlideModuleNames = extractLibraryModuleNamesFromIndex(index)
+        if (libraryGlideModuleNames.isNotEmpty()) {
+          environment.logger.info(
+            "Found index annotation: $index with modules: $libraryGlideModuleNames"
+          )
+          add(IndexAndLibraryModuleNames(index, libraryGlideModuleNames))
+        }
+      }
+  }
+
+  private fun extractGlideModulesFromJavaIndexAnnotation(
     index: KSDeclaration,
   ): List<String> {
-    val indexAnnotation: KSAnnotation = index.atMostOneIndexAnnotation() ?: return emptyList()
-    environment.logger.info("Found index annotation: $indexAnnotation")
+    val indexAnnotation: KSAnnotation = index.atMostOneJavaIndexAnnotation() ?: return emptyList()
+    return indexAnnotation.getModuleArgumentValues().toList()
+  }
+
+  private fun extractGlideModulesFromKspIndexAnnotation(
+    index: KSDeclaration,
+  ): List<String> {
+    val indexAnnotation: KSAnnotation = index.atMostOneKspIndexAnnotation() ?: return emptyList()
     return indexAnnotation.getModuleArgumentValues().toList()
   }
 
@@ -220,17 +255,23 @@ internal class AppGlideModuleParser(
     throw InvalidGlideSourceException("Found an invalid internal Glide index: $this")
   }
 
-  private fun KSDeclaration.atMostOneIndexAnnotation() = atMostOneAnnotation(Index::class)
+  private fun KSDeclaration.atMostOneJavaIndexAnnotation() =
+    atMostOneAnnotation("com.bumptech.glide.annotation.compiler.Index")
+  private fun KSDeclaration.atMostOneKspIndexAnnotation() = atMostOneAnnotation(Index::class)
 
   private fun KSDeclaration.atMostOneExcludesAnnotation() = atMostOneAnnotation(Excludes::class)
 
   private fun KSDeclaration.atMostOneAnnotation(
     annotation: KClass<out Annotation>,
+  ): KSAnnotation? = atMostOneAnnotation(annotation.qualifiedName)
+
+  private fun KSDeclaration.atMostOneAnnotation(
+    annotationQualifiedName: String?,
   ): KSAnnotation? {
     val matchingAnnotations: List<KSAnnotation> =
       annotations
         .filter {
-          annotation.qualifiedName?.equals(
+          annotationQualifiedName?.equals(
             it.annotationType.resolve().declaration.qualifiedName?.asString()
           )
             ?: false
@@ -238,7 +279,7 @@ internal class AppGlideModuleParser(
         .toList()
     if (matchingAnnotations.size > 1) {
       throw InvalidGlideSourceException(
-        """Expected 0 or 1 $annotation annotations on $qualifiedName, but found: 
+        """Expected 0 or 1 $annotationQualifiedName annotations on $qualifiedName, but found: 
           ${matchingAnnotations.size}"""
       )
     }

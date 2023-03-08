@@ -144,6 +144,7 @@ object GlideSymbolProcessorConstants {
   // This variable is visible only for testing
   // TODO(b/174783094): Add @VisibleForTesting when internal is supported.
   val PACKAGE_NAME: String = GlideSymbolProcessor::class.java.`package`.name
+  val JAVA_ANNOTATION_PACKAGE_NAME: String = "com.bumptech.glide.annotation.compiler"
   const val SINGLE_APP_MODULE_ERROR = "You can have at most one AppGlideModule, but found: %s"
   const val DUPLICATE_LIBRARY_MODULE_ERROR =
     "LibraryGlideModules %s are included more than once, keeping only one!"
