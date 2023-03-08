@@ -1,5 +1,18 @@
 import com.android.build.gradle.api.LibraryVariant
 
+/**
+ * This module is used for two things:
+ *     <ul>
+ *         <li>Compiling a single unified set of javadocs for Glide
+ *         <li>Providing a jar version of Glide for internal libraries, like
+ *         Glide's annotation processor.
+ *     </ul>
+ *
+ * <p>Previously this module was used to produce a release jar for Glide, but
+ * we've long since stopped releasing the jar. Now all release artifacts come
+ * from the upload script, which uploads aars for each production submodule
+ */
+
 apply plugin: 'java'
 
 // The paths of Android projects that should be included only in Javadoc, not in the jar.
@@ -16,6 +29,10 @@ static def getAndroidPathsForJavadoc() {
             ':third_party:disklrucache',
             ':third_party:gif_decoder',
     ]
+}
+
+static def getAndroidPathsForJar() {
+    [':library', ':third_party:disklrucache', ':third_party:gif_decoder']
 }
 
 // The paths of Java projects that should be included only in Javadoc, not in the jar.
@@ -43,8 +60,16 @@ def getAndroidProjectsForJavadoc() {
     asProjects(getAndroidPathsForJavadoc())
 }
 
+def getAndroidLibraryVariantsForJar() {
+    getAndroidLibraryVariantsForProjects(asProjects(getAndroidPathsForJar()))
+}
+
 def getAndroidLibraryVariantsForJavadoc() {
-    getAndroidProjectsForJavadoc().collect { project ->
+    getAndroidLibraryVariantsForProjects(getAndroidProjectsForJavadoc())
+}
+
+def getAndroidLibraryVariantsForProjects(projects) {
+    projects.collect { project ->
         project.android.libraryVariants.findAll { type ->
             type.buildType.name.equalsIgnoreCase("release")
         }
@@ -114,7 +139,7 @@ javadocJarTask.dependsOn(javadocTask)
 
 jar {
     from files(
-            getAndroidLibraryVariantsForJavadoc().collect { LibraryVariant variant ->
+            getAndroidLibraryVariantsForJar().collect { LibraryVariant variant ->
                 variant.getJavaCompileProvider().get().destinationDirectory
             }
     )
