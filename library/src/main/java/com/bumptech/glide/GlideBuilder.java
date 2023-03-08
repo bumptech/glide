@@ -603,11 +603,4 @@ public final class GlideBuilder {
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
-
-  /**
-   * Use {@link com.bumptech.glide.load.model.DirectResourceLoader} instead of {@link
-   * com.bumptech.glide.load.model.ResourceLoader} so that we load resources asynchronously with the
-   * correct theme.
-   */
-  public static final class UseDirectResourceLoader implements Experiment {}
 }
