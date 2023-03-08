@@ -5,6 +5,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-cronet:17.0.0'
     implementation "com.google.guava:guava:${GUAVA_VERSION}"
     implementation project(':annotation')
+    annotationProcessor project(':annotation:compiler')
 
     api "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
 
