@@ -72,8 +72,6 @@ public final class HardwareConfigState {
    *
    * <p>Prior to P, the limit per process was 1024 FDs. In P, the limit was updated to 32k FDs per
    * process.
-   *
-   * <p>Access to this variable will be removed in a future version without deprecation.
    */
   private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_O = 700;
   // 20k.
