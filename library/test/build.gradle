@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 dependencies {
     testImplementation "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
@@ -14,6 +16,8 @@ dependencies {
     testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
     testImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
     testImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
+    testImplementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
 }
 
 tasks.withType(JavaCompile) {
@@ -29,7 +33,7 @@ afterEvaluate {
 android.testOptions.unitTests.all { Test testTask ->
     // configure max heap size of the test JVM
     testTask.maxHeapSize = TEST_JVM_MEMORY_SIZE as String
-    if (JavaVersion.current() <= JavaVersion.VERSION_1_7) {
+    if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
         // Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=2048m; support was removed in 8.0
         testTask.jvmArgs "-XX:MaxPermSize=${TEST_JVM_MEMORY_SIZE}"
     }

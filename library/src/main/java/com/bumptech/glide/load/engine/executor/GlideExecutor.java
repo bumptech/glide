@@ -63,6 +63,7 @@ public final class GlideExecutor implements ExecutorService {
   private static volatile int bestThreadCount;
 
   private final ExecutorService delegate;
+  private final UncaughtThrowableStrategy uncaughtThrowableStrategy;
 
   /**
    * Returns a new {@link Builder} with the {@link #DEFAULT_DISK_CACHE_EXECUTOR_THREADS} threads,
@@ -180,7 +181,8 @@ public final class GlideExecutor implements ExecutorService {
                 new DefaultPriorityThreadFactory(),
                 DEFAULT_SOURCE_UNLIMITED_EXECUTOR_NAME,
                 UncaughtThrowableStrategy.DEFAULT,
-                false)));
+                false)),
+        UncaughtThrowableStrategy.DEFAULT);
   }
 
   /**
@@ -226,8 +228,13 @@ public final class GlideExecutor implements ExecutorService {
   }
 
   @VisibleForTesting
-  GlideExecutor(ExecutorService delegate) {
+  GlideExecutor(ExecutorService delegate, UncaughtThrowableStrategy uncaughtThrowableStrategy) {
     this.delegate = delegate;
+    this.uncaughtThrowableStrategy = uncaughtThrowableStrategy;
+  }
+
+  public UncaughtThrowableStrategy uncaughtThrowableStrategy() {
+    return uncaughtThrowableStrategy;
   }
 
   @Override
@@ -530,7 +537,7 @@ public final class GlideExecutor implements ExecutorService {
         executor.allowCoreThreadTimeOut(true);
       }
 
-      return new GlideExecutor(executor);
+      return new GlideExecutor(executor, uncaughtThrowableStrategy);
     }
   }
 }

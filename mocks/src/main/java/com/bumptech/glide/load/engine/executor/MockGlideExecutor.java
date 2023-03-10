@@ -3,6 +3,7 @@ package com.bumptech.glide.load.engine.executor;
 import android.os.StrictMode;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+import com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy;
 import com.google.common.util.concurrent.ForwardingExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.Callable;
@@ -20,7 +21,7 @@ public final class MockGlideExecutor {
   // Public API.
   @SuppressWarnings("WeakerAccess")
   public static GlideExecutor newTestExecutor(ExecutorService executorService) {
-    return new GlideExecutor(executorService);
+    return new GlideExecutor(executorService, UncaughtThrowableStrategy.DEFAULT);
   }
 
   public static GlideExecutor newMainThreadExecutor() {

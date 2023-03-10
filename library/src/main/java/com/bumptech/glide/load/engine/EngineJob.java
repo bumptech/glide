@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * A class that manages a load by adding and removing callbacks for for the load and notifying
@@ -35,6 +36,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   private final ResourceListener resourceListener;
   private final Pools.Pool<EngineJob<?>> pool;
   private final EngineResourceFactory engineResourceFactory;
+  private final CoroutineDispatcher diskCacheDispatcher;
+  private final CoroutineDispatcher sourceDispatcher;
+  private final CoroutineDispatcher sourceUnlimitedDispatcher;
+  private final CoroutineDispatcher animationDispatcher;
   private final EngineJobListener engineJobListener;
   private final GlideExecutor diskCacheExecutor;
   private final GlideExecutor sourceExecutor;
@@ -65,17 +70,20 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   @Synthetic
   EngineResource<?> engineResource;
 
-  private DecodeJob<R> decodeJob;
-
   // Checked primarily on the main thread, but also on other threads in reschedule.
   private volatile boolean isCancelled;
   private boolean isLoadedFromAlternateCacheKey;
+  private volatile ResourceLoadTask loadTask;
 
   EngineJob(
       GlideExecutor diskCacheExecutor,
       GlideExecutor sourceExecutor,
       GlideExecutor sourceUnlimitedExecutor,
       GlideExecutor animationExecutor,
+      CoroutineDispatcher diskCacheDispatcher,
+      CoroutineDispatcher sourceDispatcher,
+      CoroutineDispatcher sourceUnlimitedDispatcher,
+      CoroutineDispatcher animationDispatcher,
       EngineJobListener engineJobListener,
       ResourceListener resourceListener,
       Pools.Pool<EngineJob<?>> pool) {
@@ -84,6 +92,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
         sourceExecutor,
         sourceUnlimitedExecutor,
         animationExecutor,
+        diskCacheDispatcher,
+        sourceDispatcher,
+        sourceUnlimitedDispatcher,
+        animationDispatcher,
         engineJobListener,
         resourceListener,
         pool,
@@ -96,6 +108,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
       GlideExecutor sourceExecutor,
       GlideExecutor sourceUnlimitedExecutor,
       GlideExecutor animationExecutor,
+      CoroutineDispatcher diskCacheDispatcher,
+      CoroutineDispatcher sourceDispatcher,
+      CoroutineDispatcher sourceUnlimitedDispatcher,
+      CoroutineDispatcher animationDispatcher,
       EngineJobListener engineJobListener,
       ResourceListener resourceListener,
       Pools.Pool<EngineJob<?>> pool,
@@ -104,6 +120,10 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     this.sourceExecutor = sourceExecutor;
     this.sourceUnlimitedExecutor = sourceUnlimitedExecutor;
     this.animationExecutor = animationExecutor;
+    this.diskCacheDispatcher = diskCacheDispatcher;
+    this.sourceDispatcher = sourceDispatcher;
+    this.sourceUnlimitedDispatcher = sourceUnlimitedDispatcher;
+    this.animationDispatcher = animationDispatcher;
     this.engineJobListener = engineJobListener;
     this.resourceListener = resourceListener;
     this.pool = pool;
@@ -124,12 +144,44 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     this.onlyRetrieveFromCache = onlyRetrieveFromCache;
     return this;
   }
+  public interface ResourceLoadTask {
+    void execute(GlideExecutor executor, CoroutineDispatcher dispatcher);
+    void cancel();
+    void release(boolean isRemovedFromQueue);
+    boolean willDecodeFromCache();
+  }
 
-  public synchronized void start(DecodeJob<R> decodeJob) {
-    this.decodeJob = decodeJob;
+  public synchronized void start(final DecodeJob<R> decodeJob) {
+    start(new ResourceLoadTask() {
+      @Override
+      public void execute(GlideExecutor executor, CoroutineDispatcher dispatcher) {
+        executor.execute(decodeJob);
+      }
+
+      @Override
+      public void cancel() {
+        decodeJob.cancel();
+      }
+
+      @Override
+      public void release(boolean isRemovedFromQueue) {
+        decodeJob.release(isRemovedFromQueue);
+      }
+
+      @Override
+      public boolean willDecodeFromCache() {
+        return decodeJob.willDecodeFromCache();
+      }
+    });
+  }
+
+  public synchronized void start(ResourceLoadTask loadTask) {
     GlideExecutor executor =
-        decodeJob.willDecodeFromCache() ? diskCacheExecutor : getActiveSourceExecutor();
-    executor.execute(decodeJob);
+        loadTask.willDecodeFromCache() ? diskCacheExecutor : getActiveSourceExecutor();
+    CoroutineDispatcher dispatcher =
+        loadTask.willDecodeFromCache() ? diskCacheDispatcher : getActiveSourceDispatcher();
+    this.loadTask = loadTask;
+    loadTask.execute(executor, dispatcher);
   }
 
   synchronized void addCallback(final ResourceCallback cb, Executor callbackExecutor) {
@@ -192,6 +244,12 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     return onlyRetrieveFromCache;
   }
 
+  private CoroutineDispatcher getActiveSourceDispatcher() {
+    return useUnlimitedSourceGeneratorPool
+        ? sourceUnlimitedDispatcher
+        : (useAnimationPool ? animationDispatcher : sourceDispatcher);
+  }
+
   private GlideExecutor getActiveSourceExecutor() {
     return useUnlimitedSourceGeneratorPool
         ? sourceUnlimitedExecutor
@@ -205,7 +263,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     }
 
     isCancelled = true;
-    decodeJob.cancel();
+    loadTask.cancel();
     engineJobListener.onEngineJobCancelled(this, key);
   }
 
@@ -306,8 +364,8 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     isCancelled = false;
     hasResource = false;
     isLoadedFromAlternateCacheKey = false;
-    decodeJob.release(/* isRemovedFromQueue= */ false);
-    decodeJob = null;
+    loadTask.release(/* isRemovedFromQueue= */ false);
+    loadTask = null;
     exception = null;
     dataSource = null;
     pool.release(this);
@@ -337,6 +395,11 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     // Even if the job is cancelled here, it still needs to be scheduled so that it can clean itself
     // up.
     getActiveSourceExecutor().execute(job);
+  }
+
+  @Override
+  public CoroutineDispatcher getSourceExecutor() {
+    return getActiveSourceDispatcher();
   }
 
   // We have to post Runnables in a loop. Typically there will be very few callbacks. Acessor method

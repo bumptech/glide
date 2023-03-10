@@ -24,6 +24,8 @@ import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
+import kotlinx.coroutines.CoroutineDispatcher;
 
 /** Responsible for starting loads and managing active and cached resources. */
 public class Engine
@@ -39,8 +41,12 @@ public class Engine
   private final EngineJobFactory engineJobFactory;
   private final ResourceRecycler resourceRecycler;
   private final LazyDiskCacheProvider diskCacheProvider;
+  private final boolean useKotlinDecodeJob;
   private final DecodeJobFactory decodeJobFactory;
   private final ActiveResources activeResources;
+  private final CoroutineScopeHolder coroutineScopeHolder = new CoroutineScopeHolder();
+
+  private final AtomicInteger order = new AtomicInteger();
 
   public Engine(
       MemoryCache memoryCache,
@@ -57,13 +63,34 @@ public class Engine
         sourceExecutor,
         sourceUnlimitedExecutor,
         animationExecutor,
+        /* isActiveResourceRetentionAllowed= */isActiveResourceRetentionAllowed,
+        /* useKotlinDecodeJob= */ false);
+  }
+
+  public Engine(
+      MemoryCache memoryCache,
+      DiskCache.Factory diskCacheFactory,
+      GlideExecutor diskCacheExecutor,
+      GlideExecutor sourceExecutor,
+      GlideExecutor sourceUnlimitedExecutor,
+      GlideExecutor animationExecutor,
+      boolean isActiveResourceRetentionAllowed,
+      boolean useKotlinDecodeJob) {
+    this(
+        memoryCache,
+        diskCacheFactory,
+        diskCacheExecutor,
+        sourceExecutor,
+        sourceUnlimitedExecutor,
+        animationExecutor,
         /* jobs= */ null,
         /* keyFactory= */ null,
         /* activeResources= */ null,
         /* engineJobFactory= */ null,
         /* decodeJobFactory= */ null,
         /* resourceRecycler= */ null,
-        isActiveResourceRetentionAllowed);
+        /* isActiveResourceRetentionAllowed= */ isActiveResourceRetentionAllowed,
+        /* useKotlinDecodeJob= */ useKotlinDecodeJob);
   }
 
   @VisibleForTesting
@@ -80,9 +107,11 @@ public class Engine
       EngineJobFactory engineJobFactory,
       DecodeJobFactory decodeJobFactory,
       ResourceRecycler resourceRecycler,
-      boolean isActiveResourceRetentionAllowed) {
+      boolean isActiveResourceRetentionAllowed,
+      boolean useKotlinDecodeJob) {
     this.cache = cache;
     this.diskCacheProvider = new LazyDiskCacheProvider(diskCacheFactory);
+    this.useKotlinDecodeJob = useKotlinDecodeJob;
 
     if (activeResources == null) {
       activeResources = new ActiveResources(isActiveResourceRetentionAllowed);
@@ -107,6 +136,7 @@ public class Engine
               sourceExecutor,
               sourceUnlimitedExecutor,
               animationExecutor,
+
               /* engineJobListener= */ this,
               /* resourceListener= */ this);
     }
@@ -262,34 +292,94 @@ public class Engine
             useAnimationPool,
             onlyRetrieveFromCache);
 
-    DecodeJob<R> decodeJob =
-        decodeJobFactory.build(
-            glideContext,
-            model,
-            key,
-            signature,
-            width,
-            height,
-            resourceClass,
-            transcodeClass,
-            priority,
-            diskCacheStrategy,
-            transformations,
-            isTransformationRequired,
-            isScaleOnlyOrNoTransform,
-            onlyRetrieveFromCache,
-            options,
-            engineJob);
-
     jobs.put(key, engineJob);
-
     engineJob.addCallback(cb, callbackExecutor);
-    engineJob.start(decodeJob);
+    buildDecodeJobAndStart(
+        glideContext,
+        model,
+        signature,
+        width,
+        height,
+        resourceClass,
+        transcodeClass,
+        priority,
+        diskCacheStrategy,
+        transformations,
+        isTransformationRequired,
+        isScaleOnlyOrNoTransform,
+        options,
+        onlyRetrieveFromCache,
+        key,
+        useKotlinDecodeJob,
+        engineJob);
 
     if (VERBOSE_IS_LOGGABLE) {
       logWithTimeAndKey("Started new load", startTime, key);
     }
     return new LoadStatus(cb, engineJob);
+  }
+
+  private <R> void buildDecodeJobAndStart(
+      GlideContext glideContext,
+      Object model,
+      Key signature,
+      int width,
+      int height,
+      Class<?> resourceClass,
+      Class<R> transcodeClass,
+      Priority priority,
+      DiskCacheStrategy diskCacheStrategy,
+      Map<Class<?>, Transformation<?>> transformations,
+      boolean isTransformationRequired,
+      boolean isScaleOnlyOrNoTransform,
+      Options options,
+      boolean onlyRetrieveFromCache,
+      EngineKey key,
+      boolean useKotlinDecodeJob, EngineJob<R> engineJob) {
+    if (useKotlinDecodeJob) {
+      KotlinResourceLoadTask<R> kotlinResourceLoadTask =
+          new KotlinResourceLoadTask<>(
+              new KotlinDecodeJob<>(
+                  diskCacheProvider,
+                  glideContext,
+                  model,
+                  signature,
+                  width,
+                  height,
+                  resourceClass,
+                  transcodeClass,
+                  priority,
+                  diskCacheStrategy,
+                  transformations,
+                  isTransformationRequired,
+                  isScaleOnlyOrNoTransform,
+                  onlyRetrieveFromCache,
+                  options,
+                  engineJob,
+                  order.incrementAndGet()),
+              coroutineScopeHolder);
+      engineJob.start(kotlinResourceLoadTask);
+    } else {
+      DecodeJob<R> decodeJob =
+          decodeJobFactory.build(
+              glideContext,
+              model,
+              key,
+              signature,
+              width,
+              height,
+              resourceClass,
+              transcodeClass,
+              priority,
+              diskCacheStrategy,
+              transformations,
+              isTransformationRequired,
+              isScaleOnlyOrNoTransform,
+              onlyRetrieveFromCache,
+              options,
+              engineJob);
+      engineJob.start(decodeJob);
+    }
   }
 
   @Nullable
@@ -370,7 +460,6 @@ public class Engine
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public synchronized void onEngineJobComplete(
       EngineJob<?> engineJob, Key key, EngineResource<?> resource) {
@@ -410,6 +499,7 @@ public class Engine
 
   @VisibleForTesting
   public void shutdown() {
+    coroutineScopeHolder.cancelAll();
     engineJobFactory.shutdown();
     diskCacheProvider.clearDiskCacheIfCreated();
     activeResources.shutdown();
@@ -540,6 +630,10 @@ public class Engine
     @Synthetic final GlideExecutor sourceExecutor;
     @Synthetic final GlideExecutor sourceUnlimitedExecutor;
     @Synthetic final GlideExecutor animationExecutor;
+    @Synthetic final CoroutineDispatcher diskCacheDispatcher;
+    @Synthetic final CoroutineDispatcher sourceDispatcher;
+    @Synthetic final CoroutineDispatcher sourceUnlimitedDispatcher;
+    @Synthetic final CoroutineDispatcher animationDispatcher;
     @Synthetic final EngineJobListener engineJobListener;
     @Synthetic final ResourceListener resourceListener;
 
@@ -555,6 +649,10 @@ public class Engine
                     sourceExecutor,
                     sourceUnlimitedExecutor,
                     animationExecutor,
+                    diskCacheDispatcher,
+                    sourceDispatcher,
+                    sourceUnlimitedDispatcher,
+                    animationDispatcher,
                     engineJobListener,
                     resourceListener,
                     pool);
@@ -572,6 +670,10 @@ public class Engine
       this.sourceExecutor = sourceExecutor;
       this.sourceUnlimitedExecutor = sourceUnlimitedExecutor;
       this.animationExecutor = animationExecutor;
+      this.diskCacheDispatcher = new PriorityDispatcher(diskCacheExecutor);
+      this.sourceDispatcher = new PriorityDispatcher(sourceExecutor);
+      this.sourceUnlimitedDispatcher = new PriorityDispatcher(sourceUnlimitedExecutor);
+      this.animationDispatcher = new PriorityDispatcher(animationExecutor);
       this.engineJobListener = engineJobListener;
       this.resourceListener = resourceListener;
     }

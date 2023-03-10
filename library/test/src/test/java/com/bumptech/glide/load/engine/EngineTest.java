@@ -740,7 +740,8 @@ public class EngineTest {
                 engineJobFactory,
                 decodeJobFactory,
                 resourceRecycler,
-                /* isActiveResourceRetentionAllowed= */ true);
+                /* isActiveResourceRetentionAllowed= */ true,
+                /* useKotlinDecodeJob= */ false);
       }
       return engine;
     }

@@ -539,7 +539,7 @@ public class EngineJobTest {
     MultiCbHarness() {
       when(factory.build(resource, isCacheable, key, resourceListener)).thenReturn(engineResource);
       job =
-          new EngineJob<>(
+          EngineJobFactory.newFakeEngineJob(
               diskCacheService,
               sourceService,
               sourceUnlimitedService,
@@ -589,7 +589,7 @@ public class EngineJobTest {
     EngineJob<Object> getJob() {
       when(factory.build(resource, isCacheable, key, resourceListener)).thenReturn(engineResource);
       EngineJob<Object> result =
-          new EngineJob<>(
+          EngineJobFactory.newFakeEngineJob(
               diskCacheService,
               sourceService,
               sourceUnlimitedService,

@@ -4,6 +4,9 @@ if (!hasProperty('DISABLE_ERROR_PRONE')) {
     apply plugin: "net.ltgt.errorprone"
 }
 
+apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.android'
+
 tasks.withType(JavaCompile) {
     options.fork = true
 }
@@ -16,6 +19,8 @@ dependencies {
     api "androidx.vectordrawable:vectordrawable-animated:${ANDROID_X_VECTOR_DRAWABLE_ANIMATED_VERSION}"
     api "androidx.exifinterface:exifinterface:${ANDROID_X_EXIF_INTERFACE_VERSION}"
     api "androidx.tracing:tracing:${ANDROID_X_TRACING_VERSION}"
+    implementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
     compileOnly "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
 
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
@@ -64,8 +69,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -95,3 +100,4 @@ def classPathForQuality() {
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+apply plugin: 'org.jetbrains.kotlin.android'

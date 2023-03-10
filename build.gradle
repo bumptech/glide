@@ -71,15 +71,6 @@ subprojects { project ->
         gradlePluginPortal()
     }
 
-    afterEvaluate {
-        if (!project.plugins.hasPlugin("org.jetbrains.kotlin.jvm")) {
-            tasks.withType(JavaCompile) {
-                sourceCompatibility = 1.7
-                targetCompatibility = 1.7
-            }
-        }
-    }
-
     // Exclude packages not intended for public use.
     if ([
           "testutil",

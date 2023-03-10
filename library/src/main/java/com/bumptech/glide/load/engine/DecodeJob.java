@@ -25,6 +25,7 @@ import com.bumptech.glide.util.pool.StateVerifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import kotlinx.coroutines.CoroutineDispatcher;
 
 /**
  * A class responsible for decoding resources either from cached data or from the original source
@@ -684,7 +685,7 @@ class DecodeJob<R>
    * Allows transformed resources to be encoded after the transcoded result is already delivered to
    * requestors.
    */
-  private static class DeferredEncodeManager<Z> {
+  static class DeferredEncodeManager<Z> {
     private Key key;
     private ResourceEncoder<Z> encoder;
     private LockedResource<Z> toEncode;
@@ -731,6 +732,8 @@ class DecodeJob<R>
     void onLoadFailed(GlideException e);
 
     void reschedule(DecodeJob<?> job);
+
+    CoroutineDispatcher getSourceExecutor();
   }
 
   interface DiskCacheProvider {

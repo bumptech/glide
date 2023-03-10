@@ -5,6 +5,7 @@ import androidx.test.espresso.IdlingRegistry;
 import androidx.test.espresso.idling.concurrent.IdlingThreadPoolExecutor;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.UnaryOperator;
@@ -52,9 +53,12 @@ public final class IdlingGlideRule implements TestRule {
               ApplicationProvider.getApplicationContext(),
               additionalOptions
                   .apply(new GlideBuilder())
-                  .setSourceExecutor(new GlideExecutor(sourceExecutor))
-                  .setDiskCacheExecutor(new GlideExecutor(diskCacheExecutor))
-                  .setAnimationExecutor(new GlideExecutor(animationExecutor)));
+                  .setSourceExecutor(
+                      new GlideExecutor(sourceExecutor, UncaughtThrowableStrategy.DEFAULT))
+                  .setDiskCacheExecutor(
+                      new GlideExecutor(diskCacheExecutor, UncaughtThrowableStrategy.DEFAULT))
+                  .setAnimationExecutor(
+                      new GlideExecutor(animationExecutor, UncaughtThrowableStrategy.DEFAULT)));
           base.evaluate();
         } finally {
           idlingRegistry.unregister(sourceExecutor);

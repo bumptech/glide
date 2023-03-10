@@ -136,7 +136,6 @@ javadocJarTask.dependsOn(javadocTask)
         jar.dependsOn(project.tasks.compileReleaseSources)
 }
 
-
 jar {
     from files(
             getAndroidLibraryVariantsForJar().collect { LibraryVariant variant ->
@@ -148,10 +147,3 @@ jar {
     exclude "android/**"
     exclude "**/BuildConfig.class"
 }
- 
-artifacts {
-    archives releaseJavadocJar {
-        classifier 'javadoc'
-    }
-}
-

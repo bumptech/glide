@@ -66,6 +66,7 @@ public final class GlideBuilder {
   private GlideExecutor animationExecutor;
   private boolean isActiveResourceRetentionAllowed;
   @Nullable private List<RequestListener<Object>> defaultRequestListeners;
+  private boolean useKotlinDecodeJob;
 
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
@@ -500,6 +501,20 @@ public final class GlideBuilder {
     return this;
   }
 
+  /**
+   * Swap out the internal implementation of Glide's decoding logic from the java version that
+   * uses 'generator' like objects to avoid object allocations to a new version written in Kotlin
+   * that simplifies the logic using async away.
+   *
+   * @deprecated This method is experimental. It will be hard coded and removed in a future release
+   * without further warning.
+   */
+  @Deprecated
+  public GlideBuilder setUseKotlinDecodeJob(boolean useKotlinDecodeJob) {
+    this.useKotlinDecodeJob = useKotlinDecodeJob;
+    return this;
+  }
+
   void setRequestManagerFactory(@Nullable RequestManagerFactory factory) {
     this.requestManagerFactory = factory;
   }
@@ -565,7 +580,8 @@ public final class GlideBuilder {
               sourceExecutor,
               GlideExecutor.newUnlimitedSourceExecutor(),
               animationExecutor,
-              isActiveResourceRetentionAllowed);
+              /* isActiveResourceRetentionAllowed= */ isActiveResourceRetentionAllowed,
+              /* useKotlinDecodeJob= */ useKotlinDecodeJob);
     }
 
     if (defaultRequestListeners == null) {

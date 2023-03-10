@@ -1,0 +1,2878 @@
+public final class com/bumptech/glide/GenericTransitionOptions : com/bumptech/glide/TransitionOptions {
+	public fun <init> ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public static fun with (I)Lcom/bumptech/glide/GenericTransitionOptions;
+	public static fun with (Lcom/bumptech/glide/request/transition/TransitionFactory;)Lcom/bumptech/glide/GenericTransitionOptions;
+	public static fun with (Lcom/bumptech/glide/request/transition/ViewPropertyTransition$Animator;)Lcom/bumptech/glide/GenericTransitionOptions;
+	public static fun withNoTransition ()Lcom/bumptech/glide/GenericTransitionOptions;
+}
+
+public class com/bumptech/glide/Glide : android/content/ComponentCallbacks2 {
+	public fun clearDiskCache ()V
+	public fun clearMemory ()V
+	public static fun enableHardwareBitmaps ()V
+	public static fun get (Landroid/content/Context;)Lcom/bumptech/glide/Glide;
+	public fun getArrayPool ()Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;
+	public fun getBitmapPool ()Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;
+	public fun getContext ()Landroid/content/Context;
+	public static fun getPhotoCacheDir (Landroid/content/Context;)Ljava/io/File;
+	public static fun getPhotoCacheDir (Landroid/content/Context;Ljava/lang/String;)Ljava/io/File;
+	public fun getRegistry ()Lcom/bumptech/glide/Registry;
+	public fun getRequestManagerRetriever ()Lcom/bumptech/glide/manager/RequestManagerRetriever;
+	public static fun init (Landroid/content/Context;Lcom/bumptech/glide/GlideBuilder;)V
+	public static fun init (Lcom/bumptech/glide/Glide;)V
+	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
+	public fun onLowMemory ()V
+	public fun onTrimMemory (I)V
+	public fun preFillBitmapPool ([Lcom/bumptech/glide/load/engine/prefill/PreFillType$Builder;)V
+	public fun setMemoryCategory (Lcom/bumptech/glide/MemoryCategory;)Lcom/bumptech/glide/MemoryCategory;
+	public static fun tearDown ()V
+	public fun trimMemory (I)V
+	public static fun with (Landroid/app/Activity;)Lcom/bumptech/glide/RequestManager;
+	public static fun with (Landroid/app/Fragment;)Lcom/bumptech/glide/RequestManager;
+	public static fun with (Landroid/content/Context;)Lcom/bumptech/glide/RequestManager;
+	public static fun with (Landroid/view/View;)Lcom/bumptech/glide/RequestManager;
+	public static fun with (Landroidx/fragment/app/Fragment;)Lcom/bumptech/glide/RequestManager;
+	public static fun with (Landroidx/fragment/app/FragmentActivity;)Lcom/bumptech/glide/RequestManager;
+}
+
+public abstract interface class com/bumptech/glide/Glide$RequestOptionsFactory {
+	public abstract fun build ()Lcom/bumptech/glide/request/RequestOptions;
+}
+
+public final class com/bumptech/glide/GlideBuilder {
+	public fun <init> ()V
+	public fun addGlobalRequestListener (Lcom/bumptech/glide/request/RequestListener;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setAnimationExecutor (Lcom/bumptech/glide/load/engine/executor/GlideExecutor;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setArrayPool (Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setBitmapPool (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setConnectivityMonitorFactory (Lcom/bumptech/glide/manager/ConnectivityMonitorFactory;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setDefaultRequestOptions (Lcom/bumptech/glide/Glide$RequestOptionsFactory;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setDefaultRequestOptions (Lcom/bumptech/glide/request/RequestOptions;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setDefaultTransitionOptions (Ljava/lang/Class;Lcom/bumptech/glide/TransitionOptions;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setDisableHardwareBitmapsOnO (Z)Lcom/bumptech/glide/GlideBuilder;
+	public fun setDiskCache (Lcom/bumptech/glide/load/engine/cache/DiskCache$Factory;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setDiskCacheExecutor (Lcom/bumptech/glide/load/engine/executor/GlideExecutor;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setImageDecoderEnabledForBitmaps (Z)Lcom/bumptech/glide/GlideBuilder;
+	public fun setIsActiveResourceRetentionAllowed (Z)Lcom/bumptech/glide/GlideBuilder;
+	public fun setLogLevel (I)Lcom/bumptech/glide/GlideBuilder;
+	public fun setLogRequestOrigins (Z)Lcom/bumptech/glide/GlideBuilder;
+	public fun setMemoryCache (Lcom/bumptech/glide/load/engine/cache/MemoryCache;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setMemorySizeCalculator (Lcom/bumptech/glide/load/engine/cache/MemorySizeCalculator$Builder;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setMemorySizeCalculator (Lcom/bumptech/glide/load/engine/cache/MemorySizeCalculator;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setResizeExecutor (Lcom/bumptech/glide/load/engine/executor/GlideExecutor;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setSourceExecutor (Lcom/bumptech/glide/load/engine/executor/GlideExecutor;)Lcom/bumptech/glide/GlideBuilder;
+	public fun setUseKotlinDecodeJob (Z)Lcom/bumptech/glide/GlideBuilder;
+}
+
+public final class com/bumptech/glide/GlideBuilder$LogRequestOrigins : com/bumptech/glide/GlideExperiments$Experiment {
+	public fun <init> ()V
+}
+
+public class com/bumptech/glide/GlideContext : android/content/ContextWrapper {
+	public fun <init> (Landroid/content/Context;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;Lcom/bumptech/glide/util/GlideSuppliers$GlideSupplier;Lcom/bumptech/glide/request/target/ImageViewTargetFactory;Lcom/bumptech/glide/Glide$RequestOptionsFactory;Ljava/util/Map;Ljava/util/List;Lcom/bumptech/glide/load/engine/Engine;Lcom/bumptech/glide/GlideExperiments;I)V
+	public fun buildImageViewTarget (Landroid/widget/ImageView;Ljava/lang/Class;)Lcom/bumptech/glide/request/target/ViewTarget;
+	public fun getArrayPool ()Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;
+	public fun getDefaultRequestListeners ()Ljava/util/List;
+	public fun getDefaultRequestOptions ()Lcom/bumptech/glide/request/RequestOptions;
+	public fun getDefaultTransitionOptions (Ljava/lang/Class;)Lcom/bumptech/glide/TransitionOptions;
+	public fun getEngine ()Lcom/bumptech/glide/load/engine/Engine;
+	public fun getExperiments ()Lcom/bumptech/glide/GlideExperiments;
+	public fun getLogLevel ()I
+	public fun getRegistry ()Lcom/bumptech/glide/Registry;
+}
+
+public class com/bumptech/glide/GlideExperiments {
+	public fun isEnabled (Ljava/lang/Class;)Z
+}
+
+public class com/bumptech/glide/ListPreloader : android/widget/AbsListView$OnScrollListener {
+	public fun <init> (Lcom/bumptech/glide/RequestManager;Lcom/bumptech/glide/ListPreloader$PreloadModelProvider;Lcom/bumptech/glide/ListPreloader$PreloadSizeProvider;I)V
+	public fun onScroll (Landroid/widget/AbsListView;III)V
+	public fun onScrollStateChanged (Landroid/widget/AbsListView;I)V
+}
+
+public abstract interface class com/bumptech/glide/ListPreloader$PreloadModelProvider {
+	public abstract fun getPreloadItems (I)Ljava/util/List;
+	public abstract fun getPreloadRequestBuilder (Ljava/lang/Object;)Lcom/bumptech/glide/RequestBuilder;
+}
+
+public abstract interface class com/bumptech/glide/ListPreloader$PreloadSizeProvider {
+	public abstract fun getPreloadSize (Ljava/lang/Object;II)[I
+}
+
+public final class com/bumptech/glide/MemoryCategory : java/lang/Enum {
+	public static final field HIGH Lcom/bumptech/glide/MemoryCategory;
+	public static final field LOW Lcom/bumptech/glide/MemoryCategory;
+	public static final field NORMAL Lcom/bumptech/glide/MemoryCategory;
+	public fun getMultiplier ()F
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/MemoryCategory;
+	public static fun values ()[Lcom/bumptech/glide/MemoryCategory;
+}
+
+public final class com/bumptech/glide/Priority : java/lang/Enum {
+	public static final field HIGH Lcom/bumptech/glide/Priority;
+	public static final field IMMEDIATE Lcom/bumptech/glide/Priority;
+	public static final field LOW Lcom/bumptech/glide/Priority;
+	public static final field NORMAL Lcom/bumptech/glide/Priority;
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/Priority;
+	public static fun values ()[Lcom/bumptech/glide/Priority;
+}
+
+public class com/bumptech/glide/Registry {
+	public static final field BUCKET_ANIMATION Ljava/lang/String;
+	public static final field BUCKET_BITMAP Ljava/lang/String;
+	public static final field BUCKET_BITMAP_DRAWABLE Ljava/lang/String;
+	public static final field BUCKET_GIF Ljava/lang/String;
+	public fun <init> ()V
+	public fun append (Ljava/lang/Class;Lcom/bumptech/glide/load/Encoder;)Lcom/bumptech/glide/Registry;
+	public fun append (Ljava/lang/Class;Lcom/bumptech/glide/load/ResourceEncoder;)Lcom/bumptech/glide/Registry;
+	public fun append (Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/ResourceDecoder;)Lcom/bumptech/glide/Registry;
+	public fun append (Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/model/ModelLoaderFactory;)Lcom/bumptech/glide/Registry;
+	public fun append (Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/ResourceDecoder;)Lcom/bumptech/glide/Registry;
+	public fun getImageHeaderParsers ()Ljava/util/List;
+	public fun getLoadPath (Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;)Lcom/bumptech/glide/load/engine/LoadPath;
+	public fun getModelLoaders (Ljava/lang/Object;)Ljava/util/List;
+	public fun getRegisteredResourceClasses (Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;)Ljava/util/List;
+	public fun getResultEncoder (Lcom/bumptech/glide/load/engine/Resource;)Lcom/bumptech/glide/load/ResourceEncoder;
+	public fun getRewinder (Ljava/lang/Object;)Lcom/bumptech/glide/load/data/DataRewinder;
+	public fun getSourceEncoder (Ljava/lang/Object;)Lcom/bumptech/glide/load/Encoder;
+	public fun isResourceEncoderAvailable (Lcom/bumptech/glide/load/engine/Resource;)Z
+	public fun prepend (Ljava/lang/Class;Lcom/bumptech/glide/load/Encoder;)Lcom/bumptech/glide/Registry;
+	public fun prepend (Ljava/lang/Class;Lcom/bumptech/glide/load/ResourceEncoder;)Lcom/bumptech/glide/Registry;
+	public fun prepend (Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/ResourceDecoder;)Lcom/bumptech/glide/Registry;
+	public fun prepend (Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/model/ModelLoaderFactory;)Lcom/bumptech/glide/Registry;
+	public fun prepend (Ljava/lang/String;Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/ResourceDecoder;)Lcom/bumptech/glide/Registry;
+	public fun register (Lcom/bumptech/glide/load/ImageHeaderParser;)Lcom/bumptech/glide/Registry;
+	public fun register (Lcom/bumptech/glide/load/data/DataRewinder$Factory;)Lcom/bumptech/glide/Registry;
+	public fun register (Ljava/lang/Class;Lcom/bumptech/glide/load/Encoder;)Lcom/bumptech/glide/Registry;
+	public fun register (Ljava/lang/Class;Lcom/bumptech/glide/load/ResourceEncoder;)Lcom/bumptech/glide/Registry;
+	public fun register (Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/resource/transcode/ResourceTranscoder;)Lcom/bumptech/glide/Registry;
+	public fun replace (Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/model/ModelLoaderFactory;)Lcom/bumptech/glide/Registry;
+	public final fun setResourceDecoderBucketPriorityList (Ljava/util/List;)Lcom/bumptech/glide/Registry;
+}
+
+public class com/bumptech/glide/Registry$MissingComponentException : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/bumptech/glide/Registry$NoImageHeaderParserException : com/bumptech/glide/Registry$MissingComponentException {
+	public fun <init> ()V
+}
+
+public class com/bumptech/glide/Registry$NoModelLoaderAvailableException : com/bumptech/glide/Registry$MissingComponentException {
+	public fun <init> (Ljava/lang/Class;Ljava/lang/Class;)V
+	public fun <init> (Ljava/lang/Object;)V
+	public fun <init> (Ljava/lang/Object;Ljava/util/List;)V
+}
+
+public class com/bumptech/glide/Registry$NoResultEncoderAvailableException : com/bumptech/glide/Registry$MissingComponentException {
+	public fun <init> (Ljava/lang/Class;)V
+}
+
+public class com/bumptech/glide/Registry$NoSourceEncoderAvailableException : com/bumptech/glide/Registry$MissingComponentException {
+	public fun <init> (Ljava/lang/Class;)V
+}
+
+public class com/bumptech/glide/RequestBuilder : com/bumptech/glide/request/BaseRequestOptions, com/bumptech/glide/ModelTypes, java/lang/Cloneable {
+	protected static final field DOWNLOAD_ONLY_OPTIONS Lcom/bumptech/glide/request/RequestOptions;
+	protected fun <init> (Lcom/bumptech/glide/Glide;Lcom/bumptech/glide/RequestManager;Ljava/lang/Class;Landroid/content/Context;)V
+	protected fun <init> (Ljava/lang/Class;Lcom/bumptech/glide/RequestBuilder;)V
+	public fun addListener (Lcom/bumptech/glide/request/RequestListener;)Lcom/bumptech/glide/RequestBuilder;
+	public fun apply (Lcom/bumptech/glide/request/BaseRequestOptions;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun apply (Lcom/bumptech/glide/request/BaseRequestOptions;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun clone ()Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun clone ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public synthetic fun clone ()Ljava/lang/Object;
+	public fun downloadOnly (II)Lcom/bumptech/glide/request/FutureTarget;
+	public fun downloadOnly (Lcom/bumptech/glide/request/target/Target;)Lcom/bumptech/glide/request/target/Target;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun error (Lcom/bumptech/glide/RequestBuilder;)Lcom/bumptech/glide/RequestBuilder;
+	public fun error (Ljava/lang/Object;)Lcom/bumptech/glide/RequestBuilder;
+	protected fun getDownloadOnlyRequest ()Lcom/bumptech/glide/RequestBuilder;
+	public fun hashCode ()I
+	public fun into (II)Lcom/bumptech/glide/request/FutureTarget;
+	public fun into (Landroid/widget/ImageView;)Lcom/bumptech/glide/request/target/ViewTarget;
+	public fun into (Lcom/bumptech/glide/request/target/Target;)Lcom/bumptech/glide/request/target/Target;
+	public fun listener (Lcom/bumptech/glide/request/RequestListener;)Lcom/bumptech/glide/RequestBuilder;
+	public fun load (Landroid/graphics/Bitmap;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Landroid/graphics/Bitmap;)Ljava/lang/Object;
+	public fun load (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Landroid/graphics/drawable/Drawable;)Ljava/lang/Object;
+	public fun load (Landroid/net/Uri;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Landroid/net/Uri;)Ljava/lang/Object;
+	public fun load (Ljava/io/File;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Ljava/io/File;)Ljava/lang/Object;
+	public fun load (Ljava/lang/Integer;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Ljava/lang/Integer;)Ljava/lang/Object;
+	public fun load (Ljava/lang/Object;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun load (Ljava/lang/String;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Ljava/lang/String;)Ljava/lang/Object;
+	public fun load (Ljava/net/URL;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Ljava/net/URL;)Ljava/lang/Object;
+	public fun load ([B)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load ([B)Ljava/lang/Object;
+	public fun preload ()Lcom/bumptech/glide/request/target/Target;
+	public fun preload (II)Lcom/bumptech/glide/request/target/Target;
+	public fun submit ()Lcom/bumptech/glide/request/FutureTarget;
+	public fun submit (II)Lcom/bumptech/glide/request/FutureTarget;
+	public fun thumbnail (F)Lcom/bumptech/glide/RequestBuilder;
+	public fun thumbnail (Lcom/bumptech/glide/RequestBuilder;)Lcom/bumptech/glide/RequestBuilder;
+	public fun thumbnail (Ljava/util/List;)Lcom/bumptech/glide/RequestBuilder;
+	public fun thumbnail ([Lcom/bumptech/glide/RequestBuilder;)Lcom/bumptech/glide/RequestBuilder;
+	public fun transition (Lcom/bumptech/glide/TransitionOptions;)Lcom/bumptech/glide/RequestBuilder;
+}
+
+public class com/bumptech/glide/RequestManager : android/content/ComponentCallbacks2, com/bumptech/glide/ModelTypes, com/bumptech/glide/manager/LifecycleListener {
+	protected final field context Landroid/content/Context;
+	protected final field glide Lcom/bumptech/glide/Glide;
+	public fun <init> (Lcom/bumptech/glide/Glide;Lcom/bumptech/glide/manager/Lifecycle;Lcom/bumptech/glide/manager/RequestManagerTreeNode;Landroid/content/Context;)V
+	public fun addDefaultRequestListener (Lcom/bumptech/glide/request/RequestListener;)Lcom/bumptech/glide/RequestManager;
+	public fun applyDefaultRequestOptions (Lcom/bumptech/glide/request/RequestOptions;)Lcom/bumptech/glide/RequestManager;
+	public fun as (Ljava/lang/Class;)Lcom/bumptech/glide/RequestBuilder;
+	public fun asBitmap ()Lcom/bumptech/glide/RequestBuilder;
+	public fun asDrawable ()Lcom/bumptech/glide/RequestBuilder;
+	public fun asFile ()Lcom/bumptech/glide/RequestBuilder;
+	public fun asGif ()Lcom/bumptech/glide/RequestBuilder;
+	public fun clear (Landroid/view/View;)V
+	public fun clear (Lcom/bumptech/glide/request/target/Target;)V
+	public fun download (Ljava/lang/Object;)Lcom/bumptech/glide/RequestBuilder;
+	public fun downloadOnly ()Lcom/bumptech/glide/RequestBuilder;
+	public fun isPaused ()Z
+	public fun load (Landroid/graphics/Bitmap;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Landroid/graphics/Bitmap;)Ljava/lang/Object;
+	public fun load (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Landroid/graphics/drawable/Drawable;)Ljava/lang/Object;
+	public fun load (Landroid/net/Uri;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Landroid/net/Uri;)Ljava/lang/Object;
+	public fun load (Ljava/io/File;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Ljava/io/File;)Ljava/lang/Object;
+	public fun load (Ljava/lang/Integer;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Ljava/lang/Integer;)Ljava/lang/Object;
+	public fun load (Ljava/lang/Object;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun load (Ljava/lang/String;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Ljava/lang/String;)Ljava/lang/Object;
+	public fun load (Ljava/net/URL;)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load (Ljava/net/URL;)Ljava/lang/Object;
+	public fun load ([B)Lcom/bumptech/glide/RequestBuilder;
+	public synthetic fun load ([B)Ljava/lang/Object;
+	public fun onConfigurationChanged (Landroid/content/res/Configuration;)V
+	public fun onDestroy ()V
+	public fun onLowMemory ()V
+	public fun onStart ()V
+	public fun onStop ()V
+	public fun onTrimMemory (I)V
+	public fun pauseAllRequests ()V
+	public fun pauseAllRequestsRecursive ()V
+	public fun pauseRequests ()V
+	public fun pauseRequestsRecursive ()V
+	public fun resumeRequests ()V
+	public fun resumeRequestsRecursive ()V
+	public fun setDefaultRequestOptions (Lcom/bumptech/glide/request/RequestOptions;)Lcom/bumptech/glide/RequestManager;
+	public fun setPauseAllRequestsOnTrimMemoryModerate (Z)V
+	protected fun setRequestOptions (Lcom/bumptech/glide/request/RequestOptions;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/bumptech/glide/TransitionOptions : java/lang/Cloneable {
+	public fun <init> ()V
+	public final fun clone ()Lcom/bumptech/glide/TransitionOptions;
+	public synthetic fun clone ()Ljava/lang/Object;
+	public final fun dontTransition ()Lcom/bumptech/glide/TransitionOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public final fun transition (I)Lcom/bumptech/glide/TransitionOptions;
+	public final fun transition (Lcom/bumptech/glide/request/transition/TransitionFactory;)Lcom/bumptech/glide/TransitionOptions;
+	public final fun transition (Lcom/bumptech/glide/request/transition/ViewPropertyTransition$Animator;)Lcom/bumptech/glide/TransitionOptions;
+}
+
+public final class com/bumptech/glide/load/DataSource : java/lang/Enum {
+	public static final field DATA_DISK_CACHE Lcom/bumptech/glide/load/DataSource;
+	public static final field LOCAL Lcom/bumptech/glide/load/DataSource;
+	public static final field MEMORY_CACHE Lcom/bumptech/glide/load/DataSource;
+	public static final field REMOTE Lcom/bumptech/glide/load/DataSource;
+	public static final field RESOURCE_DISK_CACHE Lcom/bumptech/glide/load/DataSource;
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/load/DataSource;
+	public static fun values ()[Lcom/bumptech/glide/load/DataSource;
+}
+
+public final class com/bumptech/glide/load/DecodeFormat : java/lang/Enum {
+	public static final field DEFAULT Lcom/bumptech/glide/load/DecodeFormat;
+	public static final field PREFER_ARGB_8888 Lcom/bumptech/glide/load/DecodeFormat;
+	public static final field PREFER_RGB_565 Lcom/bumptech/glide/load/DecodeFormat;
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/load/DecodeFormat;
+	public static fun values ()[Lcom/bumptech/glide/load/DecodeFormat;
+}
+
+public final class com/bumptech/glide/load/EncodeStrategy : java/lang/Enum {
+	public static final field NONE Lcom/bumptech/glide/load/EncodeStrategy;
+	public static final field SOURCE Lcom/bumptech/glide/load/EncodeStrategy;
+	public static final field TRANSFORMED Lcom/bumptech/glide/load/EncodeStrategy;
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/load/EncodeStrategy;
+	public static fun values ()[Lcom/bumptech/glide/load/EncodeStrategy;
+}
+
+public abstract interface class com/bumptech/glide/load/Encoder {
+	public abstract fun encode (Ljava/lang/Object;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public final class com/bumptech/glide/load/HttpException : java/io/IOException {
+	public static final field UNKNOWN I
+	public fun <init> (I)V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;I)V
+	public fun <init> (Ljava/lang/String;ILjava/lang/Throwable;)V
+	public fun getStatusCode ()I
+}
+
+public abstract interface class com/bumptech/glide/load/ImageHeaderParser {
+	public static final field UNKNOWN_ORIENTATION I
+	public abstract fun getOrientation (Ljava/io/InputStream;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)I
+	public abstract fun getOrientation (Ljava/nio/ByteBuffer;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)I
+	public abstract fun getType (Ljava/io/InputStream;)Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public abstract fun getType (Ljava/nio/ByteBuffer;)Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+}
+
+public final class com/bumptech/glide/load/ImageHeaderParser$ImageType : java/lang/Enum {
+	public static final field ANIMATED_AVIF Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static final field ANIMATED_WEBP Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static final field AVIF Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static final field GIF Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static final field JPEG Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static final field PNG Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static final field PNG_A Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static final field RAW Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static final field UNKNOWN Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static final field WEBP Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static final field WEBP_A Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public fun hasAlpha ()Z
+	public fun isWebp ()Z
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static fun values ()[Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+}
+
+public final class com/bumptech/glide/load/ImageHeaderParserUtils {
+	public static fun getOrientation (Ljava/util/List;Lcom/bumptech/glide/load/data/ParcelFileDescriptorRewinder;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)I
+	public static fun getOrientation (Ljava/util/List;Ljava/io/InputStream;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)I
+	public static fun getOrientation (Ljava/util/List;Ljava/nio/ByteBuffer;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)I
+	public static fun getType (Ljava/util/List;Lcom/bumptech/glide/load/data/ParcelFileDescriptorRewinder;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static fun getType (Ljava/util/List;Ljava/io/InputStream;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public static fun getType (Ljava/util/List;Ljava/nio/ByteBuffer;)Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+}
+
+public abstract interface class com/bumptech/glide/load/Key {
+	public static final field CHARSET Ljava/nio/charset/Charset;
+	public static final field STRING_CHARSET_NAME Ljava/lang/String;
+	public abstract fun equals (Ljava/lang/Object;)Z
+	public abstract fun hashCode ()I
+	public abstract fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public class com/bumptech/glide/load/MultiTransformation : com/bumptech/glide/load/Transformation {
+	public fun <init> (Ljava/util/Collection;)V
+	public fun <init> ([Lcom/bumptech/glide/load/Transformation;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun transform (Landroid/content/Context;Lcom/bumptech/glide/load/engine/Resource;II)Lcom/bumptech/glide/load/engine/Resource;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/load/Option {
+	public static fun disk (Ljava/lang/String;Lcom/bumptech/glide/load/Option$CacheKeyUpdater;)Lcom/bumptech/glide/load/Option;
+	public static fun disk (Ljava/lang/String;Ljava/lang/Object;Lcom/bumptech/glide/load/Option$CacheKeyUpdater;)Lcom/bumptech/glide/load/Option;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDefaultValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public static fun memory (Ljava/lang/String;)Lcom/bumptech/glide/load/Option;
+	public static fun memory (Ljava/lang/String;Ljava/lang/Object;)Lcom/bumptech/glide/load/Option;
+	public fun toString ()Ljava/lang/String;
+	public fun update (Ljava/lang/Object;Ljava/security/MessageDigest;)V
+}
+
+public abstract interface class com/bumptech/glide/load/Option$CacheKeyUpdater {
+	public abstract fun update ([BLjava/lang/Object;Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/load/Options : com/bumptech/glide/load/Key {
+	public fun <init> ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun get (Lcom/bumptech/glide/load/Option;)Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun putAll (Lcom/bumptech/glide/load/Options;)V
+	public fun remove (Lcom/bumptech/glide/load/Option;)Lcom/bumptech/glide/load/Options;
+	public fun set (Lcom/bumptech/glide/load/Option;Ljava/lang/Object;)Lcom/bumptech/glide/load/Options;
+	public fun toString ()Ljava/lang/String;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/load/PreferredColorSpace : java/lang/Enum {
+	public static final field DISPLAY_P3 Lcom/bumptech/glide/load/PreferredColorSpace;
+	public static final field SRGB Lcom/bumptech/glide/load/PreferredColorSpace;
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/load/PreferredColorSpace;
+	public static fun values ()[Lcom/bumptech/glide/load/PreferredColorSpace;
+}
+
+public abstract interface class com/bumptech/glide/load/ResourceDecoder {
+	public abstract fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public abstract fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public abstract interface class com/bumptech/glide/load/ResourceEncoder : com/bumptech/glide/load/Encoder {
+	public abstract fun getEncodeStrategy (Lcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/EncodeStrategy;
+}
+
+public abstract interface class com/bumptech/glide/load/Transformation : com/bumptech/glide/load/Key {
+	public abstract fun transform (Landroid/content/Context;Lcom/bumptech/glide/load/engine/Resource;II)Lcom/bumptech/glide/load/engine/Resource;
+}
+
+public final class com/bumptech/glide/load/data/AssetFileDescriptorLocalUriFetcher : com/bumptech/glide/load/data/LocalUriFetcher {
+	public fun <init> (Landroid/content/ContentResolver;Landroid/net/Uri;)V
+	public fun getDataClass ()Ljava/lang/Class;
+}
+
+public abstract class com/bumptech/glide/load/data/AssetPathFetcher : com/bumptech/glide/load/data/DataFetcher {
+	public fun <init> (Landroid/content/res/AssetManager;Ljava/lang/String;)V
+	public fun cancel ()V
+	public fun cleanup ()V
+	protected abstract fun close (Ljava/lang/Object;)V
+	public fun getDataSource ()Lcom/bumptech/glide/load/DataSource;
+	public fun loadData (Lcom/bumptech/glide/Priority;Lcom/bumptech/glide/load/data/DataFetcher$DataCallback;)V
+	protected abstract fun loadResource (Landroid/content/res/AssetManager;Ljava/lang/String;)Ljava/lang/Object;
+}
+
+public final class com/bumptech/glide/load/data/BufferedOutputStream : java/io/OutputStream {
+	public fun <init> (Ljava/io/OutputStream;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public fun close ()V
+	public fun flush ()V
+	public fun write (I)V
+	public fun write ([B)V
+	public fun write ([BII)V
+}
+
+public abstract interface class com/bumptech/glide/load/data/DataFetcher {
+	public abstract fun cancel ()V
+	public abstract fun cleanup ()V
+	public abstract fun getDataClass ()Ljava/lang/Class;
+	public abstract fun getDataSource ()Lcom/bumptech/glide/load/DataSource;
+	public abstract fun loadData (Lcom/bumptech/glide/Priority;Lcom/bumptech/glide/load/data/DataFetcher$DataCallback;)V
+}
+
+public abstract interface class com/bumptech/glide/load/data/DataFetcher$DataCallback {
+	public abstract fun onDataReady (Ljava/lang/Object;)V
+	public abstract fun onLoadFailed (Ljava/lang/Exception;)V
+}
+
+public abstract interface class com/bumptech/glide/load/data/DataRewinder {
+	public abstract fun cleanup ()V
+	public abstract fun rewindAndGet ()Ljava/lang/Object;
+}
+
+public abstract interface class com/bumptech/glide/load/data/DataRewinder$Factory {
+	public abstract fun build (Ljava/lang/Object;)Lcom/bumptech/glide/load/data/DataRewinder;
+	public abstract fun getDataClass ()Ljava/lang/Class;
+}
+
+public class com/bumptech/glide/load/data/DataRewinderRegistry {
+	public fun <init> ()V
+	public fun build (Ljava/lang/Object;)Lcom/bumptech/glide/load/data/DataRewinder;
+	public fun register (Lcom/bumptech/glide/load/data/DataRewinder$Factory;)V
+}
+
+public final class com/bumptech/glide/load/data/ExifOrientationStream : java/io/FilterInputStream {
+	public fun <init> (Ljava/io/InputStream;I)V
+	public fun mark (I)V
+	public fun markSupported ()Z
+	public fun read ()I
+	public fun read ([BII)I
+	public fun reset ()V
+	public fun skip (J)J
+}
+
+public class com/bumptech/glide/load/data/FileDescriptorAssetPathFetcher : com/bumptech/glide/load/data/AssetPathFetcher {
+	public fun <init> (Landroid/content/res/AssetManager;Ljava/lang/String;)V
+	protected fun close (Landroid/content/res/AssetFileDescriptor;)V
+	protected synthetic fun close (Ljava/lang/Object;)V
+	public fun getDataClass ()Ljava/lang/Class;
+	protected fun loadResource (Landroid/content/res/AssetManager;Ljava/lang/String;)Landroid/content/res/AssetFileDescriptor;
+	protected synthetic fun loadResource (Landroid/content/res/AssetManager;Ljava/lang/String;)Ljava/lang/Object;
+}
+
+public class com/bumptech/glide/load/data/FileDescriptorLocalUriFetcher : com/bumptech/glide/load/data/LocalUriFetcher {
+	public fun <init> (Landroid/content/ContentResolver;Landroid/net/Uri;)V
+	protected fun close (Landroid/os/ParcelFileDescriptor;)V
+	protected synthetic fun close (Ljava/lang/Object;)V
+	public fun getDataClass ()Ljava/lang/Class;
+	protected fun loadResource (Landroid/net/Uri;Landroid/content/ContentResolver;)Landroid/os/ParcelFileDescriptor;
+	protected synthetic fun loadResource (Landroid/net/Uri;Landroid/content/ContentResolver;)Ljava/lang/Object;
+}
+
+public class com/bumptech/glide/load/data/HttpUrlFetcher : com/bumptech/glide/load/data/DataFetcher {
+	public fun <init> (Lcom/bumptech/glide/load/model/GlideUrl;I)V
+	public fun cancel ()V
+	public fun cleanup ()V
+	public fun getDataClass ()Ljava/lang/Class;
+	public fun getDataSource ()Lcom/bumptech/glide/load/DataSource;
+	public fun loadData (Lcom/bumptech/glide/Priority;Lcom/bumptech/glide/load/data/DataFetcher$DataCallback;)V
+}
+
+public final class com/bumptech/glide/load/data/InputStreamRewinder : com/bumptech/glide/load/data/DataRewinder {
+	public fun <init> (Ljava/io/InputStream;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public fun cleanup ()V
+	public fun fixMarkLimits ()V
+	public fun rewindAndGet ()Ljava/io/InputStream;
+	public synthetic fun rewindAndGet ()Ljava/lang/Object;
+}
+
+public final class com/bumptech/glide/load/data/InputStreamRewinder$Factory : com/bumptech/glide/load/data/DataRewinder$Factory {
+	public fun <init> (Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public fun build (Ljava/io/InputStream;)Lcom/bumptech/glide/load/data/DataRewinder;
+	public synthetic fun build (Ljava/lang/Object;)Lcom/bumptech/glide/load/data/DataRewinder;
+	public fun getDataClass ()Ljava/lang/Class;
+}
+
+public abstract class com/bumptech/glide/load/data/LocalUriFetcher : com/bumptech/glide/load/data/DataFetcher {
+	public fun <init> (Landroid/content/ContentResolver;Landroid/net/Uri;)V
+	public fun cancel ()V
+	public fun cleanup ()V
+	protected abstract fun close (Ljava/lang/Object;)V
+	public fun getDataSource ()Lcom/bumptech/glide/load/DataSource;
+	public final fun loadData (Lcom/bumptech/glide/Priority;Lcom/bumptech/glide/load/data/DataFetcher$DataCallback;)V
+	protected abstract fun loadResource (Landroid/net/Uri;Landroid/content/ContentResolver;)Ljava/lang/Object;
+}
+
+public final class com/bumptech/glide/load/data/ParcelFileDescriptorRewinder : com/bumptech/glide/load/data/DataRewinder {
+	public fun <init> (Landroid/os/ParcelFileDescriptor;)V
+	public fun cleanup ()V
+	public static fun isSupported ()Z
+	public fun rewindAndGet ()Landroid/os/ParcelFileDescriptor;
+	public synthetic fun rewindAndGet ()Ljava/lang/Object;
+}
+
+public final class com/bumptech/glide/load/data/ParcelFileDescriptorRewinder$Factory : com/bumptech/glide/load/data/DataRewinder$Factory {
+	public fun <init> ()V
+	public fun build (Landroid/os/ParcelFileDescriptor;)Lcom/bumptech/glide/load/data/DataRewinder;
+	public synthetic fun build (Ljava/lang/Object;)Lcom/bumptech/glide/load/data/DataRewinder;
+	public fun getDataClass ()Ljava/lang/Class;
+}
+
+public class com/bumptech/glide/load/data/StreamAssetPathFetcher : com/bumptech/glide/load/data/AssetPathFetcher {
+	public fun <init> (Landroid/content/res/AssetManager;Ljava/lang/String;)V
+	protected fun close (Ljava/io/InputStream;)V
+	protected synthetic fun close (Ljava/lang/Object;)V
+	public fun getDataClass ()Ljava/lang/Class;
+	protected fun loadResource (Landroid/content/res/AssetManager;Ljava/lang/String;)Ljava/io/InputStream;
+	protected synthetic fun loadResource (Landroid/content/res/AssetManager;Ljava/lang/String;)Ljava/lang/Object;
+}
+
+public class com/bumptech/glide/load/data/StreamLocalUriFetcher : com/bumptech/glide/load/data/LocalUriFetcher {
+	public fun <init> (Landroid/content/ContentResolver;Landroid/net/Uri;)V
+	protected fun close (Ljava/io/InputStream;)V
+	protected synthetic fun close (Ljava/lang/Object;)V
+	public fun getDataClass ()Ljava/lang/Class;
+	protected fun loadResource (Landroid/net/Uri;Landroid/content/ContentResolver;)Ljava/io/InputStream;
+	protected synthetic fun loadResource (Landroid/net/Uri;Landroid/content/ContentResolver;)Ljava/lang/Object;
+}
+
+public final class com/bumptech/glide/load/data/mediastore/MediaStoreUtil {
+	public static fun isMediaStoreImageUri (Landroid/net/Uri;)Z
+	public static fun isMediaStoreUri (Landroid/net/Uri;)Z
+	public static fun isMediaStoreVideoUri (Landroid/net/Uri;)Z
+	public static fun isThumbnailSize (II)Z
+}
+
+public class com/bumptech/glide/load/data/mediastore/ThumbFetcher : com/bumptech/glide/load/data/DataFetcher {
+	public static fun buildImageFetcher (Landroid/content/Context;Landroid/net/Uri;)Lcom/bumptech/glide/load/data/mediastore/ThumbFetcher;
+	public static fun buildVideoFetcher (Landroid/content/Context;Landroid/net/Uri;)Lcom/bumptech/glide/load/data/mediastore/ThumbFetcher;
+	public fun cancel ()V
+	public fun cleanup ()V
+	public fun getDataClass ()Ljava/lang/Class;
+	public fun getDataSource ()Lcom/bumptech/glide/load/DataSource;
+	public fun loadData (Lcom/bumptech/glide/Priority;Lcom/bumptech/glide/load/data/DataFetcher$DataCallback;)V
+}
+
+public class com/bumptech/glide/load/engine/DecodePath {
+	public fun <init> (Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;Ljava/util/List;Lcom/bumptech/glide/load/resource/transcode/ResourceTranscoder;Landroidx/core/util/Pools$Pool;)V
+	public fun decode (Lcom/bumptech/glide/load/data/DataRewinder;IILcom/bumptech/glide/load/Options;Lcom/bumptech/glide/load/engine/DecodePath$DecodeCallback;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/bumptech/glide/load/engine/DiskCacheStrategy {
+	public static final field ALL Lcom/bumptech/glide/load/engine/DiskCacheStrategy;
+	public static final field AUTOMATIC Lcom/bumptech/glide/load/engine/DiskCacheStrategy;
+	public static final field DATA Lcom/bumptech/glide/load/engine/DiskCacheStrategy;
+	public static final field NONE Lcom/bumptech/glide/load/engine/DiskCacheStrategy;
+	public static final field RESOURCE Lcom/bumptech/glide/load/engine/DiskCacheStrategy;
+	public fun <init> ()V
+	public abstract fun decodeCachedData ()Z
+	public abstract fun decodeCachedResource ()Z
+	public abstract fun isDataCacheable (Lcom/bumptech/glide/load/DataSource;)Z
+	public abstract fun isResourceCacheable (ZLcom/bumptech/glide/load/DataSource;Lcom/bumptech/glide/load/EncodeStrategy;)Z
+}
+
+public class com/bumptech/glide/load/engine/Engine : com/bumptech/glide/load/engine/EngineJobListener, com/bumptech/glide/load/engine/EngineResource$ResourceListener, com/bumptech/glide/load/engine/cache/MemoryCache$ResourceRemovedListener {
+	public fun <init> (Lcom/bumptech/glide/load/engine/cache/MemoryCache;Lcom/bumptech/glide/load/engine/cache/DiskCache$Factory;Lcom/bumptech/glide/load/engine/executor/GlideExecutor;Lcom/bumptech/glide/load/engine/executor/GlideExecutor;Lcom/bumptech/glide/load/engine/executor/GlideExecutor;Lcom/bumptech/glide/load/engine/executor/GlideExecutor;Z)V
+	public fun <init> (Lcom/bumptech/glide/load/engine/cache/MemoryCache;Lcom/bumptech/glide/load/engine/cache/DiskCache$Factory;Lcom/bumptech/glide/load/engine/executor/GlideExecutor;Lcom/bumptech/glide/load/engine/executor/GlideExecutor;Lcom/bumptech/glide/load/engine/executor/GlideExecutor;Lcom/bumptech/glide/load/engine/executor/GlideExecutor;ZZ)V
+	public fun clearDiskCache ()V
+	public fun load (Lcom/bumptech/glide/GlideContext;Ljava/lang/Object;Lcom/bumptech/glide/load/Key;IILjava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/Priority;Lcom/bumptech/glide/load/engine/DiskCacheStrategy;Ljava/util/Map;ZZLcom/bumptech/glide/load/Options;ZZZZLcom/bumptech/glide/request/ResourceCallback;Ljava/util/concurrent/Executor;)Lcom/bumptech/glide/load/engine/Engine$LoadStatus;
+	public fun onEngineJobCancelled (Lcom/bumptech/glide/load/engine/EngineJob;Lcom/bumptech/glide/load/Key;)V
+	public fun onEngineJobComplete (Lcom/bumptech/glide/load/engine/EngineJob;Lcom/bumptech/glide/load/Key;Lcom/bumptech/glide/load/engine/EngineResource;)V
+	public fun onResourceReleased (Lcom/bumptech/glide/load/Key;Lcom/bumptech/glide/load/engine/EngineResource;)V
+	public fun onResourceRemoved (Lcom/bumptech/glide/load/engine/Resource;)V
+	public fun release (Lcom/bumptech/glide/load/engine/Resource;)V
+	public fun shutdown ()V
+}
+
+public class com/bumptech/glide/load/engine/Engine$LoadStatus {
+	public fun cancel ()V
+}
+
+public final class com/bumptech/glide/load/engine/GlideException : java/lang/Exception {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public fun fillInStackTrace ()Ljava/lang/Throwable;
+	public fun getCauses ()Ljava/util/List;
+	public fun getMessage ()Ljava/lang/String;
+	public fun getOrigin ()Ljava/lang/Exception;
+	public fun getRootCauses ()Ljava/util/List;
+	public fun logRootCauses (Ljava/lang/String;)V
+	public fun printStackTrace ()V
+	public fun printStackTrace (Ljava/io/PrintStream;)V
+	public fun printStackTrace (Ljava/io/PrintWriter;)V
+	public fun setOrigin (Ljava/lang/Exception;)V
+}
+
+public abstract interface class com/bumptech/glide/load/engine/Initializable {
+	public abstract fun initialize ()V
+}
+
+public class com/bumptech/glide/load/engine/LoadPath {
+	public fun <init> (Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;Ljava/util/List;Landroidx/core/util/Pools$Pool;)V
+	public fun getDataClass ()Ljava/lang/Class;
+	public fun load (Lcom/bumptech/glide/load/data/DataRewinder;Lcom/bumptech/glide/load/Options;IILcom/bumptech/glide/load/engine/DecodePath$DecodeCallback;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/bumptech/glide/load/engine/Resource {
+	public abstract fun get ()Ljava/lang/Object;
+	public abstract fun getResourceClass ()Ljava/lang/Class;
+	public abstract fun getSize ()I
+	public abstract fun recycle ()V
+}
+
+public abstract interface class com/bumptech/glide/load/engine/bitmap_recycle/ArrayPool {
+	public static final field STANDARD_BUFFER_SIZE_BYTES I
+	public abstract fun clearMemory ()V
+	public abstract fun get (ILjava/lang/Class;)Ljava/lang/Object;
+	public abstract fun getExact (ILjava/lang/Class;)Ljava/lang/Object;
+	public abstract fun put (Ljava/lang/Object;)V
+	public abstract fun put (Ljava/lang/Object;Ljava/lang/Class;)V
+	public abstract fun trimMemory (I)V
+}
+
+public abstract interface class com/bumptech/glide/load/engine/bitmap_recycle/BitmapPool {
+	public abstract fun clearMemory ()V
+	public abstract fun get (IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;
+	public abstract fun getDirty (IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;
+	public abstract fun getMaxSize ()J
+	public abstract fun put (Landroid/graphics/Bitmap;)V
+	public abstract fun setSizeMultiplier (F)V
+	public abstract fun trimMemory (I)V
+}
+
+public class com/bumptech/glide/load/engine/bitmap_recycle/BitmapPoolAdapter : com/bumptech/glide/load/engine/bitmap_recycle/BitmapPool {
+	public fun <init> ()V
+	public fun clearMemory ()V
+	public fun get (IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;
+	public fun getDirty (IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;
+	public fun getMaxSize ()J
+	public fun put (Landroid/graphics/Bitmap;)V
+	public fun setSizeMultiplier (F)V
+	public fun trimMemory (I)V
+}
+
+public final class com/bumptech/glide/load/engine/bitmap_recycle/ByteArrayAdapter : com/bumptech/glide/load/engine/bitmap_recycle/ArrayAdapterInterface {
+	public fun <init> ()V
+	public synthetic fun getArrayLength (Ljava/lang/Object;)I
+	public fun getArrayLength ([B)I
+	public fun getElementSizeInBytes ()I
+	public fun getTag ()Ljava/lang/String;
+	public synthetic fun newArray (I)Ljava/lang/Object;
+	public fun newArray (I)[B
+}
+
+public final class com/bumptech/glide/load/engine/bitmap_recycle/IntegerArrayAdapter : com/bumptech/glide/load/engine/bitmap_recycle/ArrayAdapterInterface {
+	public fun <init> ()V
+	public synthetic fun getArrayLength (Ljava/lang/Object;)I
+	public fun getArrayLength ([I)I
+	public fun getElementSizeInBytes ()I
+	public fun getTag ()Ljava/lang/String;
+	public synthetic fun newArray (I)Ljava/lang/Object;
+	public fun newArray (I)[I
+}
+
+public final class com/bumptech/glide/load/engine/bitmap_recycle/LruArrayPool : com/bumptech/glide/load/engine/bitmap_recycle/ArrayPool {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public fun clearMemory ()V
+	public fun get (ILjava/lang/Class;)Ljava/lang/Object;
+	public fun getExact (ILjava/lang/Class;)Ljava/lang/Object;
+	public fun put (Ljava/lang/Object;)V
+	public fun put (Ljava/lang/Object;Ljava/lang/Class;)V
+	public fun trimMemory (I)V
+}
+
+public class com/bumptech/glide/load/engine/bitmap_recycle/LruBitmapPool : com/bumptech/glide/load/engine/bitmap_recycle/BitmapPool {
+	public fun <init> (J)V
+	public fun <init> (JLjava/util/Set;)V
+	public fun clearMemory ()V
+	public fun evictionCount ()J
+	public fun get (IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;
+	public fun getCurrentSize ()J
+	public fun getDirty (IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;
+	public fun getMaxSize ()J
+	public fun hitCount ()J
+	public fun missCount ()J
+	public fun put (Landroid/graphics/Bitmap;)V
+	public fun setSizeMultiplier (F)V
+	public fun trimMemory (I)V
+}
+
+public class com/bumptech/glide/load/engine/bitmap_recycle/SizeConfigStrategy : com/bumptech/glide/load/engine/bitmap_recycle/LruPoolStrategy {
+	public fun <init> ()V
+	public fun get (IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;
+	public fun getSize (Landroid/graphics/Bitmap;)I
+	public fun logBitmap (IILandroid/graphics/Bitmap$Config;)Ljava/lang/String;
+	public fun logBitmap (Landroid/graphics/Bitmap;)Ljava/lang/String;
+	public fun put (Landroid/graphics/Bitmap;)V
+	public fun removeLast ()Landroid/graphics/Bitmap;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/bumptech/glide/load/engine/cache/DiskCache {
+	public abstract fun clear ()V
+	public abstract fun delete (Lcom/bumptech/glide/load/Key;)V
+	public abstract fun get (Lcom/bumptech/glide/load/Key;)Ljava/io/File;
+	public abstract fun put (Lcom/bumptech/glide/load/Key;Lcom/bumptech/glide/load/engine/cache/DiskCache$Writer;)V
+}
+
+public abstract interface class com/bumptech/glide/load/engine/cache/DiskCache$Factory {
+	public static final field DEFAULT_DISK_CACHE_DIR Ljava/lang/String;
+	public static final field DEFAULT_DISK_CACHE_SIZE I
+	public abstract fun build ()Lcom/bumptech/glide/load/engine/cache/DiskCache;
+}
+
+public abstract interface class com/bumptech/glide/load/engine/cache/DiskCache$Writer {
+	public abstract fun write (Ljava/io/File;)Z
+}
+
+public class com/bumptech/glide/load/engine/cache/DiskCacheAdapter : com/bumptech/glide/load/engine/cache/DiskCache {
+	public fun <init> ()V
+	public fun clear ()V
+	public fun delete (Lcom/bumptech/glide/load/Key;)V
+	public fun get (Lcom/bumptech/glide/load/Key;)Ljava/io/File;
+	public fun put (Lcom/bumptech/glide/load/Key;Lcom/bumptech/glide/load/engine/cache/DiskCache$Writer;)V
+}
+
+public final class com/bumptech/glide/load/engine/cache/DiskCacheAdapter$Factory : com/bumptech/glide/load/engine/cache/DiskCache$Factory {
+	public fun <init> ()V
+	public fun build ()Lcom/bumptech/glide/load/engine/cache/DiskCache;
+}
+
+public class com/bumptech/glide/load/engine/cache/DiskLruCacheFactory : com/bumptech/glide/load/engine/cache/DiskCache$Factory {
+	public fun <init> (Lcom/bumptech/glide/load/engine/cache/DiskLruCacheFactory$CacheDirectoryGetter;J)V
+	public fun <init> (Ljava/lang/String;J)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;J)V
+	public fun build ()Lcom/bumptech/glide/load/engine/cache/DiskCache;
+}
+
+public abstract interface class com/bumptech/glide/load/engine/cache/DiskLruCacheFactory$CacheDirectoryGetter {
+	public abstract fun getCacheDirectory ()Ljava/io/File;
+}
+
+public class com/bumptech/glide/load/engine/cache/DiskLruCacheWrapper : com/bumptech/glide/load/engine/cache/DiskCache {
+	protected fun <init> (Ljava/io/File;J)V
+	public fun clear ()V
+	public static fun create (Ljava/io/File;J)Lcom/bumptech/glide/load/engine/cache/DiskCache;
+	public fun delete (Lcom/bumptech/glide/load/Key;)V
+	public fun get (Lcom/bumptech/glide/load/Key;)Ljava/io/File;
+	public static fun get (Ljava/io/File;J)Lcom/bumptech/glide/load/engine/cache/DiskCache;
+	public fun put (Lcom/bumptech/glide/load/Key;Lcom/bumptech/glide/load/engine/cache/DiskCache$Writer;)V
+}
+
+public final class com/bumptech/glide/load/engine/cache/ExternalCacheDiskCacheFactory : com/bumptech/glide/load/engine/cache/DiskLruCacheFactory {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;I)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;I)V
+}
+
+public final class com/bumptech/glide/load/engine/cache/ExternalPreferredCacheDiskCacheFactory : com/bumptech/glide/load/engine/cache/DiskLruCacheFactory {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;J)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;J)V
+}
+
+public final class com/bumptech/glide/load/engine/cache/InternalCacheDiskCacheFactory : com/bumptech/glide/load/engine/cache/DiskLruCacheFactory {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;J)V
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;J)V
+}
+
+public class com/bumptech/glide/load/engine/cache/LruResourceCache : com/bumptech/glide/util/LruCache, com/bumptech/glide/load/engine/cache/MemoryCache {
+	public fun <init> (J)V
+	protected fun getSize (Lcom/bumptech/glide/load/engine/Resource;)I
+	protected synthetic fun getSize (Ljava/lang/Object;)I
+	protected fun onItemEvicted (Lcom/bumptech/glide/load/Key;Lcom/bumptech/glide/load/engine/Resource;)V
+	protected synthetic fun onItemEvicted (Ljava/lang/Object;Ljava/lang/Object;)V
+	public synthetic fun put (Lcom/bumptech/glide/load/Key;Lcom/bumptech/glide/load/engine/Resource;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun remove (Lcom/bumptech/glide/load/Key;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun setResourceRemovedListener (Lcom/bumptech/glide/load/engine/cache/MemoryCache$ResourceRemovedListener;)V
+	public fun trimMemory (I)V
+}
+
+public abstract interface class com/bumptech/glide/load/engine/cache/MemoryCache {
+	public abstract fun clearMemory ()V
+	public abstract fun getCurrentSize ()J
+	public abstract fun getMaxSize ()J
+	public abstract fun put (Lcom/bumptech/glide/load/Key;Lcom/bumptech/glide/load/engine/Resource;)Lcom/bumptech/glide/load/engine/Resource;
+	public abstract fun remove (Lcom/bumptech/glide/load/Key;)Lcom/bumptech/glide/load/engine/Resource;
+	public abstract fun setResourceRemovedListener (Lcom/bumptech/glide/load/engine/cache/MemoryCache$ResourceRemovedListener;)V
+	public abstract fun setSizeMultiplier (F)V
+	public abstract fun trimMemory (I)V
+}
+
+public abstract interface class com/bumptech/glide/load/engine/cache/MemoryCache$ResourceRemovedListener {
+	public abstract fun onResourceRemoved (Lcom/bumptech/glide/load/engine/Resource;)V
+}
+
+public class com/bumptech/glide/load/engine/cache/MemoryCacheAdapter : com/bumptech/glide/load/engine/cache/MemoryCache {
+	public fun <init> ()V
+	public fun clearMemory ()V
+	public fun getCurrentSize ()J
+	public fun getMaxSize ()J
+	public fun put (Lcom/bumptech/glide/load/Key;Lcom/bumptech/glide/load/engine/Resource;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun remove (Lcom/bumptech/glide/load/Key;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun setResourceRemovedListener (Lcom/bumptech/glide/load/engine/cache/MemoryCache$ResourceRemovedListener;)V
+	public fun setSizeMultiplier (F)V
+	public fun trimMemory (I)V
+}
+
+public final class com/bumptech/glide/load/engine/cache/MemorySizeCalculator {
+	public fun getArrayPoolSizeInBytes ()I
+	public fun getBitmapPoolSize ()I
+	public fun getMemoryCacheSize ()I
+}
+
+public final class com/bumptech/glide/load/engine/cache/MemorySizeCalculator$Builder {
+	public fun <init> (Landroid/content/Context;)V
+	public fun build ()Lcom/bumptech/glide/load/engine/cache/MemorySizeCalculator;
+	public fun setArrayPoolSize (I)Lcom/bumptech/glide/load/engine/cache/MemorySizeCalculator$Builder;
+	public fun setBitmapPoolScreens (F)Lcom/bumptech/glide/load/engine/cache/MemorySizeCalculator$Builder;
+	public fun setLowMemoryMaxSizeMultiplier (F)Lcom/bumptech/glide/load/engine/cache/MemorySizeCalculator$Builder;
+	public fun setMaxSizeMultiplier (F)Lcom/bumptech/glide/load/engine/cache/MemorySizeCalculator$Builder;
+	public fun setMemoryCacheScreens (F)Lcom/bumptech/glide/load/engine/cache/MemorySizeCalculator$Builder;
+}
+
+public class com/bumptech/glide/load/engine/cache/SafeKeyGenerator {
+	public fun <init> ()V
+	public fun getSafeKey (Lcom/bumptech/glide/load/Key;)Ljava/lang/String;
+}
+
+public final class com/bumptech/glide/load/engine/executor/GlideExecutor : java/util/concurrent/ExecutorService {
+	public fun awaitTermination (JLjava/util/concurrent/TimeUnit;)Z
+	public static fun calculateBestThreadCount ()I
+	public fun execute (Ljava/lang/Runnable;)V
+	public fun invokeAll (Ljava/util/Collection;)Ljava/util/List;
+	public fun invokeAll (Ljava/util/Collection;JLjava/util/concurrent/TimeUnit;)Ljava/util/List;
+	public fun invokeAny (Ljava/util/Collection;)Ljava/lang/Object;
+	public fun invokeAny (Ljava/util/Collection;JLjava/util/concurrent/TimeUnit;)Ljava/lang/Object;
+	public fun isShutdown ()Z
+	public fun isTerminated ()Z
+	public static fun newAnimationBuilder ()Lcom/bumptech/glide/load/engine/executor/GlideExecutor$Builder;
+	public static fun newAnimationExecutor ()Lcom/bumptech/glide/load/engine/executor/GlideExecutor;
+	public static fun newAnimationExecutor (ILcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;)Lcom/bumptech/glide/load/engine/executor/GlideExecutor;
+	public static fun newDiskCacheBuilder ()Lcom/bumptech/glide/load/engine/executor/GlideExecutor$Builder;
+	public static fun newDiskCacheExecutor ()Lcom/bumptech/glide/load/engine/executor/GlideExecutor;
+	public static fun newDiskCacheExecutor (ILjava/lang/String;Lcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;)Lcom/bumptech/glide/load/engine/executor/GlideExecutor;
+	public static fun newDiskCacheExecutor (Lcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;)Lcom/bumptech/glide/load/engine/executor/GlideExecutor;
+	public static fun newSourceBuilder ()Lcom/bumptech/glide/load/engine/executor/GlideExecutor$Builder;
+	public static fun newSourceExecutor ()Lcom/bumptech/glide/load/engine/executor/GlideExecutor;
+	public static fun newSourceExecutor (ILjava/lang/String;Lcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;)Lcom/bumptech/glide/load/engine/executor/GlideExecutor;
+	public static fun newSourceExecutor (Lcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;)Lcom/bumptech/glide/load/engine/executor/GlideExecutor;
+	public static fun newUnlimitedSourceExecutor ()Lcom/bumptech/glide/load/engine/executor/GlideExecutor;
+	public fun shutdown ()V
+	public fun shutdownNow ()Ljava/util/List;
+	public fun submit (Ljava/lang/Runnable;)Ljava/util/concurrent/Future;
+	public fun submit (Ljava/lang/Runnable;Ljava/lang/Object;)Ljava/util/concurrent/Future;
+	public fun submit (Ljava/util/concurrent/Callable;)Ljava/util/concurrent/Future;
+	public fun toString ()Ljava/lang/String;
+	public fun uncaughtThrowableStrategy ()Lcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;
+}
+
+public final class com/bumptech/glide/load/engine/executor/GlideExecutor$Builder {
+	public static final field NO_THREAD_TIMEOUT J
+	public fun build ()Lcom/bumptech/glide/load/engine/executor/GlideExecutor;
+	public fun setName (Ljava/lang/String;)Lcom/bumptech/glide/load/engine/executor/GlideExecutor$Builder;
+	public fun setThreadCount (I)Lcom/bumptech/glide/load/engine/executor/GlideExecutor$Builder;
+	public fun setThreadFactory (Ljava/util/concurrent/ThreadFactory;)Lcom/bumptech/glide/load/engine/executor/GlideExecutor$Builder;
+	public fun setThreadTimeoutMillis (J)Lcom/bumptech/glide/load/engine/executor/GlideExecutor$Builder;
+	public fun setUncaughtThrowableStrategy (Lcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;)Lcom/bumptech/glide/load/engine/executor/GlideExecutor$Builder;
+}
+
+public abstract interface class com/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy {
+	public static final field DEFAULT Lcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;
+	public static final field IGNORE Lcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;
+	public static final field LOG Lcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;
+	public static final field THROW Lcom/bumptech/glide/load/engine/executor/GlideExecutor$UncaughtThrowableStrategy;
+	public abstract fun handle (Ljava/lang/Throwable;)V
+}
+
+public final class com/bumptech/glide/load/engine/prefill/BitmapPreFiller {
+	public fun <init> (Lcom/bumptech/glide/load/engine/cache/MemoryCache;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Lcom/bumptech/glide/load/DecodeFormat;)V
+	public fun preFill ([Lcom/bumptech/glide/load/engine/prefill/PreFillType$Builder;)V
+}
+
+public final class com/bumptech/glide/load/engine/prefill/PreFillType {
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class com/bumptech/glide/load/engine/prefill/PreFillType$Builder {
+	public fun <init> (I)V
+	public fun <init> (II)V
+	public fun setConfig (Landroid/graphics/Bitmap$Config;)Lcom/bumptech/glide/load/engine/prefill/PreFillType$Builder;
+	public fun setWeight (I)Lcom/bumptech/glide/load/engine/prefill/PreFillType$Builder;
+}
+
+public class com/bumptech/glide/load/model/AssetUriLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Landroid/content/res/AssetManager;Lcom/bumptech/glide/load/model/AssetUriLoader$AssetFetcherFactory;)V
+	public fun buildLoadData (Landroid/net/Uri;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Landroid/net/Uri;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public abstract interface class com/bumptech/glide/load/model/AssetUriLoader$AssetFetcherFactory {
+	public abstract fun buildFetcher (Landroid/content/res/AssetManager;Ljava/lang/String;)Lcom/bumptech/glide/load/data/DataFetcher;
+}
+
+public class com/bumptech/glide/load/model/AssetUriLoader$FileDescriptorFactory : com/bumptech/glide/load/model/AssetUriLoader$AssetFetcherFactory, com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> (Landroid/content/res/AssetManager;)V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun buildFetcher (Landroid/content/res/AssetManager;Ljava/lang/String;)Lcom/bumptech/glide/load/data/DataFetcher;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/AssetUriLoader$StreamFactory : com/bumptech/glide/load/model/AssetUriLoader$AssetFetcherFactory, com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> (Landroid/content/res/AssetManager;)V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun buildFetcher (Landroid/content/res/AssetManager;Ljava/lang/String;)Lcom/bumptech/glide/load/data/DataFetcher;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/ByteArrayLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Lcom/bumptech/glide/load/model/ByteArrayLoader$Converter;)V
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun buildLoadData ([BIILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun handles (Ljava/lang/Object;)Z
+	public fun handles ([B)Z
+}
+
+public class com/bumptech/glide/load/model/ByteArrayLoader$ByteBufferFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public abstract interface class com/bumptech/glide/load/model/ByteArrayLoader$Converter {
+	public abstract fun convert ([B)Ljava/lang/Object;
+	public abstract fun getDataClass ()Ljava/lang/Class;
+}
+
+public class com/bumptech/glide/load/model/ByteArrayLoader$StreamFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/ByteBufferEncoder : com/bumptech/glide/load/Encoder {
+	public fun <init> ()V
+	public synthetic fun encode (Ljava/lang/Object;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+	public fun encode (Ljava/nio/ByteBuffer;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/model/ByteBufferFileLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> ()V
+	public fun buildLoadData (Ljava/io/File;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Ljava/io/File;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public class com/bumptech/glide/load/model/ByteBufferFileLoader$Factory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public final class com/bumptech/glide/load/model/DataUrlLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Lcom/bumptech/glide/load/model/DataUrlLoader$DataDecoder;)V
+	public fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Ljava/lang/Object;)Z
+}
+
+public abstract interface class com/bumptech/glide/load/model/DataUrlLoader$DataDecoder {
+	public abstract fun close (Ljava/lang/Object;)V
+	public abstract fun decode (Ljava/lang/String;)Ljava/lang/Object;
+	public abstract fun getDataClass ()Ljava/lang/Class;
+}
+
+public final class com/bumptech/glide/load/model/DataUrlLoader$StreamFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public final class com/bumptech/glide/load/model/DirectResourceLoader : com/bumptech/glide/load/model/ModelLoader {
+	public static fun assetFileDescriptorFactory (Landroid/content/Context;)Lcom/bumptech/glide/load/model/ModelLoaderFactory;
+	public fun buildLoadData (Ljava/lang/Integer;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public static fun drawableFactory (Landroid/content/Context;)Lcom/bumptech/glide/load/model/ModelLoaderFactory;
+	public fun handles (Ljava/lang/Integer;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+	public static fun inputStreamFactory (Landroid/content/Context;)Lcom/bumptech/glide/load/model/ModelLoaderFactory;
+}
+
+public class com/bumptech/glide/load/model/FileLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Lcom/bumptech/glide/load/model/FileLoader$FileOpener;)V
+	public fun buildLoadData (Ljava/io/File;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Ljava/io/File;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public class com/bumptech/glide/load/model/FileLoader$Factory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> (Lcom/bumptech/glide/load/model/FileLoader$FileOpener;)V
+	public final fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public final fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/FileLoader$FileDescriptorFactory : com/bumptech/glide/load/model/FileLoader$Factory {
+	public fun <init> ()V
+}
+
+public abstract interface class com/bumptech/glide/load/model/FileLoader$FileOpener {
+	public abstract fun close (Ljava/lang/Object;)V
+	public abstract fun getDataClass ()Ljava/lang/Class;
+	public abstract fun open (Ljava/io/File;)Ljava/lang/Object;
+}
+
+public class com/bumptech/glide/load/model/FileLoader$StreamFactory : com/bumptech/glide/load/model/FileLoader$Factory {
+	public fun <init> ()V
+}
+
+public class com/bumptech/glide/load/model/GlideUrl : com/bumptech/glide/load/Key {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lcom/bumptech/glide/load/model/Headers;)V
+	public fun <init> (Ljava/net/URL;)V
+	public fun <init> (Ljava/net/URL;Lcom/bumptech/glide/load/model/Headers;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getCacheKey ()Ljava/lang/String;
+	public fun getHeaders ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun toStringUrl ()Ljava/lang/String;
+	public fun toURL ()Ljava/net/URL;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public abstract interface class com/bumptech/glide/load/model/Headers {
+	public static final field DEFAULT Lcom/bumptech/glide/load/model/Headers;
+	public static final field NONE Lcom/bumptech/glide/load/model/Headers;
+	public abstract fun getHeaders ()Ljava/util/Map;
+}
+
+public abstract interface class com/bumptech/glide/load/model/LazyHeaderFactory {
+	public abstract fun buildHeader ()Ljava/lang/String;
+}
+
+public final class com/bumptech/glide/load/model/LazyHeaders : com/bumptech/glide/load/model/Headers {
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getHeaders ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/bumptech/glide/load/model/LazyHeaders$Builder {
+	public fun <init> ()V
+	public fun addHeader (Ljava/lang/String;Lcom/bumptech/glide/load/model/LazyHeaderFactory;)Lcom/bumptech/glide/load/model/LazyHeaders$Builder;
+	public fun addHeader (Ljava/lang/String;Ljava/lang/String;)Lcom/bumptech/glide/load/model/LazyHeaders$Builder;
+	public fun build ()Lcom/bumptech/glide/load/model/LazyHeaders;
+	public fun setHeader (Ljava/lang/String;Lcom/bumptech/glide/load/model/LazyHeaderFactory;)Lcom/bumptech/glide/load/model/LazyHeaders$Builder;
+	public fun setHeader (Ljava/lang/String;Ljava/lang/String;)Lcom/bumptech/glide/load/model/LazyHeaders$Builder;
+}
+
+public final class com/bumptech/glide/load/model/MediaStoreFileLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Landroid/content/Context;)V
+	public fun buildLoadData (Landroid/net/Uri;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Landroid/net/Uri;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public final class com/bumptech/glide/load/model/MediaStoreFileLoader$Factory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> (Landroid/content/Context;)V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public abstract interface class com/bumptech/glide/load/model/Model {
+	public abstract fun isEquivalentTo (Ljava/lang/Object;)Z
+}
+
+public class com/bumptech/glide/load/model/ModelCache {
+	public fun <init> ()V
+	public fun <init> (J)V
+	public fun clear ()V
+	public fun get (Ljava/lang/Object;II)Ljava/lang/Object;
+	public fun put (Ljava/lang/Object;IILjava/lang/Object;)V
+}
+
+public abstract interface class com/bumptech/glide/load/model/ModelLoader {
+	public abstract fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public abstract fun handles (Ljava/lang/Object;)Z
+}
+
+public class com/bumptech/glide/load/model/ModelLoader$LoadData {
+	public final field alternateKeys Ljava/util/List;
+	public final field fetcher Lcom/bumptech/glide/load/data/DataFetcher;
+	public final field sourceKey Lcom/bumptech/glide/load/Key;
+	public fun <init> (Lcom/bumptech/glide/load/Key;Lcom/bumptech/glide/load/data/DataFetcher;)V
+	public fun <init> (Lcom/bumptech/glide/load/Key;Ljava/util/List;Lcom/bumptech/glide/load/data/DataFetcher;)V
+}
+
+public abstract interface class com/bumptech/glide/load/model/ModelLoaderFactory {
+	public abstract fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public abstract fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/ModelLoaderRegistry {
+	public fun <init> (Landroidx/core/util/Pools$Pool;)V
+	public fun append (Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/model/ModelLoaderFactory;)V
+	public fun build (Ljava/lang/Class;Ljava/lang/Class;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun getDataClasses (Ljava/lang/Class;)Ljava/util/List;
+	public fun getModelLoaders (Ljava/lang/Object;)Ljava/util/List;
+	public fun prepend (Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/model/ModelLoaderFactory;)V
+	public fun remove (Ljava/lang/Class;Ljava/lang/Class;)V
+	public fun replace (Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/model/ModelLoaderFactory;)V
+}
+
+public class com/bumptech/glide/load/model/MultiModelLoaderFactory {
+	public fun <init> (Landroidx/core/util/Pools$Pool;)V
+	public fun build (Ljava/lang/Class;Ljava/lang/Class;)Lcom/bumptech/glide/load/model/ModelLoader;
+}
+
+public class com/bumptech/glide/load/model/ResourceLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Landroid/content/res/Resources;Lcom/bumptech/glide/load/model/ModelLoader;)V
+	public fun buildLoadData (Ljava/lang/Integer;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Ljava/lang/Integer;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public final class com/bumptech/glide/load/model/ResourceLoader$AssetFileDescriptorFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> (Landroid/content/res/Resources;)V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/ResourceLoader$FileDescriptorFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> (Landroid/content/res/Resources;)V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/ResourceLoader$StreamFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> (Landroid/content/res/Resources;)V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/ResourceLoader$UriFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> (Landroid/content/res/Resources;)V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public final class com/bumptech/glide/load/model/ResourceUriLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun buildLoadData (Landroid/net/Uri;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Landroid/net/Uri;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+	public static fun newAssetFileDescriptorFactory (Landroid/content/Context;)Lcom/bumptech/glide/load/model/ModelLoaderFactory;
+	public static fun newStreamFactory (Landroid/content/Context;)Lcom/bumptech/glide/load/model/ModelLoaderFactory;
+}
+
+public class com/bumptech/glide/load/model/StreamEncoder : com/bumptech/glide/load/Encoder {
+	public fun <init> (Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public fun encode (Ljava/io/InputStream;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun encode (Ljava/lang/Object;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/model/StringLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Lcom/bumptech/glide/load/model/ModelLoader;)V
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun buildLoadData (Ljava/lang/String;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun handles (Ljava/lang/Object;)Z
+	public fun handles (Ljava/lang/String;)Z
+}
+
+public final class com/bumptech/glide/load/model/StringLoader$AssetFileDescriptorFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/StringLoader$FileDescriptorFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/StringLoader$StreamFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/UnitModelLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> ()V
+	public fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public static fun getInstance ()Lcom/bumptech/glide/load/model/UnitModelLoader;
+	public fun handles (Ljava/lang/Object;)Z
+}
+
+public class com/bumptech/glide/load/model/UnitModelLoader$Factory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public static fun getInstance ()Lcom/bumptech/glide/load/model/UnitModelLoader$Factory;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/UriLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Lcom/bumptech/glide/load/model/UriLoader$LocalUriFetcherFactory;)V
+	public fun buildLoadData (Landroid/net/Uri;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Landroid/net/Uri;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public final class com/bumptech/glide/load/model/UriLoader$AssetFileDescriptorFactory : com/bumptech/glide/load/model/ModelLoaderFactory, com/bumptech/glide/load/model/UriLoader$LocalUriFetcherFactory {
+	public fun <init> (Landroid/content/ContentResolver;)V
+	public fun build (Landroid/net/Uri;)Lcom/bumptech/glide/load/data/DataFetcher;
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/UriLoader$FileDescriptorFactory : com/bumptech/glide/load/model/ModelLoaderFactory, com/bumptech/glide/load/model/UriLoader$LocalUriFetcherFactory {
+	public fun <init> (Landroid/content/ContentResolver;)V
+	public fun build (Landroid/net/Uri;)Lcom/bumptech/glide/load/data/DataFetcher;
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public abstract interface class com/bumptech/glide/load/model/UriLoader$LocalUriFetcherFactory {
+	public abstract fun build (Landroid/net/Uri;)Lcom/bumptech/glide/load/data/DataFetcher;
+}
+
+public class com/bumptech/glide/load/model/UriLoader$StreamFactory : com/bumptech/glide/load/model/ModelLoaderFactory, com/bumptech/glide/load/model/UriLoader$LocalUriFetcherFactory {
+	public fun <init> (Landroid/content/ContentResolver;)V
+	public fun build (Landroid/net/Uri;)Lcom/bumptech/glide/load/data/DataFetcher;
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/UrlUriLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Lcom/bumptech/glide/load/model/ModelLoader;)V
+	public fun buildLoadData (Landroid/net/Uri;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Landroid/net/Uri;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public class com/bumptech/glide/load/model/UrlUriLoader$StreamFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public abstract class com/bumptech/glide/load/model/stream/BaseGlideUrlLoader : com/bumptech/glide/load/model/ModelLoader {
+	protected fun <init> (Lcom/bumptech/glide/load/model/ModelLoader;)V
+	protected fun <init> (Lcom/bumptech/glide/load/model/ModelLoader;Lcom/bumptech/glide/load/model/ModelCache;)V
+	public fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	protected fun getAlternateUrls (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Ljava/util/List;
+	protected fun getHeaders (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/Headers;
+	protected abstract fun getUrl (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Ljava/lang/String;
+}
+
+public class com/bumptech/glide/load/model/stream/HttpGlideUrlLoader : com/bumptech/glide/load/model/ModelLoader {
+	public static final field TIMEOUT Lcom/bumptech/glide/load/Option;
+	public fun <init> ()V
+	public fun <init> (Lcom/bumptech/glide/load/model/ModelCache;)V
+	public fun buildLoadData (Lcom/bumptech/glide/load/model/GlideUrl;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Lcom/bumptech/glide/load/model/GlideUrl;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public class com/bumptech/glide/load/model/stream/HttpGlideUrlLoader$Factory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/stream/HttpUriLoader : com/bumptech/glide/load/model/UrlUriLoader {
+	public fun <init> (Lcom/bumptech/glide/load/model/ModelLoader;)V
+}
+
+public class com/bumptech/glide/load/model/stream/HttpUriLoader$Factory : com/bumptech/glide/load/model/UrlUriLoader$StreamFactory {
+	public fun <init> ()V
+}
+
+public class com/bumptech/glide/load/model/stream/MediaStoreImageThumbLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Landroid/content/Context;)V
+	public fun buildLoadData (Landroid/net/Uri;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Landroid/net/Uri;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public class com/bumptech/glide/load/model/stream/MediaStoreImageThumbLoader$Factory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> (Landroid/content/Context;)V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public class com/bumptech/glide/load/model/stream/MediaStoreVideoThumbLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Landroid/content/Context;)V
+	public fun buildLoadData (Landroid/net/Uri;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Landroid/net/Uri;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public class com/bumptech/glide/load/model/stream/MediaStoreVideoThumbLoader$Factory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> (Landroid/content/Context;)V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public final class com/bumptech/glide/load/model/stream/QMediaStoreUriLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun buildLoadData (Landroid/net/Uri;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun handles (Landroid/net/Uri;)Z
+	public synthetic fun handles (Ljava/lang/Object;)Z
+}
+
+public final class com/bumptech/glide/load/model/stream/QMediaStoreUriLoader$FileDescriptorFactory {
+	public fun <init> (Landroid/content/Context;)V
+}
+
+public final class com/bumptech/glide/load/model/stream/QMediaStoreUriLoader$InputStreamFactory {
+	public fun <init> (Landroid/content/Context;)V
+}
+
+public class com/bumptech/glide/load/model/stream/UrlLoader : com/bumptech/glide/load/model/ModelLoader {
+	public fun <init> (Lcom/bumptech/glide/load/model/ModelLoader;)V
+	public synthetic fun buildLoadData (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public fun buildLoadData (Ljava/net/URL;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/model/ModelLoader$LoadData;
+	public synthetic fun handles (Ljava/lang/Object;)Z
+	public fun handles (Ljava/net/URL;)Z
+}
+
+public class com/bumptech/glide/load/model/stream/UrlLoader$StreamFactory : com/bumptech/glide/load/model/ModelLoaderFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/model/MultiModelLoaderFactory;)Lcom/bumptech/glide/load/model/ModelLoader;
+	public fun teardown ()V
+}
+
+public final class com/bumptech/glide/load/resource/DefaultOnHeaderDecodedListener : android/graphics/ImageDecoder$OnHeaderDecodedListener {
+	public fun <init> (IILcom/bumptech/glide/load/Options;)V
+	public fun onHeaderDecoded (Landroid/graphics/ImageDecoder;Landroid/graphics/ImageDecoder$ImageInfo;Landroid/graphics/ImageDecoder$Source;)V
+}
+
+public class com/bumptech/glide/load/resource/SimpleResource : com/bumptech/glide/load/engine/Resource {
+	protected final field data Ljava/lang/Object;
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun get ()Ljava/lang/Object;
+	public fun getResourceClass ()Ljava/lang/Class;
+	public final fun getSize ()I
+	public fun recycle ()V
+}
+
+public final class com/bumptech/glide/load/resource/UnitTransformation : com/bumptech/glide/load/Transformation {
+	public static fun get ()Lcom/bumptech/glide/load/resource/UnitTransformation;
+	public fun transform (Landroid/content/Context;Lcom/bumptech/glide/load/engine/Resource;II)Lcom/bumptech/glide/load/engine/Resource;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public class com/bumptech/glide/load/resource/bitmap/BitmapDrawableDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> (Landroid/content/Context;Lcom/bumptech/glide/load/ResourceDecoder;)V
+	public fun <init> (Landroid/content/res/Resources;Lcom/bumptech/glide/load/ResourceDecoder;)V
+	public fun <init> (Landroid/content/res/Resources;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Lcom/bumptech/glide/load/ResourceDecoder;)V
+	public fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/resource/bitmap/BitmapDrawableEncoder : com/bumptech/glide/load/ResourceEncoder {
+	public fun <init> (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Lcom/bumptech/glide/load/ResourceEncoder;)V
+	public fun encode (Lcom/bumptech/glide/load/engine/Resource;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun encode (Ljava/lang/Object;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+	public fun getEncodeStrategy (Lcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/EncodeStrategy;
+}
+
+public class com/bumptech/glide/load/resource/bitmap/BitmapDrawableResource : com/bumptech/glide/load/resource/drawable/DrawableResource, com/bumptech/glide/load/engine/Initializable {
+	public fun <init> (Landroid/graphics/drawable/BitmapDrawable;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)V
+	public fun getResourceClass ()Ljava/lang/Class;
+	public fun getSize ()I
+	public fun initialize ()V
+	public fun recycle ()V
+}
+
+public class com/bumptech/glide/load/resource/bitmap/BitmapDrawableTransformation : com/bumptech/glide/load/Transformation {
+	public fun <init> (Lcom/bumptech/glide/load/Transformation;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun transform (Landroid/content/Context;Lcom/bumptech/glide/load/engine/Resource;II)Lcom/bumptech/glide/load/engine/Resource;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public class com/bumptech/glide/load/resource/bitmap/BitmapEncoder : com/bumptech/glide/load/ResourceEncoder {
+	public static final field COMPRESSION_FORMAT Lcom/bumptech/glide/load/Option;
+	public static final field COMPRESSION_QUALITY Lcom/bumptech/glide/load/Option;
+	public fun <init> ()V
+	public fun <init> (Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public fun encode (Lcom/bumptech/glide/load/engine/Resource;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun encode (Ljava/lang/Object;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+	public fun getEncodeStrategy (Lcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/EncodeStrategy;
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/BitmapImageDecoderResourceDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> ()V
+	public fun decode (Landroid/graphics/ImageDecoder$Source;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Landroid/graphics/ImageDecoder$Source;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/resource/bitmap/BitmapResource : com/bumptech/glide/load/engine/Initializable, com/bumptech/glide/load/engine/Resource {
+	public fun <init> (Landroid/graphics/Bitmap;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)V
+	public fun get ()Landroid/graphics/Bitmap;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun getResourceClass ()Ljava/lang/Class;
+	public fun getSize ()I
+	public fun initialize ()V
+	public static fun obtain (Landroid/graphics/Bitmap;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)Lcom/bumptech/glide/load/resource/bitmap/BitmapResource;
+	public fun recycle ()V
+}
+
+public abstract class com/bumptech/glide/load/resource/bitmap/BitmapTransformation : com/bumptech/glide/load/Transformation {
+	public fun <init> ()V
+	public final fun transform (Landroid/content/Context;Lcom/bumptech/glide/load/engine/Resource;II)Lcom/bumptech/glide/load/engine/Resource;
+	protected abstract fun transform (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;II)Landroid/graphics/Bitmap;
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions : com/bumptech/glide/TransitionOptions {
+	public fun <init> ()V
+	public fun crossFade ()Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+	public fun crossFade (I)Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+	public fun crossFade (Lcom/bumptech/glide/request/transition/DrawableCrossFadeFactory$Builder;)Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+	public fun crossFade (Lcom/bumptech/glide/request/transition/DrawableCrossFadeFactory;)Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun transitionUsing (Lcom/bumptech/glide/request/transition/TransitionFactory;)Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+	public static fun with (Lcom/bumptech/glide/request/transition/TransitionFactory;)Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+	public static fun withCrossFade ()Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+	public static fun withCrossFade (I)Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+	public static fun withCrossFade (Lcom/bumptech/glide/request/transition/DrawableCrossFadeFactory$Builder;)Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+	public static fun withCrossFade (Lcom/bumptech/glide/request/transition/DrawableCrossFadeFactory;)Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+	public static fun withWrapped (Lcom/bumptech/glide/request/transition/TransitionFactory;)Lcom/bumptech/glide/load/resource/bitmap/BitmapTransitionOptions;
+}
+
+public class com/bumptech/glide/load/resource/bitmap/ByteBufferBitmapDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> (Lcom/bumptech/glide/load/resource/bitmap/Downsampler;)V
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun decode (Ljava/nio/ByteBuffer;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+	public fun handles (Ljava/nio/ByteBuffer;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/ByteBufferBitmapImageDecoderResourceDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> ()V
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun decode (Ljava/nio/ByteBuffer;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+	public fun handles (Ljava/nio/ByteBuffer;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/resource/bitmap/CenterCrop : com/bumptech/glide/load/resource/bitmap/BitmapTransformation {
+	public fun <init> ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	protected fun transform (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;II)Landroid/graphics/Bitmap;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public class com/bumptech/glide/load/resource/bitmap/CenterInside : com/bumptech/glide/load/resource/bitmap/BitmapTransformation {
+	public fun <init> ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	protected fun transform (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;II)Landroid/graphics/Bitmap;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public class com/bumptech/glide/load/resource/bitmap/CircleCrop : com/bumptech/glide/load/resource/bitmap/BitmapTransformation {
+	public fun <init> ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	protected fun transform (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;II)Landroid/graphics/Bitmap;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/DefaultImageHeaderParser : com/bumptech/glide/load/ImageHeaderParser {
+	public fun <init> ()V
+	public fun getOrientation (Ljava/io/InputStream;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)I
+	public fun getOrientation (Ljava/nio/ByteBuffer;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)I
+	public fun getType (Ljava/io/InputStream;)Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public fun getType (Ljava/nio/ByteBuffer;)Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+}
+
+public abstract class com/bumptech/glide/load/resource/bitmap/DownsampleStrategy {
+	public static final field AT_LEAST Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy;
+	public static final field AT_MOST Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy;
+	public static final field CENTER_INSIDE Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy;
+	public static final field CENTER_OUTSIDE Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy;
+	public static final field DEFAULT Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy;
+	public static final field FIT_CENTER Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy;
+	public static final field NONE Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy;
+	public static final field OPTION Lcom/bumptech/glide/load/Option;
+	public fun <init> ()V
+	public abstract fun getSampleSizeRounding (IIII)Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy$SampleSizeRounding;
+	public abstract fun getScaleFactor (IIII)F
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/DownsampleStrategy$SampleSizeRounding : java/lang/Enum {
+	public static final field MEMORY Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy$SampleSizeRounding;
+	public static final field QUALITY Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy$SampleSizeRounding;
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy$SampleSizeRounding;
+	public static fun values ()[Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy$SampleSizeRounding;
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/Downsampler {
+	public static final field ALLOW_HARDWARE_CONFIG Lcom/bumptech/glide/load/Option;
+	public static final field DECODE_FORMAT Lcom/bumptech/glide/load/Option;
+	public static final field DOWNSAMPLE_STRATEGY Lcom/bumptech/glide/load/Option;
+	public static final field FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS Lcom/bumptech/glide/load/Option;
+	public static final field PREFERRED_COLOR_SPACE Lcom/bumptech/glide/load/Option;
+	public fun <init> (Ljava/util/List;Landroid/util/DisplayMetrics;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public fun decode (Landroid/os/ParcelFileDescriptor;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun decode (Ljava/io/InputStream;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun decode (Ljava/io/InputStream;IILcom/bumptech/glide/load/Options;Lcom/bumptech/glide/load/resource/bitmap/Downsampler$DecodeCallbacks;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun decode (Ljava/nio/ByteBuffer;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Landroid/os/ParcelFileDescriptor;)Z
+	public fun handles (Ljava/io/InputStream;)Z
+	public fun handles (Ljava/nio/ByteBuffer;)Z
+}
+
+public abstract interface class com/bumptech/glide/load/resource/bitmap/Downsampler$DecodeCallbacks {
+	public abstract fun onDecodeComplete (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;)V
+	public abstract fun onObtainBounds ()V
+}
+
+public class com/bumptech/glide/load/resource/bitmap/DrawableTransformation : com/bumptech/glide/load/Transformation {
+	public fun <init> (Lcom/bumptech/glide/load/Transformation;Z)V
+	public fun asBitmapDrawable ()Lcom/bumptech/glide/load/Transformation;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun transform (Landroid/content/Context;Lcom/bumptech/glide/load/engine/Resource;II)Lcom/bumptech/glide/load/engine/Resource;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/ExifInterfaceImageHeaderParser : com/bumptech/glide/load/ImageHeaderParser {
+	public fun <init> ()V
+	public fun getOrientation (Ljava/io/InputStream;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)I
+	public fun getOrientation (Ljava/nio/ByteBuffer;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)I
+	public fun getType (Ljava/io/InputStream;)Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+	public fun getType (Ljava/nio/ByteBuffer;)Lcom/bumptech/glide/load/ImageHeaderParser$ImageType;
+}
+
+public class com/bumptech/glide/load/resource/bitmap/FitCenter : com/bumptech/glide/load/resource/bitmap/BitmapTransformation {
+	public fun <init> ()V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	protected fun transform (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;II)Landroid/graphics/Bitmap;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/GranularRoundedCorners : com/bumptech/glide/load/resource/bitmap/BitmapTransformation {
+	public fun <init> (FFFF)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/HardwareConfigState {
+	public static final field BLOCK_HARDWARE_BITMAPS_WHEN_GL_CONTEXT_MIGHT_NOT_BE_INITIALIZED Z
+	public static final field HARDWARE_BITMAPS_SUPPORTED Z
+	public static final field NO_MAX_FD_COUNT I
+	public fun blockHardwareBitmaps ()V
+	public static fun getInstance ()Lcom/bumptech/glide/load/resource/bitmap/HardwareConfigState;
+	public fun isHardwareConfigAllowed (IIZZ)Z
+	public static fun setDisableHardwareBitmapsOnO (Z)V
+	public fun unblockHardwareBitmaps ()V
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/InputStreamBitmapImageDecoderResourceDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> ()V
+	public fun decode (Ljava/io/InputStream;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Ljava/io/InputStream;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/LazyBitmapDrawableResource : com/bumptech/glide/load/engine/Initializable, com/bumptech/glide/load/engine/Resource {
+	public fun get ()Landroid/graphics/drawable/BitmapDrawable;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun getResourceClass ()Ljava/lang/Class;
+	public fun getSize ()I
+	public fun initialize ()V
+	public static fun obtain (Landroid/content/Context;Landroid/graphics/Bitmap;)Lcom/bumptech/glide/load/resource/bitmap/LazyBitmapDrawableResource;
+	public static fun obtain (Landroid/content/res/Resources;Lcom/bumptech/glide/load/engine/Resource;)Lcom/bumptech/glide/load/engine/Resource;
+	public static fun obtain (Landroid/content/res/Resources;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;)Lcom/bumptech/glide/load/resource/bitmap/LazyBitmapDrawableResource;
+	public fun recycle ()V
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/ParcelFileDescriptorBitmapDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> (Lcom/bumptech/glide/load/resource/bitmap/Downsampler;)V
+	public fun decode (Landroid/os/ParcelFileDescriptor;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Landroid/os/ParcelFileDescriptor;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/resource/bitmap/RecyclableBufferedInputStream : java/io/FilterInputStream {
+	public fun <init> (Ljava/io/InputStream;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public fun available ()I
+	public fun close ()V
+	public fun fixMarkLimit ()V
+	public fun mark (I)V
+	public fun markSupported ()Z
+	public fun read ()I
+	public fun read ([BII)I
+	public fun release ()V
+	public fun reset ()V
+	public fun skip (J)J
+}
+
+public class com/bumptech/glide/load/resource/bitmap/ResourceBitmapDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> (Lcom/bumptech/glide/load/resource/drawable/ResourceDrawableDecoder;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)V
+	public fun decode (Landroid/net/Uri;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Landroid/net/Uri;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/resource/bitmap/Rotate : com/bumptech/glide/load/resource/bitmap/BitmapTransformation {
+	public fun <init> (I)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	protected fun transform (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;II)Landroid/graphics/Bitmap;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/RoundedCorners : com/bumptech/glide/load/resource/bitmap/BitmapTransformation {
+	public fun <init> (I)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public class com/bumptech/glide/load/resource/bitmap/StreamBitmapDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> (Lcom/bumptech/glide/load/resource/bitmap/Downsampler;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public fun decode (Ljava/io/InputStream;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Ljava/io/InputStream;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/TransformationUtils {
+	public static final field PAINT_FLAGS I
+	public static fun centerCrop (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;II)Landroid/graphics/Bitmap;
+	public static fun centerInside (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;II)Landroid/graphics/Bitmap;
+	public static fun circleCrop (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;II)Landroid/graphics/Bitmap;
+	public static fun fitCenter (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;II)Landroid/graphics/Bitmap;
+	public static fun getBitmapDrawableLock ()Ljava/util/concurrent/locks/Lock;
+	public static fun getExifOrientationDegrees (I)I
+	public static fun isExifOrientationRequired (I)Z
+	public static fun rotateImage (Landroid/graphics/Bitmap;I)Landroid/graphics/Bitmap;
+	public static fun rotateImageExif (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;I)Landroid/graphics/Bitmap;
+	public static fun roundedCorners (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;FFFF)Landroid/graphics/Bitmap;
+	public static fun roundedCorners (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;I)Landroid/graphics/Bitmap;
+	public static fun roundedCorners (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Landroid/graphics/Bitmap;III)Landroid/graphics/Bitmap;
+	public static fun setAlpha (Landroid/graphics/Bitmap;Landroid/graphics/Bitmap;)V
+}
+
+public final class com/bumptech/glide/load/resource/bitmap/UnitBitmapDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> ()V
+	public fun decode (Landroid/graphics/Bitmap;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Landroid/graphics/Bitmap;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/resource/bitmap/VideoBitmapDecoder : com/bumptech/glide/load/resource/bitmap/VideoDecoder {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)V
+}
+
+public class com/bumptech/glide/load/resource/bitmap/VideoDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public static final field DEFAULT_FRAME J
+	public static final field FRAME_OPTION Lcom/bumptech/glide/load/Option;
+	public static final field TARGET_FRAME Lcom/bumptech/glide/load/Option;
+	public static fun asset (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)Lcom/bumptech/glide/load/ResourceDecoder;
+	public static fun byteBuffer (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)Lcom/bumptech/glide/load/ResourceDecoder;
+	public fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+	public static fun parcel (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)Lcom/bumptech/glide/load/ResourceDecoder;
+}
+
+public class com/bumptech/glide/load/resource/bytes/ByteBufferRewinder : com/bumptech/glide/load/data/DataRewinder {
+	public fun <init> (Ljava/nio/ByteBuffer;)V
+	public fun cleanup ()V
+	public synthetic fun rewindAndGet ()Ljava/lang/Object;
+	public fun rewindAndGet ()Ljava/nio/ByteBuffer;
+}
+
+public class com/bumptech/glide/load/resource/bytes/ByteBufferRewinder$Factory : com/bumptech/glide/load/data/DataRewinder$Factory {
+	public fun <init> ()V
+	public synthetic fun build (Ljava/lang/Object;)Lcom/bumptech/glide/load/data/DataRewinder;
+	public fun build (Ljava/nio/ByteBuffer;)Lcom/bumptech/glide/load/data/DataRewinder;
+	public fun getDataClass ()Ljava/lang/Class;
+}
+
+public class com/bumptech/glide/load/resource/bytes/BytesResource : com/bumptech/glide/load/engine/Resource {
+	public fun <init> ([B)V
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()[B
+	public fun getResourceClass ()Ljava/lang/Class;
+	public fun getSize ()I
+	public fun recycle ()V
+}
+
+public final class com/bumptech/glide/load/resource/drawable/AnimatedImageDecoder {
+	public static fun byteBufferDecoder (Ljava/util/List;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)Lcom/bumptech/glide/load/ResourceDecoder;
+	public static fun streamDecoder (Ljava/util/List;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)Lcom/bumptech/glide/load/ResourceDecoder;
+}
+
+public final class com/bumptech/glide/load/resource/drawable/AnimatedWebpDecoder {
+	public static fun byteBufferDecoder (Ljava/util/List;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)Lcom/bumptech/glide/load/ResourceDecoder;
+	public static fun streamDecoder (Ljava/util/List;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)Lcom/bumptech/glide/load/ResourceDecoder;
+}
+
+public final class com/bumptech/glide/load/resource/drawable/DrawableDecoderCompat {
+	public static fun getDrawable (Landroid/content/Context;ILandroid/content/res/Resources$Theme;)Landroid/graphics/drawable/Drawable;
+	public static fun getDrawable (Landroid/content/Context;Landroid/content/Context;I)Landroid/graphics/drawable/Drawable;
+}
+
+public abstract class com/bumptech/glide/load/resource/drawable/DrawableResource : com/bumptech/glide/load/engine/Initializable, com/bumptech/glide/load/engine/Resource {
+	protected final field drawable Landroid/graphics/drawable/Drawable;
+	public fun <init> (Landroid/graphics/drawable/Drawable;)V
+	public final fun get ()Landroid/graphics/drawable/Drawable;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun initialize ()V
+}
+
+public final class com/bumptech/glide/load/resource/drawable/DrawableTransitionOptions : com/bumptech/glide/TransitionOptions {
+	public fun <init> ()V
+	public fun crossFade ()Lcom/bumptech/glide/load/resource/drawable/DrawableTransitionOptions;
+	public fun crossFade (I)Lcom/bumptech/glide/load/resource/drawable/DrawableTransitionOptions;
+	public fun crossFade (Lcom/bumptech/glide/request/transition/DrawableCrossFadeFactory$Builder;)Lcom/bumptech/glide/load/resource/drawable/DrawableTransitionOptions;
+	public fun crossFade (Lcom/bumptech/glide/request/transition/DrawableCrossFadeFactory;)Lcom/bumptech/glide/load/resource/drawable/DrawableTransitionOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public static fun with (Lcom/bumptech/glide/request/transition/TransitionFactory;)Lcom/bumptech/glide/load/resource/drawable/DrawableTransitionOptions;
+	public static fun withCrossFade ()Lcom/bumptech/glide/load/resource/drawable/DrawableTransitionOptions;
+	public static fun withCrossFade (I)Lcom/bumptech/glide/load/resource/drawable/DrawableTransitionOptions;
+	public static fun withCrossFade (Lcom/bumptech/glide/request/transition/DrawableCrossFadeFactory$Builder;)Lcom/bumptech/glide/load/resource/drawable/DrawableTransitionOptions;
+	public static fun withCrossFade (Lcom/bumptech/glide/request/transition/DrawableCrossFadeFactory;)Lcom/bumptech/glide/load/resource/drawable/DrawableTransitionOptions;
+}
+
+public class com/bumptech/glide/load/resource/drawable/ResourceDrawableDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public static final field THEME Lcom/bumptech/glide/load/Option;
+	public fun <init> (Landroid/content/Context;)V
+	public fun decode (Landroid/net/Uri;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Landroid/net/Uri;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/resource/drawable/UnitDrawableDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> ()V
+	public fun decode (Landroid/graphics/drawable/Drawable;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Landroid/graphics/drawable/Drawable;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/resource/file/FileDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> ()V
+	public fun decode (Ljava/io/File;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/resource/file/FileResource : com/bumptech/glide/load/resource/SimpleResource {
+	public fun <init> (Ljava/io/File;)V
+}
+
+public class com/bumptech/glide/load/resource/gif/ByteBufferGifDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/Context;Ljava/util/List;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun decode (Ljava/nio/ByteBuffer;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/resource/gif/GifDrawableResource;
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+	public fun handles (Ljava/nio/ByteBuffer;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public final class com/bumptech/glide/load/resource/gif/GifBitmapProvider : com/bumptech/glide/gifdecoder/GifDecoder$BitmapProvider {
+	public fun <init> (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)V
+	public fun <init> (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public fun obtain (IILandroid/graphics/Bitmap$Config;)Landroid/graphics/Bitmap;
+	public fun obtainByteArray (I)[B
+	public fun obtainIntArray (I)[I
+	public fun release (Landroid/graphics/Bitmap;)V
+	public fun release ([B)V
+	public fun release ([I)V
+}
+
+public class com/bumptech/glide/load/resource/gif/GifDrawable : android/graphics/drawable/Drawable, android/graphics/drawable/Animatable, androidx/vectordrawable/graphics/drawable/Animatable2Compat, com/bumptech/glide/load/resource/gif/GifFrameLoader$FrameCallback {
+	public static final field LOOP_FOREVER I
+	public static final field LOOP_INTRINSIC I
+	public fun <init> (Landroid/content/Context;Lcom/bumptech/glide/gifdecoder/GifDecoder;Lcom/bumptech/glide/load/Transformation;IILandroid/graphics/Bitmap;)V
+	public fun <init> (Landroid/content/Context;Lcom/bumptech/glide/gifdecoder/GifDecoder;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Lcom/bumptech/glide/load/Transformation;IILandroid/graphics/Bitmap;)V
+	public fun clearAnimationCallbacks ()V
+	public fun draw (Landroid/graphics/Canvas;)V
+	public fun getBuffer ()Ljava/nio/ByteBuffer;
+	public fun getConstantState ()Landroid/graphics/drawable/Drawable$ConstantState;
+	public fun getFirstFrame ()Landroid/graphics/Bitmap;
+	public fun getFrameCount ()I
+	public fun getFrameIndex ()I
+	public fun getFrameTransformation ()Lcom/bumptech/glide/load/Transformation;
+	public fun getIntrinsicHeight ()I
+	public fun getIntrinsicWidth ()I
+	public fun getOpacity ()I
+	public fun getSize ()I
+	public fun isRunning ()Z
+	protected fun onBoundsChange (Landroid/graphics/Rect;)V
+	public fun onFrameReady ()V
+	public fun recycle ()V
+	public fun registerAnimationCallback (Landroidx/vectordrawable/graphics/drawable/Animatable2Compat$AnimationCallback;)V
+	public fun setAlpha (I)V
+	public fun setColorFilter (Landroid/graphics/ColorFilter;)V
+	public fun setFrameTransformation (Lcom/bumptech/glide/load/Transformation;Landroid/graphics/Bitmap;)V
+	public fun setLoopCount (I)V
+	public fun setVisible (ZZ)Z
+	public fun start ()V
+	public fun startFromFirstFrame ()V
+	public fun stop ()V
+	public fun unregisterAnimationCallback (Landroidx/vectordrawable/graphics/drawable/Animatable2Compat$AnimationCallback;)Z
+}
+
+public class com/bumptech/glide/load/resource/gif/GifDrawableEncoder : com/bumptech/glide/load/ResourceEncoder {
+	public fun <init> ()V
+	public fun encode (Lcom/bumptech/glide/load/engine/Resource;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun encode (Ljava/lang/Object;Ljava/io/File;Lcom/bumptech/glide/load/Options;)Z
+	public fun getEncodeStrategy (Lcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/EncodeStrategy;
+}
+
+public class com/bumptech/glide/load/resource/gif/GifDrawableResource : com/bumptech/glide/load/resource/drawable/DrawableResource, com/bumptech/glide/load/engine/Initializable {
+	public fun <init> (Lcom/bumptech/glide/load/resource/gif/GifDrawable;)V
+	public fun getResourceClass ()Ljava/lang/Class;
+	public fun getSize ()I
+	public fun initialize ()V
+	public fun recycle ()V
+}
+
+public class com/bumptech/glide/load/resource/gif/GifDrawableTransformation : com/bumptech/glide/load/Transformation {
+	public fun <init> (Lcom/bumptech/glide/load/Transformation;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun transform (Landroid/content/Context;Lcom/bumptech/glide/load/engine/Resource;II)Lcom/bumptech/glide/load/engine/Resource;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/load/resource/gif/GifFrameResourceDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)V
+	public fun decode (Lcom/bumptech/glide/gifdecoder/GifDecoder;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Lcom/bumptech/glide/gifdecoder/GifDecoder;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public final class com/bumptech/glide/load/resource/gif/GifOptions {
+	public static final field DECODE_FORMAT Lcom/bumptech/glide/load/Option;
+	public static final field DISABLE_ANIMATION Lcom/bumptech/glide/load/Option;
+}
+
+public class com/bumptech/glide/load/resource/gif/StreamGifDecoder : com/bumptech/glide/load/ResourceDecoder {
+	public fun <init> (Ljava/util/List;Lcom/bumptech/glide/load/ResourceDecoder;Lcom/bumptech/glide/load/engine/bitmap_recycle/ArrayPool;)V
+	public fun decode (Ljava/io/InputStream;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public synthetic fun decode (Ljava/lang/Object;IILcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+	public fun handles (Ljava/io/InputStream;Lcom/bumptech/glide/load/Options;)Z
+	public synthetic fun handles (Ljava/lang/Object;Lcom/bumptech/glide/load/Options;)Z
+}
+
+public class com/bumptech/glide/load/resource/transcode/BitmapBytesTranscoder : com/bumptech/glide/load/resource/transcode/ResourceTranscoder {
+	public fun <init> ()V
+	public fun <init> (Landroid/graphics/Bitmap$CompressFormat;I)V
+	public fun transcode (Lcom/bumptech/glide/load/engine/Resource;Lcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+}
+
+public class com/bumptech/glide/load/resource/transcode/BitmapDrawableTranscoder : com/bumptech/glide/load/resource/transcode/ResourceTranscoder {
+	public fun <init> (Landroid/content/Context;)V
+	public fun <init> (Landroid/content/res/Resources;)V
+	public fun <init> (Landroid/content/res/Resources;Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;)V
+	public fun transcode (Lcom/bumptech/glide/load/engine/Resource;Lcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+}
+
+public final class com/bumptech/glide/load/resource/transcode/DrawableBytesTranscoder : com/bumptech/glide/load/resource/transcode/ResourceTranscoder {
+	public fun <init> (Lcom/bumptech/glide/load/engine/bitmap_recycle/BitmapPool;Lcom/bumptech/glide/load/resource/transcode/ResourceTranscoder;Lcom/bumptech/glide/load/resource/transcode/ResourceTranscoder;)V
+	public fun transcode (Lcom/bumptech/glide/load/engine/Resource;Lcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+}
+
+public class com/bumptech/glide/load/resource/transcode/GifDrawableBytesTranscoder : com/bumptech/glide/load/resource/transcode/ResourceTranscoder {
+	public fun <init> ()V
+	public fun transcode (Lcom/bumptech/glide/load/engine/Resource;Lcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+}
+
+public abstract interface class com/bumptech/glide/load/resource/transcode/ResourceTranscoder {
+	public abstract fun transcode (Lcom/bumptech/glide/load/engine/Resource;Lcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+}
+
+public class com/bumptech/glide/load/resource/transcode/TranscoderRegistry {
+	public fun <init> ()V
+	public fun get (Ljava/lang/Class;Ljava/lang/Class;)Lcom/bumptech/glide/load/resource/transcode/ResourceTranscoder;
+	public fun getTranscodeClasses (Ljava/lang/Class;Ljava/lang/Class;)Ljava/util/List;
+	public fun register (Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/resource/transcode/ResourceTranscoder;)V
+}
+
+public class com/bumptech/glide/load/resource/transcode/UnitTranscoder : com/bumptech/glide/load/resource/transcode/ResourceTranscoder {
+	public fun <init> ()V
+	public static fun get ()Lcom/bumptech/glide/load/resource/transcode/ResourceTranscoder;
+	public fun transcode (Lcom/bumptech/glide/load/engine/Resource;Lcom/bumptech/glide/load/Options;)Lcom/bumptech/glide/load/engine/Resource;
+}
+
+public abstract interface class com/bumptech/glide/manager/ConnectivityMonitor : com/bumptech/glide/manager/LifecycleListener {
+}
+
+public abstract interface class com/bumptech/glide/manager/ConnectivityMonitor$ConnectivityListener {
+	public abstract fun onConnectivityChanged (Z)V
+}
+
+public abstract interface class com/bumptech/glide/manager/ConnectivityMonitorFactory {
+	public abstract fun build (Landroid/content/Context;Lcom/bumptech/glide/manager/ConnectivityMonitor$ConnectivityListener;)Lcom/bumptech/glide/manager/ConnectivityMonitor;
+}
+
+public class com/bumptech/glide/manager/DefaultConnectivityMonitorFactory : com/bumptech/glide/manager/ConnectivityMonitorFactory {
+	public fun <init> ()V
+	public fun build (Landroid/content/Context;Lcom/bumptech/glide/manager/ConnectivityMonitor$ConnectivityListener;)Lcom/bumptech/glide/manager/ConnectivityMonitor;
+}
+
+public abstract interface class com/bumptech/glide/manager/Lifecycle {
+	public abstract fun addListener (Lcom/bumptech/glide/manager/LifecycleListener;)V
+	public abstract fun removeListener (Lcom/bumptech/glide/manager/LifecycleListener;)V
+}
+
+public abstract interface class com/bumptech/glide/manager/LifecycleListener {
+	public abstract fun onDestroy ()V
+	public abstract fun onStart ()V
+	public abstract fun onStop ()V
+}
+
+public class com/bumptech/glide/manager/RequestManagerFragment : android/app/Fragment {
+	public fun <init> ()V
+	public fun getRequestManager ()Lcom/bumptech/glide/RequestManager;
+	public fun getRequestManagerTreeNode ()Lcom/bumptech/glide/manager/RequestManagerTreeNode;
+	public fun setRequestManager (Lcom/bumptech/glide/RequestManager;)V
+}
+
+public class com/bumptech/glide/manager/RequestManagerRetriever : android/os/Handler$Callback {
+	public fun <init> (Lcom/bumptech/glide/manager/RequestManagerRetriever$RequestManagerFactory;)V
+	public fun get (Landroid/app/Activity;)Lcom/bumptech/glide/RequestManager;
+	public fun get (Landroid/app/Fragment;)Lcom/bumptech/glide/RequestManager;
+	public fun get (Landroid/content/Context;)Lcom/bumptech/glide/RequestManager;
+	public fun get (Landroid/view/View;)Lcom/bumptech/glide/RequestManager;
+	public fun get (Landroidx/fragment/app/Fragment;)Lcom/bumptech/glide/RequestManager;
+	public fun get (Landroidx/fragment/app/FragmentActivity;)Lcom/bumptech/glide/RequestManager;
+	public fun handleMessage (Landroid/os/Message;)Z
+}
+
+public abstract interface class com/bumptech/glide/manager/RequestManagerRetriever$RequestManagerFactory {
+	public abstract fun build (Lcom/bumptech/glide/Glide;Lcom/bumptech/glide/manager/Lifecycle;Lcom/bumptech/glide/manager/RequestManagerTreeNode;Landroid/content/Context;)Lcom/bumptech/glide/RequestManager;
+}
+
+public abstract interface class com/bumptech/glide/manager/RequestManagerTreeNode {
+	public abstract fun getDescendants ()Ljava/util/Set;
+}
+
+public class com/bumptech/glide/manager/RequestTracker {
+	public fun <init> ()V
+	public fun clearAndRemove (Lcom/bumptech/glide/request/Request;)Z
+	public fun clearRequests ()V
+	public fun isPaused ()Z
+	public fun pauseAllRequests ()V
+	public fun pauseRequests ()V
+	public fun restartRequests ()V
+	public fun resumeRequests ()V
+	public fun runRequest (Lcom/bumptech/glide/request/Request;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public class com/bumptech/glide/manager/SupportRequestManagerFragment : androidx/fragment/app/Fragment {
+	public fun <init> ()V
+	public fun getRequestManager ()Lcom/bumptech/glide/RequestManager;
+	public fun getRequestManagerTreeNode ()Lcom/bumptech/glide/manager/RequestManagerTreeNode;
+	public fun setRequestManager (Lcom/bumptech/glide/RequestManager;)V
+}
+
+public final class com/bumptech/glide/manager/TargetTracker : com/bumptech/glide/manager/LifecycleListener {
+	public fun <init> ()V
+	public fun clear ()V
+	public fun getAll ()Ljava/util/List;
+	public fun onDestroy ()V
+	public fun onStart ()V
+	public fun onStop ()V
+	public fun track (Lcom/bumptech/glide/request/target/Target;)V
+	public fun untrack (Lcom/bumptech/glide/request/target/Target;)V
+}
+
+public abstract class com/bumptech/glide/module/AppGlideModule : com/bumptech/glide/module/LibraryGlideModule, com/bumptech/glide/module/AppliesOptions {
+	public fun <init> ()V
+	public fun applyOptions (Landroid/content/Context;Lcom/bumptech/glide/GlideBuilder;)V
+	public fun isManifestParsingEnabled ()Z
+}
+
+public abstract interface class com/bumptech/glide/module/GlideModule : com/bumptech/glide/module/AppliesOptions, com/bumptech/glide/module/RegistersComponents {
+}
+
+public abstract class com/bumptech/glide/module/LibraryGlideModule : com/bumptech/glide/module/RegistersComponents {
+	public fun <init> ()V
+	public fun registerComponents (Landroid/content/Context;Lcom/bumptech/glide/Glide;Lcom/bumptech/glide/Registry;)V
+}
+
+public final class com/bumptech/glide/module/ManifestParser {
+	public fun <init> (Landroid/content/Context;)V
+	public fun parse ()Ljava/util/List;
+}
+
+public class com/bumptech/glide/provider/EncoderRegistry {
+	public fun <init> ()V
+	public fun append (Ljava/lang/Class;Lcom/bumptech/glide/load/Encoder;)V
+	public fun getEncoder (Ljava/lang/Class;)Lcom/bumptech/glide/load/Encoder;
+	public fun prepend (Ljava/lang/Class;Lcom/bumptech/glide/load/Encoder;)V
+}
+
+public final class com/bumptech/glide/provider/ImageHeaderParserRegistry {
+	public fun <init> ()V
+	public fun add (Lcom/bumptech/glide/load/ImageHeaderParser;)V
+	public fun getParsers ()Ljava/util/List;
+}
+
+public class com/bumptech/glide/provider/LoadPathCache {
+	public fun <init> ()V
+	public fun get (Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;)Lcom/bumptech/glide/load/engine/LoadPath;
+	public fun isEmptyLoadPath (Lcom/bumptech/glide/load/engine/LoadPath;)Z
+	public fun put (Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;Lcom/bumptech/glide/load/engine/LoadPath;)V
+}
+
+public class com/bumptech/glide/provider/ModelToResourceClassCache {
+	public fun <init> ()V
+	public fun clear ()V
+	public fun get (Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;)Ljava/util/List;
+	public fun put (Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;Ljava/util/List;)V
+}
+
+public class com/bumptech/glide/provider/ResourceDecoderRegistry {
+	public fun <init> ()V
+	public fun append (Ljava/lang/String;Lcom/bumptech/glide/load/ResourceDecoder;Ljava/lang/Class;Ljava/lang/Class;)V
+	public fun getDecoders (Ljava/lang/Class;Ljava/lang/Class;)Ljava/util/List;
+	public fun getResourceClasses (Ljava/lang/Class;Ljava/lang/Class;)Ljava/util/List;
+	public fun prepend (Ljava/lang/String;Lcom/bumptech/glide/load/ResourceDecoder;Ljava/lang/Class;Ljava/lang/Class;)V
+	public fun setBucketPriorityList (Ljava/util/List;)V
+}
+
+public class com/bumptech/glide/provider/ResourceEncoderRegistry {
+	public fun <init> ()V
+	public fun append (Ljava/lang/Class;Lcom/bumptech/glide/load/ResourceEncoder;)V
+	public fun get (Ljava/lang/Class;)Lcom/bumptech/glide/load/ResourceEncoder;
+	public fun prepend (Ljava/lang/Class;Lcom/bumptech/glide/load/ResourceEncoder;)V
+}
+
+public abstract class com/bumptech/glide/request/BaseRequestOptions : java/lang/Cloneable {
+	public fun <init> ()V
+	public fun apply (Lcom/bumptech/glide/request/BaseRequestOptions;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun autoClone ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun centerCrop ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun centerInside ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun circleCrop ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun clone ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public synthetic fun clone ()Ljava/lang/Object;
+	public fun decode (Ljava/lang/Class;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun disallowHardwareConfig ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun diskCacheStrategy (Lcom/bumptech/glide/load/engine/DiskCacheStrategy;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun dontAnimate ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun dontTransform ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun downsample (Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun encodeFormat (Landroid/graphics/Bitmap$CompressFormat;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun encodeQuality (I)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun error (I)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun error (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun fallback (I)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun fallback (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun fitCenter ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun format (Lcom/bumptech/glide/load/DecodeFormat;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun frame (J)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public final fun getDiskCacheStrategy ()Lcom/bumptech/glide/load/engine/DiskCacheStrategy;
+	public final fun getErrorId ()I
+	public final fun getErrorPlaceholder ()Landroid/graphics/drawable/Drawable;
+	public final fun getFallbackDrawable ()Landroid/graphics/drawable/Drawable;
+	public final fun getFallbackId ()I
+	public final fun getOnlyRetrieveFromCache ()Z
+	public final fun getOptions ()Lcom/bumptech/glide/load/Options;
+	public final fun getOverrideHeight ()I
+	public final fun getOverrideWidth ()I
+	public final fun getPlaceholderDrawable ()Landroid/graphics/drawable/Drawable;
+	public final fun getPlaceholderId ()I
+	public final fun getPriority ()Lcom/bumptech/glide/Priority;
+	public final fun getResourceClass ()Ljava/lang/Class;
+	public final fun getSignature ()Lcom/bumptech/glide/load/Key;
+	public final fun getSizeMultiplier ()F
+	public final fun getTheme ()Landroid/content/res/Resources$Theme;
+	public final fun getTransformations ()Ljava/util/Map;
+	public final fun getUseAnimationPool ()Z
+	public final fun getUseUnlimitedSourceGeneratorsPool ()Z
+	public fun hashCode ()I
+	protected final fun isAutoCloneEnabled ()Z
+	public final fun isDiskCacheStrategySet ()Z
+	public final fun isLocked ()Z
+	public final fun isMemoryCacheable ()Z
+	public final fun isPrioritySet ()Z
+	public final fun isSkipMemoryCacheSet ()Z
+	public final fun isTransformationAllowed ()Z
+	public final fun isTransformationRequired ()Z
+	public final fun isTransformationSet ()Z
+	public final fun isValidOverride ()Z
+	public fun lock ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun onlyRetrieveFromCache (Z)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun optionalCenterCrop ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun optionalCenterInside ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun optionalCircleCrop ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun optionalFitCenter ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun optionalTransform (Lcom/bumptech/glide/load/Transformation;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun optionalTransform (Ljava/lang/Class;Lcom/bumptech/glide/load/Transformation;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun override (I)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun override (II)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun placeholder (I)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun placeholder (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun priority (Lcom/bumptech/glide/Priority;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	protected final fun selfOrThrowIfLocked ()Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun set (Lcom/bumptech/glide/load/Option;Ljava/lang/Object;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun signature (Lcom/bumptech/glide/load/Key;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun sizeMultiplier (F)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun skipMemoryCache (Z)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun theme (Landroid/content/res/Resources$Theme;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun timeout (I)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun transform (Lcom/bumptech/glide/load/Transformation;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun transform (Ljava/lang/Class;Lcom/bumptech/glide/load/Transformation;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun transform ([Lcom/bumptech/glide/load/Transformation;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun transforms ([Lcom/bumptech/glide/load/Transformation;)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun useAnimationPool (Z)Lcom/bumptech/glide/request/BaseRequestOptions;
+	public fun useUnlimitedSourceGeneratorsPool (Z)Lcom/bumptech/glide/request/BaseRequestOptions;
+}
+
+public final class com/bumptech/glide/request/ErrorRequestCoordinator : com/bumptech/glide/request/Request, com/bumptech/glide/request/RequestCoordinator {
+	public fun <init> (Ljava/lang/Object;Lcom/bumptech/glide/request/RequestCoordinator;)V
+	public fun begin ()V
+	public fun canNotifyCleared (Lcom/bumptech/glide/request/Request;)Z
+	public fun canNotifyStatusChanged (Lcom/bumptech/glide/request/Request;)Z
+	public fun canSetImage (Lcom/bumptech/glide/request/Request;)Z
+	public fun clear ()V
+	public fun getRoot ()Lcom/bumptech/glide/request/RequestCoordinator;
+	public fun isAnyResourceSet ()Z
+	public fun isCleared ()Z
+	public fun isComplete ()Z
+	public fun isEquivalentTo (Lcom/bumptech/glide/request/Request;)Z
+	public fun isRunning ()Z
+	public fun onRequestFailed (Lcom/bumptech/glide/request/Request;)V
+	public fun onRequestSuccess (Lcom/bumptech/glide/request/Request;)V
+	public fun pause ()V
+	public fun setRequests (Lcom/bumptech/glide/request/Request;Lcom/bumptech/glide/request/Request;)V
+}
+
+public abstract class com/bumptech/glide/request/ExperimentalRequestListener : com/bumptech/glide/request/RequestListener {
+	public fun <init> ()V
+	public fun onRequestStarted (Ljava/lang/Object;)V
+	public abstract fun onResourceReady (Ljava/lang/Object;Ljava/lang/Object;Lcom/bumptech/glide/request/target/Target;Lcom/bumptech/glide/load/DataSource;ZZ)Z
+}
+
+public abstract interface class com/bumptech/glide/request/FutureTarget : com/bumptech/glide/request/target/Target, java/util/concurrent/Future {
+}
+
+public abstract interface class com/bumptech/glide/request/Request {
+	public abstract fun begin ()V
+	public abstract fun clear ()V
+	public abstract fun isAnyResourceSet ()Z
+	public abstract fun isCleared ()Z
+	public abstract fun isComplete ()Z
+	public abstract fun isEquivalentTo (Lcom/bumptech/glide/request/Request;)Z
+	public abstract fun isRunning ()Z
+	public abstract fun pause ()V
+}
+
+public abstract interface class com/bumptech/glide/request/RequestCoordinator {
+	public abstract fun canNotifyCleared (Lcom/bumptech/glide/request/Request;)Z
+	public abstract fun canNotifyStatusChanged (Lcom/bumptech/glide/request/Request;)Z
+	public abstract fun canSetImage (Lcom/bumptech/glide/request/Request;)Z
+	public abstract fun getRoot ()Lcom/bumptech/glide/request/RequestCoordinator;
+	public abstract fun isAnyResourceSet ()Z
+	public abstract fun onRequestFailed (Lcom/bumptech/glide/request/Request;)V
+	public abstract fun onRequestSuccess (Lcom/bumptech/glide/request/Request;)V
+}
+
+public final class com/bumptech/glide/request/RequestCoordinator$RequestState : java/lang/Enum {
+	public static final field CLEARED Lcom/bumptech/glide/request/RequestCoordinator$RequestState;
+	public static final field FAILED Lcom/bumptech/glide/request/RequestCoordinator$RequestState;
+	public static final field PAUSED Lcom/bumptech/glide/request/RequestCoordinator$RequestState;
+	public static final field RUNNING Lcom/bumptech/glide/request/RequestCoordinator$RequestState;
+	public static final field SUCCESS Lcom/bumptech/glide/request/RequestCoordinator$RequestState;
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/request/RequestCoordinator$RequestState;
+	public static fun values ()[Lcom/bumptech/glide/request/RequestCoordinator$RequestState;
+}
+
+public class com/bumptech/glide/request/RequestFutureTarget : com/bumptech/glide/request/FutureTarget, com/bumptech/glide/request/RequestListener {
+	public fun <init> (II)V
+	public fun cancel (Z)Z
+	public fun get ()Ljava/lang/Object;
+	public fun get (JLjava/util/concurrent/TimeUnit;)Ljava/lang/Object;
+	public fun getRequest ()Lcom/bumptech/glide/request/Request;
+	public fun getSize (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public fun isCancelled ()Z
+	public fun isDone ()Z
+	public fun onDestroy ()V
+	public fun onLoadCleared (Landroid/graphics/drawable/Drawable;)V
+	public fun onLoadFailed (Landroid/graphics/drawable/Drawable;)V
+	public fun onLoadFailed (Lcom/bumptech/glide/load/engine/GlideException;Ljava/lang/Object;Lcom/bumptech/glide/request/target/Target;Z)Z
+	public fun onLoadStarted (Landroid/graphics/drawable/Drawable;)V
+	public fun onResourceReady (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition;)V
+	public fun onResourceReady (Ljava/lang/Object;Ljava/lang/Object;Lcom/bumptech/glide/request/target/Target;Lcom/bumptech/glide/load/DataSource;Z)Z
+	public fun onStart ()V
+	public fun onStop ()V
+	public fun removeCallback (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public fun setRequest (Lcom/bumptech/glide/request/Request;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/bumptech/glide/request/RequestListener {
+	public abstract fun onLoadFailed (Lcom/bumptech/glide/load/engine/GlideException;Ljava/lang/Object;Lcom/bumptech/glide/request/target/Target;Z)Z
+	public abstract fun onResourceReady (Ljava/lang/Object;Ljava/lang/Object;Lcom/bumptech/glide/request/target/Target;Lcom/bumptech/glide/load/DataSource;Z)Z
+}
+
+public class com/bumptech/glide/request/RequestOptions : com/bumptech/glide/request/BaseRequestOptions {
+	public fun <init> ()V
+	public static fun bitmapTransform (Lcom/bumptech/glide/load/Transformation;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun centerCropTransform ()Lcom/bumptech/glide/request/RequestOptions;
+	public static fun centerInsideTransform ()Lcom/bumptech/glide/request/RequestOptions;
+	public static fun circleCropTransform ()Lcom/bumptech/glide/request/RequestOptions;
+	public static fun decodeTypeOf (Ljava/lang/Class;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun diskCacheStrategyOf (Lcom/bumptech/glide/load/engine/DiskCacheStrategy;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun downsampleOf (Lcom/bumptech/glide/load/resource/bitmap/DownsampleStrategy;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun encodeFormatOf (Landroid/graphics/Bitmap$CompressFormat;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun encodeQualityOf (I)Lcom/bumptech/glide/request/RequestOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun errorOf (I)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun errorOf (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun fitCenterTransform ()Lcom/bumptech/glide/request/RequestOptions;
+	public static fun formatOf (Lcom/bumptech/glide/load/DecodeFormat;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun frameOf (J)Lcom/bumptech/glide/request/RequestOptions;
+	public fun hashCode ()I
+	public static fun noAnimation ()Lcom/bumptech/glide/request/RequestOptions;
+	public static fun noTransformation ()Lcom/bumptech/glide/request/RequestOptions;
+	public static fun option (Lcom/bumptech/glide/load/Option;Ljava/lang/Object;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun overrideOf (I)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun overrideOf (II)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun placeholderOf (I)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun placeholderOf (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun priorityOf (Lcom/bumptech/glide/Priority;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun signatureOf (Lcom/bumptech/glide/load/Key;)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun sizeMultiplierOf (F)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun skipMemoryCacheOf (Z)Lcom/bumptech/glide/request/RequestOptions;
+	public static fun timeoutOf (I)Lcom/bumptech/glide/request/RequestOptions;
+}
+
+public abstract interface class com/bumptech/glide/request/ResourceCallback {
+	public abstract fun getLock ()Ljava/lang/Object;
+	public abstract fun onLoadFailed (Lcom/bumptech/glide/load/engine/GlideException;)V
+	public abstract fun onResourceReady (Lcom/bumptech/glide/load/engine/Resource;Lcom/bumptech/glide/load/DataSource;Z)V
+}
+
+public final class com/bumptech/glide/request/SingleRequest : com/bumptech/glide/request/Request, com/bumptech/glide/request/ResourceCallback, com/bumptech/glide/request/target/SizeReadyCallback {
+	public fun begin ()V
+	public fun clear ()V
+	public fun getLock ()Ljava/lang/Object;
+	public fun isAnyResourceSet ()Z
+	public fun isCleared ()Z
+	public fun isComplete ()Z
+	public fun isEquivalentTo (Lcom/bumptech/glide/request/Request;)Z
+	public fun isRunning ()Z
+	public static fun obtain (Landroid/content/Context;Lcom/bumptech/glide/GlideContext;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Class;Lcom/bumptech/glide/request/BaseRequestOptions;IILcom/bumptech/glide/Priority;Lcom/bumptech/glide/request/target/Target;Lcom/bumptech/glide/request/RequestListener;Ljava/util/List;Lcom/bumptech/glide/request/RequestCoordinator;Lcom/bumptech/glide/load/engine/Engine;Lcom/bumptech/glide/request/transition/TransitionFactory;Ljava/util/concurrent/Executor;)Lcom/bumptech/glide/request/SingleRequest;
+	public fun onLoadFailed (Lcom/bumptech/glide/load/engine/GlideException;)V
+	public fun onResourceReady (Lcom/bumptech/glide/load/engine/Resource;Lcom/bumptech/glide/load/DataSource;Z)V
+	public fun onSizeReady (II)V
+	public fun pause ()V
+	public fun toString ()Ljava/lang/String;
+}
+
+public class com/bumptech/glide/request/ThumbnailRequestCoordinator : com/bumptech/glide/request/Request, com/bumptech/glide/request/RequestCoordinator {
+	public fun <init> (Ljava/lang/Object;Lcom/bumptech/glide/request/RequestCoordinator;)V
+	public fun begin ()V
+	public fun canNotifyCleared (Lcom/bumptech/glide/request/Request;)Z
+	public fun canNotifyStatusChanged (Lcom/bumptech/glide/request/Request;)Z
+	public fun canSetImage (Lcom/bumptech/glide/request/Request;)Z
+	public fun clear ()V
+	public fun getRoot ()Lcom/bumptech/glide/request/RequestCoordinator;
+	public fun isAnyResourceSet ()Z
+	public fun isCleared ()Z
+	public fun isComplete ()Z
+	public fun isEquivalentTo (Lcom/bumptech/glide/request/Request;)Z
+	public fun isRunning ()Z
+	public fun onRequestFailed (Lcom/bumptech/glide/request/Request;)V
+	public fun onRequestSuccess (Lcom/bumptech/glide/request/Request;)V
+	public fun pause ()V
+	public fun setRequests (Lcom/bumptech/glide/request/Request;Lcom/bumptech/glide/request/Request;)V
+}
+
+public class com/bumptech/glide/request/target/AppWidgetTarget : com/bumptech/glide/request/target/CustomTarget {
+	public fun <init> (Landroid/content/Context;IIILandroid/widget/RemoteViews;Landroid/content/ComponentName;)V
+	public fun <init> (Landroid/content/Context;IIILandroid/widget/RemoteViews;[I)V
+	public fun <init> (Landroid/content/Context;ILandroid/widget/RemoteViews;Landroid/content/ComponentName;)V
+	public fun <init> (Landroid/content/Context;ILandroid/widget/RemoteViews;[I)V
+	public fun onLoadCleared (Landroid/graphics/drawable/Drawable;)V
+	public fun onResourceReady (Landroid/graphics/Bitmap;Lcom/bumptech/glide/request/transition/Transition;)V
+	public synthetic fun onResourceReady (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition;)V
+}
+
+public abstract class com/bumptech/glide/request/target/BaseTarget : com/bumptech/glide/request/target/Target {
+	public fun <init> ()V
+	public fun getRequest ()Lcom/bumptech/glide/request/Request;
+	public fun onDestroy ()V
+	public fun onLoadCleared (Landroid/graphics/drawable/Drawable;)V
+	public fun onLoadFailed (Landroid/graphics/drawable/Drawable;)V
+	public fun onLoadStarted (Landroid/graphics/drawable/Drawable;)V
+	public fun onStart ()V
+	public fun onStop ()V
+	public fun setRequest (Lcom/bumptech/glide/request/Request;)V
+}
+
+public class com/bumptech/glide/request/target/BitmapImageViewTarget : com/bumptech/glide/request/target/ImageViewTarget {
+	public fun <init> (Landroid/widget/ImageView;)V
+	public fun <init> (Landroid/widget/ImageView;Z)V
+	protected fun setResource (Landroid/graphics/Bitmap;)V
+	protected synthetic fun setResource (Ljava/lang/Object;)V
+}
+
+public class com/bumptech/glide/request/target/BitmapThumbnailImageViewTarget : com/bumptech/glide/request/target/ThumbnailImageViewTarget {
+	public fun <init> (Landroid/widget/ImageView;)V
+	public fun <init> (Landroid/widget/ImageView;Z)V
+	protected fun getDrawable (Landroid/graphics/Bitmap;)Landroid/graphics/drawable/Drawable;
+	protected synthetic fun getDrawable (Ljava/lang/Object;)Landroid/graphics/drawable/Drawable;
+}
+
+public abstract class com/bumptech/glide/request/target/CustomTarget : com/bumptech/glide/request/target/Target {
+	public fun <init> ()V
+	public fun <init> (II)V
+	public final fun getRequest ()Lcom/bumptech/glide/request/Request;
+	public final fun getSize (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public fun onDestroy ()V
+	public fun onLoadFailed (Landroid/graphics/drawable/Drawable;)V
+	public fun onLoadStarted (Landroid/graphics/drawable/Drawable;)V
+	public fun onStart ()V
+	public fun onStop ()V
+	public final fun removeCallback (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public final fun setRequest (Lcom/bumptech/glide/request/Request;)V
+}
+
+public abstract class com/bumptech/glide/request/target/CustomViewTarget : com/bumptech/glide/request/target/Target {
+	protected final field view Landroid/view/View;
+	public fun <init> (Landroid/view/View;)V
+	public final fun clearOnDetach ()Lcom/bumptech/glide/request/target/CustomViewTarget;
+	public final fun getRequest ()Lcom/bumptech/glide/request/Request;
+	public final fun getSize (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public final fun getView ()Landroid/view/View;
+	public fun onDestroy ()V
+	public final fun onLoadCleared (Landroid/graphics/drawable/Drawable;)V
+	public final fun onLoadStarted (Landroid/graphics/drawable/Drawable;)V
+	protected abstract fun onResourceCleared (Landroid/graphics/drawable/Drawable;)V
+	protected fun onResourceLoading (Landroid/graphics/drawable/Drawable;)V
+	public fun onStart ()V
+	public fun onStop ()V
+	public final fun removeCallback (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public final fun setRequest (Lcom/bumptech/glide/request/Request;)V
+	public fun toString ()Ljava/lang/String;
+	public final fun useTagId (I)Lcom/bumptech/glide/request/target/CustomViewTarget;
+	public final fun waitForLayout ()Lcom/bumptech/glide/request/target/CustomViewTarget;
+}
+
+public class com/bumptech/glide/request/target/DrawableImageViewTarget : com/bumptech/glide/request/target/ImageViewTarget {
+	public fun <init> (Landroid/widget/ImageView;)V
+	public fun <init> (Landroid/widget/ImageView;Z)V
+	protected fun setResource (Landroid/graphics/drawable/Drawable;)V
+	protected synthetic fun setResource (Ljava/lang/Object;)V
+}
+
+public class com/bumptech/glide/request/target/DrawableThumbnailImageViewTarget : com/bumptech/glide/request/target/ThumbnailImageViewTarget {
+	public fun <init> (Landroid/widget/ImageView;)V
+	public fun <init> (Landroid/widget/ImageView;Z)V
+	protected fun getDrawable (Landroid/graphics/drawable/Drawable;)Landroid/graphics/drawable/Drawable;
+	protected synthetic fun getDrawable (Ljava/lang/Object;)Landroid/graphics/drawable/Drawable;
+}
+
+public class com/bumptech/glide/request/target/FixedSizeDrawable : android/graphics/drawable/Drawable {
+	public fun <init> (Landroid/graphics/drawable/Drawable;II)V
+	public fun clearColorFilter ()V
+	public fun draw (Landroid/graphics/Canvas;)V
+	public fun getAlpha ()I
+	public fun getCallback ()Landroid/graphics/drawable/Drawable$Callback;
+	public fun getChangingConfigurations ()I
+	public fun getConstantState ()Landroid/graphics/drawable/Drawable$ConstantState;
+	public fun getCurrent ()Landroid/graphics/drawable/Drawable;
+	public fun getIntrinsicHeight ()I
+	public fun getIntrinsicWidth ()I
+	public fun getMinimumHeight ()I
+	public fun getMinimumWidth ()I
+	public fun getOpacity ()I
+	public fun getPadding (Landroid/graphics/Rect;)Z
+	public fun invalidateSelf ()V
+	public fun mutate ()Landroid/graphics/drawable/Drawable;
+	public fun scheduleSelf (Ljava/lang/Runnable;J)V
+	public fun setAlpha (I)V
+	public fun setBounds (IIII)V
+	public fun setBounds (Landroid/graphics/Rect;)V
+	public fun setChangingConfigurations (I)V
+	public fun setColorFilter (ILandroid/graphics/PorterDuff$Mode;)V
+	public fun setColorFilter (Landroid/graphics/ColorFilter;)V
+	public fun setDither (Z)V
+	public fun setFilterBitmap (Z)V
+	public fun setVisible (ZZ)Z
+	public fun unscheduleSelf (Ljava/lang/Runnable;)V
+}
+
+public abstract class com/bumptech/glide/request/target/ImageViewTarget : com/bumptech/glide/request/target/ViewTarget, com/bumptech/glide/request/transition/Transition$ViewAdapter {
+	public fun <init> (Landroid/widget/ImageView;)V
+	public fun <init> (Landroid/widget/ImageView;Z)V
+	public fun getCurrentDrawable ()Landroid/graphics/drawable/Drawable;
+	public fun onLoadCleared (Landroid/graphics/drawable/Drawable;)V
+	public fun onLoadFailed (Landroid/graphics/drawable/Drawable;)V
+	public fun onLoadStarted (Landroid/graphics/drawable/Drawable;)V
+	public fun onResourceReady (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition;)V
+	public fun onStart ()V
+	public fun onStop ()V
+	public fun setDrawable (Landroid/graphics/drawable/Drawable;)V
+	protected abstract fun setResource (Ljava/lang/Object;)V
+}
+
+public class com/bumptech/glide/request/target/ImageViewTargetFactory {
+	public fun <init> ()V
+	public fun buildTarget (Landroid/widget/ImageView;Ljava/lang/Class;)Lcom/bumptech/glide/request/target/ViewTarget;
+}
+
+public class com/bumptech/glide/request/target/NotificationTarget : com/bumptech/glide/request/target/CustomTarget {
+	public fun <init> (Landroid/content/Context;IIILandroid/widget/RemoteViews;Landroid/app/Notification;ILjava/lang/String;)V
+	public fun <init> (Landroid/content/Context;ILandroid/widget/RemoteViews;Landroid/app/Notification;I)V
+	public fun <init> (Landroid/content/Context;ILandroid/widget/RemoteViews;Landroid/app/Notification;ILjava/lang/String;)V
+	public fun onLoadCleared (Landroid/graphics/drawable/Drawable;)V
+	public fun onResourceReady (Landroid/graphics/Bitmap;Lcom/bumptech/glide/request/transition/Transition;)V
+	public synthetic fun onResourceReady (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition;)V
+}
+
+public final class com/bumptech/glide/request/target/PreloadTarget : com/bumptech/glide/request/target/CustomTarget {
+	public static fun obtain (Lcom/bumptech/glide/RequestManager;II)Lcom/bumptech/glide/request/target/PreloadTarget;
+	public fun onLoadCleared (Landroid/graphics/drawable/Drawable;)V
+	public fun onResourceReady (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition;)V
+}
+
+public abstract class com/bumptech/glide/request/target/SimpleTarget : com/bumptech/glide/request/target/BaseTarget {
+	public fun <init> ()V
+	public fun <init> (II)V
+	public final fun getSize (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public fun removeCallback (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+}
+
+public abstract interface class com/bumptech/glide/request/target/SizeReadyCallback {
+	public abstract fun onSizeReady (II)V
+}
+
+public abstract interface class com/bumptech/glide/request/target/Target : com/bumptech/glide/manager/LifecycleListener {
+	public static final field SIZE_ORIGINAL I
+	public abstract fun getRequest ()Lcom/bumptech/glide/request/Request;
+	public abstract fun getSize (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public abstract fun onLoadCleared (Landroid/graphics/drawable/Drawable;)V
+	public abstract fun onLoadFailed (Landroid/graphics/drawable/Drawable;)V
+	public abstract fun onLoadStarted (Landroid/graphics/drawable/Drawable;)V
+	public abstract fun onResourceReady (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition;)V
+	public abstract fun removeCallback (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public abstract fun setRequest (Lcom/bumptech/glide/request/Request;)V
+}
+
+public abstract class com/bumptech/glide/request/target/ThumbnailImageViewTarget : com/bumptech/glide/request/target/ImageViewTarget {
+	public fun <init> (Landroid/widget/ImageView;)V
+	public fun <init> (Landroid/widget/ImageView;Z)V
+	protected abstract fun getDrawable (Ljava/lang/Object;)Landroid/graphics/drawable/Drawable;
+	protected fun setResource (Ljava/lang/Object;)V
+}
+
+public abstract class com/bumptech/glide/request/target/ViewTarget : com/bumptech/glide/request/target/BaseTarget {
+	protected final field view Landroid/view/View;
+	public fun <init> (Landroid/view/View;)V
+	public fun <init> (Landroid/view/View;Z)V
+	public final fun clearOnDetach ()Lcom/bumptech/glide/request/target/ViewTarget;
+	public fun getRequest ()Lcom/bumptech/glide/request/Request;
+	public fun getSize (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public fun getView ()Landroid/view/View;
+	public fun onLoadCleared (Landroid/graphics/drawable/Drawable;)V
+	public fun onLoadStarted (Landroid/graphics/drawable/Drawable;)V
+	public fun removeCallback (Lcom/bumptech/glide/request/target/SizeReadyCallback;)V
+	public fun setRequest (Lcom/bumptech/glide/request/Request;)V
+	public static fun setTagId (I)V
+	public fun toString ()Ljava/lang/String;
+	public final fun waitForLayout ()Lcom/bumptech/glide/request/target/ViewTarget;
+}
+
+public abstract class com/bumptech/glide/request/transition/BitmapContainerTransitionFactory : com/bumptech/glide/request/transition/TransitionFactory {
+	public fun <init> (Lcom/bumptech/glide/request/transition/TransitionFactory;)V
+	public fun build (Lcom/bumptech/glide/load/DataSource;Z)Lcom/bumptech/glide/request/transition/Transition;
+	protected abstract fun getBitmap (Ljava/lang/Object;)Landroid/graphics/Bitmap;
+}
+
+public class com/bumptech/glide/request/transition/BitmapTransitionFactory : com/bumptech/glide/request/transition/BitmapContainerTransitionFactory {
+	public fun <init> (Lcom/bumptech/glide/request/transition/TransitionFactory;)V
+	protected fun getBitmap (Landroid/graphics/Bitmap;)Landroid/graphics/Bitmap;
+	protected synthetic fun getBitmap (Ljava/lang/Object;)Landroid/graphics/Bitmap;
+}
+
+public class com/bumptech/glide/request/transition/DrawableCrossFadeFactory : com/bumptech/glide/request/transition/TransitionFactory {
+	protected fun <init> (IZ)V
+	public fun build (Lcom/bumptech/glide/load/DataSource;Z)Lcom/bumptech/glide/request/transition/Transition;
+}
+
+public class com/bumptech/glide/request/transition/DrawableCrossFadeFactory$Builder {
+	public fun <init> ()V
+	public fun <init> (I)V
+	public fun build ()Lcom/bumptech/glide/request/transition/DrawableCrossFadeFactory;
+	public fun setCrossFadeEnabled (Z)Lcom/bumptech/glide/request/transition/DrawableCrossFadeFactory$Builder;
+}
+
+public class com/bumptech/glide/request/transition/DrawableCrossFadeTransition : com/bumptech/glide/request/transition/Transition {
+	public fun <init> (IZ)V
+	public fun transition (Landroid/graphics/drawable/Drawable;Lcom/bumptech/glide/request/transition/Transition$ViewAdapter;)Z
+	public synthetic fun transition (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition$ViewAdapter;)Z
+}
+
+public class com/bumptech/glide/request/transition/NoTransition : com/bumptech/glide/request/transition/Transition {
+	public fun <init> ()V
+	public static fun get ()Lcom/bumptech/glide/request/transition/Transition;
+	public static fun getFactory ()Lcom/bumptech/glide/request/transition/TransitionFactory;
+	public fun transition (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition$ViewAdapter;)Z
+}
+
+public class com/bumptech/glide/request/transition/NoTransition$NoAnimationFactory : com/bumptech/glide/request/transition/TransitionFactory {
+	public fun <init> ()V
+	public fun build (Lcom/bumptech/glide/load/DataSource;Z)Lcom/bumptech/glide/request/transition/Transition;
+}
+
+public abstract interface class com/bumptech/glide/request/transition/Transition {
+	public abstract fun transition (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition$ViewAdapter;)Z
+}
+
+public abstract interface class com/bumptech/glide/request/transition/Transition$ViewAdapter {
+	public abstract fun getCurrentDrawable ()Landroid/graphics/drawable/Drawable;
+	public abstract fun getView ()Landroid/view/View;
+	public abstract fun setDrawable (Landroid/graphics/drawable/Drawable;)V
+}
+
+public abstract interface class com/bumptech/glide/request/transition/TransitionFactory {
+	public abstract fun build (Lcom/bumptech/glide/load/DataSource;Z)Lcom/bumptech/glide/request/transition/Transition;
+}
+
+public class com/bumptech/glide/request/transition/ViewAnimationFactory : com/bumptech/glide/request/transition/TransitionFactory {
+	public fun <init> (I)V
+	public fun <init> (Landroid/view/animation/Animation;)V
+	public fun build (Lcom/bumptech/glide/load/DataSource;Z)Lcom/bumptech/glide/request/transition/Transition;
+}
+
+public class com/bumptech/glide/request/transition/ViewPropertyAnimationFactory : com/bumptech/glide/request/transition/TransitionFactory {
+	public fun <init> (Lcom/bumptech/glide/request/transition/ViewPropertyTransition$Animator;)V
+	public fun build (Lcom/bumptech/glide/load/DataSource;Z)Lcom/bumptech/glide/request/transition/Transition;
+}
+
+public class com/bumptech/glide/request/transition/ViewPropertyTransition : com/bumptech/glide/request/transition/Transition {
+	public fun <init> (Lcom/bumptech/glide/request/transition/ViewPropertyTransition$Animator;)V
+	public fun transition (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition$ViewAdapter;)Z
+}
+
+public abstract interface class com/bumptech/glide/request/transition/ViewPropertyTransition$Animator {
+	public abstract fun animate (Landroid/view/View;)V
+}
+
+public class com/bumptech/glide/request/transition/ViewTransition : com/bumptech/glide/request/transition/Transition {
+	public fun transition (Ljava/lang/Object;Lcom/bumptech/glide/request/transition/Transition$ViewAdapter;)Z
+}
+
+public final class com/bumptech/glide/signature/AndroidResourceSignature : com/bumptech/glide/load/Key {
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public static fun obtain (Landroid/content/Context;)Lcom/bumptech/glide/load/Key;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/signature/ApplicationVersionSignature {
+	public static fun obtain (Landroid/content/Context;)Lcom/bumptech/glide/load/Key;
+}
+
+public final class com/bumptech/glide/signature/EmptySignature : com/bumptech/glide/load/Key {
+	public static fun obtain ()Lcom/bumptech/glide/signature/EmptySignature;
+	public fun toString ()Ljava/lang/String;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public class com/bumptech/glide/signature/MediaStoreSignature : com/bumptech/glide/load/Key {
+	public fun <init> (Ljava/lang/String;JI)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/signature/ObjectKey : com/bumptech/glide/load/Key {
+	public fun <init> (Ljava/lang/Object;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun updateDiskCacheKey (Ljava/security/MessageDigest;)V
+}
+
+public final class com/bumptech/glide/util/ByteBufferUtil {
+	public static fun fromFile (Ljava/io/File;)Ljava/nio/ByteBuffer;
+	public static fun fromStream (Ljava/io/InputStream;)Ljava/nio/ByteBuffer;
+	public static fun rewind (Ljava/nio/ByteBuffer;)Ljava/nio/ByteBuffer;
+	public static fun toBytes (Ljava/nio/ByteBuffer;)[B
+	public static fun toFile (Ljava/nio/ByteBuffer;Ljava/io/File;)V
+	public static fun toStream (Ljava/nio/ByteBuffer;)Ljava/io/InputStream;
+	public static fun toStream (Ljava/nio/ByteBuffer;Ljava/io/OutputStream;)V
+}
+
+public final class com/bumptech/glide/util/CachedHashCodeArrayMap : androidx/collection/ArrayMap {
+	public fun <init> ()V
+	public fun clear ()V
+	public fun hashCode ()I
+	public fun put (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public fun putAll (Landroidx/collection/SimpleArrayMap;)V
+	public fun removeAt (I)Ljava/lang/Object;
+	public fun setValueAt (ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/bumptech/glide/util/ContentLengthInputStream : java/io/FilterInputStream {
+	public fun available ()I
+	public static fun obtain (Ljava/io/InputStream;J)Ljava/io/InputStream;
+	public static fun obtain (Ljava/io/InputStream;Ljava/lang/String;)Ljava/io/InputStream;
+	public fun read ()I
+	public fun read ([B)I
+	public fun read ([BII)I
+}
+
+public class com/bumptech/glide/util/ExceptionCatchingInputStream : java/io/InputStream {
+	public fun available ()I
+	public fun close ()V
+	public fun getException ()Ljava/io/IOException;
+	public fun mark (I)V
+	public fun markSupported ()Z
+	public static fun obtain (Ljava/io/InputStream;)Lcom/bumptech/glide/util/ExceptionCatchingInputStream;
+	public fun read ()I
+	public fun read ([B)I
+	public fun read ([BII)I
+	public fun release ()V
+	public fun reset ()V
+	public fun skip (J)J
+}
+
+public final class com/bumptech/glide/util/ExceptionPassthroughInputStream : java/io/InputStream {
+	public fun available ()I
+	public fun close ()V
+	public fun getException ()Ljava/io/IOException;
+	public fun mark (I)V
+	public fun markSupported ()Z
+	public static fun obtain (Ljava/io/InputStream;)Lcom/bumptech/glide/util/ExceptionPassthroughInputStream;
+	public fun read ()I
+	public fun read ([B)I
+	public fun read ([BII)I
+	public fun release ()V
+	public fun reset ()V
+	public fun skip (J)J
+}
+
+public final class com/bumptech/glide/util/Executors {
+	public static fun directExecutor ()Ljava/util/concurrent/Executor;
+	public static fun mainThreadExecutor ()Ljava/util/concurrent/Executor;
+	public static fun shutdownAndAwaitTermination (Ljava/util/concurrent/ExecutorService;)V
+}
+
+public class com/bumptech/glide/util/FixedPreloadSizeProvider : com/bumptech/glide/ListPreloader$PreloadSizeProvider {
+	public fun <init> (II)V
+	public fun getPreloadSize (Ljava/lang/Object;II)[I
+}
+
+public final class com/bumptech/glide/util/GlideSuppliers {
+	public static fun memorize (Lcom/bumptech/glide/util/GlideSuppliers$GlideSupplier;)Lcom/bumptech/glide/util/GlideSuppliers$GlideSupplier;
+}
+
+public abstract interface class com/bumptech/glide/util/GlideSuppliers$GlideSupplier {
+	public abstract fun get ()Ljava/lang/Object;
+}
+
+public final class com/bumptech/glide/util/LogTime {
+	public static fun getElapsedMillis (J)D
+	public static fun getLogTime ()J
+}
+
+public class com/bumptech/glide/util/LruCache {
+	public fun <init> (J)V
+	public fun clearMemory ()V
+	public fun contains (Ljava/lang/Object;)Z
+	public fun get (Ljava/lang/Object;)Ljava/lang/Object;
+	protected fun getCount ()I
+	public fun getCurrentSize ()J
+	public fun getMaxSize ()J
+	protected fun getSize (Ljava/lang/Object;)I
+	protected fun onItemEvicted (Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun put (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+	public fun remove (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun setSizeMultiplier (F)V
+	protected fun trimToSize (J)V
+}
+
+public class com/bumptech/glide/util/MarkEnforcingInputStream : java/io/FilterInputStream {
+	public fun <init> (Ljava/io/InputStream;)V
+	public fun available ()I
+	public fun mark (I)V
+	public fun read ()I
+	public fun read ([BII)I
+	public fun reset ()V
+	public fun skip (J)J
+}
+
+public class com/bumptech/glide/util/MultiClassKey {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Class;Ljava/lang/Class;)V
+	public fun <init> (Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun set (Ljava/lang/Class;Ljava/lang/Class;)V
+	public fun set (Ljava/lang/Class;Ljava/lang/Class;Ljava/lang/Class;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/bumptech/glide/util/Preconditions {
+	public static fun checkArgument (ZLjava/lang/String;)V
+	public static fun checkNotEmpty (Ljava/lang/String;)Ljava/lang/String;
+	public static fun checkNotEmpty (Ljava/util/Collection;)Ljava/util/Collection;
+	public static fun checkNotNull (Ljava/lang/Object;)Ljava/lang/Object;
+	public static fun checkNotNull (Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;
+}
+
+public abstract interface annotation class com/bumptech/glide/util/Synthetic : java/lang/annotation/Annotation {
+}
+
+public final class com/bumptech/glide/util/Util {
+	public static fun assertBackgroundThread ()V
+	public static fun assertMainThread ()V
+	public static fun bothModelsNullEquivalentOrEquals (Ljava/lang/Object;Ljava/lang/Object;)Z
+	public static fun bothNullOrEqual (Ljava/lang/Object;Ljava/lang/Object;)Z
+	public static fun createQueue (I)Ljava/util/Queue;
+	public static fun getBitmapByteSize (IILandroid/graphics/Bitmap$Config;)I
+	public static fun getBitmapByteSize (Landroid/graphics/Bitmap;)I
+	public static fun getBytesPerPixel (Landroid/graphics/Bitmap$Config;)I
+	public static fun getSize (Landroid/graphics/Bitmap;)I
+	public static fun getSnapshot (Ljava/util/Collection;)Ljava/util/List;
+	public static fun hashCode (F)I
+	public static fun hashCode (FI)I
+	public static fun hashCode (I)I
+	public static fun hashCode (II)I
+	public static fun hashCode (Ljava/lang/Object;I)I
+	public static fun hashCode (Z)I
+	public static fun hashCode (ZI)I
+	public static fun isOnBackgroundThread ()Z
+	public static fun isOnMainThread ()Z
+	public static fun isValidDimension (I)Z
+	public static fun isValidDimensions (II)Z
+	public static fun postOnUiThread (Ljava/lang/Runnable;)V
+	public static fun removeCallbacksOnUiThread (Ljava/lang/Runnable;)V
+	public static fun sha256BytesToHex ([B)Ljava/lang/String;
+}
+
+public class com/bumptech/glide/util/ViewPreloadSizeProvider : com/bumptech/glide/ListPreloader$PreloadSizeProvider, com/bumptech/glide/request/target/SizeReadyCallback {
+	public fun <init> ()V
+	public fun <init> (Landroid/view/View;)V
+	public fun getPreloadSize (Ljava/lang/Object;II)[I
+	public fun onSizeReady (II)V
+	public fun setView (Landroid/view/View;)V
+}
+
+public final class com/bumptech/glide/util/pool/FactoryPools {
+	public static fun simple (ILcom/bumptech/glide/util/pool/FactoryPools$Factory;)Landroidx/core/util/Pools$Pool;
+	public static fun threadSafe (ILcom/bumptech/glide/util/pool/FactoryPools$Factory;)Landroidx/core/util/Pools$Pool;
+	public static fun threadSafe (ILcom/bumptech/glide/util/pool/FactoryPools$Factory;Lcom/bumptech/glide/util/pool/FactoryPools$Resetter;)Landroidx/core/util/Pools$Pool;
+	public static fun threadSafeList ()Landroidx/core/util/Pools$Pool;
+	public static fun threadSafeList (I)Landroidx/core/util/Pools$Pool;
+}
+
+public abstract interface class com/bumptech/glide/util/pool/FactoryPools$Factory {
+	public abstract fun create ()Ljava/lang/Object;
+}
+
+public abstract interface class com/bumptech/glide/util/pool/FactoryPools$Poolable {
+	public abstract fun getVerifier ()Lcom/bumptech/glide/util/pool/StateVerifier;
+}
+
+public abstract interface class com/bumptech/glide/util/pool/FactoryPools$Resetter {
+	public abstract fun reset (Ljava/lang/Object;)V
+}
+
+public final class com/bumptech/glide/util/pool/GlideTrace {
+	public static fun beginSection (Ljava/lang/String;)V
+	public static fun beginSectionAsync (Ljava/lang/String;)I
+	public static fun beginSectionFormat (Ljava/lang/String;Ljava/lang/Object;)V
+	public static fun beginSectionFormat (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+	public static fun beginSectionFormat (Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V
+	public static fun endSection ()V
+	public static fun endSectionAsync (Ljava/lang/String;I)V
+}
+
+public abstract class com/bumptech/glide/util/pool/StateVerifier {
+	public static fun newInstance ()Lcom/bumptech/glide/util/pool/StateVerifier;
+	public abstract fun throwIfRecycled ()V
+}
+
