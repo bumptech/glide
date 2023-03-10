@@ -1,6 +1,5 @@
 package com.bumptech.glide.request.transition;
 
-import static com.bumptech.glide.request.transition.Transition.ViewAdapter;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -12,6 +11,7 @@ import static org.mockito.Mockito.when;
 import android.view.View;
 import android.widget.ImageView;
 import androidx.test.core.app.ApplicationProvider;
+import com.bumptech.glide.request.transition.Transition.ViewAdapter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
