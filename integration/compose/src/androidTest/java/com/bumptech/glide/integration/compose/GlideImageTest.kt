@@ -28,6 +28,12 @@ import com.bumptech.glide.integration.compose.test.expectDisplayedDrawable
 import com.bumptech.glide.integration.compose.test.expectDisplayedDrawableSize
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.Size
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.Rule
 import org.junit.Test
@@ -280,5 +286,41 @@ class GlideImageTest {
       .assert(
         expectDisplayedDrawableSize(Size(expectedSize.dpToPixels(), expectedSize.dpToPixels()))
       )
+  }
+
+  @Test
+  fun glideImage_withSuccessfulResource_callsOnResourceReadyOnce() {
+    val onResourceReadyCounter = AtomicInteger()
+    val requestListener = object : RequestListener<Drawable> {
+      override fun onLoadFailed(
+        e: GlideException?,
+        model: Any?,
+        target: Target<Drawable>?,
+        isFirstResource: Boolean,
+      ): Boolean {
+        throw UnsupportedOperationException()
+      }
+
+      override fun onResourceReady(
+        resource: Drawable?,
+        model: Any?,
+        target: Target<Drawable>?,
+        dataSource: DataSource?,
+        isFirstResource: Boolean,
+      ): Boolean {
+        onResourceReadyCounter.incrementAndGet()
+        return false
+      }
+    }
+
+    glideComposeRule.setContent {
+      GlideImage(model = android.R.drawable.star_big_on, contentDescription = "") {
+        it.listener(requestListener)
+      }
+    }
+
+    glideComposeRule.waitForIdle()
+
+    assertThat(onResourceReadyCounter.get()).isEqualTo(1)
   }
 }

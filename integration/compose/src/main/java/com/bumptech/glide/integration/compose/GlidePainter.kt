@@ -3,6 +3,7 @@ package com.bumptech.glide.integration.compose
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.Stable
@@ -29,6 +30,7 @@ import com.bumptech.glide.integration.ktx.flowResolvable
 import com.google.accompanist.drawablepainter.DrawablePainter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -52,6 +54,7 @@ constructor(
   private var delegate: Painter? by mutableStateOf(null)
   private val scope =
     scope + SupervisorJob(parent = scope.coroutineContext.job) + Dispatchers.Main.immediate
+  private var currentJob: Job? = null
 
   override val intrinsicSize: Size
     get() = delegate?.intrinsicSize ?: Size.Unspecified
@@ -66,25 +69,27 @@ constructor(
 
   override fun onForgotten() {
     (delegate as? RememberObserver)?.onForgotten()
+    currentJob?.cancel()
+    currentJob = null
   }
 
   override fun onRemembered() {
     (delegate as? RememberObserver)?.onRemembered()
-    launchRequest()
+    if (currentJob == null) {
+      currentJob = launchRequest()
+    }
   }
 
   @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class)
-  private fun launchRequest() {
-    this.scope.launch {
-      requestBuilder.flowResolvable(size).collect {
-        updateDelegate(
-          when (it) {
-            is Resource -> it.resource
-            is Placeholder -> it.placeholder
-          }
-        )
-        status = it.status
-      }
+  private fun launchRequest() = this.scope.launch {
+    requestBuilder.flowResolvable(size).collect {
+      updateDelegate(
+        when (it) {
+          is Resource -> it.resource
+          is Placeholder -> it.placeholder
+        }
+      )
+      status = it.status
     }
   }
 
