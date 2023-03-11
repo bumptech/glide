@@ -1,6 +1,5 @@
 package com.bumptech.glide.request.transition;
 
-import static com.bumptech.glide.request.transition.Transition.ViewAdapter;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -11,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
+import com.bumptech.glide.request.transition.Transition.ViewAdapter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
