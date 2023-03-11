@@ -20,7 +20,6 @@ dependencies {
     androidTestImplementation "androidx.test:core:$ANDROID_X_TEST_CORE_VERSION"
     androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$ANDROID_X_TEST_ESPRESSO_VERSION"
     androidTestImplementation "androidx.test.espresso:espresso-core:$ANDROID_X_TEST_ESPRESSO_VERSION"
-    androidTestImplementation "androidx.fragment:fragment-testing:$ANDROID_X_FRAGMENT_TESTING_VERSION"
     androidTestImplementation "com.google.truth:truth:$TRUTH_VERSION"
     androidTestImplementation "junit:junit:$JUNIT_VERSION"
     androidTestImplementation "androidx.exifinterface:exifinterface:$ANDROID_X_EXIF_INTERFACE_VERSION"

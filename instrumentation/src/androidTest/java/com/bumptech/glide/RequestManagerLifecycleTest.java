@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.testing.FragmentScenario;
 import androidx.lifecycle.Lifecycle.Event;
 import androidx.lifecycle.Lifecycle.State;
 import androidx.lifecycle.LifecycleObserver;
@@ -177,11 +176,12 @@ public class RequestManagerLifecycleTest {
 
   @Test
   public void get_twice_withSameFragment_returnsSameRequestManager() {
-    try (FragmentScenario<EmptyContainerFragment> fragmentScenario =
-        FragmentScenario.launchInContainer(EmptyContainerFragment.class)) {
-      fragmentScenario.onFragment(
-          fragment -> assertThat(Glide.with(fragment)).isEqualTo(Glide.with(fragment)));
-    }
+    withActivityFragmentAndChildFragment(
+        activity -> {
+          Fragment fragment = getFragment(activity);
+          assertThat(Glide.with(fragment)).isEqualTo(Glide.with(fragment));
+        }
+    );
   }
 
   @Test
