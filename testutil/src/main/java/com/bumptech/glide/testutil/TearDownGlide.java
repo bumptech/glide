@@ -40,12 +40,5 @@ public final class TearDownGlide implements TestRule {
           }
         });
     Glide.tearDown();
-    concurrencyHelper.loadOnOtherThread(
-        new Runnable() {
-          @Override
-          public void run() {
-            Glide.get(ApplicationProvider.getApplicationContext()).clearDiskCache();
-          }
-        });
   }
 }
