@@ -1,6 +1,5 @@
 package com.bumptech.glide.request.target;
 
-import static android.view.ViewGroup.LayoutParams;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -21,6 +20,7 @@ import android.view.Display;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -271,7 +271,8 @@ public class CustomViewTargetTest {
       target.getSize(cbs[i]);
     }
 
-    int width = 100, height = 111;
+    int width = 100;
+    int height = 111;
     parent.getLayoutParams().width = width;
     parent.getLayoutParams().height = height;
     activity.visible();
