@@ -582,6 +582,14 @@ public final class GlideBuilder {
         experiments);
   }
 
+  static final class DisableHardwareBitmapsOnO implements Experiment {
+    final boolean disableHardwareBitmapsOnO;
+
+    DisableHardwareBitmapsOnO(boolean disableHardwareBitmapsOnO) {
+      this.disableHardwareBitmapsOnO = disableHardwareBitmapsOnO;
+    }
+  }
+
   static final class ManualOverrideHardwareBitmapMaxFdCount implements Experiment {
 
     final int fdCount;

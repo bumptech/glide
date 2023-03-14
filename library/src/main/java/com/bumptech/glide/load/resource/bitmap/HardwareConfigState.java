@@ -83,6 +83,8 @@ public final class HardwareConfigState {
   private static volatile HardwareConfigState instance;
   private static volatile int manualOverrideMaxFdCount = NO_MAX_FD_COUNT;
 
+  private static boolean disableHardwareBitmapsOnO;
+
   private final boolean isHardwareConfigAllowedByDeviceModel;
   private final int sdkBasedMaxFdCount;
   private final int minHardwareDimension;
@@ -124,11 +126,6 @@ public final class HardwareConfigState {
     }
   }
 
-  public boolean areHardwareBitmapsBlocked() {
-    Util.assertMainThread();
-    return !isHardwareConfigAllowedByAppState.get();
-  }
-
   public void blockHardwareBitmaps() {
     Util.assertMainThread();
     isHardwareConfigAllowedByAppState.set(false);
@@ -137,6 +134,11 @@ public final class HardwareConfigState {
   public void unblockHardwareBitmaps() {
     Util.assertMainThread();
     isHardwareConfigAllowedByAppState.set(true);
+  }
+
+  private boolean areHardwareBitmapsAllowedBySdk() {
+    return HARDWARE_BITMAPS_SUPPORTED
+        && (!disableHardwareBitmapsOnO || Build.VERSION.SDK_INT >= Build.VERSION_CODES.P);
   }
 
   public boolean isHardwareConfigAllowed(
@@ -156,7 +158,7 @@ public final class HardwareConfigState {
       }
       return false;
     }
-    if (!HARDWARE_BITMAPS_SUPPORTED) {
+    if (!areHardwareBitmapsAllowedBySdk()) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Hardware config disallowed by sdk");
       }
