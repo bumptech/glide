@@ -77,11 +77,18 @@ public final class HardwareConfigState {
   // 20k.
   private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P = 20000;
 
-  /** This constant will be removed in a future version without deprecation, avoid using it. */
-  public static final int NO_MAX_FD_COUNT = -1;
+  /**
+   * Some P devices seem to have a more O like FD count, so we'll manually reduce the number of FDs
+   * we use for hardware bitmaps. See b/139097735.
+   */
+  private static final int REDUCED_MAX_FDS_FOR_HARDWARE_CONFIGS_P = 500;
+
+  /**
+   * @deprecated This constant is unused and will be removed in a future version, avoid using it.
+   */
+  @Deprecated public static final int NO_MAX_FD_COUNT = -1;
 
   private static volatile HardwareConfigState instance;
-  private static volatile int manualOverrideMaxFdCount = NO_MAX_FD_COUNT;
 
   private static boolean disableHardwareBitmapsOnO;
 
@@ -290,10 +297,38 @@ public final class HardwareConfigState {
     return false;
   }
 
+  private static boolean isHardwareBitmapCountReducedOnApi28ByB139097735() {
+    if (Build.VERSION.SDK_INT != Build.VERSION_CODES.P) {
+      return false;
+    }
+    for (String prefixOrModelName :
+        Arrays.asList(
+            "GM1900",
+            "GM1901",
+            "GM1903",
+            "GM1911",
+            "GM1915",
+            "ONEPLUS A3000",
+            "ONEPLUS A3010",
+            "ONEPLUS A5010",
+            "ONEPLUS A5000",
+            "ONEPLUS A3003",
+            "ONEPLUS A6000",
+            "ONEPLUS A6003",
+            "ONEPLUS A6010",
+            "ONEPLUS A6013")) {
+      if (Build.MODEL.startsWith(prefixOrModelName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private int getMaxFdCount() {
-    return manualOverrideMaxFdCount != NO_MAX_FD_COUNT
-        ? manualOverrideMaxFdCount
-        : sdkBasedMaxFdCount;
+    if (isHardwareBitmapCountReducedOnApi28ByB139097735()) {
+      return REDUCED_MAX_FDS_FOR_HARDWARE_CONFIGS_P;
+    }
+    return sdkBasedMaxFdCount;
   }
 
   private synchronized boolean isFdSizeBelowHardwareLimit() {
