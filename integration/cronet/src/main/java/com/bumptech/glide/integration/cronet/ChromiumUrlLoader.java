@@ -3,6 +3,7 @@ package com.bumptech.glide.integration.cronet;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
@@ -12,7 +13,10 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 /**
- * An {@link com.bumptech.glide.load.model.ModelLoader} for loading urls using cronet.
+ * A {@link com.bumptech.glide.load.model.ModelLoader} for loading urls using cronet.
+ *
+ * <p>You can optionally pass an executor to the constructor for handling cronet callbacks in {@link
+ * ChromiumRequestSerializer}. If the executor is not provided, it will be created for you.
  *
  * @param <T> The type of data this loader will load.
  */
@@ -29,7 +33,17 @@ public final class ChromiumUrlLoader<T> implements ModelLoader<GlideUrl, T> {
       CronetRequestFactory requestFactory,
       @Nullable DataLogger dataLogger) {
     this.parser = parser;
-    requestSerializer = new ChromiumRequestSerializer(requestFactory, dataLogger);
+    requestSerializer =
+        new ChromiumRequestSerializer(requestFactory, dataLogger, /* executor= */ null);
+  }
+
+  ChromiumUrlLoader(
+      ByteBufferParser<T> parser,
+      CronetRequestFactory requestFactory,
+      @Nullable DataLogger dataLogger,
+      @Nullable GlideExecutor executor) {
+    this.parser = parser;
+    requestSerializer = new ChromiumRequestSerializer(requestFactory, dataLogger, executor);
   }
 
   @Override
@@ -49,15 +63,29 @@ public final class ChromiumUrlLoader<T> implements ModelLoader<GlideUrl, T> {
 
     private CronetRequestFactory requestFactory;
     @Nullable private final DataLogger dataLogger;
+    @Nullable private final GlideExecutor executor;
 
     public StreamFactory(CronetRequestFactory requestFactory, @Nullable DataLogger dataLogger) {
       this.requestFactory = requestFactory;
       this.dataLogger = dataLogger;
+      this.executor = null;
+    }
+
+    /**
+     * @param executor See {@link ChromiumUrlLoader} for details.
+     */
+    public StreamFactory(
+        CronetRequestFactory requestFactory,
+        @Nullable DataLogger dataLogger,
+        @Nullable GlideExecutor executor) {
+      this.requestFactory = requestFactory;
+      this.dataLogger = dataLogger;
+      this.executor = executor;
     }
 
     @Override
     public ModelLoader<GlideUrl, InputStream> build(MultiModelLoaderFactory multiFactory) {
-      return new ChromiumUrlLoader<>(this /*parser*/, requestFactory, dataLogger);
+      return new ChromiumUrlLoader<>(/* parser= */ this, requestFactory, dataLogger, executor);
     }
 
     @Override
@@ -80,15 +108,29 @@ public final class ChromiumUrlLoader<T> implements ModelLoader<GlideUrl, T> {
 
     private CronetRequestFactory requestFactory;
     @Nullable private final DataLogger dataLogger;
+    @Nullable private final GlideExecutor executor;
 
     public ByteBufferFactory(CronetRequestFactory requestFactory, @Nullable DataLogger dataLogger) {
       this.requestFactory = requestFactory;
       this.dataLogger = dataLogger;
+      this.executor = null;
+    }
+
+    /**
+     * @param executor See {@link ChromiumUrlLoader} for details.
+     */
+    public ByteBufferFactory(
+        CronetRequestFactory requestFactory,
+        @Nullable DataLogger dataLogger,
+        @Nullable GlideExecutor executor) {
+      this.requestFactory = requestFactory;
+      this.dataLogger = dataLogger;
+      this.executor = executor;
     }
 
     @Override
     public ModelLoader<GlideUrl, ByteBuffer> build(MultiModelLoaderFactory multiFactory) {
-      return new ChromiumUrlLoader<>(this /*parser*/, requestFactory, dataLogger);
+      return new ChromiumUrlLoader<>(/* parser= */ this, requestFactory, dataLogger, executor);
     }
 
     @Override

@@ -87,7 +87,9 @@ public class ChromiumUrlFetcherTest {
     glideUrl = new GlideUrl("http://www.google.com");
 
     urlRequestListenerCaptor = ArgumentCaptor.forClass(UrlRequest.Callback.class);
-    serializer = new ChromiumRequestSerializer(cronetRequestFactory, null /*dataLogger*/);
+    serializer =
+        new ChromiumRequestSerializer(
+            cronetRequestFactory, /* dataLogger= */ null, /* executor= */ null);
     fetcher = new ChromiumUrlFetcher<>(serializer, parser, glideUrl);
     builder =
         cronetEngine.newUrlRequestBuilder(
