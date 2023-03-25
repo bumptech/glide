@@ -42,6 +42,15 @@ public final class FactoryPools {
   }
 
   /**
+   * Identical to {@link #threadSafe(int, Factory, Resetter)} except no action is taken when an
+   * instance is returned to the pool.
+   */
+  @NonNull
+  public static <T extends Poolable> Pool<T> threadSafe(int size, @NonNull Factory<T> factory) {
+    return build(new SynchronizedPool<T>(size), factory);
+  }
+
+  /**
    * Returns a new thread safe {@link Pool} that never returns {@code null} from {@link
    * Pool#acquire()} and that contains objects of the type created by the given {@link Factory} with
    * the given maximum size.
@@ -49,11 +58,15 @@ public final class FactoryPools {
    * <p>If the pool is empty when {@link Pool#acquire()} is called, the given {@link Factory} will
    * be used to create a new instance.
    *
+   * <p>Each time an instance is returned to the pool {@code resetter} will be called with the given
+   * instance.
+   *
    * @param <T> The type of object the pool will contains.
    */
   @NonNull
-  public static <T extends Poolable> Pool<T> threadSafe(int size, @NonNull Factory<T> factory) {
-    return build(new SynchronizedPool<T>(size), factory);
+  public static <T extends Poolable> Pool<T> threadSafe(
+      int size, @NonNull Factory<T> factory, @NonNull Resetter<T> resetter) {
+    return build(new SynchronizedPool<T>(size), factory, resetter);
   }
 
   /**
