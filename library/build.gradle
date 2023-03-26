@@ -44,6 +44,11 @@ if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
             // Doesn't apply when we can't use lambadas.
             "UnnecessaryAnonymousClass",
             // TODO(judds): Fix these and re-enable this check
+            "BadImport",
+            "UnescapedEntity",
+            "MissingSummary",
+            "InlineMeSuggester",
+            "CanIgnoreReturnValueSuggester",
             "TypeNameShadowing",
             "UndefinedEquals",
             "UnnecessaryParentheses",

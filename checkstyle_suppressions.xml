@@ -10,6 +10,8 @@
     <suppress files=".*[/\\]library[/\\]test[/\\]src[/\\]test[/\\].*" checks="Javadoc.*"/>
     <suppress files=".*[/\\]annotation[/\\]compiler[/\\]test[/\\]src[/\\]test[/\\]resources[/\\].*" checks=".*"/>
     <suppress files=".*[/\\]integration[/\\]concurrent[/\\]src[/\\]test[/\\].*" checks=".*"/>
+    <suppress files=".*[/\\]integration[/\\]sqljournaldiskcache[/\\]src[/\\]test[/\\].*" checks="Javadoc.*"/>
+    <suppress files=".*[/\\]integration[/\\]sqljournaldiskcache[/\\]src[/\\]main[/\\].*" checks="InterfaceIsTypeCheck.*"/>
     <suppress files=".*[/\\]testutil[/\\]src[/\\].*" checks="Javadoc.*"/>
     <suppress files=".*[/\\]benchmark[/\\]src[/\\].*" checks="Javadoc.*"/>
     <suppress files=".*[/\\]instrumentation[/\\]src[/\\].*" checks="Javadoc.*"/>
