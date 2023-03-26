@@ -132,9 +132,19 @@ When in doubt, send us a single pull request and we will work with you.
 
 ### Documentation
 
-#### Obtaining and uploading changes
+#### Via GitHub
+To make simple contributions to existing pages on this documentation site, use GitHub's UI for editing markdown files. To do so:
 
-To make contributions to this documentation site:
+1. Sign in to GitHub
+2. Open the page you want to edit on https://bumptech.github.io/glide
+3. Click ‘Edit this page’ in the page header to open the md file for the page in GitHub's UI
+4. Click the pencil icon to open GitHub’s editor. This will only be clickable if you've signed in to GitHub
+5. Make your edits
+6. Scroll to the bottom of GitHub's UI, and click the buttons to create a pull request.
+
+#### Via the Git Branch
+
+For more involved changes where you want to add or remove a page, change the order in which their displayed, add a new section or perform any other more advanced task, you'll need to clone the git branch where the documentation site is stored. To do so:
 
 1. [Fork][Github Fork] the [Glide repo][1] on GitHub.
 2. [Clone][Github Clone] the [Glide repo][1] from GitHub on to your computer:
@@ -167,11 +177,11 @@ To make contributions to this documentation site:
 5. Open your fork of Glide on GitHub (`https://github.com/<your_username>/glide`)
 6. Open a [pull request][2] from your fork to the main Glide repo on GitHub with the ``gh-pages`` branch.
 
-#### Modifying existing pages
+##### Modifying existing pages
 
 The pages you see on the docs page are located in the ``_pages`` folder and can be modified in place.
 
-#### Adding a new page
+##### Adding a new page
 New pages can be added using ``./bin/jekyll-page <page_name> <category>``. ``<page_name>`` is the title of the page, ``<category>`` matches one of the sections in the left hand nav. Typically ``<category>`` should be ``doc`` so that the page is placed under the ``Documentation`` section.
 
 When adding a new page, make sure you add ``disqus: 1`` and ``order: <n>`` to the header. The number you give to order is used to order the pages within the subsection, with 0 being the first page. To just add the page at the end (a reasonable default), find the order value for the last page in the section and use that value + 1 for your new page.
@@ -188,7 +198,7 @@ disqus: 1
 ---
 ```
 
-#### Viewing your local changes
+##### Viewing your local changes
 
 To view your local changes, you will need to install jekyll and the gems used by the docs page:
 
