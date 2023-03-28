@@ -445,7 +445,7 @@ public final class GlideExecutor implements ExecutorService {
     private int corePoolSize;
     private int maximumPoolSize;
 
-    @NonNull private final ThreadFactory threadFactory = new DefaultPriorityThreadFactory();
+    @NonNull private ThreadFactory threadFactory = new DefaultPriorityThreadFactory();
 
     @NonNull
     private UncaughtThrowableStrategy uncaughtThrowableStrategy = UncaughtThrowableStrategy.DEFAULT;
@@ -473,6 +473,22 @@ public final class GlideExecutor implements ExecutorService {
     public Builder setThreadCount(@IntRange(from = 1) int threadCount) {
       corePoolSize = threadCount;
       maximumPoolSize = threadCount;
+      return this;
+    }
+
+    /**
+     * Sets the {@link ThreadFactory} responsible for creating threads and setting their priority.
+     *
+     * <p>Usage of this method may override other options on this builder. No guarantees are
+     * provided with regards to the behavior of this method or how it interacts with other methods
+     * on the builder. Use at your own risk.
+     *
+     * @deprecated This is an experimental method that may be removed without warning in a future
+     *     version.
+     */
+    @Deprecated
+    public Builder setThreadFactory(@NonNull ThreadFactory threadFactory) {
+      this.threadFactory = threadFactory;
       return this;
     }
 
