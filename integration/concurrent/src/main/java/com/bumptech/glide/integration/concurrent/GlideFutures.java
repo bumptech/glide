@@ -24,6 +24,28 @@ import java.util.concurrent.Executor;
 public final class GlideFutures {
 
   /**
+   * Preloads the resource for {@code builder} and returns a {@link ListenableFuture} that can be
+   * used to monitor status.
+   *
+   * <p>Shorthand for simply calling {@link #submitAndExecute(RequestManager, RequestBuilder,
+   * ResourceConsumer, Executor)} with an empty {@code action}.
+   */
+  // Wildcard resource types can't be directly instantiated, we don't need to care about the type
+  // here.
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static ListenableFuture<Void> preload(
+      final RequestManager requestManager, RequestBuilder<?> builder, Executor executor) {
+    return submitAndExecute(
+        requestManager,
+        builder,
+        new ResourceConsumer() {
+          @Override
+          public void act(Object resource) {}
+        },
+        executor);
+  }
+
+  /**
    * Acts on a resource loaded by Glide.
    *
    * @param <T> The type of resource (Bitmap, Drawable etc).
