@@ -487,6 +487,19 @@ public final class GlideBuilder {
     return this;
   }
 
+  /**
+   * Disables hardware bitmaps if the sdk level is <= O and {@code disableHardwareBitmapsOnO} is
+   * {@code true}.
+   *
+   * @deprecated This method is experimental. It will be hard coded and removed in a future release
+   *     without further warning.
+   */
+  @Deprecated
+  public GlideBuilder setDisableHardwareBitmapsOnO(boolean disableHardwareBitmapsOnO) {
+    glideExperimentsBuilder.add(new DisableHardwareBitmapsOnO(disableHardwareBitmapsOnO));
+    return this;
+  }
+
   void setRequestManagerFactory(@Nullable RequestManagerFactory factory) {
     this.requestManagerFactory = factory;
   }

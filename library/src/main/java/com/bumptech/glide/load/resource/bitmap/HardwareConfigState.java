@@ -143,6 +143,17 @@ public final class HardwareConfigState {
     isHardwareConfigAllowedByAppState.set(true);
   }
 
+  /**
+   * Temporary API to try disabling hardware Bitmaps < Android P.
+   *
+   * @deprecated Will be removed in a future version without further warning. This value will be
+   *     hard coded for release.
+   */
+  @Deprecated
+  public static void setDisableHardwareBitmapsOnO(boolean disableHardwareBitmapsOnO) {
+    HardwareConfigState.disableHardwareBitmapsOnO = disableHardwareBitmapsOnO;
+  }
+
   private boolean areHardwareBitmapsAllowedBySdk() {
     return HARDWARE_BITMAPS_SUPPORTED
         && (!disableHardwareBitmapsOnO || Build.VERSION.SDK_INT >= Build.VERSION_CODES.P);
