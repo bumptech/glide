@@ -526,6 +526,14 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), anyBoolean());
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result),
+            any(Number.class),
+            isAListTarget(),
+            isADataSource(),
+            anyBoolean(),
+            eq(isLoadedFromAlternateCacheKey));
   }
 
   @Test
@@ -624,6 +632,14 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(true));
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result),
+            any(Number.class),
+            isAListTarget(),
+            isADataSource(),
+            eq(true),
+            eq(false));
   }
 
   @Test
@@ -636,6 +652,14 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(true));
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result),
+            any(Number.class),
+            isAListTarget(),
+            isADataSource(),
+            eq(true),
+            eq(false));
   }
 
   @Test
@@ -649,6 +673,14 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(false));
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result),
+            any(Number.class),
+            isAListTarget(),
+            isADataSource(),
+            eq(false),
+            eq(false));
   }
 
   @Test
@@ -748,6 +780,14 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(false));
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result),
+            any(Number.class),
+            isAListTarget(),
+            isADataSource(),
+            eq(false),
+            eq(true));
   }
 
   @Test

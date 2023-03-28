@@ -648,6 +648,14 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
         for (RequestListener<R> listener : requestListeners) {
           anyListenerHandledUpdatingTarget |=
               listener.onResourceReady(result, model, target, dataSource, isFirstResource);
+
+          if (listener instanceof ExperimentalRequestListener) {
+            ExperimentalRequestListener<R> experimentalRequestListener =
+                (ExperimentalRequestListener<R>) listener;
+            anyListenerHandledUpdatingTarget |=
+                experimentalRequestListener.onResourceReady(
+                    result, model, target, dataSource, isFirstResource, isAlternateCacheKey);
+          }
         }
       }
       anyListenerHandledUpdatingTarget |=
