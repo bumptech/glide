@@ -189,6 +189,28 @@ public class HardwareConfigStateTest {
     assertThat(options.inPreferredConfig).isNull();
   }
 
+  @Config(sdk = Build.VERSION_CODES.Q)
+  @Test
+  public void
+      setHardwareConfigIfAllowed_withOsQ_beforeUnblockingHardwareBitmaps_returnsTrueAndSetsValues() {
+    HardwareConfigState state = new HardwareConfigState();
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inPreferredConfig = null;
+    options.inMutable = true;
+
+    boolean result =
+        state.setHardwareConfigIfAllowed(
+            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            options,
+            /* isHardwareConfigAllowed= */ true,
+            /* isExifOrientationRequired= */ false);
+
+    assertThat(result).isTrue();
+    assertThat(options.inMutable).isFalse();
+    assertThat(options.inPreferredConfig).isEqualTo(Bitmap.Config.HARDWARE);
+  }
+
   @Config(sdk = Build.VERSION_CODES.O)
   @Test
   public void
