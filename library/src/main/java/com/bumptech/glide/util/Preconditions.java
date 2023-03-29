@@ -12,6 +12,10 @@ public final class Preconditions {
     // Utility class.
   }
 
+  public static void checkArgument(boolean expression) {
+    checkArgument(expression, /* message= */ "");
+  }
+
   public static void checkArgument(boolean expression, @NonNull String message) {
     if (!expression) {
       throw new IllegalArgumentException(message);

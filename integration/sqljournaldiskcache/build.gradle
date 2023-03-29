@@ -1,0 +1,36 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdk COMPILE_SDK_VERSION as int
+
+    defaultConfig {
+        minSdk MIN_SDK_VERSION as int
+        targetSdk TARGET_SDK_VERSION as int
+
+        versionName VERSION_NAME as String
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation project(':library')
+    implementation "com.google.errorprone:error_prone_annotations:$ERROR_PRONE_VERSION"
+
+    testImplementation "com.google.guava:guava-testlib:${GUAVA_TESTLIB_VERSION}"
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation "junit:junit:${JUNIT_VERSION}"
+    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
+    testImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
+    testImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle"
