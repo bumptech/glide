@@ -17,7 +17,9 @@ jobs:
           - uses: gradle/gradle-build-action@v2
           - name: Build and run unit tests with Gradle
             run: ./scripts/ci_unit.sh
-          - name: Publish to Sonatype
+          - name: Build javadocs
+            run: ./gradlew dokkaHtmlMultiModule
+          - name: Publish a source snapshot to Sonatype
             env:
               NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
               NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
