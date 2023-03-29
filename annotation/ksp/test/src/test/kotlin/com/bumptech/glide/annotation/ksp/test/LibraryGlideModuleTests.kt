@@ -498,7 +498,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
       javaLibraryModule2,
     ) {
       assertThat(it.generatedAppGlideModuleContents())
-        .hasSourceEqualTo(simpleAppGlideModule)
+        .hasSourceEqualTo(CommonSources.simpleAppGlideModule)
       assertThat(it.exitCode).isEqualTo(ExitCode.OK)
     }
   }
@@ -570,7 +570,6 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           public SomeOtherAppModule() {}
         }
         """
-
       )
     val javaAppModule =
       JavaSourceFile(
@@ -647,8 +646,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
       )
 
     val generatedLibrarySources =
-      libraryCompilationResult.allGeneratedFiles()
-        .map { GeneratedSourceFile(it, sourceType) }
+      libraryCompilationResult.allGeneratedFiles().map { GeneratedSourceFile(it, sourceType) }
 
     compileCurrentSourceType(
       *(listOf(kotlinAppModule, javaAppModule) + generatedLibrarySources).toTypedArray(),

@@ -30,7 +30,8 @@ object AppGlideModuleConstants {
       "accepts only a Context."
   // This variable is visible only for testing
   // TODO(b/174783094): Add @VisibleForTesting when internal is supported.
-  const val INVALID_EXCLUDES_ANNOTATION_MESSAGE = """
+  const val INVALID_EXCLUDES_ANNOTATION_MESSAGE =
+    """
      @Excludes on %s is invalid. The value argument of your @Excludes annotation must be set to 
      either a single LibraryGlideModule class or a non-empty list of LibraryGlideModule classes. 
      Remove the annotation if you do not wish to exclude any LibraryGlideModules. Include each 
@@ -91,7 +92,9 @@ internal class AppGlideModuleParser(
     return parseExcludesAnnotationArgumentsOrNull(excludesAnnotation)
       ?: throw InvalidGlideSourceException(
         AppGlideModuleConstants.INVALID_EXCLUDES_ANNOTATION_MESSAGE.format(
-          appGlideModuleClass.qualifiedName?.asString()))
+          appGlideModuleClass.qualifiedName?.asString()
+        )
+      )
   }
 
   /**
@@ -100,8 +103,8 @@ internal class AppGlideModuleParser(
    * [com.bumptech.glide.module.LibraryGlideModule] implementations, or returns null if the
    * arguments are invalid.
    *
-   * Ideally we'd throw more specific exceptions based on the type of failure. However, there are
-   * a bunch of individual failure types and they differ depending on whether the source was written
+   * Ideally we'd throw more specific exceptions based on the type of failure. However, there are a
+   * bunch of individual failure types and they differ depending on whether the source was written
    * in Java or Kotlin. Rather than trying to describe every failure in detail, we'll just return
    * null and allow callers to describe the correct behavior.
    */
@@ -135,10 +138,10 @@ internal class AppGlideModuleParser(
    * has multiple arguments or `value` has any entries that are not of the expected type `T`.
    *
    * `value` is the name of the default annotation parameter allowed by syntax like
-   * `@Excludes(argument)` or `@Excludes(argument1, argument2)` or
-   * `@Excludes({argument1, argument2})`, depending on the source type (Kotlin or Java). This method
-   * requires that the annotation has exactly one `value` argument of a given type and standardizes
-   * the differences KSP produces between Kotlin and Java source.
+   * `@Excludes(argument)` or `@Excludes(argument1, argument2)` or `@Excludes({argument1,
+   * argument2})`, depending on the source type (Kotlin or Java). This method requires that the
+   * annotation has exactly one `value` argument of a given type and standardizes the differences
+   * KSP produces between Kotlin and Java source.
    *
    * To make this function more general purpose, we should assert that the values are of type T
    * rather just returning null. For our current single use case, returning null matches the use
@@ -149,17 +152,15 @@ internal class AppGlideModuleParser(
     // or a list of things (A or [A, B, C]). First validate that there's exactly one parameter and
     // that it has the expected name.
     // e.g. @Excludes(value = (A or [A, B, C])) -> (A or [A, B, C])
-    val valueParameterValue: Any?  =
-      arguments.singleOrNull()
-        .takeIf{ it?.name?.asString() == "value" }
-        ?.value
+    val valueParameterValue: Any? =
+      arguments.singleOrNull().takeIf { it?.name?.asString() == "value" }?.value
 
     // Next unify the types by verifying that it either has a single value of T, or a List of
     // T and converting both to List<T>
     // (A or [A, B, C]) -> ([A] or [A, B, C]) with the correct types
-    return when(valueParameterValue) {
-      is T -> listOf(valueParameterValue)
+    return when (valueParameterValue) {
       is List<*> -> valueParameterValue.asListGivenTypeOfOrNull()
+      is T -> listOf(valueParameterValue)
       else -> null
     }
   }
@@ -203,7 +204,8 @@ internal class AppGlideModuleParser(
   }
 
   internal data class IndexAndLibraryModuleNames(
-    val index: KSDeclaration, val libraryModuleNames: List<String>
+    val index: KSDeclaration,
+    val libraryModuleNames: List<String>
   )
 
   private fun getAllLibraryNamesFromKspIndexes(): List<IndexAndLibraryModuleNames> =
@@ -213,23 +215,24 @@ internal class AppGlideModuleParser(
 
   private fun getAllLibraryNamesFromJavaIndexes(): List<IndexAndLibraryModuleNames> =
     getAllLibraryNamesFromIndexes(GlideSymbolProcessorConstants.JAVA_ANNOTATION_PACKAGE_NAME) {
-        index -> extractGlideModulesFromJavaIndexAnnotation(index)
+      index ->
+      extractGlideModulesFromJavaIndexAnnotation(index)
     }
 
   @OptIn(KspExperimental::class)
   private fun getAllLibraryNamesFromIndexes(
-    packageName: String, extractLibraryModuleNamesFromIndex: (KSDeclaration) -> List<String>
+    packageName: String,
+    extractLibraryModuleNamesFromIndex: (KSDeclaration) -> List<String>
   ) = buildList {
-    resolver.getDeclarationsFromPackage(packageName)
-      .forEach { index: KSDeclaration ->
-        val libraryGlideModuleNames = extractLibraryModuleNamesFromIndex(index)
-        if (libraryGlideModuleNames.isNotEmpty()) {
-          environment.logger.info(
-            "Found index annotation: $index with modules: $libraryGlideModuleNames"
-          )
-          add(IndexAndLibraryModuleNames(index, libraryGlideModuleNames))
-        }
+    resolver.getDeclarationsFromPackage(packageName).forEach { index: KSDeclaration ->
+      val libraryGlideModuleNames = extractLibraryModuleNamesFromIndex(index)
+      if (libraryGlideModuleNames.isNotEmpty()) {
+        environment.logger.info(
+          "Found index annotation: $index with modules: $libraryGlideModuleNames"
+        )
+        add(IndexAndLibraryModuleNames(index, libraryGlideModuleNames))
       }
+    }
   }
 
   private fun extractGlideModulesFromJavaIndexAnnotation(

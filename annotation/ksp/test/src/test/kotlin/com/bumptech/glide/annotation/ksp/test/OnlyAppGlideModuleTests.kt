@@ -68,11 +68,13 @@ class OnlyAppGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           import com.bumptech.glide.module.AppGlideModule;
           
           @GlideModule public class AppModule extends AppGlideModule {}
-        """.trimIndent()
+        """
+          .trimIndent()
       )
 
     compileCurrentSourceType(kotlinModule, javaModule) {
-      assertThat(it.generatedAppGlideModuleContents()).hasSourceEqualTo(simpleAppGlideModule)
+      assertThat(it.generatedAppGlideModuleContents())
+        .hasSourceEqualTo(CommonSources.simpleAppGlideModule)
       assertThat(it.exitCode).isEqualTo(KotlinCompilation.ExitCode.OK)
     }
   }
@@ -273,42 +275,6 @@ class OnlyAppGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
     }
   }
 }
-
-@Language("kotlin")
-const val simpleAppGlideModule =
-  """
-package com.bumptech.glide
-
-import AppModule
-import android.content.Context
-import kotlin.Boolean
-import kotlin.Suppress
-import kotlin.Unit
-
-internal class GeneratedAppGlideModuleImpl(
-  @Suppress("UNUSED_PARAMETER")
-  context: Context,
-) : GeneratedAppGlideModule() {
-  private val appGlideModule: AppModule
-  init {
-    appGlideModule = AppModule()
-  }
-
-  public override fun registerComponents(
-    context: Context,
-    glide: Glide,
-    registry: Registry,
-  ): Unit {
-    appGlideModule.registerComponents(context, glide, registry)
-  }
-
-  public override fun applyOptions(context: Context, builder: GlideBuilder): Unit {
-    appGlideModule.applyOptions(context, builder)
-  }
-
-  public override fun isManifestParsingEnabled(): Boolean = false
-}
-"""
 
 @Language("kotlin")
 const val appGlideModuleWithContext =

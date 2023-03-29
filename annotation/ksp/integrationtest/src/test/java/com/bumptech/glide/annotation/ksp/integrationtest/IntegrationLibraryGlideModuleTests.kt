@@ -1,12 +1,12 @@
 package com.bumptech.glide.annotation.ksp.integrationtest
 
-import com.google.common.truth.Truth.assertThat
-import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.bumptech.glide.annotation.ksp.test.JavaSourceFile
 import com.bumptech.glide.annotation.ksp.test.KotlinSourceFile
-import com.bumptech.glide.annotation.ksp.test.SourceType
 import com.bumptech.glide.annotation.ksp.test.PerSourceTypeTest
+import com.bumptech.glide.annotation.ksp.test.SourceType
 import com.bumptech.glide.annotation.ksp.test.hasSourceEqualTo
+import com.google.common.truth.Truth.assertThat
+import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import org.intellij.lang.annotations.Language
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,9 +17,7 @@ import org.junit.runners.Parameterized.Parameters
 class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTypeTest {
 
   companion object {
-    @Parameters(name = "sourceType = {0}")
-    @JvmStatic
-    fun data() = SourceType.values()
+    @Parameters(name = "sourceType = {0}") @JvmStatic fun data() = SourceType.values()
   }
 
   @Test
@@ -46,7 +44,6 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           }
         """
       )
-
 
     compileCurrentSourceType(
       kotlinAppModule,
@@ -153,7 +150,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
     ) {
       assertThat(it.exitCode).isEqualTo(ExitCode.OK)
       assertThat(it.generatedAppGlideModuleContents())
-        .hasSourceEqualTo(simpleAppGlideModule)
+        .hasSourceEqualTo(CommonSources.simpleAppGlideModule)
     }
   }
 
@@ -221,44 +218,6 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
     }
   }
 }
-
-// generated code always includes public and Unit
-@Suppress("RedundantVisibilityModifier", "RedundantUnitReturnType")
-@Language("kotlin")
-const val simpleAppGlideModule =
-  """
-package com.bumptech.glide
-
-import AppModule
-import android.content.Context
-import kotlin.Boolean
-import kotlin.Suppress
-import kotlin.Unit
-
-internal class GeneratedAppGlideModuleImpl(
-  @Suppress("UNUSED_PARAMETER")
-  context: Context,
-) : GeneratedAppGlideModule() {
-  private val appGlideModule: AppModule
-  init {
-    appGlideModule = AppModule()
-  }
-
-  public override fun registerComponents(
-    context: Context,
-    glide: Glide,
-    registry: Registry,
-  ): Unit {
-    appGlideModule.registerComponents(context, glide, registry)
-  }
-
-  public override fun applyOptions(context: Context, builder: GlideBuilder): Unit {
-    appGlideModule.applyOptions(context, builder)
-  }
-
-  public override fun isManifestParsingEnabled(): Boolean = false
-}
-  """
 
 // generated code always includes public and Unit
 @Suppress("RedundantVisibilityModifier", "RedundantUnitReturnType")
@@ -341,4 +300,3 @@ internal class GeneratedAppGlideModuleImpl(
   public override fun isManifestParsingEnabled(): Boolean = false
 }
 """
-
