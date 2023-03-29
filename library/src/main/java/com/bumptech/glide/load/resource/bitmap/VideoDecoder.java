@@ -132,6 +132,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   private final BitmapPool bitmapPool;
   private final MediaMetadataRetrieverFactory factory;
 
+  @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
   public static ResourceDecoder<AssetFileDescriptor, Bitmap> asset(BitmapPool bitmapPool) {
     return new VideoDecoder<>(bitmapPool, new AssetFileDescriptorInitializer());
   }
@@ -272,6 +273,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
    *   <li>The video has a rotation angle of +/- 180 degrees.
    * </ul>
    */
+  @TargetApi(Build.VERSION_CODES.R)
   private static Bitmap correctHdr180DegVideoFrameOrientation(
       MediaMetadataRetriever mediaMetadataRetriever, Bitmap frame) {
     if (!isHdr180RotationFixRequired()) {
@@ -470,9 +472,11 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   interface MediaInitializer<T> {
     void initializeRetriever(MediaMetadataRetriever retriever, T data);
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     void initializeExtractor(MediaExtractor extractor, T data) throws IOException;
   }
 
+  @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
   private static final class AssetFileDescriptorInitializer
       implements MediaInitializer<AssetFileDescriptor> {
 
@@ -497,6 +501,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
       retriever.setDataSource(data.getFileDescriptor());
     }
 
+    @RequiresApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void initializeExtractor(MediaExtractor extractor, ParcelFileDescriptor data)
         throws IOException {

@@ -205,17 +205,20 @@ final class RegistryFactory {
           new ParcelFileDescriptorBitmapDecoder(downsampler));
     }
 
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      registry.append(
+          Registry.BUCKET_BITMAP,
+          AssetFileDescriptor.class,
+          Bitmap.class,
+          VideoDecoder.asset(bitmapPool));
+    }
+
     registry
         .append(
             Registry.BUCKET_BITMAP,
             ParcelFileDescriptor.class,
             Bitmap.class,
             parcelFileDescriptorVideoDecoder)
-        .append(
-            Registry.BUCKET_BITMAP,
-            AssetFileDescriptor.class,
-            Bitmap.class,
-            VideoDecoder.asset(bitmapPool))
         .append(Bitmap.class, Bitmap.class, UnitModelLoader.Factory.<Bitmap>getInstance())
         .append(Registry.BUCKET_BITMAP, Bitmap.class, Bitmap.class, new UnitBitmapDecoder())
         .append(Bitmap.class, bitmapEncoder)
