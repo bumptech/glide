@@ -53,6 +53,10 @@ import java.util.Set;
  */
 public class Glide implements ComponentCallbacks2 {
   private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
+  private static final String DESTROYED_ACTIVITY_WARNING =
+      "You cannot start a load on a not yet attached View or a Fragment where getActivity() "
+          + "returns null (which usually occurs when getActivity() is called before the Fragment "
+          + "is attached or after the Fragment is destroyed).";
   private static final String TAG = "Glide";
 
   @GuardedBy("Glide.class")
@@ -513,11 +517,7 @@ public class Glide implements ComponentCallbacks2 {
   private static RequestManagerRetriever getRetriever(@Nullable Context context) {
     // Context could be null for other reasons (ie the user passes in null), but in practice it will
     // only occur due to errors with the Fragment lifecycle.
-    Preconditions.checkNotNull(
-        context,
-        "You cannot start a load on a not yet attached View or a Fragment where getActivity() "
-            + "returns null (which usually occurs when getActivity() is called before the Fragment "
-            + "is attached or after the Fragment is destroyed).");
+    Preconditions.checkNotNull(context, DESTROYED_ACTIVITY_WARNING);
     return Glide.get(context).getRequestManagerRetriever();
   }
 
@@ -602,7 +602,9 @@ public class Glide implements ComponentCallbacks2 {
   @Deprecated
   @NonNull
   public static RequestManager with(@NonNull android.app.Fragment fragment) {
-    return with(fragment.getContext().getApplicationContext());
+    Activity activity = fragment.getActivity();
+    Preconditions.checkNotNull(activity, DESTROYED_ACTIVITY_WARNING);
+    return with(activity.getApplicationContext());
   }
 
   /**
