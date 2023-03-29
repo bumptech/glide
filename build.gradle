@@ -81,7 +81,7 @@ subprojects { project ->
     }
 
     // Exclude packages not intended for public use.
-    if (![
+    if ([
           "testutil",
           "flickr",
           "giphy",
@@ -95,8 +95,18 @@ subprojects { project ->
           "compiler",
           "benchmark",
           "integrationtest",
-          "instrumentation"
+          "instrumentation",
+          "glide-parent",
+          "integration",
+          "samples",
+          "third_party"
     ].contains(project.getName())) {
+        afterEvaluate {
+            project.apply plugin: 'org.jetbrains.dokka'
+
+            project.tasks.dokkaHtmlPartial.enabled = false
+        }
+    } else {
         afterEvaluate {
             project.apply plugin: 'org.jetbrains.dokka'
 
