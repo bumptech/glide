@@ -272,6 +272,7 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
    *   <li>The video has a rotation angle of +/- 180 degrees.
    * </ul>
    */
+  @TargetApi(Build.VERSION_CODES.R)
   private static Bitmap correctHdr180DegVideoFrameOrientation(
       MediaMetadataRetriever mediaMetadataRetriever, Bitmap frame) {
     if (!isHdr180RotationFixRequired()) {
