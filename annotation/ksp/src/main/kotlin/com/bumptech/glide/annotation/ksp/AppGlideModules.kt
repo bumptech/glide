@@ -158,8 +158,8 @@ internal class AppGlideModuleParser(
     // T and converting both to List<T>
     // (A or [A, B, C]) -> ([A] or [A, B, C]) with the correct types
     return when(valueParameterValue) {
-      is T -> listOf(valueParameterValue)
       is List<*> -> valueParameterValue.asListGivenTypeOfOrNull()
+      is T -> listOf(valueParameterValue)
       else -> null
     }
   }
