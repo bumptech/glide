@@ -47,7 +47,9 @@ class CompilationResult(
   private fun readFile(file: File) = file.readLines().joinToString("\n")
 
   private fun findAppGlideModule(): File {
-    return generatedFilesParentDir()?.listFiles()?.find { it.name.equals("GeneratedAppGlideModuleImpl.kt") }
+    return generatedFilesParentDir()?.listFiles()?.find {
+      it.name.equals("GeneratedAppGlideModuleImpl.kt")
+    }
       ?: throw FileNotFoundException(
         "GeneratedAppGlideModuleImpl.kt was not generated or not generated in the expected" +
           "location"
@@ -66,7 +68,8 @@ sealed interface TypedSourceFile {
 }
 
 class GeneratedSourceFile(
-  private val file: File, private val currentSourceType: SourceType,
+  private val file: File,
+  private val currentSourceType: SourceType,
 ) : TypedSourceFile {
   override fun sourceFile(): SourceFile = SourceFile.fromPath(file)
 
@@ -100,7 +103,7 @@ interface PerSourceTypeTest {
   fun compileCurrentSourceType(
     vararg sourceFiles: TypedSourceFile,
     test: (input: CompilationResult) -> Unit = {},
-  ) : CompilationResult {
+  ): CompilationResult {
     val result =
       compile(sourceFiles.filter { it.sourceType() == sourceType }.map { it.sourceFile() }.toList())
     test(result)
@@ -121,3 +124,43 @@ internal fun compile(sourceFiles: List<SourceFile>): CompilationResult {
 }
 
 fun StringSubject.hasSourceEqualTo(sourceContents: String) = isEqualTo(sourceContents.trimIndent())
+
+object CommonSources {
+  // generated code always includes public and Unit
+  @Suppress("RedundantVisibilityModifier", "RedundantUnitReturnType")
+  @Language("kotlin")
+  const val simpleAppGlideModule =
+    """
+package com.bumptech.glide
+
+import AppModule
+import android.content.Context
+import kotlin.Boolean
+import kotlin.Suppress
+import kotlin.Unit
+
+internal class GeneratedAppGlideModuleImpl(
+  @Suppress("UNUSED_PARAMETER")
+  context: Context,
+) : GeneratedAppGlideModule() {
+  private val appGlideModule: AppModule
+  init {
+    appGlideModule = AppModule()
+  }
+
+  public override fun registerComponents(
+    context: Context,
+    glide: Glide,
+    registry: Registry,
+  ): Unit {
+    appGlideModule.registerComponents(context, glide, registry)
+  }
+
+  public override fun applyOptions(context: Context, builder: GlideBuilder): Unit {
+    appGlideModule.applyOptions(context, builder)
+  }
+
+  public override fun isManifestParsingEnabled(): Boolean = false
+}
+"""
+}
