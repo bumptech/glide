@@ -4,12 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.bumptech.glide.integration.compose'
-    compileSdk 34
+    compileSdk 33
 
     defaultConfig {
         minSdk 21
-        targetSdk 34
+        targetSdk 33
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -25,7 +24,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion libs.versions.kotlin.compiler.extension.get()
+        kotlinCompilerExtensionVersion '1.2.0'
     }
 
     compileOptions {
@@ -35,12 +34,6 @@ android {
 
     kotlinOptions {
         jvmTarget = '1.8'
-    }
-
-    testOptions {
-      unitTests {
-        includeAndroidResources = true
-      }
     }
 }
 
@@ -57,51 +50,19 @@ dependencies {
     implementation(project(':integration:recyclerview')) {
         transitive = false
     }
-    implementation libs.compose.foundation
-    implementation libs.compose.ui
-    implementation libs.drawablepainter
-    implementation libs.androidx.core.ktx
-    debugImplementation libs.compose.ui.testmanifest
-    testImplementation libs.compose.ui.testmanifest
-    testImplementation libs.compose.ui.testjunit4
-    testImplementation libs.junit
-    testImplementation libs.robolectric
-    testImplementation libs.androidx.appcompat
-    testImplementation libs.androidx.junit
-    testImplementation libs.androidx.test.runner
-    androidTestImplementation libs.junit
-    androidTestImplementation libs.compose.ui.testjunit4
-    androidTestImplementation libs.androidx.espresso
-    androidTestImplementation libs.androidx.espresso.idling
-    androidTestImplementation libs.androidx.junit
-    androidTestImplementation libs.compose.material
-    androidTestImplementation libs.truth
+    implementation "androidx.compose.foundation:foundation:$ANDROID_X_COMPOSE_FOUNDATION_VERSION"
+    implementation "androidx.compose.ui:ui:$ANDROID_X_COMPOSE_VERSION"
+    implementation "com.google.accompanist:accompanist-drawablepainter:$ACCOMPANIEST_VERSION"
+    implementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$ANDROID_X_COMPOSE_VERSION"
+    androidTestImplementation "junit:junit:$JUNIT_VERSION"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$ANDROID_X_COMPOSE_VERSION"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$ANDROID_X_TEST_ESPRESSO_VERSION"
+    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$ANDROID_X_TEST_ESPRESSO_VERSION"
+    androidTestImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
+    androidTestImplementation "androidx.compose.material:material:$ANDROID_X_COMPOSE_MATERIAL_VERSION"
     androidTestImplementation project(':testutil')
+    androidTestImplementation "com.google.truth:truth:${TRUTH_VERSION}"
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"
-
-task cleanGoldensOnDevice(type: Exec) {
-    commandLine = ['adb', 'shell', 'rm -rf /storage/emulated/0/DCIM/compose_goldens']
-}
-
-task pullGoldens(type: Exec) {
-    commandLine = [
-            'bash',
-            '-c',
-            'adb shell \'find /storage/emulated/0/DCIM/compose_goldens -iname "*.png"\' ' +
-                    '| tr -d "\015" ' +
-                    '| while read line; do adb pull "$line" src/androidTest/assets/; done'
-    ]
-
-}
-
-afterEvaluate {
-    task rebuildGoldens(type: Exec) {
-        ignoreExitValue = true
-        dependsOn(
-                cleanGoldensOnDevice,
-                tasks.getByName("connectedDebugAndroidTest").finalizedBy(pullGoldens)
-        )
-    }
-}

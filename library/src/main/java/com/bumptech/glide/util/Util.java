@@ -8,7 +8,6 @@ import android.os.Looper;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.load.model.Model;
-import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.target.Target;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -239,16 +238,6 @@ public final class Util {
       return ((Model) a).isEquivalentTo(b);
     }
     return a.equals(b);
-  }
-
-  public static boolean bothBaseRequestOptionsNullEquivalentOrEquals(
-      @Nullable BaseRequestOptions<?> a,
-      @Nullable BaseRequestOptions<?> b
-  ) {
-    if (a == null) {
-      return b == null;
-    }
-    return a.isEquivalentTo(b);
   }
 
   public static int hashCode(int value) {

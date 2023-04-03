@@ -10,7 +10,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-import androidx.annotation.NonNull;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -71,17 +70,17 @@ public class FullscreenActivity extends Activity {
               public boolean onLoadFailed(
                   GlideException e,
                   Object model,
-                  @NonNull Target<Drawable> target,
+                  Target<Drawable> target,
                   boolean isFirstResource) {
                 return false;
               }
 
               @Override
               public boolean onResourceReady(
-                  @NonNull Drawable resource,
-                  @NonNull Object model,
+                  Drawable resource,
+                  Object model,
                   Target<Drawable> target,
-                  @NonNull DataSource dataSource,
+                  DataSource dataSource,
                   boolean isFirstResource) {
                 if (resource instanceof GifDrawable) {
                   gifDrawable = (GifDrawable) resource;

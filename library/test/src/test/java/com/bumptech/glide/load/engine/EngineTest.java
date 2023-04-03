@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.anyResource;
 import static com.bumptech.glide.tests.Util.isADataSource;
 import static com.bumptech.glide.tests.Util.mockResource;
@@ -45,7 +44,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 @SuppressWarnings("unchecked")
 public class EngineTest {
   private EngineTestHarness harness;

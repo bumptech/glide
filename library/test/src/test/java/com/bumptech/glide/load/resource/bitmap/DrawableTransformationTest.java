@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -40,7 +39,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class DrawableTransformationTest {
   @Rule public final KeyTester keyTester = new KeyTester();
   @Mock private Transformation<Bitmap> bitmapTransformation;

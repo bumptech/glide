@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.data;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -24,7 +23,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class LocalUriFetcherTest {
   private TestLocalUriFetcher fetcher;
   @Mock private DataFetcher.DataCallback<Closeable> callback;

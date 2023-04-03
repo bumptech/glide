@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,7 +26,7 @@ import org.robolectric.annotation.Config;
 // containsExactly produces a spurious warning.
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class MultiModelLoaderFactoryTest {
   @Mock private ModelLoaderFactory<String, String> firstFactory;
   @Mock private ModelLoader<String, String> firstModelLoader;

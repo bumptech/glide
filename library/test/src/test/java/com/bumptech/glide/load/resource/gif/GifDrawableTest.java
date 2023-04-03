@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.gif;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -49,7 +48,7 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowCanvas;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class GifDrawableTest {
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
 

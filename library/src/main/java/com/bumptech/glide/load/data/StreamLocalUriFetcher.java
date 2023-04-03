@@ -13,20 +13,25 @@ import java.io.InputStream;
 public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
   /** A lookup uri (e.g. content://com.android.contacts/contacts/lookup/3570i61d948d30808e537) */
   private static final int ID_CONTACTS_LOOKUP = 1;
+
   /** A contact thumbnail uri (e.g. content://com.android.contacts/contacts/38/photo) */
   private static final int ID_CONTACTS_THUMBNAIL = 2;
+
   /** A contact uri (e.g. content://com.android.contacts/contacts/38) */
   private static final int ID_CONTACTS_CONTACT = 3;
+
   /**
    * A contact display photo (high resolution) uri (e.g.
    * content://com.android.contacts/5/display_photo)
    */
   private static final int ID_CONTACTS_PHOTO = 4;
+
   /**
    * Uri for optimized search of phones by number (e.g.
    * content://com.android.contacts/phone_lookup/232323232
    */
   private static final int ID_LOOKUP_BY_PHONE = 5;
+
   /** Match the incoming Uri for special cases which we can handle nicely. */
   private static final UriMatcher URI_MATCHER;
 

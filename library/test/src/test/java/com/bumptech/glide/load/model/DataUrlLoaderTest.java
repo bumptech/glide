@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -27,7 +26,7 @@ import org.robolectric.annotation.Config;
 
 /** Tests for the {@link DataUrlLoader} class. */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class DataUrlLoaderTest {
 
   // A valid base64-encoded PNG (a small "Google" logo).

@@ -151,7 +151,7 @@ jar {
  
 artifacts {
     archives releaseJavadocJar {
-        archiveClassifier = 'javadoc'
+        classifier 'javadoc'
     }
 }
 

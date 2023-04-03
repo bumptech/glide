@@ -68,7 +68,7 @@ class StrictLineReader implements Closeable {
    * @throws NullPointerException if {@code in} or {@code charset} is null.
    * @throws IllegalArgumentException if the specified charset is not supported.
    */
-  StrictLineReader(InputStream in, Charset charset) {
+  public StrictLineReader(InputStream in, Charset charset) {
     this(in, 8192, charset);
   }
 
@@ -83,7 +83,7 @@ class StrictLineReader implements Closeable {
    * @throws IllegalArgumentException if {@code capacity} is negative or zero
    * or the specified charset is not supported.
    */
-  StrictLineReader(InputStream in, int capacity, Charset charset) {
+  public StrictLineReader(InputStream in, int capacity, Charset charset) {
     if (in == null || charset == null) {
       throw new NullPointerException();
     }
@@ -105,7 +105,6 @@ class StrictLineReader implements Closeable {
    *
    * @throws IOException for errors when closing the underlying {@code InputStream}.
    */
-  @Override
   public void close() throws IOException {
     synchronized (in) {
       if (buf != null) {
@@ -123,7 +122,7 @@ class StrictLineReader implements Closeable {
    * @throws IOException for underlying {@code InputStream} errors.
    * @throws EOFException for the end of source stream.
    */
-  String readLine() throws IOException {
+  public String readLine() throws IOException {
     synchronized (in) {
       if (buf == null) {
         throw new IOException("LineReader is closed");
@@ -177,7 +176,7 @@ class StrictLineReader implements Closeable {
     }
   }
 
-  boolean hasUnterminatedLine() {
+  public boolean hasUnterminatedLine() {
     return end == -1;
   }
 

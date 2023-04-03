@@ -26,6 +26,7 @@ class ResourceCacheGenerator implements DataFetcherGenerator, DataFetcher.DataCa
   private List<ModelLoader<File, ?>> modelLoaders;
   private int modelLoaderIndex;
   private volatile LoadData<?> loadData;
+
   // PMD is wrong here, this File must be an instance variable because it may be used across
   // multiple calls to startNext.
   @SuppressWarnings("PMD.SingularField")

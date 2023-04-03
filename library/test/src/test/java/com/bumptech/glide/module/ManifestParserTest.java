@@ -1,7 +1,7 @@
 package com.bumptech.glide.module;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,6 +21,7 @@ import com.bumptech.glide.Registry;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -28,7 +29,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 @SuppressWarnings("deprecation")
 public class ManifestParserTest {
   private static final String MODULE_VALUE = "GlideModule";
@@ -124,12 +125,20 @@ public class ManifestParserTest {
   }
 
   @Test
-  public void parse_withMissingName_doesNotThrow() throws NameNotFoundException {
+  public void parse_withMissingName_throwsRuntimeException() throws NameNotFoundException {
     PackageManager pm = mock(PackageManager.class);
     doThrow(new NameNotFoundException("name")).when(pm).getApplicationInfo(anyString(), anyInt());
     when(context.getPackageManager()).thenReturn(pm);
 
-    parser.parse();
+    assertThrows(
+        "Unable to find metadata to parse GlideModules",
+        RuntimeException.class,
+        new ThrowingRunnable() {
+          @Override
+          public void run() {
+            parser.parse();
+          }
+        });
   }
 
   private void addModuleToManifest(Class<?> moduleClass) {

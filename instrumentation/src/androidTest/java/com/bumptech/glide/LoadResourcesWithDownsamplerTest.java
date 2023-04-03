@@ -130,8 +130,8 @@ public class LoadResourcesWithDownsamplerTest {
   public void loadTransparentGifResource_asHardware_withNoOtherLoaders_decodesResource()
       throws InterruptedException {
     assumeTrue(
-        "Hardware Bitmaps are only supported on P+",
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P);
+        "Hardware Bitmaps are only supported on O+",
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O);
     // enableHardwareBitmaps must be called on the main thread.
     final CountDownLatch latch = new CountDownLatch(1);
     Util.postOnUiThread(
@@ -191,8 +191,8 @@ public class LoadResourcesWithDownsamplerTest {
   @Test
   public void loadOpaqueGifResource_asHardware_withNoOtherLoaders_decodesResource() {
     assumeTrue(
-        "Hardware Bitmaps are only supported on P+",
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P);
+        "Hardware Bitmaps are only supported on O+",
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O);
 
     Glide.get(context)
         .getRegistry()

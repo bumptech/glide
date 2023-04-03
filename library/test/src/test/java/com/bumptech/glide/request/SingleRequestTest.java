@@ -1,6 +1,5 @@
 package com.bumptech.glide.request;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.isADataSource;
 import static com.bumptech.glide.tests.Util.mockResource;
 import static com.google.common.truth.Truth.assertThat;
@@ -60,7 +59,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 @SuppressWarnings("rawtypes")
 public class SingleRequestTest {
 
@@ -696,17 +695,17 @@ public class SingleRequestTest {
                   public boolean onLoadFailed(
                       @Nullable GlideException e,
                       Object model,
-                      @NonNull Target<List> target,
+                      Target<List> target,
                       boolean isFirstResource) {
                     return false;
                   }
 
                   @Override
                   public boolean onResourceReady(
-                      @NonNull List resource,
-                      @NonNull Object model,
+                      List resource,
+                      Object model,
                       Target<List> target,
-                      @NonNull DataSource dataSource,
+                      DataSource dataSource,
                       boolean isFirstResource) {
                     verify(builder.requestCoordinator).onRequestSuccess(target.getRequest());
                     isRequestCoordinatorVerified.set(true);
@@ -733,7 +732,7 @@ public class SingleRequestTest {
                   public boolean onLoadFailed(
                       @Nullable GlideException e,
                       Object model,
-                      @NonNull Target<List> target,
+                      Target<List> target,
                       boolean isFirstResource) {
                     verify(builder.requestCoordinator).onRequestFailed(target.getRequest());
                     isRequestCoordinatorVerified.set(true);
@@ -742,10 +741,10 @@ public class SingleRequestTest {
 
                   @Override
                   public boolean onResourceReady(
-                      @NonNull List resource,
-                      @NonNull Object model,
+                      List resource,
+                      Object model,
                       Target<List> target,
-                      @NonNull DataSource dataSource,
+                      DataSource dataSource,
                       boolean isFirstResource) {
                     return false;
                   }

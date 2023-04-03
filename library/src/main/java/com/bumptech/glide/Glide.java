@@ -6,14 +6,15 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.MessageQueue.IdleHandler;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
+import com.bumptech.glide.GlideBuilder.DisableHardwareBitmapsOnO;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -183,11 +184,6 @@ public class Glide implements ComponentCallbacks2 {
     }
   }
 
-  @VisibleForTesting
-  public static synchronized boolean isInitialized() {
-    return glide != null;
-  }
-
   /**
    * Allows hardware Bitmaps to be used prior to the first frame in the app being drawn as soon as
    * this method is called.
@@ -331,6 +327,13 @@ public class Glide implements ComponentCallbacks2 {
     this.requestManagerRetriever = requestManagerRetriever;
     this.connectivityMonitorFactory = connectivityMonitorFactory;
     this.defaultRequestOptionsFactory = defaultRequestOptionsFactory;
+
+    DisableHardwareBitmapsOnO disableHardwareBitmapsOnO =
+        experiments.get(DisableHardwareBitmapsOnO.class);
+    if (disableHardwareBitmapsOnO != null) {
+      HardwareConfigState.setDisableHardwareBitmapsOnO(
+          disableHardwareBitmapsOnO.disableHardwareBitmapsOnO);
+    }
 
     // This has a circular relationship with Glide and GlideContext in that it depends on both,
     // but it's created by Glide's constructor. In practice this shouldn't matter because the
@@ -537,8 +540,8 @@ public class Glide implements ComponentCallbacks2 {
    * @return A RequestManager for the top level application that can be used to start a load.
    * @see #with(android.app.Activity)
    * @see #with(android.app.Fragment)
-   * @see #with(androidx.fragment.app.Fragment)
-   * @see #with(androidx.fragment.app.FragmentActivity)
+   * @see #with(android.support.v4.app.Fragment)
+   * @see #with(android.support.v4.app.FragmentActivity)
    */
   @NonNull
   public static RequestManager with(@NonNull Context context) {
@@ -553,7 +556,7 @@ public class Glide implements ComponentCallbacks2 {
    * @return A RequestManager for the given activity that can be used to start a load.
    * @deprecated This is equivalent to calling {@link #with(Context)} using the application context.
    *     Use the androidx Activity class instead (ie {@link FragmentActivity}, or {@link
-   *     androidx.appcompat.app.AppCompatActivity}).
+   *     android.support.v7.app.AppCompatActivity}).
    */
   @NonNull
   @Deprecated
@@ -563,8 +566,8 @@ public class Glide implements ComponentCallbacks2 {
 
   /**
    * Begin a load with Glide that will tied to the give {@link
-   * androidx.fragment.app.FragmentActivity}'s lifecycle and that uses the given {@link
-   * androidx.fragment.app.FragmentActivity}'s default options.
+   * android.support.v4.app.FragmentActivity}'s lifecycle and that uses the given {@link
+   * android.support.v4.app.FragmentActivity}'s default options.
    *
    * @param activity The activity to use.
    * @return A RequestManager for the given FragmentActivity that can be used to start a load.
@@ -575,8 +578,9 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   /**
-   * Begin a load with Glide that will be tied to the given {@link androidx.fragment.app.Fragment}'s
-   * lifecycle and that uses the given {@link androidx.fragment.app.Fragment}'s default options.
+   * Begin a load with Glide that will be tied to the given {@link
+   * android.support.v4.app.Fragment}'s lifecycle and that uses the given {@link
+   * android.support.v4.app.Fragment}'s default options.
    *
    * @param fragment The fragment to use.
    * @return A RequestManager for the given Fragment that can be used to start a load.

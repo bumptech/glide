@@ -4,9 +4,7 @@ import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.util.Log;
-import androidx.annotation.ChecksSdkIntAtLeast;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.VisibleForTesting;
 import com.bumptech.glide.util.Util;
@@ -31,9 +29,21 @@ public final class HardwareConfigState {
       Build.VERSION.SDK_INT < Build.VERSION_CODES.Q;
 
   /** Support for the hardware bitmap config was added in Android O. */
-  @ChecksSdkIntAtLeast(api = VERSION_CODES.P)
   public static final boolean HARDWARE_BITMAPS_SUPPORTED =
-      Build.VERSION.SDK_INT >= Build.VERSION_CODES.P;
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
+
+  /**
+   * The minimum size in pixels a {@link Bitmap} must be in both dimensions to be created with the
+   * {@link Bitmap.Config#HARDWARE} configuration.
+   *
+   * <p>This is a quick check that lets us skip wasting FDs (see {@link #FD_SIZE_LIST}) on small
+   * {@link Bitmap}s with relatively low memory costs.
+   *
+   * @see #FD_SIZE_LIST
+   */
+  @VisibleForTesting static final int MIN_HARDWARE_DIMENSION_O = 128;
+
+  private static final int MIN_HARDWARE_DIMENSION_P = 0;
 
   /**
    * Allows us to check to make sure we're not exceeding the FD limit for a process with hardware
@@ -55,6 +65,16 @@ public final class HardwareConfigState {
    * arbitrary.
    */
   private static final int MINIMUM_DECODES_BETWEEN_FD_CHECKS = 50;
+
+  /**
+   * 700 with an error of 50 Bitmaps in between at two FDs each lets us use up to 800 FDs for
+   * hardware Bitmaps.
+   *
+   * <p>Prior to P, the limit per process was 1024 FDs. In P, the limit was updated to 32k FDs per
+   * process.
+   */
+  private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_O = 700;
+
   // 20k.
   private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P = 20000;
 
@@ -71,7 +91,12 @@ public final class HardwareConfigState {
 
   private static volatile HardwareConfigState instance;
 
+  private static boolean disableHardwareBitmapsOnO;
+
+  private final boolean isHardwareConfigAllowedByDeviceModel;
   private final int sdkBasedMaxFdCount;
+  private final int minHardwareDimension;
+
   @GuardedBy("this")
   private int decodesSinceLastFdCheck;
 
@@ -99,7 +124,14 @@ public final class HardwareConfigState {
 
   @VisibleForTesting
   HardwareConfigState() {
-    sdkBasedMaxFdCount = MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P;
+    isHardwareConfigAllowedByDeviceModel = isHardwareConfigAllowedByDeviceModel();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+      sdkBasedMaxFdCount = MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P;
+      minHardwareDimension = MIN_HARDWARE_DIMENSION_P;
+    } else {
+      sdkBasedMaxFdCount = MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_O;
+      minHardwareDimension = MIN_HARDWARE_DIMENSION_O;
+    }
   }
 
   public void blockHardwareBitmaps() {
@@ -110,6 +142,22 @@ public final class HardwareConfigState {
   public void unblockHardwareBitmaps() {
     Util.assertMainThread();
     isHardwareConfigAllowedByAppState.set(true);
+  }
+
+  /**
+   * Temporary API to try disabling hardware Bitmaps < Android P.
+   *
+   * @deprecated Will be removed in a future version without further warning. This value will be
+   *     hard coded for release.
+   */
+  @Deprecated
+  public static void setDisableHardwareBitmapsOnO(boolean disableHardwareBitmapsOnO) {
+    HardwareConfigState.disableHardwareBitmapsOnO = disableHardwareBitmapsOnO;
+  }
+
+  private boolean areHardwareBitmapsAllowedBySdk() {
+    return HARDWARE_BITMAPS_SUPPORTED
+        && (!disableHardwareBitmapsOnO || Build.VERSION.SDK_INT >= Build.VERSION_CODES.P);
   }
 
   public boolean isHardwareConfigAllowed(
@@ -123,7 +171,13 @@ public final class HardwareConfigState {
       }
       return false;
     }
-    if (!HARDWARE_BITMAPS_SUPPORTED) {
+    if (!isHardwareConfigAllowedByDeviceModel) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Hardware config disallowed by device model");
+      }
+      return false;
+    }
+    if (!areHardwareBitmapsAllowedBySdk()) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(TAG, "Hardware config disallowed by sdk");
       }
@@ -141,9 +195,15 @@ public final class HardwareConfigState {
       }
       return false;
     }
-    if (targetWidth < 0 || targetHeight < 0) {
+    if (targetWidth < minHardwareDimension) {
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
-        Log.v(TAG, "Hardware config disallowed because of invalid dimensions");
+        Log.v(TAG, "Hardware config disallowed because width is too small");
+      }
+      return false;
+    }
+    if (targetHeight < minHardwareDimension) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "Hardware config disallowed because height is too small");
       }
       return false;
     }
@@ -178,6 +238,75 @@ public final class HardwareConfigState {
       optionsWithScaling.inMutable = false;
     }
     return result;
+  }
+
+  private static boolean isHardwareConfigAllowedByDeviceModel() {
+    return !isHardwareConfigDisallowedByB112551574() && !isHardwareConfigDisallowedByB147430447();
+  }
+
+  private static boolean isHardwareConfigDisallowedByB147430447() {
+    if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O_MR1) {
+      return false;
+    }
+    // This method will only be called once, so simple iteration is reasonable.
+    return Arrays.asList(
+            "LG-M250",
+            "LG-M320",
+            "LG-Q710AL",
+            "LG-Q710PL",
+            "LGM-K121K",
+            "LGM-K121L",
+            "LGM-K121S",
+            "LGM-X320K",
+            "LGM-X320L",
+            "LGM-X320S",
+            "LGM-X401L",
+            "LGM-X401S",
+            "LM-Q610.FG",
+            "LM-Q610.FGN",
+            "LM-Q617.FG",
+            "LM-Q617.FGN",
+            "LM-Q710.FG",
+            "LM-Q710.FGN",
+            "LM-X220PM",
+            "LM-X220QMA",
+            "LM-X410PM")
+        .contains(Build.MODEL);
+  }
+
+  private static boolean isHardwareConfigDisallowedByB112551574() {
+    if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
+      return false;
+    }
+    // This method will only be called once, so simple iteration is reasonable.
+    for (String prefixOrModelName :
+        // This is sadly a list of prefixes, not models. We no longer have the data that shows us
+        // all the explicit models, so we have to live with the prefixes.
+        Arrays.asList(
+            // Samsung
+            "SC-04J",
+            "SM-N935",
+            "SM-J720",
+            "SM-G570F",
+            "SM-G570M",
+            "SM-G960",
+            "SM-G965",
+            "SM-G935",
+            "SM-G930",
+            "SM-A520",
+            "SM-A720F",
+            // Moto
+            "moto e5",
+            "moto e5 play",
+            "moto e5 plus",
+            "moto e5 cruise",
+            "moto g(6) forge",
+            "moto g(6) play")) {
+      if (Build.MODEL.startsWith(prefixOrModelName)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static boolean isHardwareBitmapCountReducedOnApi28ByB139097735() {

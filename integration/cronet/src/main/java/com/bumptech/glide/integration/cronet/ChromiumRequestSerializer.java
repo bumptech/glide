@@ -369,7 +369,7 @@ final class ChromiumRequestSerializer {
                 + (buffer.limit() / 1024)
                 + "kb");
       } else if (!isSuccess && Log.isLoggable(TAG, Log.ERROR) && !wasCancelled) {
-        Log.e(TAG, "Request failed, url: " + glideUrl, exception);
+        Log.e(TAG, "Request failed", exception);
       }
     }
 

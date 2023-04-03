@@ -4,17 +4,16 @@ dependencies {
     implementation project(':library')
     annotationProcessor project(':annotation:compiler')
 
-    api libs.okhttp4
-    api libs.androidx.annotation
+    api "com.squareup.okhttp3:okhttp:${OK_HTTP_4_VERSION}"
+    api "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
 }
 
 android {
-    namespace 'com.bumptech.glide.integration.okhttp'
-    compileSdkVersion libs.versions.compile.sdk.version.get()
+    compileSdk COMPILE_SDK_VERSION as int
 
     defaultConfig {
-        minSdk libs.versions.okhttp.min.sdk.version.get() as int
-        targetSdk libs.versions.target.sdk.version.get() as int
+        minSdk OK_HTTP_4_MIN_SDK_VERSION as int
+        targetSdk TARGET_SDK_VERSION as int
 
         versionName VERSION_NAME as String
     }

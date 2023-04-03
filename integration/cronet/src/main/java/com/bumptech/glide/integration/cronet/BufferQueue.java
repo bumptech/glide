@@ -62,7 +62,6 @@ final class BufferQueue {
       return ByteBuffer.allocateDirect((int) Math.min(bufferSizeHeuristic(info), 524288));
     }
 
-    @SuppressWarnings("checkstyle:UnnecessaryParentheses") // Readability
     private static long bufferSizeHeuristic(UrlResponseInfo info) {
       final Map<String, List<String>> headers = info.getAllHeaders();
       if (headers.containsKey(CONTENT_LENGTH)) {

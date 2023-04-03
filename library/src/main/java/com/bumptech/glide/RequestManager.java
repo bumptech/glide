@@ -49,9 +49,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * handling, use the static Glide.load methods with your Fragment or Activity.
  *
  * @see Glide#with(android.app.Activity)
- * @see Glide#with(androidx.fragment.app.FragmentActivity)
+ * @see Glide#with(android.support.v4.app.FragmentActivity)
  * @see Glide#with(android.app.Fragment)
- * @see Glide#with(androidx.fragment.app.Fragment)
+ * @see Glide#with(android.support.v4.app.Fragment)
  * @see Glide#with(Context)
  */
 public class RequestManager
@@ -94,8 +94,6 @@ public class RequestManager
   private RequestOptions requestOptions;
 
   private boolean pauseAllRequestsOnTrimMemoryModerate;
-
-  private boolean clearOnStop;
 
   public RequestManager(
       @NonNull Glide glide,
@@ -202,17 +200,6 @@ public class RequestManager
   public synchronized RequestManager setDefaultRequestOptions(
       @NonNull RequestOptions requestOptions) {
     setRequestOptions(requestOptions);
-    return this;
-  }
-
-  /**
-   * Clear all resources when onStop() from {@link LifecycleListener} is called.
-   *
-   * @return This request manager.
-   */
-  @NonNull
-  public synchronized RequestManager clearOnStop() {
-    clearOnStop = true;
     return this;
   }
 
@@ -367,17 +354,12 @@ public class RequestManager
 
   /**
    * Lifecycle callback that unregisters for connectivity events (if the
-   * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads
-   * and clears all resources if {@link #clearOnStop()} is called.
+   * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads.
    */
   @Override
   public synchronized void onStop() {
+    pauseRequests();
     targetTracker.onStop();
-    if (clearOnStop) {
-      clearRequests();
-    } else {
-      pauseRequests();
-    }
   }
 
   /**
@@ -387,7 +369,10 @@ public class RequestManager
   @Override
   public synchronized void onDestroy() {
     targetTracker.onDestroy();
-    clearRequests();
+    for (Target<?> target : targetTracker.getAll()) {
+      clear(target);
+    }
+    targetTracker.clear();
     requestTracker.clearRequests();
     lifecycle.removeListener(this);
     lifecycle.removeListener(connectivityMonitor);
@@ -716,13 +701,6 @@ public class RequestManager
   @Override
   public void onLowMemory() {
     // Nothing to add conditionally. See Glide#onTrimMemory for unconditional behavior.
-  }
-
-  private synchronized void clearRequests() {
-    for (Target<?> target : targetTracker.getAll()) {
-      clear(target);
-    }
-    targetTracker.clear();
   }
 
   @Override

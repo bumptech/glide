@@ -1,19 +1,19 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    testImplementation libs.androidx.appcompat
+    testImplementation "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
     testImplementation project(':library')
     testImplementation project(':mocks')
     testImplementation project(':testutil')
-    testImplementation libs.guava.testlib
-    testImplementation libs.truth
-    testImplementation libs.junit
-    testImplementation libs.mockito
-    testImplementation libs.robolectric
-    testImplementation libs.mockwebserver
-    testImplementation libs.androidx.test.core
-    testImplementation libs.androidx.junit
-    testImplementation libs.androidx.test.runner
+    testImplementation "com.google.guava:guava-testlib:${GUAVA_TESTLIB_VERSION}"
+    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation "junit:junit:${JUNIT_VERSION}"
+    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
+    testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
+    testImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
+    testImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
 }
 
 tasks.withType(JavaCompile) {
@@ -29,7 +29,7 @@ afterEvaluate {
 android.testOptions.unitTests.all { Test testTask ->
     // configure max heap size of the test JVM
     testTask.maxHeapSize = TEST_JVM_MEMORY_SIZE as String
-    if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
+    if (JavaVersion.current() <= JavaVersion.VERSION_1_7) {
         // Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=2048m; support was removed in 8.0
         testTask.jvmArgs "-XX:MaxPermSize=${TEST_JVM_MEMORY_SIZE}"
     }
@@ -40,12 +40,11 @@ android.testOptions.unitTests.all { Test testTask ->
 }
 
 android {
-    namespace 'com.bumptech.glide.test'
-    compileSdkVersion libs.versions.compile.sdk.version.get()
+    compileSdk COMPILE_SDK_VERSION as int
 
     defaultConfig {
-        minSdk libs.versions.min.sdk.version.get() as int
-        targetSdk libs.versions.target.sdk.version.get() as int
+        minSdk MIN_SDK_VERSION as int
+        targetSdk TARGET_SDK_VERSION as int
         versionName VERSION_NAME as String
     }
 

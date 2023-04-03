@@ -7,26 +7,26 @@ dependencies {
     }
     annotationProcessor project(':annotation:compiler')
 
-    implementation libs.androidx.appcompat
-    implementation libs.volley
-    implementation libs.androidx.recyclerview
+    implementation "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
+    implementation "com.android.volley:volley:${VOLLEY_VERSION}"
+    implementation "androidx.recyclerview:recyclerview:${ANDROID_X_RECYCLERVIEW_VERSION}"
 }
 
 android {
-    namespace 'com.bumptech.glide.samples.flickr'
-    compileSdkVersion libs.versions.compile.sdk.version.get()
+    compileSdk COMPILE_SDK_VERSION as int
 
     defaultConfig {
-        minSdk libs.versions.min.sdk.version.get() as int
-        targetSdk libs.versions.target.sdk.version.get() as int
+        applicationId 'com.bumptech.glide.samples.flickr'
+        minSdk MIN_SDK_VERSION as int
+        targetSdk TARGET_SDK_VERSION as int
 
         versionCode 1
         versionName '1.0'
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 }
 

@@ -8,34 +8,34 @@ apply plugin: 'com.android.application'
 dependencies {
     annotationProcessor project(":annotation:compiler")
     implementation project(":library")
-    implementation libs.androidx.multidex
-    implementation libs.androidx.appcompat
+    implementation "com.android.support:multidex:$ANDROID_SUPPORT_MULTIDEX_VERSION"
+    implementation "androidx.appcompat:appcompat:$ANDROID_X_APPCOMPAT_VERSION"
 
     androidTestImplementation project(':library')
     androidTestImplementation project(':mocks')
     androidTestImplementation project(':testutil')
-    androidTestImplementation libs.mockito.android
-    androidTestImplementation libs.androidx.junit
-    androidTestImplementation libs.androidx.test.rules
-    androidTestImplementation libs.androidx.test.core
-    androidTestImplementation libs.androidx.espresso.idling
-    androidTestImplementation libs.androidx.espresso
-    androidTestImplementation libs.truth
-    androidTestImplementation libs.junit
-    androidTestImplementation libs.androidx.exifinterface
+    androidTestImplementation "org.mockito:mockito-android:$MOCKITO_ANDROID_VERSION"
+    androidTestImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
+    androidTestImplementation "androidx.test:rules:$ANDROID_X_TEST_RULES_VERSION"
+    androidTestImplementation "androidx.test:core:$ANDROID_X_TEST_CORE_VERSION"
+    androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$ANDROID_X_TEST_ESPRESSO_VERSION"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$ANDROID_X_TEST_ESPRESSO_VERSION"
+    androidTestImplementation "com.google.truth:truth:$TRUTH_VERSION"
+    androidTestImplementation "junit:junit:$JUNIT_VERSION"
+    androidTestImplementation "androidx.exifinterface:exifinterface:$ANDROID_X_EXIF_INTERFACE_VERSION"
 
     // Not totally clear why this is required, but it seems to be missing when tests are run on
     // 4.1.2 and 4.2.0 emulators.
-    androidTestImplementation libs.findbugs.jsr305
+    androidTestImplementation "com.google.code.findbugs:jsr305:$JSR_305_VERSION"
 }
 
 android {
-    namespace 'com.bumptech.glide.instrumentation'
-    compileSdkVersion libs.versions.compile.sdk.version.get()
+    compileSdk COMPILE_SDK_VERSION as int
 
     defaultConfig {
-        minSdk libs.versions.min.sdk.version.get() as int
-        targetSdk libs.versions.target.sdk.version.get() as int
+        applicationId 'com.bumptech.glide.instrumentation'
+        minSdk MIN_SDK_VERSION as int
+        targetSdk TARGET_SDK_VERSION as int
         versionCode 1
         versionName '1.0'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -53,3 +53,4 @@ android {
         }
     }
 }
+

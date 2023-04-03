@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.transcode;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -17,7 +16,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class BitmapDrawableTranscoderTest {
   private BitmapDrawableTranscoder transcoder;
 

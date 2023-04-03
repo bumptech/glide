@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -19,7 +18,7 @@ import org.robolectric.annotation.Config;
 
 // TODO: add a test for bitmap size using getAllocationByteSize when robolectric supports kitkat.
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class BitmapResourceTest {
   private int currentBuildVersion;
   private BitmapResourceHarness harness;

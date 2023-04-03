@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.bumptech.glide.samples.gallery">
 
   <uses-sdk
     android:minSdkVersion="29"
-    android:targetSdkVersion="34"
-    android:compileSdkVersion="34" />
+    android:targetSdkVersion="32"
+    android:compileSdkVersion="32" />
 
-  <uses-permission
-    android:maxSdkVersion="32"
-    android:name="android.permission.READ_EXTERNAL_STORAGE" />
-  <uses-permission
-    android:name="android.permission.READ_MEDIA_IMAGES" />
-  <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
   <application
           android:label="@string/app_name"

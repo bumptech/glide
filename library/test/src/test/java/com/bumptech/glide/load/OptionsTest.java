@@ -1,7 +1,5 @@
 package com.bumptech.glide.load;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
-
 import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Option.CacheKeyUpdater;
 import com.bumptech.glide.tests.KeyTester;
@@ -14,7 +12,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class OptionsTest {
   @Rule public final KeyTester keyTester = new KeyTester();
 

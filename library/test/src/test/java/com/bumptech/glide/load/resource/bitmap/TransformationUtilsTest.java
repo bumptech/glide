@@ -3,7 +3,6 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -15,9 +14,7 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.graphics.Matrix;
-import android.os.Build.VERSION_CODES;
 import androidx.exifinterface.media.ExifInterface;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
@@ -403,29 +400,14 @@ public class TransformationUtilsTest {
 
   @Test
   @Config(sdk = 19)
-  public void testRotateImageExif_preservesitmapsWithNullConfigs() {
+  public void testRotateImageExifHandlesBitmapsWithNullConfigs() {
     Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     toRotate.setConfig(null);
     Bitmap rotated =
         TransformationUtils.rotateImageExif(
             bitmapPool, toRotate, ExifInterface.ORIENTATION_ROTATE_180);
-    assertNull(rotated.getConfig());
+    assertEquals(Bitmap.Config.ARGB_8888, rotated.getConfig());
   }
-
-  @Test
-  @Config(sdk = VERSION_CODES.UPSIDE_DOWN_CAKE)
-  public void rotateImageExif_preservesColorSpace() {
-    Bitmap toRotate = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888);
-    toRotate.setColorSpace(ColorSpace.get(ColorSpace.Named.DISPLAY_P3));
-
-    Bitmap rotated =
-        TransformationUtils.rotateImageExif(
-            bitmapPool, toRotate, ExifInterface.ORIENTATION_ROTATE_90);
-
-    assertEquals(ColorSpace.get(ColorSpace.Named.DISPLAY_P3), rotated.getColorSpace());
-  }
-
-  // TODO: Add gainmap-based tests once Robolectric has sufficient support.
 
   @Test
   public void testInitializeMatrixSetsScaleIfFlipHorizontal() {

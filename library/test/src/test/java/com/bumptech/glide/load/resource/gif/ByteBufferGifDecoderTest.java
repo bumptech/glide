@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.gif;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
@@ -33,7 +32,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class ByteBufferGifDecoderTest {
   private static final byte[] GIF_HEADER = new byte[] {0x47, 0x49, 0x46};
   private static final int ARRAY_POOL_SIZE_BYTES = 4 * 1024 * 1024;

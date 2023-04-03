@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.gif;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -47,7 +46,7 @@ import org.robolectric.annotation.LooperMode;
 
 @LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class GifFrameLoaderTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 

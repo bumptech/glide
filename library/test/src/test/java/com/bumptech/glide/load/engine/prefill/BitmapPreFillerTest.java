@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine.prefill;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -31,7 +30,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class BitmapPreFillerTest {
   private static final int DEFAULT_BITMAP_WIDTH = 100;
   private static final int DEFAULT_BITMAP_HEIGHT = 50;

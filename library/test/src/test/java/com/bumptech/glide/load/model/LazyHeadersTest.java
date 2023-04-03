@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.model;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -17,7 +16,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class LazyHeadersTest {
   private static final String DEFAULT_USER_AGENT = "default_user_agent";
   private static final String DEFAULT_USER_AGENT_PROPERTY = "http.agent";

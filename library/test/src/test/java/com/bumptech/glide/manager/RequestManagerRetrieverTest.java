@@ -1,6 +1,5 @@
 package com.bumptech.glide.manager;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -16,12 +15,12 @@ import android.content.ContextWrapper;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentController;
+import android.support.v4.app.FragmentHostCallback;
 import android.view.LayoutInflater;
 import androidx.annotation.RequiresApi;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentController;
-import androidx.fragment.app.FragmentHostCallback;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -44,7 +43,7 @@ import org.robolectric.shadows.ShadowLooper;
 
 @LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class RequestManagerRetrieverTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 

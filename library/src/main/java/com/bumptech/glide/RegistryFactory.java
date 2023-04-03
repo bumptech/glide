@@ -155,10 +155,7 @@ final class RegistryFactory {
     // TODO(judds): Make ParcelFileDescriptorBitmapDecoder work with ImageDecoder.
     Downsampler downsampler =
         new Downsampler(
-            registry.getImageHeaderParsers(),
-            resources.getDisplayMetrics(),
-            bitmapPool,
-            arrayPool);
+            registry.getImageHeaderParsers(), resources.getDisplayMetrics(), bitmapPool, arrayPool);
 
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;

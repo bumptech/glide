@@ -1,6 +1,5 @@
 package com.bumptech.glide.request.target;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -23,7 +22,7 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowNotificationManager;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK, shadows = NotificationTargetTest.UpdateShadowNotificationManager.class)
+@Config(sdk = 18, shadows = NotificationTargetTest.UpdateShadowNotificationManager.class)
 public class NotificationTargetTest {
   private UpdateShadowNotificationManager shadowManager;
   private RemoteViews remoteViews;

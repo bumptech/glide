@@ -52,7 +52,9 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
               + "://"
               + resources.getResourcePackageName(model)
               + '/'
-              + model);
+              + resources.getResourceTypeName(model)
+              + '/'
+              + resources.getResourceEntryName(model));
     } catch (Resources.NotFoundException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Received invalid resource id: " + model, e);

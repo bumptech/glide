@@ -37,7 +37,7 @@ internal class LibraryGlideModulesParser(
         }
         .toList()
     val uniqueLibraryGlideModules = allLibraryGlideModules.associateBy { it.name }.values.toList()
-    if (uniqueLibraryGlideModules.size != libraryGlideModules.size) {
+    if (uniqueLibraryGlideModules != libraryGlideModules) {
       // Find the set of modules that have been included more than once by mapping the qualified
       // name of the module to a count of the number of times it's been seen. Duplicates are then
       // any keys that have a value > 1.

@@ -1,20 +1,19 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    implementation libs.truth
+    implementation "com.google.truth:truth:${TRUTH_VERSION}"
     implementation project(":library")
-    api libs.androidx.annotation
-    api libs.androidx.core
-    api libs.androidx.test.core
+    api "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
+    api "androidx.core:core:${ANDROID_X_CORE_VERSION}"
+    api "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
 }
 
 android {
-    namespace 'com.bumptech.glide.testutil'
-    compileSdkVersion libs.versions.compile.sdk.version.get()
+    compileSdk COMPILE_SDK_VERSION as int
 
     defaultConfig {
-        minSdk libs.versions.min.sdk.version.get() as int
-        targetSdk libs.versions.target.sdk.version.get() as int
+        minSdk MIN_SDK_VERSION as int
+        targetSdk TARGET_SDK_VERSION as int
         versionName VERSION_NAME as String
     }
 

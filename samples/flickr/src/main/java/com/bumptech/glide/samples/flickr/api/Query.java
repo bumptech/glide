@@ -6,6 +6,7 @@ import android.os.Parcelable;
 public interface Query extends Parcelable {
   /** A user facing description of the query. */
   String getDescription();
+
   /** The url to use to execute the query. */
   String getUrl();
 }

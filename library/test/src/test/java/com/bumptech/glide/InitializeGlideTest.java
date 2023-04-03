@@ -1,6 +1,5 @@
 package com.bumptech.glide;
 
-import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertThrows;
 
 import android.content.Context;
@@ -69,17 +68,5 @@ public class InitializeGlideTest {
     assertThrows(TestException.class, initializeGlide);
     // Make sure the second exception isn't hidden by some Glide initialization related exception.
     assertThrows(TestException.class, initializeGlide);
-  }
-
-  @Test
-  public void isInitialized_whenNotInitialized_returnsFalse() {
-    assertThat(Glide.isInitialized()).isFalse();
-  }
-
-  @Test
-  public void isInitialized_whenInitialized_returnsTrue() {
-    Glide.get(context);
-
-    assertThat(Glide.isInitialized()).isTrue();
   }
 }

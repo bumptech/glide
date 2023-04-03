@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.mockResource;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -17,7 +16,7 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class ResourceRecyclerTest {
 
   private ResourceRecycler recycler;

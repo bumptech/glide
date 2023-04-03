@@ -27,18 +27,17 @@ afterEvaluate {
 }
 
 android {
-    namespace 'com.bumptech.glide.annotation.compiler.test'
-    compileSdk libs.versions.compile.sdk.version.get()
+    compileSdk COMPILE_SDK_VERSION as int
 
     defaultConfig {
-        minSdk libs.versions.min.sdk.version.get() as int
-        targetSdk libs.versions.target.sdk.version.get() as int
+        minSdk MIN_SDK_VERSION as int
+        targetSdk TARGET_SDK_VERSION as int
         versionName VERSION_NAME as String
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 
     testOptions {
@@ -57,9 +56,9 @@ android {
 dependencies {
     testImplementation project(':glide')
     testImplementation project(':annotation:compiler')
-    testImplementation libs.junit
-    testImplementation libs.javapoet
-    testImplementation libs.findbugs.jsr305
+    testImplementation "junit:junit:${JUNIT_VERSION}"
+    testImplementation "com.squareup:javapoet:${JAVAPOET_VERSION}"
+    testImplementation "com.google.code.findbugs:jsr305:${JSR_305_VERSION}"
     // Using 0.10 of compile-testing is required for Android Studio to function, but not for the
     // gradle build. Not yet clear why, but it looks like some kind of version conflict between
     // javapoet, guava and/or truth.
@@ -69,13 +68,13 @@ dependencies {
         // confusing.
         exclude group: "com.google.auto.value", module: "auto-value"
     }
-    testImplementation libs.androidx.annotation
-    testImplementation libs.androidx.fragment
+    testImplementation "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
+    testImplementation "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
     // TODO: Find some way to include a similar dependency on java 9+ and re-enable these tests in gradle.
 //    testImplementation files(Jvm.current().getJre().homeDir.getAbsolutePath()+'/lib/rt.jar')
 
     testAnnotationProcessor project(':annotation:compiler')
-    testAnnotationProcessor libs.autoservice
+    testAnnotationProcessor "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
 }
 
 task regenerateTestResources {
@@ -95,3 +94,4 @@ task regenerateTestResources {
 afterEvaluate {
     regenerateTestResources.finalizedBy(testReleaseUnitTest)
 }
+

@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import android.app.Application;
 import android.net.Uri;
 import android.widget.ImageView;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.DataSource;
@@ -41,7 +40,7 @@ import org.robolectric.annotation.Config;
 
 @SuppressWarnings("unchecked")
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class RequestBuilderTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
@@ -175,17 +174,17 @@ public class RequestBuilderTest {
           public boolean onLoadFailed(
               @Nullable GlideException e,
               Object model,
-              @NonNull Target<Object> target,
+              Target<Object> target,
               boolean isFirstResource) {
             return false;
           }
 
           @Override
           public boolean onResourceReady(
-              @NonNull Object resource,
-              @NonNull Object model,
+              Object resource,
+              Object model,
               Target<Object> target,
-              @NonNull DataSource dataSource,
+              DataSource dataSource,
               boolean isFirstResource) {
             return false;
           }
@@ -196,17 +195,17 @@ public class RequestBuilderTest {
           public boolean onLoadFailed(
               @Nullable GlideException e,
               Object model,
-              @NonNull Target<Object> target,
+              Target<Object> target,
               boolean isFirstResource) {
             return false;
           }
 
           @Override
           public boolean onResourceReady(
-              @NonNull Object resource,
-              @NonNull Object model,
+              Object resource,
+              Object model,
               Target<Object> target,
-              @NonNull DataSource dataSource,
+              DataSource dataSource,
               boolean isFirstResource) {
             return false;
           }

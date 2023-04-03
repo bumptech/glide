@@ -12,13 +12,13 @@ jobs:
           - uses: actions/checkout@v3
           - uses: actions/setup-java@v3
             with:
-              java-version: '17'
+              java-version: '11'
               distribution: 'zulu'
           - uses: gradle/gradle-build-action@v2
           - name: Build and run unit tests with Gradle
             run: ./scripts/ci_unit.sh
           - name: Build javadocs
-            run: ./gradlew :dokkaHtmlMultiModule
+            run: ./gradlew dokkaHtmlMultiModule
           - name: Publish a source snapshot to Sonatype
             env:
               NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}

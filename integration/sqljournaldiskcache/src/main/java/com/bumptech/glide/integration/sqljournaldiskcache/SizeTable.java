@@ -5,6 +5,7 @@ final class SizeTable {
 
   interface Columns {
     String ID = "id";
+
     /** The total size in bytes of all files in the cache (+- pending deletes and inserts). */
     String SIZE = "size";
   }

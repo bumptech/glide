@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 interface ByteBufferParser<T> {
   /** Returns the required type of data parsed from the given {@link ByteBuffer}. */
   T parse(ByteBuffer byteBuffer);
+
   /** Returns the {@link Class} of the data that will be parsed from {@link ByteBuffer}s. */
   Class<T> getDataClass();
 }

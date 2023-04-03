@@ -541,6 +541,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     isModelSet = true;
     return selfOrThrowIfLocked();
   }
+
   /**
    * Returns an object to load the given {@link Bitmap}.
    *
@@ -1293,10 +1294,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
         glideContext.getEngine(),
         transitionOptions.getTransitionFactory(),
         callbackExecutor);
-  }
-
-  Object getModel() {
-    return model;
   }
 
   @Override

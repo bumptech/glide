@@ -16,7 +16,6 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.os.Build;
-import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.util.DisplayMetrics;
 import androidx.annotation.Nullable;
@@ -126,26 +125,6 @@ public class DownsamplerEmulatorTest {
         // Original scaling
         .setTargetDimensions(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
         .givenImageWithDimensionsOf(1821, 2634, onAllApisAndAllFormatsExpect(1821, 2634))
-        .run();
-  }
-
-  @Test
-  public void calculateScaling_withGainmap_androidU_withAtMost() throws IOException {
-    new Tester(DownsampleStrategy.AT_MOST)
-        // See #3673
-        .setTargetDimensions(1977, 2636)
-        .givenGainmapImageWithDimensionsOf(
-            3024,
-            4032,
-            /* allowHardwareConfig= */ false,
-            atAndAbove(34)
-                .with(new Formats(new CompressFormat[] {CompressFormat.JPEG}, 1512, 2016)))
-        .givenGainmapImageWithDimensionsOf(
-            3024,
-            4032,
-            /* allowHardwareConfig= */ true,
-            atAndAbove(34)
-                .with(new Formats(new CompressFormat[] {CompressFormat.JPEG}, 1512, 2016)))
         .run();
   }
 
@@ -438,18 +417,14 @@ public class DownsamplerEmulatorTest {
       int targetWidth,
       int targetHeight,
       int exifOrientation,
-      boolean hasGainmap,
-      boolean allowHardwareConfig,
       DownsampleStrategy strategy,
       int expectedWidth,
       int expectedHeight)
       throws IOException {
     Downsampler downsampler = buildDownsampler();
 
-    InputStream is =
-        openBitmapStream(format, initialWidth, initialHeight, exifOrientation, hasGainmap);
+    InputStream is = openBitmapStream(format, initialWidth, initialHeight, exifOrientation);
     Options options = new Options().set(DownsampleStrategy.OPTION, strategy);
-    options.set(Downsampler.ALLOW_HARDWARE_CONFIG, allowHardwareConfig);
     Bitmap bitmap;
     try {
       bitmap = downsampler.decode(is, targetWidth, targetHeight, options).get();
@@ -464,8 +439,6 @@ public class DownsamplerEmulatorTest {
           + strategy
           + ", orientation: "
           + exifOrientation
-          + ", allowHardwareConfig: "
-          + allowHardwareConfig
           + " -"
           + " Initial "
           + readableDimens(initialWidth, initialHeight)
@@ -476,10 +449,7 @@ public class DownsamplerEmulatorTest {
           + " but threw OutOfMemoryError";
     }
     try {
-      if (VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE
-          && (bitmap.getWidth() != expectedWidth
-              || bitmap.getHeight() != expectedHeight
-              || bitmap.hasGainmap() != hasGainmap)) {
+      if (bitmap.getWidth() != expectedWidth || bitmap.getHeight() != expectedHeight) {
         return "API: "
             + Build.VERSION.SDK_INT
             + ", os: "
@@ -490,33 +460,6 @@ public class DownsamplerEmulatorTest {
             + strategy
             + ", orientation: "
             + exifOrientation
-            + ", hasGainmap: "
-            + hasGainmap
-            + ", allowHardwareConfig: "
-            + allowHardwareConfig
-            + " -"
-            + " Initial "
-            + readableDimens(initialWidth, initialHeight)
-            + " Target "
-            + readableDimens(targetWidth, targetHeight)
-            + " Expected "
-            + readableDimensAndHasGainmap(expectedWidth, expectedHeight, hasGainmap)
-            + ", but Received "
-            + readableDimensAndHasGainmap(
-                bitmap.getWidth(), bitmap.getHeight(), bitmap.hasGainmap());
-      } else if (bitmap.getWidth() != expectedWidth || bitmap.getHeight() != expectedHeight) {
-        return "API: "
-            + Build.VERSION.SDK_INT
-            + ", os: "
-            + Build.VERSION.RELEASE
-            + ", format: "
-            + format
-            + ", strategy: "
-            + strategy
-            + ", orientation: "
-            + exifOrientation
-            + ", allowHardwareConfig: "
-            + allowHardwareConfig
             + " -"
             + " Initial "
             + readableDimens(initialWidth, initialHeight)
@@ -537,10 +480,6 @@ public class DownsamplerEmulatorTest {
     return "[" + width + "x" + height + "]";
   }
 
-  private static String readableDimensAndHasGainmap(int width, int height, boolean hasGainmap) {
-    return "[" + width + "x" + height + "], hasGainmap=" + hasGainmap;
-  }
-
   private static Downsampler buildDownsampler() {
     List<ImageHeaderParser> parsers =
         Collections.<ImageHeaderParser>singletonList(new DefaultImageHeaderParser());
@@ -553,7 +492,7 @@ public class DownsamplerEmulatorTest {
   }
 
   private static InputStream openBitmapStream(
-      CompressFormat format, int width, int height, int exifOrientation, boolean hasGainmap) {
+      CompressFormat format, int width, int height, int exifOrientation) {
     Preconditions.checkArgument(
         format == CompressFormat.JPEG || exifOrientation == ExifInterface.ORIENTATION_UNDEFINED,
         "Can only orient JPEGs, but asked for orientation: "
@@ -563,14 +502,13 @@ public class DownsamplerEmulatorTest {
 
     // TODO: support orientations for formats other than JPEG.
     if (format == CompressFormat.JPEG) {
-      return openFileStream(width, height, exifOrientation, hasGainmap);
+      return openFileStream(width, height, exifOrientation);
     } else {
-      return openInMemoryStream(format, width, height, hasGainmap);
+      return openInMemoryStream(format, width, height);
     }
   }
 
-  private static InputStream openFileStream(
-      int width, int height, int exifOrientation, boolean hasGainmap) {
+  private static InputStream openFileStream(int width, int height, int exifOrientation) {
     int rotationDegrees = TransformationUtils.getExifOrientationDegrees(exifOrientation);
     if (rotationDegrees == 270 || rotationDegrees == 90) {
       int temp = width;
@@ -579,19 +517,12 @@ public class DownsamplerEmulatorTest {
     }
 
     Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
-    if (hasGainmap && VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
-      bitmap.setGainmap(
-          // Intentionally not directly imported due to test failures with class resolution when
-          // running on SDK levels < 34. Also, do not extract methods with Gainmap in the method
-          // signature for the same reason.
-          new android.graphics.Gainmap(Bitmap.createBitmap(width / 2, height / 2, Config.ALPHA_8)));
-    }
 
     OutputStream os = null;
     try {
       File tempFile =
           File.createTempFile(
-              "ds-" + width + "-" + height + "-" + exifOrientation + "-" + hasGainmap,
+              "ds-" + width + "-" + height + "-" + exifOrientation,
               ".jpeg",
               ApplicationProvider.getApplicationContext().getCacheDir());
       os = new BufferedOutputStream(new FileOutputStream(tempFile));
@@ -620,16 +551,8 @@ public class DownsamplerEmulatorTest {
     }
   }
 
-  private static InputStream openInMemoryStream(
-      CompressFormat format, int width, int height, boolean hasGainmap) {
+  private static InputStream openInMemoryStream(CompressFormat format, int width, int height) {
     Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
-    if (hasGainmap && VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
-      // Intentionally not directly imported due to test failures with class resolution when
-      // running on SDK levels < 34. Also, do not extract methods with Gainmap in the method
-      // signature for the same reason.
-      bitmap.setGainmap(
-          new android.graphics.Gainmap(Bitmap.createBitmap(width / 2, height / 2, Config.ALPHA_8)));
-    }
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     bitmap.compress(format, 100 /*quality*/, os);
     bitmap.recycle();
@@ -656,21 +579,6 @@ public class DownsamplerEmulatorTest {
 
     Tester givenSquareImageWithDimensionOf(int dimension, Api... apis) {
       return givenImageWithDimensionsOf(dimension, dimension, apis);
-    }
-
-    Tester givenGainmapImageWithDimensionsOf(
-        int sourceWidth, int sourceHeight, boolean allowHardwareConfig, Api... apis) {
-      testCases.add(
-          new TestCase.Builder()
-              .setSourceWidth(sourceWidth)
-              .setSourceHeight(sourceHeight)
-              .setTargetWidth(targetWidth)
-              .setTargetHeight(targetHeight)
-              .setHasGainmap(true)
-              .setAllowHardwareConfig(allowHardwareConfig)
-              .setApis(apis)
-              .build());
-      return this;
     }
 
     Tester givenImageWithDimensionsOf(int sourceWidth, int sourceHeight, Api... apis) {
@@ -700,99 +608,22 @@ public class DownsamplerEmulatorTest {
       private final int sourceHeight;
       private final int targetWidth;
       private final int targetHeight;
-      private final boolean hasGainmap;
-      private final boolean allowHardwareConfig;
       private final Api[] apis;
 
-      /**
-       * @deprecated Use the {@link Builder}.
-       */
-      @Deprecated
       TestCase(int sourceWidth, int sourceHeight, int targetWidth, int targetHeight, Api... apis) {
         this.sourceWidth = sourceWidth;
         this.sourceHeight = sourceHeight;
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
-        this.hasGainmap = false;
-        this.allowHardwareConfig = false;
         this.apis = apis;
-      }
-
-      private TestCase(Builder builder) {
-        this.sourceWidth = builder.sourceWidth;
-        this.sourceHeight = builder.sourceHeight;
-        this.targetWidth = builder.targetWidth;
-        this.targetHeight = builder.targetHeight;
-        this.hasGainmap = builder.hasGainmap;
-        this.allowHardwareConfig = builder.allowHardwareConfig;
-        this.apis = builder.apis;
       }
 
       List<String> test(DownsampleStrategy strategy) throws IOException {
         List<String> results = new ArrayList<>();
         for (Api api : apis) {
-          results.addAll(
-              api.test(
-                  sourceWidth,
-                  sourceHeight,
-                  hasGainmap,
-                  allowHardwareConfig,
-                  targetWidth,
-                  targetHeight,
-                  strategy));
+          results.addAll(api.test(sourceWidth, sourceHeight, targetWidth, targetHeight, strategy));
         }
         return results;
-      }
-
-      private static final class Builder {
-
-        private int sourceWidth;
-        private int sourceHeight;
-        private int targetWidth;
-        private int targetHeight;
-        private boolean hasGainmap;
-        private boolean allowHardwareConfig;
-        @Nullable private Api[] apis;
-
-        public Builder setSourceWidth(int sourceWidth) {
-          this.sourceWidth = sourceWidth;
-          return this;
-        }
-
-        public Builder setSourceHeight(int sourceHeight) {
-          this.sourceHeight = sourceHeight;
-          return this;
-        }
-
-        public Builder setTargetWidth(int targetWidth) {
-          this.targetWidth = targetWidth;
-          return this;
-        }
-
-        public Builder setTargetHeight(int targetHeight) {
-          this.targetHeight = targetHeight;
-          return this;
-        }
-
-        public Builder setHasGainmap(boolean hasGainmap) {
-          this.hasGainmap = hasGainmap;
-          return this;
-        }
-
-        public Builder setAllowHardwareConfig(boolean allowHardwareConfig) {
-          this.allowHardwareConfig = allowHardwareConfig;
-          return this;
-        }
-
-        public Builder setApis(Api[] apis) {
-          this.apis = apis;
-          return this;
-        }
-
-        public TestCase build() {
-          Preconditions.checkNotNull(apis);
-          return new TestCase(this);
-        }
       }
     }
   }
@@ -851,8 +682,6 @@ public class DownsamplerEmulatorTest {
     List<String> test(
         int sourceWidth,
         int sourceHeight,
-        boolean hasGainmap,
-        boolean allowHardwareConfig,
         int targetWidth,
         int targetHeight,
         DownsampleStrategy strategy)
@@ -864,14 +693,7 @@ public class DownsamplerEmulatorTest {
       List<String> results = new ArrayList<>();
       for (Formats format : formats) {
         results.addAll(
-            format.runTest(
-                sourceWidth,
-                sourceHeight,
-                hasGainmap,
-                allowHardwareConfig,
-                targetWidth,
-                targetHeight,
-                strategy));
+            format.runTest(sourceWidth, sourceHeight, targetWidth, targetHeight, strategy));
       }
       return results;
     }
@@ -925,8 +747,6 @@ public class DownsamplerEmulatorTest {
     List<String> runTest(
         int sourceWidth,
         int sourceHeight,
-        boolean hasGainmap,
-        boolean allowHardwareConfig,
         int targetWidth,
         int targetHeight,
         DownsampleStrategy strategy)
@@ -944,8 +764,6 @@ public class DownsamplerEmulatorTest {
                   targetWidth,
                   targetHeight,
                   exifOrientation,
-                  hasGainmap,
-                  allowHardwareConfig,
                   strategy,
                   expectedWidth,
                   expectedHeight);

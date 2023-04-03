@@ -19,39 +19,41 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.robolectric.util.Util;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(sdk = 18)
 public class DefaultImageHeaderParserTest {
 
   private static final byte[] PNG_HEADER_WITH_IHDR_CHUNK =
       new byte[] {
-          (byte) 0x89,
-          0x50,
-          0x4e,
-          0x47,
-          0xd,
-          0xa,
-          0x1a,
-          0xa,
-          0x0,
-          0x0,
-          0x0,
-          0xd,
-          0x49,
-          0x48,
-          0x44,
-          0x52,
-          0x0,
-          0x0,
-          0x1,
-          (byte) 0x90,
-          0x0,
-          0x0,
-          0x1,
-          0x2c,
-          0x8,
-          0x6
+        (byte) 0x89,
+        0x50,
+        0x4e,
+        0x47,
+        0xd,
+        0xa,
+        0x1a,
+        0xa,
+        0x0,
+        0x0,
+        0x0,
+        0xd,
+        0x49,
+        0x48,
+        0x44,
+        0x52,
+        0x0,
+        0x0,
+        0x1,
+        (byte) 0x90,
+        0x0,
+        0x0,
+        0x1,
+        0x2c,
+        0x8,
+        0x6
       };
 
   private ArrayPool byteArrayPool;
@@ -177,38 +179,38 @@ public class DefaultImageHeaderParserTest {
   public void testCanParseLosslessWebpWithAlpha() throws IOException {
     byte[] data =
         new byte[] {
-            0x52,
-            0x49,
-            0x46,
-            0x46,
-            0x3c,
-            0x50,
-            0x00,
-            0x00,
-            0x57,
-            0x45,
-            0x42,
-            0x50,
-            0x56,
-            0x50,
-            0x38,
-            0x4c, // Lossless
-            0x30,
-            0x50,
-            0x00,
-            0x00,
-            0x2f, // Flags
-            (byte) 0xef,
-            (byte) 0x80,
-            0x15,
-            0x10,
-            (byte) 0x8d,
-            0x30,
-            0x68,
-            0x1b,
-            (byte) 0xc9,
-            (byte) 0x91,
-            (byte) 0xb2
+          0x52,
+          0x49,
+          0x46,
+          0x46,
+          0x3c,
+          0x50,
+          0x00,
+          0x00,
+          0x57,
+          0x45,
+          0x42,
+          0x50,
+          0x56,
+          0x50,
+          0x38,
+          0x4c, // Lossless
+          0x30,
+          0x50,
+          0x00,
+          0x00,
+          0x2f, // Flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
         };
     runTest(
         data,
@@ -232,38 +234,38 @@ public class DefaultImageHeaderParserTest {
   public void testCanParseLosslessWebpWithoutAlpha() throws IOException {
     byte[] data =
         new byte[] {
-            0x52,
-            0x49,
-            0x46,
-            0x46,
-            0x3c,
-            0x50,
-            0x00,
-            0x00,
-            0x57,
-            0x45,
-            0x42,
-            0x50,
-            0x56,
-            0x50,
-            0x38,
-            0x4c, // Lossless
-            0x30,
-            0x50,
-            0x00,
-            0x00,
-            0x00, // Flags
-            (byte) 0xef,
-            (byte) 0x80,
-            0x15,
-            0x10,
-            (byte) 0x8d,
-            0x30,
-            0x68,
-            0x1b,
-            (byte) 0xc9,
-            (byte) 0x91,
-            (byte) 0xb2
+          0x52,
+          0x49,
+          0x46,
+          0x46,
+          0x3c,
+          0x50,
+          0x00,
+          0x00,
+          0x57,
+          0x45,
+          0x42,
+          0x50,
+          0x56,
+          0x50,
+          0x38,
+          0x4c, // Lossless
+          0x30,
+          0x50,
+          0x00,
+          0x00,
+          0x00, // Flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
         };
     runTest(
         data,
@@ -287,38 +289,38 @@ public class DefaultImageHeaderParserTest {
   public void testCanParseExtendedWebpWithAlpha() throws IOException {
     byte[] data =
         new byte[] {
-            0x52,
-            0x49,
-            0x46,
-            0x46,
-            0x3c,
-            0x50,
-            0x00,
-            0x00,
-            0x57,
-            0x45,
-            0x42,
-            0x50,
-            0x56,
-            0x50,
-            0x38,
-            0x58, // Extended
-            0x30,
-            0x50,
-            0x00,
-            0x00,
-            0x10, // flags
-            (byte) 0xef,
-            (byte) 0x80,
-            0x15,
-            0x10,
-            (byte) 0x8d,
-            0x30,
-            0x68,
-            0x1b,
-            (byte) 0xc9,
-            (byte) 0x91,
-            (byte) 0xb2
+          0x52,
+          0x49,
+          0x46,
+          0x46,
+          0x3c,
+          0x50,
+          0x00,
+          0x00,
+          0x57,
+          0x45,
+          0x42,
+          0x50,
+          0x56,
+          0x50,
+          0x38,
+          0x58, // Extended
+          0x30,
+          0x50,
+          0x00,
+          0x00,
+          0x10, // flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
         };
     runTest(
         data,
@@ -342,38 +344,38 @@ public class DefaultImageHeaderParserTest {
   public void testCanParseExtendedWebpWithoutAlpha() throws IOException {
     byte[] data =
         new byte[] {
-            0x52,
-            0x49,
-            0x46,
-            0x46,
-            0x3c,
-            0x50,
-            0x00,
-            0x00,
-            0x57,
-            0x45,
-            0x42,
-            0x50,
-            0x56,
-            0x50,
-            0x38,
-            0x58, // Extended
-            0x30,
-            0x50,
-            0x00,
-            0x00,
-            0x00, // flags
-            (byte) 0xef,
-            (byte) 0x80,
-            0x15,
-            0x10,
-            (byte) 0x8d,
-            0x30,
-            0x68,
-            0x1b,
-            (byte) 0xc9,
-            (byte) 0x91,
-            (byte) 0xb2
+          0x52,
+          0x49,
+          0x46,
+          0x46,
+          0x3c,
+          0x50,
+          0x00,
+          0x00,
+          0x57,
+          0x45,
+          0x42,
+          0x50,
+          0x56,
+          0x50,
+          0x38,
+          0x58, // Extended
+          0x30,
+          0x50,
+          0x00,
+          0x00,
+          0x00, // flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
         };
     runTest(
         data,
@@ -397,38 +399,38 @@ public class DefaultImageHeaderParserTest {
   public void testCanParseExtendedWebpWithoutAlphaAndWithAnimation() throws IOException {
     byte[] data =
         new byte[] {
-            0x52,
-            0x49,
-            0x46,
-            0x46,
-            0x3c,
-            0x50,
-            0x00,
-            0x00,
-            0x57,
-            0x45,
-            0x42,
-            0x50,
-            0x56,
-            0x50,
-            0x38,
-            0x58, // Extended
-            0x30,
-            0x50,
-            0x00,
-            0x00,
-            0x02, // Flags
-            (byte) 0xef,
-            (byte) 0x80,
-            0x15,
-            0x10,
-            (byte) 0x8d,
-            0x30,
-            0x68,
-            0x1b,
-            (byte) 0xc9,
-            (byte) 0x91,
-            (byte) 0xb2
+          0x52,
+          0x49,
+          0x46,
+          0x46,
+          0x3c,
+          0x50,
+          0x00,
+          0x00,
+          0x57,
+          0x45,
+          0x42,
+          0x50,
+          0x56,
+          0x50,
+          0x38,
+          0x58, // Extended
+          0x30,
+          0x50,
+          0x00,
+          0x00,
+          0x02, // Flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
         };
     runTest(
         data,
@@ -452,38 +454,38 @@ public class DefaultImageHeaderParserTest {
   public void testCanParseExtendedWebpWithAlphaAndAnimation() throws IOException {
     byte[] data =
         new byte[] {
-            0x52,
-            0x49,
-            0x46,
-            0x46,
-            0x3c,
-            0x50,
-            0x00,
-            0x00,
-            0x57,
-            0x45,
-            0x42,
-            0x50,
-            0x56,
-            0x50,
-            0x38,
-            0x58, // Extended
-            0x30,
-            0x50,
-            0x00,
-            0x00,
-            (byte) 0x12, // Flags
-            (byte) 0xef,
-            (byte) 0x80,
-            0x15,
-            0x10,
-            (byte) 0x8d,
-            0x30,
-            0x68,
-            0x1b,
-            (byte) 0xc9,
-            (byte) 0x91,
-            (byte) 0xb2
+          0x52,
+          0x49,
+          0x46,
+          0x46,
+          0x3c,
+          0x50,
+          0x00,
+          0x00,
+          0x57,
+          0x45,
+          0x42,
+          0x50,
+          0x56,
+          0x50,
+          0x38,
+          0x58, // Extended
+          0x30,
+          0x50,
+          0x00,
+          0x00,
+          (byte) 0x12, // Flags
+          (byte) 0xef,
+          (byte) 0x80,
+          0x15,
+          0x10,
+          (byte) 0x8d,
+          0x30,
+          0x68,
+          0x1b,
+          (byte) 0xc9,
+          (byte) 0x91,
+          (byte) 0xb2
         };
     runTest(
         data,
@@ -528,39 +530,39 @@ public class DefaultImageHeaderParserTest {
   public void testCanParseAvifMajorBrand() throws IOException {
     byte[] data =
         new byte[] {
-            // Box Size.
-            0x00,
-            0x00,
-            0x00,
-            0x1C,
-            // ftyp.
-            0x66,
-            0x74,
-            0x79,
-            0x70,
-            // avif (major brand).
-            0x61,
-            0x76,
-            0x69,
-            0x66,
-            // minor version.
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            // other minor brands (mif1, miaf, MA1B).
-            0x6d,
-            0x69,
-            0x66,
-            0x31,
-            0x6d,
-            0x69,
-            0x61,
-            0x66,
-            0x4d,
-            0x41,
-            0x31,
-            0x42
+          // Box Size.
+          0x00,
+          0x00,
+          0x00,
+          0x1C,
+          // ftyp.
+          0x66,
+          0x74,
+          0x79,
+          0x70,
+          // avif (major brand).
+          0x61,
+          0x76,
+          0x69,
+          0x66,
+          // minor version.
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          // other minor brands (mif1, miaf, MA1B).
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          0x6d,
+          0x69,
+          0x61,
+          0x66,
+          0x4d,
+          0x41,
+          0x31,
+          0x42
         };
     runTest(
         data,
@@ -602,39 +604,39 @@ public class DefaultImageHeaderParserTest {
   public void testCanParseAvifMinorBrand() throws IOException {
     byte[] data =
         new byte[] {
-            // Box Size.
-            0x00,
-            0x00,
-            0x00,
-            0x1C,
-            // ftyp.
-            0x66,
-            0x74,
-            0x79,
-            0x70,
-            // mif1 (major brand).
-            0x6d,
-            0x69,
-            0x66,
-            0x31,
-            // minor version.
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            // other minor brands (miaf, avif, MA1B).
-            0x6d,
-            0x69,
-            0x61,
-            0x66,
-            0x61,
-            0x76,
-            0x69,
-            0x66,
-            0x4d,
-            0x41,
-            0x31,
-            0x42
+          // Box Size.
+          0x00,
+          0x00,
+          0x00,
+          0x1C,
+          // ftyp.
+          0x66,
+          0x74,
+          0x79,
+          0x70,
+          // mif1 (major brand).
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          // minor version.
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          // other minor brands (miaf, avif, MA1B).
+          0x6d,
+          0x69,
+          0x61,
+          0x66,
+          0x61,
+          0x76,
+          0x69,
+          0x66,
+          0x4d,
+          0x41,
+          0x31,
+          0x42
         };
     runTest(
         data,
@@ -679,39 +681,39 @@ public class DefaultImageHeaderParserTest {
   public void testCanParseAvifAndAvisBrandsAsAnimatedAvif() throws IOException {
     byte[] data =
         new byte[] {
-            // Box Size.
-            0x00,
-            0x00,
-            0x00,
-            0x1C,
-            // ftyp.
-            0x66,
-            0x74,
-            0x79,
-            0x70,
-            // avis (major brand).
-            0x61,
-            0x76,
-            0x69,
-            0x73,
-            // minor version.
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            // other minor brands (miaf, avif, MA1B).
-            0x6d,
-            0x69,
-            0x61,
-            0x66,
-            0x61,
-            0x76,
-            0x69,
-            0x66,
-            0x4d,
-            0x41,
-            0x31,
-            0x42
+          // Box Size.
+          0x00,
+          0x00,
+          0x00,
+          0x1C,
+          // ftyp.
+          0x66,
+          0x74,
+          0x79,
+          0x70,
+          // avis (major brand).
+          0x61,
+          0x76,
+          0x69,
+          0x73,
+          // minor version.
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          // other minor brands (miaf, avif, MA1B).
+          0x6d,
+          0x69,
+          0x61,
+          0x66,
+          0x61,
+          0x76,
+          0x69,
+          0x66,
+          0x4d,
+          0x41,
+          0x31,
+          0x42
         };
     runTest(
         data,
@@ -755,52 +757,52 @@ public class DefaultImageHeaderParserTest {
   public void testCannotParseAvifMoreThanFiveMinorBrands() throws IOException {
     byte[] data =
         new byte[] {
-            // Box Size.
-            0x00,
-            0x00,
-            0x00,
-            0x28,
-            // ftyp.
-            0x66,
-            0x74,
-            0x79,
-            0x70,
-            // mif1 (major brand).
-            0x6d,
-            0x69,
-            0x66,
-            0x31,
-            // minor version.
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            // more than five minor brands with the sixth one being avif (mif1, miaf, MA1B, mif1,
-            // miab, avif).
-            0x6d,
-            0x69,
-            0x66,
-            0x31,
-            0x6d,
-            0x69,
-            0x61,
-            0x66,
-            0x4d,
-            0x41,
-            0x31,
-            0x42,
-            0x6d,
-            0x69,
-            0x66,
-            0x31,
-            0x6d,
-            0x69,
-            0x61,
-            0x66,
-            0x61,
-            0x76,
-            0x69,
-            0x66,
+          // Box Size.
+          0x00,
+          0x00,
+          0x00,
+          0x28,
+          // ftyp.
+          0x66,
+          0x74,
+          0x79,
+          0x70,
+          // mif1 (major brand).
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          // minor version.
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          // more than five minor brands with the sixth one being avif (mif1, miaf, MA1B, mif1,
+          // miab, avif).
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          0x6d,
+          0x69,
+          0x61,
+          0x66,
+          0x4d,
+          0x41,
+          0x31,
+          0x42,
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          0x6d,
+          0x69,
+          0x61,
+          0x66,
+          0x61,
+          0x76,
+          0x69,
+          0x66,
         };
     runTest(
         data,
@@ -935,13 +937,13 @@ public class DefaultImageHeaderParserTest {
     ByteBuffer jpegHeaderBytes = getExifMagicNumber();
     byte[] data =
         new byte[] {
-            jpegHeaderBytes.get(0),
-            jpegHeaderBytes.get(1),
-            (byte) DefaultImageHeaderParser.SEGMENT_START_ID,
-            (byte) DefaultImageHeaderParser.EXIF_SEGMENT_TYPE,
-            // SEGMENT_LENGTH
-            (byte) 0xFF,
-            (byte) 0xFF,
+          jpegHeaderBytes.get(0),
+          jpegHeaderBytes.get(1),
+          (byte) DefaultImageHeaderParser.SEGMENT_START_ID,
+          (byte) DefaultImageHeaderParser.EXIF_SEGMENT_TYPE,
+          // SEGMENT_LENGTH
+          (byte) 0xFF,
+          (byte) 0xFF,
         };
     ByteBuffer byteBuffer = ByteBuffer.wrap(data);
     DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
@@ -954,14 +956,14 @@ public class DefaultImageHeaderParserTest {
     ByteBuffer jpegHeaderBytes = getExifMagicNumber();
     byte[] data =
         new byte[] {
-            jpegHeaderBytes.get(0),
-            jpegHeaderBytes.get(1),
-            (byte) DefaultImageHeaderParser.SEGMENT_START_ID,
-            // SEGMENT_TYPE (NOT EXIF_SEGMENT_TYPE)
-            (byte) 0xE5,
-            // SEGMENT_LENGTH
-            (byte) 0xFF,
-            (byte) 0xFF,
+          jpegHeaderBytes.get(0),
+          jpegHeaderBytes.get(1),
+          (byte) DefaultImageHeaderParser.SEGMENT_START_ID,
+          // SEGMENT_TYPE (NOT EXIF_SEGMENT_TYPE)
+          (byte) 0xE5,
+          // SEGMENT_LENGTH
+          (byte) 0xFF,
+          (byte) 0xFF,
         };
     ByteBuffer byteBuffer = ByteBuffer.wrap(data);
     DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
@@ -1011,50 +1013,6 @@ public class DefaultImageHeaderParserTest {
     data.position(0);
     DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
     assertEquals(ImageHeaderParser.UNKNOWN_ORIENTATION, parser.getOrientation(data, byteArrayPool));
-  }
-
-  @Test
-  public void hasJpegMpf_withGainmapFile_returnsTrue() throws IOException {
-    byte[] data =
-        Util.readBytes(TestResourceUtil.openResource(getClass(), "small_gainmap_image.jpg"));
-    runTest(
-        data,
-        new ParserTestCase() {
-          @Override
-          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
-              throws IOException {
-            assertEquals(true, parser.hasJpegMpf(is, byteArrayPool));
-          }
-
-          @Override
-          public void run(
-              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
-              throws IOException {
-            assertEquals(true, parser.hasJpegMpf(byteBuffer, byteArrayPool));
-          }
-        });
-  }
-
-  @Test
-  public void hasJpegMpf_withNonGainmapFile_returnsFalse() throws IOException {
-    byte[] data =
-        Util.readBytes(TestResourceUtil.openResource(getClass(), "short_exif_sample.jpg"));
-    runTest(
-        data,
-        new ParserTestCase() {
-          @Override
-          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
-              throws IOException {
-            assertEquals(false, parser.hasJpegMpf(is, byteArrayPool));
-          }
-
-          @Override
-          public void run(
-              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
-              throws IOException {
-            assertEquals(false, parser.hasJpegMpf(byteBuffer, byteArrayPool));
-          }
-        });
   }
 
   private static ByteBuffer getExifMagicNumber() {

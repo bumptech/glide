@@ -2,7 +2,6 @@ package com.bumptech.glide.samples.svg;
 
 import android.graphics.drawable.PictureDrawable;
 import android.widget.ImageView;
-import androidx.annotation.NonNull;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -18,7 +17,7 @@ public class SvgSoftwareLayerSetter implements RequestListener<PictureDrawable> 
 
   @Override
   public boolean onLoadFailed(
-      GlideException e, Object model, @NonNull Target<PictureDrawable> target, boolean isFirstResource) {
+      GlideException e, Object model, Target<PictureDrawable> target, boolean isFirstResource) {
     ImageView view = ((ImageViewTarget<?>) target).getView();
     view.setLayerType(ImageView.LAYER_TYPE_NONE, null);
     return false;
@@ -26,10 +25,10 @@ public class SvgSoftwareLayerSetter implements RequestListener<PictureDrawable> 
 
   @Override
   public boolean onResourceReady(
-      @NonNull PictureDrawable resource,
-      @NonNull Object model,
+      PictureDrawable resource,
+      Object model,
       Target<PictureDrawable> target,
-      @NonNull DataSource dataSource,
+      DataSource dataSource,
       boolean isFirstResource) {
     ImageView view = ((ImageViewTarget<?>) target).getView();
     view.setLayerType(ImageView.LAYER_TYPE_SOFTWARE, null);

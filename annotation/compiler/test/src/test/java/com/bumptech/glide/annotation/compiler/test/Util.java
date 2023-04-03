@@ -12,6 +12,7 @@ public final class Util {
   private static final String ANNOTATION_PACKAGE_NAME = "com.bumptech.glide.annotation.compiler";
   private static final String DEFAULT_APP_DIR_NAME = "EmptyAppGlideModuleTest";
   private static final String DEFAULT_LIBRARY_DIR_NAME = "EmptyLibraryGlideModuleTest";
+
   /**
    * Hardcoded file separator to workaround {@code JavaFileObjects.forResource(...)} defaulting to
    * the unix one.

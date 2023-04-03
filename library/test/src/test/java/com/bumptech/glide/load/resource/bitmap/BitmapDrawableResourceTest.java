@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,7 +17,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = 18)
 public class BitmapDrawableResourceTest {
   private BitmapDrawableResourceHarness harness;
 

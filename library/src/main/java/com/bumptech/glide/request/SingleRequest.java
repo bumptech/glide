@@ -36,6 +36,7 @@ import java.util.concurrent.Executor;
 public final class SingleRequest<R> implements Request, SizeReadyCallback, ResourceCallback {
   /** Tag for logging internal events, not generally suitable for public use. */
   private static final String TAG = "GlideRequest";
+
   /** Tag for logging externally useful events (request completion, timing etc). */
   private static final String GLIDE_TAG = "Glide";
 
@@ -778,7 +779,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
         && localOverrideHeight == otherLocalOverrideHeight
         && Util.bothModelsNullEquivalentOrEquals(localModel, otherLocalModel)
         && localTranscodeClass.equals(otherLocalTranscodeClass)
-        && Util.bothBaseRequestOptionsNullEquivalentOrEquals(localRequestOptions, otherLocalRequestOptions)
+        && localRequestOptions.equals(otherLocalRequestOptions)
         && localPriority == otherLocalPriority
         // We do not want to require that RequestListeners implement equals/hashcode, so we
         // don't compare them using equals(). We can however, at least assert that the same

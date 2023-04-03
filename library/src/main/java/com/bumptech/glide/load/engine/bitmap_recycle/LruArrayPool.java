@@ -23,6 +23,7 @@ public final class LruArrayPool implements ArrayPool {
    * to be returned from the pool.
    */
   @VisibleForTesting static final int MAX_OVER_SIZE_MULTIPLE = 8;
+
   /** Used to calculate the maximum % of the total pool size a single byte array may consume. */
   private static final int SINGLE_ARRAY_MAX_SIZE_DIVISOR = 2;
 
@@ -126,7 +127,7 @@ public final class LruArrayPool implements ArrayPool {
   }
 
   private boolean isNoMoreThanHalfFull() {
-    return currentSize == 0 || maxSize / currentSize >= 2;
+    return currentSize == 0 || (maxSize / currentSize >= 2);
   }
 
   @Override
@@ -135,7 +136,7 @@ public final class LruArrayPool implements ArrayPool {
   }
 
   @Override
-  public synchronized void trimMemory(int level){
+  public synchronized void trimMemory(int level) {
     if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
       clearMemory();
     } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN

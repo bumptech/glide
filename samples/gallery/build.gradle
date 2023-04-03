@@ -6,19 +6,18 @@ apply plugin: 'com.google.devtools.ksp'
 dependencies {
     implementation project(':library')
     implementation project(':integration:compose')
-    implementation project(':integration:ktx')
     implementation(project(':integration:recyclerview')) {
         transitive = false
     }
 
-    implementation libs.androidx.recyclerview
-    implementation libs.androidx.fragment.ktx
-    implementation libs.androidx.core.ktx
-    implementation libs.coroutines.core
-    implementation libs.coroutines.android
-    implementation libs.kotlin.jdk7
-    implementation libs.compose.foundation
-    implementation libs.compose.ui
+    implementation "androidx.recyclerview:recyclerview:$ANDROID_X_RECYCLERVIEW_VERSION"
+    implementation "androidx.fragment:fragment-ktx:$ANDROID_X_FRAGMENT_VERSION"
+    implementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$JETBRAINS_KOTLIN_VERSION"
+    implementation "androidx.compose.foundation:foundation:$ANDROID_X_COMPOSE_FOUNDATION_VERSION"
+    implementation "androidx.compose.ui:ui:$ANDROID_X_COMPOSE_VERSION"
 
     ksp project(':annotation:ksp')
 }
@@ -30,12 +29,12 @@ kotlin {
 }
 
 android {
-    namespace 'com.bumptech.glide.samples.gallery'
-    compileSdk 34
+    compileSdk 33
 
     defaultConfig {
+        applicationId 'com.bumptech.glide.samples.gallery'
         minSdk 29
-        targetSdk 34
+        targetSdk 33
         versionCode 1
         versionName '1.0'
     }
@@ -46,7 +45,7 @@ android {
         jvmTarget = "11"
     }
     composeOptions {
-        kotlinCompilerExtensionVersion libs.versions.kotlin.compiler.extension.get()
+        kotlinCompilerExtensionVersion '1.2.0'
     }
 
     compileOptions {
