@@ -15,7 +15,7 @@ import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)
-class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTypeTest {
+class IntegrationLibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTypeTest {
 
   companion object {
     @Parameters(name = "sourceType = {0}") @JvmStatic fun data() = SourceType.values()
