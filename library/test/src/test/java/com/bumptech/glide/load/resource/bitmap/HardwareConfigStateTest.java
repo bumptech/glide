@@ -15,8 +15,9 @@ import org.robolectric.shadows.ShadowBuild;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
 public class HardwareConfigStateTest {
+  private static final int VALID_DIMENSION = 100;
 
-  @Config(sdk = Build.VERSION_CODES.O)
+  @Config(sdk = Build.VERSION_CODES.P)
   @Test
   public void
       setHardwareConfigIfAllowed_withAllowedState_setsInPreferredConfigAndMutable_returnsTrue() {
@@ -25,8 +26,8 @@ public class HardwareConfigStateTest {
     BitmapFactory.Options options = new BitmapFactory.Options();
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ VALID_DIMENSION,
+            /* targetHeight= */ VALID_DIMENSION,
             options,
             /* isHardwareConfigAllowed= */ true,
             /* isExifOrientationRequired= */ false);
@@ -35,7 +36,7 @@ public class HardwareConfigStateTest {
     assertThat(options.inPreferredConfig).isEqualTo(Bitmap.Config.HARDWARE);
   }
 
-  @Config(sdk = Build.VERSION_CODES.O)
+  @Config(sdk = Build.VERSION_CODES.P)
   @Test
   public void
       setHardwareConfigIfAllowed_withAllowedState_afterReblock_returnsFalseAndDoesNotSetValues() {
@@ -45,8 +46,8 @@ public class HardwareConfigStateTest {
     BitmapFactory.Options options = new BitmapFactory.Options();
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ VALID_DIMENSION,
+            /* targetHeight= */ VALID_DIMENSION,
             options,
             /* isHardwareConfigAllowed= */ true,
             /* isExifOrientationRequired= */ false);
@@ -55,9 +56,9 @@ public class HardwareConfigStateTest {
     assertThat(options.inPreferredConfig).isNotEqualTo(Bitmap.Config.HARDWARE);
   }
 
-  @Config(sdk = Build.VERSION_CODES.O)
+  @Config(sdk = Build.VERSION_CODES.P)
   @Test
-  public void setHardwareConfigIfAllowed_withSmallerThanMinWidth_returnsFalse_doesNotSetValues() {
+  public void setHardwareConfigIfAllowed_withInvalidWidth_returnsFalse_doesNotSetValues() {
     HardwareConfigState state = new HardwareConfigState();
     state.unblockHardwareBitmaps();
     BitmapFactory.Options options = new BitmapFactory.Options();
@@ -66,8 +67,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O - 1,
-            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ -1,
+            /* targetHeight= */ VALID_DIMENSION,
             options,
             /* isHardwareConfigAllowed= */ true,
             /* isExifOrientationRequired= */ false);
@@ -77,9 +78,9 @@ public class HardwareConfigStateTest {
     assertThat(options.inPreferredConfig).isNull();
   }
 
-  @Config(sdk = Build.VERSION_CODES.O)
+  @Config(sdk = Build.VERSION_CODES.P)
   @Test
-  public void setHardwareConfigIfAllowed_withSmallerThanMinHeight_returnsFalse_doesNotSetValues() {
+  public void setHardwareConfigIfAllowed_withInvalidHeight_returnsFalse_doesNotSetValues() {
     HardwareConfigState state = new HardwareConfigState();
     state.unblockHardwareBitmaps();
     BitmapFactory.Options options = new BitmapFactory.Options();
@@ -88,8 +89,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O - 1,
+            /* targetWidth= */ VALID_DIMENSION,
+            /* targetHeight= */ -1,
             options,
             /* isHardwareConfigAllowed= */ true,
             /* isExifOrientationRequired= */ false);
@@ -99,7 +100,7 @@ public class HardwareConfigStateTest {
     assertThat(options.inPreferredConfig).isNull();
   }
 
-  @Config(sdk = Build.VERSION_CODES.O)
+  @Config(sdk = Build.VERSION_CODES.P)
   @Test
   public void
       setHardwareConfigIfAllowed_withHardwareConfigDisallowed_returnsFalse_doesNotSetValues() {
@@ -111,8 +112,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ VALID_DIMENSION,
+            /* targetHeight= */ VALID_DIMENSION,
             options,
             /* isHardwareConfigAllowed= */ false,
             /* isExifOrientationRequired= */ false);
@@ -122,7 +123,7 @@ public class HardwareConfigStateTest {
     assertThat(options.inPreferredConfig).isNull();
   }
 
-  @Config(sdk = Build.VERSION_CODES.O)
+  @Config(sdk = Build.VERSION_CODES.P)
   @Test
   public void
       setHardwareConfigIfAllowed_withExifOrientationRequired_returnsFalse_doesNotSetValues() {
@@ -134,8 +135,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ VALID_DIMENSION,
+            /* targetHeight= */ VALID_DIMENSION,
             options,
             /* isHardwareConfigAllowed= */ true,
             /* isExifOrientationRequired= */ true);
@@ -156,8 +157,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ VALID_DIMENSION,
+            /* targetHeight= */ VALID_DIMENSION,
             options,
             /* isHardwareConfigAllowed= */ true,
             /* isExifOrientationRequired= */ false);
@@ -178,8 +179,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ VALID_DIMENSION,
+            /* targetHeight= */ VALID_DIMENSION,
             options,
             /* isHardwareConfigAllowed= */ true,
             /* isExifOrientationRequired= */ false);
@@ -200,8 +201,8 @@ public class HardwareConfigStateTest {
 
     boolean result =
         state.setHardwareConfigIfAllowed(
-            /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-            /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+            /* targetWidth= */ VALID_DIMENSION,
+            /* targetHeight= */ VALID_DIMENSION,
             options,
             /* isHardwareConfigAllowed= */ true,
             /* isExifOrientationRequired= */ false);
@@ -211,10 +212,9 @@ public class HardwareConfigStateTest {
     assertThat(options.inPreferredConfig).isEqualTo(Bitmap.Config.HARDWARE);
   }
 
-  @Config(sdk = Build.VERSION_CODES.O)
+  @Config(sdk = Build.VERSION_CODES.P)
   @Test
-  public void
-      setHardwareConfigIfAllowed_withDisallowedSamsungDevices_returnsFalse_doesNotSetValues() {
+  public void setHardwareConfigIfAllowed_withPreviouslyDisallowedSamsungDevices_P_returnsTrue() {
     for (String model :
         new String[] {
           "SM-N9351", "SM-J72053", "SM-G9600", "SM-G965ab", "SM-G935.", "SM-G930", "SM-A5204"
@@ -228,36 +228,8 @@ public class HardwareConfigStateTest {
 
       boolean result =
           state.setHardwareConfigIfAllowed(
-              /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-              /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-              options,
-              /* isHardwareConfigAllowed= */ true,
-              /* isExifOrientationRequired= */ false);
-
-      assertWithMessage("model: " + model).that(result).isFalse();
-      assertWithMessage("model: " + model).that(options.inMutable).isTrue();
-      assertWithMessage("model: " + model).that(options.inPreferredConfig).isNull();
-    }
-  }
-
-  @Config(sdk = Build.VERSION_CODES.O_MR1)
-  @Test
-  public void setHardwareConfigIfAllowed_withDisallowedSamsungDevices_OMR1_returnsTrue() {
-    for (String model :
-        new String[] {
-          "SM-N9351", "SM-J72053", "SM-G9600", "SM-G965ab", "SM-G935.", "SM-G930", "SM-A5204"
-        }) {
-      ShadowBuild.setModel(model);
-      HardwareConfigState state = new HardwareConfigState();
-      state.unblockHardwareBitmaps();
-      BitmapFactory.Options options = new BitmapFactory.Options();
-      options.inPreferredConfig = null;
-      options.inMutable = true;
-
-      boolean result =
-          state.setHardwareConfigIfAllowed(
-              /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-              /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+              /* targetWidth= */ VALID_DIMENSION,
+              /* targetHeight= */ VALID_DIMENSION,
               options,
               /* isHardwareConfigAllowed= */ true,
               /* isExifOrientationRequired= */ false);
@@ -270,7 +242,7 @@ public class HardwareConfigStateTest {
     }
   }
 
-  @Config(sdk = Build.VERSION_CODES.O)
+  @Config(sdk = Build.VERSION_CODES.P)
   @Test
   public void setHardwareConfigIfAllowed_withShortOrEmptyModelNames_returnsTrue() {
     for (String model : new String[] {".", "-", "", "S", "SM", "SM-", "SM-G", "SM-G9.", "SM-G93"}) {
@@ -283,8 +255,8 @@ public class HardwareConfigStateTest {
 
       boolean result =
           state.setHardwareConfigIfAllowed(
-              /* targetWidth= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
-              /* targetHeight= */ HardwareConfigState.MIN_HARDWARE_DIMENSION_O,
+              /* targetWidth= */ VALID_DIMENSION,
+              /* targetHeight= */ VALID_DIMENSION,
               options,
               /* isHardwareConfigAllowed= */ true,
               /* isExifOrientationRequired= */ false);

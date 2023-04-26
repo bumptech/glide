@@ -14,7 +14,6 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
-import com.bumptech.glide.GlideBuilder.DisableHardwareBitmapsOnO;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -327,13 +326,6 @@ public class Glide implements ComponentCallbacks2 {
     this.requestManagerRetriever = requestManagerRetriever;
     this.connectivityMonitorFactory = connectivityMonitorFactory;
     this.defaultRequestOptionsFactory = defaultRequestOptionsFactory;
-
-    DisableHardwareBitmapsOnO disableHardwareBitmapsOnO =
-        experiments.get(DisableHardwareBitmapsOnO.class);
-    if (disableHardwareBitmapsOnO != null) {
-      HardwareConfigState.setDisableHardwareBitmapsOnO(
-          disableHardwareBitmapsOnO.disableHardwareBitmapsOnO);
-    }
 
     // This has a circular relationship with Glide and GlideContext in that it depends on both,
     // but it's created by Glide's constructor. In practice this shouldn't matter because the
