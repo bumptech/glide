@@ -30,9 +30,17 @@ public final class ManifestParser {
   @SuppressWarnings("ConstantConditions")
   @Nullable
   private ApplicationInfo getOurApplicationInfo() throws NameNotFoundException {
-    return context
-        .getPackageManager()
-        .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+    try {
+      return context
+          .getPackageManager()
+          .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+    } catch (NameNotFoundException e) {
+      if (e.getMessage().equals("PackageManager features are not supported")) {
+        // Only happens in preview mode in jetpack compose
+        return null;
+      }
+      throw e;
+    }
   }
 
   @SuppressWarnings("deprecation")
