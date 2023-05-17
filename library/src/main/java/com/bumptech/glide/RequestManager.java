@@ -95,6 +95,8 @@ public class RequestManager
 
   private boolean pauseAllRequestsOnTrimMemoryModerate;
 
+  private boolean clearOnStop = false;
+
   public RequestManager(
       @NonNull Glide glide,
       @NonNull Lifecycle lifecycle,
@@ -200,6 +202,17 @@ public class RequestManager
   public synchronized RequestManager setDefaultRequestOptions(
       @NonNull RequestOptions requestOptions) {
     setRequestOptions(requestOptions);
+    return this;
+  }
+
+  /**
+   * Clear all resources when onStop() from {@link LifecycleListener} is called.
+   *
+   * @return This request manager.
+   */
+  @NonNull
+  public synchronized RequestManager clearOnStop() {
+    clearOnStop = true;
     return this;
   }
 
@@ -354,12 +367,19 @@ public class RequestManager
 
   /**
    * Lifecycle callback that unregisters for connectivity events (if the
-   * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads.
+   * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads
+   * and clears all resources if {@link #clearOnStop()} is called.
    */
   @Override
   public synchronized void onStop() {
     pauseRequests();
     targetTracker.onStop();
+    if (clearOnStop) {
+      for (Target<?> target : targetTracker.getAll()) {
+        clear(target);
+      }
+    }
+    targetTracker.clear();
   }
 
   /**
