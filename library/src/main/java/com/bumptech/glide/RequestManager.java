@@ -95,7 +95,7 @@ public class RequestManager
 
   private boolean pauseAllRequestsOnTrimMemoryModerate;
 
-  private boolean clearOnStop = false;
+  private boolean clearOnStop;
 
   public RequestManager(
       @NonNull Glide glide,
