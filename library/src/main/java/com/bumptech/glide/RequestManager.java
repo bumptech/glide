@@ -378,8 +378,8 @@ public class RequestManager
       for (Target<?> target : targetTracker.getAll()) {
         clear(target);
       }
+      targetTracker.clear();
     }
-    targetTracker.clear();
   }
 
   /**
