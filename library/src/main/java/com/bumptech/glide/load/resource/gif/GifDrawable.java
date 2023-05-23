@@ -202,6 +202,7 @@ public class GifDrawable extends Drawable
   @Override
   public void start() {
     isStarted = true;
+    isRunning = true;
     resetLoopCount();
     if (isVisible) {
       startRunning();
@@ -211,6 +212,7 @@ public class GifDrawable extends Drawable
   @Override
   public void stop() {
     isStarted = false;
+    isRunning = false;
     stopRunning();
   }
 
@@ -232,6 +234,7 @@ public class GifDrawable extends Drawable
   private void stopRunning() {
     isRunning = false;
     state.frameLoader.unsubscribe(this);
+    clearAnimationCallbacks();
   }
 
   @Override
