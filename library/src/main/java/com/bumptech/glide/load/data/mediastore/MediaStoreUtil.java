@@ -20,6 +20,10 @@ public final class MediaStoreUtil {
         && MediaStore.AUTHORITY.equals(uri.getAuthority());
   }
 
+  public static boolean isAndroidPickerUri(Uri uri) {
+    return isMediaStoreUri(uri) && uri.getPathSegments().contains("picker");
+  }
+
   private static boolean isVideoUri(Uri uri) {
     return uri.getPathSegments().contains("video");
   }
