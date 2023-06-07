@@ -882,7 +882,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    */
   @NonNull
   public ViewTarget<ImageView, TranscodeType> into(@NonNull ImageView view) {
-    Util.assertMainThread();
     Preconditions.checkNotNull(view);
 
     BaseRequestOptions<?> requestOptions = this;
