@@ -140,6 +140,8 @@ subprojects { project ->
             "-Werror",
             //Enable all warnings.
             "-Xlint:all",
+            // Disable warnings about source 7 being obsolete.
+            "-Xlint:-options",
             // Java expects every annotation to have a processor, but we use
             // javax.annotation.Nullable, which doesn't have one.
             "-Xlint:-processing",
