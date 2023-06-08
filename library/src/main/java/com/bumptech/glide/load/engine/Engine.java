@@ -578,10 +578,18 @@ public class Engine
 
     @VisibleForTesting
     void shutdown() {
-      Executors.shutdownAndAwaitTermination(diskCacheExecutor);
-      Executors.shutdownAndAwaitTermination(sourceExecutor);
-      Executors.shutdownAndAwaitTermination(sourceUnlimitedExecutor);
-      Executors.shutdownAndAwaitTermination(animationExecutor);
+      if (!diskCacheExecutor.isExternal()) {
+        Executors.shutdownAndAwaitTermination(diskCacheExecutor);
+      }
+      if (!sourceExecutor.isExternal()) {
+        Executors.shutdownAndAwaitTermination(sourceExecutor);
+      }
+      if (!sourceUnlimitedExecutor.isExternal()) {
+        Executors.shutdownAndAwaitTermination(sourceUnlimitedExecutor);
+      }
+      if (!animationExecutor.isExternal()) {
+        Executors.shutdownAndAwaitTermination(animationExecutor);
+      }
     }
 
     @SuppressWarnings("unchecked")

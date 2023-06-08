@@ -17,10 +17,30 @@ public final class MockGlideExecutor {
     // Utility class.
   }
 
-  // Public API.
+  /**
+   * Returns a new Glide executor that delegates to the provided {@code executorService}.
+   *
+   * <p>The service provided will be considered managed by Glide and will be shutdown when {@link
+   * com.bumptech.glide.Glide#tearDown()} is called. To use an executor that should not be torn down
+   * by Glide use {@link #wrapExecutor(ExecutorService)}. If you're creating a new executor for a
+   * test (e.g. an idling resource executor) then typically you should use this method.
+   */
   @SuppressWarnings("WeakerAccess")
   public static GlideExecutor newTestExecutor(ExecutorService executorService) {
     return new GlideExecutor(executorService);
+  }
+
+  /**
+   * Wraps an external executor in a {@link GlideExecutor}.
+   *
+   * <p>This should only be used when the executor used in a test is externally managed and will be
+   * shutdown by the calling code or application, Glide will not shutdown the executor when {@link
+   * com.bumptech.glide.Glide#tearDown()} is called. Most users should prefer {@link
+   * #newTestExecutor(ExecutorService)}.
+   */
+  @SuppressWarnings("WeakerAccess")
+  public static GlideExecutor wrapExecutor(ExecutorService executorService) {
+    return new GlideExecutor(executorService, /* isDelegateExternal= */ true);
   }
 
   public static GlideExecutor newMainThreadExecutor() {

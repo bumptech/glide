@@ -63,6 +63,7 @@ public final class GlideExecutor implements ExecutorService {
   private static volatile int bestThreadCount;
 
   private final ExecutorService delegate;
+  private final boolean isDelegateExternal;
 
   /**
    * Returns a new {@link Builder} with the {@link #DEFAULT_DISK_CACHE_EXECUTOR_THREADS} threads,
@@ -227,7 +228,29 @@ public final class GlideExecutor implements ExecutorService {
 
   @VisibleForTesting
   GlideExecutor(ExecutorService delegate) {
+    this(delegate, /* isDelegateExternal= */ false);
+  }
+
+  /**
+   * @param isDelegateExternal Whether the delegate executor is owned by Glide or external. See
+   *     {@link #isExternal()}.
+   */
+  @VisibleForTesting
+  GlideExecutor(ExecutorService delegate, boolean isDelegateExternal) {
     this.delegate = delegate;
+    this.isDelegateExternal = isDelegateExternal;
+  }
+
+  /**
+   * Returns true if this executor is not "owned" by Glide.
+   *
+   * <p>Typically this means the executor was created using {@link
+   * MockGlideExecutor#wrapExecutor(ExecutorService)}. Glide will not shutdown executors that are
+   * external during teardown. Typically this is only important in testing environments Glide is
+   * recreated and torn down between tests.
+   */
+  public boolean isExternal() {
+    return isDelegateExternal;
   }
 
   @Override

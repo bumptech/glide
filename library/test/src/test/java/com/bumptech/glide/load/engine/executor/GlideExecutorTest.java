@@ -3,10 +3,15 @@ package com.bumptech.glide.load.engine.executor;
 import static com.google.common.truth.Truth.assertThat;
 
 import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.util.Executors;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +52,46 @@ public class GlideExecutorTest {
     // Since no jobs are queued, the first item added will be run immediately, regardless of
     // priority.
     assertThat(resultPriorities).containsExactly(5, 1, 2, 3, 4).inOrder();
+  }
+
+  @Test
+  public void newTestExecutor_teardown_isShutdown() {
+    ExecutorService executor = java.util.concurrent.Executors.newSingleThreadExecutor();
+    try {
+      GlideExecutor glideExecutor = MockGlideExecutor.newTestExecutor(executor);
+      Glide.init(
+          ApplicationProvider.getApplicationContext(),
+          new GlideBuilder()
+              .setAnimationExecutor(glideExecutor)
+              .setDiskCacheExecutor(glideExecutor)
+              .setSourceExecutor(glideExecutor));
+
+      Glide.tearDown();
+
+      assertThat(executor.isShutdown()).isTrue();
+    } finally {
+      executor.shutdown();
+    }
+  }
+
+  @Test
+  public void wrapExecutor_teardown_isNotShutdown() {
+    ExecutorService executor = java.util.concurrent.Executors.newSingleThreadExecutor();
+    try {
+      GlideExecutor glideExecutor = MockGlideExecutor.wrapExecutor(executor);
+      Glide.init(
+          ApplicationProvider.getApplicationContext(),
+          new GlideBuilder()
+              .setAnimationExecutor(glideExecutor)
+              .setDiskCacheExecutor(glideExecutor)
+              .setSourceExecutor(glideExecutor));
+
+      Glide.tearDown();
+
+      assertThat(executor.isShutdown()).isFalse();
+    } finally {
+      Executors.shutdownAndAwaitTermination(executor);
+    }
   }
 
   private static final class MockRunnable implements Runnable, Comparable<MockRunnable> {
