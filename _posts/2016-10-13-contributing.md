@@ -32,7 +32,8 @@ To make contributions to Glide's source:
    4. Click on 'settings.gradle'
    5. Click on 'Open'
 3. Make your contributions.
-4. Commit your changes:
+4. Build the project (see below) and make sure the build passes
+5. Commit your changes:
 
    ```sh
    git add . 
@@ -55,6 +56,7 @@ To build the project, you typically need to run a single gradle command from the
 
 ``./gradlew build``
 
+Glide currently requires a Java version <= 16 to build. 
 
 #### Testing changes
 
