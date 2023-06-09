@@ -60,11 +60,13 @@ public final class ManifestParser {
           }
         }
       }
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Finished loading Glide modules");
+      }
     } catch (PackageManager.NameNotFoundException e) {
-      throw new RuntimeException("Unable to find metadata to parse GlideModules", e);
-    }
-    if (Log.isLoggable(TAG, Log.DEBUG)) {
-      Log.d(TAG, "Finished loading Glide modules");
+      if (Log.isLoggable(TAG, Log.ERROR)) {
+        Log.e(TAG, "Failed to parse glide modules", e);
+      }
     }
 
     return modules;
