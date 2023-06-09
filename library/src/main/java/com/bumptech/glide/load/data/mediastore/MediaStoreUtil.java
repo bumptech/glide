@@ -20,6 +20,12 @@ public final class MediaStoreUtil {
         && MediaStore.AUTHORITY.equals(uri.getAuthority());
   }
 
+  // Android picker uris contain a "picker" segment:
+  // https://android.googlesource.com/platform/packages/providers/MediaProvider/+/refs/heads/master/src/com/android/providers/media/PickerUriResolver.java#58
+  public static boolean isAndroidPickerUri(Uri uri) {
+    return isMediaStoreUri(uri) && uri.getPathSegments().contains("picker");
+  }
+
   private static boolean isVideoUri(Uri uri) {
     return uri.getPathSegments().contains("video");
   }
