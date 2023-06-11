@@ -26,6 +26,12 @@ public class SvgDecoder implements ResourceDecoder<InputStream, SVG> {
       throws IOException {
     try {
       SVG svg = SVG.getFromInputStream(source);
+
+      // if viewBox is not set, resizing will not work properly, so set it to the actual size
+      if (svg.getDocumentViewBox() == null) {
+        svg.setDocumentViewBox(0f, 0f, svg.getDocumentWidth(), svg.getDocumentHeight());
+      }
+
       if (width != SIZE_ORIGINAL) {
         svg.setDocumentWidth(width);
       }

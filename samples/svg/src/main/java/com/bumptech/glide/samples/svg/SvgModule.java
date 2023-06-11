@@ -2,6 +2,7 @@ package com.bumptech.glide.samples.svg;
 
 import android.content.Context;
 import android.graphics.drawable.PictureDrawable;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Registry;
@@ -16,9 +17,11 @@ public class SvgModule extends AppGlideModule {
   @Override
   public void registerComponents(
       @NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
+    Log.d("SvgModule", "working!!");
     registry
         .register(SVG.class, PictureDrawable.class, new SvgDrawableTranscoder())
-        .append(InputStream.class, SVG.class, new SvgDecoder());
+        .append(InputStream.class, SVG.class, new SvgDecoder())
+        .append(SVG.class, new SvgEncoder(glide.getArrayPool(), glide.getBitmapPool()));
   }
 
   // Disable manifest parsing to avoid adding similar modules twice.
