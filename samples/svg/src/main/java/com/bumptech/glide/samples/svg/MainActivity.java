@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.util.Preconditions;
 import java.io.File;
 
@@ -33,7 +34,7 @@ public class MainActivity extends Activity {
     imageViewNet = (ImageView) findViewById(R.id.svg_image_view2);
 
     requestBuilder =
-        GlideApp.with(this)
+        Glide.with(getApplicationContext())
             .as(PictureDrawable.class)
             .placeholder(R.drawable.image_loading)
             .error(R.drawable.image_error)
@@ -49,10 +50,10 @@ public class MainActivity extends Activity {
 
   public void clearCache(View v) {
     Log.w(TAG, "clearing cache");
-    GlideRequests glideRequests = GlideApp.with(this);
+    RequestManager glideRequests = Glide.with(getApplicationContext());
     glideRequests.clear(imageViewRes);
     glideRequests.clear(imageViewNet);
-    GlideApp.get(this).clearMemory();
+    Glide.get(this).clearMemory();
     File cacheDir = Preconditions.checkNotNull(Glide.getPhotoCacheDir(this));
     if (cacheDir.isDirectory()) {
       for (File child : cacheDir.listFiles()) {
