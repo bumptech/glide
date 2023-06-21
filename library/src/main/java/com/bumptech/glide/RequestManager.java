@@ -372,13 +372,11 @@ public class RequestManager
    */
   @Override
   public synchronized void onStop() {
-    pauseRequests();
     targetTracker.onStop();
     if (clearOnStop) {
-      for (Target<?> target : targetTracker.getAll()) {
-        clear(target);
-      }
-      targetTracker.clear();
+      clearRequests();
+    } else {
+      pauseRequests();
     }
   }
 
@@ -389,10 +387,7 @@ public class RequestManager
   @Override
   public synchronized void onDestroy() {
     targetTracker.onDestroy();
-    for (Target<?> target : targetTracker.getAll()) {
-      clear(target);
-    }
-    targetTracker.clear();
+    clearRequests();
     requestTracker.clearRequests();
     lifecycle.removeListener(this);
     lifecycle.removeListener(connectivityMonitor);
@@ -721,6 +716,13 @@ public class RequestManager
   @Override
   public void onLowMemory() {
     // Nothing to add conditionally. See Glide#onTrimMemory for unconditional behavior.
+  }
+
+  private synchronized void clearRequests() {
+    for (Target<?> target : targetTracker.getAll()) {
+      clear(target);
+    }
+    targetTracker.clear();
   }
 
   @Override
