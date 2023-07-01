@@ -4,17 +4,18 @@ dependencies {
     implementation project(':library')
 
     testImplementation project(":testutil")
-    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
-    testImplementation "junit:junit:${JUNIT_VERSION}"
-    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
-    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
-    testImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
-    testImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
+    testImplementation libs.truth
+    testImplementation libs.junit
+    testImplementation libs.mockito
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.test.core
+    testImplementation libs.androidx.junit
+    testImplementation libs.androidx.test.runner
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
+
 
     sourceSets {
         main {
@@ -23,8 +24,8 @@ android {
     }
 
     defaultConfig {
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
 
         versionName = VERSION_NAME as String
     }

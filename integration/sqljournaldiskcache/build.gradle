@@ -4,11 +4,12 @@ plugins {
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
+
 
     defaultConfig {
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
 
         versionName VERSION_NAME as String
     }
@@ -21,16 +22,16 @@ android {
 
 dependencies {
     implementation project(':library')
-    implementation "com.google.errorprone:error_prone_annotations:$ERROR_PRONE_VERSION"
+    implementation libs.errorprone.annotations
 
-    testImplementation "com.google.guava:guava-testlib:${GUAVA_TESTLIB_VERSION}"
-    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
-    testImplementation "junit:junit:${JUNIT_VERSION}"
-    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
-    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
-    testImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
-    testImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
+    testImplementation libs.guava.testlib
+    testImplementation libs.truth
+    testImplementation libs.junit
+    testImplementation libs.mockito
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.test.core
+    testImplementation libs.androidx.junit
+    testImplementation libs.androidx.test.runner
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"

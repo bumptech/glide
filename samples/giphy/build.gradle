@@ -6,18 +6,19 @@ dependencies {
         transitive = false
     }
     implementation 'com.google.code.gson:gson:2.8.2'
-    implementation "androidx.recyclerview:recyclerview:${ANDROID_X_RECYCLERVIEW_VERSION}"
-    implementation "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
+    implementation libs.androidx.recyclerview
+    implementation libs.androidx.fragment
     annotationProcessor project(':annotation:compiler')
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
+
 
     defaultConfig {
         applicationId 'com.bumptech.glide.samples.giphy'
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
         versionCode 1
         versionName '1.0'
     }

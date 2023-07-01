@@ -1,12 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
+
 
     defaultConfig {
         applicationId "com.bumptech.glide.samples.imgur"
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
         versionCode 1
         versionName "1.0"
 
@@ -28,29 +29,29 @@ dependencies {
     implementation project(':library')
     annotationProcessor project(':annotation:compiler')
 
-    implementation "com.google.dagger:dagger:${DAGGER_VERSION}"
-    annotationProcessor "com.google.dagger:dagger-compiler:${DAGGER_VERSION}"
-    implementation "com.google.dagger:dagger-android:${DAGGER_VERSION}"
-    implementation ("com.google.dagger:dagger-android-support:${DAGGER_VERSION}") {
+    implementation libs.dagger
+    implementation libs.dagger.android
+    implementation (libs.dagger.android.support) {
         exclude group: "com.android.support"
     }
-    annotationProcessor "com.google.dagger:dagger-android-processor:${DAGGER_VERSION}"
+    annotationProcessor libs.dagger.compiler
+    annotationProcessor libs.dagger.android.processor
 
-    implementation "com.squareup.okhttp3:okhttp:${OK_HTTP_VERSION}"
-    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
-    implementation 'com.squareup.retrofit2:adapter-rxjava:2.3.0'
+    implementation libs.okhttp3
+    implementation libs.retrofit
+    implementation libs.retrofit.gson
+    implementation libs.retrofit.rxjava
 
-    implementation 'io.reactivex:rxandroid:1.2.1'
-    implementation 'io.reactivex:rxjava:1.3.4'
+    implementation libs.rx.android
+    implementation libs.rx.java
 
-    implementation "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
-    implementation "androidx.cardview:cardview:${ANDROID_X_CARDVIEW_VERSION}"
-    implementation "androidx.recyclerview:recyclerview:${ANDROID_X_RECYCLERVIEW_VERSION}"
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.cardview
+    implementation libs.androidx.recyclerview
 
     // Fixes a compilation warning related to dagger, see
     // https://github.com/google/guava/issues/2721.
-    compileOnly "com.google.errorprone:error_prone_annotations:${ERROR_PRONE_VERSION}"
+    compileOnly libs.errorprone.annotations
 }
 
 task run(type: Exec, dependsOn: 'installDebug') {

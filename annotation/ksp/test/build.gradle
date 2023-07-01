@@ -4,22 +4,22 @@ plugins {
 }
 
 android {
-    compileSdkVersion COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        minSdkVersion MIN_SDK_VERSION as int
-        targetSdkVersion TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
         versionName VERSION_NAME as String
     }
 }
 
 dependencies {
-    implementation "junit:junit:$JUNIT_VERSION"
+    implementation libs.junit
     implementation project(":annotation:ksp")
-    implementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:${KOTLIN_COMPILE_TESTING_VERSION}"
-    implementation "com.google.truth:truth:${TRUTH_VERSION}"
+    implementation libs.ksp.compiletesting
+    implementation libs.truth
     testImplementation project(":annotation:ksp")
     testImplementation project(":annotation")
     testImplementation project(":glide")
-    testImplementation "org.jetbrains.kotlin:kotlin-test:${JETBRAINS_KOTLIN_TEST_VERSION}"
+    testImplementation libs.kotlin.test
 }

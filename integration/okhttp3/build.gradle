@@ -4,16 +4,17 @@ dependencies {
     implementation project(':library')
     annotationProcessor project(':annotation:compiler')
 
-    api "com.squareup.okhttp3:okhttp:${OK_HTTP_VERSION}"
-    api "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
+    api libs.okhttp3
+    api libs.androidx.annotation
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
+
 
     defaultConfig {
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
 
         versionName VERSION_NAME as String
     }

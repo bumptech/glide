@@ -2,17 +2,17 @@ apply plugin: 'com.android.library'
 
 dependencies {
     implementation project(':library')
-    implementation "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
-    implementation "com.google.guava:guava:${GUAVA_VERSION}"
-    implementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    implementation libs.androidx.annotation
+    implementation libs.guava
+    implementation libs.mockito
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
 
         versionName = VERSION_NAME as String
     }
