@@ -3,7 +3,7 @@ apply plugin: 'pmd'
 def library = project(':library')
 
 pmd {
-    toolVersion PMD_VERSION
+    toolVersion libs.versions.pmd.get()
 }
 
 tasks.create('pmd', Pmd) {

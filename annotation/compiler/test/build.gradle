@@ -27,11 +27,11 @@ afterEvaluate {
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdk libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
         versionName VERSION_NAME as String
     }
 
@@ -56,9 +56,9 @@ android {
 dependencies {
     testImplementation project(':glide')
     testImplementation project(':annotation:compiler')
-    testImplementation "junit:junit:${JUNIT_VERSION}"
-    testImplementation "com.squareup:javapoet:${JAVAPOET_VERSION}"
-    testImplementation "com.google.code.findbugs:jsr305:${JSR_305_VERSION}"
+    testImplementation libs.junit
+    testImplementation libs.javapoet
+    testImplementation libs.findbugs.jsr305
     // Using 0.10 of compile-testing is required for Android Studio to function, but not for the
     // gradle build. Not yet clear why, but it looks like some kind of version conflict between
     // javapoet, guava and/or truth.
@@ -68,13 +68,13 @@ dependencies {
         // confusing.
         exclude group: "com.google.auto.value", module: "auto-value"
     }
-    testImplementation "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
-    testImplementation "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
+    testImplementation libs.androidx.annotation
+    testImplementation libs.androidx.fragment
     // TODO: Find some way to include a similar dependency on java 9+ and re-enable these tests in gradle.
 //    testImplementation files(Jvm.current().getJre().homeDir.getAbsolutePath()+'/lib/rt.jar')
 
     testAnnotationProcessor project(':annotation:compiler')
-    testAnnotationProcessor "com.google.auto.service:auto-service:${AUTO_SERVICE_VERSION}"
+    testAnnotationProcessor libs.autoservice
 }
 
 task regenerateTestResources {

@@ -15,24 +15,24 @@ plugins {
 }
 
 android {
-    compileSdkVersion COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        minSdkVersion MIN_SDK_VERSION as int
-        targetSdkVersion TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
         versionName VERSION_NAME as String
     }
 }
 
 dependencies {
-    implementation "junit:junit:$JUNIT_VERSION"
+    implementation libs.junit
     testImplementation project(":annotation:ksp:test")
     testImplementation project(":annotation:ksp")
     testImplementation project(":annotation")
     testImplementation project(":glide")
     testImplementation project(":integration:okhttp3")
-    testImplementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:${KOTLIN_COMPILE_TESTING_VERSION}"
-    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
-    testImplementation "org.jetbrains.kotlin:kotlin-test:${JETBRAINS_KOTLIN_TEST_VERSION}"
+    testImplementation libs.ksp.compiletesting
+    testImplementation libs.truth
+    testImplementation libs.kotlin.test
     testImplementation project(path: ':annotation:ksp:test')
 }
