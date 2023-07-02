@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -40,18 +40,18 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
 
 dependencies {
     api project(":library")
-    implementation "androidx.core:core-ktx:$ANDROID_X_CORE_KTX_VERSION"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$JETBRAINS_KOTLINX_COROUTINES_VERSION"
-    testImplementation "androidx.test:core-ktx:$ANDROID_X_TEST_CORE_KTX_VERSION"
-    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$JETBRAINS_KOTLIN_VERSION"
-    testImplementation "androidx.test.ext:junit-ktx:$ANDROID_X_TEST_JUNIT_KTX_VERSION"
-    testImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
-    testImplementation "org.robolectric:robolectric:$ROBOLECTRIC_VERSION"
-    testImplementation "androidx.test:runner:$ANDROID_X_TEST_RUNNER_VERSION"
-    testImplementation "junit:junit:$JUNIT_VERSION"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$JETBRAINS_KOTLINX_COROUTINES_TEST_VERSION"
-    testImplementation "com.google.truth:truth:$TRUTH_VERSION"
-    androidTestImplementation "androidx.test.ext:junit:$ANDROID_X_TEST_JUNIT_VERSION"
+    implementation libs.androidx.core.ktx
+    implementation libs.coroutines.core
+    testImplementation libs.androidx.test.ktx
+    testImplementation libs.kotlin.junit
+    testImplementation libs.androidx.test.ktx.junit
+    testImplementation libs.androidx.junit
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.test.runner
+    testImplementation libs.junit
+    testImplementation libs.coroutines.test
+    testImplementation libs.truth
+    androidTestImplementation libs.androidx.junit
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"

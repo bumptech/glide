@@ -2,17 +2,17 @@ apply plugin: 'com.android.application'
 
 dependencies {
     implementation project(':library')
-    implementation "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
+    implementation libs.androidx.appcompat
     annotationProcessor project(':annotation:compiler')
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
         applicationId 'com.bumptech.glide.samples.contacturi'
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
 
         versionCode 1
         versionName '1.0'

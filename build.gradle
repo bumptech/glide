@@ -9,17 +9,17 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:$ANDROID_GRADLE_VERSION"
+        classpath libs.android.gradle
         if (!hasProperty('DISABLE_ERROR_PRONE')) {
-            classpath "net.ltgt.gradle:gradle-errorprone-plugin:$ERROR_PRONE_PLUGIN_VERSION"
+            classpath libs.errorprone.gradle
         }
-        classpath 'com.guardsquare:proguard-gradle:7.1.0'
-        classpath "se.bjurr.violations:violations-gradle-plugin:$VIOLATIONS_PLUGIN_VERSION"
-        classpath "androidx.benchmark:benchmark-gradle-plugin:$ANDROID_X_BENCHMARK_VERSION"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$JETBRAINS_KOTLIN_VERSION"
-        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$KSP_GRADLE_PLUGIN_VERSION"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:$JETBRAINS_KOTLINX_BINARY_COMPATIBILITY_VALIDATOR_VERSION"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$JETBRAINS_DOKKA_VERSION"
+        classpath libs.proguard.gradle
+        classpath libs.violations
+        classpath libs.androidx.benchmark.gradle
+        classpath libs.kotlin.gradle
+        classpath libs.ksp.gradle
+        classpath libs.coroutines.binarycompat.gradle
+        classpath libs.dokka.gradle
     }
 }
 
