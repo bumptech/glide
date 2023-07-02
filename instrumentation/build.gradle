@@ -8,7 +8,7 @@ apply plugin: 'com.android.application'
 dependencies {
     annotationProcessor project(":annotation:compiler")
     implementation project(":library")
-    implementation libs.android.support.multidex
+    implementation libs.androidx.multidex
     implementation libs.androidx.appcompat
 
     androidTestImplementation project(':library')
