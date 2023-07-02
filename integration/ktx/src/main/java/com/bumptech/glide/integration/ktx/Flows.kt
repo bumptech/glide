@@ -13,6 +13,7 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.requestManager
 import com.bumptech.glide.util.Util
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -82,17 +83,18 @@ public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
 
 /**
  * Identical to [flow] with dimensions, except that the size is resolved asynchronously using
- * [waitForSize].
+ * [size].
  *
  * If an override size has been set using [RequestBuilder.override], that size will be used instead
- * and [waitForSize] may never be called.
+ * and [size] may never be called.
  *
- * [Placeholder] values may be emitted prior to [waitForSize] returning. Similarly if
+ * [Placeholder] values may be emitted prior to [size] returning. Similarly if
  * [RequestBuilder.thumbnail] requests are present and have overridden sizes, [Resource] values for
- * those thumbnails may also be emitted. [waitForSize] will only be used for requests where no
+ * those thumbnails may also be emitted. [size] will only be used for requests where no
  * [RequestBuilder.override] size is available.
  *
- * If [waitForSize] does not return, this flow may never return values other than placeholders.
+ * If [size] never has [AsyncGlideSize.setSize] called, this flow may never return values other than
+ * placeholders.
  *
  * This function is internal only, intended primarily for Compose. The Target API provides similar
  * functionality for traditional Views. We could consider expanding the visibility if there are use
@@ -101,8 +103,8 @@ public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
 @InternalGlideApi
 @ExperimentGlideFlows
 public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
-  waitForSize: suspend () -> Size,
-): Flow<GlideFlowInstant<ResourceT>> = flow(AsyncGlideSize(waitForSize))
+  size: AsyncGlideSize,
+): Flow<GlideFlowInstant<ResourceT>> = flowResolvable(size)
 
 /**
  * Convert a load in Glide into a flow that emits placeholders and resources in the order they'd be
@@ -276,7 +278,7 @@ private class FlowTarget<ResourceT : Any>(
       // begin immediately, shaving off some small amount of time.
       is AsyncGlideSize ->
         scope.launch {
-          val localResolvedSize = size.asyncSize()
+          val localResolvedSize = size.getSize()
           val callbacksToNotify: List<SizeReadyCallback>
           synchronized(this) {
             resolvedSize = localResolvedSize
@@ -387,6 +389,16 @@ public data class Size(val width: Int, val height: Int) {
 @InternalGlideApi public data class ImmediateGlideSize(val size: Size) : ResolvableGlideSize()
 
 @InternalGlideApi
-public data class AsyncGlideSize(val asyncSize: suspend () -> Size) : ResolvableGlideSize()
+public class AsyncGlideSize : ResolvableGlideSize() {
+  private val size = CompletableDeferred<Size>()
+
+  public fun setSize(size: Size) {
+    this.size.complete(size)
+  }
+
+  public suspend fun getSize(): Size {
+    return size.await()
+  }
+}
 
 @InternalGlideApi public fun Int.isValidGlideDimension(): Boolean = Util.isValidDimension(this)
