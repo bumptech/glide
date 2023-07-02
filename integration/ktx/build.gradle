@@ -42,6 +42,8 @@ dependencies {
     api project(":library")
     implementation libs.androidx.core.ktx
     implementation libs.coroutines.core
+    testImplementation libs.androidx.espresso
+    testImplementation libs.androidx.espresso.idling
     testImplementation libs.androidx.test.ktx
     testImplementation libs.kotlin.junit
     testImplementation libs.androidx.test.ktx.junit
