@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.SemanticsPropertyKey
@@ -35,9 +34,8 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuilder<T>
 
 /**
- * Start a request by passing [model] to [RequestBuilder.load] using the given [requestManager] and
- * then applying the [requestBuilderTransform] function to add options or apply mutations if the
- * caller desires.
+ * Start a request by passing [model] to [RequestBuilder.load] and then applying the
+ * [requestBuilderTransform] function to add options or apply mutations if the caller desires.
  *
  * [alignment], [contentScale], [alpha], [colorFilter] and [contentDescription] have the same
  * defaults (if any) and function identically to the parameters in [Image].
@@ -50,10 +48,6 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  * [com.bumptech.glide.request.target.Target.SIZE_ORIGINAL]. Avoid `SIZE_ORIGINAL`, implicitly or
  * explicitly if you can. You may end up loading a substantially larger image than you need, which
  * will increase memory usage and may also increase latency.
- *
- * If you provide your own [requestManager] rather than using this method's default, consider using
- * [remember] at a higher level to avoid some amount of overhead of retrieving it each
- * re-composition.
  *
  * This method will inspect [contentScale] and apply a matching transformation if one exists. Any
  * automatically applied transformation can be overridden using [requestBuilderTransform]. Either
@@ -111,7 +105,7 @@ public fun GlideImage(
       .let { failure?.apply(it::error, it::error) ?: it }
 
   val overrideSize: Size? = requestBuilder.overrideSize()
-  val (size, finalModifier) = rememberSizeAndModifier(overrideSize, modifier)
+  val size = rememberResolvableSize(overrideSize)
 
   // TODO(judds): It seems like we should be able to use the production paths for
   // resource / drawables as well as Composables. It's not totally clear what part of the prod code
@@ -124,7 +118,7 @@ public fun GlideImage(
   SizedGlideImage(
     requestBuilder = requestBuilder,
     size = size,
-    modifier = finalModifier,
+    modifier = modifier,
     contentDescription = contentDescription,
     alignment = alignment,
     contentScale = contentScale,
@@ -234,24 +228,12 @@ public sealed class Placeholder {
 }
 
 @OptIn(InternalGlideApi::class)
-private data class SizeAndModifier(val size: ResolvableGlideSize, val modifier: Modifier)
-
-@OptIn(InternalGlideApi::class)
 @Composable
-private fun rememberSizeAndModifier(
+private fun rememberResolvableSize(
   overrideSize: Size?,
-  modifier: Modifier,
 ) =
-  remember(overrideSize, modifier) {
-    if (overrideSize != null) {
-      SizeAndModifier(ImmediateGlideSize(overrideSize), modifier)
-    } else {
-      val sizeObserver = SizeObserver()
-      SizeAndModifier(
-        AsyncGlideSize(sizeObserver::getSize),
-        modifier.sizeObservingModifier(sizeObserver)
-      )
-    }
+  remember(overrideSize) {
+    overrideSize?.let { ImmediateGlideSize(it) } ?: AsyncGlideSize()
   }
 
 @Composable
@@ -346,17 +328,6 @@ private fun rememberGlidePainter(
   //  triggers a recomposition
   return remember(requestBuilder, size) { GlidePainter(requestBuilder, size, scope) }
 }
-
-@OptIn(InternalGlideApi::class)
-private fun Modifier.sizeObservingModifier(sizeObserver: SizeObserver): Modifier =
-  this.layout { measurable, constraints ->
-    val inferredSize = constraints.inferredGlideSize()
-    if (inferredSize != null) {
-      sizeObserver.setSize(inferredSize)
-    }
-    val placeable = measurable.measure(constraints)
-    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-  }
 
 internal val DisplayedDrawableKey =
   SemanticsPropertyKey<MutableState<Drawable?>>("DisplayedDrawable")
