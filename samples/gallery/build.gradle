@@ -6,6 +6,7 @@ apply plugin: 'com.google.devtools.ksp'
 dependencies {
     implementation project(':library')
     implementation project(':integration:compose')
+    implementation project(':integration:ktx')
     implementation(project(':integration:recyclerview')) {
         transitive = false
     }

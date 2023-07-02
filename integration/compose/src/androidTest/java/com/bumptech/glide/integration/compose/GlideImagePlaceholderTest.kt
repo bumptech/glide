@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalGlideComposeApi::class)
-
 package com.bumptech.glide.integration.compose
 
 import android.content.Context
@@ -21,11 +19,16 @@ import org.junit.Test
  * [com.bumptech.glide.integration.compose.test.GlideComposeRule] because we want to make assertions
  * about loads that have not yet completed.
  */
+@Suppress("DEPRECATION") // Tests for a deprecated method
+@OptIn(ExperimentalGlideComposeApi::class)
 class GlideImagePlaceholderTest {
   private val context: Context = ApplicationProvider.getApplicationContext()
-  @get:Rule(order = 1) val composeRule = createComposeRule()
-  @get:Rule(order = 2) val waitModelLoaderRule = WaitModelLoaderRule()
-  @get:Rule(order = 3) val tearDownGlide = TearDownGlide()
+  @get:Rule(order = 1)
+  val composeRule = createComposeRule()
+  @get:Rule(order = 2)
+  val waitModelLoaderRule = WaitModelLoaderRule()
+  @get:Rule(order = 3)
+  val tearDownGlide = TearDownGlide()
 
   @Test
   fun requestBuilderTransform_withPlaceholderResourceId_displaysPlaceholder() {
@@ -120,16 +123,16 @@ class GlideImagePlaceholderTest {
         model = waitModel,
         contentDescription = "none",
         loading =
-          placeholder {
-            // Nesting GlideImage is not really a good idea, but it's convenient for this test
-            // because
-            // we can use our helpers to assert on its contents.
-            GlideImage(
-              model = waitModel,
-              contentDescription = description,
-              loading = placeholder(placeholderResourceId),
-            )
-          }
+        placeholder {
+          // Nesting GlideImage is not really a good idea, but it's convenient for this test
+          // because
+          // we can use our helpers to assert on its contents.
+          GlideImage(
+            model = waitModel,
+            contentDescription = description,
+            loading = placeholder(placeholderResourceId),
+          )
+        }
       )
     }
 
@@ -205,13 +208,13 @@ class GlideImagePlaceholderTest {
         model = waitModel,
         contentDescription = "other",
         loading =
-          placeholder {
-            GlideImage(
-              model = waitModel,
-              contentDescription = description,
-              loading = placeholder(placeholderResourceId),
-            )
-          },
+        placeholder {
+          GlideImage(
+            model = waitModel,
+            contentDescription = description,
+            loading = placeholder(placeholderResourceId),
+          )
+        },
       ) {
         it.placeholder(android.R.drawable.btn_star)
       }

@@ -241,7 +241,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>, RequestListener<
 
   @Override
   public synchronized boolean onLoadFailed(
-      @Nullable GlideException e, Object model, Target<R> target, boolean isFirstResource) {
+      @Nullable GlideException e, Object model, @NonNull Target<R> target, boolean isFirstResource) {
     loadFailed = true;
     exception = e;
     waiter.notifyAll(this);
@@ -250,7 +250,7 @@ public class RequestFutureTarget<R> implements FutureTarget<R>, RequestListener<
 
   @Override
   public synchronized boolean onResourceReady(
-      R resource, Object model, Target<R> target, DataSource dataSource, boolean isFirstResource) {
+      @NonNull R resource, @NonNull Object model, Target<R> target, @NonNull DataSource dataSource, boolean isFirstResource) {
     // We might get a null result.
     resultReceived = true;
     this.resource = resource;

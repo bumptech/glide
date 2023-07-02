@@ -696,17 +696,17 @@ public class SingleRequestTest {
                   public boolean onLoadFailed(
                       @Nullable GlideException e,
                       Object model,
-                      Target<List> target,
+                      @NonNull Target<List> target,
                       boolean isFirstResource) {
                     return false;
                   }
 
                   @Override
                   public boolean onResourceReady(
-                      List resource,
-                      Object model,
+                      @NonNull List resource,
+                      @NonNull Object model,
                       Target<List> target,
-                      DataSource dataSource,
+                      @NonNull DataSource dataSource,
                       boolean isFirstResource) {
                     verify(builder.requestCoordinator).onRequestSuccess(target.getRequest());
                     isRequestCoordinatorVerified.set(true);
@@ -733,7 +733,7 @@ public class SingleRequestTest {
                   public boolean onLoadFailed(
                       @Nullable GlideException e,
                       Object model,
-                      Target<List> target,
+                      @NonNull Target<List> target,
                       boolean isFirstResource) {
                     verify(builder.requestCoordinator).onRequestFailed(target.getRequest());
                     isRequestCoordinatorVerified.set(true);
@@ -742,10 +742,10 @@ public class SingleRequestTest {
 
                   @Override
                   public boolean onResourceReady(
-                      List resource,
-                      Object model,
+                      @NonNull List resource,
+                      @NonNull Object model,
                       Target<List> target,
-                      DataSource dataSource,
+                      @NonNull DataSource dataSource,
                       boolean isFirstResource) {
                     return false;
                   }

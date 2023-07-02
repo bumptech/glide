@@ -7,9 +7,7 @@
 package com.bumptech.glide.integration.compose
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.drawable.Drawable
-import android.util.TypedValue
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -28,7 +26,6 @@ import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
 import com.bumptech.glide.integration.ktx.Resource
 import com.bumptech.glide.integration.ktx.Status
 import com.bumptech.glide.integration.ktx.flow
-import kotlin.math.roundToInt
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

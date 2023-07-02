@@ -424,17 +424,17 @@ public class GlideTest {
               public boolean onLoadFailed(
                   GlideException e,
                   Object model,
-                  Target<Drawable> target,
+                  @NonNull Target<Drawable> target,
                   boolean isFirstResource) {
                 throw new RuntimeException("Load failed");
               }
 
               @Override
               public boolean onResourceReady(
-                  Drawable resource,
-                  Object model,
+                  @NonNull Drawable resource,
+                  @NonNull Object model,
                   Target<Drawable> target,
-                  DataSource dataSource,
+                  @NonNull DataSource dataSource,
                   boolean isFirstResource) {
                 return false;
               }
