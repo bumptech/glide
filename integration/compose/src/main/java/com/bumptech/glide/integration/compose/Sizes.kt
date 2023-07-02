@@ -2,6 +2,7 @@
 
 package com.bumptech.glide.integration.compose
 
+import androidx.compose.ui.unit.Constraints
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.Size
@@ -38,4 +39,23 @@ internal fun androidx.compose.ui.geometry.Size.toGlideSize(): Size? {
     return null;
   }
   return Size(width, height);
+}
+
+internal fun Constraints.inferredGlideSize(): Size? {
+  val width =
+    if (hasBoundedWidth) {
+      maxWidth
+    } else {
+      com.bumptech.glide.request.target.Target.SIZE_ORIGINAL
+    }
+  val height =
+    if (hasBoundedHeight) {
+      maxHeight
+    } else {
+      com.bumptech.glide.request.target.Target.SIZE_ORIGINAL
+    }
+  if (!width.isValidGlideDimension() || !height.isValidGlideDimension()) {
+    return null
+  }
+  return Size(width, height)
 }

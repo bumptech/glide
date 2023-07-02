@@ -295,17 +295,17 @@ class GlideImageTest {
       override fun onLoadFailed(
         e: GlideException?,
         model: Any?,
-        target: Target<Drawable>?,
+        target: Target<Drawable>,
         isFirstResource: Boolean,
       ): Boolean {
         throw UnsupportedOperationException()
       }
 
       override fun onResourceReady(
-        resource: Drawable?,
-        model: Any?,
-        target: Target<Drawable>?,
-        dataSource: DataSource?,
+        resource: Drawable,
+        model: Any,
+        target: Target<Drawable>,
+        dataSource: DataSource,
         isFirstResource: Boolean,
       ): Boolean {
         onResourceReadyCounter.incrementAndGet()

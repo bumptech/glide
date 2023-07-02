@@ -28,15 +28,20 @@ public final class com/bumptech/glide/integration/ktx/Placeholder : com/bumptech
 }
 
 public final class com/bumptech/glide/integration/ktx/Resource : com/bumptech/glide/integration/ktx/GlideFlowInstant {
-	public fun <init> (Lcom/bumptech/glide/integration/ktx/Status;Ljava/lang/Object;)V
+	public fun <init> (Lcom/bumptech/glide/integration/ktx/Status;Ljava/lang/Object;ZLcom/bumptech/glide/load/DataSource;)V
+	public final fun asFailure ()Lcom/bumptech/glide/integration/ktx/Resource;
 	public final fun component1 ()Lcom/bumptech/glide/integration/ktx/Status;
 	public final fun component2 ()Ljava/lang/Object;
-	public final fun copy (Lcom/bumptech/glide/integration/ktx/Status;Ljava/lang/Object;)Lcom/bumptech/glide/integration/ktx/Resource;
-	public static synthetic fun copy$default (Lcom/bumptech/glide/integration/ktx/Resource;Lcom/bumptech/glide/integration/ktx/Status;Ljava/lang/Object;ILjava/lang/Object;)Lcom/bumptech/glide/integration/ktx/Resource;
+	public final fun component3 ()Z
+	public final fun component4 ()Lcom/bumptech/glide/load/DataSource;
+	public final fun copy (Lcom/bumptech/glide/integration/ktx/Status;Ljava/lang/Object;ZLcom/bumptech/glide/load/DataSource;)Lcom/bumptech/glide/integration/ktx/Resource;
+	public static synthetic fun copy$default (Lcom/bumptech/glide/integration/ktx/Resource;Lcom/bumptech/glide/integration/ktx/Status;Ljava/lang/Object;ZLcom/bumptech/glide/load/DataSource;ILjava/lang/Object;)Lcom/bumptech/glide/integration/ktx/Resource;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDataSource ()Lcom/bumptech/glide/load/DataSource;
 	public final fun getResource ()Ljava/lang/Object;
 	public fun getStatus ()Lcom/bumptech/glide/integration/ktx/Status;
 	public fun hashCode ()I
+	public final fun isFirstResource ()Z
 	public fun toString ()Ljava/lang/String;
 }
 

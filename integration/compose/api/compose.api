@@ -1,3 +1,22 @@
+public final class com/bumptech/glide/integration/compose/AnimationState : java/lang/Enum {
+	public static final field Animate Lcom/bumptech/glide/integration/compose/AnimationState;
+	public static final field Failed Lcom/bumptech/glide/integration/compose/AnimationState;
+	public static final field Loading Lcom/bumptech/glide/integration/compose/AnimationState;
+	public static final field Success Lcom/bumptech/glide/integration/compose/AnimationState;
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/integration/compose/AnimationState;
+	public static fun values ()[Lcom/bumptech/glide/integration/compose/AnimationState;
+}
+
+public final class com/bumptech/glide/integration/compose/AsyncLayoutSize {
+	public static final field $stable I
+	public fun <init> (Lcom/bumptech/glide/integration/ktx/AsyncGlideSize;)V
+	public final fun copy (Lcom/bumptech/glide/integration/ktx/AsyncGlideSize;)Lcom/bumptech/glide/integration/compose/AsyncLayoutSize;
+	public static synthetic fun copy$default (Lcom/bumptech/glide/integration/compose/AsyncLayoutSize;Lcom/bumptech/glide/integration/ktx/AsyncGlideSize;ILjava/lang/Object;)Lcom/bumptech/glide/integration/compose/AsyncLayoutSize;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface annotation class com/bumptech/glide/integration/compose/ExperimentalGlideComposeApi : java/lang/annotation/Annotation {
 }
 
@@ -6,6 +25,45 @@ public final class com/bumptech/glide/integration/compose/GlideImageKt {
 	public static final fun placeholder (I)Lcom/bumptech/glide/integration/compose/Placeholder;
 	public static final fun placeholder (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/integration/compose/Placeholder;
 	public static final fun placeholder (Lkotlin/jvm/functions/Function2;)Lcom/bumptech/glide/integration/compose/Placeholder;
+}
+
+public abstract class com/bumptech/glide/integration/compose/GlidePainter : androidx/compose/ui/graphics/painter/Painter {
+	public static final field $stable I
+	public fun <init> ()V
+	public abstract fun getState ()Lcom/bumptech/glide/integration/compose/GlidePainter$State;
+}
+
+public abstract class com/bumptech/glide/integration/compose/GlidePainter$State {
+	public static final field $stable I
+}
+
+public final class com/bumptech/glide/integration/compose/GlidePainter$State$Failure : com/bumptech/glide/integration/compose/GlidePainter$State {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/bumptech/glide/integration/compose/GlidePainter$State$Failure;
+}
+
+public final class com/bumptech/glide/integration/compose/GlidePainter$State$Loading : com/bumptech/glide/integration/compose/GlidePainter$State {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/bumptech/glide/integration/compose/GlidePainter$State$Loading;
+}
+
+public final class com/bumptech/glide/integration/compose/GlidePainter$State$Success : com/bumptech/glide/integration/compose/GlidePainter$State {
+	public static final field $stable I
+	public fun <init> (Lcom/bumptech/glide/load/DataSource;)V
+	public final fun component1 ()Lcom/bumptech/glide/load/DataSource;
+	public final fun copy (Lcom/bumptech/glide/load/DataSource;)Lcom/bumptech/glide/integration/compose/GlidePainter$State$Success;
+	public static synthetic fun copy$default (Lcom/bumptech/glide/integration/compose/GlidePainter$State$Success;Lcom/bumptech/glide/load/DataSource;ILjava/lang/Object;)Lcom/bumptech/glide/integration/compose/GlidePainter$State$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDataSource ()Lcom/bumptech/glide/load/DataSource;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/bumptech/glide/integration/compose/GlidePainterKt {
+	public static final fun animate (Lcom/bumptech/glide/integration/compose/GlidePainter$State;)Lcom/bumptech/glide/integration/compose/AnimationState;
+	public static final fun rememberGlidePainter (Ljava/lang/Object;Lcom/bumptech/glide/integration/compose/AsyncLayoutSize;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lcom/bumptech/glide/integration/compose/GlidePainter;
+	public static final fun rememberGlidePainter (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)Lcom/bumptech/glide/integration/compose/GlidePainter;
+	public static final fun rememberSizeAndModifier (Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;I)Lkotlin/Pair;
 }
 
 public abstract interface class com/bumptech/glide/integration/compose/GlidePreloadingData {

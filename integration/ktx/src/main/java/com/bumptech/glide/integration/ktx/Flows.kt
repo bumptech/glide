@@ -19,6 +19,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
+import java.lang.UnsupportedOperationException
 
 @RequiresOptIn(
   level = RequiresOptIn.Level.ERROR,
@@ -201,6 +202,8 @@ public data class Placeholder<ResourceT>(
 public data class Resource<ResourceT>(
   public override val status: Status,
   public val resource: ResourceT,
+  public val isFirstResource: Boolean,
+  public val dataSource: DataSource,
 ) : GlideFlowInstant<ResourceT>() {
   init {
     require(
@@ -215,6 +218,9 @@ public data class Resource<ResourceT>(
       }
     )
   }
+
+  public fun asFailure():Resource<ResourceT> =
+    Resource(Status.FAILED, resource, isFirstResource, dataSource)
 }
 
 @InternalGlideApi
@@ -264,7 +270,7 @@ private class FlowTarget<ResourceT : Any>(
 ) : Target<ResourceT>, RequestListener<ResourceT> {
   @Volatile private var resolvedSize: Size? = null
   @Volatile private var currentRequest: Request? = null
-  @Volatile private var lastResource: ResourceT? = null
+  @Volatile private var lastResource: Resource<ResourceT>? = null
 
   @GuardedBy("this") private val sizeReadyCallbacks = mutableListOf<SizeReadyCallback>()
 
@@ -306,15 +312,8 @@ private class FlowTarget<ResourceT : Any>(
   }
 
   override fun onResourceReady(resource: ResourceT, transition: Transition<in ResourceT>?) {
-    lastResource = resource
-    scope.trySend(
-      Resource(
-        // currentRequest is the entire request state, so we can use it to figure out if this
-        // resource is from a thumbnail request (isComplete is false) or the primary request.
-        if (currentRequest?.isComplete == true) Status.SUCCEEDED else Status.RUNNING,
-        resource
-      )
-    )
+    throw UnsupportedOperationException()
+
   }
 
   override fun onLoadCleared(placeholder: Drawable?) {
@@ -354,25 +353,36 @@ private class FlowTarget<ResourceT : Any>(
   override fun onLoadFailed(
     e: GlideException?,
     model: Any?,
-    target: Target<ResourceT>?,
+    target: Target<ResourceT>,
     isFirstResource: Boolean,
   ): Boolean {
     val localLastResource = lastResource
     val localRequest = currentRequest
     if (localLastResource != null && localRequest?.isComplete == false && !localRequest.isRunning) {
-      scope.channel.trySend(Resource(Status.FAILED, localLastResource))
+      scope.channel.trySend(localLastResource.asFailure())
     }
     return false
   }
 
   override fun onResourceReady(
     resource: ResourceT,
-    model: Any?,
-    target: Target<ResourceT>?,
-    dataSource: DataSource?,
+    model: Any,
+    target: Target<ResourceT>,
+    dataSource: DataSource,
     isFirstResource: Boolean,
   ): Boolean {
-    return false
+    val result =
+      Resource(
+        // currentRequest is the entire request state, so we can use it to figure out if this
+        // resource is from a thumbnail request (isComplete is false) or the primary request.
+        if (currentRequest?.isComplete == true) Status.SUCCEEDED else Status.RUNNING,
+        resource,
+        isFirstResource,
+        dataSource
+      )
+    lastResource = result
+    scope.trySend(result)
+    return true
   }
 }
 

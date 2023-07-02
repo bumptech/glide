@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -22,12 +21,10 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.integration.ktx.AsyncGlideSize
-import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
 import com.bumptech.glide.integration.ktx.ImmediateGlideSize
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.ResolvableGlideSize
 import com.bumptech.glide.integration.ktx.Size
-import com.bumptech.glide.integration.ktx.Status
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 /** Mutates and returns the given [RequestBuilder] to apply relevant options. */
@@ -129,6 +126,7 @@ public fun GlideImage(
   )
 }
 
+
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun PreviewResourceOrDrawable(
@@ -229,7 +227,7 @@ public sealed class Placeholder {
 
 @OptIn(InternalGlideApi::class)
 @Composable
-private fun rememberResolvableSize(
+internal fun rememberResolvableSize(
   overrideSize: Size?,
 ) =
   remember(overrideSize) {
@@ -269,7 +267,7 @@ private fun RequestBuilder<Drawable>.contentScaleTransform(
   // TODO(judds): Think about how to handle the various fills
 }
 
-@OptIn(InternalGlideApi::class, ExperimentGlideFlows::class)
+@OptIn(InternalGlideApi::class, ExperimentalGlideComposeApi::class)
 @Composable
 private fun SizedGlideImage(
   requestBuilder: RequestBuilder<Drawable>,
@@ -290,10 +288,11 @@ private fun SizedGlideImage(
     rememberGlidePainter(
       requestBuilder = requestBuilder,
       size = size,
+      resolveSize = true
     )
-  if (placeholder != null && painter.status.showPlaceholder()) {
+  if (placeholder != null && (painter.state is GlidePainter.State.Loading)) {
     placeholder.boxed()
-  } else if (failure != null && painter.status == Status.FAILED) {
+  } else if (failure != null && painter.state is GlidePainter.State.Failure) {
     failure.boxed()
   } else {
     Image(
@@ -308,26 +307,6 @@ private fun SizedGlideImage(
   }
 }
 
-@OptIn(ExperimentGlideFlows::class)
-private fun Status.showPlaceholder(): Boolean =
-  when (this) {
-    Status.RUNNING -> true
-    Status.CLEARED -> true
-    else -> false
-  }
-
-@OptIn(InternalGlideApi::class)
-@Composable
-private fun rememberGlidePainter(
-  requestBuilder: RequestBuilder<Drawable>,
-  size: ResolvableGlideSize,
-): GlidePainter {
-  val scope = rememberCoroutineScope()
-  // TODO(judds): Calling onRemembered here manually might make a minor improvement in how quickly
-  //  the image load is started, but it also triggers a recomposition. I can't figure out why it
-  //  triggers a recomposition
-  return remember(requestBuilder, size) { GlidePainter(requestBuilder, size, scope) }
-}
 
 internal val DisplayedDrawableKey =
   SemanticsPropertyKey<MutableState<Drawable?>>("DisplayedDrawable")
