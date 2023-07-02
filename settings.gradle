@@ -60,7 +60,7 @@ dependencyResolutionManagement {
             version('kotlin', '1.7.0')
             version('mockito', '5.3.1')
             version('retrofit', '2.3.0')
-            version('androidx-benchmark', '1.1.0')
+            version('androidx-benchmark', '1.1.1')
             version('androidx-espresso', '3.4.0')
             // At least versions 1.5 and later require java 8 desugaring, which Glide can't
             // currently use, so we're stuck on an older version.
