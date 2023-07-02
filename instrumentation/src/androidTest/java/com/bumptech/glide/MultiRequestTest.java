@@ -68,17 +68,17 @@ public class MultiRequestTest {
                   public boolean onLoadFailed(
                       @Nullable GlideException e,
                       Object model,
-                      Target<Drawable> target,
+                      @NonNull Target<Drawable> target,
                       boolean isFirstResource) {
                     return false;
                   }
 
                   @Override
                   public boolean onResourceReady(
-                      Drawable resource,
-                      Object model,
+                      @NonNull Drawable resource,
+                      @NonNull Object model,
                       Target<Drawable> target,
-                      DataSource dataSource,
+                      @NonNull DataSource dataSource,
                       boolean isFirstResource) {
                     isPrimaryRequestComplete.set(target.getRequest().isComplete());
                     countDownLatch.countDown();
@@ -115,7 +115,7 @@ public class MultiRequestTest {
                   public boolean onLoadFailed(
                       @Nullable GlideException e,
                       Object model,
-                      Target<Drawable> target,
+                      @NonNull Target<Drawable> target,
                       boolean isFirstResource) {
                     Request request = target.getRequest();
                     isNeitherRunningNorComplete.set(!request.isComplete() && !request.isRunning());
@@ -125,10 +125,10 @@ public class MultiRequestTest {
 
                   @Override
                   public boolean onResourceReady(
-                      Drawable resource,
-                      Object model,
+                      @NonNull Drawable resource,
+                      @NonNull Object model,
                       Target<Drawable> target,
-                      DataSource dataSource,
+                      @NonNull DataSource dataSource,
                       boolean isFirstResource) {
                     return false;
                   }

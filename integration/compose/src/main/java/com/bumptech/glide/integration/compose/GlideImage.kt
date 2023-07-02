@@ -1,33 +1,42 @@
 package com.bumptech.glide.integration.compose
 
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.semantics.SemanticsPropertyKey
-import androidx.compose.ui.semantics.SemanticsPropertyReceiver
-import androidx.compose.ui.semantics.semantics
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.integration.ktx.AsyncGlideSize
 import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
+import com.bumptech.glide.integration.ktx.GlideFlowInstant
 import com.bumptech.glide.integration.ktx.ImmediateGlideSize
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.ResolvableGlideSize
-import com.bumptech.glide.integration.ktx.Size
+import com.bumptech.glide.integration.ktx.Resource
 import com.bumptech.glide.integration.ktx.Status
+import com.bumptech.glide.integration.ktx.flowResolvable
+import com.bumptech.glide.load.DataSource
+import com.google.accompanist.drawablepainter.DrawablePainter
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 /** Mutates and returns the given [RequestBuilder] to apply relevant options. */
@@ -104,8 +113,6 @@ public fun GlideImage(
       .let { loading?.apply(it::placeholder, it::placeholder) ?: it }
       .let { failure?.apply(it::error, it::error) ?: it }
 
-  val overrideSize: Size? = requestBuilder.overrideSize()
-  val size = rememberResolvableSize(overrideSize)
 
   // TODO(judds): It seems like we should be able to use the production paths for
   // resource / drawables as well as Composables. It's not totally clear what part of the prod code
@@ -115,18 +122,216 @@ public fun GlideImage(
     return
   }
 
-  SizedGlideImage(
-    requestBuilder = requestBuilder,
-    size = size,
-    modifier = modifier,
-    contentDescription = contentDescription,
-    alignment = alignment,
-    contentScale = contentScale,
-    alpha = alpha,
-    colorFilter = colorFilter,
-    placeholder = loading?.maybeComposable(),
-    failure = failure?.maybeComposable(),
-  )
+  // TODO(sam): Remove this branch when GlideSubcomposition has been out for a bit.
+  val loadingComposable = loading?.maybeComposable()
+  val failureComposable = failure?.maybeComposable()
+  if (loadingComposable != null || failureComposable != null) {
+    GlideSubcomposition(model, modifier, { requestBuilder }) {
+      if (state == RequestState.Loading && loadingComposable != null) {
+        loadingComposable()
+      } else if (state == RequestState.Failure && failureComposable != null) {
+        failureComposable()
+      } else {
+        Image(
+          painter,
+          contentDescription,
+          modifier,
+          alignment,
+          contentScale,
+          alpha,
+          colorFilter
+        )
+      }
+    }
+  } else {
+    val size: ImmediateGlideSize? = requestBuilder.overrideSize()?.let { ImmediateGlideSize(it) }
+    ModifierGlideImage(
+      requestBuilder,
+      size,
+      contentDescription,
+      modifier,
+      alignment,
+      contentScale,
+      alpha,
+      colorFilter,
+    )
+  }
+}
+
+/**
+ * Provides the current state of the request and a [Painter] to draw it.
+ */
+@ExperimentalGlideComposeApi
+public interface GlideSubcompositionScope {
+  /** The current state of the request, slightly simplified over Glide's standard request state. */
+  public val state: RequestState
+
+  /**
+   * A painter that will draw the placeholder or resource matching the current request state. If no
+   * placeholder or resource is available currently, the painter will draw transparent.
+   */
+  public val painter: Painter
+}
+
+@OptIn(ExperimentGlideFlows::class)
+@ExperimentalGlideComposeApi
+internal class GlideSubcompositionScopeImpl(
+  private val value: GlideFlowInstant<Drawable>?,
+) : GlideSubcompositionScope {
+
+  override val painter: Painter
+    get() = value?.drawable()?.toPainter() ?: ColorPainter(Color.Transparent)
+
+  override val state: RequestState
+    get() = when (val current = value) {
+      is com.bumptech.glide.integration.ktx.Placeholder -> {
+        when (current.status) {
+          Status.CLEARED -> RequestState.Loading
+          Status.RUNNING -> RequestState.Loading
+          Status.FAILED -> RequestState.Failure
+          Status.SUCCEEDED -> throw IllegalStateException()
+        }
+      }
+
+      is Resource -> RequestState.Success(current.dataSource)
+      null -> RequestState.Loading
+    }
+
+  private fun GlideFlowInstant<Drawable>.drawable(): Drawable? = when (this) {
+    is com.bumptech.glide.integration.ktx.Placeholder -> placeholder
+    is Resource -> resource
+  }
+
+  private fun Drawable.toPainter(): Painter =
+    when (this) {
+      is BitmapDrawable -> BitmapPainter(bitmap.asImageBitmap())
+      is ColorDrawable -> ColorPainter(Color(color))
+      else -> DrawablePainter(mutate())
+    }
+}
+
+@OptIn(InternalGlideApi::class)
+private fun Modifier.sizeObservingModifier(size: ResolvableGlideSize): Modifier =
+  this.layout { measurable, constraints ->
+    if (size is AsyncGlideSize) {
+      val inferredSize = constraints.inferredGlideSize()
+      if (inferredSize != null) {
+        size.setSize(inferredSize)
+      }
+    }
+    val placeable = measurable.measure(constraints)
+    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+  }
+
+/**
+ * The current state of a request associated with a Glide painter.
+ *
+ * This state is a bit of a simplification over Glide's real state. In particular [Success] is
+ * used in any case where we have an image, even if that image is the thumbnail of a full request
+ * where the full request has failed. From the point of view of the UI this is usually reasonable
+ * and a significant simplification of this API.
+ */
+@ExperimentalGlideComposeApi
+public sealed class RequestState {
+
+  @ExperimentalGlideComposeApi
+  public object Loading : RequestState()
+
+  /**
+   * Indicates the load finished successfully (or at least one thumbnail was loaded, see the details
+   * on [RequestState]).
+   *
+   * @param dataSource The data source the latest image was loaded from. If your request uses one
+   * or more thumbnails this value may change as each successive thumbnail is loaded.
+   */
+  @ExperimentalGlideComposeApi
+  public data class Success(
+    val dataSource: DataSource,
+  ) : RequestState()
+
+  @ExperimentalGlideComposeApi
+  public object Failure : RequestState()
+}
+
+/**
+ * Starts an image load with Glide, exposing the state of the load via [GlideSubcompositionScope]
+ * to allow complex subcompositions or animations that depend on the load's state.
+ *
+ * [GlideImage] is significantly more efficient and easier to use than this method. GlideImage
+ * should be preferred over GlideSubcomposition whenever possible. Using GlideSubcomposition in a
+ * scrolling list will cause multiple recompositions per image, significantly degrading performance.
+ * The use case for this method is as a fallback for cases where you cannot animate or compose your
+ * layout without knowing the status of the image load request.
+ *
+ * All that said, you can use this class to display custom placeholders and/or animations. For
+ * example to start an animation when a load completes, you might do something like:
+ *
+ * ```
+ * GlideSubcomposition(model = uri, modifier) {
+ *   when (state) {
+ *     RequestState.Loading -> ShowLoadingUi()
+ *     RequestState.Failure -> ShowFailureUi()
+ *     is RequestState.Success -> {
+ *       if (state.dataSource != DataSource.MEMORY_CACHE) {
+ *         ShowSomeComplexAnimation()
+ *       } else {
+ *         DoSomethingNormal()
+ *       }
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * [RequestState.Success] contains the [DataSource] where the image was loaded from so that you can
+ * avoid animating or otherwise change your composition if the image was loaded from the memory
+ * cache. Typically you do not want to animate loads from the memory cache.
+ *
+ * If your [requestBuilderTransform] does not have an [overrideSize] set, this method will wrap your
+ * subcomposition in [Box] and use the size of that `Box` to determine the
+ * size to use when loading the image. The box's modifier will be set to the [modifier] you provide.
+ * As with [GlideImage] try to ensure that you either set a reasonable [RequestBuilder.override]
+ * size using [requestBuilderTransform] or that you provide a [modifier] that will cause this
+ * composition to go through layout with a reasonable size. Failing to do so may result in the image
+ * load never starting, or in an unreasonably large amount of memory being used. Loading overly
+ * large images in memory can also impact scrolling performance.
+ */
+@OptIn(InternalGlideApi::class, ExperimentGlideFlows::class)
+@ExperimentalGlideComposeApi
+@Composable
+public fun GlideSubcomposition(
+  model: Any?,
+  modifier: Modifier = Modifier,
+  requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
+  content: @Composable GlideSubcompositionScope.() -> Unit
+) {
+  val requestManager: RequestManager = LocalContext.current.let { remember(it) { Glide.with(it) } }
+  val requestBuilder =
+    remember(model, requestManager, requestBuilderTransform) {
+      requestBuilderTransform(requestManager.load(model))
+    }
+
+  val overrideSize = requestBuilder.overrideSize()
+  val size = remember(overrideSize) {
+    if (overrideSize != null) {
+      ImmediateGlideSize(overrideSize)
+    } else {
+      AsyncGlideSize()
+    }
+  }
+
+  val result = remember(requestBuilder, size) {
+    requestBuilder.flowResolvable(size)
+  }.collectAsState(initial = null)
+
+  val scope = GlideSubcompositionScopeImpl(result.value)
+
+  if (overrideSize != null) {
+    scope.content()
+  } else {
+    Box(modifier = modifier.sizeObservingModifier(size)) {
+      scope.content()
+    }
+  }
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -137,7 +342,7 @@ private fun PreviewResourceOrDrawable(
   modifier: Modifier,
 ) {
   val drawable =
-    when(loading) {
+    when (loading) {
       is Placeholder.OfDrawable -> loading.drawable
       is Placeholder.OfResourceId -> LocalContext.current.getDrawable(loading.resourceId)
       is Placeholder.OfComposable ->
@@ -180,6 +385,11 @@ public fun placeholder(@DrawableRes resourceId: Int): Placeholder =
  * Providing a nested [GlideImage] is not recommended. Use [RequestBuilder.thumbnail] or
  * [RequestBuilder.error] as an alternative.
  */
+@Deprecated(
+  "Using this method forces recomposition when the image load state changes." +
+      " If you require this behavior use GlideSubcomposition instead",
+  level = DeprecationLevel.WARNING
+)
 @ExperimentalGlideComposeApi
 public fun placeholder(composable: @Composable () -> Unit): Placeholder =
   Placeholder.OfComposable(composable)
@@ -227,15 +437,6 @@ public sealed class Placeholder {
     }
 }
 
-@OptIn(InternalGlideApi::class)
-@Composable
-private fun rememberResolvableSize(
-  overrideSize: Size?,
-) =
-  remember(overrideSize) {
-    overrideSize?.let { ImmediateGlideSize(it) } ?: AsyncGlideSize()
-  }
-
 @Composable
 private fun rememberRequestBuilderWithDefaults(
   model: Any?,
@@ -254,6 +455,7 @@ private fun RequestBuilder<Drawable>.contentScaleTransform(
     ContentScale.Crop -> {
       optionalCenterCrop()
     }
+
     ContentScale.Inside,
     ContentScale.Fit -> {
       // Outside compose, glide would use fitCenter() for FIT. But that's probably not a good
@@ -262,6 +464,7 @@ private fun RequestBuilder<Drawable>.contentScaleTransform(
       // centerInside(). The UI can still scale the view even if the Bitmap is smaller.
       optionalCenterInside()
     }
+
     else -> {
       this
     }
@@ -269,66 +472,31 @@ private fun RequestBuilder<Drawable>.contentScaleTransform(
   // TODO(judds): Think about how to handle the various fills
 }
 
-@OptIn(InternalGlideApi::class, ExperimentGlideFlows::class)
+@OptIn(InternalGlideApi::class, ExperimentalGlideComposeApi::class)
 @Composable
-private fun SizedGlideImage(
+private fun ModifierGlideImage(
   requestBuilder: RequestBuilder<Drawable>,
-  size: ResolvableGlideSize,
-  modifier: Modifier,
+  size: ImmediateGlideSize?,
   contentDescription: String?,
+  modifier: Modifier,
   alignment: Alignment,
   contentScale: ContentScale,
   alpha: Float,
-  colorFilter: ColorFilter?,
-  placeholder: @Composable (() -> Unit)?,
-  failure: @Composable (() -> Unit)?,
+  colorFilter: ColorFilter?
 ) {
-  // Use a Box so we can infer the size if the request doesn't have an explicit size.
-  @Composable fun @Composable () -> Unit.boxed() = Box(modifier = modifier) { this@boxed() }
-
-  val painter =
-    rememberGlidePainter(
-      requestBuilder = requestBuilder,
-      size = size,
-    )
-  if (placeholder != null && painter.status.showPlaceholder()) {
-    placeholder.boxed()
-  } else if (failure != null && painter.status == Status.FAILED) {
-    failure.boxed()
-  } else {
-    Image(
-      painter = painter,
-      contentDescription = contentDescription,
-      alignment = alignment,
-      contentScale = contentScale,
-      alpha = alpha,
-      colorFilter = colorFilter,
-      modifier = modifier.then(Modifier.semantics { displayedDrawable = painter.currentDrawable })
-    )
+  Layout(
+    {},
+    modifier
+      .glideNode(
+        requestBuilder,
+        size,
+        contentDescription,
+        alignment,
+        contentScale,
+        alpha,
+        colorFilter,
+      )
+    ) { _, constraints ->
+    layout(constraints.minWidth, constraints.minHeight) {}
   }
 }
-
-@OptIn(ExperimentGlideFlows::class)
-private fun Status.showPlaceholder(): Boolean =
-  when (this) {
-    Status.RUNNING -> true
-    Status.CLEARED -> true
-    else -> false
-  }
-
-@OptIn(InternalGlideApi::class)
-@Composable
-private fun rememberGlidePainter(
-  requestBuilder: RequestBuilder<Drawable>,
-  size: ResolvableGlideSize,
-): GlidePainter {
-  val scope = rememberCoroutineScope()
-  // TODO(judds): Calling onRemembered here manually might make a minor improvement in how quickly
-  //  the image load is started, but it also triggers a recomposition. I can't figure out why it
-  //  triggers a recomposition
-  return remember(requestBuilder, size) { GlidePainter(requestBuilder, size, scope) }
-}
-
-internal val DisplayedDrawableKey =
-  SemanticsPropertyKey<MutableState<Drawable?>>("DisplayedDrawable")
-internal var SemanticsPropertyReceiver.displayedDrawable by DisplayedDrawableKey

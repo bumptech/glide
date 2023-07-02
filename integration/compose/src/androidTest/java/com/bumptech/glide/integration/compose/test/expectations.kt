@@ -62,13 +62,13 @@ private fun <ValueT> expectDisplayedDrawable(
   expectStateValue(DisplayedDrawableKey, expectedValue, compare) { transform(it) }
 
 private fun <ValueT, TransformedValueT> expectStateValue(
-  key: SemanticsPropertyKey<MutableState<ValueT?>>,
+  key: SemanticsPropertyKey<() -> ValueT?>,
   expectedValue: TransformedValueT,
   compare: (TransformedValueT?, TransformedValueT?) -> Boolean,
   transform: (ValueT?) -> TransformedValueT?,
 ): SemanticsMatcher =
   SemanticsMatcher("${key.name} = '$expectedValue'") {
-    val value = transform(it.config.getOrElseNullable(key) { null }?.value)
+    val value = transform(it.config.getOrElseNullable(key) { null }?.invoke())
     if (!compare(value, expectedValue)) {
       throw AssertionError("Expected: $expectedValue, but was: $value")
     }
@@ -77,7 +77,7 @@ private fun <ValueT, TransformedValueT> expectStateValue(
 
 fun expectSameInstance(expectedDrawable: Drawable) =
   SemanticsMatcher("${DisplayedDrawableKey.name} = '$expectedDrawable'") {
-    val actualValue: Drawable? = it.config.getOrElseNullable(DisplayedDrawableKey) { null }?.value
+    val actualValue: Drawable? = it.config.getOrElseNullable(DisplayedDrawableKey) { null }?.invoke()
     if (actualValue !== expectedDrawable) {
       throw AssertionError("Expected: $expectedDrawable, but was: $actualValue")
     }

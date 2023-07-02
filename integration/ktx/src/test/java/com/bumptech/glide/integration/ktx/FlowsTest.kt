@@ -646,22 +646,22 @@ private fun atMostOnce(function: () -> Unit): () -> Unit {
   }
 }
 
-private fun <ResourceT> onSuccess(onSuccess: () -> Unit) =
+private fun <ResourceT : Any> onSuccess(onSuccess: () -> Unit) =
   simpleRequestListener<ResourceT>(onSuccess) {}
 
-private fun <ResourceT> onFailure(onFailure: () -> Unit) =
+private fun <ResourceT : Any> onFailure(onFailure: () -> Unit) =
   simpleRequestListener<ResourceT>({}, onFailure)
 
-private fun <ResourceT> simpleRequestListener(
+private fun <ResourceT : Any> simpleRequestListener(
   onSuccess: () -> Unit,
   onFailure: () -> Unit
 ): RequestListener<ResourceT> =
   object : RequestListener<ResourceT> {
     override fun onResourceReady(
-      resource: ResourceT?,
-      model: Any?,
-      target: Target<ResourceT>?,
-      dataSource: DataSource?,
+      resource: ResourceT,
+      model: Any,
+      target: Target<ResourceT>,
+      dataSource: DataSource,
       isFirstResource: Boolean,
     ): Boolean {
       onSuccess()
@@ -671,7 +671,7 @@ private fun <ResourceT> simpleRequestListener(
     override fun onLoadFailed(
       e: GlideException?,
       model: Any?,
-      target: Target<ResourceT>?,
+      target: Target<ResourceT>,
       isFirstResource: Boolean,
     ): Boolean {
       onFailure()

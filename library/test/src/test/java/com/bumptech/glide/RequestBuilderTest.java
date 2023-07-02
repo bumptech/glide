@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import android.app.Application;
 import android.net.Uri;
 import android.widget.ImageView;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.DataSource;
@@ -174,17 +175,17 @@ public class RequestBuilderTest {
           public boolean onLoadFailed(
               @Nullable GlideException e,
               Object model,
-              Target<Object> target,
+              @NonNull Target<Object> target,
               boolean isFirstResource) {
             return false;
           }
 
           @Override
           public boolean onResourceReady(
-              Object resource,
-              Object model,
+              @NonNull Object resource,
+              @NonNull Object model,
               Target<Object> target,
-              DataSource dataSource,
+              @NonNull DataSource dataSource,
               boolean isFirstResource) {
             return false;
           }
@@ -195,17 +196,17 @@ public class RequestBuilderTest {
           public boolean onLoadFailed(
               @Nullable GlideException e,
               Object model,
-              Target<Object> target,
+              @NonNull Target<Object> target,
               boolean isFirstResource) {
             return false;
           }
 
           @Override
           public boolean onResourceReady(
-              Object resource,
-              Object model,
+              @NonNull Object resource,
+              @NonNull Object model,
               Target<Object> target,
-              DataSource dataSource,
+              @NonNull DataSource dataSource,
               boolean isFirstResource) {
             return false;
           }

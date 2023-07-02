@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalGlideComposeApi::class)
-
 package com.bumptech.glide.integration.compose
 
 import android.content.Context
@@ -18,9 +16,12 @@ import org.junit.Test
  * Avoids [com.bumptech.glide.load.engine.executor.GlideIdlingResourceInit] because we want to make
  * assertions about loads that have not yet completed.
  */
+@OptIn(ExperimentalGlideComposeApi::class)
+@Suppress("DEPRECATION") // Tests for a deprecated method
 class GlideImageErrorTest {
   private val context: Context = ApplicationProvider.getApplicationContext()
-  @get:Rule val glideComposeRule = GlideComposeRule()
+  @get:Rule
+  val glideComposeRule = GlideComposeRule()
 
   @Test
   fun requestBuilderTransform_withErrorResourceId_displaysError() {
@@ -105,16 +106,16 @@ class GlideImageErrorTest {
         model = null,
         contentDescription = "none",
         failure =
-          placeholder {
-            // Nesting GlideImage is not really a good idea, but it's convenient for this test
-            // because
-            // we can use our helpers to assert on its contents.
-            GlideImage(
-              model = null,
-              contentDescription = description,
-              failure = placeholder(failureResourceId),
-            )
-          }
+        placeholder {
+          // Nesting GlideImage is not really a good idea, but it's convenient for this test
+          // because
+          // we can use our helpers to assert on its contents.
+          GlideImage(
+            model = null,
+            contentDescription = description,
+            failure = placeholder(failureResourceId),
+          )
+        }
       )
     }
 
@@ -186,13 +187,13 @@ class GlideImageErrorTest {
         model = null,
         contentDescription = "other",
         failure =
-          placeholder {
-            GlideImage(
-              model = null,
-              contentDescription = description,
-              failure = placeholder(failureResourceId),
-            )
-          },
+        placeholder {
+          GlideImage(
+            model = null,
+            contentDescription = description,
+            failure = placeholder(failureResourceId),
+          )
+        },
       ) {
         it.error(android.R.drawable.btn_star)
       }
