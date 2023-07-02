@@ -10,6 +10,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.onIdle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bumptech.glide.Glide
 import com.bumptech.glide.GlideBuilder
@@ -20,6 +21,7 @@ import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.engine.cache.MemoryCache
 import com.bumptech.glide.load.engine.executor.GlideExecutor
+import com.bumptech.glide.load.engine.executor.GlideIdlingResources
 import com.bumptech.glide.load.model.ModelLoader
 import com.bumptech.glide.load.model.ModelLoaderFactory
 import com.bumptech.glide.load.model.MultiModelLoaderFactory
@@ -47,6 +49,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -54,11 +57,16 @@ import org.junit.runner.RunWith
 
 // newFile throws IOException, which triggers this warning even though there's no reasonable
 // alternative :/.
-@Suppress("BlockingMethodInNonBlockingContext")
+@Suppress("BlockingMethodInNonBlockingContext", "RedundantSuppression")
 @RunWith(AndroidJUnit4::class)
 class FlowsTest {
   private val context = ApplicationProvider.getApplicationContext<Context>()
   @get:Rule val temporaryFolder = TemporaryFolder()
+
+  @Before
+  fun setUp() {
+    GlideIdlingResources.initGlide()
+  }
 
   @After
   fun tearDown() {
@@ -303,8 +311,7 @@ class FlowsTest {
   @Test
   fun flow_onClose_clearsTarget() = runTest {
     val inCache = AtomicReference<com.bumptech.glide.load.engine.Resource<*>?>()
-    Glide.init(
-      context,
+    GlideIdlingResources.initGlide(
       GlideBuilder()
         .setMemoryCache(
           object : MemoryCache {
@@ -327,11 +334,15 @@ class FlowsTest {
               inCache.set(resource)
               return null
             }
-          }
-        )
+        }
+      )
     )
     val data = Glide.with(context).load(newImageFile()).flow(100, 100).firstLoad().toList()
     assertThat(data).isNotEmpty()
+    // Glide's executor (in EngineJob's notify loop) and the coroutine race to close the resource.
+    // If Glide's executor wins, then the coroutine will be able to put the resource in the cache,
+    // but if not, the item won't be cached until after the coroutine starts back up.
+    onIdle()
     assertThat(inCache.get()).isNotNull()
   }
 
