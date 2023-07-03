@@ -2,15 +2,35 @@
 
 set -e
 
-# TODO(judds): Remove the KSP tests when support is available to run them in
-# Google3
 ./gradlew build \
-  -x :samples:flickr:build \
-  -x :samples:giphy:build \
-  -x :samples:contacturi:build \
-  -x :samples:gallery:build \
-  -x :samples:imgur:build \
-  -x :samples:svg:build \
+  -x :library:test:testDebugUnitTest \
+  :library:test:assembleDebugUnitTest \
+  -x :library:testDebugUnitTest \
+  :library:assembleDebugUnitTest \
+  -x :annotation:ksp:test:testDebugUnitTest \
+  :annotation:ksp:test:assembleDebugUnitTest \
+  -x :third_party:disklrucache:testDebugUnitTest \
+  :third_party:disklrucache:assembleDebugUnitTest \
+  -x :integration:cronet:testDebugUnitTest \
+  :integration:cronet:assembleDebugUnitTest \
+  -x :integration:gifencoder:testDebugUnitTest \
+  :integration:gifencoder:assembleDebugUnitTest \
+  -x :integration:ktx:testDebugUnitTest \
+  :integration:ktx:assembleDebugUnitTest \
+  -x :integration:concurrent:testDebugUnitTest \
+  :integration:concurrent:assembleDebugUnitTest \
+  -x :integration:volley:testDebugUnitTest \
+  :integration:volley:assembleDebugUnitTest \
+  -x :integration:sqljournaldiskcache:testDebugUnitTest \
+  :integration:sqljournaldiskcache:assembleDebugUnitTest \
+  -x :third_party:gif_decoder:testDebugUnitTest \
+  :third_party:gif_decoder:assembleDebugUnitTest \
+  :samples:flickr:build \
+  :samples:giphy:build \
+  :samples:contacturi:build \
+  :samples:gallery:build \
+  :samples:imgur:build \
+  :samples:svg:build \
   :instrumentation:assembleAndroidTest \
   :benchmark:assembleAndroidTest \
   :glide:releaseJavadoc \

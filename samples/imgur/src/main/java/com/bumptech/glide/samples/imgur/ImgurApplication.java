@@ -1,7 +1,7 @@
 package com.bumptech.glide.samples.imgur;
 
 import dagger.android.AndroidInjector;
-import dagger.android.support.DaggerApplication;
+import dagger.android.DaggerApplication;
 
 /** Runs Dagger injection in the Imgur sample. */
 public final class ImgurApplication extends DaggerApplication {

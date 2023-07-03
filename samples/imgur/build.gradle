@@ -11,7 +11,6 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -30,9 +29,6 @@ dependencies {
 
     implementation libs.dagger
     implementation libs.dagger.android
-    implementation (libs.dagger.android.support) {
-        exclude group: "com.android.support"
-    }
     annotationProcessor libs.dagger.compiler
     annotationProcessor libs.dagger.android.processor
 
