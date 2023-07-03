@@ -51,6 +51,7 @@ dependencyResolutionManagement {
             version('okhttp-min-sdk-version', '21')
             version('target-sdk-version', '32')
             version('pmd', '6.0.0')
+            version('kotlin-compiler-extension', '1.2.0')
 
             // Versions for dependencies
             version('compose', '1.4.3')
@@ -65,6 +66,7 @@ dependencyResolutionManagement {
             // At least versions 1.5 and later require java 8 desugaring, which Glide can't
             // currently use, so we're stuck on an older version.
             version('androidx-fragment', '1.3.6')
+            version('ksp', '1.7.0-1.0.6')
 
             library('androidx-multidex', "androidx.multidex:multidex:2.0.1")
             library('autoservice', 'com.google.auto.service:auto-service:1.0-rc3')
@@ -126,10 +128,10 @@ dependencyResolutionManagement {
             library('kotlin-gradle', 'org.jetbrains.kotlin', 'kotlin-gradle-plugin').versionRef('kotlin')
             library('kotlin-test', 'org.jetbrains.kotlin:kotlin-test:1.7.0')
             library('kotlinpoet', 'com.squareup:kotlinpoet:1.12.0')
-            library('ksp', 'com.google.devtools.ksp:symbol-processing-api:1.7.0-1.0.6')
+            library('ksp', 'com.google.devtools.ksp', 'symbol-processing-api').versionRef('ksp')
             library('ksp-autoservice', 'dev.zacsweers.autoservice:auto-service-ksp:1.0.0')
             library('ksp-compiletesting', 'com.github.tschuchortdev:kotlin-compile-testing-ksp:1.4.9')
-            library('ksp-gradle', 'com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:1.7.0-1.0.6')
+            library('ksp-gradle', 'com.google.devtools.ksp', 'com.google.devtools.ksp.gradle.plugin').versionRef('ksp')
             library('mockwebserver', 'com.squareup.okhttp3:mockwebserver:3.0.0-RC1')
             library('mockito', 'org.mockito', 'mockito-core').versionRef('mockito')
             library('mockito-android', 'org.mockito', 'mockito-android').versionRef('mockito')
