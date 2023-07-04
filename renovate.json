@@ -16,6 +16,10 @@
     {
       "matchPackageNames": ["androidx.annotation:annotation"],
       "allowedVersions": "<1.6.0"
+    },
+    {
+      "matchPackageNames": ["androidx.appcompat:appcompat"],
+      "allowedVersions": "<1.4.0"
     }
   ]
 }
