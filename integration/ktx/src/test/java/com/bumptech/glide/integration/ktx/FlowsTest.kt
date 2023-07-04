@@ -31,14 +31,11 @@ import com.google.common.truth.Correspondence
 import com.google.common.truth.IterableSubject
 import com.google.common.truth.Truth.assertThat
 import java.io.File
-import java.lang.RuntimeException
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -494,11 +491,13 @@ class FlowsTest {
   @Test
   fun flow_withAsyncSize_andOverrideSize_usesOverrideSize() = runTest {
     val requestedSizeReference = registerSizeCapturingFakeModelLoader()
+    val asyncSize = AsyncGlideSize()
+    asyncSize.setSize(Size(1, 2))
 
     Glide.with(context)
       .load(FakeModel())
       .override(200, 100)
-      .flow { Size(1, 2) }
+      .flow(asyncSize)
       .firstLoad()
       .toList()
 
@@ -525,11 +524,7 @@ class FlowsTest {
   @Test
   fun flow_withAsyncSize_concreteSizeForThumbnail_startsMainRequestWhenAsyncSizeIsAvailable() =
     runTest {
-      val waitForThumbnailToFinishChannel = Channel<Boolean>()
-      val waitForThumbnailToFinishSize: suspend () -> Size = {
-        waitForThumbnailToFinishChannel.receive()
-        Size(100, 200)
-      }
+      val size = AsyncGlideSize()
 
       val result =
         Glide.with(context)
@@ -538,9 +533,9 @@ class FlowsTest {
             Glide.with(context)
               .load(newImageFile())
               .override(75, 50)
-              .listener(onSuccess { launch { waitForThumbnailToFinishChannel.send(true) } })
+              .listener(onSuccess { launch { size.setSize(Size(100, 200)) } })
           )
-          .flow(waitForThumbnailToFinishSize)
+          .flow(size)
           .firstLoad()
           .toList()
 
@@ -573,10 +568,7 @@ class FlowsTest {
     assertFailsWith<IllegalArgumentException> { requestBuilder.flow() }
   }
 
-  private val delayForever: suspend () -> Size = {
-    delay(kotlin.time.Duration.INFINITE)
-    throw RuntimeException()
-  }
+  private val delayForever = AsyncGlideSize()
 
   private fun registerSizeCapturingFakeModelLoader(): AtomicReference<Size> {
     val result = AtomicReference<Size>()

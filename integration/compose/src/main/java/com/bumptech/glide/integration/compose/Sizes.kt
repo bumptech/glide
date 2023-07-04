@@ -2,13 +2,12 @@
 
 package com.bumptech.glide.integration.compose
 
-import androidx.compose.ui.unit.Constraints
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.Size
 import com.bumptech.glide.integration.ktx.isValidGlideDimension
-import com.bumptech.glide.request.target.Target
 import kotlinx.coroutines.CompletableDeferred
+import kotlin.math.roundToInt
 
 internal class SizeObserver {
   private val size = CompletableDeferred<Size>()
@@ -32,12 +31,11 @@ internal fun RequestBuilder<out Any?>.overrideSize(): Size? =
 internal fun RequestBuilder<out Any?>.isOverrideSizeSet(): Boolean =
   overrideWidth.isValidGlideDimension() && overrideHeight.isValidGlideDimension()
 
-internal fun Constraints.inferredGlideSize(): Size? {
-  val width = if (hasBoundedWidth) maxWidth else Target.SIZE_ORIGINAL
-  val height = if (hasBoundedHeight) maxHeight else Target.SIZE_ORIGINAL
+internal fun androidx.compose.ui.geometry.Size.toGlideSize(): Size? {
+  val width = width.roundToInt();
+  val height = height.roundToInt();
   if (!width.isValidGlideDimension() || !height.isValidGlideDimension()) {
-    return null
+    return null;
   }
-  return Size(width, height)
+  return Size(width, height);
 }
-

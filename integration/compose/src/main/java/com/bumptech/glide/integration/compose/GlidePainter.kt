@@ -3,7 +3,6 @@ package com.bumptech.glide.integration.compose
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.Stable
@@ -20,7 +19,9 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.integration.ktx.AsyncGlideSize
 import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
+import com.bumptech.glide.integration.ktx.ImmediateGlideSize
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.Placeholder
 import com.bumptech.glide.integration.ktx.ResolvableGlideSize
@@ -44,7 +45,7 @@ internal class GlidePainter
 @OptIn(InternalGlideApi::class)
 constructor(
   private val requestBuilder: RequestBuilder<Drawable>,
-  private val size: ResolvableGlideSize,
+  private val resolvableSize: ResolvableGlideSize,
   scope: CoroutineScope,
 ) : Painter(), RememberObserver {
   @OptIn(ExperimentGlideFlows::class) internal var status: Status by mutableStateOf(Status.CLEARED)
@@ -59,7 +60,15 @@ constructor(
   override val intrinsicSize: Size
     get() = delegate?.intrinsicSize ?: Size.Unspecified
 
+  @OptIn(InternalGlideApi::class)
   override fun DrawScope.onDraw() {
+    when (resolvableSize) {
+      is AsyncGlideSize -> {
+        size.toGlideSize()?.let { resolvableSize.setSize(it) }
+      }
+      // Do nothing.
+      is ImmediateGlideSize -> {}
+    }
     delegate?.apply { draw(size, alpha, colorFilter) }
   }
 
@@ -82,7 +91,7 @@ constructor(
 
   @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class)
   private fun launchRequest() = this.scope.launch {
-    requestBuilder.flowResolvable(size).collect {
+    requestBuilder.flowResolvable(resolvableSize).collect {
       updateDelegate(
         when (it) {
           is Resource -> it.resource
