@@ -55,14 +55,14 @@ dependencyResolutionManagement {
 
             // Versions for dependencies
             version('compose', '1.3.2')
-            version('coroutines', '1.6.4')
+            version('coroutines', '1.7.2')
             version('dagger', '2.46.1')
             version('errorprone', '2.18.0')
             version('kotlin', '1.7.0')
             version('mockito', '5.3.1')
             version('retrofit', '2.3.0')
             version('androidx-benchmark', '1.1.1')
-            version('androidx-espresso', '3.4.0')
+            version('androidx-espresso', '3.5.1')
             // At least versions 1.5 and later require java 8 desugaring, which Glide can't
             // currently use, so we're stuck on an older version.
             version('androidx-fragment', '1.3.6')
