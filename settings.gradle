@@ -54,7 +54,7 @@ dependencyResolutionManagement {
             version('kotlin-compiler-extension', '1.2.0')
 
             // Versions for dependencies
-            version('compose', '1.3.2')
+            version('compose', '1.4.3')
             version('coroutines', '1.7.2')
             version('dagger', '2.46.1')
             version('errorprone', '2.18.0')
