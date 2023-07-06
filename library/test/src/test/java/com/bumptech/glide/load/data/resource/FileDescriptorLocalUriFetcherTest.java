@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data.resource;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
@@ -28,7 +29,7 @@ import org.robolectric.shadow.api.Shadow;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(
-    sdk = 18,
+    sdk = ROBOLECTRIC_SDK,
     shadows = {ContentResolverShadow.class})
 public class FileDescriptorLocalUriFetcherTest {
 

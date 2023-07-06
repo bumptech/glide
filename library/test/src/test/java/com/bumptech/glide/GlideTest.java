@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.request.RequestOptions.decodeTypeOf;
 import static com.bumptech.glide.request.RequestOptions.errorOf;
 import static com.bumptech.glide.request.RequestOptions.placeholderOf;
@@ -94,7 +95,7 @@ import org.robolectric.shadow.api.Shadow;
 @LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
 @Config(
-    sdk = 18,
+    sdk = ROBOLECTRIC_SDK,
     shadows = {
       GlideTest.ShadowFileDescriptorContentResolver.class,
       GlideTest.ShadowMediaMetadataRetriever.class,
