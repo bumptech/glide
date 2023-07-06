@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertThrows;
 
 import androidx.annotation.NonNull;
@@ -23,7 +24,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class EngineKeyTest {
   @Mock private Transformation<Object> transformation;
 

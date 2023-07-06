@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data.mediastore;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -36,7 +37,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboCursor;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class ThumbnailStreamOpenerTest {
   private Harness harness;
 

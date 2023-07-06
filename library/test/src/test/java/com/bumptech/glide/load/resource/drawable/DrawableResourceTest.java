@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.drawable;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
@@ -18,7 +19,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class DrawableResourceTest {
   private TestDrawable drawable;
   private DrawableResource<TestDrawable> resource;

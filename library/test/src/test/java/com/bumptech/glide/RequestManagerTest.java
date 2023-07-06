@@ -1,5 +1,6 @@
 package com.bumptech.glide;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -42,7 +43,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class RequestManagerTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 

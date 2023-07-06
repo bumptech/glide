@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.anyContext;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,7 +38,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 @SuppressWarnings("deprecation")
 public class BitmapDrawableTransformationTest {
   @Rule public final KeyTester keyTester = new KeyTester();

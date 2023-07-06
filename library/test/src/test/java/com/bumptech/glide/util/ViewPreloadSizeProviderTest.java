@@ -13,7 +13,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK)
 public class ViewPreloadSizeProviderTest {
 
   private View view;

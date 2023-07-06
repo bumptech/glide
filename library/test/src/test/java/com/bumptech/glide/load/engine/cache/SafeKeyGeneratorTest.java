@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.cache;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertTrue;
 
 import androidx.annotation.NonNull;
@@ -14,7 +15,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class SafeKeyGeneratorTest {
   private SafeKeyGenerator keyGenerator;
   private int nextId;

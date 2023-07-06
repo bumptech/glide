@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.cache;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
@@ -21,7 +22,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class DiskLruCacheWrapperTest {
   private DiskCache cache;
   private byte[] data;

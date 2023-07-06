@@ -1,5 +1,6 @@
 package com.bumptech.glide.request.target;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -22,7 +23,7 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowAppWidgetManager;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18, shadows = AppWidgetTargetTest.UpdateShadowAppWidgetManager.class)
+@Config(sdk = ROBOLECTRIC_SDK, shadows = AppWidgetTargetTest.UpdateShadowAppWidgetManager.class)
 public class AppWidgetTargetTest {
   private UpdateShadowAppWidgetManager shadowManager;
   private RemoteViews views;
