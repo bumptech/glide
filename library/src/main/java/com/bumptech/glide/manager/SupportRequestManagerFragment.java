@@ -1,12 +1,12 @@
 package com.bumptech.glide.manager;
 
-import android.support.v4.app.Fragment;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import com.bumptech.glide.RequestManager;
 
 /**
- * A view-less {@link android.support.v4.app.Fragment} used to safely store an {@link
+ * A view-less {@link androidx.fragment.app.Fragment} used to safely store an {@link
  * com.bumptech.glide.RequestManager} that can be used to start, stop and manage Glide requests
  * started for targets within the fragment or activity this fragment is a child of.
  *

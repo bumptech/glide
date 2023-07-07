@@ -1,8 +1,8 @@
 package com.bumptech.glide.test;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 import com.bumptech.glide.instrumentation.R;
 
 public class DefaultFragmentActivity extends FragmentActivity {

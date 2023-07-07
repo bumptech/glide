@@ -8,14 +8,14 @@ import android.content.ContextWrapper;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.collection.ArrayMap;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.resource.bitmap.HardwareConfigState;
@@ -145,7 +145,7 @@ public class RequestManagerRetriever implements Handler.Callback {
   /**
    * @deprecated This is identical to calling {@link #get(Context)} with the application context.
    *     Use androidx Activities instead (ie {@link FragmentActivity}, or {@link
-   *     android.support.v7.app.AppCompatActivity}).
+   *     androidx.appcompat.app.AppCompatActivity}).
    */
   @Deprecated
   @NonNull

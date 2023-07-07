@@ -3,8 +3,8 @@ package com.bumptech.glide.test;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 import com.bumptech.glide.Glide;
 
 public class GlideWithAsDifferentSupertypesActivity extends FragmentActivity {

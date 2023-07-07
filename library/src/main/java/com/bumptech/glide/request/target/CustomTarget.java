@@ -18,7 +18,7 @@ import com.bumptech.glide.util.Util;
  * com.bumptech.glide.RequestBuilder#into(ImageView)}, a subclass of {@link ImageViewTarget}, or
  * {@link CustomViewTarget}. Using this class to load resources into {@link View}s can prevent Glide
  * from correctly cancelling any previous loads, which may result in incorrect images appearing in
- * the view, especially in scrolling views like {@link android.support.v7.widget.RecyclerView}.
+ * the view, especially in scrolling views like {@link androidx.recyclerview.widget.RecyclerView}.
  *
  * <p>You <em>MUST</em> implement {@link #onLoadCleared(Drawable)} and ensure that all references to
  * any resource passed into the target in {@link #onResourceReady(Object, Transition)} are removed
@@ -26,7 +26,7 @@ import com.bumptech.glide.util.Util;
  * corruption, crashes caused by recycled {@link Bitmap}s, and other undefined behavior. It is never
  * safe to leave {@link #onLoadCleared(Drawable)} unimplemented or empty. Even if you do not
  * manually clear this {@link Target}, Glide may do so automatically after certain lifecycle events
- * in {@link android.support.v4.app.Fragment}s and {@link android.app.Activity}s.
+ * in {@link androidx.fragment.app.Fragment}s and {@link android.app.Activity}s.
  *
  * <p>This class can only be used with {@link Target#SIZE_ORIGINAL} or when the desired resource
  * dimensions are known when the {@link Target} is created. If you'd like to run some asynchronous

@@ -1,9 +1,9 @@
 package com.bumptech.glide.test;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentActivity;
 import com.bumptech.glide.Glide;
 
 public class GlideWithBeforeSuperOnCreateActivity extends FragmentActivity {
