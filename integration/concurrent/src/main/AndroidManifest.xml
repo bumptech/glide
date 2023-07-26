@@ -1,6 +1,3 @@
 <manifest
   package="com.bumptech.glide.integration.concurrent">
-
-    <application>
-    </application>
 </manifest>
