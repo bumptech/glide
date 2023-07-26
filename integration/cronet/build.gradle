@@ -16,6 +16,7 @@ dependencies {
 }
 
 android {
+    namespace 'com.bumptech.glide.integration.cronet'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {

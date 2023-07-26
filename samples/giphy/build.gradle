@@ -12,10 +12,10 @@ dependencies {
 }
 
 android {
+    namespace 'com.bumptech.glide.samples.giphy'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        applicationId 'com.bumptech.glide.samples.giphy'
         minSdk libs.versions.min.sdk.version.get() as int
         targetSdk libs.versions.target.sdk.version.get() as int
         versionCode 1

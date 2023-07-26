@@ -40,6 +40,7 @@ android.testOptions.unitTests.all { Test testTask ->
 }
 
 android {
+    namespace 'com.bumptech.glide.test'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {

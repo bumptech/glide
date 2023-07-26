@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+    namespace 'com.bumptech.glide.annotation.ksp.test'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
