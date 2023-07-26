@@ -94,4 +94,3 @@ task regenerateTestResources {
 afterEvaluate {
     regenerateTestResources.finalizedBy(testReleaseUnitTest)
 }
-
