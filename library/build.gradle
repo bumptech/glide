@@ -59,6 +59,7 @@ if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
 }
 
 android {
+    namespace 'com.bumptech.glide'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {

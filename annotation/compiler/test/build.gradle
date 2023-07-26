@@ -27,6 +27,7 @@ afterEvaluate {
 }
 
 android {
+    namespace 'com.bumptech.glide.annotation.compiler.test'
     compileSdk libs.versions.compile.sdk.version.get()
 
     defaultConfig {

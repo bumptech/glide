@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+    namespace 'com.bumptech.glide.benchmark'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     buildToolsVersion "30.0.3"

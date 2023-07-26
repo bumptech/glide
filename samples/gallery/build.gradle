@@ -29,10 +29,10 @@ kotlin {
 }
 
 android {
+    namespace 'com.bumptech.glide.samples.gallery'
     compileSdk 34
 
     defaultConfig {
-        applicationId 'com.bumptech.glide.samples.gallery'
         minSdk 29
         targetSdk 34
         versionCode 1

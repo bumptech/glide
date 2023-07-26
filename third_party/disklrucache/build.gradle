@@ -11,6 +11,7 @@ dependencies {
 }
 
 android {
+    namespace 'com.bumptech.glide.disklrucache'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {

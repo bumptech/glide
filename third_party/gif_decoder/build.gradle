@@ -12,6 +12,7 @@ dependencies {
 }
 
 android {
+    namespace 'com.bumptech.glide.gifdecoder'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {

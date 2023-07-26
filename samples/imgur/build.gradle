@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace 'com.bumptech.glide.samples.imgur'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        applicationId "com.bumptech.glide.samples.imgur"
         minSdk libs.versions.min.sdk.version.get() as int
         targetSdk libs.versions.target.sdk.version.get() as int
         versionCode 1
