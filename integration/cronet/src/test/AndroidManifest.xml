@@ -3,4 +3,3 @@
     package="com.bumptech.glide.integration.cronet">
   <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="26"/>
 </manifest>
-
