@@ -1,5 +1,7 @@
 package com.bumptech.glide.request.target;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -8,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.widget.RemoteViews;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Preconditions;
 
@@ -39,6 +42,9 @@ public class NotificationTarget extends CustomTarget<Bitmap> {
    * @param notification The Notification object that we want to update.
    * @param notificationId The notificationId of the Notification that we want to load the Bitmap.
    */
+  @SuppressLint("InlinedApi")
+  // Alert users of Glide to have this permission.
+  @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
   public NotificationTarget(
       Context context,
       int viewId,
@@ -61,6 +67,9 @@ public class NotificationTarget extends CustomTarget<Bitmap> {
    * @param notificationTag The notificationTag of the Notification that we want to load the Bitmap.
    *     May be {@code null}.
    */
+  @SuppressLint("InlinedApi")
+  // Alert users of Glide to have this permission.
+  @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
   public NotificationTarget(
       Context context,
       int viewId,
@@ -95,6 +104,9 @@ public class NotificationTarget extends CustomTarget<Bitmap> {
    * @param notificationTag The notificationTag of the Notification that we want to load the Bitmap.
    *     May be {@code null}.
    */
+  @SuppressLint("InlinedApi")
+  // Alert users of Glide to have this permission.
+  @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
   public NotificationTarget(
       Context context,
       int width,
@@ -116,6 +128,9 @@ public class NotificationTarget extends CustomTarget<Bitmap> {
   }
 
   /** Updates the Notification after the Bitmap resource is loaded. */
+  @SuppressLint("InlinedApi")
+  // Help tools to recognize that this method requires a permission, because it posts a notification.
+  @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
   private void update() {
     NotificationManager manager =
         (NotificationManager) this.context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -123,17 +138,26 @@ public class NotificationTarget extends CustomTarget<Bitmap> {
         .notify(this.notificationTag, this.notificationId, this.notification);
   }
 
+  @SuppressLint("InlinedApi")
+  // Help tools to recognize that this method requires a permission, because it calls setBitmap().
+  @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
   @Override
   public void onResourceReady(
       @NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
     setBitmap(resource);
   }
 
+  @SuppressLint("InlinedApi")
+  // Help tools to recognize that this method requires a permission, because it calls setBitmap().
+  @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
   @Override
   public void onLoadCleared(@Nullable Drawable placeholder) {
     setBitmap(null);
   }
 
+  @SuppressLint("InlinedApi")
+  // Help tools to recognize that this method requires a permission, because it calls update().
+  @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
   private void setBitmap(@Nullable Bitmap bitmap) {
     this.remoteViews.setImageViewBitmap(this.viewId, bitmap);
     this.update();
