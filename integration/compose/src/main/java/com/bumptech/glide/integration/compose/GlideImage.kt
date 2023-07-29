@@ -1,6 +1,5 @@
 package com.bumptech.glide.integration.compose
 
-import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -150,7 +149,6 @@ private fun PreviewResourceOrDrawable(
   )
 }
 
-@SuppressLint("UseCompatLoadingForDrawables")
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun getPlaceholderPainter(placeholder: Placeholder?): Painter? {
