@@ -46,10 +46,11 @@ internal class GlidePainter
 constructor(
   private val requestBuilder: RequestBuilder<Drawable>,
   private val resolvableSize: ResolvableGlideSize,
+  private val placeholder: Painter?,
+  private val failure: Painter?,
   scope: CoroutineScope,
 ) : Painter(), RememberObserver {
   @OptIn(ExperimentGlideFlows::class) internal var status: Status by mutableStateOf(Status.CLEARED)
-  internal val currentDrawable: MutableState<Drawable?> = mutableStateOf(null)
   private var alpha: Float by mutableStateOf(DefaultAlpha)
   private var colorFilter: ColorFilter? by mutableStateOf(null)
   private var delegate: Painter? by mutableStateOf(null)
@@ -94,28 +95,30 @@ constructor(
     requestBuilder.flowResolvable(resolvableSize).collect {
       updateDelegate(
         when (it) {
-          is Resource -> it.resource
-          is Placeholder -> it.placeholder
+          is Resource -> it.resource.toPainter()
+          is Placeholder -> getPlaceholderPainter(it)
         }
       )
       status = it.status
     }
   }
 
-  private fun Drawable.toPainter() =
-    when (this) {
-      is BitmapDrawable -> BitmapPainter(bitmap.asImageBitmap())
-      is ColorDrawable -> ColorPainter(Color(color))
-      else -> DrawablePainter(mutate())
+  @OptIn(ExperimentGlideFlows::class)
+  private fun getPlaceholderPainter(placeholder: Placeholder<Drawable>): Painter? {
+    if(placeholder.status == Status.RUNNING || placeholder.status == Status.CLEARED) {
+      return this.placeholder
+    } else if (placeholder.status == Status.FAILED) {
+      return this.failure
     }
+    return null
+  }
 
-  private fun updateDelegate(drawable: Drawable?) {
-    val newDelegate = drawable?.toPainter()
+  private fun updateDelegate(newDelegate: Painter?) {
+//    val newDelegate = drawable?.toPainter()
     val oldDelegate = delegate
     if (newDelegate !== oldDelegate) {
       (oldDelegate as? RememberObserver)?.onForgotten()
       (newDelegate as? RememberObserver)?.onRemembered()
-      currentDrawable.value = drawable
       delegate = newDelegate
     }
   }
@@ -130,3 +133,4 @@ constructor(
     return true
   }
 }
+

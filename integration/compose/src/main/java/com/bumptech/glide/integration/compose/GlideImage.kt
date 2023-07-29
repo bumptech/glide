@@ -1,5 +1,6 @@
 package com.bumptech.glide.integration.compose
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -12,12 +13,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
-import androidx.compose.ui.semantics.semantics
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
@@ -101,8 +102,6 @@ public fun GlideImage(
   val requestManager: RequestManager = LocalContext.current.let { remember(it) { Glide.with(it) } }
   val requestBuilder =
     rememberRequestBuilderWithDefaults(model, requestManager, requestBuilderTransform, contentScale)
-      .let { loading?.apply(it::placeholder, it::placeholder) ?: it }
-      .let { failure?.apply(it::error, it::error) ?: it }
 
   val overrideSize: Size? = requestBuilder.overrideSize()
   val size = rememberResolvableSize(overrideSize)
@@ -124,8 +123,8 @@ public fun GlideImage(
     contentScale = contentScale,
     alpha = alpha,
     colorFilter = colorFilter,
-    placeholder = loading?.maybeComposable(),
-    failure = failure?.maybeComposable(),
+    placeholder = loading,
+    failure = failure,
   )
 }
 
@@ -136,18 +135,35 @@ private fun PreviewResourceOrDrawable(
   contentDescription: String?,
   modifier: Modifier,
 ) {
-  val drawable =
+  val painter =
     when(loading) {
-      is Placeholder.OfDrawable -> loading.drawable
-      is Placeholder.OfResourceId -> LocalContext.current.getDrawable(loading.resourceId)
+      is Placeholder.OfDrawable -> rememberDrawablePainter(loading.drawable)
+      is Placeholder.OfResourceId -> rememberDrawablePainter(LocalContext.current.getDrawable(loading.resourceId))
+      is Placeholder.OfPainter -> loading.painter
       is Placeholder.OfComposable ->
         throw IllegalArgumentException("Composables should go through the production codepath")
     }
   Image(
-    painter = rememberDrawablePainter(drawable),
+    painter = painter,
     modifier = modifier,
     contentDescription = contentDescription,
   )
+}
+
+@SuppressLint("UseCompatLoadingForDrawables")
+@OptIn(ExperimentalGlideComposeApi::class)
+@Composable
+private fun getPlaceholderPainter(placeholder: Placeholder?): Painter? {
+  if (placeholder == null) return null
+  val painter =
+    when(placeholder) {
+      is Placeholder.OfDrawable -> placeholder.drawable?.toPainter()
+      is Placeholder.OfResourceId -> LocalContext.current.getDrawable(placeholder.resourceId)?.toPainter()
+      is Placeholder.OfPainter -> placeholder.painter
+      is Placeholder.OfComposable ->
+        throw IllegalArgumentException("Composables should go through the production codepath")
+    }
+  return painter
 }
 
 /**
@@ -174,6 +190,16 @@ public fun placeholder(@DrawableRes resourceId: Int): Placeholder =
   Placeholder.OfResourceId(resourceId)
 
 /**
+ * Used to specify a [Painter] to use in conjunction with [GlideImage]'s `loading` or `failure`
+ * parameters.
+ *
+ * Ideally [painter] is non-null.
+ */
+@ExperimentalGlideComposeApi
+public fun placeholder(painter: Painter): Placeholder =
+  Placeholder.OfPainter(painter)
+
+/**
  * Used to specify a [Composable] function to use in conjunction with [GlideImage]'s `loading` or
  * `failure` parameter.
  *
@@ -183,6 +209,8 @@ public fun placeholder(@DrawableRes resourceId: Int): Placeholder =
 @ExperimentalGlideComposeApi
 public fun placeholder(composable: @Composable () -> Unit): Placeholder =
   Placeholder.OfComposable(composable)
+
+
 
 /**
  * Content to display during a particular state of a Glide Request, for example while the request is
@@ -201,11 +229,13 @@ public sealed class Placeholder {
   internal class OfDrawable(internal val drawable: Drawable?) : Placeholder()
   internal class OfResourceId(@DrawableRes internal val resourceId: Int) : Placeholder()
   internal class OfComposable(internal val composable: @Composable () -> Unit) : Placeholder()
+  internal class OfPainter(internal val painter: Painter) : Placeholder()
 
   internal fun isResourceOrDrawable() =
     when (this) {
       is OfDrawable -> true
       is OfResourceId -> true
+      is OfPainter -> true
       is OfComposable -> false
     }
 
@@ -269,7 +299,7 @@ private fun RequestBuilder<Drawable>.contentScaleTransform(
   // TODO(judds): Think about how to handle the various fills
 }
 
-@OptIn(InternalGlideApi::class, ExperimentGlideFlows::class)
+@OptIn(InternalGlideApi::class, ExperimentGlideFlows::class, ExperimentalGlideComposeApi::class)
 @Composable
 private fun SizedGlideImage(
   requestBuilder: RequestBuilder<Drawable>,
@@ -280,8 +310,8 @@ private fun SizedGlideImage(
   contentScale: ContentScale,
   alpha: Float,
   colorFilter: ColorFilter?,
-  placeholder: @Composable (() -> Unit)?,
-  failure: @Composable (() -> Unit)?,
+  placeholder: Placeholder?,
+  failure: Placeholder?,
 ) {
   // Use a Box so we can infer the size if the request doesn't have an explicit size.
   @Composable fun @Composable () -> Unit.boxed() = Box(modifier = modifier) { this@boxed() }
@@ -290,11 +320,13 @@ private fun SizedGlideImage(
     rememberGlidePainter(
       requestBuilder = requestBuilder,
       size = size,
+      getPlaceholderPainter(placeholder),
+      getPlaceholderPainter(failure),
     )
-  if (placeholder != null && painter.status.showPlaceholder()) {
-    placeholder.boxed()
-  } else if (failure != null && painter.status == Status.FAILED) {
-    failure.boxed()
+  if (placeholder != null && !placeholder.isResourceOrDrawable() && painter.status.showPlaceholder()) {
+    placeholder.maybeComposable()?.boxed()
+  } else if (failure != null && !failure.isResourceOrDrawable() && painter.status == Status.FAILED) {
+    failure.maybeComposable()?.boxed()
   } else {
     Image(
       painter = painter,
@@ -303,7 +335,7 @@ private fun SizedGlideImage(
       contentScale = contentScale,
       alpha = alpha,
       colorFilter = colorFilter,
-      modifier = modifier.then(Modifier.semantics { displayedDrawable = painter.currentDrawable })
+      modifier = modifier
     )
   }
 }
@@ -321,12 +353,14 @@ private fun Status.showPlaceholder(): Boolean =
 private fun rememberGlidePainter(
   requestBuilder: RequestBuilder<Drawable>,
   size: ResolvableGlideSize,
+  placeholder: Painter?,
+  failure: Painter?,
 ): GlidePainter {
   val scope = rememberCoroutineScope()
   // TODO(judds): Calling onRemembered here manually might make a minor improvement in how quickly
   //  the image load is started, but it also triggers a recomposition. I can't figure out why it
   //  triggers a recomposition
-  return remember(requestBuilder, size) { GlidePainter(requestBuilder, size, scope) }
+  return remember(requestBuilder, size) { GlidePainter(requestBuilder, size, placeholder, failure, scope) }
 }
 
 internal val DisplayedDrawableKey =
