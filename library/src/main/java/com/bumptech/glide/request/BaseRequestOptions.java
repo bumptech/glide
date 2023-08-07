@@ -1209,31 +1209,42 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     return selfOrThrowIfLocked();
   }
 
+  /**
+   * Returns {@code true} if this {@link BaseRequestOptions} is equivalent to the given
+   * {@link BaseRequestOptions} (has all of the same options and sizes).
+   *
+   * <p>This method is identical to {@link #equals(Object)}, but this can not be overridden. We need
+   * to use this method instead of {@link #equals(Object)}, because child classes may have additional
+   * fields, such as listeners and models, that should not be considered when checking for equality.
+   */
+  public final boolean isEquivalentTo(BaseRequestOptions<?> other) {
+    return Float.compare(other.sizeMultiplier, sizeMultiplier) == 0
+        && errorId == other.errorId
+        && Util.bothNullOrEqual(errorPlaceholder, other.errorPlaceholder)
+        && placeholderId == other.placeholderId
+        && Util.bothNullOrEqual(placeholderDrawable, other.placeholderDrawable)
+        && fallbackId == other.fallbackId
+        && Util.bothNullOrEqual(fallbackDrawable, other.fallbackDrawable)
+        && isCacheable == other.isCacheable
+        && overrideHeight == other.overrideHeight
+        && overrideWidth == other.overrideWidth
+        && isTransformationRequired == other.isTransformationRequired
+        && isTransformationAllowed == other.isTransformationAllowed
+        && useUnlimitedSourceGeneratorsPool == other.useUnlimitedSourceGeneratorsPool
+        && onlyRetrieveFromCache == other.onlyRetrieveFromCache
+        && diskCacheStrategy.equals(other.diskCacheStrategy)
+        && priority == other.priority
+        && options.equals(other.options)
+        && transformations.equals(other.transformations)
+        && resourceClass.equals(other.resourceClass)
+        && Util.bothNullOrEqual(signature, other.signature)
+        && Util.bothNullOrEqual(theme, other.theme);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o instanceof BaseRequestOptions<?>) {
-      BaseRequestOptions<?> other = (BaseRequestOptions<?>) o;
-      return Float.compare(other.sizeMultiplier, sizeMultiplier) == 0
-          && errorId == other.errorId
-          && Util.bothNullOrEqual(errorPlaceholder, other.errorPlaceholder)
-          && placeholderId == other.placeholderId
-          && Util.bothNullOrEqual(placeholderDrawable, other.placeholderDrawable)
-          && fallbackId == other.fallbackId
-          && Util.bothNullOrEqual(fallbackDrawable, other.fallbackDrawable)
-          && isCacheable == other.isCacheable
-          && overrideHeight == other.overrideHeight
-          && overrideWidth == other.overrideWidth
-          && isTransformationRequired == other.isTransformationRequired
-          && isTransformationAllowed == other.isTransformationAllowed
-          && useUnlimitedSourceGeneratorsPool == other.useUnlimitedSourceGeneratorsPool
-          && onlyRetrieveFromCache == other.onlyRetrieveFromCache
-          && diskCacheStrategy.equals(other.diskCacheStrategy)
-          && priority == other.priority
-          && options.equals(other.options)
-          && transformations.equals(other.transformations)
-          && resourceClass.equals(other.resourceClass)
-          && Util.bothNullOrEqual(signature, other.signature)
-          && Util.bothNullOrEqual(theme, other.theme);
+      return isEquivalentTo((BaseRequestOptions<?>) o);
     }
     return false;
   }
