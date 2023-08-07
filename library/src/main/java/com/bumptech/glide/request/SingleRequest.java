@@ -778,7 +778,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
         && localOverrideHeight == otherLocalOverrideHeight
         && Util.bothModelsNullEquivalentOrEquals(localModel, otherLocalModel)
         && localTranscodeClass.equals(otherLocalTranscodeClass)
-        && localRequestOptions.equals(otherLocalRequestOptions)
+        && Util.bothBaseRequestOptionsNullEquivalentOrEquals(localRequestOptions, otherLocalRequestOptions)
         && localPriority == otherLocalPriority
         // We do not want to require that RequestListeners implement equals/hashcode, so we
         // don't compare them using equals(). We can however, at least assert that the same
