@@ -72,7 +72,7 @@ class HorizontalGalleryFragment : Fragment() {
     preloadRequestBuilder: RequestBuilder<Drawable>,
     modifier: Modifier,
   ) =
-    GlideImage(model = item.uri, contentDescription = null, modifier = modifier) {
+    GlideImage(model = item.uri, contentDescription = item.displayName, modifier = modifier) {
       it.thumbnail(preloadRequestBuilder).signature(item.signature())
     }
 

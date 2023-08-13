@@ -2,18 +2,19 @@ package com.bumptech.glide.integration.compose
 
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
-import androidx.compose.ui.graphics.asAndroidColorFilter
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.withSave
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
@@ -35,6 +36,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.toSize
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.ktx.AsyncGlideSize
 import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
@@ -46,7 +48,9 @@ import com.bumptech.glide.integration.ktx.Resource
 import com.bumptech.glide.integration.ktx.Status
 import com.bumptech.glide.integration.ktx.flowResolvable
 import com.bumptech.glide.internalModel
+import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.util.Preconditions
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -66,6 +70,7 @@ internal fun Modifier.glideNode(
   contentScale: ContentScale? = null,
   alpha: Float? = null,
   colorFilter: ColorFilter? = null,
+  transitionFactory: Transition.Factory? = null,
   requestListener: RequestListener? = null,
   draw: Boolean? = true,
 ): Modifier {
@@ -73,12 +78,13 @@ internal fun Modifier.glideNode(
     requestBuilder,
     contentScale ?: ContentScale.None,
     alignment ?: Alignment.Center,
+    alpha,
     colorFilter,
     requestListener,
-    draw
+    draw,
+    transitionFactory,
   ) then
       clipToBounds() then
-      alpha(alpha ?: DefaultAlpha) then
       if (contentDescription != null) {
         semantics {
           this@semantics.contentDescription = contentDescription
@@ -95,9 +101,11 @@ internal data class GlideNodeElement constructor(
   private val requestBuilder: RequestBuilder<Drawable>,
   private val contentScale: ContentScale,
   private val alignment: Alignment,
+  private val alpha: Float?,
   private val colorFilter: ColorFilter?,
   private val requestListener: RequestListener?,
   private val draw: Boolean?,
+  private val transitionFactory: Transition.Factory?,
 ) : ModifierNodeElement<GlideNode>() {
   override fun create(): GlideNode {
     val result = GlideNode()
@@ -110,9 +118,11 @@ internal data class GlideNodeElement constructor(
       requestBuilder,
       contentScale,
       alignment,
+      alpha,
       colorFilter,
       requestListener,
       draw,
+      transitionFactory,
     )
   }
 
@@ -124,6 +134,13 @@ internal data class GlideNodeElement constructor(
     properties["contentScale"] = contentScale
     properties["colorFilter"] = colorFilter
     properties["draw"] = draw
+    properties["transition"] = when (transitionFactory) {
+      is DoNotTransition.Factory -> "None"
+      is CrossFade -> "CrossFade"
+      else -> {
+        "Custom: $transitionFactory"
+      }
+    }
   }
 }
 
@@ -134,14 +151,27 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   private lateinit var requestBuilder: RequestBuilder<Drawable>
   private lateinit var contentScale: ContentScale
   private lateinit var alignment: Alignment
-  private var draw: Boolean = true
+  private var alpha: Float = DefaultAlpha
   private var colorFilter: ColorFilter? = null
+  private var transitionFactory: Transition.Factory = DoNotTransition.Factory
+  private var draw: Boolean = true
   private var requestListener: RequestListener? = null
 
   private var currentJob: Job? = null
+  private var painter: Painter? = null
+
+  // Only used for debugging
   private var drawable: Drawable? = null
   private var state: RequestState = RequestState.Loading
   private var resolvableGlideSize: ResolvableGlideSize? = null
+  private var placeholder: Painter? = null
+  private var isFirstResource = true
+
+  // Avoid allocating Point/PointFs during draw
+  private var placeholderPositionAndSize: CachedPositionAndSize? = null
+  private var drawablePositionAndSize: CachedPositionAndSize? = null
+
+  private var transition: Transition = DoNotTransition
 
   private fun RequestBuilder<*>.maybeImmediateSize() =
     this.overrideSize()?.let { ImmediateGlideSize(it) }
@@ -150,9 +180,11 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     requestBuilder: RequestBuilder<Drawable>,
     contentScale: ContentScale,
     alignment: Alignment,
+    alpha: Float?,
     colorFilter: ColorFilter?,
     requestListener: RequestListener?,
     draw: Boolean?,
+    transitionFactory: Transition.Factory?,
   ) {
     // Other attributes can be refreshed by re-drawing rather than restarting a request
     val restartLoad =
@@ -162,9 +194,11 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     this.requestBuilder = requestBuilder
     this.contentScale = contentScale
     this.alignment = alignment
+    this.alpha = alpha ?: DefaultAlpha
     this.colorFilter = colorFilter
     this.requestListener = requestListener
     this.draw = draw ?: true
+    this.transitionFactory = transitionFactory ?: DoNotTransition.Factory
 
     if (restartLoad) {
       clear()
@@ -187,13 +221,9 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
         launchRequest(requestBuilder)
       }
     } else {
-      drawable?.colorFilter = colorFilter?.asAndroidColorFilter()
       invalidateDraw()
     }
   }
-
-  private val Int.isValidDimension
-    get() = this > 0
 
   private val Float.isValidDimension
     get() = this > 0f
@@ -205,16 +235,26 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
 
   private fun IntOffset.toPointF() = PointF(x.toFloat(), y.toFloat())
 
-  override fun ContentDrawScope.draw() {
-    if (draw) {
-      val drawable = drawable ?: return
-      val srcWidth = if (drawable.intrinsicWidth.isValidDimension) {
-        drawable.intrinsicWidth.toFloat()
+  internal data class CachedPositionAndSize(val position: PointF, val size: Size)
+
+  private fun ContentDrawScope.drawOne(
+    painter: Painter?,
+    cache: CachedPositionAndSize?,
+    drawOne: DrawScope.(Size) -> Unit
+  ): CachedPositionAndSize? {
+    if (painter == null) {
+      return null
+    }
+    val currentPositionAndSize = if (cache != null) {
+      cache
+    } else {
+      val srcWidth = if (painter.intrinsicSize.width.isValidDimension) {
+        painter.intrinsicSize.width
       } else {
         size.width
       }
-      val srcHeight = if (drawable.intrinsicHeight.isValidDimension) {
-        drawable.intrinsicHeight.toFloat()
+      val srcHeight = if (painter.intrinsicSize.height.isValidDimension) {
+        painter.intrinsicSize.height
       } else {
         size.height
       }
@@ -226,15 +266,38 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
         Size.Zero.roundToInt()
       }
 
-      drawable.setBounds(0, 0, scaledSize.width, scaledSize.height)
-      val alignedPosition: PointF = alignment.align(
-        IntSize(scaledSize.width, scaledSize.height),
-        IntSize(size.width.roundToInt(), size.height.roundToInt()),
-        layoutDirection
-      ).toPointF()
+      CachedPositionAndSize(
+        alignment.align(
+          IntSize(scaledSize.width, scaledSize.height),
+          IntSize(size.width.roundToInt(), size.height.roundToInt()),
+          layoutDirection
+        ).toPointF(), scaledSize.toSize()
+      )
+    }
 
-      translate(alignedPosition.x, alignedPosition.y) {
-        drawable.draw(drawContext.canvas.nativeCanvas)
+    translate(currentPositionAndSize.position.x, currentPositionAndSize.position.y) {
+      drawOne.invoke(this, currentPositionAndSize.size)
+    }
+    return currentPositionAndSize
+  }
+
+  override fun ContentDrawScope.draw() {
+    if (draw) {
+      val drawPlaceholder = transition.drawPlaceholder ?: DoNotTransition.drawPlaceholder
+      placeholder?.let { painter ->
+        drawContext.canvas.withSave {
+          placeholderPositionAndSize = drawOne(painter, placeholderPositionAndSize) { size ->
+            drawPlaceholder.invoke(this, painter, size, alpha, colorFilter)
+          }
+        }
+      }
+
+      painter?.let { painter ->
+        drawContext.canvas.withSave {
+          drawablePositionAndSize = drawOne(painter, drawablePositionAndSize) { size ->
+            transition.drawCurrent.invoke(this, painter, size, alpha, colorFilter)
+          }
+        }
       }
     }
 
@@ -258,6 +321,25 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     updateDrawable(null)
   }
 
+  @OptIn(ExperimentGlideFlows::class)
+  private fun CoroutineScope.maybeAnimate(instant: Resource<Drawable>) {
+    if (instant.dataSource == DataSource.MEMORY_CACHE
+      || !isFirstResource
+      || transitionFactory == DoNotTransition.Factory
+    ) {
+      isFirstResource = false
+      transition = DoNotTransition
+      return
+    }
+    isFirstResource = false
+    transition = transitionFactory.build()
+    launch {
+      transition.transition {
+        invalidateDraw()
+      }
+    }
+  }
+
   @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class, ExperimentalComposeUiApi::class)
   private fun launchRequest(requestBuilder: RequestBuilder<Drawable>) =
   // Launch via sideEffect because onAttach is called before onNewRequest and onNewRequest is not
@@ -274,11 +356,17 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
       Preconditions.checkArgument(currentJob == null)
       currentJob = (coroutineScope + Dispatchers.Main.immediate).launch {
         this@GlideNode.resolvableGlideSize = requestBuilder.maybeImmediateSize() ?: AsyncGlideSize()
+        placeholder = null
+        placeholderPositionAndSize = null
 
         requestBuilder.flowResolvable(resolvableGlideSize!!).collect {
           val (state, drawable) =
             when (it) {
-              is Resource -> Pair(RequestState.Success(it.dataSource), it.resource)
+              is Resource -> {
+                maybeAnimate(it)
+                Pair(RequestState.Success(it.dataSource), it.resource)
+              }
+
               is Placeholder -> {
                 val drawable = it.placeholder
                 val state = when (it.status) {
@@ -286,6 +374,8 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
                   Status.FAILED -> RequestState.Failure
                   Status.SUCCEEDED -> throw IllegalStateException()
                 }
+                placeholder = drawable?.toPainter()
+                placeholderPositionAndSize = null
                 Pair(state, drawable)
               }
             }
@@ -298,25 +388,23 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     }
 
   private fun updateDrawable(drawable: Drawable?) {
-    this.drawable?.callback = null
     this.drawable = drawable
-    drawable?.colorFilter = colorFilter?.asAndroidColorFilter()
-    drawable?.callback = object : Drawable.Callback {
-      override fun invalidateDrawable(who: Drawable) {
-        invalidateDraw()
-      }
-
-      override fun scheduleDrawable(who: Drawable, what: Runnable, `when`: Long) {}
-      override fun unscheduleDrawable(who: Drawable, what: Runnable) {}
-    }
+    painter = drawable?.toPainter()
+    drawablePositionAndSize = null
   }
 
   override fun onDetach() {
     super.onDetach()
     clear()
+    if (transition != DoNotTransition) {
+      coroutineScope.launch {
+        transition.stop()
+      }
+    }
   }
 
   private fun clear() {
+    isFirstResource = true
     resolvableGlideSize = null
     currentJob?.cancel()
     currentJob = null
@@ -329,6 +417,8 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     measurable: Measurable,
     constraints: Constraints
   ): MeasureResult {
+    placeholderPositionAndSize = null
+    drawablePositionAndSize = null
     when (val currentSize = resolvableGlideSize) {
       is AsyncGlideSize -> {
         val inferredSize = constraints.inferredGlideSize()
@@ -341,7 +431,9 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
       null -> {}
     }
     val placeable = measurable.measure(constraints)
-    return layout(constraints.maxWidth, constraints.maxHeight) { placeable.placeRelative(0, 0) }
+    return layout(constraints.maxWidth, constraints.maxHeight) {
+      placeable.placeRelative(0, 0)
+    }
   }
 
   override fun SemanticsPropertyReceiver.applySemantics() {
@@ -356,6 +448,8 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
           && colorFilter == other.colorFilter
           && requestListener == other.requestListener
           && draw == other.draw
+          && transitionFactory == other.transitionFactory
+          && alpha == other.alpha
     }
     return false
   }
@@ -367,7 +461,8 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     result = 31 * result + colorFilter.hashCode()
     result = 31 * result + draw.hashCode()
     result = 31 * result + requestListener.hashCode()
-
+    result = 31 * result + transitionFactory.hashCode()
+    result = 31 * result + alpha.hashCode()
     return result
   }
 }
