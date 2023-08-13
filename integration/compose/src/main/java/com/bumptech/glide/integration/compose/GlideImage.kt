@@ -85,6 +85,13 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  * opposed to resource id or [Drawable]), this [Placeholder] will not be used unless the `error`
  * [RequestBuilder] also fails. This parameter does not override error [RequestBuilder]s, only error
  * resource ids and/or [Drawable]s.
+ * @param transition An optional [TransitionFactory] that can animate the transition from a
+ * placeholder to a loaded image. The transition will only be called once, when the load transitions
+ * from showing the placeholder to showing the first resource. The transition will persist across
+ * multiple resources if you're using thumbnail, but will not be called for each successive resource
+ * in the request chain. The transition factory will not be called across different requests if
+ * multiple are made. The transition will not be called if you use [placeholder] or [failure] with
+ * the deprecated [Composable] API. See [CrossFade]
  */
 // TODO(judds): the API here is not particularly composeesque, we should consider alternatives
 // to RequestBuilder (though thumbnail() may make that a challenge).
@@ -104,6 +111,7 @@ public fun GlideImage(
   // See http://shortn/_x79pjkMZIH for an internal discussion.
   loading: Placeholder? = null,
   failure: Placeholder? = null,
+  transition: Transition.Factory? = null,
   // TODO(judds): Consider defaulting to load the model here instead of always doing so below.
   requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
 ) {
@@ -154,6 +162,7 @@ public fun GlideImage(
       contentScale,
       alpha,
       colorFilter,
+      transition,
     )
   }
 }
@@ -482,7 +491,8 @@ private fun ModifierGlideImage(
   alignment: Alignment,
   contentScale: ContentScale,
   alpha: Float,
-  colorFilter: ColorFilter?
+  colorFilter: ColorFilter?,
+  transitionFactory: Transition.Factory?,
 ) {
   Layout(
     {},
@@ -495,6 +505,7 @@ private fun ModifierGlideImage(
         contentScale,
         alpha,
         colorFilter,
+        transitionFactory,
       )
     ) { _, constraints ->
     layout(constraints.minWidth, constraints.minHeight) {}
