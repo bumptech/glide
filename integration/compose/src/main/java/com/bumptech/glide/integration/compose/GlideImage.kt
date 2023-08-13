@@ -1,7 +1,5 @@
 package com.bumptech.glide.integration.compose
 
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -15,8 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -26,10 +22,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
-import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.load.DataSource
-import com.google.accompanist.drawablepainter.DrawablePainter
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 /** Mutates and returns the given [RequestBuilder] to apply relevant options. */
 public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuilder<T>
@@ -77,6 +70,13 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  * opposed to resource id or [Drawable]), this [Placeholder] will not be used unless the `error`
  * [RequestBuilder] also fails. This parameter does not override error [RequestBuilder]s, only error
  * resource ids and/or [Drawable]s.
+ * @param transition An optional [Transition.Factory] that can animate the transition from a
+ * placeholder to a loaded image. The transition will only be called once, when the load transitions
+ * from showing the placeholder to showing the first resource. The transition will persist across
+ * multiple resources if you're using thumbnail, but will not be called for each successive resource
+ * in the request chain. The transition factory will not be called across different requests if
+ * multiple are made. The transition will not be called if you use [placeholder] or [failure] with
+ * the deprecated [Composable] API. See [CrossFade]
  */
 // TODO(judds): the API here is not particularly composeesque, we should consider alternatives
 // to RequestBuilder (though thumbnail() may make that a challenge).
@@ -95,6 +95,7 @@ public fun GlideImage(
   // See http://shortn/_x79pjkMZIH for an internal discussion.
   loading: Placeholder? = null,
   failure: Placeholder? = null,
+  transition: Transition.Factory? = null,
   // TODO(judds): Consider defaulting to load the model here instead of always doing so below.
   requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
 ) {
@@ -144,6 +145,7 @@ public fun GlideImage(
           contentScale,
           alpha,
           colorFilter,
+          transition,
         )
     )
   }
@@ -173,12 +175,6 @@ internal class GlideSubcompositionScopeImpl(
   override val painter: Painter
     get() = drawable?.toPainter() ?: ColorPainter(Color.Transparent)
 
-  private fun Drawable.toPainter(): Painter =
-    when (this) {
-      is BitmapDrawable -> BitmapPainter(bitmap.asImageBitmap())
-      is ColorDrawable -> ColorPainter(Color(color))
-      else -> DrawablePainter(mutate())
-    }
 }
 
 /**
@@ -253,7 +249,6 @@ public sealed class RequestState {
  * load never starting, or in an unreasonably large amount of memory being used. Loading overly
  * large images in memory can also impact scrolling performance.
  */
-@OptIn(InternalGlideApi::class)
 @ExperimentalGlideComposeApi
 @Composable
 public fun GlideSubcomposition(
@@ -325,7 +320,7 @@ private fun PreviewResourceOrDrawable(
         throw IllegalArgumentException("Composables should go through the production codepath")
     }
   Image(
-    painter = rememberDrawablePainter(drawable),
+    painter = remember(drawable) { drawable.toPainter() },
     modifier = modifier,
     contentDescription = contentDescription,
   )
