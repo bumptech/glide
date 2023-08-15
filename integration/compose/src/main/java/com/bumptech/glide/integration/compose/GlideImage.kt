@@ -7,7 +7,8 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,21 +21,12 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
-import com.bumptech.glide.integration.ktx.AsyncGlideSize
-import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
-import com.bumptech.glide.integration.ktx.GlideFlowInstant
-import com.bumptech.glide.integration.ktx.ImmediateGlideSize
 import com.bumptech.glide.integration.ktx.InternalGlideApi
-import com.bumptech.glide.integration.ktx.ResolvableGlideSize
-import com.bumptech.glide.integration.ktx.Resource
-import com.bumptech.glide.integration.ktx.Status
-import com.bumptech.glide.integration.ktx.flowResolvable
 import com.bumptech.glide.load.DataSource
 import com.google.accompanist.drawablepainter.DrawablePainter
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
@@ -97,7 +89,6 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
 // to RequestBuilder (though thumbnail() may make that a challenge).
 // TODO(judds): Consider how to deal with transitions.
 @ExperimentalGlideComposeApi
-@OptIn(InternalGlideApi::class)
 @Composable
 public fun GlideImage(
   model: Any?,
@@ -152,17 +143,17 @@ public fun GlideImage(
       }
     }
   } else {
-    val size: ImmediateGlideSize? = requestBuilder.overrideSize()?.let { ImmediateGlideSize(it) }
-    ModifierGlideImage(
-      requestBuilder,
-      size,
-      contentDescription,
-      modifier,
-      alignment,
-      contentScale,
-      alpha,
-      colorFilter,
-      transition,
+    SimpleLayout(
+      modifier
+        .glideNode(
+          requestBuilder,
+          contentDescription,
+          alignment,
+          contentScale,
+          alpha,
+          colorFilter,
+          transition,
+        )
     )
   }
 }
@@ -182,34 +173,14 @@ public interface GlideSubcompositionScope {
   public val painter: Painter
 }
 
-@OptIn(ExperimentGlideFlows::class)
 @ExperimentalGlideComposeApi
 internal class GlideSubcompositionScopeImpl(
-  private val value: GlideFlowInstant<Drawable>?,
+  private val drawable: Drawable?,
+  override val state: RequestState
 ) : GlideSubcompositionScope {
 
   override val painter: Painter
-    get() = value?.drawable()?.toPainter() ?: ColorPainter(Color.Transparent)
-
-  override val state: RequestState
-    get() = when (val current = value) {
-      is com.bumptech.glide.integration.ktx.Placeholder -> {
-        when (current.status) {
-          Status.CLEARED -> RequestState.Loading
-          Status.RUNNING -> RequestState.Loading
-          Status.FAILED -> RequestState.Failure
-          Status.SUCCEEDED -> throw IllegalStateException()
-        }
-      }
-
-      is Resource -> RequestState.Success(current.dataSource)
-      null -> RequestState.Loading
-    }
-
-  private fun GlideFlowInstant<Drawable>.drawable(): Drawable? = when (this) {
-    is com.bumptech.glide.integration.ktx.Placeholder -> placeholder
-    is Resource -> resource
-  }
+    get() = drawable?.toPainter() ?: ColorPainter(Color.Transparent)
 
   private fun Drawable.toPainter(): Painter =
     when (this) {
@@ -218,19 +189,6 @@ internal class GlideSubcompositionScopeImpl(
       else -> DrawablePainter(mutate())
     }
 }
-
-@OptIn(InternalGlideApi::class)
-private fun Modifier.sizeObservingModifier(size: ResolvableGlideSize): Modifier =
-  this.layout { measurable, constraints ->
-    if (size is AsyncGlideSize) {
-      val inferredSize = constraints.inferredGlideSize()
-      if (inferredSize != null) {
-        size.setSize(inferredSize)
-      }
-    }
-    val placeable = measurable.measure(constraints)
-    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-  }
 
 /**
  * The current state of a request associated with a Glide painter.
@@ -304,7 +262,7 @@ public sealed class RequestState {
  * load never starting, or in an unreasonably large amount of memory being used. Loading overly
  * large images in memory can also impact scrolling performance.
  */
-@OptIn(InternalGlideApi::class, ExperimentGlideFlows::class)
+@OptIn(InternalGlideApi::class)
 @ExperimentalGlideComposeApi
 @Composable
 public fun GlideSubcomposition(
@@ -319,27 +277,45 @@ public fun GlideSubcomposition(
       requestBuilderTransform(requestManager.load(model))
     }
 
-  val overrideSize = requestBuilder.overrideSize()
-  val size = remember(overrideSize) {
-    if (overrideSize != null) {
-      ImmediateGlideSize(overrideSize)
-    } else {
-      AsyncGlideSize()
+  val requestState: MutableState<RequestState> =
+    remember(model, requestManager, requestBuilderTransform) {
+      mutableStateOf(RequestState.Loading)
     }
+  val drawable: MutableState<Drawable?> = remember(model, requestManager, requestBuilderTransform) {
+    mutableStateOf(null)
   }
 
-  val result = remember(requestBuilder, size) {
-    requestBuilder.flowResolvable(size)
-  }.collectAsState(initial = null)
-
-  val scope = GlideSubcompositionScopeImpl(result.value)
-
-  if (overrideSize != null) {
-    scope.content()
-  } else {
-    Box(modifier = modifier.sizeObservingModifier(size)) {
-      scope.content()
+  val requestListener: StateTrackingListener =
+    remember(model, requestManager, requestBuilderTransform) {
+      StateTrackingListener(
+        requestState,
+        drawable
+      )
     }
+
+  val scope = GlideSubcompositionScopeImpl(drawable.value, requestState.value)
+
+  Box(
+    modifier
+      .glideNode(
+        requestBuilder,
+        draw = false,
+        requestListener = requestListener,
+      )
+  ) {
+    scope.content()
+  }
+}
+
+@ExperimentalGlideComposeApi
+private class StateTrackingListener(
+  val state: MutableState<RequestState>,
+  val drawable: MutableState<Drawable?>
+) : RequestListener {
+
+  override fun onStateChanged(model: Any?, drawable: Drawable?, requestState: RequestState) {
+    state.value = requestState
+    this.drawable.value = drawable
   }
 }
 
@@ -481,33 +457,15 @@ private fun RequestBuilder<Drawable>.contentScaleTransform(
   // TODO(judds): Think about how to handle the various fills
 }
 
-@OptIn(InternalGlideApi::class, ExperimentalGlideComposeApi::class)
+
 @Composable
-private fun ModifierGlideImage(
-  requestBuilder: RequestBuilder<Drawable>,
-  size: ImmediateGlideSize?,
-  contentDescription: String?,
+private fun SimpleLayout(
   modifier: Modifier,
-  alignment: Alignment,
-  contentScale: ContentScale,
-  alpha: Float,
-  colorFilter: ColorFilter?,
-  transitionFactory: Transition.Factory?,
 ) {
   Layout(
-    {},
     modifier
-      .glideNode(
-        requestBuilder,
-        size,
-        contentDescription,
-        alignment,
-        contentScale,
-        alpha,
-        colorFilter,
-        transitionFactory,
-      )
-    ) { _, constraints ->
-    layout(constraints.minWidth, constraints.minHeight) {}
+  ) { _, constraints ->
+    layout(constraints.minWidth, constraints.minHeight) {
+    }
   }
 }

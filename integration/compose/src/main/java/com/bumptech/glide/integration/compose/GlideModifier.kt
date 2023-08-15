@@ -2,7 +2,6 @@ package com.bumptech.glide.integration.compose
 
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -57,27 +56,33 @@ import kotlinx.coroutines.plus
 import kotlin.math.roundToInt
 
 @ExperimentalGlideComposeApi
-@OptIn(InternalGlideApi::class)
+internal interface RequestListener {
+  fun onStateChanged(model: Any?, drawable: Drawable?, requestState: RequestState)
+}
+
+@ExperimentalGlideComposeApi
 internal fun Modifier.glideNode(
   requestBuilder: RequestBuilder<Drawable>,
-  size: ImmediateGlideSize?,
-  contentDescription: String?,
-  alignment: Alignment,
-  contentScale: ContentScale,
-  alpha: Float = DefaultAlpha,
-  colorFilter: ColorFilter?,
-  transitionFactory: Transition.Factory?,
+  contentDescription: String? = null,
+  alignment: Alignment? = null,
+  contentScale: ContentScale? = null,
+  alpha: Float? = null,
+  colorFilter: ColorFilter? = null,
+  transitionFactory: Transition.Factory? = null,
+  requestListener: RequestListener? = null,
+  draw: Boolean? = true,
 ): Modifier {
   return this then GlideNodeElement(
     requestBuilder,
-    size,
-    contentScale,
-    alignment,
+    contentScale ?: ContentScale.None,
+    alignment ?: Alignment.Center,
     colorFilter,
     transitionFactory,
+    requestListener,
+    draw
   ) then
       clipToBounds() then
-      alpha(alpha) then
+      alpha(alpha ?: DefaultAlpha) then
       if (contentDescription != null) {
         semantics {
           this@semantics.contentDescription = contentDescription
@@ -92,11 +97,12 @@ internal fun Modifier.glideNode(
 @OptIn(InternalGlideApi::class)
 internal data class GlideNodeElement constructor(
   private val requestBuilder: RequestBuilder<Drawable>,
-  private val fixedSize: ImmediateGlideSize?,
   private val contentScale: ContentScale,
   private val alignment: Alignment,
   private val colorFilter: ColorFilter?,
   private val transitionFactory: Transition.Factory?,
+  private val requestListener: RequestListener?,
+  private val draw: Boolean?,
 ) : ModifierNodeElement<GlideNode>() {
   override fun create(): GlideNode {
     val result = GlideNode()
@@ -107,18 +113,19 @@ internal data class GlideNodeElement constructor(
   override fun update(node: GlideNode) {
     node.onNewRequest(
       requestBuilder,
-      fixedSize,
       contentScale,
       alignment,
       colorFilter,
       transitionFactory,
+      requestListener,
+      draw,
     )
   }
 
   override fun InspectorInfo.inspectableProperties() {
     name = "GlideNode"
     properties["model"] = requestBuilder.internalModel
-    properties["size"] = fixedSize ?: "LayoutBased"
+    properties["size"] = requestBuilder.overrideSize() ?: "LayoutBased"
     properties["alignment"] = alignment
     properties["contentScale"] = contentScale
     properties["colorFilter"] = colorFilter
@@ -127,6 +134,7 @@ internal data class GlideNodeElement constructor(
       is CrossFade.Factory -> "CrossFade"
       else -> { "Custom: $transitionFactory"}
     }
+    properties["draw"] = draw
   }
 }
 
@@ -137,9 +145,10 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   private lateinit var requestBuilder: RequestBuilder<Drawable>
   private lateinit var contentScale: ContentScale
   private lateinit var alignment: Alignment
-  private var fixedSize: ImmediateGlideSize? = null
+  private var draw: Boolean = true
   private var colorFilter: ColorFilter? = null
   private var transitionFactory: Transition.Factory = DoNotTransition.Factory
+  private var requestListener: RequestListener? = null
 
   private var currentJob: Job? = null
   private var drawable: Drawable? = null
@@ -150,29 +159,32 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   // Avoid allocating Point/PointFs during draw
   private var placeholderPosition: PointF? = null
   private var drawablePosition: PointF? = null
-
   private var transition: Transition = DoNotTransition
+
+  private fun RequestBuilder<*>.maybeImmediateSize() =
+    this.overrideSize()?.let { ImmediateGlideSize(it) }
 
   fun onNewRequest(
     requestBuilder: RequestBuilder<Drawable>,
-    fixedSize: ImmediateGlideSize?,
     contentScale: ContentScale,
     alignment: Alignment,
     colorFilter: ColorFilter?,
     transitionFactory: Transition.Factory?,
+    requestListener: RequestListener?,
+    draw: Boolean?,
   ) {
     // Other attributes can be refreshed by re-drawing rather than restarting a request
     val restartLoad =
       !this::requestBuilder.isInitialized ||
           requestBuilder != this.requestBuilder
-          || fixedSize != this.fixedSize
 
     this.requestBuilder = requestBuilder
-    this.fixedSize = fixedSize
     this.contentScale = contentScale
     this.alignment = alignment
     this.colorFilter = colorFilter
     this.transitionFactory = transitionFactory ?: DoNotTransition.Factory
+    this.requestListener = requestListener
+    this.draw = draw ?: true
 
     if (restartLoad) {
       clear()
@@ -189,7 +201,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
         // correct.
         // TODO(sam): See if we can find a reasonable way to remove this behavior, or be more
         //  targeted.
-        if (fixedSize == null) {
+        if (requestBuilder.overrideSize() == null) {
           invalidateMeasurement()
         }
         launchRequest(requestBuilder)
@@ -253,20 +265,22 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   }
 
   override fun ContentDrawScope.draw() {
-    val drawable = drawable ?: return
-    val drawPlaceholder = transition.drawPlaceholder ?: DoNotTransition.drawPlaceholder
-    if (placeholderDrawable != null) {
+    if (draw) {
+      val drawable = drawable ?: return
+      val drawPlaceholder = transition.drawPlaceholder ?: DoNotTransition.drawPlaceholder
+      if (placeholderDrawable != null) {
+        drawContext.canvas.save()
+        placeholderPosition = drawOne(placeholderDrawable, placeholderPosition) {
+          drawPlaceholder.invoke(this, it)
+        }
+        drawContext.canvas.restore()
+      }
       drawContext.canvas.save()
-      placeholderPosition = drawOne(placeholderDrawable, placeholderPosition) {
-        drawPlaceholder.invoke(this, it)
+      drawablePosition = drawOne(drawable, drawablePosition) {
+        transition.drawCurrent.invoke(this, it)
       }
       drawContext.canvas.restore()
     }
-    drawContext.canvas.save()
-    drawablePosition = drawOne(drawable, drawablePosition) {
-      transition.drawCurrent.invoke(this, it)
-    }
-    drawContext.canvas.restore()
 
     // Allow chaining of DrawModifiers
     drawContent()
@@ -321,7 +335,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
       }
       Preconditions.checkArgument(currentJob == null)
       currentJob = (coroutineScope + Dispatchers.Main.immediate).launch {
-        resolvableGlideSize = fixedSize ?: AsyncGlideSize()
+        resolvableGlideSize = requestBuilder.maybeImmediateSize() ?: AsyncGlideSize()
         placeholderDrawable = null
         placeholderPosition = null
 
@@ -335,7 +349,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
               is Placeholder -> {
                 val drawable = it.placeholder
                 val state = when (it.status) {
-                  Status.CLEARED, Status.RUNNING -> RequestState.Loading
+                  Status.RUNNING, Status.CLEARED -> RequestState.Loading
                   Status.FAILED -> RequestState.Failure
                   Status.SUCCEEDED -> throw IllegalStateException()
                 }
@@ -346,6 +360,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
               }
             }
           updateDrawable(drawable)
+          requestListener?.onStateChanged(requestBuilder.internalModel, drawable, state)
           this@GlideNode.state = state
           invalidateDraw()
         }
@@ -423,22 +438,25 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   override fun equals(other: Any?): Boolean {
     if (other is GlideNode) {
       return requestBuilder == other.requestBuilder
-          && fixedSize == other.fixedSize
           && contentScale == other.contentScale
           && alignment == other.alignment
           && colorFilter == other.colorFilter
           && transitionFactory == other.transitionFactory
+          && requestListener == other.requestListener
+          && draw == other.draw
     }
     return false
   }
 
   override fun hashCode(): Int {
     var result = requestBuilder.hashCode()
-    result = 31 * result + fixedSize.hashCode()
     result = 31 * result + contentScale.hashCode()
     result = 31 * result + alignment.hashCode()
     result = 31 * result + colorFilter.hashCode()
     result = 31 * result + transitionFactory.hashCode()
+    result = 31 * result + draw.hashCode()
+    result = 31 * result + requestListener.hashCode()
+
     return result
   }
 }

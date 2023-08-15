@@ -135,8 +135,8 @@ public class CrossFade private constructor(
   }
 
   override val drawPlaceholder: DrawScope.(Drawable?) -> Unit = {
-    val nativeCanvas = drawContext.canvas.nativeCanvas
     if (it != null) {
+      val nativeCanvas = drawContext.canvas.nativeCanvas
       nativeCanvas.saveLayerAlpha(
         0f, 0f, drawContext.size.width, drawContext.size.height, OPAQUE_ALPHA - animatable.value
       )
