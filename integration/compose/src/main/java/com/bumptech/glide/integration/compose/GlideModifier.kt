@@ -2,7 +2,6 @@ package com.bumptech.glide.integration.compose
 
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -12,6 +11,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.withSave
@@ -36,6 +36,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.toSize
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.ktx.AsyncGlideSize
@@ -72,7 +74,7 @@ internal fun Modifier.glideNode(
   colorFilter: ColorFilter? = null,
   transitionFactory: Transition.Factory? = null,
   requestListener: RequestListener? = null,
-  draw: Boolean? = true,
+  draw: Boolean? = null,
 ): Modifier {
   return this then GlideNodeElement(
     requestBuilder,
@@ -151,6 +153,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   private lateinit var requestBuilder: RequestBuilder<Drawable>
   private lateinit var contentScale: ContentScale
   private lateinit var alignment: Alignment
+  private lateinit var resolvableGlideSize: ResolvableGlideSize
   private var alpha: Float = DefaultAlpha
   private var colorFilter: ColorFilter? = null
   private var transitionFactory: Transition.Factory = DoNotTransition.Factory
@@ -163,13 +166,15 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   // Only used for debugging
   private var drawable: Drawable? = null
   private var state: RequestState = RequestState.Loading
-  private var resolvableGlideSize: ResolvableGlideSize? = null
   private var placeholder: Painter? = null
   private var isFirstResource = true
 
   // Avoid allocating Point/PointFs during draw
   private var placeholderPositionAndSize: CachedPositionAndSize? = null
   private var drawablePositionAndSize: CachedPositionAndSize? = null
+
+  private var hasFixedSize: Boolean = false
+  private var inferredGlideSize: com.bumptech.glide.integration.ktx.Size? = null
 
   private var transition: Transition = DoNotTransition
 
@@ -199,6 +204,10 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     this.requestListener = requestListener
     this.draw = draw ?: true
     this.transitionFactory = transitionFactory ?: DoNotTransition.Factory
+    this.resolvableGlideSize =
+      requestBuilder.maybeImmediateSize()
+        ?: inferredGlideSize?.let { ImmediateGlideSize(it) }
+            ?: AsyncGlideSize()
 
     if (restartLoad) {
       clear()
@@ -206,18 +215,6 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
 
       // If we're not attached, we'll be measured when we eventually are attached.
       if (isAttached) {
-        // If we don't have a fixed size, we need a new layout pass to figure out how large the
-        // image should be. Ideally we'd retain the old resolved glide size unless some other
-        // modifier node had already requested measurement. Since we can't tell if measurement is
-        // requested, we can either re-use the old resolvableGlideSize, which will be incorrect if
-        // measurement was requested. Or we can invalidate resolvableGlideSize and ensure that it's
-        // resolved by requesting measurement ourselves. Requesting is less efficient, but more
-        // correct.
-        // TODO(sam): See if we can find a reasonable way to remove this behavior, or be more
-        //  targeted.
-        if (requestBuilder.overrideSize() == null) {
-          invalidateMeasurement()
-        }
         launchRequest(requestBuilder)
       }
     } else {
@@ -225,11 +222,17 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     }
   }
 
+  private val Size.isValidWidth
+    get() = this != Size.Unspecified && this.width.isValidDimension
+
+  private val Size.isValidHeight
+    get() = this != Size.Unspecified && this.height.isValidDimension
+
   private val Float.isValidDimension
-    get() = this > 0f
+    get() = this > 0f && isFinite()
 
   private val Size.isValid
-    get() = width.isValidDimension && height.isValidDimension
+    get() = isValidWidth && isValidHeight
 
   private fun Size.roundToInt() = IntSize(width.roundToInt(), height.roundToInt())
 
@@ -248,12 +251,12 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     val currentPositionAndSize = if (cache != null) {
       cache
     } else {
-      val srcWidth = if (painter.intrinsicSize.width.isValidDimension) {
+      val srcWidth = if (painter.intrinsicSize.isValidWidth) {
         painter.intrinsicSize.width
       } else {
         size.width
       }
-      val srcHeight = if (painter.intrinsicSize.height.isValidDimension) {
+      val srcHeight = if (painter.intrinsicSize.isValidHeight) {
         painter.intrinsicSize.height
       } else {
         size.height
@@ -275,8 +278,10 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
       )
     }
 
-    translate(currentPositionAndSize.position.x, currentPositionAndSize.position.y) {
-      drawOne.invoke(this, currentPositionAndSize.size)
+    clipRect {
+      translate(currentPositionAndSize.position.x, currentPositionAndSize.position.y) {
+        drawOne.invoke(this, currentPositionAndSize.size)
+      }
     }
     return currentPositionAndSize
   }
@@ -355,11 +360,10 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
       }
       Preconditions.checkArgument(currentJob == null)
       currentJob = (coroutineScope + Dispatchers.Main.immediate).launch {
-        this@GlideNode.resolvableGlideSize = requestBuilder.maybeImmediateSize() ?: AsyncGlideSize()
         placeholder = null
         placeholderPositionAndSize = null
 
-        requestBuilder.flowResolvable(resolvableGlideSize!!).collect {
+        requestBuilder.flowResolvable(resolvableGlideSize).collect {
           val (state, drawable) =
             when (it) {
               is Resource -> {
@@ -382,7 +386,11 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
           updateDrawable(drawable)
           requestListener?.onStateChanged(requestBuilder.internalModel, drawable, state)
           this@GlideNode.state = state
-          invalidateDraw()
+          if (hasFixedSize) {
+            invalidateDraw()
+          } else {
+            invalidateMeasurement()
+          }
         }
       }
     }
@@ -405,7 +413,6 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
 
   private fun clear() {
     isFirstResource = true
-    resolvableGlideSize = null
     currentJob?.cancel()
     currentJob = null
     state = RequestState.Loading
@@ -419,21 +426,64 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   ): MeasureResult {
     placeholderPositionAndSize = null
     drawablePositionAndSize = null
+    hasFixedSize = constraints.hasFixedSize()
+    inferredGlideSize = constraints.inferredGlideSize()
+
     when (val currentSize = resolvableGlideSize) {
       is AsyncGlideSize -> {
-        val inferredSize = constraints.inferredGlideSize()
-        if (inferredSize != null) {
-          currentSize.setSize(inferredSize)
-        }
+        inferredGlideSize?.also { currentSize.setSize(it) }
       }
-      // Do nothing.
+
       is ImmediateGlideSize -> {}
-      null -> {}
     }
-    val placeable = measurable.measure(constraints)
-    return layout(constraints.maxWidth, constraints.maxHeight) {
+    val placeable = measurable.measure(modifyConstraints(constraints))
+    return layout(placeable.width, placeable.height) {
       placeable.placeRelative(0, 0)
     }
+  }
+
+  private fun Constraints.hasFixedSize() = hasFixedWidth && hasFixedHeight
+
+  private fun modifyConstraints(constraints: Constraints): Constraints {
+    if (constraints.hasFixedSize()) {
+      return constraints.copy(
+        minWidth = constraints.maxWidth,
+        minHeight = constraints.maxHeight
+      )
+    }
+
+    val intrinsicSize = painter?.intrinsicSize ?: return constraints
+
+    val intrinsicWidth =
+      if (constraints.hasFixedWidth) {
+        constraints.maxWidth
+      } else if (intrinsicSize.isValidWidth) {
+        intrinsicSize.width.roundToInt()
+      } else {
+        constraints.minWidth
+      }
+
+    val intrinsicHeight =
+      if (constraints.hasFixedHeight) {
+        constraints.maxHeight
+      } else if (intrinsicSize.isValidHeight) {
+        intrinsicSize.height.roundToInt()
+      } else {
+        constraints.minHeight
+      }
+
+    val constrainedWidth = constraints.constrainWidth(intrinsicWidth)
+    val constrainedHeight = constraints.constrainHeight(intrinsicHeight)
+
+    val srcSize = Size(intrinsicWidth.toFloat(), intrinsicHeight.toFloat())
+    val scaledSize =
+      srcSize * contentScale.computeScaleFactor(
+        srcSize, Size(constrainedWidth.toFloat(), constrainedHeight.toFloat())
+      )
+
+    val minWidth = constraints.constrainWidth(scaledSize.width.roundToInt())
+    val minHeight = constraints.constrainHeight(scaledSize.height.roundToInt())
+    return constraints.copy(minWidth = minWidth, minHeight = minHeight)
   }
 
   override fun SemanticsPropertyReceiver.applySemantics() {

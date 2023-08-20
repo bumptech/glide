@@ -34,29 +34,29 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  * [alignment], [contentScale], [alpha], [colorFilter] and [contentDescription] have the same
  * defaults (if any) and function identically to the parameters in [Image].
  *
- * If you want to restrict the size of this [Composable], use the given [modifier]. If you'd like to
- * force the size of the pixels you load to be different than the display area, use
- * [RequestBuilder.override]. Often you can get better performance by setting an explicit size so
- * that we do not have to wait for layout to fetch the image. If the size set via the [modifier] is
+ * Set the size this [Composable] using the given [modifier]. Use fixed sizes when you can for
+ * better performance and to avoid layout jank when images are loaded. If you cannot use a fixed
+ * size, try to at least set a bounded size. If the size set via the [modifier] is
  * dependent on the content, Glide will probably end up loading the image using
  * [com.bumptech.glide.request.target.Target.SIZE_ORIGINAL]. Avoid `SIZE_ORIGINAL`, implicitly or
  * explicitly if you can. You may end up loading a substantially larger image than you need, which
  * will increase memory usage and may also increase latency.
  *
- * This method will inspect [contentScale] and apply a matching transformation if one exists. Any
- * automatically applied transformation can be overridden using [requestBuilderTransform]. Either
- * apply a specific transformation instead, or use [RequestBuilder.dontTransform]]
+ * You can force the size of the image you load to be different than the display area using
+ * [RequestBuilder.override].
  *
- * Transitions set via [RequestBuilder.transition] are currently ignored.
- *
- * Note - this method is likely to change while we work on improving the API. Transitions are one
- * significant unexplored area. It's also possible we'll try and remove the [RequestBuilder] from
- * the direct API and instead allow all options to be set directly in the method.
+ * [contentScale] will apply to both [loading] and [error] placeholders, as well as the the primary
+ * request. If you'd like different scaling behavior for placeholders vs the primary request, use
+ * [contentScale] to scale the placeholders and [requestBuilderTransform] to set a different
+ * `Transformation` for the image load. [contentScale] will also be inspected to apply a matching
+ * default `Transformation` if one exists. Any automatically applied `Transformation` based on
+ * [contentScale] can be overridden using [requestBuilderTransform] via [RequestBuilder.transform]
+ * or [RequestBuilder.dontTransform].
  *
  * [requestBuilderTransform] is overridden by any overlapping parameter defined in this method if
  * that parameter is non-null. For example, [loading] and [failure], if non-null will be used in
  * place of any placeholder set by [requestBuilderTransform] using [RequestBuilder.placeholder] or
- * [RequestBuilder.error].
+ * [RequestBuilder.error]. Transitions set via [RequestBuilder.transition] are ignored.
  *
  * @param loading A [Placeholder] that will be displayed while the request is loading. Specifically
  * it's used if the request is cleared ([com.bumptech.glide.request.target.Target.onLoadCleared]) or
@@ -80,7 +80,6 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  */
 // TODO(judds): the API here is not particularly composeesque, we should consider alternatives
 // to RequestBuilder (though thumbnail() may make that a challenge).
-// TODO(judds): Consider how to deal with transitions.
 @ExperimentalGlideComposeApi
 @Composable
 public fun GlideImage(
@@ -131,7 +130,7 @@ public fun GlideImage(
           alignment,
           contentScale,
           alpha,
-          colorFilter
+          colorFilter,
         )
       }
     }
