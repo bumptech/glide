@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /** Helper for running sections of code on the main thread in emulator tests. */
 public class ConcurrencyHelper {
   private final Handler handler = new Handler(Looper.getMainLooper());
-  private static final long TIMEOUT_SECONDS = 10;
+  private static final long TIMEOUT_SECONDS = 20;
   private static final TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
 
   public <T> T get(final Future<T> future) {
