@@ -7,6 +7,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
@@ -38,7 +39,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
-import androidx.compose.ui.unit.toSize
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.ktx.AsyncGlideSize
 import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
@@ -223,10 +223,10 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   }
 
   private val Size.isValidWidth
-    get() = this != Size.Unspecified && this.width.isValidDimension
+    get() = isSpecified && width.isValidDimension
 
   private val Size.isValidHeight
-    get() = this != Size.Unspecified && this.height.isValidDimension
+    get() = isSpecified && height.isValidDimension
 
   private val Float.isValidDimension
     get() = this > 0f && isFinite()
@@ -264,17 +264,18 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
       val srcSize = Size(srcWidth, srcHeight)
 
       val scaledSize = if (size.isValid) {
-        contentScale.computeScaleFactor(srcSize, size).times(srcSize).roundToInt()
+        contentScale.computeScaleFactor(srcSize, size).times(srcSize)
       } else {
-        Size.Zero.roundToInt()
+        Size.Zero
       }
 
       CachedPositionAndSize(
         alignment.align(
-          IntSize(scaledSize.width, scaledSize.height),
-          IntSize(size.width.roundToInt(), size.height.roundToInt()),
+          scaledSize.roundToInt(),
+          size.roundToInt(),
           layoutDirection
-        ).toPointF(), scaledSize.toSize()
+        ).toPointF(),
+        scaledSize,
       )
     }
 
