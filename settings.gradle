@@ -110,7 +110,7 @@ dependencyResolutionManagement {
             library('coroutines-android', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-android').versionRef('coroutines')
             library('coroutines-core', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-core').versionRef('coroutines')
             library('coroutines-test', 'org.jetbrains.kotlinx', 'kotlinx-coroutines-test').versionRef('coroutines')
-            library('cronet', 'com.google.android.gms:play-services-cronet:17.0.0')
+            library('cronet', 'com.google.android.gms:play-services-cronet:17.0.1')
             library('dagger', 'com.google.dagger', 'dagger').versionRef('dagger')
             library('dagger-compiler', 'com.google.dagger', 'dagger-compiler').versionRef('dagger')
             library('dagger-android', 'com.google.dagger', 'dagger-android').versionRef('dagger')
