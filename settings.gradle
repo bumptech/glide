@@ -150,7 +150,7 @@ dependencyResolutionManagement {
             library('svg', 'com.caverock:androidsvg:1.2.1')
             library('truth', 'com.google.truth:truth:1.1.3')
             library('violations', 'se.bjurr.violations:violations-gradle-plugin:1.8')
-            library('volley', 'com.android.volley:volley:1.2.0')
+            library('volley', 'com.android.volley:volley:1.2.1')
         }
     }
 }
