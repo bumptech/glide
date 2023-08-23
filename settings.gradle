@@ -73,7 +73,7 @@ dependencyResolutionManagement {
             library('autoservice.annotations', 'com.google.auto.service:auto-service-annotations:1.0.1')
             library('android-gradle', 'com.android.tools.build:gradle:7.3.0')
             // 1.2.3 seems broken: https://issuetracker.google.com/issues/290507059
-            library('android-tools-desugar', 'com.android.tools:desugar_jdk_libs:1.2.2')
+            library('android-tools-desugar', 'com.android.tools:desugar_jdk_libs:1.2.3')
             library('androidx-cardview', 'androidx.cardview:cardview:1.0.0')
             library('androidx-core', 'androidx.core:core:1.6.0')
             // 1.6.0 seems to introduce:
