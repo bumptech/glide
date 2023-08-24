@@ -18,14 +18,8 @@
       "allowedVersions": "<1.6.0"
     },
     {
-      "matchPackageNames": [
-        "androidx.appcompat:appcompat"
-      ],
+      "matchPackageNames": ["androidx.appcompat:appcompat"],
       "allowedVersions": "<1.4.0"
-    },
-    {
-      "matchPackageNames": ["com.android.tools:desugar_jdk_libs"],
-      "matchPackageNames": ["!/1\.2\.3/"]
     }
   ]
 }
