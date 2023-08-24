@@ -5,13 +5,18 @@ import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assert
@@ -371,5 +376,19 @@ class GlideImageTest {
         .onNodeWithContentDescription(description + i)
         .assert(expectDisplayedDrawable(drawable))
     }
+  }
+
+  // See #5256
+  @Test
+  fun glideImage_withZeroSize_doesNotCrash() {
+    glideComposeRule.setContent {
+     GlideImage(
+        model = android.R.drawable.star_big_on,
+        contentDescription = null,
+        modifier = Modifier.width(IntrinsicSize.Min),
+        contentScale = ContentScale.Crop
+      )
+    }
+    glideComposeRule.waitForIdle()
   }
 }

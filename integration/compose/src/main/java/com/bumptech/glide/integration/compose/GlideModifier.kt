@@ -20,6 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.layout.times
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.LayoutModifierNode
@@ -477,10 +478,13 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     val constrainedHeight = constraints.constrainHeight(intrinsicHeight)
 
     val srcSize = Size(intrinsicWidth.toFloat(), intrinsicHeight.toFloat())
-    val scaledSize =
-      srcSize * contentScale.computeScaleFactor(
+    val scaleFactor = contentScale.computeScaleFactor(
         srcSize, Size(constrainedWidth.toFloat(), constrainedHeight.toFloat())
       )
+    if (scaleFactor == ScaleFactor.Unspecified) {
+      return constraints
+    }
+    val scaledSize = srcSize * scaleFactor
 
     val minWidth = constraints.constrainWidth(scaledSize.width.roundToInt())
     val minHeight = constraints.constrainHeight(scaledSize.height.roundToInt())
