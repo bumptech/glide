@@ -27,8 +27,6 @@ dependencies {
     // Not totally clear why this is required, but it seems to be missing when tests are run on
     // 4.1.2 and 4.2.0 emulators.
     androidTestImplementation libs.findbugs.jsr305
-
-    coreLibraryDesugaring libs.android.tools.desugar
 }
 
 android {
@@ -47,7 +45,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
-        coreLibraryDesugaringEnabled true
     }
 
     buildTypes {
