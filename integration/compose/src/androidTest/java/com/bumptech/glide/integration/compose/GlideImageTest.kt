@@ -1,15 +1,15 @@
 package com.bumptech.glide.integration.compose
 
 import android.content.Context
+import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -20,6 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -40,11 +41,13 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.test.compareToGolden
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestName
 
 @OptIn(ExperimentalGlideComposeApi::class, InternalGlideApi::class)
 class GlideImageTest {
@@ -52,6 +55,8 @@ class GlideImageTest {
 
   @get:Rule
   val glideComposeRule = GlideComposeRule()
+  @get:Rule
+  val testName = TestName()
 
   @Test
   fun glideImage_noModifierSize_resourceDrawable_displaysDrawable() {
@@ -390,5 +395,28 @@ class GlideImageTest {
       )
     }
     glideComposeRule.waitForIdle()
+  }
+
+  @Test
+  fun glideImage_startsAnimatedDrawable() {
+    val drawable = AnimationDrawable()
+    val firstFrame = context.getDrawable(android.R.drawable.star_big_on)!!
+    val secondFrame = context.getDrawable(android.R.drawable.star_big_off)!!
+    drawable.addFrame(firstFrame, 0)
+    drawable.addFrame(secondFrame, 10000)
+    val description = "test"
+    glideComposeRule.setContent {
+      GlideImage(
+        model = drawable,
+        contentDescription = description,
+        modifier = Modifier.wrapContentSize(),
+      ) {
+        it.override(20).dontTransform()
+      }
+    }
+    glideComposeRule
+      .onNodeWithContentDescription(description)
+      .captureToImage()
+      .compareToGolden(testName.methodName)
   }
 }

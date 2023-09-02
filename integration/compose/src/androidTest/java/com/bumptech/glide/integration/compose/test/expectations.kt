@@ -5,6 +5,7 @@ package com.bumptech.glide.integration.compose.test
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
+import android.graphics.drawable.Animatable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
@@ -41,6 +42,11 @@ fun expectDisplayedDrawableSize(expectedSize: Size): SemanticsMatcher =
 
 fun expectDisplayedDrawable(expectedValue: Drawable?): SemanticsMatcher =
   expectDisplayedDrawable(expectedValue.bitmapOrThrow(), ::compareBitmaps) { it.bitmapOrThrow() }
+
+fun expectAnimatingDrawable(): SemanticsMatcher =
+  expectDisplayedDrawable(true) {
+    (it as Animatable).isRunning
+  }
 
 fun expectNoDrawable(): SemanticsMatcher = expectDisplayedDrawable(null)
 
