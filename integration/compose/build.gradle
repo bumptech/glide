@@ -53,7 +53,6 @@ dependencies {
     }
     implementation libs.compose.foundation
     implementation libs.compose.ui
-    implementation libs.drawablepainter
     implementation libs.androidx.core.ktx
     debugImplementation libs.compose.ui.testmanifest
     androidTestImplementation libs.junit
