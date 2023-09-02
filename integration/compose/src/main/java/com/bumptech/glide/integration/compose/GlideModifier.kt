@@ -1,7 +1,10 @@
 package com.bumptech.glide.integration.compose
 
 import android.graphics.PointF
+import android.graphics.drawable.Animatable
 import android.graphics.drawable.Drawable
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -146,6 +149,10 @@ internal data class GlideNodeElement constructor(
   }
 }
 
+private val MAIN_HANDLER by lazy(LazyThreadSafetyMode.NONE) {
+  Handler(Looper.getMainLooper())
+}
+
 @ExperimentalGlideComposeApi
 @OptIn(InternalGlideApi::class)
 internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifierNode,
@@ -177,6 +184,23 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   private var inferredGlideSize: com.bumptech.glide.integration.ktx.Size? = null
 
   private var transition: Transition = DoNotTransition
+
+
+  private val callback: Drawable.Callback by lazy {
+    object : Drawable.Callback {
+      override fun invalidateDrawable(d: Drawable) {
+        invalidateDraw()
+      }
+
+      override fun scheduleDrawable(d: Drawable, what: Runnable, time: Long) {
+        MAIN_HANDLER.postAtTime(what, time)
+      }
+
+      override fun unscheduleDrawable(d: Drawable, what: Runnable) {
+        MAIN_HANDLER.removeCallbacks(what)
+      }
+    }
+  }
 
   private fun RequestBuilder<*>.maybeImmediateSize() =
     this.overrideSize()?.let { ImmediateGlideSize(it) }
@@ -398,7 +422,15 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
 
   private fun updateDrawable(drawable: Drawable?) {
     this.drawable = drawable
+
+    this.drawable?.callback = null
+    this.drawable?.setVisible(false, false)
+    (this.drawable as? Animatable)?.stop()
+
     painter = drawable?.toPainter()
+    drawable?.callback = callback
+    drawable?.setVisible(true, true)
+    (drawable as? Animatable)?.start()
     drawablePositionAndSize = null
   }
 

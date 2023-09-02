@@ -115,7 +115,6 @@ dependencyResolutionManagement {
             library('dagger-android.support', 'com.google.dagger', 'dagger-android-support').versionRef('dagger')
             library('dagger-android.processor', 'com.google.dagger', 'dagger-android-processor').versionRef('dagger')
             library('dokka-gradle', 'org.jetbrains.dokka:dokka-gradle-plugin:1.7.10')
-            library('drawablepainter', 'com.google.accompanist:accompanist-drawablepainter:0.25.1')
             library('errorprone-annotations', 'com.google.errorprone', 'error_prone_annotations').versionRef('errorprone')
             library('errorprone-core', 'com.google.errorprone', 'error_prone_core').versionRef('errorprone')
             library('errorprone-gradle', 'net.ltgt.gradle:gradle-errorprone-plugin:2.0.2')
