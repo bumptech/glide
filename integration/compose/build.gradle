@@ -66,3 +66,28 @@ dependencies {
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+
+task cleanGoldensOnDevice(type: Exec) {
+    commandLine = ['adb', 'shell', 'rm -rf /storage/emulated/0/DCIM/compose_goldens']
+}
+
+task pullGoldens(type: Exec) {
+    commandLine = [
+            'bash',
+            '-c',
+            'adb shell \'find /storage/emulated/0/DCIM/compose_goldens -iname "*.png"\' ' +
+                    '| tr -d "\015" ' +
+                    '| while read line; do adb pull "$line" src/androidTest/assets/; done'
+    ]
+
+}
+
+afterEvaluate {
+    task rebuildGoldens(type: Exec) {
+        ignoreExitValue = true
+        dependsOn(
+                cleanGoldensOnDevice,
+                tasks.getByName("connectedDebugAndroidTest").finalizedBy(pullGoldens)
+        )
+    }
+}
