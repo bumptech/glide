@@ -89,16 +89,14 @@ internal fun Modifier.glideNode(
     requestListener,
     draw,
     transitionFactory,
-  ) then
-      clipToBounds() then
+  )
+    .clipToBounds()
+    .semantics {
       if (contentDescription != null) {
-        semantics {
-          this@semantics.contentDescription = contentDescription
-          role = Role.Image
-        }
-      } else {
-        Modifier
+        this@semantics.contentDescription = contentDescription
       }
+      role = Role.Image
+    }
 }
 
 @ExperimentalGlideComposeApi

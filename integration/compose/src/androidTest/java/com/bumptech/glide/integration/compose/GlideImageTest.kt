@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -16,6 +18,8 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -42,6 +46,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.test.compareToGolden
+import com.bumptech.glide.test.pxToDp
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -53,10 +58,11 @@ import org.junit.rules.TestName
 class GlideImageTest {
   private val context: Context = ApplicationProvider.getApplicationContext()
 
-  @get:Rule
-  val glideComposeRule = GlideComposeRule()
-  @get:Rule
+  @get:Rule(order = 1)
   val testName = TestName()
+
+  @get:Rule(order = 2)
+  val glideComposeRule = GlideComposeRule()
 
   @Test
   fun glideImage_noModifierSize_resourceDrawable_displaysDrawable() {
@@ -387,7 +393,7 @@ class GlideImageTest {
   @Test
   fun glideImage_withZeroSize_doesNotCrash() {
     glideComposeRule.setContent {
-     GlideImage(
+      GlideImage(
         model = android.R.drawable.star_big_on,
         contentDescription = null,
         modifier = Modifier.width(IntrinsicSize.Min),
@@ -416,6 +422,49 @@ class GlideImageTest {
     }
     glideComposeRule
       .onNodeWithContentDescription(description)
+      .captureToImage()
+      .compareToGolden(testName.methodName)
+  }
+
+  @Test
+  fun glideImage_withDrawBehind_drawsImageOnTopOfBackground() {
+    glideComposeRule.setContent {
+      GlideImage(
+        android.R.drawable.star_big_on,
+        "test",
+        Modifier
+          .size(100.pxToDp())
+          .drawBehind { drawRect(Color.Red) }) {
+        it.override(100)
+      }
+    }
+
+    glideComposeRule
+      .onNodeWithContentDescription("test")
+      .captureToImage()
+      .compareToGolden(testName.methodName)
+  }
+
+  // See #5272
+  @Test
+  fun glideImage_withPadding_appliesPaddingOnce() {
+    glideComposeRule.setContent {
+      GlideImage(
+        model = android.R.drawable.star_big_on,
+        contentDescription = "test",
+        modifier = Modifier
+          .size(400.pxToDp())
+          .aspectRatio(1f)
+          .drawBehind {
+            drawRect(Color.Blue)
+          }
+          .padding(80.pxToDp()),
+      )
+    }
+    glideComposeRule.waitForIdle()
+
+    glideComposeRule
+      .onNodeWithContentDescription("test")
       .captureToImage()
       .compareToGolden(testName.methodName)
   }

@@ -4,8 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.test.core.app.ApplicationProvider
 import java.io.BufferedOutputStream
 import java.io.File
@@ -17,6 +19,9 @@ import java.lang.IllegalStateException
 
 const val GENERATED_FILES_DIR = "compose_goldens"
 const val EXTENSION = "png"
+
+@Composable
+fun Int.pxToDp() = with(LocalDensity.current) { toDp() }
 
 fun ImageBitmap.compareToGolden(testName: String) {
   val bitmap = toBitmap()
