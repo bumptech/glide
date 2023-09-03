@@ -48,6 +48,9 @@ class GlideImageTest {
   @get:Rule
   val glideComposeRule = GlideComposeRule()
 
+  @get:Rule(order = 2)
+  val glideComposeRule = GlideComposeRule()
+
   @Test
   fun glideImage_noModifierSize_resourceDrawable_displaysDrawable() {
     val description = "test"
