@@ -3,6 +3,7 @@ package com.bumptech.glide.test
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Environment
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.ImageBitmap
@@ -19,6 +20,7 @@ import java.lang.IllegalStateException
 
 const val GENERATED_FILES_DIR = "compose_goldens"
 const val EXTENSION = "png"
+const val SEPARATOR = "_"
 
 @Composable
 fun Int.pxToDp() = with(LocalDensity.current) { toDp() }
@@ -68,12 +70,17 @@ private fun readExistingGolden(testName: String): Bitmap? {
   }
 }
 
-private fun testFileName(testName: String) = "$testName.$EXTENSION"
-
+private fun testFileName(testName: String) = "$testName$SEPARATOR${getDeviceString()}.$EXTENSION"
 private fun getTestFilesDir(): File {
   val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
   return File(dir, GENERATED_FILES_DIR)
 }
+
+private fun getDeviceString() =
+  "${ApplicationProvider.getApplicationContext<Context>()
+    .resources
+    .displayMetrics
+    .density}$SEPARATOR${Build.VERSION.SDK_INT}"
 
 private fun writeBitmap(bitmap: Bitmap, testName: String): String {
   val testFilesDir = getTestFilesDir()
