@@ -71,15 +71,11 @@ dependencyResolutionManagement {
             library('androidx-multidex', "androidx.multidex:multidex:2.0.1")
             library('autoservice', 'com.google.auto.service:auto-service:1.0-rc3')
             library('autoservice.annotations', 'com.google.auto.service:auto-service-annotations:1.0.1')
-            library('android-gradle', 'com.android.tools.build:gradle:7.3.0')
+            library('android-gradle', 'com.android.tools.build:gradle:8.1.0')
             library('androidx-cardview', 'androidx.cardview:cardview:1.0.0')
             library('androidx-core', 'androidx.core:core:1.6.0')
-            // 1.6.0 seems to introduce:
-            // The dependency contains Java 8 bytecode. Please enable desugaring by adding the following to build.gradle
-            // in the samples.
-            library('androidx-annotation', 'androidx.annotation:annotation:1.5.0')
-            // 1.4+ requires java8.
-            library('androidx-appcompat', 'androidx.appcompat:appcompat:1.3.1')
+            library('androidx-annotation', 'androidx.annotation:annotation:1.6.0')
+            library('androidx-appcompat', 'androidx.appcompat:appcompat:1.4.0')
             library('androidx-benchmark.gradle', 'androidx.benchmark', 'benchmark-gradle-plugin').versionRef('androidx-benchmark')
             library('androidx-benchmark.junit', 'androidx.benchmark', 'benchmark-junit4').versionRef('androidx-benchmark')
             library('androidx-core.ktx', 'androidx.core:core-ktx:1.8.0')

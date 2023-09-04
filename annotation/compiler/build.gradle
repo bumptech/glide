@@ -2,6 +2,11 @@ import proguard.gradle.ProGuardTask
 
 apply plugin: 'java'
 
+java {
+    sourceCompatibility JavaVersion.VERSION_1_7
+    targetCompatibility JavaVersion.VERSION_1_7
+}
+
 configurations {
     // adapted from https://android.googlesource.com/platform/frameworks/testing/+/976c423/espresso/espresso-lib/build.gradle
     // compileOnly dependencies will be repackaged, see rules in jarjar ant task below

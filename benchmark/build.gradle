@@ -7,11 +7,11 @@ android {
     namespace 'com.bumptech.glide.benchmark'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
-    buildToolsVersion "30.0.3"
+    buildToolsVersion "33.0.1"
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
