@@ -29,7 +29,7 @@ afterEvaluate {
 android.testOptions.unitTests.all { Test testTask ->
     // configure max heap size of the test JVM
     testTask.maxHeapSize = TEST_JVM_MEMORY_SIZE as String
-    if (JavaVersion.current() <= JavaVersion.VERSION_1_7) {
+    if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
         // Java HotSpot(TM) 64-Bit Server VM warning: ignoring option MaxPermSize=2048m; support was removed in 8.0
         testTask.jvmArgs "-XX:MaxPermSize=${TEST_JVM_MEMORY_SIZE}"
     }

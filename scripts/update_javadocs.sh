@@ -43,7 +43,7 @@ fi
 
 git checkout master
 GIT_COMMIT_SHA="$(git rev-parse HEAD)"
-./gradlew dokkaHtmlMultiModule
+./gradlew :dokkaHtmlMultiModule
 rm -rf $TEMP_DIR
 cp -r build/dokka/htmlMultiModule $TEMP_DIR
 
