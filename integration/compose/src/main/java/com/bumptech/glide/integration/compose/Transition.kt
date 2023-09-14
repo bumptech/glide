@@ -12,6 +12,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 /**
  * Transition between a given request's optional placeholder and the resource.
@@ -141,7 +143,9 @@ internal class CrossFadeImpl(
       animatable.animateTo(OPAQUE_ALPHA, animationSpec)
       invalidate()
     } finally {
-      animatable.snapTo(OPAQUE_ALPHA)
+      withContext(NonCancellable) {
+        animatable.snapTo(OPAQUE_ALPHA)
+      }
       invalidate()
     }
   }
