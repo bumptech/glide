@@ -126,7 +126,7 @@ public final class LruArrayPool implements ArrayPool {
   }
 
   private boolean isNoMoreThanHalfFull() {
-    return currentSize == 0 || (maxSize / currentSize >= 2);
+    return currentSize == 0 || maxSize / currentSize >= 2;
   }
 
   @Override
@@ -135,7 +135,7 @@ public final class LruArrayPool implements ArrayPool {
   }
 
   @Override
-  public synchronized void trimMemory(int level) {
+  public synchronized void trimMemory(int level){
     if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
       clearMemory();
     } else if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN

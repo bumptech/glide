@@ -355,7 +355,7 @@ public class GifHeaderParser {
         int b2 = ((int) block[2]) & MASK_INT_LOWEST_BYTE;
         header.loopCount = (b2 << 8) | b1;
       }
-    } while ((blockSize > 0) && !err());
+    } while (blockSize > 0 && !err());
   }
 
 

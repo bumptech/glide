@@ -30,8 +30,10 @@
         <property name="format" value="^\s*for \(.*?([^ ]:|:[^ ])"/>
         <property name="message" value="Space needed around ':' character."/>
     </module>
-
+    <module name="SuppressWarningsFilter" />
     <module name="TreeWalker">
+        <module name="SuppressWarningsHolder" />
+
         <!-- Checks for uncommented main() methods (debugging leftovers). -->
         <!-- Checks that long constants are defined with an upper ell. -->
         <!-- See http://checkstyle.sourceforge.net/config_misc.html#UpperEll -->

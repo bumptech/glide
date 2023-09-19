@@ -580,7 +580,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       int numBytesRead = 0;
       int lastReadResult = 0;
       while (numBytesRead < byteCount
-          && ((lastReadResult = is.read(buffer, numBytesRead, byteCount - numBytesRead)) != -1)) {
+          && (lastReadResult = is.read(buffer, numBytesRead, byteCount - numBytesRead)) != -1) {
         numBytesRead += lastReadResult;
       }
 
