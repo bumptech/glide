@@ -20,6 +20,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner 'androidx.benchmark.junit4.AndroidBenchmarkRunner'
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -33,6 +34,8 @@ android {
 }
 
 dependencies {
+    implementation libs.androidx.multidex
+
     androidTestImplementation libs.androidx.test.runner
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.junit
