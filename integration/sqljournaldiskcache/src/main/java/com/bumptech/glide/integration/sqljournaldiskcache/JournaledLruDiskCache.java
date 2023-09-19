@@ -120,6 +120,7 @@ final class JournaledLruDiskCache {
     return workThread.getLooper();
   }
 
+  @SuppressWarnings("checkstyle:UnnecessaryParentheses") // Readability
   private void openIfNotOpen() {
     if (!isOpen) {
       synchronized (this) {
