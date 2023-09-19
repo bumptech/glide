@@ -64,7 +64,7 @@ dependencyResolutionManagement {
             version('androidx-benchmark', '1.2.0-beta05')
             version('androidx-espresso', '3.5.1')
             // Newer versions depend on different kotlin versions causing duplicate class paths:
-            version('androidx-fragment', '1.4.1')
+            version('androidx-fragment', '1.6.1')
             version('ksp', '1.7.0-1.0.6')
 
             library('androidx-multidex', "androidx.multidex:multidex:2.0.1")
