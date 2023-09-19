@@ -23,6 +23,16 @@ android {
         targetSdk libs.versions.target.sdk.version.get() as int
         versionName VERSION_NAME as String
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
 }
 
 dependencies {

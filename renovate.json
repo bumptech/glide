@@ -8,10 +8,6 @@
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true,
       "automergeType": "branch"
-    },
-    {
-      "matchPackageNames": ["androidx.fragment:fragment"],
-      "allowedVersions": "1.4.1"
     }
   ]
 }

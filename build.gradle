@@ -122,6 +122,15 @@ subprojects { project ->
         }
     }
 
+    afterEvaluate {
+        if (project.plugins.hasPlugin("com.android.application")) {
+            project.dependencies {
+                // Hack around some version mismatches: https://stackoverflow.com/questions/75263047/duplicate-class-in-kotlin-android
+                implementation(platform(libs.kotlin.bom))
+            }
+        }
+    }
+
     tasks.withType(JavaCompile) {
         // gifencoder is a legacy project that has a ton of warnings and is basically never
         // modified, so we're not going to worry about cleaning it up.
