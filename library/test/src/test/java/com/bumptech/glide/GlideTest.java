@@ -27,7 +27,6 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.view.ViewGroup;
@@ -83,7 +82,6 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -98,7 +96,6 @@ import org.robolectric.shadow.api.Shadow;
     sdk = ROBOLECTRIC_SDK,
     shadows = {
       GlideTest.ShadowFileDescriptorContentResolver.class,
-      GlideTest.ShadowMediaMetadataRetriever.class,
     })
 @SuppressWarnings("unchecked")
 public class GlideTest {
@@ -861,18 +858,6 @@ public class GlideTest {
             "You must first register an AssetFileDescriptor for " + "uri: " + uri);
       }
       return URI_TO_FILE_DESCRIPTOR.get(uri);
-    }
-  }
-
-  @Implements(MediaMetadataRetriever.class)
-  public static class ShadowMediaMetadataRetriever {
-
-    @Implementation
-    @SuppressWarnings("unused")
-    public Bitmap getFrameAtTime() {
-      Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
-      Shadows.shadowOf(bitmap).appendDescription(" from MediaMetadataRetriever");
-      return bitmap;
     }
   }
 }
