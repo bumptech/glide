@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 checkstyle {
-    toolVersion = "6.6"
+    toolVersion = "6.19"
     configFile = new File(projectDir, 'checkstyle.xml')
 }
 
