@@ -1,15 +1,15 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.common.testing.EqualsTester;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(JUnit4.class)
+@RunWith(AndroidJUnit4.class)
 public class SizeConfigStrategyTest {
 
   @Mock private SizeConfigStrategy.KeyPool pool;
