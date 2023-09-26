@@ -145,6 +145,8 @@ public fun GlideImage(
           alpha,
           colorFilter,
           transition,
+          loadingPlaceholder = loading?.maybePainter(),
+          errorPlaceholder = failure?.maybePainter(),
         )
     )
   }
@@ -167,13 +169,10 @@ public interface GlideSubcompositionScope {
 
 @ExperimentalGlideComposeApi
 internal class GlideSubcompositionScopeImpl(
-  private val drawable: Drawable?,
+  maybePainter: Painter?,
   override val state: RequestState
 ) : GlideSubcompositionScope {
-
-  override val painter: Painter
-    get() = drawable?.toPainter() ?: ColorPainter(Color.Transparent)
-
+  override val painter: Painter = maybePainter ?: ColorPainter(Color.Transparent)
 }
 
 /**
@@ -266,7 +265,7 @@ public fun GlideSubcomposition(
     remember(model, requestManager, requestBuilderTransform) {
       mutableStateOf(RequestState.Loading)
     }
-  val drawable: MutableState<Drawable?> = remember(model, requestManager, requestBuilderTransform) {
+  val painter: MutableState<Painter?> = remember(model, requestManager, requestBuilderTransform) {
     mutableStateOf(null)
   }
 
@@ -274,11 +273,11 @@ public fun GlideSubcomposition(
     remember(model, requestManager, requestBuilderTransform) {
       StateTrackingListener(
         requestState,
-        drawable
+        painter
       )
     }
 
-  val scope = GlideSubcompositionScopeImpl(drawable.value, requestState.value)
+  val scope = GlideSubcompositionScopeImpl(painter.value, requestState.value)
 
   Box(
     modifier
@@ -295,12 +294,12 @@ public fun GlideSubcomposition(
 @ExperimentalGlideComposeApi
 private class StateTrackingListener(
   val state: MutableState<RequestState>,
-  val drawable: MutableState<Drawable?>
+  val painter: MutableState<Painter?>
 ) : RequestListener {
 
-  override fun onStateChanged(model: Any?, drawable: Drawable?, requestState: RequestState) {
+  override fun onStateChanged(model: Any?, painter: Painter?, requestState: RequestState) {
     state.value = requestState
-    this.drawable.value = drawable
+    this.painter.value = painter
   }
 }
 
@@ -311,15 +310,18 @@ private fun PreviewResourceOrDrawable(
   contentDescription: String?,
   modifier: Modifier,
 ) {
-  val drawable =
+  val painter =
     when (loading) {
-      is Placeholder.OfDrawable -> loading.drawable
-      is Placeholder.OfResourceId -> LocalContext.current.getDrawable(loading.resourceId)
+      is Placeholder.OfDrawable -> loading.drawable.toPainter()
+      is Placeholder.OfResourceId ->
+        LocalContext.current.getDrawable(loading.resourceId).toPainter()
+
+      is Placeholder.OfPainter -> loading.painter
       is Placeholder.OfComposable ->
         throw IllegalArgumentException("Composables should go through the production codepath")
     }
   Image(
-    painter = remember(drawable) { drawable.toPainter() },
+    painter = painter,
     modifier = modifier,
     contentDescription = contentDescription,
   )
@@ -347,6 +349,14 @@ public fun placeholder(drawable: Drawable?): Placeholder = Placeholder.OfDrawabl
 @ExperimentalGlideComposeApi
 public fun placeholder(@DrawableRes resourceId: Int): Placeholder =
   Placeholder.OfResourceId(resourceId)
+
+/**
+ * Used to specify a [Painter] to use in conjunction with [GlideImage]'s `loading` or `failure`
+ * parameters.
+ */
+@ExperimentalGlideComposeApi
+public fun placeholder(painter: Painter?): Placeholder =
+  Placeholder.OfPainter(painter ?: ColorPainter(Color.Transparent))
 
 /**
  * Used to specify a [Composable] function to use in conjunction with [GlideImage]'s `loading` or
@@ -380,6 +390,8 @@ public fun placeholder(composable: @Composable () -> Unit): Placeholder =
 public sealed class Placeholder {
   internal class OfDrawable(internal val drawable: Drawable?) : Placeholder()
   internal class OfResourceId(@DrawableRes internal val resourceId: Int) : Placeholder()
+
+  internal class OfPainter(internal val painter: Painter) : Placeholder()
   internal class OfComposable(internal val composable: @Composable () -> Unit) : Placeholder()
 
   internal fun isResourceOrDrawable() =
@@ -387,11 +399,18 @@ public sealed class Placeholder {
       is OfDrawable -> true
       is OfResourceId -> true
       is OfComposable -> false
+      is OfPainter -> false
     }
 
   internal fun maybeComposable(): (@Composable () -> Unit)? =
     when (this) {
       is OfComposable -> this.composable
+      else -> null
+    }
+
+  internal fun maybePainter() =
+    when (this) {
+      is OfPainter -> this.painter
       else -> null
     }
 

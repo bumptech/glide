@@ -10,10 +10,12 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.TypedValue
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.test.core.app.ApplicationProvider
 import com.bumptech.glide.integration.compose.DisplayedDrawableKey
+import com.bumptech.glide.integration.compose.DisplayedPainterKey
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.Size
 import kotlin.math.roundToInt
@@ -43,10 +45,10 @@ fun expectDisplayedDrawableSize(expectedSize: Size): SemanticsMatcher =
 fun expectDisplayedDrawable(expectedValue: Drawable?): SemanticsMatcher =
   expectDisplayedDrawable(expectedValue.bitmapOrThrow(), ::compareBitmaps) { it.bitmapOrThrow() }
 
-fun expectAnimatingDrawable(): SemanticsMatcher =
-  expectDisplayedDrawable(true) {
-    (it as Animatable).isRunning
-  }
+fun expectDisplayedPainter(expectedValue: Painter?): SemanticsMatcher =
+  expectStateValue(
+    DisplayedPainterKey, expectedValue, {first, second -> first == second}, {value -> value}
+  )
 
 fun expectNoDrawable(): SemanticsMatcher = expectDisplayedDrawable(null)
 

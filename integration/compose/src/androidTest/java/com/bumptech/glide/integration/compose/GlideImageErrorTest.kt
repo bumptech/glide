@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.core.app.ApplicationProvider
 import com.bumptech.glide.integration.compose.test.GlideComposeRule
 import com.bumptech.glide.integration.compose.test.expectDisplayedDrawable
+import com.bumptech.glide.integration.compose.test.expectDisplayedPainter
 import com.bumptech.glide.integration.compose.test.expectDisplayedResource
 import com.bumptech.glide.integration.compose.test.expectNoDrawable
 import org.junit.Rule
@@ -141,6 +142,25 @@ class GlideImageErrorTest {
     glideComposeRule
       .onNodeWithContentDescription(description)
       .assert(expectDisplayedResource(failureResourceId))
+  }
+
+  @Test
+  fun failure_setViaFailureParameterWithPainter_andRequestBuilderTransform_prefersFailurePainter() {
+    val description = "test"
+    val failurePainter = context.getDrawable(android.R.drawable.star_big_off).toPainter()
+    glideComposeRule.setContent {
+      GlideImage(
+        model = null,
+        contentDescription = description,
+        failure = placeholder(failurePainter),
+      ) {
+        it.error(android.R.drawable.btn_star)
+      }
+    }
+
+    glideComposeRule
+      .onNodeWithContentDescription(description)
+      .assert(expectDisplayedPainter(failurePainter))
   }
 
   @Test

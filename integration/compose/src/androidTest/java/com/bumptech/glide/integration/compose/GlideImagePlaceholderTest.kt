@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.core.app.ApplicationProvider
 import com.bumptech.glide.integration.compose.test.expectDisplayedDrawable
+import com.bumptech.glide.integration.compose.test.expectDisplayedPainter
 import com.bumptech.glide.integration.compose.test.expectDisplayedResource
 import com.bumptech.glide.integration.compose.test.expectNoDrawable
 import com.bumptech.glide.testutil.TearDownGlide
@@ -179,6 +180,27 @@ class GlideImagePlaceholderTest {
     composeRule
       .onNodeWithContentDescription(description)
       .assert(expectDisplayedDrawable(placeholderDrawable))
+  }
+
+  @Test
+  fun loading_setViaLoadingParameterWithPainter_andRequestBuilderTransform_prefersLoadingParameter() {
+    val description = "test"
+    val waitModel = waitModelLoaderRule.waitOn(android.R.drawable.star_big_on)
+    val placeholderDrawable = context.getDrawable(android.R.drawable.star_big_off)
+    val placeholderPainter = placeholderDrawable.toPainter()
+    composeRule.setContent {
+      GlideImage(
+        model = waitModel,
+        contentDescription = description,
+        loading = placeholder(placeholderPainter),
+      ) {
+        it.placeholder(android.R.drawable.btn_star)
+      }
+    }
+
+    composeRule
+      .onNodeWithContentDescription(description)
+      .assert(expectDisplayedPainter(placeholderPainter))
   }
 
   @Test
