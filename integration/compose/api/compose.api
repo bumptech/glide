@@ -19,6 +19,7 @@ public final class com/bumptech/glide/integration/compose/GlideImageKt {
 	public static final fun GlideSubcomposition (Ljava/lang/Object;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 	public static final fun placeholder (I)Lcom/bumptech/glide/integration/compose/Placeholder;
 	public static final fun placeholder (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/integration/compose/Placeholder;
+	public static final fun placeholder (Landroidx/compose/ui/graphics/painter/Painter;)Lcom/bumptech/glide/integration/compose/Placeholder;
 	public static final fun placeholder (Lkotlin/jvm/functions/Function2;)Lcom/bumptech/glide/integration/compose/Placeholder;
 }
 

@@ -65,7 +65,7 @@ import kotlin.math.roundToInt
 
 @ExperimentalGlideComposeApi
 internal interface RequestListener {
-  fun onStateChanged(model: Any?, drawable: Drawable?, requestState: RequestState)
+  fun onStateChanged(model: Any?, painter: Painter?, requestState: RequestState)
 }
 
 @ExperimentalGlideComposeApi
@@ -79,6 +79,8 @@ internal fun Modifier.glideNode(
   transitionFactory: Transition.Factory? = null,
   requestListener: RequestListener? = null,
   draw: Boolean? = null,
+  loadingPlaceholder: Painter? = null,
+  errorPlaceholder: Painter? = null,
 ): Modifier {
   return this then GlideNodeElement(
     requestBuilder,
@@ -89,6 +91,8 @@ internal fun Modifier.glideNode(
     requestListener,
     draw,
     transitionFactory,
+    loadingPlaceholder,
+    errorPlaceholder,
   )
     .clipToBounds()
     .semantics {
@@ -110,6 +114,8 @@ internal data class GlideNodeElement constructor(
   private val requestListener: RequestListener?,
   private val draw: Boolean?,
   private val transitionFactory: Transition.Factory?,
+  private val loadingPlaceholder: Painter?,
+  private val errorPlaceholder: Painter?,
 ) : ModifierNodeElement<GlideNode>() {
   override fun create(): GlideNode {
     val result = GlideNode()
@@ -127,6 +133,8 @@ internal data class GlideNodeElement constructor(
       requestListener,
       draw,
       transitionFactory,
+      loadingPlaceholder,
+      errorPlaceholder,
     )
   }
 
@@ -167,10 +175,12 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   private var requestListener: RequestListener? = null
 
   private var currentJob: Job? = null
-  private var painter: Painter? = null
+  private var primary: Primary? = null
+
+  private var loadingPlaceholder: Painter? = null
+  private var errorPlaceholder: Painter? = null
 
   // Only used for debugging
-  private var drawable: Drawable? = null
   private var state: RequestState = RequestState.Loading
   private var placeholder: Painter? = null
   private var isFirstResource = true
@@ -213,11 +223,18 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     requestListener: RequestListener?,
     draw: Boolean?,
     transitionFactory: Transition.Factory?,
+    loadingPlaceholder: Painter?,
+    errorPlaceholder: Painter?,
   ) {
     // Other attributes can be refreshed by re-drawing rather than restarting a request
     val restartLoad =
       !this::requestBuilder.isInitialized ||
           requestBuilder != this.requestBuilder
+          // TODO(sam): Avoid restarting the entire load if we just change the placeholder. State
+          // management makes this complicated and this might not be a common use case, so we
+          // haven't yet done so.
+          || loadingPlaceholder != this.loadingPlaceholder
+          || errorPlaceholder != this.errorPlaceholder
 
     this.requestBuilder = requestBuilder
     this.contentScale = contentScale
@@ -227,6 +244,8 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     this.requestListener = requestListener
     this.draw = draw ?: true
     this.transitionFactory = transitionFactory ?: DoNotTransition.Factory
+    this.loadingPlaceholder = loadingPlaceholder
+    this.errorPlaceholder = errorPlaceholder
     this.resolvableGlideSize =
       requestBuilder.maybeImmediateSize()
         ?: inferredGlideSize?.let { ImmediateGlideSize(it) }
@@ -234,7 +253,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
 
     if (restartLoad) {
       clear()
-      updateDrawable(null)
+      updatePrimary(null)
 
       // If we're not attached, we'll be measured when we eventually are attached.
       if (isAttached) {
@@ -321,7 +340,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
         }
       }
 
-      painter?.let { painter ->
+      primary?.painter?.let { painter ->
         drawContext.canvas.withSave {
           drawablePositionAndSize = drawOne(painter, drawablePositionAndSize) { size ->
             transition.drawCurrent.invoke(this, painter, size, alpha, colorFilter)
@@ -347,7 +366,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   override fun onReset() {
     super.onReset()
     clear()
-    updateDrawable(null)
+    updatePrimary(null)
   }
 
   @OptIn(ExperimentGlideFlows::class)
@@ -388,27 +407,37 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
         placeholderPositionAndSize = null
 
         requestBuilder.flowResolvable(resolvableGlideSize).collect {
-          val (state, drawable) =
+          val (state, primary) =
             when (it) {
               is Resource -> {
                 maybeAnimate(it)
-                Pair(RequestState.Success(it.dataSource), it.resource)
+                Pair(RequestState.Success(it.dataSource), Primary.PrimaryDrawable(it.resource))
               }
 
               is Placeholder -> {
-                val drawable = it.placeholder
                 val state = when (it.status) {
                   Status.RUNNING, Status.CLEARED -> RequestState.Loading
                   Status.FAILED -> RequestState.Failure
                   Status.SUCCEEDED -> throw IllegalStateException()
                 }
-                placeholder = drawable?.toPainter()
+                // Prefer the override Painters if set.
+                val painter = when (state) {
+                  is RequestState.Loading -> loadingPlaceholder
+                  is RequestState.Failure -> errorPlaceholder
+                  is RequestState.Success -> throw IllegalStateException()
+                }
+                val primary = if (painter != null) {
+                  Primary.PrimaryPainter(painter)
+                } else {
+                  Primary.PrimaryDrawable(it.placeholder)
+                }
+                placeholder = primary.painter
                 placeholderPositionAndSize = null
-                Pair(state, drawable)
+                Pair(state, primary)
               }
             }
-          updateDrawable(drawable)
-          requestListener?.onStateChanged(requestBuilder.internalModel, drawable, state)
+          updatePrimary(primary)
+          requestListener?.onStateChanged(requestBuilder.internalModel, primary.painter, state)
           this@GlideNode.state = state
           if (hasFixedSize) {
             invalidateDraw()
@@ -419,17 +448,40 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
       }
     }
 
-  private fun updateDrawable(drawable: Drawable?) {
-    this.drawable = drawable
+  private sealed class Primary {
+    class PrimaryDrawable(override val drawable: Drawable?) : Primary() {
+      override val painter = drawable?.toPainter()
+      override fun onUnset() {
+        drawable?.callback = null
+        drawable?.setVisible(false, false)
+        (drawable as? Animatable)?.stop()
+      }
 
-    this.drawable?.callback = null
-    this.drawable?.setVisible(false, false)
-    (this.drawable as? Animatable)?.stop()
+      override fun onSet(callback: Drawable.Callback) {
+        drawable?.callback = callback
+        drawable?.setVisible(true, true)
+        (drawable as? Animatable)?.start()
+      }
+    }
 
-    painter = drawable?.toPainter()
-    drawable?.callback = callback
-    drawable?.setVisible(true, true)
-    (drawable as? Animatable)?.start()
+    class PrimaryPainter(override val painter: Painter?) : Primary() {
+      override val drawable = null
+      override fun onUnset() {}
+      override fun onSet(callback: Drawable.Callback) {}
+    }
+
+    abstract val painter: Painter?
+    abstract val drawable: Drawable?
+
+    abstract fun onUnset()
+
+    abstract fun onSet(callback: Drawable.Callback)
+  }
+
+  private fun updatePrimary(newPrimary: Primary?) {
+    this.primary?.onUnset()
+    this.primary = newPrimary
+    newPrimary?.onSet(callback)
     drawablePositionAndSize = null
   }
 
@@ -448,7 +500,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     currentJob?.cancel()
     currentJob = null
     state = RequestState.Loading
-    updateDrawable(null)
+    updatePrimary(null)
   }
 
   @OptIn(InternalGlideApi::class)
@@ -484,7 +536,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
       )
     }
 
-    val intrinsicSize = painter?.intrinsicSize ?: return constraints
+    val intrinsicSize = primary?.painter?.intrinsicSize ?: return constraints
 
     val intrinsicWidth =
       if (constraints.hasFixedWidth) {
@@ -509,8 +561,8 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
 
     val srcSize = Size(intrinsicWidth.toFloat(), intrinsicHeight.toFloat())
     val scaleFactor = contentScale.computeScaleFactor(
-        srcSize, Size(constrainedWidth.toFloat(), constrainedHeight.toFloat())
-      )
+      srcSize, Size(constrainedWidth.toFloat(), constrainedHeight.toFloat())
+    )
     if (scaleFactor == ScaleFactor.Unspecified) {
       return constraints
     }
@@ -522,7 +574,8 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   }
 
   override fun SemanticsPropertyReceiver.applySemantics() {
-    displayedDrawable = { drawable }
+    displayedDrawable = { primary?.drawable }
+    displayedPainter = { primary?.painter }
   }
 
   override fun equals(other: Any?): Boolean {
@@ -535,6 +588,8 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
           && draw == other.draw
           && transitionFactory == other.transitionFactory
           && alpha == other.alpha
+          && loadingPlaceholder == other.loadingPlaceholder
+          && errorPlaceholder == other.errorPlaceholder
     }
     return false
   }
@@ -548,6 +603,8 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     result = 31 * result + requestListener.hashCode()
     result = 31 * result + transitionFactory.hashCode()
     result = 31 * result + alpha.hashCode()
+    result = 31 * result + loadingPlaceholder.hashCode()
+    result = 31 * result + errorPlaceholder.hashCode()
     return result
   }
 }
@@ -555,3 +612,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
 internal val DisplayedDrawableKey =
   SemanticsPropertyKey<() -> Drawable?>("DisplayedDrawable")
 internal var SemanticsPropertyReceiver.displayedDrawable by DisplayedDrawableKey
+
+internal val DisplayedPainterKey =
+  SemanticsPropertyKey<() -> Painter?>("DisplayedPainter")
+internal var SemanticsPropertyReceiver.displayedPainter by DisplayedPainterKey
