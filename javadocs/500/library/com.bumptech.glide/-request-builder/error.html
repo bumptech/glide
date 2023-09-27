@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>error</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:dokkaHtmlPartial/main">main</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageids="Glide::com.bumptech.glide/RequestBuilder/error/#com.bumptech.glide.RequestBuilder<TranscodeType>/PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide</a><span class="delimiter">/</span><a href="index.html">RequestBuilder</a><span class="delimiter">/</span><span class="current">error</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>error</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">errorBuilder<span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><p class="paragraph">Sets a <a href="index.html">RequestBuilder</a> that is built and run if the load started by this  fails. </p><p class="paragraph">If this <a href="index.html">RequestBuilder</a> uses a thumbnail that succeeds the given error  will be started anyway if the non-thumbnail request fails. </p><p class="paragraph">Recursive calls to this method as well as calls to <a href="thumbnail.html">thumbnail</a> and <a href="thumbnail.html">thumbnail</a> are supported for the given error <a href="index.html">RequestBuilder</a>. </p><p class="paragraph">Unlike <a href="thumbnail.html">thumbnail</a> and <a href="thumbnail.html">thumbnail</a>, no options from this primary <a href="index.html">RequestBuilder</a> are propagated to the given error <a href="index.html">RequestBuilder</a>. Options like priority, override widths and heights and transitions must be applied independently to the error builder. </p><p class="paragraph">The given <a href="index.html">RequestBuilder</a> will start and potentially override a fallback drawable if it's set on this <a href="index.html">RequestBuilder</a> via <a href="../../com.bumptech.glide.request/-base-request-options/fallback.html">fallback</a> or <a href="../../com.bumptech.glide.request/-base-request-options/fallback.html">fallback</a>.</p><span class="kdoc-tag"><h4 class="">Return</h4><p class="paragraph">This <a href="index.html">RequestBuilder</a>.</p></span><hr><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><p class="paragraph">Identical to calling <a href="error.html">error</a> where the <code class="lang-kotlin">RequestBuilder</code> is the result of calling <a href="clone.html">clone</a> and removing any existing thumbnail and error <code class="lang-kotlin">
+RequestBuilders</code>. </p><p class="paragraph">Other than thumbnail and error <code class="lang-kotlin">RequestBuilder</code>s, which are removed, all other options are retained from the primary request. However, <strong>order matters!</strong> Any options applied after this method is called will not be applied to the error <code class="lang-kotlin">RequestBuilder</code>. </p><p class="paragraph">WARNING: Calling this method with a <code class="lang-kotlin">model</code> whose type does not match the type of the model passed to <code class="lang-kotlin">load()</code> may be dangerous! Any options that were applied by the various type specific <code class="lang-kotlin">load()</code> methods, like <a href="load.html">load</a> will be copied to the error request here even if the <code class="lang-kotlin">model</code> you pass to this method doesn't match. Similary, options that would be normally applied by type specific <code class="lang-kotlin">load()</code> methods will not be applied to this request. If this behavior is confusing or unexpected, use <a href="error.html">error</a> instead.</p></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

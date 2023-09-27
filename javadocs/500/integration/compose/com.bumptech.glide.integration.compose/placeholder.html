@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>placeholder</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":integration:compose:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageids="compose::com.bumptech.glide.integration.compose//placeholder/#android.graphics.drawable.Drawable?/PointingToDeclaration//-1291154055">
+  <div class="breadcrumbs"><a href="../index.html">compose</a><span class="delimiter">/</span><a href="index.html">com.bumptech.glide.integration.compose</a><span class="delimiter">/</span><span class="current">placeholder</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>placeholder</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":integration:compose:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="placeholder.html"><span class="token function">placeholder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">drawable<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/graphics/drawable/Drawable.html">Drawable</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-placeholder/index.html">Placeholder</a></div><p class="paragraph">Used to specify a <a href="https://developer.android.com/reference/kotlin/android/graphics/drawable/Drawable.html">Drawable</a> to use in conjunction with <a href="-glide-image.html">GlideImage</a>'s <code class="lang-kotlin">loading</code> or <code class="lang-kotlin">failure</code> parameters.</p><p class="paragraph">Ideally <a href="placeholder.html">drawable</a> is non-null, but because <a href="https://developer.android.com/reference/kotlin/android/content/Context.html#getdrawable">android.content.Context.getDrawable</a> can return null, we allow it here. <code class="lang-kotlin">placeholder(null)</code> has the same override behavior as if a non-null <code class="lang-kotlin">Drawable</code> were provided.</p><hr><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="placeholder.html"><span class="token function">placeholder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/DrawableRes.html"><span class="token annotation builtin">DrawableRes</span></a>&nbsp;</span>resourceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-placeholder/index.html">Placeholder</a></div><p class="paragraph">Used to specify a resource id to use in conjunction with <a href="-glide-image.html">GlideImage</a>'s <code class="lang-kotlin">loading</code> or <code class="lang-kotlin">failure</code> parameters.</p><p class="paragraph">In addition to being slightly simpler than manually fetching a <a href="https://developer.android.com/reference/kotlin/android/graphics/drawable/Drawable.html">Drawable</a> and passing it to <a href="placeholder.html">placeholder</a>, this method can be more efficient because the <a href="https://developer.android.com/reference/kotlin/android/graphics/drawable/Drawable.html">Drawable</a> will only be loaded when needed.</p><hr><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="placeholder.html"><span class="token function">placeholder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">painter<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/painter/Painter.html">Painter</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-placeholder/index.html">Placeholder</a></div><p class="paragraph">Used to specify a <a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/painter/Painter.html">Painter</a> to use in conjunction with <a href="-glide-image.html">GlideImage</a>'s <code class="lang-kotlin">loading</code> or <code class="lang-kotlin">failure</code> parameters.</p><hr><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="placeholder.html"><span class="token function"><strike>placeholder</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">composable<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-placeholder/index.html">Placeholder</a></div><div class="deprecation-content"><h3 class="">Deprecated</h3><p class="paragraph">Using this method forces recomposition when the image load state changes. If you require this behavior use GlideSubcomposition instead</p></div><p class="paragraph">Used to specify a <a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html">Composable</a> function to use in conjunction with <a href="-glide-image.html">GlideImage</a>'s <code class="lang-kotlin">loading</code> or <code class="lang-kotlin">failure</code> parameter.</p><p class="paragraph">Providing a nested <a href="-glide-image.html">GlideImage</a> is not recommended. Use <a href="../../../library/com.bumptech.glide/-request-builder/thumbnail.html">RequestBuilder.thumbnail</a> or <a href="../../../library/com.bumptech.glide/-request-builder/error.html">RequestBuilder.error</a> as an alternative.</p></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

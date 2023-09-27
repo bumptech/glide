@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>submitAndExecute</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":integration:concurrent:dokkaHtmlPartial/main">main</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageids="concurrent::com.bumptech.glide.integration.concurrent/GlideFutures/submitAndExecute/#RequestManager#RequestBuilder<T>#com.bumptech.glide.integration.concurrent.GlideFutures.ResourceConsumer<T>#java.util.concurrent.Executor/PointingToDeclaration//823497239">
+  <div class="breadcrumbs"><a href="../../index.html">concurrent</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.integration.concurrent</a><span class="delimiter">/</span><a href="index.html">GlideFutures</a><span class="delimiter">/</span><span class="current">submitAndExecute</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>submit</span><wbr><span>And</span><wbr><span><span>Execute</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":integration:concurrent:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="submit-and-execute.html">T</a><span class="token operator">&gt; </span><a href="submit-and-execute.html"><span class="token function">submitAndExecute</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestManager<span class="token operator">: </span>RequestManager<span class="token punctuation">, </span></span><span class="parameter ">requestBuilder<span class="token operator">: </span>RequestBuilder&lt;T&gt;<span class="token punctuation">, </span></span><span class="parameter ">action<span class="token operator">: </span><a href="-resource-consumer/index.html">GlideFutures.ResourceConsumer</a><span class="token operator">&lt;</span><a href="submit-and-execute.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">executor<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/concurrent/Executor.html">Executor</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span>ListenableFuture&lt;Void&gt;</div><p class="paragraph">Submits the provided request, performs the provided <code class="lang-kotlin">action</code> and returns a  that can be used to cancel the request or monitor its status. </p><p class="paragraph">Cancellation is best effort and may result in some resources not being returned back to Glide's pool. In particular, if the request is cancelled after the resource is loaded by Glide, but before <code class="lang-kotlin">action</code> is run on <code class="lang-kotlin">executor</code>, the resource will not be returned. We have the unfortunate choice between unsafely returning resources to the pool immediately when cancel is called while they may still be in use via  or occasionally failing to return resources to the pool. Because failing to return resources to the pool is inefficient, but safe, that's the route we've chosen. A more sophisticated implementation may allow us to avoid the resource inefficiency. </p><p class="paragraph">If you do not need to interact with resource, use <a href="preload.html">preload</a>. <code class="lang-kotlin">preload</code> is more efficient because it knows that the resource is never used and can always clear the resource immediately on cancellation, unlike this method. </p><p class="paragraph">An example usage: </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">
+  ListenableFuture&lt;Void&gt; future =
+    submitAndExecute(
+      requestManager,
+      requestBuilder,
+      (bitmap) -&gt; doSomethingWithBitmap(bitmap),
+      backgroundExecutor);
+;
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":integration:concurrent:dokkaHtmlPartial/main" data-filterable-set=":integration:concurrent:dokkaHtmlPartial/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>&lt;T&gt;</span></span></u></div></span></div><div><div class="title"><p class="paragraph">The type of resource that will be loaded (Bitmap, Drawable, etc).</p></div></div></div></div></div></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>addListener</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:dokkaHtmlPartial/main">main</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageids="Glide::com.bumptech.glide/RequestBuilder/addListener/#com.bumptech.glide.request.RequestListener<TranscodeType>/PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide</a><span class="delimiter">/</span><a href="index.html">RequestBuilder</a><span class="delimiter">/</span><span class="current">addListener</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>add</span><wbr><span><span>Listener</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="add-listener.html"><span class="token function">addListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestListener<span class="token operator">: </span><a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><p class="paragraph">Adds a <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> to the list that will be called in the order they were added when the request ends. </p><p class="paragraph">Multiple calls to this method append additional listeners. Previous listeners are not removed. If you want to replace any previously added listeners, use <a href="listener.html">listener</a>. </p><p class="paragraph">Listeners track the state of the request started by this particular <code class="lang-kotlin">builder</code>. When used with the thumbnail APIs (<a href="thumbnail.html">thumbnail</a>) this can start to seem confusing because multiple requests are running and each may succeed or fail, independent of each other. As a rule, Glide does not add <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a>s to thumbnail requests automatically. That means that <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a>s track the state of exactly one request in the chain. For example, if you start a primary request with a single nested thumbnail and you add a <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> only to the primary request, then the <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> will only be notified when the primary request succeeds or fails. If the thumbnail succeeds, but the primary request fails, the <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> added to the primary request will still be called with <a href="../../com.bumptech.glide.request/-request-listener/on-load-failed.html">onLoadFailed</a>. In the same scenario, the <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> added only to the primary request will not have <a href="../../com.bumptech.glide.request/-request-listener/on-resource-ready.html">onResourceReady</a> called when the thumbnail request finishes successfully. Similarly, if you add a <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> only to a thumbnail request, but not the primary request, that <code class="lang-kotlin">
+listener</code> will only be called for changes related to the thumbnail request. If the thumbnail request fails, the <code class="lang-kotlin">listener</code> added to the thumbnail request will be immediately called via <a href="../../com.bumptech.glide.request/-request-listener/on-load-failed.html">onLoadFailed</a>, even though the primary request may eventually succeed. It is perfectly possible to add a  to both the primary and a thumbnail request. If you do so, the  will be called independently for each request when it finishes. Keep in mind that if any parent request finishes before its thumbnail request(s), it will attempt to cancel those requests. As a result there's no guarantee that a <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> added to a thumbnail request will actually be called with either success or failure. These same patterns hold for arbitrarily nested thumbnails. The <code class="lang-kotlin">listener</code> is only called for the requests it is added to and may not be called for every thumbnail request if those requests are cancelled due to the completion of a parent request. </p><p class="paragraph">The one exception to the rules about thumbnails is <a href="thumbnail.html">thumbnail</a>. In this case we appear to be passing <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a>s added to the parent request to the generated thumbnail requests. To try to reduce confusion, the <a href="thumbnail.html">thumbnail</a> method has been deprecated. It can be easily replicated using <a href="thumbnail.html">thumbnail</a> and <a href="../../com.bumptech.glide.request/-base-request-options/size-multiplier.html">sizeMultiplier</a>. </p><p class="paragraph">Often in UIs it's desirable to try to track the overall status of a request, including the thumbnails. For example, you might want to load an image, start an animation if the asynchronous image load succeeds and perform some fallback action if it fails. If you're using a single primary request, <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> will work for this. However, if you then decide to try to make things more performant by adding a thumbnail (or multiple thumbnails), <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> is awkward because either you only add it to the main request and it's not called when the thumbnails complete (which defeats the purpose) or it's called for every request and it's hard to keep track of when the overall request has failed. A better option than using <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> to track the state of the UI then is to use <a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a> instead. <a href="../../com.bumptech.glide.request.target/-target/on-resource-ready.html">onResourceReady</a> will be called when any thumbnail finishes, which you can use to trigger your animation starting. <a href="../../com.bumptech.glide.request.target/-target/on-load-failed.html">onLoadFailed</a> will only be called if every request in the chain, including the primary request, fails, which you can use to trigger your fallback behavior. Be sure to pick an appropriate <a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a> subclass when possible, like  or  when loading into ImageView or <a href="../../com.bumptech.glide.request.target/-custom-target/index.html">com.bumptech.glide.request.target.CustomTarget</a> when using custom rendering. Don't forget to call <code class="lang-kotlin">super()</code> in the <code class="lang-kotlin">ImageViewTarget</code>s. </p><p class="paragraph">It's best to create a single instance of an exception handler per type of request (usually activity/fragment) rather than pass one in per request to avoid some redundant object allocation.</p><span class="kdoc-tag"><h4 class="">Return</h4><p class="paragraph">This request builder.</p></span><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>request</span><wbr><span><span>Listener</span></span></u></div></span></div><div><div class="title"><p class="paragraph">The request listener to use. If <code class="lang-kotlin">null</code>, this method is a noop.</p></div></div></div></div></div></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

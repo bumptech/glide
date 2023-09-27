@@ -1,0 +1,222 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Downsampler</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:dokkaHtmlPartial/main">main</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="Glide::com.bumptech.glide.load.resource.bitmap/Downsampler///PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.load.resource.bitmap</a><span class="delimiter">/</span><span class="current">Downsampler</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Downsampler</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">Downsampler</a></div><p class="paragraph">Downsamples, decodes, and rotates images according to their exif orientation using .</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="-2112497539%2FConstructors%2F-954213597" anchor-label="Downsampler" id="-2112497539%2FConstructors%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-downsampler.html"><span><span>Downsampler</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2112497539%2FConstructors%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parsers<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/List.html">List</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.load/-image-header-parser/index.html">ImageHeaderParser</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">displayMetrics<span class="token operator">: </span>DisplayMetrics<span class="token punctuation">, </span></span><span class="parameter ">bitmapPool<span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine.bitmap_recycle/-bitmap-pool/index.html">BitmapPool</a><span class="token punctuation">, </span></span><span class="parameter ">byteArrayPool<span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine.bitmap_recycle/-array-pool/index.html">ArrayPool</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="1971825251%2FClasslikes%2F-954213597" anchor-label="DecodeCallbacks" id="1971825251%2FClasslikes%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-decode-callbacks/index.html"><span>Decode</span><wbr><span><span>Callbacks</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1971825251%2FClasslikes%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-decode-callbacks/index.html">DecodeCallbacks</a></div><div class="brief ">Callbacks for key points during decodes.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="1365926925%2FProperties%2F-954213597" anchor-label="ALLOW_HARDWARE_CONFIG" id="1365926925%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-a-l-l-o-w_-h-a-r-d-w-a-r-e_-c-o-n-f-i-g.html"><span><span>ALLOW_HARDWARE_CONFIG</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1365926925%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-a-l-l-o-w_-h-a-r-d-w-a-r-e_-c-o-n-f-i-g.html">ALLOW_HARDWARE_CONFIG</a><span class="token operator">: </span><a href="../../com.bumptech.glide.load/-option/index.html">Option</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Boolean.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief ">Indicates that it's safe or unsafe to decode Bitmaps with HARDWARE.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1040065448%2FProperties%2F-954213597" anchor-label="DECODE_FORMAT" id="1040065448%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-e-c-o-d-e_-f-o-r-m-a-t.html"><span><span>DECODE_FORMAT</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1040065448%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-d-e-c-o-d-e_-f-o-r-m-a-t.html">DECODE_FORMAT</a><span class="token operator">: </span><a href="../../com.bumptech.glide.load/-option/index.html">Option</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.load/-decode-format/index.html">DecodeFormat</a><span class="token operator">&gt;</span></div><div class="brief ">Indicates the <a href="../../com.bumptech.glide.load/-decode-format/index.html">com.bumptech.glide.load.DecodeFormat</a> that will be used in conjunction with the image format to determine the android.graphics.Bitmap.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="506785034%2FProperties%2F-954213597" anchor-label="DOWNSAMPLE_STRATEGY" id="506785034%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-o-w-n-s-a-m-p-l-e_-s-t-r-a-t-e-g-y.html"><span><span>DOWNSAMPLE_STRATEGY</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="506785034%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-d-o-w-n-s-a-m-p-l-e_-s-t-r-a-t-e-g-y.html"><strike>DOWNSAMPLE_STRATEGY</strike></a><span class="token operator">: </span><a href="../../com.bumptech.glide.load/-option/index.html">Option</a><span class="token operator">&lt;</span><a href="../-downsample-strategy/index.html">DownsampleStrategy</a><span class="token operator">&gt;</span></div><div class="brief ">Indicates the <a href="../-downsample-strategy/index.html">com.bumptech.glide.load.resource.bitmap.DownsampleStrategy</a> option that will be used to calculate the sample size to use to downsample an image given the original and target dimensions of the image.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1369611110%2FProperties%2F-954213597" anchor-label="FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS" id="1369611110%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-f-i-x_-b-i-t-m-a-p_-s-i-z-e_-t-o_-r-e-q-u-e-s-t-e-d_-d-i-m-e-n-s-i-o-n-s.html"><span><span>FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1369611110%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-f-i-x_-b-i-t-m-a-p_-s-i-z-e_-t-o_-r-e-q-u-e-s-t-e-d_-d-i-m-e-n-s-i-o-n-s.html">FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS</a><span class="token operator">: </span><a href="../../com.bumptech.glide.load/-option/index.html">Option</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Boolean.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief ">Ensure that the size of the bitmap is fixed to the requested width and height of the resource from the caller.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1194699132%2FProperties%2F-954213597" anchor-label="PREFERRED_COLOR_SPACE" id="-1194699132%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-p-r-e-f-e-r-r-e-d_-c-o-l-o-r_-s-p-a-c-e.html"><span><span>PREFERRED_COLOR_SPACE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1194699132%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-p-r-e-f-e-r-r-e-d_-c-o-l-o-r_-s-p-a-c-e.html">PREFERRED_COLOR_SPACE</a><span class="token operator">: </span><a href="../../com.bumptech.glide.load/-option/index.html">Option</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.load/-preferred-color-space/index.html">PreferredColorSpace</a><span class="token operator">&gt;</span></div><div class="brief ">Sets the <a href="../../com.bumptech.glide.load/-preferred-color-space/index.html">PreferredColorSpace</a> that will be used along with the version of Android and color space of the requested image to determine the final color space used to decode the image.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1743271876%2FFunctions%2F-954213597" anchor-label="decode" id="-1743271876%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="decode.html"><span><span>decode</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1743271876%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="decode.html"><span class="token function">decode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parcelFileDescriptor<span class="token operator">: </span>ParcelFileDescriptor<span class="token punctuation">, </span></span><span class="parameter ">outWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">outHeight<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">options<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-options/index.html">Options</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine/-resource/index.html">Resource</a><span class="token operator">&lt;</span>Bitmap<span class="token operator">&gt;</span></div><br><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="decode.html"><span class="token function">decode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">is<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/InputStream.html">InputStream</a><span class="token punctuation">, </span></span><span class="parameter ">outWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">outHeight<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">options<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-options/index.html">Options</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine/-resource/index.html">Resource</a><span class="token operator">&lt;</span>Bitmap<span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="decode.html"><span class="token function">decode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">is<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/InputStream.html">InputStream</a><span class="token punctuation">, </span></span><span class="parameter ">requestedWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">requestedHeight<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">options<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-options/index.html">Options</a><span class="token punctuation">, </span></span><span class="parameter ">callbacks<span class="token operator">: </span><a href="-decode-callbacks/index.html">Downsampler.DecodeCallbacks</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine/-resource/index.html">Resource</a><span class="token operator">&lt;</span>Bitmap<span class="token operator">&gt;</span></div><div class="brief ">Returns a Bitmap decoded from the given <a href="https://developer.android.com/reference/kotlin/java/io/InputStream.html">InputStream</a> that is rotated to match any EXIF data present in the stream and that is downsampled according to the given dimensions and any provided <a href="../-downsample-strategy/index.html">com.bumptech.glide.load.resource.bitmap.DownsampleStrategy</a> option.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="decode.html"><span class="token function">decode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">buffer<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/nio/ByteBuffer.html">ByteBuffer</a><span class="token punctuation">, </span></span><span class="parameter ">requestedWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">requestedHeight<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">options<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-options/index.html">Options</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine/-resource/index.html">Resource</a><span class="token operator">&lt;</span>Bitmap<span class="token operator">&gt;</span></div><div class="brief ">Identical to <a href="decode.html">decode</a>, except that it accepts a  in place of an <a href="https://developer.android.com/reference/kotlin/java/io/InputStream.html">InputStream</a>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-542195759%2FFunctions%2F-954213597" anchor-label="handles" id="-542195759%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="handles.html"><span><span>handles</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-542195759%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="handles.html"><span class="token function">handles</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">source<span class="token operator">: </span>ParcelFileDescriptor</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="handles.html"><span class="token function">handles</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">is<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/InputStream.html">InputStream</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="handles.html"><span class="token function">handles</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">byteBuffer<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/nio/ByteBuffer.html">ByteBuffer</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

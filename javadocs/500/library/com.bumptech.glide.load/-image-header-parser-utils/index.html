@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ImageHeaderParserUtils</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:dokkaHtmlPartial/main">main</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="Glide::com.bumptech.glide.load/ImageHeaderParserUtils///PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.load</a><span class="delimiter">/</span><span class="current">ImageHeaderParserUtils</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Image</span><wbr><span>Header</span><wbr><span>Parser</span><wbr><span><span>Utils</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">ImageHeaderParserUtils</a></div><p class="paragraph">Utilities for the ImageHeaderParser.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="1857427550%2FFunctions%2F-954213597" anchor-label="getOrientation" id="1857427550%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-orientation.html"><span>get</span><wbr><span><span>Orientation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1857427550%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-orientation.html"><span class="token function">getOrientation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parsers<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/List.html">List</a><span class="token operator">&lt;</span><a href="../-image-header-parser/index.html">ImageHeaderParser</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">parcelFileDescriptorRewinder<span class="token operator">: </span><a href="../../com.bumptech.glide.load.data/-parcel-file-descriptor-rewinder/index.html">ParcelFileDescriptorRewinder</a><span class="token punctuation">, </span></span><span class="parameter ">byteArrayPool<span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine.bitmap_recycle/-array-pool/index.html">ArrayPool</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div><br><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-orientation.html"><span class="token function">getOrientation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parsers<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/List.html">List</a><span class="token operator">&lt;</span><a href="../-image-header-parser/index.html">ImageHeaderParser</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">is<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/InputStream.html">InputStream</a><span class="token punctuation">, </span></span><span class="parameter ">byteArrayPool<span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine.bitmap_recycle/-array-pool/index.html">ArrayPool</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div><div class="brief ">Returns the orientation for the given InputStream.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-orientation.html"><span class="token function">getOrientation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parsers<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/List.html">List</a><span class="token operator">&lt;</span><a href="../-image-header-parser/index.html">ImageHeaderParser</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">buffer<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/nio/ByteBuffer.html">ByteBuffer</a><span class="token punctuation">, </span></span><span class="parameter ">arrayPool<span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine.bitmap_recycle/-array-pool/index.html">ArrayPool</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div><div class="brief ">Returns the result from the first of <code class="lang-kotlin">parsers</code> that returns something other than <a href="../-image-header-parser/-u-n-k-n-o-w-n_-o-r-i-e-n-t-a-t-i-o-n.html">UNKNOWN_ORIENTATION</a>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-987857439%2FFunctions%2F-954213597" anchor-label="getType" id="-987857439%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-type.html"><span>get</span><wbr><span><span>Type</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-987857439%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-type.html"><span class="token function">getType</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parsers<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/List.html">List</a><span class="token operator">&lt;</span><a href="../-image-header-parser/index.html">ImageHeaderParser</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">buffer<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/nio/ByteBuffer.html">ByteBuffer</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-image-header-parser/-image-type/index.html">ImageHeaderParser.ImageType</a></div><div class="brief ">Returns the ImageType for the given ByteBuffer.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-type.html"><span class="token function">getType</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parsers<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/List.html">List</a><span class="token operator">&lt;</span><a href="../-image-header-parser/index.html">ImageHeaderParser</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">parcelFileDescriptorRewinder<span class="token operator">: </span><a href="../../com.bumptech.glide.load.data/-parcel-file-descriptor-rewinder/index.html">ParcelFileDescriptorRewinder</a><span class="token punctuation">, </span></span><span class="parameter ">byteArrayPool<span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine.bitmap_recycle/-array-pool/index.html">ArrayPool</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-image-header-parser/-image-type/index.html">ImageHeaderParser.ImageType</a></div><br><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-type.html"><span class="token function">getType</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">parsers<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/List.html">List</a><span class="token operator">&lt;</span><a href="../-image-header-parser/index.html">ImageHeaderParser</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">is<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/InputStream.html">InputStream</a><span class="token punctuation">, </span></span><span class="parameter ">byteArrayPool<span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine.bitmap_recycle/-array-pool/index.html">ArrayPool</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-image-header-parser/-image-type/index.html">ImageHeaderParser.ImageType</a></div><div class="brief ">Returns the ImageType for the given InputStream.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

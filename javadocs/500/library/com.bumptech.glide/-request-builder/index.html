@@ -1,0 +1,1265 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>RequestBuilder</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:dokkaHtmlPartial/main">main</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="Glide::com.bumptech.glide/RequestBuilder///PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide</a><span class="delimiter">/</span><span class="current">RequestBuilder</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Request</span><wbr><span><span>Builder</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span> : <a href="../../com.bumptech.glide.request/-base-request-options/index.html">BaseRequestOptions</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a><span class="token operator">&gt; </span>, <a href="https://developer.android.com/reference/kotlin/java/lang/Cloneable.html">Cloneable</a>, <a href="../../../library/com.bumptech.glide/-model-types/index.html">ModelTypes</a><span class="token operator">&lt;</span><a href="../../../library/com.bumptech.glide/-model-types/index.html">T</a><span class="token operator">&gt; </span></div><p class="paragraph">A generic class that can handle setting options and staring loads for generic resource types.</p><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>&lt;Transcode</span><wbr><span><span>Type&gt;</span></span></u></div></span></div><div><div class="title"><p class="paragraph">The type of resource that will be delivered to the .</p></div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="511647862%2FProperties%2F-954213597" anchor-label="diskCacheStrategy" id="511647862%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/disk-cache-strategy.html"><span>disk</span><wbr><span>Cache</span><wbr><span><span>Strategy</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="511647862%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/disk-cache-strategy.html">diskCacheStrategy</a><span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine/-disk-cache-strategy/index.html">DiskCacheStrategy</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="853813579%2FProperties%2F-954213597" anchor-label="errorId" id="853813579%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/error-id.html"><span>error</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="853813579%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/error-id.html">errorId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1381755265%2FProperties%2F-954213597" anchor-label="errorPlaceholder" id="1381755265%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/error-placeholder.html"><span>error</span><wbr><span><span>Placeholder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1381755265%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/error-placeholder.html">errorPlaceholder</a><span class="token operator">: </span>Drawable</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1892589516%2FProperties%2F-954213597" anchor-label="fallbackDrawable" id="1892589516%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/fallback-drawable.html"><span>fallback</span><wbr><span><span>Drawable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1892589516%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/fallback-drawable.html">fallbackDrawable</a><span class="token operator">: </span>Drawable</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1093460049%2FProperties%2F-954213597" anchor-label="fallbackId" id="-1093460049%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/fallback-id.html"><span>fallback</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1093460049%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/fallback-id.html">fallbackId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1717082600%2FProperties%2F-954213597" anchor-label="isLocked" id="-1717082600%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/is-locked.html"><span>is</span><wbr><span><span>Locked</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1717082600%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/is-locked.html">isLocked</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="732364153%2FProperties%2F-954213597" anchor-label="isTransformationAllowed" id="732364153%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/is-transformation-allowed.html"><span>is</span><wbr><span>Transformation</span><wbr><span><span>Allowed</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="732364153%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/is-transformation-allowed.html">isTransformationAllowed</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-889088230%2FProperties%2F-954213597" anchor-label="isTransformationRequired" id="-889088230%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/is-transformation-required.html"><span>is</span><wbr><span>Transformation</span><wbr><span><span>Required</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-889088230%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/is-transformation-required.html">isTransformationRequired</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1722252958%2FProperties%2F-954213597" anchor-label="onlyRetrieveFromCache" id="1722252958%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/only-retrieve-from-cache.html"><span>only</span><wbr><span>Retrieve</span><wbr><span>From</span><wbr><span><span>Cache</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1722252958%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/only-retrieve-from-cache.html">onlyRetrieveFromCache</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-160479152%2FProperties%2F-954213597" anchor-label="options" id="-160479152%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/options.html"><span><span>options</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-160479152%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/options.html">options</a><span class="token operator">: </span><a href="../../com.bumptech.glide.load/-options/index.html">Options</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1559187577%2FProperties%2F-954213597" anchor-label="overrideHeight" id="1559187577%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/override-height.html"><span>override</span><wbr><span><span>Height</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1559187577%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/override-height.html">overrideHeight</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1988304812%2FProperties%2F-954213597" anchor-label="overrideWidth" id="-1988304812%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/override-width.html"><span>override</span><wbr><span><span>Width</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1988304812%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/override-width.html">overrideWidth</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-215834211%2FProperties%2F-954213597" anchor-label="placeholderDrawable" id="-215834211%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/placeholder-drawable.html"><span>placeholder</span><wbr><span><span>Drawable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-215834211%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/placeholder-drawable.html">placeholderDrawable</a><span class="token operator">: </span>Drawable</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="159191616%2FProperties%2F-954213597" anchor-label="placeholderId" id="159191616%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/placeholder-id.html"><span>placeholder</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="159191616%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/placeholder-id.html">placeholderId</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-312730808%2FProperties%2F-954213597" anchor-label="priority" id="-312730808%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/priority.html"><span><span>priority</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-312730808%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/priority.html">priority</a><span class="token operator">: </span><a href="../-priority/index.html">Priority</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1727800924%2FProperties%2F-954213597" anchor-label="resourceClass" id="-1727800924%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/resource-class.html"><span>resource</span><wbr><span><span>Class</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1727800924%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/resource-class.html">resourceClass</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1102139190%2FProperties%2F-954213597" anchor-label="signature" id="1102139190%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/signature.html"><span><span>signature</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1102139190%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/signature.html">signature</a><span class="token operator">: </span><a href="../../com.bumptech.glide.load/-key/index.html">Key</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1771838774%2FProperties%2F-954213597" anchor-label="sizeMultiplier" id="-1771838774%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/size-multiplier.html"><span>size</span><wbr><span><span>Multiplier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1771838774%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/size-multiplier.html">sizeMultiplier</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2129078331%2FProperties%2F-954213597" anchor-label="theme" id="-2129078331%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/theme.html"><span><span>theme</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2129078331%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/theme.html">theme</a><span class="token operator">: </span>Theme</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1858666268%2FProperties%2F-954213597" anchor-label="transformations" id="-1858666268%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/transformations.html"><span><span>transformations</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1858666268%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/transformations.html">transformations</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/Map.html">Map</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="token punctuation">, </span><a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1209277459%2FProperties%2F-954213597" anchor-label="useAnimationPool" id="1209277459%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/use-animation-pool.html"><span>use</span><wbr><span>Animation</span><wbr><span><span>Pool</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1209277459%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/use-animation-pool.html">useAnimationPool</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1184885477%2FProperties%2F-954213597" anchor-label="useUnlimitedSourceGeneratorsPool" id="-1184885477%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/use-unlimited-source-generators-pool.html"><span>use</span><wbr><span>Unlimited</span><wbr><span>Source</span><wbr><span>Generators</span><wbr><span><span>Pool</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1184885477%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../../com.bumptech.glide.request/-base-request-options/use-unlimited-source-generators-pool.html">useUnlimitedSourceGeneratorsPool</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="1410377777%2FFunctions%2F-954213597" anchor-label="addListener" id="1410377777%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="add-listener.html"><span>add</span><wbr><span><span>Listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1410377777%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="add-listener.html"><span class="token function">addListener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestListener<span class="token operator">: </span><a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Adds a <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> to the list that will be called in the order they were added when the request ends.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1254974357%2FFunctions%2F-954213597" anchor-label="apply" id="1254974357%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="apply.html"><span><span>apply</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1254974357%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="apply.html"><span class="token function">apply</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestOptions<span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">BaseRequestOptions</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Applies the given options to the request.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-234312768%2FFunctions%2F-954213597" anchor-label="autoClone" id="-234312768%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/auto-clone.html"><span>auto</span><wbr><span><span>Clone</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-234312768%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/auto-clone.html"><span class="token function">autoClone</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Similar to <a href="../../com.bumptech.glide.request/-base-request-options/lock.html">lock</a> except that mutations cause a <a href="../../com.bumptech.glide.request/-base-request-options/clone.html">clone</a> operation to happen before the mutation resulting in all methods returning a new Object and leaving the original locked object unmodified.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="169749447%2FFunctions%2F-954213597" anchor-label="centerCrop" id="169749447%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/center-crop.html"><span>center</span><wbr><span><span>Crop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="169749447%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/center-crop.html"><span class="token function">centerCrop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies <a href="../../com.bumptech.glide.load.resource.bitmap/-center-crop/index.html">CenterCrop</a> to all default types and throws an exception if asked to transform an unknown type.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1152448165%2FFunctions%2F-954213597" anchor-label="centerInside" id="-1152448165%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/center-inside.html"><span>center</span><wbr><span><span>Inside</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1152448165%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/center-inside.html"><span class="token function">centerInside</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies <a href="../../com.bumptech.glide.load.resource.bitmap/-center-inside/index.html">CenterInside</a> to all default types, <a href="../../com.bumptech.glide.load.resource.bitmap/-downsample-strategy/-c-e-n-t-e-r_-i-n-s-i-d-e.html">CENTER_INSIDE</a> to image types and throws an exception if asked to transform an unknown type.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1952493868%2FFunctions%2F-954213597" anchor-label="circleCrop" id="1952493868%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/circle-crop.html"><span>circle</span><wbr><span><span>Crop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1952493868%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/circle-crop.html"><span class="token function">circleCrop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies <a href="../../com.bumptech.glide.load.resource.bitmap/-circle-crop/index.html">CircleCrop</a> to all default types and throws an exception if asked to transform an unknown type.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1444356732%2FFunctions%2F-954213597" anchor-label="clone" id="-1444356732%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="clone.html"><span><span>clone</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1444356732%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="clone.html"><span class="token function">clone</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns a copy of this request builder with all of the options put so far on this builder.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-16374553%2FFunctions%2F-954213597" anchor-label="decode" id="-16374553%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/decode.html"><span><span>decode</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-16374553%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/decode.html"><span class="token function">decode</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">resourceClass<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-375938521%2FFunctions%2F-954213597" anchor-label="disallowHardwareConfig" id="-375938521%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/disallow-hardware-config.html"><span>disallow</span><wbr><span>Hardware</span><wbr><span><span>Config</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-375938521%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/disallow-hardware-config.html"><span class="token function">disallowHardwareConfig</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Disables the use of HARDWARE in <a href="../../com.bumptech.glide.load.resource.bitmap/-downsampler/index.html">Downsampler</a> to avoid errors caused by inspecting Bitmap pixels, drawing with hardware support disabled, drawing to android.graphics.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1482054304%2FFunctions%2F-954213597" anchor-label="diskCacheStrategy" id="-1482054304%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/disk-cache-strategy.html"><span>disk</span><wbr><span>Cache</span><wbr><span><span>Strategy</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1482054304%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/disk-cache-strategy.html"><span class="token function">diskCacheStrategy</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">strategy<span class="token operator">: </span><a href="../../com.bumptech.glide.load.engine/-disk-cache-strategy/index.html">DiskCacheStrategy</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets the <a href="../../com.bumptech.glide.load.engine/-disk-cache-strategy/index.html">DiskCacheStrategy</a> to use for this load.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2142084962%2FFunctions%2F-954213597" anchor-label="dontAnimate" id="-2142084962%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/dont-animate.html"><span>dont</span><wbr><span><span>Animate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2142084962%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/dont-animate.html"><span class="token function">dontAnimate</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Disables resource decoders that return animated resources so any resource returned will be static.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1572230669%2FFunctions%2F-954213597" anchor-label="dontTransform" id="-1572230669%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/dont-transform.html"><span>dont</span><wbr><span><span>Transform</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1572230669%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/dont-transform.html"><span class="token function">dontTransform</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Removes all applied <a href="../../com.bumptech.glide.load/-transformation/index.html">Transformations</a> for all resource classes and allows unknown resource types to be transformed without throwing an exception.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="60928186%2FFunctions%2F-954213597" anchor-label="downloadOnly" id="60928186%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="download-only.html"><span>download</span><wbr><span><span>Only</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="60928186%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="download-only.html">Y</a><span class="token operator"> : </span><a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator">&gt; </span><a href="download-only.html"><span class="token function"><strike>downloadOnly</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">target<span class="token operator">: </span><a href="download-only.html">Y</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="download-only.html">Y</a></div><div class="brief ">Loads the original unmodified data into the cache and calls the given Target with the cache File.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="download-only.html"><span class="token function"><strike>downloadOnly</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-future-target/index.html">FutureTarget</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a><span class="token operator">&gt;</span></div><div class="brief ">Loads the original unmodified data into the cache and returns a  that can be used to retrieve the cache File containing the data.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2118338488%2FFunctions%2F-954213597" anchor-label="downsample" id="2118338488%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/downsample.html"><span><span>downsample</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2118338488%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/downsample.html"><span class="token function">downsample</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">strategy<span class="token operator">: </span><a href="../../com.bumptech.glide.load.resource.bitmap/-downsample-strategy/index.html">DownsampleStrategy</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets the <a href="../../com.bumptech.glide.load.resource.bitmap/-downsample-strategy/index.html">DownsampleStrategy</a> to use when decoding Bitmaps using .</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1168319125%2FFunctions%2F-954213597" anchor-label="encodeFormat" id="-1168319125%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/encode-format.html"><span>encode</span><wbr><span><span>Format</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1168319125%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/encode-format.html"><span class="token function">encodeFormat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">format<span class="token operator">: </span>CompressFormat</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets the value for key <a href="../../com.bumptech.glide.load.resource.bitmap/-bitmap-encoder/-c-o-m-p-r-e-s-s-i-o-n_-f-o-r-m-a-t.html">COMPRESSION_FORMAT</a>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="318781518%2FFunctions%2F-954213597" anchor-label="encodeQuality" id="318781518%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/encode-quality.html"><span>encode</span><wbr><span><span>Quality</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="318781518%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/encode-quality.html"><span class="token function">encodeQuality</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">quality<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets the value for key <a href="../../com.bumptech.glide.load.resource.bitmap/-bitmap-encoder/-c-o-m-p-r-e-s-s-i-o-n_-q-u-a-l-i-t-y.html">COMPRESSION_QUALITY</a>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="792925159%2FFunctions%2F-954213597" anchor-label="equals" id="792925159%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="equals.html"><span><span>equals</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="792925159%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="equals.html"><span class="token function">equals</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">o<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1381297737%2FFunctions%2F-954213597" anchor-label="error" id="-1381297737%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="error.html"><span><span>error</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1381297737%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">errorBuilder<span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Sets a <a href="index.html">RequestBuilder</a> that is built and run if the load started by this  fails.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Identical to calling <a href="error.html">error</a> where the <code class="lang-kotlin">RequestBuilder</code> is the result of calling <a href="clone.html">clone</a> and removing any existing thumbnail and error <code class="lang-kotlin">
+RequestBuilders</code>.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">drawable<span class="token operator">: </span>Drawable</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets a Drawable to display if a load fails.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/error.html"><span class="token function">error</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">resourceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets a resource to display if a load fails.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2104714153%2FFunctions%2F-954213597" anchor-label="fallback" id="2104714153%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/fallback.html"><span><span>fallback</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2104714153%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/fallback.html"><span class="token function">fallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">drawable<span class="token operator">: </span>Drawable</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets an Drawable to display if the model provided to <a href="load.html">load</a> is <code class="lang-kotlin">null</code>.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/fallback.html"><span class="token function">fallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">resourceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets a resource to display if the model provided to <a href="load.html">load</a> is <code class="lang-kotlin">null</code>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-681861144%2FFunctions%2F-954213597" anchor-label="fitCenter" id="-681861144%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/fit-center.html"><span>fit</span><wbr><span><span>Center</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-681861144%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/fit-center.html"><span class="token function">fitCenter</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies <a href="../../com.bumptech.glide.load.resource.bitmap/-fit-center/index.html">FitCenter</a> and to all default types, <a href="../../com.bumptech.glide.load.resource.bitmap/-downsample-strategy/-f-i-t_-c-e-n-t-e-r.html">FIT_CENTER</a> to image types, and throws an exception if asked to transform an unknown type.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1625032730%2FFunctions%2F-954213597" anchor-label="format" id="-1625032730%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/format.html"><span><span>format</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1625032730%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/format.html"><span class="token function">format</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">format<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-decode-format/index.html">DecodeFormat</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets the <a href="../../com.bumptech.glide.load/-decode-format/index.html">DecodeFormat</a> to use when decoding Bitmap objects using  and Glide's default GIF decoders.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1035545253%2FFunctions%2F-954213597" anchor-label="frame" id="1035545253%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/frame.html"><span><span>frame</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1035545253%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/frame.html"><span class="token function">frame</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">frameTimeMicros<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets the time position of the frame to extract from a video.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-443320066%2FFunctions%2F-954213597" anchor-label="hashCode" id="-443320066%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="hash-code.html"><span>hash</span><wbr><span><span>Code</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-443320066%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="hash-code.html"><span class="token function">hashCode</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="888163919%2FFunctions%2F-954213597" anchor-label="into" id="888163919%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="into.html"><span><span>into</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="888163919%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="into.html"><span class="token function">into</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">view<span class="token operator">: </span>ImageView</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request.target/-view-target/index.html">ViewTarget</a><span class="token operator">&lt;</span>ImageView<span class="token punctuation">, </span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Sets the ImageView the resource will be loaded into, cancels any existing loads into the view, and frees any resources Glide may have previously loaded into the view so they may be reused.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="into.html">Y</a><span class="token operator"> : </span><a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator">&gt; </span><a href="into.html"><span class="token function">into</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">target<span class="token operator">: </span><a href="into.html">Y</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="into.html">Y</a></div><div class="brief ">Set the target the resource will be loaded into.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="into.html"><span class="token function"><strike>into</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-future-target/index.html">FutureTarget</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns a future that can be used to do a blocking get on a background thread.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="918264216%2FFunctions%2F-954213597" anchor-label="isDiskCacheStrategySet" id="918264216%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/is-disk-cache-strategy-set.html"><span>is</span><wbr><span>Disk</span><wbr><span>Cache</span><wbr><span>Strategy</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="918264216%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/is-disk-cache-strategy-set.html"><span class="token function">isDiskCacheStrategySet</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="520796735%2FFunctions%2F-954213597" anchor-label="isEquivalentTo" id="520796735%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/is-equivalent-to.html"><span>is</span><wbr><span>Equivalent</span><wbr><span><span>To</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="520796735%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/is-equivalent-to.html"><span class="token function">isEquivalentTo</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">other<span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">BaseRequestOptions</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief ">Returns <code class="lang-kotlin">true</code> if this <a href="../../com.bumptech.glide.request/-base-request-options/index.html">BaseRequestOptions</a> is equivalent to the given <a href="../../com.bumptech.glide.request/-base-request-options/index.html">BaseRequestOptions</a> (has all of the same options and sizes).</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-867419203%2FFunctions%2F-954213597" anchor-label="isMemoryCacheable" id="-867419203%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/is-memory-cacheable.html"><span>is</span><wbr><span>Memory</span><wbr><span><span>Cacheable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-867419203%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/is-memory-cacheable.html"><span class="token function">isMemoryCacheable</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1975083610%2FFunctions%2F-954213597" anchor-label="isPrioritySet" id="1975083610%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/is-priority-set.html"><span>is</span><wbr><span>Priority</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1975083610%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/is-priority-set.html"><span class="token function">isPrioritySet</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1317012834%2FFunctions%2F-954213597" anchor-label="isSkipMemoryCacheSet" id="1317012834%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/is-skip-memory-cache-set.html"><span>is</span><wbr><span>Skip</span><wbr><span>Memory</span><wbr><span>Cache</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1317012834%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/is-skip-memory-cache-set.html"><span class="token function">isSkipMemoryCacheSet</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1430406657%2FFunctions%2F-954213597" anchor-label="isTransformationSet" id="-1430406657%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/is-transformation-set.html"><span>is</span><wbr><span>Transformation</span><wbr><span><span>Set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1430406657%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/is-transformation-set.html"><span class="token function">isTransformationSet</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="866609936%2FFunctions%2F-954213597" anchor-label="isValidOverride" id="866609936%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/is-valid-override.html"><span>is</span><wbr><span>Valid</span><wbr><span><span>Override</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="866609936%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/is-valid-override.html"><span class="token function">isValidOverride</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1210998328%2FFunctions%2F-954213597" anchor-label="listener" id="1210998328%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="listener.html"><span><span>listener</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1210998328%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="listener.html"><span class="token function">listener</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">requestListener<span class="token operator">: </span><a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Sets a <a href="../../com.bumptech.glide.request/-request-listener/index.html">RequestListener</a> to monitor the resource load and removes all previously set listeners (either via this method or from <a href="add-listener.html">addListener</a> .</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-990246624%2FFunctions%2F-954213597" anchor-label="load" id="-990246624%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="load.html"><span><span>load</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-990246624%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bitmap<span class="token operator">: </span>Bitmap</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns an object to load the given Bitmap.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">drawable<span class="token operator">: </span>Drawable</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns a request builder to load the given Drawable.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">uri<span class="token operator">: </span>Uri</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns a request builder to load the given Uri.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-byte/index.html">Byte</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns a request to load the given byte array.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">file<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns a request builder to load the given <a href="https://developer.android.com/reference/kotlin/java/io/File.html">File</a>.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">resourceId<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Integer.html">Integer</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns a request builder that uses the  currently registered or <a href="https://developer.android.com/reference/kotlin/java/lang/Integer.html">Integer</a> to load the image represented by the given <a href="https://developer.android.com/reference/kotlin/java/lang/Integer.html">Integer</a> resource id.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Sets the specific model to load data for.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function">load</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns a request builder to load the given <a href="https://developer.android.com/reference/kotlin/java/lang/String.html">java.lang.String</a>.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="load.html"><span class="token function"><strike>load</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">url<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/net/URL.html">URL</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns a request builder to load the given <a href="https://developer.android.com/reference/kotlin/java/net/URL.html">URL</a>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="418428193%2FFunctions%2F-954213597" anchor-label="lock" id="418428193%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/lock.html"><span><span>lock</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="418428193%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/lock.html"><span class="token function">lock</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Throws if any further mutations are attempted.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="891998140%2FFunctions%2F-954213597" anchor-label="onlyRetrieveFromCache" id="891998140%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/only-retrieve-from-cache.html"><span>only</span><wbr><span>Retrieve</span><wbr><span>From</span><wbr><span><span>Cache</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="891998140%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/only-retrieve-from-cache.html"><span class="token function">onlyRetrieveFromCache</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">flag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">If set to true, will only load an item if found in the cache, and will not fetch from source.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-830943929%2FFunctions%2F-954213597" anchor-label="optionalCenterCrop" id="-830943929%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/optional-center-crop.html"><span>optional</span><wbr><span>Center</span><wbr><span><span>Crop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-830943929%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/optional-center-crop.html"><span class="token function">optionalCenterCrop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies <a href="../../com.bumptech.glide.load.resource.bitmap/-center-crop/index.html">com.bumptech.glide.load.resource.bitmap.CenterCrop</a> to all default types, and ignores unknown types.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-746108197%2FFunctions%2F-954213597" anchor-label="optionalCenterInside" id="-746108197%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/optional-center-inside.html"><span>optional</span><wbr><span>Center</span><wbr><span><span>Inside</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-746108197%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/optional-center-inside.html"><span class="token function">optionalCenterInside</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies <a href="../../com.bumptech.glide.load.resource.bitmap/-center-inside/index.html">com.bumptech.glide.load.resource.bitmap.CenterInside</a> to all default types, <a href="../../com.bumptech.glide.load.resource.bitmap/-downsample-strategy/-c-e-n-t-e-r_-i-n-s-i-d-e.html">CENTER_INSIDE</a> to image types, and ignores unknown types.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="951800492%2FFunctions%2F-954213597" anchor-label="optionalCircleCrop" id="951800492%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/optional-circle-crop.html"><span>optional</span><wbr><span>Circle</span><wbr><span><span>Crop</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="951800492%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/optional-circle-crop.html"><span class="token function">optionalCircleCrop</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies <a href="../../com.bumptech.glide.load.resource.bitmap/-circle-crop/index.html">CircleCrop</a> to all default types, and ignores unknown types.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1268330904%2FFunctions%2F-954213597" anchor-label="optionalFitCenter" id="-1268330904%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/optional-fit-center.html"><span>optional</span><wbr><span>Fit</span><wbr><span><span>Center</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1268330904%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/optional-fit-center.html"><span class="token function">optionalFitCenter</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies <a href="../../com.bumptech.glide.load.resource.bitmap/-fit-center/index.html">FitCenter</a> and to all default types, <a href="../../com.bumptech.glide.load.resource.bitmap/-downsample-strategy/-f-i-t_-c-e-n-t-e-r.html">FIT_CENTER</a> to image types, and ignores unknown types.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1872099050%2FFunctions%2F-954213597" anchor-label="optionalTransform" id="1872099050%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/optional-transform.html"><span>optional</span><wbr><span><span>Transform</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1872099050%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/optional-transform.html"><span class="token function">optionalTransform</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">transformation<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a><span class="token operator">&lt;</span>Bitmap<span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies the given <a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a> for Bitmaps to the default types (Bitmap, android.graphics.drawable.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.bumptech.glide.request/-base-request-options/optional-transform.html">Y</a><span class="token operator">&gt; </span><a href="../../com.bumptech.glide.request/-base-request-options/optional-transform.html"><span class="token function">optionalTransform</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">resourceClass<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.request/-base-request-options/optional-transform.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">transformation<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.request/-base-request-options/optional-transform.html">Y</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies the given <a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a> for any decoded resource of the given type and allows unknown resource types to be ignored.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2019127598%2FFunctions%2F-954213597" anchor-label="override" id="2019127598%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/override.html"><span><span>override</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2019127598%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/override.html"><span class="token function">override</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">size<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Overrides the <a href="../../com.bumptech.glide.request.target/-target/index.html">com.bumptech.glide.request.target.Target</a>'s width and height with the given size.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/override.html"><span class="token function">override</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Overrides the <a href="../../com.bumptech.glide.request.target/-target/index.html">com.bumptech.glide.request.target.Target</a>'s width and height with the given values.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1535125305%2FFunctions%2F-954213597" anchor-label="placeholder" id="-1535125305%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/placeholder.html"><span><span>placeholder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1535125305%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/placeholder.html"><span class="token function">placeholder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">drawable<span class="token operator">: </span>Drawable</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets an Drawable to display while a resource is loading.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/placeholder.html"><span class="token function">placeholder</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">resourceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets an Android resource id for a Drawable resource to display while a resource is loading.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1230482915%2FFunctions%2F-954213597" anchor-label="preload" id="1230482915%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="preload.html"><span><span>preload</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1230482915%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="preload.html"><span class="token function">preload</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Preloads the resource into the cache using <a href="../../com.bumptech.glide.request.target/-target/-s-i-z-e_-o-r-i-g-i-n-a-l.html">SIZE_ORIGINAL</a> as the target width and height.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="preload.html"><span class="token function">preload</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request.target/-target/index.html">Target</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Preloads the resource into the cache using the given width and height.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-712556968%2FFunctions%2F-954213597" anchor-label="priority" id="-712556968%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/priority.html"><span><span>priority</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-712556968%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/priority.html"><span class="token function">priority</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">priority<span class="token operator">: </span><a href="../-priority/index.html">Priority</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets the priority for this load.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1308711554%2FFunctions%2F-954213597" anchor-label="set" id="-1308711554%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/set.html"><span><span>set</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1308711554%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.bumptech.glide.request/-base-request-options/set.html">Y</a><span class="token operator">&gt; </span><a href="../../com.bumptech.glide.request/-base-request-options/set.html"><span class="token function">set</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">option<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-option/index.html">Option</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.request/-base-request-options/set.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">value<span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/set.html">Y</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1862254807%2FFunctions%2F-954213597" anchor-label="signature" id="1862254807%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/signature.html"><span><span>signature</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1862254807%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/signature.html"><span class="token function">signature</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">signature<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-key/index.html">Key</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets some additional data to be mixed in to the memory and disk cache keys allowing the caller more control over when cached data is invalidated.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-24260836%2FFunctions%2F-954213597" anchor-label="sizeMultiplier" id="-24260836%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/size-multiplier.html"><span>size</span><wbr><span><span>Multiplier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-24260836%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/size-multiplier.html"><span class="token function">sizeMultiplier</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sizeMultiplier<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies a multiplier to the <a href="../../com.bumptech.glide.request.target/-target/index.html">com.bumptech.glide.request.target.Target</a>'s size before loading the resource.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-965227474%2FFunctions%2F-954213597" anchor-label="skipMemoryCache" id="-965227474%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/skip-memory-cache.html"><span>skip</span><wbr><span>Memory</span><wbr><span><span>Cache</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-965227474%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/skip-memory-cache.html"><span class="token function">skipMemoryCache</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">skip<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Allows the loaded resource to skip the memory cache.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="469050011%2FFunctions%2F-954213597" anchor-label="submit" id="469050011%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="submit.html"><span><span>submit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="469050011%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="submit.html"><span class="token function">submit</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-future-target/index.html">FutureTarget</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="submit.html"><span class="token function">submit</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">width<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">height<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-future-target/index.html">FutureTarget</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Returns a future that can be used to do a blocking get on a background thread.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1076146525%2FFunctions%2F-954213597" anchor-label="theme" id="1076146525%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/theme.html"><span><span>theme</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1076146525%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/theme.html"><span class="token function">theme</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">theme<span class="token operator">: </span>Theme</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets the android.content.res.Resources.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-380121185%2FFunctions%2F-954213597" anchor-label="thumbnail" id="-380121185%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="thumbnail.html"><span><span>thumbnail</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-380121185%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="thumbnail.html"><span class="token function">thumbnail</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">thumbnailRequest<span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Loads and displays the resource retrieved by the given thumbnail request if it finishes before this request.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="thumbnail.html"><span class="token function">thumbnail</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">thumbnails<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="thumbnail.html"><span class="token function">thumbnail</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">thumbnails<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/util/List.html">List</a><span class="token operator">&lt;</span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Recursively applies <a href="thumbnail.html">thumbnail</a> so that the <a href="index.html">RequestBuilder</a>s are loaded as thumbnails in the given priority order.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="thumbnail.html"><span class="token function"><strike>thumbnail</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sizeMultiplier<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Loads a resource in an identical manner to this request except with the dimensions of the target multiplied by the given size multiplier.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1114180326%2FFunctions%2F-954213597" anchor-label="timeout" id="1114180326%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/timeout.html"><span><span>timeout</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1114180326%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/timeout.html"><span class="token function">timeout</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">timeoutMs<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Sets the read and write timeout for the http requests used to load the image.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="785881942%2FFunctions%2F-954213597" anchor-label="transform" id="785881942%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/transform.html"><span><span>transform</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="785881942%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/transform.html"><span class="token function">transform</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">transformation<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a><span class="token operator">&lt;</span>Bitmap<span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies the given <a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a> for Bitmaps to the default types (Bitmap, android.graphics.drawable.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/transform.html"><span class="token function">transform</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">transformations<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a><span class="token operator">&lt;</span>Bitmap<span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies the given <a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a>s in the given order for Bitmaps to the default types (Bitmap, android.graphics.drawable.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../com.bumptech.glide.request/-base-request-options/transform.html">Y</a><span class="token operator">&gt; </span><a href="../../com.bumptech.glide.request/-base-request-options/transform.html"><span class="token function">transform</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">resourceClass<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Class.html">Class</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.request/-base-request-options/transform.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">transformation<span class="token operator">: </span><a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.request/-base-request-options/transform.html">Y</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies the given <a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a> for any decoded resource of the given type and throws if asked to transform an unknown resource type.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1068905813%2FFunctions%2F-954213597" anchor-label="transforms" id="1068905813%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/transforms.html"><span><span>transforms</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1068905813%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/transforms.html"><span class="token function"><strike>transforms</strike></span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">transformations<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a><span class="token operator">&lt;</span>Bitmap<span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">Applies the given <a href="../../com.bumptech.glide.load/-transformation/index.html">Transformation</a>s in the given order for Bitmaps to the default types (Bitmap, android.graphics.drawable.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-241802581%2FFunctions%2F-954213597" anchor-label="transition" id="-241802581%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="transition.html"><span><span>transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-241802581%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="transition.html"><span class="token function">transition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">transitionOptions<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">RequestBuilder</a><span class="token operator">&lt;</span><a href="index.html">TranscodeType</a><span class="token operator">&gt;</span></div><div class="brief ">Sets the <a href="../-transition-options/index.html">TransitionOptions</a> to use to transition from the placeholder or thumbnail when this load completes.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1263725401%2FFunctions%2F-954213597" anchor-label="useAnimationPool" id="-1263725401%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/use-animation-pool.html"><span>use</span><wbr><span>Animation</span><wbr><span><span>Pool</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1263725401%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/use-animation-pool.html"><span class="token function">useAnimationPool</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">flag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">If set to <code class="lang-kotlin">true</code>, uses a special <a href="https://developer.android.com/reference/kotlin/java/util/concurrent/Executor.html">java.util.concurrent.Executor</a> that is used exclusively for decoding frames of animated resources, like GIFs.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1934597473%2FFunctions%2F-954213597" anchor-label="useUnlimitedSourceGeneratorsPool" id="-1934597473%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../com.bumptech.glide.request/-base-request-options/use-unlimited-source-generators-pool.html"><span>use</span><wbr><span>Unlimited</span><wbr><span>Source</span><wbr><span>Generators</span><wbr><span><span>Pool</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1934597473%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="../../com.bumptech.glide.request/-base-request-options/use-unlimited-source-generators-pool.html"><span class="token function">useUnlimitedSourceGeneratorsPool</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">flag<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.bumptech.glide.request/-base-request-options/index.html">T</a></div><div class="brief ">If set to <code class="lang-kotlin">true</code>, uses a cached unlimited <a href="https://developer.android.com/reference/kotlin/java/util/concurrent/Executor.html">java.util.concurrent.Executor</a> to run the request.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

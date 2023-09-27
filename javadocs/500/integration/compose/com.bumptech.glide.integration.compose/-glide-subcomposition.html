@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>GlideSubcomposition</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":integration:compose:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageids="compose::com.bumptech.glide.integration.compose//GlideSubcomposition/#kotlin.Any?#androidx.compose.ui.Modifier#kotlin.Function1[com.bumptech.glide.RequestBuilder[android.graphics.drawable.Drawable],com.bumptech.glide.RequestBuilder[android.graphics.drawable.Drawable]]#kotlin.Function1[com.bumptech.glide.integration.compose.GlideSubcompositionScope,kotlin.Unit]/PointingToDeclaration//-1291154055">
+  <div class="breadcrumbs"><a href="../index.html">compose</a><span class="delimiter">/</span><a href="index.html">com.bumptech.glide.integration.compose</a><span class="delimiter">/</span><span class="current">GlideSubcomposition</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Glide</span><wbr><span><span>Subcomposition</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":integration:compose:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="-glide-subcomposition.html"><span class="token function">GlideSubcomposition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">model<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">requestBuilderTransform<span class="token operator">: </span><a href="index.html#-2072453018%2FClasslikes%2F-1291154055">RequestBuilderTransform</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://developer.android.com/reference/kotlin/android/graphics/drawable/Drawable.html">Drawable</a><span class="token operator">&gt;</span><span class="token operator"> = </span>{ it }<span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token keyword"></span><a href="-glide-subcomposition-scope/index.html">GlideSubcompositionScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><p class="paragraph">Starts an image load with Glide, exposing the state of the load via <a href="-glide-subcomposition-scope/index.html">GlideSubcompositionScope</a> to allow complex subcompositions or animations that depend on the load's state.</p><p class="paragraph"><a href="-glide-image.html">GlideImage</a> is significantly more efficient and easier to use than this method. GlideImage should be preferred over GlideSubcomposition whenever possible. Using GlideSubcomposition in a scrolling list will cause multiple recompositions per image, significantly degrading performance. The use case for this method is as a fallback for cases where you cannot animate or compose your layout without knowing the status of the image load request.</p><p class="paragraph">All that said, you can use this class to display custom placeholders and/or animations. For example to start an animation when a load completes, you might do something like:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">GlideSubcomposition(model = uri, modifier) {<br>  when (state) {<br>    RequestState.Loading -&gt; ShowLoadingUi()<br>    RequestState.Failure -&gt; ShowFailureUi()<br>    is RequestState.Success -&gt; {<br>      if (state.dataSource != DataSource.MEMORY_CACHE) {<br>        ShowSomeComplexAnimation()<br>      } else {<br>        DoSomethingNormal()<br>      }<br>    }<br>  }<br>}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph"><a href="-request-state/-success/index.html">RequestState.Success</a> contains the <a href="../../../library/com.bumptech.glide.load/-data-source/index.html">DataSource</a> where the image was loaded from so that you can avoid animating or otherwise change your composition if the image was loaded from the memory cache. Typically you do not want to animate loads from the memory cache.</p><p class="paragraph">If your <a href="-glide-subcomposition.html">requestBuilderTransform</a> does not have an <a href="../../../integration/compose/com.bumptech.glide.integration.compose/index.html">overrideSize</a> set, this method will wrap your subcomposition in <a href="https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/package-summary.html">Box</a> and use the size of that <code class="lang-kotlin">Box</code> to determine the size to use when loading the image. The box's modifier will be set to the <a href="-glide-subcomposition.html">modifier</a> you provide. As with <a href="-glide-image.html">GlideImage</a> try to ensure that you either set a reasonable <a href="../../../library/com.bumptech.glide/-request-builder/override.html">RequestBuilder.override</a> size using <a href="-glide-subcomposition.html">requestBuilderTransform</a> or that you provide a <a href="-glide-subcomposition.html">modifier</a> that will cause this composition to go through layout with a reasonable size. Failing to do so may result in the image load never starting, or in an unreasonably large amount of memory being used. Loading overly large images in memory can also impact scrolling performance.</p></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

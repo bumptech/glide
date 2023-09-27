@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>setImageDecoderEnabledForBitmaps</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:dokkaHtmlPartial/main">main</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageids="Glide::com.bumptech.glide/GlideBuilder/setImageDecoderEnabledForBitmaps/#boolean/PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide</a><span class="delimiter">/</span><a href="index.html">GlideBuilder</a><span class="delimiter">/</span><span class="current">setImageDecoderEnabledForBitmaps</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>set</span><wbr><span>Image</span><wbr><span>Decoder</span><wbr><span>Enabled</span><wbr><span>For</span><wbr><span><span>Bitmaps</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="set-image-decoder-enabled-for-bitmaps.html"><span class="token function">setImageDecoderEnabledForBitmaps</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">isEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">GlideBuilder</a></div><p class="paragraph">Set to <code class="lang-kotlin">true</code> to make Glide use android.graphics.ImageDecoder when decoding Bitmaps on Android P and higher. </p><p class="paragraph">Calls to this method on versions of Android less than Q are ignored. Although ImageDecoder was added in Android O a bug prevents it from scaling images with exif orientations until Q. See b/136096254. </p><p class="paragraph">Specifically android.graphics.ImageDecoder will be used in place of  and android.graphics.BitmapFactory to decode Bitmaps. GIFs, resources, and all other types of s are not affected by this flag. </p><p class="paragraph">This flag is experimental and may be removed without deprecation in a future version. </p><p class="paragraph">When this flag is enabled, Bitmap's will not be re-used when decoding images, though they may still be used as part of <a href="../../com.bumptech.glide.load/-transformation/index.html">com.bumptech.glide.load.Transformation</a>s because  does not support Bitmap re-use. </p><p class="paragraph">When this flag is enabled <a href="../../com.bumptech.glide.load.resource.bitmap/-downsampler/-f-i-x_-b-i-t-m-a-p_-s-i-z-e_-t-o_-r-e-q-u-e-s-t-e-d_-d-i-m-e-n-s-i-o-n-s.html">FIX_BITMAP_SIZE_TO_REQUESTED_DIMENSIONS</a> is ignored. All other <a href="../../com.bumptech.glide.load.resource.bitmap/-downsampler/index.html">com.bumptech.glide.load.resource.bitmap.Downsampler</a> flags are obeyed, although there may be subtle behavior differences because many options are subject to the whims of android.graphics.BitmapFactory and android.graphics.ImageDecoder which may not agree.</p></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

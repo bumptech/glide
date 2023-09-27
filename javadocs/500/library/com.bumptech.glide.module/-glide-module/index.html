@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>GlideModule</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:dokkaHtmlPartial/main">main</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="Glide::com.bumptech.glide.module/GlideModule///PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.module</a><span class="delimiter">/</span><span class="current">GlideModule</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Glide</span><wbr><span><span>Module</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html"><strike>GlideModule</strike></a> : <a href="../../../library/com.bumptech.glide.module/-registers-components/index.html">RegistersComponents</a>, <a href="../../../library/com.bumptech.glide.module/-applies-options/index.html">AppliesOptions</a></div><div class="deprecation-content"><h3 class="">Deprecated</h3></div><p class="paragraph">An interface allowing lazy configuration of Glide including setting options using  and registering <a href="../../com.bumptech.glide.load.model/-model-loader/index.html">ModelLoaders</a>. </p><p class="paragraph">To use this interface: </p><ol><li>Implement the GlideModule interface in a class with public visibility, calling <a href="../../com.bumptech.glide/-registry/prepend.html">prepend</a> for each  you'd like to register: <div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">
+                     public class FlickrGlideModule implements GlideModule {
+                         @Override
+                         public void applyOptions(Context context, GlideBuilder builder) {
+                             builder.setDecodeFormat(DecodeFormat.ALWAYS_ARGB_8888);
+                         }
+
+                         @Override
+                         public void registerComponents(Context context, Glide glide) {
+                             glide.register(Model.class, Data.class, new MyModelLoader());
+                         }
+                     }
+                 </code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></li><li>Add your implementation to your list of keeps in your proguard.cfg file: <div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">
+-keepnames class * com.bumptech.glide.samples.flickr.FlickrGlideModule
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></li><li>Add a metadata tag to your AndroidManifest.xml with your GlideModule implementation's fully qualified classname as the key, and <code class="lang-kotlin">GlideModule</code> as the value: <div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">
+&lt;meta-data
+    android:name="com.bumptech.glide.samples.flickr.FlickrGlideModule"
+    android:value="GlideModule" /&gt;
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></li></ol><p class="paragraph">All implementations must be publicly visible and contain only an empty constructor so they can be instantiated via reflection when Glide is lazily initialized. </p><p class="paragraph">There is no defined order in which modules are called, so projects should be careful to avoid applying conflicting settings in different modules. If an application depends on libraries that have conflicting modules, the application should consider avoiding the library modules and instead providing their required dependencies in a single application module.</p><span class="kdoc-tag"><h4 class="">Deprecated</h4><p class="paragraph">Libraries should use <a href="../-library-glide-module/index.html">LibraryGlideModule</a> and Applications should use .</p></span></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="1758358413%2FFunctions%2F-954213597" anchor-label="applyOptions" id="1758358413%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1758358413%2FFunctions%2F-954213597"><span>apply</span><wbr><span><span>Options</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1758358413%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#1758358413%2FFunctions%2F-954213597"><span class="token function">applyOptions</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span>Context<span class="token punctuation">, </span></span><span class="parameter ">builder<span class="token operator">: </span><a href="../../com.bumptech.glide/-glide-builder/index.html">GlideBuilder</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Lazily apply options to a <a href="../../com.bumptech.glide/-glide-builder/index.html">com.bumptech.glide.GlideBuilder</a> immediately before the Glide singleton is created.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1125659907%2FFunctions%2F-954213597" anchor-label="registerComponents" id="1125659907%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#1125659907%2FFunctions%2F-954213597"><span>register</span><wbr><span><span>Components</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1125659907%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#1125659907%2FFunctions%2F-954213597"><span class="token function">registerComponents</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span>Context<span class="token punctuation">, </span></span><span class="parameter ">glide<span class="token operator">: </span><a href="../../com.bumptech.glide/-glide/index.html">Glide</a><span class="token punctuation">, </span></span><span class="parameter ">registry<span class="token operator">: </span><a href="../../com.bumptech.glide/-registry/index.html">Registry</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Lazily register components immediately after the Glide singleton is created but before any requests can be started.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

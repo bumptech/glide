@@ -1,0 +1,268 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>DownsampleStrategy</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>Glide</span>            </a>    </div>
+    <div>
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":library:dokkaHtmlPartial/main">main</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="Glide::com.bumptech.glide.load.resource.bitmap/DownsampleStrategy///PointingToDeclaration//-954213597">
+  <div class="breadcrumbs"><a href="../../index.html">Glide</a><span class="delimiter">/</span><a href="../index.html">com.bumptech.glide.load.resource.bitmap</a><span class="delimiter">/</span><span class="current">DownsampleStrategy</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Downsample</span><wbr><span><span>Strategy</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">class </span><a href="index.html">DownsampleStrategy</a></div><p class="paragraph">Indicates the algorithm to use when downsampling images. </p><p class="paragraph"><code class="lang-kotlin">DownsampleStrategy</code> does not provide any guarantees about output sizes. Behavior will differ depending on the <a href="../../com.bumptech.glide.load/-resource-decoder/index.html">com.bumptech.glide.load.ResourceDecoder</a> using the strategy and the version of Android the code runs on. Use <code class="lang-kotlin">DownsampleStrategy</code> as an optimization to improve memory efficiency only. If you need a particular size or shape output, use an  either instead or in addition to a <code class="lang-kotlin">
+DownsampleStrategy</code>. </p><p class="paragraph">Some differences between versions of Android and s are listed below, but the list is not comprehensive because <a href="index.html">DownsampleStrategy</a> only controls its output scale value, not how that output value is used. </p><p class="paragraph">On some versions of Android, precise scaling is not possible. In those cases, the strategies can only pick between downsampling to between 1x the requested size and 2x the requested size and between 0.5x the requested size and 1x the requested size because only power of two downsampling is supported. To preserve the potential for a <a href="../../com.bumptech.glide.load/-transformation/index.html">com.bumptech.glide.load.Transformation</a> to scale precisely without a loss in quality, all but <a href="-a-t_-m-o-s-t.html">AT_MOST</a> will prefer to downsample to between 1x and 2x the requested size.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="-356131656%2FConstructors%2F-954213597" anchor-label="DownsampleStrategy" id="-356131656%2FConstructors%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-downsample-strategy.html"><span>Downsample</span><wbr><span><span>Strategy</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-356131656%2FConstructors%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="1735826605%2FClasslikes%2F-954213597" anchor-label="SampleSizeRounding" id="1735826605%2FClasslikes%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-sample-size-rounding/index.html"><span>Sample</span><wbr><span>Size</span><wbr><span><span>Rounding</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1735826605%2FClasslikes%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-sample-size-rounding/index.html">SampleSizeRounding</a></div><div class="brief ">Indicates whether to prefer to prefer downsampling or scaling to prefer lower memory usage or higher quality.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="1357588538%2FProperties%2F-954213597" anchor-label="AT_LEAST" id="1357588538%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-a-t_-l-e-a-s-t.html"><span><span>AT_LEAST</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1357588538%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-a-t_-l-e-a-s-t.html">AT_LEAST</a><span class="token operator">: </span><a href="index.html">DownsampleStrategy</a></div><div class="brief ">Downsamples so the image's smallest dimension is between the given dimensions and 2x the given dimensions, with no size restrictions on the image's largest dimension.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="962627124%2FProperties%2F-954213597" anchor-label="AT_MOST" id="962627124%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-a-t_-m-o-s-t.html"><span><span>AT_MOST</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="962627124%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-a-t_-m-o-s-t.html">AT_MOST</a><span class="token operator">: </span><a href="index.html">DownsampleStrategy</a></div><div class="brief ">Downsamples so the image's largest dimension is between 1/2 the given dimensions and the given dimensions, with no restrictions on the image's smallest dimension.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-338186627%2FProperties%2F-954213597" anchor-label="CENTER_INSIDE" id="-338186627%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-c-e-n-t-e-r_-i-n-s-i-d-e.html"><span><span>CENTER_INSIDE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-338186627%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-c-e-n-t-e-r_-i-n-s-i-d-e.html">CENTER_INSIDE</a><span class="token operator">: </span><a href="index.html">DownsampleStrategy</a></div><div class="brief ">Identical to <a href="-f-i-t_-c-e-n-t-e-r.html">FIT_CENTER</a>, but never upscales.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1937440284%2FProperties%2F-954213597" anchor-label="CENTER_OUTSIDE" id="1937440284%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-c-e-n-t-e-r_-o-u-t-s-i-d-e.html"><span><span>CENTER_OUTSIDE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1937440284%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-c-e-n-t-e-r_-o-u-t-s-i-d-e.html">CENTER_OUTSIDE</a><span class="token operator">: </span><a href="index.html">DownsampleStrategy</a></div><div class="brief ">Scales, maintaining the original aspect ratio, so that one of the image's dimensions is exactly equal to the requested size and the other dimension is greater than or equal to the requested size.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1419720606%2FProperties%2F-954213597" anchor-label="DEFAULT" id="-1419720606%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-d-e-f-a-u-l-t.html"><span><span>DEFAULT</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1419720606%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-d-e-f-a-u-l-t.html">DEFAULT</a><span class="token operator">: </span><a href="index.html">DownsampleStrategy</a></div><div class="brief ">Default strategy, currently <a href="-c-e-n-t-e-r_-o-u-t-s-i-d-e.html">CENTER_OUTSIDE</a>.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="68272980%2FProperties%2F-954213597" anchor-label="FIT_CENTER" id="68272980%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-f-i-t_-c-e-n-t-e-r.html"><span><span>FIT_CENTER</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="68272980%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-f-i-t_-c-e-n-t-e-r.html">FIT_CENTER</a><span class="token operator">: </span><a href="index.html">DownsampleStrategy</a></div><div class="brief ">Scales, maintaining the original aspect ratio, so that one of the image's dimensions is exactly equal to the requested size and the other dimension is less than or equal to the requested size.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1341722015%2FProperties%2F-954213597" anchor-label="NONE" id="1341722015%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-n-o-n-e.html"><span><span>NONE</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1341722015%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-n-o-n-e.html">NONE</a><span class="token operator">: </span><a href="index.html">DownsampleStrategy</a></div><div class="brief ">Performs no downsampling or scaling.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1580894338%2FProperties%2F-954213597" anchor-label="OPTION" id="1580894338%2FProperties%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-o-p-t-i-o-n.html"><span><span>OPTION</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1580894338%2FProperties%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-o-p-t-i-o-n.html">OPTION</a><span class="token operator">: </span><a href="../../com.bumptech.glide.load/-option/index.html">Option</a><span class="token operator">&lt;</span><a href="index.html">DownsampleStrategy</a><span class="token operator">&gt;</span></div><div class="brief ">Indicates the <a href="index.html">com.bumptech.glide.load.resource.bitmap.DownsampleStrategy</a> option that will be used to calculate the sample size to use to downsample an image given the original and target dimensions of the image.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="185978849%2FFunctions%2F-954213597" anchor-label="getSampleSizeRounding" id="185978849%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-sample-size-rounding.html"><span>get</span><wbr><span>Sample</span><wbr><span>Size</span><wbr><span><span>Rounding</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="185978849%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-sample-size-rounding.html"><span class="token function">getSampleSizeRounding</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">sourceHeight<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">requestedWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">requestedHeight<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-sample-size-rounding/index.html">DownsampleStrategy.SampleSizeRounding</a></div><div class="brief ">Returns a non-null <a href="-sample-size-rounding/index.html">SampleSizeRounding</a> to use to resolve rounding errors and conflicts between scaling for the width and the height of the image.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1839246981%2FFunctions%2F-954213597" anchor-label="getScaleFactor" id="-1839246981%2FFunctions%2F-954213597" data-filterable-set=":library:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":library:dokkaHtmlPartial/main" data-filterable-set=":library:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-scale-factor.html"><span>get</span><wbr><span>Scale</span><wbr><span><span>Factor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1839246981%2FFunctions%2F-954213597"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":library:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="get-scale-factor.html"><span class="token function">getScaleFactor</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">sourceHeight<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">requestedWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">requestedHeight<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></div><div class="brief ">Returns a float (0, +infinity) indicating a scale factor to apply to the source width and height when displayed in the requested width and height.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+
