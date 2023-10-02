@@ -34,7 +34,8 @@ class GlideImageCustomDrawableTransformationTest(
   // though it's only used by Parameters to create the test name.
   @Suppress("unused") private val name: String,
 ) {
-  @get:Rule val glideComposeRule = GlideComposeRule()
+  @get:Rule
+  val glideComposeRule = GlideComposeRule()
 
   @Test
   fun glideImage_nonBitmapDrawable_doesNotThrow() = runTest {
@@ -98,6 +99,7 @@ private open class FakeDrawable : Drawable() {
   override fun draw(p0: Canvas) {}
   override fun setAlpha(p0: Int) {}
   override fun setColorFilter(p0: ColorFilter?) {}
+
   @Deprecated("Deprecated in Java")
   override fun getOpacity(): Int = throw UnsupportedOperationException()
 }

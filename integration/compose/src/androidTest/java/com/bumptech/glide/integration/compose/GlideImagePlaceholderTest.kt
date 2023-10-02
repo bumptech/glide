@@ -20,14 +20,16 @@ import org.junit.Test
  * [com.bumptech.glide.integration.compose.test.GlideComposeRule] because we want to make assertions
  * about loads that have not yet completed.
  */
-@Suppress("DEPRECATION") // Tests for a deprecated method
 @OptIn(ExperimentalGlideComposeApi::class)
 class GlideImagePlaceholderTest {
   private val context: Context = ApplicationProvider.getApplicationContext()
+
   @get:Rule(order = 1)
   val composeRule = createComposeRule()
+
   @get:Rule(order = 2)
   val waitModelLoaderRule = WaitModelLoaderRule()
+
   @get:Rule(order = 3)
   val tearDownGlide = TearDownGlide()
 
@@ -78,7 +80,7 @@ class GlideImagePlaceholderTest {
 
     composeRule
       .onNodeWithContentDescription(description)
-      .assert(expectDisplayedResource(placeholderResourceId))
+      .assert(expectDisplayedPainter(context, placeholderResourceId))
   }
 
   @Test
@@ -96,7 +98,7 @@ class GlideImagePlaceholderTest {
 
     composeRule
       .onNodeWithContentDescription(description)
-      .assert(expectDisplayedDrawable(placeholderDrawable))
+      .assert(expectDisplayedPainter(placeholderDrawable))
   }
 
   @Test
@@ -112,34 +114,6 @@ class GlideImagePlaceholderTest {
     }
 
     composeRule.onNodeWithContentDescription(description).assert(expectNoDrawable())
-  }
-
-  @Test
-  fun loadingParameter_withComposable_displaysComposable() {
-    val waitModel = waitModelLoaderRule.waitOn(android.R.drawable.star_big_on)
-    val placeholderResourceId = android.R.drawable.star_big_off
-    val description = "test"
-    composeRule.setContent {
-      GlideImage(
-        model = waitModel,
-        contentDescription = "none",
-        loading =
-        placeholder {
-          // Nesting GlideImage is not really a good idea, but it's convenient for this test
-          // because
-          // we can use our helpers to assert on its contents.
-          GlideImage(
-            model = waitModel,
-            contentDescription = description,
-            loading = placeholder(placeholderResourceId),
-          )
-        }
-      )
-    }
-
-    composeRule
-      .onNodeWithContentDescription(description)
-      .assert(expectDisplayedResource(placeholderResourceId))
   }
 
   @Test
@@ -159,7 +133,7 @@ class GlideImagePlaceholderTest {
 
     composeRule
       .onNodeWithContentDescription(description)
-      .assert(expectDisplayedResource(placeholderResourceId))
+      .assert(expectDisplayedPainter(context, placeholderResourceId))
   }
 
   @Test
@@ -179,7 +153,7 @@ class GlideImagePlaceholderTest {
 
     composeRule
       .onNodeWithContentDescription(description)
-      .assert(expectDisplayedDrawable(placeholderDrawable))
+      .assert(expectDisplayedPainter(placeholderDrawable))
   }
 
   @Test
@@ -218,32 +192,5 @@ class GlideImagePlaceholderTest {
     }
 
     composeRule.onNodeWithContentDescription(description).assert(expectNoDrawable())
-  }
-
-  @Test
-  fun loading_setViaLoadingParameterWithComposable_andRequestBuilderTransform_showsComposable() {
-    val description = "test"
-    val waitModel = waitModelLoaderRule.waitOn(android.R.drawable.star_big_on)
-    val placeholderResourceId = android.R.drawable.star_big_off
-    composeRule.setContent {
-      GlideImage(
-        model = waitModel,
-        contentDescription = "other",
-        loading =
-        placeholder {
-          GlideImage(
-            model = waitModel,
-            contentDescription = description,
-            loading = placeholder(placeholderResourceId),
-          )
-        },
-      ) {
-        it.placeholder(android.R.drawable.btn_star)
-      }
-    }
-
-    composeRule
-      .onNodeWithContentDescription(description)
-      .assert(expectDisplayedResource(placeholderResourceId))
   }
 }

@@ -84,4 +84,13 @@ private class DrawablePainter(
       }
     }
   }
+
+  override fun equals(other: Any?): Boolean {
+    val compare = other as? DrawablePainter ?: return false
+    return drawable == compare.drawable
+  }
+
+  override fun hashCode(): Int {
+    return drawable.hashCode()
+  }
 }
