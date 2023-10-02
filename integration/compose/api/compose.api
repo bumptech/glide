@@ -20,7 +20,6 @@ public final class com/bumptech/glide/integration/compose/GlideImageKt {
 	public static final fun placeholder (I)Lcom/bumptech/glide/integration/compose/Placeholder;
 	public static final fun placeholder (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/integration/compose/Placeholder;
 	public static final fun placeholder (Landroidx/compose/ui/graphics/painter/Painter;)Lcom/bumptech/glide/integration/compose/Placeholder;
-	public static final fun placeholder (Lkotlin/jvm/functions/Function2;)Lcom/bumptech/glide/integration/compose/Placeholder;
 }
 
 public abstract interface class com/bumptech/glide/integration/compose/GlidePreloadingData {
@@ -35,6 +34,7 @@ public abstract interface class com/bumptech/glide/integration/compose/GlideSubc
 
 public abstract class com/bumptech/glide/integration/compose/Placeholder {
 	public static final field $stable I
+	public abstract fun painter (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
 }
 
 public final class com/bumptech/glide/integration/compose/PreloadKt {
