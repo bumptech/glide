@@ -18,9 +18,9 @@ import org.junit.Test
  * assertions about loads that have not yet completed.
  */
 @OptIn(ExperimentalGlideComposeApi::class)
-@Suppress("DEPRECATION") // Tests for a deprecated method
 class GlideImageErrorTest {
   private val context: Context = ApplicationProvider.getApplicationContext()
+
   @get:Rule
   val glideComposeRule = GlideComposeRule()
 
@@ -64,7 +64,7 @@ class GlideImageErrorTest {
 
     glideComposeRule
       .onNodeWithContentDescription(description)
-      .assert(expectDisplayedResource(failureResourceId))
+      .assert(expectDisplayedPainter(context, failureResourceId))
   }
 
   @Test
@@ -81,7 +81,7 @@ class GlideImageErrorTest {
 
     glideComposeRule
       .onNodeWithContentDescription(description)
-      .assert(expectDisplayedDrawable(failureDrawable))
+      .assert(expectDisplayedPainter(failureDrawable))
   }
 
   @Test
@@ -96,33 +96,6 @@ class GlideImageErrorTest {
     }
 
     glideComposeRule.onNodeWithContentDescription(description).assert(expectNoDrawable())
-  }
-
-  @Test
-  fun failureParameter_withComposable_displaysComposable() {
-    val failureResourceId = android.R.drawable.star_big_off
-    val description = "test"
-    glideComposeRule.setContent {
-      GlideImage(
-        model = null,
-        contentDescription = "none",
-        failure =
-        placeholder {
-          // Nesting GlideImage is not really a good idea, but it's convenient for this test
-          // because
-          // we can use our helpers to assert on its contents.
-          GlideImage(
-            model = null,
-            contentDescription = description,
-            failure = placeholder(failureResourceId),
-          )
-        }
-      )
-    }
-
-    glideComposeRule
-      .onNodeWithContentDescription(description)
-      .assert(expectDisplayedResource(failureResourceId))
   }
 
   @Test
@@ -141,7 +114,7 @@ class GlideImageErrorTest {
 
     glideComposeRule
       .onNodeWithContentDescription(description)
-      .assert(expectDisplayedResource(failureResourceId))
+      .assert(expectDisplayedPainter(context, failureResourceId))
   }
 
   @Test
@@ -179,7 +152,7 @@ class GlideImageErrorTest {
 
     glideComposeRule
       .onNodeWithContentDescription(description)
-      .assert(expectDisplayedDrawable(failureDrawable))
+      .assert(expectDisplayedPainter(failureDrawable))
   }
 
   @Test
@@ -196,31 +169,5 @@ class GlideImageErrorTest {
     }
 
     glideComposeRule.onNodeWithContentDescription(description).assert(expectNoDrawable())
-  }
-
-  @Test
-  fun failure_setViaFailureParameterWithComposable_andRequestBuilderTransform_showsComposable() {
-    val description = "test"
-    val failureResourceId = android.R.drawable.star_big_off
-    glideComposeRule.setContent {
-      GlideImage(
-        model = null,
-        contentDescription = "other",
-        failure =
-        placeholder {
-          GlideImage(
-            model = null,
-            contentDescription = description,
-            failure = placeholder(failureResourceId),
-          )
-        },
-      ) {
-        it.error(android.R.drawable.btn_star)
-      }
-    }
-
-    glideComposeRule
-      .onNodeWithContentDescription(description)
-      .assert(expectDisplayedResource(failureResourceId))
   }
 }

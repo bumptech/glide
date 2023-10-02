@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.painterResource
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
@@ -60,10 +61,7 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  *
  * @param loading A [Placeholder] that will be displayed while the request is loading. Specifically
  * it's used if the request is cleared ([com.bumptech.glide.request.target.Target.onLoadCleared]) or
- * loading ([com.bumptech.glide.request.target.Target.onLoadStarted]. There's a subtle difference in
- * behavior depending on which type of [Placeholder] you use. The resource and `Drawable` variants
- * will be displayed if the request fails and no other failure handling is specified, but the
- * `Composable` will not.
+ * loading ([com.bumptech.glide.request.target.Target.onLoadStarted].
  * @param failure A [Placeholder] that will be displayed if the request fails. Specifically it's
  * used when [com.bumptech.glide.request.target.Target.onLoadFailed] is called. If
  * [RequestBuilder.error] is called in [requestBuilderTransform] with a valid [RequestBuilder] (as
@@ -98,58 +96,33 @@ public fun GlideImage(
   // TODO(judds): Consider defaulting to load the model here instead of always doing so below.
   requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
 ) {
-  val requestManager: RequestManager = LocalContext.current.let { remember(it) { Glide.with(it) } }
+  val context = LocalContext.current
+  val requestManager: RequestManager = remember(context) { Glide.with(context) }
   val requestBuilder =
     rememberRequestBuilderWithDefaults(model, requestManager, requestBuilderTransform, contentScale)
-      .let { loading?.apply(it::placeholder, it::placeholder) ?: it }
-      .let { failure?.apply(it::error, it::error) ?: it }
-
 
   // TODO(judds): It seems like we should be able to use the production paths for
   // resource / drawables as well as Composables. It's not totally clear what part of the prod code
   // isn't supported.
-  if (LocalInspectionMode.current && loading?.isResourceOrDrawable() == true) {
+  if (LocalInspectionMode.current && loading != null) {
     PreviewResourceOrDrawable(loading, contentDescription, modifier)
     return
   }
 
-  // TODO(sam): Remove this branch when GlideSubcomposition has been out for a bit.
-  val loadingComposable = loading?.maybeComposable()
-  val failureComposable = failure?.maybeComposable()
-  if (loadingComposable != null || failureComposable != null) {
-    GlideSubcomposition(model, modifier, { requestBuilder }) {
-      if (state == RequestState.Loading && loadingComposable != null) {
-        loadingComposable()
-      } else if (state == RequestState.Failure && failureComposable != null) {
-        failureComposable()
-      } else {
-        Image(
-          painter,
-          contentDescription,
-          modifier,
-          alignment,
-          contentScale,
-          alpha,
-          colorFilter,
-        )
-      }
-    }
-  } else {
-    SimpleLayout(
-      modifier
-        .glideNode(
-          requestBuilder,
-          contentDescription,
-          alignment,
-          contentScale,
-          alpha,
-          colorFilter,
-          transition,
-          loadingPlaceholder = loading?.maybePainter(),
-          errorPlaceholder = failure?.maybePainter(),
-        )
-    )
-  }
+  SimpleLayout(
+    modifier
+      .glideNode(
+        requestBuilder,
+        contentDescription,
+        alignment,
+        contentScale,
+        alpha,
+        colorFilter,
+        transition,
+        loadingPlaceholder = loading?.painter(),
+        errorPlaceholder = failure?.painter(),
+      )
+  )
 }
 
 /**
@@ -310,16 +283,7 @@ private fun PreviewResourceOrDrawable(
   contentDescription: String?,
   modifier: Modifier,
 ) {
-  val painter =
-    when (loading) {
-      is Placeholder.OfDrawable -> loading.drawable.toPainter()
-      is Placeholder.OfResourceId ->
-        LocalContext.current.getDrawable(loading.resourceId).toPainter()
-
-      is Placeholder.OfPainter -> loading.painter
-      is Placeholder.OfComposable ->
-        throw IllegalArgumentException("Composables should go through the production codepath")
-    }
+  val painter = loading.painter()
   Image(
     painter = painter,
     modifier = modifier,
@@ -359,11 +323,11 @@ public fun placeholder(painter: Painter?): Placeholder =
   Placeholder.OfPainter(painter ?: ColorPainter(Color.Transparent))
 
 /**
- * Used to specify a [Composable] function to use in conjunction with [GlideImage]'s `loading` or
- * `failure` parameter.
+ * This method does nothing! It's been deprecated for a while.
  *
- * Providing a nested [GlideImage] is not recommended. Use [RequestBuilder.thumbnail] or
- * [RequestBuilder.error] as an alternative.
+ * Use any of the other placeholder variants. If you need to have a composable placeholder status,
+ * consider using [GlideSubcomposition], but keep in mind it will force an expensive recomposition
+ * each time the load status changes. Do not use it in scrolling lists.
  */
 @Deprecated(
   "Using this method forces recomposition when the image load state changes." +
@@ -372,7 +336,7 @@ public fun placeholder(painter: Painter?): Placeholder =
 )
 @ExperimentalGlideComposeApi
 public fun placeholder(composable: @Composable () -> Unit): Placeholder =
-  Placeholder.OfComposable(composable)
+  Placeholder.OfComposable()
 
 /**
  * Content to display during a particular state of a Glide Request, for example while the request is
@@ -388,43 +352,46 @@ public fun placeholder(composable: @Composable () -> Unit): Placeholder =
  */
 @ExperimentalGlideComposeApi
 public sealed class Placeholder {
-  internal class OfDrawable(internal val drawable: Drawable?) : Placeholder()
-  internal class OfResourceId(@DrawableRes internal val resourceId: Int) : Placeholder()
+  @Composable
+  internal abstract fun painter(): Painter
 
-  internal class OfPainter(internal val painter: Painter) : Placeholder()
-  internal class OfComposable(internal val composable: @Composable () -> Unit) : Placeholder()
-
-  internal fun isResourceOrDrawable() =
-    when (this) {
-      is OfDrawable -> true
-      is OfResourceId -> true
-      is OfComposable -> false
-      is OfPainter -> false
+  /** This class does nothing, the functionality has been deprecated for a while. */
+  internal class OfComposable() : Placeholder() {
+    private val painter = ColorPainter(Color.Transparent)
+    @Composable
+    override fun painter(): Painter {
+      return painter
     }
+  }
 
-  internal fun maybeComposable(): (@Composable () -> Unit)? =
-    when (this) {
-      is OfComposable -> this.composable
-      else -> null
-    }
+  @OptIn(ExperimentalGlideComposeApi::class)
+  internal class OfDrawable(val drawable: Drawable?) : Placeholder() {
+    private val painter: Painter = drawable.toPainter()
 
-  internal fun maybePainter() =
-    when (this) {
-      is OfPainter -> this.painter
-      else -> null
-    }
+    @Composable
+    override fun painter(): Painter = painter
+  }
 
-  internal fun <T> apply(
-    resource: (Int) -> RequestBuilder<T>,
-    drawable: (Drawable?) -> RequestBuilder<T>
-  ): RequestBuilder<T> =
-    when (this) {
-      is OfDrawable -> drawable(this.drawable)
-      is OfResourceId -> resource(this.resourceId)
-      // Clear out any previously set placeholder.
-      else -> drawable(null)
+  @OptIn(ExperimentalGlideComposeApi::class)
+  internal class OfResourceId(@DrawableRes val resourceId: Int) : Placeholder() {
+    private lateinit var _painter: Painter
+
+    @Composable
+    override fun painter(): Painter {
+      if (!this::_painter.isInitialized) {
+        _painter = painterResource(resourceId)
+      }
+      return _painter
     }
+  }
+
+  @OptIn(ExperimentalGlideComposeApi::class)
+  internal class OfPainter(private val painter: Painter) : Placeholder() {
+    @Composable
+    override fun painter(): Painter = painter
+  }
 }
+
 
 @Composable
 private fun rememberRequestBuilderWithDefaults(
