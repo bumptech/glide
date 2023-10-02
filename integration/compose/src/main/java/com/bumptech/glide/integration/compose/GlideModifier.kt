@@ -332,10 +332,15 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   override fun ContentDrawScope.draw() {
     if (draw) {
       val drawPlaceholder = transition.drawPlaceholder ?: DoNotTransition.drawPlaceholder
-      placeholder?.let { painter ->
-        drawContext.canvas.withSave {
-          placeholderPositionAndSize = drawOne(painter, placeholderPositionAndSize) { size ->
-            drawPlaceholder.invoke(this, painter, size, alpha, colorFilter)
+      // If we're only showing the placeholder, it should just be drawn as the primary image.
+      // If we've loaded a full image and we have a placeholder, then we should try to draw both so
+      // that the transition can decide what to do.
+      if (placeholder != primary && transition != DoNotTransition) {
+        placeholder?.let { painter ->
+          drawContext.canvas.withSave {
+            placeholderPositionAndSize = drawOne(painter, placeholderPositionAndSize) { size ->
+              drawPlaceholder.invoke(this, painter, size, alpha, colorFilter)
+            }
           }
         }
       }
