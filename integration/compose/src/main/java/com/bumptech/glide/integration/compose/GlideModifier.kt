@@ -5,9 +5,12 @@ import android.graphics.drawable.Animatable
 import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.Looper
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.isSpecified
@@ -32,6 +35,7 @@ import androidx.compose.ui.node.SemanticsModifierNode
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.node.invalidateMeasurement
 import androidx.compose.ui.platform.InspectorInfo
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
@@ -43,7 +47,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
+import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.RequestManager
 import com.bumptech.glide.integration.ktx.AsyncGlideSize
 import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
 import com.bumptech.glide.integration.ktx.ImmediateGlideSize
@@ -66,6 +72,76 @@ import kotlin.math.roundToInt
 @ExperimentalGlideComposeApi
 internal interface RequestListener {
   fun onStateChanged(model: Any?, painter: Painter?, requestState: RequestState)
+}
+
+@ExperimentalGlideComposeApi
+internal fun Modifier.glideNode(
+  model: Any?,
+  contentDescription: String? = null,
+  alignment: Alignment = Alignment.Center,
+  contentScale: ContentScale = ContentScale.Fit,
+  alpha: Float = DefaultAlpha,
+  colorFilter: ColorFilter? = null,
+  draw: Boolean? = true,
+  loading: com.bumptech.glide.integration.compose.Placeholder? = null,
+  failure: com.bumptech.glide.integration.compose.Placeholder? = null,
+  transition: Transition.Factory? = null,
+  requestListener: RequestListener? = null,
+  requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
+) = composed {
+  val context = LocalContext.current
+  val requestManager: RequestManager = remember(context) { Glide.with(context) }
+  val requestBuilder =
+    rememberRequestBuilderWithDefaults(model, requestManager, requestBuilderTransform, contentScale)
+
+  glideNode(
+    requestBuilder,
+    contentDescription,
+    alignment,
+    contentScale,
+    alpha,
+    colorFilter,
+    transition,
+    requestListener,
+    loadingPlaceholder = loading?.painter(),
+    errorPlaceholder = failure?.painter(),
+    draw = draw,
+  )
+}
+
+@Composable
+internal fun rememberRequestBuilderWithDefaults(
+  model: Any?,
+  requestManager: RequestManager,
+  requestBuilderTransform: RequestBuilderTransform<Drawable>,
+  contentScale: ContentScale
+) =
+  remember(model, requestManager, requestBuilderTransform, contentScale) {
+    requestBuilderTransform(requestManager.load(model).contentScaleTransform(contentScale))
+  }
+
+private fun RequestBuilder<Drawable>.contentScaleTransform(
+  contentScale: ContentScale
+): RequestBuilder<Drawable> {
+  return when (contentScale) {
+    ContentScale.Crop -> {
+      optionalCenterCrop()
+    }
+
+    ContentScale.Inside,
+    ContentScale.Fit -> {
+      // Outside compose, glide would use fitCenter() for FIT. But that's probably not a good
+      // decision given how unimportant Bitmap re-use is relative to minimizing texture sizes now.
+      // So instead we'll do something different and prefer not to upscale, which means using
+      // centerInside(). The UI can still scale the view even if the Bitmap is smaller.
+      optionalCenterInside()
+    }
+
+    else -> {
+      this
+    }
+  }
+  // TODO(judds): Think about how to handle the various fills
 }
 
 @ExperimentalGlideComposeApi

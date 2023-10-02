@@ -20,9 +20,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
-import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
-import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.DataSource
 
 /** Mutates and returns the given [RequestBuilder] to apply relevant options. */
@@ -76,8 +74,6 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  * multiple are made. The transition will not be called if you use [placeholder] or [failure] with
  * the deprecated [Composable] API. See [CrossFade]
  */
-// TODO(judds): the API here is not particularly composeesque, we should consider alternatives
-// to RequestBuilder (though thumbnail() may make that a challenge).
 @ExperimentalGlideComposeApi
 @Composable
 public fun GlideImage(
@@ -88,19 +84,11 @@ public fun GlideImage(
   contentScale: ContentScale = ContentScale.Fit,
   alpha: Float = DefaultAlpha,
   colorFilter: ColorFilter? = null,
-  // TODO(judds): Consider using separate GlideImage* methods instead of sealed classes.
-  // See http://shortn/_x79pjkMZIH for an internal discussion.
   loading: Placeholder? = null,
   failure: Placeholder? = null,
   transition: Transition.Factory? = null,
-  // TODO(judds): Consider defaulting to load the model here instead of always doing so below.
   requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
 ) {
-  val context = LocalContext.current
-  val requestManager: RequestManager = remember(context) { Glide.with(context) }
-  val requestBuilder =
-    rememberRequestBuilderWithDefaults(model, requestManager, requestBuilderTransform, contentScale)
-
   // TODO(judds): It seems like we should be able to use the production paths for
   // resource / drawables as well as Composables. It's not totally clear what part of the prod code
   // isn't supported.
@@ -112,15 +100,16 @@ public fun GlideImage(
   SimpleLayout(
     modifier
       .glideNode(
-        requestBuilder,
-        contentDescription,
-        alignment,
-        contentScale,
-        alpha,
-        colorFilter,
-        transition,
-        loadingPlaceholder = loading?.painter(),
-        errorPlaceholder = failure?.painter(),
+        model = model,
+        contentDescription = contentDescription,
+        alignment = alignment,
+        contentScale = contentScale,
+        alpha = alpha,
+        colorFilter = colorFilter,
+        loading = loading,
+        failure = failure,
+        transition = transition,
+        requestBuilderTransform = requestBuilderTransform,
       )
   )
 }
@@ -228,34 +217,21 @@ public fun GlideSubcomposition(
   requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
   content: @Composable GlideSubcompositionScope.() -> Unit
 ) {
-  val requestManager: RequestManager = LocalContext.current.let { remember(it) { Glide.with(it) } }
-  val requestBuilder =
-    remember(model, requestManager, requestBuilderTransform) {
-      requestBuilderTransform(requestManager.load(model))
-    }
-
-  val requestState: MutableState<RequestState> =
-    remember(model, requestManager, requestBuilderTransform) {
-      mutableStateOf(RequestState.Loading)
-    }
-  val painter: MutableState<Painter?> = remember(model, requestManager, requestBuilderTransform) {
-    mutableStateOf(null)
-  }
-
   val requestListener: StateTrackingListener =
-    remember(model, requestManager, requestBuilderTransform) {
-      StateTrackingListener(
-        requestState,
-        painter
-      )
+    remember(LocalContext.current, model, requestBuilderTransform) {
+      StateTrackingListener()
     }
 
-  val scope = GlideSubcompositionScopeImpl(painter.value, requestState.value)
+  val scope = GlideSubcompositionScopeImpl(
+    requestListener.painter.value,
+    requestListener.state.value
+  )
 
   Box(
     modifier
       .glideNode(
-        requestBuilder,
+        model = model,
+        requestBuilderTransform = requestBuilderTransform,
         draw = false,
         requestListener = requestListener,
       )
@@ -265,10 +241,9 @@ public fun GlideSubcomposition(
 }
 
 @ExperimentalGlideComposeApi
-private class StateTrackingListener(
-  val state: MutableState<RequestState>,
-  val painter: MutableState<Painter?>
-) : RequestListener {
+private class StateTrackingListener : RequestListener {
+  val state: MutableState<RequestState> = mutableStateOf(RequestState.Loading)
+  val painter: MutableState<Painter?> = mutableStateOf(null)
 
   override fun onStateChanged(model: Any?, painter: Painter?, requestState: RequestState) {
     state.value = requestState
@@ -366,43 +341,6 @@ public sealed class Placeholder {
     override fun painter(): Painter = painter
   }
 }
-
-
-@Composable
-private fun rememberRequestBuilderWithDefaults(
-  model: Any?,
-  requestManager: RequestManager,
-  requestBuilderTransform: RequestBuilderTransform<Drawable>,
-  contentScale: ContentScale
-) =
-  remember(model, requestManager, requestBuilderTransform, contentScale) {
-    requestBuilderTransform(requestManager.load(model).contentScaleTransform(contentScale))
-  }
-
-private fun RequestBuilder<Drawable>.contentScaleTransform(
-  contentScale: ContentScale
-): RequestBuilder<Drawable> {
-  return when (contentScale) {
-    ContentScale.Crop -> {
-      optionalCenterCrop()
-    }
-
-    ContentScale.Inside,
-    ContentScale.Fit -> {
-      // Outside compose, glide would use fitCenter() for FIT. But that's probably not a good
-      // decision given how unimportant Bitmap re-use is relative to minimizing texture sizes now.
-      // So instead we'll do something different and prefer not to upscale, which means using
-      // centerInside(). The UI can still scale the view even if the Bitmap is smaller.
-      optionalCenterInside()
-    }
-
-    else -> {
-      this
-    }
-  }
-  // TODO(judds): Think about how to handle the various fills
-}
-
 
 @Composable
 private fun SimpleLayout(

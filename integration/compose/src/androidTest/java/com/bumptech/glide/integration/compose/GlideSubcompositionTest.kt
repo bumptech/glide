@@ -165,7 +165,14 @@ class GlideSubcompositionTest {
     val overrideSize = 50
     // TODO: Compose always uses the generic paths to load models, so it skips options that are
     // set by default by Glide's various class specific .load() method overrides.
-    val future = Glide.with(context).load(resourceId as Any).override(overrideSize).submit()
+    val future =
+      Glide
+        .with(context)
+        .load(resourceId as Any)
+        .override(overrideSize)
+        // Match the default transformation in Compose
+        .centerInside()
+        .submit()
     glideComposeRule.waitForIdle()
     future.get()
     glideComposeRule.setContent {
