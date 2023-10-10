@@ -5,8 +5,8 @@ import androidx.annotation.NonNull;
 
 /**
  * An {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool BitmapPool} implementation
- * that rejects all {@link android.graphics.Bitmap Bitmap}s added to it and always returns {@code
- * null} from get.
+ * that rejects all {@link android.graphics.Bitmap Bitmap}s added to it and always returns a new
+ * {@link android.graphics.Bitmap Bitmap} from {@link #get}.
  */
 public class BitmapPoolAdapter implements BitmapPool {
   @Override
