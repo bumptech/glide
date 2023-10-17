@@ -55,7 +55,6 @@ import com.bumptech.glide.integration.ktx.Status
 import com.bumptech.glide.integration.ktx.flowResolvable
 import com.bumptech.glide.internalModel
 import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.util.Preconditions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -395,18 +394,25 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
 
   @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class, ExperimentalComposeUiApi::class)
   private fun launchRequest(requestBuilder: RequestBuilder<Drawable>) =
-  // Launch via sideEffect because onAttach is called before onNewRequest and onNewRequest is not
-  // always called. That means in onAttach if we launch the request, we might restart an old
-  // request only to have it immediately replaced by a new request, causing jank. Or if we don't
-  // launch the new requests in onAttach, then onNewRequest might not be called and we won't show
-  // the old image.
-  // sideEffect is called after all changes in the tree, so we can always queue a new request, but
+    // Launch via sideEffect because onAttach is called before onNewRequest and onNewRequest is not
+    // always called. That means in onAttach if we launch the request, we might restart an old
+    // request only to have it immediately replaced by a new request, causing jank. Or if we don't
+    // launch the new requests in onAttach, then onNewRequest might not be called and we won't show
+    // the old image.
+    // sideEffect is called after all changes in the tree, so we can always queue a new request, but
     // drop any for old requests by comparing requests builders.
     sideEffect {
+      // The request changed while our sideEffect was queued, which should also have triggered
+      // another sideEffect. Wait for that one instead.
       if (this.requestBuilder != requestBuilder) {
         return@sideEffect
       }
-      Preconditions.checkArgument(currentJob == null)
+      // We've raced with another sideEffect, our previous check means that the request hasn't
+      // changed and this check means we're already loading that image, so we have nothing useful to
+      // to do.
+      if (currentJob != null) {
+        return@sideEffect
+      }
       currentJob = (coroutineScope + Dispatchers.Main.immediate).launch {
         placeholder = null
         placeholderPositionAndSize = null
