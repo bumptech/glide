@@ -1,4 +1,4 @@
-package com.leia.holopix.util.glide;
+package com.bumptech.glide.integration.recyclerview;
 
 import android.widget.AbsListView;
 import android.widget.ListView;
