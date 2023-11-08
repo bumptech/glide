@@ -2,10 +2,12 @@ package com.bumptech.glide.integration.avif;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import androidx.annotation.NonNull;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.annotation.GlideModule;
+import com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder;
 import com.bumptech.glide.module.LibraryGlideModule;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -21,10 +23,21 @@ public final class AvifGlideModule extends LibraryGlideModule {
     // the integration will be preferred for Avif images.
     AvifByteBufferBitmapDecoder byteBufferBitmapDecoder =
         new AvifByteBufferBitmapDecoder(glide.getBitmapPool());
-    registry.prepend(ByteBuffer.class, Bitmap.class, byteBufferBitmapDecoder);
+    registry.prepend(
+        Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class, byteBufferBitmapDecoder);
+    registry.prepend(
+        Registry.BUCKET_BITMAP_DRAWABLE,
+        ByteBuffer.class,
+        BitmapDrawable.class,
+        new BitmapDrawableDecoder<>(context.getResources(), byteBufferBitmapDecoder));
     AvifStreamBitmapDecoder streamBitmapDecoder =
         new AvifStreamBitmapDecoder(
             registry.getImageHeaderParsers(), byteBufferBitmapDecoder, glide.getArrayPool());
-    registry.prepend(InputStream.class, Bitmap.class, streamBitmapDecoder);
+    registry.prepend(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, streamBitmapDecoder);
+    registry.prepend(
+        Registry.BUCKET_BITMAP_DRAWABLE,
+        InputStream.class,
+        BitmapDrawable.class,
+        new BitmapDrawableDecoder<>(context.getResources(), streamBitmapDecoder));
   }
 }
