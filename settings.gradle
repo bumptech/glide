@@ -138,7 +138,7 @@ dependencyResolutionManagement {
             library('retrofit', 'com.squareup.retrofit2', 'retrofit').versionRef('retrofit')
             library('retrofit-gson', 'com.squareup.retrofit2', 'converter-gson').versionRef('retrofit')
             library('retrofit-rxjava', 'com.squareup.retrofit2', 'adapter-rxjava').versionRef('retrofit')
-            library('robolectric', 'org.robolectric:robolectric:4.8.1')
+            library('robolectric', 'org.robolectric:robolectric:4.11.1')
             library('rx-android', 'io.reactivex:rxandroid:1.2.1')
             library('rx-java', 'io.reactivex:rxjava:1.3.8')
             library('svg', 'com.caverock:androidsvg:1.2.1')
