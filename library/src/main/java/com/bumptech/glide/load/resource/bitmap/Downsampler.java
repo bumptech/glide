@@ -139,18 +139,39 @@ public final class Downsampler {
   private final ArrayPool byteArrayPool;
   private final List<ImageHeaderParser> parsers;
   private final HardwareConfigState hardwareConfigState = HardwareConfigState.getInstance();
+  private final boolean preserveGainmapAndColorSpaceForTransformations;
 
   public Downsampler(
       List<ImageHeaderParser> parsers,
       DisplayMetrics displayMetrics,
       BitmapPool bitmapPool,
       ArrayPool byteArrayPool) {
+    this(
+        parsers,
+        displayMetrics,
+        bitmapPool,
+        byteArrayPool,
+        /* preserveGainmapAndColorSpaceForTransformations= */ false);
+  }
+
+  /**
+   * @param preserveGainmapAndColorSpaceForTransformations Preserves gainmap and color space for
+   *     transformation, e.g., the color space of wide gamut images or the gainmap of Ultra HDR
+   *     images.
+   */
+  public Downsampler(
+      List<ImageHeaderParser> parsers,
+      DisplayMetrics displayMetrics,
+      BitmapPool bitmapPool,
+      ArrayPool byteArrayPool,
+      boolean preserveGainmapAndColorSpaceForTransformations) {
     this.parsers = parsers;
     this.displayMetrics = Preconditions.checkNotNull(displayMetrics);
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
     this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
+    this.preserveGainmapAndColorSpaceForTransformations =
+        preserveGainmapAndColorSpaceForTransformations;
   }
-
   public boolean handles(@SuppressWarnings("unused") InputStream is) {
     // We expect Downsampler to handle any available type Android supports.
     return true;
@@ -447,7 +468,9 @@ public final class Downsampler {
       // the expected density dpi.
       downsampled.setDensity(displayMetrics.densityDpi);
 
-      rotated = TransformationUtils.rotateImageExif(bitmapPool, downsampled, orientation);
+      rotated =
+          TransformationUtils.rotateImageExif(
+              bitmapPool, downsampled, orientation, preserveGainmapAndColorSpaceForTransformations);
       if (!downsampled.equals(rotated)) {
         bitmapPool.put(downsampled);
       }
