@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -16,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Application;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -40,7 +42,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -568,12 +569,53 @@ public class GifDrawableTest {
   public void testSetColorFilterSetsColorFilterOnPaint() {
     ColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, Mode.ADD);
     drawable.setColorFilter(colorFilter);
+    verify(paint).setColorFilter(eq(colorFilter));
+  }
 
-    // Use ArgumentCaptor instead of eq() due to b/73121412 where ShadowPorterDuffColorFilter.equals
-    // uses a method that can't be found (PorterDuffColorFilter.getColor).
-    ArgumentCaptor<ColorFilter> captor = ArgumentCaptor.forClass(ColorFilter.class);
-    verify(paint).setColorFilter(captor.capture());
-    assertThat(captor.getValue()).isSameInstanceAs(colorFilter);
+  @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
+  @Test
+  public void testDrawSetsTintListColorFilterOnPaint() {
+    ColorStateList tint =
+        new ColorStateList(
+            new int[][] {new int[] {android.R.attr.state_pressed}, new int[0]},
+            new int[] {Color.RED, Color.GREEN});
+    drawable.setTintList(tint);
+    drawable.setTintMode(Mode.ADD);
+    when(paint.getColorFilter()).thenReturn(null);
+    drawable.draw(new Canvas());
+
+    // draw() temporary sets tint filter then restore.
+    verify(paint).setColorFilter(eq(new PorterDuffColorFilter(Color.GREEN, Mode.ADD)));
+    verify(paint).setColorFilter(null);
+
+    assertThat(drawable.setState(new int[] {android.R.attr.state_pressed})).isTrue();
+    drawable.draw(new Canvas());
+
+    // Pressed state. draw() temporary sets a red color filter.
+    verify(paint).setColorFilter(eq(new PorterDuffColorFilter(Color.RED, Mode.ADD)));
+    verify(paint, times(2)).setColorFilter(null);
+  }
+
+  @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
+  @Test
+  public void testDrawUsesColorFilterInsteadOfTintList() {
+    ColorStateList tint =
+        new ColorStateList(
+            new int[][] {new int[] {android.R.attr.state_pressed}, new int[0]},
+            new int[] {Color.RED, Color.GREEN});
+    drawable.setTintList(tint);
+    drawable.setTintMode(Mode.ADD);
+    ColorFilter colorFilter = new PorterDuffColorFilter(Color.BLUE, Mode.ADD);
+    drawable.setColorFilter(colorFilter);
+    verify(paint).setColorFilter(eq(colorFilter));
+    when(paint.getColorFilter()).thenReturn(colorFilter);
+
+    drawable.draw(new Canvas());
+    drawable.onStateChange(new int[] {android.R.attr.state_pressed});
+    drawable.draw(new Canvas());
+
+    // ColorFilter disables tint list, so draw() should not invoke setColorFilter() any more.
+    verify(paint).setColorFilter(any());
   }
 
   @Test

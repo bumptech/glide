@@ -3,12 +3,16 @@ package com.bumptech.glide.load.resource.gif;
 import static com.bumptech.glide.gifdecoder.GifDecoder.TOTAL_ITERATION_COUNT_FOREVER;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
@@ -66,6 +70,9 @@ public class GifDrawable extends Drawable
 
   private boolean applyGravity;
   private Paint paint;
+  private ColorStateList tint;
+  private PorterDuff.Mode tintMode;
+  private ColorFilter tintFilter;
   private Rect destRect;
 
   /** Callbacks to notify loop completion of a gif, where the loop count is explicitly specified. */
@@ -288,7 +295,17 @@ public class GifDrawable extends Drawable
     }
 
     Bitmap currentFrame = state.frameLoader.getCurrentFrame();
-    canvas.drawBitmap(currentFrame, null, getDestRect(), getPaint());
+    Paint paint = getPaint();
+    ColorFilter colorFilter = paint.getColorFilter();
+    if (colorFilter != null || tintFilter == null) {
+      // ColorFilter disables tint list. See Drawable#setColorFilter().
+      canvas.drawBitmap(currentFrame, null, getDestRect(), paint);
+    } else {
+      // Temporary set a tint filter then restore.
+      paint.setColorFilter(tintFilter);
+      canvas.drawBitmap(currentFrame, null, getDestRect(), paint);
+      paint.setColorFilter(colorFilter);
+    }
   }
 
   @Override
@@ -298,7 +315,47 @@ public class GifDrawable extends Drawable
 
   @Override
   public void setColorFilter(ColorFilter colorFilter) {
-    getPaint().setColorFilter(colorFilter);
+    if (getColorFilter() != colorFilter) {
+      getPaint().setColorFilter(colorFilter);
+      invalidateSelf();
+    }
+  }
+
+  @Override
+  public ColorFilter getColorFilter() {
+    return getPaint().getColorFilter();
+  }
+
+  @Override
+  public void setTintList(ColorStateList tint) {
+    this.tint = tint;
+    updateTintFilter();
+    invalidateSelf();
+  }
+
+  @Override
+  public void setTintMode(PorterDuff.Mode tintMode) {
+    this.tintMode = tintMode;
+    updateTintFilter();
+    invalidateSelf();
+  }
+
+  @Override
+  protected boolean onStateChange(int[] stateSet) {
+    if (tint != null && tintMode != null) {
+      updateTintFilter();
+      return true;
+    }
+    return false;
+  }
+
+  private void updateTintFilter() {
+    if (tint != null && tintMode != null) {
+      int color = tint.getColorForState(getState(), Color.TRANSPARENT);
+      tintFilter = new PorterDuffColorFilter(color, tintMode);
+    } else {
+      tintFilter = null;
+    }
   }
 
   private Rect getDestRect() {
