@@ -49,6 +49,8 @@ public class GifDrawable extends Drawable
 
   private static final int GRAVITY = Gravity.FILL;
 
+  private static final PorterDuff.Mode DEFAULT_TINT_MODE = PorterDuff.Mode.SRC_IN;
+
   private final GifState state;
   /** True if the drawable is currently animating. */
   private boolean isRunning;
@@ -70,8 +72,9 @@ public class GifDrawable extends Drawable
 
   private boolean applyGravity;
   private Paint paint;
+  private ColorFilter colorFilter;
   private ColorStateList tint;
-  private PorterDuff.Mode tintMode;
+  private PorterDuff.Mode tintMode = DEFAULT_TINT_MODE;
   private ColorFilter tintFilter;
   private Rect destRect;
 
@@ -296,16 +299,15 @@ public class GifDrawable extends Drawable
 
     Bitmap currentFrame = state.frameLoader.getCurrentFrame();
     Paint paint = getPaint();
-    ColorFilter colorFilter = paint.getColorFilter();
-    if (colorFilter != null || tintFilter == null) {
+    if (colorFilter != null) {
       // ColorFilter disables tint list. See Drawable#setColorFilter().
-      canvas.drawBitmap(currentFrame, null, getDestRect(), paint);
-    } else {
-      // Temporary set a tint filter then restore.
-      paint.setColorFilter(tintFilter);
-      canvas.drawBitmap(currentFrame, null, getDestRect(), paint);
       paint.setColorFilter(colorFilter);
+    } else if (tintFilter != null) {
+      paint.setColorFilter(tintFilter);
+    } else {
+      paint.setColorFilter(null);
     }
+    canvas.drawBitmap(currentFrame, null, getDestRect(), paint);
   }
 
   @Override
@@ -315,10 +317,8 @@ public class GifDrawable extends Drawable
 
   @Override
   public void setColorFilter(ColorFilter colorFilter) {
-    if (getColorFilter() != colorFilter) {
-      getPaint().setColorFilter(colorFilter);
-      invalidateSelf();
-    }
+    this.colorFilter = colorFilter;
+    invalidateSelf();
   }
 
   @Override
@@ -342,7 +342,7 @@ public class GifDrawable extends Drawable
 
   @Override
   protected boolean onStateChange(int[] stateSet) {
-    if (tint != null && tintMode != null) {
+    if (tint != null) {
       updateTintFilter();
       return true;
     }
@@ -350,9 +350,10 @@ public class GifDrawable extends Drawable
   }
 
   private void updateTintFilter() {
-    if (tint != null && tintMode != null) {
+    if (tint != null) {
       int color = tint.getColorForState(getState(), Color.TRANSPARENT);
-      tintFilter = new PorterDuffColorFilter(color, tintMode);
+      PorterDuff.Mode mode = tintMode != null ? tintMode : DEFAULT_TINT_MODE;
+      tintFilter = new PorterDuffColorFilter(color, mode);
     } else {
       tintFilter = null;
     }
