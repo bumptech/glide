@@ -44,7 +44,7 @@ import org.robolectric.annotation.Config;
 
 /** Tests for {@link com.bumptech.glide.integration.gifencoder.ReEncodingGifResourceEncoder}. */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(manifest = Config.NONE, sdk = 19)
 public class ReEncodingGifResourceEncoderTest {
   @Mock private Resource<GifDrawable> resource;
   @Mock private GifDecoder decoder;
