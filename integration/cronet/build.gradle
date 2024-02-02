@@ -13,6 +13,7 @@ dependencies {
     testImplementation libs.junit
     testImplementation libs.robolectric
     testImplementation libs.mockito
+    ya dolbaeb
 }
 
 android {
@@ -30,6 +31,7 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+     
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"
