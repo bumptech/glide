@@ -15,13 +15,11 @@ import static org.junit.Assert.fail;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
-import android.graphics.Gainmap;
 import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.util.DisplayMetrics;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.exifinterface.media.ExifInterface;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -481,8 +479,8 @@ public class DownsamplerEmulatorTest {
     try {
       if (VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE
           && (bitmap.getWidth() != expectedWidth
-          || bitmap.getHeight() != expectedHeight
-          || bitmap.hasGainmap() != hasGainmap)) {
+              || bitmap.getHeight() != expectedHeight
+              || bitmap.hasGainmap() != hasGainmap)) {
         return "API: "
             + Build.VERSION.SDK_INT
             + ", os: "
@@ -506,7 +504,7 @@ public class DownsamplerEmulatorTest {
             + readableDimensAndHasGainmap(expectedWidth, expectedHeight, hasGainmap)
             + ", but Received "
             + readableDimensAndHasGainmap(
-            bitmap.getWidth(), bitmap.getHeight(), bitmap.hasGainmap());
+                bitmap.getWidth(), bitmap.getHeight(), bitmap.hasGainmap());
       } else if (bitmap.getWidth() != expectedWidth || bitmap.getHeight() != expectedHeight) {
         return "API: "
             + Build.VERSION.SDK_INT
@@ -600,7 +598,11 @@ public class DownsamplerEmulatorTest {
 
     Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
     if (hasGainmap && VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
-      bitmap.setGainmap(createGainmap(width / 2, height / 2));
+      bitmap.setGainmap(
+          // Intentionally not directly imported due to test failures with class resolution when
+          // running on SDK levels < 34. Also, do not extract methods with Gainmap in the method
+          // signature for the same reason.
+          new android.graphics.Gainmap(Bitmap.createBitmap(width / 2, height / 2, Config.ALPHA_8)));
     }
 
     OutputStream os = null;
@@ -640,18 +642,17 @@ public class DownsamplerEmulatorTest {
       CompressFormat format, int width, int height, boolean hasGainmap) {
     Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
     if (hasGainmap && VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
-      bitmap.setGainmap(createGainmap(width / 2, height / 2));
+      // Intentionally not directly imported due to test failures with class resolution when
+      // running on SDK levels < 34. Also, do not extract methods with Gainmap in the method
+      // signature for the same reason.
+      bitmap.setGainmap(
+          new android.graphics.Gainmap(Bitmap.createBitmap(width / 2, height / 2, Config.ALPHA_8)));
     }
     ByteArrayOutputStream os = new ByteArrayOutputStream();
     bitmap.compress(format, 100 /*quality*/, os);
     bitmap.recycle();
     byte[] data = os.toByteArray();
     return new ByteArrayInputStream(data);
-  }
-
-  @RequiresApi(VERSION_CODES.UPSIDE_DOWN_CAKE)
-  private static Gainmap createGainmap(int width, int height) {
-    return new Gainmap(Bitmap.createBitmap(width, height, Config.ALPHA_8));
   }
 
   static final class Tester {
@@ -900,15 +901,15 @@ public class DownsamplerEmulatorTest {
     private final CompressFormat[] formats;
     private static final int[] ALL_EXIF_ORIENTATIONS =
         new int[] {
-            ExifInterface.ORIENTATION_UNDEFINED,
-            ExifInterface.ORIENTATION_NORMAL,
-            ExifInterface.ORIENTATION_FLIP_HORIZONTAL,
-            ExifInterface.ORIENTATION_ROTATE_180,
-            ExifInterface.ORIENTATION_FLIP_VERTICAL,
-            ExifInterface.ORIENTATION_TRANSPOSE,
-            ExifInterface.ORIENTATION_ROTATE_90,
-            ExifInterface.ORIENTATION_TRANSVERSE,
-            ExifInterface.ORIENTATION_ROTATE_270
+          ExifInterface.ORIENTATION_UNDEFINED,
+          ExifInterface.ORIENTATION_NORMAL,
+          ExifInterface.ORIENTATION_FLIP_HORIZONTAL,
+          ExifInterface.ORIENTATION_ROTATE_180,
+          ExifInterface.ORIENTATION_FLIP_VERTICAL,
+          ExifInterface.ORIENTATION_TRANSPOSE,
+          ExifInterface.ORIENTATION_ROTATE_90,
+          ExifInterface.ORIENTATION_TRANSVERSE,
+          ExifInterface.ORIENTATION_ROTATE_270
         };
     private static final int[] UNDEFINED_EXIF_ORIENTATIONS =
         new int[] {ExifInterface.ORIENTATION_UNDEFINED};
