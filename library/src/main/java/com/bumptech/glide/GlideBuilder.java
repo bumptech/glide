@@ -488,14 +488,11 @@ public final class GlideBuilder {
   }
 
   /**
-   * Preserves gainmap and color spaces while {@link Bitmap}s undergo transformation, i.e., in
-   * {@link com.bumptech.glide.load.resource.bitmap.TransformationUtils}.
-   *
-   * <p>Without this flag on, gainmap and color space information may be dropped in transformations,
-   * leading to unexpected behavior when transforming wide gamut images or Ultra HDR images.
+   * @deprecated This method does nothing. It will be hard coded and removed in a future release
+   *     without further warning.
    */
+  @Deprecated
   public GlideBuilder setPreserveGainmapAndColorSpaceForTransformations(boolean isEnabled) {
-    glideExperimentsBuilder.update(new PreserveGainmapAndColorSpaceForTransformations(), isEnabled);
     return this;
   }
 
@@ -622,12 +619,6 @@ public final class GlideBuilder {
       this.fdCount = fdCount;
     }
   }
-
-  /**
-   * Preserves gainmap and color spaces while {@link Bitmap}s undergo transformation, i.e., in
-   * {@link com.bumptech.glide.load.resource.bitmap.TransformationUtils}.
-   */
-  static final class PreserveGainmapAndColorSpaceForTransformations implements Experiment {}
 
   /** Fixes decoding of hardware gainmaps from Ultra HDR images on Android U. */
   static final class EnableHardwareGainmapFixOnU implements Experiment {}

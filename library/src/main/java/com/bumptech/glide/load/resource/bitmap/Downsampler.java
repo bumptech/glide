@@ -141,7 +141,6 @@ public final class Downsampler {
   private final ArrayPool byteArrayPool;
   private final List<ImageHeaderParser> parsers;
   private final HardwareConfigState hardwareConfigState = HardwareConfigState.getInstance();
-  private final boolean preserveGainmapAndColorSpaceForTransformations;
   private final boolean enableHardwareGainmapFixOnU;
 
   public Downsampler(
@@ -154,34 +153,10 @@ public final class Downsampler {
         displayMetrics,
         bitmapPool,
         byteArrayPool,
-        /* preserveGainmapAndColorSpaceForTransformations= */ false,
         /* enableHardwareGainmapFixOnU= */ false);
   }
 
   /**
-   * @param preserveGainmapAndColorSpaceForTransformations Preserves gainmap and color space for
-   *     transformation, e.g., the color space of wide gamut images or the gainmap of Ultra HDR
-   *     images.
-   */
-  public Downsampler(
-      List<ImageHeaderParser> parsers,
-      DisplayMetrics displayMetrics,
-      BitmapPool bitmapPool,
-      ArrayPool byteArrayPool,
-      boolean preserveGainmapAndColorSpaceForTransformations) {
-    this(
-        parsers,
-        displayMetrics,
-        bitmapPool,
-        byteArrayPool,
-        preserveGainmapAndColorSpaceForTransformations,
-        /* enableHardwareGainmapFixOnU= */ false);
-  }
-
-  /**
-   * @param preserveGainmapAndColorSpaceForTransformations Preserves gainmap and color space for
-   *     transformation, e.g., the color space of wide gamut images or the gainmap of Ultra HDR
-   *     images.
    * @param enableHardwareGainmapFixOnU Fixes issues with hardware gainmaps on U.
    */
   public Downsampler(
@@ -189,14 +164,11 @@ public final class Downsampler {
       DisplayMetrics displayMetrics,
       BitmapPool bitmapPool,
       ArrayPool byteArrayPool,
-      boolean preserveGainmapAndColorSpaceForTransformations,
       boolean enableHardwareGainmapFixOnU) {
     this.parsers = parsers;
     this.displayMetrics = Preconditions.checkNotNull(displayMetrics);
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
     this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
-    this.preserveGainmapAndColorSpaceForTransformations =
-        preserveGainmapAndColorSpaceForTransformations;
     this.enableHardwareGainmapFixOnU = enableHardwareGainmapFixOnU;
   }
 
@@ -498,9 +470,7 @@ public final class Downsampler {
       // the expected density dpi.
       downsampled.setDensity(displayMetrics.densityDpi);
 
-      rotated =
-          TransformationUtils.rotateImageExif(
-              bitmapPool, downsampled, orientation, preserveGainmapAndColorSpaceForTransformations);
+      rotated = TransformationUtils.rotateImageExif(bitmapPool, downsampled, orientation);
       if (!downsampled.equals(rotated)) {
         bitmapPool.put(downsampled);
       }
