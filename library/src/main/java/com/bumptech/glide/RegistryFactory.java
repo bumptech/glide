@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.tracing.Trace;
 import com.bumptech.glide.GlideBuilder.EnableHardwareGainmapFixOnU;
 import com.bumptech.glide.GlideBuilder.EnableImageDecoderForBitmaps;
-import com.bumptech.glide.GlideBuilder.PreserveGainmapAndColorSpaceForTransformations;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -161,7 +160,6 @@ final class RegistryFactory {
             resources.getDisplayMetrics(),
             bitmapPool,
             arrayPool,
-            experiments.isEnabled(PreserveGainmapAndColorSpaceForTransformations.class),
             experiments.isEnabled(EnableHardwareGainmapFixOnU.class));
 
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;

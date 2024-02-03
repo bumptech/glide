@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -15,7 +16,6 @@ import static org.mockito.Mockito.when;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.ColorSpace;
-import android.graphics.ColorSpace.Named;
 import android.graphics.Matrix;
 import android.os.Build.VERSION_CODES;
 import androidx.exifinterface.media.ExifInterface;
@@ -403,43 +403,24 @@ public class TransformationUtilsTest {
 
   @Test
   @Config(sdk = 19)
-  public void testRotateImageExifHandlesBitmapsWithNullConfigs() {
+  public void testRotateImageExif_preservesitmapsWithNullConfigs() {
     Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     toRotate.setConfig(null);
     Bitmap rotated =
         TransformationUtils.rotateImageExif(
             bitmapPool, toRotate, ExifInterface.ORIENTATION_ROTATE_180);
-    assertEquals(Bitmap.Config.ARGB_8888, rotated.getConfig());
+    assertNull(rotated.getConfig());
   }
 
   @Test
   @Config(sdk = VERSION_CODES.UPSIDE_DOWN_CAKE)
-  public void rotateImageExif_flagOff_doesNotPreserveColorSpace() {
+  public void rotateImageExif_preservesColorSpace() {
     Bitmap toRotate = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888);
     toRotate.setColorSpace(ColorSpace.get(ColorSpace.Named.DISPLAY_P3));
 
     Bitmap rotated =
         TransformationUtils.rotateImageExif(
-            bitmapPool,
-            toRotate,
-            ExifInterface.ORIENTATION_ROTATE_90,
-            /* preserveGainmapAndColorSpace= */ false);
-
-    assertEquals(ColorSpace.get(Named.SRGB), rotated.getColorSpace());
-  }
-
-  @Test
-  @Config(sdk = VERSION_CODES.UPSIDE_DOWN_CAKE)
-  public void rotateImageExif_flagOm_preservesColorSpace() {
-    Bitmap toRotate = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888);
-    toRotate.setColorSpace(ColorSpace.get(ColorSpace.Named.DISPLAY_P3));
-
-    Bitmap rotated =
-        TransformationUtils.rotateImageExif(
-            bitmapPool,
-            toRotate,
-            ExifInterface.ORIENTATION_ROTATE_90,
-            /* preserveGainmapAndColorSpace= */ true);
+            bitmapPool, toRotate, ExifInterface.ORIENTATION_ROTATE_90);
 
     assertEquals(ColorSpace.get(ColorSpace.Named.DISPLAY_P3), rotated.getColorSpace());
   }
