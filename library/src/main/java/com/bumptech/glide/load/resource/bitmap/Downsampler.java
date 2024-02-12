@@ -65,6 +65,7 @@ public final class Downsampler {
    */
   public static final Option<PreferredColorSpace> PREFERRED_COLOR_SPACE =
       Option.memory("com.bumptech.glide.load.resource.bitmap.Downsampler.PreferredColorSpace");
+
   /**
    * Indicates the {@link com.bumptech.glide.load.resource.bitmap.DownsampleStrategy} option that
    * will be used to calculate the sample size to use to downsample an image given the original and
@@ -74,6 +75,7 @@ public final class Downsampler {
    */
   @Deprecated
   public static final Option<DownsampleStrategy> DOWNSAMPLE_STRATEGY = DownsampleStrategy.OPTION;
+
   /**
    * Ensure that the size of the bitmap is fixed to the requested width and height of the resource
    * from the caller. The final resource dimensions may differ from the requested width and height,
@@ -140,6 +142,7 @@ public final class Downsampler {
   private final List<ImageHeaderParser> parsers;
   private final HardwareConfigState hardwareConfigState = HardwareConfigState.getInstance();
   private final boolean preserveGainmapAndColorSpaceForTransformations;
+  private final boolean enableHardwareGainmapFixOnU;
 
   public Downsampler(
       List<ImageHeaderParser> parsers,
@@ -151,7 +154,8 @@ public final class Downsampler {
         displayMetrics,
         bitmapPool,
         byteArrayPool,
-        /* preserveGainmapAndColorSpaceForTransformations= */ false);
+        /* preserveGainmapAndColorSpaceForTransformations= */ false,
+        /* enableHardwareGainmapFixOnU= */ false);
   }
 
   /**
@@ -165,13 +169,37 @@ public final class Downsampler {
       BitmapPool bitmapPool,
       ArrayPool byteArrayPool,
       boolean preserveGainmapAndColorSpaceForTransformations) {
+    this(
+        parsers,
+        displayMetrics,
+        bitmapPool,
+        byteArrayPool,
+        preserveGainmapAndColorSpaceForTransformations,
+        /* enableHardwareGainmapFixOnU= */ false);
+  }
+
+  /**
+   * @param preserveGainmapAndColorSpaceForTransformations Preserves gainmap and color space for
+   *     transformation, e.g., the color space of wide gamut images or the gainmap of Ultra HDR
+   *     images.
+   * @param enableHardwareGainmapFixOnU Fixes issues with hardware gainmaps on U.
+   */
+  public Downsampler(
+      List<ImageHeaderParser> parsers,
+      DisplayMetrics displayMetrics,
+      BitmapPool bitmapPool,
+      ArrayPool byteArrayPool,
+      boolean preserveGainmapAndColorSpaceForTransformations,
+      boolean enableHardwareGainmapFixOnU) {
     this.parsers = parsers;
     this.displayMetrics = Preconditions.checkNotNull(displayMetrics);
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
     this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
     this.preserveGainmapAndColorSpaceForTransformations =
         preserveGainmapAndColorSpaceForTransformations;
+    this.enableHardwareGainmapFixOnU = enableHardwareGainmapFixOnU;
   }
+
   public boolean handles(@SuppressWarnings("unused") InputStream is) {
     // We expect Downsampler to handle any available type Android supports.
     return true;
@@ -206,7 +234,8 @@ public final class Downsampler {
       ByteBuffer buffer, int requestedWidth, int requestedHeight, Options options)
       throws IOException {
     return decode(
-        new ImageReader.ByteBufferReader(buffer, parsers, byteArrayPool),
+        new ImageReader.ByteBufferReader(
+            buffer, parsers, byteArrayPool, enableHardwareGainmapFixOnU),
         requestedWidth,
         requestedHeight,
         options,
@@ -241,7 +270,8 @@ public final class Downsampler {
       DecodeCallbacks callbacks)
       throws IOException {
     return decode(
-        new ImageReader.InputStreamImageReader(is, parsers, byteArrayPool),
+        new ImageReader.InputStreamImageReader(
+            is, parsers, byteArrayPool, enableHardwareGainmapFixOnU),
         requestedWidth,
         requestedHeight,
         options,
@@ -252,7 +282,7 @@ public final class Downsampler {
   void decode(byte[] bytes, int requestedWidth, int requestedHeight, Options options)
       throws IOException {
     decode(
-        new ImageReader.ByteArrayReader(bytes, parsers, byteArrayPool),
+        new ImageReader.ByteArrayReader(bytes, parsers, byteArrayPool, enableHardwareGainmapFixOnU),
         requestedWidth,
         requestedHeight,
         options,
@@ -263,7 +293,7 @@ public final class Downsampler {
   void decode(File file, int requestedWidth, int requestedHeight, Options options)
       throws IOException {
     decode(
-        new ImageReader.FileReader(file, parsers, byteArrayPool),
+        new ImageReader.FileReader(file, parsers, byteArrayPool, enableHardwareGainmapFixOnU),
         requestedWidth,
         requestedHeight,
         options,
@@ -276,7 +306,7 @@ public final class Downsampler {
       throws IOException {
     return decode(
         new ImageReader.ParcelFileDescriptorImageReader(
-            parcelFileDescriptor, parsers, byteArrayPool),
+            parcelFileDescriptor, parsers, byteArrayPool, enableHardwareGainmapFixOnU),
         outWidth,
         outHeight,
         options,
