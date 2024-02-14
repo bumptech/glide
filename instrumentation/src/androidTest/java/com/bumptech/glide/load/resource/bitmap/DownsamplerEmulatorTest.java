@@ -562,12 +562,7 @@ public class DownsamplerEmulatorTest {
     BitmapPool bitmapPool = new BitmapPoolAdapter();
     ArrayPool arrayPool = new LruArrayPool();
     return new Downsampler(
-        parsers,
-        displayMetrics,
-        bitmapPool,
-        arrayPool,
-        /* preserveGainmapAndColorSpaceForTransformations= */ true,
-        /* enableHardwareGainmapFixOnU= */ true);
+        parsers, displayMetrics, bitmapPool, arrayPool, /* enableHardwareGainmapFixOnU= */ true);
   }
 
   private static InputStream openBitmapStream(
