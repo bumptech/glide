@@ -74,7 +74,7 @@ dependencyResolutionManagement {
             library('android-gradle', 'com.android.tools.build:gradle:8.1.1')
             library('androidx-cardview', 'androidx.cardview:cardview:1.0.0')
             library('androidx-core', 'androidx.core:core:1.12.0')
-            library('androidx-annotation', 'androidx.annotation:annotation:1.6.0')
+            library('androidx-annotation', 'androidx.annotation:annotation:1.7.1')
             library('androidx-appcompat', 'androidx.appcompat:appcompat:1.6.1')
             library('androidx-benchmark.gradle', 'androidx.benchmark', 'benchmark-gradle-plugin').versionRef('androidx-benchmark')
             library('androidx-benchmark.junit', 'androidx.benchmark', 'benchmark-junit4').versionRef('androidx-benchmark')
