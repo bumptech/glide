@@ -141,35 +141,16 @@ public final class Downsampler {
   private final ArrayPool byteArrayPool;
   private final List<ImageHeaderParser> parsers;
   private final HardwareConfigState hardwareConfigState = HardwareConfigState.getInstance();
-  private final boolean enableHardwareGainmapFixOnU;
 
   public Downsampler(
       List<ImageHeaderParser> parsers,
       DisplayMetrics displayMetrics,
       BitmapPool bitmapPool,
       ArrayPool byteArrayPool) {
-    this(
-        parsers,
-        displayMetrics,
-        bitmapPool,
-        byteArrayPool,
-        /* enableHardwareGainmapFixOnU= */ false);
-  }
-
-  /**
-   * @param enableHardwareGainmapFixOnU Fixes issues with hardware gainmaps on U.
-   */
-  public Downsampler(
-      List<ImageHeaderParser> parsers,
-      DisplayMetrics displayMetrics,
-      BitmapPool bitmapPool,
-      ArrayPool byteArrayPool,
-      boolean enableHardwareGainmapFixOnU) {
     this.parsers = parsers;
     this.displayMetrics = Preconditions.checkNotNull(displayMetrics);
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
     this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
-    this.enableHardwareGainmapFixOnU = enableHardwareGainmapFixOnU;
   }
 
   public boolean handles(@SuppressWarnings("unused") InputStream is) {
@@ -206,8 +187,7 @@ public final class Downsampler {
       ByteBuffer buffer, int requestedWidth, int requestedHeight, Options options)
       throws IOException {
     return decode(
-        new ImageReader.ByteBufferReader(
-            buffer, parsers, byteArrayPool, enableHardwareGainmapFixOnU),
+        new ImageReader.ByteBufferReader(buffer, parsers, byteArrayPool),
         requestedWidth,
         requestedHeight,
         options,
@@ -242,8 +222,7 @@ public final class Downsampler {
       DecodeCallbacks callbacks)
       throws IOException {
     return decode(
-        new ImageReader.InputStreamImageReader(
-            is, parsers, byteArrayPool, enableHardwareGainmapFixOnU),
+        new ImageReader.InputStreamImageReader(is, parsers, byteArrayPool),
         requestedWidth,
         requestedHeight,
         options,
@@ -254,7 +233,7 @@ public final class Downsampler {
   void decode(byte[] bytes, int requestedWidth, int requestedHeight, Options options)
       throws IOException {
     decode(
-        new ImageReader.ByteArrayReader(bytes, parsers, byteArrayPool, enableHardwareGainmapFixOnU),
+        new ImageReader.ByteArrayReader(bytes, parsers, byteArrayPool),
         requestedWidth,
         requestedHeight,
         options,
@@ -265,7 +244,7 @@ public final class Downsampler {
   void decode(File file, int requestedWidth, int requestedHeight, Options options)
       throws IOException {
     decode(
-        new ImageReader.FileReader(file, parsers, byteArrayPool, enableHardwareGainmapFixOnU),
+        new ImageReader.FileReader(file, parsers, byteArrayPool),
         requestedWidth,
         requestedHeight,
         options,
@@ -278,7 +257,7 @@ public final class Downsampler {
       throws IOException {
     return decode(
         new ImageReader.ParcelFileDescriptorImageReader(
-            parcelFileDescriptor, parsers, byteArrayPool, enableHardwareGainmapFixOnU),
+            parcelFileDescriptor, parsers, byteArrayPool),
         outWidth,
         outHeight,
         options,

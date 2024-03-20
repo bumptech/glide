@@ -444,8 +444,7 @@ public class DownsamplerEmulatorTest {
       int expectedWidth,
       int expectedHeight)
       throws IOException {
-    Downsampler downsampler =
-        hasGainmap ? buildDownsamplerWithGainmapBugFixes() : buildDownsampler();
+    Downsampler downsampler = buildDownsampler();
 
     InputStream is =
         openBitmapStream(format, initialWidth, initialHeight, exifOrientation, hasGainmap);
@@ -551,18 +550,6 @@ public class DownsamplerEmulatorTest {
     BitmapPool bitmapPool = new BitmapPoolAdapter();
     ArrayPool arrayPool = new LruArrayPool();
     return new Downsampler(parsers, displayMetrics, bitmapPool, arrayPool);
-  }
-
-  private static Downsampler buildDownsamplerWithGainmapBugFixes() {
-    List<ImageHeaderParser> parsers =
-        Collections.<ImageHeaderParser>singletonList(new DefaultImageHeaderParser());
-    DisplayMetrics displayMetrics = new DisplayMetrics();
-    // XHDPI.
-    displayMetrics.densityDpi = 320;
-    BitmapPool bitmapPool = new BitmapPoolAdapter();
-    ArrayPool arrayPool = new LruArrayPool();
-    return new Downsampler(
-        parsers, displayMetrics, bitmapPool, arrayPool, /* enableHardwareGainmapFixOnU= */ true);
   }
 
   private static InputStream openBitmapStream(
