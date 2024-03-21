@@ -44,7 +44,6 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 import org.robolectric.util.ReflectionHelpers;
 
 /**
@@ -55,7 +54,6 @@ import org.robolectric.util.ReflectionHelpers;
  * gradle changes, but I've so far failed to figure out the right set of commands.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 19)
 public class CustomViewTargetTest {
   private ActivityController<Activity> activity;
   private View view;
@@ -230,7 +228,7 @@ public class CustomViewTargetTest {
     activity.visible();
     view.getViewTreeObserver().dispatchOnPreDraw();
 
-    verify(cb).onSizeReady(width, 352);
+    verify(cb).onSizeReady(width, 344);
   }
 
   @Test
