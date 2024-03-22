@@ -49,7 +49,7 @@ public class ResourceLoaderTest {
   @Test
   public void testCanHandleId() {
     int id = android.R.drawable.star_off;
-    Uri contentUri = Uri.parse("android.resource://android/drawable/star_off");
+    Uri contentUri = Uri.parse("android.resource://android/" + String.valueOf(id));
     when(uriLoader.buildLoadData(eq(contentUri), anyInt(), anyInt(), any(Options.class)))
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 
