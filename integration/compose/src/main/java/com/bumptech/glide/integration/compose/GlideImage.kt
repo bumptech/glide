@@ -235,15 +235,15 @@ public fun GlideSubcomposition(
     }
 
   val requestState: MutableState<RequestState> =
-    remember(model, requestManager, requestBuilderTransform) {
+    remember(requestBuilder) {
       mutableStateOf(RequestState.Loading)
     }
-  val painter: MutableState<Painter?> = remember(model, requestManager, requestBuilderTransform) {
+  val painter: MutableState<Painter?> = remember(requestBuilder) {
     mutableStateOf(null)
   }
 
   val requestListener: StateTrackingListener =
-    remember(model, requestManager, requestBuilderTransform) {
+    remember(requestBuilder) {
       StateTrackingListener(
         requestState,
         painter
