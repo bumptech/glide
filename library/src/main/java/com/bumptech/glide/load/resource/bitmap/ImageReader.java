@@ -43,25 +43,17 @@ interface ImageReader {
     private final byte[] bytes;
     private final List<ImageHeaderParser> parsers;
     private final ArrayPool byteArrayPool;
-    private final boolean enableHardwareGainmapFixOnU;
 
-    ByteArrayReader(
-        byte[] bytes,
-        List<ImageHeaderParser> parsers,
-        ArrayPool byteArrayPool,
-        boolean enableHardwareGainmapFixOnU) {
+    ByteArrayReader(byte[] bytes, List<ImageHeaderParser> parsers, ArrayPool byteArrayPool) {
       this.bytes = bytes;
       this.parsers = parsers;
       this.byteArrayPool = byteArrayPool;
-      this.enableHardwareGainmapFixOnU = enableHardwareGainmapFixOnU;
     }
 
     @Nullable
     @Override
     public Bitmap decodeBitmap(Options options) {
-      return enableHardwareGainmapFixOnU
-          ? GlideBitmapFactory.decodeByteArray(bytes, options)
-          : BitmapFactory.decodeByteArray(bytes, /* offset= */ 0, bytes.length, options);
+      return GlideBitmapFactory.decodeByteArray(bytes, options);
     }
 
     @Override
@@ -83,17 +75,11 @@ interface ImageReader {
     private final File file;
     private final List<ImageHeaderParser> parsers;
     private final ArrayPool byteArrayPool;
-    private final boolean enableHardwareGainmapFixOnU;
 
-    FileReader(
-        File file,
-        List<ImageHeaderParser> parsers,
-        ArrayPool byteArrayPool,
-        boolean enableHardwareGainmapFixOnU) {
+    FileReader(File file, List<ImageHeaderParser> parsers, ArrayPool byteArrayPool) {
       this.file = file;
       this.parsers = parsers;
       this.byteArrayPool = byteArrayPool;
-      this.enableHardwareGainmapFixOnU = enableHardwareGainmapFixOnU;
     }
 
     @Nullable
@@ -102,9 +88,7 @@ interface ImageReader {
       InputStream is = null;
       try {
         is = new RecyclableBufferedInputStream(new FileInputStream(file), byteArrayPool);
-        return enableHardwareGainmapFixOnU
-            ? GlideBitmapFactory.decodeStream(is, options)
-            : BitmapFactory.decodeStream(is, /* outPadding= */ null, options);
+        return GlideBitmapFactory.decodeStream(is, options);
       } finally {
         if (is != null) {
           try {
@@ -159,26 +143,18 @@ interface ImageReader {
     private final ByteBuffer buffer;
     private final List<ImageHeaderParser> parsers;
     private final ArrayPool byteArrayPool;
-    private final boolean enableHardwareGainmapFixOnU;
 
-    ByteBufferReader(
-        ByteBuffer buffer,
-        List<ImageHeaderParser> parsers,
-        ArrayPool byteArrayPool,
-        boolean enableHardwareGainmapFixOnU) {
+    ByteBufferReader(ByteBuffer buffer, List<ImageHeaderParser> parsers, ArrayPool byteArrayPool) {
       this.buffer = buffer;
       this.parsers = parsers;
       this.byteArrayPool = byteArrayPool;
-      this.enableHardwareGainmapFixOnU = enableHardwareGainmapFixOnU;
     }
 
     @Nullable
     @Override
     public Bitmap decodeBitmap(Options options) {
       InputStream inputStream = stream();
-      return enableHardwareGainmapFixOnU
-          ? GlideBitmapFactory.decodeStream(inputStream, options)
-          : BitmapFactory.decodeStream(inputStream, /* outPadding= */ null, options);
+      return GlideBitmapFactory.decodeStream(inputStream, options);
     }
 
     @Override
@@ -204,27 +180,20 @@ interface ImageReader {
     private final InputStreamRewinder dataRewinder;
     private final ArrayPool byteArrayPool;
     private final List<ImageHeaderParser> parsers;
-    private final boolean enableHardwareGainmapFixOnU;
 
     InputStreamImageReader(
-        InputStream is,
-        List<ImageHeaderParser> parsers,
-        ArrayPool byteArrayPool,
-        boolean enableHardwareGainmapFixOnU) {
+        InputStream is, List<ImageHeaderParser> parsers, ArrayPool byteArrayPool) {
       this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
       this.parsers = Preconditions.checkNotNull(parsers);
 
       dataRewinder = new InputStreamRewinder(is, byteArrayPool);
-      this.enableHardwareGainmapFixOnU = enableHardwareGainmapFixOnU;
     }
 
     @Nullable
     @Override
     public Bitmap decodeBitmap(BitmapFactory.Options options) throws IOException {
       InputStream inputStream = dataRewinder.rewindAndGet();
-      return enableHardwareGainmapFixOnU
-          ? GlideBitmapFactory.decodeStream(inputStream, options)
-          : BitmapFactory.decodeStream(inputStream, /* outPadding= */ null, options);
+      return GlideBitmapFactory.decodeStream(inputStream, options);
     }
 
     @Override
@@ -248,18 +217,15 @@ interface ImageReader {
     private final ArrayPool byteArrayPool;
     private final List<ImageHeaderParser> parsers;
     private final ParcelFileDescriptorRewinder dataRewinder;
-    private final boolean enableHardwareGainmapFixOnU;
 
     ParcelFileDescriptorImageReader(
         ParcelFileDescriptor parcelFileDescriptor,
         List<ImageHeaderParser> parsers,
-        ArrayPool byteArrayPool,
-        boolean enableHardwareGainmapFixOnU) {
+        ArrayPool byteArrayPool) {
       this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
       this.parsers = Preconditions.checkNotNull(parsers);
 
       dataRewinder = new ParcelFileDescriptorRewinder(parcelFileDescriptor);
-      this.enableHardwareGainmapFixOnU = enableHardwareGainmapFixOnU;
     }
 
     @Nullable
@@ -267,10 +233,7 @@ interface ImageReader {
     public Bitmap decodeBitmap(BitmapFactory.Options options) throws IOException {
       ParcelFileDescriptor parcelFileDescriptor = dataRewinder.rewindAndGet();
       FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-      return enableHardwareGainmapFixOnU
-          ? GlideBitmapFactory.decodeFileDescriptor(fileDescriptor, options)
-          : BitmapFactory.decodeFileDescriptor(
-              parcelFileDescriptor.getFileDescriptor(), /* outPadding= */ null, options);
+      return GlideBitmapFactory.decodeFileDescriptor(fileDescriptor, options);
     }
 
     @Override

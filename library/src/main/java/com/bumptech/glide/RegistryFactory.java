@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import androidx.annotation.Nullable;
 import androidx.tracing.Trace;
-import com.bumptech.glide.GlideBuilder.EnableHardwareGainmapFixOnU;
 import com.bumptech.glide.GlideBuilder.EnableImageDecoderForBitmaps;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.ImageHeaderParser;
@@ -156,11 +155,7 @@ final class RegistryFactory {
     // TODO(judds): Make ParcelFileDescriptorBitmapDecoder work with ImageDecoder.
     Downsampler downsampler =
         new Downsampler(
-            registry.getImageHeaderParsers(),
-            resources.getDisplayMetrics(),
-            bitmapPool,
-            arrayPool,
-            experiments.isEnabled(EnableHardwareGainmapFixOnU.class));
+            registry.getImageHeaderParsers(), resources.getDisplayMetrics(), bitmapPool, arrayPool);
 
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
