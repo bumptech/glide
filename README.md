@@ -16,6 +16,8 @@ stack, but also includes utility libraries plug in to Google's Volley project or
 Glide's primary focus is on making scrolling any kind of a list of images as smooth and fast as possible, but Glide is
 also effective for almost any case where you need to fetch, resize, and display a remote image.
 
+Glide can also smoothly display lists of images generated with GenAI.
+
 Download
 --------
 For detailed instructions and requirements, see Glide's [download and setup docs page][28].
