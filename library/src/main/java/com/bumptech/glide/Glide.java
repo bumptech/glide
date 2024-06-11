@@ -104,19 +104,22 @@ public class Glide implements ComponentCallbacks2 {
   @Nullable
   public static File getPhotoCacheDir(@NonNull Context context, @NonNull String cacheName) {
     File cacheDir = context.getCacheDir();
-    if (cacheDir != null) {
-      File result = new File(cacheDir, cacheName);
-      if (result.isDirectory() || result.mkdirs()) {
-        return result;
-      }
-      // File wasn't able to create a directory, or the result exists but not a directory
+    if (cacheDir == null) {
+      Log.e(TAG, "getCacheDir returned null");
       return null;
     }
-    if (Log.isLoggable(TAG, Log.ERROR)) {
-      Log.e(TAG, "default disk cache dir is null");
+
+    File result = new File(cacheDir, cacheName);
+    if (result.mkdirs()) {
+      return result;
+    } else {
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Failed to create directory: " + result);
+      }
+      return null;
     }
-    return null;
   }
+
 
   /**
    * Get the singleton.
@@ -224,45 +227,26 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull Context context,
       @NonNull GlideBuilder builder,
       @Nullable GeneratedAppGlideModule annotationGeneratedModule) {
+
     Context applicationContext = context.getApplicationContext();
+
     List<GlideModule> manifestModules = Collections.emptyList();
     if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
       manifestModules = new ManifestParser(applicationContext).parse();
     }
 
-    if (annotationGeneratedModule != null
-        && !annotationGeneratedModule.getExcludedModuleClasses().isEmpty()) {
-      Set<Class<?>> excludedModuleClasses = annotationGeneratedModule.getExcludedModuleClasses();
-      Iterator<GlideModule> iterator = manifestModules.iterator();
-      while (iterator.hasNext()) {
-        GlideModule current = iterator.next();
-        if (!excludedModuleClasses.contains(current.getClass())) {
-          continue;
-        }
-        if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "AppGlideModule excludes manifest GlideModule: " + current);
-        }
-        iterator.remove();
-      }
-    }
+    Set<Class<?>> excludedModules = annotationGeneratedModule != null ? annotationGeneratedModule.getExcludedModuleClasses() : Collections.emptySet();
+    manifestModules = manifestModules.stream()
+        .filter(module -> !excludedModules.contains(module.getClass()))
+        .collect(Collectors.toList());
 
-    if (Log.isLoggable(TAG, Log.DEBUG)) {
-      for (GlideModule glideModule : manifestModules) {
-        Log.d(TAG, "Discovered GlideModule from manifest: " + glideModule.getClass());
-      }
-    }
-
-    RequestManagerRetriever.RequestManagerFactory factory =
-        annotationGeneratedModule != null
-            ? annotationGeneratedModule.getRequestManagerFactory()
-            : null;
+    RequestManagerRetriever.RequestManagerFactory factory = annotationGeneratedModule != null ? annotationGeneratedModule.getRequestManagerFactory() : null;
     builder.setRequestManagerFactory(factory);
-    for (GlideModule module : manifestModules) {
-      module.applyOptions(applicationContext, builder);
-    }
+    manifestModules.forEach(module -> module.applyOptions(applicationContext, builder));
     if (annotationGeneratedModule != null) {
       annotationGeneratedModule.applyOptions(applicationContext, builder);
     }
+
     Glide glide = builder.build(applicationContext, manifestModules, annotationGeneratedModule);
     applicationContext.registerComponentCallbacks(glide);
     Glide.glide = glide;
