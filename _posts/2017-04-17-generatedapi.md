@@ -18,7 +18,7 @@ Specifically:
 1. You should not add new [`Extensions`][6] as described on this page
 2. You should not use generated classes. Use the equivalent non-generated classes instead:
 
-    *  Instead of `GlideApp`, use `com.bumptech.Glide`
+    *  Instead of `GlideApp`, use `com.bumptech.glide.Glide`
     *  Instead of `GlideRequests`, use `com.bumptech.glide.RequestManager`
     *  Instead of `GlideRequest`, use `com.bumptech.glide.RequestBuilder`
     *  Instead of `GlideOptions`, use `com.bumptech.glide.request.RequestOptions`
