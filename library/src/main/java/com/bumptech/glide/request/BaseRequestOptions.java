@@ -1364,8 +1364,18 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   }
 
   @SuppressWarnings("WeakerAccess")
+  public final boolean hasErrorId() {
+    return isSet(ERROR_ID);
+  }
+
+  @SuppressWarnings("WeakerAccess")
   public final int getPlaceholderId() {
     return placeholderId;
+  }
+
+  @SuppressWarnings("WeakerAccess")
+  public final boolean hasPlaceholderId() {
+    return isSet(PLACEHOLDER_ID);
   }
 
   @SuppressWarnings("WeakerAccess")
@@ -1377,6 +1387,11 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @SuppressWarnings("WeakerAccess")
   public final int getFallbackId() {
     return fallbackId;
+  }
+
+  @SuppressWarnings("WeakerAccess")
+  public final boolean hasFallbackId() {
+    return isSet(FALLBACK_ID);
   }
 
   @SuppressWarnings("WeakerAccess")
