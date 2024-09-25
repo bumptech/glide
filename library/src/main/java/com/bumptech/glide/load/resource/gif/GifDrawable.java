@@ -352,8 +352,8 @@ public class GifDrawable extends Drawable
     }
 
     if (maxLoopCount != LOOP_FOREVER && loopCount >= maxLoopCount) {
-      notifyAnimationEndToListeners();
       stop();
+      notifyAnimationEndToListeners();
     }
   }
 
