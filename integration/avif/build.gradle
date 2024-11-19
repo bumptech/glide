@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 dependencies {
     implementation project(':library')
-    implementation 'org.aomedia.avif.android:avif:0.11.1.647c3c2'
+    implementation 'org.aomedia.avif.android:avif:1.1.1.14d8e3c4'
     implementation libs.guava
 
     annotationProcessor project(':annotation:compiler')
