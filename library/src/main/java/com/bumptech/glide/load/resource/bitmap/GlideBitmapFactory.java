@@ -249,8 +249,8 @@ final class GlideBitmapFactory {
     private static Bitmap copyAlpha8ToOpaqueArgb888(Bitmap bitmap) {
       Preconditions.checkArgument(bitmap.getConfig() == Config.ALPHA_8);
       // We have to use a canvas operation with an opaque alpha filter to draw the gainmap. We can't
-      // use bitmap.copy(Config.ARGB_8888, /* isMutable= */ false) because copying from A8 to RBGA
-      // will result in zero-valued RGB values.
+      // use bitmap.copy(Config.ARGB_8888, /* isMutable= */ false) because the output bitmap will
+      // have zero values for alpha.
       Bitmap newContents =
           Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Config.ARGB_8888);
       Canvas canvas = new Canvas(newContents);
