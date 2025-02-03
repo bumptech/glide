@@ -36,10 +36,14 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   private static final String JPEG_EXIF_SEGMENT_PREAMBLE = "Exif\0\0";
   static final byte[] JPEG_EXIF_SEGMENT_PREAMBLE_BYTES =
       JPEG_EXIF_SEGMENT_PREAMBLE.getBytes(Charset.forName("UTF-8"));
+  private static final String JPEG_MPF_SEGMENT_PREAMBLE = "MPF";
+  static final byte[] JPEG_MPF_SEGMENT_PREAMBLE_BYTES =
+      JPEG_MPF_SEGMENT_PREAMBLE.getBytes(Charset.forName("UTF-8"));
   private static final int SEGMENT_SOS = 0xDA;
   private static final int MARKER_EOI = 0xD9;
   static final int SEGMENT_START_ID = 0xFF;
   static final int EXIF_SEGMENT_TYPE = 0xE1;
+  static final int APP2_SEGMENT_TYPE = 0xE2;
   private static final int ORIENTATION_TAG_TYPE = 0x0112;
   private static final int[] BYTES_PER_FORMAT = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
   // WebP-related
@@ -92,6 +96,49 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     return getOrientation(
         new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)),
         Preconditions.checkNotNull(byteArrayPool));
+  }
+
+  @Override
+  public boolean hasJpegMpf(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
+    return hasJpegMpf(
+        new StreamReader(Preconditions.checkNotNull(is)),
+        Preconditions.checkNotNull(byteArrayPool));
+  }
+
+  @Override
+  public boolean hasJpegMpf(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
+    return hasJpegMpf(
+        new ByteBufferReader(Preconditions.checkNotNull(byteBuffer)),
+        Preconditions.checkNotNull(byteArrayPool));
+  }
+
+  private boolean hasJpegMpf(@NonNull Reader reader, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
+    if (getType(reader) != JPEG) {
+      return false;
+    }
+    int app2SegmentLength = moveToApp2SegmentAndGetLength(reader);
+    while (app2SegmentLength > 0) {
+      byte[] app2Data = byteArrayPool.get(app2SegmentLength, byte[].class);
+      try {
+        boolean hasJpegMpfPreamble = hasJpegMpfPreamble(reader, app2Data, app2SegmentLength);
+        if (hasJpegMpfPreamble) {
+          return true;
+        }
+      } finally {
+        byteArrayPool.put(app2Data);
+      }
+      app2SegmentLength = moveToApp2SegmentAndGetLength(reader);
+    }
+    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+      Log.v(
+          TAG,
+          "hasMpf: Failed to parse APP2 segment length, or no APP2 segment with MPF metadata not"
+              + " found");
+    }
+    return false;
   }
 
   @NonNull
@@ -283,11 +330,14 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   }
 
   private boolean hasJpegExifPreamble(byte[] exifData, int exifSegmentLength) {
-    boolean result =
-        exifData != null && exifSegmentLength > JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length;
+    return hasMatchingBytes(exifData, exifSegmentLength, JPEG_EXIF_SEGMENT_PREAMBLE_BYTES);
+  }
+
+  private boolean hasMatchingBytes(byte[] bytes, int byteLength, byte[] bytesToMatch) {
+    boolean result = bytes != null && bytesToMatch != null && byteLength > bytesToMatch.length;
     if (result) {
-      for (int i = 0; i < JPEG_EXIF_SEGMENT_PREAMBLE_BYTES.length; i++) {
-        if (exifData[i] != JPEG_EXIF_SEGMENT_PREAMBLE_BYTES[i]) {
+      for (int i = 0; i < bytesToMatch.length; i++) {
+        if (bytes[i] != bytesToMatch[i]) {
           result = false;
           break;
         }
@@ -301,6 +351,37 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
    * {@code -1} if no exif segment is found.
    */
   private int moveToExifSegmentAndGetLength(Reader reader) throws IOException {
+    return moveToSegmentAndGetLength(reader, EXIF_SEGMENT_TYPE);
+  }
+
+  private boolean hasJpegMpfPreamble(Reader reader, byte[] tempArray, int mpfSegmentLength)
+      throws IOException {
+    int read = reader.read(tempArray, mpfSegmentLength);
+    if (read != mpfSegmentLength) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(
+            TAG,
+            "Unable to read MPF segment data"
+                + ", length: "
+                + mpfSegmentLength
+                + ", actually read: "
+                + read);
+      }
+      return false;
+    }
+    return hasMatchingBytes(tempArray, mpfSegmentLength, JPEG_MPF_SEGMENT_PREAMBLE_BYTES);
+  }
+
+  private int moveToApp2SegmentAndGetLength(Reader reader) throws IOException {
+    return moveToSegmentAndGetLength(reader, APP2_SEGMENT_TYPE);
+  }
+
+  /**
+   * Moves reader to the start of the segment identified by the segment type (e.g., "0xE1" for APP1
+   * and returns the length of the exif segment or {@code -1} if no segment of that type is found.
+   */
+  private int moveToSegmentAndGetLength(Reader reader, int requestedSegmentType)
+      throws IOException {
     while (true) {
       short segmentId = reader.getUInt8();
       if (segmentId != SEGMENT_START_ID) {
@@ -315,7 +396,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
         return -1;
       } else if (segmentType == MARKER_EOI) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-          Log.d(TAG, "Found MARKER_EOI in exif segment");
+          Log.d(TAG, "Found MARKER_EOI in " + requestedSegmentType + " segment");
         }
         return -1;
       }
@@ -323,7 +404,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       int segmentLength = reader.getUInt16();
       // A segment includes the bytes that specify its length.
       int segmentContentsLength = segmentLength - 2;
-      if (segmentType != EXIF_SEGMENT_TYPE) {
+      if (segmentType != requestedSegmentType) {
         long skipped = reader.skip(segmentContentsLength);
         if (skipped != segmentContentsLength) {
           if (Log.isLoggable(TAG, Log.DEBUG)) {

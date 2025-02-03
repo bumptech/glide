@@ -36,6 +36,8 @@ interface ImageReader {
 
   int getImageOrientation() throws IOException;
 
+  boolean hasJpegMpf() throws IOException;
+
   void stopGrowingBuffers();
 
   final class ByteArrayReader implements ImageReader {
@@ -53,7 +55,7 @@ interface ImageReader {
     @Nullable
     @Override
     public Bitmap decodeBitmap(Options options) {
-      return GlideBitmapFactory.decodeByteArray(bytes, options);
+      return GlideBitmapFactory.decodeByteArray(bytes, options, this);
     }
 
     @Override
@@ -64,6 +66,11 @@ interface ImageReader {
     @Override
     public int getImageOrientation() throws IOException {
       return ImageHeaderParserUtils.getOrientation(parsers, ByteBuffer.wrap(bytes), byteArrayPool);
+    }
+
+    @Override
+    public boolean hasJpegMpf() throws IOException {
+      return ImageHeaderParserUtils.hasJpegMpf(parsers, ByteBuffer.wrap(bytes), byteArrayPool);
     }
 
     @Override
@@ -88,7 +95,7 @@ interface ImageReader {
       InputStream is = null;
       try {
         is = new RecyclableBufferedInputStream(new FileInputStream(file), byteArrayPool);
-        return GlideBitmapFactory.decodeStream(is, options);
+        return GlideBitmapFactory.decodeStream(is, options, this);
       } finally {
         if (is != null) {
           try {
@@ -135,6 +142,23 @@ interface ImageReader {
     }
 
     @Override
+    public boolean hasJpegMpf() throws IOException {
+      InputStream is = null;
+      try {
+        is = new RecyclableBufferedInputStream(new FileInputStream(file), byteArrayPool);
+        return ImageHeaderParserUtils.hasJpegMpf(parsers, is, byteArrayPool);
+      } finally {
+        if (is != null) {
+          try {
+            is.close();
+          } catch (IOException e) {
+            // Ignored.
+          }
+        }
+      }
+    }
+
+    @Override
     public void stopGrowingBuffers() {}
   }
 
@@ -154,7 +178,7 @@ interface ImageReader {
     @Override
     public Bitmap decodeBitmap(Options options) {
       InputStream inputStream = stream();
-      return GlideBitmapFactory.decodeStream(inputStream, options);
+      return GlideBitmapFactory.decodeStream(inputStream, options, this);
     }
 
     @Override
@@ -165,6 +189,12 @@ interface ImageReader {
     @Override
     public int getImageOrientation() throws IOException {
       return ImageHeaderParserUtils.getOrientation(
+          parsers, ByteBufferUtil.rewind(buffer), byteArrayPool);
+    }
+
+    @Override
+    public boolean hasJpegMpf() throws IOException {
+      return ImageHeaderParserUtils.hasJpegMpf(
           parsers, ByteBufferUtil.rewind(buffer), byteArrayPool);
     }
 
@@ -193,7 +223,7 @@ interface ImageReader {
     @Override
     public Bitmap decodeBitmap(BitmapFactory.Options options) throws IOException {
       InputStream inputStream = dataRewinder.rewindAndGet();
-      return GlideBitmapFactory.decodeStream(inputStream, options);
+      return GlideBitmapFactory.decodeStream(inputStream, options, this);
     }
 
     @Override
@@ -205,6 +235,11 @@ interface ImageReader {
     public int getImageOrientation() throws IOException {
       return ImageHeaderParserUtils.getOrientation(
           parsers, dataRewinder.rewindAndGet(), byteArrayPool);
+    }
+
+    @Override
+    public boolean hasJpegMpf() throws IOException {
+      return ImageHeaderParserUtils.hasJpegMpf(parsers, dataRewinder.rewindAndGet(), byteArrayPool);
     }
 
     @Override
@@ -233,7 +268,7 @@ interface ImageReader {
     public Bitmap decodeBitmap(BitmapFactory.Options options) throws IOException {
       ParcelFileDescriptor parcelFileDescriptor = dataRewinder.rewindAndGet();
       FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-      return GlideBitmapFactory.decodeFileDescriptor(fileDescriptor, options);
+      return GlideBitmapFactory.decodeFileDescriptor(fileDescriptor, options, this);
     }
 
     @Override
@@ -244,6 +279,11 @@ interface ImageReader {
     @Override
     public int getImageOrientation() throws IOException {
       return ImageHeaderParserUtils.getOrientation(parsers, dataRewinder, byteArrayPool);
+    }
+
+    @Override
+    public boolean hasJpegMpf() throws IOException {
+      return ImageHeaderParserUtils.hasJpegMpf(parsers, dataRewinder, byteArrayPool);
     }
 
     @Override
