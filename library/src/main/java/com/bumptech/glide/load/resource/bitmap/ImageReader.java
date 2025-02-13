@@ -145,7 +145,7 @@ interface ImageReader {
     public boolean hasJpegMpf() throws IOException {
       InputStream is = null;
       try {
-        is = new RecyclableBufferedInputStream(new FileInputStream(file), byteArrayPool);
+        is = new FileInputStream(file);
         return ImageHeaderParserUtils.hasJpegMpf(parsers, is, byteArrayPool);
       } finally {
         if (is != null) {
