@@ -78,17 +78,4 @@ public interface ImageHeaderParser {
 
   int getOrientation(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
       throws IOException;
-
-  /**
-   * Returns whether the {@link InputStream} has associated multi-picture-format (MPF) data. Only
-   * JPEGs have MPF data.
-   */
-  boolean hasJpegMpf(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool) throws IOException;
-
-  /**
-   * Returns whether the {@link ByteBuffer} has associated multi-picture-format (MPF) data. Only
-   * JPEGs have MPF data.
-   */
-  boolean hasJpegMpf(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
-      throws IOException;
 }
