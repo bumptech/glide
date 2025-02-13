@@ -239,7 +239,7 @@ public final class ImageHeaderParserUtils {
    * Returns the result from the first of {@code parsers} that returns true when MPF is detected, if
    * any..
    *
-   * <p>If {@code buffer} is null, the parers list is empty, or none of the parsers returns a valid
+   * <p>If {@code buffer} is null, the parsers list is empty, or none of the parsers returns a valid
    * value, false is returned.
    */
   public static boolean hasJpegMpf(

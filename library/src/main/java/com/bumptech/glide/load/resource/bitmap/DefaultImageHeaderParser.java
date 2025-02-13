@@ -354,22 +354,33 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     return moveToSegmentAndGetLength(reader, EXIF_SEGMENT_TYPE);
   }
 
-  private boolean hasJpegMpfPreamble(Reader reader, byte[] tempArray, int mpfSegmentLength)
+  /**
+   * Returns whether the reader, set at the beginning of the APP2 segment past the length bytes,
+   * contains multi-picture format (MPF) data.
+   *
+   * @param reader must be set at the start of an APP2 segment, past the APP2 label and length
+   *      bytes.
+   * @param tempArray for storing temporary array. Must be at least the size of
+   *     {@code app2SegmentLength}.
+   * @param app2SegmentLength the length of the APP2 segment.
+   * @throws IOException if an EOF is reached before anything was read.
+   */
+  private boolean hasJpegMpfPreamble(Reader reader, byte[] tempArray, int app2SegmentLength)
       throws IOException {
-    int read = reader.read(tempArray, mpfSegmentLength);
-    if (read != mpfSegmentLength) {
+    int read = reader.read(tempArray, app2SegmentLength);
+    if (read != app2SegmentLength) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
         Log.d(
             TAG,
-            "Unable to read MPF segment data"
+            "Unable to read APP2 segment data"
                 + ", length: "
-                + mpfSegmentLength
+                + app2SegmentLength
                 + ", actually read: "
                 + read);
       }
       return false;
     }
-    return hasMatchingBytes(tempArray, mpfSegmentLength, JPEG_MPF_SEGMENT_PREAMBLE_BYTES);
+    return hasMatchingBytes(tempArray, app2SegmentLength, JPEG_MPF_SEGMENT_PREAMBLE_BYTES);
   }
 
   private int moveToApp2SegmentAndGetLength(Reader reader) throws IOException {
