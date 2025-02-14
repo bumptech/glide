@@ -52,4 +52,16 @@ public final class ExifInterfaceImageHeaderParser implements ImageHeaderParser {
       throws IOException {
     return getOrientation(ByteBufferUtil.toStream(byteBuffer), byteArrayPool);
   }
+
+  @Override
+  public boolean hasJpegMpf(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
+    return false;
+  }
+
+  @Override
+  public boolean hasJpegMpf(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
+      throws IOException {
+    return false;
+  }
 }
