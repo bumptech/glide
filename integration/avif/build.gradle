@@ -3,17 +3,17 @@ apply plugin: 'com.android.library'
 dependencies {
     implementation project(':library')
     implementation 'org.aomedia.avif.android:avif:0.11.1.3c786d2'
-    implementation "com.google.guava:guava:${GUAVA_VERSION}"
+    implementation libs.guava
 
     annotationProcessor project(':annotation:compiler')
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
 
         versionName VERSION_NAME as String
     }

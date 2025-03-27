@@ -2,25 +2,25 @@ apply plugin: 'com.android.library'
 
 dependencies {
     implementation project(':library')
-    implementation 'com.google.android.gms:play-services-cronet:17.0.0'
-    implementation "com.google.guava:guava:${GUAVA_VERSION}"
+    implementation libs.cronet
+    implementation libs.guava
     implementation project(':annotation')
     annotationProcessor project(':annotation:compiler')
 
-    api "androidx.annotation:annotation:${ANDROID_X_ANNOTATION_VERSION}"
+    api libs.androidx.annotation
 
-    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
-    testImplementation "junit:junit:${JUNIT_VERSION}"
-    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
+    testImplementation libs.truth
+    testImplementation libs.junit
+    testImplementation libs.robolectric
+    testImplementation libs.mockito
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
         minSdk 16 as int
-        targetSdk TARGET_SDK_VERSION as int
+        targetSdk libs.versions.target.sdk.version.get() as int
 
         versionName VERSION_NAME as String
     }

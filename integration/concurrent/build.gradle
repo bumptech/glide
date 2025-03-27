@@ -2,23 +2,23 @@ apply plugin: 'com.android.library'
 
 dependencies {
     implementation project(':library')
-    implementation "com.google.guava:guava:${GUAVA_VERSION}"
-    implementation "androidx.concurrent:concurrent-futures:${ANDROID_X_CONCURRENT_FUTURES_VERSION}"
+    implementation libs.guava
+    implementation libs.androidx.futures
 
     testImplementation project(':mocks')
     testImplementation project(':testutil')
-    testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
-    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
-    testImplementation "junit:junit:${JUNIT_VERSION}"
-    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
+    testImplementation libs.androidx.test.core
+    testImplementation libs.truth
+    testImplementation libs.junit
+    testImplementation libs.robolectric
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
 
         versionName = VERSION_NAME as String
     }
