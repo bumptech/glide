@@ -183,6 +183,11 @@ public class Glide implements ComponentCallbacks2 {
     }
   }
 
+  @VisibleForTesting
+  public static synchronized boolean isInitialized() {
+    return glide != null;
+  }
+
   /**
    * Allows hardware Bitmaps to be used prior to the first frame in the app being drawn as soon as
    * this method is called.
