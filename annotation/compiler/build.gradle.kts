@@ -1,0 +1,117 @@
+// import proguard.gradle.ProGuardTask
+plugins {
+    id("java")
+}
+
+//apply plugin: 'java'
+
+// This package is stuck at java 7 for as long as we use jarjar.
+// We should re-evaluate whether we need to continue to worry
+// about this.
+//java {
+//    sourceCompatibility = JavaVersion.VERSION_1_7
+//    targetCompatibility = JavaVersion.VERSION_1_7
+//}
+
+//configurations {
+//    // adapted from https://android.googlesource.com/platform/frameworks/testing/+/976c423/espresso/espresso-lib/build.gradle
+//    // compileOnly dependencies will be repackaged, see rules in jarjar ant task below
+//    jarjar
+//}
+
+dependencies {
+    // jarjar "com.googlecode.jarjar:jarjar:1.3"
+
+    // compileOnly("com.squareup:kotlinpoet:1.12.0")
+    implementation("com.squareup:javapoet:1.13.0")
+    compileOnly("com.google.auto.service:auto-service:1.1.1")
+    compileOnly("com.google.code.findbugs:jsr305:3.0.2")
+    implementation(project(":annotation"))
+    annotationProcessor("com.google.auto.service:auto-service:1.1.1")
+}
+//
+//javadoc {
+//    failOnError = false
+//}
+//
+//// TODO: Figure out a way to get the annotation processor tests running and re-enable this.
+//// Make sure running `gradlew :annotation:compiler:check` actually does full quality control.
+////test.dependsOn ':annotation:compiler:test:test'
+//
+//def packagingFolder = file("${buildDir}/intermediates")
+//def repackagedJar = file("${packagingFolder}/repackaged.jar")
+//def proguardedJar = file("${packagingFolder}/proguarded.jar")
+//
+//task compiledJar(type: Jar, dependsOn: classes) {
+//    destinationDirectory.set(packagingFolder)
+//    archiveFileName.set('compiled.jar')
+//    from sourceSets.main.output
+//}
+//
+//// Repackage compileOnly dependencies to avoid namespace collisions.
+//task jarjar(dependsOn: [tasks.compiledJar, configurations.compileClasspath]) {
+//    // Set up inputs and outputs to only rebuild when necessary (code change, dependency change).
+//    inputs.files compiledJar
+//    inputs.files configurations.compileClasspath
+//    outputs.file repackagedJar
+//
+//    doFirst {
+//        ant {
+//            taskdef name: 'jarjar',
+//                    classname: 'com.tonicsystems.jarjar.JarJarTask',
+//                    classpath: configurations.jarjar.asPath
+//
+//            jarjar(jarfile: repackagedJar) {
+//                configurations.compileClasspath.resolve().each {
+//                    zipfileset(src: it.absolutePath, excludes: [
+//                        'META-INF/maven/**',
+//                        'META-INF/services/javax.annotation.processing.Processor'
+//                    ].join(','))
+//                }
+//                zipfileset(src: tasks.compiledJar.archivePath)
+//                def repackageIntoGlide = 'com.bumptech.glide.repackaged.@0'
+//                rule result: repackageIntoGlide, pattern: 'com.squareup.javapoet.**'
+//                rule result: repackageIntoGlide, pattern: 'com.google.auto.**'
+//                rule result: repackageIntoGlide, pattern: 'com.google.common.**'
+//                rule result: repackageIntoGlide, pattern: 'com.google.thirdparty.publicsuffix.**'
+//            }
+//        }
+//    }
+//}
+
+// Proguard repackaged dependencies to reduce the binary size.
+//task proguard(type: ProGuardTask, dependsOn: tasks.jarjar) {
+//    configuration 'proguard.pro'
+//
+//    injars repackagedJar
+//    outjars proguardedJar
+//
+//    libraryjars files(configurations.compileClasspath.collect())
+//    // From http://cr.openjdk.java.net/~mr/jigsaw/ea/module-summary.html
+//    for (jmod in [
+//            "java.base",
+//            "java.logging",
+//            "java.compiler",
+//            "jdk.compiler",
+//            "jdk.unsupported"]) {
+//        libraryjars(
+//                "${System.getProperty('java.home')}/jmods/${jmod}.jmod",
+//                jarfilter: '!**.jar',
+//                filter: '!module-info.class')
+//    }
+//}
+
+// Replace the contents of the standard jar task with those from our our compiled, repackaged and
+// proguarded jar. Replacing the task itself is possible and looks simpler, but requires
+// reconstructing the task dependency chain and is more complex in practice.
+//jar {
+//    dependsOn proguard
+//    from zipTree(proguardedJar)
+//    exclude { entry ->
+//        sourceSets.main.output.files*.absolutePath.any {
+//            entry.file.absolutePath.startsWith it
+//        }
+//    }
+//}
+
+// apply from: "${rootProject.projectDir}/scripts/upload.gradle"

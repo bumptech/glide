@@ -53,7 +53,7 @@ android {
 // This special test only submodule exists because adding the :glide dependency seems to break
 // the annotation processor dependency chain for the internal sample apps. It's also somewhat
 // easier to parse as a separate module given the existing complexity here and in the compiler
-// build.gradle file.
+// build.gradle.kts file.
 dependencies {
     testImplementation project(':glide')
     testImplementation project(':annotation:compiler')

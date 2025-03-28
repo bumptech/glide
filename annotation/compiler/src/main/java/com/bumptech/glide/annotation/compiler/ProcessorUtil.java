@@ -20,8 +20,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
-import com.sun.tools.javac.code.Attribute;
-import com.sun.tools.javac.code.Type.ClassType;
+import javax.lang.model.type.DeclaredType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -558,13 +557,12 @@ final class ProcessorUtil {
         throw new IllegalArgumentException("Expected single value, but found: " + values);
       }
       excludedModuleAnnotationValue = values.iterator().next().getValue();
-      if (excludedModuleAnnotationValue == null
-          || excludedModuleAnnotationValue instanceof Attribute.UnresolvedClass) {
+      if (excludedModuleAnnotationValue == null) {
         throw new IllegalArgumentException(
-            "Failed to find value for: "
-                + annotationClass
-                + " from mirrors: "
-                + clazz.getAnnotationMirrors());
+                "Failed to find value for: "
+                        + annotationClass
+                        + " from mirrors: "
+                        + clazz.getAnnotationMirrors());
       }
     }
     if (excludedModuleAnnotationValue == null) {
@@ -579,7 +577,7 @@ final class ProcessorUtil {
       }
       return result;
     } else {
-      ClassType classType = (ClassType) value;
+      DeclaredType classType = (DeclaredType) value;
       return Collections.singleton(classType.toString());
     }
   }
