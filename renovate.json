@@ -5,13 +5,10 @@
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["androidx-fragment"],
-      "allowedVersions": "<1.4"
-    },
-    {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true,
       "automergeType": "branch",
-    },
+      "ignoreDeps": ["androidx.fragment:fragment", "androidx.annotation:annotation"]
+    }
   ]
 }
