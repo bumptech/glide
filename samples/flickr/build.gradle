@@ -13,10 +13,10 @@ dependencies {
 }
 
 android {
+    namespace 'com.bumptech.glide.samples.flickr'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        applicationId 'com.bumptech.glide.samples.flickr'
         minSdk libs.versions.min.sdk.version.get() as int
         targetSdk libs.versions.target.sdk.version.get() as int
 

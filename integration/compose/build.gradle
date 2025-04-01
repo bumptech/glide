@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+    namespace 'com.bumptech.glide.integration.compose'
     compileSdk 33
 
     defaultConfig {

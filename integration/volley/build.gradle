@@ -18,6 +18,7 @@ dependencies {
 }
 
 android {
+    namespace 'com.bumptech.glide.integration.volley'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {

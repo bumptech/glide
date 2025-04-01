@@ -14,6 +14,7 @@ dependencies {
 }
 
 android {
+    namespace 'com.bumptech.glide.integration.gifencoder'
     compileSdkVersion libs.versions.compile.sdk.version.get()
 
     sourceSets {
