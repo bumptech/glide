@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,7 +22,7 @@ import org.robolectric.annotation.Config;
 
 /** Tests for the {@link UriLoader} class. */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class UriLoaderTest {
   // Not a magic number, just arbitrary non zero.
   private static final int IMAGE_SIDE = 120;

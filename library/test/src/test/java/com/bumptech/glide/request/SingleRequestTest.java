@@ -1,5 +1,6 @@
 package com.bumptech.glide.request;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.isADataSource;
 import static com.bumptech.glide.tests.Util.mockResource;
 import static com.google.common.truth.Truth.assertThat;
@@ -59,7 +60,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 @SuppressWarnings("rawtypes")
 public class SingleRequestTest {
 

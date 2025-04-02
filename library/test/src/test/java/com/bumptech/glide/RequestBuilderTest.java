@@ -40,7 +40,7 @@ import org.robolectric.annotation.Config;
 
 @SuppressWarnings("unchecked")
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK)
 public class RequestBuilderTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 

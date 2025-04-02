@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.prefill;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.anyResource;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNotEquals;
@@ -43,7 +44,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class BitmapPreFillRunnerTest {
   @Mock private BitmapPreFillRunner.Clock clock;
   @Mock private BitmapPool pool;
