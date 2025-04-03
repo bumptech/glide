@@ -19,7 +19,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
@@ -379,7 +378,7 @@ public sealed class Placeholder {
     @Composable
     override fun painter(): Painter {
       if (!this::_painter.isInitialized) {
-        _painter = painterResource(resourceId)
+        _painter = LocalContext.current.getDrawable(resourceId).toPainter()
       }
       return _painter
     }
