@@ -329,9 +329,8 @@ public fun placeholder(painter: Painter?): Placeholder =
  * each time the load status changes. Do not use it in scrolling lists.
  */
 @Deprecated(
-  "Using this method forces recomposition when the image load state changes." +
-      " If you require this behavior use GlideSubcomposition instead",
-  level = DeprecationLevel.WARNING
+  "This method doesn't do anything! Use GlideSubcomposition instead",
+  level = DeprecationLevel.ERROR
 )
 @ExperimentalGlideComposeApi
 public fun placeholder(composable: @Composable () -> Unit): Placeholder =
