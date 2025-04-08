@@ -92,7 +92,7 @@ dependencyResolutionManagement {
             library('androidx-test.ktx.junit', 'androidx.test.ext:junit-ktx:1.1.5')
             library('androidx-test.rules', 'androidx.test:rules:1.4.0')
             library('androidx-test.runner', 'androidx.test:runner:1.4.0')
-            library('androidx-tracing', 'androidx.tracing:tracing:1.0.0')
+            library('androidx-tracing', 'androidx.tracing:tracing:1.2.0')
             library('androidx.vectordrawable', 'androidx.vectordrawable:vectordrawable-animated:1.1.0')
             library('proguard-gradle', 'com.guardsquare:proguard-gradle:7.1.0')
             library('compose-foundation', 'androidx.compose.foundation', 'foundation').versionRef('compose')
