@@ -434,7 +434,7 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
                 // Prefer the override Painters if set.
                 val painter = when (state) {
                   is RequestState.Loading -> loadingPlaceholder
-                  is RequestState.Failure -> errorPlaceholder
+                  is RequestState.Failure -> errorPlaceholder ?: loadingPlaceholder
                   is RequestState.Success -> throw IllegalStateException()
                 }
                 val primary = if (painter != null) {

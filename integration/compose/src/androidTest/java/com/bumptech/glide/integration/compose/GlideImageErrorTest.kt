@@ -51,6 +51,23 @@ class GlideImageErrorTest {
   }
 
   @Test
+  fun loadingParameter_withError_isUsedWhenAllElseFails() {
+    val description = "test"
+    val resourceId = android.R.drawable.star_big_off
+    glideComposeRule.setContent {
+      GlideImage(
+        model = null,
+        contentDescription = description,
+        loading = placeholder(resourceId),
+      )
+    }
+
+    glideComposeRule
+      .onNodeWithContentDescription(description)
+      .assert(expectDisplayedPainter(context, resourceId))
+  }
+
+  @Test
   fun failureParameter_withErrorResourceId_displaysError() {
     val description = "test"
     val failureResourceId = android.R.drawable.star_big_off
@@ -58,6 +75,7 @@ class GlideImageErrorTest {
       GlideImage(
         model = null,
         contentDescription = description,
+        loading = placeholder(android.R.drawable.star_on), // arbitary; shouldn't be displayed.
         failure = placeholder(failureResourceId),
       )
     }
