@@ -44,6 +44,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
       )
 
     compileCurrentSourceType(kotlinModule, javaModule) {
+      assertThat(it.messages).doesNotContainMatch("[we]: \\[ksp] .*")
       assertThat(it.exitCode).isEqualTo(ExitCode.OK)
       assertFailsWith<FileNotFoundException> { it.generatedAppGlideModuleContents() }
     }
@@ -100,6 +101,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
       javaAppModule,
       javaLibraryModule
     ) {
+      assertThat(it.messages).doesNotContainMatch("[we]: \\[ksp] .*")
       assertThat(it.exitCode).isEqualTo(ExitCode.OK)
       assertThat(it.generatedAppGlideModuleContents())
         .hasSourceEqualTo(appGlideModuleWithLibraryModule)

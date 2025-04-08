@@ -21,11 +21,9 @@ import com.squareup.kotlinpoet.FileSpec
  * `AppGlideModule` is found, we then generate Glide's configuration so that it calls the
  * `AppGlideModule` and any included `LibraryGlideModules`. Using indexes allows us to process
  * `LibraryGlideModules` in multiple rounds and/or libraries.
- *
- * TODO(b/239086146): Finish implementing the behavior described here.
  */
 class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) : SymbolProcessor {
-  var isAppGlideModuleGenerated = false
+  private var isAppGlideModuleGenerated = false
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val symbols = resolver.getSymbolsWithAnnotation("com.bumptech.glide.annotation.GlideModule")
