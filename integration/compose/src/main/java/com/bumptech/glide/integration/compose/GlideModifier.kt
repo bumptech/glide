@@ -541,10 +541,10 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
 
   private fun modifyConstraints(constraints: Constraints): Constraints {
     if (constraints.hasFixedSize()) {
-      return constraints.copy(
-        minWidth = constraints.maxWidth,
-        minHeight = constraints.maxHeight
-      )
+      return constraints
+    }
+    if (constraints.isZero) {
+      return constraints
     }
 
     val intrinsicSize = primary?.painter?.intrinsicSize ?: return constraints
