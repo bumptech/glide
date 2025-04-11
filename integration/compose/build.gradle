@@ -36,6 +36,12 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    testOptions {
+      unitTests {
+        includeAndroidResources = true
+      }
+    }
 }
 
 // Enable strict mode, but exclude tests.
@@ -55,6 +61,12 @@ dependencies {
     implementation libs.compose.ui
     implementation libs.androidx.core.ktx
     debugImplementation libs.compose.ui.testmanifest
+    testImplementation libs.compose.ui.testmanifest
+    testImplementation libs.compose.ui.testjunit4
+    testImplementation libs.junit
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.junit
+    testImplementation libs.androidx.test.runner
     androidTestImplementation libs.junit
     androidTestImplementation libs.compose.ui.testjunit4
     androidTestImplementation libs.androidx.espresso
