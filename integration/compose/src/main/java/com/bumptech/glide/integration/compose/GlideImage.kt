@@ -203,7 +203,7 @@ public fun placeholder(@DrawableRes resourceId: Int): Placeholder =
     + "|.*/java/com/google/android/apps/keep/wear/workdown/screen/EditorImage.kt"
     + "|.*/java/com/google/android/apps/photos/devicesetup/AccountHeader.kt"
     + "|.*/java/com/google/android/apps/search/googleapp/saves/savefeature/ui/compose/ListPickerWrapper.kt"
-    + "|.*/java/com/google/android/apps/search/googleapp/saves/savefeature/ui/compose/SnackbarWithThumbnailWrapper.kt"
+    + "|.*/java/com/google/android/libraries/search/imagesearch/common/ui/SnackbarWithThumbnailWrapper.kt"
     + "|.*/java/com/google/android/apps/search/googleapp/spark/SparkCardCompose.kt"
     + "|.*/java/com/google/android/apps/security/adm/src/com/google/android/apps/adm/locationsharing/sharecreation/sharekit/preview/LocationSharePreviewView.kt"
     + "|.*/java/com/google/android/apps/stargate/questionnaire/ui/impl/phone/questionnaire/contactsscreen/contactslist/ContactsList.kt"
