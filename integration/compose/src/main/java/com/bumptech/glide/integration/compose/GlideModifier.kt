@@ -576,8 +576,12 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
     }
     val scaledSize = srcSize * scaleFactor
 
-    val minWidth = constraints.constrainWidth(scaledSize.width.roundToInt())
-    val minHeight = constraints.constrainHeight(scaledSize.height.roundToInt())
+    val minWidth = constraints.constrainWidth(
+      if (scaledSize.width.isFinite()) scaledSize.width.roundToInt() else constraints.minWidth
+    )
+    val minHeight = constraints.constrainHeight(
+      if (scaledSize.height.isFinite()) scaledSize.height.roundToInt() else constraints.minHeight
+    )
     return constraints.copy(minWidth = minWidth, minHeight = minHeight)
   }
 
