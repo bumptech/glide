@@ -2,9 +2,11 @@ package com.bumptech.glide.load.data;
 
 import android.content.ContentResolver;
 import android.content.UriMatcher;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import androidx.annotation.NonNull;
+import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,7 +73,26 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
       case ID_CONTACTS_PHOTO:
       case UriMatcher.NO_MATCH:
       default:
-        return contentResolver.openInputStream(uri);
+        if (MediaStoreUtil.isMediaStoreUri(uri)
+            && MediaStoreUtil.isMediaStoreOpenFileAPIsAvailable()) {
+          AssetFileDescriptor afd = MediaStoreUtil.openAssetFileDescriptor(uri, contentResolver);
+          if (afd == null) {
+            throw new FileNotFoundException("FileDescriptor is null for: " + uri);
+          }
+          try {
+            return afd.createInputStream();
+          } catch (IOException exception) {
+            try {
+              afd.close();
+            } catch (Exception innerException) {
+              // Ignored
+            }
+            throw (FileNotFoundException)
+                new FileNotFoundException("Unable to create stream").initCause(exception);
+          }
+        } else {
+          return contentResolver.openInputStream(uri);
+        }
     }
   }
 
