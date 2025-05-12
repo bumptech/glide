@@ -1,55 +1,7 @@
 Glide
 =====
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.bumptech.glide/glide/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.bumptech.glide/glide)
-| [View Glide's documentation][20] | [简体中文文档][22] | [Report an issue with Glide][5]
-
-Glide is a fast and efficient open source media management and image loading framework for Android that wraps media
-decoding, memory and disk caching, and resource pooling into a simple and easy to use interface.
-
-![](static/glide_logo.png)
-
-Glide supports fetching, decoding, and displaying video stills, images, and animated GIFs. Glide includes a flexible API
-that allows developers to plug in to almost any network stack. By default Glide uses a custom `HttpUrlConnection` based
-stack, but also includes utility libraries plug in to Google's Volley project or Square's OkHttp library instead.
-
-Glide's primary focus is on making scrolling any kind of a list of images as smooth and fast as possible, but Glide is
-also effective for almost any case where you need to fetch, resize, and display a remote image.
-
-Download
---------
-For detailed instructions and requirements, see Glide's [download and setup docs page][28].
-
-You can download a jar from GitHub's [releases page][1].
-
-Or use Gradle:
-
-```gradle
-repositories {
-  google()
-  mavenCentral()
-}
-
-dependencies {
-  implementation 'com.github.bumptech.glide:glide:4.16.0'
-}
-```
-
-Or Maven:
-
-```xml
-<dependency>
-  <groupId>com.github.bumptech.glide</groupId>
-  <artifactId>glide</artifactId>
-  <version>4.16.0</version>
-</dependency>
-```
-
-For info on using the bleeding edge, see the [Snapshots][17] docs page.
-
-R8 / Proguard
---------
-The specific rules are [already bundled](library/proguard-rules.txt) into the aar which can be interpreted by R8 automatically
+Ciao sono riccardo e sto modificando il file readme.md
 
 How do I use Glide?
 -------------------
