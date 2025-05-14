@@ -13,13 +13,11 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.requestManager
 import com.bumptech.glide.util.Util
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import java.lang.UnsupportedOperationException
 
 @RequiresOptIn(
   level = RequiresOptIn.Level.ERROR,
@@ -84,28 +82,27 @@ public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
 
 /**
  * Identical to [flow] with dimensions, except that the size is resolved asynchronously using
- * [size].
+ * [waitForSize].
  *
  * If an override size has been set using [RequestBuilder.override], that size will be used instead
- * and [size] may never be called.
+ * and [waitForSize] may never be called.
  *
- * [Placeholder] values may be emitted prior to [size] returning. Similarly if
+ * [Placeholder] values may be emitted prior to [waitForSize] returning. Similarly if
  * [RequestBuilder.thumbnail] requests are present and have overridden sizes, [Resource] values for
- * those thumbnails may also be emitted. [size] will only be used for requests where no
+ * those thumbnails may also be emitted. [waitForSize] will only be used for requests where no
  * [RequestBuilder.override] size is available.
  *
- * If [size] never has [AsyncGlideSize.setSize] called, this flow may never return values other than
- * placeholders.
+ * If [waitForSize] does not return, this flow may never return values other than placeholders.
  *
  * This function is internal only, intended primarily for Compose. The Target API provides similar
  * functionality for traditional Views. We could consider expanding the visibility if there are use
  * cases for asynchronous size resolution outside of Glide's Compose integration.
  */
-@OptIn(InternalGlideApi::class)
+@InternalGlideApi
 @ExperimentGlideFlows
 public fun <ResourceT : Any> RequestBuilder<ResourceT>.flow(
-  size: AsyncGlideSize,
-): Flow<GlideFlowInstant<ResourceT>> = flowResolvable(size)
+  waitForSize: suspend () -> Size,
+): Flow<GlideFlowInstant<ResourceT>> = flow(AsyncGlideSize(waitForSize))
 
 /**
  * Convert a load in Glide into a flow that emits placeholders and resources in the order they'd be
@@ -202,8 +199,6 @@ public data class Placeholder<ResourceT>(
 public data class Resource<ResourceT>(
   public override val status: Status,
   public val resource: ResourceT,
-  public val isFirstResource: Boolean,
-  public val dataSource: DataSource,
 ) : GlideFlowInstant<ResourceT>() {
   init {
     require(
@@ -218,9 +213,6 @@ public data class Resource<ResourceT>(
       }
     )
   }
-
-  public fun asFailure():Resource<ResourceT> =
-    Resource(Status.FAILED, resource, isFirstResource, dataSource)
 }
 
 @InternalGlideApi
@@ -270,7 +262,7 @@ private class FlowTarget<ResourceT : Any>(
 ) : Target<ResourceT>, RequestListener<ResourceT> {
   @Volatile private var resolvedSize: Size? = null
   @Volatile private var currentRequest: Request? = null
-  @Volatile private var lastResource: Resource<ResourceT>? = null
+  @Volatile private var lastResource: ResourceT? = null
 
   @GuardedBy("this") private val sizeReadyCallbacks = mutableListOf<SizeReadyCallback>()
 
@@ -284,7 +276,7 @@ private class FlowTarget<ResourceT : Any>(
       // begin immediately, shaving off some small amount of time.
       is AsyncGlideSize ->
         scope.launch {
-          val localResolvedSize = size.getSize()
+          val localResolvedSize = size.asyncSize()
           val callbacksToNotify: List<SizeReadyCallback>
           synchronized(this) {
             resolvedSize = localResolvedSize
@@ -312,8 +304,15 @@ private class FlowTarget<ResourceT : Any>(
   }
 
   override fun onResourceReady(resource: ResourceT, transition: Transition<in ResourceT>?) {
-    throw UnsupportedOperationException()
-
+    lastResource = resource
+    scope.trySend(
+      Resource(
+        // currentRequest is the entire request state, so we can use it to figure out if this
+        // resource is from a thumbnail request (isComplete is false) or the primary request.
+        if (currentRequest?.isComplete == true) Status.SUCCEEDED else Status.RUNNING,
+        resource
+      )
+    )
   }
 
   override fun onLoadCleared(placeholder: Drawable?) {
@@ -353,36 +352,25 @@ private class FlowTarget<ResourceT : Any>(
   override fun onLoadFailed(
     e: GlideException?,
     model: Any?,
-    target: Target<ResourceT>,
+    target: Target<ResourceT>?,
     isFirstResource: Boolean,
   ): Boolean {
     val localLastResource = lastResource
     val localRequest = currentRequest
     if (localLastResource != null && localRequest?.isComplete == false && !localRequest.isRunning) {
-      scope.channel.trySend(localLastResource.asFailure())
+      scope.channel.trySend(Resource(Status.FAILED, localLastResource))
     }
     return false
   }
 
   override fun onResourceReady(
     resource: ResourceT,
-    model: Any,
-    target: Target<ResourceT>,
-    dataSource: DataSource,
+    model: Any?,
+    target: Target<ResourceT>?,
+    dataSource: DataSource?,
     isFirstResource: Boolean,
   ): Boolean {
-    val result =
-      Resource(
-        // currentRequest is the entire request state, so we can use it to figure out if this
-        // resource is from a thumbnail request (isComplete is false) or the primary request.
-        if (currentRequest?.isComplete == true) Status.SUCCEEDED else Status.RUNNING,
-        resource,
-        isFirstResource,
-        dataSource
-      )
-    lastResource = result
-    scope.trySend(result)
-    return true
+    return false
   }
 }
 
@@ -398,17 +386,7 @@ public data class Size(val width: Int, val height: Int) {
 
 @InternalGlideApi public data class ImmediateGlideSize(val size: Size) : ResolvableGlideSize()
 
-@OptIn(InternalGlideApi::class)
-public class AsyncGlideSize : ResolvableGlideSize() {
-  private val size = CompletableDeferred<Size>()
-
-  public fun setSize(size: Size) {
-    this.size.complete(size)
-  }
-
-  public suspend fun getSize(): Size {
-    return size.await()
-  }
-}
+@InternalGlideApi
+public data class AsyncGlideSize(val asyncSize: suspend () -> Size) : ResolvableGlideSize()
 
 @InternalGlideApi public fun Int.isValidGlideDimension(): Boolean = Util.isValidDimension(this)

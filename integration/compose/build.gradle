@@ -59,12 +59,14 @@ dependencies {
     }
     implementation libs.compose.foundation
     implementation libs.compose.ui
+    implementation libs.drawablepainter
     implementation libs.androidx.core.ktx
     debugImplementation libs.compose.ui.testmanifest
     testImplementation libs.compose.ui.testmanifest
     testImplementation libs.compose.ui.testjunit4
     testImplementation libs.junit
     testImplementation libs.robolectric
+    testImplementation libs.androidx.appcompat
     testImplementation libs.androidx.junit
     testImplementation libs.androidx.test.runner
     androidTestImplementation libs.junit

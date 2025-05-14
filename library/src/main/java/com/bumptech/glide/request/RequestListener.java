@@ -2,7 +2,6 @@ package com.bumptech.glide.request;
 
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.DataSource;
@@ -62,8 +61,8 @@ public interface RequestListener<R> {
    */
   boolean onLoadFailed(
       @Nullable GlideException e,
-      @Nullable Object model,
-      @NonNull Target<R> target,
+      Object model,
+      Target<R> target,
       boolean isFirstResource);
 
   /**
@@ -89,9 +88,9 @@ public interface RequestListener<R> {
    *     Target#onResourceReady(Object, Transition)} to be called on {@code target}.
    */
   boolean onResourceReady(
-      @NonNull R resource,
-      @NonNull Object model,
+      R resource,
+      Object model,
       Target<R> target,
-      @NonNull DataSource dataSource,
+      DataSource dataSource,
       boolean isFirstResource);
 }

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalGlideComposeApi::class, ExperimentalCoroutinesApi::class)
+
 package com.bumptech.glide.integration.compose
 
 import android.graphics.Canvas
@@ -14,6 +16,7 @@ import com.bumptech.glide.integration.compose.test.Constants
 import com.bumptech.glide.integration.compose.test.GlideComposeRule
 import com.bumptech.glide.integration.compose.test.assertDisplaysInstance
 import com.bumptech.glide.integration.compose.test.onNodeWithDefaultContentDescription
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -25,7 +28,6 @@ import org.junit.runners.Parameterized
  *
  * Transformable types are tested in [GlideImageDefaultTransformationTest].
  */
-@OptIn(ExperimentalGlideComposeApi::class)
 @RunWith(Parameterized::class)
 class GlideImageCustomDrawableTransformationTest(
   private val contentScale: ContentScale,
@@ -34,8 +36,7 @@ class GlideImageCustomDrawableTransformationTest(
   // though it's only used by Parameters to create the test name.
   @Suppress("unused") private val name: String,
 ) {
-  @get:Rule
-  val glideComposeRule = GlideComposeRule()
+  @get:Rule val glideComposeRule = GlideComposeRule()
 
   @Test
   fun glideImage_nonBitmapDrawable_doesNotThrow() = runTest {
@@ -97,9 +98,8 @@ class GlideImageCustomDrawableTransformationTest(
 @Suppress("DeprecatedCallableAddReplaceWith")
 private open class FakeDrawable : Drawable() {
   override fun draw(p0: Canvas) {}
-  override fun setAlpha(p0: Int) {}
-  override fun setColorFilter(p0: ColorFilter?) {}
-
+  override fun setAlpha(p0: Int) = throw UnsupportedOperationException()
+  override fun setColorFilter(p0: ColorFilter?) = throw UnsupportedOperationException()
   @Deprecated("Deprecated in Java")
   override fun getOpacity(): Int = throw UnsupportedOperationException()
 }
