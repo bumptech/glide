@@ -31,11 +31,14 @@ import com.google.common.truth.Correspondence
 import com.google.common.truth.IterableSubject
 import com.google.common.truth.Truth.assertThat
 import java.io.File
+import java.lang.RuntimeException
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.reflect.KClass
 import kotlin.test.assertFailsWith
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -491,13 +494,11 @@ class FlowsTest {
   @Test
   fun flow_withAsyncSize_andOverrideSize_usesOverrideSize() = runTest {
     val requestedSizeReference = registerSizeCapturingFakeModelLoader()
-    val asyncSize = AsyncGlideSize()
-    asyncSize.setSize(Size(1, 2))
 
     Glide.with(context)
       .load(FakeModel())
       .override(200, 100)
-      .flow(asyncSize)
+      .flow { Size(1, 2) }
       .firstLoad()
       .toList()
 
@@ -524,7 +525,11 @@ class FlowsTest {
   @Test
   fun flow_withAsyncSize_concreteSizeForThumbnail_startsMainRequestWhenAsyncSizeIsAvailable() =
     runTest {
-      val size = AsyncGlideSize()
+      val waitForThumbnailToFinishChannel = Channel<Boolean>()
+      val waitForThumbnailToFinishSize: suspend () -> Size = {
+        waitForThumbnailToFinishChannel.receive()
+        Size(100, 200)
+      }
 
       val result =
         Glide.with(context)
@@ -533,9 +538,9 @@ class FlowsTest {
             Glide.with(context)
               .load(newImageFile())
               .override(75, 50)
-              .listener(onSuccess { launch { size.setSize(Size(100, 200)) } })
+              .listener(onSuccess { launch { waitForThumbnailToFinishChannel.send(true) } })
           )
-          .flow(size)
+          .flow(waitForThumbnailToFinishSize)
           .firstLoad()
           .toList()
 
@@ -568,7 +573,10 @@ class FlowsTest {
     assertFailsWith<IllegalArgumentException> { requestBuilder.flow() }
   }
 
-  private val delayForever = AsyncGlideSize()
+  private val delayForever: suspend () -> Size = {
+    delay(kotlin.time.Duration.INFINITE)
+    throw RuntimeException()
+  }
 
   private fun registerSizeCapturingFakeModelLoader(): AtomicReference<Size> {
     val result = AtomicReference<Size>()
@@ -646,22 +654,22 @@ private fun atMostOnce(function: () -> Unit): () -> Unit {
   }
 }
 
-private fun <ResourceT : Any> onSuccess(onSuccess: () -> Unit) =
+private fun <ResourceT> onSuccess(onSuccess: () -> Unit) =
   simpleRequestListener<ResourceT>(onSuccess) {}
 
-private fun <ResourceT : Any> onFailure(onFailure: () -> Unit) =
+private fun <ResourceT> onFailure(onFailure: () -> Unit) =
   simpleRequestListener<ResourceT>({}, onFailure)
 
-private fun <ResourceT : Any> simpleRequestListener(
+private fun <ResourceT> simpleRequestListener(
   onSuccess: () -> Unit,
   onFailure: () -> Unit
 ): RequestListener<ResourceT> =
   object : RequestListener<ResourceT> {
     override fun onResourceReady(
-      resource: ResourceT,
-      model: Any,
-      target: Target<ResourceT>,
-      dataSource: DataSource,
+      resource: ResourceT?,
+      model: Any?,
+      target: Target<ResourceT>?,
+      dataSource: DataSource?,
       isFirstResource: Boolean,
     ): Boolean {
       onSuccess()
@@ -671,7 +679,7 @@ private fun <ResourceT : Any> simpleRequestListener(
     override fun onLoadFailed(
       e: GlideException?,
       model: Any?,
-      target: Target<ResourceT>,
+      target: Target<ResourceT>?,
       isFirstResource: Boolean,
     ): Boolean {
       onFailure()

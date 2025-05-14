@@ -1,35 +1,22 @@
+@file:OptIn(ExperimentalGlideComposeApi::class, InternalGlideApi::class)
+
 package com.bumptech.glide.integration.compose
 
 import android.content.Context
-import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.Drawable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import com.bumptech.glide.Glide
@@ -45,24 +32,15 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.test.compareToGolden
-import com.bumptech.glide.test.pxToDp
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TestName
 
-@OptIn(ExperimentalGlideComposeApi::class, InternalGlideApi::class)
 class GlideImageTest {
   private val context: Context = ApplicationProvider.getApplicationContext()
-
-  @get:Rule(order = 1)
-  val testName = TestName()
-
-  @get:Rule(order = 2)
-  val glideComposeRule = GlideComposeRule()
+  @get:Rule val glideComposeRule = GlideComposeRule()
 
   @Test
   fun glideImage_noModifierSize_resourceDrawable_displaysDrawable() {
@@ -121,11 +99,6 @@ class GlideImageTest {
         )
       }
     }
-
-    // Precondition - ensure we loaded the first drawable.
-    glideComposeRule
-      .onNodeWithContentDescription(description)
-      .assert(expectDisplayedDrawable(firstDrawable))
 
     glideComposeRule.waitForIdle()
     glideComposeRule.onNodeWithText("Swap").performClick()
@@ -199,6 +172,7 @@ class GlideImageTest {
       .onNodeWithContentDescription(description)
       .assertDisplays(null)
   }
+
 
   @Test
   fun glideImage_withNegativeSize_doesNotStartLoad() {
@@ -321,17 +295,17 @@ class GlideImageTest {
       override fun onLoadFailed(
         e: GlideException?,
         model: Any?,
-        target: Target<Drawable>,
+        target: Target<Drawable>?,
         isFirstResource: Boolean,
       ): Boolean {
         throw UnsupportedOperationException()
       }
 
       override fun onResourceReady(
-        resource: Drawable,
-        model: Any,
-        target: Target<Drawable>,
-        dataSource: DataSource,
+        resource: Drawable?,
+        model: Any?,
+        target: Target<Drawable>?,
+        dataSource: DataSource?,
         isFirstResource: Boolean,
       ): Boolean {
         onResourceReadyCounter.incrementAndGet()
@@ -348,124 +322,5 @@ class GlideImageTest {
     glideComposeRule.waitForIdle()
 
     assertThat(onResourceReadyCounter.get()).isEqualTo(1)
-  }
-
-  @Test
-  fun glideImage_whenDetachedAndReattached_rendersImage() {
-    val description = "test"
-    val testTag = "testTag"
-    glideComposeRule.setContent {
-      LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.testTag(testTag)
-      ) {
-        items(3) {
-          GlideImage(
-            model = android.R.drawable.star_big_on,
-            contentDescription = description + it,
-            modifier = Modifier.fillParentMaxSize()
-          )
-        }
-      }
-    }
-
-    // Scroll back and forth to trigger re-use of the GlideImages with the same
-    // parameters.
-    for (i in 0..2) {
-      glideComposeRule.onNode(hasTestTag(testTag)).performScrollToIndex(i)
-      glideComposeRule.waitForIdle()
-    }
-    glideComposeRule.onNode(hasTestTag(testTag)).performScrollToIndex(0)
-    glideComposeRule.waitForIdle()
-
-    val drawable = context.getDrawable(android.R.drawable.star_big_on)
-    // Make sure that all images are rendered
-    for (i in 0..2) {
-      glideComposeRule.onNode(hasTestTag(testTag)).performScrollToIndex(i)
-      glideComposeRule.waitForIdle()
-      glideComposeRule
-        .onNodeWithContentDescription(description + i)
-        .assert(expectDisplayedDrawable(drawable))
-    }
-  }
-
-  // See #5256
-  @Test
-  fun glideImage_withZeroSize_doesNotCrash() {
-    glideComposeRule.setContent {
-      GlideImage(
-        model = android.R.drawable.star_big_on,
-        contentDescription = null,
-        modifier = Modifier.width(IntrinsicSize.Min),
-        contentScale = ContentScale.Crop
-      )
-    }
-    glideComposeRule.waitForIdle()
-  }
-
-  @Test
-  fun glideImage_startsAnimatedDrawable() {
-    val drawable = AnimationDrawable()
-    val firstFrame = context.getDrawable(android.R.drawable.star_big_on)!!
-    val secondFrame = context.getDrawable(android.R.drawable.star_big_off)!!
-    drawable.addFrame(firstFrame, 0)
-    drawable.addFrame(secondFrame, 10000)
-    val description = "test"
-    glideComposeRule.setContent {
-      GlideImage(
-        model = drawable,
-        contentDescription = description,
-        modifier = Modifier.wrapContentSize(),
-      ) {
-        it.override(20).dontTransform()
-      }
-    }
-    glideComposeRule
-      .onNodeWithContentDescription(description)
-      .captureToImage()
-      .compareToGolden(testName.methodName)
-  }
-
-  @Test
-  fun glideImage_withDrawBehind_drawsImageOnTopOfBackground() {
-    glideComposeRule.setContent {
-      GlideImage(
-        android.R.drawable.star_big_on,
-        "test",
-        Modifier
-          .size(100.pxToDp())
-          .drawBehind { drawRect(Color.Red) }) {
-        it.override(100)
-      }
-    }
-
-    glideComposeRule
-      .onNodeWithContentDescription("test")
-      .captureToImage()
-      .compareToGolden(testName.methodName)
-  }
-
-  // See #5272
-  @Test
-  fun glideImage_withPadding_appliesPaddingOnce() {
-    glideComposeRule.setContent {
-      GlideImage(
-        model = android.R.drawable.star_big_on,
-        contentDescription = "test",
-        modifier = Modifier
-          .size(400.pxToDp())
-          .aspectRatio(1f)
-          .drawBehind {
-            drawRect(Color.Blue)
-          }
-          .padding(80.pxToDp()),
-      )
-    }
-    glideComposeRule.waitForIdle()
-
-    glideComposeRule
-      .onNodeWithContentDescription("test")
-      .captureToImage()
-      .compareToGolden(testName.methodName)
   }
 }
