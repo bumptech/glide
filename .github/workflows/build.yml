@@ -18,7 +18,7 @@ jobs:
           - name: Build and run unit tests with Gradle
             run: ./scripts/ci_unit.sh
           - name: Build javadocs
-            run: ./gradlew dokkaHtmlMultiModule
+            run: ./gradlew :dokkaHtmlMultiModule
           - name: Publish a source snapshot to Sonatype
             env:
               NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}

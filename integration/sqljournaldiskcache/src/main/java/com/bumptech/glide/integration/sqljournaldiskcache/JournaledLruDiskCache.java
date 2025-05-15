@@ -3,7 +3,6 @@ package com.bumptech.glide.integration.sqljournaldiskcache;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
-import android.os.SystemClock;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -120,6 +119,7 @@ final class JournaledLruDiskCache {
     return workThread.getLooper();
   }
 
+  @SuppressWarnings("checkstyle:UnnecessaryParentheses") // Readability
   private void openIfNotOpen() {
     if (!isOpen) {
       synchronized (this) {
@@ -460,7 +460,7 @@ final class JournaledLruDiskCache {
   }
 
   private static long getLogTime() {
-    return SystemClock.currentThreadTimeMillis();
+    return System.currentTimeMillis();
   }
 
   private static long getElapsedTime(long startTime) {

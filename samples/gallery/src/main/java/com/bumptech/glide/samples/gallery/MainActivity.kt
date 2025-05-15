@@ -12,17 +12,15 @@ import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
 import com.bumptech.glide.MemoryCategory
 
-/** Displays a [HorizontalGalleryFragment]. */
+/** Displays a [HorizontalGalleryFragment].  */
 class MainActivity : FragmentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.main_activity)
     Glide.get(this).setMemoryCategory(MemoryCategory.HIGH)
-    if (
-      PERMISSIONS_REQUEST.any {
+    if (PERMISSIONS_REQUEST.any {
         ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-      }
-    ) {
+      }) {
       requestStoragePermission()
     } else {
       replaceFragment()
@@ -30,18 +28,20 @@ class MainActivity : FragmentActivity() {
   }
 
   private fun requestStoragePermission() {
-    ActivityCompat.requestPermissions(this, PERMISSIONS_REQUEST, REQUEST_READ_STORAGE)
+    ActivityCompat.requestPermissions(
+      this, PERMISSIONS_REQUEST, REQUEST_READ_STORAGE)
   }
 
   private fun replaceFragment() {
     val fragment: Fragment = HorizontalGalleryFragment()
-    supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+    supportFragmentManager
+      .beginTransaction()
+      .replace(R.id.fragment_container, fragment)
+      .commit()
   }
 
   override fun onRequestPermissionsResult(
-    requestCode: Int,
-    permissions: Array<String>,
-    grantResults: IntArray,
+    requestCode: Int, permissions: Array<String>, grantResults: IntArray,
   ) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     when (requestCode) {

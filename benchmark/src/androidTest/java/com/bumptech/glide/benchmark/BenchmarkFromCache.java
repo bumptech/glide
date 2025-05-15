@@ -2,6 +2,7 @@ package com.bumptech.glide.benchmark;
 
 import android.app.Application;
 import android.graphics.Bitmap;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
 import androidx.benchmark.BenchmarkState;
@@ -111,17 +112,17 @@ public class BenchmarkFromCache {
                   public boolean onLoadFailed(
                       @Nullable GlideException e,
                       Object model,
-                      Target<Bitmap> target,
+                      @NonNull Target<Bitmap> target,
                       boolean isFirstResource) {
                     return false;
                   }
 
                   @Override
                   public boolean onResourceReady(
-                      Bitmap resource,
-                      Object model,
+                      @NonNull Bitmap resource,
+                      @NonNull Object model,
                       Target<Bitmap> target,
-                      DataSource dataSource,
+                      @NonNull DataSource dataSource,
                       boolean isFirstResource) {
                     dataSourceRef.set(dataSource);
                     return false;

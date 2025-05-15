@@ -60,6 +60,7 @@ public final class AnimatedImageDecoder {
     return isHandled(ImageHeaderParserUtils.getType(imageHeaderParsers, is, arrayPool));
   }
 
+  @SuppressWarnings("checkstyle:UnnecessaryParentheses") // Readability
   private boolean isHandled(ImageType imageType) {
     return imageType == ImageType.ANIMATED_WEBP
         || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && imageType == ImageType.ANIMATED_AVIF);

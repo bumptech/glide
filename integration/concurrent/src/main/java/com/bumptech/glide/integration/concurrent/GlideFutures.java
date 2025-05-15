@@ -181,14 +181,18 @@ public final class GlideFutures {
 
     @Override
     public boolean onLoadFailed(
-        @Nullable GlideException e, Object model, Target<T> target, boolean isFirst) {
+        @Nullable GlideException e, Object model, @NonNull Target<T> target, boolean isFirst) {
       completer.setException(e != null ? e : new RuntimeException("Unknown error"));
       return true;
     }
 
     @Override
     public boolean onResourceReady(
-        T resource, Object model, Target<T> target, DataSource dataSource, boolean isFirst) {
+        @NonNull T resource,
+        @NonNull Object model,
+        Target<T> target,
+        @NonNull DataSource dataSource,
+        boolean isFirst) {
       try {
         completer.set(new TargetAndResult<>(target, resource));
       } catch (Throwable t) {

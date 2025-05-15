@@ -6,6 +6,7 @@ apply plugin: 'com.google.devtools.ksp'
 dependencies {
     implementation project(':library')
     implementation project(':integration:compose')
+    implementation project(':integration:ktx')
     implementation(project(':integration:recyclerview')) {
         transitive = false
     }
@@ -45,7 +46,7 @@ android {
         jvmTarget = "11"
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.2.0'
+        kotlinCompilerExtensionVersion libs.versions.kotlin.compiler.extension.get()
     }
 
     compileOptions {

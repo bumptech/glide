@@ -5,13 +5,12 @@ plugins {
 
 android {
     namespace 'com.bumptech.glide.benchmark'
-    compileSdkVersion libs.versions.compile.sdk.version.get()
-
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 34
+    buildToolsVersion "34.0.0"
 
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
@@ -21,6 +20,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner 'androidx.benchmark.junit4.AndroidBenchmarkRunner'
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -34,6 +34,8 @@ android {
 }
 
 dependencies {
+    implementation libs.androidx.multidex
+
     androidTestImplementation libs.androidx.test.runner
     androidTestImplementation libs.androidx.junit
     androidTestImplementation libs.junit

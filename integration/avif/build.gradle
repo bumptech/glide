@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 dependencies {
     implementation project(':library')
-    implementation 'org.aomedia.avif.android:avif:0.11.1.3c786d2'
+    implementation 'org.aomedia.avif.android:avif:1.1.1.14d8e3c4'
     implementation libs.guava
 
     annotationProcessor project(':annotation:compiler')
@@ -20,8 +20,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 

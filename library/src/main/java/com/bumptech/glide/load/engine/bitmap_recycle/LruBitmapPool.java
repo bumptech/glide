@@ -239,18 +239,19 @@ public class LruBitmapPool implements BitmapPool {
     trimToSize(0);
   }
 
+  @SuppressWarnings("checkstyle:UnnecessaryParentheses") // Readability
   @SuppressLint("InlinedApi")
   @Override
   public void trimMemory(int level) {
     if (Log.isLoggable(TAG, Log.DEBUG)) {
       Log.d(TAG, "trimMemory, level=" + level);
     }
-    if ((level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND)
-        || ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            && (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN))) {
+    if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
+        || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+            && level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)) {
       clearMemory();
-    } else if ((level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
-        || (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)) {
+    } else if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
+        || level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
       trimToSize(getMaxSize() / 2);
     }
   }

@@ -1,21 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
+  "semanticCommits": "disabled",
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true,
       "automergeType": "branch"
-    },
-    {
-      "matchPackageNames": ["androidx.fragment:fragment"],
-      "allowedVersions": "1.3.6"
-    },
-    {
-      "matchPackageNames": ["androidx.annotation:annotation"],
-      "allowedVersions": "<1.6.0"
     }
   ]
 }

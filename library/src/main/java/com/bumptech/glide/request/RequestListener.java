@@ -68,8 +68,12 @@ public interface RequestListener<R> {
    *
    * <p>For threading guarantees, see the class comment.
    *
-   * @param resource The resource that was loaded for the target.
-   * @param model The specific model that was used to load the image.
+   * @param resource The resource that was loaded for the target. Non-null because a null resource
+   *     will result in a call to {@link #onLoadFailed(GlideException, Object, Target, boolean)}
+   *     instead of this method.
+   * @param model The specific model that was used to load the image. Non-null because a null model
+   *     will result in a call to {@link #onLoadFailed(GlideException, Object, Target, boolean)}
+   *     instead of this method.
    * @param target The target the model was loaded into.
    * @param dataSource The {@link DataSource} the resource was loaded from.
    * @param isFirstResource {@code true} if this is the first resource to in this load to be loaded

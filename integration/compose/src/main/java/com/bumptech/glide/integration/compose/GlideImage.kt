@@ -186,49 +186,6 @@ public fun placeholder(@DrawableRes resourceId: Int): Placeholder =
  * Providing a nested [GlideImage] is not recommended. Use [RequestBuilder.thumbnail] or
  * [RequestBuilder.error] as an alternative.
  */
-// BEGIN_INTERNAL
-@com.google.errorprone.annotations.RestrictedApi(
-  explanation = "Will be imminently broken by a Glide update",
-  link = "https://github.com/bumptech/glide/pull/5306#issuecomment-1791826714",
-  allowedOnPath =
-    ".*/java/com/google/android/apps/contacts/photomanager/ContactThumbnailImage.kt"
-    + "|.*/java/com/google/android/apps/car/applib/ui/components/image/compose/ClientAssetImage.kt"
-    + "|.*/java/com/google/android/apps/docs/common/compose/components/imagepreview/ImagePreview.kt"
-    + "|.*/java/com/google/android/apps/docs/common/entrypicker/presentation/legacy/LegacyPickerDoclistSharedDrivesView.kt"
-    + "|.*/java/com/google/android/apps/docs/common/labels/presentation/components/LabelCard.kt"
-    + "|.*/java/com/google/android/apps/docs/common/powertrain/doclist/components/common/DoclistComponents.kt"
-    + "|.*/java/com/google/android/apps/docs/drive/common/compose/components/avatarimage/AvatarImage.kt"
-    + "|.*/java/com/google/android/apps/keep/wear/accounts/MicroAccountChooserScreen.kt"
-    + "|.*/java/com/google/android/apps/keep/wear/badges/CollaboratorBadge.kt"
-    + "|.*/java/com/google/android/apps/keep/wear/workdown/screen/EditorImage.kt"
-    + "|.*/java/com/google/android/apps/photos/devicesetup/AccountHeader.kt"
-    + "|.*/java/com/google/android/apps/search/googleapp/saves/savefeature/ui/compose/ListPickerWrapper.kt"
-    + "|.*/java/com/google/android/libraries/search/imagesearch/common/ui/SnackbarWithThumbnailWrapper.kt"
-    + "|.*/java/com/google/android/apps/search/googleapp/spark/SparkCardCompose.kt"
-    + "|.*/java/com/google/android/apps/security/adm/src/com/google/android/apps/adm/locationsharing/sharecreation/sharekit/preview/LocationSharePreviewView.kt"
-    + "|.*/java/com/google/android/apps/stargate/questionnaire/ui/impl/phone/questionnaire/contactsscreen/contactslist/ContactsList.kt"
-    + "|.*/java/com/google/android/apps/stargate/questionnaire/ui/impl/wear/questionnaire/contactsscreen/contactslist/ContactsList.kt"
-    + "|.*/java/com/google/android/gmscore/integ/modules/credential_manager/src/com/google/android/gms/credential/manager/passwordsharing/MultiAvatar.kt"
-    + "|.*/java/com/google/android/gmscore/integ/modules/credential_manager/src/com/google/android/gms/credential/manager/passwordsharing/SharingConfirmationAnimation.kt"
-    + "|.*/java/com/google/android/gmscore/integ/modules/credential_manager/src/com/google/android/gms/credential/manager/passwordsharing/SharingFlowComponents.kt"
-    + "|.*/java/com/google/android/gmscore/integ/modules/dck/src/com/google/android/gms/dck/digitalkey/keysharing/sharekit/view/KeySharingPreviewProvider.kt"
-    + "|.*/java/com/google/android/gmscore/integ/modules/nearby/src/com/google/android/gms/nearby/sharing/common/ui/Avatar.kt"
-    + "|.*/java/com/google/android/gmscore/integ/modules/nearby/src/com/google/android/gms/nearby/sharing/common/ui/QrCode.kt"
-    + "|.*/java/com/google/android/gmscore/integ/modules/nearby/src/com/google/android/gms/nearby/sharing/main/home/ContentPreview.kt"
-    + "|.*/java/com/google/android/gmscore/integ/modules/nearby/src/com/google/android/gms/nearby/sharing/receive/CompletionView.kt"
-    + "|.*/java/com/google/android/libraries/gstore/shop/widget/OfferBannerModule.kt"
-    + "|.*/java/com/google/android/libraries/home/coreui/compose/launchtile/LaunchTileGraphic.kt"
-    + "|.*/java/com/google/android/libraries/search/imagesearch/common/ui/BaseGlideImage.kt"
-    + "|.*/java/com/google/android/libraries/search/imagesearch/common/ui/ImageViewer.kt"
-    + "|.*/java/com/google/android/libraries/search/imagesearch/common/ui/InGridRefinements.kt"
-    + "|.*/java/com/google/android/libraries/sharing/sharekit/control/preview/DefaultPreviewProvider.kt"
-    + "|.*/java/com/google/android/libraries/sharing/sharekit/control/preview/SamplePreviewScreen.kt"
-    + "|.*/java/com/google/android/libraries/subscriptions/compose/components/Glide.kt"
-    + "|.*/java/com/google/android/libraries/user/profile/quickeditor/photo/ProfileQuickEditorView.kt"
-    + "|.*/third_party/java_src/android_libs/car/apphost/main/com/android/car/libraries/apphost/basewidgets/image/CarImage.kt"
-    + "|.*/third_party/java_src/android_libs/glide/integration/compose/src/androidTest/.*"
-)
-// END_INTERNAL
 @ExperimentalGlideComposeApi
 public fun placeholder(composable: @Composable () -> Unit): Placeholder =
   Placeholder.OfComposable(composable)

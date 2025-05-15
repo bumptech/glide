@@ -316,6 +316,7 @@ final class RequestOptionsGenerator {
     return new MethodAndStaticVar(methodSpecBuilder.build(), requiredStaticField);
   }
 
+  @SuppressWarnings("checkstyle:UnnecessaryParentheses") // Readability
   private static boolean memoizeStaticMethodFromArguments(ExecutableElement staticMethod) {
     return staticMethod.getParameters().isEmpty()
         || (staticMethod.getParameters().size() == 1

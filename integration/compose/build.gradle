@@ -5,11 +5,11 @@ plugins {
 
 android {
     namespace 'com.bumptech.glide.integration.compose'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         minSdk 21
-        targetSdk 33
+        targetSdk 34
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -25,7 +25,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion '1.2.0'
+        kotlinCompilerExtensionVersion libs.versions.kotlin.compiler.extension.get()
     }
 
     compileOptions {
@@ -35,6 +35,12 @@ android {
 
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    testOptions {
+      unitTests {
+        includeAndroidResources = true
+      }
     }
 }
 
@@ -56,6 +62,13 @@ dependencies {
     implementation libs.drawablepainter
     implementation libs.androidx.core.ktx
     debugImplementation libs.compose.ui.testmanifest
+    testImplementation libs.compose.ui.testmanifest
+    testImplementation libs.compose.ui.testjunit4
+    testImplementation libs.junit
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.appcompat
+    testImplementation libs.androidx.junit
+    testImplementation libs.androidx.test.runner
     androidTestImplementation libs.junit
     androidTestImplementation libs.compose.ui.testjunit4
     androidTestImplementation libs.androidx.espresso
@@ -67,3 +80,28 @@ dependencies {
 }
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+
+task cleanGoldensOnDevice(type: Exec) {
+    commandLine = ['adb', 'shell', 'rm -rf /storage/emulated/0/DCIM/compose_goldens']
+}
+
+task pullGoldens(type: Exec) {
+    commandLine = [
+            'bash',
+            '-c',
+            'adb shell \'find /storage/emulated/0/DCIM/compose_goldens -iname "*.png"\' ' +
+                    '| tr -d "\015" ' +
+                    '| while read line; do adb pull "$line" src/androidTest/assets/; done'
+    ]
+
+}
+
+afterEvaluate {
+    task rebuildGoldens(type: Exec) {
+        ignoreExitValue = true
+        dependsOn(
+                cleanGoldensOnDevice,
+                tasks.getByName("connectedDebugAndroidTest").finalizedBy(pullGoldens)
+        )
+    }
+}

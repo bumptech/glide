@@ -127,7 +127,7 @@ public final class LruArrayPool implements ArrayPool {
   }
 
   private boolean isNoMoreThanHalfFull() {
-    return currentSize == 0 || (maxSize / currentSize >= 2);
+    return currentSize == 0 || maxSize / currentSize >= 2;
   }
 
   @Override

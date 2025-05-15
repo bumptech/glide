@@ -72,15 +72,6 @@ subprojects { project ->
         gradlePluginPortal()
     }
 
-    afterEvaluate {
-        if (!project.plugins.hasPlugin("org.jetbrains.kotlin.jvm")) {
-            tasks.withType(JavaCompile) {
-                sourceCompatibility = 1.7
-                targetCompatibility = 1.7
-            }
-        }
-    }
-
     // Exclude packages not intended for public use.
     if ([
           "testutil",
@@ -131,6 +122,15 @@ subprojects { project ->
         }
     }
 
+    afterEvaluate {
+        if (project.plugins.hasPlugin("com.android.application")) {
+            project.dependencies {
+                // Hack around some version mismatches: https://stackoverflow.com/questions/75263047/duplicate-class-in-kotlin-android
+                implementation(platform(libs.kotlin.bom))
+            }
+        }
+    }
+
     tasks.withType(JavaCompile) {
         // gifencoder is a legacy project that has a ton of warnings and is basically never
         // modified, so we're not going to worry about cleaning it up.
@@ -169,7 +169,7 @@ subprojects { project ->
     apply plugin: 'checkstyle'
 
     checkstyle {
-        toolVersion = '8.5'
+        toolVersion = '8.45.1'
     }
 
     checkstyle {

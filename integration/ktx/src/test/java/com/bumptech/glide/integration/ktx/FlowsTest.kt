@@ -334,8 +334,8 @@ class FlowsTest {
               inCache.set(resource)
               return null
             }
-          }
-        )
+        }
+      )
     )
     val data = Glide.with(context).load(newImageFile()).flow(100, 100).firstLoad().toList()
     assertThat(data).isNotEmpty()

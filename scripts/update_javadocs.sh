@@ -9,8 +9,8 @@ set -o pipefail
 TEMP_DIR="/tmp/tmp_glide_javadoc"
 JAVADOC_GH_PAGES_DIR="javadocs"
 
-major_version=$(fgrep VERSION_MAJOR gradle.properties | cut -d '=' -f 2)
-minor_version=$(fgrep VERSION_MINOR gradle.properties | cut -d '=' -f 2)
+major_version=$(grep -F VERSION_MAJOR gradle.properties | cut -d '=' -f 2)
+minor_version=$(grep -F VERSION_MINOR gradle.properties | cut -d '=' -f 2)
 version="${major_version}${minor_version}0"
 
 echo "Updating javadocs for ${version}"
@@ -43,7 +43,7 @@ fi
 
 git checkout master
 GIT_COMMIT_SHA="$(git rev-parse HEAD)"
-./gradlew dokkaHtmlMultiModule
+./gradlew :dokkaHtmlMultiModule
 rm -rf $TEMP_DIR
 cp -r build/dokka/htmlMultiModule $TEMP_DIR
 

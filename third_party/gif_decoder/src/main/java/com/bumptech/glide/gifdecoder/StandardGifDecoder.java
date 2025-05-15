@@ -168,7 +168,7 @@ public class StandardGifDecoder implements GifDecoder {
   @Override
   public int getDelay(int n) {
     int delay = -1;
-    if ((n >= 0) && (n < header.frameCount)) {
+    if (n >= 0 && n < header.frameCount) {
       delay = header.frames.get(n).delay;
     }
     return delay;
@@ -499,6 +499,7 @@ public class StandardGifDecoder implements GifDecoder {
     return result;
   }
 
+  @SuppressWarnings("checkstyle:UnnecessaryParentheses") // Readability
   private void copyIntoScratchFast(GifFrame currentFrame) {
     int[] dest = mainScratch;
     int downsampledIH = currentFrame.ih;
@@ -807,7 +808,7 @@ public class StandardGifDecoder implements GifDecoder {
           prefix[available] = (short) oldCode;
           suffix[available] = (byte) first;
           ++available;
-          if (((available & codeMask) == 0) && (available < MAX_STACK_SIZE)) {
+          if ((available & codeMask) == 0 && available < MAX_STACK_SIZE) {
             ++codeSize;
             codeMask += available;
           }
