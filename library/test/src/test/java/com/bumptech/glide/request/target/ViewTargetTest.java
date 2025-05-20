@@ -1,5 +1,6 @@
 package com.bumptech.glide.request.target;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -51,7 +52,7 @@ import org.robolectric.shadows.ShadowView;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(
-    sdk = 19,
+    sdk = ROBOLECTRIC_SDK,
     shadows = {
       ViewTargetTest.SizedShadowView.class,
       ViewTargetTest.PreDrawShadowViewTreeObserver.class
