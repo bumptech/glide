@@ -58,7 +58,7 @@ dependencyResolutionManagement {
             // Versions for dependencies
             version('compose', '1.5.1')
             version('coroutines', '1.7.3')
-            version('dagger', '2.47')
+            version('dagger', '2.56.2')
             version('errorprone', '2.18.0')
             version('kotlin', '1.8.22')
             version('mockito', '5.3.1')
