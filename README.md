@@ -132,6 +132,7 @@ Follow the steps in the [Build](#build) section to set up the project and then:
 ./gradlew :samples:svg:run
 ./gradlew :samples:contacturi:run
 ```
+
 You may also find precompiled APKs on the [releases page][1].
 
 Development
