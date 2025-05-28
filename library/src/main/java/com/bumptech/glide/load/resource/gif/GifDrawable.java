@@ -12,6 +12,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.Gravity;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -299,7 +300,7 @@ public class GifDrawable extends Drawable
       try {
         canvas.drawBitmap(currentFrame, null, getDestRect(), getPaint());
       } catch (Exception e) {
-        e.printStackTrace();
+        Log.e("GifDrawable", "draw failed: " + e.getMessage());
       }
     }
   }
