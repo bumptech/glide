@@ -295,7 +295,13 @@ public class GifDrawable extends Drawable
     }
 
     Bitmap currentFrame = state.frameLoader.getCurrentFrame();
-    canvas.drawBitmap(currentFrame, null, getDestRect(), getPaint());
+    if (currentFrame != null && !currentFrame.isRecycled()) {
+      try {
+        canvas.drawBitmap(currentFrame, null, getDestRect(), getPaint());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
