@@ -128,7 +128,7 @@ dependencyResolutionManagement {
             library('kotlinpoet', 'com.squareup:kotlinpoet:1.12.0')
             library('ksp', 'com.google.devtools.ksp', 'symbol-processing-api').versionRef('ksp')
             library('ksp-autoservice', 'dev.zacsweers.autoservice:auto-service-ksp:1.0.0')
-            library('ksp-compiletesting', 'com.github.tschuchortdev:kotlin-compile-testing-ksp:1.4.9')
+            library('ksp-compiletesting', 'com.github.tschuchortdev:kotlin-compile-testing-ksp:1.6.0')
             library('ksp-gradle', 'com.google.devtools.ksp', 'com.google.devtools.ksp.gradle.plugin').versionRef('ksp')
             library('mockwebserver', 'com.squareup.okhttp3:mockwebserver:3.0.0-RC1')
             library('mockito', 'org.mockito', 'mockito-core').versionRef('mockito')
