@@ -163,6 +163,7 @@ Thanks
 * **Dave Smith** for the [GIF decoder gist][9] Glide's GIF decoder is based on.
 * **Chris Banes** for his [gradle-mvn-push][10] script.
 * **Corey Hall** for Glide's [amazing logo][11].
+* [**kanelbulle**](https://github.com/kanelbulle) for many reviews over the years. 
 * Everyone who has contributed code and reported issues!
 
 Author
