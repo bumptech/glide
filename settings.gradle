@@ -87,7 +87,7 @@ dependencyResolutionManagement {
             library('androidx-futures', 'androidx.concurrent:concurrent-futures:1.1.0')
             library('androidx-junit', 'androidx.test.ext:junit:1.1.5')
             library('androidx-recyclerview','androidx.recyclerview:recyclerview:1.3.1')
-            library('androidx-test.core', 'androidx.test:core:1.4.0')
+            library('androidx-test.core', 'androidx.test:core:1.6.1')
             library('androidx-test.ktx', 'androidx.test:core-ktx:1.5.0')
             library('androidx-test.ktx.junit', 'androidx.test.ext:junit-ktx:1.1.5')
             library('androidx-test.rules', 'androidx.test:rules:1.4.0')
