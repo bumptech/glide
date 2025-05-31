@@ -30,4 +30,15 @@ class GlideImageTest {
       )
     }
   }
+
+  @Test
+  fun glideImage_colorDrawable() {
+    composeRule.setContent {
+      GlideImage(
+        model = null,
+        contentDescription = null,
+        loading = placeholder(android.R.color.black),
+      )
+    }
+  }
 }
