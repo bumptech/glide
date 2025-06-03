@@ -14,24 +14,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.view.Display;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.util.Preconditions;
 import com.google.common.truth.Truth;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
@@ -43,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.util.ReflectionHelpers;
@@ -146,13 +140,12 @@ public class CustomViewTargetTest {
     verify(cb).onSizeReady(eq(dimens), eq(dimens));
   }
 
+  @Config(qualifiers = "w200dp-h300dp")
   @Test
   public void getSize_withBothWrapContent_usesDisplayDimens() {
     LayoutParams layoutParams =
         new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     view.setLayoutParams(layoutParams);
-
-    setDisplayDimens(200, 300);
 
     activity.visible();
     view.layout(0, 0, 0, 0);
@@ -162,13 +155,12 @@ public class CustomViewTargetTest {
     verify(cb).onSizeReady(300, 300);
   }
 
+  @Config(qualifiers = "w100dp-h200dp")
   @Test
   public void getSize_withWrapContentWidthAndValidHeight_usesDisplayDimenAndValidHeight() {
     int height = 100;
     LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, height);
     view.setLayoutParams(params);
-
-    setDisplayDimens(100, 200);
 
     activity.visible();
     view.setRight(0);
@@ -178,12 +170,12 @@ public class CustomViewTargetTest {
     verify(cb).onSizeReady(200, height);
   }
 
+  @Config(qualifiers = "w200dp-h100dp")
   @Test
   public void getSize_withWrapContentHeightAndValidWidth_returnsWidthAndDisplayDimen() {
     int width = 100;
     LayoutParams params = new FrameLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
     view.setLayoutParams(params);
-    setDisplayDimens(200, 100);
     parent.getLayoutParams().height = 200;
 
     activity.visible();
@@ -193,13 +185,12 @@ public class CustomViewTargetTest {
     verify(cb).onSizeReady(width, 200);
   }
 
+  @Config(qualifiers = "w500dp-h600dp")
   @Test
   public void getSize_withWrapContentWidthAndMatchParentHeight_usesDisplayDimenWidthAndHeight() {
     LayoutParams params =
         new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
     view.setLayoutParams(params);
-
-    setDisplayDimens(500, 600);
 
     target.getSize(cb);
 
@@ -214,13 +205,12 @@ public class CustomViewTargetTest {
     verify(cb).onSizeReady(500, height);
   }
 
+  @Config(qualifiers = "w300dp-h400dp")
   @Test
   public void getSize_withMatchParentWidthAndWrapContentHeight_usesWidthAndDisplayDimenHeight() {
     LayoutParams params =
         new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
     view.setLayoutParams(params);
-
-    setDisplayDimens(300, 400);
 
     target.getSize(cb);
 
@@ -468,20 +458,6 @@ public class CustomViewTargetTest {
     target.getSize(cb);
 
     verify(cb, never()).onSizeReady(anyInt(), anyInt());
-  }
-
-  private void setDisplayDimens(Integer width, Integer height) {
-    WindowManager windowManager =
-        (WindowManager)
-            ApplicationProvider.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-    Display display = Preconditions.checkNotNull(windowManager).getDefaultDisplay();
-    if (width != null) {
-      Shadows.shadowOf(display).setWidth(width);
-    }
-
-    if (height != null) {
-      Shadows.shadowOf(display).setHeight(height);
-    }
   }
 
   @Test
