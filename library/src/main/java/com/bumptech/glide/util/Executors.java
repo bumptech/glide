@@ -19,6 +19,13 @@ public final class Executors {
           Util.postOnUiThread(command);
         }
       };
+  private static final Executor MAIN_THREAD_EXECUTOR_FRONT =
+      new Executor() {
+        @Override
+        public void execute(@NonNull Runnable command) {
+          Util.postAtFrontOfQueueOnUiThread(command);
+        }
+      };
   private static final Executor DIRECT_EXECUTOR =
       new Executor() {
         @Override
@@ -30,6 +37,11 @@ public final class Executors {
   /** Posts executions to the main thread. */
   public static Executor mainThreadExecutor() {
     return MAIN_THREAD_EXECUTOR;
+  }
+
+  /** Posts executions to the main thread at the front of the queue. */
+  public static Executor mainThreadExecutorFront() {
+    return MAIN_THREAD_EXECUTOR_FRONT;
   }
 
   /** Immediately calls {@link Runnable#run()} on the current thread. */
