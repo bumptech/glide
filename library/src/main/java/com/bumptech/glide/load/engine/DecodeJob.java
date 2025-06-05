@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Build;
+import android.os.Process;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.util.Pools;
@@ -10,6 +11,7 @@ import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
@@ -25,6 +27,7 @@ import com.bumptech.glide.util.pool.StateVerifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * A class responsible for decoding resources either from cached data or from the original source
@@ -41,6 +44,10 @@ class DecodeJob<R>
         Comparable<DecodeJob<?>>,
         Poolable {
   private static final String TAG = "DecodeJob";
+  private static final Option<Supplier<Integer>> GLIDE_THREAD_PRIORITY =
+      Option.memory("glide_thread_priority");
+  private static final int DEFAULT_THREAD_PRIORITY =
+      Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
   private final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
   private final List<Throwable> throwables = new ArrayList<>();
@@ -49,6 +56,7 @@ class DecodeJob<R>
   private final Pools.Pool<DecodeJob<?>> pool;
   private final DeferredEncodeManager<?> deferredEncodeManager = new DeferredEncodeManager<>();
   private final ReleaseManager releaseManager = new ReleaseManager();
+  private final int threadPriority = Process.getThreadPriority(Process.myTid());
 
   private GlideContext glideContext;
   private Key signature;
@@ -65,6 +73,7 @@ class DecodeJob<R>
   private long startFetchTime;
   private boolean onlyRetrieveFromCache;
   private Object model;
+  private Supplier<Integer> glideThreadPriorityOverride;
 
   private Thread currentThread;
   private Key currentSourceKey;
@@ -129,6 +138,7 @@ class DecodeJob<R>
     this.order = order;
     this.runReason = RunReason.INITIALIZE;
     this.model = model;
+    this.glideThreadPriorityOverride = options.get(GLIDE_THREAD_PRIORITY);
     return this;
   }
 
@@ -326,7 +336,17 @@ class DecodeJob<R>
     // onDataFetcherReady.
   }
 
+  private void restoreThreadPriority() {
+    if (glideThreadPriorityOverride != null && glideThreadPriorityOverride.get() != null) {
+      // Setting to default instead of original priority because threads can run multiple jobs at
+      // once so if a new job is started before a previous higher priority job completes, that new
+      // job will start with a higher priority.
+      Process.setThreadPriority(Process.myTid(), DEFAULT_THREAD_PRIORITY);
+    }
+  }
+
   private void notifyFailed() {
+    restoreThreadPriority();
     setNotifiedOrThrow();
     GlideException e = new GlideException("Failed to load resource", new ArrayList<>(throwables));
     callback.onLoadFailed(e);
@@ -335,6 +355,7 @@ class DecodeJob<R>
 
   private void notifyComplete(
       Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
+    restoreThreadPriority();
     setNotifiedOrThrow();
     callback.onResourceReady(resource, dataSource, isLoadedFromAlternateCacheKey);
   }
@@ -428,6 +449,17 @@ class DecodeJob<R>
               + currentSourceKey
               + ", fetcher: "
               + currentFetcher);
+    }
+    if (glideThreadPriorityOverride != null && glideThreadPriorityOverride.get() != null) {
+      Log.d(
+          "BigDawg",
+          "Setting thread priority for thread "
+              + Process.myTid()
+              + " from "
+              + threadPriority
+              + " to "
+              + glideThreadPriorityOverride.get().intValue());
+      Process.setThreadPriority(Process.myTid(), glideThreadPriorityOverride.get().intValue());
     }
     Resource<R> resource = null;
     try {
