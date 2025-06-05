@@ -818,6 +818,19 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     return into(target, /* targetListener= */ null, Executors.mainThreadExecutor());
   }
 
+  /**
+   * Set the target the resource will be loaded into; the callback will be set at the front of the
+   * queue.
+   *
+   * @param target The target to load the resource into.
+   * @return The given target.
+   * @see RequestManager#clear(Target)
+   */
+  @NonNull
+  public <Y extends Target<TranscodeType>> Y intoFront(@NonNull Y target) {
+    return into(target, /* targetListener= */ null, Executors.mainThreadExecutorFront());
+  }
+
   @NonNull
   <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
@@ -999,6 +1012,36 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   public Target<TranscodeType> preload(int width, int height) {
     final PreloadTarget<TranscodeType> target = PreloadTarget.obtain(requestManager, width, height);
     return into(target);
+  }
+
+  /**
+   * Preloads the resource into the cache using the given width and height; the callback will be set
+   * at the front of the queue.
+   *
+   * <p>Pre-loading is useful for making sure that resources you are going to to want in the near
+   * future are available quickly.
+   *
+   * <p>Note - Any thumbnail request that does not complete before the primary request will be
+   * cancelled and may not be preloaded successfully. Cancellation of outstanding thumbnails after
+   * the primary request succeeds is a common behavior of all Glide requests. We do not try to
+   * prevent that behavior here. If you absolutely need all thumbnails to be preloaded individually,
+   * make separate preload() requests for each thumbnail (you can still combine them into one call
+   * when loading the image(s) into the UI in a subsequent request).
+   *
+   * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
+   *     overridden by {@link com.bumptech.glide.request.RequestOptions#override(int, int)} if
+   *     previously called.
+   * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
+   *     overridden by {@link com.bumptech.glide.request.RequestOptions#override(int, int)}} if
+   *     previously called).
+   * @return A {@link Target} that can be used to cancel the load via {@link
+   *     RequestManager#clear(Target)}.
+   * @see com.bumptech.glide.ListPreloader
+   */
+  @NonNull
+  public Target<TranscodeType> preloadFront(int width, int height) {
+    final PreloadTarget<TranscodeType> target = PreloadTarget.obtain(requestManager, width, height);
+    return intoFront(target);
   }
 
   /**

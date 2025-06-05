@@ -151,6 +151,14 @@ public final class Util {
     getUiThreadHandler().post(runnable);
   }
 
+  /**
+   * Posts the given {@code runnable} to the front of the queue on the UI thread using a shared
+   * {@link Handler}.
+   */
+  public static void postAtFrontOfQueueOnUiThread(Runnable runnable) {
+    getUiThreadHandler().postAtFrontOfQueue(runnable);
+  }
+
   /** Removes the given {@code runnable} from the UI threads queue if it is still queued. */
   public static void removeCallbacksOnUiThread(Runnable runnable) {
     getUiThreadHandler().removeCallbacks(runnable);
