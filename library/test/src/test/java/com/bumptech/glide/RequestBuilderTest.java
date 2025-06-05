@@ -78,8 +78,20 @@ public class RequestBuilderTest {
   }
 
   @Test
+  public void testDoesNotThrowWithNullModelWhenRequestIsBuiltFront() {
+    getNullModelRequest().experimentalIntoFront(target);
+  }
+
+  @Test
   public void testAddsNewRequestToRequestTracker() {
     getNullModelRequest().into(target);
+
+    verify(requestManager).track(eq(target), isA(Request.class));
+  }
+
+  @Test
+  public void testAddsNewRequestToRequestTrackerFront() {
+    getNullModelRequest().experimentalIntoFront(target);
 
     verify(requestManager).track(eq(target), isA(Request.class));
   }
@@ -94,6 +106,16 @@ public class RequestBuilderTest {
     verify(requestManager).clear(eq(target));
   }
 
+  @Test
+  public void testRemovesPreviousRequestFromRequestTrackerFront() {
+    Request previous = mock(Request.class);
+    when(target.getRequest()).thenReturn(previous);
+
+    getNullModelRequest().experimentalIntoFront(target);
+
+    verify(requestManager).clear(eq(target));
+  }
+
   @Test(expected = NullPointerException.class)
   public void testThrowsIfGivenNullTarget() {
     //noinspection ConstantConditions testing if @NonNull is enforced
@@ -101,8 +123,19 @@ public class RequestBuilderTest {
   }
 
   @Test(expected = NullPointerException.class)
+  public void testThrowsIfGivenNullTargetFront() {
+    //noinspection ConstantConditions testing if @NonNull is enforced
+    getNullModelRequest().experimentalIntoFront((Target<Object>) null);
+  }
+
+  @Test(expected = NullPointerException.class)
   public void testThrowsIfGivenNullView() {
     getNullModelRequest().into((ImageView) null);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testThrowsIfGivenNullViewFront() {
+    getNullModelRequest().experimentalIntoFront((ImageView) null);
   }
 
   @Test(expected = RuntimeException.class)
@@ -117,6 +150,18 @@ public class RequestBuilderTest {
         });
   }
 
+  @Test(expected = RuntimeException.class)
+  public void testThrowsIfIntoViewCalledOnBackgroundThreadFront() throws InterruptedException {
+    final ImageView imageView = new ImageView(ApplicationProvider.getApplicationContext());
+    testInBackground(
+        new BackgroundTester() {
+          @Override
+          public void runTest() {
+            getNullModelRequest().experimentalIntoFront(imageView);
+          }
+        });
+  }
+
   @Test
   public void doesNotThrowIfIntoTargetCalledOnBackgroundThread() throws InterruptedException {
     final Target<Object> target = mock(Target.class);
@@ -125,6 +170,18 @@ public class RequestBuilderTest {
           @Override
           public void runTest() {
             getNullModelRequest().into(target);
+          }
+        });
+  }
+
+  @Test
+  public void doesNotThrowIfIntoTargetCalledOnBackgroundThreadFront() throws InterruptedException {
+    final Target<Object> target = mock(Target.class);
+    testInBackground(
+        new BackgroundTester() {
+          @Override
+          public void runTest() {
+            getNullModelRequest().experimentalIntoFront(target);
           }
         });
   }
@@ -147,8 +204,46 @@ public class RequestBuilderTest {
   }
 
   @Test
+  public void testMultipleRequestListenersFront() {
+    getNullModelRequest()
+        .addListener(listener1)
+        .addListener(listener2)
+        .experimentalIntoFront(target);
+    verify(requestManager).track(any(Target.class), requestCaptor.capture());
+    requestCaptor
+        .getValue()
+        .onResourceReady(
+            new SimpleResource<>(new Object()),
+            DataSource.LOCAL,
+            /* isLoadedFromAlternateCacheKey= */ false);
+
+    verify(listener1)
+        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+    verify(listener2)
+        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+  }
+
+  @Test
   public void testListenerApiOverridesListeners() {
     getNullModelRequest().addListener(listener1).listener(listener2).into(target);
+    verify(requestManager).track(any(Target.class), requestCaptor.capture());
+    requestCaptor
+        .getValue()
+        .onResourceReady(
+            new SimpleResource<>(new Object()),
+            DataSource.LOCAL,
+            /* isLoadedFromAlternateCacheKey= */ false);
+
+    // The #listener API removes any previous listeners, so the first listener should not be called.
+    verify(listener1, never())
+        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+    verify(listener2)
+        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+  }
+
+  @Test
+  public void testListenerApiOverridesListenersFront() {
+    getNullModelRequest().addListener(listener1).listener(listener2).experimentalIntoFront(target);
     verify(requestManager).track(any(Target.class), requestCaptor.capture());
     requestCaptor
         .getValue()
