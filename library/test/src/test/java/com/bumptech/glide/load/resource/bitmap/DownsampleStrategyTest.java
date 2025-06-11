@@ -8,7 +8,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 21)
+@Config(sdk = Config.OLDEST_SDK)
 public class DownsampleStrategyTest {
 
   @Test
