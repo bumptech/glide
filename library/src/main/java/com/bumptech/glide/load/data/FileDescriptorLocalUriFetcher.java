@@ -5,6 +5,7 @@ import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import androidx.annotation.NonNull;
+import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -17,7 +18,12 @@ public class FileDescriptorLocalUriFetcher extends LocalUriFetcher<ParcelFileDes
   @Override
   protected ParcelFileDescriptor loadResource(Uri uri, ContentResolver contentResolver)
       throws FileNotFoundException {
-    AssetFileDescriptor assetFileDescriptor = contentResolver.openAssetFileDescriptor(uri, "r");
+    AssetFileDescriptor assetFileDescriptor = null;
+    if (MediaStoreUtil.isMediaStoreUri(uri) && MediaStoreUtil.isMediaStoreOpenFileAPIsAvailable()) {
+      assetFileDescriptor = MediaStoreUtil.openAssetFileDescriptor(uri, contentResolver);
+    } else {
+      assetFileDescriptor = contentResolver.openAssetFileDescriptor(uri, "r");
+    }
     if (assetFileDescriptor == null) {
       throw new FileNotFoundException("FileDescriptor is null for: " + uri);
     }
