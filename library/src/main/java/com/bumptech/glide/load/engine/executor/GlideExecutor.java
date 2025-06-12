@@ -64,6 +64,11 @@ public final class GlideExecutor implements ExecutorService {
 
   private final ExecutorService delegate;
 
+  /** The default priority for threads created by Glide. */
+  public static final int DEFAULT_PRIORITY =
+      android.os.Process.THREAD_PRIORITY_BACKGROUND
+          + android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
+
   /**
    * Returns a new {@link Builder} with the {@link #DEFAULT_DISK_CACHE_EXECUTOR_THREADS} threads,
    * {@link #DEFAULT_DISK_CACHE_EXECUTOR_NAME} name and {@link UncaughtThrowableStrategy#DEFAULT}
@@ -371,9 +376,6 @@ public final class GlideExecutor implements ExecutorService {
   }
 
   private static final class DefaultPriorityThreadFactory implements ThreadFactory {
-    private static final int DEFAULT_PRIORITY =
-        android.os.Process.THREAD_PRIORITY_BACKGROUND
-            + android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
 
     @Override
     public Thread newThread(@NonNull Runnable runnable) {
