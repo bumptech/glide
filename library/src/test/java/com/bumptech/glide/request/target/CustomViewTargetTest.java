@@ -40,7 +40,6 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ReflectionHelpers;
 
 /**
  * Test for {@link CustomViewTarget}.
@@ -58,12 +57,10 @@ public class CustomViewTargetTest {
   private CustomViewTarget<View, Object> target;
   @Mock private SizeReadyCallback cb;
   @Mock private Request request;
-  private int sdkVersion;
   private AttachStateTarget attachStateTarget;
 
   @Before
   public void setUp() {
-    sdkVersion = Build.VERSION.SDK_INT;
     MockitoAnnotations.initMocks(this);
     activity = Robolectric.buildActivity(Activity.class).create().start().postCreate(null).resume();
     view = new View(activity.get());
@@ -87,7 +84,6 @@ public class CustomViewTargetTest {
 
   @After
   public void tearDown() {
-    setSdkVersionInt(sdkVersion);
     CustomViewTarget.SizeDeterminer.maxDisplayLength = null;
   }
 
@@ -444,7 +440,6 @@ public class CustomViewTargetTest {
 
   @Test
   public void getSize_withValidWidthAndHeight_preV19_layoutRequested_callsSizeReady() {
-    setSdkVersionInt(18);
     view.setLayoutParams(new FrameLayout.LayoutParams(100, 100));
     view.requestLayout();
 
@@ -675,9 +670,5 @@ public class CustomViewTargetTest {
     public void onLoadFailed(@Nullable Drawable errorDrawable) {
       // Avoid calling super.
     }
-  }
-
-  private static void setSdkVersionInt(int version) {
-    ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", version);
   }
 }
