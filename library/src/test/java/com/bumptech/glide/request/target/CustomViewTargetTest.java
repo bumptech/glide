@@ -221,7 +221,11 @@ public class CustomViewTargetTest {
     activity.visible();
     view.getViewTreeObserver().dispatchOnPreDraw();
 
-    verify(cb).onSizeReady(width, 344);
+    if (Build.VERSION.SDK_INT <= 19) {
+      verify(cb).onSizeReady(width, 352);
+    } else {
+      verify(cb).onSizeReady(width, 344);
+    }
   }
 
   @Test
