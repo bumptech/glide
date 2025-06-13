@@ -1,6 +1,5 @@
 package com.bumptech.glide.request.target;
 
-import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -49,7 +48,7 @@ import org.robolectric.annotation.Config;
  * gradle changes, but I've so far failed to figure out the right set of commands.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK)
+@Config(sdk = Config.OLDEST_SDK)
 public class CustomViewTargetTest {
   private ActivityController<Activity> activity;
   private View view;
