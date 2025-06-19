@@ -2,9 +2,11 @@ package com.bumptech.glide.load.data;
 
 import android.content.ContentResolver;
 import android.content.UriMatcher;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import androidx.annotation.NonNull;
+import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,21 +47,25 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
     URI_MATCHER.addURI(ContactsContract.AUTHORITY, "phone_lookup/*", ID_LOOKUP_BY_PHONE);
   }
 
-  public StreamLocalUriFetcher(ContentResolver resolver, Uri uri) {
-    super(resolver, uri);
+  public StreamLocalUriFetcher(
+      ContentResolver resolver, Uri uri, boolean useMediaStoreAPIsIfAvailable) {
+    super(resolver, uri, useMediaStoreAPIsIfAvailable);
   }
 
   @Override
-  protected InputStream loadResource(Uri uri, ContentResolver contentResolver)
+  protected InputStream loadResource(
+      Uri uri, ContentResolver contentResolver, boolean useMediaStoreAPIsIfAvailable)
       throws FileNotFoundException {
-    InputStream inputStream = loadResourceFromUri(uri, contentResolver);
+    InputStream inputStream =
+        loadResourceFromUri(uri, contentResolver, useMediaStoreAPIsIfAvailable);
     if (inputStream == null) {
       throw new FileNotFoundException("InputStream is null for " + uri);
     }
     return inputStream;
   }
 
-  private InputStream loadResourceFromUri(Uri uri, ContentResolver contentResolver)
+  private InputStream loadResourceFromUri(
+      Uri uri, ContentResolver contentResolver, boolean useMediaStoreAPIsIfAvailable)
       throws FileNotFoundException {
     switch (URI_MATCHER.match(uri)) {
       case ID_CONTACTS_CONTACT:
@@ -76,7 +82,27 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
       case ID_CONTACTS_PHOTO:
       case UriMatcher.NO_MATCH:
       default:
-        return contentResolver.openInputStream(uri);
+        if (useMediaStoreAPIsIfAvailable
+            && MediaStoreUtil.isMediaStoreUri(uri)
+            && MediaStoreUtil.isMediaStoreOpenFileAPIsAvailable()) {
+          AssetFileDescriptor afd = MediaStoreUtil.openAssetFileDescriptor(uri, contentResolver);
+          if (afd == null) {
+            throw new FileNotFoundException("FileDescriptor is null for: " + uri);
+          }
+          try {
+            return afd.createInputStream();
+          } catch (IOException exception) {
+            try {
+              afd.close();
+            } catch (Exception innerException) {
+              // Ignored
+            }
+            throw (FileNotFoundException)
+                new FileNotFoundException("Unable to create stream").initCause(exception);
+          }
+        } else {
+          return contentResolver.openInputStream(uri);
+        }
     }
   }
 

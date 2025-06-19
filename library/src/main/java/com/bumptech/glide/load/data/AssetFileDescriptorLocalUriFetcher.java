@@ -4,20 +4,31 @@ import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import androidx.annotation.NonNull;
+import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /** Fetches an {@link AssetFileDescriptor} for a local {@link android.net.Uri}. */
 public final class AssetFileDescriptorLocalUriFetcher extends LocalUriFetcher<AssetFileDescriptor> {
 
-  public AssetFileDescriptorLocalUriFetcher(ContentResolver contentResolver, Uri uri) {
-    super(contentResolver, uri);
+  public AssetFileDescriptorLocalUriFetcher(
+      ContentResolver contentResolver, Uri uri, boolean useMediaStoreAPIsIfAvailable) {
+    super(contentResolver, uri, useMediaStoreAPIsIfAvailable);
   }
 
   @Override
-  protected AssetFileDescriptor loadResource(Uri uri, ContentResolver contentResolver)
+  protected AssetFileDescriptor loadResource(
+      Uri uri, ContentResolver contentResolver, boolean useMediaStoreAPIsIfAvailable)
       throws FileNotFoundException {
-    AssetFileDescriptor result = contentResolver.openAssetFileDescriptor(uri, "r");
+
+    AssetFileDescriptor result = null;
+    if (useMediaStoreAPIsIfAvailable
+        && MediaStoreUtil.isMediaStoreUri(uri)
+        && MediaStoreUtil.isMediaStoreOpenFileAPIsAvailable()) {
+      result = MediaStoreUtil.openAssetFileDescriptor(uri, contentResolver);
+    } else {
+      result = contentResolver.openAssetFileDescriptor(uri, "r");
+    }
     if (result == null) {
       throw new FileNotFoundException("FileDescriptor is null for: " + uri);
     }

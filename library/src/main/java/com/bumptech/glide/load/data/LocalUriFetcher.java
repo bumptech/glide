@@ -20,6 +20,7 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   private static final String TAG = "LocalUriFetcher";
   private final Uri uri;
   private final ContentResolver contentResolver;
+  private final boolean useMediaStoreAPIsIfAvailable;
   private T data;
 
   /**
@@ -28,20 +29,24 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
    * @param contentResolver Any {@link android.content.ContentResolver}.
    * @param uri A Uri pointing to a local asset. This load will fail if the uri isn't openable by
    *     {@link ContentResolver#openInputStream(android.net.Uri)}
+   * @param useMediaStoreAPIsIfAvailable used to decide if the uri should be opened using MediaStore
+   *     APIs
    * @see ContentResolver#openInputStream(android.net.Uri)
    */
   // Public API.
   @SuppressWarnings("WeakerAccess")
-  public LocalUriFetcher(ContentResolver contentResolver, Uri uri) {
+  public LocalUriFetcher(
+      ContentResolver contentResolver, Uri uri, boolean useMediaStoreAPIsIfAvailable) {
     this.contentResolver = contentResolver;
     this.uri = uri;
+    this.useMediaStoreAPIsIfAvailable = useMediaStoreAPIsIfAvailable;
   }
 
   @Override
   public final void loadData(
       @NonNull Priority priority, @NonNull DataCallback<? super T> callback) {
     try {
-      data = loadResource(uri, contentResolver);
+      data = loadResource(uri, contentResolver, useMediaStoreAPIsIfAvailable);
       callback.onDataReady(data);
     } catch (FileNotFoundException e) {
       if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -77,7 +82,8 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
    * Returns a concrete data type from the given {@link android.net.Uri} using the given {@link
    * android.content.ContentResolver}.
    */
-  protected abstract T loadResource(Uri uri, ContentResolver contentResolver)
+  protected abstract T loadResource(
+      Uri uri, ContentResolver contentResolver, boolean useMediaStoreAPIsIfAvailable)
       throws FileNotFoundException;
 
   /**
