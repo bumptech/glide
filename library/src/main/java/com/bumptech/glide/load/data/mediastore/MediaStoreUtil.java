@@ -1,9 +1,16 @@
 package com.bumptech.glide.load.data.mediastore;
 
 import android.content.ContentResolver;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Build.VERSION_CODES;
+import android.os.ext.SdkExtensions;
 import android.provider.MediaStore;
+import androidx.annotation.ChecksSdkIntAtLeast;
+import androidx.annotation.RequiresExtension;
 import com.bumptech.glide.request.target.Target;
+import java.io.FileNotFoundException;
 
 /** Utility classes for interacting with the media store. */
 public final class MediaStoreUtil {
@@ -18,6 +25,18 @@ public final class MediaStoreUtil {
     return uri != null
         && ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())
         && MediaStore.AUTHORITY.equals(uri.getAuthority());
+  }
+
+  @ChecksSdkIntAtLeast(api = 16, extension = VERSION_CODES.R)
+  public static boolean isMediaStoreOpenFileAPIsAvailable() {
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+        && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 16;
+  }
+
+  @RequiresExtension(extension = VERSION_CODES.R, version = 16)
+  public static AssetFileDescriptor openAssetFileDescriptor(
+      Uri uri, ContentResolver contentResolver) throws FileNotFoundException {
+    return MediaStore.openAssetFileDescriptor(contentResolver, uri, "r", null);
   }
 
   // Android picker uris contain a "picker" segment:
