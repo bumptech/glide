@@ -13,6 +13,7 @@ import android.os.ParcelFileDescriptor;
 import androidx.annotation.Nullable;
 import androidx.tracing.Trace;
 import com.bumptech.glide.GlideBuilder.EnableImageDecoderForBitmaps;
+import com.bumptech.glide.GlideBuilder.UseMediaStoreOpenFileAPIsIfPossible;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -338,16 +339,23 @@ final class RegistryFactory {
           ParcelFileDescriptor.class,
           new QMediaStoreUriLoader.FileDescriptorFactory(context));
     }
+    boolean useMediaStoreOpenFileAPIsIfPossible =
+        experiments.isEnabled(UseMediaStoreOpenFileAPIsIfPossible.class);
     registry
-        .append(Uri.class, InputStream.class, new UriLoader.StreamFactory(contentResolver))
+        .append(
+            Uri.class,
+            InputStream.class,
+            new UriLoader.StreamFactory(contentResolver, useMediaStoreOpenFileAPIsIfPossible))
         .append(
             Uri.class,
             ParcelFileDescriptor.class,
-            new UriLoader.FileDescriptorFactory(contentResolver))
+            new UriLoader.FileDescriptorFactory(
+                contentResolver, useMediaStoreOpenFileAPIsIfPossible))
         .append(
             Uri.class,
             AssetFileDescriptor.class,
-            new UriLoader.AssetFileDescriptorFactory(contentResolver))
+            new UriLoader.AssetFileDescriptorFactory(
+                contentResolver, useMediaStoreOpenFileAPIsIfPossible))
         .append(Uri.class, InputStream.class, new UrlUriLoader.StreamFactory())
         .append(URL.class, InputStream.class, new UrlLoader.StreamFactory())
         .append(Uri.class, File.class, new MediaStoreFileLoader.Factory(context))

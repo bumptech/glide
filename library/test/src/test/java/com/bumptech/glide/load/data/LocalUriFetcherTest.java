@@ -65,11 +65,12 @@ public class LocalUriFetcherTest {
     final Closeable closeable = mock(Closeable.class);
 
     TestLocalUriFetcher(Context context, Uri uri) {
-      super(context.getContentResolver(), uri);
+      super(context.getContentResolver(), uri, false);
     }
 
     @Override
-    protected Closeable loadResource(Uri uri, ContentResolver contentResolver)
+    protected Closeable loadResource(
+        Uri uri, ContentResolver contentResolver, boolean useMediaStoreAPIsIfAvailable)
         throws FileNotFoundException {
       return closeable;
     }
