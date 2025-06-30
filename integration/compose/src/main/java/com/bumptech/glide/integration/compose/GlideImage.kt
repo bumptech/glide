@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
@@ -71,17 +72,17 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  * [RequestBuilder.error].
  *
  * @param loading A [Placeholder] that will be displayed while the request is loading. Specifically
- * it's used if the request is cleared ([com.bumptech.glide.request.target.Target.onLoadCleared]) or
- * loading ([com.bumptech.glide.request.target.Target.onLoadStarted]. There's a subtle difference in
- * behavior depending on which type of [Placeholder] you use. The resource and `Drawable` variants
- * will be displayed if the request fails and no other failure handling is specified, but the
- * `Composable` will not.
+ *   it's used if the request is cleared ([com.bumptech.glide.request.target.Target.onLoadCleared])
+ *   or loading ([com.bumptech.glide.request.target.Target.onLoadStarted]. There's a subtle
+ *   difference in behavior depending on which type of [Placeholder] you use. The resource and
+ *   `Drawable` variants will be displayed if the request fails and no other failure handling is
+ *   specified, but the `Composable` will not.
  * @param failure A [Placeholder] that will be displayed if the request fails. Specifically it's
- * used when [com.bumptech.glide.request.target.Target.onLoadFailed] is called. If
- * [RequestBuilder.error] is called in [requestBuilderTransform] with a valid [RequestBuilder] (as
- * opposed to resource id or [Drawable]), this [Placeholder] will not be used unless the `error`
- * [RequestBuilder] also fails. This parameter does not override error [RequestBuilder]s, only error
- * resource ids and/or [Drawable]s.
+ *   used when [com.bumptech.glide.request.target.Target.onLoadFailed] is called. If
+ *   [RequestBuilder.error] is called in [requestBuilderTransform] with a valid [RequestBuilder] (as
+ *   opposed to resource id or [Drawable]), this [Placeholder] will not be used unless the `error`
+ *   [RequestBuilder] also fails. This parameter does not override error [RequestBuilder]s, only
+ *   error resource ids and/or [Drawable]s.
  */
 // TODO(judds): the API here is not particularly composeesque, we should consider alternatives
 // to RequestBuilder (though thumbnail() may make that a challenge).
@@ -103,6 +104,7 @@ public fun GlideImage(
   failure: Placeholder? = null,
   // TODO(judds): Consider defaulting to load the model here instead of always doing so below.
   requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
+  stopAnimationWhenLifecycleNotStarted: Boolean = true,
 ) {
   val requestManager: RequestManager = LocalContext.current.let { remember(it) { Glide.with(it) } }
   val requestBuilder =
@@ -132,6 +134,7 @@ public fun GlideImage(
     colorFilter = colorFilter,
     placeholder = loading?.maybeComposable(),
     failure = failure?.maybeComposable(),
+    stopAnimationWhenLifecycleNotStarted = stopAnimationWhenLifecycleNotStarted,
   )
 }
 
@@ -143,7 +146,7 @@ private fun PreviewResourceOrDrawable(
   modifier: Modifier,
 ) {
   val drawable =
-    when(loading) {
+    when (loading) {
       is Placeholder.OfDrawable -> loading.drawable
       is Placeholder.OfResourceId -> LocalContext.current.getDrawable(loading.resourceId)
       is Placeholder.OfComposable ->
@@ -205,7 +208,9 @@ public fun placeholder(composable: @Composable () -> Unit): Placeholder =
 @ExperimentalGlideComposeApi
 public sealed class Placeholder {
   internal class OfDrawable(internal val drawable: Drawable?) : Placeholder()
+
   internal class OfResourceId(@DrawableRes internal val resourceId: Int) : Placeholder()
+
   internal class OfComposable(internal val composable: @Composable () -> Unit) : Placeholder()
 
   internal fun isResourceOrDrawable() =
@@ -223,7 +228,7 @@ public sealed class Placeholder {
 
   internal fun <T> apply(
     resource: (Int) -> RequestBuilder<T>,
-    drawable: (Drawable?) -> RequestBuilder<T>
+    drawable: (Drawable?) -> RequestBuilder<T>,
   ): RequestBuilder<T> =
     when (this) {
       is OfDrawable -> drawable(this.drawable)
@@ -238,10 +243,7 @@ private data class SizeAndModifier(val size: ResolvableGlideSize, val modifier: 
 
 @OptIn(InternalGlideApi::class)
 @Composable
-private fun rememberSizeAndModifier(
-  overrideSize: Size?,
-  modifier: Modifier,
-) =
+private fun rememberSizeAndModifier(overrideSize: Size?, modifier: Modifier) =
   remember(overrideSize, modifier) {
     if (overrideSize != null) {
       SizeAndModifier(ImmediateGlideSize(overrideSize), modifier)
@@ -249,7 +251,7 @@ private fun rememberSizeAndModifier(
       val sizeObserver = SizeObserver()
       SizeAndModifier(
         AsyncGlideSize(sizeObserver::getSize),
-        modifier.sizeObservingModifier(sizeObserver)
+        modifier.sizeObservingModifier(sizeObserver),
       )
     }
   }
@@ -259,7 +261,7 @@ private fun rememberRequestBuilderWithDefaults(
   model: Any?,
   requestManager: RequestManager,
   requestBuilderTransform: RequestBuilderTransform<Drawable>,
-  contentScale: ContentScale
+  contentScale: ContentScale,
 ) =
   remember(model, requestManager, requestBuilderTransform, contentScale) {
     requestBuilderTransform(requestManager.load(model).contentScaleTransform(contentScale))
@@ -300,6 +302,7 @@ private fun SizedGlideImage(
   colorFilter: ColorFilter?,
   placeholder: @Composable (() -> Unit)?,
   failure: @Composable (() -> Unit)?,
+  stopAnimationWhenLifecycleNotStarted: Boolean,
 ) {
   // Use a Box so we can infer the size if the request doesn't have an explicit size.
   @Composable fun @Composable () -> Unit.boxed() = Box(modifier = modifier) { this@boxed() }
@@ -308,6 +311,7 @@ private fun SizedGlideImage(
     rememberGlidePainter(
       requestBuilder = requestBuilder,
       size = size,
+      stopAnimationWhenLifecycleNotStarted = stopAnimationWhenLifecycleNotStarted,
     )
   if (placeholder != null && painter.status.showPlaceholder()) {
     placeholder.boxed()
@@ -321,7 +325,7 @@ private fun SizedGlideImage(
       contentScale = contentScale,
       alpha = alpha,
       colorFilter = colorFilter,
-      modifier = modifier.then(Modifier.semantics { displayedDrawable = painter.currentDrawable })
+      modifier = modifier.then(Modifier.semantics { displayedDrawable = painter.currentDrawable }),
     )
   }
 }
@@ -339,12 +343,22 @@ private fun Status.showPlaceholder(): Boolean =
 private fun rememberGlidePainter(
   requestBuilder: RequestBuilder<Drawable>,
   size: ResolvableGlideSize,
+  stopAnimationWhenLifecycleNotStarted: Boolean,
 ): GlidePainter {
   val scope = rememberCoroutineScope()
+  val lifecycleOwner = LocalLifecycleOwner.current
   // TODO(judds): Calling onRemembered here manually might make a minor improvement in how quickly
   //  the image load is started, but it also triggers a recomposition. I can't figure out why it
   //  triggers a recomposition
-  return remember(requestBuilder, size) { GlidePainter(requestBuilder, size, scope) }
+  return remember(requestBuilder, size) {
+    GlidePainter(
+      requestBuilder,
+      size,
+      scope,
+      lifecycleOwner,
+      stopAnimationWhenLifecycleNotStarted = stopAnimationWhenLifecycleNotStarted,
+    )
+  }
 }
 
 @OptIn(InternalGlideApi::class)
