@@ -1,9 +1,9 @@
 package com.bumptech.glide.integration.compose
 
+import android.graphics.drawable.Animatable
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.Stable
@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
 import com.bumptech.glide.integration.ktx.InternalGlideApi
@@ -46,6 +48,7 @@ constructor(
   private val requestBuilder: RequestBuilder<Drawable>,
   private val size: ResolvableGlideSize,
   scope: CoroutineScope,
+  private val lifecycleOwner: LifecycleOwner,
 ) : Painter(), RememberObserver {
   @OptIn(ExperimentGlideFlows::class) internal var status: Status by mutableStateOf(Status.CLEARED)
   internal val currentDrawable: MutableState<Drawable?> = mutableStateOf(null)
@@ -55,6 +58,28 @@ constructor(
   private val scope =
     scope + SupervisorJob(parent = scope.coroutineContext.job) + Dispatchers.Main.immediate
   private var currentJob: Job? = null
+
+  init {
+    scope.launch {
+      // If the Lifecycle state is at least STARTED, start the animation. Otherwise, stop the
+      // animation.
+      lifecycleOwner.lifecycle.currentStateFlow.collect {
+        if (it.isAtLeast(Lifecycle.State.STARTED)) {
+          currentDrawable.value?.let { drawable ->
+            if (drawable is Animatable) {
+              drawable.start()
+            }
+          }
+        } else {
+          currentDrawable.value?.let { drawable ->
+            if (drawable is Animatable) {
+              drawable.stop()
+            }
+          }
+        }
+      }
+    }
+  }
 
   override val intrinsicSize: Size
     get() = delegate?.intrinsicSize ?: Size.Unspecified
@@ -78,20 +103,30 @@ constructor(
     if (currentJob == null) {
       currentJob = launchRequest()
     }
+    // In case the onRemembered is called after the lifecycle onStop, it will start the animation,
+    // stop it here again.
+    if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+      currentDrawable.value?.let { drawable ->
+        if (drawable is Animatable) {
+          drawable.stop()
+        }
+      }
+    }
   }
 
   @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class)
-  private fun launchRequest() = this.scope.launch {
-    requestBuilder.flowResolvable(size).collect {
-      updateDelegate(
-        when (it) {
-          is Resource -> it.resource
-          is Placeholder -> it.placeholder
-        }
-      )
-      status = it.status
+  private fun launchRequest() =
+    this.scope.launch {
+      requestBuilder.flowResolvable(size).collect {
+        updateDelegate(
+          when (it) {
+            is Resource -> it.resource
+            is Placeholder -> it.placeholder
+          }
+        )
+        status = it.status
+      }
     }
-  }
 
   private fun Drawable.toPainter() =
     when (this) {

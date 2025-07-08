@@ -7,15 +7,21 @@ import android.graphics.ColorFilter
 import android.graphics.drawable.Animatable
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.bumptech.glide.integration.compose.test.Constants
 import com.bumptech.glide.integration.compose.test.GlideComposeRule
 import com.bumptech.glide.integration.compose.test.assertDisplaysInstance
 import com.bumptech.glide.integration.compose.test.onNodeWithDefaultContentDescription
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -42,14 +48,7 @@ class GlideImageCustomDrawableTransformationTest(
   fun glideImage_nonBitmapDrawable_doesNotThrow() = runTest {
     val customDrawable = FakeDrawable()
 
-    glideComposeRule.setContent {
-      GlideImage(
-        model = customDrawable,
-        contentScale = contentScale,
-        contentDescription = Constants.DEFAULT_DESCRIPTION,
-        modifier = Modifier.size(100.dp, 200.dp)
-      )
-    }
+    glideComposeRule.setContent { GlideImageWithCustomDrawable(customDrawable) }
 
     glideComposeRule.onNodeWithDefaultContentDescription().assertDisplaysInstance(customDrawable)
   }
@@ -58,16 +57,34 @@ class GlideImageCustomDrawableTransformationTest(
   fun glideImage_animatableDrawable_doesNotThrow() = runTest {
     val customDrawable = FakeAnimatableDrawable()
 
-    glideComposeRule.setContent {
-      GlideImage(
-        model = customDrawable,
-        contentScale = contentScale,
-        contentDescription = Constants.DEFAULT_DESCRIPTION,
-        modifier = Modifier.size(200.dp, 100.dp)
-      )
-    }
+    glideComposeRule.setContent { GlideImageWithCustomDrawable(customDrawable) }
 
     glideComposeRule.onNodeWithDefaultContentDescription().assertDisplaysInstance(customDrawable)
+  }
+
+  @Test
+  fun glideImage_animatableDrawable_stopsAnimationWhenLifecycleNotStarted() = runTest {
+    val customDrawable = FakeAnimatableDrawable()
+    val testLifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.STARTED)
+
+    glideComposeRule.setContent {
+      CompositionLocalProvider(LocalLifecycleOwner provides testLifecycleOwner) {
+        GlideImageWithCustomDrawable(customDrawable)
+      }
+    }
+    assertThat(customDrawable.animating).isTrue()
+    testLifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+    assertThat(customDrawable.animating).isFalse()
+  }
+
+  @Composable
+  private fun GlideImageWithCustomDrawable(customDrawable: FakeDrawable) {
+    GlideImage(
+      model = customDrawable,
+      contentScale = contentScale,
+      contentDescription = Constants.DEFAULT_DESCRIPTION,
+      modifier = Modifier.size(200.dp, 100.dp),
+    )
   }
 
   companion object {
@@ -89,8 +106,8 @@ class GlideImageCustomDrawableTransformationTest(
             override fun computeScaleFactor(srcSize: Size, dstSize: Size): ScaleFactor =
               ContentScale.Fit.computeScaleFactor(srcSize, dstSize)
           },
-          "Custom"
-        )
+          "Custom",
+        ),
       )
   }
 }
@@ -98,14 +115,25 @@ class GlideImageCustomDrawableTransformationTest(
 @Suppress("DeprecatedCallableAddReplaceWith")
 private open class FakeDrawable : Drawable() {
   override fun draw(p0: Canvas) {}
+
   override fun setAlpha(p0: Int) = throw UnsupportedOperationException()
+
   override fun setColorFilter(p0: ColorFilter?) = throw UnsupportedOperationException()
+
   @Deprecated("Deprecated in Java")
   override fun getOpacity(): Int = throw UnsupportedOperationException()
 }
 
 private class FakeAnimatableDrawable : FakeDrawable(), Animatable {
-  override fun start() {}
-  override fun stop() {}
+  var animating: Boolean? = null
+
+  override fun start() {
+    animating = true
+  }
+
+  override fun stop() {
+    animating = false
+  }
+
   override fun isRunning(): Boolean = throw UnsupportedOperationException()
 }
