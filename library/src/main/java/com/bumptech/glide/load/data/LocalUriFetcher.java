@@ -1,11 +1,13 @@
 package com.bumptech.glide.load.data;
 
 import android.content.ContentResolver;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -17,6 +19,7 @@ import java.io.IOException;
  *     java.io.InputStream} or {@link android.os.ParcelFileDescriptor}.
  */
 public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
+  protected final boolean useMediaStoreApisIfAvailable;
   private static final String TAG = "LocalUriFetcher";
   private final Uri uri;
   private final ContentResolver contentResolver;
@@ -28,13 +31,17 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
    * @param contentResolver Any {@link android.content.ContentResolver}.
    * @param uri A Uri pointing to a local asset. This load will fail if the uri isn't openable by
    *     {@link ContentResolver#openInputStream(android.net.Uri)}
+   * @param useMediaStoreApisIfAvailable used to decide if the uri should be opened using MediaStore
+   *     APIs
    * @see ContentResolver#openInputStream(android.net.Uri)
    */
   // Public API.
   @SuppressWarnings("WeakerAccess")
-  public LocalUriFetcher(ContentResolver contentResolver, Uri uri) {
+  public LocalUriFetcher(
+      ContentResolver contentResolver, Uri uri, boolean useMediaStoreApisIfAvailable) {
     this.contentResolver = contentResolver;
     this.uri = uri;
+    this.useMediaStoreApisIfAvailable = useMediaStoreApisIfAvailable;
   }
 
   @Override
@@ -71,6 +78,22 @@ public abstract class LocalUriFetcher<T> implements DataFetcher<T> {
   @Override
   public DataSource getDataSource() {
     return DataSource.LOCAL;
+  }
+
+  /**
+   * Opens an {@link AssetFileDescriptor} for a uri pointing to a local asset. Depending on the
+   * {@code useMediaStoreApisIfAvailable} flag and the availability of MediaStore APIs, the uri may
+   * be opened using MediaStore APIs or {@link
+   * ContentResolver#openAssetFileDescriptor(android.net.Uri, String)}.
+   *
+   * @param uri A Uri pointing to a local asset.
+   */
+  protected AssetFileDescriptor openAssetFileDescriptor(Uri uri) throws FileNotFoundException {
+    return useMediaStoreApisIfAvailable
+            && MediaStoreUtil.isMediaStoreUri(uri)
+            && MediaStoreUtil.isMediaStoreOpenFileApisAvailable()
+        ? MediaStoreUtil.openAssetFileDescriptor(uri, contentResolver)
+        : contentResolver.openAssetFileDescriptor(uri, "r");
   }
 
   /**

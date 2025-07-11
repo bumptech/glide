@@ -10,14 +10,15 @@ import java.io.IOException;
 /** Fetches an {@link AssetFileDescriptor} for a local {@link android.net.Uri}. */
 public final class AssetFileDescriptorLocalUriFetcher extends LocalUriFetcher<AssetFileDescriptor> {
 
-  public AssetFileDescriptorLocalUriFetcher(ContentResolver contentResolver, Uri uri) {
-    super(contentResolver, uri);
+  public AssetFileDescriptorLocalUriFetcher(
+      ContentResolver contentResolver, Uri uri, boolean useMediaStoreApisIfAvailable) {
+    super(contentResolver, uri, useMediaStoreApisIfAvailable);
   }
 
   @Override
   protected AssetFileDescriptor loadResource(Uri uri, ContentResolver contentResolver)
       throws FileNotFoundException {
-    AssetFileDescriptor result = contentResolver.openAssetFileDescriptor(uri, "r");
+    AssetFileDescriptor result = openAssetFileDescriptor(uri);
     if (result == null) {
       throw new FileNotFoundException("FileDescriptor is null for: " + uri);
     }
