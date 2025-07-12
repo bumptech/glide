@@ -69,7 +69,7 @@ dependencyResolutionManagement {
             version('ksp', '1.8.22-1.0.11')
 
             library('androidx-multidex', "androidx.multidex:multidex:2.0.1")
-            library('autoservice', 'com.google.auto.service:auto-service:1.0-rc3')
+            library('autoservice', 'com.google.auto.service:auto-service:1.1.1')
             library('autoservice.annotations', 'com.google.auto.service:auto-service-annotations:1.0.1')
             library('android-gradle', 'com.android.tools.build:gradle:8.1.1')
             library('androidx-cardview', 'androidx.cardview:cardview:1.0.0')
