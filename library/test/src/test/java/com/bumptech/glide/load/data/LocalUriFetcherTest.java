@@ -65,7 +65,7 @@ public class LocalUriFetcherTest {
     final Closeable closeable = mock(Closeable.class);
 
     TestLocalUriFetcher(Context context, Uri uri) {
-      super(context.getContentResolver(), uri, /*useMediaStoreApisIfAvailable*/ false);
+      super(context.getContentResolver(), uri);
     }
 
     @Override

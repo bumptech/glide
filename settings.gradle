@@ -46,7 +46,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             // Versions for things other than dependencies
-            version('compile-sdk-version', 'android-36')
+            version('compile-sdk-version', 'android-34')
             version('min-sdk-version', '14')
             version('okhttp-min-sdk-version', '21')
             version('target-sdk-version', '32')
