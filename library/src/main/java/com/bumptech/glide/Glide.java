@@ -1,10 +1,12 @@
 package com.bumptech.glide;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.os.MessageQueue.IdleHandler;
 import android.util.Log;
 import android.view.View;
@@ -44,13 +46,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A singleton to present a simple static interface for building requests with {@link
  * RequestBuilder} and maintaining an {@link Engine}, {@link BitmapPool}, {@link
  * com.bumptech.glide.load.engine.cache.DiskCache} and {@link MemoryCache}.
  */
-public class Glide implements ComponentCallbacks2 {
+public class Glide implements ComponentCallbacks2, Application.ActivityLifecycleCallbacks {
   private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
   private static final String DESTROYED_ACTIVITY_WARNING =
       "You cannot start a load on a not yet attached View or a Fragment where getActivity() "
@@ -205,7 +208,9 @@ public class Glide implements ComponentCallbacks2 {
   public static void tearDown() {
     synchronized (Glide.class) {
       if (glide != null) {
-        glide.getContext().getApplicationContext().unregisterComponentCallbacks(glide);
+        Application application = (Application) glide.getContext().getApplicationContext();
+        application.unregisterComponentCallbacks(glide);
+        application.unregisterActivityLifecycleCallbacks(glide);
         glide.engine.shutdown();
       }
       glide = null;
@@ -224,7 +229,7 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull Context context,
       @NonNull GlideBuilder builder,
       @Nullable GeneratedAppGlideModule annotationGeneratedModule) {
-    Context applicationContext = context.getApplicationContext();
+    Application applicationContext = (Application) context.getApplicationContext();
     List<GlideModule> manifestModules = Collections.emptyList();
     if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
       manifestModules = new ManifestParser(applicationContext).parse();
@@ -265,6 +270,7 @@ public class Glide implements ComponentCallbacks2 {
     }
     Glide glide = builder.build(applicationContext, manifestModules, annotationGeneratedModule);
     applicationContext.registerComponentCallbacks(glide);
+    applicationContext.registerActivityLifecycleCallbacks(glide);
     Glide.glide = glide;
   }
 
@@ -445,6 +451,8 @@ public class Glide implements ComponentCallbacks2 {
     bitmapPool.clearMemory();
     arrayPool.clearMemory();
   }
+
+  private AtomicBoolean inBackground = new AtomicBoolean(false);
 
   /**
    * Clears some memory with the exact amount depending on the given level.
@@ -678,6 +686,12 @@ public class Glide implements ComponentCallbacks2 {
   @Override
   public void onTrimMemory(int level) {
     trimMemory(level);
+    // when level is TRIM_MEMORY_UI_HIDDEN or higher, it indicates that the app is
+    // in the background, we limit the memory usage to ZERO.
+    if (level >= TRIM_MEMORY_UI_HIDDEN) {
+      inBackground.set(true);
+      setMemoryCategory(MemoryCategory.ZERO);
+    }
   }
 
   @Override
@@ -696,5 +710,49 @@ public class Glide implements ComponentCallbacks2 {
     /** Returns a non-null {@link RequestOptions} object. */
     @NonNull
     RequestOptions build();
+  }
+
+  /**
+   * Any activity that is started or resumed indicates that the app is no longer in the background,
+   * and we should restore the memory usage to normal.
+   */
+  @Override
+  public void onActivityStarted(Activity activity) {
+    if (inBackground.getAndSet(false)) {
+      setMemoryCategory(MemoryCategory.NORMAL);
+    }
+  }
+
+  @Override
+  public void onActivityResumed(Activity activity) {
+    boolean wasInBackground = inBackground.getAndSet(false);
+    if (inBackground.getAndSet(false)) {
+      setMemoryCategory(MemoryCategory.NORMAL);
+    }
+  }
+
+  @Override
+  public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+    // Do nothing.
+  }
+
+  @Override
+  public void onActivityDestroyed(Activity activity) {
+    // Do nothing.
+  }
+
+  @Override
+  public void onActivityStopped(Activity activity) {
+    // Do nothing.
+  }
+
+  @Override
+  public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+    // Do nothing.
+  }
+
+  @Override
+  public void onActivityPaused(Activity activity) {
+    // Do nothing.
   }
 }
