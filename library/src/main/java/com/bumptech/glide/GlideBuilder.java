@@ -500,6 +500,19 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to make Glide use {@link
+   * android.provider.MediaStore#openAssetFileDescriptor(ContentResolver, Uri, String,
+   * CancellationSignal)} when opening {@link android.provider.MediaStore#AUTHORITY} content URIs
+   * when it is available.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder setUseMediaStoreOpenFileApisIfPossible(boolean isEnabled) {
+    glideExperimentsBuilder.update(new UseMediaStoreOpenFileApisIfPossible(), isEnabled);
+    return this;
+  }
+
+  /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
    */
@@ -637,4 +650,7 @@ public final class GlideBuilder {
 
   /** See {@link #setOverrideGlideThreadPriority(boolean)}. */
   public static final class OverrideGlideThreadPriority implements Experiment {}
+
+  /** See {@link #setUseMediaStoreOpenFileApisIfPossible(boolean)}. */
+  public static final class UseMediaStoreOpenFileApisIfPossible implements Experiment {}
 }
