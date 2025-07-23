@@ -560,7 +560,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     short getInt16(int offset) {
-      return (offset, 2) ? data.getShort(offset) : -1;
+      return isAvailable(offset, 2) ? data.getShort(offset) : -1;
     }
 
     private boolean isAvailable(int offset, int byteSize) {
