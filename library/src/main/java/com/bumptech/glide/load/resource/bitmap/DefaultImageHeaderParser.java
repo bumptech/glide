@@ -564,6 +564,9 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
     }
 
     private boolean isAvailable(int offset, int byteSize) {
+      if (offset < 0){
+        return false;
+      }
       return data.remaining() - offset >= byteSize;
     }
   }
