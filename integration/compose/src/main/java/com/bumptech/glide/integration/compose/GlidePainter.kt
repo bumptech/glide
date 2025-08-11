@@ -96,6 +96,8 @@ constructor(
     (delegate as? RememberObserver)?.onForgotten()
     currentJob?.cancel()
     currentJob = null
+    currentDrawable.value = null
+    delegate = null
   }
 
   override fun onRemembered() {
