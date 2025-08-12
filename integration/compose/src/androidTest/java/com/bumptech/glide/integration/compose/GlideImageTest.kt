@@ -16,7 +16,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.printToString
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import com.bumptech.glide.Glide
@@ -37,6 +39,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 class GlideImageTest {
   private val context: Context = ApplicationProvider.getApplicationContext()
@@ -64,7 +69,7 @@ class GlideImageTest {
       GlideImage(
         model = resourceId,
         contentDescription = description,
-        modifier = Modifier.size(300.dp, 300.dp)
+        modifier = Modifier.size(300.dp, 300.dp),
       )
     }
 
@@ -95,7 +100,7 @@ class GlideImageTest {
         GlideImage(
           model = model.value,
           modifier = Modifier.size(100.dp),
-          contentDescription = description
+          contentDescription = description,
         )
       }
     }
@@ -119,7 +124,7 @@ class GlideImageTest {
         model = android.R.drawable.star_big_on,
         requestBuilderTransform = { it.fitCenter() },
         contentDescription = description,
-        modifier = Modifier.size(viewDimension.dp, viewDimension.dp)
+        modifier = Modifier.size(viewDimension.dp, viewDimension.dp),
       )
 
       with(LocalDensity.current) {
@@ -161,34 +166,23 @@ class GlideImageTest {
     val description = "test"
     glideComposeRule.setContent {
       Box(modifier = Modifier.size(0.dp)) {
-        GlideImage(
-          model = android.R.drawable.star_big_on,
-          contentDescription = description,
-        )
+        GlideImage(model = android.R.drawable.star_big_on, contentDescription = description)
       }
     }
     glideComposeRule.waitForIdle()
-    glideComposeRule
-      .onNodeWithContentDescription(description)
-      .assertDisplays(null)
+    glideComposeRule.onNodeWithContentDescription(description).assertDisplays(null)
   }
-
 
   @Test
   fun glideImage_withNegativeSize_doesNotStartLoad() {
     val description = "test"
     glideComposeRule.setContent {
       Box(modifier = Modifier.size((-10).dp)) {
-        GlideImage(
-          model = android.R.drawable.star_big_on,
-          contentDescription = description,
-        )
+        GlideImage(model = android.R.drawable.star_big_on, contentDescription = description)
       }
     }
     glideComposeRule.waitForIdle()
-    glideComposeRule
-      .onNodeWithContentDescription(description)
-      .assertDisplays(null)
+    glideComposeRule.onNodeWithContentDescription(description).assertDisplays(null)
   }
 
   @Test
@@ -196,16 +190,11 @@ class GlideImageTest {
     val description = "test"
     glideComposeRule.setContent {
       Box(modifier = Modifier.size(0.dp, 10.dp)) {
-        GlideImage(
-          model = android.R.drawable.star_big_on,
-          contentDescription = description,
-        )
+        GlideImage(model = android.R.drawable.star_big_on, contentDescription = description)
       }
     }
     glideComposeRule.waitForIdle()
-    glideComposeRule
-      .onNodeWithContentDescription(description)
-      .assertDisplays(null)
+    glideComposeRule.onNodeWithContentDescription(description).assertDisplays(null)
   }
 
   @Test
@@ -213,16 +202,11 @@ class GlideImageTest {
     val description = "test"
     glideComposeRule.setContent {
       Box(modifier = Modifier.size(10.dp, 0.dp)) {
-        GlideImage(
-          model = android.R.drawable.star_big_on,
-          contentDescription = description,
-        )
+        GlideImage(model = android.R.drawable.star_big_on, contentDescription = description)
       }
     }
     glideComposeRule.waitForIdle()
-    glideComposeRule
-      .onNodeWithContentDescription(description)
-      .assertDisplays(null)
+    glideComposeRule.onNodeWithContentDescription(description).assertDisplays(null)
   }
 
   @Test
@@ -238,10 +222,7 @@ class GlideImageTest {
 
       TextButton(onClick = ::swapSize) { Text(text = "Swap") }
       Box(modifier = Modifier.size(currentSize.value)) {
-        GlideImage(
-          model = resourceId,
-          contentDescription = description,
-        )
+        GlideImage(model = resourceId, contentDescription = description)
       }
     }
     glideComposeRule.waitForIdle()
@@ -268,10 +249,7 @@ class GlideImageTest {
 
       TextButton(onClick = ::swapSize) { Text(text = "Swap") }
       Box(modifier = Modifier.size(currentSize.value)) {
-        GlideImage(
-          model = resourceId,
-          contentDescription = description,
-        )
+        GlideImage(model = resourceId, contentDescription = description)
       }
     }
     repeat(validSizeDps.size) {
@@ -291,27 +269,28 @@ class GlideImageTest {
   @Test
   fun glideImage_withSuccessfulResource_callsOnResourceReadyOnce() {
     val onResourceReadyCounter = AtomicInteger()
-    val requestListener = object : RequestListener<Drawable> {
-      override fun onLoadFailed(
-        e: GlideException?,
-        model: Any?,
-        target: Target<Drawable>?,
-        isFirstResource: Boolean,
-      ): Boolean {
-        throw UnsupportedOperationException()
-      }
+    val requestListener =
+      object : RequestListener<Drawable> {
+        override fun onLoadFailed(
+          e: GlideException?,
+          model: Any?,
+          target: Target<Drawable>?,
+          isFirstResource: Boolean,
+        ): Boolean {
+          throw UnsupportedOperationException()
+        }
 
-      override fun onResourceReady(
-        resource: Drawable?,
-        model: Any?,
-        target: Target<Drawable>?,
-        dataSource: DataSource?,
-        isFirstResource: Boolean,
-      ): Boolean {
-        onResourceReadyCounter.incrementAndGet()
-        return false
+        override fun onResourceReady(
+          resource: Drawable?,
+          model: Any?,
+          target: Target<Drawable>?,
+          dataSource: DataSource?,
+          isFirstResource: Boolean,
+        ): Boolean {
+          onResourceReadyCounter.incrementAndGet()
+          return false
+        }
       }
-    }
 
     glideComposeRule.setContent {
       GlideImage(model = android.R.drawable.star_big_on, contentDescription = "") {
@@ -322,5 +301,32 @@ class GlideImageTest {
     glideComposeRule.waitForIdle()
 
     assertThat(onResourceReadyCounter.get()).isEqualTo(1)
+  }
+
+  @Test
+  fun glideImage_loadImageFromFile_callsOnImageVisibleToUser() {
+    val onImageVisibleToUser = mock<(Drawable) -> Unit>()
+
+    glideComposeRule.setContent {
+      GlideImage(
+        model = android.R.drawable.star_big_on,
+        contentDescription = "star",
+        onImageVisibleToUser = onImageVisibleToUser,
+      )
+    }
+    glideComposeRule.waitUntilContentDescriptionWithinRootNode("star")
+
+    verify(onImageVisibleToUser).invoke(any())
+  }
+
+  private fun GlideComposeRule.waitUntilContentDescriptionWithinRootNode(
+    contentDescription: String
+  ) {
+    waitUntil(
+      conditionDescription = "waitUntilContentDescriptionWithinRootNode",
+      timeoutMillis = 10000,
+    ) {
+      onRoot(useUnmergedTree = false).printToString().contains(contentDescription)
+    }
   }
 }
