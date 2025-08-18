@@ -18,6 +18,7 @@ import com.bumptech.glide.util.GlideSuppliers;
 import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
 import com.bumptech.glide.util.Preconditions;
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -37,24 +38,30 @@ import java.io.InputStream;
  */
 final class GlideBitmapFactory {
 
+  private static final String TAG = "GlideBitmapFactory";
+
   private GlideBitmapFactory() {}
 
   /** Wrapper for {@link BitmapFactory#decodeStream}. */
   @Nullable
-  public static Bitmap decodeStream(InputStream inputStream, BitmapFactory.Options options) {
+  public static Bitmap decodeStream(
+      InputStream inputStream, BitmapFactory.Options options, ImageReader reader) {
     if (VERSION.SDK_INT == VERSION_CODES.UPSIDE_DOWN_CAKE
-        && GainmapDecoderWorkaroundStateCalculator.needsGainmapDecodeWorkaround(options)) {
-      return safeDecodeHardwareBitmapWithGainmap(inputStream, options);
+        && GainmapDecoderWorkaroundStateCalculator.needsGainmapDecodeWorkaround(options)
+        && isLikelyToContainGainmap(reader)) {
+      return safeAndExpensiveDecodeHardwareBitmapWithGainmap(inputStream, options);
     }
     return BitmapFactory.decodeStream(inputStream, /* outPadding= */ null, options);
   }
 
   /** Wrapper for {@link BitmapFactory#decodeByteArray}. */
   @Nullable
-  public static Bitmap decodeByteArray(byte[] bytes, BitmapFactory.Options options) {
+  public static Bitmap decodeByteArray(
+      byte[] bytes, BitmapFactory.Options options, ImageReader reader) {
     if (VERSION.SDK_INT == VERSION_CODES.UPSIDE_DOWN_CAKE
-        && GainmapDecoderWorkaroundStateCalculator.needsGainmapDecodeWorkaround(options)) {
-      return safeDecodeHardwareBitmapWithGainmap(bytes, options);
+        && GainmapDecoderWorkaroundStateCalculator.needsGainmapDecodeWorkaround(options)
+        && isLikelyToContainGainmap(reader)) {
+      return safeAndExpensiveDecodeHardwareBitmapWithGainmap(bytes, options);
     }
     return BitmapFactory.decodeByteArray(bytes, /* offset= */ 0, bytes.length, options);
   }
@@ -62,27 +69,56 @@ final class GlideBitmapFactory {
   /** Wrapper for {@link BitmapFactory#decodeFileDescriptor}. */
   @Nullable
   public static Bitmap decodeFileDescriptor(
-      FileDescriptor fileDescriptor, BitmapFactory.Options options) {
+      FileDescriptor fileDescriptor, BitmapFactory.Options options, ImageReader reader) {
     if (VERSION.SDK_INT == VERSION_CODES.UPSIDE_DOWN_CAKE
-        && GainmapDecoderWorkaroundStateCalculator.needsGainmapDecodeWorkaround(options)) {
-      return safeDecodeHardwareBitmapWithGainmap(fileDescriptor, options);
+        && GainmapDecoderWorkaroundStateCalculator.needsGainmapDecodeWorkaround(options)
+        && isLikelyToContainGainmap(reader)) {
+      return safeAndExpensiveDecodeHardwareBitmapWithGainmap(fileDescriptor, options);
     }
     return BitmapFactory.decodeFileDescriptor(fileDescriptor, /* outPadding= */ null, options);
   }
 
   /**
+   * Returns whether the image referenced by the {@link ImageReader} is likely to have a gainmap.
+   *
+   * <p>On Android devices, a JPEG with multi-picture format (MPF) metadata is very likely to
+   * contain a gainmap, either it being an Ultra HDR JPEG or a ISO 21496-1 JPEG.
+   */
+  private static boolean isLikelyToContainGainmap(ImageReader imageReader) {
+    try {
+      boolean hasMpf = imageReader.hasJpegMpf();
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "isLikelyToContainGainmap=" + hasMpf);
+      }
+      return hasMpf;
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "isLikelyToContainGainmap failed", e);
+      }
+    }
+    return false;
+  }
+
+  /**
    * Returns a decoded bitmap for the input stream, ensuring that any associated gainmap is decoded
-   * without errors on Android U if it is a valid gainamp.
+   * without being silently dropped on Android U.
+   *
+   * <p>If the input stream does not reference an image with a gainmap, then this method simply
+   * returns a hardware bitmap.
    *
    * <p>This method safely wraps BitmapFactory#decodeStream(InputStream, Rect, Options)} on Android
    * U.
+   *
+   * <p>This method performs an expensive workaround, using software bitmap decoding. It is
+   * recommended to only use this check on images that have a reasonable chance of containing
+   * gainmaps (e.g., they already contain JPEG multi-picture format metadata).
    *
    * @param inputStream for the bitmap to be decoded.
    * @param options to be applied in the {@link BitmapFactory#decodeStream} call.
    */
   @RequiresApi(VERSION_CODES.UPSIDE_DOWN_CAKE)
   @Nullable
-  private static Bitmap safeDecodeHardwareBitmapWithGainmap(
+  private static Bitmap safeAndExpensiveDecodeHardwareBitmapWithGainmap(
       InputStream inputStream, Options options) {
     Preconditions.checkArgument(options.inPreferredConfig == Config.HARDWARE);
     Bitmap softwareBitmap = null;
@@ -103,7 +139,10 @@ final class GlideBitmapFactory {
 
   /**
    * Returns a decoded bitmap for the input byte array, ensuring that any associated gainmap is
-   * decoded without errors on Android U if it is a valid gainmap.
+   * decoded without being silently dropped on Android U.
+   *
+   * <p>If the input bytes do not reference an image with a gainmap, then this method simply returns
+   * a hardware bitmap.
    *
    * <p>This method safely wraps BitmapFactory#decodeByteArray(byte[], int, int)} on Android U.
    *
@@ -115,10 +154,11 @@ final class GlideBitmapFactory {
    */
   @RequiresApi(VERSION_CODES.UPSIDE_DOWN_CAKE)
   @Nullable
-  private static Bitmap safeDecodeHardwareBitmapWithGainmap(byte[] bytes, Options options) {
+  private static Bitmap safeAndExpensiveDecodeHardwareBitmapWithGainmap(
+      byte[] bytes, Options options) {
     Preconditions.checkArgument(options.inPreferredConfig == Config.HARDWARE);
-    Bitmap softwareBitmap = null;
     options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+    Bitmap softwareBitmap = null;
     try {
       softwareBitmap = BitmapFactory.decodeByteArray(bytes, /* offset= */ 0, bytes.length, options);
       if (softwareBitmap == null) {
@@ -135,7 +175,10 @@ final class GlideBitmapFactory {
 
   /**
    * Returns a decoded bitmap for the input file descriptor, ensuring that any associated gainmap is
-   * decoded without errors on Android U if it is a valid gainmap.
+   * decoded without being silently dropped on Android U.
+   *
+   * <p>If the input file descriptor does not reference an image with a gainmap, then this method
+   * simply returns a hardware bitmap.
    *
    * <p>This method safely wraps {@link BitmapFactory#decodeFileDescriptor(FileDescriptor, Rect,
    * Options)} on Android U.
@@ -148,7 +191,7 @@ final class GlideBitmapFactory {
    */
   @RequiresApi(VERSION_CODES.UPSIDE_DOWN_CAKE)
   @Nullable
-  private static Bitmap safeDecodeHardwareBitmapWithGainmap(
+  private static Bitmap safeAndExpensiveDecodeHardwareBitmapWithGainmap(
       FileDescriptor fileDescriptor, Options options) {
     Preconditions.checkArgument(options.inPreferredConfig == Config.HARDWARE);
     Bitmap softwareBitmap = null;
@@ -172,26 +215,23 @@ final class GlideBitmapFactory {
    * Returns a decoded bitmap for the input software bitmap, ensuring that any associated gainmap is
    * decoded without errors on Android U if it is a valid gainmap.
    *
-   * @param softwareBitmap The bitmap to be decoded. Must not be a hardware bitmap.
+   * @param softwareBitmap The bitmap to be decoded. Must not be a hardware bitmap. The caller of
+   *     this method is responsible for recycling this bitmap.
    * @throws IllegalArgumentException if {@link Options#inPreferredConfig} is set to any state other
    *     than {@link Config#HARDWARE}.
    */
   @RequiresApi(VERSION_CODES.UPSIDE_DOWN_CAKE)
   @Nullable
   private static Bitmap safeDecodeBitmapWithGainmap(Bitmap softwareBitmap) {
-    try {
-      Gainmap gainmap = softwareBitmap.getGainmap();
-      if (gainmap != null) {
-        Bitmap gainmapContents = gainmap.getGainmapContents();
-        if (gainmapContents.getConfig() == Config.ALPHA_8) {
-          softwareBitmap.setGainmap(
-              GainmapCopier.convertSingleChannelGainmapToTripleChannelGainmap(gainmap));
-        }
+    Gainmap gainmap = softwareBitmap.getGainmap();
+    if (gainmap != null) {
+      Bitmap gainmapContents = gainmap.getGainmapContents();
+      if (gainmapContents.getConfig() == Config.ALPHA_8) {
+        softwareBitmap.setGainmap(
+            GainmapCopier.convertSingleChannelGainmapToTripleChannelGainmap(gainmap));
       }
-      return softwareBitmap.copy(Config.HARDWARE, /* isMutable= */ false);
-    } finally {
-      softwareBitmap.recycle();
     }
+    return softwareBitmap.copy(Config.HARDWARE, /* isMutable= */ false);
   }
 
   /** Utils to copy gainmaps. */
@@ -315,8 +355,8 @@ final class GlideBitmapFactory {
       Bitmap a8HardwareBitmap = a8Source.copy(Config.HARDWARE, /* isMutable= */ false);
       a8Source.recycle();
       boolean needsGainmapDecodeWorkaround = a8HardwareBitmap == null;
-      if (Log.isLoggable(TAG, Log.DEBUG)) {
-        Log.d(TAG, "calculateNeedsGainmapDecodeWorkaround=" + needsGainmapDecodeWorkaround);
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(TAG, "calculateNeedsGainmapDecodeWorkaround=" + needsGainmapDecodeWorkaround);
       }
       if (a8HardwareBitmap != null) {
         a8HardwareBitmap.recycle();

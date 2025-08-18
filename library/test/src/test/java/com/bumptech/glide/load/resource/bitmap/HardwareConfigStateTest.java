@@ -17,7 +17,6 @@ import org.robolectric.shadows.ShadowBuild;
 public class HardwareConfigStateTest {
   private static final int VALID_DIMENSION = 100;
 
-
   @Config(sdk = Build.VERSION_CODES.P)
   @Test
   public void

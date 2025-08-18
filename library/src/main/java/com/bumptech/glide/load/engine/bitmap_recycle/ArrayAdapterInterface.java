@@ -1,4 +1,5 @@
 package com.bumptech.glide.load.engine.bitmap_recycle;
+
 /**
  * Interface for handling operations on a primitive array type.
  *

@@ -15,6 +15,7 @@ import org.chromium.net.UrlResponseInfo;
 final class BufferQueue {
   public static final String CONTENT_LENGTH = "content-length";
   public static final String CONTENT_ENCODING = "content-encoding";
+  private static final int DEFAULT_BUFFER_SIZE = 16384;
   private final Queue<ByteBuffer> buffers;
   private final AtomicBoolean isCoalesced = new AtomicBoolean(false);
 
@@ -48,7 +49,7 @@ final class BufferQueue {
       if (lastBuffer.hasRemaining()) {
         return lastBuffer;
       } else {
-        return ByteBuffer.allocateDirect(8096);
+        return ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
       }
     }
 
@@ -87,7 +88,7 @@ final class BufferQueue {
         // No content-length. This means we're either being sent a chunked response, or the
         // java stack stripped content length because of transparent gzip. In either case we really
         // have no idea, and so we fall back to a reasonable guess.
-        return 8192;
+        return DEFAULT_BUFFER_SIZE;
       }
     }
 

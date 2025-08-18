@@ -14,10 +14,19 @@ public class FileDescriptorLocalUriFetcher extends LocalUriFetcher<ParcelFileDes
     super(contentResolver, uri);
   }
 
+  /**
+   * useMediaStoreApisIfAvailable is part of an experiment and the constructor can be removed in a
+   * future version.
+   */
+  public FileDescriptorLocalUriFetcher(
+      ContentResolver contentResolver, Uri uri, boolean useMediaStoreApisIfAvailable) {
+    super(contentResolver, uri, useMediaStoreApisIfAvailable);
+  }
+
   @Override
   protected ParcelFileDescriptor loadResource(Uri uri, ContentResolver contentResolver)
       throws FileNotFoundException {
-    AssetFileDescriptor assetFileDescriptor = contentResolver.openAssetFileDescriptor(uri, "r");
+    AssetFileDescriptor assetFileDescriptor = openAssetFileDescriptor(uri);
     if (assetFileDescriptor == null) {
       throw new FileNotFoundException("FileDescriptor is null for: " + uri);
     }

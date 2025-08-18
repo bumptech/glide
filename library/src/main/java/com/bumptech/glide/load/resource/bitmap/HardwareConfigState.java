@@ -55,6 +55,7 @@ public final class HardwareConfigState {
    * arbitrary.
    */
   private static final int MINIMUM_DECODES_BETWEEN_FD_CHECKS = 50;
+
   // 20k.
   private static final int MAXIMUM_FDS_FOR_HARDWARE_CONFIGS_P = 20000;
 
@@ -72,6 +73,7 @@ public final class HardwareConfigState {
   private static volatile HardwareConfigState instance;
 
   private final int sdkBasedMaxFdCount;
+
   @GuardedBy("this")
   private int decodesSinceLastFdCheck;
 

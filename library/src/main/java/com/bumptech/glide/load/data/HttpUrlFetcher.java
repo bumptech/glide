@@ -28,6 +28,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   @VisibleForTesting
   static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY =
       new DefaultHttpUrlConnectionFactory();
+
   /** Returned when a connection error prevented us from receiving an http error. */
   @VisibleForTesting static final int INVALID_STATUS_CODE = -1;
 

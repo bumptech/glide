@@ -188,7 +188,11 @@ public final class GlideFutures {
 
     @Override
     public boolean onResourceReady(
-        @NonNull T resource, @NonNull Object model, Target<T> target, @NonNull DataSource dataSource, boolean isFirst) {
+        @NonNull T resource,
+        @NonNull Object model,
+        Target<T> target,
+        @NonNull DataSource dataSource,
+        boolean isFirst) {
       try {
         completer.set(new TargetAndResult<>(target, resource));
       } catch (Throwable t) {

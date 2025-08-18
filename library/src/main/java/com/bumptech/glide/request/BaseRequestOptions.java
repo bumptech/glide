@@ -1210,12 +1210,13 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   }
 
   /**
-   * Returns {@code true} if this {@link BaseRequestOptions} is equivalent to the given
-   * {@link BaseRequestOptions} (has all of the same options and sizes).
+   * Returns {@code true} if this {@link BaseRequestOptions} is equivalent to the given {@link
+   * BaseRequestOptions} (has all of the same options and sizes).
    *
    * <p>This method is identical to {@link #equals(Object)}, but this can not be overridden. We need
-   * to use this method instead of {@link #equals(Object)}, because child classes may have additional
-   * fields, such as listeners and models, that should not be considered when checking for equality.
+   * to use this method instead of {@link #equals(Object)}, because child classes may have
+   * additional fields, such as listeners and models, that should not be considered when checking
+   * for equality.
    */
   public final boolean isEquivalentTo(BaseRequestOptions<?> other) {
     return Float.compare(other.sizeMultiplier, sizeMultiplier) == 0

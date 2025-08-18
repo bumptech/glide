@@ -488,6 +488,31 @@ public final class GlideBuilder {
   }
 
   /**
+   * Override the OS thread priority of threads created in {@link
+   * com.bumptech.glide.load.engine.executor.GlideExecutor#DefaultThreadFactory} with {@link
+   * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder setOverrideGlideThreadPriority(boolean isEnabled) {
+    glideExperimentsBuilder.update(new OverrideGlideThreadPriority(), isEnabled);
+    return this;
+  }
+
+  /**
+   * Set to {@code true} to make Glide use {@link
+   * android.provider.MediaStore#openAssetFileDescriptor(ContentResolver, Uri, String,
+   * CancellationSignal)} when opening {@link android.provider.MediaStore#AUTHORITY} content URIs
+   * when it is available.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder setUseMediaStoreOpenFileApisIfPossible(boolean isEnabled) {
+    glideExperimentsBuilder.update(new UseMediaStoreOpenFileApisIfPossible(), isEnabled);
+    return this;
+  }
+
+  /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
    */
@@ -622,4 +647,10 @@ public final class GlideBuilder {
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
+
+  /** See {@link #setOverrideGlideThreadPriority(boolean)}. */
+  public static final class OverrideGlideThreadPriority implements Experiment {}
+
+  /** See {@link #setUseMediaStoreOpenFileApisIfPossible(boolean)}. */
+  public static final class UseMediaStoreOpenFileApisIfPossible implements Experiment {}
 }

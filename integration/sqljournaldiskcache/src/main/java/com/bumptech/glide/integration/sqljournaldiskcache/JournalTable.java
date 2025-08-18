@@ -7,10 +7,13 @@ final class JournalTable {
   interface Columns {
     /** The cache key/cache file name. */
     String KEY = "key";
+
     /** The time the key was most recently created, updated, or read in UTC milliseconds. */
     String LAST_MODIFIED_TIME = "last_modified_time";
+
     /** 1 if the key is going to be deleted, 0 otherwise. */
     String PENDING_DELETE = "pending_delete";
+
     /** The length in bytes of the cache file. */
     String SIZE = "size";
   }

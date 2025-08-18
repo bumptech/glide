@@ -2,9 +2,13 @@ package com.bumptech.glide.load.data;
 
 import android.content.ContentResolver;
 import android.content.UriMatcher;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
+import android.os.Build.VERSION_CODES;
 import android.provider.ContactsContract;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresExtension;
+import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,20 +17,25 @@ import java.io.InputStream;
 public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
   /** A lookup uri (e.g. content://com.android.contacts/contacts/lookup/3570i61d948d30808e537) */
   private static final int ID_CONTACTS_LOOKUP = 1;
+
   /** A contact thumbnail uri (e.g. content://com.android.contacts/contacts/38/photo) */
   private static final int ID_CONTACTS_THUMBNAIL = 2;
+
   /** A contact uri (e.g. content://com.android.contacts/contacts/38) */
   private static final int ID_CONTACTS_CONTACT = 3;
+
   /**
    * A contact display photo (high resolution) uri (e.g.
    * content://com.android.contacts/5/display_photo)
    */
   private static final int ID_CONTACTS_PHOTO = 4;
+
   /**
    * Uri for optimized search of phones by number (e.g.
    * content://com.android.contacts/phone_lookup/232323232
    */
   private static final int ID_LOOKUP_BY_PHONE = 5;
+
   /** Match the incoming Uri for special cases which we can handle nicely. */
   private static final UriMatcher URI_MATCHER;
 
@@ -42,6 +51,15 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
 
   public StreamLocalUriFetcher(ContentResolver resolver, Uri uri) {
     super(resolver, uri);
+  }
+
+  /**
+   * useMediaStoreApisIfAvailable is part of an experiment and the constructor can be removed in a
+   * future version.
+   */
+  public StreamLocalUriFetcher(
+      ContentResolver resolver, Uri uri, boolean useMediaStoreApisIfAvailable) {
+    super(resolver, uri, useMediaStoreApisIfAvailable);
   }
 
   @Override
@@ -71,13 +89,42 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
       case ID_CONTACTS_PHOTO:
       case UriMatcher.NO_MATCH:
       default:
-        return contentResolver.openInputStream(uri);
+        if (useMediaStoreApisIfAvailable
+            && MediaStoreUtil.isMediaStoreUri(uri)
+            && MediaStoreUtil.isMediaStoreOpenFileApisAvailable()) {
+          return openMediaStoreFileInputStream(uri, contentResolver);
+        } else {
+          return contentResolver.openInputStream(uri);
+        }
     }
   }
 
   private InputStream openContactPhotoInputStream(ContentResolver contentResolver, Uri contactUri) {
     return ContactsContract.Contacts.openContactPhotoInputStream(
         contentResolver, contactUri, true /*preferHighres*/);
+  }
+
+  @RequiresExtension(
+      extension = VERSION_CODES.R,
+      version = MediaStoreUtil.MIN_EXTENSION_VERSION_FOR_OPEN_FILE_APIS)
+  private InputStream openMediaStoreFileInputStream(Uri uri, ContentResolver contentResolver)
+      throws FileNotFoundException {
+    AssetFileDescriptor assetFileDescriptor =
+        MediaStoreUtil.openAssetFileDescriptor(uri, contentResolver);
+    if (assetFileDescriptor == null) {
+      throw new FileNotFoundException("FileDescriptor is null for: " + uri);
+    }
+    try {
+      return assetFileDescriptor.createInputStream();
+    } catch (IOException exception) {
+      try {
+        assetFileDescriptor.close();
+      } catch (Exception innerException) {
+        // Ignored
+      }
+      throw (FileNotFoundException)
+          new FileNotFoundException("Unable to create stream").initCause(exception);
+    }
   }
 
   @Override

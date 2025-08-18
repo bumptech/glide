@@ -114,6 +114,41 @@ public class ImageHeaderParserUtilsTest {
     assertAllParsersReceivedTheSameData();
   }
 
+  @Test
+  public void hasJpegMpf_withTwoParsers_andStream_rewindsBeforeEachParser() throws IOException {
+    ImageHeaderParserUtils.hasJpegMpf(
+        parsers, new ByteArrayInputStream(expectedData), lruArrayPool);
+
+    assertAllParsersReceivedTheSameData();
+  }
+
+  @Test
+  public void hasJpegMpf_withTwoParsers_andByteBuffer_rewindsBeforeEachParser() throws IOException {
+    ImageHeaderParserUtils.hasJpegMpf(parsers, ByteBuffer.wrap(expectedData), lruArrayPool);
+
+    assertAllParsersReceivedTheSameData();
+  }
+
+  @Test
+  public void hasJpegMpf_withTwoParsers_andFileDescriptor_rewindsBeforeEachParser()
+      throws IOException {
+    // This test can't work if file descriptor rewinding isn't supported. Sadly that means this
+    // test doesn't work in Robolectric.
+    assumeTrue(ParcelFileDescriptorRewinder.isSupported());
+    ParcelFileDescriptor fileDescriptor = null;
+    try {
+      fileDescriptor = asFileDescriptor(expectedData);
+      ParcelFileDescriptorRewinder rewinder = new ParcelFileDescriptorRewinder(fileDescriptor);
+      ImageHeaderParserUtils.hasJpegMpf(parsers, rewinder, lruArrayPool);
+    } finally {
+      if (fileDescriptor != null) {
+        fileDescriptor.close();
+      }
+    }
+
+    assertAllParsersReceivedTheSameData();
+  }
+
   private void assertAllParsersReceivedTheSameData() {
     for (FakeImageHeaderParser parser : fakeParsers) {
       assertThat(parser.data).isNotNull();
@@ -192,6 +227,20 @@ public class ImageHeaderParserUtilsTest {
         throws IOException {
       readData(byteBuffer);
       return ImageHeaderParser.UNKNOWN_ORIENTATION;
+    }
+
+    @Override
+    public boolean hasJpegMpf(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool)
+        throws IOException {
+      readData(is);
+      return false;
+    }
+
+    @Override
+    public boolean hasJpegMpf(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
+        throws IOException {
+      readData(byteBuffer);
+      return false;
     }
   }
 }

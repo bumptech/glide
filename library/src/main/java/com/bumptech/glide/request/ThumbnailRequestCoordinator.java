@@ -19,6 +19,7 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
 
   @GuardedBy("requestLock")
   private RequestState thumbState = RequestState.CLEARED;
+
   // Only used to check if the full request is cleared by the thumbnail request.
   @GuardedBy("requestLock")
   private boolean isRunningDuringBegin;

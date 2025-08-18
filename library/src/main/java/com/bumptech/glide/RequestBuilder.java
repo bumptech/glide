@@ -541,6 +541,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     isModelSet = true;
     return selfOrThrowIfLocked();
   }
+
   /**
    * Returns an object to load the given {@link Bitmap}.
    *
@@ -817,6 +818,19 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     return into(target, /* targetListener= */ null, Executors.mainThreadExecutor());
   }
 
+  /**
+   * Set the target the resource will be loaded into; the callback will be set at the front of the
+   * queue.
+   *
+   * @param target The target to load the resource into.
+   * @return The given target.
+   * @see RequestManager#clear(Target)
+   */
+  @NonNull
+  public <Y extends Target<TranscodeType>> Y experimentalIntoFront(@NonNull Y target) {
+    return into(target, /* targetListener= */ null, Executors.mainThreadExecutorFront());
+  }
+
   @NonNull
   <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
@@ -922,6 +936,57 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   }
 
   /**
+   * Sets the {@link ImageView} the resource will be loaded into, cancels any existing loads into
+   * the view, and frees any resources Glide may have previously loaded into the view so they may be
+   * reused; the callback will be set at the front of the queue.
+   *
+   * @see RequestManager#clear(Target)
+   * @param view The view to cancel previous loads for and load the new resource into.
+   * @return The {@link com.bumptech.glide.request.target.Target} used to wrap the given {@link
+   *     ImageView}.
+   */
+  @NonNull
+  public ViewTarget<ImageView, TranscodeType> experimentalIntoFront(@NonNull ImageView view) {
+    Util.assertMainThread();
+    Preconditions.checkNotNull(view);
+
+    BaseRequestOptions<?> requestOptions = this;
+    if (!requestOptions.isTransformationSet()
+        && requestOptions.isTransformationAllowed()
+        && view.getScaleType() != null) {
+      // Clone in this method so that if we use this RequestBuilder to load into a View and then
+      // into a different target, we don't retain the transformation applied based on the previous
+      // View's scale type.
+      switch (view.getScaleType()) {
+        case CENTER_CROP:
+          requestOptions = requestOptions.clone().optionalCenterCrop();
+          break;
+        case CENTER_INSIDE:
+          requestOptions = requestOptions.clone().optionalCenterInside();
+          break;
+        case FIT_CENTER:
+        case FIT_START:
+        case FIT_END:
+          requestOptions = requestOptions.clone().optionalFitCenter();
+          break;
+        case FIT_XY:
+          requestOptions = requestOptions.clone().optionalCenterInside();
+          break;
+        case CENTER:
+        case MATRIX:
+        default:
+          // Do nothing.
+      }
+    }
+
+    return into(
+        glideContext.buildImageViewTarget(view, transcodeClass),
+        /* targetListener= */ null,
+        requestOptions,
+        Executors.mainThreadExecutorFront());
+  }
+
+  /**
    * Returns a future that can be used to do a blocking get on a background thread.
    *
    * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
@@ -998,6 +1063,36 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   public Target<TranscodeType> preload(int width, int height) {
     final PreloadTarget<TranscodeType> target = PreloadTarget.obtain(requestManager, width, height);
     return into(target);
+  }
+
+  /**
+   * Preloads the resource into the cache using the given width and height; the callback will be set
+   * at the front of the queue.
+   *
+   * <p>Pre-loading is useful for making sure that resources you are going to to want in the near
+   * future are available quickly.
+   *
+   * <p>Note - Any thumbnail request that does not complete before the primary request will be
+   * cancelled and may not be preloaded successfully. Cancellation of outstanding thumbnails after
+   * the primary request succeeds is a common behavior of all Glide requests. We do not try to
+   * prevent that behavior here. If you absolutely need all thumbnails to be preloaded individually,
+   * make separate preload() requests for each thumbnail (you can still combine them into one call
+   * when loading the image(s) into the UI in a subsequent request).
+   *
+   * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
+   *     overridden by {@link com.bumptech.glide.request.RequestOptions#override(int, int)} if
+   *     previously called.
+   * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
+   *     overridden by {@link com.bumptech.glide.request.RequestOptions#override(int, int)}} if
+   *     previously called).
+   * @return A {@link Target} that can be used to cancel the load via {@link
+   *     RequestManager#clear(Target)}.
+   * @see com.bumptech.glide.ListPreloader
+   */
+  @NonNull
+  public Target<TranscodeType> experimentalPreloadFront(int width, int height) {
+    final PreloadTarget<TranscodeType> target = PreloadTarget.obtain(requestManager, width, height);
+    return experimentalIntoFront(target);
   }
 
   /**

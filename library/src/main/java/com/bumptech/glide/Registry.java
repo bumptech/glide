@@ -38,6 +38,7 @@ import java.util.List;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Registry {
   public static final String BUCKET_ANIMATION = "Animation";
+
   /**
    * @deprecated Identical to {@link #BUCKET_ANIMATION}, just with a more confusing name. This
    *     bucket can be used for all animation types (including webp).

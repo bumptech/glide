@@ -367,8 +367,8 @@ public class RequestManager
 
   /**
    * Lifecycle callback that unregisters for connectivity events (if the
-   * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads
-   * and clears all resources if {@link #clearOnStop()} is called.
+   * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads and
+   * clears all resources if {@link #clearOnStop()} is called.
    */
   @Override
   public synchronized void onStop() {

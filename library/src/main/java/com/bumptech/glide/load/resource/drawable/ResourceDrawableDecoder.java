@@ -39,11 +39,13 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
    * <p>As far as I can tell this is undocumented, but works.
    */
   private static final String ANDROID_PACKAGE_NAME = "android";
+
   /**
    * {@link Resources#getIdentifier(String, String, String)} documents that it will return 0 and
    * that 0 is not a valid resouce id.
    */
   private static final int MISSING_RESOURCE_ID = 0;
+
   // android.resource://<package_name>/<type>/<name>.
   private static final int NAME_URI_PATH_SEGMENTS = 2;
   private static final int TYPE_PATH_SEGMENT_INDEX = 0;

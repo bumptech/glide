@@ -36,6 +36,12 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    testOptions {
+      unitTests {
+        includeAndroidResources = true
+      }
+    }
 }
 
 // Enable strict mode, but exclude tests.
@@ -53,8 +59,18 @@ dependencies {
     }
     implementation libs.compose.foundation
     implementation libs.compose.ui
+    implementation libs.drawablepainter
     implementation libs.androidx.core.ktx
+    implementation libs.androidx.lifecycle.runtime.compose
     debugImplementation libs.compose.ui.testmanifest
+    testImplementation libs.compose.ui.testmanifest
+    testImplementation libs.compose.ui.testjunit4
+    testImplementation libs.junit
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.appcompat
+    testImplementation libs.androidx.junit
+    testImplementation libs.androidx.test.runner
+    testImplementation libs.androidx.lifecycle.runtime.testing
     androidTestImplementation libs.junit
     androidTestImplementation libs.compose.ui.testjunit4
     androidTestImplementation libs.androidx.espresso

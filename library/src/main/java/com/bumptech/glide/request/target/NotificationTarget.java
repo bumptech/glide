@@ -129,7 +129,8 @@ public class NotificationTarget extends CustomTarget<Bitmap> {
 
   /** Updates the Notification after the Bitmap resource is loaded. */
   @SuppressLint("InlinedApi")
-  // Help tools to recognize that this method requires a permission, because it posts a notification.
+  // Help tools to recognize that this method requires a permission, because it posts a
+  // notification.
   @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
   private void update() {
     NotificationManager manager =

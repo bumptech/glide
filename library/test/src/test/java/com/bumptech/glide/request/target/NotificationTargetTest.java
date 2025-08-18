@@ -23,7 +23,9 @@ import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowNotificationManager;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = ROBOLECTRIC_SDK, shadows = NotificationTargetTest.UpdateShadowNotificationManager.class)
+@Config(
+    sdk = ROBOLECTRIC_SDK,
+    shadows = NotificationTargetTest.UpdateShadowNotificationManager.class)
 public class NotificationTargetTest {
   private UpdateShadowNotificationManager shadowManager;
   private RemoteViews remoteViews;
