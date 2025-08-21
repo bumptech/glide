@@ -20,6 +20,7 @@ buildscript {
         classpath libs.ksp.gradle
         classpath libs.coroutines.binarycompat.gradle
         classpath libs.dokka.gradle
+        classpath libs.vanniktech
         classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.3.2' : '7.1.0')
     }
 }
