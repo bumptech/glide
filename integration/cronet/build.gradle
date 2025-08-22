@@ -32,4 +32,4 @@ android {
     }
 }
 
-apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle.kts"
