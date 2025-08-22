@@ -81,7 +81,7 @@ dependencies {
     androidTestImplementation project(':testutil')
 }
 
-apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle.kts"
 
 task cleanGoldensOnDevice(type: Exec) {
     commandLine = ['adb', 'shell', 'rm -rf /storage/emulated/0/DCIM/compose_goldens']

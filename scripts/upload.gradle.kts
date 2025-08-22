@@ -1,28 +1,15 @@
-// TODO(b/409147894): Should be documented properly
-
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withGroovyBuilder
 
 pluginManager.apply("com.vanniktech.maven.publish")
 
+// Helper function to get project properties
 fun prop(key: String): String? = if (hasProperty(key)) property(key)?.toString() else null
 
+// Grab everything we will need for publishing
 val groupId: String = prop("GROUP") ?: group.toString()
 val artifactId: String = prop("POM_ARTIFACT_ID") ?: name
 val versionName: String = prop("VERSION_NAME") ?: version.toString()
-val publishVariant: String = prop("PUBLISH_VARIANT") ?: "release"
-val isSnapshot: Boolean = versionName.endsWith("SNAPSHOT")
-
-if (pluginManager.hasPlugin("com.android.library")) {
-  extensions.findByName("android")?.withGroovyBuilder {
-    "publishing" {
-      "singleVariant"(publishVariant) {
-        "withSourcesJar"()
-        "withJavadocJar"()
-      }
-    }
-  }
-}
 
 if (pluginManager.hasPlugin("java") || pluginManager.hasPlugin("java-library")) {
   extensions.configure(org.gradle.api.plugins.JavaPluginExtension::class.java) {
@@ -32,30 +19,9 @@ if (pluginManager.hasPlugin("java") || pluginManager.hasPlugin("java-library")) 
   }
 }
 
+// Sign and fill out POM
 extensions.findByName("mavenPublishing")?.withGroovyBuilder {
-  val autoRelease = prop("MAVEN_CENTRAL_AUTO_RELEASE")?.toBoolean() ?: false
-  val wantsCustomRepo =
-    prop("LOCAL") != null ||
-      prop("RELEASE_REPOSITORY_URL") != null ||
-      prop("SNAPSHOT_REPOSITORY_URL") != null
-
-  if (!wantsCustomRepo && autoRelease) {
-    "publishToMavenCentral"(mapOf("automaticRelease" to true))
-  }
-
-  if (!wantsCustomRepo && !autoRelease) {
-    "publishToMavenCentral"()
-  }
-
-  if (!isSnapshot) {
-    val hasSigning =
-      hasProperty("signingInMemoryKey") ||
-        hasProperty("signing.secretKeyRingFile") ||
-        hasProperty("signing.keyId")
-    if (hasSigning) {
-      "signAllPublications"()
-    }
-  }
+  "signAllPublications"()
 
   "pom" {
     "licenses" {

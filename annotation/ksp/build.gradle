@@ -11,7 +11,7 @@ dependencies {
     ksp libs.ksp.autoservice
 }
 
-apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle.kts"
 
 kotlin {
     jvmToolchain {

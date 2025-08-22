@@ -51,22 +51,20 @@ dependencyResolutionManagement {
             version('okhttp-min-sdk-version', '21')
             version('target-sdk-version', '32')
             version('pmd', '6.0.0')
-            // 1.5.3 requires Kotlin 1.9.x, which doesn't seem to be supported by the coroutines
-            // libraries: https://github.com/Kotlin/kotlinx.coroutines/issues/3812
-            version('kotlin-compiler-extension', '1.4.8')
+            version('kotlin-compiler-extension', '1.5.5')
 
             // Versions for dependencies
             version('compose', '1.5.1')
             version('coroutines', '1.7.3')
             version('dagger', '2.47')
             version('errorprone', '2.18.0')
-            version('kotlin', '1.8.22')
+            version('kotlin', '1.9.20')
             version('mockito', '5.3.1')
             version('retrofit', '2.3.0')
             version('androidx-benchmark', '1.2.0-beta05')
             version('androidx-espresso', '3.5.1')
             version('androidx-fragment', '1.6.1')
-            version('ksp', '1.8.22-1.0.11')
+            version('ksp', '1.9.20-1.0.14')
 
             library('androidx-multidex', "androidx.multidex:multidex:2.0.1")
             library('autoservice', 'com.google.auto.service:auto-service:1.0-rc3')
