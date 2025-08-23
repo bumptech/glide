@@ -10,6 +10,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
@@ -20,18 +21,13 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.TypeVariableName;
-import com.sun.tools.javac.code.Attribute;
-import com.sun.tools.javac.code.Type.ClassType;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -46,6 +42,8 @@ import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.util.ElementFilter;
@@ -408,7 +406,7 @@ final class ProcessorUtil {
         }
       }
       if (allCaps) {
-        name = rawClassName.toLowerCase();
+        name = rawClassName.toLowerCase(Locale.ROOT);
       } else {
         int indexOfLastWordStart = 0;
         char[] chars = rawClassName.toCharArray();
@@ -431,7 +429,7 @@ final class ProcessorUtil {
 
   private static String getSmartPrimitiveParameterName(VariableElement parameter) {
     for (AnnotationMirror annotation : parameter.getAnnotationMirrors()) {
-      String annotationName = annotation.getAnnotationType().toString().toUpperCase();
+      String annotationName = annotation.getAnnotationType().toString().toUpperCase(Locale.ROOT);
       if (annotationName.endsWith("RES")) {
         // Catch annotations like StringRes
         return "id";
@@ -539,7 +537,7 @@ final class ProcessorUtil {
         .toList();
   }
 
-  Set<String> findClassValuesFromAnnotationOnClassAsNames(
+  ImmutableSet<String> findClassValuesFromAnnotationOnClassAsNames(
       Element clazz, Class<? extends Annotation> annotationClass) {
     String annotationClassName = annotationClass.getName();
     AnnotationValue excludedModuleAnnotationValue = null;
@@ -549,17 +547,13 @@ final class ProcessorUtil {
       if (!annotationClassName.equals(annotationMirror.getAnnotationType().toString())) {
         continue;
       }
-      Set<? extends Map.Entry<? extends ExecutableElement, ? extends AnnotationValue>> values =
-          annotationMirror.getElementValues().entrySet();
-      // Excludes has only one value. If we ever change that, we'd need to iterate over all
-      // values in the entry set and compare the keys to whatever our Annotation's attribute is
-      // (usually value).
-      if (values.size() != 1) {
-        throw new IllegalArgumentException("Expected single value, but found: " + values);
+
+      var entries = annotationMirror.getElementValues().entrySet();
+      if (entries.size() != 1) {
+        throw new IllegalArgumentException("Expected single value, but found: " + entries);
       }
-      excludedModuleAnnotationValue = values.iterator().next().getValue();
-      if (excludedModuleAnnotationValue == null
-          || excludedModuleAnnotationValue instanceof Attribute.UnresolvedClass) {
+      excludedModuleAnnotationValue = entries.iterator().next().getValue();
+      if (excludedModuleAnnotationValue == null) {
         throw new IllegalArgumentException(
             "Failed to find value for: "
                 + annotationClass
@@ -567,49 +561,34 @@ final class ProcessorUtil {
                 + clazz.getAnnotationMirrors());
       }
     }
+
     if (excludedModuleAnnotationValue == null) {
-      return Collections.emptySet();
+      return ImmutableSet.of();
     }
+
     Object value = excludedModuleAnnotationValue.getValue();
     if (value instanceof List) {
-      List<?> values = (List<?>) value;
-      Set<String> result = new HashSet<>(values.size());
-      for (Object current : values) {
-        result.add(getExcludedModuleClassFromAnnotationAttribute(clazz, current));
+      LinkedHashSet<String> out = new LinkedHashSet<>();
+      for (Object o : (List<?>) value) {
+        AnnotationValue av = (AnnotationValue) o;
+        out.add(qualifiedNameFromTypeMirror((TypeMirror) av.getValue()));
       }
-      return result;
+      return ImmutableSet.copyOf(out);
     } else {
-      ClassType classType = (ClassType) value;
-      return Collections.singleton(classType.toString());
+      return ImmutableSet.of(qualifiedNameFromTypeMirror((TypeMirror) value));
     }
   }
 
-  // We should be able to cast to Attribute.Class rather than use reflection, but there are some
-  // compilers that seem to break when we do so. See #2673 for an example.
-  private static String getExcludedModuleClassFromAnnotationAttribute(
-      Element clazz, Object attribute) {
-    if (attribute.getClass().getSimpleName().equals("UnresolvedClass")) {
-      throw new IllegalArgumentException(
-          "Failed to parse @Excludes for: "
-              + clazz
-              + ", one or more excluded Modules could not be found at compile time. Ensure that all"
-              + "excluded Modules are included in your classpath.");
+  static String qualifiedNameFromTypeMirror(TypeMirror type) {
+    if (type.getKind() == TypeKind.ERROR) {
+      throw new IllegalArgumentException("Unresolved class type in annotation: " + type);
     }
-    Method[] methods = attribute.getClass().getDeclaredMethods();
-    if (methods == null || methods.length == 0) {
-      throw new IllegalArgumentException(
-          "Failed to parse @Excludes for: " + clazz + ", invalid exclude: " + attribute);
+    if (type.getKind() == TypeKind.DECLARED) {
+      DeclaredType dt = (DeclaredType) type;
+      TypeElement te = (TypeElement) dt.asElement();
+      return te.getQualifiedName().toString();
     }
-    for (Method method : methods) {
-      if (method.getName().equals("getValue")) {
-        try {
-          return method.invoke(attribute).toString();
-        } catch (IllegalAccessException | InvocationTargetException e) {
-          throw new IllegalArgumentException("Failed to parse @Excludes for: " + clazz, e);
-        }
-      }
-    }
-    throw new IllegalArgumentException("Failed to parse @Excludes for: " + clazz);
+    return type.toString();
   }
 
   private enum MethodType {
