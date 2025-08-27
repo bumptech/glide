@@ -27,7 +27,7 @@ android {
     }
 }
 
-def uploaderScript = "${rootProject.projectDir}/scripts/upload.gradle"
+def uploaderScript = "${rootProject.projectDir}/scripts/upload.gradle.kts"
 if (file(uploaderScript).exists()) {
 	apply from: uploaderScript
 }

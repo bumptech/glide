@@ -34,4 +34,4 @@ dependencies {
     testImplementation libs.androidx.test.runner
 }
 
-apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle.kts"

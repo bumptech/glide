@@ -1,5 +1,3 @@
-import proguard.gradle.ProGuardTask
-
 apply plugin: 'java'
 
 dependencies {
@@ -15,4 +13,4 @@ javadoc {
     failOnError = false
 }
 
-apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle.kts"
