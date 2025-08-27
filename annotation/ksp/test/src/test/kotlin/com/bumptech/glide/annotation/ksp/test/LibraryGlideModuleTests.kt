@@ -7,6 +7,7 @@ import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import java.io.FileNotFoundException
 import kotlin.test.assertFailsWith
 import org.intellij.lang.annotations.Language
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,6 +15,7 @@ import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
 
 @RunWith(Parameterized::class)
+@OptIn(ExperimentalCompilerApi::class)
 class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTypeTest {
 
   companion object {
@@ -30,7 +32,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class Module : LibraryGlideModule()
-        """
+        """,
       )
     val javaModule =
       JavaSourceFile(
@@ -40,7 +42,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           import com.bumptech.glide.module.LibraryGlideModule;
           
           @GlideModule public class Module extends LibraryGlideModule {}
-        """
+        """,
       )
 
     compileCurrentSourceType(kotlinModule, javaModule) {
@@ -60,7 +62,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class LibraryModule : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinAppModule =
       KotlinSourceFile(
@@ -70,7 +72,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.AppGlideModule
 
         @GlideModule class AppModule : AppGlideModule()
-        """
+        """,
       )
     val javaLibraryModule =
       JavaSourceFile(
@@ -80,7 +82,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           import com.bumptech.glide.module.LibraryGlideModule;
           
           @GlideModule public class LibraryModule extends LibraryGlideModule {}
-        """
+        """,
       )
     val javaAppModule =
       JavaSourceFile(
@@ -92,14 +94,14 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           @GlideModule public class AppModule extends AppGlideModule {
             public AppModule() {}
           }
-        """
+        """,
       )
 
     compileCurrentSourceType(
       kotlinAppModule,
       kotlinLibraryModule,
       javaAppModule,
-      javaLibraryModule
+      javaLibraryModule,
     ) {
       assertThat(it.messages).doesNotContainMatch("[we]: \\[ksp] .*")
       assertThat(it.exitCode).isEqualTo(ExitCode.OK)
@@ -119,7 +121,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
 
         class BaseLibraryModule : LibraryGlideModule()
         @GlideModule class LibraryModule : BaseLibraryModule()
-        """
+        """,
       )
     val kotlinAppModule =
       KotlinSourceFile(
@@ -130,7 +132,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
 
         class BaseAppModule : AppGlideModule()
         @GlideModule class AppModule : BaseAppModule()
-        """
+        """,
       )
     val javaBaseLibraryModule =
       JavaSourceFile(
@@ -139,7 +141,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           import com.bumptech.glide.module.LibraryGlideModule;
 
           public class BaseLibraryModule extends LibraryGlideModule {}
-        """
+        """,
       )
     val javaLibraryModule =
       JavaSourceFile(
@@ -148,7 +150,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           import com.bumptech.glide.annotation.GlideModule;
 
           @GlideModule public class LibraryModule extends BaseLibraryModule {}
-        """
+        """,
       )
     val javaBaseAppModule =
       JavaSourceFile(
@@ -159,7 +161,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           public class BaseAppModule extends AppGlideModule {
             public BaseAppModule() {}
           }
-        """
+        """,
       )
     val javaAppModule =
       JavaSourceFile(
@@ -170,21 +172,21 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           @GlideModule public class AppModule extends BaseAppModule {
             public AppModule() {}
           }
-        """
+        """,
       )
 
     compileCurrentSourceType(
-        kotlinAppModule,
-        kotlinLibraryModule,
-        javaBaseAppModule,
-        javaAppModule,
-        javaBaseLibraryModule,
-        javaLibraryModule
+      kotlinAppModule,
+      kotlinLibraryModule,
+      javaBaseAppModule,
+      javaAppModule,
+      javaBaseLibraryModule,
+      javaLibraryModule,
     ) {
       assertThat(it.messages).doesNotContainMatch("[we]: \\[ksp] .*")
       assertThat(it.exitCode).isEqualTo(ExitCode.OK)
       assertThat(it.generatedAppGlideModuleContents())
-          .hasSourceEqualTo(appGlideModuleWithLibraryModule)
+        .hasSourceEqualTo(appGlideModuleWithLibraryModule)
     }
   }
 
@@ -198,7 +200,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class LibraryModule1 : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinLibraryModule2 =
       KotlinSourceFile(
@@ -208,7 +210,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class LibraryModule2 : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinAppModule =
       KotlinSourceFile(
@@ -218,7 +220,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.AppGlideModule
 
         @GlideModule class AppModule : AppGlideModule()
-        """
+        """,
       )
     val javaLibraryModule1 =
       JavaSourceFile(
@@ -228,7 +230,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule;
         
         @GlideModule public class LibraryModule1 extends LibraryGlideModule {}
-        """
+        """,
       )
     val javaLibraryModule2 =
       JavaSourceFile(
@@ -238,7 +240,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule;
         
         @GlideModule public class LibraryModule2 extends LibraryGlideModule {}
-        """
+        """,
       )
     val javaAppModule =
       JavaSourceFile(
@@ -250,7 +252,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         @GlideModule public class AppModule extends AppGlideModule {
           public AppModule() {}
         }
-        """
+        """,
       )
 
     compileCurrentSourceType(
@@ -280,7 +282,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class LibraryModule : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinLibraryModule2 =
       KotlinSourceFile(
@@ -290,7 +292,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class LibraryModule : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinAppModule =
       KotlinSourceFile(
@@ -300,14 +302,10 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.AppGlideModule
 
         @GlideModule class AppModule : AppGlideModule()
-        """
+        """,
       )
 
-    compileCurrentSourceType(
-      kotlinAppModule,
-      kotlinLibraryModule1,
-      kotlinLibraryModule2,
-    ) {
+    compileCurrentSourceType(kotlinAppModule, kotlinLibraryModule1, kotlinLibraryModule2) {
       assertThat(it.generatedAppGlideModuleContents())
         .hasSourceEqualTo(appGlideModuleWithLibraryModule)
       assertThat(it.exitCode).isEqualTo(ExitCode.OK)
@@ -334,7 +332,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class LibraryModule : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinLibraryModule2 =
       KotlinSourceFile(
@@ -346,7 +344,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class LibraryModule : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinAppModule =
       KotlinSourceFile(
@@ -356,7 +354,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.AppGlideModule
 
         @GlideModule class AppModule : AppGlideModule()
-        """
+        """,
       )
     val javaLibraryModule1 =
       JavaSourceFile(
@@ -369,7 +367,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         public class LibraryModule1 {
           @GlideModule public static final class LibraryModule extends LibraryGlideModule {}
         }
-        """
+        """,
       )
     val javaLibraryModule2 =
       JavaSourceFile(
@@ -382,7 +380,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         public class LibraryModule2 {
           @GlideModule public static final class LibraryModule extends LibraryGlideModule {}
         }
-        """
+        """,
       )
     val javaAppModule =
       JavaSourceFile(
@@ -394,7 +392,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         @GlideModule public class AppModule extends AppGlideModule {
           public AppModule() {}
         }
-        """
+        """,
       )
 
     compileCurrentSourceType(
@@ -421,7 +419,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class LibraryModule : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinLibraryModule2 =
       KotlinSourceFile(
@@ -431,7 +429,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class ExcludedLibraryModule : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinAppModule =
       KotlinSourceFile(
@@ -444,7 +442,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         @GlideModule 
         @Excludes(ExcludedLibraryModule::class) 
         class AppModule : AppGlideModule()
-        """
+        """,
       )
 
     val javaLibraryModule1 =
@@ -456,7 +454,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         
         @GlideModule
         public class LibraryModule extends LibraryGlideModule {}
-        """
+        """,
       )
     val javaLibraryModule2 =
       JavaSourceFile(
@@ -467,7 +465,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         
         @GlideModule
         public class ExcludedLibraryModule extends LibraryGlideModule {}
-        """
+        """,
       )
     val javaAppModule =
       JavaSourceFile(
@@ -482,7 +480,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         public class AppModule extends AppGlideModule {
           public AppModule() {}
         }
-        """
+        """,
       )
     compileCurrentSourceType(
       kotlinAppModule,
@@ -508,7 +506,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class LibraryModule : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinLibraryModule2 =
       KotlinSourceFile(
@@ -518,7 +516,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class ExcludedLibraryModule : LibraryGlideModule()
-        """
+        """,
       )
     val kotlinAppModule =
       KotlinSourceFile(
@@ -531,7 +529,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         @GlideModule 
         @Excludes(LibraryModule::class, ExcludedLibraryModule::class) 
         class AppModule : AppGlideModule()
-        """
+        """,
       )
 
     val javaLibraryModule1 =
@@ -543,7 +541,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         
         @GlideModule
         public class LibraryModule extends LibraryGlideModule {}
-        """
+        """,
       )
     val javaLibraryModule2 =
       JavaSourceFile(
@@ -554,7 +552,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         
         @GlideModule
         public class ExcludedLibraryModule extends LibraryGlideModule {}
-        """
+        """,
       )
     val javaAppModule =
       JavaSourceFile(
@@ -569,7 +567,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         public class AppModule extends AppGlideModule {
           public AppModule() {}
         }
-        """
+        """,
       )
     compileCurrentSourceType(
       kotlinAppModule,
@@ -598,7 +596,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         @GlideModule 
         @Excludes
         class AppModule : AppGlideModule()
-        """
+        """,
       )
     val javaAppModule =
       JavaSourceFile(
@@ -613,12 +611,9 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         public class AppModule extends AppGlideModule {
           public AppModule() {}
         }
-        """
+        """,
       )
-    compileCurrentSourceType(
-      kotlinAppModule,
-      javaAppModule,
-    ) {
+    compileCurrentSourceType(kotlinAppModule, javaAppModule) {
       assertThat(it.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
       assertThat(it.messages)
         .contains(AppGlideModuleConstants.INVALID_EXCLUDES_ANNOTATION_MESSAGE.format("AppModule"))
@@ -640,7 +635,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         @GlideModule 
         @Excludes(SomeOtherAppModule::class)
         class AppModule : AppGlideModule()
-        """
+        """,
       )
     val otherJavaAppModule =
       JavaSourceFile(
@@ -651,7 +646,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         public class SomeOtherAppModule extends AppGlideModule {
           public SomeOtherAppModule() {}
         }
-        """
+        """,
       )
     val javaAppModule =
       JavaSourceFile(
@@ -666,13 +661,9 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         public class AppModule extends AppGlideModule {
           public AppModule() {}
         }
-        """
+        """,
       )
-    compileCurrentSourceType(
-      kotlinAppModule,
-      otherJavaAppModule,
-      javaAppModule,
-    ) {
+    compileCurrentSourceType(kotlinAppModule, otherJavaAppModule, javaAppModule) {
       assertThat(it.exitCode).isEqualTo(ExitCode.COMPILATION_ERROR)
       assertThat(it.messages)
         .contains(AppGlideModuleConstants.INVALID_EXCLUDES_ANNOTATION_MESSAGE.format("AppModule"))
@@ -689,7 +680,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.LibraryGlideModule
 
         @GlideModule class LibraryModule : LibraryGlideModule()
-        """
+        """,
       )
     val javaLibraryModule =
       JavaSourceFile(
@@ -699,7 +690,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           import com.bumptech.glide.module.LibraryGlideModule;
           
           @GlideModule public class LibraryModule extends LibraryGlideModule {}
-        """
+        """,
       )
 
     val libraryCompilationResult = compileCurrentSourceType(kotlinLibraryModule, javaLibraryModule)
@@ -712,7 +703,7 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
         import com.bumptech.glide.module.AppGlideModule
 
         @GlideModule class AppModule : AppGlideModule()
-        """
+        """,
       )
     val javaAppModule =
       JavaSourceFile(
@@ -724,14 +715,14 @@ class LibraryGlideModuleTests(override val sourceType: SourceType) : PerSourceTy
           @GlideModule public class AppModule extends AppGlideModule {
             public AppModule() {}
           }
-        """
+        """,
       )
 
     val generatedLibrarySources =
       libraryCompilationResult.allGeneratedFiles().map { GeneratedSourceFile(it, sourceType) }
 
     compileCurrentSourceType(
-      *(listOf(kotlinAppModule, javaAppModule) + generatedLibrarySources).toTypedArray(),
+      *(listOf(kotlinAppModule, javaAppModule) + generatedLibrarySources).toTypedArray()
     ) {
       assertThat(it.generatedAppGlideModuleContents())
         .hasSourceEqualTo(appGlideModuleWithLibraryModule)

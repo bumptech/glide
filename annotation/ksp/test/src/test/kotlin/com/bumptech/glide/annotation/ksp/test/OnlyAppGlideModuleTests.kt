@@ -5,11 +5,13 @@ import com.bumptech.glide.annotation.ksp.GlideSymbolProcessorConstants
 import com.google.common.truth.Truth.assertThat
 import com.tschuchort.compiletesting.KotlinCompilation
 import org.intellij.lang.annotations.Language
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
+@OptIn(ExperimentalCompilerApi::class)
 class OnlyAppGlideModuleTests(override val sourceType: SourceType) : PerSourceTypeTest {
 
   companion object {
