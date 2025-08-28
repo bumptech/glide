@@ -17,7 +17,7 @@ jobs:
           java-version: "17"
       - name: Build and publish everything to Maven Central
       # This can be improved in Gradle
-        run: ./gradlew :mocks:publishToMavenCentral :annotation:publishToMavenCentral :library:publishToMavenCentral :integration:sqljournaldiskcache:publishToMavenCentral :annotation:ksp:publishToMavenCentral :integration:recyclerview:publishToMavenCentral :integration:avif:publishToMavenCentral :integration:okhttp:publishToMavenCentral :integration:gifencoder:publishToMavenCentral :integration:ktx:publishToMavenCentral :integration:okhttp4:publishToMavenCentral :integration:volley:publishToMavenCentral :integration:concurrent:publishToMavenCentral :integration:cronet:publishToMavenCentral :integration:okhttp3:publishToMavenCentral :integration:compose:publishToMavenCentral :integration:compiler:publishToMavenCentral
+        run: ./gradlew :mocks:publishToMavenCentral :annotation:publishToMavenCentral :library:publishToMavenCentral :integration:sqljournaldiskcache:publishToMavenCentral :annotation:ksp:publishToMavenCentral :integration:recyclerview:publishToMavenCentral :integration:avif:publishToMavenCentral :integration:okhttp:publishToMavenCentral :integration:gifencoder:publishToMavenCentral :integration:ktx:publishToMavenCentral :integration:okhttp4:publishToMavenCentral :integration:volley:publishToMavenCentral :integration:concurrent:publishToMavenCentral :integration:cronet:publishToMavenCentral :integration:okhttp3:publishToMavenCentral :integration:compose:publishToMavenCentral
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
