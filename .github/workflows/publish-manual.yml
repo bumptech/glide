@@ -24,3 +24,5 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.MAVEN_SIGNING_KEY_ID }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_SIGNING_PRIVATE_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_SIGNING_PRIVATE_KEY_PASSWORD }}
+          ORG_GRADLE_PROJECT_mavenCentralPublishing: true
+          ORG_GRADLE_PROJECT_mavenCentralAutomaticPublishing: false
