@@ -9,7 +9,9 @@ import com.tschuchort.compiletesting.symbolProcessorProviders
 import java.io.File
 import java.io.FileNotFoundException
 import org.intellij.lang.annotations.Language
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 
+@OptIn(ExperimentalCompilerApi::class)
 class CompilationResult(
   private val compilation: KotlinCompilation,
   result: KotlinCompilation.Result,
@@ -111,6 +113,7 @@ interface PerSourceTypeTest {
   }
 }
 
+@OptIn(ExperimentalCompilerApi::class)
 internal fun compile(sourceFiles: List<SourceFile>): CompilationResult {
   require(sourceFiles.isNotEmpty())
   val compilation =

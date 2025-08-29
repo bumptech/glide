@@ -61,6 +61,7 @@ dependencies {
     implementation libs.compose.ui
     implementation libs.drawablepainter
     implementation libs.androidx.core.ktx
+    implementation libs.androidx.lifecycle.runtime.compose
     debugImplementation libs.compose.ui.testmanifest
     testImplementation libs.compose.ui.testmanifest
     testImplementation libs.compose.ui.testjunit4
@@ -69,6 +70,7 @@ dependencies {
     testImplementation libs.androidx.appcompat
     testImplementation libs.androidx.junit
     testImplementation libs.androidx.test.runner
+    testImplementation libs.androidx.lifecycle.runtime.testing
     androidTestImplementation libs.junit
     androidTestImplementation libs.compose.ui.testjunit4
     androidTestImplementation libs.androidx.espresso
@@ -79,7 +81,7 @@ dependencies {
     androidTestImplementation project(':testutil')
 }
 
-apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle.kts"
 
 task cleanGoldensOnDevice(type: Exec) {
     commandLine = ['adb', 'shell', 'rm -rf /storage/emulated/0/DCIM/compose_goldens']

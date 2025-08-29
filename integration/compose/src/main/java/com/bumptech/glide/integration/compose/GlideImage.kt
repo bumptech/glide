@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
@@ -205,7 +206,9 @@ public fun placeholder(composable: @Composable () -> Unit): Placeholder =
 @ExperimentalGlideComposeApi
 public sealed class Placeholder {
   internal class OfDrawable(internal val drawable: Drawable?) : Placeholder()
+
   internal class OfResourceId(@DrawableRes internal val resourceId: Int) : Placeholder()
+
   internal class OfComposable(internal val composable: @Composable () -> Unit) : Placeholder()
 
   internal fun isResourceOrDrawable() =
@@ -341,10 +344,13 @@ private fun rememberGlidePainter(
   size: ResolvableGlideSize,
 ): GlidePainter {
   val scope = rememberCoroutineScope()
+  val lifecycleOwner = LocalLifecycleOwner.current
   // TODO(judds): Calling onRemembered here manually might make a minor improvement in how quickly
   //  the image load is started, but it also triggers a recomposition. I can't figure out why it
   //  triggers a recomposition
-  return remember(requestBuilder, size) { GlidePainter(requestBuilder, size, scope) }
+  return remember(requestBuilder, size, lifecycleOwner) {
+    GlidePainter(requestBuilder, size, scope, lifecycleOwner)
+  }
 }
 
 @OptIn(InternalGlideApi::class)

@@ -20,6 +20,7 @@ buildscript {
         classpath libs.ksp.gradle
         classpath libs.coroutines.binarycompat.gradle
         classpath libs.dokka.gradle
+        classpath libs.vanniktech
         classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.3.2' : '7.1.0')
     }
 }
@@ -193,7 +194,7 @@ subprojects { project ->
     task violations(type: ViolationsTask) {
         minSeverity = 'INFO'
         detailLevel = 'VERBOSE'
-        maxViolations = 0
+        maxViolations = 6
         diffMaxViolations = 0
 
         // Formats are listed here: https://github.com/tomasbjerre/violations-lib

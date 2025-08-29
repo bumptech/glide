@@ -2,9 +2,13 @@ package com.bumptech.glide.load.data;
 
 import android.content.ContentResolver;
 import android.content.UriMatcher;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
+import android.os.Build.VERSION_CODES;
 import android.provider.ContactsContract;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresExtension;
+import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +53,15 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
     super(resolver, uri);
   }
 
+  /**
+   * useMediaStoreApisIfAvailable is part of an experiment and the constructor can be removed in a
+   * future version.
+   */
+  public StreamLocalUriFetcher(
+      ContentResolver resolver, Uri uri, boolean useMediaStoreApisIfAvailable) {
+    super(resolver, uri, useMediaStoreApisIfAvailable);
+  }
+
   @Override
   protected InputStream loadResource(Uri uri, ContentResolver contentResolver)
       throws FileNotFoundException {
@@ -76,13 +89,42 @@ public class StreamLocalUriFetcher extends LocalUriFetcher<InputStream> {
       case ID_CONTACTS_PHOTO:
       case UriMatcher.NO_MATCH:
       default:
-        return contentResolver.openInputStream(uri);
+        if (useMediaStoreApisIfAvailable
+            && MediaStoreUtil.isMediaStoreUri(uri)
+            && MediaStoreUtil.isMediaStoreOpenFileApisAvailable()) {
+          return openMediaStoreFileInputStream(uri, contentResolver);
+        } else {
+          return contentResolver.openInputStream(uri);
+        }
     }
   }
 
   private InputStream openContactPhotoInputStream(ContentResolver contentResolver, Uri contactUri) {
     return ContactsContract.Contacts.openContactPhotoInputStream(
         contentResolver, contactUri, true /*preferHighres*/);
+  }
+
+  @RequiresExtension(
+      extension = VERSION_CODES.R,
+      version = MediaStoreUtil.MIN_EXTENSION_VERSION_FOR_OPEN_FILE_APIS)
+  private InputStream openMediaStoreFileInputStream(Uri uri, ContentResolver contentResolver)
+      throws FileNotFoundException {
+    AssetFileDescriptor assetFileDescriptor =
+        MediaStoreUtil.openAssetFileDescriptor(uri, contentResolver);
+    if (assetFileDescriptor == null) {
+      throw new FileNotFoundException("FileDescriptor is null for: " + uri);
+    }
+    try {
+      return assetFileDescriptor.createInputStream();
+    } catch (IOException exception) {
+      try {
+        assetFileDescriptor.close();
+      } catch (Exception innerException) {
+        // Ignored
+      }
+      throw (FileNotFoundException)
+          new FileNotFoundException("Unable to create stream").initCause(exception);
+    }
   }
 
   @Override

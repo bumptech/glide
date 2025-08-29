@@ -1,0 +1,28 @@
+name: Publish to Maven (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+      - name: Build and publish everything to Maven Central
+      # This can be improved in Gradle
+        run: ./gradlew :mocks:publishToMavenCentral :annotation:publishToMavenCentral :library:publishToMavenCentral :integration:sqljournaldiskcache:publishToMavenCentral :annotation:ksp:publishToMavenCentral :integration:recyclerview:publishToMavenCentral :integration:avif:publishToMavenCentral :integration:okhttp:publishToMavenCentral :integration:gifencoder:publishToMavenCentral :integration:ktx:publishToMavenCentral :integration:okhttp4:publishToMavenCentral :integration:volley:publishToMavenCentral :integration:concurrent:publishToMavenCentral :integration:cronet:publishToMavenCentral :integration:okhttp3:publishToMavenCentral :integration:compose:publishToMavenCentral
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.MAVEN_SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_SIGNING_PRIVATE_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_SIGNING_PRIVATE_KEY_PASSWORD }}
+          ORG_GRADLE_PROJECT_mavenCentralPublishing: true
+          ORG_GRADLE_PROJECT_mavenCentralAutomaticPublishing: false

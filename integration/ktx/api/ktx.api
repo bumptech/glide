@@ -45,6 +45,7 @@ public final class com/bumptech/glide/integration/ktx/Status : java/lang/Enum {
 	public static final field FAILED Lcom/bumptech/glide/integration/ktx/Status;
 	public static final field RUNNING Lcom/bumptech/glide/integration/ktx/Status;
 	public static final field SUCCEEDED Lcom/bumptech/glide/integration/ktx/Status;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/integration/ktx/Status;
 	public static fun values ()[Lcom/bumptech/glide/integration/ktx/Status;
 }
