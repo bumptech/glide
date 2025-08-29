@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.github.bumptech.glide:glide:4.16.0'
+  implementation 'com.github.bumptech.glide:glide:5.0.0-rc02'
 }
 ```
 
@@ -41,7 +41,7 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.16.0</version>
+  <version>5.0.0-rc02</version>
 </dependency>
 ```
 
@@ -163,6 +163,7 @@ Thanks
 * **Dave Smith** for the [GIF decoder gist][9] Glide's GIF decoder is based on.
 * **Chris Banes** for his [gradle-mvn-push][10] script.
 * **Corey Hall** for Glide's [amazing logo][11].
+* [**kanelbulle**](https://github.com/kanelbulle) for many reviews over the years. 
 * Everyone who has contributed code and reported issues!
 
 Author
