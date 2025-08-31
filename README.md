@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.github.bumptech.glide:glide:5.0.2'
+  implementation 'com.github.bumptech.glide:glide:5.0.3'
 }
 ```
 
@@ -41,7 +41,7 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>5.0.2</version>
+  <version>5.0.3</version>
 </dependency>
 ```
 
