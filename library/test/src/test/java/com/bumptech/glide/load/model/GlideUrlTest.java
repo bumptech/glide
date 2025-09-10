@@ -118,4 +118,12 @@ public class GlideUrlTest {
         .addEqualityGroup(new GlideUrl(url, otherHeaders), new GlideUrl(new URL(url), otherHeaders))
         .testEquals();
   }
+
+  @Test
+  public void issue_5444() throws MalformedURLException {
+    String original = "http://[2600:1f13:37c:1400:ba21:7165:5fc7:736e]/";
+    GlideUrl glideUrl = new GlideUrl(original);
+    assertThat(glideUrl.toURL().toString()).isEqualTo(original);
+    assertThat(glideUrl.toStringUrl()).isEqualTo(original);
+  }
 }
