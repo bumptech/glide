@@ -28,6 +28,7 @@ import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.tests.BackgroundUtil.BackgroundTester;
 import com.bumptech.glide.tests.TearDownGlide;
 import com.google.common.testing.EqualsTester;
+import java.util.concurrent.Executors;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -85,6 +86,14 @@ public class RequestBuilderTest {
   @Test
   public void testAddsNewRequestToRequestTracker() {
     getNullModelRequest().into(target);
+
+    verify(requestManager).track(eq(target), isA(Request.class));
+  }
+
+  @Test
+  public void testAddsNewRequestToRequestTrackerWithCustomExecutor() {
+    getNullModelRequest()
+        .into(target, /* targetListener= */ null, Executors.newSingleThreadExecutor());
 
     verify(requestManager).track(eq(target), isA(Request.class));
   }
@@ -182,6 +191,20 @@ public class RequestBuilderTest {
           @Override
           public void runTest() {
             getNullModelRequest().experimentalIntoFront(target);
+          }
+        });
+  }
+
+  @Test
+  public void doesNotThrowIfIntoTargetWithCustomExecutorCalledOnBackgroundThread()
+      throws InterruptedException {
+    final Target<Object> target = mock(Target.class);
+    testInBackground(
+        new BackgroundTester() {
+          @Override
+          public void runTest() {
+            getNullModelRequest()
+                .into(target, /* targetListener= */ null, Executors.newSingleThreadExecutor());
           }
         });
   }

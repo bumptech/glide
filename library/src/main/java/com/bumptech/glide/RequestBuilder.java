@@ -832,7 +832,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   }
 
   @NonNull
-  <Y extends Target<TranscodeType>> Y into(
+  public <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
       @Nullable RequestListener<TranscodeType> targetListener,
       Executor callbackExecutor) {
