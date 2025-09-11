@@ -14,7 +14,7 @@ jobs:
             with:
               java-version: '17'
               distribution: 'zulu'
-          - uses: gradle/gradle-build-action@v2
+          - uses: gradle/actions/setup-gradle@v4
           - name: Build and run unit tests with Gradle
             run: ./scripts/ci_unit.sh
           - name: Build javadocs
