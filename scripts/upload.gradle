@@ -193,6 +193,8 @@ afterEvaluate { project ->
                     artifact androidSourcesJar
                     artifact androidJavadocsJar
                     artifact project.tasks.bundleReleaseAar
+                } else if (project.plugins.hasPlugin('java-platform')) {
+                    from components.javaPlatform
                 } else if (project.plugins.hasPlugin('java')) {
                     task sourcesJar(type: Jar, dependsOn: classes) {
                         archiveClassifier.set('sources')
