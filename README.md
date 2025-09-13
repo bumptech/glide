@@ -20,10 +20,6 @@ Download
 --------
 For detailed instructions and requirements, see Glide's [download and setup docs page][28].
 
-You can download a jar from GitHub's [releases page][1].
-
-Or use Gradle:
-
 ```gradle
 repositories {
   google()
@@ -33,16 +29,6 @@ repositories {
 dependencies {
   implementation 'com.github.bumptech.glide:glide:5.0.5'
 }
-```
-
-Or Maven:
-
-```xml
-<dependency>
-  <groupId>com.github.bumptech.glide</groupId>
-  <artifactId>glide</artifactId>
-  <version>5.0.5</version>
-</dependency>
 ```
 
 For info on using the bleeding edge, see the [Snapshots][17] docs page.
