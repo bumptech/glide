@@ -9,8 +9,8 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    api project(':third_party:gif_decoder')
-    api project(':third_party:disklrucache')
+    api project(':gif_decoder')
+    api project(':disklrucache')
     api project(':annotation')
     api libs.androidx.fragment
     api libs.androidx.vectordrawable

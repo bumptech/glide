@@ -19,7 +19,7 @@ android {
 
     sourceSets {
         main {
-            java.srcDirs = ['src/main/java', '../../third_party/gif_encoder/src/main/java']
+            java.srcDirs = ['src/main/java', '../../gif_encoder/src/main/java']
         }
     }
 

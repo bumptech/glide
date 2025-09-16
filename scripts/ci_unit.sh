@@ -9,8 +9,8 @@ set -e
   :library:assembleDebugUnitTest \
   -x :annotation:ksp:test:testDebugUnitTest \
   :annotation:ksp:test:assembleDebugUnitTest \
-  -x :third_party:disklrucache:testDebugUnitTest \
-  :third_party:disklrucache:assembleDebugUnitTest \
+  -x :disklrucache:testDebugUnitTest \
+  :disklrucache:assembleDebugUnitTest \
   -x :integration:cronet:testDebugUnitTest \
   :integration:cronet:assembleDebugUnitTest \
   -x :integration:gifencoder:testDebugUnitTest \
@@ -23,8 +23,8 @@ set -e
   :integration:volley:assembleDebugUnitTest \
   -x :integration:sqljournaldiskcache:testDebugUnitTest \
   :integration:sqljournaldiskcache:assembleDebugUnitTest \
-  -x :third_party:gif_decoder:testDebugUnitTest \
-  :third_party:gif_decoder:assembleDebugUnitTest \
+  -x :gif_decoder:testDebugUnitTest \
+  :gif_decoder:assembleDebugUnitTest \
   :samples:flickr:build \
   :samples:giphy:build \
   :samples:contacturi:build \
