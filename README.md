@@ -1,7 +1,7 @@
 Glide
 =====
 
-[![Maven Central Version](https://img.shields.io/maven-central/v/com.github.bumptech.glide/glide)](https://central.sonatype.com/search?q=g%3Acom.github.bumptech.glide)
+[![Maven Central Version](https://img.shields.io/maven-central/v/com.github.bumptech.glide/glide)](https://central.sonatype.com/artifact/com.github.bumptech.glide/glide)
 | [View Glide's documentation][20] | [简体中文文档][22] | [Report an issue with Glide][5]
 
 Glide is a fast and efficient open source media management and image loading framework for Android that wraps media
