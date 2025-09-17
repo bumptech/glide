@@ -26,13 +26,13 @@ static def getAndroidPathsForJavadoc() {
             ':integration:volley',
             ':library',
             ':mocks',
-            ':third_party:disklrucache',
-            ':third_party:gif_decoder',
+            ':disklrucache',
+            ':gif_decoder',
     ]
 }
 
 static def getAndroidPathsForJar() {
-    [':library', ':third_party:disklrucache', ':third_party:gif_decoder']
+    [':library', ':disklrucache', ':gif_decoder']
 }
 
 // The paths of Java projects that should be included only in Javadoc, not in the jar.
