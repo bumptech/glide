@@ -21,6 +21,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 /** A prioritized {@link ThreadPoolExecutor} for running jobs in Glide. */
 public final class GlideExecutor implements ExecutorService {
@@ -456,6 +457,7 @@ public final class GlideExecutor implements ExecutorService {
 
     private String name;
     private long threadTimeoutMillis;
+    private Function<? super Runnable, ? extends Runnable> onExecuteDecorator;
 
     @Synthetic
     Builder(boolean preventNetworkOperations) {
@@ -514,21 +516,51 @@ public final class GlideExecutor implements ExecutorService {
       return this;
     }
 
+    /**
+     * Sets the decorator to be applied to each runnable executed by the executor.
+     *
+     * <p>This is an experimental method that may be removed without warning in a future version.
+     */
+    public Builder experimentalSetOnExecuteDecorator(
+        Function<? super Runnable, ? extends Runnable> onExecuteDecorator) {
+      this.onExecuteDecorator = onExecuteDecorator;
+      return this;
+    }
+
     /** Builds a new {@link GlideExecutor} with any previously specified options. */
     public GlideExecutor build() {
       if (TextUtils.isEmpty(name)) {
         throw new IllegalArgumentException(
             "Name must be non-null and non-empty, but given: " + name);
       }
-      ThreadPoolExecutor executor =
-          new ThreadPoolExecutor(
-              corePoolSize,
-              maximumPoolSize,
-              /* keepAliveTime= */ threadTimeoutMillis,
-              TimeUnit.MILLISECONDS,
-              new PriorityBlockingQueue<Runnable>(),
-              new DefaultThreadFactory(
-                  threadFactory, name, uncaughtThrowableStrategy, preventNetworkOperations));
+      ThreadFactory factory =
+          new DefaultThreadFactory(
+              threadFactory, name, uncaughtThrowableStrategy, preventNetworkOperations);
+      ThreadPoolExecutor executor;
+      if (onExecuteDecorator != null) {
+        executor =
+            new ThreadPoolExecutor(
+                corePoolSize,
+                maximumPoolSize,
+                /* keepAliveTime= */ threadTimeoutMillis,
+                TimeUnit.MILLISECONDS,
+                new PriorityBlockingQueue<>(),
+                factory) {
+              @Override
+              public void execute(@NonNull Runnable command) {
+                super.execute(onExecuteDecorator.apply(command));
+              }
+            };
+      } else {
+        executor =
+            new ThreadPoolExecutor(
+                corePoolSize,
+                maximumPoolSize,
+                /* keepAliveTime= */ threadTimeoutMillis,
+                TimeUnit.MILLISECONDS,
+                new PriorityBlockingQueue<>(),
+                factory);
+      }
 
       if (threadTimeoutMillis != NO_THREAD_TIMEOUT) {
         executor.allowCoreThreadTimeOut(true);
