@@ -1,0 +1,18 @@
+plugins {
+    id 'java-platform'
+}
+
+apply from: "${rootProject.projectDir}/scripts/upload.gradle.kts"
+
+dependencies {
+    constraints {
+        rootProject.subprojects { subproject ->
+            subproject.plugins.withId('maven-publish') {
+                // Exclude self project from BOM.
+                if (subproject != this.project) {
+                    api subproject
+                }
+            }
+        }
+    }
+}

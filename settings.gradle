@@ -37,6 +37,7 @@ include ':integration:sqljournaldiskcache'
 include ':integration:volley'
 include ':testutil'
 include ':mocks'
+include ':bom'
 
 rootProject.name = 'glide-parent'
 
