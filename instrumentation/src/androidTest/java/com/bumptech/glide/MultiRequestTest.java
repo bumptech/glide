@@ -53,8 +53,7 @@ public class MultiRequestTest {
     Glide.init(
         context,
         new GlideBuilder()
-            .setSourceExecutor(GlideExecutor.newSourceBuilder().setThreadCount(1).build())
-            .setFixSingleRequestClearDeadlock(true));
+            .setSourceExecutor(GlideExecutor.newSourceBuilder().setThreadCount(1).build()));
 
     AtomicBoolean isPrimaryRequestComplete = new AtomicBoolean(false);
     CountDownLatch countDownLatch = new CountDownLatch(1);

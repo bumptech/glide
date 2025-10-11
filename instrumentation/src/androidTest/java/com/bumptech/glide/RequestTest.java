@@ -50,10 +50,7 @@ public class RequestTest {
     // Some emulators only have a single resize thread, so waiting on a latch will block them
     // forever.
     Glide.init(
-        context,
-        new GlideBuilder()
-            .setSourceExecutor(GlideExecutor.newUnlimitedSourceExecutor())
-            .setFixSingleRequestClearDeadlock(true));
+        context, new GlideBuilder().setSourceExecutor(GlideExecutor.newUnlimitedSourceExecutor()));
   }
 
   @Test

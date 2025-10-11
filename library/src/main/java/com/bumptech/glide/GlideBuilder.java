@@ -539,19 +539,6 @@ public final class GlideBuilder {
     return this;
   }
 
-  /**
-   * Fix single request clear deadlock mentioned in <a
-   * href="https://github.com/bumptech/glide/issues/5617">#5617</a>.
-   *
-   * <p>This flag changes {@link com.bumptech.glide.request.SingleRequest} to lock on underlying
-   * {@link Engine} to avoid deadlocks in calling code that also requires a lock on the {@link
-   * Engine}.
-   */
-  public GlideBuilder setFixSingleRequestClearDeadlock(boolean isEnabled) {
-    glideExperimentsBuilder.update(new FixSingleRequestClearDeadlock(), isEnabled);
-    return this;
-  }
-
   void setRequestManagerFactory(@Nullable RequestManagerFactory factory) {
     this.requestManagerFactory = factory;
   }
@@ -666,7 +653,4 @@ public final class GlideBuilder {
 
   /** See {@link #setUseMediaStoreOpenFileApisIfPossible(boolean)}. */
   public static final class UseMediaStoreOpenFileApisIfPossible implements Experiment {}
-
-  /** See {@link #setFixSingleRequestClearDeadlock(boolean)}. */
-  public static final class FixSingleRequestClearDeadlock implements Experiment {}
 }

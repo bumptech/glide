@@ -16,7 +16,6 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
-import com.bumptech.glide.GlideBuilder.FixSingleRequestClearDeadlock;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -69,7 +68,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   private final Class<TranscodeType> transcodeClass;
   private final Glide glide;
   private final GlideContext glideContext;
-  private final GlideExperiments experiments;
 
   @NonNull
   @SuppressWarnings("unchecked")
@@ -101,7 +99,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     this.context = context;
     this.transitionOptions = requestManager.getDefaultTransitionOptions(transcodeClass);
     this.glideContext = glide.getGlideContext();
-    this.experiments = glide.getGlideContext().getExperiments();
 
     initRequestListeners(requestManager.getDefaultRequestListeners());
     apply(requestManager.getDefaultRequestOptions());
@@ -1169,13 +1166,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       @Nullable RequestListener<TranscodeType> targetListener,
       BaseRequestOptions<?> requestOptions,
       Executor callbackExecutor) {
-    GlideExperiments experiments = glideContext.getExperiments();
-    Object requestLock =
-        glideContext.getExperiments().isEnabled(FixSingleRequestClearDeadlock.class)
-            ? glideContext.getEngine()
-            : new Object();
     return buildRequestRecursive(
-        requestLock,
+        /* requestLock= */ new Object(),
         target,
         targetListener,
         /* parentCoordinator= */ null,

@@ -23,7 +23,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.bumptech.glide.GlideBuilder.FixSingleRequestClearDeadlock;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.Priority;
@@ -1072,8 +1071,6 @@ public class SingleRequestTest {
     private final Map<Class<?>, Transformation<?>> transformations = new HashMap<>();
 
     SingleRequestBuilder() {
-      GlideExperiments glideExperiments = mock(GlideExperiments.class);
-      when(glideExperiments.isEnabled(FixSingleRequestClearDeadlock.class)).thenReturn(true);
       when(glideContext.getExperiments()).thenReturn(mock(GlideExperiments.class));
       when(requestCoordinator.getRoot()).thenReturn(requestCoordinator);
       when(requestCoordinator.canSetImage(any(Request.class))).thenReturn(true);
