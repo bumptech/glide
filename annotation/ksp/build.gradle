@@ -6,7 +6,7 @@ plugins {
 dependencies {
     implementation libs.kotlinpoet
     implementation project(":annotation")
-    implementation libs.ksp
+    implementation libs.ksp.api
     implementation libs.autoservice.annotations
     ksp libs.ksp.autoservice
 }

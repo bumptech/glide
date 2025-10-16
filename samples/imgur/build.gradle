@@ -27,13 +27,13 @@ dependencies {
     implementation project(':library')
     annotationProcessor project(':annotation:compiler')
 
-    implementation libs.dagger
+    implementation libs.dagger.runtime
     implementation libs.dagger.android
     annotationProcessor libs.dagger.compiler
     annotationProcessor libs.dagger.android.processor
 
     implementation libs.okhttp3
-    implementation libs.retrofit
+    implementation libs.retrofit.runtime
     implementation libs.retrofit.gson
     implementation libs.retrofit.rxjava
 

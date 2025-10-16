@@ -17,17 +17,12 @@ buildscript {
         classpath libs.violations
         classpath libs.androidx.benchmark.gradle
         classpath libs.kotlin.gradle
-        classpath libs.ksp.gradle
+        classpath libs.ksp.gradle.plugin
         classpath libs.coroutines.binarycompat.gradle
         classpath libs.dokka.gradle
         classpath libs.vanniktech
         classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.3.2' : '7.1.0')
     }
-}
-
-repositories {
-    google()
-    mavenCentral()
 }
 
 apply plugin: 'binary-compatibility-validator'
@@ -64,14 +59,6 @@ afterEvaluate {
 }
 
 subprojects { project ->
-    repositories {
-        google()
-        mavenCentral()
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
-        gradlePluginPortal()
-    }
 
     // Exclude packages not intended for public use.
     if ([

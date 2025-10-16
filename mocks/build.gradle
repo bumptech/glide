@@ -4,7 +4,7 @@ dependencies {
     implementation project(':library')
     implementation libs.androidx.annotation
     implementation libs.guava
-    implementation libs.mockito
+    implementation libs.mockito.core
 }
 
 android {

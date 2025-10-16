@@ -9,7 +9,7 @@ dependencies {
     testImplementation project(":testutil")
     testImplementation libs.truth
     testImplementation libs.junit
-    testImplementation libs.mockito
+    testImplementation libs.mockito.core
     testImplementation libs.robolectric
     testImplementation libs.mockwebserver
     testImplementation libs.androidx.test.core

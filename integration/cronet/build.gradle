@@ -12,7 +12,7 @@ dependencies {
     testImplementation libs.truth
     testImplementation libs.junit
     testImplementation libs.robolectric
-    testImplementation libs.mockito
+    testImplementation libs.mockito.core
 }
 
 android {
