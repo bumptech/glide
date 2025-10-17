@@ -25,7 +25,7 @@ public interface MemoryCache {
    * <p>If the size multiplier causes the size of the cache to be decreased, items will be evicted
    * until the cache is smaller than the new size.
    *
-   * @param multiplier A size multiplier >= 0.
+   * @param multiplier A size multiplier {@code >= 0}.
    */
   void setSizeMultiplier(float multiplier);
 

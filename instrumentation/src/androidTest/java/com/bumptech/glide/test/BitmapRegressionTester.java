@@ -1,6 +1,7 @@
 package com.bumptech.glide.test;
 
 import static com.bumptech.glide.testutil.BitmapSubject.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -41,17 +42,38 @@ public final class BitmapRegressionTester {
   private static final String GENERATED_FILES_DIR = "test_files";
   private static final String SEPARATOR = "_";
 
+  private static final int RESOURCE_ID_NOT_FOUND = 0;
+
   private final Class<?> testClass;
   private final TestName testName;
   private final Context context = ApplicationProvider.getApplicationContext();
 
-  public BitmapRegressionTester(Class<?> testClass, TestName testName) {
+  public static AssumeCanRun newInstance(Class<?> testClass, TestName testName) {
+    return new AssumeCanRun(new BitmapRegressionTester(testClass, testName));
+  }
+
+  private BitmapRegressionTester(Class<?> testClass, TestName testName) {
     this.testClass = testClass;
     this.testName = testName;
 
     if (testClass.getAnnotation(RegressionTest.class) == null) {
       throw new IllegalArgumentException(
           testClass + " must be annotated with " + RegressionTest.class);
+    }
+  }
+
+  public static final class AssumeCanRun {
+
+    private final BitmapRegressionTester regressionTester;
+
+    private AssumeCanRun(BitmapRegressionTester regressionTester) {
+      this.regressionTester = regressionTester;
+    }
+
+    public BitmapRegressionTester assumeShouldRun() {
+      boolean shouldRun = regressionTester.shouldRun();
+      assumeTrue(shouldRun);
+      return regressionTester;
     }
   }
 
@@ -151,7 +173,7 @@ public final class BitmapRegressionTester {
     OutputStream os = null;
     try {
       os = new BufferedOutputStream(new FileOutputStream(file));
-      bitmap.compress(CompressFormat.PNG, /*quality=*/ 100, os);
+      bitmap.compress(CompressFormat.PNG, /* quality= */ 100, os);
       os.close();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -166,17 +188,24 @@ public final class BitmapRegressionTester {
     }
   }
 
+  private boolean shouldRun() {
+    return writeNewExpected() || getResourceId() != RESOURCE_ID_NOT_FOUND;
+  }
+
   private boolean writeNewExpected() {
     File testFiles = getTestFilesDir();
     return new File(testFiles, REGENERATE_SIGNAL_FILE_NAME).exists();
   }
 
+  private int getResourceId() {
+    return context
+        .getResources()
+        .getIdentifier(getResourceName(), RESOURCE_TYPE, context.getPackageName());
+  }
+
   private Bitmap decodeExpected() {
-    int resourceId =
-        context
-            .getResources()
-            .getIdentifier(getResourceName(), RESOURCE_TYPE, context.getPackageName());
-    if (resourceId == 0) {
+    int resourceId = getResourceId();
+    if (resourceId == RESOURCE_ID_NOT_FOUND) {
       throw new IllegalArgumentException(
           "Failed to find resource for: "
               + getResourceName()

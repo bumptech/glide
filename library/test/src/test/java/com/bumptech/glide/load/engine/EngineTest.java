@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.anyResource;
 import static com.bumptech.glide.tests.Util.isADataSource;
 import static com.bumptech.glide.tests.Util.mockResource;
@@ -44,7 +45,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 @SuppressWarnings("unchecked")
 public class EngineTest {
   private EngineTestHarness harness;
@@ -275,7 +276,7 @@ public class EngineTest {
   public void testEngineIsNotSetAsResourceListenerIfResourceIsNullOnJobComplete() {
     harness.doLoad();
 
-    harness.getEngine().onEngineJobComplete(harness.job, harness.cacheKey, /*resource=*/ null);
+    harness.getEngine().onEngineJobComplete(harness.job, harness.cacheKey, /* resource= */ null);
   }
 
   @Test
@@ -289,7 +290,7 @@ public class EngineTest {
 
   @Test
   public void testDoesNotPutNullResourceInActiveResourcesOnEngineComplete() {
-    harness.getEngine().onEngineJobComplete(harness.job, harness.cacheKey, /*resource=*/ null);
+    harness.getEngine().onEngineJobComplete(harness.job, harness.cacheKey, /* resource= */ null);
     assertThat(harness.activeResources.get(harness.cacheKey)).isNull();
   }
 
@@ -408,8 +409,8 @@ public class EngineTest {
             eq(harness.cacheKey),
             eq(true) /*isMemoryCacheable*/,
             eq(false) /*useUnlimitedSourceGeneratorPool*/,
-            /*useAnimationPool=*/ eq(false),
-            /*onlyRetrieveFromCache=*/ eq(false));
+            /* useAnimationPool= */ eq(false),
+            /* onlyRetrieveFromCache= */ eq(false));
   }
 
   @Test
@@ -422,8 +423,8 @@ public class EngineTest {
             eq(harness.cacheKey),
             eq(true) /*isMemoryCacheable*/,
             eq(true) /*useUnlimitedSourceGeneratorPool*/,
-            /*useAnimationPool=*/ eq(false),
-            /*onlyRetrieveFromCache=*/ eq(false));
+            /* useAnimationPool= */ eq(false),
+            /* onlyRetrieveFromCache= */ eq(false));
   }
 
   @Test
@@ -655,7 +656,7 @@ public class EngineTest {
 
     final Jobs jobs = new Jobs();
     final ActiveResources activeResources =
-        new ActiveResources(/*isActiveResourceRetentionAllowed=*/ true);
+        new ActiveResources(/* isActiveResourceRetentionAllowed= */ true);
 
     final int width = 100;
     final int height = 100;
@@ -718,7 +719,7 @@ public class EngineTest {
               options,
               isMemoryCacheable,
               useUnlimitedSourceGeneratorPool,
-              /*useAnimationPool=*/ false,
+              /* useAnimationPool= */ false,
               onlyRetrieveFromCache,
               cb,
               Executors.directExecutor());
@@ -740,7 +741,7 @@ public class EngineTest {
                 engineJobFactory,
                 decodeJobFactory,
                 resourceRecycler,
-                /*isActiveResourceRetentionAllowed=*/ true);
+                /* isActiveResourceRetentionAllowed= */ true);
       }
       return engine;
     }

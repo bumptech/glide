@@ -92,6 +92,6 @@ public class DataUriTest {
     Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
     bitmap.compress(format, 100, bos);
     byte[] data = bos.toByteArray();
-    return Base64.encodeToString(data, /*flags=*/ 0);
+    return Base64.encodeToString(data, /* flags= */ 0);
   }
 }

@@ -3,6 +3,7 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -13,11 +14,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.ColorSpace;
 import android.graphics.Matrix;
+import android.os.Build.VERSION_CODES;
 import androidx.exifinterface.media.ExifInterface;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.tests.Util;
-import com.bumptech.glide.util.Preconditions;
 import com.google.common.collect.Range;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,14 +30,9 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowBitmap;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    sdk = 28,
-    shadows = {TransformationUtilsTest.AlphaShadowBitmap.class})
+@Config(sdk = 28)
 public class TransformationUtilsTest {
 
   @Mock private BitmapPool bitmapPool;
@@ -356,12 +354,20 @@ public class TransformationUtilsTest {
   @Test
   public void testRotateImage() {
     Bitmap toRotate = Bitmap.createBitmap(2, 2, Bitmap.Config.ARGB_8888);
-
+    toRotate.setPixel(0, 0, Color.BLUE);
+    toRotate.setPixel(0, 1, Color.RED);
     Bitmap zero = TransformationUtils.rotateImage(toRotate, 0);
     assertTrue(toRotate == zero);
 
     Bitmap ninety = TransformationUtils.rotateImage(toRotate, 90);
-    assertThat(Shadows.shadowOf(ninety).getDescription()).contains("rotate=90.0");
+    // Checks if native graphics is enabled.
+    if (System.getProperty("robolectric.graphicsMode", "").equals("NATIVE")) {
+      assertThat(ninety.getPixel(0, 0)).isEqualTo(Color.RED);
+      assertThat(ninety.getPixel(1, 0)).isEqualTo(Color.BLUE);
+    } else {
+      // Use legacy shadow APIs
+      assertThat(Shadows.shadowOf(ninety).getDescription()).contains("rotate=90.0");
+    }
     assertEquals(toRotate.getWidth(), toRotate.getHeight());
   }
 
@@ -397,14 +403,29 @@ public class TransformationUtilsTest {
 
   @Test
   @Config(sdk = 19)
-  public void testRotateImageExifHandlesBitmapsWithNullConfigs() {
+  public void testRotateImageExif_preservesitmapsWithNullConfigs() {
     Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     toRotate.setConfig(null);
     Bitmap rotated =
         TransformationUtils.rotateImageExif(
             bitmapPool, toRotate, ExifInterface.ORIENTATION_ROTATE_180);
-    assertEquals(Bitmap.Config.ARGB_8888, rotated.getConfig());
+    assertNull(rotated.getConfig());
   }
+
+  @Test
+  @Config(sdk = VERSION_CODES.UPSIDE_DOWN_CAKE)
+  public void rotateImageExif_preservesColorSpace() {
+    Bitmap toRotate = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888);
+    toRotate.setColorSpace(ColorSpace.get(ColorSpace.Named.DISPLAY_P3));
+
+    Bitmap rotated =
+        TransformationUtils.rotateImageExif(
+            bitmapPool, toRotate, ExifInterface.ORIENTATION_ROTATE_90);
+
+    assertEquals(ColorSpace.get(ColorSpace.Named.DISPLAY_P3), rotated.getColorSpace());
+  }
+
+  // TODO: Add gainmap-based tests once Robolectric has sufficient support.
 
   @Test
   public void testInitializeMatrixSetsScaleIfFlipHorizontal() {
@@ -448,17 +469,5 @@ public class TransformationUtilsTest {
     verify(matrix).setRotate(180);
     TransformationUtils.initializeMatrixForRotation(ExifInterface.ORIENTATION_ROTATE_270, matrix);
     verify(matrix).setRotate(-90);
-  }
-
-  @Implements(Bitmap.class)
-  public static class AlphaShadowBitmap extends ShadowBitmap {
-
-    @Implementation
-    public static Bitmap createBitmap(int width, int height, Bitmap.Config config) {
-      // Robolectric doesn't match the framework behavior with null configs, so we have to do so
-      // here.
-      Preconditions.checkNotNull("Config must not be null");
-      return ShadowBitmap.createBitmap(width, height, config);
-    }
   }
 }

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -30,7 +31,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class HttpUrlFetcherTest {
   @Mock private HttpURLConnection urlConnection;
   @Mock private HttpUrlFetcher.HttpUrlConnectionFactory connectionFactory;

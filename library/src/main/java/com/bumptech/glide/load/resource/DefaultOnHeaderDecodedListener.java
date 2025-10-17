@@ -61,7 +61,7 @@ public final class DefaultOnHeaderDecodedListener implements OnHeaderDecodedList
         requestedWidth,
         requestedHeight,
         isHardwareConfigAllowed,
-        /*isExifOrientationRequired=*/ false)) {
+        /* isExifOrientationRequired= */ false)) {
       decoder.setAllocator(ImageDecoder.ALLOCATOR_HARDWARE);
     } else {
       decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);

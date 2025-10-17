@@ -19,8 +19,7 @@ import java.security.MessageDigest;
  *
  * <p>Use cases will look something like this:
  *
- * <pre>
- * <code>
+ * <pre>{@code
  * public class FillSpace extends BitmapTransformation {
  *     private static final String ID = "com.bumptech.glide.transformations.FillSpace";
  *     private static final byte[] ID_BYTES = ID.getBytes(Charset.forName("UTF-8"));
@@ -49,8 +48,7 @@ import java.security.MessageDigest;
  *       messageDigest.update(ID_BYTES);
  *     }
  * }
- * </code>
- * </pre>
+ * }</pre>
  *
  * <p>Using the fully qualified class name as a static final {@link String} (not {@link
  * Class#getName()} to avoid proguard obfuscation) is an easy way to implement {@link

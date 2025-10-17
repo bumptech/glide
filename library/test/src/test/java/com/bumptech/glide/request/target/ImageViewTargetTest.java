@@ -1,5 +1,6 @@
 package com.bumptech.glide.request.target;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -29,7 +30,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class ImageViewTargetTest {
 
   @Mock private AnimatedDrawable animatedDrawable;
@@ -123,7 +124,7 @@ public class ImageViewTargetTest {
     AnimatedDrawable drawable = mock(AnimatedDrawable.class);
     ImageView view = mock(ImageView.class);
     target = new TestTarget(view);
-    target.onResourceReady(drawable, /*transition=*/ null);
+    target.onResourceReady(drawable, /* transition= */ null);
 
     InOrder order = inOrder(view, drawable);
     order.verify(view).setImageDrawable(drawable);
@@ -132,11 +133,11 @@ public class ImageViewTargetTest {
 
   @Test
   public void onLoadCleared_withAnimatableDrawable_stopsDrawable() {
-    target.onResourceReady(animatedDrawable, /*transition=*/ null);
+    target.onResourceReady(animatedDrawable, /* transition= */ null);
     verify(animatedDrawable).start();
     verify(animatedDrawable, never()).stop();
 
-    target.onLoadCleared(/*placeholder=*/ null);
+    target.onLoadCleared(/* placeholder= */ null);
 
     verify(animatedDrawable).stop();
   }

@@ -18,48 +18,53 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
-/** Loads metadata from the media store for images and videos.  */
-class MediaStoreDataSource internal constructor(
+/** Loads metadata from the media store for images and videos. */
+class MediaStoreDataSource
+internal constructor(
   private val context: Context,
 ) {
 
   fun loadMediaStoreData(): Flow<List<MediaStoreData>> = callbackFlow {
-    val contentObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
-      override fun onChange(selfChange: Boolean) {
-        super.onChange(selfChange)
-        launch {
-          trySend(query())
+    val contentObserver =
+      object : ContentObserver(Handler(Looper.getMainLooper())) {
+        override fun onChange(selfChange: Boolean) {
+          super.onChange(selfChange)
+          launch { trySend(query()) }
         }
       }
-    }
 
     context.contentResolver.registerContentObserver(
       MEDIA_STORE_FILE_URI,
       /* notifyForDescendants=*/ true,
-      contentObserver)
+      contentObserver
+    )
 
     trySend(query())
 
-    awaitClose {
-      context.contentResolver.unregisterContentObserver(contentObserver)
-    }
+    awaitClose { context.contentResolver.unregisterContentObserver(contentObserver) }
   }
 
   private fun query(): MutableList<MediaStoreData> {
     Preconditions.checkArgument(
-      Util.isOnBackgroundThread(), "Can only query from a background thread")
+      Util.isOnBackgroundThread(),
+      "Can only query from a background thread"
+    )
     val data: MutableList<MediaStoreData> = ArrayList()
     val cursor =
-      context
-        .contentResolver
-        .query(
-          MEDIA_STORE_FILE_URI,
-          PROJECTION,
-          FileColumns.MEDIA_TYPE + " = " + FileColumns.MEDIA_TYPE_IMAGE
-            + " OR " + FileColumns.MEDIA_TYPE + " = " + FileColumns.MEDIA_TYPE_VIDEO,
-          /* selectionArgs= */ null,
-          "${MediaColumns.DATE_TAKEN} DESC"
-        ) ?: return data
+      context.contentResolver.query(
+        MEDIA_STORE_FILE_URI,
+        PROJECTION,
+        FileColumns.MEDIA_TYPE +
+          " = " +
+          FileColumns.MEDIA_TYPE_IMAGE +
+          " OR " +
+          FileColumns.MEDIA_TYPE +
+          " = " +
+          FileColumns.MEDIA_TYPE_VIDEO,
+        /* selectionArgs= */ null,
+        "${MediaColumns.DATE_TAKEN} DESC"
+      )
+        ?: return data
 
     @Suppress("NAME_SHADOWING") // Might as well, it's the same object?
     cursor.use { cursor ->
@@ -69,6 +74,7 @@ class MediaStoreDataSource internal constructor(
       val mimeTypeColNum = cursor.getColumnIndexOrThrow(MediaColumns.MIME_TYPE)
       val orientationColNum = cursor.getColumnIndexOrThrow(MediaColumns.ORIENTATION)
       val mediaTypeColumnIndex = cursor.getColumnIndexOrThrow(FileColumns.MEDIA_TYPE)
+      val displayNameIndex = cursor.getColumnIndexOrThrow(FileColumns.DISPLAY_NAME)
 
       while (cursor.moveToNext()) {
         val id = cursor.getLong(idColNum)
@@ -76,11 +82,10 @@ class MediaStoreDataSource internal constructor(
         val mimeType = cursor.getString(mimeTypeColNum)
         val dateModified = cursor.getLong(dateModifiedColNum)
         val orientation = cursor.getInt(orientationColNum)
+        val displayName = cursor.getString(displayNameIndex)
         val type =
-          if (cursor.getInt(mediaTypeColumnIndex) == FileColumns.MEDIA_TYPE_IMAGE)
-            Type.IMAGE
-          else
-            Type.VIDEO
+          if (cursor.getInt(mediaTypeColumnIndex) == FileColumns.MEDIA_TYPE_IMAGE) Type.IMAGE
+          else Type.VIDEO
         data.add(
           MediaStoreData(
             type = type,
@@ -89,7 +94,10 @@ class MediaStoreDataSource internal constructor(
             mimeType = mimeType,
             dateModified = dateModified,
             orientation = orientation,
-            dateTaken = dateTaken))
+            dateTaken = dateTaken,
+            displayName = displayName,
+          )
+        )
       }
     }
     return data
@@ -97,17 +105,20 @@ class MediaStoreDataSource internal constructor(
 
   companion object {
     private val MEDIA_STORE_FILE_URI = MediaStore.Files.getContentUri("external")
-    private val PROJECTION = arrayOf(
-      MediaColumns._ID,
-      MediaColumns.DATE_TAKEN,
-      MediaColumns.DATE_MODIFIED,
-      MediaColumns.MIME_TYPE,
-      MediaColumns.ORIENTATION,
-      FileColumns.MEDIA_TYPE)
+    private val PROJECTION =
+      arrayOf(
+        MediaColumns._ID,
+        MediaColumns.DATE_TAKEN,
+        MediaColumns.DATE_MODIFIED,
+        MediaColumns.MIME_TYPE,
+        MediaColumns.ORIENTATION,
+        MediaColumns.DISPLAY_NAME,
+        FileColumns.MEDIA_TYPE
+      )
   }
 }
 
-/** A data model containing data for a single media item.  */
+/** A data model containing data for a single media item. */
 @Parcelize
 data class MediaStoreData(
   private val type: Type,
@@ -117,9 +128,11 @@ data class MediaStoreData(
   val dateModified: Long,
   val orientation: Int,
   val dateTaken: Long,
+  val displayName: String?
 ) : Parcelable
 
-/** The type of data.  */
+/** The type of data. */
 enum class Type {
-  VIDEO, IMAGE
+  VIDEO,
+  IMAGE
 }

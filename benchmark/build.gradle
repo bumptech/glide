@@ -4,21 +4,23 @@ plugins {
 }
 
 android {
-    compileSdk 30
-    buildToolsVersion "30.0.3"
+    namespace 'com.bumptech.glide.benchmark'
+    compileSdkVersion 34
+    buildToolsVersion "34.0.0"
 
     compileOptions {
-        sourceCompatibility = 1.7
-        targetCompatibility = 1.7
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     defaultConfig {
         minSdk 19
-        targetSdk 30
+        targetSdk libs.versions.target.sdk.version.get() as int
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner 'androidx.benchmark.junit4.AndroidBenchmarkRunner'
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -32,12 +34,14 @@ android {
 }
 
 dependencies {
-    androidTestImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
-    androidTestImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
-    androidTestImplementation "junit:junit:{$JUNIT_VERSION}"
+    implementation libs.androidx.multidex
+
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.junit
 
     androidTestImplementation project(':library')
     androidTestImplementation project(':testutil')
-    androidTestImplementation "androidx.benchmark:benchmark-junit4:${ANDROID_X_BENCHMARK_VERSION}"
-    androidTestImplementation "com.google.guava:guava:${GUAVA_VERSION}"
+    androidTestImplementation libs.androidx.benchmark.junit
+    androidTestImplementation libs.guava
 }

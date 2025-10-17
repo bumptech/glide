@@ -3,26 +3,21 @@ package com.bumptech.glide.gifdecoder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.robolectric.Shadows.shadowOf;
 
 import android.graphics.Bitmap;
 import androidx.annotation.NonNull;
 import com.bumptech.glide.testutil.TestUtil;
 import java.io.IOException;
-import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowBitmap;
 
 /** Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}. */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = 19)
 public class GifDecoderTest {
 
   private MockProvider provider;
@@ -141,7 +136,6 @@ public class GifDecoderTest {
   }
 
   @Test
-  @Config(shadows = {CustomShadowBitmap.class})
   public void testFirstFrameMustClearBeforeDrawingWhenLastFrameIsDisposalBackground()
       throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "transparent_disposal_background.gif");
@@ -156,12 +150,10 @@ public class GifDecoderTest {
     decoder.getNextFrame();
     decoder.advance();
     Bitmap firstFrameTwice = decoder.getNextFrame();
-    assertTrue(Arrays.equals((((CustomShadowBitmap) shadowOf(firstFrame))).getPixels(),
-        (((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels()));
+    assertTrue(firstFrame.sameAs(firstFrameTwice));
   }
 
   @Test
-  @Config(shadows = {CustomShadowBitmap.class})
   public void testFirstFrameMustClearBeforeDrawingWhenLastFrameIsDisposalNone() throws IOException {
     byte[] data = TestUtil.resourceToBytes(getClass(), "transparent_disposal_none.gif");
     GifHeaderParser headerParser = new GifHeaderParser();
@@ -175,28 +167,7 @@ public class GifDecoderTest {
     decoder.getNextFrame();
     decoder.advance();
     Bitmap firstFrameTwice = decoder.getNextFrame();
-    assertTrue(Arrays.equals((((CustomShadowBitmap) shadowOf(firstFrame))).getPixels(),
-        (((CustomShadowBitmap) shadowOf(firstFrameTwice))).getPixels()));
-  }
-
-  /**
-   * Preserve generated bitmap data for checking.
-   */
-  @Implements(Bitmap.class)
-  public static class CustomShadowBitmap extends ShadowBitmap {
-
-    private int[] pixels;
-
-    @Implementation
-    public void setPixels(int[] pixels, int offset, int stride,
-        int x, int y, int width, int height) {
-      this.pixels = new int[pixels.length];
-      System.arraycopy(pixels, 0, this.pixels, 0, this.pixels.length);
-    }
-
-    public int[] getPixels() {
-      return pixels;
-    }
+    assertTrue(firstFrame.sameAs(firstFrameTwice));
   }
 
   private static class MockProvider implements GifDecoder.BitmapProvider {
@@ -235,6 +206,5 @@ public class GifDecoderTest {
     public void release(@NonNull int[] array) {
       // Do Nothing
     }
-
   }
 }

@@ -34,6 +34,7 @@ public class GifDrawable extends Drawable
   // Public API.
   @SuppressWarnings("WeakerAccess")
   public static final int LOOP_FOREVER = -1;
+
   /**
    * A constant indicating that an animated drawable should loop for its default number of times.
    * For animated GIFs, this constant indicates the GIF should use the netscape loop count if
@@ -46,12 +47,16 @@ public class GifDrawable extends Drawable
   private static final int GRAVITY = Gravity.FILL;
 
   private final GifState state;
+
   /** True if the drawable is currently animating. */
   private boolean isRunning;
+
   /** True if the drawable should animate while visible. */
   private boolean isStarted;
+
   /** True if the drawable's resources have been recycled. */
   private boolean isRecycled;
+
   /**
    * True if the drawable is currently visible. Default to true because on certain platforms (at
    * least 4.1.1), setVisible is not called on {@link android.graphics.drawable.Drawable Drawables}
@@ -59,8 +64,10 @@ public class GifDrawable extends Drawable
    * See issue #130.
    */
   private boolean isVisible = true;
+
   /** The number of times we've looped over all the frames in the GIF. */
   private int loopCount;
+
   /** The number of times to loop through the GIF animation. */
   private int maxLoopCount = LOOP_FOREVER;
 
@@ -345,8 +352,8 @@ public class GifDrawable extends Drawable
     }
 
     if (maxLoopCount != LOOP_FOREVER && loopCount >= maxLoopCount) {
-      notifyAnimationEndToListeners();
       stop();
+      notifyAnimationEndToListeners();
     }
   }
 

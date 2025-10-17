@@ -1,6 +1,5 @@
 package com.bumptech.glide.request.target;
 
-import static android.view.ViewGroup.LayoutParams;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -14,23 +13,19 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.view.Display;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.util.Preconditions;
 import com.google.common.truth.Truth;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
@@ -42,11 +37,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.TextLayoutMode;
-import org.robolectric.util.ReflectionHelpers;
 
 /**
  * Test for {@link CustomViewTarget}.
@@ -56,8 +48,7 @@ import org.robolectric.util.ReflectionHelpers;
  * gradle changes, but I've so far failed to figure out the right set of commands.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 19, manifest = "build/intermediates/manifests/full/debug/AndroidManifest.xml")
-@TextLayoutMode(value = TextLayoutMode.Mode.LEGACY, issueId = "130378660")
+@Config(sdk = Config.OLDEST_SDK)
 public class CustomViewTargetTest {
   private ActivityController<Activity> activity;
   private View view;
@@ -65,12 +56,10 @@ public class CustomViewTargetTest {
   private CustomViewTarget<View, Object> target;
   @Mock private SizeReadyCallback cb;
   @Mock private Request request;
-  private int sdkVersion;
   private AttachStateTarget attachStateTarget;
 
   @Before
   public void setUp() {
-    sdkVersion = Build.VERSION.SDK_INT;
     MockitoAnnotations.initMocks(this);
     activity = Robolectric.buildActivity(Activity.class).create().start().postCreate(null).resume();
     view = new View(activity.get());
@@ -80,7 +69,7 @@ public class CustomViewTargetTest {
     LinearLayout linearLayout = new LinearLayout(activity.get());
     View expandView = new View(activity.get());
     LinearLayout.LayoutParams linearLayoutParams =
-        new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, /*height=*/ 0);
+        new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, /* height= */ 0);
     linearLayoutParams.weight = 1f;
     expandView.setLayoutParams(linearLayoutParams);
     linearLayout.addView(expandView);
@@ -94,7 +83,6 @@ public class CustomViewTargetTest {
 
   @After
   public void tearDown() {
-    setSdkVersionInt(sdkVersion);
     CustomViewTarget.SizeDeterminer.maxDisplayLength = null;
   }
 
@@ -147,13 +135,12 @@ public class CustomViewTargetTest {
     verify(cb).onSizeReady(eq(dimens), eq(dimens));
   }
 
+  @Config(qualifiers = "w200dp-h300dp")
   @Test
   public void getSize_withBothWrapContent_usesDisplayDimens() {
     LayoutParams layoutParams =
         new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     view.setLayoutParams(layoutParams);
-
-    setDisplayDimens(200, 300);
 
     activity.visible();
     view.layout(0, 0, 0, 0);
@@ -163,13 +150,12 @@ public class CustomViewTargetTest {
     verify(cb).onSizeReady(300, 300);
   }
 
+  @Config(qualifiers = "w100dp-h200dp")
   @Test
   public void getSize_withWrapContentWidthAndValidHeight_usesDisplayDimenAndValidHeight() {
     int height = 100;
     LayoutParams params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, height);
     view.setLayoutParams(params);
-
-    setDisplayDimens(100, 200);
 
     activity.visible();
     view.setRight(0);
@@ -179,12 +165,12 @@ public class CustomViewTargetTest {
     verify(cb).onSizeReady(200, height);
   }
 
+  @Config(qualifiers = "w200dp-h100dp")
   @Test
   public void getSize_withWrapContentHeightAndValidWidth_returnsWidthAndDisplayDimen() {
     int width = 100;
     LayoutParams params = new FrameLayout.LayoutParams(width, LayoutParams.WRAP_CONTENT);
     view.setLayoutParams(params);
-    setDisplayDimens(200, 100);
     parent.getLayoutParams().height = 200;
 
     activity.visible();
@@ -194,13 +180,12 @@ public class CustomViewTargetTest {
     verify(cb).onSizeReady(width, 200);
   }
 
+  @Config(qualifiers = "w500dp-h600dp")
   @Test
   public void getSize_withWrapContentWidthAndMatchParentHeight_usesDisplayDimenWidthAndHeight() {
     LayoutParams params =
         new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
     view.setLayoutParams(params);
-
-    setDisplayDimens(500, 600);
 
     target.getSize(cb);
 
@@ -212,16 +197,15 @@ public class CustomViewTargetTest {
 
     view.getViewTreeObserver().dispatchOnPreDraw();
 
-    verify(cb).onSizeReady(600, height);
+    verify(cb).onSizeReady(500, height);
   }
 
+  @Config(qualifiers = "w300dp-h400dp")
   @Test
   public void getSize_withMatchParentWidthAndWrapContentHeight_usesWidthAndDisplayDimenHeight() {
     LayoutParams params =
         new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
     view.setLayoutParams(params);
-
-    setDisplayDimens(300, 400);
 
     target.getSize(cb);
 
@@ -232,7 +216,11 @@ public class CustomViewTargetTest {
     activity.visible();
     view.getViewTreeObserver().dispatchOnPreDraw();
 
-    verify(cb).onSizeReady(width, 400);
+    if (Build.VERSION.SDK_INT <= 19) {
+      verify(cb).onSizeReady(width, 352);
+    } else {
+      verify(cb).onSizeReady(width, 344);
+    }
   }
 
   @Test
@@ -273,7 +261,8 @@ public class CustomViewTargetTest {
       target.getSize(cbs[i]);
     }
 
-    int width = 100, height = 111;
+    int width = 100;
+    int height = 111;
     parent.getLayoutParams().width = width;
     parent.getLayoutParams().height = height;
     activity.visible();
@@ -450,7 +439,6 @@ public class CustomViewTargetTest {
 
   @Test
   public void getSize_withValidWidthAndHeight_preV19_layoutRequested_callsSizeReady() {
-    setSdkVersionInt(18);
     view.setLayoutParams(new FrameLayout.LayoutParams(100, 100));
     view.requestLayout();
 
@@ -468,20 +456,6 @@ public class CustomViewTargetTest {
     target.getSize(cb);
 
     verify(cb, never()).onSizeReady(anyInt(), anyInt());
-  }
-
-  private void setDisplayDimens(Integer width, Integer height) {
-    WindowManager windowManager =
-        (WindowManager)
-            ApplicationProvider.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-    Display display = Preconditions.checkNotNull(windowManager).getDefaultDisplay();
-    if (width != null) {
-      Shadows.shadowOf(display).setWidth(width);
-    }
-
-    if (height != null) {
-      Shadows.shadowOf(display).setHeight(height);
-    }
   }
 
   @Test
@@ -518,7 +492,7 @@ public class CustomViewTargetTest {
   public void clearOnDetach_onDetach_afterOnLoadCleared_removesListener() {
     activity.visible();
     attachStateTarget.clearOnDetach();
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
     attachStateTarget.setRequest(request);
     parent.removeView(view);
 
@@ -539,7 +513,7 @@ public class CustomViewTargetTest {
   public void clearOnDetach_onDetach_afterMultipleClearOnDetaches_removesListener() {
     activity.visible();
     attachStateTarget.clearOnDetach().clearOnDetach().clearOnDetach();
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
     attachStateTarget.setRequest(request);
     parent.removeView(view);
 
@@ -589,8 +563,8 @@ public class CustomViewTargetTest {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
     when(request.isCleared()).thenReturn(true);
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
-    attachStateTarget.onLoadStarted(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
+    attachStateTarget.onLoadStarted(/* placeholder= */ null);
     activity.visible();
 
     verify(request).begin();
@@ -601,7 +575,7 @@ public class CustomViewTargetTest {
     attachStateTarget.clearOnDetach();
     attachStateTarget.setRequest(request);
     when(request.isCleared()).thenReturn(true);
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
     activity.visible();
 
     verify(request, never()).begin();
@@ -611,7 +585,7 @@ public class CustomViewTargetTest {
   public void onLoadStarted_withoutClearOnDetach_doesNotAddListener() {
     activity.visible();
     target.setRequest(request);
-    attachStateTarget.onLoadStarted(/*placeholder=*/ null);
+    attachStateTarget.onLoadStarted(/* placeholder= */ null);
     parent.removeView(view);
 
     verify(request, never()).clear();
@@ -634,7 +608,7 @@ public class CustomViewTargetTest {
         };
     view.addOnAttachStateChangeListener(expected);
 
-    attachStateTarget.onLoadCleared(/*placeholder=*/ null);
+    attachStateTarget.onLoadCleared(/* placeholder= */ null);
 
     activity.visible();
 
@@ -695,9 +669,5 @@ public class CustomViewTargetTest {
     public void onLoadFailed(@Nullable Drawable errorDrawable) {
       // Avoid calling super.
     }
-  }
-
-  private static void setSdkVersionInt(int version) {
-    ReflectionHelpers.setStaticField(Build.VERSION.class, "SDK_INT", version);
   }
 }

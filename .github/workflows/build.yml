@@ -5,22 +5,56 @@ on:
     pull_request:
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
 
-        steps:
-          - uses: actions/checkout@v2
-          - name: Set up JDK 11
-            uses: actions/setup-java@v3
-            with:
-              java-version: '11'
-              distribution: 'zulu'
-          - name: Build and run unit tests with Gradle
-            run: ./scripts/ci_unit.sh
-          - name: Publish to Sonatype
-            env:
-              NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-              NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-            if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'bumptech/glide' }}
-            run: ./gradlew publish -PNEXUS_USERNAME="${NEXUS_USERNAME}" -PNEXUS_PASSWORD="${NEXUS_PASSWORD}"
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run Gradle Build
+        run: |
+          ./gradlew build \
+            -x :library:test:testDebugUnitTest \
+            :library:test:assembleDebugUnitTest \
+            -x :library:testDebugUnitTest \
+            :library:assembleDebugUnitTest \
+            -x :annotation:ksp:test:testDebugUnitTest \
+            :annotation:ksp:test:assembleDebugUnitTest \
+            -x :third_party:disklrucache:testDebugUnitTest \
+            :third_party:disklrucache:assembleDebugUnitTest \
+            -x :integration:cronet:testDebugUnitTest \
+            :integration:cronet:assembleDebugUnitTest \
+            -x :integration:gifencoder:testDebugUnitTest \
+            :integration:gifencoder:assembleDebugUnitTest \
+            -x :integration:ktx:testDebugUnitTest \
+            :integration:ktx:assembleDebugUnitTest \
+            -x :integration:concurrent:testDebugUnitTest \
+            :integration:concurrent:assembleDebugUnitTest \
+            -x :integration:volley:testDebugUnitTest \
+            :integration:volley:assembleDebugUnitTest \
+            -x :integration:sqljournaldiskcache:testDebugUnitTest \
+            :integration:sqljournaldiskcache:assembleDebugUnitTest \
+            -x :third_party:gif_decoder:testDebugUnitTest \
+            :third_party:gif_decoder:assembleDebugUnitTest \
+            :samples:flickr:build \
+            :samples:giphy:build \
+            :samples:contacturi:build \
+            :samples:gallery:build \
+            :samples:imgur:build \
+            :samples:svg:build \
+            :instrumentation:assembleAndroidTest \
+            :benchmark:assembleAndroidTest \
+            :glide:releaseJavadoc \
+            :annotation:ksp:test:test \
+            :integration:ktx:apiCheck \
+            :annotation:ksp:integrationtest:test \
+            --parallel

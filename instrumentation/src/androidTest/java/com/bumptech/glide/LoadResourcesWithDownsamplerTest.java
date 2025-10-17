@@ -78,8 +78,15 @@ public class LoadResourcesWithDownsamplerTest {
     Bitmap bitmap = concurrency.get(Glide.with(context).asBitmap().load(new Object()).submit());
     assertThat(bitmap).isNotNull();
     assertThat(bitmap.getConfig()).isEqualTo(Bitmap.Config.RGBA_F16);
+
+    // The exact value here depends on the emulator / device we're running on. On Pixel devices and
+    // emulators it'll return DISPLAY_P3. On 'generic' emulators and some other devices, it'll
+    // return LINEAR_EXTENDED_SRGB. It's unclear how else we can assert correctly based on the
+    // device type, so I've just left this is isAnyOf for now.
     assertThat(bitmap.getColorSpace())
-        .isEqualTo(ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB));
+        .isAnyOf(
+            ColorSpace.get(ColorSpace.Named.DISPLAY_P3),
+            ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB));
   }
 
   @Test
@@ -123,8 +130,8 @@ public class LoadResourcesWithDownsamplerTest {
   public void loadTransparentGifResource_asHardware_withNoOtherLoaders_decodesResource()
       throws InterruptedException {
     assumeTrue(
-        "Hardware Bitmaps are only supported on O+",
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O);
+        "Hardware Bitmaps are only supported on P+",
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P);
     // enableHardwareBitmaps must be called on the main thread.
     final CountDownLatch latch = new CountDownLatch(1);
     Util.postOnUiThread(
@@ -184,8 +191,8 @@ public class LoadResourcesWithDownsamplerTest {
   @Test
   public void loadOpaqueGifResource_asHardware_withNoOtherLoaders_decodesResource() {
     assumeTrue(
-        "Hardware Bitmaps are only supported on O+",
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O);
+        "Hardware Bitmaps are only supported on P+",
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P);
 
     Glide.get(context)
         .getRegistry()

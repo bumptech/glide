@@ -421,11 +421,14 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     if (isAutoCloneEnabled) {
       return clone().theme(theme);
     }
-    // TODO(b/234614365): Allow the theme option to be null.
-    Preconditions.checkNotNull(theme);
     this.theme = theme;
-    fields |= THEME;
-    return set(ResourceDrawableDecoder.THEME, theme);
+    if (theme != null) {
+      fields |= THEME;
+      return set(ResourceDrawableDecoder.THEME, theme);
+    } else {
+      fields &= ~THEME;
+      return removeOption(ResourceDrawableDecoder.THEME);
+    }
   }
 
   /**
@@ -555,6 +558,14 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     Preconditions.checkNotNull(option);
     Preconditions.checkNotNull(value);
     options.set(option, value);
+    return selfOrThrowIfLocked();
+  }
+
+  T removeOption(@NonNull Option<?> option) {
+    if (isAutoCloneEnabled) {
+      return clone().removeOption(option);
+    }
+    options.remove(option);
     return selfOrThrowIfLocked();
   }
 
@@ -830,7 +841,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     }
 
     downsample(downsampleStrategy);
-    return transform(transformation, /*isRequired=*/ false);
+    return transform(transformation, /* isRequired= */ false);
   }
 
   // calling transform() on the result of clone() requires greater access.
@@ -893,7 +904,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @NonNull
   @CheckResult
   public T transform(@NonNull Transformation<Bitmap> transformation) {
-    return transform(transformation, /*isRequired=*/ true);
+    return transform(transformation, /* isRequired= */ true);
   }
 
   /**
@@ -914,7 +925,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @CheckResult
   public T transform(@NonNull Transformation<Bitmap>... transformations) {
     if (transformations.length > 1) {
-      return transform(new MultiTransformation<>(transformations), /*isRequired=*/ true);
+      return transform(new MultiTransformation<>(transformations), /* isRequired= */ true);
     } else if (transformations.length == 1) {
       return transform(transformations[0]);
     } else {
@@ -941,7 +952,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @CheckResult
   @Deprecated
   public T transforms(@NonNull Transformation<Bitmap>... transformations) {
-    return transform(new MultiTransformation<>(transformations), /*isRequired=*/ true);
+    return transform(new MultiTransformation<>(transformations), /* isRequired= */ true);
   }
 
   /**
@@ -960,7 +971,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @NonNull
   @CheckResult
   public T optionalTransform(@NonNull Transformation<Bitmap> transformation) {
-    return transform(transformation, /*isRequired=*/ false);
+    return transform(transformation, /* isRequired= */ false);
   }
 
   @NonNull
@@ -1003,7 +1014,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @CheckResult
   public <Y> T optionalTransform(
       @NonNull Class<Y> resourceClass, @NonNull Transformation<Y> transformation) {
-    return transform(resourceClass, transformation, /*isRequired=*/ false);
+    return transform(resourceClass, transformation, /* isRequired= */ false);
   }
 
   @NonNull
@@ -1047,7 +1058,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   @CheckResult
   public <Y> T transform(
       @NonNull Class<Y> resourceClass, @NonNull Transformation<Y> transformation) {
-    return transform(resourceClass, transformation, /*isRequired=*/ true);
+    return transform(resourceClass, transformation, /* isRequired= */ true);
   }
 
   /**
@@ -1198,31 +1209,43 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
     return selfOrThrowIfLocked();
   }
 
+  /**
+   * Returns {@code true} if this {@link BaseRequestOptions} is equivalent to the given {@link
+   * BaseRequestOptions} (has all of the same options and sizes).
+   *
+   * <p>This method is identical to {@link #equals(Object)}, but this can not be overridden. We need
+   * to use this method instead of {@link #equals(Object)}, because child classes may have
+   * additional fields, such as listeners and models, that should not be considered when checking
+   * for equality.
+   */
+  public final boolean isEquivalentTo(BaseRequestOptions<?> other) {
+    return Float.compare(other.sizeMultiplier, sizeMultiplier) == 0
+        && errorId == other.errorId
+        && Util.bothNullOrEqual(errorPlaceholder, other.errorPlaceholder)
+        && placeholderId == other.placeholderId
+        && Util.bothNullOrEqual(placeholderDrawable, other.placeholderDrawable)
+        && fallbackId == other.fallbackId
+        && Util.bothNullOrEqual(fallbackDrawable, other.fallbackDrawable)
+        && isCacheable == other.isCacheable
+        && overrideHeight == other.overrideHeight
+        && overrideWidth == other.overrideWidth
+        && isTransformationRequired == other.isTransformationRequired
+        && isTransformationAllowed == other.isTransformationAllowed
+        && useUnlimitedSourceGeneratorsPool == other.useUnlimitedSourceGeneratorsPool
+        && onlyRetrieveFromCache == other.onlyRetrieveFromCache
+        && diskCacheStrategy.equals(other.diskCacheStrategy)
+        && priority == other.priority
+        && options.equals(other.options)
+        && transformations.equals(other.transformations)
+        && resourceClass.equals(other.resourceClass)
+        && Util.bothNullOrEqual(signature, other.signature)
+        && Util.bothNullOrEqual(theme, other.theme);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o instanceof BaseRequestOptions<?>) {
-      BaseRequestOptions<?> other = (BaseRequestOptions<?>) o;
-      return Float.compare(other.sizeMultiplier, sizeMultiplier) == 0
-          && errorId == other.errorId
-          && Util.bothNullOrEqual(errorPlaceholder, other.errorPlaceholder)
-          && placeholderId == other.placeholderId
-          && Util.bothNullOrEqual(placeholderDrawable, other.placeholderDrawable)
-          && fallbackId == other.fallbackId
-          && Util.bothNullOrEqual(fallbackDrawable, other.fallbackDrawable)
-          && isCacheable == other.isCacheable
-          && overrideHeight == other.overrideHeight
-          && overrideWidth == other.overrideWidth
-          && isTransformationRequired == other.isTransformationRequired
-          && isTransformationAllowed == other.isTransformationAllowed
-          && useUnlimitedSourceGeneratorsPool == other.useUnlimitedSourceGeneratorsPool
-          && onlyRetrieveFromCache == other.onlyRetrieveFromCache
-          && diskCacheStrategy.equals(other.diskCacheStrategy)
-          && priority == other.priority
-          && options.equals(other.options)
-          && transformations.equals(other.transformations)
-          && resourceClass.equals(other.resourceClass)
-          && Util.bothNullOrEqual(signature, other.signature)
-          && Util.bothNullOrEqual(theme, other.theme);
+      return isEquivalentTo((BaseRequestOptions<?>) o);
     }
     return false;
   }

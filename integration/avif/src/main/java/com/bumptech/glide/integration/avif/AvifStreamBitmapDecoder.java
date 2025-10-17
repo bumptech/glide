@@ -41,6 +41,7 @@ public final class AvifStreamBitmapDecoder implements ResourceDecoder<InputStrea
 
   @Override
   public boolean handles(InputStream source, Options options) throws IOException {
-    return ImageType.AVIF.equals(ImageHeaderParserUtils.getType(parsers, source, arrayPool));
+    ImageType type = ImageHeaderParserUtils.getType(parsers, source, arrayPool);
+    return type.equals(ImageType.AVIF) || type.equals(ImageType.ANIMATED_AVIF);
   }
 }

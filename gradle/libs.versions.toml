@@ -1,0 +1,100 @@
+[versions]
+pmd = "6.0.0"
+dagger = "2.47"
+compose = "1.5.1"
+kotlin = "1.9.20"
+mockito = "5.3.1"
+retrofit = "2.3.0"
+coroutines = "1.8.0"
+ksp = "1.9.20-1.0.14"
+errorprone = "2.18.0"
+min-sdk-version = "14"
+target-sdk-version = "32"
+androidx-espresso = "3.5.1"
+androidx-fragment = "1.6.1"
+okhttp-min-sdk-version = "21"
+kotlin-compiler-extension = "1.5.5"
+androidx-benchmark = "1.2.0-beta05"
+compile-sdk-version = 'android-36'
+
+[libraries]
+androidx-multidex = { group = "androidx.multidex", name = "multidex", version = "2.0.1" }
+autoservice = { group = "com.google.auto.service", name = "auto-service", version = "1.0-rc3" }
+autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version = "1.0.1" }
+android-gradle = { group = "com.android.tools.build", name = "gradle", version = "8.1.1" }
+androidx-cardview = { group = "androidx.cardview", name = "cardview", version = "1.0.0" }
+androidx-core = { group = "androidx.core", name = "core", version = "1.12.0" }
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version = "1.7.1" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version = "1.6.1" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.12.0" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version = "1.3.6" }
+androidx-futures = { group = "androidx.concurrent", name = "concurrent-futures", version = "1.1.0" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version = "1.1.5" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version = "2.8.2" }
+androidx-lifecycle-runtime-testing = { group = "androidx.lifecycle", name = "lifecycle-runtime-testing", version = "2.8.2" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version = "1.3.1" }
+androidx-test-core = { group = "androidx.test", name = "core", version = "1.4.0" }
+androidx-test-ktx = { group = "androidx.test", name = "core-ktx", version = "1.5.0" }
+androidx-test-ktx-junit = { group = "androidx.test.ext", name = "junit-ktx", version = "1.1.5" }
+androidx-test-rules = { group = "androidx.test", name = "rules", version = "1.4.0" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version = "1.4.0" }
+androidx-tracing = { group = "androidx.tracing", name = "tracing", version = "1.0.0" }
+androidx-vectordrawable = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.1.0" }
+proguard-gradle = { group = "com.guardsquare", name = "proguard-gradle", version = "7.1.0" }
+compose-material = { group = "androidx.compose.material", name = "material", version = "1.5.1" }
+coroutines-binarycompat-gradle = { group = "org.jetbrains.kotlinx", name = "binary-compatibility-validator", version = "0.18.1" }
+cronet = { group = "com.google.android.gms", name = "play-services-cronet", version = "17.0.1" }
+dokka-gradle = { group = "org.jetbrains.dokka", name = "dokka-gradle-plugin", version = "1.8.20" }
+drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version = "0.25.1" }
+errorprone-gradle = { group = "net.ltgt.gradle", name = "gradle-errorprone-plugin", version = "2.0.2" }
+findbugs-jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version = "3.0.2" }
+guava = { group = "com.google.guava", name = "guava", version = "28.1-android" }
+guava-testlib = { group = "com.google.guava", name = "guava-testlib", version = "18.0" }
+javapoet = { group = "com.squareup", name = "javapoet", version = "1.9.0" }
+junit = { group = "junit", name = "junit", version = "4.13.2" }
+kotlinpoet = { group = "com.squareup", name = "kotlinpoet", version = "1.12.0" }
+ksp-autoservice = { group = "dev.zacsweers.autoservice", name = "auto-service-ksp", version = "1.0.0" }
+ksp-compiletesting = { group = "com.github.tschuchortdev", name = "kotlin-compile-testing-ksp", version = "1.6.0" }
+mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version = "3.0.0-RC1" }
+okhttp2 = { group = "com.squareup.okhttp", name = "okhttp", version = "2.7.5" }
+okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version = "3.10.0" }
+okhttp4 = { group = "com.squareup.okhttp3", name = "okhttp", version = "4.10.0" }
+robolectric = { group = "org.robolectric", name = "robolectric", version = "4.11.1" }
+rx-android = { group = "io.reactivex", name = "rxandroid", version = "1.2.1" }
+rx-java = { group = "io.reactivex", name = "rxjava", version = "1.3.8" }
+svg = { group = "com.caverock", name = "androidsvg", version = "1.2.1" }
+truth = { group = "com.google.truth", name = "truth", version = "1.4.4" }
+violations = { group = "se.bjurr.violations", name = "violations-gradle-plugin", version = "1.8" }
+volley = { group = "com.android.volley", name = "volley", version = "1.2.1" }
+vanniktech = { group = "com.vanniktech", name = "gradle-maven-publish-plugin", version = "0.34.0" }
+androidx-benchmark-gradle = { group = "androidx.benchmark", name = "benchmark-gradle-plugin", version.ref = "androidx-benchmark" }
+androidx-benchmark-junit = { group = "androidx.benchmark", name = "benchmark-junit4", version.ref = "androidx-benchmark" }
+androidx-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-espresso" }
+androidx-espresso-idling = { group = "androidx.test.espresso.idling", name = "idling-concurrent", version.ref = "androidx-espresso" }
+androidx-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "androidx-fragment" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "androidx-fragment" }
+compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "compose" }
+compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
+compose-ui-testmanifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "compose" }
+compose-ui-testjunit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "compose" }
+coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+dagger-runtime = { group = "com.google.dagger", name = "dagger", version.ref = "dagger" }
+dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "dagger" }
+dagger-android = { group = "com.google.dagger", name = "dagger-android", version.ref = "dagger" }
+dagger-android-processor = { group = "com.google.dagger", name = "dagger-android-processor", version.ref = "dagger" }
+errorprone-annotations = { group = "com.google.errorprone", name = "error_prone_annotations", version.ref = "errorprone" }
+errorprone-core = { group = "com.google.errorprone", name = "error_prone_core", version.ref = "errorprone" }
+kotlin-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
+kotlin-jdk7 = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk7", version.ref = "kotlin" }
+kotlin-gradle = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
+kotlin-bom = { group = "org.jetbrains.kotlin", name = "kotlin-bom", version.ref = "kotlin" }
+ksp-api = { group = "com.google.devtools.ksp", name = "symbol-processing-api", version.ref = "ksp" }
+ksp-gradle-plugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-android = { group = "org.mockito", name = "mockito-android", version.ref = "mockito" }
+retrofit-runtime = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+retrofit-rxjava = { group = "com.squareup.retrofit2", name = "adapter-rxjava", version.ref = "retrofit" }

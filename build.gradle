@@ -5,23 +5,32 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
         gradlePluginPortal()
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:${ANDROID_GRADLE_VERSION}"
+        classpath libs.android.gradle
         if (!hasProperty('DISABLE_ERROR_PRONE')) {
-            classpath "net.ltgt.gradle:gradle-errorprone-plugin:${ERROR_PRONE_PLUGIN_VERSION}"
+            classpath libs.errorprone.gradle
         }
-        classpath 'com.guardsquare:proguard-gradle:7.1.0'
-        classpath "se.bjurr.violations:violations-gradle-plugin:${VIOLATIONS_PLUGIN_VERSION}"
-        classpath "androidx.benchmark:benchmark-gradle-plugin:${ANDROID_X_BENCHMARK_VERSION}"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${JETBRAINS_KOTLIN_VERSION}"
-        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:$KSP_GRADLE_PLUGIN_VERSION"
+        classpath libs.proguard.gradle
+        classpath libs.violations
+        classpath libs.androidx.benchmark.gradle
+        classpath libs.kotlin.gradle
+        classpath libs.ksp.gradle.plugin
+        classpath libs.coroutines.binarycompat.gradle
+        classpath libs.dokka.gradle
+        classpath libs.vanniktech
+        classpath 'com.guardsquare:proguard-gradle:' + (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11) ? '7.3.2' : '7.1.0')
     }
+}
+
+apply plugin: 'binary-compatibility-validator'
+apply plugin: 'org.jetbrains.dokka'
+
+apiValidation {
+    ignoredProjects += ["ksp", "test", "gallery", "integrationtest", "sqljournaldiskcache"]
+    nonPublicMarkers += ["com.bumptech.glide.integration.ktx.InternalGlideApi"]
 }
 
 // See http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html.
@@ -33,60 +42,104 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
+dokkaHtmlMultiModule.configure {
+    moduleName.set("Glide")
+}
+afterEvaluate {
+    tasks.named("dokkaHtmlMultiModule") {
+        pluginsMapConfiguration.set(
+                [
+        "org.jetbrains.dokka.base.DokkaBase": """{
+          "customStyleSheets": ["${projectDir.toString()}/static/logo-styles.css"],
+          "customAssets" : ["${projectDir.toString()}/static/logo-icon.svg", "${projectDir.toString()}/static/glide_circle_logo.png"]
+         }"""
+                ]
+        )
+    }
+}
+
 subprojects { project ->
 
-    repositories {
-        google()
-        mavenCentral()
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
+    // Exclude packages not intended for public use.
+    if ([
+          "testutil",
+          "flickr",
+          "giphy",
+          "imgur",
+          "svg",
+          "gallery",
+          "contacturi",
+          "test",
+          "gif_decoder",
+          "gifencoder",
+          "compiler",
+          "benchmark",
+          "integrationtest",
+          "instrumentation",
+          "glide-parent",
+          "integration",
+          "samples",
+          "third_party"
+    ].contains(project.getName())) {
+        afterEvaluate {
+            project.apply plugin: 'org.jetbrains.dokka'
+
+            project.tasks.dokkaHtmlPartial.enabled = false
         }
-        gradlePluginPortal()
+    } else {
+        afterEvaluate {
+            project.apply plugin: 'org.jetbrains.dokka'
 
-    }
+            project.tasks.dokkaHtmlPartial.configure {
+                dokkaSourceSets {
+                    // Kotlin works out of the box
+                     if (!project.plugins.hasPlugin("kotlin-android") && project.plugins.hasPlugin("com.android.library")) {
+                        // Java Android modules
+                        register("main") {
+                            sourceRoots.from(project.android.sourceSets.main.java.srcDirs)
 
-    afterEvaluate {
-        if (!project.plugins.hasPlugin("org.jetbrains.kotlin.jvm")) {
-            tasks.withType(JavaCompile) {
-                sourceCompatibility = 1.7
-                targetCompatibility = 1.7
+                        }
+                    } else if (project.plugins.hasPlugin("java") && "ksp" != project.getName()) {
+                        // Java only modules (ksp is not useful and uses multiple plugins)
+                        register("main") {
+                            sourceRoots.from(sourceSets.main.java.srcDirs)
+                        }
+                    }
+                }
             }
         }
     }
 
+    afterEvaluate {
+        if (project.plugins.hasPlugin("com.android.application")) {
+            project.dependencies {
+                // Hack around some version mismatches: https://stackoverflow.com/questions/75263047/duplicate-class-in-kotlin-android
+                implementation(platform(libs.kotlin.bom))
+            }
+        }
+    }
 
     tasks.withType(JavaCompile) {
-
-
         // gifencoder is a legacy project that has a ton of warnings and is basically never
         // modified, so we're not going to worry about cleaning it up.
         // Imgur uses generated code from dagger that has warnings.
         if ("gifencoder" != project.getName() && "imgur" != project.getName()) {
-          options.compilerArgs \
-                /*
-                 * Treat all warnings as errors.
-                 */ \
-                << "-Werror" \
-                /*
-                 * Enable all warnings.
-                 */ \
-                << "-Xlint:all" \
-                /*
-                 * Java expects every annotation to have a processor, but we use
-                 * javax.annotation.Nullable, which doesn't have one.
-                 */ \
-                << "-Xlint:-processing" \
-                /*
-                 * See https://github.com/google/dagger/issues/945
-                 * and https://bugs.openjdk.java.net/browse/JDK-8190452
-                 */ \
-                << "-Xlint:-classfile" \
-                /*
-                 * Disable deprecation warnings for ViewTarget/BaseTarget for now.
-                 */ \
-                << "-Xlint:-deprecation"
-
-
+          options.compilerArgs.addAll([
+            //Treat all warnings as errors.
+            "-Werror",
+            //Enable all warnings.
+            "-Xlint:all",
+            // Disable warnings about source 7 being obsolete.
+            "-Xlint:-options",
+            // Java expects every annotation to have a processor, but we use
+            // javax.annotation.Nullable, which doesn't have one.
+            "-Xlint:-processing",
+            // See https://github.com/google/dagger/issues/945
+            // and https://bugs.openjdk.java.net/browse/JDK-8190452
+            "-Xlint:-classfile",
+             // Disable deprecation warnings for ViewTarget/BaseTarget for now.
+            "-Xlint:-deprecation",
+          ])
         }
     }
 
@@ -104,7 +157,7 @@ subprojects { project ->
     apply plugin: 'checkstyle'
 
     checkstyle {
-        toolVersion = '8.5'
+        toolVersion = '8.45.1'
     }
 
     checkstyle {
@@ -128,7 +181,7 @@ subprojects { project ->
     task violations(type: ViolationsTask) {
         minSeverity = 'INFO'
         detailLevel = 'VERBOSE'
-        maxViolations = 0
+        maxViolations = 6
         diffMaxViolations = 0
 
         // Formats are listed here: https://github.com/tomasbjerre/violations-lib
@@ -141,7 +194,6 @@ subprojects { project ->
     }
 
     afterEvaluate {
-
         if (project.hasProperty("android")
                 && project.name != 'pmd' ) {
             android {
@@ -151,11 +203,18 @@ subprojects { project ->
                     // Caught by the violations plugin.
                     abortOnError false
                 }
-            }
 
-            android.variantFilter { variant ->
-                if(variant.buildType.name == 'release') {
-                    variant.setIgnore(true)
+                // We don't need a BuildConfig constants class.
+                buildFeatures {
+                    buildConfig = false
+                }
+
+                // Signing isn't relevant to a library. Our signing is done via
+                // a GPG key at upload time, there's no APK to sign.
+                buildTypes {
+                    release {
+                        signingConfig signingConfigs.debug
+                    }
                 }
             }
         }
@@ -163,13 +222,6 @@ subprojects { project ->
         if (project.tasks.findByName('check')) {
             check.dependsOn('checkstyle')
             check.finalizedBy violations
-        }
-
-
-        if (project.plugins.hasPlugin('com.android.library')) {
-            android.libraryVariants.all {
-                it.generateBuildConfigProvider.configure { enabled = false }
-            }
         }
     }
 }

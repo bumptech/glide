@@ -31,10 +31,10 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.test.ResourceIds.raw;
-import com.bumptech.glide.test.WaitModelLoader;
-import com.bumptech.glide.test.WaitModelLoader.WaitModel;
 import com.bumptech.glide.testutil.ConcurrencyHelper;
 import com.bumptech.glide.testutil.TearDownGlide;
+import com.bumptech.glide.testutil.WaitModelLoader;
+import com.bumptech.glide.testutil.WaitModelLoader.WaitModel;
 import com.google.common.truth.Truth;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -308,7 +308,7 @@ public class CachingTest {
   // Tests #2428.
   @Test
   public void onlyRetrieveFromCache_withPreviousRequestLoadingFromSource_doesNotBlock() {
-    final WaitModel<Integer> waitModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
+    final WaitModel<Integer> waitModel = WaitModelLoader.waitOn(ResourceIds.raw.canonical);
 
     FutureTarget<Drawable> loadFromSourceFuture = GlideApp.with(context).load(waitModel).submit();
 

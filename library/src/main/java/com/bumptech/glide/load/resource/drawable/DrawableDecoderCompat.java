@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -25,7 +27,7 @@ public final class DrawableDecoderCompat {
   /** See {@code getDrawable(Context, int, Theme)}. */
   public static Drawable getDrawable(
       Context ourContext, Context targetContext, @DrawableRes int id) {
-    return getDrawable(ourContext, targetContext, id, /*theme=*/ null);
+    return getDrawable(ourContext, targetContext, id, /* theme= */ null);
   }
 
   /**
@@ -65,13 +67,19 @@ public final class DrawableDecoderCompat {
 
   private static Drawable loadDrawableV7(
       Context context, @DrawableRes int id, @Nullable Theme theme) {
-    Context resourceContext = theme != null ? new ContextThemeWrapper(context, theme) : context;
+    Context resourceContext;
+    if (theme != null && VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+      ContextThemeWrapper contextThemeWrapper = new ContextThemeWrapper(context, theme);
+      contextThemeWrapper.applyOverrideConfiguration(theme.getResources().getConfiguration());
+      resourceContext = contextThemeWrapper;
+    } else {
+      resourceContext = context;
+    }
     return AppCompatResources.getDrawable(resourceContext, id);
   }
 
   private static Drawable loadDrawableV4(
       Context context, @DrawableRes int id, @Nullable Theme theme) {
-    Resources resources = context.getResources();
-    return ResourcesCompat.getDrawable(resources, id, theme);
+    return ResourcesCompat.getDrawable(context.getResources(), id, theme);
   }
 }

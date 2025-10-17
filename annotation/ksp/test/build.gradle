@@ -4,21 +4,33 @@ plugins {
 }
 
 android {
-    compileSdkVersion COMPILE_SDK_VERSION as int
+    namespace 'com.bumptech.glide.annotation.ksp.test'
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        minSdkVersion MIN_SDK_VERSION as int
-        targetSdkVersion TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
         versionName VERSION_NAME as String
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
 
 dependencies {
-    implementation "junit:junit:$JUNIT_VERSION"
+    implementation libs.junit
+    implementation project(":annotation:ksp")
+    implementation libs.ksp.compiletesting
+    implementation libs.truth
     testImplementation project(":annotation:ksp")
     testImplementation project(":annotation")
     testImplementation project(":glide")
-    testImplementation "com.github.tschuchortdev:kotlin-compile-testing-ksp:${KOTLIN_COMPILE_TESTING_VERSION}"
-    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
-    testImplementation "org.jetbrains.kotlin:kotlin-test:${JETBRAINS_KOTLIN_TEST_VERSION}"
+    testImplementation libs.kotlin.test
 }

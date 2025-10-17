@@ -559,7 +559,30 @@ public class RequestOptionsTest {
     Drawable second = new GradientDrawable();
     assertThat(first).isNotEqualTo(second);
     assertThat(Util.bothNullOrEqual(first, second)).isFalse();
+    // Make sure we're not equal to any other subclass of RequestOptions.
+    class FakeOptions extends BaseRequestOptions<FakeOptions> {
+      @Override
+      public boolean equals(Object o) {
+        return o instanceof FakeOptions && super.equals(o);
+      }
+
+      // Our class doesn't include any additional properties, so we don't need to modify hashcode,
+      // but
+      // keep it here as a reminder in case we add properties.
+      @SuppressWarnings("PMD.UselessOverridingMethod")
+      @Override
+      public int hashCode() {
+        return super.hashCode();
+      }
+    }
     new EqualsTester()
+        .addEqualityGroup(
+            new RequestOptions(),
+            new RequestOptions(),
+            new RequestOptions().skipMemoryCache(false),
+            new RequestOptions().onlyRetrieveFromCache(false),
+            new RequestOptions().useUnlimitedSourceGeneratorsPool(false))
+        .addEqualityGroup(new FakeOptions(), new FakeOptions())
         .addEqualityGroup(
             new RequestOptions().sizeMultiplier(.7f), new RequestOptions().sizeMultiplier(.7f))
         .addEqualityGroup(new RequestOptions().sizeMultiplier(0.8f))
@@ -579,11 +602,6 @@ public class RequestOptionsTest {
         .addEqualityGroup(new RequestOptions().fallback(second))
         .addEqualityGroup(
             new RequestOptions().skipMemoryCache(true), new RequestOptions().skipMemoryCache(true))
-        .addEqualityGroup(
-            new RequestOptions(),
-            new RequestOptions().skipMemoryCache(false),
-            new RequestOptions().onlyRetrieveFromCache(false),
-            new RequestOptions().useUnlimitedSourceGeneratorsPool(false))
         .addEqualityGroup(
             new RequestOptions().override(100), new RequestOptions().override(100, 100))
         .addEqualityGroup(

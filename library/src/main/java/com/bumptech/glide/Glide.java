@@ -52,6 +52,10 @@ import java.util.Set;
  */
 public class Glide implements ComponentCallbacks2 {
   private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
+  private static final String DESTROYED_ACTIVITY_WARNING =
+      "You cannot start a load on a not yet attached View or a Fragment where getActivity() "
+          + "returns null (which usually occurs when getActivity() is called before the Fragment "
+          + "is attached or after the Fragment is destroyed).";
   private static final String TAG = "Glide";
 
   @GuardedBy("Glide.class")
@@ -137,18 +141,21 @@ public class Glide implements ComponentCallbacks2 {
   }
 
   @GuardedBy("Glide.class")
-  private static void checkAndInitializeGlide(
+  @VisibleForTesting
+  static void checkAndInitializeGlide(
       @NonNull Context context, @Nullable GeneratedAppGlideModule generatedAppGlideModule) {
     // In the thread running initGlide(), one or more classes may call Glide.get(context).
     // Without this check, those calls could trigger infinite recursion.
     if (isInitializing) {
       throw new IllegalStateException(
-          "You cannot call Glide.get() in registerComponents(),"
-              + " use the provided Glide instance instead");
+          "Glide has been called recursively, this is probably an internal library error!");
     }
     isInitializing = true;
-    initializeGlide(context, generatedAppGlideModule);
-    isInitializing = false;
+    try {
+      initializeGlide(context, generatedAppGlideModule);
+    } finally {
+      isInitializing = false;
+    }
   }
 
   /**
@@ -174,6 +181,11 @@ public class Glide implements ComponentCallbacks2 {
       }
       initializeGlide(context, builder, annotationGeneratedModule);
     }
+  }
+
+  @VisibleForTesting
+  public static synchronized boolean isInitialized() {
+    return glide != null;
   }
 
   /**
@@ -502,11 +514,7 @@ public class Glide implements ComponentCallbacks2 {
   private static RequestManagerRetriever getRetriever(@Nullable Context context) {
     // Context could be null for other reasons (ie the user passes in null), but in practice it will
     // only occur due to errors with the Fragment lifecycle.
-    Preconditions.checkNotNull(
-        context,
-        "You cannot start a load on a not yet attached View or a Fragment where getActivity() "
-            + "returns null (which usually occurs when getActivity() is called before the Fragment "
-            + "is attached or after the Fragment is destroyed).");
+    Preconditions.checkNotNull(context, DESTROYED_ACTIVITY_WARNING);
     return Glide.get(context).getRequestManagerRetriever();
   }
 
@@ -543,10 +551,16 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @param activity The activity to use.
    * @return A RequestManager for the given activity that can be used to start a load.
+   * @deprecated This is equivalent to calling {@link #with(Context)} using the application context.
+   *     Use the androidx Activity class instead (ie {@link FragmentActivity}, or {@link
+   *     androidx.appcompat.app.AppCompatActivity}).
+   * @throws IllegalArgumentException if the activity associated with the Glide request is being
+   *     destroyed.
    */
   @NonNull
+  @Deprecated
   public static RequestManager with(@NonNull Activity activity) {
-    return getRetriever(activity).get(activity);
+    return with(activity.getApplicationContext());
   }
 
   /**
@@ -554,8 +568,9 @@ public class Glide implements ComponentCallbacks2 {
    * androidx.fragment.app.FragmentActivity}'s lifecycle and that uses the given {@link
    * androidx.fragment.app.FragmentActivity}'s default options.
    *
-   * @param activity The activity to use.
+   * @param activity The activity to use. The activity must not be destroyed.
    * @return A RequestManager for the given FragmentActivity that can be used to start a load.
+   * @throws IllegalArgumentException if the activity is being destroyed.
    */
   @NonNull
   public static RequestManager with(@NonNull FragmentActivity activity) {
@@ -568,6 +583,7 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @param fragment The fragment to use.
    * @return A RequestManager for the given Fragment that can be used to start a load.
+   * @throws IllegalArgumentException if the activity associated with the fragment is destroyed.
    */
   @NonNull
   public static RequestManager with(@NonNull Fragment fragment) {
@@ -580,15 +596,17 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @param fragment The fragment to use.
    * @return A RequestManager for the given Fragment that can be used to start a load.
-   * @deprecated Prefer support Fragments and {@link #with(Fragment)} instead, {@link
-   *     android.app.Fragment} will be deprecated. See
+   * @deprecated This method is identical to calling {@link Glide#with(Context)} using the
+   *     application context. Prefer support Fragments and {@link #with(Fragment)} instead. See
    *     https://github.com/android/android-ktx/pull/161#issuecomment-363270555.
+   * @throws IllegalArgumentException if the activity associated with the fragment is destroyed.
    */
-  @SuppressWarnings("deprecation")
   @Deprecated
   @NonNull
   public static RequestManager with(@NonNull android.app.Fragment fragment) {
-    return getRetriever(fragment.getActivity()).get(fragment);
+    Activity activity = fragment.getActivity();
+    Preconditions.checkNotNull(activity, DESTROYED_ACTIVITY_WARNING);
+    return with(activity.getApplicationContext());
   }
 
   /**
@@ -615,6 +633,7 @@ public class Glide implements ComponentCallbacks2 {
    *
    * @param view The view to search for a containing Fragment or Activity from.
    * @return A RequestManager that can be used to start a load.
+   * @throws IllegalArgumentException if the activity associated with the view is destroyed.
    */
   @NonNull
   public static RequestManager with(@NonNull View view) {

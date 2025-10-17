@@ -10,8 +10,7 @@ import com.bumptech.glide.util.Util;
  * implementations of non essential methods that allows the caller to specify an exact width/height.
  * Typically use cases look something like this:
  *
- * <pre>
- * <code>
+ * <pre>{@code
  * Target<Bitmap> target =
  *     Glide.with(fragment)
  *       .asBitmap()
@@ -29,8 +28,7 @@ import com.bumptech.glide.util.Util;
  * // At some later point, clear the Target to release the resources, prevent load queues from
  * // blowing out proportion, and to improve load times for future requests:
  * Glide.with(fragment).clear(target);
- * </code>
- * </pre>
+ * }</pre>
  *
  * <p><em>Warning!</em> this class is extremely prone to mis-use. Use SimpleTarget only as a last
  * resort. {@link ViewTarget} or a subclass of {@link ViewTarget} is almost always a better choice.

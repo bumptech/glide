@@ -20,10 +20,11 @@ import com.bumptech.glide.request.transition.Transition;
  *   <li>onLoadFailed
  * </ul>
  *
- * The typical lifecycle is onLoadStarted -> onResourceReady or onLoadFailed -> onLoadCleared.
- * However, there are no guarantees. onLoadStarted may not be called if the resource is in memory or
- * if the load will fail because of a null model object. onLoadCleared similarly may never be called
- * if the target is never cleared. See the docs for the individual methods for details.
+ * <p>The typical lifecycle is onLoadStarted, then onResourceReady or onLoadFailed, then
+ * onLoadCleared. However, there are no guarantees. onLoadStarted may not be called if the resource
+ * is in memory or if the load will fail because of a null model object. onLoadCleared similarly may
+ * never be called if the target is never cleared. See the docs for the individual methods for
+ * details.
  *
  * @param <R> The type of resource the target can display.
  */
@@ -61,6 +62,21 @@ public interface Target<R> extends LifecycleListener {
 
   /**
    * The method that will be called when the resource load has finished.
+   *
+   * <p>This may be called multiple times both within a single load and also across different loads
+   * if the {@code Target} object is re-used.
+   *
+   * <p>Within a single load this may be called multiple times for reasons that include:
+   *
+   * <ul>
+   *   <li>The load uses one or more thumbnails. Each time a thumbnail load completes successfully
+   *       and no higher priority load has finished, this method will be called with the thumbnail
+   *       resource. See {@link
+   *       com.bumptech.glide.RequestBuilder#thumbnail(com.bumptech.glide.RequestBuilder)}.
+   *   <li>The load is paused and restarted. This can happen automatically in response to
+   *       connectivity changes or the Activity / Fragment lifecycle. It can also happen if {@link
+   *       com.bumptech.glide.RequestManager#pauseRequests()} is called manually.
+   * </ul>
    *
    * @param resource the loaded resource.
    */

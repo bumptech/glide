@@ -37,6 +37,6 @@ public final class TestUtil {
   }
 
   public static void assertStreamOf(String expected, InputStream result) throws IOException {
-    assertThat(expected).isEqualTo(isToString(result));
+    assertThat(isToString(result)).isEqualTo(expected);
   }
 }

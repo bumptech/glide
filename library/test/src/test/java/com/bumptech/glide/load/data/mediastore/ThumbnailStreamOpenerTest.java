@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data.mediastore;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -26,7 +27,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.Shadows;
@@ -34,12 +37,14 @@ import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboCursor;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class ThumbnailStreamOpenerTest {
   private Harness harness;
 
+  @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     harness = new Harness();
   }
 
@@ -123,15 +128,15 @@ public class ThumbnailStreamOpenerTest {
     return ApplicationProvider.getApplicationContext().getContentResolver();
   }
 
-  private static class Harness {
+  private class Harness {
     final MatrixCursor cursor = new MatrixCursor(new String[1]);
-    final File file = new File("fake/uri");
+    final File file = temporaryFolder.newFile();
     final Uri uri = Uri.fromFile(file);
     final ThumbnailQuery query = mock(ThumbnailQuery.class);
     final FileService service = mock(FileService.class);
     final ArrayPool byteArrayPool = new LruArrayPool();
 
-    Harness() {
+    Harness() throws Exception {
       cursor.addRow(new String[] {file.getAbsolutePath()});
       when(query.query(eq(uri))).thenReturn(cursor);
       when(service.get(eq(file.getAbsolutePath()))).thenReturn(file);

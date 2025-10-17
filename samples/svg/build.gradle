@@ -3,25 +3,25 @@ apply plugin: 'com.android.application'
 dependencies {
     implementation project(':library')
     annotationProcessor project(':annotation:compiler')
-    implementation 'com.caverock:androidsvg:1.2.1'
-    implementation "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
+    implementation libs.svg
+    implementation libs.androidx.fragment
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    namespace 'com.bumptech.glide.samples.svg'
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        applicationId 'com.bumptech.glide.samples.svg'
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
 
         versionCode 1
         versionName '1.0'
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 

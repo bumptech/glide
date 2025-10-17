@@ -102,6 +102,7 @@ final class RequestBuilderGenerator {
    * RequestBuilder<TranscodeType>
    */
   private static final String TRANSCODE_TYPE_NAME = "TranscodeType";
+
   /** A set of method names to avoid overriding from RequestOptions. */
   private static final ImmutableSet<String> EXCLUDED_METHODS_FROM_BASE_REQUEST_OPTIONS =
       ImmutableSet.of("clone", "apply");
@@ -186,6 +187,7 @@ final class RequestBuilderGenerator {
         .addMethods(requestOptionsExtensionMethods)
         .build();
   }
+
   /**
    * Generates methods with equivalent names and arguments to methods annotated with {@link
    * GlideOption} in {@link com.bumptech.glide.annotation.GlideExtension}s that return our generated

@@ -48,14 +48,14 @@ public final class ExternalPreferredCacheDiskCacheFactory extends DiskLruCacheFa
 
             // Already used internal cache, so keep using that one,
             // thus avoiding using both external and internal with transient errors.
-            if ((null != internalCacheDirectory) && internalCacheDirectory.exists()) {
+            if (internalCacheDirectory != null && internalCacheDirectory.exists()) {
               return internalCacheDirectory;
             }
 
             File cacheDirectory = context.getExternalCacheDir();
 
             // Shared storage is not available.
-            if ((cacheDirectory == null) || (!cacheDirectory.canWrite())) {
+            if (cacheDirectory == null || !cacheDirectory.canWrite()) {
               return internalCacheDirectory;
             }
             if (diskCacheName != null) {

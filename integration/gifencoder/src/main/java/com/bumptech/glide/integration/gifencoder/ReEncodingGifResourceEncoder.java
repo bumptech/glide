@@ -39,6 +39,7 @@ public class ReEncodingGifResourceEncoder implements ResourceEncoder<GifDrawable
 
   private static final String KEY_ENCODE_TRANSFORMATION =
       "com.bumptech.glide.load.resource.gif.GifResourceEncoder.EncodeTransformation";
+
   /**
    * A boolean option that, if set to <code>true</code>, causes the fully transformed GIF to be
    * written to cache.

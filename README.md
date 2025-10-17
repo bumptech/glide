@@ -1,7 +1,7 @@
 Glide
 =====
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.bumptech.glide/glide/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.bumptech.glide/glide) [![Build Status](https://travis-ci.org/bumptech/glide.svg?branch=master)](https://travis-ci.org/bumptech/glide)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.bumptech.glide/glide/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.bumptech.glide/glide)
 | [View Glide's documentation][20] | [简体中文文档][22] | [Report an issue with Glide][5]
 
 Glide is a fast and efficient open source media management and image loading framework for Android that wraps media
@@ -31,8 +31,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.github.bumptech.glide:glide:4.13.2'
-  annotationProcessor 'com.github.bumptech.glide:compiler:4.13.2'
+  implementation 'com.github.bumptech.glide:glide:5.0.5'
 }
 ```
 
@@ -42,38 +41,15 @@ Or Maven:
 <dependency>
   <groupId>com.github.bumptech.glide</groupId>
   <artifactId>glide</artifactId>
-  <version>4.13.2</version>
-</dependency>
-<dependency>
-  <groupId>com.github.bumptech.glide</groupId>
-  <artifactId>compiler</artifactId>
-  <version>4.13.2</version>
-  <optional>true</optional>
+  <version>5.0.5</version>
 </dependency>
 ```
 
 For info on using the bleeding edge, see the [Snapshots][17] docs page.
 
-ProGuard
+R8 / Proguard
 --------
-Depending on your ProGuard (DexGuard) config and usage, you may need to include the following lines in your proguard.cfg (see the [Download and Setup docs page][25] for more details):
-
-```pro
--keep public class * implements com.bumptech.glide.module.GlideModule
--keep class * extends com.bumptech.glide.module.AppGlideModule {
- <init>(...);
-}
--keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
-  **[] $VALUES;
-  public *;
-}
--keep class com.bumptech.glide.load.data.ParcelFileDescriptorRewinder$InternalRewinder {
-  *** rewind();
-}
-
-# for DexGuard only
--keepresourcexmlelements manifest/application/meta-data@value=GlideModule
-```
+The specific rules are [already bundled](library/proguard-rules.txt) into the aar which can be interpreted by R8 automatically
 
 How do I use Glide?
 -------------------
@@ -89,7 +65,7 @@ Simple use cases will look something like this:
   ...
   ImageView imageView = (ImageView) findViewById(R.id.my_image_view);
 
-  Glide.with(this).load("http://goo.gl/gEgYUd").into(imageView);
+  Glide.with(this).load("https://goo.gl/gEgYUd").into(imageView);
 }
 
 // For a simple image list:

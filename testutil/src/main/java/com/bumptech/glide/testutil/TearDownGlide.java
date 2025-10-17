@@ -39,13 +39,6 @@ public final class TearDownGlide implements TestRule {
             requestManager.onDestroy();
           }
         });
-    concurrencyHelper.loadOnOtherThread(
-        new Runnable() {
-          @Override
-          public void run() {
-            Glide.get(ApplicationProvider.getApplicationContext()).clearDiskCache();
-          }
-        });
     Glide.tearDown();
   }
 }

@@ -52,6 +52,10 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
      * Returns a {@link List} of models that need to be loaded for the list to display adapter items
      * in positions between {@code start} and {@code end}.
      *
+     * <p>{@code position} is the position in the view. If the view contains a mix of types (e.g.
+     * headers and images) then not every view position will actually have any model to return here.
+     * If that's the case for the given {@code position}, then return an empty list.
+     *
      * <p>A list of any size can be returned so there can be multiple models per adapter position.
      *
      * <p>Every model returned by this method is expected to produce a valid {@link RequestBuilder}
@@ -141,6 +145,9 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
   @Override
   public void onScroll(
       AbsListView absListView, int firstVisible, int visibleCount, int totalCount) {
+    if (totalItemCount == 0 && totalCount == 0) {
+      return;
+    }
     totalItemCount = totalCount;
     if (firstVisible > lastFirstVisible) {
       preload(firstVisible + visibleCount, true);
@@ -174,12 +181,14 @@ public class ListPreloader<T> implements AbsListView.OnScrollListener {
     if (from < to) {
       // Increasing
       for (int i = start; i < end; i++) {
-        preloadAdapterPosition(preloadModelProvider.getPreloadItems(i), i, true);
+        preloadAdapterPosition(
+            preloadModelProvider.getPreloadItems(i), /* position= */ i, /* isIncreasing= */ true);
       }
     } else {
       // Decreasing
       for (int i = end - 1; i >= start; i--) {
-        preloadAdapterPosition(preloadModelProvider.getPreloadItems(i), i, false);
+        preloadAdapterPosition(
+            preloadModelProvider.getPreloadItems(i), /* position= */ i, /* isIncreasing= */ false);
       }
     }
 

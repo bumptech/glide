@@ -1,0 +1,52 @@
+public abstract interface annotation class com/bumptech/glide/integration/ktx/ExperimentGlideFlows : java/lang/annotation/Annotation {
+}
+
+public final class com/bumptech/glide/integration/ktx/FlowsKt {
+	public static final fun flow (Lcom/bumptech/glide/RequestBuilder;)Lkotlinx/coroutines/flow/Flow;
+	public static final fun flow (Lcom/bumptech/glide/RequestBuilder;I)Lkotlinx/coroutines/flow/Flow;
+	public static final fun flow (Lcom/bumptech/glide/RequestBuilder;II)Lkotlinx/coroutines/flow/Flow;
+}
+
+public abstract class com/bumptech/glide/integration/ktx/GlideFlowInstant {
+	public abstract fun getStatus ()Lcom/bumptech/glide/integration/ktx/Status;
+}
+
+public abstract interface annotation class com/bumptech/glide/integration/ktx/InternalGlideApi : java/lang/annotation/Annotation {
+}
+
+public final class com/bumptech/glide/integration/ktx/Placeholder : com/bumptech/glide/integration/ktx/GlideFlowInstant {
+	public fun <init> (Lcom/bumptech/glide/integration/ktx/Status;Landroid/graphics/drawable/Drawable;)V
+	public final fun component1 ()Lcom/bumptech/glide/integration/ktx/Status;
+	public final fun component2 ()Landroid/graphics/drawable/Drawable;
+	public final fun copy (Lcom/bumptech/glide/integration/ktx/Status;Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/integration/ktx/Placeholder;
+	public static synthetic fun copy$default (Lcom/bumptech/glide/integration/ktx/Placeholder;Lcom/bumptech/glide/integration/ktx/Status;Landroid/graphics/drawable/Drawable;ILjava/lang/Object;)Lcom/bumptech/glide/integration/ktx/Placeholder;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPlaceholder ()Landroid/graphics/drawable/Drawable;
+	public fun getStatus ()Lcom/bumptech/glide/integration/ktx/Status;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/bumptech/glide/integration/ktx/Resource : com/bumptech/glide/integration/ktx/GlideFlowInstant {
+	public fun <init> (Lcom/bumptech/glide/integration/ktx/Status;Ljava/lang/Object;)V
+	public final fun component1 ()Lcom/bumptech/glide/integration/ktx/Status;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Lcom/bumptech/glide/integration/ktx/Status;Ljava/lang/Object;)Lcom/bumptech/glide/integration/ktx/Resource;
+	public static synthetic fun copy$default (Lcom/bumptech/glide/integration/ktx/Resource;Lcom/bumptech/glide/integration/ktx/Status;Ljava/lang/Object;ILjava/lang/Object;)Lcom/bumptech/glide/integration/ktx/Resource;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getResource ()Ljava/lang/Object;
+	public fun getStatus ()Lcom/bumptech/glide/integration/ktx/Status;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/bumptech/glide/integration/ktx/Status : java/lang/Enum {
+	public static final field CLEARED Lcom/bumptech/glide/integration/ktx/Status;
+	public static final field FAILED Lcom/bumptech/glide/integration/ktx/Status;
+	public static final field RUNNING Lcom/bumptech/glide/integration/ktx/Status;
+	public static final field SUCCEEDED Lcom/bumptech/glide/integration/ktx/Status;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/bumptech/glide/integration/ktx/Status;
+	public static fun values ()[Lcom/bumptech/glide/integration/ktx/Status;
+}
+

@@ -13,6 +13,7 @@ import android.os.ParcelFileDescriptor;
 import androidx.annotation.Nullable;
 import androidx.tracing.Trace;
 import com.bumptech.glide.GlideBuilder.EnableImageDecoderForBitmaps;
+import com.bumptech.glide.GlideBuilder.UseMediaStoreOpenFileApisIfPossible;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -25,10 +26,13 @@ import com.bumptech.glide.load.model.ByteArrayLoader;
 import com.bumptech.glide.load.model.ByteBufferEncoder;
 import com.bumptech.glide.load.model.ByteBufferFileLoader;
 import com.bumptech.glide.load.model.DataUrlLoader;
+import com.bumptech.glide.load.model.DirectResourceLoader;
 import com.bumptech.glide.load.model.FileLoader;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.MediaStoreFileLoader;
+import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.ResourceLoader;
+import com.bumptech.glide.load.model.ResourceUriLoader;
 import com.bumptech.glide.load.model.StreamEncoder;
 import com.bumptech.glide.load.model.StringLoader;
 import com.bumptech.glide.load.model.UnitModelLoader;
@@ -54,7 +58,7 @@ import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoDecoder;
 import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
-import com.bumptech.glide.load.resource.drawable.AnimatedWebpDecoder;
+import com.bumptech.glide.load.resource.drawable.AnimatedImageDecoder;
 import com.bumptech.glide.load.resource.drawable.ResourceDrawableDecoder;
 import com.bumptech.glide.load.resource.drawable.UnitDrawableDecoder;
 import com.bumptech.glide.load.resource.file.FileDecoder;
@@ -86,22 +90,24 @@ final class RegistryFactory {
       final List<GlideModule> manifestModules,
       @Nullable final AppGlideModule annotationGeneratedModule) {
     return new GlideSupplier<Registry>() {
-      private boolean isInitializingOrInitialized;
+      // Rely on callers using memoization if they want to avoid duplicate work, but
+      // rely on ourselves to verify that no recursive initialization occurs.
+      private boolean isInitializing;
 
       @Override
       public Registry get() {
-        if (isInitializingOrInitialized) {
+        if (isInitializing) {
           throw new IllegalStateException(
               "Recursive Registry initialization! In your"
                   + " AppGlideModule and LibraryGlideModules, Make sure you're using the provided "
                   + "Registry rather calling glide.getRegistry()!");
         }
-        isInitializingOrInitialized = true;
-
         Trace.beginSection("Glide registry");
+        isInitializing = true;
         try {
           return createAndInitRegistry(glide, manifestModules, annotationGeneratedModule);
         } finally {
+          isInitializing = false;
           Trace.endSection();
         }
       }
@@ -168,22 +174,16 @@ final class RegistryFactory {
           Registry.BUCKET_ANIMATION,
           InputStream.class,
           Drawable.class,
-          AnimatedWebpDecoder.streamDecoder(imageHeaderParsers, arrayPool));
+          AnimatedImageDecoder.streamDecoder(imageHeaderParsers, arrayPool));
       registry.append(
           Registry.BUCKET_ANIMATION,
           ByteBuffer.class,
           Drawable.class,
-          AnimatedWebpDecoder.byteBufferDecoder(imageHeaderParsers, arrayPool));
+          AnimatedImageDecoder.byteBufferDecoder(imageHeaderParsers, arrayPool));
     }
 
     ResourceDrawableDecoder resourceDrawableDecoder = new ResourceDrawableDecoder(context);
-    ResourceLoader.StreamFactory resourceLoaderStreamFactory =
-        new ResourceLoader.StreamFactory(resources);
-    ResourceLoader.UriFactory resourceLoaderUriFactory = new ResourceLoader.UriFactory(resources);
-    ResourceLoader.FileDescriptorFactory resourceLoaderFileDescriptorFactory =
-        new ResourceLoader.FileDescriptorFactory(resources);
-    ResourceLoader.AssetFileDescriptorFactory resourceLoaderAssetFileDescriptorFactory =
-        new ResourceLoader.AssetFileDescriptorFactory(resources);
+
     BitmapEncoder bitmapEncoder = new BitmapEncoder(arrayPool);
 
     BitmapBytesTranscoder bitmapBytesTranscoder = new BitmapBytesTranscoder();
@@ -206,17 +206,20 @@ final class RegistryFactory {
           new ParcelFileDescriptorBitmapDecoder(downsampler));
     }
 
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+      registry.append(
+          Registry.BUCKET_BITMAP,
+          AssetFileDescriptor.class,
+          Bitmap.class,
+          VideoDecoder.asset(bitmapPool));
+    }
+
     registry
         .append(
             Registry.BUCKET_BITMAP,
             ParcelFileDescriptor.class,
             Bitmap.class,
             parcelFileDescriptorVideoDecoder)
-        .append(
-            Registry.BUCKET_BITMAP,
-            AssetFileDescriptor.class,
-            Bitmap.class,
-            VideoDecoder.asset(bitmapPool))
         .append(Bitmap.class, Bitmap.class, UnitModelLoader.Factory.<Bitmap>getInstance())
         .append(Registry.BUCKET_BITMAP, Bitmap.class, Bitmap.class, new UnitBitmapDecoder())
         .append(Bitmap.class, bitmapEncoder)
@@ -274,15 +277,47 @@ final class RegistryFactory {
       registry.register(new ParcelFileDescriptorRewinder.Factory());
     }
 
+    // DirectResourceLoader and ResourceUriLoader handle resource IDs and Uris owned by this
+    // package.
+    ModelLoaderFactory<Integer, InputStream> directResourceLoaderStreamFactory =
+        DirectResourceLoader.inputStreamFactory(context);
+    ModelLoaderFactory<Integer, AssetFileDescriptor>
+        directResourceLoaderAssetFileDescriptorFactory =
+            DirectResourceLoader.assetFileDescriptorFactory(context);
+    ModelLoaderFactory<Integer, Drawable> directResourceLaoderDrawableFactory =
+        DirectResourceLoader.drawableFactory(context);
     registry
-        .append(int.class, InputStream.class, resourceLoaderStreamFactory)
-        .append(int.class, ParcelFileDescriptor.class, resourceLoaderFileDescriptorFactory)
-        .append(Integer.class, InputStream.class, resourceLoaderStreamFactory)
-        .append(Integer.class, ParcelFileDescriptor.class, resourceLoaderFileDescriptorFactory)
+        .append(int.class, InputStream.class, directResourceLoaderStreamFactory)
+        .append(Integer.class, InputStream.class, directResourceLoaderStreamFactory)
+        .append(
+            int.class, AssetFileDescriptor.class, directResourceLoaderAssetFileDescriptorFactory)
+        .append(
+            Integer.class,
+            AssetFileDescriptor.class,
+            directResourceLoaderAssetFileDescriptorFactory)
+        .append(int.class, Drawable.class, directResourceLaoderDrawableFactory)
+        .append(Integer.class, Drawable.class, directResourceLaoderDrawableFactory)
+        .append(Uri.class, InputStream.class, ResourceUriLoader.newStreamFactory(context))
+        .append(
+            Uri.class,
+            AssetFileDescriptor.class,
+            ResourceUriLoader.newAssetFileDescriptorFactory(context));
+
+    // ResourceLoader and UriLoader handle resource IDs and Uris owned by other packages.
+    ResourceLoader.UriFactory resourceLoaderUriFactory = new ResourceLoader.UriFactory(resources);
+    ResourceLoader.AssetFileDescriptorFactory resourceLoaderAssetFileDescriptorFactory =
+        new ResourceLoader.AssetFileDescriptorFactory(resources);
+    ResourceLoader.StreamFactory resourceLoaderStreamFactory =
+        new ResourceLoader.StreamFactory(resources);
+    registry
         .append(Integer.class, Uri.class, resourceLoaderUriFactory)
-        .append(int.class, AssetFileDescriptor.class, resourceLoaderAssetFileDescriptorFactory)
-        .append(Integer.class, AssetFileDescriptor.class, resourceLoaderAssetFileDescriptorFactory)
         .append(int.class, Uri.class, resourceLoaderUriFactory)
+        .append(Integer.class, AssetFileDescriptor.class, resourceLoaderAssetFileDescriptorFactory)
+        .append(int.class, AssetFileDescriptor.class, resourceLoaderAssetFileDescriptorFactory)
+        .append(Integer.class, InputStream.class, resourceLoaderStreamFactory)
+        .append(int.class, InputStream.class, resourceLoaderStreamFactory);
+
+    registry
         .append(String.class, InputStream.class, new DataUrlLoader.StreamFactory<String>())
         .append(Uri.class, InputStream.class, new DataUrlLoader.StreamFactory<Uri>())
         .append(String.class, InputStream.class, new StringLoader.StreamFactory())
@@ -304,16 +339,23 @@ final class RegistryFactory {
           ParcelFileDescriptor.class,
           new QMediaStoreUriLoader.FileDescriptorFactory(context));
     }
+    boolean useMediaStoreOpenFileApisIfPossible =
+        experiments.isEnabled(UseMediaStoreOpenFileApisIfPossible.class);
     registry
-        .append(Uri.class, InputStream.class, new UriLoader.StreamFactory(contentResolver))
+        .append(
+            Uri.class,
+            InputStream.class,
+            new UriLoader.StreamFactory(contentResolver, useMediaStoreOpenFileApisIfPossible))
         .append(
             Uri.class,
             ParcelFileDescriptor.class,
-            new UriLoader.FileDescriptorFactory(contentResolver))
+            new UriLoader.FileDescriptorFactory(
+                contentResolver, useMediaStoreOpenFileApisIfPossible))
         .append(
             Uri.class,
             AssetFileDescriptor.class,
-            new UriLoader.AssetFileDescriptorFactory(contentResolver))
+            new UriLoader.AssetFileDescriptorFactory(
+                contentResolver, useMediaStoreOpenFileApisIfPossible))
         .append(Uri.class, InputStream.class, new UrlUriLoader.StreamFactory())
         .append(URL.class, InputStream.class, new UrlLoader.StreamFactory())
         .append(Uri.class, File.class, new MediaStoreFileLoader.Factory(context))

@@ -15,6 +15,14 @@ import java.io.InputStream;
  * A model loader for handling Android resource files. Model must be an Android resource id in the
  * package of the given context.
  *
+ * <p>This class should always be less preferred than {@link DirectResourceLoader} because {@link
+ * DirectResourceLoader} is more efficient for {@code Drawables} owned by this package. This class
+ * only handles passing through {@link Uri}s to {@link
+ * com.bumptech.glide.load.resource.drawable.ResourceDrawableDecoder} and {@link
+ * com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder}. Those classes can handle assets
+ * from other applications, but are not as efficient as {@link DirectResourceLoader} for assets
+ * owned by this package.
+ *
  * @param <Data> The type of data that will be loaded for the given android resource.
  */
 public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
@@ -44,9 +52,7 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
               + "://"
               + resources.getResourcePackageName(model)
               + '/'
-              + resources.getResourceTypeName(model)
-              + '/'
-              + resources.getResourceEntryName(model));
+              + model);
     } catch (Resources.NotFoundException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
         Log.w(TAG, "Received invalid resource id: " + model, e);
@@ -82,7 +88,14 @@ public class ResourceLoader<Data> implements ModelLoader<Integer, Data> {
     }
   }
 
-  /** Factory for loading {@link ParcelFileDescriptor}s from Android resource ids. */
+  /**
+   * Factory for loading {@link ParcelFileDescriptor}s from Android resource ids.
+   *
+   * @deprecated This class is unused by Glide. {@link AssetFileDescriptorFactory} should be
+   *     preferred because it's not possible to reliably load a simple {@link
+   *     java.io.FileDescriptor} for resources.
+   */
+  @Deprecated
   public static class FileDescriptorFactory
       implements ModelLoaderFactory<Integer, ParcelFileDescriptor> {
 

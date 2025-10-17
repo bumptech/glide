@@ -1,6 +1,6 @@
 package com.bumptech.glide.request.transition;
 
-import static com.bumptech.glide.request.transition.Transition.ViewAdapter;
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import android.view.View;
 import android.widget.ImageView;
 import androidx.test.core.app.ApplicationProvider;
+import com.bumptech.glide.request.transition.Transition.ViewAdapter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +20,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class ViewPropertyAnimationTest {
   private ViewPropertyTransition.Animator animator;
   private ViewPropertyTransition<Object> animation;

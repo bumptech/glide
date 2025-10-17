@@ -1,50 +1,83 @@
 package com.bumptech.glide.samples.gallery
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.GridLayoutManager
-import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
-import kotlinx.coroutines.launch
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.integration.compose.rememberGlidePreloadingData
+import com.bumptech.glide.signature.MediaStoreSignature
 
-/** Displays media store data in a recycler view.  */
+/** Displays media store data in a recycler view. */
+@OptIn(ExperimentalGlideComposeApi::class)
 class HorizontalGalleryFragment : Fragment() {
-  private lateinit var adapter: RecyclerAdapter
-  private lateinit var recyclerView: RecyclerView
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?,
+  ): View {
     val galleryViewModel: GalleryViewModel by viewModels()
-    lifecycleScope.launch {
-      repeatOnLifecycle(Lifecycle.State.STARTED) {
-        galleryViewModel.mediaStoreData.collect { data ->
-          adapter.setData(data)
-        }
+    return ComposeView(requireContext()).apply {
+      setContent { LoadableDeviceMedia(galleryViewModel) }
+    }
+  }
+
+  @Composable
+  fun LoadableDeviceMedia(viewModel: GalleryViewModel) {
+    val mediaStoreData = viewModel.mediaStoreData.collectAsState()
+    DeviceMedia(mediaStoreData.value)
+  }
+
+  @Composable
+  fun DeviceMedia(mediaStoreData: List<MediaStoreData>) {
+    val requestBuilderTransform =
+      { item: MediaStoreData, requestBuilder: RequestBuilder<Drawable> ->
+        requestBuilder.load(item.uri).signature(item.signature())
+      }
+
+    val preloadingData =
+      rememberGlidePreloadingData(
+        mediaStoreData,
+        THUMBNAIL_SIZE,
+        requestBuilderTransform = requestBuilderTransform,
+      )
+
+    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+      items(preloadingData.size) { index ->
+        val (mediaStoreItem, preloadRequestBuilder) = preloadingData[index]
+        MediaStoreView(mediaStoreItem, preloadRequestBuilder, Modifier.fillParentMaxSize())
       }
     }
   }
 
-  override fun onCreateView(
-    inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
-  ): View? {
-    val result = inflater.inflate(R.layout.recycler_view, container, false)
-    recyclerView = result.findViewById<View>(R.id.recycler_view) as RecyclerView
-    val layoutManager = GridLayoutManager(activity, 1)
-    layoutManager.orientation = RecyclerView.HORIZONTAL
-    recyclerView.layoutManager = layoutManager
-    recyclerView.setHasFixedSize(true)
+  private fun MediaStoreData.signature() = MediaStoreSignature(mimeType, dateModified, orientation)
 
-    val glideRequests = GlideApp.with(this)
-    adapter = RecyclerAdapter(requireContext(), glideRequests)
-    val preloader = RecyclerViewPreloader(glideRequests, adapter, adapter, 3)
-    recyclerView.addOnScrollListener(preloader)
-    recyclerView.adapter = adapter
-    return result
+  @Composable
+  fun MediaStoreView(
+    item: MediaStoreData,
+    preloadRequestBuilder: RequestBuilder<Drawable>,
+    modifier: Modifier,
+  ) =
+    GlideImage(model = item.uri, contentDescription = item.displayName, modifier = modifier) {
+      it.thumbnail(preloadRequestBuilder).signature(item.signature())
+    }
+
+  companion object {
+    private const val THUMBNAIL_DIMENSION = 50
+    private val THUMBNAIL_SIZE = Size(THUMBNAIL_DIMENSION.toFloat(), THUMBNAIL_DIMENSION.toFloat())
   }
 }

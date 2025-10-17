@@ -28,6 +28,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
   @VisibleForTesting
   static final HttpUrlConnectionFactory DEFAULT_CONNECTION_FACTORY =
       new DefaultHttpUrlConnectionFactory();
+
   /** Returned when a connection error prevented us from receiving an http error. */
   @VisibleForTesting static final int INVALID_STATUS_CODE = -1;
 
@@ -148,7 +149,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
     try {
       urlConnection = connectionFactory.build(url);
     } catch (IOException e) {
-      throw new HttpException("URL.openConnection threw", /*statusCode=*/ 0, e);
+      throw new HttpException("URL.openConnection threw", /* statusCode= */ 0, e);
     }
     for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
       urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());

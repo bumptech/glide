@@ -235,11 +235,130 @@ public final class ImageHeaderParserUtils {
     return ImageHeaderParser.UNKNOWN_ORIENTATION;
   }
 
+  /**
+   * Returns the result from the first of {@code parsers} that returns true when MPF is detected, if
+   * any..
+   *
+   * <p>If {@code buffer} is null, the parsers list is empty, or none of the parsers returns a valid
+   * value, false is returned.
+   */
+  public static boolean hasJpegMpf(
+      @NonNull List<ImageHeaderParser> parsers,
+      @Nullable final ByteBuffer buffer,
+      @NonNull ArrayPool byteArrayPool)
+      throws IOException {
+    if (buffer == null) {
+      return false;
+    }
+
+    return hasJpegMpfInternal(
+        parsers,
+        new JpegMpfReader() {
+          @Override
+          public boolean getHasJpegMpfAndRewind(ImageHeaderParser parser) throws IOException {
+            try {
+              return parser.hasJpegMpf(buffer, byteArrayPool);
+            } finally {
+              ByteBufferUtil.rewind(buffer);
+            }
+          }
+        });
+  }
+
+  /** Returns whether the given {@link InputStream} references MPF. */
+  public static boolean hasJpegMpf(
+      @NonNull List<ImageHeaderParser> parsers,
+      @Nullable InputStream is,
+      @NonNull final ArrayPool byteArrayPool)
+      throws IOException {
+    if (is == null) {
+      return false;
+    }
+
+    if (!is.markSupported()) {
+      is = new RecyclableBufferedInputStream(is, byteArrayPool);
+    }
+
+    is.mark(MARK_READ_LIMIT);
+    final InputStream finalIs = is;
+    return hasJpegMpfInternal(
+        parsers,
+        new JpegMpfReader() {
+          @Override
+          public boolean getHasJpegMpfAndRewind(ImageHeaderParser parser) throws IOException {
+            try {
+              return parser.hasJpegMpf(finalIs, byteArrayPool);
+            } finally {
+              finalIs.reset();
+            }
+          }
+        });
+  }
+
+  /** Returns whether the given {@link ParcelFileDescriptorRewinder} references MPF. */
+  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+  public static boolean hasJpegMpf(
+      @NonNull List<ImageHeaderParser> parsers,
+      @NonNull final ParcelFileDescriptorRewinder parcelFileDescriptorRewinder,
+      @NonNull final ArrayPool byteArrayPool)
+      throws IOException {
+    return hasJpegMpfInternal(
+        parsers,
+        new JpegMpfReader() {
+          @Override
+          public boolean getHasJpegMpfAndRewind(ImageHeaderParser parser) throws IOException {
+            // Wrap the FileInputStream into a RecyclableBufferedInputStream to optimize I/O
+            // performance
+            RecyclableBufferedInputStream is = null;
+            try {
+              is =
+                  new RecyclableBufferedInputStream(
+                      new FileInputStream(
+                          parcelFileDescriptorRewinder.rewindAndGet().getFileDescriptor()),
+                      byteArrayPool);
+              return parser.hasJpegMpf(is, byteArrayPool);
+            } finally {
+              // If we close the stream, we'll close the file descriptor as well, so we can't do
+              // that. We do however want to make sure we release any buffers we used back to the
+              // pool so we call release instead of close.
+              if (is != null) {
+                is.release();
+              }
+              parcelFileDescriptorRewinder.rewindAndGet();
+            }
+          }
+        });
+  }
+
+  private static boolean hasJpegMpfInternal(
+      @NonNull List<ImageHeaderParser> parsers, JpegMpfReader reader) throws IOException {
+    //noinspection ForLoopReplaceableByForEach to improve perf
+    for (int i = 0, size = parsers.size(); i < size; i++) {
+      ImageHeaderParser parser = parsers.get(i);
+      if (reader.getHasJpegMpfAndRewind(parser)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   private interface TypeReader {
     ImageType getTypeAndRewind(ImageHeaderParser parser) throws IOException;
   }
 
   private interface OrientationReader {
     int getOrientationAndRewind(ImageHeaderParser parser) throws IOException;
+  }
+
+  /** Reads JPEG multi-picture format (MPF) data. */
+  private interface JpegMpfReader {
+
+    /**
+     * Returns whether the image is JPEG and has MPF data.
+     *
+     * <p>The parser is guaranteed to be rewound upon termination of the method.
+     */
+    boolean getHasJpegMpfAndRewind(ImageHeaderParser parser) throws IOException;
   }
 }

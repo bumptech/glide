@@ -12,27 +12,27 @@ dependencies {
     api project(':third_party:gif_decoder')
     api project(':third_party:disklrucache')
     api project(':annotation')
-    api "androidx.fragment:fragment:${ANDROID_X_FRAGMENT_VERSION}"
-    api "androidx.vectordrawable:vectordrawable-animated:${ANDROID_X_VECTOR_DRAWABLE_ANIMATED_VERSION}"
-    api "androidx.exifinterface:exifinterface:${ANDROID_X_EXIF_INTERFACE_VERSION}"
-    api "androidx.tracing:tracing:${ANDROID_X_TRACING_VERSION}"
-    compileOnly "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
+    api libs.androidx.fragment
+    api libs.androidx.vectordrawable
+    api libs.androidx.exifinterface
+    api libs.androidx.tracing
+    compileOnly libs.androidx.appcompat
 
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
-        errorprone "com.google.errorprone:error_prone_core:${ERROR_PRONE_VERSION}"
+        errorprone libs.errorprone.core
     }
 
-    testImplementation "androidx.appcompat:appcompat:${ANDROID_X_APPCOMPAT_VERSION}"
+    testImplementation libs.androidx.appcompat
     testImplementation project(':testutil')
-    testImplementation "com.google.guava:guava-testlib:${GUAVA_TESTLIB_VERSION}"
-    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
-    testImplementation "junit:junit:${JUNIT_VERSION}"
-    testImplementation "org.mockito:mockito-core:${MOCKITO_VERSION}"
-    testImplementation "org.robolectric:robolectric:${ROBOLECTRIC_VERSION}"
-    testImplementation "com.squareup.okhttp3:mockwebserver:${MOCKWEBSERVER_VERSION}"
-    testImplementation "androidx.test:core:${ANDROID_X_TEST_CORE_VERSION}"
-    testImplementation "androidx.test.ext:junit:${ANDROID_X_TEST_JUNIT_VERSION}"
-    testImplementation "androidx.test:runner:${ANDROID_X_TEST_RUNNER_VERSION}"
+    testImplementation libs.guava.testlib
+    testImplementation libs.truth
+    testImplementation libs.junit
+    testImplementation libs.mockito.core
+    testImplementation libs.robolectric
+    testImplementation libs.mockwebserver
+    testImplementation libs.androidx.test.core
+    testImplementation libs.androidx.junit
+    testImplementation libs.androidx.test.runner
 }
 
 if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
@@ -44,6 +44,11 @@ if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
             // Doesn't apply when we can't use lambadas.
             "UnnecessaryAnonymousClass",
             // TODO(judds): Fix these and re-enable this check
+            "BadImport",
+            "UnescapedEntity",
+            "MissingSummary",
+            "InlineMeSuggester",
+            "CanIgnoreReturnValueSuggester",
             "TypeNameShadowing",
             "UndefinedEquals",
             "UnnecessaryParentheses",
@@ -54,18 +59,32 @@ if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    namespace 'com.bumptech.glide'
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
         versionName VERSION_NAME as String
         consumerProguardFiles 'proguard-rules.txt'
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+// Change the name to make it a little more obvious where the main library
+// documentation has gone. Using a capital letter happens to make this first in
+// the list too...
+afterEvaluate {
+    dokkaHtmlPartial.configure {
+        dokkaSourceSets {
+            named("main") {
+                moduleName.set("Glide")
+            }
+        }
     }
 }
 
@@ -81,4 +100,4 @@ def classPathForQuality() {
     )
 }
 
-apply from: "${rootProject.projectDir}/scripts/upload.gradle"
+apply from: "${rootProject.projectDir}/scripts/upload.gradle.kts"

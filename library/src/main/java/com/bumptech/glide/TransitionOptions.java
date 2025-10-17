@@ -7,9 +7,12 @@ import com.bumptech.glide.request.transition.ViewAnimationFactory;
 import com.bumptech.glide.request.transition.ViewPropertyAnimationFactory;
 import com.bumptech.glide.request.transition.ViewPropertyTransition;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Util;
 
 /**
  * A base class for setting a transition to use on a resource when a load completes.
+ *
+ * <p>Note: Implementations must implement equals/hashcode.
  *
  * @param <CHILD> The implementation of this class to return to chain methods.
  * @param <TranscodeType> The type of resource that will be animated.
@@ -35,8 +38,8 @@ public abstract class TransitionOptions<
    * load finishes. Will only be run if the resource was loaded asynchronously (i.e. was not in the
    * memory cache).
    *
-   * @param viewAnimationId The resource id of the {@link android.view.animation} to use as the
-   *     transition.
+   * @param viewAnimationId The resource id of the {@link android.view.animation.Animation} to use
+   *     as the transition.
    * @return This request builder.
    */
   @NonNull
@@ -96,5 +99,19 @@ public abstract class TransitionOptions<
   @SuppressWarnings("unchecked")
   private CHILD self() {
     return (CHILD) this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof TransitionOptions) {
+      TransitionOptions<?, ?> other = (TransitionOptions<?, ?>) o;
+      return Util.bothNullOrEqual(transitionFactory, other.transitionFactory);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return transitionFactory != null ? transitionFactory.hashCode() : 0;
   }
 }

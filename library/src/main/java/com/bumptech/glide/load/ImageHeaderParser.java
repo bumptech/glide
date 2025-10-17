@@ -34,6 +34,8 @@ public interface ImageHeaderParser {
     ANIMATED_WEBP(true),
     /** Avif type (may contain alpha). */
     AVIF(true),
+    /** Animated Avif type (may contain alpha). */
+    ANIMATED_AVIF(true),
     /** Unrecognized type. */
     UNKNOWN(false);
 
@@ -75,5 +77,18 @@ public interface ImageHeaderParser {
   int getOrientation(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool) throws IOException;
 
   int getOrientation(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
+      throws IOException;
+
+  /**
+   * Returns whether the {@link InputStream} has associated multi-picture-format (MPF) data. Only
+   * JPEGs have MPF data.
+   */
+  boolean hasJpegMpf(@NonNull InputStream is, @NonNull ArrayPool byteArrayPool) throws IOException;
+
+  /**
+   * Returns whether the {@link ByteBuffer} has associated multi-picture-format (MPF) data. Only
+   * JPEGs have MPF data.
+   */
+  boolean hasJpegMpf(@NonNull ByteBuffer byteBuffer, @NonNull ArrayPool byteArrayPool)
       throws IOException;
 }

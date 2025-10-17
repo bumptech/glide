@@ -1,11 +1,12 @@
 package com.bumptech.glide;
 
 import static com.bumptech.glide.request.RequestOptions.diskCacheStrategyOf;
-import static com.bumptech.glide.request.RequestOptions.signatureOf;
 import static com.bumptech.glide.request.RequestOptions.skipMemoryCacheOf;
 
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -36,13 +37,13 @@ import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.signature.AndroidResourceSignature;
 import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.Preconditions;
-import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -81,6 +82,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @Nullable private Float thumbSizeMultiplier;
   private boolean isDefaultTransitionOptionsSet = true;
   private boolean isModelSet;
+
   private boolean isThumbnailBuilt;
 
   // We only override the method to change the return type, not the functionality.
@@ -100,6 +102,10 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
 
     initRequestListeners(requestManager.getDefaultRequestListeners());
     apply(requestManager.getDefaultRequestOptions());
+  }
+
+  RequestManager getRequestManager() {
+    return requestManager;
   }
 
   @SuppressLint("CheckResult")
@@ -535,6 +541,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     isModelSet = true;
     return selfOrThrowIfLocked();
   }
+
   /**
    * Returns an object to load the given {@link Bitmap}.
    *
@@ -598,6 +605,11 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or {@link
    * com.bumptech.glide.request.RequestOptions#skipMemoryCache(boolean)} may be appropriate.
    *
+   * <p>If {@code string} is in fact a resource {@link Uri}, you should first parse it to a Uri
+   * using {@link Uri#parse(String)} and then pass the {@code Uri} to {@link #load(Uri)}. Doing so
+   * will ensure that we respect the appropriate theme / dark / light mode. As an alternative, you
+   * can also manually apply the current {@link Theme} using {@link #theme(Theme)}.
+   *
    * @see #load(Object)
    * @param string A file path, or a uri or url handled by {@link
    *     com.bumptech.glide.load.model.UriLoader}.
@@ -619,7 +631,20 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * signature you create based on the data at the given Uri that will invalidate the cache if that
    * data changes. Alternatively, using {@link
    * com.bumptech.glide.load.engine.DiskCacheStrategy#NONE} and/or {@link
-   * com.bumptech.glide.request.RequestOptions#skipMemoryCache(boolean)} may be appropriate.
+   * com.bumptech.glide.request.RequestOptions#skipMemoryCache(boolean)} may be appropriate. The
+   * only exception to this is that if we recognize the given {@code uri} as having {@link
+   * ContentResolver#SCHEME_ANDROID_RESOURCE}, then we'll apply {@link AndroidResourceSignature}
+   * automatically. If we do so, calls to other {@code load()} methods will <em>not</em> override
+   * the automatically applied signature.
+   *
+   * <p>If {@code uri} has a {@link Uri#getScheme()} of {@link
+   * android.content.ContentResolver#SCHEME_ANDROID_RESOURCE}, then this method will add the {@link
+   * android.content.res.Resources.Theme} of the {@link Context} associated with this {@code
+   * requestBuilder} so that we can respect themeable attributes and/or light / dark mode. Any call
+   * to {@link #theme(Theme)} prior to this method call will be overridden. To avoid this, call
+   * {@link #theme(Theme)} after calling this method with either {@code null} or the {@code Theme}
+   * you'd prefer to use instead. Note that even if you change the theme, the {@link
+   * AndroidResourceSignature} will still be based on the {@link Context} theme.
    *
    * @see #load(Object)
    * @param uri The Uri representing the image. Must be of a type handled by {@link
@@ -629,7 +654,22 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable Uri uri) {
-    return loadGeneric(uri);
+    return maybeApplyOptionsResourceUri(uri, loadGeneric(uri));
+  }
+
+  private RequestBuilder<TranscodeType> maybeApplyOptionsResourceUri(
+      @Nullable Uri uri, RequestBuilder<TranscodeType> requestBuilder) {
+    if (uri == null || !ContentResolver.SCHEME_ANDROID_RESOURCE.equals(uri.getScheme())) {
+      return requestBuilder;
+    }
+    return applyResourceThemeAndSignature(requestBuilder);
+  }
+
+  private RequestBuilder<TranscodeType> applyResourceThemeAndSignature(
+      RequestBuilder<TranscodeType> requestBuilder) {
+    return requestBuilder
+        .theme(context.getTheme())
+        .signature(AndroidResourceSignature.obtain(context));
   }
 
   /**
@@ -683,6 +723,13 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * method, especially in conjunction with {@link com.bumptech.glide.load.Transformation}s with
    * caution for non-{@link Bitmap} {@link Drawable}s.
    *
+   * <p>This method will add the {@link android.content.res.Resources.Theme} of the {@link Context}
+   * associated with this {@code requestBuilder} so that we can respect themeable attributes and/or
+   * light / dark mode. Any call to {@link #theme(Theme)} prior to this method call will be
+   * overridden. To avoid this, call {@link #theme(Theme)} after calling this method with either
+   * {@code null} or the {@code Theme} you'd prefer to use instead. Note that even if you change the
+   * theme, the {@link AndroidResourceSignature} will still be based on the {@link Context} theme.
+   *
    * @see #load(Integer)
    * @see com.bumptech.glide.signature.AndroidResourceSignature
    */
@@ -690,7 +737,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@RawRes @DrawableRes @Nullable Integer resourceId) {
-    return loadGeneric(resourceId).apply(signatureOf(AndroidResourceSignature.obtain(context)));
+    return applyResourceThemeAndSignature(loadGeneric(resourceId));
   }
 
   /**
@@ -768,16 +815,28 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    */
   @NonNull
   public <Y extends Target<TranscodeType>> Y into(@NonNull Y target) {
-    return into(target, /*targetListener=*/ null, Executors.mainThreadExecutor());
+    return into(target, /* targetListener= */ null, Executors.mainThreadExecutor());
+  }
+
+  /**
+   * Set the target the resource will be loaded into; the callback will be set at the front of the
+   * queue.
+   *
+   * @param target The target to load the resource into.
+   * @return The given target.
+   * @see RequestManager#clear(Target)
+   */
+  @NonNull
+  public <Y extends Target<TranscodeType>> Y experimentalIntoFront(@NonNull Y target) {
+    return into(target, /* targetListener= */ null, Executors.mainThreadExecutorFront());
   }
 
   @NonNull
-  @Synthetic
-  <Y extends Target<TranscodeType>> Y into(
+  public <Y extends Target<TranscodeType>> Y into(
       @NonNull Y target,
       @Nullable RequestListener<TranscodeType> targetListener,
       Executor callbackExecutor) {
-    return into(target, targetListener, /*options=*/ this, callbackExecutor);
+    return into(target, targetListener, /* options= */ this, callbackExecutor);
   }
 
   private <Y extends Target<TranscodeType>> Y into(
@@ -871,9 +930,60 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
 
     return into(
         glideContext.buildImageViewTarget(view, transcodeClass),
-        /*targetListener=*/ null,
+        /* targetListener= */ null,
         requestOptions,
         Executors.mainThreadExecutor());
+  }
+
+  /**
+   * Sets the {@link ImageView} the resource will be loaded into, cancels any existing loads into
+   * the view, and frees any resources Glide may have previously loaded into the view so they may be
+   * reused; the callback will be set at the front of the queue.
+   *
+   * @see RequestManager#clear(Target)
+   * @param view The view to cancel previous loads for and load the new resource into.
+   * @return The {@link com.bumptech.glide.request.target.Target} used to wrap the given {@link
+   *     ImageView}.
+   */
+  @NonNull
+  public ViewTarget<ImageView, TranscodeType> experimentalIntoFront(@NonNull ImageView view) {
+    Util.assertMainThread();
+    Preconditions.checkNotNull(view);
+
+    BaseRequestOptions<?> requestOptions = this;
+    if (!requestOptions.isTransformationSet()
+        && requestOptions.isTransformationAllowed()
+        && view.getScaleType() != null) {
+      // Clone in this method so that if we use this RequestBuilder to load into a View and then
+      // into a different target, we don't retain the transformation applied based on the previous
+      // View's scale type.
+      switch (view.getScaleType()) {
+        case CENTER_CROP:
+          requestOptions = requestOptions.clone().optionalCenterCrop();
+          break;
+        case CENTER_INSIDE:
+          requestOptions = requestOptions.clone().optionalCenterInside();
+          break;
+        case FIT_CENTER:
+        case FIT_START:
+        case FIT_END:
+          requestOptions = requestOptions.clone().optionalFitCenter();
+          break;
+        case FIT_XY:
+          requestOptions = requestOptions.clone().optionalCenterInside();
+          break;
+        case CENTER:
+        case MATRIX:
+        default:
+          // Do nothing.
+      }
+    }
+
+    return into(
+        glideContext.buildImageViewTarget(view, transcodeClass),
+        /* targetListener= */ null,
+        requestOptions,
+        Executors.mainThreadExecutorFront());
   }
 
   /**
@@ -956,6 +1066,36 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   }
 
   /**
+   * Preloads the resource into the cache using the given width and height; the callback will be set
+   * at the front of the queue.
+   *
+   * <p>Pre-loading is useful for making sure that resources you are going to to want in the near
+   * future are available quickly.
+   *
+   * <p>Note - Any thumbnail request that does not complete before the primary request will be
+   * cancelled and may not be preloaded successfully. Cancellation of outstanding thumbnails after
+   * the primary request succeeds is a common behavior of all Glide requests. We do not try to
+   * prevent that behavior here. If you absolutely need all thumbnails to be preloaded individually,
+   * make separate preload() requests for each thumbnail (you can still combine them into one call
+   * when loading the image(s) into the UI in a subsequent request).
+   *
+   * @param width The desired width in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
+   *     overridden by {@link com.bumptech.glide.request.RequestOptions#override(int, int)} if
+   *     previously called.
+   * @param height The desired height in pixels, or {@link Target#SIZE_ORIGINAL}. This will be
+   *     overridden by {@link com.bumptech.glide.request.RequestOptions#override(int, int)}} if
+   *     previously called).
+   * @return A {@link Target} that can be used to cancel the load via {@link
+   *     RequestManager#clear(Target)}.
+   * @see com.bumptech.glide.ListPreloader
+   */
+  @NonNull
+  public Target<TranscodeType> experimentalPreloadFront(int width, int height) {
+    final PreloadTarget<TranscodeType> target = PreloadTarget.obtain(requestManager, width, height);
+    return experimentalIntoFront(target);
+  }
+
+  /**
    * Preloads the resource into the cache using {@link Target#SIZE_ORIGINAL} as the target width and
    * height. Equivalent to calling {@link #preload(int, int)} with {@link Target#SIZE_ORIGINAL} as
    * the width and height.
@@ -1027,10 +1167,10 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
       BaseRequestOptions<?> requestOptions,
       Executor callbackExecutor) {
     return buildRequestRecursive(
-        /*requestLock=*/ new Object(),
+        /* requestLock= */ new Object(),
         target,
         targetListener,
-        /*parentCoordinator=*/ null,
+        /* parentCoordinator= */ null,
         transitionOptions,
         requestOptions.getPriority(),
         requestOptions.getOverrideWidth(),
@@ -1248,5 +1388,42 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
         glideContext.getEngine(),
         transitionOptions.getTransitionFactory(),
         callbackExecutor);
+  }
+
+  Object getModel() {
+    return model;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof RequestBuilder<?>) {
+      RequestBuilder<?> that = (RequestBuilder<?>) o;
+      return super.equals(that)
+          && Objects.equals(transcodeClass, that.transcodeClass)
+          && transitionOptions.equals(that.transitionOptions)
+          && Objects.equals(model, that.model)
+          && Objects.equals(requestListeners, that.requestListeners)
+          && Objects.equals(thumbnailBuilder, that.thumbnailBuilder)
+          && Objects.equals(errorBuilder, that.errorBuilder)
+          && Objects.equals(thumbSizeMultiplier, that.thumbSizeMultiplier)
+          && isDefaultTransitionOptionsSet == that.isDefaultTransitionOptionsSet
+          && isModelSet == that.isModelSet;
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    int hashCode = super.hashCode();
+    hashCode = Util.hashCode(transcodeClass, hashCode);
+    hashCode = Util.hashCode(transitionOptions, hashCode);
+    hashCode = Util.hashCode(model, hashCode);
+    hashCode = Util.hashCode(requestListeners, hashCode);
+    hashCode = Util.hashCode(thumbnailBuilder, hashCode);
+    hashCode = Util.hashCode(errorBuilder, hashCode);
+    hashCode = Util.hashCode(thumbSizeMultiplier, hashCode);
+    hashCode = Util.hashCode(isDefaultTransitionOptionsSet, hashCode);
+    hashCode = Util.hashCode(isModelSet, hashCode);
+    return hashCode;
   }
 }

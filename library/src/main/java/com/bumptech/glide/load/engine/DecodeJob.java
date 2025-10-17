@@ -1,21 +1,27 @@
 package com.bumptech.glide.load.engine;
 
 import android.os.Build;
+import android.os.Process;
 import android.util.Log;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.util.Pools;
+import com.bumptech.glide.GlideBuilder.OverrideGlideThreadPriority;
 import com.bumptech.glide.GlideContext;
+import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.EncodeStrategy;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceEncoder;
 import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Synthetic;
@@ -25,6 +31,7 @@ import com.bumptech.glide.util.pool.StateVerifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * A class responsible for decoding resources either from cached data or from the original source
@@ -41,6 +48,23 @@ class DecodeJob<R>
         Comparable<DecodeJob<?>>,
         Poolable {
   private static final String TAG = "DecodeJob";
+
+  /**
+   * {@link com.bumptech.glide.load.Option} to override the OS thread priority of the thread
+   * handling the decode job.
+   *
+   * <p>Acceptable values are integer constants defined in {@link android.os.Process}, ranging from
+   * {@link android.os.Process#THREAD_PRIORITY_LOWEST} to (-20). Any exceptions thrown will cause
+   * the override to fail silently and disable overrides on any subsequent jobs.
+   *
+   * <p>Must have {@link GlideBuilder#setOverrideGlideThreadPriority(boolean)} experiment enabled to
+   * be used.
+   *
+   * <p>This is used for a highly experimental API that may be removed in the future. Please use at
+   * your own risk.
+   */
+  public static final Option<Supplier<Integer>> GLIDE_THREAD_PRIORITY_OVERRIDE =
+      Option.memory("glide_thread_priority_override");
 
   private final DecodeHelper<R> decodeHelper = new DecodeHelper<>();
   private final List<Throwable> throwables = new ArrayList<>();
@@ -65,6 +89,8 @@ class DecodeJob<R>
   private long startFetchTime;
   private boolean onlyRetrieveFromCache;
   private Object model;
+  private GlideExperiments experiments;
+  @Nullable private Supplier<Integer> glideThreadPriorityOverride;
 
   private Thread currentThread;
   private Key currentSourceKey;
@@ -129,6 +155,8 @@ class DecodeJob<R>
     this.order = order;
     this.runReason = RunReason.INITIALIZE;
     this.model = model;
+    this.experiments = glideContext.getExperiments();
+    this.glideThreadPriorityOverride = options.get(GLIDE_THREAD_PRIORITY_OVERRIDE);
     return this;
   }
 
@@ -313,7 +341,7 @@ class DecodeJob<R>
       currentGenerator = getNextGenerator();
 
       if (stage == Stage.SOURCE) {
-        reschedule();
+        reschedule(RunReason.SWITCH_TO_SOURCE_SERVICE);
         return;
       }
     }
@@ -326,7 +354,33 @@ class DecodeJob<R>
     // onDataFetcherReady.
   }
 
+  /**
+   * Restores the OS priority of the Glide thread to the default thread priority of {@link
+   * com.bumptech.glide.load.engine.executor.GlideExecutor}.
+   */
+  private void restoreThreadPriority() {
+    if (!experiments.isEnabled(OverrideGlideThreadPriority.class)) {
+      throw new IllegalStateException("OverrideGlideThreadPriority experiment is not enabled.");
+    }
+    if (glideThreadPriorityOverride != null && glideThreadPriorityOverride.get() != null) {
+      try {
+        Process.setThreadPriority(Process.myTid(), GlideExecutor.DEFAULT_PRIORITY);
+      } catch (IllegalArgumentException | SecurityException e) {
+        glideThreadPriorityOverride = null;
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+          Log.v(
+              TAG,
+              "Failed to set thread priority; using default priority for any subsequent jobs.",
+              e);
+        }
+      }
+    }
+  }
+
   private void notifyFailed() {
+    if (experiments.isEnabled(OverrideGlideThreadPriority.class)) {
+      restoreThreadPriority();
+    }
     setNotifiedOrThrow();
     GlideException e = new GlideException("Failed to load resource", new ArrayList<>(throwables));
     callback.onLoadFailed(e);
@@ -335,6 +389,9 @@ class DecodeJob<R>
 
   private void notifyComplete(
       Resource<R> resource, DataSource dataSource, boolean isLoadedFromAlternateCacheKey) {
+    if (experiments.isEnabled(OverrideGlideThreadPriority.class)) {
+      restoreThreadPriority();
+    }
     setNotifiedOrThrow();
     callback.onResourceReady(resource, dataSource, isLoadedFromAlternateCacheKey);
   }
@@ -369,10 +426,16 @@ class DecodeJob<R>
     }
   }
 
+  private void reschedule(RunReason runReason) {
+    this.runReason = runReason;
+    callback.reschedule(this);
+  }
+
+  // This is used by SourceGenerator to ask us to switch back to our thread. Internal methods in
+  // this class should call reschedule with a specific RunReason.
   @Override
   public void reschedule() {
-    runReason = RunReason.SWITCH_TO_SOURCE_SERVICE;
-    callback.reschedule(this);
+    reschedule(RunReason.SWITCH_TO_SOURCE_SERVICE);
   }
 
   @Override
@@ -386,8 +449,7 @@ class DecodeJob<R>
     this.isLoadingFromAlternateCacheKey = sourceKey != decodeHelper.getCacheKeys().get(0);
 
     if (Thread.currentThread() != currentThread) {
-      runReason = RunReason.DECODE_DATA;
-      callback.reschedule(this);
+      reschedule(RunReason.DECODE_DATA);
     } else {
       GlideTrace.beginSection("DecodeJob.decodeFromRetrievedData");
       try {
@@ -406,8 +468,7 @@ class DecodeJob<R>
     exception.setLoggingDetails(attemptedKey, dataSource, fetcher.getDataClass());
     throwables.add(exception);
     if (Thread.currentThread() != currentThread) {
-      runReason = RunReason.SWITCH_TO_SOURCE_SERVICE;
-      callback.reschedule(this);
+      reschedule(RunReason.SWITCH_TO_SOURCE_SERVICE);
     } else {
       runGenerators();
     }
@@ -424,6 +485,21 @@ class DecodeJob<R>
               + currentSourceKey
               + ", fetcher: "
               + currentFetcher);
+    }
+    if (experiments.isEnabled(OverrideGlideThreadPriority.class)
+        && glideThreadPriorityOverride != null
+        && glideThreadPriorityOverride.get() != null) {
+      try {
+        Process.setThreadPriority(Process.myTid(), glideThreadPriorityOverride.get().intValue());
+      } catch (IllegalArgumentException | SecurityException e) {
+        glideThreadPriorityOverride = null;
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+          Log.v(
+              TAG,
+              "Failed to set thread priority; using default priority for any subsequent jobs.",
+              e);
+        }
+      }
     }
     Resource<R> resource = null;
     try {

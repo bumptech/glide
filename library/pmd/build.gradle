@@ -3,11 +3,11 @@ apply plugin: 'pmd'
 def library = project(':library')
 
 pmd {
-    toolVersion PMD_VERSION
+    toolVersion libs.versions.pmd.get()
 }
 
 tasks.create('pmd', Pmd) {
-    dependsOn library.tasks.compileDebugJavaWithJavac
+    dependsOn library.tasks.compileReleaseJavaWithJavac
     targetJdk = TargetJdk.VERSION_1_7
 
     description 'Run pmd'
@@ -19,7 +19,7 @@ tasks.create('pmd', Pmd) {
     ruleSetFiles = files("${library.projectDir}/pmd-ruleset.xml")
     source library.android.sourceSets.main.java.srcDirs
     classpath = files()
-    classpath += files(library.tasks.compileDebugJavaWithJavac.destinationDir)
+    classpath += files(library.tasks.compileReleaseJavaWithJavac.destinationDir)
     doFirst {
         classpath += library.classPathForQuality()
     }

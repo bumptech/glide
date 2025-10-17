@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -46,7 +47,7 @@ import org.robolectric.annotation.LooperMode;
 
 @LooperMode(LEGACY)
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class GifFrameLoaderTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
@@ -195,7 +196,7 @@ public class GifFrameLoaderTest {
     Request previousRequest = mock(Request.class);
     previous.setRequest(previousRequest);
     previous.onResourceReady(
-        Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), /*transition=*/ null);
+        Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888), /* transition= */ null);
 
     DelayTarget current = mock(DelayTarget.class);
     when(current.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565));
@@ -271,7 +272,7 @@ public class GifFrameLoaderTest {
 
   @Test
   public void onFrameReady_whenNotRunning_doesNotClearPreviouslyLoadedImage() {
-    loader = createGifFrameLoader(/*handler=*/ null);
+    loader = createGifFrameLoader(/* handler= */ null);
     DelayTarget loaded = mock(DelayTarget.class);
     when(loaded.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
     loader.onFrameReady(loaded);
@@ -286,7 +287,7 @@ public class GifFrameLoaderTest {
 
   @Test
   public void onFrameReady_whenNotRunning_clearsPendingFrameOnClear() {
-    loader = createGifFrameLoader(/*handler=*/ null);
+    loader = createGifFrameLoader(/* handler= */ null);
     DelayTarget loaded = mock(DelayTarget.class);
     when(loaded.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
     loader.onFrameReady(loaded);
@@ -304,7 +305,7 @@ public class GifFrameLoaderTest {
 
   @Test
   public void onFrameReady_whenNotRunning_clearsOldFrameOnStart() {
-    loader = createGifFrameLoader(/*handler=*/ null);
+    loader = createGifFrameLoader(/* handler= */ null);
     DelayTarget loaded = mock(DelayTarget.class);
     when(loaded.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
     loader.onFrameReady(loaded);
@@ -321,7 +322,7 @@ public class GifFrameLoaderTest {
 
   @Test
   public void onFrameReady_whenNotRunning_callsFrameReadyWithNewFrameOnStart() {
-    loader = createGifFrameLoader(/*handler=*/ null);
+    loader = createGifFrameLoader(/* handler= */ null);
     DelayTarget loaded = mock(DelayTarget.class);
     when(loaded.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
     loader.onFrameReady(loaded);
@@ -340,7 +341,7 @@ public class GifFrameLoaderTest {
 
   @Test
   public void onFrameReady_whenInvisible_setVisibleLater() {
-    loader = createGifFrameLoader(/*handler=*/ null);
+    loader = createGifFrameLoader(/* handler= */ null);
     // The target is invisible at this point.
     loader.unsubscribe(callback);
     loader.setNextStartFromFirstFrame();
@@ -352,7 +353,7 @@ public class GifFrameLoaderTest {
 
   @Test
   public void startFromFirstFrame_withPendingFrame_clearsPendingFrame() {
-    loader = createGifFrameLoader(/*handler=*/ null);
+    loader = createGifFrameLoader(/* handler= */ null);
     DelayTarget loaded = mock(DelayTarget.class);
     when(loaded.getResource()).thenReturn(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888));
     loader.onFrameReady(loaded);
@@ -371,7 +372,7 @@ public class GifFrameLoaderTest {
   }
 
   private DelayTarget newDelayTarget() {
-    return new DelayTarget(handler, /*index=*/ 0, /*targetTime=*/ 0);
+    return new DelayTarget(handler, /* index= */ 0, /* targetTime= */ 0);
   }
 
   @SuppressWarnings("unchecked")

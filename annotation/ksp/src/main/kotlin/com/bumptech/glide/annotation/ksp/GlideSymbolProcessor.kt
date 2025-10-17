@@ -19,13 +19,11 @@ import com.squareup.kotlinpoet.FileSpec
  *
  * `LibraryGlideModule`s are merged into indexes, or classes generated in Glide's package. When a
  * `AppGlideModule` is found, we then generate Glide's configuration so that it calls the
- * `AppGlideModule` and anay included `LibraryGlideModules`. Using indexes allows us to process
+ * `AppGlideModule` and any included `LibraryGlideModules`. Using indexes allows us to process
  * `LibraryGlideModules` in multiple rounds and/or libraries.
- *
- * TODO(b/239086146): Finish implementing the behavior described here.
  */
 class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) : SymbolProcessor {
-  var isAppGlideModuleGenerated = false
+  private var isAppGlideModuleGenerated = false
 
   override fun process(resolver: Resolver): List<KSAnnotated> {
     val symbols = resolver.getSymbolsWithAnnotation("com.bumptech.glide.annotation.GlideModule")
@@ -46,7 +44,7 @@ class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) 
   ): List<KSAnnotated> {
     environment.logger.logging("Found symbols, valid: $validSymbols, invalid: $invalidSymbols")
 
-    val (appGlideModules, libraryGlideModules) = extractGlideModules(validSymbols)
+    val (appGlideModules, libraryGlideModules) = ModuleParser.extractGlideModules(validSymbols)
 
     if (libraryGlideModules.size + appGlideModules.size != validSymbols.count()) {
       val invalidModules =
@@ -136,28 +134,6 @@ class GlideSymbolProcessor(private val environment: SymbolProcessorEnvironment) 
 
     environment.logger.logging("Wrote file: $file")
   }
-
-  internal data class GlideModules(
-    val appModules: List<KSClassDeclaration>,
-    val libraryModules: List<KSClassDeclaration>,
-  )
-
-  private fun extractGlideModules(annotatedModules: List<KSAnnotated>): GlideModules {
-    val appAndLibraryModuleNames = listOf(APP_MODULE_QUALIFIED_NAME, LIBRARY_MODULE_QUALIFIED_NAME)
-    val modulesBySuperType: Map<String?, List<KSClassDeclaration>> =
-      annotatedModules.filterIsInstance<KSClassDeclaration>().groupBy { classDeclaration ->
-        appAndLibraryModuleNames.singleOrNull { classDeclaration.hasSuperType(it) }
-      }
-
-    val (appModules, libraryModules) =
-      appAndLibraryModuleNames.map { modulesBySuperType[it] ?: emptyList() }
-    return GlideModules(appModules, libraryModules)
-  }
-
-  private fun KSClassDeclaration.hasSuperType(superTypeQualifiedName: String) =
-    superTypes
-      .map { superType -> superType.resolve().declaration.qualifiedName!!.asString() }
-      .contains(superTypeQualifiedName)
 }
 
 // This class is visible only for testing
@@ -166,6 +142,7 @@ object GlideSymbolProcessorConstants {
   // This variable is visible only for testing
   // TODO(b/174783094): Add @VisibleForTesting when internal is supported.
   val PACKAGE_NAME: String = GlideSymbolProcessor::class.java.`package`.name
+  val JAVA_ANNOTATION_PACKAGE_NAME: String = "com.bumptech.glide.annotation.compiler"
   const val SINGLE_APP_MODULE_ERROR = "You can have at most one AppGlideModule, but found: %s"
   const val DUPLICATE_LIBRARY_MODULE_ERROR =
     "LibraryGlideModules %s are included more than once, keeping only one!"
@@ -175,5 +152,3 @@ object GlideSymbolProcessorConstants {
 
 internal class InvalidGlideSourceException(val userMessage: String) : Exception(userMessage)
 
-private const val APP_MODULE_QUALIFIED_NAME = "com.bumptech.glide.module.AppGlideModule"
-private const val LIBRARY_MODULE_QUALIFIED_NAME = "com.bumptech.glide.module.LibraryGlideModule"

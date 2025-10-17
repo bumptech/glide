@@ -59,9 +59,10 @@ public abstract class CustomTarget<T> implements Target<T> {
    * as the requested size (unless overridden by {@link
    * com.bumptech.glide.request.RequestOptions#override(int)} in the request).
    *
-   * @param width The requested width (> 0, or == Target.SIZE_ORIGINAL).
-   * @param height The requested height (> 0, or == Target.SIZE_ORIGINAL).
-   * @throws IllegalArgumentException if width/height doesn't meet (> 0, or == Target.SIZE_ORIGINAL)
+   * @param width The requested width in pixels ({@code > 0, or == Target.SIZE_ORIGINAL}).
+   * @param height The requested height in pixels ({@code > 0, or == Target.SIZE_ORIGINAL}).
+   * @throws IllegalArgumentException if width/height doesn't meet the requirement: {@code > 0, or
+   *     == Target.SIZE_ORIGINAL}
    */
   public CustomTarget(int width, int height) {
     if (!Util.isValidDimensions(width, height)) {

@@ -156,6 +156,11 @@ public final class QMediaStoreUriLoader<DataT> implements ModelLoader<Uri, DataT
       if (Environment.isExternalStorageLegacy()) {
         return fileDelegate.buildLoadData(queryForFilePath(uri), width, height, options);
       } else {
+        // Android Picker uris have MediaStore authority and does not accept requireOriginal.
+        if (MediaStoreUtil.isAndroidPickerUri(uri)) {
+          return uriDelegate.buildLoadData(uri, width, height, options);
+        }
+
         Uri toLoad = isAccessMediaLocationGranted() ? MediaStore.setRequireOriginal(uri) : uri;
         return uriDelegate.buildLoadData(toLoad, width, height, options);
       }
@@ -200,9 +205,9 @@ public final class QMediaStoreUriLoader<DataT> implements ModelLoader<Uri, DataT
                 .query(
                     uri,
                     PROJECTION,
-                    /*selection=*/ null,
-                    /*selectionArgs=*/ null,
-                    /*sortOrder=*/ null);
+                    /* selection= */ null,
+                    /* selectionArgs= */ null,
+                    /* sortOrder= */ null);
         if (cursor == null || !cursor.moveToFirst()) {
           throw new FileNotFoundException("Failed to media store entry for: " + uri);
         }

@@ -95,6 +95,8 @@ public class RequestManager
 
   private boolean pauseAllRequestsOnTrimMemoryModerate;
 
+  private boolean clearOnStop;
+
   public RequestManager(
       @NonNull Glide glide,
       @NonNull Lifecycle lifecycle,
@@ -129,6 +131,10 @@ public class RequestManager
             context.getApplicationContext(),
             new RequestManagerConnectivityListener(requestTracker));
 
+    // Order matters, this might be unregistered by teh listeners below, so we need to be sure to
+    // register first to prevent both assertions and memory leaks.
+    glide.registerRequestManager(this);
+
     // If we're the application level request manager, we may be created on a background thread.
     // In that case we cannot risk synchronously pausing or resuming requests, so we hack around the
     // issue by delaying adding ourselves as a lifecycle listener by posting to the main thread.
@@ -143,8 +149,6 @@ public class RequestManager
     defaultRequestListeners =
         new CopyOnWriteArrayList<>(glide.getGlideContext().getDefaultRequestListeners());
     setRequestOptions(glide.getGlideContext().getDefaultRequestOptions());
-
-    glide.registerRequestManager(this);
   }
 
   protected synchronized void setRequestOptions(@NonNull RequestOptions toSet) {
@@ -198,6 +202,17 @@ public class RequestManager
   public synchronized RequestManager setDefaultRequestOptions(
       @NonNull RequestOptions requestOptions) {
     setRequestOptions(requestOptions);
+    return this;
+  }
+
+  /**
+   * Clear all resources when onStop() from {@link LifecycleListener} is called.
+   *
+   * @return This request manager.
+   */
+  @NonNull
+  public synchronized RequestManager clearOnStop() {
+    clearOnStop = true;
     return this;
   }
 
@@ -352,12 +367,17 @@ public class RequestManager
 
   /**
    * Lifecycle callback that unregisters for connectivity events (if the
-   * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads.
+   * android.permission.ACCESS_NETWORK_STATE permission is present) and pauses in progress loads and
+   * clears all resources if {@link #clearOnStop()} is called.
    */
   @Override
   public synchronized void onStop() {
-    pauseRequests();
     targetTracker.onStop();
+    if (clearOnStop) {
+      clearRequests();
+    } else {
+      pauseRequests();
+    }
   }
 
   /**
@@ -367,10 +387,7 @@ public class RequestManager
   @Override
   public synchronized void onDestroy() {
     targetTracker.onDestroy();
-    for (Target<?> target : targetTracker.getAll()) {
-      clear(target);
-    }
-    targetTracker.clear();
+    clearRequests();
     requestTracker.clearRequests();
     lifecycle.removeListener(this);
     lifecycle.removeListener(connectivityMonitor);
@@ -699,6 +716,13 @@ public class RequestManager
   @Override
   public void onLowMemory() {
     // Nothing to add conditionally. See Glide#onTrimMemory for unconditional behavior.
+  }
+
+  private synchronized void clearRequests() {
+    for (Target<?> target : targetTracker.getAll()) {
+      clear(target);
+    }
+    targetTracker.clear();
   }
 
   @Override

@@ -204,7 +204,8 @@ class SourceGenerator implements DataFetcherGenerator, DataFetcherGenerator.Fetc
     if (data != null && diskCacheStrategy.isDataCacheable(loadData.fetcher.getDataSource())) {
       dataToCache = data;
       // We might be being called back on someone else's thread. Before doing anything, we should
-      // reschedule to get back onto Glide's thread.
+      // reschedule to get back onto Glide's thread. Then once we're back on Glide's thread, we'll
+      // get called again and we can write the retrieved data to cache.
       cb.reschedule();
     } else {
       cb.onDataFetcherReady(

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -10,9 +11,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.Application;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
@@ -33,14 +31,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowCanvas;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    sdk = 18,
-    shadows = {CenterInsideTest.DrawNothingCanvas.class})
+@Config(sdk = ROBOLECTRIC_SDK)
 public class CenterInsideTest {
   @Rule public final KeyTester keyTester = new KeyTester();
 
@@ -118,15 +111,5 @@ public class CenterInsideTest {
         .addRegressionTest(
             new CenterInside(), "acf83850a2e8e9e809c8bfb999e2aede9e932cb897a15367fac9856b96f3ba33")
         .test();
-  }
-
-  @Implements(Canvas.class)
-  public static final class DrawNothingCanvas extends ShadowCanvas {
-
-    @Implementation
-    @Override
-    public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
-      // Do nothing.
-    }
   }
 }

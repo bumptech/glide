@@ -36,7 +36,8 @@ public class FitCenterRegressionTest {
   @Before
   public void setUp() {
     context = ApplicationProvider.getApplicationContext();
-    bitmapRegressionTester = new BitmapRegressionTester(getClass(), testName);
+    bitmapRegressionTester =
+        BitmapRegressionTester.newInstance(getClass(), testName).assumeShouldRun();
     canonical = new CanonicalBitmap();
   }
 

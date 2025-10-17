@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  package="com.bumptech.glide.samples.imgur">
+  xmlns:tools="http://schemas.android.com/tools">
   <uses-permission android:name="android.permission.INTERNET" />
   <!--
   Allows Glide to monitor connectivity status and restart failed requests if users go from a
@@ -18,7 +17,9 @@
     android:networkSecurityConfig="@xml/network_security_config"
     android:name="com.bumptech.glide.samples.imgur.ImgurApplication"
     tools:targetApi="n">
-    <activity android:name="com.bumptech.glide.samples.imgur.MainActivity">
+    <activity
+        android:exported="true"
+        android:name="com.bumptech.glide.samples.imgur.MainActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,14 +22,15 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy;
+import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.test.ResourceIds;
-import com.bumptech.glide.test.WaitModelLoader;
-import com.bumptech.glide.test.WaitModelLoader.WaitModel;
 import com.bumptech.glide.testutil.ConcurrencyHelper;
 import com.bumptech.glide.testutil.TearDownGlide;
+import com.bumptech.glide.testutil.WaitModelLoader;
+import com.bumptech.glide.testutil.WaitModelLoader.WaitModel;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import org.junit.Before;
@@ -54,18 +56,30 @@ public class ErrorHandlingTest {
     context = ApplicationProvider.getApplicationContext();
   }
 
-  // ResourceEncoders are expected not to throw and to return true or false. If they do throw, it's
-  // a developer error, so we expect UncaughtThrowableStrategy to be called.
-  @Test
-  public void load_whenEncoderFails_callsUncaughtThrowableStrategy() {
+  private WaitForErrorStrategy initializeGlideWithWaitForErrorStrategy() {
     WaitForErrorStrategy strategy = new WaitForErrorStrategy();
     Glide.init(
         context,
         new GlideBuilder()
-            .setAnimationExecutor(GlideExecutor.newAnimationExecutor(/*threadCount=*/ 1, strategy))
+            .setAnimationExecutor(
+                GlideExecutor.newAnimationExecutor(/* threadCount= */ 1, strategy))
             .setSourceExecutor(GlideExecutor.newSourceExecutor(strategy))
             .setDiskCacheExecutor(GlideExecutor.newDiskCacheExecutor(strategy)));
-    Glide.get(context).getRegistry().prepend(Bitmap.class, new FailEncoder());
+    Glide.get(context)
+        .getRegistry()
+        .prepend(Bitmap.class, new FailEncoder())
+        .prepend(
+            BitmapDrawable.class,
+            new BitmapDrawableEncoder(Glide.get(context).getBitmapPool(), new FailEncoder()));
+
+    return strategy;
+  }
+
+  // ResourceEncoders are expected not to throw and to return true or false. If they do throw, it's
+  // a developer error, so we expect UncaughtThrowableStrategy to be called.
+  @Test
+  public void load_whenEncoderFails_callsUncaughtThrowableStrategy() {
+    WaitForErrorStrategy strategy = initializeGlideWithWaitForErrorStrategy();
 
     concurrency.get(
         Glide.with(context).load(ResourceIds.raw.canonical).listener(requestListener).submit());
@@ -85,14 +99,7 @@ public class ErrorHandlingTest {
 
   @Test
   public void load_whenLoadSucceeds_butEncoderFails_doesNotCallOnLoadFailed() {
-    WaitForErrorStrategy strategy = new WaitForErrorStrategy();
-    Glide.init(
-        context,
-        new GlideBuilder()
-            .setAnimationExecutor(GlideExecutor.newAnimationExecutor(/*threadCount=*/ 1, strategy))
-            .setSourceExecutor(GlideExecutor.newSourceExecutor(strategy))
-            .setDiskCacheExecutor(GlideExecutor.newDiskCacheExecutor(strategy)));
-    Glide.get(context).getRegistry().prepend(Bitmap.class, new FailEncoder());
+    WaitForErrorStrategy strategy = initializeGlideWithWaitForErrorStrategy();
 
     concurrency.get(
         Glide.with(context).load(ResourceIds.raw.canonical).listener(requestListener).submit());
@@ -114,7 +121,7 @@ public class ErrorHandlingTest {
 
   @Test
   public void clearRequest_withError_afterPrimaryFails_clearsErrorRequest() {
-    WaitModel<Integer> errorModel = WaitModelLoader.Factory.waitOn(ResourceIds.raw.canonical);
+    WaitModel<Integer> errorModel = WaitModelLoader.waitOn(ResourceIds.raw.canonical);
 
     FutureTarget<Drawable> target =
         Glide.with(context)

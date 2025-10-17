@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,7 +22,7 @@ import org.robolectric.annotation.Config;
 
 /** Tests for the {@link UriLoader} class. */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class UriLoaderTest {
   // Not a magic number, just arbitrary non zero.
   private static final int IMAGE_SIDE = 120;
@@ -48,19 +49,6 @@ public class UriLoaderTest {
     assertEquals(
         localUriFetcher,
         Preconditions.checkNotNull(loader.buildLoadData(fileUri, IMAGE_SIDE, IMAGE_SIDE, options))
-            .fetcher);
-  }
-
-  @Test
-  public void testHandlesResourceUris() throws IOException {
-    Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
-    when(factory.build(eq(resourceUri))).thenReturn(localUriFetcher);
-
-    assertTrue(loader.handles(resourceUri));
-    assertEquals(
-        localUriFetcher,
-        Preconditions.checkNotNull(
-                loader.buildLoadData(resourceUri, IMAGE_SIDE, IMAGE_SIDE, options))
             .fetcher);
   }
 

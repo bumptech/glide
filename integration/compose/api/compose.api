@@ -1,0 +1,24 @@
+public abstract interface annotation class com/bumptech/glide/integration/compose/ExperimentalGlideComposeApi : java/lang/annotation/Annotation {
+}
+
+public final class com/bumptech/glide/integration/compose/GlideImageKt {
+	public static final fun GlideImage (Ljava/lang/Object;Ljava/lang/String;Landroidx/compose/ui/Modifier;Landroidx/compose/ui/Alignment;Landroidx/compose/ui/layout/ContentScale;FLandroidx/compose/ui/graphics/ColorFilter;Lcom/bumptech/glide/integration/compose/Placeholder;Lcom/bumptech/glide/integration/compose/Placeholder;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+	public static final fun placeholder (I)Lcom/bumptech/glide/integration/compose/Placeholder;
+	public static final fun placeholder (Landroid/graphics/drawable/Drawable;)Lcom/bumptech/glide/integration/compose/Placeholder;
+	public static final fun placeholder (Lkotlin/jvm/functions/Function2;)Lcom/bumptech/glide/integration/compose/Placeholder;
+}
+
+public abstract interface class com/bumptech/glide/integration/compose/GlidePreloadingData {
+	public abstract fun get (ILandroidx/compose/runtime/Composer;I)Lkotlin/Pair;
+	public abstract fun getSize ()I
+}
+
+public abstract class com/bumptech/glide/integration/compose/Placeholder {
+	public static final field $stable I
+}
+
+public final class com/bumptech/glide/integration/compose/PreloadKt {
+	public static final fun rememberGlidePreloadingData-Z8o_i8w (Ljava/util/List;JILjava/lang/Integer;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)Lcom/bumptech/glide/integration/compose/GlidePreloadingData;
+	public static final fun rememberGlidePreloadingData-u6VnWhU (ILkotlin/jvm/functions/Function1;JILjava/lang/Integer;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)Lcom/bumptech/glide/integration/compose/GlidePreloadingData;
+}
+

@@ -126,7 +126,7 @@ public final class GlideException extends Exception {
       for (Throwable t : glideException.getCauses()) {
         addRootCauses(t, rootCauses);
       }
-    } else {
+    } else if (throwable != null) {
       rootCauses.add(throwable);
     }
   }

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.mockResource;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -21,7 +22,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class EngineResourceTest {
   private EngineResource<Object> engineResource;
   @Mock private EngineResource.ResourceListener listener;
@@ -33,7 +34,7 @@ public class EngineResourceTest {
     MockitoAnnotations.initMocks(this);
     engineResource =
         new EngineResource<>(
-            resource, /*isMemoryCacheable=*/ true, /*isRecyclable=*/ true, cacheKey, listener);
+            resource, /* isMemoryCacheable= */ true, /* isRecyclable= */ true, cacheKey, listener);
   }
 
   @Test
@@ -148,7 +149,11 @@ public class EngineResourceTest {
   @Test(expected = NullPointerException.class)
   public void testThrowsIfWrappedResourceIsNull() {
     new EngineResource<>(
-        /*toWrap=*/ null, /*isMemoryCacheable=*/ false, /*isRecyclable=*/ true, cacheKey, listener);
+        /* toWrap= */ null,
+        /* isMemoryCacheable= */ false,
+        /* isRecyclable= */ true,
+        cacheKey,
+        listener);
   }
 
   @Test
@@ -156,16 +161,16 @@ public class EngineResourceTest {
     engineResource =
         new EngineResource<>(
             mockResource(),
-            /*isMemoryCacheable=*/ true,
-            /*isRecyclable=*/ true,
+            /* isMemoryCacheable= */ true,
+            /* isRecyclable= */ true,
             cacheKey,
             listener);
     assertTrue(engineResource.isMemoryCacheable());
     engineResource =
         new EngineResource<>(
             mockResource(),
-            /*isMemoryCacheable=*/ false,
-            /*isRecyclable=*/ true,
+            /* isMemoryCacheable= */ false,
+            /* isRecyclable= */ true,
             cacheKey,
             listener);
     assertFalse(engineResource.isMemoryCacheable());
@@ -176,7 +181,7 @@ public class EngineResourceTest {
     resource = mockResource();
     engineResource =
         new EngineResource<>(
-            resource, /*isMemoryCacheable=*/ true, /*isRecyclable=*/ false, cacheKey, listener);
+            resource, /* isMemoryCacheable= */ true, /* isRecyclable= */ false, cacheKey, listener);
     engineResource.recycle();
 
     verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));

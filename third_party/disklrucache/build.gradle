@@ -1,35 +1,33 @@
 apply plugin: 'com.android.library'
 
 checkstyle {
-    toolVersion = "6.6"
-}
-
-checkstyle {
+    toolVersion = "6.19"
     configFile = new File(projectDir, 'checkstyle.xml')
 }
 
 dependencies {
-    testImplementation "junit:junit:${JUNIT_VERSION}"
-    testImplementation "com.google.truth:truth:${TRUTH_VERSION}"
+    testImplementation libs.junit
+    testImplementation libs.truth
 }
 
 android {
-    compileSdk COMPILE_SDK_VERSION as int
+    namespace 'com.bumptech.glide.disklrucache'
+    compileSdkVersion libs.versions.compile.sdk.version.get()
 
     defaultConfig {
-        minSdk MIN_SDK_VERSION as int
-        targetSdk TARGET_SDK_VERSION as int
+        minSdk libs.versions.min.sdk.version.get() as int
+        targetSdk libs.versions.target.sdk.version.get() as int
         versionName VERSION_NAME as String
         consumerProguardFiles 'proguard-rules.txt'
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
-def uploaderScript = "${rootProject.projectDir}/scripts/upload.gradle"
+def uploaderScript = "${rootProject.projectDir}/scripts/upload.gradle.kts"
 if (file(uploaderScript).exists()) {
 	apply from: uploaderScript
 }

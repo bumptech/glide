@@ -20,11 +20,11 @@ import com.bumptech.glide.request.target.Target;
  * <p>The framework will decode some resources as {@link Drawable}s that do not wrap {@link
  * Bitmap}s. This decoder will attempt to return a {@link Bitmap} for those {@link Drawable}s anyway
  * by drawing the {@link Drawable} to a {@link Canvas}s using the {@link Drawable}'s intrinsic
- * bounds or the dimensions provided to {@link #decode(Object, int, int, Options)}.
+ * bounds or the dimensions provided to {@link #decode(Uri, int, int, Options)}.
  *
- * <p>For non-{@link Bitmap} {@link Drawable}s that return <= 0 for {@link
+ * <p>For non-{@link Bitmap} {@link Drawable}s that return {@code <= 0} for {@link
  * Drawable#getIntrinsicWidth()} and/or {@link Drawable#getIntrinsicHeight()}, this decoder will
- * fail if the width and height provided to {@link #decode(Object, int, int, Options)} are {@link
+ * fail if the width and height provided to {@link #decode(Uri, int, int, Options)} are {@link
  * Target#SIZE_ORIGINAL}.
  */
 public class ResourceBitmapDecoder implements ResourceDecoder<Uri, Bitmap> {

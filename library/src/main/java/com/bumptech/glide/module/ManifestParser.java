@@ -3,7 +3,9 @@ package com.bumptech.glide.module;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
+import androidx.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,15 @@ public final class ManifestParser {
     this.context = context;
   }
 
+  // getApplicationInfo returns null in Compose previews, see #4977 and b/263613353.
+  @SuppressWarnings("ConstantConditions")
+  @Nullable
+  private ApplicationInfo getOurApplicationInfo() throws NameNotFoundException {
+    return context
+        .getPackageManager()
+        .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+  }
+
   @SuppressWarnings("deprecation")
   public List<GlideModule> parse() {
     if (Log.isLoggable(TAG, Log.DEBUG)) {
@@ -31,11 +42,8 @@ public final class ManifestParser {
     }
     List<GlideModule> modules = new ArrayList<>();
     try {
-      ApplicationInfo appInfo =
-          context
-              .getPackageManager()
-              .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-      if (appInfo.metaData == null) {
+      ApplicationInfo appInfo = getOurApplicationInfo();
+      if (appInfo == null || appInfo.metaData == null) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
           Log.d(TAG, "Got null app info metadata");
         }
@@ -52,11 +60,13 @@ public final class ManifestParser {
           }
         }
       }
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Finished loading Glide modules");
+      }
     } catch (PackageManager.NameNotFoundException e) {
-      throw new RuntimeException("Unable to find metadata to parse GlideModules", e);
-    }
-    if (Log.isLoggable(TAG, Log.DEBUG)) {
-      Log.d(TAG, "Finished loading Glide modules");
+      if (Log.isLoggable(TAG, Log.ERROR)) {
+        Log.e(TAG, "Failed to parse glide modules", e);
+      }
     }
 
     return modules;

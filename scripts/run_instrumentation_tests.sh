@@ -16,5 +16,6 @@ gcloud firebase test android run \
   --device model=Nexus6P,version=23,locale=en,orientation=portrait \
   --device model=Nexus6,version=22,locale=en,orientation=portrait \
   --device model=Nexus5,version=19,locale=en,orientation=portrait \
+  --device model=MediumPhone.arm,version=34,locale=en,orientation=portrait \
   --project android-glide \
   --no-auto-google-login \

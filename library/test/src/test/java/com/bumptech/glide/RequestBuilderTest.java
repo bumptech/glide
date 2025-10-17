@@ -11,9 +11,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Application;
+import android.net.Uri;
 import android.widget.ImageView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.SimpleResource;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
@@ -23,6 +27,8 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.bumptech.glide.tests.BackgroundUtil.BackgroundTester;
 import com.bumptech.glide.tests.TearDownGlide;
+import com.google.common.testing.EqualsTester;
+import java.util.concurrent.Executors;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,7 +42,7 @@ import org.robolectric.annotation.Config;
 
 @SuppressWarnings("unchecked")
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK)
 public class RequestBuilderTest {
   @Rule public TearDownGlide tearDownGlide = new TearDownGlide();
 
@@ -73,8 +79,28 @@ public class RequestBuilderTest {
   }
 
   @Test
+  public void testDoesNotThrowWithNullModelWhenRequestIsBuiltFront() {
+    getNullModelRequest().experimentalIntoFront(target);
+  }
+
+  @Test
   public void testAddsNewRequestToRequestTracker() {
     getNullModelRequest().into(target);
+
+    verify(requestManager).track(eq(target), isA(Request.class));
+  }
+
+  @Test
+  public void testAddsNewRequestToRequestTrackerWithCustomExecutor() {
+    getNullModelRequest()
+        .into(target, /* targetListener= */ null, Executors.newSingleThreadExecutor());
+
+    verify(requestManager).track(eq(target), isA(Request.class));
+  }
+
+  @Test
+  public void testAddsNewRequestToRequestTrackerFront() {
+    getNullModelRequest().experimentalIntoFront(target);
 
     verify(requestManager).track(eq(target), isA(Request.class));
   }
@@ -89,6 +115,16 @@ public class RequestBuilderTest {
     verify(requestManager).clear(eq(target));
   }
 
+  @Test
+  public void testRemovesPreviousRequestFromRequestTrackerFront() {
+    Request previous = mock(Request.class);
+    when(target.getRequest()).thenReturn(previous);
+
+    getNullModelRequest().experimentalIntoFront(target);
+
+    verify(requestManager).clear(eq(target));
+  }
+
   @Test(expected = NullPointerException.class)
   public void testThrowsIfGivenNullTarget() {
     //noinspection ConstantConditions testing if @NonNull is enforced
@@ -96,8 +132,19 @@ public class RequestBuilderTest {
   }
 
   @Test(expected = NullPointerException.class)
+  public void testThrowsIfGivenNullTargetFront() {
+    //noinspection ConstantConditions testing if @NonNull is enforced
+    getNullModelRequest().experimentalIntoFront((Target<Object>) null);
+  }
+
+  @Test(expected = NullPointerException.class)
   public void testThrowsIfGivenNullView() {
     getNullModelRequest().into((ImageView) null);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testThrowsIfGivenNullViewFront() {
+    getNullModelRequest().experimentalIntoFront((ImageView) null);
   }
 
   @Test(expected = RuntimeException.class)
@@ -108,6 +155,18 @@ public class RequestBuilderTest {
           @Override
           public void runTest() {
             getNullModelRequest().into(imageView);
+          }
+        });
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testThrowsIfIntoViewCalledOnBackgroundThreadFront() throws InterruptedException {
+    final ImageView imageView = new ImageView(ApplicationProvider.getApplicationContext());
+    testInBackground(
+        new BackgroundTester() {
+          @Override
+          public void runTest() {
+            getNullModelRequest().experimentalIntoFront(imageView);
           }
         });
   }
@@ -125,6 +184,32 @@ public class RequestBuilderTest {
   }
 
   @Test
+  public void doesNotThrowIfIntoTargetCalledOnBackgroundThreadFront() throws InterruptedException {
+    final Target<Object> target = mock(Target.class);
+    testInBackground(
+        new BackgroundTester() {
+          @Override
+          public void runTest() {
+            getNullModelRequest().experimentalIntoFront(target);
+          }
+        });
+  }
+
+  @Test
+  public void doesNotThrowIfIntoTargetWithCustomExecutorCalledOnBackgroundThread()
+      throws InterruptedException {
+    final Target<Object> target = mock(Target.class);
+    testInBackground(
+        new BackgroundTester() {
+          @Override
+          public void runTest() {
+            getNullModelRequest()
+                .into(target, /* targetListener= */ null, Executors.newSingleThreadExecutor());
+          }
+        });
+  }
+
+  @Test
   public void testMultipleRequestListeners() {
     getNullModelRequest().addListener(listener1).addListener(listener2).into(target);
     verify(requestManager).track(any(Target.class), requestCaptor.capture());
@@ -133,7 +218,27 @@ public class RequestBuilderTest {
         .onResourceReady(
             new SimpleResource<>(new Object()),
             DataSource.LOCAL,
-            /*isLoadedFromAlternateCacheKey=*/ false);
+            /* isLoadedFromAlternateCacheKey= */ false);
+
+    verify(listener1)
+        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+    verify(listener2)
+        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+  }
+
+  @Test
+  public void testMultipleRequestListenersFront() {
+    getNullModelRequest()
+        .addListener(listener1)
+        .addListener(listener2)
+        .experimentalIntoFront(target);
+    verify(requestManager).track(any(Target.class), requestCaptor.capture());
+    requestCaptor
+        .getValue()
+        .onResourceReady(
+            new SimpleResource<>(new Object()),
+            DataSource.LOCAL,
+            /* isLoadedFromAlternateCacheKey= */ false);
 
     verify(listener1)
         .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
@@ -150,7 +255,7 @@ public class RequestBuilderTest {
         .onResourceReady(
             new SimpleResource<>(new Object()),
             DataSource.LOCAL,
-            /*isLoadedFromAlternateCacheKey=*/ false);
+            /* isLoadedFromAlternateCacheKey= */ false);
 
     // The #listener API removes any previous listeners, so the first listener should not be called.
     verify(listener1, never())
@@ -159,13 +264,146 @@ public class RequestBuilderTest {
         .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
   }
 
+  @Test
+  public void testListenerApiOverridesListenersFront() {
+    getNullModelRequest().addListener(listener1).listener(listener2).experimentalIntoFront(target);
+    verify(requestManager).track(any(Target.class), requestCaptor.capture());
+    requestCaptor
+        .getValue()
+        .onResourceReady(
+            new SimpleResource<>(new Object()),
+            DataSource.LOCAL,
+            /* isLoadedFromAlternateCacheKey= */ false);
+
+    // The #listener API removes any previous listeners, so the first listener should not be called.
+    verify(listener1, never())
+        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+    verify(listener2)
+        .onResourceReady(any(), any(), isA(Target.class), isA(DataSource.class), anyBoolean());
+  }
+
+  @Test
+  public void testEquals() {
+    Object firstModel = new Object();
+    Object secondModel = new Object();
+
+    RequestListener<Object> firstListener =
+        new RequestListener<>() {
+          @Override
+          public boolean onLoadFailed(
+              @Nullable GlideException e,
+              Object model,
+              @NonNull Target<Object> target,
+              boolean isFirstResource) {
+            return false;
+          }
+
+          @Override
+          public boolean onResourceReady(
+              @NonNull Object resource,
+              @NonNull Object model,
+              Target<Object> target,
+              @NonNull DataSource dataSource,
+              boolean isFirstResource) {
+            return false;
+          }
+        };
+    RequestListener<Object> secondListener =
+        new RequestListener<>() {
+          @Override
+          public boolean onLoadFailed(
+              @Nullable GlideException e,
+              Object model,
+              @NonNull Target<Object> target,
+              boolean isFirstResource) {
+            return false;
+          }
+
+          @Override
+          public boolean onResourceReady(
+              @NonNull Object resource,
+              @NonNull Object model,
+              Target<Object> target,
+              @NonNull DataSource dataSource,
+              boolean isFirstResource) {
+            return false;
+          }
+        };
+
+    new EqualsTester()
+        .addEqualityGroup(new Object())
+        .addEqualityGroup(newRequestBuilder(Object.class), newRequestBuilder(Object.class))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class).load((Object) null),
+            newRequestBuilder(Object.class).load((Object) null),
+            newRequestBuilder(Object.class).load((Uri) null))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class).load(firstModel),
+            newRequestBuilder(Object.class).load(firstModel))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class).load(secondModel),
+            newRequestBuilder(Object.class).load(secondModel))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class).load(Uri.EMPTY),
+            newRequestBuilder(Object.class).load(Uri.EMPTY))
+        .addEqualityGroup(
+            newRequestBuilder(Uri.class).load(Uri.EMPTY),
+            newRequestBuilder(Uri.class).load(Uri.EMPTY))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class).centerCrop(),
+            newRequestBuilder(Object.class).centerCrop())
+        .addEqualityGroup(
+            newRequestBuilder(Object.class).addListener(firstListener),
+            newRequestBuilder(Object.class).addListener(firstListener))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class).addListener(secondListener),
+            newRequestBuilder(Object.class).addListener(secondListener))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class).error(newRequestBuilder(Object.class)),
+            newRequestBuilder(Object.class).error(newRequestBuilder(Object.class)))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class).error(firstModel),
+            newRequestBuilder(Object.class).error(firstModel),
+            newRequestBuilder(Object.class).error(newRequestBuilder(Object.class).load(firstModel)))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class).error(secondModel),
+            newRequestBuilder(Object.class).error(secondModel),
+            newRequestBuilder(Object.class)
+                .error(newRequestBuilder(Object.class).load(secondModel)))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class)
+                .error(newRequestBuilder(Object.class).load(firstModel).centerCrop()),
+            newRequestBuilder(Object.class)
+                .error(newRequestBuilder(Object.class).load(firstModel).centerCrop()))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class)
+                .thumbnail(newRequestBuilder(Object.class).load(firstModel)),
+            newRequestBuilder(Object.class)
+                .thumbnail(newRequestBuilder(Object.class).load(firstModel)))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class)
+                .thumbnail(newRequestBuilder(Object.class).load(secondModel)),
+            newRequestBuilder(Object.class)
+                .thumbnail(newRequestBuilder(Object.class).load(secondModel)))
+        .addEqualityGroup(
+            newRequestBuilder(Object.class)
+                .transition(new GenericTransitionOptions<>().dontTransition()),
+            newRequestBuilder(Object.class)
+                .transition(new GenericTransitionOptions<>().dontTransition()))
+        .testEquals();
+  }
+
   private RequestBuilder<Object> getNullModelRequest() {
+    return newRequestBuilder(Object.class).load((Object) null);
+  }
+
+  private <ModelT> RequestBuilder<ModelT> newRequestBuilder(Class<ModelT> modelClass) {
     when(glideContext.buildImageViewTarget(isA(ImageView.class), isA(Class.class)))
         .thenReturn(mock(ViewTarget.class));
     when(glideContext.getDefaultRequestOptions()).thenReturn(new RequestOptions());
     when(requestManager.getDefaultRequestOptions()).thenReturn(new RequestOptions());
     when(requestManager.getDefaultTransitionOptions(any(Class.class)))
         .thenReturn(new GenericTransitionOptions<>());
-    return new RequestBuilder<>(glide, requestManager, Object.class, context).load((Object) null);
+    return new RequestBuilder<>(glide, requestManager, modelClass, context);
   }
 }

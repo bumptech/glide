@@ -46,7 +46,7 @@ public final class CanonicalBitmap {
               result,
               (int) (result.getWidth() * scaleFactor),
               (int) (result.getHeight() * scaleFactor),
-              /*filter=*/ false);
+              /* filter= */ false);
     }
     // Make sure the Bitmap is immutable.
     return result;

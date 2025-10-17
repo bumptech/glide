@@ -1,5 +1,6 @@
 package com.bumptech.glide.request;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -27,7 +28,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class RequestFutureTargetTest {
   private int width;
   private int height;
@@ -60,9 +61,9 @@ public class RequestFutureTargetTest {
   @Test
   public void testReturnsTrueFromIsDoneIfDone() {
     future.onResourceReady(
-        /*resource=*/ new Object(),
-        /*model=*/ null,
-        /*target=*/ future,
+        /* resource= */ new Object(),
+        /* model= */ null,
+        /* target= */ future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     assertTrue(future.isDone());
@@ -103,9 +104,9 @@ public class RequestFutureTargetTest {
   @Test
   public void testDoesNotClearRequestIfCancelledAfterDone() {
     future.onResourceReady(
-        /*resource=*/ new Object(),
-        /*model=*/ null,
-        /*target=*/ future,
+        /* resource= */ new Object(),
+        /* model= */ null,
+        /* target= */ future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     future.cancel(true);
@@ -122,9 +123,9 @@ public class RequestFutureTargetTest {
   @Test
   public void testReturnsFalseFromIsCancelledIfCancelledAfterDone() {
     future.onResourceReady(
-        /*resource=*/ new Object(),
-        /*model=*/ null,
-        /*target=*/ future,
+        /* resource= */ new Object(),
+        /* model= */ null,
+        /* target= */ future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     future.cancel(true);
@@ -141,9 +142,9 @@ public class RequestFutureTargetTest {
   @Test
   public void testReturnsFalseFromCancelIfDone() {
     future.onResourceReady(
-        /*resource=*/ new Object(),
-        /*model=*/ null,
-        /*target=*/ future,
+        /* resource= */ new Object(),
+        /* model= */ null,
+        /* target= */ future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     assertFalse(future.cancel(true));
@@ -154,9 +155,9 @@ public class RequestFutureTargetTest {
       throws ExecutionException, InterruptedException {
     Object expected = new Object();
     future.onResourceReady(
-        /*resource=*/ expected,
-        /*model=*/ null,
-        /*target=*/ future,
+        /* resource= */ expected,
+        /* model= */ null,
+        /* target= */ future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
 
@@ -168,9 +169,9 @@ public class RequestFutureTargetTest {
       throws InterruptedException, ExecutionException, TimeoutException {
     Object expected = new Object();
     future.onResourceReady(
-        /*resource=*/ expected,
-        /*model=*/ null,
-        /*target=*/ future,
+        /* resource= */ expected,
+        /* model= */ null,
+        /* target= */ future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
 
@@ -194,21 +195,21 @@ public class RequestFutureTargetTest {
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGet()
       throws ExecutionException, InterruptedException {
-    future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
+    future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
     future.get();
   }
 
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionOnGetIfExceptionWithNullValueBeforeGet()
       throws ExecutionException, InterruptedException, TimeoutException {
-    future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
+    future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
     future.get(100, TimeUnit.MILLISECONDS);
   }
 
   @Test(expected = ExecutionException.class)
   public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout()
       throws ExecutionException, InterruptedException, TimeoutException {
-    future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
+    future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
     future.get(100, TimeUnit.MILLISECONDS);
   }
 
@@ -229,9 +230,9 @@ public class RequestFutureTargetTest {
   public void testGetSucceedsOnMainThreadIfDone() throws ExecutionException, InterruptedException {
     future = new RequestFutureTarget<>(width, height, true, waiter);
     future.onResourceReady(
-        /*resource=*/ new Object(),
-        /*model=*/ null,
-        /*target=*/ future,
+        /* resource= */ new Object(),
+        /* model= */ null,
+        /* target= */ future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     future.get();
@@ -262,7 +263,7 @@ public class RequestFutureTargetTest {
               @Override
               public Void answer(InvocationOnMock invocationOnMock) {
                 future.onLoadFailed(
-                    /*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
+                    /* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
                 return null;
               }
             })
@@ -301,16 +302,16 @@ public class RequestFutureTargetTest {
 
   @Test
   public void testNotifiesAllWhenLoadFails() {
-    future.onLoadFailed(/*e=*/ null, /*model=*/ null, future, /*isFirstResource=*/ true);
+    future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
     verify(waiter).notifyAll(eq(future));
   }
 
   @Test
   public void testNotifiesAllWhenResourceReady() {
     future.onResourceReady(
-        /*resource=*/ new Object(),
-        /*model=*/ null,
-        /*target=*/ future,
+        /* resource= */ new Object(),
+        /* model= */ null,
+        /* target= */ future,
         DataSource.DATA_DISK_CACHE,
         true /*isFirstResource*/);
     verify(waiter).notifyAll(eq(future));
@@ -339,9 +340,9 @@ public class RequestFutureTargetTest {
               @Override
               public Void answer(InvocationOnMock invocationOnMock) {
                 future.onResourceReady(
-                    /*resource=*/ expected,
-                    /*model=*/ null,
-                    /*target=*/ future,
+                    /* resource= */ expected,
+                    /* model= */ null,
+                    /* target= */ future,
                     DataSource.DATA_DISK_CACHE,
                     true /*isFirstResource*/);
                 return null;

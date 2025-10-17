@@ -804,7 +804,7 @@ public class BufferedOutputStreamTest {
         new ThrowingRunnable() {
           @Override
           public void run() throws Throwable {
-            os.write(new byte[0], /*initialOffset=*/ -1, /*length=*/ 0);
+            os.write(new byte[0], /* initialOffset= */ -1, /* length= */ 0);
           }
         });
   }
@@ -816,7 +816,7 @@ public class BufferedOutputStreamTest {
         new ThrowingRunnable() {
           @Override
           public void run() throws Throwable {
-            os.write(new byte[0], /*initialOffset=*/ 0, /*length=*/ -1);
+            os.write(new byte[0], /* initialOffset= */ 0, /* length= */ -1);
           }
         });
   }
@@ -828,7 +828,7 @@ public class BufferedOutputStreamTest {
         new ThrowingRunnable() {
           @Override
           public void run() throws Throwable {
-            os.write(new byte[0], /*initialOffset=*/ 1, /*length=*/ 0);
+            os.write(new byte[0], /* initialOffset= */ 1, /* length= */ 0);
           }
         });
   }
@@ -840,7 +840,7 @@ public class BufferedOutputStreamTest {
         new ThrowingRunnable() {
           @Override
           public void run() throws Throwable {
-            os.write(new byte[0], /*initialOffset=*/ 0, /*length=*/ 1);
+            os.write(new byte[0], /* initialOffset= */ 0, /* length= */ 1);
           }
         });
   }
@@ -852,7 +852,7 @@ public class BufferedOutputStreamTest {
         new ThrowingRunnable() {
           @Override
           public void run() throws Throwable {
-            os.write(new byte[1], /*initialOffset=*/ 1, /*length=*/ 1);
+            os.write(new byte[1], /* initialOffset= */ 1, /* length= */ 1);
           }
         });
   }

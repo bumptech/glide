@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
@@ -36,7 +37,7 @@ import org.robolectric.annotation.Config;
  * com.bumptech.glide.load.data.HttpUrlFetcherTest}, response handling should go here.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 18)
+@Config(manifest = Config.NONE, sdk = ROBOLECTRIC_SDK)
 public class HttpUrlFetcherServerTest {
   private static final String DEFAULT_PATH = "/fakepath";
   private static final int TIMEOUT_TIME_MS = 300;

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data.resource;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
@@ -15,12 +16,15 @@ import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.FileDescriptorLocalUriFetcher;
+import com.bumptech.glide.load.data.mediastore.MediaStoreUtil;
 import com.bumptech.glide.tests.ContentResolverShadow;
 import java.io.FileNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -28,7 +32,7 @@ import org.robolectric.shadow.api.Shadow;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(
-    sdk = 18,
+    sdk = ROBOLECTRIC_SDK,
     shadows = {ContentResolverShadow.class})
 public class FileDescriptorLocalUriFetcherTest {
 
@@ -53,9 +57,35 @@ public class FileDescriptorLocalUriFetcherTest {
     shadow.registerFileDescriptor(uri, assetFileDescriptor);
 
     FileDescriptorLocalUriFetcher fetcher =
-        new FileDescriptorLocalUriFetcher(context.getContentResolver(), uri);
+        new FileDescriptorLocalUriFetcher(context.getContentResolver(), uri, false);
     fetcher.loadData(Priority.NORMAL, callback);
     verify(callback).onDataReady(eq(parcelFileDescriptor));
+  }
+
+  @Test
+  public void testLoadResource_mediaUri_returnsFileDescriptor() throws Exception {
+    Context context = ApplicationProvider.getApplicationContext();
+    Uri uri = Uri.parse("content://media");
+
+    ContentResolver contentResolver = context.getContentResolver();
+
+    AssetFileDescriptor assetFileDescriptor = mock(AssetFileDescriptor.class);
+    ParcelFileDescriptor parcelFileDescriptor = mock(ParcelFileDescriptor.class);
+    when(assetFileDescriptor.getParcelFileDescriptor()).thenReturn(parcelFileDescriptor);
+
+    FileDescriptorLocalUriFetcher fetcher =
+        new FileDescriptorLocalUriFetcher(
+            context.getContentResolver(), uri, /* useMediaStoreApisIfAvailable */ true);
+
+    try (MockedStatic<MediaStoreUtil> utils = Mockito.mockStatic(MediaStoreUtil.class)) {
+      utils.when(MediaStoreUtil::isMediaStoreOpenFileApisAvailable).thenReturn(true);
+      utils.when(() -> MediaStoreUtil.isMediaStoreUri(uri)).thenReturn(true);
+      utils
+          .when(() -> MediaStoreUtil.openAssetFileDescriptor(uri, contentResolver))
+          .thenReturn(assetFileDescriptor);
+      fetcher.loadData(Priority.NORMAL, callback);
+      verify(callback).onDataReady(eq(parcelFileDescriptor));
+    }
   }
 
   @Test
@@ -68,7 +98,8 @@ public class FileDescriptorLocalUriFetcherTest {
     shadow.registerFileDescriptor(uri, null /*fileDescriptor*/);
 
     FileDescriptorLocalUriFetcher fetcher =
-        new FileDescriptorLocalUriFetcher(context.getContentResolver(), uri);
+        new FileDescriptorLocalUriFetcher(
+            context.getContentResolver(), uri, /* useMediaStoreApisIfAvailable */ false);
     fetcher.loadData(Priority.NORMAL, callback);
     verify(callback).onLoadFailed(isA(FileNotFoundException.class));
   }

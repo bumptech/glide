@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.mockResource;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -16,7 +17,7 @@ import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class ResourceRecyclerTest {
 
   private ResourceRecycler recycler;
@@ -30,7 +31,7 @@ public class ResourceRecyclerTest {
   public void recycle_withoutForceNextFrame_recyclesResourceSynchronously() {
     Resource<?> resource = mockResource();
     Shadows.shadowOf(Looper.getMainLooper()).pause();
-    recycler.recycle(resource, /*forceNextFrame=*/ false);
+    recycler.recycle(resource, /* forceNextFrame= */ false);
     verify(resource).recycle();
   }
 
@@ -38,7 +39,7 @@ public class ResourceRecyclerTest {
   public void recycle_withForceNextFrame_postsRecycle() {
     Resource<?> resource = mockResource();
     Shadows.shadowOf(Looper.getMainLooper()).pause();
-    recycler.recycle(resource, /*forceNextFrame=*/ true);
+    recycler.recycle(resource, /* forceNextFrame= */ true);
     verify(resource, never()).recycle();
     Shadows.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
     verify(resource).recycle();
@@ -52,7 +53,7 @@ public class ResourceRecyclerTest {
             new Answer<Void>() {
               @Override
               public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-                recycler.recycle(child, /*forceNextFrame=*/ false);
+                recycler.recycle(child, /* forceNextFrame= */ false);
                 return null;
               }
             })
@@ -61,7 +62,7 @@ public class ResourceRecyclerTest {
 
     Shadows.shadowOf(Looper.getMainLooper()).pause();
 
-    recycler.recycle(parent, /*forceNextFrame=*/ false);
+    recycler.recycle(parent, /* forceNextFrame= */ false);
 
     verify(parent).recycle();
     verify(child, never()).recycle();

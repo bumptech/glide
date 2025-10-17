@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.data;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
@@ -15,7 +16,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class ExifOrientationStreamTest {
   private ArrayPool byteArrayPool;
 

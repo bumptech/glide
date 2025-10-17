@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -26,7 +27,7 @@ import org.robolectric.annotation.Config;
 
 /** Tests for the {@link com.bumptech.glide.load.model.ResourceLoader} class. */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class ResourceLoaderTest {
 
   @Mock private ModelLoader<Uri, Object> uriLoader;
@@ -48,7 +49,7 @@ public class ResourceLoaderTest {
   @Test
   public void testCanHandleId() {
     int id = android.R.drawable.star_off;
-    Uri contentUri = Uri.parse("android.resource://android/drawable/star_off");
+    Uri contentUri = Uri.parse("android.resource://android/" + String.valueOf(id));
     when(uriLoader.buildLoadData(eq(contentUri), anyInt(), anyInt(), any(Options.class)))
         .thenReturn(new ModelLoader.LoadData<>(key, fetcher));
 

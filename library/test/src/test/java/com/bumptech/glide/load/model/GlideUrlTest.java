@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.model;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -13,7 +14,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class GlideUrlTest {
 
   @Test(expected = NullPointerException.class)
@@ -116,5 +117,13 @@ public class GlideUrlTest {
         .addEqualityGroup(new GlideUrl(url, headers), new GlideUrl(new URL(url), headers))
         .addEqualityGroup(new GlideUrl(url, otherHeaders), new GlideUrl(new URL(url), otherHeaders))
         .testEquals();
+  }
+
+  @Test
+  public void issue_5444() throws MalformedURLException {
+    String original = "http://[2600:1f13:37c:1400:ba21:7165:5fc7:736e]/";
+    GlideUrl glideUrl = new GlideUrl(original);
+    assertThat(glideUrl.toURL().toString()).isEqualTo(original);
+    assertThat(glideUrl.toStringUrl()).isEqualTo(original);
   }
 }

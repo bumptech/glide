@@ -55,4 +55,18 @@ public final class GenericTransitionOptions<TranscodeType>
       @NonNull TransitionFactory<? super TranscodeType> transitionFactory) {
     return new GenericTransitionOptions<TranscodeType>().transition(transitionFactory);
   }
+
+  // Make sure that we're not equal to any other concrete implementation of TransitionOptions.
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof GenericTransitionOptions && super.equals(o);
+  }
+
+  // Our class doesn't include any additional properties, so we don't need to modify hashcode, but
+  // keep it here as a reminder in case we add properties.
+  @SuppressWarnings("PMD.UselessOverridingMethod")
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
 }

@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.prefill;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -30,7 +31,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class BitmapPreFillerTest {
   private static final int DEFAULT_BITMAP_WIDTH = 100;
   private static final int DEFAULT_BITMAP_HEIGHT = 50;
@@ -184,7 +185,8 @@ public class BitmapPreFillerTest {
             .build();
     PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(smallWidth, smallHeight);
 
-    int numSmallWidth = 0, numSmallHeight = 0;
+    int numSmallWidth = 0;
+    int numSmallHeight = 0;
     while (!allocationOrder.isEmpty()) {
       PreFillType current = allocationOrder.remove();
       if (smallWidth.equals(current)) {
@@ -211,7 +213,8 @@ public class BitmapPreFillerTest {
             .build();
     PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(smallWidth, normal);
 
-    int numSmallWidth = 0, numNormal = 0;
+    int numSmallWidth = 0;
+    int numNormal = 0;
     while (!allocationOrder.isEmpty()) {
       PreFillType current = allocationOrder.remove();
       if (smallWidth.equals(current)) {
@@ -239,7 +242,8 @@ public class BitmapPreFillerTest {
             .build();
     PreFillQueue allocationOrder = bitmapPreFiller.generateAllocationOrder(doubleWeight, normal);
 
-    int numDoubleWeight = 0, numNormal = 0;
+    int numDoubleWeight = 0;
+    int numNormal = 0;
     while (!allocationOrder.isEmpty()) {
       PreFillType current = allocationOrder.remove();
       if (doubleWeight.equals(current)) {

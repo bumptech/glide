@@ -306,7 +306,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     isCancelled = false;
     hasResource = false;
     isLoadedFromAlternateCacheKey = false;
-    decodeJob.release(/*isRemovedFromQueue=*/ false);
+    decodeJob.release(/* isRemovedFromQueue= */ false);
     decodeJob = null;
     exception = null;
     dataSource = null;
@@ -370,7 +370,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
       incrementPendingCallbacks(copy.size() + 1);
     }
 
-    engineJobListener.onEngineJobComplete(this, localKey, /*resource=*/ null);
+    engineJobListener.onEngineJobComplete(this, localKey, /* resource= */ null);
 
     for (ResourceCallbackAndExecutor entry : copy) {
       entry.executor.execute(new CallLoadFailed(entry.cb));
@@ -514,7 +514,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
     public <R> EngineResource<R> build(
         Resource<R> resource, boolean isMemoryCacheable, Key key, ResourceListener listener) {
       return new EngineResource<>(
-          resource, isMemoryCacheable, /*isRecyclable=*/ true, key, listener);
+          resource, isMemoryCacheable, /* isRecyclable= */ true, key, listener);
     }
   }
 }

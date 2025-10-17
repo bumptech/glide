@@ -483,7 +483,59 @@ public final class GlideBuilder {
   public GlideBuilder setImageDecoderEnabledForBitmaps(boolean isEnabled) {
     glideExperimentsBuilder.update(
         new EnableImageDecoderForBitmaps(),
-        /*isEnabled=*/ isEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
+        /* isEnabled= */ isEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
+    return this;
+  }
+
+  /**
+   * Override the OS thread priority of threads created in {@link
+   * com.bumptech.glide.load.engine.executor.GlideExecutor#DefaultThreadFactory} with {@link
+   * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder setOverrideGlideThreadPriority(boolean isEnabled) {
+    glideExperimentsBuilder.update(new OverrideGlideThreadPriority(), isEnabled);
+    return this;
+  }
+
+  /**
+   * Set to {@code true} to make Glide use {@link
+   * android.provider.MediaStore#openAssetFileDescriptor(ContentResolver, Uri, String,
+   * CancellationSignal)} when opening {@link android.provider.MediaStore#AUTHORITY} content URIs
+   * when it is available.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder setUseMediaStoreOpenFileApisIfPossible(boolean isEnabled) {
+    glideExperimentsBuilder.update(new UseMediaStoreOpenFileApisIfPossible(), isEnabled);
+    return this;
+  }
+
+  /**
+   * @deprecated This method does nothing. It will be hard coded and removed in a future release
+   *     without further warning.
+   */
+  @Deprecated
+  public GlideBuilder setPreserveGainmapAndColorSpaceForTransformations(boolean isEnabled) {
+    return this;
+  }
+
+  /**
+   * @deprecated This method does nothing. It will be hard coded and removed in a future release
+   *     without further warning.
+   */
+  @Deprecated
+  public GlideBuilder setEnableHardwareGainmapFixOnU(boolean isEnabled) {
+    return this;
+  }
+
+  /**
+   * @deprecated This method does nothing. It will be hard coded and removed in a future release
+   *     without further warning.
+   */
+  @Deprecated
+  public GlideBuilder setDisableHardwareBitmapsOnO(boolean disableHardwareBitmapsOnO) {
     return this;
   }
 
@@ -563,7 +615,7 @@ public final class GlideBuilder {
 
     GlideExperiments experiments = glideExperimentsBuilder.build();
     RequestManagerRetriever requestManagerRetriever =
-        new RequestManagerRetriever(requestManagerFactory, experiments);
+        new RequestManagerRetriever(requestManagerFactory);
 
     return new Glide(
         context,
@@ -591,15 +643,14 @@ public final class GlideBuilder {
     }
   }
 
-  /** See {@link #setWaitForFramesAfterTrimMemory(boolean)}. */
-  public static final class WaitForFramesAfterTrimMemory implements Experiment {
-    private WaitForFramesAfterTrimMemory() {}
-  }
-
   static final class EnableImageDecoderForBitmaps implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
 
-  static final class EnableLazyGlideRegistry implements Experiment {}
+  /** See {@link #setOverrideGlideThreadPriority(boolean)}. */
+  public static final class OverrideGlideThreadPriority implements Experiment {}
+
+  /** See {@link #setUseMediaStoreOpenFileApisIfPossible(boolean)}. */
+  public static final class UseMediaStoreOpenFileApisIfPossible implements Experiment {}
 }

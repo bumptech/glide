@@ -318,22 +318,16 @@ public final class TransformationUtils {
     final Matrix matrix = new Matrix();
     initializeMatrixForRotation(exifOrientation, matrix);
 
-    // From Bitmap.createBitmap.
-    final RectF newRect = new RectF(0, 0, inBitmap.getWidth(), inBitmap.getHeight());
-    matrix.mapRect(newRect);
-
-    final int newWidth = Math.round(newRect.width());
-    final int newHeight = Math.round(newRect.height());
-
-    Bitmap.Config config = getNonNullConfig(inBitmap);
-    Bitmap result = pool.get(newWidth, newHeight, config);
-
-    matrix.postTranslate(-newRect.left, -newRect.top);
-
-    result.setHasAlpha(inBitmap.hasAlpha());
-
-    applyMatrix(inBitmap, result, matrix);
-    return result;
+    // BitmapPool doesn't preserve gainmaps and color space, so use Bitmap.create to apply the
+    // matrix.
+    return Bitmap.createBitmap(
+        inBitmap,
+        /* x= */ 0,
+        /* y= */ 0,
+        inBitmap.getWidth(),
+        inBitmap.getHeight(),
+        matrix,
+        /* filter= */ true);
   }
 
   /**

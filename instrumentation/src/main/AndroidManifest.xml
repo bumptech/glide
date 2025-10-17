@@ -1,9 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.bumptech.glide.instrumentation">
+    xmlns:tools="http://schemas.android.com/tools">
+
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-  <application>
-    <activity android:name="com.bumptech.glide.test.GlideWithBeforeSuperOnCreateActivity" />
-    <activity android:name="com.bumptech.glide.test.GlideWithAsDifferentSupertypesActivity"  />
+  <application
+      tools:ignore="MissingApplicationIcon"
+      android:theme="@style/AppTheme">
+    <activity
+        android:name="com.bumptech.glide.test.GlideWithBeforeSuperOnCreateActivity"
+        android:exported="false" />
+    <activity
+        android:name="com.bumptech.glide.test.GlideWithAsDifferentSupertypesActivity"
+        android:exported="false" />
+    <activity
+        android:name="com.bumptech.glide.test.DefaultFragmentActivity"
+        android:exported="false" />
+    <activity
+        android:name="com.bumptech.glide.test.ForceDarkOrLightModeActivity"
+        android:exported="false" />
   </application>
 </manifest>

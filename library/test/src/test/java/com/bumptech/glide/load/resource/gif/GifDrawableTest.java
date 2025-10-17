@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.gif;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,12 +32,9 @@ import android.view.View;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.gifdecoder.GifDecoder;
 import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.resource.gif.GifDrawableTest.BitmapTrackingShadowCanvas;
 import com.bumptech.glide.tests.TearDownGlide;
 import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
-import java.util.HashSet;
-import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -47,15 +45,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.robolectric.annotation.Implementation;
-import org.robolectric.annotation.Implements;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowCanvas;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(
-    sdk = 18,
-    shadows = {BitmapTrackingShadowCanvas.class})
+@Config(sdk = ROBOLECTRIC_SDK)
 public class GifDrawableTest {
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
 
@@ -100,15 +94,19 @@ public class GifDrawableTest {
     Util.setSdkVersionInt(initialSdkVersion);
   }
 
-  // containsExactly doesn't need its return value checked.
-  @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
   public void testShouldDrawFirstFrameBeforeAnyFrameRead() {
     Canvas canvas = new Canvas();
     drawable.draw(canvas);
 
-    BitmapTrackingShadowCanvas shadowCanvas = Shadow.extract(canvas);
-    assertThat(shadowCanvas.getDrawnBitmaps()).containsExactly(firstFrame);
+    ShadowCanvas shadowCanvas = Shadow.extract(canvas);
+    assertThat(shadowCanvas.getDescription())
+        .isEqualTo(
+            "Bitmap ("
+                + firstFrame.getWidth()
+                + " x "
+                + firstFrame.getHeight()
+                + ") at (0,0) with height=0 and width=0");
   }
 
   @Test
@@ -631,22 +629,6 @@ public class GifDrawableTest {
             drawable.isRunning());
         drawable.onFrameReady();
       }
-    }
-  }
-
-  /** Keeps track of the set of Bitmaps drawn to the canvas. */
-  @Implements(Canvas.class)
-  public static final class BitmapTrackingShadowCanvas extends ShadowCanvas {
-    private final Set<Bitmap> drawnBitmaps = new HashSet<>();
-
-    @Implementation
-    @Override
-    public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
-      drawnBitmaps.add(bitmap);
-    }
-
-    private Iterable<Bitmap> getDrawnBitmaps() {
-      return drawnBitmaps;
     }
   }
 }

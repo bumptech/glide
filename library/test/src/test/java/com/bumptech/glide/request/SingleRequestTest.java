@@ -1,5 +1,6 @@
 package com.bumptech.glide.request;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.isADataSource;
 import static com.bumptech.glide.tests.Util.mockResource;
 import static com.google.common.truth.Truth.assertThat;
@@ -33,6 +34,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.SizeReadyCallback;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
@@ -46,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,7 +60,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 18)
+@Config(sdk = ROBOLECTRIC_SDK)
 @SuppressWarnings("rawtypes")
 public class SingleRequestTest {
 
@@ -258,7 +261,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
@@ -524,6 +527,14 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), anyBoolean());
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result),
+            any(Number.class),
+            isAListTarget(),
+            isADataSource(),
+            anyBoolean(),
+            eq(isLoadedFromAlternateCacheKey));
   }
 
   @Test
@@ -568,7 +579,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor()))
@@ -622,6 +633,14 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(true));
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result),
+            any(Number.class),
+            isAListTarget(),
+            isADataSource(),
+            eq(true),
+            eq(false));
   }
 
   @Test
@@ -634,6 +653,14 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(true));
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result),
+            any(Number.class),
+            isAListTarget(),
+            isADataSource(),
+            eq(true),
+            eq(false));
   }
 
   @Test
@@ -647,6 +674,97 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(false));
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result),
+            any(Number.class),
+            isAListTarget(),
+            isADataSource(),
+            eq(false),
+            eq(false));
+  }
+
+  @Test
+  public void onResourceReady_notifiesRequestCoordinator_beforeCallingRequestListeners() {
+    AtomicBoolean isRequestCoordinatorVerified = new AtomicBoolean();
+    SingleRequest<List> request =
+        builder
+            .setTarget(new DoNothingTarget())
+            .addRequestListener(
+                new RequestListener<>() {
+                  @Override
+                  public boolean onLoadFailed(
+                      @Nullable GlideException e,
+                      Object model,
+                      @NonNull Target<List> target,
+                      boolean isFirstResource) {
+                    return false;
+                  }
+
+                  @Override
+                  public boolean onResourceReady(
+                      @NonNull List resource,
+                      @NonNull Object model,
+                      Target<List> target,
+                      @NonNull DataSource dataSource,
+                      boolean isFirstResource) {
+                    verify(builder.requestCoordinator).onRequestSuccess(target.getRequest());
+                    isRequestCoordinatorVerified.set(true);
+                    return false;
+                  }
+                })
+            .build();
+    builder.target.setRequest(request);
+    request.onResourceReady(
+        builder.resource, DataSource.DATA_DISK_CACHE, /* isLoadedFromAlternateCacheKey= */ false);
+
+    assertThat(isRequestCoordinatorVerified.get()).isTrue();
+  }
+
+  @Test
+  public void onLoadFailed_notifiesRequestCoordinator_beforeCallingRequestListeners() {
+    AtomicBoolean isRequestCoordinatorVerified = new AtomicBoolean();
+    SingleRequest<List> request =
+        builder
+            .setTarget(new DoNothingTarget())
+            .addRequestListener(
+                new RequestListener<>() {
+                  @Override
+                  public boolean onLoadFailed(
+                      @Nullable GlideException e,
+                      Object model,
+                      @NonNull Target<List> target,
+                      boolean isFirstResource) {
+                    verify(builder.requestCoordinator).onRequestFailed(target.getRequest());
+                    isRequestCoordinatorVerified.set(true);
+                    return false;
+                  }
+
+                  @Override
+                  public boolean onResourceReady(
+                      @NonNull List resource,
+                      @NonNull Object model,
+                      Target<List> target,
+                      @NonNull DataSource dataSource,
+                      boolean isFirstResource) {
+                    return false;
+                  }
+                })
+            .build();
+    builder.target.setRequest(request);
+    request.onLoadFailed(new GlideException("test"));
+
+    assertThat(isRequestCoordinatorVerified.get()).isTrue();
+  }
+
+  // We don't need to clear a resource since we're not using it to being with.
+  private static final class DoNothingTarget extends CustomTarget<List> {
+    @Override
+    public void onResourceReady(
+        @NonNull List resource, @Nullable Transition<? super List> transition) {}
+
+    @Override
+    public void onLoadCleared(@Nullable Drawable placeholder) {}
   }
 
   @Test
@@ -663,6 +781,14 @@ public class SingleRequestTest {
     verify(listener1)
         .onResourceReady(
             eq(builder.result), any(Number.class), isAListTarget(), isADataSource(), eq(false));
+    verify(listener1)
+        .onResourceReady(
+            eq(builder.result),
+            any(Number.class),
+            isAListTarget(),
+            isADataSource(),
+            eq(false),
+            eq(true));
   }
 
   @Test
@@ -723,7 +849,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
@@ -760,7 +886,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor()))
@@ -806,7 +932,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             anyBoolean(),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
@@ -838,7 +964,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             eq(true),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
@@ -870,7 +996,7 @@ public class SingleRequestTest {
             any(Options.class),
             anyBoolean(),
             eq(false),
-            /*useAnimationPool=*/ anyBoolean(),
+            /* useAnimationPool= */ anyBoolean(),
             anyBoolean(),
             any(ResourceCallback.class),
             anyExecutor());
@@ -1035,9 +1161,9 @@ public class SingleRequestTest {
               .signature(signature)
               .useUnlimitedSourceGeneratorsPool(useUnlimitedSourceGeneratorsPool);
       return SingleRequest.obtain(
-          /*context=*/ glideContext,
-          /*glideContext=*/ glideContext,
-          /*requestLock=*/ new Object(),
+          /* context= */ glideContext,
+          /* glideContext= */ glideContext,
+          /* requestLock= */ new Object(),
           model,
           transcodeClass,
           requestOptions,
@@ -1045,7 +1171,7 @@ public class SingleRequestTest {
           overrideHeight,
           priority,
           target,
-          /*targetListener=*/ null,
+          /* targetListener= */ null,
           requestListeners,
           requestCoordinator,
           engine,

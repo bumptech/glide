@@ -91,14 +91,29 @@ final class ChromiumRequestSerializer {
     GLIDE_TO_CHROMIUM_PRIORITY.put(Priority.LOW, UrlRequest.Builder.REQUEST_PRIORITY_LOWEST);
   }
 
-  private final JobPool jobPool = new JobPool();
+  private final JobPool jobPool;
   private final Map<GlideUrl, Job> jobs = new HashMap<>();
   private final CronetRequestFactory requestFactory;
   @Nullable private final DataLogger dataLogger;
 
-  ChromiumRequestSerializer(CronetRequestFactory requestFactory, @Nullable DataLogger dataLogger) {
+  ChromiumRequestSerializer(
+      CronetRequestFactory requestFactory,
+      @Nullable DataLogger dataLogger,
+      @Nullable final GlideExecutor executor) {
     this.requestFactory = requestFactory;
     this.dataLogger = dataLogger;
+    if (executor == null) {
+      this.jobPool = new JobPool(GLIDE_EXECUTOR_SUPPLIER);
+    } else {
+      this.jobPool =
+          new JobPool(
+              new Supplier<Executor>() {
+                @Override
+                public Executor get() {
+                  return executor;
+                }
+              });
+    }
   }
 
   void startRequest(Priority priority, GlideUrl glideUrl, Listener listener) {
@@ -178,6 +193,11 @@ final class ChromiumRequestSerializer {
     private long responseStartTimeMs;
     private volatile boolean isCancelled;
     private BufferQueue.Builder builder;
+    private final Supplier<Executor> executorSupplier;
+
+    Job(Supplier<Executor> executorSupplier) {
+      this.executorSupplier = executorSupplier;
+    }
 
     void init(GlideUrl glideUrl) {
       startTime = System.currentTimeMillis();
@@ -233,7 +253,7 @@ final class ChromiumRequestSerializer {
 
     @Override
     public void onSucceeded(UrlRequest request, final UrlResponseInfo info) {
-      GLIDE_EXECUTOR_SUPPLIER
+      executorSupplier
           .get()
           .execute(
               new PriorityRunnable(priority) {
@@ -251,7 +271,7 @@ final class ChromiumRequestSerializer {
     @Override
     public void onFailed(
         UrlRequest urlRequest, final UrlResponseInfo urlResponseInfo, final CronetException e) {
-      GLIDE_EXECUTOR_SUPPLIER
+      executorSupplier
           .get()
           .execute(
               new PriorityRunnable(priority) {
@@ -264,7 +284,7 @@ final class ChromiumRequestSerializer {
 
     @Override
     public void onCanceled(UrlRequest urlRequest, @Nullable final UrlResponseInfo urlResponseInfo) {
-      GLIDE_EXECUTOR_SUPPLIER
+      executorSupplier
           .get()
           .execute(
               new PriorityRunnable(priority) {
@@ -349,7 +369,7 @@ final class ChromiumRequestSerializer {
                 + (buffer.limit() / 1024)
                 + "kb");
       } else if (!isSuccess && Log.isLoggable(TAG, Log.ERROR) && !wasCancelled) {
-        Log.e(TAG, "Request failed", exception);
+        Log.e(TAG, "Request failed, url: " + glideUrl, exception);
       }
     }
 
@@ -365,11 +385,16 @@ final class ChromiumRequestSerializer {
   private class JobPool {
     private static final int MAX_POOL_SIZE = 50;
     private final ArrayDeque<Job> pool = new ArrayDeque<>();
+    private final Supplier<Executor> executorSupplier;
+
+    public JobPool(Supplier<Executor> executorSupplier) {
+      this.executorSupplier = executorSupplier;
+    }
 
     public synchronized Job get(GlideUrl glideUrl) {
       Job job = pool.poll();
       if (job == null) {
-        job = new Job();
+        job = new Job(executorSupplier);
       }
       job.init(glideUrl);
       return job;

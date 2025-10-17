@@ -25,10 +25,11 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * Allows decoding animated webp images using {@link ImageDecoder} on Android P+.
- *
- * <p>This class is experimental and may be removed at any time.
+ * Allows decoding animated webp images using {@link ImageDecoder} on Android P+. @Deprecated This
+ * class has been replaced by {@link AnimatedImageDecoder} and is not used in Glide by default. It
+ * will be removed in a future version.
  */
+@Deprecated
 @RequiresApi(Build.VERSION_CODES.P)
 public final class AnimatedWebpDecoder {
   private final List<ImageHeaderParser> imageHeaderParsers;

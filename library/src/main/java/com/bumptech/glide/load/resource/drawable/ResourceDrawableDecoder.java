@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.text.TextUtils;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,11 +39,13 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
    * <p>As far as I can tell this is undocumented, but works.
    */
   private static final String ANDROID_PACKAGE_NAME = "android";
+
   /**
    * {@link Resources#getIdentifier(String, String, String)} documents that it will return 0 and
    * that 0 is not a valid resouce id.
    */
   private static final int MISSING_RESOURCE_ID = 0;
+
   // android.resource://<package_name>/<type>/<name>.
   private static final int NAME_URI_PATH_SEGMENTS = 2;
   private static final int TYPE_PATH_SEGMENT_INDEX = 0;
@@ -59,7 +62,8 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
 
   @Override
   public boolean handles(@NonNull Uri source, @NonNull Options options) {
-    return source.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE);
+    String scheme = source.getScheme();
+    return scheme != null && scheme.equals(ContentResolver.SCHEME_ANDROID_RESOURCE);
   }
 
   @Nullable
@@ -67,13 +71,18 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
   public Resource<Drawable> decode(
       @NonNull Uri source, int width, int height, @NonNull Options options) {
     String packageName = source.getAuthority();
+    if (TextUtils.isEmpty(packageName)) {
+      throw new IllegalStateException("Package name for " + source + " is null or empty");
+    }
     Context targetContext = findContextForPackage(source, packageName);
     @DrawableRes int resId = findResourceIdFromUri(targetContext, source);
-    // We can't get a theme from another application.
-    Theme theme = options.get(THEME);
-    Preconditions.checkArgument(
-        targetContext.getPackageName().equals(packageName) || theme == null,
-        "Can't get a theme from another package");
+    // Only use the provided theme if we're loading resources from our package. We can't get themes
+    // from other packages and we don't want to use a theme from our package when loading another
+    // package's resources.
+    Theme theme =
+        Preconditions.checkNotNull(packageName).equals(context.getPackageName())
+            ? options.get(THEME)
+            : null;
     Drawable drawable =
         theme == null
             ? DrawableDecoderCompat.getDrawable(context, targetContext, resId)
@@ -82,14 +91,14 @@ public class ResourceDrawableDecoder implements ResourceDecoder<Uri, Drawable> {
   }
 
   @NonNull
-  private Context findContextForPackage(Uri source, String packageName) {
+  private Context findContextForPackage(Uri source, @NonNull String packageName) {
     // Fast path
     if (packageName.equals(context.getPackageName())) {
       return context;
     }
 
     try {
-      return context.createPackageContext(packageName, /*flags=*/ 0);
+      return context.createPackageContext(packageName, /* flags= */ 0);
     } catch (NameNotFoundException e) {
       // The parent APK holds the correct context if the resource is located in a split
       if (packageName.contains(context.getPackageName())) {

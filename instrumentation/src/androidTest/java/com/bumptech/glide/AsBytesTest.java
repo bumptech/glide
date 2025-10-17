@@ -3,7 +3,6 @@ package com.bumptech.glide;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -11,16 +10,12 @@ import android.net.Uri;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.test.GlideApp;
+import com.bumptech.glide.test.ModelGeneratorRule;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.testutil.ConcurrencyHelper;
 import com.bumptech.glide.testutil.TearDownGlide;
-import com.google.common.io.ByteStreams;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,6 +26,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidJUnit4.class)
 public class AsBytesTest {
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
+  @Rule public final ModelGeneratorRule modelGeneratorRule = new ModelGeneratorRule();
   private final ConcurrencyHelper concurrency = new ConcurrencyHelper();
 
   private Context context;
@@ -149,8 +145,7 @@ public class AsBytesTest {
   @Test
   public void loadVideoFileUri_asBytes_providesByteOfFrame() throws IOException {
     byte[] data =
-        concurrency.get(
-            Glide.with(context).as(byte[].class).load(Uri.fromFile(writeVideoToFile())).submit());
+        concurrency.get(Glide.with(context).as(byte[].class).load(writeVideoToFileUri()).submit());
 
     assertThat(data).isNotNull();
     assertThat(BitmapFactory.decodeByteArray(data, 0, data.length)).isNotNull();
@@ -162,7 +157,7 @@ public class AsBytesTest {
         concurrency.get(
             GlideApp.with(context)
                 .as(byte[].class)
-                .load(Uri.fromFile(writeVideoToFile()))
+                .load(writeVideoToFileUri())
                 .frame(TimeUnit.SECONDS.toMicros(1))
                 .submit());
 
@@ -171,32 +166,10 @@ public class AsBytesTest {
   }
 
   private File writeVideoToFile() throws IOException {
-    byte[] videoData = loadVideoBytes();
-    File parent = context.getCacheDir();
-    if (!parent.mkdirs() && (!parent.exists() || !parent.isDirectory())) {
-      throw new IllegalStateException("Failed to mkdirs for: " + parent);
-    }
-    File toWrite = new File(parent, "temp.jpeg");
-    if (toWrite.exists() && !toWrite.delete()) {
-      throw new IllegalStateException("Failed to delete existing temp file: " + toWrite);
-    }
-
-    OutputStream os = null;
-    try {
-      os = new BufferedOutputStream(new FileOutputStream(toWrite));
-      os.write(videoData);
-      os.close();
-    } finally {
-      if (os != null) {
-        os.close();
-      }
-    }
-    return toWrite;
+    return modelGeneratorRule.asFile(ResourceIds.raw.video);
   }
 
-  private byte[] loadVideoBytes() throws IOException {
-    Resources resources = context.getResources();
-    InputStream is = resources.openRawResource(ResourceIds.raw.video);
-    return ByteStreams.toByteArray(is);
+  private Uri writeVideoToFileUri() throws IOException {
+    return Uri.fromFile(writeVideoToFile());
   }
 }

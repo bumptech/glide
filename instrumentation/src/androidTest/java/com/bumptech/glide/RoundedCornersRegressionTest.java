@@ -43,7 +43,8 @@ public class RoundedCornersRegressionTest {
   @Before
   public void setUp() throws Exception {
     context = ApplicationProvider.getApplicationContext();
-    bitmapRegressionTester = new BitmapRegressionTester(getClass(), testName);
+    bitmapRegressionTester =
+        BitmapRegressionTester.newInstance(getClass(), testName).assumeShouldRun();
     canonicalBitmap = new CanonicalBitmap();
   }
 

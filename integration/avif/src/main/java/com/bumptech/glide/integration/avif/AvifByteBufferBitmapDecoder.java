@@ -1,12 +1,15 @@
 package com.bumptech.glide.integration.avif;
 
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.util.Log;
+import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
+import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.util.Preconditions;
 import java.nio.ByteBuffer;
 import javax.annotation.Nullable;
@@ -46,11 +49,13 @@ public final class AvifByteBufferBitmapDecoder implements ResourceDecoder<ByteBu
       }
       return null;
     }
-    Bitmap bitmap =
-        bitmapPool.get(
-            info.width,
-            info.height,
-            (info.depth == 8) ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGBA_F16);
+    Bitmap.Config config;
+    if (options.get(Downsampler.DECODE_FORMAT) == DecodeFormat.PREFER_RGB_565) {
+      config = Config.RGB_565;
+    } else {
+      config = (info.depth == 8) ? Config.ARGB_8888 : Config.RGBA_F16;
+    }
+    Bitmap bitmap = bitmapPool.get(info.width, info.height, config);
     if (!AvifDecoder.decode(sourceCopy, sourceCopy.remaining(), bitmap)) {
       if (Log.isLoggable(TAG, Log.ERROR)) {
         Log.e(TAG, "Failed to decode ByteBuffer as Avif.");

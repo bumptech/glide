@@ -14,10 +14,19 @@ public final class AssetFileDescriptorLocalUriFetcher extends LocalUriFetcher<As
     super(contentResolver, uri);
   }
 
+  /**
+   * useMediaStoreApisIfAvailable is part of an experiment and the constructor can be removed in a
+   * future version.
+   */
+  public AssetFileDescriptorLocalUriFetcher(
+      ContentResolver contentResolver, Uri uri, boolean useMediaStoreApisIfAvailable) {
+    super(contentResolver, uri, useMediaStoreApisIfAvailable);
+  }
+
   @Override
   protected AssetFileDescriptor loadResource(Uri uri, ContentResolver contentResolver)
       throws FileNotFoundException {
-    AssetFileDescriptor result = contentResolver.openAssetFileDescriptor(uri, "r");
+    AssetFileDescriptor result = openAssetFileDescriptor(uri);
     if (result == null) {
       throw new FileNotFoundException("FileDescriptor is null for: " + uri);
     }
