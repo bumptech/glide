@@ -539,6 +539,15 @@ public final class GlideBuilder {
     return this;
   }
 
+  /**
+   * This method sets the memory category when the app is in the background.
+   */
+  public GlideBuilder setMemoryCategoryInBackground(@Nullable MemoryCategory category) {
+    glideExperimentsBuilder.update(new MemoryCategoryInBackground(category),
+                                   category != null ? true : false);
+    return this;
+  }
+
   void setRequestManagerFactory(@Nullable RequestManagerFactory factory) {
     this.requestManagerFactory = factory;
   }
@@ -653,4 +662,16 @@ public final class GlideBuilder {
 
   /** See {@link #setUseMediaStoreOpenFileApisIfPossible(boolean)}. */
   public static final class UseMediaStoreOpenFileApisIfPossible implements Experiment {}
+
+  public static final class MemoryCategoryInBackground implements Experiment {
+    private final MemoryCategory category;
+
+    public MemoryCategoryInBackground(MemoryCategory category) {
+      this.category = category;
+    }
+
+    public MemoryCategory value() {
+      return this.category;
+    }
+  }
 }
