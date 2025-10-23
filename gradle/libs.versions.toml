@@ -34,7 +34,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version = "1.1.5
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version = "2.8.2" }
 androidx-lifecycle-runtime-testing = { group = "androidx.lifecycle", name = "lifecycle-runtime-testing", version = "2.8.2" }
 androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version = "1.3.1" }
-androidx-test-core = { group = "androidx.test", name = "core", version = "1.4.0" }
+androidx-test-core = { group = "androidx.test", name = "core", version = "1.7.0" }
 androidx-test-ktx = { group = "androidx.test", name = "core-ktx", version = "1.5.0" }
 androidx-test-ktx-junit = { group = "androidx.test.ext", name = "junit-ktx", version = "1.1.5" }
 androidx-test-rules = { group = "androidx.test", name = "rules", version = "1.4.0" }
