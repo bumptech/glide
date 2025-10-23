@@ -64,7 +64,7 @@ robolectric = { group = "org.robolectric", name = "robolectric", version = "4.11
 rx-android = { group = "io.reactivex", name = "rxandroid", version = "1.2.1" }
 rx-java = { group = "io.reactivex", name = "rxjava", version = "1.3.8" }
 svg = { group = "com.caverock", name = "androidsvg", version = "1.2.1" }
-truth = { group = "com.google.truth", name = "truth", version = "1.4.4" }
+truth = { group = "com.google.truth", name = "truth", version = "1.4.5" }
 violations = { group = "se.bjurr.violations", name = "violations-gradle-plugin", version = "1.8" }
 volley = { group = "com.android.volley", name = "volley", version = "1.2.1" }
 vanniktech = { group = "com.vanniktech", name = "gradle-maven-publish-plugin", version = "0.34.0" }
