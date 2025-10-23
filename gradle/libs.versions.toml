@@ -16,6 +16,7 @@ okhttp-min-sdk-version = "21"
 kotlin-compiler-extension = "1.5.5"
 androidx-benchmark = "1.2.0-beta05"
 compile-sdk-version = 'android-36'
+ktfmt = "0.25.0"
 
 [libraries]
 androidx-multidex = { group = "androidx.multidex", name = "multidex", version = "2.0.1" }
@@ -98,3 +99,6 @@ mockito-android = { group = "org.mockito", name = "mockito-android", version.ref
 retrofit-runtime = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 retrofit-rxjava = { group = "com.squareup.retrofit2", name = "adapter-rxjava", version.ref = "retrofit" }
+
+[plugins]
+ktfmt = { id = "com.ncorti.ktfmt.gradle", version.ref = "ktfmt" }

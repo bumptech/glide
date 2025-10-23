@@ -25,6 +25,10 @@ buildscript {
     }
 }
 
+plugins {
+    alias libs.plugins.ktfmt
+}
+
 apply plugin: 'binary-compatibility-validator'
 apply plugin: 'org.jetbrains.dokka'
 
@@ -87,6 +91,11 @@ subprojects { project ->
             project.tasks.dokkaHtmlPartial.enabled = false
         }
     } else {
+        apply plugin: "com.ncorti.ktfmt.gradle"
+        ktfmt {
+            kotlinLangStyle()
+        }
+
         afterEvaluate {
             project.apply plugin: 'org.jetbrains.dokka'
 

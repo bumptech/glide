@@ -72,17 +72,17 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
  * [RequestBuilder.error].
  *
  * @param loading A [Placeholder] that will be displayed while the request is loading. Specifically
- * it's used if the request is cleared ([com.bumptech.glide.request.target.Target.onLoadCleared]) or
- * loading ([com.bumptech.glide.request.target.Target.onLoadStarted]. There's a subtle difference in
- * behavior depending on which type of [Placeholder] you use. The resource and `Drawable` variants
- * will be displayed if the request fails and no other failure handling is specified, but the
- * `Composable` will not.
+ *   it's used if the request is cleared ([com.bumptech.glide.request.target.Target.onLoadCleared])
+ *   or loading ([com.bumptech.glide.request.target.Target.onLoadStarted]. There's a subtle
+ *   difference in behavior depending on which type of [Placeholder] you use. The resource and
+ *   `Drawable` variants will be displayed if the request fails and no other failure handling is
+ *   specified, but the `Composable` will not.
  * @param failure A [Placeholder] that will be displayed if the request fails. Specifically it's
- * used when [com.bumptech.glide.request.target.Target.onLoadFailed] is called. If
- * [RequestBuilder.error] is called in [requestBuilderTransform] with a valid [RequestBuilder] (as
- * opposed to resource id or [Drawable]), this [Placeholder] will not be used unless the `error`
- * [RequestBuilder] also fails. This parameter does not override error [RequestBuilder]s, only error
- * resource ids and/or [Drawable]s.
+ *   used when [com.bumptech.glide.request.target.Target.onLoadFailed] is called. If
+ *   [RequestBuilder.error] is called in [requestBuilderTransform] with a valid [RequestBuilder] (as
+ *   opposed to resource id or [Drawable]), this [Placeholder] will not be used unless the `error`
+ *   [RequestBuilder] also fails. This parameter does not override error [RequestBuilder]s, only
+ *   error resource ids and/or [Drawable]s.
  */
 // TODO(judds): the API here is not particularly composeesque, we should consider alternatives
 // to RequestBuilder (though thumbnail() may make that a challenge).
@@ -91,70 +91,79 @@ public typealias RequestBuilderTransform<T> = (RequestBuilder<T>) -> RequestBuil
 @OptIn(InternalGlideApi::class)
 @Composable
 public fun GlideImage(
-  model: Any?,
-  contentDescription: String?,
-  modifier: Modifier = Modifier,
-  alignment: Alignment = Alignment.Center,
-  contentScale: ContentScale = ContentScale.Fit,
-  alpha: Float = DefaultAlpha,
-  colorFilter: ColorFilter? = null,
-  // TODO(judds): Consider using separate GlideImage* methods instead of sealed classes.
-  // See http://shortn/_x79pjkMZIH for an internal discussion.
-  loading: Placeholder? = null,
-  failure: Placeholder? = null,
-  // TODO(judds): Consider defaulting to load the model here instead of always doing so below.
-  requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
+    model: Any?,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    alignment: Alignment = Alignment.Center,
+    contentScale: ContentScale = ContentScale.Fit,
+    alpha: Float = DefaultAlpha,
+    colorFilter: ColorFilter? = null,
+    // TODO(judds): Consider using separate GlideImage* methods instead of sealed classes.
+    // See http://shortn/_x79pjkMZIH for an internal discussion.
+    loading: Placeholder? = null,
+    failure: Placeholder? = null,
+    // TODO(judds): Consider defaulting to load the model here instead of always doing so below.
+    requestBuilderTransform: RequestBuilderTransform<Drawable> = { it },
 ) {
-  val requestManager: RequestManager = LocalContext.current.let { remember(it) { Glide.with(it) } }
-  val requestBuilder =
-    rememberRequestBuilderWithDefaults(model, requestManager, requestBuilderTransform, contentScale)
-      .let { loading?.apply(it::placeholder, it::placeholder) ?: it }
-      .let { failure?.apply(it::error, it::error) ?: it }
+    val requestManager: RequestManager =
+        LocalContext.current.let { remember(it) { Glide.with(it) } }
+    val requestBuilder =
+        rememberRequestBuilderWithDefaults(
+                model,
+                requestManager,
+                requestBuilderTransform,
+                contentScale,
+            )
+            .let { loading?.apply(it::placeholder, it::placeholder) ?: it }
+            .let { failure?.apply(it::error, it::error) ?: it }
 
-  val overrideSize: Size? = requestBuilder.overrideSize()
-  val (size, finalModifier) = rememberSizeAndModifier(overrideSize, modifier)
+    val overrideSize: Size? = requestBuilder.overrideSize()
+    val (size, finalModifier) = rememberSizeAndModifier(overrideSize, modifier)
 
-  // TODO(judds): It seems like we should be able to use the production paths for
-  // resource / drawables as well as Composables. It's not totally clear what part of the prod code
-  // isn't supported.
-  if (LocalInspectionMode.current && loading?.isResourceOrDrawable() == true) {
-    PreviewResourceOrDrawable(loading, contentDescription, modifier)
-    return
-  }
+    // TODO(judds): It seems like we should be able to use the production paths for
+    // resource / drawables as well as Composables. It's not totally clear what part of the prod
+    // code
+    // isn't supported.
+    if (LocalInspectionMode.current && loading?.isResourceOrDrawable() == true) {
+        PreviewResourceOrDrawable(loading, contentDescription, modifier)
+        return
+    }
 
-  SizedGlideImage(
-    requestBuilder = requestBuilder,
-    size = size,
-    modifier = finalModifier,
-    contentDescription = contentDescription,
-    alignment = alignment,
-    contentScale = contentScale,
-    alpha = alpha,
-    colorFilter = colorFilter,
-    placeholder = loading?.maybeComposable(),
-    failure = failure?.maybeComposable(),
-  )
+    SizedGlideImage(
+        requestBuilder = requestBuilder,
+        size = size,
+        modifier = finalModifier,
+        contentDescription = contentDescription,
+        alignment = alignment,
+        contentScale = contentScale,
+        alpha = alpha,
+        colorFilter = colorFilter,
+        placeholder = loading?.maybeComposable(),
+        failure = failure?.maybeComposable(),
+    )
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun PreviewResourceOrDrawable(
-  loading: Placeholder,
-  contentDescription: String?,
-  modifier: Modifier,
+    loading: Placeholder,
+    contentDescription: String?,
+    modifier: Modifier,
 ) {
-  val drawable =
-    when(loading) {
-      is Placeholder.OfDrawable -> loading.drawable
-      is Placeholder.OfResourceId -> LocalContext.current.getDrawable(loading.resourceId)
-      is Placeholder.OfComposable ->
-        throw IllegalArgumentException("Composables should go through the production codepath")
-    }
-  Image(
-    painter = rememberDrawablePainter(drawable),
-    modifier = modifier,
-    contentDescription = contentDescription,
-  )
+    val drawable =
+        when (loading) {
+            is Placeholder.OfDrawable -> loading.drawable
+            is Placeholder.OfResourceId -> LocalContext.current.getDrawable(loading.resourceId)
+            is Placeholder.OfComposable ->
+                throw IllegalArgumentException(
+                    "Composables should go through the production codepath"
+                )
+        }
+    Image(
+        painter = rememberDrawablePainter(drawable),
+        modifier = modifier,
+        contentDescription = contentDescription,
+    )
 }
 
 /**
@@ -178,7 +187,7 @@ public fun placeholder(drawable: Drawable?): Placeholder = Placeholder.OfDrawabl
  */
 @ExperimentalGlideComposeApi
 public fun placeholder(@DrawableRes resourceId: Int): Placeholder =
-  Placeholder.OfResourceId(resourceId)
+    Placeholder.OfResourceId(resourceId)
 
 /**
  * Used to specify a [Composable] function to use in conjunction with [GlideImage]'s `loading` or
@@ -189,7 +198,7 @@ public fun placeholder(@DrawableRes resourceId: Int): Placeholder =
  */
 @ExperimentalGlideComposeApi
 public fun placeholder(composable: @Composable () -> Unit): Placeholder =
-  Placeholder.OfComposable(composable)
+    Placeholder.OfComposable(composable)
 
 /**
  * Content to display during a particular state of a Glide Request, for example while the request is
@@ -205,35 +214,35 @@ public fun placeholder(composable: @Composable () -> Unit): Placeholder =
  */
 @ExperimentalGlideComposeApi
 public sealed class Placeholder {
-  internal class OfDrawable(internal val drawable: Drawable?) : Placeholder()
+    internal class OfDrawable(internal val drawable: Drawable?) : Placeholder()
 
-  internal class OfResourceId(@DrawableRes internal val resourceId: Int) : Placeholder()
+    internal class OfResourceId(@DrawableRes internal val resourceId: Int) : Placeholder()
 
-  internal class OfComposable(internal val composable: @Composable () -> Unit) : Placeholder()
+    internal class OfComposable(internal val composable: @Composable () -> Unit) : Placeholder()
 
-  internal fun isResourceOrDrawable() =
-    when (this) {
-      is OfDrawable -> true
-      is OfResourceId -> true
-      is OfComposable -> false
-    }
+    internal fun isResourceOrDrawable() =
+        when (this) {
+            is OfDrawable -> true
+            is OfResourceId -> true
+            is OfComposable -> false
+        }
 
-  internal fun maybeComposable(): (@Composable () -> Unit)? =
-    when (this) {
-      is OfComposable -> this.composable
-      else -> null
-    }
+    internal fun maybeComposable(): (@Composable () -> Unit)? =
+        when (this) {
+            is OfComposable -> this.composable
+            else -> null
+        }
 
-  internal fun <T> apply(
-    resource: (Int) -> RequestBuilder<T>,
-    drawable: (Drawable?) -> RequestBuilder<T>
-  ): RequestBuilder<T> =
-    when (this) {
-      is OfDrawable -> drawable(this.drawable)
-      is OfResourceId -> resource(this.resourceId)
-      // Clear out any previously set placeholder.
-      else -> drawable(null)
-    }
+    internal fun <T> apply(
+        resource: (Int) -> RequestBuilder<T>,
+        drawable: (Drawable?) -> RequestBuilder<T>,
+    ): RequestBuilder<T> =
+        when (this) {
+            is OfDrawable -> drawable(this.drawable)
+            is OfResourceId -> resource(this.resourceId)
+            // Clear out any previously set placeholder.
+            else -> drawable(null)
+        }
 }
 
 @OptIn(InternalGlideApi::class)
@@ -241,129 +250,124 @@ private data class SizeAndModifier(val size: ResolvableGlideSize, val modifier: 
 
 @OptIn(InternalGlideApi::class)
 @Composable
-private fun rememberSizeAndModifier(
-  overrideSize: Size?,
-  modifier: Modifier,
-) =
-  remember(overrideSize, modifier) {
-    if (overrideSize != null) {
-      SizeAndModifier(ImmediateGlideSize(overrideSize), modifier)
-    } else {
-      val sizeObserver = SizeObserver()
-      SizeAndModifier(
-        AsyncGlideSize(sizeObserver::getSize),
-        modifier.sizeObservingModifier(sizeObserver)
-      )
+private fun rememberSizeAndModifier(overrideSize: Size?, modifier: Modifier) =
+    remember(overrideSize, modifier) {
+        if (overrideSize != null) {
+            SizeAndModifier(ImmediateGlideSize(overrideSize), modifier)
+        } else {
+            val sizeObserver = SizeObserver()
+            SizeAndModifier(
+                AsyncGlideSize(sizeObserver::getSize),
+                modifier.sizeObservingModifier(sizeObserver),
+            )
+        }
     }
-  }
 
 @Composable
 private fun rememberRequestBuilderWithDefaults(
-  model: Any?,
-  requestManager: RequestManager,
-  requestBuilderTransform: RequestBuilderTransform<Drawable>,
-  contentScale: ContentScale
+    model: Any?,
+    requestManager: RequestManager,
+    requestBuilderTransform: RequestBuilderTransform<Drawable>,
+    contentScale: ContentScale,
 ) =
-  remember(model, requestManager, requestBuilderTransform, contentScale) {
-    requestBuilderTransform(requestManager.load(model).contentScaleTransform(contentScale))
-  }
+    remember(model, requestManager, requestBuilderTransform, contentScale) {
+        requestBuilderTransform(requestManager.load(model).contentScaleTransform(contentScale))
+    }
 
 private fun RequestBuilder<Drawable>.contentScaleTransform(
-  contentScale: ContentScale
+    contentScale: ContentScale
 ): RequestBuilder<Drawable> {
-  return when (contentScale) {
-    ContentScale.Crop -> {
-      optionalCenterCrop()
+    return when (contentScale) {
+        ContentScale.Crop -> {
+            optionalCenterCrop()
+        }
+        ContentScale.Inside,
+        ContentScale.Fit -> {
+            // Outside compose, glide would use fitCenter() for FIT. But that's probably not a good
+            // decision given how unimportant Bitmap re-use is relative to minimizing texture sizes
+            // now.
+            // So instead we'll do something different and prefer not to upscale, which means using
+            // centerInside(). The UI can still scale the view even if the Bitmap is smaller.
+            optionalCenterInside()
+        }
+        else -> {
+            this
+        }
     }
-    ContentScale.Inside,
-    ContentScale.Fit -> {
-      // Outside compose, glide would use fitCenter() for FIT. But that's probably not a good
-      // decision given how unimportant Bitmap re-use is relative to minimizing texture sizes now.
-      // So instead we'll do something different and prefer not to upscale, which means using
-      // centerInside(). The UI can still scale the view even if the Bitmap is smaller.
-      optionalCenterInside()
-    }
-    else -> {
-      this
-    }
-  }
-  // TODO(judds): Think about how to handle the various fills
+    // TODO(judds): Think about how to handle the various fills
 }
 
 @OptIn(InternalGlideApi::class, ExperimentGlideFlows::class)
 @Composable
 private fun SizedGlideImage(
-  requestBuilder: RequestBuilder<Drawable>,
-  size: ResolvableGlideSize,
-  modifier: Modifier,
-  contentDescription: String?,
-  alignment: Alignment,
-  contentScale: ContentScale,
-  alpha: Float,
-  colorFilter: ColorFilter?,
-  placeholder: @Composable (() -> Unit)?,
-  failure: @Composable (() -> Unit)?,
+    requestBuilder: RequestBuilder<Drawable>,
+    size: ResolvableGlideSize,
+    modifier: Modifier,
+    contentDescription: String?,
+    alignment: Alignment,
+    contentScale: ContentScale,
+    alpha: Float,
+    colorFilter: ColorFilter?,
+    placeholder: @Composable (() -> Unit)?,
+    failure: @Composable (() -> Unit)?,
 ) {
-  // Use a Box so we can infer the size if the request doesn't have an explicit size.
-  @Composable fun @Composable () -> Unit.boxed() = Box(modifier = modifier) { this@boxed() }
+    // Use a Box so we can infer the size if the request doesn't have an explicit size.
+    @Composable fun @Composable () -> Unit.boxed() = Box(modifier = modifier) { this@boxed() }
 
-  val painter =
-    rememberGlidePainter(
-      requestBuilder = requestBuilder,
-      size = size,
-    )
-  if (placeholder != null && painter.status.showPlaceholder()) {
-    placeholder.boxed()
-  } else if (failure != null && painter.status == Status.FAILED) {
-    failure.boxed()
-  } else {
-    Image(
-      painter = painter,
-      contentDescription = contentDescription,
-      alignment = alignment,
-      contentScale = contentScale,
-      alpha = alpha,
-      colorFilter = colorFilter,
-      modifier = modifier.then(Modifier.semantics { displayedDrawable = painter.currentDrawable })
-    )
-  }
+    val painter = rememberGlidePainter(requestBuilder = requestBuilder, size = size)
+    if (placeholder != null && painter.status.showPlaceholder()) {
+        placeholder.boxed()
+    } else if (failure != null && painter.status == Status.FAILED) {
+        failure.boxed()
+    } else {
+        Image(
+            painter = painter,
+            contentDescription = contentDescription,
+            alignment = alignment,
+            contentScale = contentScale,
+            alpha = alpha,
+            colorFilter = colorFilter,
+            modifier =
+                modifier.then(Modifier.semantics { displayedDrawable = painter.currentDrawable }),
+        )
+    }
 }
 
 @OptIn(ExperimentGlideFlows::class)
 private fun Status.showPlaceholder(): Boolean =
-  when (this) {
-    Status.RUNNING -> true
-    Status.CLEARED -> true
-    else -> false
-  }
+    when (this) {
+        Status.RUNNING -> true
+        Status.CLEARED -> true
+        else -> false
+    }
 
 @OptIn(InternalGlideApi::class)
 @Composable
 private fun rememberGlidePainter(
-  requestBuilder: RequestBuilder<Drawable>,
-  size: ResolvableGlideSize,
+    requestBuilder: RequestBuilder<Drawable>,
+    size: ResolvableGlideSize,
 ): GlidePainter {
-  val scope = rememberCoroutineScope()
-  val lifecycleOwner = LocalLifecycleOwner.current
-  // TODO(judds): Calling onRemembered here manually might make a minor improvement in how quickly
-  //  the image load is started, but it also triggers a recomposition. I can't figure out why it
-  //  triggers a recomposition
-  return remember(requestBuilder, size, lifecycleOwner) {
-    GlidePainter(requestBuilder, size, scope, lifecycleOwner)
-  }
+    val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    // TODO(judds): Calling onRemembered here manually might make a minor improvement in how quickly
+    //  the image load is started, but it also triggers a recomposition. I can't figure out why it
+    //  triggers a recomposition
+    return remember(requestBuilder, size, lifecycleOwner) {
+        GlidePainter(requestBuilder, size, scope, lifecycleOwner)
+    }
 }
 
 @OptIn(InternalGlideApi::class)
 private fun Modifier.sizeObservingModifier(sizeObserver: SizeObserver): Modifier =
-  this.layout { measurable, constraints ->
-    val inferredSize = constraints.inferredGlideSize()
-    if (inferredSize != null) {
-      sizeObserver.setSize(inferredSize)
+    this.layout { measurable, constraints ->
+        val inferredSize = constraints.inferredGlideSize()
+        if (inferredSize != null) {
+            sizeObserver.setSize(inferredSize)
+        }
+        val placeable = measurable.measure(constraints)
+        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
     }
-    val placeable = measurable.measure(constraints)
-    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-  }
 
 internal val DisplayedDrawableKey =
-  SemanticsPropertyKey<MutableState<Drawable?>>("DisplayedDrawable")
+    SemanticsPropertyKey<MutableState<Drawable?>>("DisplayedDrawable")
 internal var SemanticsPropertyReceiver.displayedDrawable by DisplayedDrawableKey

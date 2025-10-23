@@ -10,10 +10,10 @@ import com.bumptech.glide.request.target.Target
 internal fun RequestBuilder<*>.requestManager() = this.requestManager
 
 internal fun <ResourceT, TargetAndRequestListenerT> RequestBuilder<ResourceT>.intoDirect(
-  targetAndRequestListener: TargetAndRequestListenerT,
-) where TargetAndRequestListenerT : Target<ResourceT>,
-        TargetAndRequestListenerT : RequestListener<ResourceT>  {
-  this.into(targetAndRequestListener, targetAndRequestListener) {
-    it.run()
-  }
+    targetAndRequestListener: TargetAndRequestListenerT
+)
+    where
+        TargetAndRequestListenerT : Target<ResourceT>,
+        TargetAndRequestListenerT : RequestListener<ResourceT> {
+    this.into(targetAndRequestListener, targetAndRequestListener) { it.run() }
 }
