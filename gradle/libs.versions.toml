@@ -1,7 +1,7 @@
 [versions]
 pmd = "6.0.0"
 dagger = "2.47"
-compose = "1.5.1"
+compose = "1.9.4"
 kotlin = "1.9.20"
 mockito = "5.3.1"
 retrofit = "2.3.0"
