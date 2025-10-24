@@ -1,10 +1,12 @@
 package com.bumptech.glide;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.os.MessageQueue.IdleHandler;
 import android.util.Log;
 import android.view.View;
@@ -50,7 +52,7 @@ import java.util.Set;
  * RequestBuilder} and maintaining an {@link Engine}, {@link BitmapPool}, {@link
  * com.bumptech.glide.load.engine.cache.DiskCache} and {@link MemoryCache}.
  */
-public class Glide implements ComponentCallbacks2 {
+public class Glide implements ComponentCallbacks2, Application.ActivityLifecycleCallbacks {
   private static final String DEFAULT_DISK_CACHE_DIR = "image_manager_disk_cache";
   private static final String DESTROYED_ACTIVITY_WARNING =
       "You cannot start a load on a not yet attached View or a Fragment where getActivity() "
@@ -76,6 +78,9 @@ public class Glide implements ComponentCallbacks2 {
 
   private final RequestOptionsFactory defaultRequestOptionsFactory;
   private MemoryCategory memoryCategory = MemoryCategory.NORMAL;
+
+  private final MemoryCategory memoryCategoryInBackground;
+  private boolean inBackground;
 
   @GuardedBy("this")
   @Nullable
@@ -205,7 +210,9 @@ public class Glide implements ComponentCallbacks2 {
   public static void tearDown() {
     synchronized (Glide.class) {
       if (glide != null) {
-        glide.getContext().getApplicationContext().unregisterComponentCallbacks(glide);
+        Application application = (Application) glide.getContext().getApplicationContext();
+        application.unregisterActivityLifecycleCallbacks(glide);
+        application.unregisterComponentCallbacks(glide);
         glide.engine.shutdown();
       }
       glide = null;
@@ -224,7 +231,7 @@ public class Glide implements ComponentCallbacks2 {
       @NonNull Context context,
       @NonNull GlideBuilder builder,
       @Nullable GeneratedAppGlideModule annotationGeneratedModule) {
-    Context applicationContext = context.getApplicationContext();
+    Application applicationContext = (Application) context.getApplicationContext();
     List<GlideModule> manifestModules = Collections.emptyList();
     if (annotationGeneratedModule == null || annotationGeneratedModule.isManifestParsingEnabled()) {
       manifestModules = new ManifestParser(applicationContext).parse();
@@ -265,6 +272,7 @@ public class Glide implements ComponentCallbacks2 {
     }
     Glide glide = builder.build(applicationContext, manifestModules, annotationGeneratedModule);
     applicationContext.registerComponentCallbacks(glide);
+    applicationContext.registerActivityLifecycleCallbacks(glide);
     Glide.glide = glide;
   }
 
@@ -331,6 +339,11 @@ public class Glide implements ComponentCallbacks2 {
     this.requestManagerRetriever = requestManagerRetriever;
     this.connectivityMonitorFactory = connectivityMonitorFactory;
     this.defaultRequestOptionsFactory = defaultRequestOptionsFactory;
+
+    GlideBuilder.MemoryCategoryInBackground memoryCategoryInBackground =
+        experiments.get(GlideBuilder.MemoryCategoryInBackground.class);
+    this.memoryCategoryInBackground = memoryCategoryInBackground != null ?
+                                      memoryCategoryInBackground.value() : null;
 
     // This has a circular relationship with Glide and GlideContext in that it depends on both,
     // but it's created by Glide's constructor. In practice this shouldn't matter because the
@@ -678,6 +691,12 @@ public class Glide implements ComponentCallbacks2 {
   @Override
   public void onTrimMemory(int level) {
     trimMemory(level);
+    // when level is TRIM_MEMORY_UI_HIDDEN or higher, it indicates that the app
+    // is in the background, limit the memory usage by set memory category
+    if (memoryCategoryInBackground != null && level >= TRIM_MEMORY_UI_HIDDEN) {
+      inBackground = true;
+      setMemoryCategory(memoryCategoryInBackground);
+    }
   }
 
   @Override
@@ -696,5 +715,48 @@ public class Glide implements ComponentCallbacks2 {
     /** Returns a non-null {@link RequestOptions} object. */
     @NonNull
     RequestOptions build();
+  }
+
+  /**
+   * Any activity started or resumed indicates that the app is no longer
+   * in the background, and the memory category needs to be restored.
+   */
+  @Override
+  public void onActivityStarted(Activity activity) {
+    if (memoryCategoryInBackground != null && inBackground) {
+      setMemoryCategory(MemoryCategory.NORMAL);
+    }
+  }
+
+  @Override
+  public void onActivityResumed(Activity activity) {
+    if (memoryCategoryInBackground != null && inBackground) {
+      setMemoryCategory(MemoryCategory.NORMAL);
+    }
+  }
+
+  @Override
+  public void onActivityCreated(Activity activity, Bundle savedIntsanceState) {
+    // Do nothing.
+  }
+
+  @Override
+  public void onActivityDestroyed(Activity activity) {
+    // Do nothing.
+  }
+
+  @Override
+  public void onActivityStopped(Activity activity) {
+    // Do nothing.
+  }
+
+  @Override
+  public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+    // Do nothing.
+  }
+
+  @Override
+  public void onActivityPaused(Activity activity) {
+    // Do nothing.
   }
 }
