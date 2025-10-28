@@ -14,6 +14,7 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import com.bumptech.glide.GlidePlugins;
 import com.bumptech.glide.R;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
@@ -299,7 +300,7 @@ public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
     private final List<SizeReadyCallback> cbs = new ArrayList<>();
     @Synthetic boolean waitForLayout;
 
-    @Nullable private SizeDeterminerLayoutListener layoutListener;
+    @Nullable private ViewTreeObserver.OnPreDrawListener layoutListener;
 
     SizeDeterminer(@NonNull View view) {
       this.view = view;
@@ -359,7 +360,8 @@ public abstract class CustomViewTarget<T extends View, Z> implements Target<Z> {
       }
       if (layoutListener == null) {
         ViewTreeObserver observer = view.getViewTreeObserver();
-        layoutListener = new SizeDeterminerLayoutListener(this);
+        layoutListener =
+            GlidePlugins.decorateOnPreDrawListener(new SizeDeterminerLayoutListener(this));
         observer.addOnPreDrawListener(layoutListener);
       }
     }
