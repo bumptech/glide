@@ -3,6 +3,7 @@ package com.bumptech.glide.request.target;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -20,14 +21,17 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.bumptech.glide.GlidePlugins;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.common.truth.Truth;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +60,7 @@ public class CustomViewTargetTest {
   private CustomViewTarget<View, Object> target;
   @Mock private SizeReadyCallback cb;
   @Mock private Request request;
+  @Mock private Function<OnPreDrawListener, OnPreDrawListener> onPreDrawListenerDecorator;
   private AttachStateTarget attachStateTarget;
 
   @Before
@@ -84,6 +89,7 @@ public class CustomViewTargetTest {
   @After
   public void tearDown() {
     CustomViewTarget.SizeDeterminer.maxDisplayLength = null;
+    GlidePlugins.experimentalSetOnPreDrawListenerDecorator(null);
   }
 
   @Test
@@ -589,6 +595,17 @@ public class CustomViewTargetTest {
     parent.removeView(view);
 
     verify(request, never()).clear();
+  }
+
+  @Test
+  public void getSize_whenPreDrawListenerIsUsed_appliesDecorator() {
+    when(onPreDrawListenerDecorator.apply(any(OnPreDrawListener.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    GlidePlugins.experimentalSetOnPreDrawListenerDecorator(onPreDrawListenerDecorator);
+
+    target.getSize(cb);
+
+    verify(onPreDrawListenerDecorator).apply(any(OnPreDrawListener.class));
   }
 
   @Test

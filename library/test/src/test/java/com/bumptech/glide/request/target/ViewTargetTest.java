@@ -4,6 +4,7 @@ import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -26,6 +27,7 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
+import com.bumptech.glide.GlidePlugins;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.tests.Util;
@@ -34,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,6 +67,7 @@ public class ViewTargetTest {
   private PreDrawShadowViewTreeObserver shadowObserver;
   @Mock private SizeReadyCallback cb;
   @Mock private Request request;
+  @Mock private Function<OnPreDrawListener, OnPreDrawListener> onPreDrawListenerDecorator;
   private int sdkVersion;
   private AttachStateTarget attachStateTarget;
 
@@ -83,6 +87,7 @@ public class ViewTargetTest {
   public void tearDown() {
     Util.setSdkVersionInt(sdkVersion);
     ViewTarget.SizeDeterminer.maxDisplayLength = null;
+    GlidePlugins.experimentalSetOnPreDrawListenerDecorator(null);
   }
 
   @Test
@@ -439,6 +444,17 @@ public class ViewTargetTest {
     target.getSize(cb);
 
     verify(cb, never()).onSizeReady(anyInt(), anyInt());
+  }
+
+  @Test
+  public void getSize_whenPreDrawListenerIsUsed_appliesDecorator() {
+    when(onPreDrawListenerDecorator.apply(any(OnPreDrawListener.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+    GlidePlugins.experimentalSetOnPreDrawListenerDecorator(onPreDrawListenerDecorator);
+
+    target.getSize(cb);
+
+    verify(onPreDrawListenerDecorator).apply(any(OnPreDrawListener.class));
   }
 
   private void setDisplayDimens(Integer width, Integer height) {
