@@ -3,6 +3,10 @@ package com.bumptech.glide;
 /** An enum for dynamically modifying the amount of memory Glide is able to use. */
 public enum MemoryCategory {
   /**
+   * Tells Glide's memory cache and bitmap pool to use no memory.
+   */
+  ZERO(0.0f),
+  /**
    * Tells Glide's memory cache and bitmap pool to use at most half of their initial maximum size.
    */
   LOW(0.5f),
