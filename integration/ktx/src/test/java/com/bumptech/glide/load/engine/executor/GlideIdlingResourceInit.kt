@@ -19,7 +19,7 @@ object GlideIdlingResources {
                 /* maximumPoolSize = */ 1,
                 /* keepAliveTime = */ 1,
                 TimeUnit.SECONDS,
-                LinkedBlockingQueue()
+                LinkedBlockingQueue(),
             ) {
                 Thread(it)
             }
@@ -29,7 +29,7 @@ object GlideIdlingResources {
             (builder ?: GlideBuilder())
                 .setSourceExecutor(glideExecutor)
                 .setAnimationExecutor(glideExecutor)
-                .setDiskCacheExecutor(glideExecutor)
+                .setDiskCacheExecutor(glideExecutor),
         )
         registry.register(executor)
     }

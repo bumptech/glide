@@ -7,7 +7,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 
 @AutoService(SymbolProcessorProvider::class)
 class GlideSymbolProcessorProvider : SymbolProcessorProvider {
-  override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-    return GlideSymbolProcessor(environment)
-  }
+    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
+        return GlideSymbolProcessor(environment)
+    }
 }

@@ -11,31 +11,31 @@ import java.util.concurrent.TimeUnit
 
 object GlideIdlingResourceInit {
 
-  fun initGlide(composeRule: ComposeTestRule) {
-    val executor =
-      IdlingThreadPoolExecutor(
-        "glide_test_thread",
-        /* corePoolSize = */ 1,
-        /* maximumPoolSize = */ 1,
-        /* keepAliveTime = */ 1,
-        TimeUnit.SECONDS,
-        LinkedBlockingQueue()
-      ) {
-        Thread(it)
-      }
-    composeRule.registerIdlingResource(
-      object : IdlingResource {
-        override val isIdleNow: Boolean
-          get() = executor.isIdleNow
-      }
-    )
-    val glideExecutor = GlideExecutor(executor)
-    Glide.init(
-      ApplicationProvider.getApplicationContext(),
-      GlideBuilder()
-        .setSourceExecutor(glideExecutor)
-        .setAnimationExecutor(glideExecutor)
-        .setDiskCacheExecutor(glideExecutor)
-    )
-  }
+    fun initGlide(composeRule: ComposeTestRule) {
+        val executor =
+            IdlingThreadPoolExecutor(
+                "glide_test_thread",
+                /* corePoolSize = */ 1,
+                /* maximumPoolSize = */ 1,
+                /* keepAliveTime = */ 1,
+                TimeUnit.SECONDS,
+                LinkedBlockingQueue(),
+            ) {
+                Thread(it)
+            }
+        composeRule.registerIdlingResource(
+            object : IdlingResource {
+                override val isIdleNow: Boolean
+                    get() = executor.isIdleNow
+            }
+        )
+        val glideExecutor = GlideExecutor(executor)
+        Glide.init(
+            ApplicationProvider.getApplicationContext(),
+            GlideBuilder()
+                .setSourceExecutor(glideExecutor)
+                .setAnimationExecutor(glideExecutor)
+                .setDiskCacheExecutor(glideExecutor),
+        )
+    }
 }

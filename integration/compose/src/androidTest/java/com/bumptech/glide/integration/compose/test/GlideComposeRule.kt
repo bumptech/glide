@@ -13,20 +13,19 @@ import org.junit.runners.model.Statement
  * Merges [TearDownGlide], [ComposeContentTestRule] and [GlideIdlingResourceInit] into a single
  * helper rule that's common across (most of) Glide's compose integration tests.
  */
-class GlideComposeRule(
-  private val composeRule: ComposeContentTestRule = createComposeRule(),
-) : TestRule, ComposeContentTestRule by composeRule {
-  private val rules = RuleChain.outerRule(TearDownGlide()).around(composeRule)
+class GlideComposeRule(private val composeRule: ComposeContentTestRule = createComposeRule()) :
+    TestRule, ComposeContentTestRule by composeRule {
+    private val rules = RuleChain.outerRule(TearDownGlide()).around(composeRule)
 
-  override fun apply(base: Statement?, description: Description?): Statement {
-    return rules.apply(
-      object : Statement() {
-        override fun evaluate() {
-          GlideIdlingResourceInit.initGlide(this@GlideComposeRule)
-          base?.evaluate()
-        }
-      },
-      description,
-    )
-  }
+    override fun apply(base: Statement?, description: Description?): Statement {
+        return rules.apply(
+            object : Statement() {
+                override fun evaluate() {
+                    GlideIdlingResourceInit.initGlide(this@GlideComposeRule)
+                    base?.evaluate()
+                }
+            },
+            description,
+        )
+    }
 }
