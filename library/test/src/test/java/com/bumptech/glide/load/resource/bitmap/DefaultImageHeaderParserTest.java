@@ -10,6 +10,7 @@ import com.bumptech.glide.load.ImageHeaderParser.ImageType;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
 import com.bumptech.glide.testutil.TestResourceUtil;
+import com.google.common.io.ByteStreams;
 import java.io.ByteArrayInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -19,7 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.util.Util;
 
 @RunWith(RobolectricTestRunner.class)
 public class DefaultImageHeaderParserTest {
@@ -505,7 +505,8 @@ public class DefaultImageHeaderParserTest {
 
   @Test
   public void testCanParseRealAnimatedWebpFile() throws IOException {
-    byte[] data = Util.readBytes(TestResourceUtil.openResource(getClass(), "animated_webp.webp"));
+    byte[] data =
+        ByteStreams.toByteArray(TestResourceUtil.openResource(getClass(), "animated_webp.webp"));
     runTest(
         data,
         new ParserTestCase() {
@@ -822,7 +823,8 @@ public class DefaultImageHeaderParserTest {
 
   @Test
   public void testCanParseRealAnimatedAvifFile() throws IOException {
-    byte[] data = Util.readBytes(TestResourceUtil.openResource(getClass(), "animated_avif.avif"));
+    byte[] data =
+        ByteStreams.toByteArray(TestResourceUtil.openResource(getClass(), "animated_avif.avif"));
     runTest(
         data,
         new ParserTestCase() {
@@ -866,7 +868,7 @@ public class DefaultImageHeaderParserTest {
   @Test
   public void testHandlesParsingOrientationWithMinimalExifSegment() throws IOException {
     byte[] data =
-        Util.readBytes(TestResourceUtil.openResource(getClass(), "short_exif_sample.jpg"));
+        ByteStreams.toByteArray(TestResourceUtil.openResource(getClass(), "short_exif_sample.jpg"));
     runTest(
         data,
         new ParserTestCase() {
@@ -1016,7 +1018,8 @@ public class DefaultImageHeaderParserTest {
   @Test
   public void hasJpegMpf_withGainmapFile_returnsTrue() throws IOException {
     byte[] data =
-        Util.readBytes(TestResourceUtil.openResource(getClass(), "small_gainmap_image.jpg"));
+        ByteStreams.toByteArray(
+            TestResourceUtil.openResource(getClass(), "small_gainmap_image.jpg"));
     runTest(
         data,
         new ParserTestCase() {
@@ -1038,7 +1041,7 @@ public class DefaultImageHeaderParserTest {
   @Test
   public void hasJpegMpf_withNonGainmapFile_returnsFalse() throws IOException {
     byte[] data =
-        Util.readBytes(TestResourceUtil.openResource(getClass(), "short_exif_sample.jpg"));
+        ByteStreams.toByteArray(TestResourceUtil.openResource(getClass(), "short_exif_sample.jpg"));
     runTest(
         data,
         new ParserTestCase() {
