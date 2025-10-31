@@ -26,12 +26,12 @@ Or use Gradle:
 
 ```gradle
 repositories {
-  google()
+  google()
   mavenCentral()
 }
 
 dependencies {
-  implementation 'com.github.bumptech.glide:glide:5.0.5'
+  implementation 'com.github.bumptech.glide:glide:5.0.5'
 }
 ```
 
