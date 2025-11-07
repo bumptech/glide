@@ -1,5 +1,6 @@
 [versions]
 avif = "1.1.1.14d8e3c4"
+gson = "2.8.2"
 pmd = "6.0.0"
 dagger = "2.47"
 compose = "1.5.1"
@@ -88,6 +89,7 @@ androidx-test-runner = { group = "androidx.test", name = "runner", version.ref =
 androidx-tracing = { group = "androidx.tracing", name = "tracing", version.ref = "androidx-tracing" }
 androidx-vectordrawable = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version.ref = "androidx-vectordrawable" }
 avif = { module = "org.aomedia.avif.android:avif", version.ref = "avif" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 proguard-gradle = { group = "com.guardsquare", name = "proguard-gradle", version.ref = "proguard-gradle" }
 compose-material = { group = "androidx.compose.material", name = "material", version.ref = "compose" }
 coroutines-binarycompat-gradle = { group = "org.jetbrains.kotlinx", name = "binary-compatibility-validator", version.ref = "coroutines-binarycompat-gradle" }

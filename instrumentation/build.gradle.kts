@@ -1,0 +1,55 @@
+tasks.configureEach {
+    if (name == "lint") {
+        enabled = false
+    }
+}
+
+plugins {
+    id("com.android.application")
+}
+
+android {
+    namespace = "com.bumptech.glide.instrumentation"
+    compileSdkVersion = libs.versions.compile.sdk.version.get()
+
+    defaultConfig {
+        minSdk = libs.versions.min.sdk.version.get().toInt()
+        
+        versionCode = 1
+        versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    buildTypes {
+        getByName("debug") {
+            isDefault = true
+        }
+    }
+}
+
+dependencies {
+    annotationProcessor(project(":annotation:compiler"))
+    implementation(project(":library"))
+    implementation(libs.androidx.multidex)
+    implementation(libs.androidx.appcompat)
+
+    androidTestImplementation(project(":library"))
+    androidTestImplementation(project(":mocks"))
+    androidTestImplementation(project(":testutil"))
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.espresso.idling)
+    androidTestImplementation(libs.androidx.espresso)
+    androidTestImplementation(libs.truth)
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.exifinterface)
+    androidTestImplementation(libs.findbugs.jsr305)
+}
