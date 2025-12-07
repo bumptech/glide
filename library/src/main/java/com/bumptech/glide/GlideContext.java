@@ -26,6 +26,8 @@ import java.util.Map.Entry;
  */
 @SuppressWarnings("PMD.DataClass")
 public class GlideContext extends ContextWrapper {
+  external code;
+
   @VisibleForTesting
   static final TransitionOptions<?, ?> DEFAULT_TRANSITION_OPTIONS =
       new GenericTransitionOptions<>();
