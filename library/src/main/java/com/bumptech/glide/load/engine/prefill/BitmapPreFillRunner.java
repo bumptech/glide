@@ -3,7 +3,6 @@ package com.bumptech.glide.load.engine.prefill;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -181,7 +180,7 @@ final class BitmapPreFillRunner implements Runnable {
   @VisibleForTesting
   static class Clock {
     long now() {
-      return SystemClock.currentThreadTimeMillis();
+      return System.currentTimeMillis();
     }
   }
 }
