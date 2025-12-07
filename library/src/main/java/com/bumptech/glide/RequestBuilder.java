@@ -665,6 +665,8 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     return applyResourceThemeAndSignature(requestBuilder);
   }
 
+  // We should be able to remove the usage of theme in a future release
+  @SuppressWarnings("deprecation")
   private RequestBuilder<TranscodeType> applyResourceThemeAndSignature(
       RequestBuilder<TranscodeType> requestBuilder) {
     return requestBuilder
