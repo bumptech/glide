@@ -1,10 +1,12 @@
 package com.bumptech.glide;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.os.MessageQueue.IdleHandler;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +35,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.ImageViewTargetFactory;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.util.GlideSuppliers;
 import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Util;
@@ -80,6 +83,13 @@ public class Glide implements ComponentCallbacks2 {
   @GuardedBy("this")
   @Nullable
   private BitmapPreFiller bitmapPreFiller;
+
+  private boolean inBackground = false;
+  private MemoryCategory memoryCategoryInBackground = null;
+  private MemoryCategory memoryCategoryInForeground = MemoryCategory.NORMAL;
+
+  private final GlideSupplier<SetMemoryCategoryOnLifecycleCallbacks> setMemoryCategoryCallbacks =
+      GlideSuppliers.memorize(SetMemoryCategoryOnLifecycleCallbacks::new);
 
   /**
    * Returns a directory with a default name in the private cache directory of the application to
@@ -206,6 +216,7 @@ public class Glide implements ComponentCallbacks2 {
     synchronized (Glide.class) {
       if (glide != null) {
         glide.getContext().getApplicationContext().unregisterComponentCallbacks(glide);
+        glide.unregisterActivityLifecycleCallbacks();
         glide.engine.shutdown();
       }
       glide = null;
@@ -265,6 +276,7 @@ public class Glide implements ComponentCallbacks2 {
     }
     Glide glide = builder.build(applicationContext, manifestModules, annotationGeneratedModule);
     applicationContext.registerComponentCallbacks(glide);
+    glide.registerActivityLifecycleCallbacks();
     Glide.glide = glide;
   }
 
@@ -332,6 +344,12 @@ public class Glide implements ComponentCallbacks2 {
     this.connectivityMonitorFactory = connectivityMonitorFactory;
     this.defaultRequestOptionsFactory = defaultRequestOptionsFactory;
 
+    GlideBuilder.MemoryCategoryInBackground memoryCategoryInBackground =
+        experiments.get(GlideBuilder.MemoryCategoryInBackground.class);
+    if (memoryCategoryInBackground != null) {
+      this.memoryCategoryInBackground = memoryCategoryInBackground.value();
+    }
+
     // This has a circular relationship with Glide and GlideContext in that it depends on both,
     // but it's created by Glide's constructor. In practice this shouldn't matter because the
     // supplier holding the registry should never be initialized before this constructor finishes.
@@ -352,6 +370,31 @@ public class Glide implements ComponentCallbacks2 {
             engine,
             experiments,
             logLevel);
+  }
+
+  private void registerActivityLifecycleCallbacks() {
+    if (memoryCategoryInBackground != null) {
+      Context context = getContext().getApplicationContext();
+      if (!(context instanceof Application) && Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(
+            TAG,
+            "Glide requires an Application Context. You passed: "
+                + context
+                + ". This will disable lifecycle related features.");
+        return;
+      }
+      ((Application) context).registerActivityLifecycleCallbacks(setMemoryCategoryCallbacks.get());
+    }
+  }
+
+  private void unregisterActivityLifecycleCallbacks() {
+    if (memoryCategoryInBackground != null) {
+      Context context = getContext().getApplicationContext();
+      if (context instanceof Application) {
+        ((Application) context)
+            .unregisterActivityLifecycleCallbacks(setMemoryCategoryCallbacks.get());
+      }
+    }
   }
 
   /**
@@ -675,9 +718,30 @@ public class Glide implements ComponentCallbacks2 {
     }
   }
 
+  private void setMemoryCategoryWhenInBackground() {
+    if (memoryCategoryInBackground == null || inBackground) {
+      return;
+    }
+    inBackground = true;
+    memoryCategoryInForeground = setMemoryCategory(memoryCategoryInBackground);
+  }
+
+  private void setMemoryCategoryWhenInForeground() {
+    if (memoryCategoryInBackground == null || !inBackground) {
+      return;
+    }
+    inBackground = false;
+    setMemoryCategory(memoryCategoryInForeground);
+  }
+
   @Override
   public void onTrimMemory(int level) {
     trimMemory(level);
+    // when level is TRIM_MEMORY_UI_HIDDEN or higher, it indicates that the app is
+    // in the background, limit the memory usage by memoryCategoryInBackground.
+    if (level >= TRIM_MEMORY_UI_HIDDEN) {
+      setMemoryCategoryWhenInBackground();
+    }
   }
 
   @Override
@@ -696,5 +760,45 @@ public class Glide implements ComponentCallbacks2 {
     /** Returns a non-null {@link RequestOptions} object. */
     @NonNull
     RequestOptions build();
+  }
+
+  private final class SetMemoryCategoryOnLifecycleCallbacks
+      implements Application.ActivityLifecycleCallbacks {
+    @Override
+    public void onActivityStarted(Activity activity) {
+      // Do nothing.
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity) {
+      // Any activity resumed indicates that the app is no longer in the background,
+      // and we should restore the memory usage to normal.
+      setMemoryCategoryWhenInForeground();
+    }
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+      // Do nothing.
+    }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) {
+      // Do nothing.
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+      // Do nothing.
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+      // Do nothing.
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+      // Do nothing.
+    }
   }
 }

@@ -513,6 +513,17 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to make Glide use {@link MemoryCategory} to set the memory category when
+   * the app is in the background.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder setMemoryCategoryInBackground(MemoryCategory memoryCategory) {
+    glideExperimentsBuilder.add(new MemoryCategoryInBackground(memoryCategory));
+    return this;
+  }
+
+  /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
    */
@@ -653,4 +664,17 @@ public final class GlideBuilder {
 
   /** See {@link #setUseMediaStoreOpenFileApisIfPossible(boolean)}. */
   public static final class UseMediaStoreOpenFileApisIfPossible implements Experiment {}
+
+  /** See {@link #setMemoryCategoryInBackground(MemoryCategory)} */
+  public static final class MemoryCategoryInBackground implements Experiment {
+    private final MemoryCategory memoryCategory;
+
+    MemoryCategoryInBackground(MemoryCategory memoryCategory) {
+      this.memoryCategory = memoryCategory;
+    }
+
+    public MemoryCategory value() {
+      return memoryCategory;
+    }
+  }
 }
