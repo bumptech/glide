@@ -59,6 +59,15 @@ public class SizeConfigStrategy implements LruPoolStrategy {
   private final GroupedLinkedMap<Key, Bitmap> groupedMap = new GroupedLinkedMap<>();
   private final Map<Bitmap.Config, NavigableMap<Integer, Integer>> sortedSizes = new HashMap<>();
 
+  private int wasteLimit = 0;
+  private float wasteRatio = 0.0f;
+
+  private boolean isWasteful(int requestSize, int actualSize) {
+    int waste = actualSize - requestSize;
+    return (wasteLimit > 0 && waste >= wasteLimit)
+        || (wasteRatio > 0 && waste / (float) requestSize >= wasteRatio);
+  }
+
   @Override
   public void put(Bitmap bitmap) {
     int size = Util.getBitmapByteSize(bitmap);
@@ -79,9 +88,15 @@ public class SizeConfigStrategy implements LruPoolStrategy {
 
     Bitmap result = groupedMap.get(bestKey);
     if (result != null) {
-      // Decrement must be called before reconfigure.
-      decrementBitmapOfSize(bestKey.size, result);
-      result.reconfigure(width, height, config);
+      // If the waste is too much, we put the bitmap back and return null.
+      if (isWasteful(size, bestKey.size)) {
+        groupedMap.put(bestKey, result);
+        result = null;
+      } else {
+        // Decrement must be called before reconfigure.
+        decrementBitmapOfSize(bestKey.size, result);
+        result.reconfigure(width, height, config);
+      }
     }
     return result;
   }
@@ -160,6 +175,12 @@ public class SizeConfigStrategy implements LruPoolStrategy {
   @Override
   public int getSize(Bitmap bitmap) {
     return Util.getBitmapByteSize(bitmap);
+  }
+
+  @Override
+  public void setWasteLimit(int wasteLimit, float wasteRatio) {
+    this.wasteLimit = wasteLimit;
+    this.wasteRatio = wasteRatio;
   }
 
   @Override

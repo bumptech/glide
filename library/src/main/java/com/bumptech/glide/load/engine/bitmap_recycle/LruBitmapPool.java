@@ -329,6 +329,10 @@ public class LruBitmapPool implements BitmapPool {
     return Collections.unmodifiableSet(configs);
   }
 
+  public void setWasteLimit(int wasteLimit, float wasteRatio) {
+    strategy.setWasteLimit(wasteLimit, wasteRatio);
+  }
+
   private interface BitmapTracker {
     void add(Bitmap bitmap);
 

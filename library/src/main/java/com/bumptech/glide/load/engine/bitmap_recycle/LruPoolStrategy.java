@@ -17,4 +17,6 @@ interface LruPoolStrategy {
   String logBitmap(int width, int height, Bitmap.Config config);
 
   int getSize(Bitmap bitmap);
+
+  void setWasteLimit(int wasteLimit, float wasteRatio);
 }

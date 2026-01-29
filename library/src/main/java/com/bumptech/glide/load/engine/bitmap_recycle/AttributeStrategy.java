@@ -48,6 +48,11 @@ class AttributeStrategy implements LruPoolStrategy {
   }
 
   @Override
+  public void setWasteLimit(int wasteLimit, float wasteRatio) {
+    // Do nothing.
+  }
+
+  @Override
   public String toString() {
     return "AttributeStrategy:\n  " + groupedMap;
   }

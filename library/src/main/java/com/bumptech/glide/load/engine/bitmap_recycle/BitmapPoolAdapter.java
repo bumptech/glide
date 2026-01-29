@@ -45,4 +45,9 @@ public class BitmapPoolAdapter implements BitmapPool {
   public void trimMemory(int level) {
     // Do nothing.
   }
+
+  @Override
+  public void setWasteLimit(int wasteLimit, float wasteRatio) {
+    // Do nothing.
+  }
 }

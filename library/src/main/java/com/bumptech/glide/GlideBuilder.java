@@ -67,6 +67,9 @@ public final class GlideBuilder {
   private boolean isActiveResourceRetentionAllowed;
   @Nullable private List<RequestListener<Object>> defaultRequestListeners;
 
+  private int bitmapPoolWasteLimit = 0;
+  private float bitmapPoolWasteRatio = 0.0f;
+
   /**
    * Sets the {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} implementation to use
    * to store and retrieve reused {@link android.graphics.Bitmap}s.
@@ -523,6 +526,12 @@ public final class GlideBuilder {
     return this;
   }
 
+  public GlideBuilder setBitmapPoolWasteLimit(int wasteLimit, float wasteRatio) {
+    this.bitmapPoolWasteLimit = wasteLimit;
+    this.bitmapPoolWasteRatio = wasteRatio;
+    return this;
+  }
+
   /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
@@ -593,6 +602,7 @@ public final class GlideBuilder {
         bitmapPool = new BitmapPoolAdapter();
       }
     }
+    bitmapPool.setWasteLimit(bitmapPoolWasteLimit, bitmapPoolWasteRatio);
 
     if (arrayPool == null) {
       arrayPool = new LruArrayPool(memorySizeCalculator.getArrayPoolSizeInBytes());

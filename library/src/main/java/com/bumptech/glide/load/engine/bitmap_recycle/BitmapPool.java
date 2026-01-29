@@ -97,4 +97,13 @@ public interface BitmapPool {
    * @see android.content.ComponentCallbacks2
    */
   void trimMemory(int level);
+
+  /**
+   * Sets the waste limit for the pool.
+   *
+   * @param wasteLimit The maximum number of bytes that can be wasted in the pool.
+   * @param wasteRatio The maximum ratio of wasted bytes to requested bytes that can be wasted in
+   *     the pool.
+   */
+  void setWasteLimit(int wasteLimit, float wasteRatio);
 }
