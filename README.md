@@ -47,6 +47,30 @@ Or Maven:
 
 For info on using the bleeding edge, see the [Snapshots][17] docs page.
 
+If you are using Glide on older versions of Android, you may need to add
+[Java 8+ API desugaring support](https://developer.android.com/studio/write/java8-support#library-desugaring)
+
+```groovy
+android {
+    defaultConfig {
+        // Required when setting minSdkVersion to 20 or lower
+        multiDexEnabled true
+    }
+
+    compileOptions {
+        // Flag to enable support for the new language APIs
+        coreLibraryDesugaringEnabled true
+        // Set Java compatibility (version can be higher if desired)
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:<latest-version>'
+}
+```
+
 R8 / Proguard
 --------
 The specific rules are [already bundled](library/proguard-rules.txt) into the aar which can be interpreted by R8 automatically
