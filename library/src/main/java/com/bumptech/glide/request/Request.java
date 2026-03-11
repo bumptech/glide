@@ -9,8 +9,21 @@ public interface Request {
    * Prevents any bitmaps being loaded from previous requests, releases any resources held by this
    * request, displays the current placeholder if one was provided, and marks the request as having
    * been cancelled.
+   *
+   * <p>The default implementation delegates to {@link #clear(boolean)}.
    */
-  void clear();
+  default void clear() {
+    clear(false);
+  }
+
+  /**
+   * Prevents any bitmaps being loaded from previous requests, releases any resources held by this
+   * request, displays the current placeholder if one was provided, and marks the request as having
+   * been cancelled.
+   *
+   * @param skipPlaceholder does not load the placeholder if a resource id is provided
+   */
+  void clear(boolean skipPlaceholder);
 
   /**
    * Similar to {@link #clear} for in progress requests (or portions of a request), but does nothing

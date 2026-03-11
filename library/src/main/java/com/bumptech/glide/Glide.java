@@ -663,10 +663,10 @@ public class Glide implements ComponentCallbacks2 {
     return glideContext.getRegistry();
   }
 
-  boolean removeFromManagers(@NonNull Target<?> target) {
+  boolean removeFromManagers(@NonNull Target<?> target, boolean skipPlaceholder) {
     synchronized (managers) {
       for (RequestManager requestManager : managers) {
-        if (requestManager.untrack(target)) {
+        if (requestManager.untrack(target, skipPlaceholder)) {
           return true;
         }
       }
