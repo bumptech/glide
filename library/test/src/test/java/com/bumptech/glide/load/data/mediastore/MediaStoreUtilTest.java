@@ -27,5 +27,38 @@ public class MediaStoreUtilTest {
         Uri.parse("content://media/picker/0/com.android.providers.media.photopicker/media/123");
 
     assertThat(MediaStoreUtil.isAndroidPickerUri(androidPickerUri)).isTrue();
+
+    Uri androidPickerGetContentUri =
+        Uri.parse(
+            "content://media/picker_get_content/0/com.android.providers.media.photopicker/media/123");
+
+    assertThat(MediaStoreUtil.isAndroidPickerUri(androidPickerGetContentUri)).isTrue();
+
+    Uri androidPickerTranscodedUri =
+        Uri.parse(
+            "content://media/picker_transcoded/0/com.android.providers.media.photopicker/media/123");
+
+    assertThat(MediaStoreUtil.isAndroidPickerUri(androidPickerTranscodedUri)).isTrue();
+
+    Uri androidModifiedPickerUri =
+        Uri.parse(
+            "content://media/picker.component1-true.component2:"
+                + " false}/0/com.android.providers.media.photopicker/media/123");
+
+    assertThat(MediaStoreUtil.isAndroidPickerUri(androidModifiedPickerUri)).isTrue();
+
+    Uri androidModifiedPickerGetContentUri =
+        Uri.parse(
+            "content://media/picker_get_content.component1-true.component2:"
+                + " false}/0/com.android.providers.media.photopicker/media/123");
+
+    assertThat(MediaStoreUtil.isAndroidPickerUri(androidModifiedPickerGetContentUri)).isTrue();
+
+    Uri androidModifiedPickerTranscodedUri =
+        Uri.parse(
+            "content://media/picker_transcoded.component1-true.component2-xxxx"
+                + " false}/0/com.android.providers.media.photopicker/media/123");
+
+    assertThat(MediaStoreUtil.isAndroidPickerUri(androidModifiedPickerTranscodedUri)).isTrue();
   }
 }
