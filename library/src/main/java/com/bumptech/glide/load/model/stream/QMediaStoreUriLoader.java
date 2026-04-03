@@ -34,14 +34,15 @@ import java.io.InputStream;
  * to get at the un-redacted File. There are two ways we can do so:
  *
  * <ul>
- *   <li>MediaStore.setRequireOriginal
+ *   <li>MediaStore.setRequireOriginal (on Android Q)
  *   <li>Querying for and opening the file via the underlying file path, rather than via {@code
  *       ContentResolver}
  * </ul>
  *
- * <p>MediaStore.setRequireOriginal will only work for applications that target Q and request and
- * currently have {@link android.Manifest.permission#ACCESS_MEDIA_LOCATION}. It's the simplest
- * change to make, but it covers the fewest applications.
+ * <p>On Android Q, Glide uses {@code MediaStore.setRequireOriginal} to bypass redaction
+ * automatically if the application has {@link android.Manifest.permission#ACCESS_MEDIA_LOCATION}.
+ * On Android R and above, Glide expects the caller to handle adding the requireOriginal parameter
+ * to the URI themselves if they want un-redacted access.
  *
  * <p>Querying for the file path and opening the file directly works for applications that do not
  * target Q and for applications that do target Q but that opt in to legacy storage mode. Other
@@ -156,11 +157,13 @@ public final class QMediaStoreUriLoader<DataT> implements ModelLoader<Uri, DataT
       if (Environment.isExternalStorageLegacy()) {
         return fileDelegate.buildLoadData(queryForFilePath(uri), width, height, options);
       } else {
-        // Android Picker uris have MediaStore authority and does not accept requireOriginal.
-        if (MediaStoreUtil.isAndroidPickerUri(uri)) {
+        // On Android R and above, do not append requireOriginal.
+        // For Android Q, Android Picker uris have MediaStore authority and do not accept
+        // requireOriginal.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+            || MediaStoreUtil.isAndroidPickerUri(uri)) {
           return uriDelegate.buildLoadData(uri, width, height, options);
         }
-
         Uri toLoad = isAccessMediaLocationGranted() ? MediaStore.setRequireOriginal(uri) : uri;
         return uriDelegate.buildLoadData(toLoad, width, height, options);
       }
