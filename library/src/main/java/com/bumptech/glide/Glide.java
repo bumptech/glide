@@ -696,9 +696,9 @@ public class Glide implements ComponentCallbacks2 {
   @Override
   public void onTrimMemory(int level) {
     trimMemory(level);
-    // when level is TRIM_MEMORY_UI_HIDDEN or higher, it indicates that the app is
+    // when level is higher than TRIM_MEMORY_UI_HIDDEN, it indicates that the app is
     // in the background, limit the memory usage by memoryCategoryInBackground.
-    if (level >= TRIM_MEMORY_UI_HIDDEN) {
+    if (level > TRIM_MEMORY_UI_HIDDEN) {
       setMemoryCategoryWhenInBackground();
     }
   }

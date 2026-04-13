@@ -43,10 +43,24 @@ public final class MediaStoreUtil {
     return MediaStore.openAssetFileDescriptor(contentResolver, uri, "r", null);
   }
 
-  // Android picker uris contain a "picker" segment:
-  // https://android.googlesource.com/platform/packages/providers/MediaProvider/+/refs/heads/master/src/com/android/providers/media/PickerUriResolver.java#58
+  /**
+   * Android picker URIs contain a "picker" prefix in one of their path segments.
+   * https://android.googlesource.com/platform/packages/providers/MediaProvider/+/refs/heads/master/src/com/android/providers/media/PickerUriResolver.java#58
+   *
+   * @deprecated This method is retained solely to support existing use cases. It should not be
+   *     utilized for new development or upcoming features.
+   */
+  @Deprecated
   public static boolean isAndroidPickerUri(Uri uri) {
-    return isMediaStoreUri(uri) && uri.getPathSegments().contains("picker");
+    if (!isMediaStoreUri(uri)) {
+      return false;
+    }
+    for (String segment : uri.getPathSegments()) {
+      if (segment != null && segment.startsWith("picker")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static boolean isVideoUri(Uri uri) {
