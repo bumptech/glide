@@ -17,9 +17,7 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RawRes;
-import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.manager.ConnectivityMonitor;
 import com.bumptech.glide.manager.ConnectivityMonitorFactory;
@@ -28,7 +26,6 @@ import com.bumptech.glide.manager.LifecycleListener;
 import com.bumptech.glide.manager.RequestManagerTreeNode;
 import com.bumptech.glide.manager.RequestTracker;
 import com.bumptech.glide.manager.TargetTracker;
-import com.bumptech.glide.request.BaseRequestOptions;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -93,7 +90,7 @@ public class RequestManager
   @GuardedBy("this")
   private RequestOptions requestOptions;
 
-  private boolean pauseAllRequestsOnTrimMemoryModerate;
+  private boolean pauseAllRequestsOnTrimMemoryUiHidden;
 
   private boolean clearOnStop;
 
@@ -240,10 +237,10 @@ public class RequestManager
 
   /**
    * If {@code true} then clear all in-progress and completed requests when the platform sends
-   * {@code onTrimMemory} with level = {@code TRIM_MEMORY_MODERATE}.
+   * {@code onTrimMemory} with level >= {@code TRIM_MEMORY_UI_HIDDEN}.
    */
   public void setPauseAllRequestsOnTrimMemoryModerate(boolean pauseAllOnTrim) {
-    pauseAllRequestsOnTrimMemoryModerate = pauseAllOnTrim;
+    pauseAllRequestsOnTrimMemoryUiHidden = pauseAllOnTrim;
   }
 
   /**
@@ -708,8 +705,15 @@ public class RequestManager
 
   @Override
   public void onTrimMemory(int level) {
-    if (level == TRIM_MEMORY_MODERATE && pauseAllRequestsOnTrimMemoryModerate) {
-      pauseAllRequestsRecursive();
+    if (pauseAllRequestsOnTrimMemoryUiHidden) {
+      // On Android 14+ (API 34+), fine-grained trim levels like TRIM_MEMORY_MODERATE are
+      // deprecated.
+      // The primary signals indicating the app is not in the foreground are
+      // TRIM_MEMORY_UI_HIDDEN and higher. We should pause requests when the UI is hidden
+      // to save resources, in line with the original intent of pausing on memory pressure.
+      if (level >= TRIM_MEMORY_UI_HIDDEN) {
+        pauseAllRequestsRecursive();
+      }
     }
   }
 
