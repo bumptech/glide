@@ -2,6 +2,7 @@ package com.bumptech.glide.annotation.compiler;
 
 import com.bumptech.glide.annotation.GlideType;
 import com.google.auto.service.AutoService;
+import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
@@ -62,11 +63,13 @@ import javax.lang.model.element.TypeElement;
 @AutoService(Processor.class)
 public final class GlideAnnotationProcessor extends AbstractProcessor {
   static final boolean DEBUG = false;
+  private static final String USE_LEGACY_TYPE_COMPARISON_OPTION = "glide.useLegacyTypeComparison";
   private ProcessorUtil processorUtil;
   private LibraryModuleProcessor libraryModuleProcessor;
   private AppModuleProcessor appModuleProcessor;
   private boolean isGeneratedAppGlideModuleWritten;
   private ExtensionProcessor extensionProcessor;
+  private boolean useLegacyTypeComparison;
 
   @Override
   public synchronized void init(ProcessingEnvironment processingEnvironment) {
@@ -75,8 +78,17 @@ public final class GlideAnnotationProcessor extends AbstractProcessor {
     IndexerGenerator indexerGenerator = new IndexerGenerator(processorUtil);
     libraryModuleProcessor = new LibraryModuleProcessor(processorUtil, indexerGenerator);
     appModuleProcessor = new AppModuleProcessor(processingEnvironment, processorUtil);
+    useLegacyTypeComparison =
+        Boolean.parseBoolean(
+            processingEnvironment.getOptions().get(USE_LEGACY_TYPE_COMPARISON_OPTION));
     extensionProcessor =
-        new ExtensionProcessor(processingEnvironment, processorUtil, indexerGenerator);
+        new ExtensionProcessor(
+            processingEnvironment, processorUtil, indexerGenerator, useLegacyTypeComparison);
+  }
+
+  @Override
+  public Set<String> getSupportedOptions() {
+    return ImmutableSet.of(USE_LEGACY_TYPE_COMPARISON_OPTION);
   }
 
   @Override

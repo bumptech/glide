@@ -7,8 +7,8 @@ import com.bumptech.glide.annotation.GlideType;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.squareup.javapoet.ClassName;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
@@ -20,6 +20,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic.Kind;
 
 /**
@@ -33,11 +35,15 @@ import javax.tools.Diagnostic.Kind;
 final class GlideExtensionValidator {
   private final ProcessingEnvironment processingEnvironment;
   private final ProcessorUtil processorUtil;
+  private final boolean useLegacyTypeComparison;
 
   GlideExtensionValidator(
-      ProcessingEnvironment processingEnvironment, ProcessorUtil processorUtil) {
+      ProcessingEnvironment processingEnvironment,
+      ProcessorUtil processorUtil,
+      boolean useLegacyTypeComparison) {
     this.processingEnvironment = processingEnvironment;
     this.processorUtil = processorUtil;
+    this.useLegacyTypeComparison = useLegacyTypeComparison;
   }
 
   void validateExtension(TypeElement typeElement) {
@@ -109,7 +115,7 @@ final class GlideExtensionValidator {
     validateAnnotatedNonNull(executableElement);
   }
 
-  private static void validateGlideOptionParameters(ExecutableElement executableElement) {
+  private void validateGlideOptionParameters(ExecutableElement executableElement) {
     if (executableElement.getParameters().isEmpty()) {
       throw new IllegalArgumentException(
           "@GlideOption methods must take a "
@@ -130,8 +136,15 @@ final class GlideExtensionValidator {
     }
   }
 
-  private static boolean isBaseRequestOptions(TypeMirror typeMirror) {
-    return typeMirror.toString().equals("com.bumptech.glide.request.BaseRequestOptions<?>");
+  private boolean isBaseRequestOptions(TypeMirror typeMirror) {
+    if (useLegacyTypeComparison) {
+      return typeMirror.toString().equals("com.bumptech.glide.request.BaseRequestOptions<?>");
+    }
+    return typeMirror instanceof DeclaredType declaredType
+        && declaredType.asElement() instanceof TypeElement typeElement
+        && typeElement
+            .getQualifiedName()
+            .contentEquals("com.bumptech.glide.request.BaseRequestOptions");
   }
 
   private void validateGlideOptionOverride(ExecutableElement element) {
@@ -159,7 +172,8 @@ final class GlideExtensionValidator {
         processingEnvironment
             .getElementUtils()
             .getTypeElement(RequestOptionsGenerator.BASE_REQUEST_OPTIONS_QUALIFIED_NAME);
-    List<String> toFindParameterNames = getComparableParameterNames(toFind, true /*skipFirst*/);
+    List<TypeMirror> toFindParameterTypes =
+        getComparableParameterTypes(toFind, /* skipFirst= */ true);
     String toFindSimpleName = toFind.getSimpleName().toString();
     for (Element element : requestOptionsType.getEnclosedElements()) {
       if (element.getKind() != ElementKind.METHOD) {
@@ -167,27 +181,43 @@ final class GlideExtensionValidator {
       }
       ExecutableElement inBase = (ExecutableElement) element;
       if (toFindSimpleName.equals(inBase.getSimpleName().toString())) {
-        List<String> parameterNamesInBase =
-            getComparableParameterNames(inBase, false /*skipFirst*/);
-        if (parameterNamesInBase.equals(toFindParameterNames)) {
-          return true;
+        List<TypeMirror> parameterTypesInBase =
+            getComparableParameterTypes(inBase, /* skipFirst= */ false);
+        if (useLegacyTypeComparison) {
+          List<String> stringsInBase = parameterTypesInBase.stream().map(Object::toString).toList();
+          List<String> stringsToFind = toFindParameterTypes.stream().map(Object::toString).toList();
+          if (stringsInBase.equals(stringsToFind)) {
+            return true;
+          }
+        } else {
+          if (isSameTypes(
+              processingEnvironment.getTypeUtils(), parameterTypesInBase, toFindParameterTypes)) {
+            return true;
+          }
         }
       }
     }
     return false;
   }
 
-  private static List<String> getComparableParameterNames(
+  private boolean isSameTypes(Types types, List<TypeMirror> a, List<TypeMirror> b) {
+    if (a.size() != b.size()) {
+      return false;
+    }
+    for (int i = 0; i < a.size(); i++) {
+      if (!types.isSameType(a.get(i), b.get(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static List<TypeMirror> getComparableParameterTypes(
       ExecutableElement element, boolean skipFirst) {
-    List<? extends VariableElement> parameters = element.getParameters();
-    if (skipFirst) {
-      parameters = parameters.subList(1, parameters.size());
-    }
-    List<String> result = new ArrayList<>(parameters.size());
-    for (VariableElement parameter : parameters) {
-      result.add(parameter.asType().toString());
-    }
-    return result;
+    return element.getParameters().stream()
+        .skip(skipFirst ? 1 : 0)
+        .map(VariableElement::asType)
+        .toList();
   }
 
   private void validateGlideType(ExecutableElement executableElement) {
@@ -217,24 +247,48 @@ final class GlideExtensionValidator {
   }
 
   private boolean typeMatchesExpected(TypeMirror returnType, ExecutableElement executableElement) {
-    if (!(returnType instanceof DeclaredType)) {
+    if (!(returnType instanceof DeclaredType declaredType)) {
       return false;
     }
-    List<? extends TypeMirror> typeArguments = ((DeclaredType) returnType).getTypeArguments();
-    if (typeArguments.size() != 1) {
+    if (useLegacyTypeComparison) {
+      List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+      if (typeArguments.size() != 1) {
+        return false;
+      }
+      TypeMirror argument = typeArguments.get(0);
+      String expected = getGlideTypeValue(executableElement);
+      return argument.toString().equals(expected);
+    }
+    Elements elements = processingEnvironment.getElementUtils();
+    Types types = processingEnvironment.getTypeUtils();
+    String glideTypeValue = getGlideTypeValue(executableElement);
+    TypeElement glideTypeElement = elements.getTypeElement(glideTypeValue);
+    if (glideTypeElement == null) {
       return false;
     }
-    TypeMirror argument = typeArguments.get(0);
-    String expected = getGlideTypeValue(executableElement);
-    return argument.toString().equals(expected);
+    TypeElement requestBuilderElement =
+        elements.getTypeElement("com.bumptech.glide.RequestBuilder");
+    if (requestBuilderElement == null) {
+      return false;
+    }
+    TypeMirror expectedType =
+        types.getDeclaredType(requestBuilderElement, glideTypeElement.asType());
+    return types.isSameType(returnType, expectedType);
   }
 
   private boolean isRequestBuilder(TypeMirror typeMirror) {
-    TypeMirror toCompare = processingEnvironment.getTypeUtils().erasure(typeMirror);
-    return toCompare.toString().equals("com.bumptech.glide.RequestBuilder");
+    if (useLegacyTypeComparison) {
+      TypeMirror toCompare = processingEnvironment.getTypeUtils().erasure(typeMirror);
+      return toCompare.toString().equals("com.bumptech.glide.RequestBuilder");
+    }
+    Types types = processingEnvironment.getTypeUtils();
+    Elements elements = processingEnvironment.getElementUtils();
+    TypeMirror toCompare = types.erasure(typeMirror);
+    return Objects.equals(
+        types.asElement(toCompare), elements.getTypeElement("com.bumptech.glide.RequestBuilder"));
   }
 
-  private static void validateGlideTypeParameters(ExecutableElement executableElement) {
+  private void validateGlideTypeParameters(ExecutableElement executableElement) {
     if (executableElement.getParameters().size() != 1) {
       throw new IllegalArgumentException(
           "@GlideType methods must take a"
@@ -244,7 +298,9 @@ final class GlideExtensionValidator {
 
     VariableElement first = executableElement.getParameters().get(0);
     TypeMirror argumentType = first.asType();
-    if (!argumentType.toString().startsWith("com.bumptech.glide.RequestBuilder")) {
+    if (useLegacyTypeComparison
+        ? !argumentType.toString().startsWith("com.bumptech.glide.RequestBuilder")
+        : !isRequestBuilder(argumentType)) {
       throw new IllegalArgumentException(
           "@GlideType methods must take a"
               + " RequestBuilder object as their first and only parameter, but given: "
