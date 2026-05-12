@@ -18,6 +18,11 @@ import java.nio.ByteBuffer;
 public final class InputStreamBitmapImageDecoderResourceDecoder
     implements ResourceDecoder<InputStream, Bitmap> {
   private final BitmapImageDecoderResourceDecoder wrapped = new BitmapImageDecoderResourceDecoder();
+  private final boolean useHeapBuffer;
+
+  public InputStreamBitmapImageDecoderResourceDecoder(boolean useHeapBuffer) {
+    this.useHeapBuffer = useHeapBuffer;
+  }
 
   @Override
   public boolean handles(@NonNull InputStream source, @NonNull Options options) throws IOException {
@@ -28,7 +33,7 @@ public final class InputStreamBitmapImageDecoderResourceDecoder
   public Resource<Bitmap> decode(
       @NonNull InputStream stream, int width, int height, @NonNull Options options)
       throws IOException {
-    ByteBuffer buffer = ByteBufferUtil.fromStream(stream);
+    ByteBuffer buffer = ByteBufferUtil.fromStream(stream, useHeapBuffer);
     Source source = ImageDecoder.createSource(buffer);
     return wrapped.decode(source, width, height, options);
   }

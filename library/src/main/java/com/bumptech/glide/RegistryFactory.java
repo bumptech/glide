@@ -162,7 +162,10 @@ final class RegistryFactory {
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
         && experiments.isEnabled(EnableImageDecoderForBitmaps.class)) {
-      streamBitmapDecoder = new InputStreamBitmapImageDecoderResourceDecoder();
+      streamBitmapDecoder =
+          new InputStreamBitmapImageDecoderResourceDecoder(
+              experiments.isEnabled(
+                  GlideBuilder.UseHeapBufferForImageDecoderWithInputStream.class));
       byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
     } else {
       byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);

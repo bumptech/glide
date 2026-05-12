@@ -133,6 +133,12 @@ public final class ByteBufferUtil {
 
   @NonNull
   public static ByteBuffer fromStream(@NonNull InputStream stream) throws IOException {
+    return fromStream(stream, false /* useHeapBuffer */);
+  }
+
+  @NonNull
+  public static ByteBuffer fromStream(@NonNull InputStream stream, boolean useHeapBuffer)
+      throws IOException {
     ByteArrayOutputStream outStream = new ByteArrayOutputStream(BUFFER_SIZE);
 
     byte[] buffer = BUFFER_REF.getAndSet(null);
@@ -149,8 +155,12 @@ public final class ByteBufferUtil {
 
     byte[] bytes = outStream.toByteArray();
 
-    // Some resource decoders require a direct byte buffer. Prefer allocateDirect() over wrap()
-    return rewind(ByteBuffer.allocateDirect(bytes.length).put(bytes));
+    if (useHeapBuffer) {
+      return ByteBuffer.wrap(bytes);
+    } else {
+      // Some resource decoders require a direct byte buffer. Prefer allocateDirect() over wrap()
+      return rewind(ByteBuffer.allocateDirect(bytes.length).put(bytes));
+    }
   }
 
   public static ByteBuffer rewind(ByteBuffer buffer) {

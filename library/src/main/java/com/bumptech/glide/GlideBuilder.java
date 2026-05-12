@@ -488,6 +488,17 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to make Glide use a heap buffer instead of a direct buffer when decoding
+   * {@link Bitmap}s from an {@link InputStream} using {@link android.graphics.ImageDecoder}.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setUseHeapBufferForImageDecoderWithInputStream(boolean isEnabled) {
+    glideExperimentsBuilder.update(new UseHeapBufferForImageDecoderWithInputStream(), isEnabled);
+    return this;
+  }
+
+  /**
    * Override the OS thread priority of threads created in {@link
    * com.bumptech.glide.load.engine.executor.GlideExecutor#DefaultThreadFactory} with {@link
    * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
@@ -655,6 +666,9 @@ public final class GlideBuilder {
   }
 
   static final class EnableImageDecoderForBitmaps implements Experiment {}
+
+  /** See {@link #setUseHeapBufferForImageDecoderWithInputStream(boolean)}. */
+  public static final class UseHeapBufferForImageDecoderWithInputStream implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
