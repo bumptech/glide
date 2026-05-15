@@ -236,7 +236,7 @@ public class VideoDecoderTest {
   }
 
   @Test
-  @Config(sdk = VERSION_CODES.M)
+  @Config(sdk = Config.OLDEST_SDK)
   public void isHdr180RotationFixRequired_androidM_returnsFalse() {
     assertThat(VideoDecoder.isHdr180RotationFixRequired()).isFalse();
   }

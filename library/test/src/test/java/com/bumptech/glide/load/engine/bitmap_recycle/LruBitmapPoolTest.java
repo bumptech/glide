@@ -105,7 +105,7 @@ public class LruBitmapPoolTest {
     testTrimMemory(MAX_SIZE, TRIM_MEMORY_UI_HIDDEN, MAX_SIZE / 2);
   }
 
-  @Config(sdk = Build.VERSION_CODES.M)
+  @Config(sdk = Config.OLDEST_SDK)
   @Test
   public void testTrimMemoryUiHiddenOrLessRemovesHalfOfBitmaps_postM() {
     testTrimMemory(MAX_SIZE, TRIM_MEMORY_UI_HIDDEN, 0);
