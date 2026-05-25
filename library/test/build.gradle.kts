@@ -1,4 +1,3 @@
-import com.android.build.gradle.LibraryExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.tasks.compile.JavaCompile
 
@@ -11,7 +10,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 android {
-    (this as LibraryExtension).testOptions.unitTests.all { testTask ->
+    testOptions.unitTests.all { testTask ->
         testTask.maxHeapSize = rootProject.extra.get("TEST_JVM_MEMORY_SIZE") as String
 
         if (JavaVersion.current() <= JavaVersion.VERSION_1_8) {
@@ -22,7 +21,7 @@ android {
     }
 
     namespace = "com.bumptech.glide.test"
-    compileSdkVersion = libs.versions.compile.sdk.version.get()
+    compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {
         minSdk = libs.versions.min.sdk.version.get().toInt()
@@ -37,10 +36,10 @@ android {
 
     sourceSets {
         getByName("androidTest") {
-            resources.srcDirs(files("../../exifsamples"))
+            resources.directories.add("../../exifsamples")
         }
         getByName("test") {
-            resources.srcDirs(files("../../exifsamples"))
+            resources.directories.add("../../exifsamples")
         }
     }
 }

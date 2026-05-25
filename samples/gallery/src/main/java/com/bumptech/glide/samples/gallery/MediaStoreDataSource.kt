@@ -16,7 +16,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
+import android.os.Parcel
 
 /** Loads metadata from the media store for images and videos. */
 class MediaStoreDataSource
@@ -119,7 +119,6 @@ internal constructor(
 }
 
 /** A data model containing data for a single media item. */
-@Parcelize
 data class MediaStoreData(
   private val type: Type,
   val rowId: Long,
@@ -129,7 +128,44 @@ data class MediaStoreData(
   val orientation: Int,
   val dateTaken: Long,
   val displayName: String?
-) : Parcelable
+) : Parcelable {
+
+  constructor(parcel: Parcel) : this(
+    Type.valueOf(parcel.readString() ?: Type.IMAGE.name),
+    parcel.readLong(),
+    parcel.readParcelable(Uri::class.java.classLoader) ?: Uri.EMPTY,
+    parcel.readString(),
+    parcel.readLong(),
+    parcel.readInt(),
+    parcel.readLong(),
+    parcel.readString()
+  )
+
+  override fun writeToParcel(parcel: Parcel, flags: Int) {
+    parcel.writeString(type.name)
+    parcel.writeLong(rowId)
+    parcel.writeParcelable(uri, flags)
+    parcel.writeString(mimeType)
+    parcel.writeLong(dateModified)
+    parcel.writeInt(orientation)
+    parcel.writeLong(dateTaken)
+    parcel.writeString(displayName)
+  }
+
+  override fun describeContents(): Int {
+    return 0
+  }
+
+  companion object CREATOR : Parcelable.Creator<MediaStoreData> {
+    override fun createFromParcel(parcel: Parcel): MediaStoreData {
+      return MediaStoreData(parcel)
+    }
+
+    override fun newArray(size: Int): Array<MediaStoreData?> {
+      return arrayOfNulls(size)
+    }
+  }
+}
 
 /** The type of data. */
 enum class Type {

@@ -2,12 +2,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "com.bumptech.glide.integration.compose"
-    compileSdk = 34
+    compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {
         minSdk = 21
@@ -19,23 +19,23 @@ android {
 
     buildTypes { getByName("release") { isMinifyEnabled = false } }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.kotlin.compiler.extension.get()
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
-    kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_1_8) } }
-
     testOptions { unitTests { isIncludeAndroidResources = true } }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8)
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     if (!name.contains("Test")) {
-        kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
+        compilerOptions.freeCompilerArgs.add("-Xexplicit-api=strict")
     }
 }
 

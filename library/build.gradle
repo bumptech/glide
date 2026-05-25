@@ -16,10 +16,13 @@ dependencies {
     api libs.androidx.vectordrawable
     api libs.androidx.exifinterface
     api libs.androidx.tracing
+    api libs.androidx.annotation
     compileOnly libs.androidx.appcompat
 
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
         errorprone libs.errorprone.core
+        annotationProcessor libs.errorprone.core
+        testAnnotationProcessor libs.errorprone.core
     }
 
     testImplementation libs.androidx.appcompat
@@ -37,6 +40,7 @@ dependencies {
 
 if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
     tasks.withType(JavaCompile) {
+        options.errorprone.enabled = true
         options.errorprone.disable(
             // It's often useful to track individual objects when debugging
             // object pooling.
@@ -60,7 +64,7 @@ if (project.plugins.hasPlugin('net.ltgt.errorprone')) {
 
 android {
     namespace 'com.bumptech.glide'
-    compileSdkVersion libs.versions.compile.sdk.version.get()
+    compileSdk libs.versions.compile.sdk.version.get().toInteger()
 
     defaultConfig {
         minSdk libs.versions.min.sdk.version.get() as int
@@ -90,14 +94,5 @@ afterEvaluate {
 
 check.dependsOn(':library:pmd:pmd')
 check.dependsOn(':library:test:check')
-
-// Used in pmd and findbugs subprojects.
-@SuppressWarnings("GroovyUnusedDeclaration")
-def classPathForQuality() {
-    return files(
-            android.bootClasspath,
-            project.android.libraryVariants.collect { it.javaCompile.classpath }
-    )
-}
 
 apply from: "${rootProject.projectDir}/scripts/upload.gradle.kts"
