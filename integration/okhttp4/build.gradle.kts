@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.bumptech.glide.integration.okhttp"
-    compileSdk = libs.versions.compile.sdk.version.get().toInt()
+    compileSdkVersion = libs.versions.compile.sdk.version.get()
 
     defaultConfig {
         minSdk = libs.versions.okhttp.min.sdk.version.get().toInt()

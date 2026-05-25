@@ -225,11 +225,15 @@ class DecodeJob<R>
 
   @Override
   public int compareTo(@NonNull DecodeJob<?> other) {
-    int result = priority.compareTo(other.priority);
+    int result = getPriority() - other.getPriority();
     if (result == 0) {
       result = order - other.order;
     }
     return result;
+  }
+
+  private int getPriority() {
+    return priority.ordinal();
   }
 
   public void cancel() {

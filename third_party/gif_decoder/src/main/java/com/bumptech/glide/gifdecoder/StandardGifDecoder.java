@@ -59,7 +59,7 @@ import java.util.Arrays;
  *
  * @see <a href="https://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF 89a Specification</a>
  */
-public final class StandardGifDecoder implements GifDecoder {
+public class StandardGifDecoder implements GifDecoder {
   private static final String TAG = StandardGifDecoder.class.getSimpleName();
 
   /** Maximum pixel stack size for decoding LZW compressed data. */

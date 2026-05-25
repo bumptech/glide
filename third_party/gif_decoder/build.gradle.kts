@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.bumptech.glide.gifdecoder"
-    compileSdk = libs.versions.compile.sdk.version.get().toInt()
+    compileSdkVersion = libs.versions.compile.sdk.version.get()
 
     defaultConfig {
         minSdk = libs.versions.min.sdk.version.get().toInt()

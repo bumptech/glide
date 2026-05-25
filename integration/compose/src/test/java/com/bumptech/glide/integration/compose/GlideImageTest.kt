@@ -13,7 +13,6 @@ import org.junit.runner.RunWith
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @RunWith(AndroidJUnit4::class)
-@org.robolectric.annotation.Config(sdk = [android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE])
 class GlideImageTest {
 
     @get:Rule(order = 1) val composeRule = createComposeRule()

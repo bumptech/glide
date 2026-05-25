@@ -2,11 +2,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.android.library")
+    id("kotlin-android")
 }
 
 android {
     namespace = "com.bumptech.glide.integration.ktx"
-    compileSdk = libs.versions.compile.sdk.version.get().toInt()
+    compileSdkVersion = libs.versions.compile.sdk.version.get()
 
     defaultConfig {
         minSdk = libs.versions.min.sdk.version.get().toInt()
@@ -21,12 +22,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    kotlinOptions { jvmTarget = "1.8" }
 }
 
 // Enable strict mode, but exclude tests.
 tasks.withType(KotlinCompile::class.java).configureEach {
     if (!name.contains("Test")) {
-        compilerOptions.freeCompilerArgs.add("-Xexplicit-api=strict")
+        kotlinOptions.freeCompilerArgs += "-Xexplicit-api=strict"
     }
 }
 

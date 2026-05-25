@@ -49,7 +49,7 @@ def asProjects(paths) {
 }
 
 def getAndroidSdkDirectory() {
-    project(':library').androidComponents.sdkComponents.sdkDirectory.get().asFile.absolutePath
+    project(':library').android.sdkDirectory
 }
 
 def getAndroidCompileSdkVersion() {
@@ -60,7 +60,21 @@ def getAndroidProjectsForJavadoc() {
     asProjects(getAndroidPathsForJavadoc())
 }
 
+def getAndroidLibraryVariantsForJar() {
+    getAndroidLibraryVariantsForProjects(asProjects(getAndroidPathsForJar()))
+}
 
+def getAndroidLibraryVariantsForJavadoc() {
+    getAndroidLibraryVariantsForProjects(getAndroidProjectsForJavadoc())
+}
+
+def getAndroidLibraryVariantsForProjects(projects) {
+    projects.collect { project ->
+        project.android.libraryVariants.findAll { type ->
+            type.buildType.name.equalsIgnoreCase("release")
+        }
+    }.sum()
+}
 
 def getSourceFilesForJavadoc() {
     getAndroidProjectsForJavadoc().collect { project ->
@@ -72,9 +86,7 @@ def getAndroidJar() {
     "${getAndroidSdkDirectory()}/platforms/${getAndroidCompileSdkVersion()}/android.jar"
 }
 
-base {
-    archivesName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
-}
+project.archivesBaseName = "${POM_ARTIFACT_ID}-${VERSION_NAME}"
 
 // Generate javadocs and sources containing batched documentation and sources for all internal
 // projects.
@@ -85,8 +97,9 @@ def javadocTask = tasks.create("releaseJavadoc", Javadoc) {
         it.classpath =
                 project.files(
                         getAndroidJar(),
-                        getAndroidProjectsForJavadoc().collect { Project proj ->
-                            proj.tasks.compileReleaseJavaWithJavac.classpath
+                        getAndroidLibraryVariantsForJavadoc().collect {
+                            LibraryVariant lib ->
+                                lib.getJavaCompileProvider().get().classpath.files
                         },
                         // Finds dependencies of Android packages that would otherwise be
                         // ignored (Volley in particular)
@@ -126,8 +139,8 @@ javadocJarTask.dependsOn(javadocTask)
 
 jar {
     from files(
-            asProjects(getAndroidPathsForJar()).collect { Project proj ->
-                proj.tasks.compileReleaseJavaWithJavac.destinationDirectory
+            getAndroidLibraryVariantsForJar().collect { LibraryVariant variant ->
+                variant.getJavaCompileProvider().get().destinationDirectory
             }
     )
     exclude "**/R.class"

@@ -5,7 +5,8 @@ plugins {
 
 android {
     namespace = "com.bumptech.glide.benchmark"
-    compileSdk = libs.versions.compile.sdk.version.get().toInt()
+    compileSdk = 34
+    buildToolsVersion = "34.0.0"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8

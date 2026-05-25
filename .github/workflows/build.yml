@@ -54,4 +54,7 @@ jobs:
             :instrumentation:assembleAndroidTest \
             :benchmark:assembleAndroidTest \
             :glide:releaseJavadoc \
+            :annotation:ksp:test:test \
+            :integration:ktx:apiCheck \
+            :annotation:ksp:integrationtest:test \
             --parallel

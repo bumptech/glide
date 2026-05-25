@@ -28,7 +28,7 @@ afterEvaluate {
 
 android {
     namespace 'com.bumptech.glide.annotation.compiler.test'
-    compileSdk libs.versions.compile.sdk.version.get().toInteger()
+    compileSdk libs.versions.compile.sdk.version.get()
 
     defaultConfig {
         minSdk libs.versions.min.sdk.version.get() as int

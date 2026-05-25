@@ -27,10 +27,15 @@ buildscript {
 
 plugins {
     alias libs.plugins.ktfmt
-    alias libs.plugins.kotlin.compose apply false
 }
 
+apply plugin: 'binary-compatibility-validator'
 apply plugin: 'org.jetbrains.dokka'
+
+apiValidation {
+    ignoredProjects += ["ksp", "test", "gallery", "integrationtest", "sqljournaldiskcache"]
+    nonPublicMarkers += ["com.bumptech.glide.integration.ktx.InternalGlideApi"]
+}
 
 // See http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html.
 if (JavaVersion.current().isJava8Compatible()) {
@@ -96,11 +101,17 @@ subprojects { project ->
 
             project.tasks.dokkaHtmlPartial.configure {
                 dokkaSourceSets {
-                    if (project.plugins.hasPlugin("java") && "ksp" != project.getName()) {
-                        if (findByName("main") == null) {
-                            register("main") {
-                                sourceRoots.from(sourceSets.main.java.srcDirs)
-                            }
+                    // Kotlin works out of the box
+                     if (!project.plugins.hasPlugin("kotlin-android") && project.plugins.hasPlugin("com.android.library")) {
+                        // Java Android modules
+                        register("main") {
+                            sourceRoots.from(project.android.sourceSets.main.java.srcDirs)
+
+                        }
+                    } else if (project.plugins.hasPlugin("java") && "ksp" != project.getName()) {
+                        // Java only modules (ksp is not useful and uses multiple plugins)
+                        register("main") {
+                            sourceRoots.from(sourceSets.main.java.srcDirs)
                         }
                     }
                 }
@@ -124,7 +135,7 @@ subprojects { project ->
         if ("gifencoder" != project.getName() && "imgur" != project.getName()) {
           options.compilerArgs.addAll([
             //Treat all warnings as errors.
-            project.hasProperty('DISABLE_ERROR_PRONE') ? "-nowarn" : "-Werror",
+            "-Werror",
             //Enable all warnings.
             "-Xlint:all",
             // Disable warnings about source 7 being obsolete.
@@ -144,9 +155,6 @@ subprojects { project ->
     tasks.withType(Test) {
         testLogging {
             exceptionFormat = TestExceptionFormat.FULL
-        }
-        javaLauncher = javaToolchains.launcherFor {
-            languageVersion = JavaLanguageVersion.of(21)
         }
     }
 

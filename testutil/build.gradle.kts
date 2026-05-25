@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.bumptech.glide.testutil"
-    compileSdk = libs.versions.compile.sdk.version.get().toInt()
+    compileSdkVersion = libs.versions.compile.sdk.version.get()
 
     defaultConfig {
         minSdk = libs.versions.min.sdk.version.get().toInt()
@@ -22,8 +22,4 @@ dependencies {
     api(libs.androidx.annotation)
     api(libs.androidx.core)
     api(libs.androidx.test.core)
-}
-
-tasks.withType<JavaCompile>().configureEach {
-    exclude("**/google3/**")
 }

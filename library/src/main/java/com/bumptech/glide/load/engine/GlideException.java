@@ -14,9 +14,7 @@ import java.util.List;
 
 /** An exception with zero or more causes indicating why a load in Glide failed. */
 // Public API.
-// Suppress serializable warnings because although Exception implements Serializable, GlideException
-// is never serialized across processes or networks, making serialization checks irrelevant.
-@SuppressWarnings({"WeakerAccess", "serial"})
+@SuppressWarnings("WeakerAccess")
 public final class GlideException extends Exception {
   private static final long serialVersionUID = 1L;
 

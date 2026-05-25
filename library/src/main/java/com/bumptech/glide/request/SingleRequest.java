@@ -59,8 +59,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
   }
 
   @Nullable
-  private final String tag =
-      IS_VERBOSE_LOGGABLE ? String.valueOf(System.identityHashCode(this)) : null;
+  private final String tag = IS_VERBOSE_LOGGABLE ? String.valueOf(super.hashCode()) : null;
 
   private final StateVerifier stateVerifier = StateVerifier.newInstance();
 

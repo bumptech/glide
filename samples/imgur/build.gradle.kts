@@ -4,10 +4,11 @@ plugins {
 
 android {
     namespace = "com.bumptech.glide.samples.imgur"
-    compileSdk = libs.versions.compile.sdk.version.get().toInt()
+    compileSdkVersion = libs.versions.compile.sdk.version.get()
 
     defaultConfig {
         minSdk = libs.versions.min.sdk.version.get().toInt()
+        
         versionCode = 1
         versionName = "1.0"
 
