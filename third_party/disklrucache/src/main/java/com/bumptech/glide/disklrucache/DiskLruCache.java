@@ -146,6 +146,7 @@ public final class DiskLruCache implements Closeable {
   private final int appVersion;
   private long maxSize;
   private final int valueCount;
+  private final boolean memoizePathNames;
   private long size = 0;
   private Writer journalWriter;
   private final LinkedHashMap<String, Entry> lruEntries =
@@ -179,7 +180,8 @@ public final class DiskLruCache implements Closeable {
     }
   };
 
-  private DiskLruCache(File directory, int appVersion, int valueCount, long maxSize) {
+  private DiskLruCache(
+      File directory, int appVersion, int valueCount, long maxSize, boolean memoizePathNames) {
     this.directory = directory;
     this.appVersion = appVersion;
     this.journalFile = new File(directory, JOURNAL_FILE);
@@ -187,18 +189,40 @@ public final class DiskLruCache implements Closeable {
     this.journalFileBackup = new File(directory, JOURNAL_FILE_BACKUP);
     this.valueCount = valueCount;
     this.maxSize = maxSize;
+    this.memoizePathNames = memoizePathNames;
   }
 
   /**
-   * Opens the cache in {@code directory}, creating a cache if none exists
-   * there.
+   * Opens the cache in {@code directory}, creating a cache if none exists there.
    *
    * @param directory a writable directory
+   * @param appVersion the application's current version code
    * @param valueCount the number of values per cache entry. Must be positive.
    * @param maxSize the maximum number of bytes this cache should use to store
    * @throws IOException if reading or writing the cache directory fails
    */
   public static DiskLruCache open(File directory, int appVersion, int valueCount, long maxSize)
+      throws IOException {
+    return experimentalOpen(
+        directory, appVersion, valueCount, maxSize, /* memoizePathNames= */ true);
+  }
+
+  /**
+   * Opens the cache in {@code directory}, creating a cache if none exists there, with explicit
+   * control over path name memoization.
+   *
+   * <p>Disabling the memoization is an experimental setting that may be removed in a future
+   * version.
+   *
+   * @param directory a writable directory
+   * @param appVersion the application's current version code
+   * @param valueCount the number of values per cache entry. Must be positive.
+   * @param maxSize the maximum number of bytes this cache should use to store
+   * @param memoizePathNames whether to memoize path names
+   * @return The new disk cache with the given arguments
+   */
+  public static DiskLruCache experimentalOpen(
+      File directory, int appVersion, int valueCount, long maxSize, boolean memoizePathNames)
       throws IOException {
     if (maxSize <= 0) {
       throw new IllegalArgumentException("maxSize <= 0");
@@ -220,7 +244,8 @@ public final class DiskLruCache implements Closeable {
     }
 
     // Prefer to pick up where we left off.
-    DiskLruCache cache = new DiskLruCache(directory, appVersion, valueCount, maxSize);
+    DiskLruCache cache =
+        new DiskLruCache(directory, appVersion, valueCount, maxSize, memoizePathNames);
     if (cache.journalFile.exists()) {
       try {
         cache.readJournal();
@@ -239,7 +264,7 @@ public final class DiskLruCache implements Closeable {
 
     // Create a new empty cache.
     directory.mkdirs();
-    cache = new DiskLruCache(directory, appVersion, valueCount, maxSize);
+    cache = new DiskLruCache(directory, appVersion, valueCount, maxSize, memoizePathNames);
     cache.rebuildJournal();
     return cache;
   }
@@ -420,7 +445,8 @@ public final class DiskLruCache implements Closeable {
       return null;
     }
 
-    for (File file : entry.cleanFiles) {
+    for (int i = 0; i < valueCount; i++) {
+        File file = entry.getCleanFile(i);
         // A file must have been deleted manually!
         if (!file.exists()) {
             return null;
@@ -740,12 +766,15 @@ public final class DiskLruCache implements Closeable {
     }
 
     public File getFile(int index) {
+      if (files != null) {
         return files[index];
+      }
+      return new File(directory, key + "." + index);
     }
 
     /** Returns the string value for {@code index}. */
     public String getString(int index) throws IOException {
-      InputStream is = new FileInputStream(files[index]);
+      InputStream is = new FileInputStream(getFile(index));
       return inputStreamToString(is);
     }
 
@@ -874,18 +903,20 @@ public final class DiskLruCache implements Closeable {
     private Entry(String key) {
       this.key = key;
       this.lengths = new long[valueCount];
-      cleanFiles = new File[valueCount];
-      dirtyFiles = new File[valueCount];
 
-      // The names are repetitive so re-use the same builder to avoid allocations.
-      StringBuilder fileBuilder = new StringBuilder(key).append('.');
-      int truncateTo = fileBuilder.length();
-      for (int i = 0; i < valueCount; i++) {
-          fileBuilder.append(i);
-          cleanFiles[i] = new File(directory, fileBuilder.toString());
-          fileBuilder.append(".tmp");
-          dirtyFiles[i] = new File(directory, fileBuilder.toString());
-          fileBuilder.setLength(truncateTo);
+      if (memoizePathNames) {
+        cleanFiles = new File[valueCount];
+        dirtyFiles = new File[valueCount];
+        // The names are repetitive so re-use the same builder to avoid allocations.
+        StringBuilder fileBuilder = new StringBuilder(key).append('.');
+        int truncateTo = fileBuilder.length();
+        for (int i = 0; i < valueCount; i++) {
+            fileBuilder.append(i);
+            cleanFiles[i] = new File(directory, fileBuilder.toString());
+            fileBuilder.append(".tmp");
+            dirtyFiles[i] = new File(directory, fileBuilder.toString());
+            fileBuilder.setLength(truncateTo);
+        }
       }
     }
 
@@ -917,11 +948,17 @@ public final class DiskLruCache implements Closeable {
     }
 
     public File getCleanFile(int i) {
-      return cleanFiles[i];
+      if (cleanFiles != null) {
+        return cleanFiles[i];
+      }
+      return new File(directory, key + "." + i);
     }
 
     public File getDirtyFile(int i) {
-      return dirtyFiles[i];
+      if (dirtyFiles != null) {
+        return dirtyFiles[i];
+      }
+      return new File(directory, key + "." + i + ".tmp");
     }
   }
 
