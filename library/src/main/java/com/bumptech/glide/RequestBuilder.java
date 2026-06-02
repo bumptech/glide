@@ -87,7 +87,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
 
   // We only override the method to change the return type, not the functionality.
   @SuppressLint("CheckResult")
-  @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
+  @SuppressWarnings({"PMD.ConstructorCallsOverridableMethod", "this-escape"})
   protected RequestBuilder(
       @NonNull Glide glide,
       RequestManager requestManager,
@@ -109,7 +109,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   }
 
   @SuppressLint("CheckResult")
-  @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
+  @SuppressWarnings({"PMD.ConstructorCallsOverridableMethod", "this-escape"})
   protected RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
     this(other.glide, other.requestManager, transcodeClass, other.context);
     model = other.model;

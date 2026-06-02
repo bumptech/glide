@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <uses-sdk
-    android:minSdkVersion="29"
-    android:targetSdkVersion="34"
-    android:compileSdkVersion="34" />
-
   <uses-permission
     android:maxSdkVersion="32"
     android:name="android.permission.READ_EXTERNAL_STORAGE" />

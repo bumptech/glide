@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 /** Responsible for starting loads and managing active and cached resources. */
-public class Engine
+public final class Engine
     implements EngineJobListener,
         MemoryCache.ResourceRemovedListener,
         EngineResource.ResourceListener {

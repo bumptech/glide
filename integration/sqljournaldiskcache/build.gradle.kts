@@ -1,12 +1,11 @@
 plugins {
     id("com.android.library")
-    id("kotlin-android")
 }
 
 android {
     namespace = "com.bumptech.glide.integration.sqljournaldiskcache"
 
-    compileSdkVersion = libs.versions.compile.sdk.version.get()
+    compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig { minSdk = libs.versions.min.sdk.version.get().toInt() }
 

@@ -4,11 +4,11 @@ plugins {
 
 android {
     namespace = "com.bumptech.glide.integration.gifencoder"
-    compileSdkVersion = libs.versions.compile.sdk.version.get()
+    compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
     sourceSets {
         getByName("main") {
-            java.srcDirs("src/main/java", "../../third_party/gif_encoder/src/main/java")
+            java.directories.addAll(listOf("src/main/java", "../../third_party/gif_encoder/src/main/java"))
         }
     }
 
