@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.parcelize")
+    id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
 }
 
@@ -13,21 +12,16 @@ kotlin {
 
 android {
     namespace = "com.bumptech.glide.samples.gallery"
-    compileSdk = 34
+    compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {
         minSdk = 29
+        targetSdk = libs.versions.target.sdk.version.get().toInt()
         versionCode = 1
         versionName = "1.0"
     }
     buildFeatures {
         compose = true
-    }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.kotlin.compiler.extension.get()
     }
 
     compileOptions {

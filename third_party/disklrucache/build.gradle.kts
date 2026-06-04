@@ -10,12 +10,10 @@ checkstyle {
 
 android {
     namespace = "com.bumptech.glide.disklrucache"
-    compileSdkVersion = libs.versions.compile.sdk.version.get()
+    compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {
         minSdk = libs.versions.min.sdk.version.get().toInt()
-
-        consumerProguardFiles("proguard-rules.txt")
     }
 
     compileOptions {
