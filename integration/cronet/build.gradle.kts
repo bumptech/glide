@@ -1,34 +1,30 @@
-plugins {
-    id("com.android.library")
-}
+plugins { id("com.android.library") }
 
 android {
-    namespace = "com.bumptech.glide.integration.cronet"
-    compileSdk = libs.versions.compile.sdk.version.get().toInt()
+  namespace = "com.bumptech.glide.integration.cronet"
+  compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
-    defaultConfig {
-        minSdk = 16
-    }
+  defaultConfig { minSdk = libs.versions.min.sdk.version.get().toInt() }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
+  compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+  }
 }
 
 dependencies {
-    implementation(project(":library"))
-    implementation(libs.cronet)
-    implementation(libs.guava)
-    implementation(project(":annotation"))
-    annotationProcessor(project(":annotation:compiler"))
+  implementation(project(":library"))
+  implementation(libs.cronet)
+  implementation(libs.guava)
+  implementation(project(":annotation"))
+  annotationProcessor(project(":annotation:compiler"))
 
-    api(libs.androidx.annotation)
+  api(libs.androidx.annotation)
 
-    testImplementation(libs.truth)
-    testImplementation(libs.junit)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.mockito.core)
+  testImplementation(libs.truth)
+  testImplementation(libs.junit)
+  testImplementation(libs.robolectric)
+  testImplementation(libs.mockito.core)
 }
 
 apply(from = "${rootProject.projectDir}/scripts/upload.gradle.kts")
