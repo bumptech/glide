@@ -76,6 +76,11 @@ public final class StandardGifDecoder implements GifDecoder {
   @ColorInt
   private static final int COLOR_TRANSPARENT_BLACK = 0x00000000;
 
+  /** Maximum logical screen dimension a single GIF frame may declare (8K). */
+  private static final int MAX_VALID_DIMENSION = 8192;
+  /** Maximum total pixel count per frame (8K x 8K). */
+  private static final long MAX_VALID_PIXEL_COUNT = (long) MAX_VALID_DIMENSION * MAX_VALID_DIMENSION;
+
   // Global File Header values and parsing flags.
   /**
    * Active color table.
@@ -359,6 +364,17 @@ public final class StandardGifDecoder implements GifDecoder {
     if (sampleSize <= 0) {
       throw new IllegalArgumentException("Sample size must be >=0, not: " + sampleSize);
     }
+    if (header.width <= 0 || header.height <= 0
+        || header.width > MAX_VALID_DIMENSION
+        || header.height > MAX_VALID_DIMENSION) {
+      this.status = STATUS_FORMAT_ERROR;
+      return;
+    }
+    long pixelCount = (long) header.width * (long) header.height;
+    if (pixelCount > MAX_VALID_PIXEL_COUNT) {
+      this.status = STATUS_FORMAT_ERROR;
+      return;
+    }
     // Make sure sample size is a power of 2.
     sampleSize = Integer.highestOneBit(sampleSize);
     this.status = STATUS_OK;
@@ -383,7 +399,7 @@ public final class StandardGifDecoder implements GifDecoder {
     downsampledHeight = header.height / sampleSize;
     // Now that we know the size, init scratch arrays.
     // TODO Find a way to avoid this entirely or at least downsample it (either should be possible).
-    mainPixels = bitmapProvider.obtainByteArray(header.width * header.height);
+    mainPixels = bitmapProvider.obtainByteArray((int) pixelCount);
     mainScratch = bitmapProvider.obtainIntArray(downsampledWidth * downsampledHeight);
   }
 
