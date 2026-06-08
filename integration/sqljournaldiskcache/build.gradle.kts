@@ -1,32 +1,30 @@
-plugins {
-    id("com.android.library")
-}
+plugins { id("com.android.library") }
 
 android {
-    namespace = "com.bumptech.glide.integration.sqljournaldiskcache"
+  namespace = "com.bumptech.glide.integration.sqljournaldiskcache"
 
-    compileSdk = libs.versions.compile.sdk.version.get().toInt()
+  compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
-    defaultConfig { minSdk = libs.versions.min.sdk.version.get().toInt() }
+  defaultConfig { minSdk = libs.versions.min.sdk.version.get().toInt() }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
+  compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+  }
 }
 
 dependencies {
-    implementation(project(":library"))
-    implementation(libs.errorprone.annotations)
+  implementation(project(":library"))
+  implementation(libs.errorprone.annotations)
 
-    testImplementation(libs.guava.testlib)
-    testImplementation(libs.truth)
-    testImplementation(libs.junit)
-    testImplementation(libs.mockito.core)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.androidx.test.core)
-    testImplementation(libs.androidx.junit)
-    testImplementation(libs.androidx.test.runner)
+  testImplementation(libs.guava.testlib)
+  testImplementation(libs.truth)
+  testImplementation(libs.junit)
+  testImplementation(libs.mockito.core)
+  testImplementation(libs.robolectric)
+  testImplementation(libs.androidx.test.core)
+  testImplementation(libs.androidx.junit)
+  testImplementation(libs.androidx.test.runner)
 }
 
 apply(from = "${rootProject.projectDir}/scripts/upload.gradle.kts")

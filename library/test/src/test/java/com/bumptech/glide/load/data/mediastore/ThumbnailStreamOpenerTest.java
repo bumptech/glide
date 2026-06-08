@@ -1,6 +1,7 @@
 package com.bumptech.glide.load.data.mediastore;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -32,7 +33,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.fakes.RoboCursor;
 
@@ -91,7 +91,7 @@ public class ThumbnailStreamOpenerTest {
   @Test
   public void testReturnsOpenedInputStreamWhenFileFound() throws FileNotFoundException {
     InputStream expected = new ByteArrayInputStream(new byte[0]);
-    Shadows.shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
+    shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
         .registerInputStream(harness.uri, expected);
     assertEquals(expected, harness.get().open(harness.uri));
   }
@@ -108,7 +108,7 @@ public class ThumbnailStreamOpenerTest {
     ThumbFetcher.VideoThumbnailQuery query =
         new ThumbFetcher.VideoThumbnailQuery(getContentResolver());
     RoboCursor testCursor = new RoboCursor();
-    Shadows.shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
+    shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
         .setCursor(queryUri, testCursor);
     assertEquals(testCursor, query.query(harness.uri));
   }
@@ -119,7 +119,7 @@ public class ThumbnailStreamOpenerTest {
     ThumbFetcher.ImageThumbnailQuery query =
         new ThumbFetcher.ImageThumbnailQuery(getContentResolver());
     RoboCursor testCursor = new RoboCursor();
-    Shadows.shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
+    shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
         .setCursor(queryUri, testCursor);
     assertEquals(testCursor, query.query(harness.uri));
   }

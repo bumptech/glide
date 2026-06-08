@@ -1,6 +1,7 @@
 package com.bumptech.glide.request.target;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -42,7 +43,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -447,11 +447,11 @@ public class ViewTargetTest {
             ApplicationProvider.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
     Display display = Preconditions.checkNotNull(windowManager).getDefaultDisplay();
     if (width != null) {
-      Shadows.shadowOf(display).setWidth(width);
+      shadowOf(display).setWidth(width);
     }
 
     if (height != null) {
-      Shadows.shadowOf(display).setHeight(height);
+      shadowOf(display).setHeight(height);
     }
   }
 

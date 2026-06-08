@@ -4,6 +4,7 @@ import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.anyResource;
 import static com.bumptech.glide.tests.Util.isADataSource;
 import static com.bumptech.glide.tests.Util.mockResource;
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,7 +38,6 @@ import org.mockito.InOrder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
@@ -255,7 +255,7 @@ public class EngineJobTest {
   @Test
   public void testReleasesResourceIfCancelledOnReady() {
     Looper looper = harness.mainHandler.getLooper();
-    Shadows.shadowOf(looper).pause();
+    shadowOf(looper).pause();
 
     final EngineJob<Object> job = harness.getJob();
     job.start(harness.decodeJob);

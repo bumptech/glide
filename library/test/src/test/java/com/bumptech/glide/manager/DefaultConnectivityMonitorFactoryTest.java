@@ -1,9 +1,9 @@
 package com.bumptech.glide.manager;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.robolectric.Shadows.shadowOf;
 
 import android.app.Application;
 import androidx.test.core.app.ApplicationProvider;

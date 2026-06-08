@@ -1,5 +1,6 @@
 package com.bumptech.glide.signature;
 
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
@@ -13,7 +14,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -68,7 +68,7 @@ public class AndroidResourceSignatureTest {
   @Test
   public void testMissingPackageInfo() throws NameNotFoundException {
     // Make getPackageInfo throw NameNotFoundException.
-    Shadows.shadowOf(context.getPackageManager()).removePackage(context.getPackageName());
+    shadowOf(context.getPackageManager()).removePackage(context.getPackageName());
     Key key = AndroidResourceSignature.obtain(context);
 
     assertNotNull(key);

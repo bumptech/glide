@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.Util.mockResource;
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,7 +14,6 @@ import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -30,7 +30,7 @@ public class ResourceRecyclerTest {
   @Test
   public void recycle_withoutForceNextFrame_recyclesResourceSynchronously() {
     Resource<?> resource = mockResource();
-    Shadows.shadowOf(Looper.getMainLooper()).pause();
+    shadowOf(Looper.getMainLooper()).pause();
     recycler.recycle(resource, /* forceNextFrame= */ false);
     verify(resource).recycle();
   }
@@ -38,10 +38,10 @@ public class ResourceRecyclerTest {
   @Test
   public void recycle_withForceNextFrame_postsRecycle() {
     Resource<?> resource = mockResource();
-    Shadows.shadowOf(Looper.getMainLooper()).pause();
+    shadowOf(Looper.getMainLooper()).pause();
     recycler.recycle(resource, /* forceNextFrame= */ true);
     verify(resource, never()).recycle();
-    Shadows.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
+    shadowOf(Looper.getMainLooper()).runToEndOfTasks();
     verify(resource).recycle();
   }
 
@@ -60,14 +60,14 @@ public class ResourceRecyclerTest {
         .when(parent)
         .recycle();
 
-    Shadows.shadowOf(Looper.getMainLooper()).pause();
+    shadowOf(Looper.getMainLooper()).pause();
 
     recycler.recycle(parent, /* forceNextFrame= */ false);
 
     verify(parent).recycle();
     verify(child, never()).recycle();
 
-    Shadows.shadowOf(Looper.getMainLooper()).runOneTask();
+    shadowOf(Looper.getMainLooper()).runOneTask();
 
     verify(child).recycle();
   }

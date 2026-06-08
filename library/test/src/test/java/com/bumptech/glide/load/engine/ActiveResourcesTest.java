@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,7 +26,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 
 @RunWith(RobolectricTestRunner.class)
 public class ActiveResourcesTest {
@@ -375,7 +375,7 @@ public class ActiveResourcesTest {
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
-    Shadows.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
+    shadowOf(Looper.getMainLooper()).runToEndOfTasks();
   }
 
   private CountDownLatch getLatchForClearedRef() {
