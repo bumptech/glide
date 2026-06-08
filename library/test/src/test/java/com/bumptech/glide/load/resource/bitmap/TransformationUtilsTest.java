@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -28,7 +29,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class)
@@ -366,7 +366,7 @@ public class TransformationUtilsTest {
       assertThat(ninety.getPixel(1, 0)).isEqualTo(Color.BLUE);
     } else {
       // Use legacy shadow APIs
-      assertThat(Shadows.shadowOf(ninety).getDescription()).contains("rotate=90.0");
+      assertThat(shadowOf(ninety).getDescription()).contains("rotate=90.0");
     }
     assertEquals(toRotate.getWidth(), toRotate.getHeight());
   }

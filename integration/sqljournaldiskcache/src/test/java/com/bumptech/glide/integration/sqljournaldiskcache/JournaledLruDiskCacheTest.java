@@ -3,7 +3,6 @@ package com.bumptech.glide.integration.sqljournaldiskcache;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
 
 import android.content.Context;
 import android.os.Looper;
@@ -20,6 +19,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.shadow.api.Shadow;
+import org.robolectric.shadows.ShadowLooper;
 
 @RunWith(AndroidJUnit4.class)
 public class JournaledLruDiskCacheTest {
@@ -322,7 +323,7 @@ public class JournaledLruDiskCacheTest {
 
   // Eviction is triggered by posts.
   private static void onIdleWorkerThread() {
-    shadowOf(Looper.getMainLooper()).idle();
+    ((ShadowLooper) Shadow.extract(Looper.getMainLooper())).idle();
   }
 
   @Test

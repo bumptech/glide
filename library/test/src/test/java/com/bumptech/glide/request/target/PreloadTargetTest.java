@@ -1,12 +1,12 @@
 package com.bumptech.glide.request.target;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
 
 import android.os.Looper;
 import com.bumptech.glide.RequestManager;

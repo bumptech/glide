@@ -1,11 +1,11 @@
 package com.bumptech.glide.manager;
 
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.app.Application;

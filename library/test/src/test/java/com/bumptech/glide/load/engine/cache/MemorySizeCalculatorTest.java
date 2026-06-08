@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.cache;
 
+import static com.bumptech.glide.testutil.CustomShadows.shadowOf;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -16,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -42,7 +42,7 @@ public class MemorySizeCalculatorTest {
 
   @Test
   public void testDefaultMemoryCacheSizeIsTwiceScreenSize() {
-    Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
+    shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
     float memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
@@ -52,7 +52,7 @@ public class MemorySizeCalculatorTest {
   @Test
   public void testCanSetCustomMemoryCacheSize() {
     harness.memoryCacheScreens = 9.5f;
-    Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
+    shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
     float memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
@@ -64,7 +64,7 @@ public class MemorySizeCalculatorTest {
     final int memoryClassBytes =
         Math.round(harness.getScreenSize() * harness.memoryCacheScreens * harness.sizeMultiplier);
 
-    Shadows.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
+    shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
 
     float memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
 
@@ -73,7 +73,7 @@ public class MemorySizeCalculatorTest {
 
   @Test
   public void testDefaultBitmapPoolSize() {
-    Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
+    shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
     float bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
@@ -83,7 +83,7 @@ public class MemorySizeCalculatorTest {
   @Test
   public void testCanSetCustomBitmapPoolSize() {
     harness.bitmapPoolScreens = 2f;
-    Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
+    shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
     float bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
@@ -95,7 +95,7 @@ public class MemorySizeCalculatorTest {
     final int memoryClassBytes =
         Math.round(harness.getScreenSize() * harness.bitmapPoolScreens * harness.sizeMultiplier);
 
-    Shadows.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
+    shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
 
     int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
@@ -110,7 +110,7 @@ public class MemorySizeCalculatorTest {
             harness.getScreenSize()
                 * (harness.bitmapPoolScreens + harness.memoryCacheScreens)
                 * harness.sizeMultiplier);
-    Shadows.shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
+    shadowOf(harness.activityManager).setMemoryClass(memoryClassBytes / (1024 * 1024));
 
     int memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
     int bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
@@ -121,7 +121,7 @@ public class MemorySizeCalculatorTest {
 
   @Test
   public void testCumulativePoolAndMemoryCacheSizesAreSmallerOnLowMemoryDevices() {
-    Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass() / 2);
+    shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass() / 2);
     final int normalMemoryCacheSize = harness.getCalculator().getMemoryCacheSize();
     final int normalBitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
