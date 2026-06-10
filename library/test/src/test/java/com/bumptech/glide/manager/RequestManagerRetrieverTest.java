@@ -6,8 +6,10 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.app.Activity;
@@ -36,7 +38,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.LooperMode;
@@ -67,7 +68,7 @@ public class RequestManagerRetrieverTest {
   public void tearDown() {
     Util.setSdkVersionInt(initialSdkVersion);
 
-    Shadows.shadowOf(Looper.getMainLooper()).runToEndOfTasks();
+    shadowOf(Looper.getMainLooper()).runToEndOfTasks();
   }
 
   @Test
@@ -187,21 +188,21 @@ public class RequestManagerRetrieverTest {
   }
 
   @SuppressWarnings("deprecation")
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfFragmentNotAttached() {
     android.app.Fragment fragment = new android.app.Fragment();
-    retriever.get(fragment);
+    assertThrows(IllegalArgumentException.class, () -> retriever.get(fragment));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testThrowsIfSupportFragmentNotAttached() {
     Fragment fragment = new Fragment();
-    retriever.get(fragment);
+    assertThrows(NullPointerException.class, () -> retriever.get(fragment));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfGivenNullContext() {
-    retriever.get((Context) null);
+    assertThrows(IllegalArgumentException.class, () -> retriever.get((Context) null));
   }
 
   @Test
@@ -276,7 +277,7 @@ public class RequestManagerRetrieverTest {
     // to the main thread here to work around an issue caused by a recursive method call so we
     // need (and reasonably
     // expect) our message to not run immediately
-    Shadows.shadowOf(Looper.getMainLooper()).pause();
+    shadowOf(Looper.getMainLooper()).pause();
     Robolectric.buildActivity(Issue117Activity.class).create().start().resume().visible();
   }
 
@@ -308,7 +309,7 @@ public class RequestManagerRetrieverTest {
 
   @Test
   public void get_beforeActivityIsCreated_returnsSameRequestManagerAsAfterActivityIsCreated() {
-    ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
+    ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
     shadowLooper.pause();
     ActivityController<FragmentActivity> controller =
         Robolectric.buildActivity(FragmentActivity.class);
@@ -327,7 +328,7 @@ public class RequestManagerRetrieverTest {
 
   @Test
   public void get_onDetachedFragment_returnsSameRequestManagerAsAfterFragmentIsAttached() {
-    ShadowLooper shadowLooper = Shadows.shadowOf(Looper.getMainLooper());
+    ShadowLooper shadowLooper = shadowOf(Looper.getMainLooper());
     shadowLooper.pause();
     ActivityController<FragmentActivity> controller =
         Robolectric.buildActivity(FragmentActivity.class);

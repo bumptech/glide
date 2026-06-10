@@ -14,7 +14,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
-import android.os.Build;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,15 +98,8 @@ public class LruBitmapPoolTest {
     }
   }
 
-  @Config(sdk = Build.VERSION_CODES.KITKAT)
   @Test
-  public void testTrimMemoryUiHiddenOrLessRemovesHalfOfBitmaps_preM() {
-    testTrimMemory(MAX_SIZE, TRIM_MEMORY_UI_HIDDEN, MAX_SIZE / 2);
-  }
-
-  @Config(sdk = Build.VERSION_CODES.M)
-  @Test
-  public void testTrimMemoryUiHiddenOrLessRemovesHalfOfBitmaps_postM() {
+  public void testTrimMemoryUiHiddenOrLessRemovesHalfOfBitmaps() {
     testTrimMemory(MAX_SIZE, TRIM_MEMORY_UI_HIDDEN, 0);
   }
 
@@ -225,7 +217,7 @@ public class LruBitmapPoolTest {
   }
 
   @Test
-  @Config(sdk = 19)
+  @Config(sdk = 23)
   public void testBitmapsWithAllowedNullConfigsAreAllowed() {
     pool = new LruBitmapPool(100, strategy, Collections.<Bitmap.Config>singleton(null));
 

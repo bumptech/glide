@@ -206,11 +206,13 @@ subprojects { project ->
         diffMaxViolations = 0
 
         // Formats are listed here: https://github.com/tomasbjerre/violations-lib
-        def dir = projectDir.absolutePath
+        def dir = "${layout.buildDirectory.get().asFile.absolutePath}/reports".toString()
+        // Ensure the directory exists to prevent the Violations task from failing if no reports were generated yet.
+        file(dir).mkdirs()
         violations = [
-                ["PMD",         dir, ".*/pmd/.*\\.xml\$",        "PMD"],
-                ["ANDROIDLINT", dir, ".*/lint-results\\.xml\$",  "AndroidLint"],
-                ["CHECKSTYLE",  dir, ".*/checkstyle/.*\\.xml\$", "Checkstyle"],
+                ["PMD",         dir, ".*pmd.*\\.xml\$",        "PMD"],
+                ["ANDROIDLINT", dir, ".*lint-results\\.xml\$",  "AndroidLint"],
+                ["CHECKSTYLE",  dir, ".*checkstyle.*\\.xml\$", "Checkstyle"],
         ]
     }
 

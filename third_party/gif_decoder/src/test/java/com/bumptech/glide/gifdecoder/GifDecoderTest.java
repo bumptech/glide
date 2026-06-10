@@ -12,12 +12,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 /** Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}. */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 19)
+@Config(sdk = 23)
 public class GifDecoderTest {
 
   private MockProvider provider;
@@ -175,9 +174,7 @@ public class GifDecoderTest {
     @NonNull
     @Override
     public Bitmap obtain(int width, int height, Bitmap.Config config) {
-      Bitmap result = Bitmap.createBitmap(width, height, config);
-      Shadows.shadowOf(result).setMutable(true);
-      return result;
+      return Bitmap.createBitmap(width, height, config);
     }
 
     @Override
