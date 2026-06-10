@@ -499,6 +499,19 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to make Glide pool intermediate reading buffers and allocate precisely one
+   * tailored {@link ByteBuffer} using {@link ArrayPool} when decoding from an {@link InputStream}
+   * via {@link android.graphics.ImageDecoder}.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setUseArrayPoolForImageDecoderByteBufferAllocation(boolean isEnabled) {
+    glideExperimentsBuilder.update(
+        new UseArrayPoolForImageDecoderByteBufferAllocation(), isEnabled);
+    return this;
+  }
+
+  /**
    * Override the OS thread priority of threads created in {@link
    * com.bumptech.glide.load.engine.executor.GlideExecutor#DefaultThreadFactory} with {@link
    * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
@@ -669,6 +682,9 @@ public final class GlideBuilder {
 
   /** See {@link #setUseHeapBufferForImageDecoderWithInputStream(boolean)}. */
   public static final class UseHeapBufferForImageDecoderWithInputStream implements Experiment {}
+
+  /** See {@link #setUseArrayPoolForImageDecoderByteBufferAllocation(boolean)}. */
+  public static final class UseArrayPoolForImageDecoderByteBufferAllocation implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}

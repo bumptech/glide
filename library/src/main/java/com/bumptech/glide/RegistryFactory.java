@@ -164,8 +164,10 @@ final class RegistryFactory {
         && experiments.isEnabled(EnableImageDecoderForBitmaps.class)) {
       streamBitmapDecoder =
           new InputStreamBitmapImageDecoderResourceDecoder(
+              experiments.isEnabled(GlideBuilder.UseHeapBufferForImageDecoderWithInputStream.class),
+              arrayPool,
               experiments.isEnabled(
-                  GlideBuilder.UseHeapBufferForImageDecoderWithInputStream.class));
+                  GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class));
       byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
     } else {
       byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
