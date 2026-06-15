@@ -27,6 +27,7 @@ public class DiskLruCacheWrapper implements DiskCache {
   private final SafeKeyGenerator safeKeyGenerator;
   private final File directory;
   private final long maxSize;
+  private final boolean memoizePathNames;
   private final DiskCacheWriteLocker writeLocker = new DiskCacheWriteLocker();
   private DiskLruCache diskLruCache;
 
@@ -60,7 +61,24 @@ public class DiskLruCacheWrapper implements DiskCache {
    */
   @SuppressWarnings("deprecation")
   public static DiskCache create(File directory, long maxSize) {
-    return new DiskLruCacheWrapper(directory, maxSize);
+    return new DiskLruCacheWrapper(directory, maxSize, /* memoizePathNames= */ true);
+  }
+
+  /**
+   * Create a new DiskCache in the given directory with a specified max size and memoization
+   * behavior.
+   *
+   * @param directory The directory for the disk cache
+   * @param maxSize The max size for the disk cache
+   * @param memoizePathNames Whether to memoize path names
+   * @return The new disk cache with the given arguments
+   * @deprecated Disabling the memoization is an experimental setting that may be removed in a
+   *     future version.
+   */
+  @SuppressWarnings("deprecation")
+  @Deprecated
+  public static DiskCache create(File directory, long maxSize, boolean memoizePathNames) {
+    return new DiskLruCacheWrapper(directory, maxSize, memoizePathNames);
   }
 
   /**
@@ -70,14 +88,21 @@ public class DiskLruCacheWrapper implements DiskCache {
   // Deprecated public API.
   @SuppressWarnings({"WeakerAccess", "DeprecatedIsStillUsed"})
   protected DiskLruCacheWrapper(File directory, long maxSize) {
+    this(directory, maxSize, /* memoizePathNames= */ true);
+  }
+
+  protected DiskLruCacheWrapper(File directory, long maxSize, boolean memoizePathNames) {
     this.directory = directory;
     this.maxSize = maxSize;
+    this.memoizePathNames = memoizePathNames;
     this.safeKeyGenerator = new SafeKeyGenerator();
   }
 
   private synchronized DiskLruCache getDiskCache() throws IOException {
     if (diskLruCache == null) {
-      diskLruCache = DiskLruCache.open(directory, APP_VERSION, VALUE_COUNT, maxSize);
+      diskLruCache =
+          DiskLruCache.experimentalOpen(
+              directory, APP_VERSION, VALUE_COUNT, maxSize, memoizePathNames);
     }
     return diskLruCache;
   }
