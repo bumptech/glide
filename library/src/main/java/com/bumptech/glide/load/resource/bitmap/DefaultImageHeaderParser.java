@@ -4,6 +4,7 @@ import static com.bumptech.glide.load.ImageHeaderParser.ImageType.ANIMATED_AVIF;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.ANIMATED_WEBP;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.AVIF;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.GIF;
+import static com.bumptech.glide.load.ImageHeaderParser.ImageType.HEIF;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.JPEG;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG;
 import static com.bumptech.glide.load.ImageHeaderParser.ImageType.PNG_A;
@@ -69,6 +70,13 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
   private static final int AVIF_BRAND = 0x61766966;
   // "avis"
   private static final int AVIS_BRAND = 0x61766973;
+  // HEIF-related
+  private static final int HEIC_BRAND = 0x68656963;
+  private static final int HEIX_BRAND = 0x68656978;
+  private static final int HEVC_BRAND = 0x68657663;
+  private static final int HEVX_BRAND = 0x68657678;
+  private static final int MIF1_BRAND = 0x6d696631;
+  private static final int MSF1_BRAND = 0x6d736631;
 
   @NonNull
   @Override
@@ -175,9 +183,9 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       }
 
       if (firstFourBytes != RIFF_HEADER) {
-        // Check for AVIF (reads up to 32 bytes). If it is a valid AVIF stream, then the
-        // firstFourBytes will be the size of the FTYP box.
-        return sniffAvif(reader, /* boxSize= */ firstFourBytes);
+        // Check for AVIF/HEIF (reads up to 32 bytes). If it is a valid FTYP box, then the
+        // firstFourBytes will be the box size.
+        return sniffFtyp(reader, /* boxSize= */ firstFourBytes);
       }
 
       // WebP (reads up to 21 bytes).
@@ -228,7 +236,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
    * @return AVIF or ANIMATED_AVIF if the first few bytes look like it could be an AVIF Image or an
    *     animated AVIF Image respectively, UNKNOWN otherwise.
    */
-  private ImageType sniffAvif(Reader reader, int boxSize) throws IOException {
+  private ImageType sniffFtyp(Reader reader, int boxSize) throws IOException {
     int chunkType = (reader.getUInt16() << 16) | reader.getUInt16();
     if (chunkType != FTYP_HEADER) {
       return UNKNOWN;
@@ -242,6 +250,7 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
       return ANIMATED_AVIF;
     }
     boolean avifBrandSeen = brand == AVIF_BRAND;
+    boolean heifBrandSeen = isHeifBrand(brand);
     // Skip the minor version.
     reader.skip(4);
     // Check the first five minor brands. While there could theoretically be more than five minor
@@ -255,10 +264,27 @@ public final class DefaultImageHeaderParser implements ImageHeaderParser {
           return ANIMATED_AVIF;
         } else if (brand == AVIF_BRAND) {
           avifBrandSeen = true;
+        } else if (isHeifBrand(brand)) {
+          heifBrandSeen = true;
         }
       }
     }
-    return avifBrandSeen ? AVIF : UNKNOWN;
+    if (avifBrandSeen) {
+      return AVIF;
+    }
+    if (heifBrandSeen) {
+      return HEIF;
+    }
+    return UNKNOWN;
+  }
+
+  private static boolean isHeifBrand(int brand) {
+    return brand == HEIC_BRAND
+        || brand == HEIX_BRAND
+        || brand == HEVC_BRAND
+        || brand == HEVX_BRAND
+        || brand == MIF1_BRAND
+        || brand == MSF1_BRAND;
   }
 
   /**

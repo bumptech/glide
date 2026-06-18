@@ -36,6 +36,10 @@ public interface ImageHeaderParser {
     AVIF(true),
     /** Animated Avif type (may contain alpha). */
     ANIMATED_AVIF(true),
+    /** HEIF type (may contain alpha). */
+    HEIF(true),
+    /** Animated HEIF type (may contain alpha). */
+    ANIMATED_HEIF(true),
     /** Unrecognized type. */
     UNKNOWN(false);
 
