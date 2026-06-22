@@ -149,12 +149,14 @@ public final class ByteBufferUtil {
       buffer = new byte[BUFFER_SIZE];
     }
 
-    int n;
-    while ((n = stream.read(buffer)) >= 0) {
-      outStream.write(buffer, 0, n);
+    try {
+      int n;
+      while ((n = stream.read(buffer)) >= 0) {
+        outStream.write(buffer, 0, n);
+      }
+    } finally {
+      BUFFER_REF.set(buffer);
     }
-
-    BUFFER_REF.set(buffer);
 
     byte[] bytes = outStream.toByteArray();
 
@@ -183,39 +185,55 @@ public final class ByteBufferUtil {
       throws IOException {
     List<byte[]> buffers = new ArrayList<>();
     int totalSize = 0;
-    while (true) {
-      byte[] buffer = arrayPool.get(BUFFER_SIZE, byte[].class);
-      int read = 0;
-      while (read < BUFFER_SIZE) {
-        int count = stream.read(buffer, read, BUFFER_SIZE - read);
-        if (count == -1) {
+    byte[] currentBuffer = null;
+    boolean success = false;
+    try {
+      while (true) {
+        currentBuffer = arrayPool.get(BUFFER_SIZE, byte[].class);
+        int read = 0;
+        while (read < BUFFER_SIZE) {
+          int count = stream.read(currentBuffer, read, BUFFER_SIZE - read);
+          if (count == -1) {
+            break;
+          }
+          read += count;
+        }
+        if (read == 0) {
+          arrayPool.put(currentBuffer);
+          currentBuffer = null;
           break;
         }
-        read += count;
+        buffers.add(currentBuffer);
+        currentBuffer = null;
+        totalSize += read;
+        if (read < BUFFER_SIZE) {
+          break;
+        }
       }
-      if (read == 0) {
-        arrayPool.put(buffer);
-        break;
+
+      ByteBuffer result =
+          useHeapBuffer ? ByteBuffer.allocate(totalSize) : ByteBuffer.allocateDirect(totalSize);
+
+      int remaining = totalSize;
+      for (byte[] b : buffers) {
+        int toPut = Math.min(remaining, BUFFER_SIZE);
+        result.put(b, 0, toPut);
+        remaining -= toPut;
+        arrayPool.put(b);
       }
-      buffers.add(buffer);
-      totalSize += read;
-      if (read < BUFFER_SIZE) {
-        break;
+      buffers.clear();
+      success = true;
+      return rewind(result);
+    } finally {
+      if (!success) {
+        if (currentBuffer != null) {
+          arrayPool.put(currentBuffer);
+        }
+        for (byte[] b : buffers) {
+          arrayPool.put(b);
+        }
       }
     }
-
-    ByteBuffer result =
-        useHeapBuffer ? ByteBuffer.allocate(totalSize) : ByteBuffer.allocateDirect(totalSize);
-
-    int remaining = totalSize;
-    for (byte[] buffer : buffers) {
-      int toPut = Math.min(remaining, BUFFER_SIZE);
-      result.put(buffer, 0, toPut);
-      remaining -= toPut;
-      arrayPool.put(buffer);
-    }
-
-    return rewind(result);
   }
 
   public static ByteBuffer rewind(ByteBuffer buffer) {

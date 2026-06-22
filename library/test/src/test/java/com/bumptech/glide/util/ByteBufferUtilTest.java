@@ -2,7 +2,9 @@ package com.bumptech.glide.util;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,5 +84,75 @@ public class ByteBufferUtilTest {
     for (int i = 0; i < expectedBytes.length; i++) {
       assertEquals(expectedBytes[i], buffer.get(i));
     }
+  }
+
+  @Test
+  public void testFromStream_exceptionDuringRead_recyclesBuffers() {
+    FakeArrayPool pool = new FakeArrayPool();
+    InputStream stream =
+        new InputStream() {
+          int readCount = 0;
+
+          @Override
+          public int read() throws IOException {
+            throw new IOException("Failed!");
+          }
+
+          @Override
+          public int read(byte[] b, int off, int len) throws IOException {
+            readCount++;
+            if (readCount > 1) {
+              throw new IOException("Failed on second read!");
+            }
+            return len;
+          }
+        };
+
+    try {
+      ByteBufferUtil.fromStream(stream, /* useHeapBuffer= */ true, pool);
+      fail("Expected IOException");
+    } catch (IOException e) {
+      // expected
+    }
+
+    assertEquals(pool.getCalls, pool.putCalls);
+    assertEquals(2, pool.getCalls);
+  }
+
+  private static class FakeArrayPool implements ArrayPool {
+    int getCalls = 0;
+    int putCalls = 0;
+
+    @Override
+    public <T> void put(T array) {
+      putCalls++;
+    }
+
+    @Deprecated
+    @Override
+    public <T> void put(T array, Class<T> arrayClass) {
+      put(array);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T get(int size, Class<T> arrayClass) {
+      getCalls++;
+      if (arrayClass.equals(byte[].class)) {
+        return (T) new byte[size];
+      }
+      throw new IllegalArgumentException();
+    }
+
+    @Override
+    public <T> T getExact(int size, Class<T> arrayClass) {
+      return get(size, arrayClass);
+    }
+
+    @Override
+    public void clearMemory() {}
+
+    @Override
+    public void trimMemory(int level) {}
   }
 }
