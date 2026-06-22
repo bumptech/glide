@@ -17,10 +17,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.exifinterface.media.ExifInterface;
-import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
+import com.bumptech.glide.util.Util;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -137,6 +138,22 @@ public final class TransformationUtils {
     TransformationUtils.setAlpha(inBitmap, result);
 
     applyMatrix(inBitmap, result, m);
+
+    if (result != null && !result.equals(inBitmap)) {
+      // Log if centerCrop scaled the bitmap (either up or down).
+      if (result.getWidth() != inBitmap.getWidth() || result.getHeight() != inBitmap.getHeight()) {
+        if (Log.isLoggable(Engine.GLIDE_MEMORY_TRACKING_TAG, Log.DEBUG)) {
+          Util.logMemoryTracking(
+              Engine.GLIDE_MEMORY_TRACKING_TAG,
+              "TransformationUtils [centerCrop]",
+              null,
+              result,
+              inBitmap.getWidth(),
+              inBitmap.getHeight());
+        }
+      }
+    }
+
     return result;
   }
 
@@ -197,6 +214,22 @@ public final class TransformationUtils {
     Matrix matrix = new Matrix();
     matrix.setScale(minPercentage, minPercentage);
     applyMatrix(inBitmap, toReuse, matrix);
+
+    if (toReuse != null && !toReuse.equals(inBitmap)) {
+      // Log if fitCenter scaled the bitmap (either up or down).
+      if (toReuse.getWidth() != inBitmap.getWidth()
+          || toReuse.getHeight() != inBitmap.getHeight()) {
+        if (Log.isLoggable(Engine.GLIDE_MEMORY_TRACKING_TAG, Log.DEBUG)) {
+          Util.logMemoryTracking(
+              Engine.GLIDE_MEMORY_TRACKING_TAG,
+              "TransformationUtils [fitCenter]",
+              null,
+              toReuse,
+              inBitmap.getWidth(),
+              inBitmap.getHeight());
+        }
+      }
+    }
 
     return toReuse;
   }

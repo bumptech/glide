@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.load.model.Model;
@@ -283,5 +284,72 @@ public final class Util {
 
   public static int hashCode(boolean value) {
     return hashCode(value, HASH_ACCUMULATOR);
+  }
+
+  /**
+   * Logs detailed memory tracking information for a Bitmap allocation or scaling operation.
+   *
+   * <p>This method performs logging only and does not modify or transform the provided bitmap in
+   * any way.
+   *
+   * @param tag The log tag to use.
+   * @param context The component or operation context (e.g. "Downsampler", "TransformationUtils").
+   * @param strategyName The name of the scaling or downsampling strategy used, or {@code null}.
+   * @param downsampled The resulting {@link Bitmap} after allocation or scaling.
+   * @param sourceWidth The original width of the source image before scaling.
+   * @param sourceHeight The original height of the source image before scaling.
+   */
+  public static void logMemoryTracking(
+      String tag,
+      String context,
+      String strategyName,
+      Bitmap downsampled,
+      int sourceWidth,
+      int sourceHeight) {
+    int originalMemory = Util.getBitmapByteSize(sourceWidth, sourceHeight, downsampled.getConfig());
+    int expectedDecodedMemory =
+        Util.getBitmapByteSize(
+            downsampled.getWidth(), downsampled.getHeight(), downsampled.getConfig());
+    int actualAllocatedMemory = Util.getBitmapByteSize(downsampled);
+    int trueCost = expectedDecodedMemory - originalMemory;
+    int poolOverhead = actualAllocatedMemory - expectedDecodedMemory;
+    int bitmapIdentity = System.identityHashCode(downsampled);
+    int decodedArea = downsampled.getWidth() * downsampled.getHeight();
+    int sourceArea = sourceWidth * sourceHeight;
+    String scaleAction = "no scaling";
+    if (decodedArea > sourceArea) {
+      scaleAction = "upscaled";
+    } else if (decodedArea < sourceArea) {
+      scaleAction = "downscaled";
+    }
+    String strategyClause = strategyName == null ? "" : " (Strategy: " + strategyName + ")";
+    String poolInfo =
+        (poolOverhead > 0) ? " [Pooled: +" + poolOverhead + " bytes buffer overhead]" : "";
+    Log.d(
+        tag,
+        context
+            + " [Device: "
+            + android.os.Build.DEVICE
+            + "]: Decoded bitmap [ID: "
+            + bitmapIdentity
+            + "] "
+            + scaleAction
+            + strategyClause
+            + " from ["
+            + sourceWidth
+            + "x"
+            + sourceHeight
+            + "] ("
+            + originalMemory
+            + " bytes) to ["
+            + downsampled.getWidth()
+            + "x"
+            + downsampled.getHeight()
+            + "] ("
+            + expectedDecodedMemory
+            + " bytes). True cost: "
+            + trueCost
+            + " bytes"
+            + poolInfo);
   }
 }

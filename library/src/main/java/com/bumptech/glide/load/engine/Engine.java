@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +22,7 @@ import com.bumptech.glide.util.Executors;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
+import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -31,6 +33,18 @@ public final class Engine
         MemoryCache.ResourceRemovedListener,
         EngineResource.ResourceListener {
   private static final String TAG = "Engine";
+
+  /**
+   * Log tag used for tracking memory allocations and cache hits for Bitmaps.
+   *
+   * <p>When logging is enabled at the {@link Log#DEBUG} level for this tag (e.g. via {@code adb
+   * shell setprop log.tag.GlideMemoryTracking DEBUG}), Glide will log detailed memory tracking
+   * information. This includes cache hits (from active resources or memory cache) and bitmap
+   * transformations or downsampling operations, along with bitmap dimensions, size in bytes, and
+   * identity hash codes.
+   */
+  public static final String GLIDE_MEMORY_TRACKING_TAG = "GlideMemoryTracking";
+
   private static final int JOB_POOL_SIZE = 150;
   private static final boolean VERBOSE_IS_LOGGABLE = Log.isLoggable(TAG, Log.VERBOSE);
   private final Jobs jobs;
@@ -304,6 +318,9 @@ public final class Engine
       if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Loaded resource from active resources", startTime, key);
       }
+      if (Log.isLoggable(GLIDE_MEMORY_TRACKING_TAG, Log.DEBUG)) {
+        logCacheHit("active", key, active);
+      }
       return active;
     }
 
@@ -311,6 +328,9 @@ public final class Engine
     if (cached != null) {
       if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Loaded resource from cache", startTime, key);
+      }
+      if (Log.isLoggable(GLIDE_MEMORY_TRACKING_TAG, Log.DEBUG)) {
+        logCacheHit("cache", key, cached);
       }
       return cached;
     }
@@ -320,6 +340,44 @@ public final class Engine
 
   private static void logWithTimeAndKey(String log, long startTime, Key key) {
     Log.v(TAG, log + " in " + LogTime.getElapsedMillis(startTime) + "ms, key: " + key);
+  }
+
+  /**
+   * Logs memory cache hits (from active resources or memory cache). Handles both raw Bitmaps and
+   * Bitmaps wrapped inside BitmapDrawable resources.
+   */
+  private static void logCacheHit(String source, EngineKey key, EngineResource<?> resource) {
+    if (!Log.isLoggable(GLIDE_MEMORY_TRACKING_TAG, Log.DEBUG)) {
+      return;
+    }
+
+    Object data = resource.get();
+    Bitmap bitmap = null;
+    if (data instanceof Bitmap) {
+      bitmap = (Bitmap) data;
+    } else if (data instanceof android.graphics.drawable.BitmapDrawable) {
+      bitmap = ((android.graphics.drawable.BitmapDrawable) data).getBitmap();
+    }
+    if (bitmap == null) {
+      return;
+    }
+
+    int bitmapIdentity = System.identityHashCode(bitmap);
+    Log.d(
+        GLIDE_MEMORY_TRACKING_TAG,
+        "Engine [Device: "
+            + android.os.Build.DEVICE
+            + "]: Loaded bitmap [ID: "
+            + bitmapIdentity
+            + "] from memory cache ("
+            + source
+            + "). Size: ["
+            + bitmap.getWidth()
+            + "x"
+            + bitmap.getHeight()
+            + "] ("
+            + Util.getBitmapByteSize(bitmap)
+            + " bytes)");
   }
 
   @Nullable

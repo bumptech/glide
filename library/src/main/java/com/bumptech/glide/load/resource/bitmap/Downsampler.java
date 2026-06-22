@@ -19,6 +19,7 @@ import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.PreferredColorSpace;
 import com.bumptech.glide.load.data.ParcelFileDescriptorRewinder;
+import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -431,6 +432,12 @@ public final class Downsampler {
     Bitmap downsampled = decodeStream(imageReader, options, callbacks, bitmapPool);
     callbacks.onDecodeComplete(bitmapPool, downsampled);
 
+    if (downsampled != null && sourceWidth > 0 && sourceHeight > 0) {
+      if (Log.isLoggable(Engine.GLIDE_MEMORY_TRACKING_TAG, Log.DEBUG)) {
+        logMemoryTracking(downsampleStrategy, downsampled, sourceWidth, sourceHeight);
+      }
+    }
+
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logDecode(
           sourceWidth,
@@ -456,6 +463,20 @@ public final class Downsampler {
     }
 
     return rotated;
+  }
+
+  private static void logMemoryTracking(
+      DownsampleStrategy downsampleStrategy,
+      Bitmap downsampled,
+      int sourceWidth,
+      int sourceHeight) {
+    Util.logMemoryTracking(
+        Engine.GLIDE_MEMORY_TRACKING_TAG,
+        "Downsampler",
+        downsampleStrategy.getClass().getSimpleName(),
+        downsampled,
+        sourceWidth,
+        sourceHeight);
   }
 
   private static void calculateScaling(
