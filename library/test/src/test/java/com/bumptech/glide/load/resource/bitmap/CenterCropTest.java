@@ -100,7 +100,7 @@ public class CenterCropTest {
   }
 
   @Test
-  @Config(sdk = 23)
+  @Config(sdk = 24)
   public void testAsksBitmapPoolForArgb8888IfInConfigIsNull() {
     bitmap.setConfig(null);
 
