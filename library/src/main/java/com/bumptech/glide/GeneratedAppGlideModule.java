@@ -13,7 +13,7 @@ import java.util.Set;
  * processing system and optionally provides a {@link
  * com.bumptech.glide.manager.RequestManagerRetriever.RequestManagerFactory} impl.
  */
-abstract class GeneratedAppGlideModule extends AppGlideModule {
+public abstract class GeneratedAppGlideModule extends AppGlideModule {
   /** This method can be removed when manifest parsing is no longer supported. */
   @NonNull
   Set<Class<?>> getExcludedModuleClasses() {
