@@ -488,6 +488,24 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to make Glide use {@link android.graphics.ImageDecoder} when decoding
+   * {@link Bitmap}s from local {@link Uri}s on Android Q and higher.
+   *
+   * <p>This functionality is also guarded by {@link #setImageDecoderEnabledForBitmaps(boolean)} and
+   * will only be active if that flag is also enabled.
+   *
+   * <p>Calls to this method on versions of Android less than Q are ignored.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setUriImageDecoderEnabled(boolean isEnabled) {
+    glideExperimentsBuilder.update(
+        new EnableUriImageDecoder(),
+        /* isEnabled= */ isEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
+    return this;
+  }
+
+  /**
    * Set to {@code true} to make Glide use a heap buffer instead of a direct buffer when decoding
    * {@link Bitmap}s from an {@link InputStream} using {@link android.graphics.ImageDecoder}.
    *
@@ -679,6 +697,8 @@ public final class GlideBuilder {
   }
 
   static final class EnableImageDecoderForBitmaps implements Experiment {}
+
+  static final class EnableUriImageDecoder implements Experiment {}
 
   /** See {@link #setUseHeapBufferForImageDecoderWithInputStream(boolean)}. */
   public static final class UseHeapBufferForImageDecoderWithInputStream implements Experiment {}
