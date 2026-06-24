@@ -876,7 +876,9 @@ public final class DiskLruCache implements Closeable {
       if (!committed) {
         try {
           abort();
-        } catch (IOException ignored) {
+        } catch (IOException exception) {
+            lruEntries.remove(entry.key);
+            entry.currentEditor = null;
         }
       }
     }
