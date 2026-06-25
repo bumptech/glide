@@ -3,8 +3,10 @@ package com.bumptech.glide.load.resource.bitmap;
 import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruArrayPool;
+import com.google.common.collect.ImmutableList;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,17 +18,19 @@ import org.junit.runner.RunWith;
 public final class InputStreamBitmapImageDecoderResourceDecoderTest {
 
   private Options options;
+  private ImmutableList<ImageHeaderParser> parsers;
 
   @Before
   public void setUp() {
     options = new Options();
+    parsers = ImmutableList.of(new DefaultImageHeaderParser());
   }
 
   @Test
   public void decode_withHeapBuffer_readsFullStream() throws IOException {
     InputStreamBitmapImageDecoderResourceDecoder decoder =
         new InputStreamBitmapImageDecoderResourceDecoder(
-            /* useHeapBuffer= */ true, /* arrayPool= */ null, /* useArrayPool= */ false);
+            parsers, /* useHeapBuffer= */ true, /* arrayPool= */ null, /* useArrayPool= */ false);
     byte[] data = new byte[] {1, 2, 3, 4};
     InputStream stream = new ByteArrayInputStream(data);
 
@@ -45,7 +49,7 @@ public final class InputStreamBitmapImageDecoderResourceDecoderTest {
   public void decode_withDirectBuffer_readsFullStream() throws IOException {
     InputStreamBitmapImageDecoderResourceDecoder decoder =
         new InputStreamBitmapImageDecoderResourceDecoder(
-            /* useHeapBuffer= */ false, /* arrayPool= */ null, /* useArrayPool= */ false);
+            parsers, /* useHeapBuffer= */ false, /* arrayPool= */ null, /* useArrayPool= */ false);
     byte[] data = new byte[] {1, 2, 3, 4};
     InputStream stream = new ByteArrayInputStream(data);
 
@@ -63,7 +67,10 @@ public final class InputStreamBitmapImageDecoderResourceDecoderTest {
   public void decode_withArrayPool_readsFullStream() throws IOException {
     InputStreamBitmapImageDecoderResourceDecoder decoder =
         new InputStreamBitmapImageDecoderResourceDecoder(
-            /* useHeapBuffer= */ true, new LruArrayPool(1024 * 1024), /* useArrayPool= */ true);
+            parsers,
+            /* useHeapBuffer= */ true,
+            new LruArrayPool(1024 * 1024),
+            /* useArrayPool= */ true);
     byte[] data = new byte[] {1, 2, 3, 4};
     InputStream stream = new ByteArrayInputStream(data);
 
