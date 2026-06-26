@@ -47,7 +47,7 @@ import org.robolectric.shadows.ShadowSystemClock;
 @RunWith(RobolectricTestRunner.class)
 @Config(
     manifest = Config.NONE,
-    sdk = 23,
+    sdk = Config.OLDEST_SDK,
     shadows = VolleyStreamFetcherServerTest.FakeSystemClock.class)
 public class VolleyStreamFetcherServerTest {
   private static final String DEFAULT_PATH = "/fakepath";

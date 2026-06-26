@@ -162,7 +162,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  @Config(sdk = 23)
+  @Config(sdk = Config.OLDEST_SDK)
   public void testFitCenterHandlesBitmapsWithNullConfigs() {
     Bitmap toFit = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     toFit.setConfig(null);
@@ -223,7 +223,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  @Config(sdk = 23)
+  @Config(sdk = Config.OLDEST_SDK)
   public void testCenterCropHandlesBitmapsWithNullConfigs() {
     Bitmap toTransform = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     toTransform.setConfig(null);
@@ -402,7 +402,7 @@ public class TransformationUtilsTest {
   }
 
   @Test
-  @Config(sdk = 23)
+  @Config(sdk = Config.OLDEST_SDK)
   public void testRotateImageExif_preservesitmapsWithNullConfigs() {
     Bitmap toRotate = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     toRotate.setConfig(null);

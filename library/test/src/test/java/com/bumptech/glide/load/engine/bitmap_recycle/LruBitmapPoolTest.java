@@ -217,7 +217,7 @@ public class LruBitmapPoolTest {
   }
 
   @Test
-  @Config(sdk = 23)
+  @Config(sdk = Config.OLDEST_SDK)
   public void testBitmapsWithAllowedNullConfigsAreAllowed() {
     pool = new LruBitmapPool(100, strategy, Collections.<Bitmap.Config>singleton(null));
 

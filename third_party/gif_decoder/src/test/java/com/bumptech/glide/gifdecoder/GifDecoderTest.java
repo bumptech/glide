@@ -16,7 +16,7 @@ import org.robolectric.annotation.Config;
 
 /** Tests for {@link com.bumptech.glide.gifdecoder.GifDecoder}. */
 @RunWith(RobolectricTestRunner.class)
-@Config(sdk = 23)
+@Config(sdk = Config.OLDEST_SDK)
 public class GifDecoderTest {
 
   private MockProvider provider;
