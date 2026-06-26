@@ -56,6 +56,7 @@ import com.bumptech.glide.load.resource.bitmap.ParcelFileDescriptorBitmapDecoder
 import com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
+import com.bumptech.glide.load.resource.bitmap.UriBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoDecoder;
 import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
 import com.bumptech.glide.load.resource.drawable.AnimatedImageDecoder;
@@ -160,7 +161,8 @@ final class RegistryFactory {
 
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+    ResourceDecoder<Uri, Bitmap> uriBitmapDecoder = null;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
         && experiments.isEnabled(EnableImageDecoderForBitmaps.class)) {
       streamBitmapDecoder =
           new InputStreamBitmapImageDecoderResourceDecoder(
@@ -170,6 +172,7 @@ final class RegistryFactory {
               experiments.isEnabled(
                   GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class));
       byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
+      uriBitmapDecoder = new UriBitmapImageDecoderResourceDecoder(context);
     } else {
       byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
       streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
@@ -203,6 +206,11 @@ final class RegistryFactory {
         /* Bitmaps */
         .append(Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class, byteBufferBitmapDecoder)
         .append(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, streamBitmapDecoder);
+
+    if (uriBitmapDecoder != null) {
+      registry.prepend(Uri.class, Bitmap.class, uriBitmapDecoder);
+      registry.prepend(Uri.class, Uri.class, UnitModelLoader.Factory.<Uri>getInstance());
+    }
 
     if (ParcelFileDescriptorRewinder.isSupported()) {
       registry.append(
@@ -244,7 +252,16 @@ final class RegistryFactory {
             Registry.BUCKET_BITMAP_DRAWABLE,
             ParcelFileDescriptor.class,
             BitmapDrawable.class,
-            new BitmapDrawableDecoder<>(resources, parcelFileDescriptorVideoDecoder))
+            new BitmapDrawableDecoder<>(resources, parcelFileDescriptorVideoDecoder));
+
+    if (uriBitmapDecoder != null) {
+      registry.prepend(
+          Uri.class,
+          BitmapDrawable.class,
+          new BitmapDrawableDecoder<>(resources, uriBitmapDecoder));
+    }
+
+    registry
         .append(BitmapDrawable.class, new BitmapDrawableEncoder(bitmapPool, bitmapEncoder))
         /* GIFs */
         .append(
