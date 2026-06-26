@@ -83,7 +83,6 @@ public abstract class DownsampleStrategy {
   /** Performs no downsampling or scaling. */
   public static final DownsampleStrategy NONE = new None();
 
-  /** Default strategy, currently {@link #CENTER_OUTSIDE}. */
   public static final DownsampleStrategy DEFAULT = CENTER_OUTSIDE;
 
   /**
