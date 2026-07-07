@@ -187,8 +187,10 @@ public final class Downsampler {
   public Resource<Bitmap> decode(
       ByteBuffer buffer, int requestedWidth, int requestedHeight, Options options)
       throws IOException {
+    boolean enableDirectByteBufferDecoding = false;
     return decode(
-        new ImageReader.ByteBufferReader(buffer, parsers, byteArrayPool),
+        new ImageReader.ByteBufferReader(
+            buffer, parsers, byteArrayPool, enableDirectByteBufferDecoding),
         requestedWidth,
         requestedHeight,
         options,

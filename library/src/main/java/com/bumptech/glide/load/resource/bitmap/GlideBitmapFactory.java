@@ -14,12 +14,14 @@ import android.os.Build.VERSION_CODES;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import com.bumptech.glide.util.ByteBufferUtil;
 import com.bumptech.glide.util.GlideSuppliers;
 import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
 import com.bumptech.glide.util.Preconditions;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 /**
  * Wrapper around {@link BitmapFactory} to work around known issues with {@link BitmapFactory}
@@ -54,16 +56,41 @@ final class GlideBitmapFactory {
     return BitmapFactory.decodeStream(inputStream, /* outPadding= */ null, options);
   }
 
+  /** Wrapper for decoding a {@link ByteBuffer} directly without an {@link InputStream}. */
+  @Nullable
+  public static Bitmap decodeByteBuffer(
+      ByteBuffer buffer, BitmapFactory.Options options, ImageReader reader) {
+    ByteBufferUtil.rewind(buffer);
+    if (buffer.hasArray() && !buffer.isReadOnly()) {
+      return decodeByteArray(
+          buffer.array(),
+          buffer.arrayOffset() + buffer.position(),
+          buffer.remaining(),
+          options,
+          reader);
+    } else {
+      byte[] bytes = ByteBufferUtil.toBytes(buffer);
+      return decodeByteArray(bytes, /* offset= */ 0, bytes.length, options, reader);
+    }
+  }
+
   /** Wrapper for {@link BitmapFactory#decodeByteArray}. */
   @Nullable
   public static Bitmap decodeByteArray(
       byte[] bytes, BitmapFactory.Options options, ImageReader reader) {
+    return decodeByteArray(bytes, /* offset= */ 0, bytes.length, options, reader);
+  }
+
+  /** Wrapper for {@link BitmapFactory#decodeByteArray} with offset and length. */
+  @Nullable
+  public static Bitmap decodeByteArray(
+      byte[] bytes, int offset, int length, BitmapFactory.Options options, ImageReader reader) {
     if (VERSION.SDK_INT == VERSION_CODES.UPSIDE_DOWN_CAKE
         && GainmapDecoderWorkaroundStateCalculator.needsGainmapDecodeWorkaround(options)
         && isLikelyToContainGainmap(reader)) {
-      return safeAndExpensiveDecodeHardwareBitmapWithGainmap(bytes, options);
+      return safeAndExpensiveDecodeHardwareBitmapWithGainmap(bytes, offset, length, options);
     }
-    return BitmapFactory.decodeByteArray(bytes, /* offset= */ 0, bytes.length, options);
+    return BitmapFactory.decodeByteArray(bytes, offset, length, options);
   }
 
   /** Wrapper for {@link BitmapFactory#decodeFileDescriptor}. */
@@ -155,12 +182,12 @@ final class GlideBitmapFactory {
   @RequiresApi(VERSION_CODES.UPSIDE_DOWN_CAKE)
   @Nullable
   private static Bitmap safeAndExpensiveDecodeHardwareBitmapWithGainmap(
-      byte[] bytes, Options options) {
+      byte[] bytes, int offset, int length, Options options) {
     Preconditions.checkArgument(options.inPreferredConfig == Config.HARDWARE);
     options.inPreferredConfig = Bitmap.Config.ARGB_8888;
     Bitmap softwareBitmap = null;
     try {
-      softwareBitmap = BitmapFactory.decodeByteArray(bytes, /* offset= */ 0, bytes.length, options);
+      softwareBitmap = BitmapFactory.decodeByteArray(bytes, offset, length, options);
       if (softwareBitmap == null) {
         return null;
       }

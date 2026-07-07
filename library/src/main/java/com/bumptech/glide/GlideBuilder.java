@@ -530,6 +530,17 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to enable direct {@link ByteBuffer} decoding instead of wrapping buffers in
+   * an {@link java.io.InputStream}. Disabled by default.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setEnableDirectByteBufferDecoding(boolean isEnabled) {
+    glideExperimentsBuilder.update(new EnableDirectByteBufferDecoding(), isEnabled);
+    return this;
+  }
+
+  /**
    * Override the OS thread priority of threads created in {@link
    * com.bumptech.glide.load.engine.executor.GlideExecutor#DefaultThreadFactory} with {@link
    * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
@@ -705,6 +716,9 @@ public final class GlideBuilder {
 
   /** See {@link #setUseArrayPoolForImageDecoderByteBufferAllocation(boolean)}. */
   public static final class UseArrayPoolForImageDecoderByteBufferAllocation implements Experiment {}
+
+  /** See {@link #setEnableDirectByteBufferDecoding(boolean)}. */
+  public static final class EnableDirectByteBufferDecoding implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}

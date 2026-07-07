@@ -167,18 +167,32 @@ interface ImageReader {
     private final ByteBuffer buffer;
     private final List<ImageHeaderParser> parsers;
     private final ArrayPool byteArrayPool;
+    private final boolean enableDirectByteBufferDecoding;
 
     ByteBufferReader(ByteBuffer buffer, List<ImageHeaderParser> parsers, ArrayPool byteArrayPool) {
+      this(buffer, parsers, byteArrayPool, /* enableDirectByteBufferDecoding= */ true);
+    }
+
+    ByteBufferReader(
+        ByteBuffer buffer,
+        List<ImageHeaderParser> parsers,
+        ArrayPool byteArrayPool,
+        boolean enableDirectByteBufferDecoding) {
       this.buffer = buffer;
       this.parsers = parsers;
       this.byteArrayPool = byteArrayPool;
+      this.enableDirectByteBufferDecoding = enableDirectByteBufferDecoding;
     }
 
     @Nullable
     @Override
     public Bitmap decodeBitmap(Options options) {
-      InputStream inputStream = stream();
-      return GlideBitmapFactory.decodeStream(inputStream, options, this);
+      if (enableDirectByteBufferDecoding) {
+        return GlideBitmapFactory.decodeByteBuffer(buffer, options, this);
+      } else {
+        InputStream inputStream = stream();
+        return GlideBitmapFactory.decodeStream(inputStream, options, this);
+      }
     }
 
     @Override
