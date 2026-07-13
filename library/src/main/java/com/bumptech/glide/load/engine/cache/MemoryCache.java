@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
+import java.util.List;
 
 /** An interface for adding and removing resources from an in memory cache. */
 public interface MemoryCache {
@@ -64,4 +65,8 @@ public interface MemoryCache {
    *     android.content.ComponentCallbacks2}.
    */
   void trimMemory(int level);
+
+  /** Returns a snapshot of the current cache entry metadata. */
+  @NonNull
+  List<MemoryCacheEntryInfo> getCacheEntryInfos();
 }

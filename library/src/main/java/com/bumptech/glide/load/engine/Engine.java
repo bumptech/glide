@@ -24,6 +24,7 @@ import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import com.bumptech.glide.util.pool.FactoryPools;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -460,6 +461,12 @@ public final class Engine
     } else {
       resourceRecycler.recycle(resource, /* forceNextFrame= */ false);
     }
+  }
+
+  /** Returns a list of metadata for currently active bitmaps. */
+  @NonNull
+  public List<BitmapInfo> getActiveBitmapInfos() {
+    return activeResources.getActiveBitmapInfos();
   }
 
   public void clearDiskCache() {
