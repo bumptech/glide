@@ -9,10 +9,12 @@ import android.os.Build;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.bumptech.glide.load.engine.BitmapInfo;
 import com.bumptech.glide.util.Synthetic;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -254,6 +256,12 @@ public class LruBitmapPool implements BitmapPool {
         || level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
       trimToSize(getMaxSize() / 2);
     }
+  }
+
+  @NonNull
+  @Override
+  public synchronized List<BitmapInfo> getPooledBitmapInfos() {
+    return strategy.getPooledBitmapInfos();
   }
 
   private synchronized void trimToSize(long size) {
