@@ -1,9 +1,12 @@
 package com.bumptech.glide.util;
 
+import android.os.SystemClock;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -99,6 +102,9 @@ public class LruCache<T, Y> {
   @Nullable
   public synchronized Y get(@NonNull T key) {
     Entry<Y> entry = cache.get(key);
+    if (entry != null) {
+      entry.lastAccessedTimestamp = SystemClock.elapsedRealtime();
+    }
     return entry != null ? entry.value : null;
   }
 
@@ -170,6 +176,29 @@ public class LruCache<T, Y> {
     trimToSize(0);
   }
 
+  /** Value and metadata for an entry in the cache. */
+  public static final class EntryInfo<Y> {
+    public final Y value;
+    public final long lastAccessedTimestamp;
+
+    public EntryInfo(Y value, long lastAccessedTimestamp) {
+      this.value = value;
+      this.lastAccessedTimestamp = lastAccessedTimestamp;
+    }
+  }
+
+  /** Returns a snapshot of the current cache entries. */
+  @NonNull
+  public synchronized List<EntryInfo<Y>> getSnapshot() {
+    List<EntryInfo<Y>> result = new ArrayList<>(cache.size());
+    for (Entry<Y> entry : cache.values()) {
+      if (entry != null) {
+        result.add(new EntryInfo<>(entry.value, entry.lastAccessedTimestamp));
+      }
+    }
+    return result;
+  }
+
   /**
    * Removes the least recently used items from the cache until the current size is less than the
    * given size.
@@ -198,11 +227,13 @@ public class LruCache<T, Y> {
   static final class Entry<Y> {
     final Y value;
     final int size;
+    long lastAccessedTimestamp;
 
     @Synthetic
     Entry(Y value, int size) {
       this.value = value;
       this.size = size;
+      this.lastAccessedTimestamp = SystemClock.elapsedRealtime();
     }
   }
 }
