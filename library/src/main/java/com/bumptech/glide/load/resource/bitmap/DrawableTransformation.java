@@ -60,7 +60,7 @@ public class DrawableTransformation implements Transformation<Drawable> {
     Resource<Bitmap> transformedBitmapResource =
         wrapped.transform(context, bitmapResourceToTransform, outWidth, outHeight);
 
-    if (transformedBitmapResource.equals(bitmapResourceToTransform)) {
+    if (bitmapResourceToTransform.equals(transformedBitmapResource)) {
       transformedBitmapResource.recycle();
       return resource;
     } else {
