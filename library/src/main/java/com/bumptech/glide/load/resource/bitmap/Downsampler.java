@@ -113,6 +113,26 @@ public final class Downsampler {
       Option.memory(
           "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", false);
 
+  /**
+   * Indicates that we should bypass applying transformations when the decoded bitmap config is
+   * {@link Bitmap.Config#HARDWARE}.
+   *
+   * <p>Enabling this option avoids copying hardware bitmaps to software canvases for
+   * transformations (like center-cropping or rounding), which reduces memory usage and avoids
+   * crashes caused by software rendering of hardware bitmaps.
+   *
+   * <p>Tradeoffs: Enabled transformations will NOT be applied to the resulting bitmap. This is only
+   * safe for display-only layouts (like grids) where the target {@link android.widget.ImageView}
+   * can handle the scaling/cropping using its {@link android.widget.ImageView.ScaleType} (e.g.,
+   * {@link android.widget.ImageView.ScaleType#CENTER_CROP}).
+   *
+   * <p>This option is ignored unless {@link #ALLOW_HARDWARE_CONFIG} is also enabled.
+   */
+  public static final Option<Boolean> BYPASS_TRANSFORMATIONS_FOR_HARDWARE_BITMAPS =
+      Option.memory(
+          "com.bumptech.glide.load.resource.bitmap.Downsampler.BypassTransformationsForHardwareBitmaps",
+          false);
+
   private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
   private static final String ICO_MIME_TYPE = "image/x-ico";
   private static final Set<String> NO_DOWNSAMPLE_PRE_N_MIME_TYPES =

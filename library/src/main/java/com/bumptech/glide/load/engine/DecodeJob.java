@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Process;
 import android.util.Log;
@@ -643,7 +645,18 @@ class DecodeJob<R>
     Resource<Z> transformed = decoded;
     if (dataSource != DataSource.RESOURCE_DISK_CACHE) {
       appliedTransformation = decodeHelper.getTransformation(resourceSubClass);
-      transformed = appliedTransformation.transform(glideContext, decoded, width, height);
+      if (shouldBypassSoftwareTransformation(decoded, appliedTransformation)) {
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+          Log.v(
+              TAG,
+              "Bypassing software transformations for resource: "
+                  + decoded.get()
+                  + " with transformation: "
+                  + appliedTransformation);
+        }
+      } else {
+        transformed = appliedTransformation.transform(glideContext, decoded, width, height);
+      }
     }
     // TODO: Make this the responsibility of the Transformation.
     if (!decoded.equals(transformed)) {
@@ -693,6 +706,41 @@ class DecodeJob<R>
       result = lockedResult;
     }
     return result;
+  }
+
+  /**
+   * Returns {@code true} if we should bypass applying software transformations to the decoded
+   * resource.
+   *
+   * <p>This is only true if the resource is a hardware bitmap, and both ALLOW_HARDWARE_CONFIG and
+   * BYPASS_TRANSFORMATIONS_FOR_HARDWARE_BITMAPS options are enabled.
+   */
+  private <Z> boolean shouldBypassSoftwareTransformation(
+      Resource<Z> decoded, Transformation<Z> transformation) {
+    Boolean bypassOption = options.get(Downsampler.BYPASS_TRANSFORMATIONS_FOR_HARDWARE_BITMAPS);
+    if (bypassOption == null || !bypassOption) {
+      return false;
+    }
+
+    Boolean allowHardware = options.get(Downsampler.ALLOW_HARDWARE_CONFIG);
+    if (allowHardware == null || !allowHardware) {
+      return false;
+    }
+
+    Object resource = decoded.get();
+    Bitmap bitmap = null;
+    if (resource instanceof Bitmap) {
+      bitmap = (Bitmap) resource;
+    } else if (resource instanceof BitmapDrawable) {
+      bitmap = ((BitmapDrawable) resource).getBitmap();
+    }
+
+    if (bitmap == null) {
+      return false;
+    }
+
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        && bitmap.getConfig() == Bitmap.Config.HARDWARE;
   }
 
   private final class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
