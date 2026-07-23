@@ -42,15 +42,15 @@ public final class ErrorRequestCoordinator implements RequestCoordinator, Reques
   }
 
   @Override
-  public void clear() {
+  public void clear(boolean skipPlaceholder) {
     synchronized (requestLock) {
       primaryState = RequestState.CLEARED;
-      primary.clear();
+      primary.clear(skipPlaceholder);
       // Don't check primary's failed state here because it will have been reset by the clear call
       // immediately before this.
       if (errorState != RequestState.CLEARED) {
         errorState = RequestState.CLEARED;
-        error.clear();
+        error.clear(skipPlaceholder);
       }
     }
   }
