@@ -2,6 +2,7 @@ package com.bumptech.glide.util;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +11,8 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** Utilities for interacting with {@link java.nio.ByteBuffer}s. */
@@ -133,6 +136,12 @@ public final class ByteBufferUtil {
 
   @NonNull
   public static ByteBuffer fromStream(@NonNull InputStream stream) throws IOException {
+    return fromStream(stream, false /* useHeapBuffer */);
+  }
+
+  @NonNull
+  public static ByteBuffer fromStream(@NonNull InputStream stream, boolean useHeapBuffer)
+      throws IOException {
     ByteArrayOutputStream outStream = new ByteArrayOutputStream(BUFFER_SIZE);
 
     byte[] buffer = BUFFER_REF.getAndSet(null);
@@ -140,17 +149,91 @@ public final class ByteBufferUtil {
       buffer = new byte[BUFFER_SIZE];
     }
 
-    int n;
-    while ((n = stream.read(buffer)) >= 0) {
-      outStream.write(buffer, 0, n);
+    try {
+      int n;
+      while ((n = stream.read(buffer)) >= 0) {
+        outStream.write(buffer, 0, n);
+      }
+    } finally {
+      BUFFER_REF.set(buffer);
     }
-
-    BUFFER_REF.set(buffer);
 
     byte[] bytes = outStream.toByteArray();
 
-    // Some resource decoders require a direct byte buffer. Prefer allocateDirect() over wrap()
-    return rewind(ByteBuffer.allocateDirect(bytes.length).put(bytes));
+    if (useHeapBuffer) {
+      return ByteBuffer.wrap(bytes);
+    } else {
+      // Some resource decoders require a direct byte buffer. Prefer allocateDirect() over wrap()
+      return rewind(ByteBuffer.allocateDirect(bytes.length).put(bytes));
+    }
+  }
+
+  /**
+   * Creates a {@link ByteBuffer} from an {@link InputStream}, using the provided {@link ArrayPool}
+   * to recycle intermediate reading buffers.
+   *
+   * @param stream The {@link InputStream} to read from.
+   * @param useHeapBuffer True to allocate a heap {@link ByteBuffer}, false for a direct {@link
+   *     ByteBuffer}.
+   * @param arrayPool The {@link ArrayPool} used to pool and recycle temporary byte arrays.
+   * @return A {@link ByteBuffer} containing the full contents of the stream.
+   * @throws IOException If reading from the stream fails.
+   */
+  @NonNull
+  public static ByteBuffer fromStream(
+      @NonNull InputStream stream, boolean useHeapBuffer, @NonNull ArrayPool arrayPool)
+      throws IOException {
+    List<byte[]> buffers = new ArrayList<>();
+    int totalSize = 0;
+    byte[] currentBuffer = null;
+    boolean success = false;
+    try {
+      while (true) {
+        currentBuffer = arrayPool.get(BUFFER_SIZE, byte[].class);
+        int read = 0;
+        while (read < BUFFER_SIZE) {
+          int count = stream.read(currentBuffer, read, BUFFER_SIZE - read);
+          if (count == -1) {
+            break;
+          }
+          read += count;
+        }
+        if (read == 0) {
+          arrayPool.put(currentBuffer);
+          currentBuffer = null;
+          break;
+        }
+        buffers.add(currentBuffer);
+        currentBuffer = null;
+        totalSize += read;
+        if (read < BUFFER_SIZE) {
+          break;
+        }
+      }
+
+      ByteBuffer result =
+          useHeapBuffer ? ByteBuffer.allocate(totalSize) : ByteBuffer.allocateDirect(totalSize);
+
+      int remaining = totalSize;
+      for (byte[] b : buffers) {
+        int toPut = Math.min(remaining, BUFFER_SIZE);
+        result.put(b, 0, toPut);
+        remaining -= toPut;
+        arrayPool.put(b);
+      }
+      buffers.clear();
+      success = true;
+      return rewind(result);
+    } finally {
+      if (!success) {
+        if (currentBuffer != null) {
+          arrayPool.put(currentBuffer);
+        }
+        for (byte[] b : buffers) {
+          arrayPool.put(b);
+        }
+      }
+    }
   }
 
   public static ByteBuffer rewind(ByteBuffer buffer) {

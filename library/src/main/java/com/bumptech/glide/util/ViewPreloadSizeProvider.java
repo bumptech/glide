@@ -16,7 +16,7 @@ import java.util.Arrays;
  *
  * @param <T> The type of the model the size should be provided for.
  */
-public class ViewPreloadSizeProvider<T>
+public final class ViewPreloadSizeProvider<T>
     implements ListPreloader.PreloadSizeProvider<T>, SizeReadyCallback {
   private int[] size;
 

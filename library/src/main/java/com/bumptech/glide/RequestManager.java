@@ -97,6 +97,7 @@ public class RequestManager
 
   private boolean clearOnStop;
 
+  @SuppressWarnings("this-escape")
   public RequestManager(
       @NonNull Glide glide,
       @NonNull Lifecycle lifecycle,
@@ -112,7 +113,7 @@ public class RequestManager
   }
 
   // Our usage is safe here.
-  @SuppressWarnings("PMD.ConstructorCallsOverridableMethod")
+  @SuppressWarnings({"PMD.ConstructorCallsOverridableMethod", "this-escape"})
   RequestManager(
       Glide glide,
       Lifecycle lifecycle,

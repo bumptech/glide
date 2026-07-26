@@ -5,7 +5,7 @@ plugins {
 android {
     namespace = "com.bumptech.glide.integration.volley"
 
-    compileSdkVersion = libs.versions.compile.sdk.version.get()
+    compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {
         minSdk = libs.versions.min.sdk.version.get().toInt()
@@ -15,6 +15,8 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
+    useLibrary("org.apache.http.legacy")
 }
 
 dependencies {

@@ -21,10 +21,12 @@ final class ExtensionProcessor {
   ExtensionProcessor(
       ProcessingEnvironment processingEnvironment,
       ProcessorUtil processorUtil,
-      IndexerGenerator indexerGenerator) {
+      IndexerGenerator indexerGenerator,
+      boolean useLegacyTypeComparison) {
     this.processorUtil = processorUtil;
     this.indexerGenerator = indexerGenerator;
-    extensionValidator = new GlideExtensionValidator(processingEnvironment, processorUtil);
+    extensionValidator =
+        new GlideExtensionValidator(processingEnvironment, processorUtil, useLegacyTypeComparison);
   }
 
   boolean processExtensions(RoundEnvironment env) {

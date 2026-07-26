@@ -844,6 +844,118 @@ public class DefaultImageHeaderParserTest {
   }
 
   @Test
+  public void testCanParseHeifMajorBrand() throws IOException {
+    byte[] data =
+        new byte[] {
+          // Box Size.
+          0x00,
+          0x00,
+          0x00,
+          0x1C,
+          // ftyp.
+          0x66,
+          0x74,
+          0x79,
+          0x70,
+          // heic (major brand).
+          0x68,
+          0x65,
+          0x69,
+          0x63,
+          // minor version.
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          // other minor brands (mif1, msf1, hevc).
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          0x6d,
+          0x73,
+          0x66,
+          0x31,
+          0x68,
+          0x65,
+          0x76,
+          0x63
+        };
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.HEIF, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.HEIF, parser.getType(byteBuffer));
+          }
+        });
+  }
+
+  @Test
+  public void testCanParseHeifMinorBrand() throws IOException {
+    byte[] data =
+        new byte[] {
+          // Box Size.
+          0x00,
+          0x00,
+          0x00,
+          0x1C,
+          // ftyp.
+          0x66,
+          0x74,
+          0x79,
+          0x70,
+          // mif1 (major brand).
+          0x6d,
+          0x69,
+          0x66,
+          0x31,
+          // minor version.
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          // other minor brands (msf1, heic, hevc).
+          0x6d,
+          0x73,
+          0x66,
+          0x31,
+          0x68,
+          0x65,
+          0x69,
+          0x63,
+          0x68,
+          0x65,
+          0x76,
+          0x63
+        };
+    runTest(
+        data,
+        new ParserTestCase() {
+          @Override
+          public void run(DefaultImageHeaderParser parser, InputStream is, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.HEIF, parser.getType(is));
+          }
+
+          @Override
+          public void run(
+              DefaultImageHeaderParser parser, ByteBuffer byteBuffer, ArrayPool byteArrayPool)
+              throws IOException {
+            assertEquals(ImageType.HEIF, parser.getType(byteBuffer));
+          }
+        });
+  }
+
+  @Test
   public void testReturnsUnknownTypeForUnknownImageHeaders() throws IOException {
     byte[] data = new byte[] {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
     runTest(

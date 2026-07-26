@@ -38,6 +38,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.GlideSuppliers;
 import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
 import com.bumptech.glide.util.Preconditions;
+import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -84,8 +85,8 @@ public class Glide implements ComponentCallbacks2 {
   @Nullable
   private BitmapPreFiller bitmapPreFiller;
 
-  private boolean inBackground = false;
-  private MemoryCategory memoryCategoryInBackground = null;
+  private boolean inBackground;
+  private MemoryCategory memoryCategoryInBackground;
   private MemoryCategory memoryCategoryInForeground = MemoryCategory.NORMAL;
 
   private final GlideSupplier<SetMemoryCategoryOnLifecycleCallbacks> setMemoryCategoryCallbacks =
@@ -754,7 +755,8 @@ public class Glide implements ComponentCallbacks2 {
     memoryCategoryInForeground = setMemoryCategory(memoryCategoryInBackground);
   }
 
-  private void setMemoryCategoryWhenInForeground() {
+  @Synthetic
+  void setMemoryCategoryWhenInForeground() {
     if (memoryCategoryInBackground == null || !inBackground) {
       return;
     }

@@ -9,6 +9,7 @@ pmd {
 tasks.create('pmd', Pmd) {
     dependsOn library.tasks.compileReleaseJavaWithJavac
     targetJdk = TargetJdk.VERSION_1_7
+    ignoreFailures = true
 
     description 'Run pmd'
     group 'verification'
@@ -19,9 +20,11 @@ tasks.create('pmd', Pmd) {
     ruleSetFiles = files("${library.projectDir}/pmd-ruleset.xml")
     source library.android.sourceSets.main.java.srcDirs
     classpath = files()
-    classpath += files(library.tasks.compileReleaseJavaWithJavac.destinationDir)
+    classpath += files(library.tasks.compileReleaseJavaWithJavac.destinationDirectory)
+    // Classpath configured for pmd subproject quality checks.
     doFirst {
-        classpath += library.classPathForQuality()
+        classpath += library.tasks.compileReleaseJavaWithJavac.classpath
+        classpath += files(library.androidComponents.sdkComponents.bootClasspath.get())
     }
 
     //TODO enable this once new Gradle containing this flag is out

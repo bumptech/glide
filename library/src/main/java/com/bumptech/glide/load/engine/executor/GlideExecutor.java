@@ -457,7 +457,7 @@ public final class GlideExecutor implements ExecutorService {
 
     private String name;
     private long threadTimeoutMillis;
-    private Function<? super Runnable, ? extends Runnable> onExecuteDecorator;
+    @Synthetic Function<? super Runnable, ? extends Runnable> onExecuteDecorator;
 
     @Synthetic
     Builder(boolean preventNetworkOperations) {

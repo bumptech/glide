@@ -19,6 +19,7 @@ import com.bumptech.glide.load.Option;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.PreferredColorSpace;
 import com.bumptech.glide.load.data.ParcelFileDescriptorRewinder;
+import com.bumptech.glide.load.engine.Engine;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -112,6 +113,26 @@ public final class Downsampler {
       Option.memory(
           "com.bumptech.glide.load.resource.bitmap.Downsampler.AllowHardwareDecode", false);
 
+  /**
+   * Indicates that we should bypass applying transformations when the decoded bitmap config is
+   * {@link Bitmap.Config#HARDWARE}.
+   *
+   * <p>Enabling this option avoids copying hardware bitmaps to software canvases for
+   * transformations (like center-cropping or rounding), which reduces memory usage and avoids
+   * crashes caused by software rendering of hardware bitmaps.
+   *
+   * <p>Tradeoffs: Enabled transformations will NOT be applied to the resulting bitmap. This is only
+   * safe for display-only layouts (like grids) where the target {@link android.widget.ImageView}
+   * can handle the scaling/cropping using its {@link android.widget.ImageView.ScaleType} (e.g.,
+   * {@link android.widget.ImageView.ScaleType#CENTER_CROP}).
+   *
+   * <p>This option is ignored unless {@link #ALLOW_HARDWARE_CONFIG} is also enabled.
+   */
+  public static final Option<Boolean> BYPASS_TRANSFORMATIONS_FOR_HARDWARE_BITMAPS =
+      Option.memory(
+          "com.bumptech.glide.load.resource.bitmap.Downsampler.BypassTransformationsForHardwareBitmaps",
+          false);
+
   private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
   private static final String ICO_MIME_TYPE = "image/x-ico";
   private static final Set<String> NO_DOWNSAMPLE_PRE_N_MIME_TYPES =
@@ -186,8 +207,10 @@ public final class Downsampler {
   public Resource<Bitmap> decode(
       ByteBuffer buffer, int requestedWidth, int requestedHeight, Options options)
       throws IOException {
+    boolean enableDirectByteBufferDecoding = false;
     return decode(
-        new ImageReader.ByteBufferReader(buffer, parsers, byteArrayPool),
+        new ImageReader.ByteBufferReader(
+            buffer, parsers, byteArrayPool, enableDirectByteBufferDecoding),
         requestedWidth,
         requestedHeight,
         options,
@@ -431,6 +454,12 @@ public final class Downsampler {
     Bitmap downsampled = decodeStream(imageReader, options, callbacks, bitmapPool);
     callbacks.onDecodeComplete(bitmapPool, downsampled);
 
+    if (downsampled != null && sourceWidth > 0 && sourceHeight > 0) {
+      if (Log.isLoggable(Engine.GLIDE_MEMORY_TRACKING_TAG, Log.DEBUG)) {
+        logMemoryTracking(downsampleStrategy, downsampled, sourceWidth, sourceHeight);
+      }
+    }
+
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       logDecode(
           sourceWidth,
@@ -456,6 +485,20 @@ public final class Downsampler {
     }
 
     return rotated;
+  }
+
+  private static void logMemoryTracking(
+      DownsampleStrategy downsampleStrategy,
+      Bitmap downsampled,
+      int sourceWidth,
+      int sourceHeight) {
+    Util.logMemoryTracking(
+        Engine.GLIDE_MEMORY_TRACKING_TAG,
+        "Downsampler",
+        downsampleStrategy.getClass().getSimpleName(),
+        downsampled,
+        sourceWidth,
+        sourceHeight);
   }
 
   private static void calculateScaling(

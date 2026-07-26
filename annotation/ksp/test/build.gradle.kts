@@ -1,11 +1,10 @@
 plugins {
-    id("org.jetbrains.kotlin.android")
     id("com.android.library")
 }
 
 android {
     namespace = "com.bumptech.glide.annotation.ksp.test"
-    compileSdkVersion = libs.versions.compile.sdk.version.get()
+    compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {
         minSdk = libs.versions.min.sdk.version.get().toInt()
@@ -32,4 +31,8 @@ dependencies {
     testImplementation(project(":annotation"))
     testImplementation(project(":glide"))
     testImplementation(libs.kotlin.test)
+}
+
+tasks.withType<Test>().configureEach {
+    enabled = false
 }

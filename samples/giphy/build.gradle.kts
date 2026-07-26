@@ -4,11 +4,10 @@ plugins {
 
 android {
     namespace = "com.bumptech.glide.samples.giphy"
-    compileSdkVersion = libs.versions.compile.sdk.version.get()
+    compileSdk = libs.versions.compile.sdk.version.get().toInt()
 
     defaultConfig {
         minSdk = libs.versions.min.sdk.version.get().toInt()
-        
         versionCode = 1
         versionName = "1.0"
     }
