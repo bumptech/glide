@@ -97,10 +97,8 @@ def javadocTask = tasks.create("releaseJavadoc", Javadoc) {
     }
 
     options {
-        links("http://docs.oracle.com/javase/7/docs/api/")
-        links("https://square.github.io/okhttp/3.x/okhttp/")
-        links("https://square.github.io/okhttp/2.x/okhttp/")
-        links("http://d.android.com/reference")
+        links("https://docs.oracle.com/javase/7/docs/api/")
+        links("https://developer.android.com/reference")
     }
 
     exclude '**/R.java'

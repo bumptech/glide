@@ -62,7 +62,7 @@ public final class GlideFutures {
    * Glide's pool. In particular, if the request is cancelled after the resource is loaded by Glide,
    * but before {@code action} is run on {@code executor}, the resource will not be returned. We
    * have the unfortunate choice between unsafely returning resources to the pool immediately when
-   * cancel is called while they may still be in use via {@link
+   * cancel is called while they may still be in use via {@code
    * com.google.common.util.concurrent.ClosingFuture} or occasionally failing to return resources to
    * the pool. Because failing to return resources to the pool is inefficient, but safe, that's the
    * route we've chosen. A more sophisticated implementation may allow us to avoid the resource
