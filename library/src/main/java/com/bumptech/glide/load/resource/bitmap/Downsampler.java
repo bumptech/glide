@@ -440,12 +440,14 @@ public final class Downsampler {
 
     if (preferredColorSpace != null) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        boolean isP3Eligible =
-            preferredColorSpace == PreferredColorSpace.DISPLAY_P3
-                && options.outColorSpace != null
-                && options.outColorSpace.isWideGamut();
-        options.inPreferredColorSpace =
-            ColorSpace.get(isP3Eligible ? ColorSpace.Named.DISPLAY_P3 : ColorSpace.Named.SRGB);
+        if (!TransformationUtils.isHdr(options.outColorSpace)) {
+          boolean isP3Eligible =
+              preferredColorSpace == PreferredColorSpace.DISPLAY_P3
+                  && options.outColorSpace != null
+                  && options.outColorSpace.isWideGamut();
+          options.inPreferredColorSpace =
+              ColorSpace.get(isP3Eligible ? ColorSpace.Named.DISPLAY_P3 : ColorSpace.Named.SRGB);
+        }
       } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         options.inPreferredColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
       }
