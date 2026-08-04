@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * be avoided. The preferred style looks like:
  *
  * <pre>{@code
- * {@link @}GlideExtension
+ * {@literal @}GlideExtension
  * public class MyExtension {
  *   private MyExtension() {}
  *

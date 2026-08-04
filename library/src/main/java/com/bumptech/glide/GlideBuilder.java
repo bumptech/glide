@@ -489,7 +489,7 @@ public final class GlideBuilder {
 
   /**
    * Set to {@code true} to make Glide use {@link android.graphics.ImageDecoder} when decoding
-   * {@link Bitmap}s from local {@link Uri}s on Android Q and higher.
+   * {@link Bitmap}s from local {@link android.net.Uri}s on Android Q and higher.
    *
    * <p>This functionality is also guarded by {@link #setImageDecoderEnabledForBitmaps(boolean)} and
    * will only be active if that flag is also enabled.
@@ -507,7 +507,8 @@ public final class GlideBuilder {
 
   /**
    * Set to {@code true} to make Glide use a heap buffer instead of a direct buffer when decoding
-   * {@link Bitmap}s from an {@link InputStream} using {@link android.graphics.ImageDecoder}.
+   * {@link Bitmap}s from an {@link java.io.InputStream} using {@link
+   * android.graphics.ImageDecoder}.
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
@@ -518,8 +519,8 @@ public final class GlideBuilder {
 
   /**
    * Set to {@code true} to make Glide pool intermediate reading buffers and allocate precisely one
-   * tailored {@link ByteBuffer} using {@link ArrayPool} when decoding from an {@link InputStream}
-   * via {@link android.graphics.ImageDecoder}.
+   * tailored {@link java.nio.ByteBuffer} using {@link ArrayPool} when decoding from an {@link
+   * java.io.InputStream} via {@link android.graphics.ImageDecoder}.
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
@@ -530,8 +531,8 @@ public final class GlideBuilder {
   }
 
   /**
-   * Set to {@code true} to enable direct {@link ByteBuffer} decoding instead of wrapping buffers in
-   * an {@link java.io.InputStream}. Disabled by default.
+   * Set to {@code true} to enable direct {@link java.nio.ByteBuffer} decoding instead of wrapping
+   * buffers in an {@link java.io.InputStream}. Disabled by default.
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
@@ -541,8 +542,8 @@ public final class GlideBuilder {
   }
 
   /**
-   * Override the OS thread priority of threads created in {@link
-   * com.bumptech.glide.load.engine.executor.GlideExecutor#DefaultThreadFactory} with {@link
+   * Override the OS thread priority of threads created in {@code
+   * com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory} with {@link
    * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
    *
    * <p>This is an experimental API that may be removed in the future.
@@ -553,7 +554,7 @@ public final class GlideBuilder {
   }
 
   /**
-   * Set to {@code true} to make Glide use {@link
+   * Set to {@code true} to make Glide use {@code
    * android.provider.MediaStore#openAssetFileDescriptor(ContentResolver, Uri, String,
    * CancellationSignal)} when opening {@link android.provider.MediaStore#AUTHORITY} content URIs
    * when it is available.
