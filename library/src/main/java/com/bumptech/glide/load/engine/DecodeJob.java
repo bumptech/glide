@@ -59,8 +59,8 @@ class DecodeJob<R>
    * {@link android.os.Process#THREAD_PRIORITY_LOWEST} to (-20). Any exceptions thrown will cause
    * the override to fail silently and disable overrides on any subsequent jobs.
    *
-   * <p>Must have {@link GlideBuilder#setOverrideGlideThreadPriority(boolean)} experiment enabled to
-   * be used.
+   * <p>Must have {@link com.bumptech.glide.GlideBuilder#setOverrideGlideThreadPriority(boolean)}
+   * experiment enabled to be used.
    *
    * <p>This is used for a highly experimental API that may be removed in the future. Please use at
    * your own risk.

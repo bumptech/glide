@@ -163,6 +163,8 @@ final class RegistryFactory {
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
     ResourceDecoder<Uri, Bitmap> uriBitmapDecoder = null;
+    ResourceDecoder<ByteBuffer, Bitmap> fallbackByteBufferBitmapDecoder = null;
+    ResourceDecoder<InputStream, Bitmap> fallbackStreamBitmapDecoder = null;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
         && experiments.isEnabled(EnableImageDecoderForBitmaps.class)) {
       streamBitmapDecoder =
@@ -176,6 +178,8 @@ final class RegistryFactory {
       if (experiments.isEnabled(EnableUriImageDecoder.class)) {
         uriBitmapDecoder = new UriBitmapImageDecoderResourceDecoder(context);
       }
+      fallbackByteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
+      fallbackStreamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
     } else {
       byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
       streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
@@ -207,8 +211,16 @@ final class RegistryFactory {
         .append(ByteBuffer.class, new ByteBufferEncoder())
         .append(InputStream.class, new StreamEncoder(arrayPool))
         /* Bitmaps */
-        .append(Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class, byteBufferBitmapDecoder)
-        .append(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, streamBitmapDecoder);
+        .append(Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class, byteBufferBitmapDecoder);
+    if (fallbackByteBufferBitmapDecoder != null) {
+      registry.append(
+          Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class, fallbackByteBufferBitmapDecoder);
+    }
+    registry.append(Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, streamBitmapDecoder);
+    if (fallbackStreamBitmapDecoder != null) {
+      registry.append(
+          Registry.BUCKET_BITMAP, InputStream.class, Bitmap.class, fallbackStreamBitmapDecoder);
+    }
 
     if (uriBitmapDecoder != null) {
       registry.prepend(Uri.class, Bitmap.class, uriBitmapDecoder);

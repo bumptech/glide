@@ -104,4 +104,34 @@ public final class UriBitmapImageDecoderResourceDecoderTest {
 
     assertThat(decoded.getPixel(0, 0)).isEqualTo(Color.RED);
   }
+
+  @Test
+  public void handles_returnsFalseForVideoUri() throws IOException {
+    ContentValues values = new ContentValues();
+    values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+    Uri uri =
+        context.getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+    assertThat(decoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
+  public void handles_returnsFalseForVideoFileUri() throws IOException {
+    Uri uri = Uri.parse("file:///path/to/video.mp4");
+    assertThat(decoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
+  public void handles_returnsFalseForTextUri() throws IOException {
+    ContentValues values = new ContentValues();
+    values.put(MediaStore.Files.FileColumns.MIME_TYPE, "text/plain");
+    Uri uri =
+        context.getContentResolver().insert(MediaStore.Files.getContentUri("external"), values);
+    assertThat(decoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
+  public void handles_returnsFalseForUnknownExtensionFileUri() throws IOException {
+    Uri uri = Uri.parse("file:///path/to/file.unknown");
+    assertThat(decoder.handles(uri, options)).isFalse();
+  }
 }
