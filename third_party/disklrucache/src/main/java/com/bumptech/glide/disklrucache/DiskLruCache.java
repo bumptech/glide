@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -205,15 +206,14 @@ public final class DiskLruCache implements Closeable {
   public static DiskLruCache open(File directory, int appVersion, int valueCount, long maxSize)
       throws IOException {
     return experimentalOpen(
-        directory, appVersion, valueCount, maxSize, /* memoizePathNames= */ true);
+        directory, appVersion, valueCount, maxSize, /* memoizePathNames= */ false);
   }
 
   /**
    * Opens the cache in {@code directory}, creating a cache if none exists there, with explicit
    * control over path name memoization.
    *
-   * <p>Disabling the memoization is an experimental setting that may be removed in a future
-   * version.
+   * <p>Enabling the memoization is a deprecated setting that will be removed in a future version.
    *
    * @param directory a writable directory
    * @param appVersion the application's current version code
@@ -907,6 +907,7 @@ public final class DiskLruCache implements Closeable {
     private long sequenceNumber;
 
     private Entry(String key) {
+      Objects.requireNonNull(key, "key");
       this.key = key;
       this.lengths = new long[valueCount];
 
