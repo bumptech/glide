@@ -2,7 +2,7 @@
 avif = "1.1.1.14d8e3c4"
 gson = "2.8.2"
 pmd = "6.0.0"
-dagger = "2.47"
+dagger = "2.60.1"
 compose = "1.5.1"
 kotlin = "2.0.20"
 mockito = "5.3.1"
