@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.mutableStateOf
@@ -467,5 +468,45 @@ class GlideImageTest {
       .onNodeWithContentDescription("test")
       .captureToImage()
       .compareToGolden(testName.methodName)
+  }
+
+  // See #5739
+  @Test
+  fun glideImage_rapidLazyRowScroll_doesNotThrowDetachedScopeException() {
+    val description = "rapid-scroll"
+    val testTag = "rapid-scroll-list"
+    glideComposeRule.setContent {
+      LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.testTag(testTag)
+      ) {
+        items(20) { index ->
+          GlideImage(
+            model = android.R.drawable.star_big_on,
+            contentDescription = description + index,
+            modifier = Modifier.size(200.dp)
+          )
+        }
+      }
+    }
+
+    // Rapidly scroll back and forth to force the GlideImage nodes to detach while a sideEffect
+    // is still queued to launch its coroutine. Before the fix this threw
+    // IllegalStateException("This node does not have an owner.") from
+    // Modifier.Node.coroutineScope inside launchRequest.
+    val indices = listOf(0, 5, 10, 15, 19, 12, 7, 2, 8, 14, 18, 11, 4, 16, 1, 9, 17, 3, 6, 13, 0)
+    for (index in indices) {
+      glideComposeRule.onNode(hasTestTag(testTag)).performScrollToIndex(index)
+    }
+    glideComposeRule.waitForIdle()
+
+    // If we get here without an exception, the bug is fixed. Scroll back to the start and confirm
+    // the first image still renders correctly so we know the surviving nodes are not in a bad
+    // state either.
+    glideComposeRule.onNode(hasTestTag(testTag)).performScrollToIndex(0)
+    glideComposeRule.waitForIdle()
+    glideComposeRule
+      .onNodeWithContentDescription(description + 0)
+      .assert(expectDisplayedDrawable(context.getDrawable(android.R.drawable.star_big_on)))
   }
 }

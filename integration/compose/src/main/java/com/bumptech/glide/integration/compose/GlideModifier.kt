@@ -474,6 +474,13 @@ internal class GlideNode : DrawModifierNode, LayoutModifierNode, SemanticsModifi
   // sideEffect is called after all changes in the tree, so we can always queue a new request, but
     // drop any for old requests by comparing requests builders.
     sideEffect {
+      // The node may have been detached between the caller of launchRequest and the sideEffect
+      // actually running (e.g. during a fast scroll that recycles the GlideImage out of a
+      // LazyColumn). Modifier.Node.coroutineScope throws IllegalStateException("This node does
+      // not have an owner.") in that case, so short-circuit before touching it. See #5739.
+      if (!isAttached) {
+        return@sideEffect
+      }
       if (this.requestBuilder != requestBuilder) {
         return@sideEffect
       }
