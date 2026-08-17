@@ -16,7 +16,7 @@ class ResourceRecycler {
       // If a resource has sub-resources, releasing a sub resource can cause it's parent to be
       // synchronously evicted which leads to a recycle loop when the parent releases it's children.
       // Posting breaks this loop.
-      handler.obtainMessage(ResourceRecyclerCallback.RECYCLE_RESOURCE, resource).sendToTarget();
+      handler.obtainMessage(ResourceRecyclerCallback.RECYCLE_RESOURCE, new RecycleTask(resource, new Throwable("Async stack trace"))).sendToTarget();
     } else {
       isRecycling = true;
       resource.recycle();
@@ -33,11 +33,37 @@ class ResourceRecycler {
     @Override
     public boolean handleMessage(Message message) {
       if (message.what == RECYCLE_RESOURCE) {
-        Resource<?> resource = (Resource<?>) message.obj;
-        resource.recycle();
+        RecycleTask task = (RecycleTask) message.obj;
+        try {
+          Resource<?> resource = task.resource;
+          resource.recycle();
+        } catch (RuntimeException | Error ex) {
+          task.rethrow(ex);
+        }
         return true;
       }
       return false;
+    }
+  }
+
+  private static final class RecycleTask {
+    final Resource<?> resource;
+    final Throwable stacktrace;
+
+    RecycleTask(Resource<?> resource, Throwable stacktrace) {
+      this.resource = resource;
+      this.stacktrace = stacktrace;
+    }
+
+    void rethrow(Throwable original) {
+      Throwable rootCause = original;
+      while (rootCause.getCause() != null) {
+        rootCause = rootCause.getCause();
+      }
+      rootCause.initCause(stacktrace);
+      if (original instanceof Error) throw (Error) original;
+      if (original instanceof RuntimeException) throw (RuntimeException) original;
+      throw new IllegalStateException("Unknown exception: " + original, original);
     }
   }
 }
