@@ -30,21 +30,31 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
   private InputStream inputStream;
 
   public static ThumbFetcher buildImageFetcher(Context context, Uri uri) {
+    if (context == null) {
+      throw new NullPointerException("Context must not be null");
+    }
     return build(context, uri, new ImageThumbnailQuery(context.getContentResolver()));
   }
 
   public static ThumbFetcher buildVideoFetcher(Context context, Uri uri) {
+    if (context == null) {
+      throw new NullPointerException("Context must not be null");
+    }
     return build(context, uri, new VideoThumbnailQuery(context.getContentResolver()));
   }
 
   private static ThumbFetcher build(Context context, Uri uri, ThumbnailQuery query) {
+    if (context == null) {
+      throw new NullPointerException("Context must not be null");
+    }
     ArrayPool byteArrayPool = Glide.get(context).getArrayPool();
     ThumbnailStreamOpener opener =
         new ThumbnailStreamOpener(
             Glide.get(context).getRegistry().getImageHeaderParsers(),
             query,
             byteArrayPool,
-            context.getContentResolver());
+            context.getContentResolver(),
+            context);
     return new ThumbFetcher(uri, opener);
   }
 
