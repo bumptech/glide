@@ -68,21 +68,21 @@ final class BufferQueue {
       final Map<String, List<String>> headers = info.getAllHeaders();
       if (headers.containsKey(CONTENT_LENGTH)) {
         long contentLength = Long.parseLong(headers.get(CONTENT_LENGTH).get(0));
-        boolean isCompressed =
+        boolean isIdentity =
             !headers.containsKey(CONTENT_ENCODING)
                 || (headers.get(CONTENT_ENCODING).size() == 1
                     && "identity".equals(headers.get(CONTENT_ENCODING).get(0)));
-        if (isCompressed) {
-          // We have to guess at the uncompressed size. In the future, consider guessing a
-          // compression ratio based on the content-type and content-encoding. For now,
-          // assume 2.
-          return 2 * contentLength;
-        } else {
+        if (isIdentity) {
           // In this case, we know exactly how many bytes we're going to get, so we can
           // size our buffer perfectly. However, we still have to call read() for the last time,
           // even when we know there shouldn't be any more bytes coming. To avoid allocating another
           // buffer for that case, add one more byte than we really need.
           return contentLength + 1;
+        } else {
+          // We have to guess at the uncompressed size. In the future, consider guessing a
+          // compression ratio based on the content-type and content-encoding. For now,
+          // assume 2.
+          return 2 * contentLength + 1;
         }
       } else {
         // No content-length. This means we're either being sent a chunked response, or the
