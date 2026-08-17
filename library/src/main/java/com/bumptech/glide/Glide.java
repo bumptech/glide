@@ -14,6 +14,7 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.os.TraceCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import com.bumptech.glide.load.DecodeFormat;
@@ -471,19 +472,25 @@ public class Glide implements ComponentCallbacks2 {
    * @see android.content.ComponentCallbacks2#onTrimMemory(int)
    */
   public void trimMemory(int level) {
-    // Engine asserts this anyway when removing resources, fail faster and consistently
-    Util.assertMainThread();
-    // Request managers need to be trimmed before the caches and pools, in order for the latter to
-    // have the most benefit.
-    synchronized (managers) {
-      for (RequestManager manager : managers) {
-        manager.onTrimMemory(level);
+    TraceCompat.beginSection("Glide#trimMemory");
+    try {
+      // Engine asserts this anyway when removing resources, fail faster and consistently
+      Util.assertMainThread();
+      // Request managers need to be trimmed before the caches and pools, in order for the latter to
+      // have the most benefit.
+      synchronized (managers) {
+        for (RequestManager manager : managers) {
+          manager.onTrimMemory(level);
+        }
       }
+      // memory cache needs to be trimmed before bitmap pool to trim re-pooled Bitmaps too. See
+      // #687.
+      memoryCache.trimMemory(level);
+      bitmapPool.trimMemory(level);
+      arrayPool.trimMemory(level);
+    } finally {
+      TraceCompat.endSection();
     }
-    // memory cache needs to be trimmed before bitmap pool to trim re-pooled Bitmaps too. See #687.
-    memoryCache.trimMemory(level);
-    bitmapPool.trimMemory(level);
-    arrayPool.trimMemory(level);
   }
 
   /**
