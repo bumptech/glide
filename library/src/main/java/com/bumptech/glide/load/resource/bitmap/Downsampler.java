@@ -954,6 +954,12 @@ public final class Downsampler {
       // On API 26 outConfig may be null for some images even if the image is valid, can be decoded
       // and outWidth/outHeight/outColorSpace are populated (see b/71513049).
       expectedConfig = options.outConfig;
+
+      // If we have a standard image (not wide gamut) and we're requesting RGB_565, avoid allocating
+      // more space than necessary.
+      if (expectedConfig == Config.ARGB_8888 && options.inPreferredConfig == Config.RGB_565) {
+        expectedConfig = Config.RGB_565;
+      }
     }
 
     if (expectedConfig == null) {

@@ -2,6 +2,12 @@ package com.bumptech.glide;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assume.assumeTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -19,6 +25,8 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.data.DataFetcher;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.load.model.ModelLoader;
 import com.bumptech.glide.load.model.ModelLoaderFactory;
 import com.bumptech.glide.load.model.MultiModelLoaderFactory;
@@ -55,6 +63,36 @@ public class LoadResourcesWithDownsamplerTest {
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   private final ConcurrencyHelper concurrency = new ConcurrencyHelper();
   private final Context context = ApplicationProvider.getApplicationContext();
+
+  @Test
+  public void loadJpegResource_withPreferRgb565_sizedForRgb565() {
+    BitmapPool mockBitmapPool = spy(new LruBitmapPool(1024 * 1024 * 10));
+    Glide.init(context, new GlideBuilder().setBitmapPool(mockBitmapPool));
+
+    Glide.get(context)
+        .getRegistry()
+        .prepend(Object.class, InputStream.class, new FakeModelLoader<>(ResourceIds.raw.canonical));
+
+    Bitmap bitmap =
+        concurrency.get(
+            Glide.with(context)
+                .asBitmap()
+                .format(DecodeFormat.PREFER_RGB_565)
+                .load(new Object())
+                .submit());
+
+    assertThat(bitmap).isNotNull();
+    assertThat(bitmap.getConfig()).isEqualTo(Bitmap.Config.RGB_565);
+
+    // Verify it asked for RGB_565 and not ARGB_8888
+    verify(mockBitmapPool, never()).getDirty(anyInt(), anyInt(), eq(Bitmap.Config.ARGB_8888));
+    verify(mockBitmapPool, atLeastOnce()).getDirty(anyInt(), anyInt(), eq(Bitmap.Config.RGB_565));
+
+    // Verify 2 bytes allocated per pixel (RGB_565) not 4 (ARGB_8888)
+    int expectedByteCount = bitmap.getWidth() * bitmap.getHeight() * 2;
+    assertThat(expectedByteCount).isGreaterThan(0);
+    assertThat(Util.getBitmapByteSize(bitmap)).isEqualTo(expectedByteCount);
+  }
 
   @Test
   public void loadJpegResource_withNoOtherLoaders_decodesResource() {
