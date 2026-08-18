@@ -5,12 +5,13 @@ import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.ColorSpace;
 import android.os.Build;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.test.FakeStreamModelLoader;
 import com.bumptech.glide.test.GlideApp;
@@ -21,22 +22,33 @@ import com.bumptech.glide.util.Util;
 import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.jspecify.annotations.Nullable;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * On API 26, decoding a variety of different images can cause {@link BitmapFactory} with {@link
- * BitmapFactory.Options#inJustDecodeBounds} set to {@code true} to set {@link
- * BitmapFactory.Options#outConfig} to null instead of a valid value, even though the image can be
- * decoded successfully. Glide can mask these failures by decoding some image sources (notably
- * including resource ids) using other data types and decoders.
+ * Tests for loading resources with {@link Downsampler}.
  *
- * <p>This test ensures that we've worked around the framework issue by loading a variety of images
- * and image types without the normal fallback behavior.
+ * <p>These tests verify:
+ *
+ * <ul>
+ *   <li>A workaround for an Android framework bug on API 26, where {@link
+ *       android.graphics.BitmapFactory} sets {@link
+ *       android.graphics.BitmapFactory.Options#outConfig} to {@code null} when {@link
+ *       android.graphics.BitmapFactory.Options#inJustDecodeBounds} is {@code true}. Fallback
+ *       loaders that normally mask this failure are bypassed to test {@link Downsampler} directly.
+ *   <li>A fix for a {@link Downsampler} bug on API 26+, where {@link Bitmap.Config#RGB_565} bitmaps
+ *       were allocated with 4 bytes per pixel instead of 2.
+ * </ul>
  */
 @RunWith(AndroidJUnit4.class)
 public class LoadResourcesWithDownsamplerTest {
+  private static final int BITMAP_POOL_SIZE_BYTES = 10 * 1024 * 1024;
+  private static final int DEFAULT_WIDTH = 320;
+  private static final int DEFAULT_HEIGHT = 240;
+  private static final int EXPECTED_RGB_565_BYTES = DEFAULT_WIDTH * DEFAULT_HEIGHT * 2;
+  private static final int EXPECTED_ARGB_8888_BYTES = DEFAULT_WIDTH * DEFAULT_HEIGHT * 4;
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   private final ConcurrencyHelper concurrency = new ConcurrencyHelper();
   private final Context context = ApplicationProvider.getApplicationContext();
@@ -204,5 +216,99 @@ public class LoadResourcesWithDownsamplerTest {
                 .load(new Object())
                 .submit());
     assertThat(bitmap).isNotNull();
+  }
+
+  @Test
+  public void loadJpegResource_withPreferRgb565_fixEnabled_returnsRgb565Config() {
+    Bitmap expectedBitmap =
+        Bitmap.createBitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT, Bitmap.Config.RGB_565);
+    initGlideWithPool(ResourceIds.raw.canonical, /* enableRgb565Fix= */ true, expectedBitmap);
+
+    Bitmap bitmap = loadPreferRgb565Bitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+    assertThat(bitmap).isSameInstanceAs(expectedBitmap);
+    assertThat(bitmap.getConfig()).isEqualTo(Bitmap.Config.RGB_565);
+  }
+
+  @Test
+  public void loadJpegResource_withPreferRgb565_fixEnabled_sizedForRgb565() {
+    initGlideWithPool(
+        ResourceIds.raw.canonical, /* enableRgb565Fix= */ true, /* expectedBitmap= */ null);
+
+    Bitmap bitmap = loadPreferRgb565Bitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+    // Verify 2 bytes allocated per pixel (RGB_565) not 4 (ARGB_8888)
+    assertThat(bitmap).isNotNull();
+    assertThat(Util.getBitmapByteSize(bitmap)).isEqualTo(EXPECTED_RGB_565_BYTES);
+  }
+
+  @Test
+  public void loadJpegResource_withPreferRgb565_fixDisabled_sizedForArgb8888() {
+    assumeTrue(
+        "RGB_565 oversized-allocation bug is only present on O+",
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O);
+    initGlideWithPool(
+        ResourceIds.raw.canonical, /* enableRgb565Fix= */ false, /* expectedBitmap= */ null);
+
+    Bitmap bitmap = loadPreferRgb565Bitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+    // Verify bad behavior: 4 bytes allocated per pixel (ARGB_8888)
+    assertThat(bitmap).isNotNull();
+    assertThat(Util.getBitmapByteSize(bitmap)).isEqualTo(EXPECTED_ARGB_8888_BYTES);
+  }
+
+  @Test
+  public void loadTransparentPngResource_withPreferRgb565_fixEnabled_returnsArgb8888Config() {
+    Bitmap expectedBitmap =
+        Bitmap.createBitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT, Bitmap.Config.ARGB_8888);
+    initGlideWithPool(
+        ResourceIds.raw.canonical_transparent_png, /* enableRgb565Fix= */ true, expectedBitmap);
+
+    Bitmap bitmap = loadPreferRgb565Bitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+    assertThat(bitmap).isSameInstanceAs(expectedBitmap);
+    assertThat(bitmap.getConfig()).isEqualTo(Bitmap.Config.ARGB_8888);
+  }
+
+  @Test
+  public void loadTransparentPngResource_withPreferRgb565_fixEnabled_sizedForArgb8888() {
+    initGlideWithPool(
+        ResourceIds.raw.canonical_transparent_png,
+        /* enableRgb565Fix= */ true,
+        /* expectedBitmap= */ null);
+
+    Bitmap bitmap = loadPreferRgb565Bitmap(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+    // Verify 4 bytes allocated per pixel (ARGB_8888)
+    assertThat(bitmap).isNotNull();
+    assertThat(Util.getBitmapByteSize(bitmap)).isEqualTo(EXPECTED_ARGB_8888_BYTES);
+  }
+
+  private void initGlideWithPool(
+      int resourceId, boolean enableRgb565Fix, @Nullable Bitmap expectedBitmap) {
+    BitmapPool pool = new LruBitmapPool(BITMAP_POOL_SIZE_BYTES);
+    Glide.init(
+        context,
+        new GlideBuilder()
+            .setBitmapPool(pool)
+            .experimentalSetEnableRgb565DownsamplerFix(enableRgb565Fix));
+
+    Glide.get(context)
+        .getRegistry()
+        .prepend(Object.class, InputStream.class, new FakeStreamModelLoader<>(context, resourceId));
+
+    if (expectedBitmap != null) {
+      pool.put(expectedBitmap);
+    }
+  }
+
+  private Bitmap loadPreferRgb565Bitmap(int width, int height) {
+    return concurrency.get(
+        Glide.with(context)
+            .asBitmap()
+            .format(DecodeFormat.PREFER_RGB_565)
+            .load(new Object())
+            .override(width, height)
+            .submit());
   }
 }
