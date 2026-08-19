@@ -156,9 +156,14 @@ final class RegistryFactory {
         VideoDecoder.parcel(bitmapPool);
 
     // TODO(judds): Make ParcelFileDescriptorBitmapDecoder work with ImageDecoder.
+    // Pass the experiments config to Downsampler so it can check active flags.
     Downsampler downsampler =
         new Downsampler(
-            registry.getImageHeaderParsers(), resources.getDisplayMetrics(), bitmapPool, arrayPool);
+            registry.getImageHeaderParsers(),
+            resources.getDisplayMetrics(),
+            bitmapPool,
+            arrayPool,
+            experiments);
 
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
