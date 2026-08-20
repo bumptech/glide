@@ -2,8 +2,12 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
 import androidx.annotation.VisibleForTesting;
+import com.bumptech.glide.load.engine.BitmapInfo;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A strategy for reusing bitmaps that requires any returned bitmap's dimensions to exactly match
@@ -30,6 +34,19 @@ class AttributeStrategy implements LruPoolStrategy {
   @Override
   public Bitmap removeLast() {
     return groupedMap.removeLast();
+  }
+
+  @Override
+  public List<BitmapInfo> getPooledBitmapInfos() {
+    final List<BitmapInfo> result = new ArrayList<>();
+    for (Map.Entry<Key, List<Bitmap>> entry : groupedMap) {
+      if (entry.getValue() != null) {
+        for (Bitmap bitmap : entry.getValue()) {
+          result.add(new BitmapInfo(bitmap));
+        }
+      }
+    }
+    return result;
   }
 
   @Override

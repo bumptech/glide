@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.cache;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,9 +21,11 @@ import com.bumptech.glide.util.LruCache;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-@RunWith(JUnit4.class)
+@RunWith(RobolectricTestRunner.class)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class LruCacheTest {
   private static final int SIZE = 10;
   private LruCache<String, Object> cache;
@@ -265,9 +268,10 @@ public class LruCacheTest {
     verify(listener, times((sizeMultiplier * SIZE) - SIZE)).onItemRemoved(any());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfMultiplierLessThanZero() {
-    cache.setSizeMultiplier(-1);
+    org.junit.Assert.assertThrows(
+        IllegalArgumentException.class, () -> cache.setSizeMultiplier(-1));
   }
 
   @Test
