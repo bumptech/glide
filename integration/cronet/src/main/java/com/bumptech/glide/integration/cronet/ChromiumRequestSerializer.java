@@ -368,8 +368,8 @@ final class ChromiumRequestSerializer {
                 + ", file size: "
                 + (buffer.limit() / 1024)
                 + "kb");
-      } else if (!isSuccess && Log.isLoggable(TAG, Log.ERROR) && !wasCancelled) {
-        Log.e(TAG, "Request failed, url: " + glideUrl, exception);
+      } else if (!isSuccess && Log.isLoggable(TAG, Log.WARN) && !wasCancelled) {
+        Log.w(TAG, "Request failed, url: " + glideUrl, exception);
       }
     }
 
