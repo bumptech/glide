@@ -83,4 +83,18 @@ public final class InputStreamBitmapImageDecoderResourceDecoderTest {
     // Verify that the stream was fully read
     assertThat(stream.read()).isEqualTo(-1);
   }
+
+  @Test
+  public void decode_withMalformedStream_returnsNull() throws IOException {
+    InputStreamBitmapImageDecoderResourceDecoder decoder =
+        new InputStreamBitmapImageDecoderResourceDecoder(
+            parsers,
+            /* useHeapBuffer= */ true,
+            new LruArrayPool(1024 * 1024),
+            /* useArrayPool= */ true);
+    byte[] corruptData = new byte[] {0, 1, 2, 3, 4, 5};
+    InputStream stream = new ByteArrayInputStream(corruptData);
+
+    assertThat(decoder.decode(stream, 100, 100, options)).isNull();
+  }
 }

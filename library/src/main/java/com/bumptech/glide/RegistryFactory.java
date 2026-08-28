@@ -175,7 +175,8 @@ final class RegistryFactory {
               experiments.isEnabled(
                   GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class));
       byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
-      if (experiments.isEnabled(EnableUriImageDecoder.class)) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
+          && experiments.isEnabled(EnableUriImageDecoder.class)) {
         uriBitmapDecoder = new UriBitmapImageDecoderResourceDecoder(context);
       }
       fallbackByteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
