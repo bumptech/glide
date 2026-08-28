@@ -61,7 +61,7 @@ public class DiskLruCacheWrapper implements DiskCache {
    */
   @SuppressWarnings("deprecation")
   public static DiskCache create(File directory, long maxSize) {
-    return new DiskLruCacheWrapper(directory, maxSize, /* memoizePathNames= */ true);
+    return new DiskLruCacheWrapper(directory, maxSize, /* memoizePathNames= */ false);
   }
 
   /**
@@ -72,8 +72,8 @@ public class DiskLruCacheWrapper implements DiskCache {
    * @param maxSize The max size for the disk cache
    * @param memoizePathNames Whether to memoize path names
    * @return The new disk cache with the given arguments
-   * @deprecated Disabling the memoization is an experimental setting that may be removed in a
-   *     future version.
+   * @deprecated Enabling the memoization is a deprecated setting that will be removed in a future
+   *     version.
    */
   @SuppressWarnings("deprecation")
   @Deprecated
@@ -88,7 +88,7 @@ public class DiskLruCacheWrapper implements DiskCache {
   // Deprecated public API.
   @SuppressWarnings({"WeakerAccess", "DeprecatedIsStillUsed"})
   protected DiskLruCacheWrapper(File directory, long maxSize) {
-    this(directory, maxSize, /* memoizePathNames= */ true);
+    this(directory, maxSize, /* memoizePathNames= */ false);
   }
 
   protected DiskLruCacheWrapper(File directory, long maxSize, boolean memoizePathNames) {
