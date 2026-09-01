@@ -85,6 +85,40 @@ public class GroupedLinkedMapTest {
     assertThat(map.removeLast()).isEqualTo(secondValue);
   }
 
+  @Test
+  public void testForEachEmptyMap() {
+    final java.util.List<Object> visited = new java.util.ArrayList<>();
+    map.forEach(
+        new GroupedLinkedMap.ValueConsumer<Object>() {
+          @Override
+          public void accept(Object value) {
+            visited.add(value);
+          }
+        });
+    assertThat(visited).isEmpty();
+  }
+
+  @Test
+  public void testForEachVisitsAllValues() {
+    Key firstKey = new Key("key", 1, 1);
+    Integer firstValue = 10;
+    map.put(firstKey, firstValue);
+
+    Key secondKey = new Key("key2", 2, 2);
+    Integer secondValue = 20;
+    map.put(secondKey, secondValue);
+
+    final java.util.List<Object> visited = new java.util.ArrayList<>();
+    map.forEach(
+        new GroupedLinkedMap.ValueConsumer<Object>() {
+          @Override
+          public void accept(Object value) {
+            visited.add(value);
+          }
+        });
+    assertThat(visited).containsExactly(firstValue, secondValue);
+  }
+
   private static final class Key implements Poolable {
 
     private final String key;

@@ -194,7 +194,6 @@ public class Glide implements ComponentCallbacks2 {
     }
   }
 
-  @VisibleForTesting
   public static synchronized boolean isInitialized() {
     return glide != null;
   }
@@ -399,6 +398,16 @@ public class Glide implements ComponentCallbacks2 {
   @NonNull
   public ArrayPool getArrayPool() {
     return arrayPool;
+  }
+
+  @NonNull
+  public Engine getEngine() {
+    return engine;
+  }
+
+  @NonNull
+  public MemoryCache getMemoryCache() {
+    return memoryCache;
   }
 
   /**

@@ -77,6 +77,22 @@ class GroupedLinkedMap<K extends Poolable, V> {
     return null;
   }
 
+  public void forEach(ValueConsumer<V> consumer) {
+    LinkedEntry<K, V> current = head.next;
+    while (!current.equals(head)) {
+      if (current.values != null) {
+        for (V value : current.values) {
+          consumer.accept(value);
+        }
+      }
+      current = current.next;
+    }
+  }
+
+  interface ValueConsumer<V> {
+    void accept(V value);
+  }
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("GroupedLinkedMap( ");
