@@ -2,6 +2,7 @@ package com.bumptech.glide.integration.compose
 
 import android.graphics.drawable.Drawable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Size
@@ -46,7 +47,6 @@ private const val DEFAULT_ITEMS_TO_PRELOAD = 10
  * rows prior to your first image, you can optionally add a few manual calls to make preloading
  * continue smoothly across data sets. One way you might do so is to call the next data set toward
  * the end of the previous data set, e.g.:
- *
  *  ```
  *  val itemsToPreload = 15
  *  items(firstDataSet.size) { index ->
@@ -81,42 +81,47 @@ private const val DEFAULT_ITEMS_TO_PRELOAD = 10
  */
 @Composable
 public fun <DataT : Any> rememberGlidePreloadingData(
-    dataSize: Int,
-    dataGetter: (Int) -> DataT,
-    preloadImageSize: Size,
-    numberOfItemsToPreload: Int = DEFAULT_ITEMS_TO_PRELOAD,
-    fixedVisibleItemCount: Int? = null,
-    requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
+  dataSize: Int,
+  dataGetter: (Int) -> DataT,
+  preloadImageSize: Size,
+  numberOfItemsToPreload: Int = DEFAULT_ITEMS_TO_PRELOAD,
+  fixedVisibleItemCount: Int? = null,
+  requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
 ): GlidePreloadingData<DataT> {
-    val requestManager = LocalContext.current.let { remember(it) { Glide.with(it) } }
-    return remember(
-        requestManager,
+  val requestManager = LocalContext.current.let { remember(it) { Glide.with(it) } }
+  val preloadData =
+    remember(
+      requestManager,
+      dataSize,
+      dataGetter,
+      preloadImageSize,
+      numberOfItemsToPreload,
+      fixedVisibleItemCount,
+      requestBuilderTransform,
+    ) {
+      val preloaderData =
+        PreloaderData(dataSize, dataGetter, requestBuilderTransform, preloadImageSize)
+      val preloader =
+        ListPreloader<DataT>(
+          requestManager,
+          PreloadModelProvider(requestManager, preloaderData),
+          PreloadDimensionsProvider(preloaderData),
+          numberOfItemsToPreload,
+        )
+      PreloadDataImpl(
         dataSize,
         dataGetter,
+        requestManager,
         preloadImageSize,
-        numberOfItemsToPreload,
         fixedVisibleItemCount,
+        preloader,
         requestBuilderTransform,
-    ) {
-        val preloaderData =
-            PreloaderData(dataSize, dataGetter, requestBuilderTransform, preloadImageSize)
-        val preloader =
-            ListPreloader<DataT>(
-                requestManager,
-                PreloadModelProvider(requestManager, preloaderData),
-                PreloadDimensionsProvider(preloaderData),
-                numberOfItemsToPreload,
-            )
-        PreloadDataImpl(
-            dataSize,
-            dataGetter,
-            requestManager,
-            preloadImageSize,
-            fixedVisibleItemCount,
-            preloader,
-            requestBuilderTransform,
-        )
+      )
     }
+
+  DisposableEffect(preloadData) { onDispose { preloadData.clear() } }
+
+  return preloadData
 }
 
 /**
@@ -125,31 +130,31 @@ public fun <DataT : Any> rememberGlidePreloadingData(
  */
 @Composable
 public fun <DataT : Any> rememberGlidePreloadingData(
-    data: List<DataT>,
-    preloadImageSize: Size,
-    numberOfItemsToPreload: Int = DEFAULT_ITEMS_TO_PRELOAD,
-    fixedVisibleItemCount: Int? = null,
-    requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
+  data: List<DataT>,
+  preloadImageSize: Size,
+  numberOfItemsToPreload: Int = DEFAULT_ITEMS_TO_PRELOAD,
+  fixedVisibleItemCount: Int? = null,
+  requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
 ): GlidePreloadingData<DataT> {
-    return rememberGlidePreloadingData(
-        dataSize = data.size,
-        dataGetter = data::get,
-        preloadImageSize = preloadImageSize,
-        numberOfItemsToPreload = numberOfItemsToPreload,
-        fixedVisibleItemCount = fixedVisibleItemCount,
-        requestBuilderTransform = requestBuilderTransform,
-    )
+  return rememberGlidePreloadingData(
+    dataSize = data.size,
+    dataGetter = data::get,
+    preloadImageSize = preloadImageSize,
+    numberOfItemsToPreload = numberOfItemsToPreload,
+    fixedVisibleItemCount = fixedVisibleItemCount,
+    requestBuilderTransform = requestBuilderTransform,
+  )
 }
 
 private data class PreloaderData<DataT>(
-    val dataSize: Int,
-    val dataAccessor: (Int) -> DataT,
-    val requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
-    val size: Size,
+  val dataSize: Int,
+  val dataAccessor: (Int) -> DataT,
+  val requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
+  val size: Size,
 ) {
-    fun preloadRequests(requestManager: RequestManager, item: DataT): RequestBuilder<Drawable> {
-        return requestBuilderTransform(item, requestManager.asDrawable())
-    }
+  fun preloadRequests(requestManager: RequestManager, item: DataT): RequestBuilder<Drawable> {
+    return requestBuilderTransform(item, requestManager.asDrawable())
+  }
 }
 
 /**
@@ -157,76 +162,80 @@ private data class PreloaderData<DataT>(
  * the data and the preload [RequestBuilder].
  */
 public interface GlidePreloadingData<DataT> {
-    /** The total number of items in the data set. */
-    public val size: Int
+  /** The total number of items in the data set. */
+  public val size: Int
 
-    /**
-     * Returns the [DataT] at a given index in the data and a [RequestBuilder] that will trigger a
-     * request that exactly matches the preload request for this index.
-     *
-     * The returned [RequestBuilder] should always be used to display the item at the given index.
-     * Otherwise the preload request triggered by this call is likely useless work. The
-     * [RequestBuilder] can either be used as the primary request, or more likely, passed as the
-     * [RequestBuilder.thumbnail] to a higher resolution request.
-     *
-     * This method has side affects! Calling it will trigger preloads based on the given [index].
-     * Preloading assumes sequential access in a manner that matches what the user will see. If you
-     * need to look up data at indices for other reasons, use the underlying data source directly so
-     * that you do not confuse the preloader. Only use this method when obtaining data to display to
-     * the user.
-     */
-    @Composable public operator fun get(index: Int): Pair<DataT, RequestBuilder<Drawable>>
+  /**
+   * Returns the [DataT] at a given index in the data and a [RequestBuilder] that will trigger a
+   * request that exactly matches the preload request for this index.
+   *
+   * The returned [RequestBuilder] should always be used to display the item at the given index.
+   * Otherwise the preload request triggered by this call is likely useless work. The
+   * [RequestBuilder] can either be used as the primary request, or more likely, passed as the
+   * [RequestBuilder.thumbnail] to a higher resolution request.
+   *
+   * This method has side affects! Calling it will trigger preloads based on the given [index].
+   * Preloading assumes sequential access in a manner that matches what the user will see. If you
+   * need to look up data at indices for other reasons, use the underlying data source directly so
+   * that you do not confuse the preloader. Only use this method when obtaining data to display to
+   * the user.
+   */
+  @Composable public operator fun get(index: Int): Pair<DataT, RequestBuilder<Drawable>>
 }
 
 private class PreloadDataImpl<DataT : Any>(
-    override val size: Int,
-    private val indexToData: (Int) -> DataT,
-    private val requestManager: RequestManager,
-    private val preloadImageSize: Size,
-    private val fixedVisibleItemCount: Int?,
-    private val preloader: ListPreloader<DataT>,
-    private val requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
+  override val size: Int,
+  private val indexToData: (Int) -> DataT,
+  private val requestManager: RequestManager,
+  private val preloadImageSize: Size,
+  private val fixedVisibleItemCount: Int?,
+  private val preloader: ListPreloader<DataT>,
+  private val requestBuilderTransform: PreloadRequestBuilderTransform<DataT>,
 ) : GlidePreloadingData<DataT> {
 
-    @Composable
-    override fun get(index: Int): Pair<DataT, RequestBuilder<Drawable>> {
-        val item = indexToData(index)
-        val requestBuilder =
-            requestBuilderTransform(
-                item,
-                requestManager
-                    .asDrawable()
-                    .override(preloadImageSize.width.toInt(), preloadImageSize.height.toInt()),
-            )
+  @Composable
+  override fun get(index: Int): Pair<DataT, RequestBuilder<Drawable>> {
+    val item = indexToData(index)
+    val requestBuilder =
+      requestBuilderTransform(
+        item,
+        requestManager
+          .asDrawable()
+          .override(preloadImageSize.width.toInt(), preloadImageSize.height.toInt()),
+      )
 
-        LaunchedEffect(preloader, preloadImageSize, requestBuilderTransform, indexToData, index) {
-            preloader.onScroll(/* absListView= */ null, index, fixedVisibleItemCount ?: 1, size)
-        }
-        return item to requestBuilder
+    LaunchedEffect(preloader, preloadImageSize, requestBuilderTransform, indexToData, index) {
+      preloader.onScroll(/* absListView= */ null, index, fixedVisibleItemCount ?: 1, size)
     }
+    return item to requestBuilder
+  }
+
+  fun clear() {
+    preloader.cancelAll()
+  }
 }
 
 private class PreloadDimensionsProvider<DataT : Any>(
-    private val updatedData: PreloaderData<DataT>
+  private val updatedData: PreloaderData<DataT>
 ) : ListPreloader.PreloadSizeProvider<DataT> {
-    override fun getPreloadSize(item: DataT, adapterPosition: Int, perItemPosition: Int): IntArray =
-        updatedData.size.toIntArray()
+  override fun getPreloadSize(item: DataT, adapterPosition: Int, perItemPosition: Int): IntArray =
+    updatedData.size.toIntArray()
 }
 
 private fun Size.toIntArray() = intArrayOf(width.toInt(), height.toInt())
 
 private class PreloadModelProvider<DataT : Any>(
-    private val requestManager: RequestManager,
-    private val data: PreloaderData<DataT>,
+  private val requestManager: RequestManager,
+  private val data: PreloaderData<DataT>,
 ) : ListPreloader.PreloadModelProvider<DataT> {
 
-    override fun getPreloadItems(position: Int): MutableList<DataT> {
-        return mutableListOf(data.dataAccessor(position))
-    }
+  override fun getPreloadItems(position: Int): MutableList<DataT> {
+    return mutableListOf(data.dataAccessor(position))
+  }
 
-    override fun getPreloadRequestBuilder(item: DataT): RequestBuilder<*> {
-        return data.preloadRequests(requestManager, item)
-    }
+  override fun getPreloadRequestBuilder(item: DataT): RequestBuilder<*> {
+    return data.preloadRequests(requestManager, item)
+  }
 }
 
 /**
@@ -237,4 +246,4 @@ private class PreloadModelProvider<DataT : Any>(
  * `requestBuilder` to customize your load.
  */
 public typealias PreloadRequestBuilderTransform<DataTypeT> =
-    (item: DataTypeT, requestBuilder: RequestBuilder<Drawable>) -> RequestBuilder<Drawable>
+  (item: DataTypeT, requestBuilder: RequestBuilder<Drawable>) -> RequestBuilder<Drawable>
