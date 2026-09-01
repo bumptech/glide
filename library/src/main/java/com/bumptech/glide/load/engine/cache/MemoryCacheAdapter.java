@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.Resource;
+import java.util.Collections;
+import java.util.List;
 
 /** A simple class that ignores all puts and returns null for all gets. */
 public class MemoryCacheAdapter implements MemoryCache {
@@ -53,5 +55,11 @@ public class MemoryCacheAdapter implements MemoryCache {
   @Override
   public void trimMemory(int level) {
     // Do nothing.
+  }
+
+  @NonNull
+  @Override
+  public List<MemoryCacheEntryInfo> getCacheEntryInfos() {
+    return Collections.emptyList();
   }
 }
