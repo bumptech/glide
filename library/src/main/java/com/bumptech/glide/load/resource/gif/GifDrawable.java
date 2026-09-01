@@ -12,6 +12,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.Gravity;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -295,7 +296,13 @@ public class GifDrawable extends Drawable
     }
 
     Bitmap currentFrame = state.frameLoader.getCurrentFrame();
-    canvas.drawBitmap(currentFrame, null, getDestRect(), getPaint());
+    if (currentFrame != null && !currentFrame.isRecycled()) {
+      try {
+        canvas.drawBitmap(currentFrame, null, getDestRect(), getPaint());
+      } catch (Exception e) {
+        Log.e("GifDrawable", "draw failed: " + e.getMessage());
+      }
+    }
   }
 
   @Override
