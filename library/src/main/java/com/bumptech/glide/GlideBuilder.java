@@ -44,15 +44,16 @@ import java.util.Map;
 public final class GlideBuilder {
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions = new ArrayMap<>();
   private final GlideExperiments.Builder glideExperimentsBuilder = new GlideExperiments.Builder();
-  private Engine engine;
-  private BitmapPool bitmapPool;
-  private ArrayPool arrayPool;
-  private MemoryCache memoryCache;
-  private GlideExecutor sourceExecutor;
-  private GlideExecutor diskCacheExecutor;
-  private DiskCache.Factory diskCacheFactory;
-  private MemorySizeCalculator memorySizeCalculator;
-  private ConnectivityMonitorFactory connectivityMonitorFactory;
+  @Nullable private Engine engine;
+  @Nullable private BitmapPool bitmapPool;
+  @Nullable private ArrayPool arrayPool;
+  @Nullable private MemoryCache memoryCache;
+  @Nullable private GlideExecutor sourceExecutor;
+  @Nullable private GlideExecutor diskCacheExecutor;
+  @Nullable private GlideExecutor sourceUnlimitedExecutor;
+  @Nullable private DiskCache.Factory diskCacheFactory;
+  @Nullable private MemorySizeCalculator memorySizeCalculator;
+  @Nullable private ConnectivityMonitorFactory connectivityMonitorFactory;
   private int logLevel = Log.INFO;
   private RequestOptionsFactory defaultRequestOptionsFactory =
       new RequestOptionsFactory() {
@@ -63,7 +64,7 @@ public final class GlideBuilder {
         }
       };
   @Nullable private RequestManagerFactory requestManagerFactory;
-  private GlideExecutor animationExecutor;
+  @Nullable private GlideExecutor animationExecutor;
   private boolean isActiveResourceRetentionAllowed;
   @Nullable private List<RequestListener<Object>> defaultRequestListeners;
 
@@ -208,6 +209,24 @@ public final class GlideBuilder {
   @NonNull
   public GlideBuilder setAnimationExecutor(@Nullable GlideExecutor service) {
     this.animationExecutor = service;
+    return this;
+  }
+
+  /**
+   * Sets the {@link GlideExecutor} to use when retrieving {@link
+   * com.bumptech.glide.load.engine.Resource}s that are not already in the cache using the unlimited
+   * source generators pool.
+   *
+   * @param service The ExecutorService to use.
+   * @return This builder.
+   * @see #setSourceExecutor(GlideExecutor)
+   * @see GlideExecutor#newUnlimitedSourceExecutor()
+   */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  @NonNull
+  public GlideBuilder setSourceUnlimitedExecutor(@Nullable GlideExecutor service) {
+    this.sourceUnlimitedExecutor = service;
     return this;
   }
 
@@ -631,6 +650,10 @@ public final class GlideBuilder {
       animationExecutor = GlideExecutor.newAnimationExecutor();
     }
 
+    if (sourceUnlimitedExecutor == null) {
+      sourceUnlimitedExecutor = GlideExecutor.newUnlimitedSourceExecutor();
+    }
+
     if (memorySizeCalculator == null) {
       memorySizeCalculator = new MemorySizeCalculator.Builder(context).build();
     }
@@ -667,7 +690,7 @@ public final class GlideBuilder {
               diskCacheFactory,
               diskCacheExecutor,
               sourceExecutor,
-              GlideExecutor.newUnlimitedSourceExecutor(),
+              sourceUnlimitedExecutor,
               animationExecutor,
               isActiveResourceRetentionAllowed);
     }
