@@ -39,7 +39,7 @@ import javax.lang.model.type.TypeMirror;
  *
  * <pre>
  * <code>
- *  final class GeneratedAppGlideModuleImpl extends com.bumptech.glide.GeneratedAppGlideModule {
+ *  public final class GeneratedAppGlideModuleImpl extends com.bumptech.glide.GeneratedAppGlideModule {
  *    private final com.bumptech.glide.samples.giphy.GiphyGlideModule appGlideModule;
  *
  *    GeneratedAppGlideModule() {
@@ -141,7 +141,7 @@ final class AppModuleGenerator {
 
     Builder builder =
         TypeSpec.classBuilder(GENERATED_APP_MODULE_IMPL_SIMPLE_NAME)
-            .addModifiers(Modifier.FINAL)
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .addAnnotation(
                 AnnotationSpec.builder(SuppressWarnings.class)
                     .addMember("value", "$S", "deprecation")
