@@ -88,6 +88,7 @@ public class Glide implements ComponentCallbacks2 {
   private boolean inBackground;
   private MemoryCategory memoryCategoryInBackground;
   private MemoryCategory memoryCategoryInForeground = MemoryCategory.NORMAL;
+  private final boolean enableTrimMemoryOnUiHidden;
 
   private final GlideSupplier<SetMemoryCategoryOnLifecycleCallbacks> setMemoryCategoryCallbacks =
       GlideSuppliers.memorize(SetMemoryCategoryOnLifecycleCallbacks::new);
@@ -350,6 +351,9 @@ public class Glide implements ComponentCallbacks2 {
     if (memoryCategoryInBackground != null) {
       this.memoryCategoryInBackground = memoryCategoryInBackground.value();
     }
+
+    this.enableTrimMemoryOnUiHidden =
+        experiments.isEnabled(GlideBuilder.EnableTrimMemoryOnUiHidden.class);
 
     // This has a circular relationship with Glide and GlideContext in that it depends on both,
     // but it's created by Glide's constructor. In practice this shouldn't matter because the
@@ -697,9 +701,12 @@ public class Glide implements ComponentCallbacks2 {
   @Override
   public void onTrimMemory(int level) {
     trimMemory(level);
-    // when level is higher than TRIM_MEMORY_UI_HIDDEN, it indicates that the app is
-    // in the background, limit the memory usage by memoryCategoryInBackground.
-    if (level > TRIM_MEMORY_UI_HIDDEN) {
+    // When level is TRIM_MEMORY_UI_HIDDEN (if experiment is enabled) or higher,
+    // it indicates that the app is in the background, limit the memory usage by
+    // memoryCategoryInBackground.
+    boolean shouldTrimForBackground =
+        enableTrimMemoryOnUiHidden ? level >= TRIM_MEMORY_UI_HIDDEN : level > TRIM_MEMORY_UI_HIDDEN;
+    if (shouldTrimForBackground) {
       setMemoryCategoryWhenInBackground();
     }
   }

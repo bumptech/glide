@@ -597,6 +597,22 @@ public final class GlideBuilder {
   }
 
   /**
+   * Sets whether Glide triggers {@link #setMemoryCategoryInBackground(MemoryCategory)} on {@link
+   * android.content.ComponentCallbacks2#TRIM_MEMORY_UI_HIDDEN} (level 20) in addition to higher
+   * levels.
+   *
+   * <p>This experimental change ensures that applications configured with {@link
+   * #setMemoryCategoryInBackground(MemoryCategory)} properly reduce memory usage as soon as the app
+   * moves to the background.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder experimentalSetEnableTrimMemoryOnUiHidden(boolean isEnabled) {
+    glideExperimentsBuilder.update(new EnableTrimMemoryOnUiHidden(), isEnabled);
+    return this;
+  }
+
+  /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
    */
@@ -743,6 +759,9 @@ public final class GlideBuilder {
 
   /** See {@link #setEnableDirectByteBufferDecoding(boolean)}. */
   public static final class EnableDirectByteBufferDecoding implements Experiment {}
+
+  /** See {@link #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}. */
+  public static final class EnableTrimMemoryOnUiHidden implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
