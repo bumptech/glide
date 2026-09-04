@@ -3,37 +3,24 @@ package com.bumptech.glide;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assume.assumeTrue;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ColorSpace;
-import android.net.Uri;
 import android.os.Build;
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.Options;
-import com.bumptech.glide.load.data.DataFetcher;
-import com.bumptech.glide.load.model.ModelLoader;
-import com.bumptech.glide.load.model.ModelLoaderFactory;
-import com.bumptech.glide.load.model.MultiModelLoaderFactory;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
-import com.bumptech.glide.signature.ObjectKey;
+import com.bumptech.glide.test.FakeStreamModelLoader;
 import com.bumptech.glide.test.GlideApp;
 import com.bumptech.glide.test.ResourceIds;
 import com.bumptech.glide.testutil.ConcurrencyHelper;
 import com.bumptech.glide.testutil.TearDownGlide;
 import com.bumptech.glide.util.Util;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.Rule;
@@ -52,15 +39,125 @@ import org.junit.runner.RunWith;
  */
 @RunWith(AndroidJUnit4.class)
 public class LoadResourcesWithDownsamplerTest {
+  private static final int BITMAP_POOL_SIZE_BYTES = 10 * 1024 * 1024;
   @Rule public final TearDownGlide tearDownGlide = new TearDownGlide();
   private final ConcurrencyHelper concurrency = new ConcurrencyHelper();
   private final Context context = ApplicationProvider.getApplicationContext();
 
   @Test
+  public void loadJpegResource_withPreferRgb565_sizedForRgb565() {
+    BitmapPool pool = new LruBitmapPool(BITMAP_POOL_SIZE_BYTES);
+    Bitmap expectedBitmap = Bitmap.createBitmap(320, 240, Bitmap.Config.RGB_565);
+    pool.put(expectedBitmap);
+    Glide.init(context, new GlideBuilder().setBitmapPool(pool).setEnableRgb565DownsamplerFix(true));
+
+    Glide.get(context)
+        .getRegistry()
+        .prepend(
+            Object.class,
+            InputStream.class,
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.canonical));
+
+    Bitmap bitmap =
+        concurrency.get(
+            Glide.with(context)
+                .asBitmap()
+                .format(DecodeFormat.PREFER_RGB_565)
+                .load(new Object())
+                .override(320, 240)
+                .submit());
+
+    assertThat(bitmap).isNotNull();
+    assertThat(bitmap).isSameInstanceAs(expectedBitmap);
+    assertThat(bitmap.getConfig()).isEqualTo(Bitmap.Config.RGB_565);
+
+    // Verify 2 bytes allocated per pixel (RGB_565) not 4 (ARGB_8888)
+    int expectedByteCount = bitmap.getWidth() * bitmap.getHeight() * 2;
+    assertThat(expectedByteCount).isGreaterThan(0);
+    assertThat(Util.getBitmapByteSize(bitmap)).isEqualTo(expectedByteCount);
+  }
+
+  @Test
+  public void loadJpegResource_withPreferRgb565_fixDisabled_sizedForArgb8888() {
+    assumeTrue(
+        "The unoptimized allocation behavior is only present on O+",
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O);
+
+    BitmapPool pool = new LruBitmapPool(BITMAP_POOL_SIZE_BYTES);
+    Bitmap expectedBitmap = Bitmap.createBitmap(320, 240, Bitmap.Config.ARGB_8888);
+    pool.put(expectedBitmap);
+    Glide.init(
+        context, new GlideBuilder().setBitmapPool(pool).setEnableRgb565DownsamplerFix(false));
+
+    Glide.get(context)
+        .getRegistry()
+        .prepend(
+            Object.class,
+            InputStream.class,
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.canonical));
+
+    Bitmap bitmap =
+        concurrency.get(
+            Glide.with(context)
+                .asBitmap()
+                .format(DecodeFormat.PREFER_RGB_565)
+                .load(new Object())
+                .override(320, 240)
+                .submit());
+
+    assertThat(bitmap).isNotNull();
+    assertThat(bitmap).isSameInstanceAs(expectedBitmap);
+    // Even though it allocates Argb8888 sized memory, the config mutates to RGB_565
+    assertThat(bitmap.getConfig()).isEqualTo(Bitmap.Config.RGB_565);
+
+    // Verify bad behavior: 4 bytes allocated per pixel (ARGB_8888)
+    int expectedByteCount = bitmap.getWidth() * bitmap.getHeight() * 4;
+    assertThat(expectedByteCount).isGreaterThan(0);
+    assertThat(Util.getBitmapByteSize(bitmap)).isEqualTo(expectedByteCount);
+  }
+
+  @Test
+  public void loadTransparentPngResource_withPreferRgb565_sizedForArgb8888() {
+    BitmapPool pool = new LruBitmapPool(BITMAP_POOL_SIZE_BYTES);
+    Bitmap expectedBitmap = Bitmap.createBitmap(320, 240, Bitmap.Config.ARGB_8888);
+    pool.put(expectedBitmap);
+    Glide.init(context, new GlideBuilder().setBitmapPool(pool).setEnableRgb565DownsamplerFix(true));
+
+    Glide.get(context)
+        .getRegistry()
+        .prepend(
+            Object.class,
+            InputStream.class,
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.canonical_transparent_png));
+
+    Bitmap bitmap =
+        concurrency.get(
+            Glide.with(context)
+                .asBitmap()
+                .format(DecodeFormat.PREFER_RGB_565)
+                .load(new Object())
+                .override(320, 240)
+                .submit());
+
+    assertThat(bitmap).isNotNull();
+    assertThat(bitmap).isSameInstanceAs(expectedBitmap);
+    assertThat(bitmap.getConfig()).isEqualTo(Bitmap.Config.ARGB_8888);
+    assertThat(bitmap.hasAlpha()).isTrue();
+
+    // Verify 4 bytes allocated per pixel (ARGB_8888)
+    int expectedByteCount = bitmap.getWidth() * bitmap.getHeight() * 4;
+    assertThat(expectedByteCount).isGreaterThan(0);
+    assertThat(Util.getBitmapByteSize(bitmap)).isEqualTo(expectedByteCount);
+  }
+
+  @Test
   public void loadJpegResource_withNoOtherLoaders_decodesResource() {
     Glide.get(context)
         .getRegistry()
-        .prepend(Object.class, InputStream.class, new FakeModelLoader<>(ResourceIds.raw.canonical));
+        .prepend(
+            Object.class,
+            InputStream.class,
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.canonical));
 
     Bitmap bitmap = concurrency.get(Glide.with(context).asBitmap().load(new Object()).submit());
     assertThat(bitmap).isNotNull();
@@ -73,7 +170,9 @@ public class LoadResourcesWithDownsamplerTest {
     Glide.get(context)
         .getRegistry()
         .prepend(
-            Object.class, InputStream.class, new FakeModelLoader<>(ResourceIds.raw.webkit_logo_p3));
+            Object.class,
+            InputStream.class,
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.webkit_logo_p3));
 
     Bitmap bitmap = concurrency.get(Glide.with(context).asBitmap().load(new Object()).submit());
     assertThat(bitmap).isNotNull();
@@ -94,7 +193,9 @@ public class LoadResourcesWithDownsamplerTest {
     Glide.get(context)
         .getRegistry()
         .prepend(
-            Object.class, InputStream.class, new FakeModelLoader<>(ResourceIds.raw.canonical_png));
+            Object.class,
+            InputStream.class,
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.canonical_png));
 
     Bitmap bitmap = concurrency.get(Glide.with(context).asBitmap().load(new Object()).submit());
     assertThat(bitmap).isNotNull();
@@ -107,7 +208,7 @@ public class LoadResourcesWithDownsamplerTest {
         .prepend(
             Object.class,
             InputStream.class,
-            new FakeModelLoader<>(ResourceIds.raw.canonical_transparent_png));
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.canonical_transparent_png));
 
     Bitmap bitmap = concurrency.get(Glide.with(context).asBitmap().load(new Object()).submit());
     assertThat(bitmap).isNotNull();
@@ -120,7 +221,7 @@ public class LoadResourcesWithDownsamplerTest {
         .prepend(
             Object.class,
             InputStream.class,
-            new FakeModelLoader<>(ResourceIds.raw.transparent_gif));
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.transparent_gif));
 
     Bitmap bitmap = concurrency.get(Glide.with(context).asBitmap().load(new Object()).submit());
     assertThat(bitmap).isNotNull();
@@ -149,7 +250,7 @@ public class LoadResourcesWithDownsamplerTest {
         .prepend(
             Object.class,
             InputStream.class,
-            new FakeModelLoader<>(ResourceIds.raw.transparent_gif));
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.transparent_gif));
 
     Bitmap bitmap =
         concurrency.get(
@@ -165,7 +266,7 @@ public class LoadResourcesWithDownsamplerTest {
 
   @Test
   public void loadTransparentGifResource_withNoOtherLoaders_fromBytes_decodesResource() {
-    byte[] data = getBytes(ResourceIds.raw.transparent_gif);
+    byte[] data = FakeStreamModelLoader.getBytes(context, ResourceIds.raw.transparent_gif);
     Bitmap bitmap = concurrency.get(Glide.with(context).asBitmap().load(data).submit());
     assertThat(bitmap).isNotNull();
   }
@@ -175,7 +276,9 @@ public class LoadResourcesWithDownsamplerTest {
     Glide.get(context)
         .getRegistry()
         .prepend(
-            Object.class, InputStream.class, new FakeModelLoader<>(ResourceIds.raw.opaque_gif));
+            Object.class,
+            InputStream.class,
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.opaque_gif));
 
     Bitmap bitmap = concurrency.get(Glide.with(context).asBitmap().load(new Object()).submit());
     assertThat(bitmap).isNotNull();
@@ -183,7 +286,7 @@ public class LoadResourcesWithDownsamplerTest {
 
   @Test
   public void loadOpaqueGifResource_asBytes_decodesResource() {
-    byte[] data = getBytes(ResourceIds.raw.opaque_gif);
+    byte[] data = FakeStreamModelLoader.getBytes(context, ResourceIds.raw.opaque_gif);
     Bitmap bitmap = concurrency.get(Glide.with(context).asBitmap().load(data).submit());
     assertThat(bitmap).isNotNull();
   }
@@ -197,7 +300,9 @@ public class LoadResourcesWithDownsamplerTest {
     Glide.get(context)
         .getRegistry()
         .prepend(
-            Object.class, InputStream.class, new FakeModelLoader<>(ResourceIds.raw.opaque_gif));
+            Object.class,
+            InputStream.class,
+            new FakeStreamModelLoader<>(context, ResourceIds.raw.opaque_gif));
 
     Bitmap bitmap =
         concurrency.get(
@@ -208,119 +313,5 @@ public class LoadResourcesWithDownsamplerTest {
                 .load(new Object())
                 .submit());
     assertThat(bitmap).isNotNull();
-  }
-
-  private byte[] getBytes(int resourceId) {
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    InputStream is = null;
-    try {
-      is = context.getResources().openRawResource(resourceId);
-      byte[] buffer = new byte[1024 * 1024];
-      int read;
-      while ((read = is.read(buffer)) != -1) {
-        os.write(buffer, 0, read);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } finally {
-      if (is != null) {
-        try {
-          is.close();
-        } catch (IOException e) {
-          // Ignored;
-        }
-      }
-    }
-
-    return os.toByteArray();
-  }
-
-  private class FakeModelLoader<T>
-      implements ModelLoader<T, InputStream>, ModelLoaderFactory<T, InputStream> {
-
-    private final int resourceId;
-
-    FakeModelLoader(int resourceId) {
-      this.resourceId = resourceId;
-    }
-
-    @androidx.annotation.Nullable
-    @Override
-    public LoadData<InputStream> buildLoadData(
-        @NonNull Object o, int width, int height, @NonNull Options options) {
-      return new LoadData<>(new ObjectKey(o), new Fetcher());
-    }
-
-    @Override
-    public boolean handles(@NonNull Object o) {
-      return true;
-    }
-
-    @NonNull
-    @Override
-    public ModelLoader<T, InputStream> build(@NonNull MultiModelLoaderFactory multiFactory) {
-      return this;
-    }
-
-    @Override
-    public void teardown() {}
-
-    private final class Fetcher implements DataFetcher<InputStream> {
-      private InputStream inputStream;
-
-      @Override
-      public void loadData(
-          @NonNull Priority priority, @NonNull DataCallback<? super InputStream> callback) {
-        inputStream = getInputStreamForResource(context, resourceId);
-        callback.onDataReady(inputStream);
-      }
-
-      private InputStream getInputStreamForResource(Context context, @DrawableRes int resourceId) {
-        Resources resources = context.getResources();
-        try {
-          Uri parse =
-              Uri.parse(
-                  String.format(
-                      Locale.US,
-                      "%s://%s/%s/%s",
-                      ContentResolver.SCHEME_ANDROID_RESOURCE,
-                      resources.getResourcePackageName(resourceId),
-                      resources.getResourceTypeName(resourceId),
-                      resources.getResourceEntryName(resourceId)));
-          return context.getContentResolver().openInputStream(parse);
-        } catch (Resources.NotFoundException | FileNotFoundException e) {
-          throw new IllegalArgumentException("Resource ID " + resourceId + " not found", e);
-        }
-      }
-
-      @Override
-      public void cleanup() {
-        InputStream local = inputStream;
-        if (local != null) {
-          try {
-            local.close();
-          } catch (IOException e) {
-            // Ignored.
-          }
-        }
-      }
-
-      @Override
-      public void cancel() {
-        // Do nothing.
-      }
-
-      @NonNull
-      @Override
-      public Class<InputStream> getDataClass() {
-        return InputStream.class;
-      }
-
-      @NonNull
-      @Override
-      public DataSource getDataSource() {
-        return DataSource.LOCAL;
-      }
-    }
   }
 }
