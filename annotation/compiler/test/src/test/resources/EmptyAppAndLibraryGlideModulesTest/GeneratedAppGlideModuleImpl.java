@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.Set;
 
 @SuppressWarnings("deprecation")
-final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
+public final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   private final EmptyAppModule appGlideModule;
 
   public GeneratedAppGlideModuleImpl(Context context) {
