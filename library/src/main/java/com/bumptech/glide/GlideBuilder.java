@@ -561,6 +561,16 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to fix allocating twice as much space as necessary for RGB_565 images.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder experimentalSetEnableRgb565DownsamplerFix(boolean isEnabled) {
+    glideExperimentsBuilder.update(new EnableRgb565DownsamplerFix(), isEnabled);
+    return this;
+  }
+
+  /**
    * Override the OS thread priority of threads created in {@code
    * com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory} with {@link
    * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
@@ -759,6 +769,9 @@ public final class GlideBuilder {
 
   /** See {@link #setEnableDirectByteBufferDecoding(boolean)}. */
   public static final class EnableDirectByteBufferDecoding implements Experiment {}
+
+  /** See {@link #experimentalSetEnableRgb565DownsamplerFix(boolean)}. */
+  public static final class EnableRgb565DownsamplerFix implements Experiment {}
 
   /** See {@link #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}. */
   public static final class EnableTrimMemoryOnUiHidden implements Experiment {}
