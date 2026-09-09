@@ -18,6 +18,7 @@ public final class ResourceIds {
     int canonical = getResourceId("raw", "canonical");
     int canonical_large = getResourceId("raw", "canonical_large");
     int canonical_png = getResourceId("raw", "canonical_png");
+    int canonical_bmp = getResourceId("raw", "canonical_bmp");
     int canonical_transparent_png = getResourceId("raw", "canonical_transparent_png");
     int interlaced_transparent_gif = getResourceId("raw", "interlaced_transparent_gif");
     int transparent_gif = getResourceId("raw", "transparent_gif");
