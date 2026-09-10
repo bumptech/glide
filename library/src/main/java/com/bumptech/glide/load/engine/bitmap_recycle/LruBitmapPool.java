@@ -101,11 +101,11 @@ public class LruBitmapPool implements BitmapPool {
 
   @Override
   public synchronized void put(Bitmap bitmap) {
-    if (bitmap == null) {
-      throw new NullPointerException("Bitmap must not be null");
-    }
-    if (bitmap.isRecycled()) {
-      throw new IllegalStateException("Cannot pool recycled bitmap");
+    if (bitmap == null || bitmap.isRecycled()) {
+      if (Log.isLoggable(TAG, Log.WARN)) {
+        Log.w(TAG, "Ignored recycled bitmap passed to pool");
+      }
+      return;
     }
     if (!bitmap.isMutable()
         || strategy.getSize(bitmap) > maxSize
