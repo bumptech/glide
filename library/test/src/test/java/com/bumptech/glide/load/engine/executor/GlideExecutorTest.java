@@ -2,6 +2,7 @@ package com.bumptech.glide.load.engine.executor;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import androidx.annotation.NonNull;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -113,6 +115,64 @@ public class GlideExecutorTest {
     // Since no jobs are queued, the first item added will be run immediately, regardless of
     // priority.
     assertThat(resultPriorities).containsExactly(5, 1, 2, 3, 4).inOrder();
+  }
+
+  @Test
+  public void testNewUnlimitedSourceBuilder_executesTasksSuccessfully()
+      throws InterruptedException {
+    final CountDownLatch executed = new CountDownLatch(1);
+    GlideExecutor executor = GlideExecutor.newUnlimitedSourceBuilder().build();
+
+    executor.execute(
+        new Runnable() {
+          @Override
+          public void run() {
+            executed.countDown();
+          }
+        });
+
+    assertThat(executed.await(100, TimeUnit.MILLISECONDS)).isTrue();
+    executor.shutdown();
+    executor.awaitTermination(500, TimeUnit.MILLISECONDS);
+  }
+
+  @Test
+  public void testNewUnlimitedSourceBuilder_customStrategy_handlesException()
+      throws InterruptedException {
+    final AtomicReference<Throwable> handledThrowable = new AtomicReference<>();
+    final CountDownLatch latch = new CountDownLatch(1);
+    GlideExecutor executor =
+        GlideExecutor.newUnlimitedSourceBuilder()
+            .setUncaughtThrowableStrategy(
+                new GlideExecutor.UncaughtThrowableStrategy() {
+                  @Override
+                  public void handle(Throwable t) {
+                    handledThrowable.set(t);
+                    latch.countDown();
+                  }
+                })
+            .build();
+
+    final RuntimeException expectedException = new RuntimeException("test uncaught throwable");
+    executor.execute(
+        new Runnable() {
+          @Override
+          public void run() {
+            throw expectedException;
+          }
+        });
+
+    assertThat(latch.await(1, TimeUnit.SECONDS)).isTrue();
+    assertThat(handledThrowable.get()).isSameInstanceAs(expectedException);
+    executor.shutdown();
+    executor.awaitTermination(500, TimeUnit.MILLISECONDS);
+  }
+
+  @Test
+  public void testNewUnlimitedSourceBuilder_setThreadCount_throwsUnsupportedOperationException() {
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> GlideExecutor.newUnlimitedSourceBuilder().setThreadCount(1));
   }
 
   private static final class MockRunnable implements Runnable, Comparable<MockRunnable> {
