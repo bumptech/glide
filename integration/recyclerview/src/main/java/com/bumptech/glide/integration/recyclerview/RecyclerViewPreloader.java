@@ -22,8 +22,11 @@ import com.bumptech.glide.RequestManager;
  * methods called from another {@link androidx.recyclerview.widget.RecyclerView.OnScrollListener} to
  * function.
  *
- * <p>This class only works with {@link androidx.recyclerview.widget.LinearLayoutManager} and
- * subclasses of {@link androidx.recyclerview.widget.LinearLayoutManager}.
+ * <p>By default this class only works with {@link
+ * androidx.recyclerview.widget.LinearLayoutManager} and subclasses of {@link
+ * androidx.recyclerview.widget.LinearLayoutManager}. To support another {@link
+ * RecyclerView.LayoutManager}, use the constructor that accepts a {@link
+ * RecyclerViewPositionProvider}.
  *
  * @param <T> The type of the model being displayed in the {@link RecyclerView}.
  */
@@ -92,6 +95,29 @@ public final class RecyclerViewPreloader<T> extends RecyclerView.OnScrollListene
         new ListPreloader<>(
             requestManager, preloadModelProvider, preloadDimensionProvider, maxPreload);
     recyclerScrollListener = new RecyclerToListViewScrollListener(listPreloader);
+  }
+
+  /**
+   * Constructor that accepts a {@link RecyclerViewPositionProvider} for custom {@link
+   * RecyclerView.LayoutManager} implementations.
+   *
+   * @param preloadModelProvider Provides models to load and requests capable of loading them.
+   * @param preloadDimensionProvider Provides the dimensions of images to load.
+   * @param maxPreload Maximum number of items to preload.
+   * @param positionProvider Provides visible adapter position metadata.
+   */
+  public RecyclerViewPreloader(
+      @NonNull RequestManager requestManager,
+      @NonNull PreloadModelProvider<T> preloadModelProvider,
+      @NonNull PreloadSizeProvider<T> preloadDimensionProvider,
+      int maxPreload,
+      @NonNull RecyclerViewPositionProvider positionProvider) {
+
+    ListPreloader<T> listPreloader =
+        new ListPreloader<>(
+            requestManager, preloadModelProvider, preloadDimensionProvider, maxPreload);
+    recyclerScrollListener =
+        new RecyclerToListViewScrollListener(listPreloader, positionProvider);
   }
 
   @Override
