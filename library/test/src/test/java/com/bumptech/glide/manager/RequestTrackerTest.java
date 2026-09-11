@@ -393,7 +393,7 @@ public class RequestTrackerTest {
     }
 
     @Override
-    public void clear() {
+    public void clear(boolean skipPlaceholder) {
       if (isCleared) {
         throw new IllegalStateException();
       }
