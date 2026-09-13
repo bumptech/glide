@@ -1,5 +1,7 @@
 package com.bumptech.glide.load.engine;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Process;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,7 +13,9 @@ import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -101,6 +105,42 @@ final class ActiveResources {
       cleanupActiveReference(activeRef);
     }
     return active;
+  }
+
+  synchronized Map<Key, EngineResource<?>> getActiveResources() {
+    Map<Key, EngineResource<?>> result = new HashMap<>();
+    for (Map.Entry<Key, ResourceWeakReference> entry : activeEngineResources.entrySet()) {
+      EngineResource<?> resource = entry.getValue().get();
+      if (resource != null) {
+        result.put(entry.getKey(), resource);
+      }
+    }
+    return result;
+  }
+
+  synchronized List<BitmapInfo> getActiveBitmapInfos() {
+    List<BitmapInfo> result = new ArrayList<>();
+    for (ResourceWeakReference ref : activeEngineResources.values()) {
+      EngineResource<?> engineResource = ref.get();
+      if (engineResource != null) {
+        Bitmap bitmap = getBitmap(engineResource.getResource());
+        if (bitmap != null) {
+          result.add(new BitmapInfo(bitmap));
+        }
+      }
+    }
+    return result;
+  }
+
+  @Nullable
+  private static Bitmap getBitmap(Resource<?> resource) {
+    Object value = resource.get();
+    if (value instanceof Bitmap) {
+      return (Bitmap) value;
+    } else if (value instanceof BitmapDrawable) {
+      return ((BitmapDrawable) value).getBitmap();
+    }
+    return null;
   }
 
   @SuppressWarnings({"WeakerAccess", "SynchronizeOnNonFinalField"})
