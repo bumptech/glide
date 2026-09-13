@@ -83,6 +83,20 @@ public class ChromiumUrlFetcherTest {
             anyString(), any(UrlRequest.Callback.class), any(Executor.class)))
         .thenReturn(mockUrlRequestBuilder);
     when(mockUrlRequestBuilder.build()).thenReturn(request);
+    org.mockito.Mockito.doAnswer(
+            new org.mockito.stubbing.Answer<Void>() {
+              @Override
+              public Void answer(org.mockito.invocation.InvocationOnMock invocation)
+                  throws Throwable {
+                ByteBuffer buffer = invocation.getArgument(0);
+                if (!buffer.hasRemaining()) {
+                  throw new IllegalArgumentException("ByteBuffer is already full.");
+                }
+                return null;
+              }
+            })
+        .when(request)
+        .read(any(ByteBuffer.class));
 
     glideUrl = new GlideUrl("http://www.google.com");
 
@@ -204,7 +218,9 @@ public class ChromiumUrlFetcherTest {
       public Map<String, List<String>> getAllHeaders() {
         ImmutableMap.Builder<String, List<String>> builder = ImmutableMap.builder();
         for (Map.Entry<String, String> entry : getAllHeadersAsList()) {
-          builder.put(entry.getKey(), ImmutableList.copyOf(entry.getValue().split(",")));
+          builder.put(
+              entry.getKey().toLowerCase(java.util.Locale.US),
+              ImmutableList.copyOf(entry.getValue().split(",")));
         }
         return builder.build();
       }
@@ -375,6 +391,20 @@ public class ChromiumUrlFetcherTest {
                 received.arrayOffset() + received.position(),
                 received.remaining()))
         .isEqualTo(data);
+  }
+
+  @Test
+  public void testRequestComplete_with200NotCancelledZeroLength_callsCallbackWithEmptyData()
+      throws Exception {
+    ByteBuffer expected = ByteBuffer.allocateDirect(0);
+    ArgumentCaptor<ByteBuffer> captor = ArgumentCaptor.forClass(ByteBuffer.class);
+
+    fetcher.loadData(Priority.LOW, callback);
+    succeed(getInfo(0, 200), urlRequestListenerCaptor.getValue(), expected.duplicate());
+
+    verify(callback, timeout(1000)).onDataReady(captor.capture());
+    ByteBuffer received = captor.getValue();
+    assertThat(received.remaining()).isEqualTo(0);
   }
 
   private static Map<String, String> anyHeaders() {
