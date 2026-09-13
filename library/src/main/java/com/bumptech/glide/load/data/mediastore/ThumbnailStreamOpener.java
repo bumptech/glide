@@ -1,8 +1,10 @@
 package com.bumptech.glide.load.data.mediastore;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -25,13 +27,15 @@ class ThumbnailStreamOpener {
   private final ArrayPool byteArrayPool;
   private final ContentResolver contentResolver;
   private final List<ImageHeaderParser> parsers;
+  private final Context context;
 
   ThumbnailStreamOpener(
       List<ImageHeaderParser> parsers,
       ThumbnailQuery query,
       ArrayPool byteArrayPool,
-      ContentResolver contentResolver) {
-    this(parsers, DEFAULT_SERVICE, query, byteArrayPool, contentResolver);
+      ContentResolver contentResolver,
+      Context context) {
+    this(parsers, DEFAULT_SERVICE, query, byteArrayPool, contentResolver, context);
   }
 
   ThumbnailStreamOpener(
@@ -39,12 +43,17 @@ class ThumbnailStreamOpener {
       FileService service,
       ThumbnailQuery query,
       ArrayPool byteArrayPool,
-      ContentResolver contentResolver) {
+      ContentResolver contentResolver,
+      Context context) {
     this.service = service;
     this.query = query;
     this.byteArrayPool = byteArrayPool;
     this.contentResolver = contentResolver;
     this.parsers = parsers;
+    if (context == null) {
+      throw new NullPointerException("Context must not be null");
+    }
+    this.context = context;
   }
 
   int getOrientation(Uri uri) {
@@ -76,7 +85,7 @@ class ThumbnailStreamOpener {
     }
 
     File file = service.get(path);
-    if (!isValid(file)) {
+    if (!isValid(file) || isPrivateFile(file)) {
       return null;
     }
 
@@ -90,6 +99,43 @@ class ThumbnailStreamOpener {
       throw (FileNotFoundException)
           new FileNotFoundException("NPE opening uri: " + uri + " -> " + thumbnailUri).initCause(e);
     }
+  }
+
+  private boolean isPrivateFile(File file) {
+    String path;
+    try {
+      path = file.getCanonicalPath();
+    } catch (IOException e) {
+      return true;
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      if (path.startsWith(context.getDataDir().getAbsolutePath())) {
+        return true;
+      }
+      if (path.startsWith(
+          context.createDeviceProtectedStorageContext().getDataDir().getAbsolutePath())) {
+        return true;
+      }
+    } else {
+      if (path.startsWith(context.getApplicationInfo().dataDir)) {
+        return true;
+      }
+    }
+
+    for (File f : context.getExternalFilesDirs(null)) {
+      if (f != null && path.startsWith(f.getAbsolutePath())) {
+        return true;
+      }
+    }
+
+    for (File f : context.getExternalCacheDirs()) {
+      if (f != null && path.startsWith(f.getAbsolutePath())) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   @Nullable
