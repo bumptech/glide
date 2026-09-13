@@ -18,6 +18,7 @@ import com.bumptech.glide.load.PreferredColorSpace;
 import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.HardwareConfigState;
+import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Synthetic;
 
@@ -116,12 +117,14 @@ public final class DefaultOnHeaderDecodedListener implements OnHeaderDecodedList
     decoder.setTargetSize(resizeWidth, resizeHeight);
     if (preferredColorSpace != null) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        boolean isP3Eligible =
-            preferredColorSpace == PreferredColorSpace.DISPLAY_P3
-                && info.getColorSpace() != null
-                && info.getColorSpace().isWideGamut();
-        decoder.setTargetColorSpace(
-            ColorSpace.get(isP3Eligible ? ColorSpace.Named.DISPLAY_P3 : ColorSpace.Named.SRGB));
+        if (!TransformationUtils.isHdr(info.getColorSpace())) {
+          boolean isP3Eligible =
+              preferredColorSpace == PreferredColorSpace.DISPLAY_P3
+                  && info.getColorSpace() != null
+                  && info.getColorSpace().isWideGamut();
+          decoder.setTargetColorSpace(
+              ColorSpace.get(isP3Eligible ? ColorSpace.Named.DISPLAY_P3 : ColorSpace.Named.SRGB));
+        }
       } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         decoder.setTargetColorSpace(ColorSpace.get(ColorSpace.Named.SRGB));
       }

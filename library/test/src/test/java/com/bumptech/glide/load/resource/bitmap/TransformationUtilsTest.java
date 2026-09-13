@@ -425,6 +425,30 @@ public class TransformationUtilsTest {
     assertEquals(ColorSpace.get(ColorSpace.Named.DISPLAY_P3), rotated.getColorSpace());
   }
 
+  @Test
+  @Config(sdk = VERSION_CODES.UPSIDE_DOWN_CAKE)
+  public void isHdr_withNullColorSpace_returnsFalse() {
+    assertFalse(TransformationUtils.isHdr(null));
+  }
+
+  @Test
+  @Config(sdk = VERSION_CODES.UPSIDE_DOWN_CAKE)
+  public void isHdr_withSrgbColorSpace_returnsFalse() {
+    assertFalse(TransformationUtils.isHdr(ColorSpace.get(ColorSpace.Named.SRGB)));
+  }
+
+  @Test
+  @Config(sdk = VERSION_CODES.UPSIDE_DOWN_CAKE)
+  public void isHdr_withDisplayP3ColorSpace_returnsFalse() {
+    assertFalse(TransformationUtils.isHdr(ColorSpace.get(ColorSpace.Named.DISPLAY_P3)));
+  }
+
+  @Test
+  @Config(sdk = VERSION_CODES.TIRAMISU)
+  public void isHdr_onPreU_returnsFalse() {
+    assertFalse(TransformationUtils.isHdr(ColorSpace.get(ColorSpace.Named.DISPLAY_P3)));
+  }
+
   // TODO: Add gainmap-based tests once Robolectric has sufficient support.
 
   @Test
