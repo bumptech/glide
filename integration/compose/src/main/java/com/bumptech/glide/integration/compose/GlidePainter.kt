@@ -8,6 +8,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Size
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.integration.ktx.ExperimentGlideFlows
 import com.bumptech.glide.integration.ktx.InternalGlideApi
@@ -50,10 +52,11 @@ constructor(
     scope: CoroutineScope,
     private val lifecycleOwner: LifecycleOwner,
 ) : Painter(), RememberObserver {
+    private val clearOnStop: Boolean = requestBuilder.isClearGlidePainterOnStopEnabled
     @OptIn(ExperimentGlideFlows::class)
     internal var status: Status by mutableStateOf(Status.CLEARED)
     internal val currentDrawable: MutableState<Drawable?> = mutableStateOf(null)
-    private var alpha: Float by mutableStateOf(DefaultAlpha)
+    private var alpha: Float by mutableFloatStateOf(DefaultAlpha)
     private var colorFilter: ColorFilter? by mutableStateOf(null)
     private var delegate: Painter? by mutableStateOf(null)
     private val scope =
@@ -61,20 +64,22 @@ constructor(
     private var currentJob: Job? = null
 
     init {
-        scope.launch {
-            // If the Lifecycle state is at least STARTED, start the animation. Otherwise, stop the
-            // animation.
-            lifecycleOwner.lifecycle.currentStateFlow.collect {
-                if (it.isAtLeast(Lifecycle.State.STARTED)) {
-                    currentDrawable.value?.let { drawable ->
-                        if (drawable is Animatable) {
-                            drawable.start()
+        if (!clearOnStop) {
+            scope.launch {
+                // If the Lifecycle state is at least STARTED, start the animation. Otherwise, stop
+                // the animation.
+                lifecycleOwner.lifecycle.currentStateFlow.collect {
+                    if (it.isAtLeast(Lifecycle.State.STARTED)) {
+                        currentDrawable.value?.let { drawable ->
+                            if (drawable is Animatable) {
+                                drawable.start()
+                            }
                         }
-                    }
-                } else {
-                    currentDrawable.value?.let { drawable ->
-                        if (drawable is Animatable) {
-                            drawable.stop()
+                    } else {
+                        currentDrawable.value?.let { drawable ->
+                            if (drawable is Animatable) {
+                                drawable.stop()
+                            }
                         }
                     }
                 }
@@ -91,46 +96,87 @@ constructor(
 
     override fun onAbandoned() {
         (delegate as? RememberObserver)?.onAbandoned()
+        if (clearOnStop) {
+            currentJob?.cancel()
+            currentJob = null
+            clearDrawableAndDelegate()
+        }
     }
 
+    @OptIn(ExperimentGlideFlows::class)
     override fun onForgotten() {
         (delegate as? RememberObserver)?.onForgotten()
         currentJob?.cancel()
         currentJob = null
         currentDrawable.value = null
         delegate = null
+        if (clearOnStop) {
+            status = Status.CLEARED
+        }
     }
 
     override fun onRemembered() {
         (delegate as? RememberObserver)?.onRemembered()
-        if (currentJob == null) {
-            currentJob = launchRequest()
-        }
-        // In case the onRemembered is called after the lifecycle onStop, it will start the
-        // animation,
-        // stop it here again.
-        if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-            currentDrawable.value?.let { drawable ->
-                if (drawable is Animatable) {
-                    drawable.stop()
+        if (clearOnStop) {
+            if (currentJob == null) {
+                currentJob =
+                    this.scope.launch {
+                        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                            try {
+                                collectRequest()
+                            } finally {
+                                clearDrawableAndDelegate()
+                            }
+                        }
+                    }
+            }
+            if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                clearDrawableAndDelegate()
+            }
+        } else {
+            if (currentJob == null) {
+                currentJob = launchRequest()
+            }
+            // In case the onRemembered is called after the lifecycle onStop, it will start the
+            // animation,
+            // stop it here again.
+            if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                currentDrawable.value?.let { drawable ->
+                    if (drawable is Animatable) {
+                        drawable.stop()
+                    }
                 }
             }
         }
     }
 
-    @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class)
-    private fun launchRequest() =
-        this.scope.launch {
-            requestBuilder.flowResolvable(size).collect {
-                updateDelegate(
-                    when (it) {
-                        is Resource -> it.resource
-                        is Placeholder -> it.placeholder
-                    }
-                )
-                status = it.status
+    @OptIn(ExperimentGlideFlows::class)
+    private fun clearDrawableAndDelegate() {
+        currentDrawable.value?.let { drawable ->
+            if (drawable is Animatable) {
+                drawable.stop()
             }
         }
+        updateDelegate(null)
+        currentDrawable.value = null
+        status = Status.CLEARED
+    }
+
+    @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class)
+    private suspend fun collectRequest() {
+        requestBuilder.flowResolvable(size).collect {
+            updateDelegate(
+                when (it) {
+                    is Resource -> it.resource
+                    is Placeholder -> it.placeholder
+                }
+            )
+            status = it.status
+        }
+    }
+
+    @OptIn(ExperimentGlideFlows::class, InternalGlideApi::class)
+    private fun launchRequest() = this.scope.launch { collectRequest() }
 
     private fun Drawable.toPainter() =
         when (this) {

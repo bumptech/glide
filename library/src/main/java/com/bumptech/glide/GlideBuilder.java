@@ -396,7 +396,7 @@ public final class GlideBuilder {
    * com.bumptech.glide.request.target.Target}s that haven't yet been cleared. Setting this method
    * to {@code true} allows Glide to also maintain a hard reference to the underlying resource so
    * that if the {@link com.bumptech.glide.request.target.Target} is garbage collected, Glide can
-   * return the underlying resource to it's memory cache so that subsequent requests will not
+   * return the underlying resource to its memory cache so that subsequent requests will not
    * unexpectedly re-load the resource from disk or source. As a side affect, it will take the
    * system slightly longer to garbage collect the underlying resource because the weak reference
    * has to be cleared and processed before the hard reference is removed. As a result, setting this
@@ -623,6 +623,18 @@ public final class GlideBuilder {
   }
 
   /**
+   * Enables clearing active requests and releasing Bitmaps in Compose {@code GlidePainter} when the
+   * host {@code LifecycleOwner} transitions below {@code Lifecycle.State.STARTED} (i.e. {@code
+   * ON_STOP}).
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder experimentalSetClearGlidePainterOnStop(boolean isEnabled) {
+    glideExperimentsBuilder.update(new ClearGlidePainterOnStop(), isEnabled);
+    return this;
+  }
+
+  /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
    */
@@ -775,6 +787,9 @@ public final class GlideBuilder {
 
   /** See {@link #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}. */
   public static final class EnableTrimMemoryOnUiHidden implements Experiment {}
+
+  /** See {@link #experimentalSetClearGlidePainterOnStop(boolean)}. */
+  public static final class ClearGlidePainterOnStop implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}

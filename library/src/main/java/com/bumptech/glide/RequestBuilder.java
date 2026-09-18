@@ -108,6 +108,14 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
     return requestManager;
   }
 
+  /**
+   * Returns whether the {@link GlideBuilder.ClearGlidePainterOnStop} experiment is enabled for this
+   * request's {@link GlideContext}.
+   */
+  public boolean isClearGlidePainterOnStopEnabled() {
+    return glideContext.getExperiments().isEnabled(GlideBuilder.ClearGlidePainterOnStop.class);
+  }
+
   @SuppressLint("CheckResult")
   @SuppressWarnings({"PMD.ConstructorCallsOverridableMethod", "this-escape"})
   protected RequestBuilder(Class<TranscodeType> transcodeClass, RequestBuilder<?> other) {
@@ -317,10 +325,10 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * <p>WARNING: Calling this method with a {@code model} whose type does not match the type of the
    * model passed to {@code load()} may be dangerous! Any options that were applied by the various
    * type specific {@code load()} methods, like {@link #load(byte[])} will be copied to the error
-   * request here even if the {@code model} you pass to this method doesn't match. Similary, options
-   * that would be normally applied by type specific {@code load()} methods will <em>not</em> be
-   * applied to this request. If this behavior is confusing or unexpected, use {@link
-   * #error(RequestBuilder)} instead.
+   * request here even if the {@code model} you pass to this method doesn't match. Similarly,
+   * options that would be normally applied by type specific {@code load()} methods will
+   * <em>not</em> be applied to this request. If this behavior is confusing or unexpected, use
+   * {@link #error(RequestBuilder)} instead.
    */
   @NonNull
   @CheckResult

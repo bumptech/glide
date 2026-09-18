@@ -5,6 +5,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
@@ -124,5 +125,23 @@ public final class GlideExperimentsTest {
     glide.setMemoryCategoryWhenInForeground();
     assertThat(memoryCache.getMaxSize()).isEqualTo(INITIAL_CACHE_SIZE);
     assertThat(bitmapPool.getMaxSize()).isEqualTo(INITIAL_POOL_SIZE);
+  }
+
+  @Test
+  public void clearGlidePainterOnStop_experimentEnabled_setsEnabledOnRequestBuilder() {
+    Glide.init(context, new GlideBuilder().experimentalSetClearGlidePainterOnStop(true));
+
+    RequestBuilder<Drawable> requestBuilder = Glide.with(context).asDrawable();
+
+    assertThat(requestBuilder.isClearGlidePainterOnStopEnabled()).isTrue();
+  }
+
+  @Test
+  public void clearGlidePainterOnStop_experimentDisabled_doesNotSetEnabledOnRequestBuilder() {
+    Glide.init(context, new GlideBuilder().experimentalSetClearGlidePainterOnStop(false));
+
+    RequestBuilder<Drawable> requestBuilder = Glide.with(context).asDrawable();
+
+    assertThat(requestBuilder.isClearGlidePainterOnStopEnabled()).isFalse();
   }
 }
