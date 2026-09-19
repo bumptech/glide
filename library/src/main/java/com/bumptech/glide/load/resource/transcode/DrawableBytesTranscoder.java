@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapResource;
+import com.bumptech.glide.load.resource.bitmap.NonOwnedBitmapResource;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 
 /**
@@ -35,8 +35,11 @@ public final class DrawableBytesTranscoder implements ResourceTranscoder<Drawabl
       @NonNull Resource<Drawable> toTranscode, @NonNull Options options) {
     Drawable drawable = toTranscode.get();
     if (drawable instanceof BitmapDrawable) {
-      return bitmapBytesTranscoder.transcode(
-          BitmapResource.obtain(((BitmapDrawable) drawable).getBitmap(), bitmapPool), options);
+      Resource<byte[]> result =
+          bitmapBytesTranscoder.transcode(
+              new NonOwnedBitmapResource(((BitmapDrawable) drawable).getBitmap()), options);
+      toTranscode.recycle();
+      return result;
     } else if (drawable instanceof GifDrawable) {
       return gifDrawableBytesTranscoder.transcode(toGifDrawableResource(toTranscode), options);
     }
