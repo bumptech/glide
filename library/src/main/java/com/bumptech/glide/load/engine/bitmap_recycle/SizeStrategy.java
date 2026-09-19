@@ -5,8 +5,12 @@ import android.os.Build;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+import com.bumptech.glide.load.engine.BitmapInfo;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.NavigableMap;
 
 /**
@@ -65,6 +69,19 @@ final class SizeStrategy implements LruPoolStrategy {
       decrementBitmapOfSize(removedSize);
     }
     return removed;
+  }
+
+  @Override
+  public List<BitmapInfo> getPooledBitmapInfos() {
+    final List<BitmapInfo> result = new ArrayList<>();
+    for (Map.Entry<Key, List<Bitmap>> entry : groupedMap) {
+      if (entry.getValue() != null) {
+        for (Bitmap bitmap : entry.getValue()) {
+          result.add(new BitmapInfo(bitmap));
+        }
+      }
+    }
+    return result;
   }
 
   private void decrementBitmapOfSize(Integer size) {
