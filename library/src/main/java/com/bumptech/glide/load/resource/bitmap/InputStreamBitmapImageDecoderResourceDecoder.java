@@ -23,21 +23,35 @@ import java.util.List;
 @RequiresApi(api = 28)
 public final class InputStreamBitmapImageDecoderResourceDecoder
     implements ResourceDecoder<InputStream, Bitmap> {
-  private final BitmapImageDecoderResourceDecoder wrapped = new BitmapImageDecoderResourceDecoder();
+  private final BitmapImageDecoderResourceDecoder wrapped;
   private final List<ImageHeaderParser> parsers;
   private final boolean useHeapBuffer;
   @Nullable private final ArrayPool arrayPool;
   private final boolean useArrayPool;
+  private final boolean respectExifOrientation;
 
   public InputStreamBitmapImageDecoderResourceDecoder(
       List<ImageHeaderParser> parsers,
       boolean useHeapBuffer,
       @Nullable ArrayPool arrayPool,
       boolean useArrayPool) {
+    this(parsers, useHeapBuffer, arrayPool, useArrayPool, /* respectExifOrientation= */ false);
+  }
+
+  public InputStreamBitmapImageDecoderResourceDecoder(
+      List<ImageHeaderParser> parsers,
+      boolean useHeapBuffer,
+      @Nullable ArrayPool arrayPool,
+      boolean useArrayPool,
+      boolean respectExifOrientation) {
     this.parsers = parsers;
     this.useHeapBuffer = useHeapBuffer;
     this.arrayPool = arrayPool;
     this.useArrayPool = useArrayPool;
+    this.respectExifOrientation = respectExifOrientation;
+    this.wrapped =
+        new BitmapImageDecoderResourceDecoder(
+            /* clampTargetSizeToOnePixel= */ respectExifOrientation);
   }
 
   @Override
@@ -60,6 +74,15 @@ public final class InputStreamBitmapImageDecoderResourceDecoder
         useArrayPool && arrayPool != null
             ? ByteBufferUtil.fromStream(stream, useHeapBuffer, arrayPool)
             : ByteBufferUtil.fromStream(stream, useHeapBuffer);
+    if (respectExifOrientation && parsers != null && !parsers.isEmpty() && arrayPool != null) {
+      int orientation = ImageHeaderParserUtils.getOrientation(parsers, buffer, arrayPool);
+      if (TransformationUtils.isExifOrientationRequired(orientation)) {
+        Options optionsWithExif = new Options();
+        optionsWithExif.putAll(options);
+        optionsWithExif.set(Downsampler.IS_EXIF_ORIENTATION_REQUIRED, true);
+        options = optionsWithExif;
+      }
+    }
     Source source = ImageDecoder.createSource(buffer);
     return wrapped.decode(source, width, height, options);
   }

@@ -594,6 +594,17 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to inspect EXIF orientation in {@link ImageDecoder} and decode rotated
+   * images in software to avoid GPU readbacks and decode overhead.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setRespectExifOrientationInImageDecoder(boolean isEnabled) {
+    glideExperimentsBuilder.update(new RespectExifOrientationInImageDecoder(), isEnabled);
+    return this;
+  }
+
+  /**
    * Override the OS thread priority of threads created in {@code
    * com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory} with {@link
    * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
@@ -798,6 +809,9 @@ public final class GlideBuilder {
 
   /** See {@link #setBypassResourceDiskCacheForHardwareBitmaps(boolean)}. */
   public static final class BypassResourceDiskCacheForHardwareBitmaps implements Experiment {}
+
+  /** See {@link #setRespectExifOrientationInImageDecoder(boolean)}. */
+  public static final class RespectExifOrientationInImageDecoder implements Experiment {}
 
   /** See {@link #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}. */
   public static final class EnableTrimMemoryOnUiHidden implements Experiment {}
