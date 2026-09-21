@@ -178,7 +178,8 @@ final class RegistryFactory {
               experiments.isEnabled(GlideBuilder.UseHeapBufferForImageDecoderWithInputStream.class),
               arrayPool,
               experiments.isEnabled(
-                  GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class));
+                  GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class),
+              experiments.isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class));
       byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
           && experiments.isEnabled(EnableUriImageDecoder.class)) {
