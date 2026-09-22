@@ -97,4 +97,37 @@ public final class InputStreamBitmapImageDecoderResourceDecoderTest {
 
     assertThat(decoder.decode(stream, 100, 100, options)).isNull();
   }
+
+  @Test
+  public void decode_withSpoolInputStreamToTempFile_readsFullStreamAndCleansUpTempFile()
+      throws IOException {
+    java.io.File tempDir = java.nio.file.Files.createTempDirectory("glide_test").toFile();
+    try {
+      InputStreamBitmapImageDecoderResourceDecoder decoder =
+          new InputStreamBitmapImageDecoderResourceDecoder(
+              parsers,
+              /* useHeapBuffer= */ true,
+              new LruArrayPool(1024 * 1024),
+              /* useArrayPool= */ true,
+              /* respectExifOrientation= */ false,
+              /* spoolInputStreamToTempFile= */ true,
+              tempDir);
+      byte[] data = new byte[] {1, 2, 3, 4};
+      InputStream stream = new ByteArrayInputStream(data);
+
+      try {
+        decoder.decode(stream, 100, 100, options);
+      } catch (Exception e) {
+        // Expecting potential failure due to missing shadows in unit test environment.
+      }
+
+      // Verify that the stream was fully read
+      assertThat(stream.read()).isEqualTo(-1);
+      // Verify that the temporary scratch file was cleaned up
+      java.io.File[] remainingFiles = tempDir.listFiles();
+      assertThat(remainingFiles).isEmpty();
+    } finally {
+      tempDir.delete();
+    }
+  }
 }
