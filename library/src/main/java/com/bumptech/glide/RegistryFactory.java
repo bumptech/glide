@@ -52,8 +52,10 @@ import com.bumptech.glide.load.resource.bitmap.ByteBufferBitmapImageDecoderResou
 import com.bumptech.glide.load.resource.bitmap.DefaultImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.ExifInterfaceImageHeaderParser;
+import com.bumptech.glide.load.resource.bitmap.FileBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.InputStreamBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.ParcelFileDescriptorBitmapDecoder;
+import com.bumptech.glide.load.resource.bitmap.ParcelFileDescriptorBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
@@ -178,7 +180,8 @@ final class RegistryFactory {
               experiments.isEnabled(GlideBuilder.UseHeapBufferForImageDecoderWithInputStream.class),
               arrayPool,
               experiments.isEnabled(
-                  GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class));
+                  GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class),
+              experiments.isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class));
       byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
           && experiments.isEnabled(EnableUriImageDecoder.class)) {
@@ -233,12 +236,32 @@ final class RegistryFactory {
       registry.prepend(Uri.class, Uri.class, UnitModelLoader.Factory.<Uri>getInstance());
     }
 
-    if (ParcelFileDescriptorRewinder.isSupported()) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+        && experiments.isEnabled(EnableImageDecoderForBitmaps.class)
+        && experiments.isEnabled(GlideBuilder.DirectImageDecoderSourcesEnabled.class)) {
       registry.append(
           Registry.BUCKET_BITMAP,
-          ParcelFileDescriptor.class,
+          File.class,
           Bitmap.class,
-          new ParcelFileDescriptorBitmapDecoder(downsampler));
+          new FileBitmapImageDecoderResourceDecoder());
+    }
+
+    if (ParcelFileDescriptorRewinder.isSupported()) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+          && experiments.isEnabled(EnableImageDecoderForBitmaps.class)
+          && experiments.isEnabled(GlideBuilder.DirectImageDecoderSourcesEnabled.class)) {
+        registry.append(
+            Registry.BUCKET_BITMAP,
+            ParcelFileDescriptor.class,
+            Bitmap.class,
+            new ParcelFileDescriptorBitmapImageDecoderResourceDecoder());
+      } else {
+        registry.append(
+            Registry.BUCKET_BITMAP,
+            ParcelFileDescriptor.class,
+            Bitmap.class,
+            new ParcelFileDescriptorBitmapDecoder(downsampler));
+      }
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
