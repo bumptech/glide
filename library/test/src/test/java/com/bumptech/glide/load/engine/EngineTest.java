@@ -434,9 +434,10 @@ public class EngineTest {
     verify(engineResource).release();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfAskedToReleaseNonEngineResource() {
-    harness.getEngine().release(mockResource());
+    org.junit.Assert.assertThrows(
+        IllegalArgumentException.class, () -> harness.getEngine().release(mockResource()));
   }
 
   @Test
