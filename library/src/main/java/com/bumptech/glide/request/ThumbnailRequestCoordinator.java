@@ -154,13 +154,13 @@ public class ThumbnailRequestCoordinator implements RequestCoordinator, Request 
   }
 
   @Override
-  public void clear() {
+  public void clear(boolean skipPlaceholder) {
     synchronized (requestLock) {
       isRunningDuringBegin = false;
       fullState = RequestState.CLEARED;
       thumbState = RequestState.CLEARED;
-      thumb.clear();
-      full.clear();
+      thumb.clear(skipPlaceholder);
+      full.clear(skipPlaceholder);
     }
   }
 

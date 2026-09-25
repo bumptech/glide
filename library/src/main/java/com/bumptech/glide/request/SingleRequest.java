@@ -321,7 +321,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
    * @see #cancel()
    */
   @Override
-  public void clear() {
+  public void clear(boolean skipPlaceholder) {
     Resource<R> toRelease = null;
     synchronized (requestLock) {
       assertNotCallingCallbacks();
@@ -336,7 +336,7 @@ public final class SingleRequest<R> implements Request, SizeReadyCallback, Resou
         resource = null;
       }
       if (canNotifyCleared()) {
-        target.onLoadCleared(getPlaceholderDrawable());
+        target.onLoadCleared(skipPlaceholder ? null : getPlaceholderDrawable());
       }
 
       GlideTrace.endSectionAsync(TAG, cookie);
