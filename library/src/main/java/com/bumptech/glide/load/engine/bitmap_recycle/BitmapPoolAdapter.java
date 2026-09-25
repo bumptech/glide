@@ -2,6 +2,9 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
 import androidx.annotation.NonNull;
+import com.bumptech.glide.load.engine.BitmapInfo;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * An {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool BitmapPool} implementation
@@ -44,5 +47,11 @@ public class BitmapPoolAdapter implements BitmapPool {
   @Override
   public void trimMemory(int level) {
     // Do nothing.
+  }
+
+  @NonNull
+  @Override
+  public List<BitmapInfo> getPooledBitmapInfos() {
+    return Collections.emptyList();
   }
 }
