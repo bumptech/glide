@@ -5,6 +5,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorSpace;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -15,6 +16,8 @@ import android.graphics.Shader;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.exifinterface.media.ExifInterface;
 import com.bumptech.glide.load.engine.Engine;
@@ -22,6 +25,7 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.util.Preconditions;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,6 +39,35 @@ import java.util.concurrent.locks.ReentrantLock;
 @SuppressWarnings("WeakerAccess")
 public final class TransformationUtils {
   private static final String TAG = "TransformationUtils";
+  @Nullable private static final Method IS_HDR_METHOD = getIsHdrMethod();
+
+  @Nullable
+  private static Method getIsHdrMethod() {
+    try {
+      return Class.forName("android.graphics.ColorSpace").getMethod("isHdr");
+    } catch (Throwable t) {
+      return null;
+    }
+  }
+
+  /**
+   * Returns {@code true} if the given {@link ColorSpace} is an HDR color space on Android 14+ (API
+   * 34+).
+   */
+  @RequiresApi(Build.VERSION_CODES.O)
+  public static boolean isHdr(@Nullable ColorSpace colorSpace) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+        && colorSpace != null
+        && IS_HDR_METHOD != null) {
+      try {
+        return (Boolean) IS_HDR_METHOD.invoke(colorSpace);
+      } catch (ReflectiveOperationException e) {
+        // Ignored.
+      }
+    }
+    return false;
+  }
+
   public static final int PAINT_FLAGS = Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG;
   private static final Paint DEFAULT_PAINT = new Paint(PAINT_FLAGS);
   private static final int CIRCLE_CROP_PAINT_FLAGS = PAINT_FLAGS | Paint.ANTI_ALIAS_FLAG;
