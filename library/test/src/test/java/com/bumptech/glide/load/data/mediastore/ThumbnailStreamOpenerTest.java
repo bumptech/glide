@@ -4,6 +4,7 @@ import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.MatrixCursor;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -124,6 +126,114 @@ public class ThumbnailStreamOpenerTest {
     assertEquals(testCursor, query.query(harness.uri));
   }
 
+  @Test
+  public void testLfiViaMediaStorePath_blocksPrivateFiles() throws Exception {
+    Context context = ApplicationProvider.getApplicationContext();
+    File privateFile = new File(context.getCacheDir(), "secrets.xml");
+    java.io.FileOutputStream fos = new java.io.FileOutputStream(privateFile);
+    fos.write("secret_data".getBytes());
+    fos.close();
+
+    try {
+      ThumbnailQuery query = mock(ThumbnailQuery.class);
+      MatrixCursor cursor = new MatrixCursor(new String[] {MediaStore.Images.Thumbnails.DATA});
+      cursor.addRow(new String[] {privateFile.getAbsolutePath()});
+      when(query.query(any(Uri.class))).thenReturn(cursor);
+
+      ThumbnailStreamOpener opener =
+          new ThumbnailStreamOpener(
+              new ArrayList<ImageHeaderParser>(),
+              new FileService(),
+              query,
+              new LruArrayPool(),
+              context.getContentResolver(),
+              context);
+
+      InputStream is = opener.open(Uri.parse("content://media/external/images/media/123"));
+      assertThat(is).isNull();
+    } finally {
+      privateFile.delete();
+    }
+  }
+
+  @Test
+  @Config(sdk = 24)
+  public void testLfiViaMediaStorePath_blocksDeviceProtectedFiles() throws Exception {
+    Context context = ApplicationProvider.getApplicationContext();
+    Context deContext = context.createDeviceProtectedStorageContext();
+    File privateFile = new File(deContext.getCacheDir(), "de_secrets.xml");
+    java.io.FileOutputStream fos = new java.io.FileOutputStream(privateFile);
+    fos.write("de_secret_data".getBytes());
+    fos.close();
+
+    try {
+      ThumbnailQuery query = mock(ThumbnailQuery.class);
+      MatrixCursor cursor = new MatrixCursor(new String[] {MediaStore.Images.Thumbnails.DATA});
+      cursor.addRow(new String[] {privateFile.getAbsolutePath()});
+      when(query.query(any(Uri.class))).thenReturn(cursor);
+
+      ThumbnailStreamOpener opener =
+          new ThumbnailStreamOpener(
+              new ArrayList<ImageHeaderParser>(),
+              new FileService(),
+              query,
+              new LruArrayPool(),
+              context.getContentResolver(),
+              context);
+
+      InputStream is = opener.open(Uri.parse("content://media/external/images/media/123"));
+      assertThat(is).isNull();
+    } finally {
+      privateFile.delete();
+    }
+  }
+
+  @Test
+  public void testLfiViaMediaStorePath_blocksExternalPrivateFiles() throws Exception {
+    Context context = ApplicationProvider.getApplicationContext();
+    File privateFile = new File(context.getExternalCacheDir(), "ext_secrets.xml");
+    if (privateFile == null || privateFile.getParentFile() == null) {
+      return;
+    }
+    java.io.FileOutputStream fos = new java.io.FileOutputStream(privateFile);
+    fos.write("ext_secret_data".getBytes());
+    fos.close();
+
+    try {
+      ThumbnailQuery query = mock(ThumbnailQuery.class);
+      MatrixCursor cursor = new MatrixCursor(new String[] {MediaStore.Images.Thumbnails.DATA});
+      cursor.addRow(new String[] {privateFile.getAbsolutePath()});
+      when(query.query(any(Uri.class))).thenReturn(cursor);
+
+      ThumbnailStreamOpener opener =
+          new ThumbnailStreamOpener(
+              new ArrayList<ImageHeaderParser>(),
+              new FileService(),
+              query,
+              new LruArrayPool(),
+              context.getContentResolver(),
+              context);
+
+      InputStream is = opener.open(Uri.parse("content://media/external/images/media/123"));
+      assertThat(is).isNull();
+    } finally {
+      privateFile.delete();
+    }
+  }
+
+  @Test
+  public void testConstructor_throwsNpeOnNullContext() {
+    assertThrows(
+        NullPointerException.class,
+        () ->
+            new ThumbnailStreamOpener(
+                new ArrayList<ImageHeaderParser>(),
+                mock(ThumbnailQuery.class),
+                new LruArrayPool(),
+                getContentResolver(),
+                null));
+  }
+
   private static ContentResolver getContentResolver() {
     return ApplicationProvider.getApplicationContext().getContentResolver();
   }
@@ -148,7 +258,12 @@ public class ThumbnailStreamOpenerTest {
       List<ImageHeaderParser> parsers = new ArrayList<>();
       parsers.add(new DefaultImageHeaderParser());
       return new ThumbnailStreamOpener(
-          parsers, service, query, byteArrayPool, getContentResolver());
+          parsers,
+          service,
+          query,
+          byteArrayPool,
+          getContentResolver(),
+          ApplicationProvider.getApplicationContext());
     }
   }
 }
