@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -14,9 +15,12 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.ExifOrientationStream;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link DataFetcher} implementation for {@link InputStream}s that loads data from thumbnail
@@ -39,13 +43,55 @@ public class ThumbFetcher implements DataFetcher<InputStream> {
 
   private static ThumbFetcher build(Context context, Uri uri, ThumbnailQuery query) {
     ArrayPool byteArrayPool = Glide.get(context).getArrayPool();
+    List<File> blockedRoots = getBlockedRoots(context);
     ThumbnailStreamOpener opener =
         new ThumbnailStreamOpener(
             Glide.get(context).getRegistry().getImageHeaderParsers(),
             query,
             byteArrayPool,
-            context.getContentResolver());
+            context.getContentResolver(),
+            blockedRoots);
     return new ThumbFetcher(uri, opener);
+  }
+
+  private static List<File> getBlockedRoots(Context context) {
+    List<File> blockedRoots = new ArrayList<>();
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      File dataDir = context.getDataDir();
+      if (dataDir != null) {
+        blockedRoots.add(dataDir);
+      }
+      Context deviceProtectedContext = context.createDeviceProtectedStorageContext();
+      if (deviceProtectedContext != null) {
+        File deviceProtectedDataDir = deviceProtectedContext.getDataDir();
+        if (deviceProtectedDataDir != null) {
+          blockedRoots.add(deviceProtectedDataDir);
+        }
+      }
+    } else if (context.getApplicationInfo() != null
+        && context.getApplicationInfo().dataDir != null) {
+      blockedRoots.add(new File(context.getApplicationInfo().dataDir));
+    }
+
+    File[] externalFilesDirs = context.getExternalFilesDirs(null);
+    if (externalFilesDirs != null) {
+      for (File dir : externalFilesDirs) {
+        if (dir != null) {
+          blockedRoots.add(dir);
+        }
+      }
+    }
+
+    File[] externalCacheDirs = context.getExternalCacheDirs();
+    if (externalCacheDirs != null) {
+      for (File dir : externalCacheDirs) {
+        if (dir != null) {
+          blockedRoots.add(dir);
+        }
+      }
+    }
+
+    return blockedRoots;
   }
 
   @VisibleForTesting
