@@ -11,6 +11,8 @@ import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.engine.bitmap_recycle.LruBitmapPool;
 import com.bumptech.glide.load.engine.cache.LruResourceCache;
 import com.bumptech.glide.load.engine.cache.MemoryCache;
+import com.bumptech.glide.load.engine.executor.GlideExecutor;
+import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
 import com.bumptech.glide.tests.TearDownGlide;
 import java.util.Collections;
 import org.junit.Before;
@@ -124,5 +126,85 @@ public final class GlideExperimentsTest {
     glide.setMemoryCategoryWhenInForeground();
     assertThat(memoryCache.getMaxSize()).isEqualTo(INITIAL_CACHE_SIZE);
     assertThat(bitmapPool.getMaxSize()).isEqualTo(INITIAL_POOL_SIZE);
+  }
+
+  @Test
+  public void testBypassResourceDiskCacheForHardwareBitmaps_experimentEnabled_isRecorded() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor)
+            .setBypassResourceDiskCacheForHardwareBitmaps(true);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.BypassResourceDiskCacheForHardwareBitmaps.class))
+        .isTrue();
+  }
+
+  @Test
+  public void testRespectExifOrientationInImageDecoder_experimentEnabled_isRecorded() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor)
+            .setRespectExifOrientationInImageDecoder(true);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class))
+        .isTrue();
+  }
+
+  @Test
+  public void testDirectImageDecoderSourcesEnabled_experimentEnabled_isRecorded() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor)
+            .setDirectImageDecoderSourcesEnabled(true);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.DirectImageDecoderSourcesEnabled.class))
+        .isTrue();
+  }
+
+  @Test
+  public void testSpoolInputStreamToTempFileInImageDecoder_experimentEnabled_isRecorded() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor)
+            .setSpoolInputStreamToTempFileInImageDecoder(true);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.SpoolInputStreamToTempFileInImageDecoder.class))
+        .isTrue();
   }
 }

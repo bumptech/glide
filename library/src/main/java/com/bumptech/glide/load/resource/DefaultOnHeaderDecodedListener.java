@@ -41,6 +41,7 @@ public final class DefaultOnHeaderDecodedListener implements OnHeaderDecodedList
   private final DownsampleStrategy strategy;
   private final boolean isHardwareConfigAllowed;
   private final PreferredColorSpace preferredColorSpace;
+  private final boolean isExifOrientationRequired;
 
   public DefaultOnHeaderDecodedListener(
       int requestedWidth, int requestedHeight, @NonNull Options options) {
@@ -52,16 +53,15 @@ public final class DefaultOnHeaderDecodedListener implements OnHeaderDecodedList
         options.get(Downsampler.ALLOW_HARDWARE_CONFIG) != null
             && options.get(Downsampler.ALLOW_HARDWARE_CONFIG);
     preferredColorSpace = options.get(Downsampler.PREFERRED_COLOR_SPACE);
+    Boolean exifRequired = options.get(Downsampler.IS_EXIF_ORIENTATION_REQUIRED);
+    isExifOrientationRequired = exifRequired != null && exifRequired;
   }
 
   @Override
   public void onHeaderDecoded(
       @NonNull ImageDecoder decoder, @NonNull ImageInfo info, @NonNull Source source) {
     if (hardwareConfigState.isHardwareConfigAllowed(
-        requestedWidth,
-        requestedHeight,
-        isHardwareConfigAllowed,
-        /* isExifOrientationRequired= */ false)) {
+        requestedWidth, requestedHeight, isHardwareConfigAllowed, isExifOrientationRequired)) {
       decoder.setAllocator(ImageDecoder.ALLOCATOR_HARDWARE);
     } else {
       decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
