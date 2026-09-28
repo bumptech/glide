@@ -12,6 +12,8 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
+import com.bumptech.glide.GlideBuilder;
+import com.bumptech.glide.GlideExperiments;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ImageHeaderParser.ImageType;
@@ -162,16 +164,27 @@ public final class Downsampler {
   private final ArrayPool byteArrayPool;
   private final List<ImageHeaderParser> parsers;
   private final HardwareConfigState hardwareConfigState = HardwareConfigState.getInstance();
+  private final GlideExperiments experiments;
 
   public Downsampler(
       List<ImageHeaderParser> parsers,
       DisplayMetrics displayMetrics,
       BitmapPool bitmapPool,
       ArrayPool byteArrayPool) {
+    this(parsers, displayMetrics, bitmapPool, byteArrayPool, null);
+  }
+
+  public Downsampler(
+      List<ImageHeaderParser> parsers,
+      DisplayMetrics displayMetrics,
+      BitmapPool bitmapPool,
+      ArrayPool byteArrayPool,
+      @Nullable GlideExperiments experiments) {
     this.parsers = parsers;
     this.displayMetrics = Preconditions.checkNotNull(displayMetrics);
     this.bitmapPool = Preconditions.checkNotNull(bitmapPool);
     this.byteArrayPool = Preconditions.checkNotNull(byteArrayPool);
+    this.experiments = experiments;
   }
 
   public boolean handles(@SuppressWarnings("unused") InputStream is) {
@@ -434,7 +447,7 @@ public final class Downsampler {
       // If this isn't an image, or BitmapFactory was unable to parse the size, width and height
       // will be -1 here.
       if (expectedWidth > 0 && expectedHeight > 0) {
-        setInBitmap(options, bitmapPool, expectedWidth, expectedHeight);
+        setInBitmap(options, bitmapPool, expectedWidth, expectedHeight, experiments);
       }
     }
 
@@ -944,7 +957,11 @@ public final class Downsampler {
   @SuppressWarnings("PMD.CollapsibleIfStatements")
   @TargetApi(Build.VERSION_CODES.O)
   private static void setInBitmap(
-      BitmapFactory.Options options, BitmapPool bitmapPool, int width, int height) {
+      BitmapFactory.Options options,
+      BitmapPool bitmapPool,
+      int width,
+      int height,
+      @Nullable GlideExperiments experiments) {
     @Nullable Bitmap.Config expectedConfig = null;
     // Avoid short circuiting, it appears to break on some devices.
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -954,6 +971,15 @@ public final class Downsampler {
       // On API 26 outConfig may be null for some images even if the image is valid, can be decoded
       // and outWidth/outHeight/outColorSpace are populated (see b/71513049).
       expectedConfig = options.outConfig;
+
+      // If we have a standard image (not wide gamut) and we're requesting RGB_565, avoid allocating
+      // more space than necessary.
+      if (expectedConfig == Config.ARGB_8888 && options.inPreferredConfig == Config.RGB_565) {
+        if (experiments != null
+            && experiments.isEnabled(GlideBuilder.EnableRgb565DownsamplerFix.class)) {
+          expectedConfig = Config.RGB_565;
+        }
+      }
     }
 
     if (expectedConfig == null) {

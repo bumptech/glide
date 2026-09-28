@@ -18,8 +18,15 @@ import com.bumptech.glide.load.engine.Resource;
 import java.io.IOException;
 import java.util.Locale;
 
-/** Decodes {@link Bitmap}s from {@link Uri}s using {@link ImageDecoder}. */
-@RequiresApi(Build.VERSION_CODES.P)
+/**
+ * Decodes {@link Bitmap}s from {@link Uri}s using {@link ImageDecoder} on Android 15+ (API 35+).
+ *
+ * <p>Direct Uri decoding using {@link ImageDecoder#createSource} is restricted to Android 15+
+ * ({@link Build.VERSION_CODES#VANILLA_ICE_CREAM}) because earlier Android versions encounter native
+ * container descriptor race conditions on multi-track containers (e.g. motion photos, gainmaps). On
+ * earlier Android versions, Glide automatically falls back to input streams.
+ */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public final class UriBitmapImageDecoderResourceDecoder implements ResourceDecoder<Uri, Bitmap> {
   private static final String TAG = "UriBitmapDecoder";
   private final Context context;
@@ -31,6 +38,9 @@ public final class UriBitmapImageDecoderResourceDecoder implements ResourceDecod
 
   @Override
   public boolean handles(@NonNull Uri uri, @NonNull Options options) throws IOException {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+      return false;
+    }
     String scheme = uri.getScheme();
     boolean isSupportedScheme =
         ContentResolver.SCHEME_CONTENT.equals(scheme)

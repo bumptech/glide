@@ -44,15 +44,16 @@ import java.util.Map;
 public final class GlideBuilder {
   private final Map<Class<?>, TransitionOptions<?, ?>> defaultTransitionOptions = new ArrayMap<>();
   private final GlideExperiments.Builder glideExperimentsBuilder = new GlideExperiments.Builder();
-  private Engine engine;
-  private BitmapPool bitmapPool;
-  private ArrayPool arrayPool;
-  private MemoryCache memoryCache;
-  private GlideExecutor sourceExecutor;
-  private GlideExecutor diskCacheExecutor;
-  private DiskCache.Factory diskCacheFactory;
-  private MemorySizeCalculator memorySizeCalculator;
-  private ConnectivityMonitorFactory connectivityMonitorFactory;
+  @Nullable private Engine engine;
+  @Nullable private BitmapPool bitmapPool;
+  @Nullable private ArrayPool arrayPool;
+  @Nullable private MemoryCache memoryCache;
+  @Nullable private GlideExecutor sourceExecutor;
+  @Nullable private GlideExecutor diskCacheExecutor;
+  @Nullable private GlideExecutor sourceUnlimitedExecutor;
+  @Nullable private DiskCache.Factory diskCacheFactory;
+  @Nullable private MemorySizeCalculator memorySizeCalculator;
+  @Nullable private ConnectivityMonitorFactory connectivityMonitorFactory;
   private int logLevel = Log.INFO;
   private RequestOptionsFactory defaultRequestOptionsFactory =
       new RequestOptionsFactory() {
@@ -63,7 +64,7 @@ public final class GlideBuilder {
         }
       };
   @Nullable private RequestManagerFactory requestManagerFactory;
-  private GlideExecutor animationExecutor;
+  @Nullable private GlideExecutor animationExecutor;
   private boolean isActiveResourceRetentionAllowed;
   @Nullable private List<RequestListener<Object>> defaultRequestListeners;
 
@@ -208,6 +209,24 @@ public final class GlideBuilder {
   @NonNull
   public GlideBuilder setAnimationExecutor(@Nullable GlideExecutor service) {
     this.animationExecutor = service;
+    return this;
+  }
+
+  /**
+   * Sets the {@link GlideExecutor} to use when retrieving {@link
+   * com.bumptech.glide.load.engine.Resource}s that are not already in the cache using the unlimited
+   * source generators pool.
+   *
+   * @param service The ExecutorService to use.
+   * @return This builder.
+   * @see #setSourceExecutor(GlideExecutor)
+   * @see GlideExecutor#newUnlimitedSourceExecutor()
+   */
+  // Public API.
+  @SuppressWarnings("WeakerAccess")
+  @NonNull
+  public GlideBuilder setSourceUnlimitedExecutor(@Nullable GlideExecutor service) {
+    this.sourceUnlimitedExecutor = service;
     return this;
   }
 
@@ -542,6 +561,16 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to fix allocating twice as much space as necessary for RGB_565 images.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder experimentalSetEnableRgb565DownsamplerFix(boolean isEnabled) {
+    glideExperimentsBuilder.update(new EnableRgb565DownsamplerFix(), isEnabled);
+    return this;
+  }
+
+  /**
    * Override the OS thread priority of threads created in {@code
    * com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory} with {@link
    * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
@@ -574,6 +603,22 @@ public final class GlideBuilder {
    */
   public GlideBuilder setMemoryCategoryInBackground(MemoryCategory memoryCategory) {
     glideExperimentsBuilder.add(new MemoryCategoryInBackground(memoryCategory));
+    return this;
+  }
+
+  /**
+   * Sets whether Glide triggers {@link #setMemoryCategoryInBackground(MemoryCategory)} on {@link
+   * android.content.ComponentCallbacks2#TRIM_MEMORY_UI_HIDDEN} (level 20) in addition to higher
+   * levels.
+   *
+   * <p>This experimental change ensures that applications configured with {@link
+   * #setMemoryCategoryInBackground(MemoryCategory)} properly reduce memory usage as soon as the app
+   * moves to the background.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder experimentalSetEnableTrimMemoryOnUiHidden(boolean isEnabled) {
+    glideExperimentsBuilder.update(new EnableTrimMemoryOnUiHidden(), isEnabled);
     return this;
   }
 
@@ -631,6 +676,10 @@ public final class GlideBuilder {
       animationExecutor = GlideExecutor.newAnimationExecutor();
     }
 
+    if (sourceUnlimitedExecutor == null) {
+      sourceUnlimitedExecutor = GlideExecutor.newUnlimitedSourceExecutor();
+    }
+
     if (memorySizeCalculator == null) {
       memorySizeCalculator = new MemorySizeCalculator.Builder(context).build();
     }
@@ -667,7 +716,7 @@ public final class GlideBuilder {
               diskCacheFactory,
               diskCacheExecutor,
               sourceExecutor,
-              GlideExecutor.newUnlimitedSourceExecutor(),
+              sourceUnlimitedExecutor,
               animationExecutor,
               isActiveResourceRetentionAllowed);
     }
@@ -720,6 +769,12 @@ public final class GlideBuilder {
 
   /** See {@link #setEnableDirectByteBufferDecoding(boolean)}. */
   public static final class EnableDirectByteBufferDecoding implements Experiment {}
+
+  /** See {@link #experimentalSetEnableRgb565DownsamplerFix(boolean)}. */
+  public static final class EnableRgb565DownsamplerFix implements Experiment {}
+
+  /** See {@link #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}. */
+  public static final class EnableTrimMemoryOnUiHidden implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}

@@ -1,10 +1,8 @@
 package com.bumptech.glide.integration.concurrent;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.concurrent.futures.CallbackToFutureAdapter;
-import androidx.concurrent.futures.CallbackToFutureAdapter.Completer;
-import androidx.concurrent.futures.CallbackToFutureAdapter.Resolver;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
@@ -14,10 +12,10 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Executors;
 import com.google.common.base.Function;
+import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.FluentFuture;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.Executor;
 
 /** Utilities for getting ListenableFutures out of Glide. */
@@ -149,40 +147,73 @@ public final class GlideFutures {
 
   private static <T> ListenableFuture<TargetAndResult<T>> submitInternal(
       final RequestBuilder<T> requestBuilder) {
-    return CallbackToFutureAdapter.getFuture(
-        new Resolver<TargetAndResult<T>>() {
-          // Only used for toString
-          @SuppressWarnings("FutureReturnValueIgnored")
-          @Override
-          public Object attachCompleter(@NonNull Completer<TargetAndResult<T>> completer) {
-            GlideLoadingListener<T> listener = new GlideLoadingListener<>(completer);
-            final FutureTarget<T> futureTarget = requestBuilder.addListener(listener).submit();
-            completer.addCancellationListener(
-                new Runnable() {
-                  @Override
-                  public void run() {
-                    futureTarget.cancel(/* mayInterruptIfRunning= */ true);
-                  }
-                },
-                MoreExecutors.directExecutor());
-            return futureTarget;
-          }
-        });
+    GlideFuture<T> future = new GlideFuture<>();
+    try {
+      FutureTarget<T> futureTarget = requestBuilder.addListener(future).submit();
+      future.setFutureTarget(futureTarget);
+    } catch (RuntimeException e) {
+      future.setException(e);
+    }
+    return future;
   }
 
-  /** Listener to convert Glide load results into ListenableFutures. */
-  private static final class GlideLoadingListener<T> implements RequestListener<T> {
+  private static final class GlideFuture<T> extends AbstractFuture<TargetAndResult<T>>
+      implements RequestListener<T> {
+    @GuardedBy("this")
+    @Nullable
+    private FutureTarget<T> futureTarget;
 
-    private final Completer<TargetAndResult<T>> completer;
+    void setFutureTarget(FutureTarget<T> futureTarget) {
+      synchronized (this) {
+        this.futureTarget = futureTarget;
+      }
+      if (isCancelled()) {
+        futureTarget.cancel(wasInterrupted());
+      }
+    }
 
-    GlideLoadingListener(Completer<TargetAndResult<T>> completer) {
-      this.completer = completer;
+    @Override
+    public boolean set(TargetAndResult<T> value) {
+      return super.set(value);
+    }
+
+    @Override
+    public boolean setException(Throwable throwable) {
+      return super.setException(throwable);
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+      boolean cancelled = super.cancel(mayInterruptIfRunning);
+      if (cancelled) {
+        FutureTarget<T> target;
+        synchronized (this) {
+          target = this.futureTarget;
+        }
+        if (target != null) {
+          target.cancel(mayInterruptIfRunning);
+        }
+      }
+      return cancelled;
+    }
+
+    @Override
+    @Nullable
+    protected String pendingToString() {
+      FutureTarget<T> target;
+      synchronized (this) {
+        target = this.futureTarget;
+      }
+      if (target != null) {
+        return "activeTarget=[" + target + "]";
+      }
+      return null;
     }
 
     @Override
     public boolean onLoadFailed(
         @Nullable GlideException e, Object model, @NonNull Target<T> target, boolean isFirst) {
-      completer.setException(e != null ? e : new RuntimeException("Unknown error"));
+      setException(e != null ? e : new RuntimeException("Unknown error"));
       return true;
     }
 
@@ -194,9 +225,9 @@ public final class GlideFutures {
         @NonNull DataSource dataSource,
         boolean isFirst) {
       try {
-        completer.set(new TargetAndResult<>(target, resource));
+        set(new TargetAndResult<>(target, resource));
       } catch (Throwable t) {
-        completer.setException(t);
+        setException(t);
       }
       return true;
     }

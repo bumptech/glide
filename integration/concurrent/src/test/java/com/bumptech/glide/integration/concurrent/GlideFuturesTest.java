@@ -73,8 +73,24 @@ public final class GlideFuturesTest {
   @Test
   public void testToString() throws Exception {
     Foo model = new Foo();
-    SettableFuture<Bar> bar = SettableFuture.create();
+    SettableFuture<Bar> bar = setupMockLoader(model);
+    ListenableFuture<Baz> future = submitLoad(model);
+    assertThat(future.toString()).contains("Foo");
+    future.cancel(true);
+    assertThat(bar.isCancelled()).isTrue();
+  }
 
+  @Test
+  public void testCancel_falseDoesNotPropagateInterrupt() throws Exception {
+    Foo model = new Foo();
+    SettableFuture<Bar> bar = setupMockLoader(model);
+    ListenableFuture<Baz> future = submitLoad(model);
+    future.cancel(false);
+    assertThat(bar.isCancelled()).isFalse();
+  }
+
+  private SettableFuture<Bar> setupMockLoader(Foo model) {
+    SettableFuture<Bar> bar = SettableFuture.create();
     Glide.get(app)
         .getRegistry()
         .prepend(
@@ -94,16 +110,16 @@ public final class GlideFuturesTest {
               }
             });
     MockModelLoader.mockAsync(model, Bar.class, bar);
-    ListenableFuture<Baz> future =
-        GlideFutures.submit(
-            Glide.with(app)
-                .as(Baz.class)
-                .load(model)
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE));
-    assertThat(future.toString()).contains("Foo");
-    future.cancel(true);
-    assertThat(bar.isCancelled()).isTrue();
+    return bar;
+  }
+
+  private ListenableFuture<Baz> submitLoad(Foo model) {
+    return GlideFutures.submit(
+        Glide.with(app)
+            .as(Baz.class)
+            .load(model)
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.NONE));
   }
 
   private static final class Foo {}

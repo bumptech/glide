@@ -156,9 +156,14 @@ final class RegistryFactory {
         VideoDecoder.parcel(bitmapPool);
 
     // TODO(judds): Make ParcelFileDescriptorBitmapDecoder work with ImageDecoder.
+    // Pass the experiments config to Downsampler so it can check active flags.
     Downsampler downsampler =
         new Downsampler(
-            registry.getImageHeaderParsers(), resources.getDisplayMetrics(), bitmapPool, arrayPool);
+            registry.getImageHeaderParsers(),
+            resources.getDisplayMetrics(),
+            bitmapPool,
+            arrayPool,
+            experiments);
 
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
@@ -175,7 +180,8 @@ final class RegistryFactory {
               experiments.isEnabled(
                   GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class));
       byteBufferBitmapDecoder = new ByteBufferBitmapImageDecoderResourceDecoder();
-      if (experiments.isEnabled(EnableUriImageDecoder.class)) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
+          && experiments.isEnabled(EnableUriImageDecoder.class)) {
         uriBitmapDecoder = new UriBitmapImageDecoderResourceDecoder(context);
       }
       fallbackByteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);

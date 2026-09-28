@@ -1,7 +1,6 @@
 package com.bumptech.glide.load.resource.bitmap;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertThrows;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -24,7 +23,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
 @RunWith(AndroidJUnit4.class)
-@Config(sdk = Build.VERSION_CODES.Q)
+@Config(sdk = Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public final class UriBitmapImageDecoderResourceDecoderTest {
 
   private Context context;
@@ -39,6 +38,13 @@ public final class UriBitmapImageDecoderResourceDecoderTest {
   }
 
   @Test
+  @Config(sdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+  public void handles_onSdkLessThanVanillaIceCream_returnsFalse() throws IOException {
+    Uri uri = Uri.parse("file:///path/to/image.png");
+    assertThat(decoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
   public void handles_returnsTrueForUri() throws IOException {
     ContentValues values = new ContentValues();
     values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
@@ -48,10 +54,9 @@ public final class UriBitmapImageDecoderResourceDecoderTest {
   }
 
   @Test
-  public void decode_withNonExistentUri_throwsIOException() {
+  public void decode_withNonExistentUri_returnsNull() throws IOException {
     Uri uri = Uri.parse("file:///non-existent-file.png");
-    assertThrows(
-        IOException.class, () -> decoder.decode(uri, /* width= */ 100, /* height= */ 100, options));
+    assertThat(decoder.decode(uri, /* width= */ 100, /* height= */ 100, options)).isNull();
   }
 
   @Test
