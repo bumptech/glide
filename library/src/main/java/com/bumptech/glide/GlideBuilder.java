@@ -571,6 +571,52 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to bypass scheduling hardware bitmaps to the resource disk cache, avoiding
+   * expensive GPU-to-CPU readbacks during compression while preserving hardware bitmaps for
+   * display.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setBypassResourceDiskCacheForHardwareBitmaps(boolean isEnabled) {
+    glideExperimentsBuilder.update(new BypassResourceDiskCacheForHardwareBitmaps(), isEnabled);
+    return this;
+  }
+
+  /**
+   * Set to {@code true} to inspect EXIF orientation in {@link ImageDecoder} and decode rotated
+   * images in software to avoid GPU readbacks and decode overhead.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setRespectExifOrientationInImageDecoder(boolean isEnabled) {
+    glideExperimentsBuilder.update(new RespectExifOrientationInImageDecoder(), isEnabled);
+    return this;
+  }
+
+  /**
+   * Set to {@code true} to enable direct decoding from File and ParcelFileDescriptor sources using
+   * {@link ImageDecoder} instead of converting to streams.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setDirectImageDecoderSourcesEnabled(boolean isEnabled) {
+    glideExperimentsBuilder.update(new DirectImageDecoderSourcesEnabled(), isEnabled);
+    return this;
+  }
+
+  /**
+   * Set to {@code true} to spool {@link InputStream} data to a temporary scratch file when decoding
+   * bitmaps via {@link ImageDecoder} instead of buffering the entire stream into a contiguous
+   * {@link java.nio.ByteBuffer} on the Java heap.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setSpoolInputStreamToTempFileInImageDecoder(boolean isEnabled) {
+    glideExperimentsBuilder.update(new SpoolInputStreamToTempFileInImageDecoder(), isEnabled);
+    return this;
+  }
+
+  /**
    * Override the OS thread priority of threads created in {@code
    * com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory} with {@link
    * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
@@ -772,6 +818,18 @@ public final class GlideBuilder {
 
   /** See {@link #experimentalSetEnableRgb565DownsamplerFix(boolean)}. */
   public static final class EnableRgb565DownsamplerFix implements Experiment {}
+
+  /** See {@link #setBypassResourceDiskCacheForHardwareBitmaps(boolean)}. */
+  public static final class BypassResourceDiskCacheForHardwareBitmaps implements Experiment {}
+
+  /** See {@link #setRespectExifOrientationInImageDecoder(boolean)}. */
+  public static final class RespectExifOrientationInImageDecoder implements Experiment {}
+
+  /** See {@link #setDirectImageDecoderSourcesEnabled(boolean)}. */
+  public static final class DirectImageDecoderSourcesEnabled implements Experiment {}
+
+  /** See {@link #setSpoolInputStreamToTempFileInImageDecoder(boolean)}. */
+  public static final class SpoolInputStreamToTempFileInImageDecoder implements Experiment {}
 
   /** See {@link #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}. */
   public static final class EnableTrimMemoryOnUiHidden implements Experiment {}

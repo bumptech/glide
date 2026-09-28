@@ -61,20 +61,20 @@ public final class UriBitmapImageDecoderResourceDecoder implements ResourceDecod
 
   @Nullable
   private String getMimeType(@NonNull Uri uri) {
-    String mimeType = context.getContentResolver().getType(uri);
-    if (mimeType == null && ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
-      String lastSegment = uri.getLastPathSegment();
-      if (lastSegment != null) {
-        int lastDot = lastSegment.lastIndexOf('.');
-        if (lastDot != -1) {
-          String extension = lastSegment.substring(lastDot + 1);
-          mimeType =
-              MimeTypeMap.getSingleton()
-                  .getMimeTypeFromExtension(extension.toLowerCase(Locale.ROOT));
+    // Fast-path: Check file extension from path segment first to avoid cross-process Binder IPC.
+    String lastSegment = uri.getLastPathSegment();
+    if (lastSegment != null) {
+      int lastDot = lastSegment.lastIndexOf('.');
+      if (lastDot != -1) {
+        String extension = lastSegment.substring(lastDot + 1);
+        String mimeType =
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase(Locale.ROOT));
+        if (mimeType != null) {
+          return mimeType;
         }
       }
     }
-    return mimeType;
+    return context.getContentResolver().getType(uri);
   }
 
   @Override

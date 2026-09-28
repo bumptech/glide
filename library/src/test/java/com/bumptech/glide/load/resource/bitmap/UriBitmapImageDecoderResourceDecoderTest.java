@@ -139,4 +139,10 @@ public final class UriBitmapImageDecoderResourceDecoderTest {
     Uri uri = Uri.parse("file:///path/to/file.unknown");
     assertThat(decoder.handles(uri, options)).isFalse();
   }
+
+  @Test
+  public void handles_returnsTrueForImageExtensionWithoutContentResolverQuery() throws IOException {
+    Uri uri = Uri.parse("content://media/external/images/media/12345.jpg");
+    assertThat(decoder.handles(uri, options)).isTrue();
+  }
 }

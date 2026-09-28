@@ -135,6 +135,11 @@ public final class Downsampler {
           "com.bumptech.glide.load.resource.bitmap.Downsampler.BypassTransformationsForHardwareBitmaps",
           false);
 
+  /** Indicates whether the image has an EXIF orientation requiring rotation. */
+  public static final Option<Boolean> IS_EXIF_ORIENTATION_REQUIRED =
+      Option.memory(
+          "com.bumptech.glide.load.resource.bitmap.Downsampler.IsExifOrientationRequired", false);
+
   private static final String WBMP_MIME_TYPE = "image/vnd.wap.wbmp";
   private static final String ICO_MIME_TYPE = "image/x-ico";
   private static final Set<String> NO_DOWNSAMPLE_PRE_N_MIME_TYPES =
