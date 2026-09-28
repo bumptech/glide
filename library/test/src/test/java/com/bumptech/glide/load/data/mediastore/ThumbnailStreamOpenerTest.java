@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
@@ -122,6 +123,159 @@ public class ThumbnailStreamOpenerTest {
     Shadows.shadowOf(ApplicationProvider.getApplicationContext().getContentResolver())
         .setCursor(queryUri, testCursor);
     assertEquals(testCursor, query.query(harness.uri));
+  }
+
+  @Test
+  public void open_returnsNull_whenFileInInternalDataDir() throws Exception {
+    File internalDataDir = temporaryFolder.newFolder("data", "user", "0", "com.example.app");
+    File file = new File(internalDataDir, "secret.db");
+    assertTrue(file.createNewFile());
+    Uri uri = Uri.fromFile(file);
+
+    MatrixCursor cursor = new MatrixCursor(new String[] {"_data"});
+    cursor.addRow(new Object[] {file.getAbsolutePath()});
+    when(harness.query.query(eq(uri))).thenReturn(cursor);
+    when(harness.service.get(eq(file.getAbsolutePath()))).thenReturn(file);
+    when(harness.service.exists(eq(file))).thenReturn(true);
+    when(harness.service.length(eq(file))).thenReturn(100L);
+
+    List<ImageHeaderParser> parsers = new ArrayList<>();
+    parsers.add(new DefaultImageHeaderParser());
+    List<File> blockedRoots = Collections.singletonList(internalDataDir);
+    ThumbnailStreamOpener opener =
+        new ThumbnailStreamOpener(
+            parsers,
+            harness.service,
+            harness.query,
+            harness.byteArrayPool,
+            getContentResolver(),
+            blockedRoots);
+
+    assertNull(opener.open(uri));
+  }
+
+  @Test
+  public void open_returnsNull_whenFileInDeviceProtectedDataDir() throws Exception {
+    File deviceProtectedDir = temporaryFolder.newFolder("data", "user_de", "0", "com.example.app");
+    File file = new File(deviceProtectedDir, "secret.db");
+    assertTrue(file.createNewFile());
+    Uri uri = Uri.fromFile(file);
+
+    MatrixCursor cursor = new MatrixCursor(new String[] {"_data"});
+    cursor.addRow(new Object[] {file.getAbsolutePath()});
+    when(harness.query.query(eq(uri))).thenReturn(cursor);
+    when(harness.service.get(eq(file.getAbsolutePath()))).thenReturn(file);
+    when(harness.service.exists(eq(file))).thenReturn(true);
+    when(harness.service.length(eq(file))).thenReturn(100L);
+
+    List<ImageHeaderParser> parsers = new ArrayList<>();
+    parsers.add(new DefaultImageHeaderParser());
+    List<File> blockedRoots = Collections.singletonList(deviceProtectedDir);
+    ThumbnailStreamOpener opener =
+        new ThumbnailStreamOpener(
+            parsers,
+            harness.service,
+            harness.query,
+            harness.byteArrayPool,
+            getContentResolver(),
+            blockedRoots);
+
+    assertNull(opener.open(uri));
+  }
+
+  @Test
+  public void open_returnsNull_whenFileInExternalPrivateDir() throws Exception {
+    File externalPrivateDir =
+        temporaryFolder.newFolder("sdcard", "Android", "data", "com.example.app");
+    File file = new File(externalPrivateDir, "secret.png");
+    assertTrue(file.createNewFile());
+    Uri uri = Uri.fromFile(file);
+
+    MatrixCursor cursor = new MatrixCursor(new String[] {"_data"});
+    cursor.addRow(new Object[] {file.getAbsolutePath()});
+    when(harness.query.query(eq(uri))).thenReturn(cursor);
+    when(harness.service.get(eq(file.getAbsolutePath()))).thenReturn(file);
+    when(harness.service.exists(eq(file))).thenReturn(true);
+    when(harness.service.length(eq(file))).thenReturn(100L);
+
+    List<ImageHeaderParser> parsers = new ArrayList<>();
+    parsers.add(new DefaultImageHeaderParser());
+    List<File> blockedRoots = Collections.singletonList(externalPrivateDir);
+    ThumbnailStreamOpener opener =
+        new ThumbnailStreamOpener(
+            parsers,
+            harness.service,
+            harness.query,
+            harness.byteArrayPool,
+            getContentResolver(),
+            blockedRoots);
+
+    assertNull(opener.open(uri));
+  }
+
+  @Test
+  public void open_returnsStream_whenFileNotInBlockedRoots() throws Exception {
+    File blockedDir = temporaryFolder.newFolder("blocked");
+    File legitimateDir = temporaryFolder.newFolder("dcim", "Camera");
+    File file = new File(legitimateDir, "photo.jpg");
+    assertTrue(file.createNewFile());
+    Uri uri = Uri.fromFile(file);
+
+    InputStream expected = new ByteArrayInputStream(new byte[0]);
+    Shadows.shadowOf(getContentResolver()).registerInputStream(uri, expected);
+
+    MatrixCursor cursor = new MatrixCursor(new String[] {"_data"});
+    cursor.addRow(new Object[] {file.getAbsolutePath()});
+    when(harness.query.query(eq(uri))).thenReturn(cursor);
+    when(harness.service.get(eq(file.getAbsolutePath()))).thenReturn(file);
+    when(harness.service.exists(eq(file))).thenReturn(true);
+    when(harness.service.length(eq(file))).thenReturn(100L);
+
+    List<ImageHeaderParser> parsers = new ArrayList<>();
+    parsers.add(new DefaultImageHeaderParser());
+    List<File> blockedRoots = Collections.singletonList(blockedDir);
+    ThumbnailStreamOpener opener =
+        new ThumbnailStreamOpener(
+            parsers,
+            harness.service,
+            harness.query,
+            harness.byteArrayPool,
+            getContentResolver(),
+            blockedRoots);
+
+    assertEquals(expected, opener.open(uri));
+  }
+
+  @Test
+  public void open_returnsNull_whenPathTraversalTargetsBlockedDir() throws Exception {
+    File internalDir = temporaryFolder.newFolder("internal_traversal");
+    File file = new File(internalDir, "target.txt");
+    assertTrue(file.createNewFile());
+
+    File otherDir = temporaryFolder.newFolder("public_dir");
+    File traversalFile = new File(otherDir, "../internal_traversal/target.txt");
+    Uri uri = Uri.fromFile(traversalFile);
+
+    MatrixCursor cursor = new MatrixCursor(new String[] {"_data"});
+    cursor.addRow(new Object[] {traversalFile.getPath()});
+    when(harness.query.query(eq(uri))).thenReturn(cursor);
+    when(harness.service.get(eq(traversalFile.getPath()))).thenReturn(traversalFile);
+    when(harness.service.exists(eq(traversalFile))).thenReturn(true);
+    when(harness.service.length(eq(traversalFile))).thenReturn(100L);
+
+    List<ImageHeaderParser> parsers = new ArrayList<>();
+    parsers.add(new DefaultImageHeaderParser());
+    List<File> blockedRoots = Collections.singletonList(internalDir);
+    ThumbnailStreamOpener opener =
+        new ThumbnailStreamOpener(
+            parsers,
+            harness.service,
+            harness.query,
+            harness.byteArrayPool,
+            getContentResolver(),
+            blockedRoots);
+
+    assertNull(opener.open(uri));
   }
 
   private static ContentResolver getContentResolver() {
