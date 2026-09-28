@@ -25,13 +25,14 @@ class ThumbnailStreamOpener {
   private final ArrayPool byteArrayPool;
   private final ContentResolver contentResolver;
   private final List<ImageHeaderParser> parsers;
+  private final List<File> blockedRoots;
 
   ThumbnailStreamOpener(
       List<ImageHeaderParser> parsers,
       ThumbnailQuery query,
       ArrayPool byteArrayPool,
       ContentResolver contentResolver) {
-    this(parsers, DEFAULT_SERVICE, query, byteArrayPool, contentResolver);
+    this(parsers, DEFAULT_SERVICE, query, byteArrayPool, contentResolver, /* blockedRoots= */ null);
   }
 
   ThumbnailStreamOpener(
@@ -40,11 +41,31 @@ class ThumbnailStreamOpener {
       ThumbnailQuery query,
       ArrayPool byteArrayPool,
       ContentResolver contentResolver) {
+    this(parsers, service, query, byteArrayPool, contentResolver, /* blockedRoots= */ null);
+  }
+
+  ThumbnailStreamOpener(
+      List<ImageHeaderParser> parsers,
+      ThumbnailQuery query,
+      ArrayPool byteArrayPool,
+      ContentResolver contentResolver,
+      List<File> blockedRoots) {
+    this(parsers, DEFAULT_SERVICE, query, byteArrayPool, contentResolver, blockedRoots);
+  }
+
+  ThumbnailStreamOpener(
+      List<ImageHeaderParser> parsers,
+      FileService service,
+      ThumbnailQuery query,
+      ArrayPool byteArrayPool,
+      ContentResolver contentResolver,
+      List<File> blockedRoots) {
     this.service = service;
     this.query = query;
     this.byteArrayPool = byteArrayPool;
     this.contentResolver = contentResolver;
     this.parsers = parsers;
+    this.blockedRoots = blockedRoots;
   }
 
   int getOrientation(Uri uri) {
@@ -76,7 +97,7 @@ class ThumbnailStreamOpener {
     }
 
     File file = service.get(path);
-    if (!isValid(file)) {
+    if (!isValid(file) || isBlocked(file)) {
       return null;
     }
 
@@ -116,5 +137,45 @@ class ThumbnailStreamOpener {
 
   private boolean isValid(File file) {
     return service.exists(file) && 0 < service.length(file);
+  }
+
+  private boolean isBlocked(File file) {
+    if (file == null || blockedRoots == null || blockedRoots.isEmpty()) {
+      return false;
+    }
+    String canonicalPath;
+    try {
+      canonicalPath = file.getCanonicalPath();
+    } catch (IOException e) {
+      if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "Failed to get canonical path for file: " + file, e);
+      }
+      return true;
+    }
+    for (File blockedRoot : blockedRoots) {
+      if (blockedRoot == null) {
+        continue;
+      }
+      try {
+        String blockedCanonicalPath = blockedRoot.getCanonicalPath();
+        if (canonicalPath.equals(blockedCanonicalPath)
+            || canonicalPath.startsWith(
+                blockedCanonicalPath.endsWith(File.separator)
+                    ? blockedCanonicalPath
+                    : blockedCanonicalPath + File.separator)) {
+          return true;
+        }
+      } catch (IOException e) {
+        String blockedAbsolutePath = blockedRoot.getAbsolutePath();
+        if (canonicalPath.equals(blockedAbsolutePath)
+            || canonicalPath.startsWith(
+                blockedAbsolutePath.endsWith(File.separator)
+                    ? blockedAbsolutePath
+                    : blockedAbsolutePath + File.separator)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
