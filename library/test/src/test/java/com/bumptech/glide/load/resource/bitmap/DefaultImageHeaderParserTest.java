@@ -1172,6 +1172,91 @@ public class DefaultImageHeaderParserTest {
         });
   }
 
+  @Test
+  public void getOrientation_withNegativeIfdOffset_returnsUnknown() throws IOException {
+    ByteBuffer byteBuffer = createExifSegmentWithIfdOffset(-2023161846);
+    DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
+    assertEquals(
+        ImageHeaderParser.UNKNOWN_ORIENTATION, parser.getOrientation(byteBuffer, byteArrayPool));
+  }
+
+  @Test
+  public void getOrientation_withOverflowIfdOffset_returnsUnknown() throws IOException {
+    ByteBuffer byteBuffer = createExifSegmentWithIfdOffset(Integer.MAX_VALUE);
+    DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
+    assertEquals(
+        ImageHeaderParser.UNKNOWN_ORIENTATION, parser.getOrientation(byteBuffer, byteArrayPool));
+  }
+
+  @Test
+  public void getOrientation_withZeroIfdOffset_returnsUnknown() throws IOException {
+    ByteBuffer byteBuffer = createExifSegmentWithIfdOffset(0);
+    DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
+    assertEquals(
+        ImageHeaderParser.UNKNOWN_ORIENTATION, parser.getOrientation(byteBuffer, byteArrayPool));
+  }
+
+  @Test
+  public void getOrientation_withValidExifOrientation_returnsOrientation() throws IOException {
+    ByteBuffer byteBuffer = createExifSegmentWithOrientation(6);
+    DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
+    assertEquals(6, parser.getOrientation(byteBuffer, byteArrayPool));
+  }
+
+  @Test
+  public void getOrientation_withIfdOffsetExceedingSegmentLength_returnsUnknown()
+      throws IOException {
+    ByteBuffer byteBuffer = createExifSegmentWithIfdOffset(500);
+    DefaultImageHeaderParser parser = new DefaultImageHeaderParser();
+    assertEquals(
+        ImageHeaderParser.UNKNOWN_ORIENTATION, parser.getOrientation(byteBuffer, byteArrayPool));
+  }
+
+  private static ByteBuffer createExifSegmentWithIfdOffset(int ifdOffset) {
+    // Segment content: "Exif\0\0" (6) + byte order "MM" (2) + magic 42 (2) + IFD offset (4) = 14
+    // Segment length = 14 + 2 = 16
+    ByteBuffer buffer = ByteBuffer.allocate(20);
+    buffer.put((byte) 0xFF);
+    buffer.put((byte) 0xD8);
+    buffer.put((byte) DefaultImageHeaderParser.SEGMENT_START_ID);
+    buffer.put((byte) DefaultImageHeaderParser.EXIF_SEGMENT_TYPE);
+    buffer.putShort((short) 16); // segment length
+    buffer.put(DefaultImageHeaderParser.JPEG_EXIF_SEGMENT_PREAMBLE_BYTES);
+    buffer.put((byte) 0x4D); // 'M'
+    buffer.put((byte) 0x4D); // 'M' (big endian)
+    buffer.putShort((short) 42); // TIFF magic number
+    buffer.putInt(ifdOffset);
+    buffer.flip();
+    return buffer;
+  }
+
+  private static ByteBuffer createExifSegmentWithOrientation(int orientation) {
+    // Segment content: "Exif\0\0" (6) + byte order (2) + magic (2) + IFD offset (4)
+    // + tag count (2) + orientation tag (12) + next IFD offset (4) = 32
+    // Segment length = 32 + 2 = 34
+    ByteBuffer buffer = ByteBuffer.allocate(38);
+    buffer.put((byte) 0xFF);
+    buffer.put((byte) 0xD8);
+    buffer.put((byte) DefaultImageHeaderParser.SEGMENT_START_ID);
+    buffer.put((byte) DefaultImageHeaderParser.EXIF_SEGMENT_TYPE);
+    buffer.putShort((short) 34); // segment length
+    buffer.put(DefaultImageHeaderParser.JPEG_EXIF_SEGMENT_PREAMBLE_BYTES);
+    buffer.put((byte) 0x4D); // 'M'
+    buffer.put((byte) 0x4D); // 'M' (big endian)
+    buffer.putShort((short) 42); // TIFF magic number
+    buffer.putInt(8); // IFD offset (relative to byte order bytes)
+    buffer.putShort((short) 1); // tag count
+    // Orientation tag (12 bytes)
+    buffer.putShort((short) 0x0112); // orientation tag id
+    buffer.putShort((short) 3); // format: SHORT
+    buffer.putInt(1); // component count
+    buffer.putShort((short) orientation); // orientation value
+    buffer.putShort((short) 0); // padding
+    buffer.putInt(0); // next IFD offset
+    buffer.flip();
+    return buffer;
+  }
+
   private static ByteBuffer getExifMagicNumber() {
     ByteBuffer jpegHeaderBytes = ByteBuffer.allocate(2);
     jpegHeaderBytes.putShort((short) DefaultImageHeaderParser.EXIF_MAGIC_NUMBER);
