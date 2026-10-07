@@ -132,8 +132,8 @@ public class ThumbnailRequestCoordinatorTest {
   public void testCallsClearOnRequestsWhenCleared() {
     coordinator.clear();
     InOrder order = inOrder(thumb, full);
-    order.verify(thumb).clear();
-    order.verify(full).clear();
+    order.verify(thumb).clear(false);
+    order.verify(full).clear(false);
   }
 
   @Test
