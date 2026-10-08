@@ -45,6 +45,7 @@ import com.bumptech.glide.load.model.stream.MediaStoreImageThumbLoader;
 import com.bumptech.glide.load.model.stream.MediaStoreVideoThumbLoader;
 import com.bumptech.glide.load.model.stream.QMediaStoreUriLoader;
 import com.bumptech.glide.load.model.stream.UrlLoader;
+import com.bumptech.glide.load.resource.bitmap.AssetFileDescriptorBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableDecoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapDrawableEncoder;
 import com.bumptech.glide.load.resource.bitmap.BitmapEncoder;
@@ -171,6 +172,7 @@ final class RegistryFactory {
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
     ResourceDecoder<Uri, Bitmap> uriBitmapDecoder = null;
     ResourceDecoder<ParcelFileDescriptor, Bitmap> parcelFileDescriptorBitmapImageDecoder = null;
+    ResourceDecoder<AssetFileDescriptor, Bitmap> assetFileDescriptorBitmapImageDecoder = null;
     ResourceDecoder<ByteBuffer, Bitmap> fallbackByteBufferBitmapDecoder = null;
     ResourceDecoder<InputStream, Bitmap> fallbackStreamBitmapDecoder = null;
     boolean isFileDescriptorImageDecoderEnabled =
@@ -180,6 +182,8 @@ final class RegistryFactory {
     if (isFileDescriptorImageDecoderEnabled) {
       parcelFileDescriptorBitmapImageDecoder =
           new ParcelFileDescriptorBitmapImageDecoderResourceDecoder(imageHeaderParsers, arrayPool);
+      assetFileDescriptorBitmapImageDecoder =
+          new AssetFileDescriptorBitmapImageDecoderResourceDecoder(imageHeaderParsers, arrayPool);
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
         && experiments.isEnabled(EnableImageDecoderForBitmaps.class)) {
@@ -277,6 +281,13 @@ final class RegistryFactory {
           new ParcelFileDescriptorBitmapDecoder(downsampler));
     }
 
+    if (assetFileDescriptorBitmapImageDecoder != null) {
+      registry.append(
+          Registry.BUCKET_BITMAP,
+          AssetFileDescriptor.class,
+          Bitmap.class,
+          assetFileDescriptorBitmapImageDecoder);
+    }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
       registry.append(
           Registry.BUCKET_BITMAP,
@@ -306,6 +317,13 @@ final class RegistryFactory {
           ParcelFileDescriptor.class,
           BitmapDrawable.class,
           new BitmapDrawableDecoder<>(resources, parcelFileDescriptorBitmapImageDecoder));
+    }
+    if (assetFileDescriptorBitmapImageDecoder != null) {
+      registry.append(
+          Registry.BUCKET_BITMAP_DRAWABLE,
+          AssetFileDescriptor.class,
+          BitmapDrawable.class,
+          new BitmapDrawableDecoder<>(resources, assetFileDescriptorBitmapImageDecoder));
     }
     registry
         .append(
@@ -382,22 +400,45 @@ final class RegistryFactory {
             DirectResourceLoader.assetFileDescriptorFactory(context);
     ModelLoaderFactory<Integer, Drawable> directResourceLaoderDrawableFactory =
         DirectResourceLoader.drawableFactory(context);
+    if (isFileDescriptorImageDecoderEnabled) {
+      registry
+          .append(
+              int.class, AssetFileDescriptor.class, directResourceLoaderAssetFileDescriptorFactory)
+          .append(
+              Integer.class,
+              AssetFileDescriptor.class,
+              directResourceLoaderAssetFileDescriptorFactory)
+          .append(int.class, InputStream.class, directResourceLoaderStreamFactory)
+          .append(Integer.class, InputStream.class, directResourceLoaderStreamFactory);
+    } else {
+      registry
+          .append(int.class, InputStream.class, directResourceLoaderStreamFactory)
+          .append(Integer.class, InputStream.class, directResourceLoaderStreamFactory)
+          .append(
+              int.class, AssetFileDescriptor.class, directResourceLoaderAssetFileDescriptorFactory)
+          .append(
+              Integer.class,
+              AssetFileDescriptor.class,
+              directResourceLoaderAssetFileDescriptorFactory);
+    }
     registry
-        .append(int.class, InputStream.class, directResourceLoaderStreamFactory)
-        .append(Integer.class, InputStream.class, directResourceLoaderStreamFactory)
-        .append(
-            int.class, AssetFileDescriptor.class, directResourceLoaderAssetFileDescriptorFactory)
-        .append(
-            Integer.class,
-            AssetFileDescriptor.class,
-            directResourceLoaderAssetFileDescriptorFactory)
         .append(int.class, Drawable.class, directResourceLaoderDrawableFactory)
-        .append(Integer.class, Drawable.class, directResourceLaoderDrawableFactory)
-        .append(Uri.class, InputStream.class, ResourceUriLoader.newStreamFactory(context))
-        .append(
-            Uri.class,
-            AssetFileDescriptor.class,
-            ResourceUriLoader.newAssetFileDescriptorFactory(context));
+        .append(Integer.class, Drawable.class, directResourceLaoderDrawableFactory);
+    if (isFileDescriptorImageDecoderEnabled) {
+      registry
+          .append(
+              Uri.class,
+              AssetFileDescriptor.class,
+              ResourceUriLoader.newAssetFileDescriptorFactory(context))
+          .append(Uri.class, InputStream.class, ResourceUriLoader.newStreamFactory(context));
+    } else {
+      registry
+          .append(Uri.class, InputStream.class, ResourceUriLoader.newStreamFactory(context))
+          .append(
+              Uri.class,
+              AssetFileDescriptor.class,
+              ResourceUriLoader.newAssetFileDescriptorFactory(context));
+    }
 
     // ResourceLoader and UriLoader handle resource IDs and Uris owned by other packages.
     ResourceLoader.UriFactory resourceLoaderUriFactory = new ResourceLoader.UriFactory(resources);
@@ -420,21 +461,34 @@ final class RegistryFactory {
       registry
           .append(
               String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory())
-          .append(String.class, InputStream.class, new StringLoader.StreamFactory());
+          .append(
+              String.class,
+              AssetFileDescriptor.class,
+              new StringLoader.AssetFileDescriptorFactory())
+          .append(String.class, InputStream.class, new StringLoader.StreamFactory())
+          .append(
+              Uri.class,
+              AssetFileDescriptor.class,
+              new AssetUriLoader.FileDescriptorFactory(context.getAssets()))
+          .append(
+              Uri.class, InputStream.class, new AssetUriLoader.StreamFactory(context.getAssets()));
     } else {
       registry
           .append(String.class, InputStream.class, new StringLoader.StreamFactory())
           .append(
-              String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory());
+              String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory())
+          .append(
+              String.class,
+              AssetFileDescriptor.class,
+              new StringLoader.AssetFileDescriptorFactory())
+          .append(
+              Uri.class, InputStream.class, new AssetUriLoader.StreamFactory(context.getAssets()))
+          .append(
+              Uri.class,
+              AssetFileDescriptor.class,
+              new AssetUriLoader.FileDescriptorFactory(context.getAssets()));
     }
     registry
-        .append(
-            String.class, AssetFileDescriptor.class, new StringLoader.AssetFileDescriptorFactory())
-        .append(Uri.class, InputStream.class, new AssetUriLoader.StreamFactory(context.getAssets()))
-        .append(
-            Uri.class,
-            AssetFileDescriptor.class,
-            new AssetUriLoader.FileDescriptorFactory(context.getAssets()))
         .append(Uri.class, InputStream.class, new MediaStoreImageThumbLoader.Factory(context))
         .append(Uri.class, InputStream.class, new MediaStoreVideoThumbLoader.Factory(context));
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -465,6 +519,11 @@ final class RegistryFactory {
                   contentResolver, useMediaStoreOpenFileApisIfPossible))
           .append(
               Uri.class,
+              AssetFileDescriptor.class,
+              new UriLoader.AssetFileDescriptorFactory(
+                  contentResolver, useMediaStoreOpenFileApisIfPossible))
+          .append(
+              Uri.class,
               InputStream.class,
               new UriLoader.StreamFactory(contentResolver, useMediaStoreOpenFileApisIfPossible));
     } else {
@@ -477,14 +536,14 @@ final class RegistryFactory {
               Uri.class,
               ParcelFileDescriptor.class,
               new UriLoader.FileDescriptorFactory(
+                  contentResolver, useMediaStoreOpenFileApisIfPossible))
+          .append(
+              Uri.class,
+              AssetFileDescriptor.class,
+              new UriLoader.AssetFileDescriptorFactory(
                   contentResolver, useMediaStoreOpenFileApisIfPossible));
     }
     registry
-        .append(
-            Uri.class,
-            AssetFileDescriptor.class,
-            new UriLoader.AssetFileDescriptorFactory(
-                contentResolver, useMediaStoreOpenFileApisIfPossible))
         .append(Uri.class, InputStream.class, new UrlUriLoader.StreamFactory())
         .append(URL.class, InputStream.class, new UrlLoader.StreamFactory())
         .append(Uri.class, File.class, new MediaStoreFileLoader.Factory(context))
