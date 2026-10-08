@@ -571,6 +571,29 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to skip writing resources backed by {@link
+   * android.graphics.Bitmap.Config#HARDWARE} bitmaps to the resource disk cache.
+   *
+   * <p>Compressing a hardware bitmap requires the framework to copy its pixels from graphics memory
+   * back into a software bitmap first. That copy occupies the Glide worker thread and the
+   * RenderThread for the duration, and transiently allocates a second, full-size copy of the image
+   * in native memory. Skipping the write avoids all of that while leaving the hardware bitmap in
+   * place for display.
+   *
+   * <p>This applies to any {@link com.bumptech.glide.load.engine.DiskCacheStrategy} that would
+   * otherwise permit the resource to be cached, including {@link
+   * com.bumptech.glide.load.engine.DiskCacheStrategy#AUTOMATIC}. The trade-off is that a later
+   * request for the same transformed hardware bitmap that misses the memory cache is decoded again
+   * from the data cache or the source rather than read from the resource cache.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setBypassResourceDiskCacheForHardwareBitmaps(boolean isEnabled) {
+    glideExperimentsBuilder.update(new BypassResourceDiskCacheForHardwareBitmaps(), isEnabled);
+    return this;
+  }
+
+  /**
    * Override the OS thread priority of threads created in {@code
    * com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory} with {@link
    * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
@@ -772,6 +795,9 @@ public final class GlideBuilder {
 
   /** See {@link #experimentalSetEnableRgb565DownsamplerFix(boolean)}. */
   public static final class EnableRgb565DownsamplerFix implements Experiment {}
+
+  /** See {@link #setBypassResourceDiskCacheForHardwareBitmaps(boolean)}. */
+  public static final class BypassResourceDiskCacheForHardwareBitmaps implements Experiment {}
 
   /** See {@link #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}. */
   public static final class EnableTrimMemoryOnUiHidden implements Experiment {}

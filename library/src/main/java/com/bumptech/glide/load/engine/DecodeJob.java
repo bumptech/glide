@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pools;
+import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.GlideBuilder.OverrideGlideThreadPriority;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.GlideExperiments;
@@ -675,8 +676,9 @@ class DecodeJob<R>
 
     Resource<Z> result = transformed;
     boolean isFromAlternateCacheKey = !decodeHelper.isSourceKey(currentSourceKey);
-    if (diskCacheStrategy.isResourceCacheable(
-        isFromAlternateCacheKey, dataSource, encodeStrategy)) {
+    boolean isResourceCacheable =
+        isResourceCacheable(isFromAlternateCacheKey, dataSource, encodeStrategy, transformed);
+    if (isResourceCacheable) {
       if (encoder == null) {
         throw new Registry.NoResultEncoderAvailableException(transformed.get().getClass());
       }
@@ -709,6 +711,48 @@ class DecodeJob<R>
   }
 
   /**
+   * Returns {@code true} if the decoded and transformed resource is eligible to be written to the
+   * resource disk cache.
+   *
+   * <p>When {@link GlideBuilder.BypassResourceDiskCacheForHardwareBitmaps} is enabled, resources
+   * backed by {@link Bitmap.Config#HARDWARE} bitmaps are never written. Compressing a hardware
+   * bitmap requires the framework to copy its pixels out of graphics memory into a software bitmap
+   * ({@code RenderProxy#copyHWBitmapInto}). That copy runs on this job's thread after the resource
+   * has been delivered, round-trips through the RenderThread (contending with frame rendering),
+   * holds the {@link LockedResource} until it finishes, and transiently allocates a second,
+   * full-size copy of the image in native memory.
+   */
+  private <Z> boolean isResourceCacheable(
+      boolean isFromAlternateCacheKey,
+      DataSource dataSource,
+      EncodeStrategy encodeStrategy,
+      Resource<Z> transformed) {
+    if (!diskCacheStrategy.isResourceCacheable(
+        isFromAlternateCacheKey, dataSource, encodeStrategy)) {
+      return false;
+    }
+    if (experiments.isEnabled(GlideBuilder.BypassResourceDiskCacheForHardwareBitmaps.class)
+        && isHardwareBitmap(transformed)) {
+      return false;
+    }
+    return true;
+  }
+
+  private static boolean isHardwareBitmap(Resource<?> resource) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+      return false;
+    }
+    Object content = resource.get();
+    Bitmap bitmap = null;
+    if (content instanceof Bitmap) {
+      bitmap = (Bitmap) content;
+    } else if (content instanceof BitmapDrawable) {
+      bitmap = ((BitmapDrawable) content).getBitmap();
+    }
+    return bitmap != null && bitmap.getConfig() == Bitmap.Config.HARDWARE;
+  }
+
+  /**
    * Returns {@code true} if we should bypass applying software transformations to the decoded
    * resource.
    *
@@ -727,20 +771,7 @@ class DecodeJob<R>
       return false;
     }
 
-    Object resource = decoded.get();
-    Bitmap bitmap = null;
-    if (resource instanceof Bitmap) {
-      bitmap = (Bitmap) resource;
-    } else if (resource instanceof BitmapDrawable) {
-      bitmap = ((BitmapDrawable) resource).getBitmap();
-    }
-
-    if (bitmap == null) {
-      return false;
-    }
-
-    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-        && bitmap.getConfig() == Bitmap.Config.HARDWARE;
+    return isHardwareBitmap(decoded);
   }
 
   private final class DecodeCallback<Z> implements DecodePath.DecodeCallback<Z> {
