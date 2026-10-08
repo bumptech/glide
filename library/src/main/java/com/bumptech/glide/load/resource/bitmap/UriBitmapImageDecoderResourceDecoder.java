@@ -38,6 +38,10 @@ public final class UriBitmapImageDecoderResourceDecoder implements ResourceDecod
 
   @Override
   public boolean handles(@NonNull Uri uri, @NonNull Options options) throws IOException {
+    Long targetFrame = options.get(VideoDecoder.TARGET_FRAME);
+    if (targetFrame != null && targetFrame >= 0) {
+      return false;
+    }
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
       return false;
     }
@@ -61,20 +65,20 @@ public final class UriBitmapImageDecoderResourceDecoder implements ResourceDecod
 
   @Nullable
   private String getMimeType(@NonNull Uri uri) {
-    String mimeType = context.getContentResolver().getType(uri);
-    if (mimeType == null && ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
-      String lastSegment = uri.getLastPathSegment();
-      if (lastSegment != null) {
-        int lastDot = lastSegment.lastIndexOf('.');
-        if (lastDot != -1) {
-          String extension = lastSegment.substring(lastDot + 1);
-          mimeType =
-              MimeTypeMap.getSingleton()
-                  .getMimeTypeFromExtension(extension.toLowerCase(Locale.ROOT));
+    // Fast-path: Check file extension from path segment first to avoid cross-process Binder IPC.
+    String lastSegment = uri.getLastPathSegment();
+    if (lastSegment != null) {
+      int lastDot = lastSegment.lastIndexOf('.');
+      if (lastDot != -1) {
+        String extension = lastSegment.substring(lastDot + 1);
+        String mimeType =
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase(Locale.ROOT));
+        if (mimeType != null) {
+          return mimeType;
         }
       }
     }
-    return mimeType;
+    return context.getContentResolver().getType(uri);
   }
 
   @Override
@@ -82,7 +86,7 @@ public final class UriBitmapImageDecoderResourceDecoder implements ResourceDecod
       throws IOException {
     Source source = ImageDecoder.createSource(context.getContentResolver(), uri);
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-      String mimeType = context.getContentResolver().getType(uri);
+      String mimeType = getMimeType(uri);
       Log.v(
           TAG, "decoding " + uri + ", mimeType: " + mimeType + ", [" + width + ", " + height + "]");
     }

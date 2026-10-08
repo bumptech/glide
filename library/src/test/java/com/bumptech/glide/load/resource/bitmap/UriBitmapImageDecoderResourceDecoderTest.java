@@ -87,6 +87,13 @@ public final class UriBitmapImageDecoderResourceDecoderTest {
   }
 
   @Test
+  public void handles_withTargetFrameOption_returnsFalse() throws IOException {
+    Uri uri = Uri.parse("file:///path/to/image.png");
+    options.set(VideoDecoder.TARGET_FRAME, 1000L);
+    assertThat(decoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
   public void decode_solidColor_returnsExactColor() throws IOException {
     Bitmap bmp = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     Canvas canvas = new Canvas(bmp);
@@ -138,5 +145,11 @@ public final class UriBitmapImageDecoderResourceDecoderTest {
   public void handles_returnsFalseForUnknownExtensionFileUri() throws IOException {
     Uri uri = Uri.parse("file:///path/to/file.unknown");
     assertThat(decoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
+  public void handles_returnsTrueForImageExtensionWithoutContentResolverQuery() throws IOException {
+    Uri uri = Uri.parse("content://media/external/images/media/12345.jpg");
+    assertThat(decoder.handles(uri, options)).isTrue();
   }
 }
