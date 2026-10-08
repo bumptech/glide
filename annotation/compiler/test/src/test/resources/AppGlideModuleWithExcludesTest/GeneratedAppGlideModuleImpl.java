@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("deprecation")
-final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
+public final class GeneratedAppGlideModuleImpl extends GeneratedAppGlideModule {
   private final AppModuleWithExcludes appGlideModule;
 
   public GeneratedAppGlideModuleImpl(Context context) {
