@@ -8,6 +8,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -19,7 +20,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bumptech.glide.GlideBuilder.EnableActiveResourceReleaseRaceFix;
 import com.bumptech.glide.GlideContext;
+import com.bumptech.glide.GlideExperimentsTestUtil;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.Key;
@@ -133,6 +136,22 @@ public class EngineTest {
     harness.doLoad();
 
     verify(harness.resource).acquire();
+  }
+
+  @Test
+  public void load_withReleaseRaceFix_acquiresActiveResourceIfInUse() {
+    when(harness.glideContext.getExperiments())
+        .thenReturn(
+            GlideExperimentsTestUtil.withExperiment(new EnableActiveResourceReleaseRaceFix()));
+    when(harness.resource.acquireIfInUse()).thenReturn(true);
+    harness.activeResources.activate(harness.cacheKey, harness.resource);
+
+    harness.doLoad();
+
+    verify(harness.resource).acquireIfInUse();
+    verify(harness.resource, never()).acquire();
+    verify(harness.cb)
+        .onResourceReady(eq(harness.resource), eq(DataSource.MEMORY_CACHE), eq(false));
   }
 
   @Test
@@ -434,9 +453,12 @@ public class EngineTest {
     verify(engineResource).release();
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testThrowsIfAskedToReleaseNonEngineResource() {
-    harness.getEngine().release(mockResource());
+    Engine engine = harness.getEngine();
+    Resource<?> resource = mockResource();
+
+    assertThrows(IllegalArgumentException.class, () -> engine.release(resource));
   }
 
   @Test
@@ -689,6 +711,7 @@ public class EngineTest {
               eq(options)))
           .thenReturn(cacheKey);
       when(resource.getResource()).thenReturn(mock(Resource.class));
+      when(glideContext.getExperiments()).thenReturn(GlideExperimentsTestUtil.empty());
 
       job = mock(EngineJob.class);
     }

@@ -93,6 +93,25 @@ class EngineResource<Z> implements Resource<Z> {
   }
 
   /**
+   * Acquires the resource only if at least one other consumer still holds it.
+   *
+   * <p>Once the count drops to zero, the releasing thread passes the resource to {@link
+   * ResourceListener#onResourceReleased}, which moves it into the memory cache. That thread is not
+   * always the main thread: an {@link EngineJob} drops its own hold on whichever thread finishes
+   * notifying callbacks. Acquiring the resource in that window would leave an acquired resource in
+   * the memory cache, and evicting it would then throw from {@link #recycle()}.
+   *
+   * @return {@code true} if the resource was acquired, {@code false} if no consumer holds it.
+   */
+  synchronized boolean acquireIfInUse() {
+    if (acquired == 0) {
+      return false;
+    }
+    acquire();
+    return true;
+  }
+
+  /**
    * Decrements the number of consumers using the wrapped resource. Must be called on the main
    * thread.
    *

@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.util.Pools;
+import com.bumptech.glide.GlideBuilder.EnableActiveResourceReleaseRaceFix;
 import com.bumptech.glide.GlideContext;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.DataSource;
@@ -199,9 +200,12 @@ public final class Engine
             transcodeClass,
             options);
 
+    boolean isReleaseRaceFixEnabled =
+        glideContext.getExperiments().isEnabled(EnableActiveResourceReleaseRaceFix.class);
+
     EngineResource<?> memoryResource;
     synchronized (this) {
-      memoryResource = loadFromMemory(key, isMemoryCacheable, startTime);
+      memoryResource = loadFromMemory(key, isMemoryCacheable, isReleaseRaceFixEnabled, startTime);
 
       if (memoryResource == null) {
         return waitForExistingOrStartNewJob(
@@ -308,12 +312,12 @@ public final class Engine
 
   @Nullable
   private EngineResource<?> loadFromMemory(
-      EngineKey key, boolean isMemoryCacheable, long startTime) {
+      EngineKey key, boolean isMemoryCacheable, boolean isReleaseRaceFixEnabled, long startTime) {
     if (!isMemoryCacheable) {
       return null;
     }
 
-    EngineResource<?> active = loadFromActiveResources(key);
+    EngineResource<?> active = loadFromActiveResources(key, isReleaseRaceFixEnabled);
     if (active != null) {
       if (VERBOSE_IS_LOGGABLE) {
         logWithTimeAndKey("Loaded resource from active resources", startTime, key);
@@ -381,10 +385,18 @@ public final class Engine
   }
 
   @Nullable
-  private EngineResource<?> loadFromActiveResources(Key key) {
+  private EngineResource<?> loadFromActiveResources(Key key, boolean isReleaseRaceFixEnabled) {
     EngineResource<?> active = activeResources.get(key);
     if (active != null) {
-      active.acquire();
+      if (isReleaseRaceFixEnabled) {
+        // A count of zero means another thread just dropped the last hold and is moving the
+        // resource into the memory cache (see EngineResource#acquireIfInUse). Treat it as a miss.
+        if (!active.acquireIfInUse()) {
+          return null;
+        }
+      } else {
+        active.acquire();
+      }
     }
 
     return active;

@@ -646,6 +646,20 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to make loads skip an active resource that no request holds anymore,
+   * instead of acquiring it again. The load then falls through to the memory cache.
+   *
+   * <p>This avoids "Cannot recycle a resource while it is still acquired" crashes. See
+   * https://github.com/bumptech/glide/issues/5782.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder experimentalSetEnableActiveResourceReleaseRaceFix(boolean isEnabled) {
+    glideExperimentsBuilder.update(new EnableActiveResourceReleaseRaceFix(), isEnabled);
+    return this;
+  }
+
+  /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
    */
@@ -801,6 +815,9 @@ public final class GlideBuilder {
 
   /** See {@link #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}. */
   public static final class EnableTrimMemoryOnUiHidden implements Experiment {}
+
+  /** See {@link #experimentalSetEnableActiveResourceReleaseRaceFix(boolean)}. */
+  public static final class EnableActiveResourceReleaseRaceFix implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
