@@ -147,4 +147,24 @@ public final class GlideExperimentsTest {
                 .isEnabled(GlideBuilder.BypassResourceDiskCacheForHardwareBitmaps.class))
         .isTrue();
   }
+
+  @Test
+  public void testRespectExifOrientationInImageDecoder_experimentEnabled_isRecorded() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor)
+            .setRespectExifOrientationInImageDecoder(true);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class))
+        .isTrue();
+  }
 }

@@ -23,21 +23,36 @@ import java.util.List;
 @RequiresApi(api = 28)
 public final class InputStreamBitmapImageDecoderResourceDecoder
     implements ResourceDecoder<InputStream, Bitmap> {
-  private final BitmapImageDecoderResourceDecoder wrapped = new BitmapImageDecoderResourceDecoder();
+  private final BitmapImageDecoderResourceDecoder wrapped;
   private final List<ImageHeaderParser> parsers;
   private final boolean useHeapBuffer;
   @Nullable private final ArrayPool arrayPool;
   private final boolean useArrayPool;
+  @Nullable private final ExifOrientationOptionsApplier exifOrientationOptionsApplier;
 
   public InputStreamBitmapImageDecoderResourceDecoder(
       List<ImageHeaderParser> parsers,
       boolean useHeapBuffer,
       @Nullable ArrayPool arrayPool,
       boolean useArrayPool) {
+    this(parsers, useHeapBuffer, arrayPool, useArrayPool, /* respectExifOrientation= */ false);
+  }
+
+  public InputStreamBitmapImageDecoderResourceDecoder(
+      List<ImageHeaderParser> parsers,
+      boolean useHeapBuffer,
+      @Nullable ArrayPool arrayPool,
+      boolean useArrayPool,
+      boolean respectExifOrientation) {
     this.parsers = parsers;
     this.useHeapBuffer = useHeapBuffer;
     this.arrayPool = arrayPool;
     this.useArrayPool = useArrayPool;
+    this.exifOrientationOptionsApplier =
+        respectExifOrientation ? new ExifOrientationOptionsApplier(parsers, arrayPool) : null;
+    this.wrapped =
+        new BitmapImageDecoderResourceDecoder(
+            /* floorTargetSizeToOnePixel= */ respectExifOrientation);
   }
 
   @Override
@@ -60,6 +75,9 @@ public final class InputStreamBitmapImageDecoderResourceDecoder
         useArrayPool && arrayPool != null
             ? ByteBufferUtil.fromStream(stream, useHeapBuffer, arrayPool)
             : ByteBufferUtil.fromStream(stream, useHeapBuffer);
+    if (exifOrientationOptionsApplier != null) {
+      options = exifOrientationOptionsApplier.apply(buffer, options);
+    }
     Source source = ImageDecoder.createSource(buffer);
     return wrapped.decode(source, width, height, options);
   }

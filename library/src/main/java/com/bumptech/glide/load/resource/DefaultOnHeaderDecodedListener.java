@@ -41,27 +41,42 @@ public final class DefaultOnHeaderDecodedListener implements OnHeaderDecodedList
   private final DownsampleStrategy strategy;
   private final boolean isHardwareConfigAllowed;
   private final PreferredColorSpace preferredColorSpace;
+  private final boolean isExifOrientationRequired;
+  private final boolean floorTargetSizeToOnePixel;
 
   public DefaultOnHeaderDecodedListener(
       int requestedWidth, int requestedHeight, @NonNull Options options) {
+    this(requestedWidth, requestedHeight, options, /* floorTargetSizeToOnePixel= */ false);
+  }
+
+  /**
+   * @param floorTargetSizeToOnePixel If {@code true}, the target size passed to {@link
+   *     ImageDecoder#setTargetSize(int, int)} is raised to at least one pixel per dimension so that
+   *     very small requested sizes on highly elongated images cannot round down to zero.
+   */
+  public DefaultOnHeaderDecodedListener(
+      int requestedWidth,
+      int requestedHeight,
+      @NonNull Options options,
+      boolean floorTargetSizeToOnePixel) {
     this.requestedWidth = requestedWidth;
     this.requestedHeight = requestedHeight;
+    this.floorTargetSizeToOnePixel = floorTargetSizeToOnePixel;
     decodeFormat = options.get(Downsampler.DECODE_FORMAT);
     strategy = options.get(DownsampleStrategy.OPTION);
     isHardwareConfigAllowed =
         options.get(Downsampler.ALLOW_HARDWARE_CONFIG) != null
             && options.get(Downsampler.ALLOW_HARDWARE_CONFIG);
     preferredColorSpace = options.get(Downsampler.PREFERRED_COLOR_SPACE);
+    Boolean exifRequired = options.get(Downsampler.IS_EXIF_ORIENTATION_REQUIRED);
+    isExifOrientationRequired = exifRequired != null && exifRequired;
   }
 
   @Override
   public void onHeaderDecoded(
       @NonNull ImageDecoder decoder, @NonNull ImageInfo info, @NonNull Source source) {
     if (hardwareConfigState.isHardwareConfigAllowed(
-        requestedWidth,
-        requestedHeight,
-        isHardwareConfigAllowed,
-        /* isExifOrientationRequired= */ false)) {
+        requestedWidth, requestedHeight, isHardwareConfigAllowed, isExifOrientationRequired)) {
       decoder.setAllocator(ImageDecoder.ALLOCATOR_HARDWARE);
     } else {
       decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
@@ -95,6 +110,10 @@ public final class DefaultOnHeaderDecodedListener implements OnHeaderDecodedList
 
     int resizeWidth = Math.round(scaleFactor * size.getWidth());
     int resizeHeight = Math.round(scaleFactor * size.getHeight());
+    if (floorTargetSizeToOnePixel) {
+      resizeWidth = Math.max(1, resizeWidth);
+      resizeHeight = Math.max(1, resizeHeight);
+    }
     if (Log.isLoggable(TAG, Log.VERBOSE)) {
       Log.v(
           TAG,

@@ -20,6 +20,19 @@ import java.io.IOException;
 public final class BitmapImageDecoderResourceDecoder implements ResourceDecoder<Source, Bitmap> {
   private static final String TAG = "BitmapImageDecoder";
   private final BitmapPool bitmapPool = new BitmapPoolAdapter();
+  private final boolean floorTargetSizeToOnePixel;
+
+  public BitmapImageDecoderResourceDecoder() {
+    this(/* floorTargetSizeToOnePixel= */ false);
+  }
+
+  /**
+   * See {@link DefaultOnHeaderDecodedListener#DefaultOnHeaderDecodedListener(int, int, Options,
+   * boolean)}.
+   */
+  public BitmapImageDecoderResourceDecoder(boolean floorTargetSizeToOnePixel) {
+    this.floorTargetSizeToOnePixel = floorTargetSizeToOnePixel;
+  }
 
   @Override
   public boolean handles(@NonNull Source source, @NonNull Options options) {
@@ -33,7 +46,9 @@ public final class BitmapImageDecoderResourceDecoder implements ResourceDecoder<
     try {
       Bitmap result =
           ImageDecoder.decodeBitmap(
-              source, new DefaultOnHeaderDecodedListener(width, height, options));
+              source,
+              new DefaultOnHeaderDecodedListener(
+                  width, height, options, floorTargetSizeToOnePixel));
       if (Log.isLoggable(TAG, Log.VERBOSE)) {
         Log.v(
             TAG,
