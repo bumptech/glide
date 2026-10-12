@@ -21,6 +21,12 @@ dependencies {
     implementation(project(":library"))
     compileOnly(libs.androidx.recyclerview)
     compileOnly(libs.androidx.fragment)
+
+    testImplementation(libs.androidx.recyclerview)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.truth)
 }
 
 apply(from = "${rootProject.projectDir}/scripts/upload.gradle.kts")
