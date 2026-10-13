@@ -38,6 +38,16 @@ public final class UriBitmapImageDecoderResourceDecoder implements ResourceDecod
 
   @Override
   public boolean handles(@NonNull Uri uri, @NonNull Options options) throws IOException {
+    // Videos are excluded by the MIME type check below. This is only a shortcut for explicit video
+    // frame requests (RequestOptions#frame), which are typically extension-less MediaStore URIs and
+    // would otherwise pay a Binder IPC to the provider in getMimeType() before being rejected. It
+    // cannot catch frame(DEFAULT_FRAME): Options#get returns DEFAULT_FRAME when the option is
+    // unset, so such requests are indistinguishable from plain image requests and fall through to
+    // the MIME type check.
+    Long targetFrame = options.get(VideoDecoder.TARGET_FRAME);
+    if (targetFrame != null && targetFrame != VideoDecoder.DEFAULT_FRAME) {
+      return false;
+    }
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
       return false;
     }
@@ -61,20 +71,19 @@ public final class UriBitmapImageDecoderResourceDecoder implements ResourceDecod
 
   @Nullable
   private String getMimeType(@NonNull Uri uri) {
-    String mimeType = context.getContentResolver().getType(uri);
-    if (mimeType == null && ContentResolver.SCHEME_FILE.equals(uri.getScheme())) {
-      String lastSegment = uri.getLastPathSegment();
-      if (lastSegment != null) {
-        int lastDot = lastSegment.lastIndexOf('.');
-        if (lastDot != -1) {
-          String extension = lastSegment.substring(lastDot + 1);
-          mimeType =
-              MimeTypeMap.getSingleton()
-                  .getMimeTypeFromExtension(extension.toLowerCase(Locale.ROOT));
+    String lastSegment = uri.getLastPathSegment();
+    if (lastSegment != null) {
+      int lastDot = lastSegment.lastIndexOf('.');
+      if (lastDot != -1) {
+        String extension = lastSegment.substring(lastDot + 1);
+        String mimeType =
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase(Locale.ROOT));
+        if (mimeType != null) {
+          return mimeType;
         }
       }
     }
-    return mimeType;
+    return context.getContentResolver().getType(uri);
   }
 
   @Override
