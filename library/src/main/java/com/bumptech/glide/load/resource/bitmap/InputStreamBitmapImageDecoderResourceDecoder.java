@@ -19,7 +19,16 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-/** {@link InputStream} specific implementation of {@link BitmapImageDecoderResourceDecoder}. */
+/**
+ * {@link InputStream} specific implementation of {@link BitmapImageDecoderResourceDecoder}.
+ *
+ * <p>{@link ImageDecoder} has no streaming {@link Source}, so this decoder must copy the entire
+ * stream into a {@link ByteBuffer} before decoding. Callers that want to avoid that copy should
+ * enable {@link com.bumptech.glide.GlideBuilder#setUseBitmapFactoryForInputStreamsWithImageDecoder}
+ * so that streams are decoded by {@link StreamBitmapDecoder} and {@link ImageDecoder} is reserved
+ * for sources it can read in place ({@link java.io.File}, {@link android.os.ParcelFileDescriptor},
+ * {@link android.net.Uri} and {@link ByteBuffer}).
+ */
 @RequiresApi(api = 28)
 public final class InputStreamBitmapImageDecoderResourceDecoder
     implements ResourceDecoder<InputStream, Bitmap> {

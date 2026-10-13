@@ -605,6 +605,26 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to decode {@link InputStream} sources with {@link
+   * android.graphics.BitmapFactory} even when {@link ImageDecoder} is enabled for bitmaps.
+   *
+   * <p>{@link ImageDecoder} cannot read from a stream, so decoding an {@link InputStream} with it
+   * requires copying the entire encoded image into a contiguous {@link java.nio.ByteBuffer} first,
+   * which can exhaust the Java heap on large images. With this flag enabled {@link ImageDecoder} is
+   * used only for sources it can read in place ({@link java.io.File}, {@link
+   * android.os.ParcelFileDescriptor}, {@link android.net.Uri} and {@link java.nio.ByteBuffer}) and
+   * streams fall back to {@link android.graphics.BitmapFactory}, which reads incrementally in
+   * native code.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setUseBitmapFactoryForInputStreamsWithImageDecoder(boolean isEnabled) {
+    glideExperimentsBuilder.update(
+        new UseBitmapFactoryForInputStreamsWithImageDecoder(), isEnabled);
+    return this;
+  }
+
+  /**
    * Override the OS thread priority of threads created in {@code
    * com.bumptech.glide.load.engine.executor.GlideExecutor.DefaultThreadFactory} with {@link
    * com.bumptech.glide.load.engine.DecodeJob#GLIDE_THREAD_PRIORITY_OVERRIDE} Glide Option.
@@ -826,6 +846,9 @@ public final class GlideBuilder {
 
   /** See {@link #setRespectExifOrientationInImageDecoder(boolean)}. */
   public static final class RespectExifOrientationInImageDecoder implements Experiment {}
+
+  /** See {@link #setUseBitmapFactoryForInputStreamsWithImageDecoder(boolean)}. */
+  public static final class UseBitmapFactoryForInputStreamsWithImageDecoder implements Experiment {}
 
   /** See {@link #experimentalSetEnableTrimMemoryOnUiHidden(boolean)}. */
   public static final class EnableTrimMemoryOnUiHidden implements Experiment {}

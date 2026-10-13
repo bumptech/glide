@@ -167,4 +167,24 @@ public final class GlideExperimentsTest {
                 .isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class))
         .isTrue();
   }
+
+  @Test
+  public void testUseBitmapFactoryForInputStreamsWithImageDecoder_experimentEnabled_isRecorded() {
+    Glide.tearDown();
+    GlideExecutor executor = MockGlideExecutor.newMainThreadExecutor();
+    GlideBuilder builder =
+        new GlideBuilder()
+            .setSourceExecutor(executor)
+            .setDiskCacheExecutor(executor)
+            .setAnimationExecutor(executor)
+            .setUseBitmapFactoryForInputStreamsWithImageDecoder(true);
+    Glide.init(context, builder);
+
+    assertThat(
+            Glide.get(context)
+                .getGlideContext()
+                .getExperiments()
+                .isEnabled(GlideBuilder.UseBitmapFactoryForInputStreamsWithImageDecoder.class))
+        .isTrue();
+  }
 }

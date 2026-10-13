@@ -172,14 +172,24 @@ final class RegistryFactory {
     ResourceDecoder<InputStream, Bitmap> fallbackStreamBitmapDecoder = null;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
         && experiments.isEnabled(EnableImageDecoderForBitmaps.class)) {
-      streamBitmapDecoder =
-          new InputStreamBitmapImageDecoderResourceDecoder(
-              imageHeaderParsers,
-              experiments.isEnabled(GlideBuilder.UseHeapBufferForImageDecoderWithInputStream.class),
-              arrayPool,
-              experiments.isEnabled(
-                  GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class),
-              experiments.isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class));
+      if (experiments.isEnabled(
+          GlideBuilder.UseBitmapFactoryForInputStreamsWithImageDecoder.class)) {
+        // ImageDecoder has no streaming Source, so decoding an InputStream with it requires
+        // copying the whole stream into memory. Decode streams with BitmapFactory instead and
+        // reserve ImageDecoder for File, ParcelFileDescriptor, Uri and ByteBuffer sources.
+        streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
+      } else {
+        streamBitmapDecoder =
+            new InputStreamBitmapImageDecoderResourceDecoder(
+                imageHeaderParsers,
+                experiments.isEnabled(
+                    GlideBuilder.UseHeapBufferForImageDecoderWithInputStream.class),
+                arrayPool,
+                experiments.isEnabled(
+                    GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class),
+                experiments.isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class));
+        fallbackStreamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
+      }
       byteBufferBitmapDecoder =
           new ByteBufferBitmapImageDecoderResourceDecoder(
               imageHeaderParsers,
@@ -190,7 +200,6 @@ final class RegistryFactory {
         uriBitmapDecoder = new UriBitmapImageDecoderResourceDecoder(context);
       }
       fallbackByteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
-      fallbackStreamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
     } else {
       byteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
       streamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
