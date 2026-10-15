@@ -7,8 +7,10 @@ import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -17,7 +19,11 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.test.GlideComposeRule
@@ -26,10 +32,12 @@ import com.bumptech.glide.integration.compose.test.bitmapSize
 import com.bumptech.glide.integration.compose.test.dpToPixels
 import com.bumptech.glide.integration.compose.test.expectDisplayedDrawable
 import com.bumptech.glide.integration.compose.test.expectDisplayedDrawableSize
+import com.bumptech.glide.integration.compose.test.expectNoDrawable
 import com.bumptech.glide.integration.ktx.InternalGlideApi
 import com.bumptech.glide.integration.ktx.Size
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.engine.executor.GlideIdlingResourceInit
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.common.truth.Truth.assertThat
@@ -82,8 +90,10 @@ class GlideImageTest {
     fun glideImage_withChangingModel_refreshes() {
         val description = "test"
 
-        val firstDrawable: Drawable = context.getDrawable(android.R.drawable.star_big_off)!!
-        val secondDrawable: Drawable = context.getDrawable(android.R.drawable.star_big_on)!!
+        val firstDrawable: Drawable =
+            requireNotNull(context.getDrawable(android.R.drawable.star_big_off))
+        val secondDrawable: Drawable =
+            requireNotNull(context.getDrawable(android.R.drawable.star_big_on))
 
         glideComposeRule.setContent {
             val model = remember { mutableStateOf(firstDrawable) }
@@ -240,62 +250,24 @@ class GlideImageTest {
     @Test
     fun glideImage_withZeroSize_thenMultipleValidSizes_startsLoadWithFirstValidSize() {
         val description = "test"
-        val resourceId = android.R.drawable.star_big_on
-        val validSizeDps = listOf(10, 20, 30, 40)
+        val currentSize = mutableStateOf(0.dp)
         glideComposeRule.setContent {
-            val currentSize = remember { mutableStateOf(0.dp) }
-            val currentSizeIndex = remember { mutableStateOf(0) }
-            fun swapSize() {
-                currentSize.value = validSizeDps[currentSizeIndex.value].dp
-                currentSizeIndex.value++
-            }
-
-            TextButton(onClick = ::swapSize) { Text(text = "Swap") }
             Box(modifier = Modifier.size(currentSize.value)) {
-                GlideImage(model = resourceId, contentDescription = description)
+                GlideImage(model = android.R.drawable.star_big_on, contentDescription = description)
             }
         }
-        repeat(validSizeDps.size) {
-            glideComposeRule.waitForIdle()
-            glideComposeRule.onNodeWithText("Swap").performClick()
-        }
-        glideComposeRule.waitForIdle()
 
-        val expectedSize = validSizeDps[0]
+        currentSize.setSizesAndWaitForIdle(10, 20, 30, 40)
+
         glideComposeRule
             .onNodeWithContentDescription(description)
-            .assert(
-                expectDisplayedDrawableSize(
-                    Size(expectedSize.dpToPixels(), expectedSize.dpToPixels())
-                )
-            )
+            .assert(expectDisplayedDrawableSize(Size(10.dpToPixels(), 10.dpToPixels())))
     }
 
     @Test
     fun glideImage_withSuccessfulResource_callsOnResourceReadyOnce() {
         val onResourceReadyCounter = AtomicInteger()
-        val requestListener =
-            object : RequestListener<Drawable> {
-                override fun onLoadFailed(
-                    e: GlideException?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    isFirstResource: Boolean,
-                ): Boolean {
-                    throw UnsupportedOperationException()
-                }
-
-                override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
-                    isFirstResource: Boolean,
-                ): Boolean {
-                    onResourceReadyCounter.incrementAndGet()
-                    return false
-                }
-            }
+        val requestListener = countingRequestListener(onResourceReadyCounter)
 
         glideComposeRule.setContent {
             GlideImage(model = android.R.drawable.star_big_on, contentDescription = "") {
@@ -307,4 +279,154 @@ class GlideImageTest {
 
         assertThat(onResourceReadyCounter.get()).isEqualTo(1)
     }
+
+    @Test
+    fun glideImage_lifecyclePaused_experimentEnabled_retainsDrawable() {
+        val resourceId = android.R.drawable.star_big_on
+        val description = "test"
+        initGlideWithClearOnStop(enabled = true)
+        val lifecycleOwner =
+            setGlideImageWithLifecycle(resourceId = resourceId, description = description)
+
+        lifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_PAUSE)
+
+        assertDisplaysResource(description, resourceId)
+    }
+
+    @Test
+    fun glideImage_lifecycleStopped_experimentEnabled_clearsDrawable() {
+        val resourceId = android.R.drawable.star_big_on
+        val description = "test"
+        initGlideWithClearOnStop(enabled = true)
+        val lifecycleOwner =
+            setGlideImageWithLifecycle(resourceId = resourceId, description = description)
+
+        lifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_STOP)
+
+        glideComposeRule.onNodeWithContentDescription(description).assert(expectNoDrawable())
+    }
+
+    @Test
+    fun glideImage_lifecycleStartedAfterStop_experimentEnabled_reloadsDrawable() {
+        val resourceId = android.R.drawable.star_big_on
+        val description = "test"
+        val onResourceReadyCounter = AtomicInteger()
+        initGlideWithClearOnStop(enabled = true)
+        val lifecycleOwner =
+            setGlideImageWithLifecycle(
+                resourceId = resourceId,
+                description = description,
+                onResourceReadyCounter = onResourceReadyCounter,
+            )
+        lifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_STOP)
+
+        lifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_START)
+
+        assertDisplaysResource(description, resourceId)
+        assertThat(onResourceReadyCounter.get()).isEqualTo(2)
+    }
+
+    @Test
+    fun glideImage_lifecycleStopped_experimentDisabled_retainsDrawable() {
+        val resourceId = android.R.drawable.star_big_on
+        val description = "test"
+        initGlideWithClearOnStop(enabled = false)
+        val lifecycleOwner =
+            setGlideImageWithLifecycle(resourceId = resourceId, description = description)
+
+        lifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_STOP)
+
+        assertDisplaysResource(description, resourceId)
+    }
+
+    @Test
+    fun glideImage_rememberedWhileStopped_experimentEnabled_doesNotLoadUntilStarted() {
+        val resourceId = android.R.drawable.star_big_on
+        val description = "test"
+        val onResourceReadyCounter = AtomicInteger()
+        initGlideWithClearOnStop(enabled = true)
+        val lifecycleOwner =
+            setGlideImageWithLifecycle(
+                resourceId = resourceId,
+                description = description,
+                initialState = Lifecycle.State.CREATED,
+                onResourceReadyCounter = onResourceReadyCounter,
+            )
+        glideComposeRule.onNodeWithContentDescription(description).assert(expectNoDrawable())
+
+        lifecycleOwner.handleLifecycleEventAndWaitForIdle(Lifecycle.Event.ON_START)
+
+        assertDisplaysResource(description, resourceId)
+        assertThat(onResourceReadyCounter.get()).isEqualTo(1)
+    }
+
+    private fun initGlideWithClearOnStop(enabled: Boolean) {
+        Glide.tearDown()
+        GlideIdlingResourceInit.initGlide(glideComposeRule) {
+            it.experimentalSetClearGlidePainterOnStop(enabled)
+        }
+    }
+
+    private fun setGlideImageWithLifecycle(
+        resourceId: Int,
+        description: String,
+        initialState: Lifecycle.State = Lifecycle.State.RESUMED,
+        onResourceReadyCounter: AtomicInteger? = null,
+    ): TestLifecycleOwner {
+        val lifecycleOwner = TestLifecycleOwner(initialState)
+        glideComposeRule.setContent {
+            CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
+                GlideImage(model = resourceId, contentDescription = description) { builder ->
+                    if (onResourceReadyCounter != null) {
+                        builder.listener(countingRequestListener(onResourceReadyCounter))
+                    } else {
+                        builder
+                    }
+                }
+            }
+        }
+        glideComposeRule.waitForIdle()
+        return lifecycleOwner
+    }
+
+    private fun MutableState<Dp>.setSizesAndWaitForIdle(vararg sizesDp: Int) {
+        for (sizeDp in sizesDp) {
+            glideComposeRule.runOnIdle { value = sizeDp.dp }
+            glideComposeRule.waitForIdle()
+        }
+    }
+
+    private fun TestLifecycleOwner.handleLifecycleEventAndWaitForIdle(event: Lifecycle.Event) {
+        glideComposeRule.runOnIdle { handleLifecycleEvent(event) }
+        glideComposeRule.waitForIdle()
+    }
+
+    private fun assertDisplaysResource(description: String, resourceId: Int) {
+        glideComposeRule
+            .onNodeWithContentDescription(description)
+            .assert(expectDisplayedDrawableSize(resourceId.bitmapSize()))
+    }
+
+    private fun countingRequestListener(counter: AtomicInteger): RequestListener<Drawable> =
+        object : RequestListener<Drawable> {
+            override fun onLoadFailed(
+                e: GlideException?,
+                model: Any?,
+                target: Target<Drawable>?,
+                isFirstResource: Boolean,
+            ): Boolean {
+                throw UnsupportedOperationException()
+            }
+
+            override fun onResourceReady(
+                resource: Drawable?,
+                model: Any?,
+                target: Target<Drawable>?,
+                dataSource: DataSource?,
+                isFirstResource: Boolean,
+            ): Boolean {
+                counter.incrementAndGet()
+                return false
+            }
+        }
 }

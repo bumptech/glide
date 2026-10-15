@@ -11,7 +11,10 @@ import java.util.concurrent.TimeUnit
 
 object GlideIdlingResourceInit {
 
-    fun initGlide(composeRule: ComposeTestRule) {
+    fun initGlide(
+        composeRule: ComposeTestRule,
+        builderTransform: (GlideBuilder) -> GlideBuilder = { it },
+    ) {
         val executor =
             IdlingThreadPoolExecutor(
                 "glide_test_thread",
@@ -32,10 +35,12 @@ object GlideIdlingResourceInit {
         val glideExecutor = GlideExecutor(executor)
         Glide.init(
             ApplicationProvider.getApplicationContext(),
-            GlideBuilder()
-                .setSourceExecutor(glideExecutor)
-                .setAnimationExecutor(glideExecutor)
-                .setDiskCacheExecutor(glideExecutor),
+            builderTransform(
+                GlideBuilder()
+                    .setSourceExecutor(glideExecutor)
+                    .setAnimationExecutor(glideExecutor)
+                    .setDiskCacheExecutor(glideExecutor)
+            ),
         )
     }
 }
