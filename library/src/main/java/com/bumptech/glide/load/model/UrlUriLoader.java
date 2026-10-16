@@ -4,10 +4,6 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import com.bumptech.glide.load.Options;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Handles http/https Uris by delegating to the {@link ModelLoader} for {@link
@@ -16,8 +12,6 @@ import java.util.Set;
  * @param <Data> The type of data this Loader will obtain for a {@link Uri}.
  */
 public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
-  private static final Set<String> SCHEMES =
-      Collections.unmodifiableSet(new HashSet<>(Arrays.asList("http", "https")));
   private final ModelLoader<GlideUrl, Data> urlLoader;
 
   // Public API.
@@ -35,7 +29,9 @@ public class UrlUriLoader<Data> implements ModelLoader<Uri, Data> {
 
   @Override
   public boolean handles(@NonNull Uri uri) {
-    return SCHEMES.contains(uri.getScheme());
+    // Schemes are case-insensitive, but Uri.getScheme() preserves the original case.
+    String scheme = uri.getScheme();
+    return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
   }
 
   /**
