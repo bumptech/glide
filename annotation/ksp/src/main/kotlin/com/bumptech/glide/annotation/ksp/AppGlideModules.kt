@@ -309,6 +309,13 @@ internal class AppGlideModuleGenerator(private val appGlideModuleData: AppGlideM
                 AppGlideModuleConstants.GLIDE_PACKAGE_NAME,
                 "GeneratedAppGlideModuleImpl",
             )
+            .addAnnotation(
+                AnnotationSpec.builder(ClassName("kotlin", "Suppress"))
+                    .useSiteTarget(AnnotationSpec.UseSiteTarget.FILE)
+                    .addMember("%S", "REDUNDANT_VISIBILITY_MODIFIER")
+                    .addMember("%S", "REDUNDANT_RETURN_UNIT_TYPE")
+                    .build()
+            )
             .addType(generatedAppGlideModuleClass)
             .build()
     }
