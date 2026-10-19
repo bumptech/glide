@@ -17,12 +17,20 @@ import androidx.recyclerview.widget.RecyclerView;
 public final class RecyclerToListViewScrollListener extends RecyclerView.OnScrollListener {
   public static final int UNKNOWN_SCROLL_STATE = Integer.MIN_VALUE;
   private final AbsListView.OnScrollListener scrollListener;
+  private final RecyclerViewPositionProvider positionProvider;
   private int lastFirstVisible = -1;
   private int lastVisibleCount = -1;
   private int lastItemCount = -1;
 
   public RecyclerToListViewScrollListener(@NonNull AbsListView.OnScrollListener scrollListener) {
+    this(scrollListener, new LinearLayoutManagerPositionProvider());
+  }
+
+  public RecyclerToListViewScrollListener(
+      @NonNull AbsListView.OnScrollListener scrollListener,
+      @NonNull RecyclerViewPositionProvider positionProvider) {
     this.scrollListener = scrollListener;
+    this.positionProvider = positionProvider;
   }
 
   @Override
@@ -47,10 +55,8 @@ public final class RecyclerToListViewScrollListener extends RecyclerView.OnScrol
 
   @Override
   public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-
-    int firstVisible = layoutManager.findFirstVisibleItemPosition();
-    int visibleCount = Math.abs(firstVisible - layoutManager.findLastVisibleItemPosition());
+    int firstVisible = positionProvider.getFirstVisiblePosition(recyclerView);
+    int visibleCount = positionProvider.getVisibleItemCount(recyclerView);
     int itemCount = recyclerView.getAdapter().getItemCount();
 
     if (firstVisible != lastFirstVisible
@@ -60,6 +66,29 @@ public final class RecyclerToListViewScrollListener extends RecyclerView.OnScrol
       lastFirstVisible = firstVisible;
       lastVisibleCount = visibleCount;
       lastItemCount = itemCount;
+    }
+  }
+
+  private static final class LinearLayoutManagerPositionProvider
+      implements RecyclerViewPositionProvider {
+    @Override
+    public int getFirstVisiblePosition(@NonNull RecyclerView recyclerView) {
+      return getLayoutManager(recyclerView).findFirstVisibleItemPosition();
+    }
+
+    @Override
+    public int getVisibleItemCount(@NonNull RecyclerView recyclerView) {
+      LinearLayoutManager layoutManager = getLayoutManager(recyclerView);
+      int firstVisible = layoutManager.findFirstVisibleItemPosition();
+      int lastVisible = layoutManager.findLastVisibleItemPosition();
+      if (firstVisible == RecyclerView.NO_POSITION || lastVisible == RecyclerView.NO_POSITION) {
+        return 0;
+      }
+      return Math.abs(lastVisible - firstVisible) + 1;
+    }
+
+    private static LinearLayoutManager getLayoutManager(RecyclerView recyclerView) {
+      return (LinearLayoutManager) recyclerView.getLayoutManager();
     }
   }
 }
