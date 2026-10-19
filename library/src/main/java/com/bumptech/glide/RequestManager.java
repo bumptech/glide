@@ -375,7 +375,7 @@ public class RequestManager
   public synchronized void onStop() {
     targetTracker.onStop();
     if (clearOnStop) {
-      clearRequests();
+      clearRequests(true);
     } else {
       pauseRequests();
     }
@@ -388,8 +388,8 @@ public class RequestManager
   @Override
   public synchronized void onDestroy() {
     targetTracker.onDestroy();
-    clearRequests();
-    requestTracker.clearRequests();
+    clearRequests(true);
+    requestTracker.clearRequests(true);
     lifecycle.removeListener(this);
     lifecycle.removeListener(connectivityMonitor);
     Util.removeCallbacksOnUiThread(addSelfToLifecycle);
@@ -622,10 +622,10 @@ public class RequestManager
    * @param view The view to cancel loads and free resources for.
    * @throws IllegalArgumentException if an object other than Glide's metadata is put as the view's
    *     tag.
-   * @see #clear(Target)
+   * @see #clear(Target, boolean)
    */
   public void clear(@NonNull View view) {
-    clear(new ClearTarget(view));
+    clear(new ClearTarget(view), false);
   }
 
   /**
@@ -635,15 +635,25 @@ public class RequestManager
    * @param target The Target to cancel loads for.
    */
   public void clear(@Nullable final Target<?> target) {
+    clear(target, false);
+  }
+
+  /**
+   * Cancel any pending loads Glide may have for the target and free any resources (such as {@link
+   * Bitmap}s) that may have been loaded for the target so they may be reused.
+   *
+   * @param target The Target to cancel loads for.
+   */
+  public void clear(@Nullable final Target<?> target, boolean skipPlaceholder) {
     if (target == null) {
       return;
     }
 
-    untrackOrDelegate(target);
+    untrackOrDelegate(target, skipPlaceholder);
   }
 
-  private void untrackOrDelegate(@NonNull Target<?> target) {
-    boolean isOwnedByUs = untrack(target);
+  private void untrackOrDelegate(@NonNull Target<?> target, boolean skipPlaceholder) {
+    boolean isOwnedByUs = untrack(target, skipPlaceholder);
     // We'll end up here if the Target was cleared after the RequestManager that started the request
     // is destroyed. That can happen for at least two reasons:
     // 1. We call clear() on a background thread using something other than Application Context
@@ -662,20 +672,20 @@ public class RequestManager
     // RequestManager leaks memory. It's possible that there's some brief period of time during or
     // immediately after onDestroy where this is reasonable, but I can't think of why.
     Request request = target.getRequest();
-    if (!isOwnedByUs && !glide.removeFromManagers(target) && request != null) {
+    if (!isOwnedByUs && !glide.removeFromManagers(target, skipPlaceholder) && request != null) {
       target.setRequest(null);
-      request.clear();
+      request.clear(skipPlaceholder);
     }
   }
 
-  synchronized boolean untrack(@NonNull Target<?> target) {
+  synchronized boolean untrack(@NonNull Target<?> target, boolean skipPlaceholder) {
     Request request = target.getRequest();
     // If the Target doesn't have a request, it's already been cleared.
     if (request == null) {
       return true;
     }
 
-    if (requestTracker.clearAndRemove(request)) {
+    if (requestTracker.clearAndRemove(request, skipPlaceholder)) {
       targetTracker.untrack(target);
       target.setRequest(null);
       return true;
@@ -719,9 +729,9 @@ public class RequestManager
     // Nothing to add conditionally. See Glide#onTrimMemory for unconditional behavior.
   }
 
-  private synchronized void clearRequests() {
+  private synchronized void clearRequests(boolean skipPlaceholder) {
     for (Target<?> target : targetTracker.getAll()) {
-      clear(target);
+      clear(target, skipPlaceholder);
     }
     targetTracker.clear();
   }
