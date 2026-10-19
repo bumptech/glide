@@ -5,8 +5,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Process;
 import android.util.Log;
+import androidx.annotation.DoNotInline;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.util.Pools;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.GlideBuilder.OverrideGlideThreadPriority;
@@ -26,6 +28,7 @@ import com.bumptech.glide.load.data.DataRewinder;
 import com.bumptech.glide.load.engine.cache.DiskCache;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
+import com.bumptech.glide.util.GlideSuppliers.GlideSupplier;
 import com.bumptech.glide.util.LogTime;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.pool.FactoryPools.Poolable;
@@ -63,6 +66,8 @@ class DecodeJob<R>
    * <p>Must have {@link com.bumptech.glide.GlideBuilder#setOverrideGlideThreadPriority(boolean)}
    * experiment enabled to be used.
    *
+   * <p>Only available on API 24 and above, where {@link java.util.function.Supplier} exists.
+   *
    * <p>This is used for a highly experimental API that may be removed in the future. Please use at
    * your own risk.
    */
@@ -93,7 +98,7 @@ class DecodeJob<R>
   private boolean onlyRetrieveFromCache;
   private Object model;
   private GlideExperiments experiments;
-  @Nullable private Supplier<Integer> glideThreadPriorityOverride;
+  @Nullable private GlideSupplier<Integer> glideThreadPriorityOverride;
 
   private Thread currentThread;
   private Key currentSourceKey;
@@ -159,7 +164,11 @@ class DecodeJob<R>
     this.runReason = RunReason.INITIALIZE;
     this.model = model;
     this.experiments = glideContext.getExperiments();
-    this.glideThreadPriorityOverride = options.get(GLIDE_THREAD_PRIORITY_OVERRIDE);
+    // Even casting a null option to Supplier can fail before API 24, with the experiment disabled.
+    this.glideThreadPriorityOverride =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+            ? Api24Impl.getThreadPriorityOverride(options)
+            : null;
     return this;
   }
 
@@ -878,6 +887,18 @@ class DecodeJob<R>
     void onLoadFailed(GlideException e);
 
     void reschedule(DecodeJob<?> job);
+  }
+
+  @RequiresApi(Build.VERSION_CODES.N)
+  static final class Api24Impl {
+    private Api24Impl() {}
+
+    @Nullable
+    @DoNotInline
+    static GlideSupplier<Integer> getThreadPriorityOverride(Options options) {
+      Supplier<Integer> supplier = options.get(GLIDE_THREAD_PRIORITY_OVERRIDE);
+      return supplier == null ? null : supplier::get;
+    }
   }
 
   interface DiskCacheProvider {
