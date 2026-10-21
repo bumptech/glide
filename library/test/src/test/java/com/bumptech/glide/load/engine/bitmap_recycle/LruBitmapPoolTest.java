@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.graphics.Bitmap;
+import com.bumptech.glide.load.engine.BitmapInfo;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -280,6 +281,15 @@ public class LruBitmapPoolTest {
     @Override
     public int getSize(Bitmap bitmap) {
       return 1;
+    }
+
+    @Override
+    public List<BitmapInfo> getPooledBitmapInfos() {
+      List<BitmapInfo> result = new ArrayList<>();
+      for (Bitmap bitmap : bitmaps) {
+        result.add(new BitmapInfo(bitmap));
+      }
+      return result;
     }
   }
 }
