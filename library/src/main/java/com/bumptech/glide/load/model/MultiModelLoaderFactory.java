@@ -175,7 +175,9 @@ public class MultiModelLoaderFactory {
   @NonNull
   @SuppressWarnings("unchecked")
   private <Model, Data> ModelLoader<Model, Data> build(@NonNull Entry<?, ?> entry) {
-    return (ModelLoader<Model, Data>) Preconditions.checkNotNull(entry.factory.build(this));
+    ModelLoader<Model, Data> result =
+        (ModelLoader<Model, Data>) Preconditions.checkNotNull(entry.factory.build(this));
+    return result;
   }
 
   @NonNull
