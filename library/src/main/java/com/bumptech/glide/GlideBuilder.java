@@ -594,8 +594,8 @@ public final class GlideBuilder {
   }
 
   /**
-   * Set to {@code true} to inspect EXIF orientation in {@link ImageDecoder} and decode rotated
-   * images in software to avoid GPU readbacks and decode overhead.
+   * Set to {@code true} to inspect EXIF orientation in {@link android.graphics.ImageDecoder} and
+   * decode rotated images in software to avoid GPU readbacks and decode overhead.
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
@@ -605,16 +605,17 @@ public final class GlideBuilder {
   }
 
   /**
-   * Set to {@code true} to decode {@link InputStream} sources with {@link
-   * android.graphics.BitmapFactory} even when {@link ImageDecoder} is enabled for bitmaps.
+   * Set to {@code true} to decode {@link java.io.InputStream} sources with {@link
+   * android.graphics.BitmapFactory} even when {@link android.graphics.ImageDecoder} is enabled for
+   * bitmaps.
    *
-   * <p>{@link ImageDecoder} cannot read from a stream, so decoding an {@link InputStream} with it
-   * requires copying the entire encoded image into a contiguous {@link java.nio.ByteBuffer} first,
-   * which can exhaust the Java heap on large images. With this flag enabled {@link ImageDecoder} is
-   * used only for sources it can read in place ({@link java.io.File}, {@link
-   * android.os.ParcelFileDescriptor}, {@link android.net.Uri} and {@link java.nio.ByteBuffer}) and
-   * streams fall back to {@link android.graphics.BitmapFactory}, which reads incrementally in
-   * native code.
+   * <p>{@link android.graphics.ImageDecoder} cannot read from a stream, so decoding an {@link
+   * java.io.InputStream} with it requires copying the entire encoded image into a contiguous {@link
+   * java.nio.ByteBuffer} first, which can exhaust the Java heap on large images. With this flag
+   * enabled {@link android.graphics.ImageDecoder} is used only for sources it can read in place
+   * ({@link java.io.File}, {@link android.os.ParcelFileDescriptor}, {@link android.net.Uri} and
+   * {@link java.nio.ByteBuffer}) and streams fall back to {@link android.graphics.BitmapFactory},
+   * which reads incrementally in native code.
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
