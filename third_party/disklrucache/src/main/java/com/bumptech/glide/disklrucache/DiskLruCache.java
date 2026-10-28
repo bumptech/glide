@@ -191,6 +191,20 @@ public final class DiskLruCache implements Closeable {
   }
 
   /**
+   * Opens the cache in {@code directory} with 1 value per entry, creating a cache if none exists
+   * there.
+   *
+   * @param directory a writable directory
+   * @param appVersion the application's current version code
+   * @param maxSize the maximum number of bytes this cache should use to store
+   * @throws IOException if reading or writing the cache directory fails
+   */
+  public static DiskLruCache open(File directory, int appVersion, long maxSize)
+      throws IOException {
+    return open(directory, appVersion, 1, maxSize);
+  }
+
+  /**
    * Opens the cache in {@code directory}, creating a cache if none exists there.
    *
    * @param directory a writable directory
@@ -739,6 +753,10 @@ public final class DiskLruCache implements Closeable {
       return DiskLruCache.this.edit(key, sequenceNumber);
     }
 
+    public File getFile() {
+      return getFile(0);
+    }
+
     public File getFile(int index) {
       return new File(directory, key + "." + index);
     }
@@ -793,6 +811,10 @@ public final class DiskLruCache implements Closeable {
     public String getString(int index) throws IOException {
       InputStream in = newInputStream(index);
       return in != null ? inputStreamToString(in) : null;
+    }
+
+    public File getFile() throws IOException {
+      return getFile(0);
     }
 
     public File getFile(int index) throws IOException {

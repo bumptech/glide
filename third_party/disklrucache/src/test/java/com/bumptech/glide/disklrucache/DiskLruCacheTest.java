@@ -86,6 +86,19 @@ public final class DiskLruCacheTest {
     assertJournalEquals();
   }
 
+  @Test public void openWithDefaultValueCount() throws Exception {
+    cache.close();
+    cache = DiskLruCache.open(cacheDir, appVersion, Integer.MAX_VALUE);
+    DiskLruCache.Editor creator = cache.edit("k1");
+    assertThat(creator.getFile()).isEqualTo(creator.getFile(0));
+    creator.set(0, "ABC");
+    creator.commit();
+
+    DiskLruCache.Value value = cache.get("k1");
+    assertThat(value.getFile()).isEqualTo(value.getFile(0));
+    assertThat(value.getString(0)).isEqualTo("ABC");
+  }
+
   @Test public void writeAndReadEntry() throws Exception {
     DiskLruCache.Editor creator = cache.edit("k1");
     creator.set(0, "ABC");
