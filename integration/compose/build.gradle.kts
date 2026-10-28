@@ -18,15 +18,8 @@ android {
 
   buildTypes { getByName("release") { isMinifyEnabled = false } }
 
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-  }
-
   testOptions { unitTests { isIncludeAndroidResources = true } }
 }
-
-kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_1_8) } }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
   if (!name.contains("Test")) {
