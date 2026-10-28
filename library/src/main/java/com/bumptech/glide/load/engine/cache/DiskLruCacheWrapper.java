@@ -21,7 +21,6 @@ public class DiskLruCacheWrapper implements DiskCache {
   private static final String TAG = "DiskLruCacheWrapper";
 
   private static final int APP_VERSION = 1;
-  private static final int VALUE_COUNT = 1;
   private static DiskLruCacheWrapper wrapper;
 
   private final SafeKeyGenerator safeKeyGenerator;
@@ -77,7 +76,7 @@ public class DiskLruCacheWrapper implements DiskCache {
 
   private synchronized DiskLruCache getDiskCache() throws IOException {
     if (diskLruCache == null) {
-      diskLruCache = DiskLruCache.open(directory, APP_VERSION, VALUE_COUNT, maxSize);
+      diskLruCache = DiskLruCache.open(directory, APP_VERSION, maxSize);
     }
     return diskLruCache;
   }
@@ -95,7 +94,7 @@ public class DiskLruCacheWrapper implements DiskCache {
       // will still represent the same data.
       final DiskLruCache.Value value = getDiskCache().get(safeKey);
       if (value != null) {
-        result = value.getFile(0);
+        result = value.getFile();
       }
     } catch (IOException e) {
       if (Log.isLoggable(TAG, Log.WARN)) {
@@ -129,7 +128,7 @@ public class DiskLruCacheWrapper implements DiskCache {
           throw new IllegalStateException("Had two simultaneous puts for: " + safeKey);
         }
         try {
-          File file = editor.getFile(0);
+          File file = editor.getFile();
           if (writer.write(file)) {
             editor.commit();
           }
