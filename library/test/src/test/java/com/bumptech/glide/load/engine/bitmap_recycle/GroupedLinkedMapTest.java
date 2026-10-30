@@ -4,6 +4,7 @@ import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNull;
 
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -83,6 +84,36 @@ public class GroupedLinkedMapTest {
     map.put(new Key("key", 2, 2), secondValue);
 
     assertThat(map.removeLast()).isEqualTo(secondValue);
+  }
+
+  @Test
+  public void testIteratorEmptyMap() {
+    final java.util.List<Object> visited = new java.util.ArrayList<>();
+    for (Map.Entry<Key, java.util.List<Object>> entry : map) {
+      if (entry.getValue() != null) {
+        visited.addAll(entry.getValue());
+      }
+    }
+    assertThat(visited).isEmpty();
+  }
+
+  @Test
+  public void testIteratorVisitsAllValues() {
+    Key firstKey = new Key("key", 1, 1);
+    Integer firstValue = 10;
+    map.put(firstKey, firstValue);
+
+    Key secondKey = new Key("key2", 2, 2);
+    Integer secondValue = 20;
+    map.put(secondKey, secondValue);
+
+    final java.util.List<Object> visited = new java.util.ArrayList<>();
+    for (Map.Entry<Key, java.util.List<Object>> entry : map) {
+      if (entry.getValue() != null) {
+        visited.addAll(entry.getValue());
+      }
+    }
+    assertThat(visited).containsExactly(firstValue, secondValue);
   }
 
   private static final class Key implements Poolable {

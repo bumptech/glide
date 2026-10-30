@@ -20,6 +20,7 @@ import com.bumptech.glide.load.Key
 import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.engine.cache.MemoryCache
+import com.bumptech.glide.load.engine.cache.MemoryCacheEntryInfo
 import com.bumptech.glide.load.engine.executor.GlideExecutor
 import com.bumptech.glide.load.engine.executor.GlideIdlingResources
 import com.bumptech.glide.load.model.ModelLoader
@@ -332,6 +333,10 @@ class FlowsTest {
                         override fun clearMemory() {}
 
                         override fun trimMemory(level: Int) {}
+
+                        override fun getCacheEntryInfos(): List<MemoryCacheEntryInfo> {
+                          return emptyList()
+                        }
 
                         override fun put(
                             key: Key,

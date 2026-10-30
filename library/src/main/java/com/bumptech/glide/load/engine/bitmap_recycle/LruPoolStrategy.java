@@ -2,6 +2,8 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
 import androidx.annotation.Nullable;
+import com.bumptech.glide.load.engine.BitmapInfo;
+import java.util.List;
 
 interface LruPoolStrategy {
   void put(Bitmap bitmap);
@@ -17,4 +19,6 @@ interface LruPoolStrategy {
   String logBitmap(int width, int height, Bitmap.Config config);
 
   int getSize(Bitmap bitmap);
+
+  List<BitmapInfo> getPooledBitmapInfos();
 }

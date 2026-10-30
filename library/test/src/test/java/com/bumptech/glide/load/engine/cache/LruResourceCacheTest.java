@@ -1,5 +1,6 @@
 package com.bumptech.glide.load.engine.cache;
 
+import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.load.engine.cache.MemoryCache.ResourceRemovedListener;
 import static com.bumptech.glide.tests.Util.anyResource;
 import static com.bumptech.glide.tests.Util.mockResource;
@@ -21,9 +22,11 @@ import com.bumptech.glide.util.LruCache;
 import java.security.MessageDigest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-@RunWith(JUnit4.class)
+@RunWith(RobolectricTestRunner.class)
+@Config(sdk = ROBOLECTRIC_SDK)
 public class LruResourceCacheTest {
 
   @Test
