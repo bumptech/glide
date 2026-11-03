@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -133,6 +134,40 @@ class GlideImageDefaultTransformationTest {
             glideComposeRule.onNodeWithDefaultContentDescription().assertDisplays(expectedDrawable)
         }
 
+    @Test
+    fun glideImage_withContentScaleCropAndTopStart_doesNotApplyTransformation() = runTest {
+        val resourceId = android.R.drawable.star_big_on
+        val expectedDrawable = loadExpectedDrawable(resourceId)
+
+        glideComposeRule.setContent {
+            ContentScaleGlideImage(
+                model = resourceId,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopStart,
+            )
+        }
+
+        glideComposeRule.onNodeWithDefaultContentDescription().assertDisplays(expectedDrawable)
+    }
+
+    @Test
+    fun glideImage_withContentScaleCropAndTopStart_usesExplicitTransformation() = runTest {
+        val resourceId = android.R.drawable.star_big_on
+        val expectedDrawable = loadExpectedDrawable(resourceId) { it.centerCrop() }
+
+        glideComposeRule.setContent {
+            ContentScaleGlideImage(
+                model = resourceId,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopStart,
+            ) {
+                it.centerCrop()
+            }
+        }
+
+        glideComposeRule.onNodeWithDefaultContentDescription().assertDisplays(expectedDrawable)
+    }
+
     private suspend fun RequestBuilder<Drawable>.loadRequiringSuccess() =
         (this.flow().first { it.status == Status.SUCCEEDED } as Resource<Drawable>).resource
 
@@ -151,12 +186,14 @@ class GlideImageDefaultTransformationTest {
     private fun ContentScaleGlideImage(
         model: Any?,
         contentScale: ContentScale,
+        alignment: Alignment = Alignment.Center,
         requestBuilderTransform: RequestBuilderTransform<Drawable> = { it -> it },
     ) =
         GlideImage(
             model = model,
             contentDescription = Constants.DEFAULT_DESCRIPTION,
             modifier = SIZE_MODIFIER,
+            alignment = alignment,
             contentScale = contentScale,
             requestBuilderTransform = requestBuilderTransform,
         )
