@@ -4,12 +4,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
 import androidx.collection.SimpleArrayMap;
-import com.bumptech.glide.util.CachedHashCodeArrayMap;
 import java.security.MessageDigest;
 
-/** A set of {@link Option Options} to apply to in memory and disk cache keys. */
+/**
+ * A set of {@link Option Options} to apply to in memory and disk cache keys.
+ *
+ * <p>An {@link Option} explicitly set to its default value is indistinguishable from an {@link
+ * Option} that isn't set at all, so it's ignored by {@link #equals(Object)}, {@link #hashCode()}
+ * and {@link #updateDiskCacheKey(MessageDigest)}. The value is still retained so that it can
+ * override a non-default value in {@link #putAll(Options)}.
+ */
 public final class Options implements Key {
-  private final ArrayMap<Option<?>, Object> values = new CachedHashCodeArrayMap<>();
+  private final ArrayMap<Option<?>, Object> values = new ArrayMap<>();
 
   public void putAll(@NonNull Options other) {
     values.putAll((SimpleArrayMap<Option<?>, Object>) other.values);
@@ -38,14 +44,33 @@ public final class Options implements Key {
   public boolean equals(Object o) {
     if (o instanceof Options) {
       Options other = (Options) o;
-      return values.equals(other.values);
+      return containsNonDefaultValuesOf(other) && other.containsNonDefaultValuesOf(this);
     }
     return false;
   }
 
+  private boolean containsNonDefaultValuesOf(@NonNull Options other) {
+    for (int i = 0; i < other.values.size(); i++) {
+      Option<?> option = other.values.keyAt(i);
+      Object value = other.values.valueAt(i);
+      if (!isDefaultValue(option, value) && !value.equals(get(option))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @Override
   public int hashCode() {
-    return values.hashCode();
+    int hashCode = 0;
+    for (int i = 0; i < values.size(); i++) {
+      Option<?> option = values.keyAt(i);
+      Object value = values.valueAt(i);
+      if (!isDefaultValue(option, value)) {
+        hashCode += option.hashCode() ^ value.hashCode();
+      }
+    }
+    return hashCode;
   }
 
   @Override
@@ -53,13 +78,19 @@ public final class Options implements Key {
     for (int i = 0; i < values.size(); i++) {
       Option<?> key = values.keyAt(i);
       Object value = values.valueAt(i);
-      updateDiskCacheKey(key, value, messageDigest);
+      if (!isDefaultValue(key, value)) {
+        updateDiskCacheKey(key, value, messageDigest);
+      }
     }
   }
 
   @Override
   public String toString() {
     return "Options{" + "values=" + values + '}';
+  }
+
+  private static boolean isDefaultValue(@NonNull Option<?> option, @NonNull Object value) {
+    return value.equals(option.getDefaultValue());
   }
 
   @SuppressWarnings("unchecked")
