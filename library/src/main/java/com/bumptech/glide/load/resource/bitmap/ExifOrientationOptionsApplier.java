@@ -1,10 +1,14 @@
 package com.bumptech.glide.load.resource.bitmap;
 
+import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import com.bumptech.glide.load.ImageHeaderParser;
 import com.bumptech.glide.load.ImageHeaderParserUtils;
 import com.bumptech.glide.load.Options;
+import com.bumptech.glide.load.data.ParcelFileDescriptorRewinder;
 import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -46,6 +50,34 @@ final class ExifOrientationOptionsApplier {
       return options;
     }
     int orientation = ImageHeaderParserUtils.getOrientation(parsers, buffer, arrayPool);
+    if (!TransformationUtils.isExifOrientationRequired(orientation)) {
+      return options;
+    }
+    Options optionsWithExif = new Options();
+    optionsWithExif.putAll(options);
+    optionsWithExif.set(Downsampler.IS_EXIF_ORIENTATION_REQUIRED, true);
+    return optionsWithExif;
+  }
+
+  /**
+   * Returns {@code options} unchanged if EXIF inspection is not possible or the image does not
+   * require rotation; otherwise returns a copy of {@code options} with {@link
+   * Downsampler#IS_EXIF_ORIENTATION_REQUIRED} set to {@code true}.
+   */
+  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+  @NonNull
+  Options apply(@NonNull ParcelFileDescriptor source, @NonNull Options options) throws IOException {
+    if (parsers == null || parsers.isEmpty() || arrayPool == null) {
+      return options;
+    }
+    int orientation =
+        ImageHeaderParserUtils.getOrientation(
+            parsers, new ParcelFileDescriptorRewinder(source), arrayPool);
+    return applyOrientation(orientation, options);
+  }
+
+  @NonNull
+  private static Options applyOrientation(int orientation, @NonNull Options options) {
     if (!TransformationUtils.isExifOrientationRequired(orientation)) {
       return options;
     }

@@ -38,6 +38,7 @@ public final class InputStreamBitmapImageDecoderResourceDecoder
   @Nullable private final ArrayPool arrayPool;
   private final boolean useArrayPool;
   @Nullable private final ExifOrientationOptionsApplier exifOrientationOptionsApplier;
+  private final boolean rejectExplicitVideoFrames;
 
   public InputStreamBitmapImageDecoderResourceDecoder(
       List<ImageHeaderParser> parsers,
@@ -53,6 +54,28 @@ public final class InputStreamBitmapImageDecoderResourceDecoder
       @Nullable ArrayPool arrayPool,
       boolean useArrayPool,
       boolean respectExifOrientation) {
+    this(
+        parsers,
+        useHeapBuffer,
+        arrayPool,
+        useArrayPool,
+        respectExifOrientation,
+        /* rejectExplicitVideoFrames= */ false);
+  }
+
+  /**
+   * @param rejectExplicitVideoFrames {@code true} to return {@code false} from {@link #handles} for
+   *     requests with a positive {@link VideoDecoder#TARGET_FRAME}. See {@link
+   *     com.bumptech.glide.GlideBuilder#setFileDescriptorImageDecoderEnabled(boolean)}.
+   */
+  public InputStreamBitmapImageDecoderResourceDecoder(
+      List<ImageHeaderParser> parsers,
+      boolean useHeapBuffer,
+      @Nullable ArrayPool arrayPool,
+      boolean useArrayPool,
+      boolean respectExifOrientation,
+      boolean rejectExplicitVideoFrames) {
+    this.rejectExplicitVideoFrames = rejectExplicitVideoFrames;
     this.parsers = parsers;
     this.useHeapBuffer = useHeapBuffer;
     this.arrayPool = arrayPool;
@@ -66,6 +89,9 @@ public final class InputStreamBitmapImageDecoderResourceDecoder
 
   @Override
   public boolean handles(@NonNull InputStream source, @NonNull Options options) throws IOException {
+    if (rejectExplicitVideoFrames && ImageDecoderSupport.hasExplicitVideoFrame(options)) {
+      return false;
+    }
     if (!useArrayPool) {
       return true;
     }
