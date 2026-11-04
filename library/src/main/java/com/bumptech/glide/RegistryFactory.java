@@ -60,6 +60,10 @@ import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.UriBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.VideoDecoder;
 import com.bumptech.glide.load.resource.bytes.ByteBufferRewinder;
+import com.bumptech.glide.load.resource.bytes.ByteBufferSourceBytesDecoder;
+import com.bumptech.glide.load.resource.bytes.SourceBytes;
+import com.bumptech.glide.load.resource.bytes.SourceBytesEncoder;
+import com.bumptech.glide.load.resource.bytes.StreamSourceBytesDecoder;
 import com.bumptech.glide.load.resource.drawable.AnimatedImageDecoder;
 import com.bumptech.glide.load.resource.drawable.ResourceDrawableDecoder;
 import com.bumptech.glide.load.resource.drawable.UnitDrawableDecoder;
@@ -328,6 +332,10 @@ final class RegistryFactory {
         .append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory())
         // Compilation with Gradle requires the type to be specified for UnitModelLoader here.
         .append(File.class, File.class, UnitModelLoader.Factory.<File>getInstance())
+        /* Source bytes */
+        .append(ByteBuffer.class, SourceBytes.class, new ByteBufferSourceBytesDecoder())
+        .append(InputStream.class, SourceBytes.class, new StreamSourceBytesDecoder(arrayPool))
+        .append(SourceBytes.class, new SourceBytesEncoder())
         /* Models */
         .register(new InputStreamRewinder.Factory(arrayPool));
 
