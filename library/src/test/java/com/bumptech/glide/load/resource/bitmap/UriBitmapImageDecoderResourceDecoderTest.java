@@ -99,6 +99,46 @@ public final class UriBitmapImageDecoderResourceDecoderTest {
   }
 
   @Test
+  public void handles_withZeroTargetFrameOption_returnsFalse() throws IOException {
+    Uri uri = Uri.parse("file:///path/to/image.png");
+    options.set(VideoDecoder.TARGET_FRAME, 0L);
+    assertThat(decoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
+  public void handles_onlyRejectPositiveVideoFrames_zeroTargetFrame_returnsTrueForImageUri()
+      throws IOException {
+    UriBitmapImageDecoderResourceDecoder positiveFrameOnlyDecoder =
+        new UriBitmapImageDecoderResourceDecoder(
+            context, /* onlyRejectPositiveVideoFrames= */ true);
+    Uri uri = Uri.parse("file:///path/to/image.png");
+    options.set(VideoDecoder.TARGET_FRAME, 0L);
+    assertThat(positiveFrameOnlyDecoder.handles(uri, options)).isTrue();
+  }
+
+  @Test
+  public void handles_onlyRejectPositiveVideoFrames_zeroTargetFrame_returnsFalseForVideoUri()
+      throws IOException {
+    UriBitmapImageDecoderResourceDecoder positiveFrameOnlyDecoder =
+        new UriBitmapImageDecoderResourceDecoder(
+            context, /* onlyRejectPositiveVideoFrames= */ true);
+    Uri uri = Uri.parse("file:///path/to/video.mp4");
+    options.set(VideoDecoder.TARGET_FRAME, 0L);
+    assertThat(positiveFrameOnlyDecoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
+  public void handles_onlyRejectPositiveVideoFrames_positiveTargetFrame_returnsFalse()
+      throws IOException {
+    UriBitmapImageDecoderResourceDecoder positiveFrameOnlyDecoder =
+        new UriBitmapImageDecoderResourceDecoder(
+            context, /* onlyRejectPositiveVideoFrames= */ true);
+    Uri uri = Uri.parse("file:///path/to/image.png");
+    options.set(VideoDecoder.TARGET_FRAME, 1000L);
+    assertThat(positiveFrameOnlyDecoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
   public void decode_solidColor_returnsExactColor() throws IOException {
     Bitmap bmp = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     Canvas canvas = new Canvas(bmp);
