@@ -8,6 +8,9 @@ kotlin {
     jvmToolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
     }
+    compilerOptions {
+        extraWarnings.set(true)
+    }
 }
 
 android {
