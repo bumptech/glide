@@ -3,10 +3,12 @@ package com.bumptech.glide.integration.cronet;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.integration.cronet.ChromiumUrlLoader.Options;
 import com.bumptech.glide.load.HttpException;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.GlideExecutor.UncaughtThrowableStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import java.io.IOException;
@@ -95,13 +97,23 @@ final class ChromiumRequestSerializer {
   private final Map<GlideUrl, Job> jobs = new HashMap<>();
   private final CronetRequestFactory requestFactory;
   @Nullable private final DataLogger dataLogger;
+  private final Options options;
 
   ChromiumRequestSerializer(
       CronetRequestFactory requestFactory,
       @Nullable DataLogger dataLogger,
       @Nullable final GlideExecutor executor) {
+    this(requestFactory, dataLogger, executor, Options.DEFAULT);
+  }
+
+  ChromiumRequestSerializer(
+      CronetRequestFactory requestFactory,
+      @Nullable DataLogger dataLogger,
+      @Nullable final GlideExecutor executor,
+      Options options) {
     this.requestFactory = requestFactory;
     this.dataLogger = dataLogger;
+    this.options = Preconditions.checkNotNull(options);
     if (executor == null) {
       this.jobPool = new JobPool(GLIDE_EXECUTOR_SUPPLIER);
     } else {
@@ -188,7 +200,7 @@ final class ChromiumRequestSerializer {
     private GlideUrl glideUrl;
     private Priority priority;
     private long startTime;
-    private UrlRequest request;
+    private volatile UrlRequest request;
     private long endTimeMs;
     private long responseStartTimeMs;
     private volatile boolean isCancelled;
@@ -211,19 +223,26 @@ final class ChromiumRequestSerializer {
     }
 
     void removeListener(Listener listener) {
+      boolean shouldCancel = false;
       synchronized (ChromiumRequestSerializer.this) {
         // Note: multiple cancellation calls + a subsequent request for a url may mean we fail to
         // remove the listener here because that listener is actually for a previous request. Since
         // that race is harmless, we simply ignore it.
-        listeners.remove(listener);
+        boolean removed = listeners.remove(listener);
+        if (options.guardActiveJobEviction() && !removed) {
+          return;
+        }
         if (listeners.isEmpty()) {
           isCancelled = true;
-          jobs.remove(glideUrl);
+          shouldCancel = true;
+          if (!options.guardActiveJobEviction() || jobs.get(glideUrl) == this) {
+            jobs.remove(glideUrl);
+          }
         }
       }
 
       // The request may not have started yet, so request may be null.
-      if (isCancelled) {
+      if (shouldCancel) {
         UrlRequest localRequest = request;
         if (localRequest != null) {
           localRequest.cancel();
@@ -302,7 +321,9 @@ final class ChromiumRequestSerializer {
         boolean wasCancelled,
         ByteBuffer buffer) {
       synchronized (ChromiumRequestSerializer.this) {
-        jobs.remove(glideUrl);
+        if (!options.guardActiveJobEviction() || jobs.get(glideUrl) == this) {
+          jobs.remove(glideUrl);
+        }
       }
 
       Exception exception = getExceptionIfFailed(info, e, wasCancelled);
