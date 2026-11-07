@@ -3,6 +3,7 @@ package com.bumptech.glide.integration.cronet;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -16,14 +17,19 @@ import static org.mockito.Mockito.when;
 
 import androidx.annotation.NonNull;
 import com.bumptech.glide.Priority;
+import com.bumptech.glide.integration.cronet.ChromiumUrlLoader.Options;
 import com.bumptech.glide.load.HttpException;
+import com.bumptech.glide.load.data.DataFetcher;
 import com.bumptech.glide.load.data.DataFetcher.DataCallback;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.load.model.LazyHeaders.Builder;
+import com.bumptech.glide.load.model.ModelLoader;
+import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.ByteBuffer;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -375,6 +381,106 @@ public class ChromiumUrlFetcherTest {
                 received.arrayOffset() + received.position(),
                 received.remaining()))
         .isEqualTo(data);
+  }
+
+  @Test
+  public void testCancelAndImmediateRestart_withGuardActiveJobEvictionEnabled_keepsSecondRequest() {
+    DataLogger dataLogger = mock(DataLogger.class);
+    Options options = Options.builder().setGuardActiveJobEviction(true).build();
+    ModelLoader<GlideUrl, ByteBuffer> loader =
+        new ChromiumUrlLoader.ByteBufferFactory(
+                cronetRequestFactory, dataLogger, /* executor= */ null, options)
+            .build(mock(MultiModelLoaderFactory.class));
+    ModelLoader<GlideUrl, InputStream> streamLoader =
+        new ChromiumUrlLoader.StreamFactory(
+                cronetRequestFactory, dataLogger, /* executor= */ null, options)
+            .build(mock(MultiModelLoaderFactory.class));
+    assertThat(streamLoader.handles(glideUrl)).isTrue();
+
+    UrlRequest firstRequest = mock(UrlRequest.class);
+    UrlRequest secondRequest = mock(UrlRequest.class);
+    when(builder.build()).thenReturn(firstRequest, secondRequest);
+
+    com.bumptech.glide.load.Options loadOptions = new com.bumptech.glide.load.Options();
+    DataFetcher<ByteBuffer> firstFetcher =
+        loader.buildLoadData(glideUrl, 10, 10, loadOptions).fetcher;
+    DataFetcher<ByteBuffer> secondFetcher =
+        loader.buildLoadData(glideUrl, 10, 10, loadOptions).fetcher;
+
+    firstFetcher.loadData(Priority.HIGH, firstCallback);
+    Callback firstUrlCallback = urlRequestListenerCaptor.getAllValues().get(0);
+
+    // Cancel firstFetcher and immediately start secondFetcher for the exact same URL before
+    // Cronet delivers onCanceled for firstRequest.
+    firstFetcher.cancel();
+    verify(firstRequest).cancel();
+
+    secondFetcher.loadData(Priority.HIGH, secondCallback);
+    verify(secondRequest).start();
+
+    // Deliver late onCanceled for firstRequest and wait for firstJob.onRequestFinished to run.
+    UrlResponseInfo canceledInfo = getInfo(100, 200);
+    firstUrlCallback.onCanceled(firstRequest, canceledInfo);
+    verify(dataLogger, timeout(1000))
+        .logNetworkData(eq(canceledInfo), anyLong(), anyLong(), anyLong());
+
+    // Cancelling secondFetcher must still find secondJob in jobs and cancel secondRequest.
+    secondFetcher.cancel();
+    verify(secondRequest).cancel();
+  }
+
+  @Test
+  public void testCancelAndImmediateRestart_withDefaultOptions_leavesLegacyEvictionUnchanged() {
+    DataLogger dataLogger = mock(DataLogger.class);
+    Options defaultOptions = Options.builder().build();
+    assertThat(defaultOptions.guardActiveJobEviction()).isFalse();
+    ChromiumRequestSerializer legacySerializer =
+        new ChromiumRequestSerializer(
+            cronetRequestFactory, dataLogger, /* executor= */ null, defaultOptions);
+
+    UrlRequest firstRequest = mock(UrlRequest.class);
+    UrlRequest secondRequest = mock(UrlRequest.class);
+    when(builder.build()).thenReturn(firstRequest, secondRequest);
+
+    ChromiumUrlFetcher<ByteBuffer> firstFetcher =
+        new ChromiumUrlFetcher<>(legacySerializer, parser, glideUrl);
+    ChromiumUrlFetcher<ByteBuffer> secondFetcher =
+        new ChromiumUrlFetcher<>(legacySerializer, parser, glideUrl);
+
+    firstFetcher.loadData(Priority.HIGH, firstCallback);
+    Callback firstUrlCallback = urlRequestListenerCaptor.getAllValues().get(0);
+
+    firstFetcher.cancel();
+    verify(firstRequest).cancel();
+
+    secondFetcher.loadData(Priority.HIGH, secondCallback);
+    verify(secondRequest).start();
+
+    UrlResponseInfo canceledInfo = getInfo(100, 200);
+    firstUrlCallback.onCanceled(firstRequest, canceledInfo);
+    verify(dataLogger, timeout(1000))
+        .logNetworkData(eq(canceledInfo), anyLong(), anyLong(), anyLong());
+
+    secondFetcher.cancel();
+    verify(secondRequest, never()).cancel();
+  }
+
+  @Test
+  public void testDuplicateCancel_withGuardActiveJobEvictionEnabled_cancelsCronetRequestOnlyOnce() {
+    ChromiumRequestSerializer guardedSerializer =
+        new ChromiumRequestSerializer(
+            cronetRequestFactory,
+            /* dataLogger= */ null,
+            /* executor= */ null,
+            Options.builder().setGuardActiveJobEviction(true).build());
+    ChromiumUrlFetcher<ByteBuffer> guardedFetcher =
+        new ChromiumUrlFetcher<>(guardedSerializer, parser, glideUrl);
+
+    guardedFetcher.loadData(Priority.HIGH, callback);
+    guardedFetcher.cancel();
+    guardedFetcher.cancel();
+
+    verify(request, times(1)).cancel();
   }
 
   private static Map<String, String> anyHeaders() {
