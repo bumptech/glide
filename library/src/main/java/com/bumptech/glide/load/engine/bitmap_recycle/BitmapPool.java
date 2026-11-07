@@ -2,6 +2,8 @@ package com.bumptech.glide.load.engine.bitmap_recycle;
 
 import android.graphics.Bitmap;
 import androidx.annotation.NonNull;
+import com.bumptech.glide.load.engine.BitmapInfo;
+import java.util.List;
 
 /** An interface for a pool that allows users to reuse {@link android.graphics.Bitmap} objects. */
 public interface BitmapPool {
@@ -97,4 +99,8 @@ public interface BitmapPool {
    * @see android.content.ComponentCallbacks2
    */
   void trimMemory(int level);
+
+  /** Returns a list of metadata for all bitmaps currently in the pool. */
+  @NonNull
+  List<BitmapInfo> getPooledBitmapInfos();
 }

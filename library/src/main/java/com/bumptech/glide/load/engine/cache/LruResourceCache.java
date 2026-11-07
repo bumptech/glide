@@ -1,11 +1,16 @@
 package com.bumptech.glide.load.engine.cache;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.bumptech.glide.load.Key;
+import com.bumptech.glide.load.engine.BitmapInfo;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.util.LruCache;
+import java.util.ArrayList;
+import java.util.List;
 
 /** An LRU in memory cache for {@link com.bumptech.glide.load.engine.Resource}s. */
 public class LruResourceCache extends LruCache<Key, Resource<?>> implements MemoryCache {
@@ -55,5 +60,31 @@ public class LruResourceCache extends LruCache<Key, Resource<?>> implements Memo
       // Evict oldest half of our bitmap cache
       trimToSize(getMaxSize() / 2);
     }
+  }
+
+  @NonNull
+  @Override
+  public synchronized List<MemoryCacheEntryInfo> getCacheEntryInfos() {
+    List<MemoryCacheEntryInfo> result = new ArrayList<>();
+    for (LruCache.EntryInfo<Resource<?>> entry : super.getSnapshot()) {
+      if (entry.value != null) {
+        Bitmap bitmap = getBitmap(entry.value);
+        if (bitmap != null) {
+          result.add(new MemoryCacheEntryInfo(new BitmapInfo(bitmap), entry.lastAccessedTimestamp));
+        }
+      }
+    }
+    return result;
+  }
+
+  @Nullable
+  private static Bitmap getBitmap(Resource<?> resource) {
+    Object value = resource.get();
+    if (value instanceof Bitmap) {
+      return (Bitmap) value;
+    } else if (value instanceof BitmapDrawable) {
+      return ((BitmapDrawable) value).getBitmap();
+    }
+    return null;
   }
 }

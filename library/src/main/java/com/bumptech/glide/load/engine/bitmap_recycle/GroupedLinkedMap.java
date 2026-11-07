@@ -4,8 +4,10 @@ import androidx.annotation.Nullable;
 import com.bumptech.glide.util.Synthetic;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Similar to {@link java.util.LinkedHashMap} when access ordered except that it is access ordered
@@ -17,7 +19,7 @@ import java.util.Map;
  * if no bitmaps of that size are present. We do not count addition or removal of bitmaps as an
  * access.
  */
-class GroupedLinkedMap<K extends Poolable, V> {
+class GroupedLinkedMap<K extends Poolable, V> implements Iterable<Map.Entry<K, List<V>>> {
   private final LinkedEntry<K, V> head = new LinkedEntry<>();
   private final Map<K, LinkedEntry<K, V>> keyToEntry = new HashMap<>();
 
@@ -78,6 +80,35 @@ class GroupedLinkedMap<K extends Poolable, V> {
   }
 
   @Override
+  public Iterator<Map.Entry<K, List<V>>> iterator() {
+    return new GroupedLinkedMapIterator();
+  }
+
+  private class GroupedLinkedMapIterator implements Iterator<Map.Entry<K, List<V>>> {
+    private LinkedEntry<K, V> currentEntry = head.next;
+
+    @Override
+    public boolean hasNext() {
+      return !currentEntry.equals(head);
+    }
+
+    @Override
+    public Map.Entry<K, List<V>> next() {
+      if (!hasNext()) {
+        throw new NoSuchElementException();
+      }
+      LinkedEntry<K, V> result = currentEntry;
+      currentEntry = currentEntry.next;
+      return result;
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  @Override
   public String toString() {
     StringBuilder sb = new StringBuilder("GroupedLinkedMap( ");
     LinkedEntry<K, V> current = head.next;
@@ -119,11 +150,26 @@ class GroupedLinkedMap<K extends Poolable, V> {
     entry.next.prev = entry.prev;
   }
 
-  private static class LinkedEntry<K, V> {
+  private static final class LinkedEntry<K, V> implements Map.Entry<K, List<V>> {
     @Synthetic final K key;
     private List<V> values;
     LinkedEntry<K, V> next;
     LinkedEntry<K, V> prev;
+
+    @Override
+    public K getKey() {
+      return key;
+    }
+
+    @Override
+    public List<V> getValue() {
+      return values;
+    }
+
+    @Override
+    public List<V> setValue(List<V> value) {
+      throw new UnsupportedOperationException();
+    }
 
     // Used only for the first item in the list which we will treat specially and which will not
     // contain a value.
