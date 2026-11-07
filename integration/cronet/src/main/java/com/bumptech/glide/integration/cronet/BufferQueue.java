@@ -1,5 +1,7 @@
 package com.bumptech.glide.integration.cronet;
 
+import androidx.annotation.GuardedBy;
+import androidx.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.List;
@@ -16,8 +18,20 @@ final class BufferQueue {
   public static final String CONTENT_LENGTH = "content-length";
   public static final String CONTENT_ENCODING = "content-encoding";
   private static final int DEFAULT_BUFFER_SIZE = 16384;
+
+  interface BufferAllocator {
+    ByteBuffer allocate(int capacity);
+  }
+
+  private static final BufferAllocator DEFAULT_ALLOCATOR = ByteBuffer::allocateDirect;
+  private static volatile BufferAllocator allocator = DEFAULT_ALLOCATOR;
+
   private final Queue<ByteBuffer> buffers;
   private final AtomicBoolean isCoalesced = new AtomicBoolean(false);
+
+  static void setBufferAllocatorForTesting(BufferAllocator customAllocator) {
+    allocator = customAllocator != null ? customAllocator : DEFAULT_ALLOCATOR;
+  }
 
   public static Builder builder() {
     return new Builder();
@@ -33,23 +47,38 @@ final class BufferQueue {
    * request.read(builder.getNextBuffer(buffer)); } }
    */
   public static final class Builder {
+    @GuardedBy("this")
+    @Nullable
     private ArrayDeque<ByteBuffer> buffers = new ArrayDeque<>();
+
+    @GuardedBy("this")
+    @Nullable
     private RuntimeException whenClosed;
 
     private Builder() {}
 
     /** Returns the next buffer to write data into. */
     public ByteBuffer getNextBuffer(ByteBuffer lastBuffer) {
+      synchronized (this) {
+        checkNotClosedLocked();
+        if (lastBuffer != buffers.peekLast()) {
+          buffers.addLast(lastBuffer);
+        }
+        if (lastBuffer.hasRemaining()) {
+          return lastBuffer;
+        }
+      }
+      ByteBuffer nextBuffer = allocator.allocate(DEFAULT_BUFFER_SIZE);
+      synchronized (this) {
+        checkNotClosedLocked();
+      }
+      return nextBuffer;
+    }
+
+    @GuardedBy("this")
+    private void checkNotClosedLocked() {
       if (buffers == null) {
-        throw new RuntimeException(whenClosed);
-      }
-      if (lastBuffer != buffers.peekLast()) {
-        buffers.addLast(lastBuffer);
-      }
-      if (lastBuffer.hasRemaining()) {
-        return lastBuffer;
-      } else {
-        return ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+        throw new IllegalStateException("Builder already closed", whenClosed);
       }
     }
 
@@ -60,7 +89,7 @@ final class BufferQueue {
       // the server having to actually send those bytes. This isn't considered to be an
       // issue, because that same malicious server could use our transparent gzip to force us
       // to allocate 1032 bytes per byte sent by the server.
-      return ByteBuffer.allocateDirect((int) Math.min(bufferSizeHeuristic(info), 524288));
+      return allocator.allocate((int) Math.min(bufferSizeHeuristic(info), 524288));
     }
 
     @SuppressWarnings("checkstyle:UnnecessaryParentheses") // Readability
@@ -92,11 +121,21 @@ final class BufferQueue {
       }
     }
 
-    public BufferQueue build() {
+    public synchronized BufferQueue build() {
+      checkNotClosedLocked();
+      final ArrayDeque<ByteBuffer> localBuffers = this.buffers;
       whenClosed = new RuntimeException();
-      final ArrayDeque<ByteBuffer> buffers = this.buffers;
       this.buffers = null;
-      return new BufferQueue(buffers);
+      return new BufferQueue(localBuffers);
+    }
+
+    /** Discards any queued buffers without coalescing them. */
+    public synchronized void discard() {
+      final ArrayDeque<ByteBuffer> localBuffers = this.buffers;
+      this.buffers = null;
+      if (localBuffers != null) {
+        localBuffers.clear();
+      }
     }
   }
 
@@ -111,7 +150,7 @@ final class BufferQueue {
   public ByteBuffer coalesceToBuffer() {
     markCoalesced();
     if (buffers.size() == 0) {
-      return ByteBuffer.allocateDirect(0);
+      return allocator.allocate(0);
     } else if (buffers.size() == 1) {
       return buffers.remove();
     } else {
@@ -119,7 +158,7 @@ final class BufferQueue {
       for (ByteBuffer buffer : buffers) {
         size += buffer.remaining();
       }
-      ByteBuffer result = ByteBuffer.allocateDirect(size);
+      ByteBuffer result = allocator.allocate(size);
       while (!buffers.isEmpty()) {
         result.put(buffers.remove());
       }

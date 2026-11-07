@@ -1,6 +1,7 @@
 package com.bumptech.glide.integration.cronet;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -598,6 +599,65 @@ public class ChromiumUrlFetcherTest {
     guardedFetcher.cancel();
 
     verify(request, times(1)).cancel();
+  }
+
+  @Test
+  public void testBufferQueueBuilder_afterDiscard_throwsIllegalStateException() {
+    BufferQueue.Builder discardedBuilder = BufferQueue.builder();
+    discardedBuilder.discard();
+
+    assertThrows(IllegalStateException.class, discardedBuilder::build);
+    assertThrows(
+        IllegalStateException.class,
+        () -> discardedBuilder.getNextBuffer(ByteBuffer.allocateDirect(1)));
+
+    BufferQueue.Builder builtBuilder = BufferQueue.builder();
+    BufferQueue unused = builtBuilder.build();
+    IllegalStateException afterBuildException =
+        assertThrows(
+            IllegalStateException.class,
+            () -> builtBuilder.getNextBuffer(ByteBuffer.allocateDirect(1)));
+    assertThat(afterBuildException).hasCauseThat().isNotNull();
+  }
+
+  @Test
+  public void testBufferQueueBuilder_discardDuringChunkAllocation_doesNotBlockCaller()
+      throws Exception {
+    CountDownLatch enteredAllocate = new CountDownLatch(1);
+    CountDownLatch releaseAllocate = new CountDownLatch(1);
+    BufferQueue.setBufferAllocatorForTesting(capacity -> {
+      enteredAllocate.countDown();
+      try {
+        releaseAllocate.await(5, TimeUnit.SECONDS);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+      return ByteBuffer.allocateDirect(capacity);
+    });
+    BufferQueue.Builder queueBuilder = BufferQueue.builder();
+    ByteBuffer fullChunk = ByteBuffer.allocateDirect(8);
+    fullChunk.position(8);
+    AtomicReference<Throwable> readError = new AtomicReference<>();
+    Thread allocThread =
+        new Thread(() -> {
+          try {
+            queueBuilder.getNextBuffer(fullChunk);
+          } catch (Throwable t) {
+            readError.set(t);
+          }
+        });
+    try {
+      allocThread.start();
+      assertThat(enteredAllocate.await(2, TimeUnit.SECONDS)).isTrue();
+      queueBuilder.discard();
+      releaseAllocate.countDown();
+      allocThread.join(2000);
+      assertThat(readError.get()).isInstanceOf(IllegalStateException.class);
+    } finally {
+      releaseAllocate.countDown();
+      allocThread.join(1000);
+      BufferQueue.setBufferAllocatorForTesting(null);
+    }
   }
 
   private static Map<String, String> anyHeaders() {
