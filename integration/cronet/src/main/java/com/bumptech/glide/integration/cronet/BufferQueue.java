@@ -24,10 +24,15 @@ final class BufferQueue {
   }
 
   private final Queue<ByteBuffer> buffers;
+  private final BufferAllocator allocator;
   private final AtomicBoolean isCoalesced = new AtomicBoolean(false);
 
   public static Builder builder() {
-    return new Builder();
+    return builder(ByteBuffer::allocateDirect);
+  }
+
+  static Builder builder(BufferAllocator allocator) {
+    return new Builder(allocator);
   }
 
   static DiscardableBuilder discardableBuilder() {
@@ -48,10 +53,13 @@ final class BufferQueue {
    * request.read(builder.getNextBuffer(buffer)); } }
    */
   public static final class Builder {
+    private final BufferAllocator allocator;
     private ArrayDeque<ByteBuffer> buffers = new ArrayDeque<>();
     private RuntimeException whenClosed;
 
-    private Builder() {}
+    private Builder(BufferAllocator allocator) {
+      this.allocator = allocator;
+    }
 
     /** Returns the next buffer to write data into. */
     public ByteBuffer getNextBuffer(ByteBuffer lastBuffer) {
@@ -64,7 +72,7 @@ final class BufferQueue {
       if (lastBuffer.hasRemaining()) {
         return lastBuffer;
       } else {
-        return ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+        return allocator.allocate(DEFAULT_BUFFER_SIZE);
       }
     }
 
@@ -75,7 +83,7 @@ final class BufferQueue {
       // the server having to actually send those bytes. This isn't considered to be an
       // issue, because that same malicious server could use our transparent gzip to force us
       // to allocate 1032 bytes per byte sent by the server.
-      return ByteBuffer.allocateDirect(firstBufferSize(info));
+      return allocator.allocate(firstBufferSize(info));
     }
 
     static int firstBufferSize(UrlResponseInfo info) {
@@ -115,7 +123,7 @@ final class BufferQueue {
       whenClosed = new RuntimeException();
       final ArrayDeque<ByteBuffer> buffers = this.buffers;
       this.buffers = null;
-      return new BufferQueue(buffers);
+      return new BufferQueue(buffers, allocator);
     }
   }
 
@@ -186,7 +194,7 @@ final class BufferQueue {
       // Only capture call site on one-time build(); discard() leaves whenClosed null.
       whenClosed = new RuntimeException();
       this.buffers = null;
-      return new BufferQueue(localBuffers);
+      return new BufferQueue(localBuffers, allocator);
     }
 
     /** Discards any queued buffers without coalescing them. */
@@ -198,8 +206,9 @@ final class BufferQueue {
     }
   }
 
-  private BufferQueue(Queue<ByteBuffer> buffers) {
+  private BufferQueue(Queue<ByteBuffer> buffers, BufferAllocator allocator) {
     this.buffers = buffers;
+    this.allocator = allocator;
     for (ByteBuffer buffer : this.buffers) {
       buffer.flip();
     }
@@ -208,8 +217,16 @@ final class BufferQueue {
   /** Returns the response body as a single contiguous buffer. */
   public ByteBuffer coalesceToBuffer() {
     markCoalesced();
+    try {
+      return coalesceBuffers();
+    } finally {
+      buffers.clear();
+    }
+  }
+
+  private ByteBuffer coalesceBuffers() {
     if (buffers.size() == 0) {
-      return ByteBuffer.allocateDirect(0);
+      return allocator.allocate(0);
     } else if (buffers.size() == 1) {
       return buffers.remove();
     } else {
@@ -217,7 +234,7 @@ final class BufferQueue {
       for (ByteBuffer buffer : buffers) {
         size += buffer.remaining();
       }
-      ByteBuffer result = ByteBuffer.allocateDirect(size);
+      ByteBuffer result = allocator.allocate(size);
       while (!buffers.isEmpty()) {
         result.put(buffers.remove());
       }
