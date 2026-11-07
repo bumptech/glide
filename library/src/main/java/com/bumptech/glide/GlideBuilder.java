@@ -703,6 +703,19 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to make {@link RequestBuilder#load(Object)} delegate to {@link
+   * RequestBuilder#load(Bitmap)}, {@link RequestBuilder#load(android.graphics.drawable.Drawable)},
+   * or {@link RequestBuilder#load(byte[])} when the runtime model is a {@link Bitmap}, {@link
+   * android.graphics.drawable.Drawable}, or {@code byte[]}.
+   *
+   * <p>This is an experimental API that may be removed in the future.
+   */
+  public GlideBuilder experimentalSetUseTypedLoadForInMemoryObjects(boolean isEnabled) {
+    glideExperimentsBuilder.update(new UseTypedLoadForInMemoryObjects(), isEnabled);
+    return this;
+  }
+
+  /**
    * @deprecated This method does nothing. It will be hard coded and removed in a future release
    *     without further warning.
    */
@@ -870,6 +883,9 @@ public final class GlideBuilder {
 
   /** See {@link #experimentalSetClearGlidePainterOnStop(boolean)}. */
   public static final class ClearGlidePainterOnStop implements Experiment {}
+
+  /** See {@link #experimentalSetUseTypedLoadForInMemoryObjects(boolean)}. */
+  public static final class UseTypedLoadForInMemoryObjects implements Experiment {}
 
   /** See {@link #setLogRequestOrigins(boolean)}. */
   public static final class LogRequestOrigins implements Experiment {}
