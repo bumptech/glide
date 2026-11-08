@@ -414,7 +414,13 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
    *
    * @param theme The theme to use when loading Drawables.
    * @return this request builder.
+   *
+   * @deprecated The theme will be automatically applied from the {@link android.content.Context}
+   * associated with the {@link com.bumptech.glide.RequestManager} used to start this load. If you
+   * have a use case where calling this method is required for some reason, please file an issue at
+   * https://github.com/bumptech/glide/issues/new.
    */
+  @Deprecated
   @NonNull
   @CheckResult
   public T theme(@Nullable Resources.Theme theme) {
