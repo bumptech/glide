@@ -5,6 +5,7 @@ import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 /**
  * Converts {@link androidx.recyclerview.widget.RecyclerView.OnScrollListener} events to {@link
@@ -47,11 +48,33 @@ public final class RecyclerToListViewScrollListener extends RecyclerView.OnScrol
 
   @Override
   public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-
-    int firstVisible = layoutManager.findFirstVisibleItemPosition();
-    int visibleCount = Math.abs(firstVisible - layoutManager.findLastVisibleItemPosition());
     int itemCount = recyclerView.getAdapter().getItemCount();
+    int firstVisible = RecyclerView.NO_POSITION;
+    int visibleCount = 0;
+
+    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+
+    if (layoutManager instanceof LinearLayoutManager) {
+      LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
+
+      firstVisible = linearLayoutManager.findFirstVisibleItemPosition();
+      visibleCount = Math.abs(firstVisible - linearLayoutManager.findLastVisibleItemPosition());
+    } else if (layoutManager instanceof StaggeredGridLayoutManager) {
+      StaggeredGridLayoutManager staggeredGridLayoutManager = (StaggeredGridLayoutManager) layoutManager;
+
+      int[] firstVisiblePositions = staggeredGridLayoutManager.findFirstVisibleItemPositions(null);
+
+      if (firstVisiblePositions.length > 0) {
+        firstVisible = firstVisiblePositions[0];
+
+        int[] lastVisiblePositions = staggeredGridLayoutManager.findLastVisibleItemPositions(null);
+
+        if (lastVisiblePositions.length > 0) {
+          int lastVisible = lastVisiblePositions[0];
+          visibleCount = Math.abs(firstVisible - lastVisible);
+        }
+      }
+    }
 
     if (firstVisible != lastFirstVisible
         || visibleCount != lastVisibleCount
