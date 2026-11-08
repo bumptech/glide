@@ -16,6 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Application;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -566,14 +567,113 @@ public class GifDrawableTest {
 
   @Test
   public void testSetColorFilterSetsColorFilterOnPaint() {
+    // Use a real Paint object, as this test depends on Paint#(get|set)ColorFilter.
+    drawable = new GifDrawable(frameLoader, new Paint());
     ColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, Mode.ADD);
     drawable.setColorFilter(colorFilter);
+    Canvas canvas = mock(Canvas.class);
+    drawable.draw(canvas);
 
-    // Use ArgumentCaptor instead of eq() due to b/73121412 where ShadowPorterDuffColorFilter.equals
-    // uses a method that can't be found (PorterDuffColorFilter.getColor).
-    ArgumentCaptor<ColorFilter> captor = ArgumentCaptor.forClass(ColorFilter.class);
-    verify(paint).setColorFilter(captor.capture());
-    assertThat(captor.getValue()).isSameInstanceAs(colorFilter);
+    ArgumentCaptor<Paint> captor = ArgumentCaptor.forClass(Paint.class);
+    verify(canvas).drawBitmap(isA(Bitmap.class), isNull(), isA(Rect.class), captor.capture());
+    assertThat(captor.getValue().getColorFilter()).isEqualTo(colorFilter);
+  }
+
+  @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
+  @Test
+  public void testSetTintListSetsColorFilterOnPaint() {
+    // Use a real Paint object, as this test depends on Paint#(get|set)ColorFilter.
+    Paint paint = new Paint();
+    drawable = new GifDrawable(frameLoader, paint);
+    ColorStateList tint =
+        new ColorStateList(
+            new int[][] {new int[] {android.R.attr.state_pressed}, new int[0]},
+            new int[] {Color.RED, Color.GREEN});
+    drawable.setTintList(tint);
+    Canvas canvas = mock(Canvas.class);
+    drawable.draw(canvas);
+
+    ArgumentCaptor<Paint> captor = ArgumentCaptor.forClass(Paint.class);
+    verify(canvas).drawBitmap(isA(Bitmap.class), isNull(), isA(Rect.class), captor.capture());
+    assertThat(captor.getValue().getColorFilter()).isEqualTo(new PorterDuffColorFilter(Color.GREEN, Mode.SRC_IN));
+  }
+
+  @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
+  @Test
+  public void testSetTintListSetsColorFilterForPressedStateOnPaint() {
+    // Use a real Paint object, as this test depends on Paint#(get|set)ColorFilter.
+    drawable = new GifDrawable(frameLoader, new Paint());
+    ColorStateList tint =
+        new ColorStateList(
+            new int[][] {new int[] {android.R.attr.state_pressed}, new int[0]},
+            new int[] {Color.RED, Color.GREEN});
+    drawable.setTintList(tint);
+    assertThat(drawable.setState(new int[] {android.R.attr.state_pressed})).isTrue();
+    Canvas canvas = mock(Canvas.class);
+    drawable.draw(canvas);
+
+    ArgumentCaptor<Paint> captor = ArgumentCaptor.forClass(Paint.class);
+    verify(canvas).drawBitmap(isA(Bitmap.class), isNull(), isA(Rect.class), captor.capture());
+    assertThat(captor.getValue().getColorFilter()).isEqualTo(new PorterDuffColorFilter(Color.RED, Mode.SRC_IN));
+  }
+
+  @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
+  @Test
+  public void testSetTintModeSetsColorFilterOnPaint() {
+    // Use a real Paint object, as this test depends on Paint#(get|set)ColorFilter.
+    drawable = new GifDrawable(frameLoader, new Paint());
+    ColorStateList tint =
+        new ColorStateList(
+            new int[][] {new int[] {android.R.attr.state_pressed}, new int[0]},
+            new int[] {Color.RED, Color.GREEN});
+    drawable.setTintList(tint);
+    drawable.setTintMode(Mode.ADD);
+    Canvas canvas = mock(Canvas.class);
+    drawable.draw(canvas);
+
+    ArgumentCaptor<Paint> captor = ArgumentCaptor.forClass(Paint.class);
+    verify(canvas).drawBitmap(isA(Bitmap.class), isNull(), isA(Rect.class), captor.capture());
+    assertThat(captor.getValue().getColorFilter()).isEqualTo(new PorterDuffColorFilter(Color.GREEN, Mode.ADD));
+  }
+
+  @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
+  @Test
+  public void testNullTintModeFallsBackToDefaultTintMode() {
+    // Use a real Paint object, as this test depends on Paint#(get|set)ColorFilter.
+    drawable = new GifDrawable(frameLoader, new Paint());
+    ColorStateList tint =
+        new ColorStateList(
+            new int[][] {new int[] {android.R.attr.state_pressed}, new int[0]},
+            new int[] {Color.RED, Color.GREEN});
+    drawable.setTintList(tint);
+    drawable.setTintMode(null);
+    Canvas canvas = mock(Canvas.class);
+    drawable.draw(canvas);
+
+    ArgumentCaptor<Paint> captor = ArgumentCaptor.forClass(Paint.class);
+    verify(canvas).drawBitmap(isA(Bitmap.class), isNull(), isA(Rect.class), captor.capture());
+    assertThat(captor.getValue().getColorFilter()).isEqualTo(new PorterDuffColorFilter(Color.GREEN, Mode.SRC_IN));
+  }
+
+  @Config(sdk = Build.VERSION_CODES.LOLLIPOP)
+  @Test
+  public void testSetColorFilterIsPrioritizedThanSetTintList() {
+    // Use a real Paint object, as this test depends on Paint#(get|set)ColorFilter.
+    drawable = new GifDrawable(frameLoader, new Paint());
+    ColorFilter colorFilter = new PorterDuffColorFilter(Color.BLUE, Mode.ADD);
+    drawable.setColorFilter(colorFilter);
+    ColorStateList tint =
+        new ColorStateList(
+            new int[][] {new int[] {android.R.attr.state_pressed}, new int[0]},
+            new int[] {Color.RED, Color.GREEN});
+    drawable.setTintList(tint);
+    drawable.setTintMode(Mode.ADD);
+    Canvas canvas = mock(Canvas.class);
+    drawable.draw(canvas);
+
+    ArgumentCaptor<Paint> captor = ArgumentCaptor.forClass(Paint.class);
+    verify(canvas).drawBitmap(isA(Bitmap.class), isNull(), isA(Rect.class), captor.capture());
+    assertThat(captor.getValue().getColorFilter()).isEqualTo(colorFilter);
   }
 
   @Test
