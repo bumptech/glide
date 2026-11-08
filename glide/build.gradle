@@ -97,7 +97,6 @@ def javadocTask = tasks.create("releaseJavadoc", Javadoc) {
     }
 
     options {
-        links("https://docs.oracle.com/javase/7/docs/api/")
         links("https://developer.android.com/reference")
     }
 
