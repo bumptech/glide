@@ -2,6 +2,7 @@ package com.bumptech.glide;
 
 import static com.bumptech.glide.RobolectricConstants.ROBOLECTRIC_SDK;
 import static com.bumptech.glide.tests.BackgroundUtil.testInBackground;
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -129,7 +130,7 @@ public class RequestManagerTest {
   public void testClearsRequestsOnDestroy() {
     manager.onDestroy();
 
-    verify(requestTracker).clearRequests();
+    verify(requestTracker).clearRequests(true);
   }
 
   @Test
@@ -261,6 +262,103 @@ public class RequestManagerTest {
     File file = new File("fake");
     child.load(file).into(target);
     parent.clear(target);
+  }
+
+  /**
+   * Reproduces the ANR reported in https://github.com/bumptech/glide/issues/5398.
+   *
+   * <p>When RequestManager.onDestroy() is called, it iterates all tracked targets and calls
+   * clear() on each. For requests configured with a placeholder resource ID (not a pre-loaded
+   * Drawable), SingleRequest.clear() triggers synchronous drawable resource decoding via
+   * getPlaceholderDrawable() -> loadDrawable() -> DrawableDecoderCompat.getDrawable(). On a real
+   * device, this involves native image decoding (ImageDecoder.nDecodeBitmap) on the main thread.
+   * With multiple requests, the cumulative cost causes ANRs.
+   */
+  @Test
+  public void onDestroy_withPlaceholderResourceId_loadsDrawableSynchronouslyDuringClear() {
+    final Drawable[] clearedPlaceholder = {null};
+    CustomTarget<Drawable> targetWithPlaceholderId =
+        new CustomTarget<>() {
+          @Override
+          public void onResourceReady(
+              @NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {}
+
+          @Override
+          public void onLoadCleared(@Nullable Drawable placeholder) {
+            clearedPlaceholder[0] = placeholder;
+          }
+        };
+
+    RequestManager managerWithRealTracker =
+        new RequestManager(
+            Glide.get(context),
+            lifecycle,
+            Collections::emptySet,
+            context);
+
+    // Load with a placeholder RESOURCE ID (not a Drawable object).
+    // This is the key condition: the placeholder drawable is lazily loaded during clear().
+    managerWithRealTracker
+        .load(new File("fake"))
+        .placeholder(android.R.drawable.ic_delete)
+        .into(targetWithPlaceholderId);
+
+    // Simulate Activity destruction. This calls clearRequests() which calls clear() on each
+    // tracked target, triggering synchronous drawable loading via DrawableDecoderCompat.
+    managerWithRealTracker.onDestroy();
+
+    // During onDestroy(), there is no need to load a placeholder drawable since the Activity is
+    // being destroyed. Loading it synchronously causes ANRs (see #5398). The fix should skip
+    // placeholder loading during destruction, so onLoadCleared() should receive null.
+    assertThat(clearedPlaceholder[0]).isNull();
+  }
+
+  /**
+   * Simulates the ANR multiplication effect: RequestManager.onDestroy() with N requests that each
+   * have a placeholder resource ID results in N synchronous drawable decode operations on the main
+   * thread.
+   */
+  @Test
+  public void onDestroy_multipleRequestsWithPlaceholderResourceId_allLoadDrawablesSynchronously() {
+    int numRequests = 10;
+    final Drawable[][] clearedPlaceholders = new Drawable[numRequests][1];
+
+    RequestManager managerWithRealTracker =
+        new RequestManager(
+            Glide.get(context),
+            lifecycle,
+            Collections::emptySet,
+            context);
+
+    for (int i = 0; i < numRequests; i++) {
+      final int index = i;
+      CustomTarget<Drawable> t =
+          new CustomTarget<>() {
+            @Override
+            public void onResourceReady(
+                @NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {}
+
+            @Override
+            public void onLoadCleared(@Nullable Drawable placeholder) {
+              clearedPlaceholders[index][0] = placeholder;
+            }
+          };
+
+      managerWithRealTracker
+          .load(new File("fake"))
+          .placeholder(android.R.drawable.ic_delete)
+          .into(t);
+    }
+
+    // onDestroy iterates all N targets, calling clear() on each.
+    // Each clear() synchronously loads the placeholder drawable.
+    managerWithRealTracker.onDestroy();
+
+    // During onDestroy(), placeholder drawables should NOT be loaded (causes ANRs, see #5398).
+    // The fix should skip placeholder loading during destruction.
+    for (int i = 0; i < numRequests; i++) {
+      assertThat(clearedPlaceholders[i][0]).isNull();
+    }
   }
 
   @Test

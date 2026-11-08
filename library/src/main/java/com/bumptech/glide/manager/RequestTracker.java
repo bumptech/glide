@@ -58,6 +58,16 @@ public class RequestTracker {
    * request was removed or invalid or {@code false} if the request was not found.
    */
   public boolean clearAndRemove(@Nullable Request request) {
+    return clearAndRemove(request, false);
+  }
+
+  /**
+   * Stops tracking the given request, clears, and recycles it, and returns {@code true} if the
+   * request was removed or invalid or {@code false} if the request was not found.
+   *
+   * @param skipPlaceholder does not load the placeholder if a resource id is provided
+   */
+  public boolean clearAndRemove(@Nullable Request request, boolean skipPlaceholder) {
     if (request == null) {
       // If the Request is null, the request is already cleared and we don't need to search further
       // for its owner.
@@ -67,7 +77,7 @@ public class RequestTracker {
     // Avoid short circuiting.
     isOwnedByUs = pendingRequests.remove(request) || isOwnedByUs;
     if (isOwnedByUs) {
-      request.clear();
+      request.clear(skipPlaceholder);
     }
     return isOwnedByUs;
   }
@@ -124,10 +134,21 @@ public class RequestTracker {
    * <p>After this call requests cannot be restarted.
    */
   public void clearRequests() {
+    clearRequests(false);
+  }
+
+  /**
+   * Cancels all requests and clears their resources.
+   *
+   * <p>After this call requests cannot be restarted.
+   *
+   * @param skipPlaceholder does not load the placeholder if a resource id is provided
+   */
+  public void clearRequests(boolean skipPlaceholder) {
     for (Request request : Util.getSnapshot(requests)) {
       // It's unsafe to recycle the Request here because we don't know who might else have a
       // reference to it.
-      clearAndRemove(request);
+      clearAndRemove(request, skipPlaceholder);
     }
     pendingRequests.clear();
   }
