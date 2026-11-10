@@ -26,12 +26,14 @@ dependencies {
     }
 
     testImplementation libs.androidx.appcompat
+    testImplementation project(':mocks')
     testImplementation project(':testutil')
     testImplementation libs.guava.testlib
     testImplementation libs.truth
     testImplementation libs.junit
     testImplementation libs.mockito.core
     testImplementation libs.robolectric
+    testImplementation libs.test.parameter.injector
     testImplementation libs.mockwebserver
     testImplementation libs.androidx.test.core
     testImplementation libs.androidx.junit

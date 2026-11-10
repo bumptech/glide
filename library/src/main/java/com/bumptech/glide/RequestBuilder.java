@@ -528,6 +528,19 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   @CheckResult
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable Object model) {
+    if (glideContext
+        .getExperiments()
+        .isEnabled(GlideBuilder.UseTypedLoadForInMemoryObjects.class)) {
+      if (model instanceof Bitmap) {
+        return load((Bitmap) model);
+      }
+      if (model instanceof Drawable) {
+        return load((Drawable) model);
+      }
+      if (model instanceof byte[]) {
+        return load((byte[]) model);
+      }
+    }
     return loadGeneric(model);
   }
 
