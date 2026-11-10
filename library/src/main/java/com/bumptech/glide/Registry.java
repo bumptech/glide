@@ -25,6 +25,7 @@ import com.bumptech.glide.provider.ModelToResourceClassCache;
 import com.bumptech.glide.provider.ResourceDecoderRegistry;
 import com.bumptech.glide.provider.ResourceEncoderRegistry;
 import com.bumptech.glide.util.pool.FactoryPools;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -92,6 +93,7 @@ public class Registry {
    */
   @NonNull
   @Deprecated
+  @CanIgnoreReturnValue
   public <Data> Registry register(@NonNull Class<Data> dataClass, @NonNull Encoder<Data> encoder) {
     return append(dataClass, encoder);
   }
@@ -112,6 +114,7 @@ public class Registry {
    * @see #prepend(Class, Encoder)
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <Data> Registry append(@NonNull Class<Data> dataClass, @NonNull Encoder<Data> encoder) {
     encoderRegistry.append(dataClass, encoder);
     return this;
@@ -128,6 +131,7 @@ public class Registry {
    * @see #append(Class, Encoder)
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <Data> Registry prepend(@NonNull Class<Data> dataClass, @NonNull Encoder<Data> encoder) {
     encoderRegistry.prepend(dataClass, encoder);
     return this;
@@ -153,6 +157,7 @@ public class Registry {
    * @param decoder The {@link ResourceDecoder} to register.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <Data, TResource> Registry append(
       @NonNull Class<Data> dataClass,
       @NonNull Class<TResource> resourceClass,
@@ -182,6 +187,7 @@ public class Registry {
    * @param decoder The {@link ResourceDecoder} to register.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <Data, TResource> Registry append(
       @NonNull String bucket,
       @NonNull Class<Data> dataClass,
@@ -210,6 +216,7 @@ public class Registry {
    * @param decoder The {@link ResourceDecoder} to register.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <Data, TResource> Registry prepend(
       @NonNull Class<Data> dataClass,
       @NonNull Class<TResource> resourceClass,
@@ -239,6 +246,7 @@ public class Registry {
    * @param decoder The {@link ResourceDecoder} to register.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <Data, TResource> Registry prepend(
       @NonNull String bucket,
       @NonNull Class<Data> dataClass,
@@ -265,6 +273,7 @@ public class Registry {
    */
   // Final to avoid a PMD error.
   @NonNull
+  @CanIgnoreReturnValue
   public final Registry setResourceDecoderBucketPriorityList(@NonNull List<String> buckets) {
     // See #3296 and https://bugs.openjdk.java.net/browse/JDK-6260652.
     List<String> modifiedBuckets = new ArrayList<>(buckets.size());
@@ -296,6 +305,7 @@ public class Registry {
    */
   @NonNull
   @Deprecated
+  @CanIgnoreReturnValue
   public <TResource> Registry register(
       @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
     return append(resourceClass, encoder);
@@ -318,6 +328,7 @@ public class Registry {
    * @see #prepend(Class, ResourceEncoder)
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <TResource> Registry append(
       @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
     resourceEncoderRegistry.append(resourceClass, encoder);
@@ -337,6 +348,7 @@ public class Registry {
    * @see #append(Class, ResourceEncoder)
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <TResource> Registry prepend(
       @NonNull Class<TResource> resourceClass, @NonNull ResourceEncoder<TResource> encoder) {
     resourceEncoderRegistry.prepend(resourceClass, encoder);
@@ -348,6 +360,7 @@ public class Registry {
    * non-default data type that can be rewind to allow for efficient reads of file headers.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public Registry register(@NonNull DataRewinder.Factory<?> factory) {
     dataRewinderRegistry.register(factory);
     return this;
@@ -364,6 +377,7 @@ public class Registry {
    * @param transcoder The {@link ResourceTranscoder} to register.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <TResource, Transcode> Registry register(
       @NonNull Class<TResource> resourceClass,
       @NonNull Class<Transcode> transcodeClass,
@@ -377,6 +391,7 @@ public class Registry {
    * header (orientation, type etc).
    */
   @NonNull
+  @CanIgnoreReturnValue
   public Registry register(@NonNull ImageHeaderParser parser) {
     imageHeaderParserRegistry.add(parser);
     return this;
@@ -403,6 +418,7 @@ public class Registry {
    *     java.io.FileDescriptor}).
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <Model, Data> Registry append(
       @NonNull Class<Model> modelClass,
       @NonNull Class<Data> dataClass,
@@ -434,6 +450,7 @@ public class Registry {
    *     java.io.FileDescriptor}).
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <Model, Data> Registry prepend(
       @NonNull Class<Model> modelClass,
       @NonNull Class<Data> dataClass,
@@ -464,6 +481,7 @@ public class Registry {
    *     java.io.FileDescriptor}).
    */
   @NonNull
+  @CanIgnoreReturnValue
   public <Model, Data> Registry replace(
       @NonNull Class<Model> modelClass,
       @NonNull Class<Data> dataClass,

@@ -35,17 +35,17 @@ import org.chromium.net.UrlResponseInfo;
  *     <ul>
  *       A new request is made to cronet if a url is requested and no cronet request for that url is
  *       in progress
- * </ul>
+ *     </ul>
  *
- * <ul>
- *   Subsequent requests for in progress urls do not make new requests to cronet, but are notified
- *   when the existing cronet request completes.
- * </ul>
+ *     <ul>
+ *       Subsequent requests for in progress urls do not make new requests to cronet, but are
+ *       notified when the existing cronet request completes.
+ *     </ul>
  *
- * <ul>
- *   Cancelling a single request does not cancel the cronet request if multiple requests for the url
- *   have been made, but cancelling all requests for a url does cancel the cronet request.
- * </ul>
+ *     <ul>
+ *       Cancelling a single request does not cancel the cronet request if multiple requests for the
+ *       url have been made, but cancelling all requests for a url does cancel the cronet request.
+ *     </ul>
  */
 final class ChromiumRequestSerializer {
   private static final String TAG = "ChromiumSerializer";

@@ -22,7 +22,7 @@ import org.robolectric.annotation.Config;
 public class BitmapBytesTranscoderTest {
   private BitmapBytesTranscoderHarness harness;
 
-  @Before()
+  @Before
   public void setUp() {
     harness = new BitmapBytesTranscoderHarness();
   }

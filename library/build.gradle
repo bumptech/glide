@@ -17,6 +17,7 @@ dependencies {
     api libs.androidx.exifinterface
     api libs.androidx.tracing
     api libs.androidx.annotation
+    api libs.errorprone.annotations
     compileOnly libs.androidx.appcompat
 
     if (project.plugins.hasPlugin('net.ltgt.errorprone')) {

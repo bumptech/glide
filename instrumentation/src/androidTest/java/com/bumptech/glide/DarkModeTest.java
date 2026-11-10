@@ -78,33 +78,30 @@ public class DarkModeTest {
       Function<FragmentActivity, RequestBuilder<Drawable>> glideBuilder) {
     AtomicReference<Bitmap> result = new AtomicReference<>();
     try (scenario) {
-      scenario.onActivity(
-          activity -> {
-            ViewGroup container = findContainer(activity);
-            ImageView imageView = newFixedSizeImageView(activity);
-            container.addView(imageView);
+      scenario.onActivity(activity -> {
+        ViewGroup container = findContainer(activity);
+        ImageView imageView = newFixedSizeImageView(activity);
+        container.addView(imageView);
 
-            glideBuilder.apply(activity).into(imageView);
-          });
+        glideBuilder.apply(activity).into(imageView);
+      });
 
       // This two step process is because setting the Drawable on the ImageView modifies the
       // drawable in a subsequent frame. If we want our Drawables to produce identical Bitmaps when
       // drawn to a canvas, we need to set both on the ImageView for at least one frame.
       onIdle();
-      scenario.onActivity(
-          activity -> {
-            ImageView imageView = findImageView(activity);
-            result.set(drawableToBitmap(imageView.getDrawable()));
-            Drawable expectedDrawable = AppCompatResources.getDrawable(activity, expectedResource);
-            imageView.setImageDrawable(expectedDrawable);
-          });
+      scenario.onActivity(activity -> {
+        ImageView imageView = findImageView(activity);
+        result.set(drawableToBitmap(imageView.getDrawable()));
+        Drawable expectedDrawable = AppCompatResources.getDrawable(activity, expectedResource);
+        imageView.setImageDrawable(expectedDrawable);
+      });
       onIdle();
-      scenario.onActivity(
-          activity -> {
-            ImageView imageView = findImageView(activity);
-            Bitmap expected = drawableToBitmap(imageView.getDrawable());
-            assertThat(result.get()).sameAs(expected);
-          });
+      scenario.onActivity(activity -> {
+        ImageView imageView = findImageView(activity);
+        Bitmap expected = drawableToBitmap(imageView.getDrawable());
+        assertThat(result.get()).sameAs(expected);
+      });
     }
   }
 
@@ -549,19 +546,18 @@ public class DarkModeTest {
       int expectedResource,
       Function<Fragment, RequestBuilder<Drawable>> requestBuilder) {
     try (scenario) {
-      scenario.onActivity(
-          activity -> {
-            ImageViewFragment fragment = new ImageViewFragment();
-            activity
-                .getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.container, fragment)
-                .commitNowAllowingStateLoss();
-            ViewGroup container = findContainer(activity);
-            ImageView imageView = (ImageView) container.getChildAt(0);
+      scenario.onActivity(activity -> {
+        ImageViewFragment fragment = new ImageViewFragment();
+        activity
+            .getSupportFragmentManager()
+            .beginTransaction()
+            .add(R.id.container, fragment)
+            .commitNowAllowingStateLoss();
+        ViewGroup container = findContainer(activity);
+        ImageView imageView = (ImageView) container.getChildAt(0);
 
-            requestBuilder.apply(fragment).into(imageView);
-          });
+        requestBuilder.apply(fragment).into(imageView);
+      });
 
       assertImageViewContainerChildHasContent(scenario, expectedResource);
     }
@@ -589,14 +585,13 @@ public class DarkModeTest {
       int expectedResource,
       Function<FragmentActivity, RequestBuilder<Drawable>> glideBuilder) {
     try (scenario) {
-      scenario.onActivity(
-          activity -> {
-            ViewGroup container = findContainer(activity);
-            ImageView imageView = newFixedSizeImageView(activity);
-            container.addView(imageView);
+      scenario.onActivity(activity -> {
+        ViewGroup container = findContainer(activity);
+        ImageView imageView = newFixedSizeImageView(activity);
+        container.addView(imageView);
 
-            glideBuilder.apply(activity).into(imageView);
-          });
+        glideBuilder.apply(activity).into(imageView);
+      });
 
       assertImageViewContainerChildHasContent(scenario, expectedResource);
     }
@@ -605,12 +600,11 @@ public class DarkModeTest {
   private static void assertImageViewContainerChildHasContent(
       ActivityScenario<? extends FragmentActivity> scenario, int expectedResource) {
     onIdle();
-    scenario.onActivity(
-        activity -> {
-          ImageView imageView = findImageView(activity);
-          Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-          assertThat(bitmap).sameAs(expectedResource);
-        });
+    scenario.onActivity(activity -> {
+      ImageView imageView = findImageView(activity);
+      Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+      assertThat(bitmap).sameAs(expectedResource);
+    });
   }
 
   private static ImageView findImageView(FragmentActivity activity) {

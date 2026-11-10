@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -131,6 +132,7 @@ public final class LazyHeaders implements Headers {
      *
      * @see #addHeader(String, LazyHeaderFactory)
      */
+    @CanIgnoreReturnValue
     public Builder addHeader(@NonNull String key, @NonNull String value) {
       return addHeader(key, new StringHeaderFactory(value));
     }
@@ -144,6 +146,7 @@ public final class LazyHeaders implements Headers {
      *
      * <p>This class does not prevent you from adding the same value to a given key multiple times
      */
+    @CanIgnoreReturnValue
     public Builder addHeader(@NonNull String key, @NonNull LazyHeaderFactory factory) {
       if (isUserAgentDefault && USER_AGENT_HEADER.equalsIgnoreCase(key)) {
         return setHeader(key, factory);
@@ -164,6 +167,7 @@ public final class LazyHeaders implements Headers {
      * (i.e. an OAuth token).
      */
     @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"}) // Public API
+    @CanIgnoreReturnValue
     public Builder setHeader(@NonNull String key, @Nullable String value) {
       return setHeader(key, value == null ? null : new StringHeaderFactory(value));
     }
@@ -174,6 +178,7 @@ public final class LazyHeaders implements Headers {
      *
      * <p>If the given value is {@code null}, the header at the given key will be removed.
      */
+    @CanIgnoreReturnValue
     public Builder setHeader(@NonNull String key, @Nullable LazyHeaderFactory factory) {
       copyIfNecessary();
       if (factory == null) {

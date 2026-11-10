@@ -37,6 +37,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.bumptech.glide.util.Synthetic;
 import com.bumptech.glide.util.Util;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
@@ -177,6 +178,7 @@ public class RequestManager
    * @return This request manager.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public synchronized RequestManager applyDefaultRequestOptions(
       @NonNull RequestOptions requestOptions) {
     updateRequestOptions(requestOptions);
@@ -199,6 +201,7 @@ public class RequestManager
    * @return This request manager.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public synchronized RequestManager setDefaultRequestOptions(
       @NonNull RequestOptions requestOptions) {
     setRequestOptions(requestOptions);
@@ -211,6 +214,7 @@ public class RequestManager
    * @return This request manager.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public synchronized RequestManager clearOnStop() {
     clearOnStop = true;
     return this;
@@ -233,6 +237,7 @@ public class RequestManager
    * the behavior of the listener on the resource type, you will need to use {@code instanceof} to
    * do so. It's not safe to cast resource types without first checking with {@code instanceof}.
    */
+  @CanIgnoreReturnValue
   public RequestManager addDefaultRequestListener(RequestListener<Object> requestListener) {
     defaultRequestListeners.add(requestListener);
     return this;

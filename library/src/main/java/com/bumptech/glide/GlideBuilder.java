@@ -34,6 +34,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.util.Preconditions;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -76,6 +77,7 @@ public final class GlideBuilder {
    * @return This builder.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setBitmapPool(@Nullable BitmapPool bitmapPool) {
     this.bitmapPool = bitmapPool;
     return this;
@@ -89,6 +91,7 @@ public final class GlideBuilder {
    * @return This builder.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setArrayPool(@Nullable ArrayPool arrayPool) {
     this.arrayPool = arrayPool;
     return this;
@@ -104,6 +107,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setMemoryCache(@Nullable MemoryCache memoryCache) {
     this.memoryCache = memoryCache;
     return this;
@@ -120,6 +124,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setDiskCache(@Nullable DiskCache.Factory diskCacheFactory) {
     this.diskCacheFactory = diskCacheFactory;
     return this;
@@ -142,6 +147,7 @@ public final class GlideBuilder {
    * @deprecated Use {@link #setSourceExecutor(GlideExecutor)}
    */
   @Deprecated
+  @CanIgnoreReturnValue
   public GlideBuilder setResizeExecutor(@Nullable GlideExecutor service) {
     return setSourceExecutor(service);
   }
@@ -164,6 +170,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setSourceExecutor(@Nullable GlideExecutor service) {
     this.sourceExecutor = service;
     return this;
@@ -187,6 +194,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setDiskCacheExecutor(@Nullable GlideExecutor service) {
     this.diskCacheExecutor = service;
     return this;
@@ -207,6 +215,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setAnimationExecutor(@Nullable GlideExecutor service) {
     this.animationExecutor = service;
     return this;
@@ -225,6 +234,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setSourceUnlimitedExecutor(@Nullable GlideExecutor service) {
     this.sourceUnlimitedExecutor = service;
     return this;
@@ -241,6 +251,7 @@ public final class GlideBuilder {
    * @return This builder.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setDefaultRequestOptions(@Nullable final RequestOptions requestOptions) {
     return setDefaultRequestOptions(
         new RequestOptionsFactory() {
@@ -266,6 +277,7 @@ public final class GlideBuilder {
    * @see #setDefaultRequestOptions(RequestOptionsFactory)
    */
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setDefaultRequestOptions(@NonNull RequestOptionsFactory factory) {
     this.defaultRequestOptionsFactory = Preconditions.checkNotNull(factory);
     return this;
@@ -290,6 +302,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("unused")
   @NonNull
+  @CanIgnoreReturnValue
   public <T> GlideBuilder setDefaultTransitionOptions(
       @NonNull Class<T> clazz, @Nullable TransitionOptions<?, T> options) {
     defaultTransitionOptions.put(clazz, options);
@@ -307,6 +320,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("unused")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setMemorySizeCalculator(@NonNull MemorySizeCalculator.Builder builder) {
     return setMemorySizeCalculator(builder.build());
   }
@@ -324,6 +338,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("WeakerAccess")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setMemorySizeCalculator(@Nullable MemorySizeCalculator calculator) {
     this.memorySizeCalculator = calculator;
     return this;
@@ -340,6 +355,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("unused")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setConnectivityMonitorFactory(@Nullable ConnectivityMonitorFactory factory) {
     this.connectivityMonitorFactory = factory;
     return this;
@@ -373,6 +389,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("unused")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setLogLevel(int logLevel) {
     if (logLevel < Log.VERBOSE || logLevel > Log.ERROR) {
       throw new IllegalArgumentException(
@@ -427,6 +444,7 @@ public final class GlideBuilder {
   // Public API.
   @SuppressWarnings("unused")
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder setIsActiveResourceRetentionAllowed(
       boolean isActiveResourceRetentionAllowed) {
     this.isActiveResourceRetentionAllowed = isActiveResourceRetentionAllowed;
@@ -450,6 +468,7 @@ public final class GlideBuilder {
    * do so. It's not safe to cast resource types without first checking with {@code instanceof}.
    */
   @NonNull
+  @CanIgnoreReturnValue
   public GlideBuilder addGlobalRequestListener(@NonNull RequestListener<Object> listener) {
     if (defaultRequestListeners == null) {
       defaultRequestListeners = new ArrayList<>();
@@ -468,6 +487,7 @@ public final class GlideBuilder {
    *
    * <p>This is an experimental API that may be removed in the future.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setLogRequestOrigins(boolean isEnabled) {
     glideExperimentsBuilder.update(new LogRequestOrigins(), isEnabled);
     return this;
@@ -499,6 +519,7 @@ public final class GlideBuilder {
    * the whims of {@link android.graphics.BitmapFactory} and {@link android.graphics.ImageDecoder}
    * which may not agree.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setImageDecoderEnabledForBitmaps(boolean isEnabled) {
     glideExperimentsBuilder.update(
         new EnableImageDecoderForBitmaps(),
@@ -517,6 +538,7 @@ public final class GlideBuilder {
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setUriImageDecoderEnabled(boolean isEnabled) {
     glideExperimentsBuilder.update(
         new EnableUriImageDecoder(),
@@ -531,6 +553,7 @@ public final class GlideBuilder {
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setUseHeapBufferForImageDecoderWithInputStream(boolean isEnabled) {
     glideExperimentsBuilder.update(new UseHeapBufferForImageDecoderWithInputStream(), isEnabled);
     return this;
@@ -543,6 +566,7 @@ public final class GlideBuilder {
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setUseArrayPoolForImageDecoderByteBufferAllocation(boolean isEnabled) {
     glideExperimentsBuilder.update(
         new UseArrayPoolForImageDecoderByteBufferAllocation(), isEnabled);
@@ -555,6 +579,7 @@ public final class GlideBuilder {
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setEnableDirectByteBufferDecoding(boolean isEnabled) {
     glideExperimentsBuilder.update(new EnableDirectByteBufferDecoding(), isEnabled);
     return this;
@@ -565,6 +590,7 @@ public final class GlideBuilder {
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder experimentalSetEnableRgb565DownsamplerFix(boolean isEnabled) {
     glideExperimentsBuilder.update(new EnableRgb565DownsamplerFix(), isEnabled);
     return this;
@@ -588,6 +614,7 @@ public final class GlideBuilder {
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setBypassResourceDiskCacheForHardwareBitmaps(boolean isEnabled) {
     glideExperimentsBuilder.update(new BypassResourceDiskCacheForHardwareBitmaps(), isEnabled);
     return this;
@@ -599,6 +626,7 @@ public final class GlideBuilder {
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setRespectExifOrientationInImageDecoder(boolean isEnabled) {
     glideExperimentsBuilder.update(new RespectExifOrientationInImageDecoder(), isEnabled);
     return this;
@@ -618,6 +646,7 @@ public final class GlideBuilder {
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setUseBitmapFactoryForInputStreamsWithImageDecoder(boolean isEnabled) {
     glideExperimentsBuilder.update(
         new UseBitmapFactoryForInputStreamsWithImageDecoder(), isEnabled);
@@ -631,6 +660,7 @@ public final class GlideBuilder {
    *
    * <p>This is an experimental API that may be removed in the future.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setOverrideGlideThreadPriority(boolean isEnabled) {
     glideExperimentsBuilder.update(new OverrideGlideThreadPriority(), isEnabled);
     return this;
@@ -644,6 +674,7 @@ public final class GlideBuilder {
    *
    * <p>This is an experimental API that may be removed in the future.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setUseMediaStoreOpenFileApisIfPossible(boolean isEnabled) {
     glideExperimentsBuilder.update(new UseMediaStoreOpenFileApisIfPossible(), isEnabled);
     return this;
@@ -655,6 +686,7 @@ public final class GlideBuilder {
    *
    * <p>This is an experimental API that may be removed in the future.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder setMemoryCategoryInBackground(MemoryCategory memoryCategory) {
     glideExperimentsBuilder.add(new MemoryCategoryInBackground(memoryCategory));
     return this;
@@ -671,6 +703,7 @@ public final class GlideBuilder {
    *
    * <p>This is an experimental API that may be removed in the future.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder experimentalSetEnableTrimMemoryOnUiHidden(boolean isEnabled) {
     glideExperimentsBuilder.update(new EnableTrimMemoryOnUiHidden(), isEnabled);
     return this;
@@ -685,6 +718,7 @@ public final class GlideBuilder {
    *
    * <p>This is an experimental API that may be removed in the future.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder experimentalSetEnableActiveResourceReleaseRaceFix(boolean isEnabled) {
     glideExperimentsBuilder.update(new EnableActiveResourceReleaseRaceFix(), isEnabled);
     return this;
@@ -697,6 +731,7 @@ public final class GlideBuilder {
    *
    * <p>This is an experimental API that may be removed in the future.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder experimentalSetClearGlidePainterOnStop(boolean isEnabled) {
     glideExperimentsBuilder.update(new ClearGlidePainterOnStop(), isEnabled);
     return this;
@@ -710,6 +745,7 @@ public final class GlideBuilder {
    *
    * <p>This is an experimental API that may be removed in the future.
    */
+  @CanIgnoreReturnValue
   public GlideBuilder experimentalSetUseTypedLoadForInMemoryObjects(boolean isEnabled) {
     glideExperimentsBuilder.update(new UseTypedLoadForInMemoryObjects(), isEnabled);
     return this;
@@ -720,6 +756,7 @@ public final class GlideBuilder {
    *     without further warning.
    */
   @Deprecated
+  @CanIgnoreReturnValue
   public GlideBuilder setPreserveGainmapAndColorSpaceForTransformations(boolean isEnabled) {
     return this;
   }
@@ -729,6 +766,7 @@ public final class GlideBuilder {
    *     without further warning.
    */
   @Deprecated
+  @CanIgnoreReturnValue
   public GlideBuilder setEnableHardwareGainmapFixOnU(boolean isEnabled) {
     return this;
   }
@@ -738,6 +776,7 @@ public final class GlideBuilder {
    *     without further warning.
    */
   @Deprecated
+  @CanIgnoreReturnValue
   public GlideBuilder setDisableHardwareBitmapsOnO(boolean disableHardwareBitmapsOnO) {
     return this;
   }
@@ -747,6 +786,7 @@ public final class GlideBuilder {
   }
 
   // For testing.
+  @CanIgnoreReturnValue
   GlideBuilder setEngine(Engine engine) {
     this.engine = engine;
     return this;
