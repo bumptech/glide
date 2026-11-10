@@ -25,6 +25,7 @@ public final class ByteBufferBitmapImageDecoderResourceDecoder
     implements ResourceDecoder<ByteBuffer, Bitmap> {
   @Nullable private final ExifOrientationOptionsApplier exifOrientationOptionsApplier;
   private final BitmapImageDecoderResourceDecoder wrapped;
+  private final boolean rejectExplicitVideoFrames;
 
   public ByteBufferBitmapImageDecoderResourceDecoder() {
     this(
@@ -41,6 +42,20 @@ public final class ByteBufferBitmapImageDecoderResourceDecoder
       @NonNull List<ImageHeaderParser> parsers,
       @Nullable ArrayPool arrayPool,
       boolean respectExifOrientation) {
+    this(parsers, arrayPool, respectExifOrientation, /* rejectExplicitVideoFrames= */ false);
+  }
+
+  /**
+   * @param rejectExplicitVideoFrames {@code true} to return {@code false} from {@link #handles} for
+   *     requests with a positive {@link VideoDecoder#TARGET_FRAME}. See {@link
+   *     com.bumptech.glide.GlideBuilder#setFileDescriptorImageDecoderEnabled(boolean)}.
+   */
+  public ByteBufferBitmapImageDecoderResourceDecoder(
+      @NonNull List<ImageHeaderParser> parsers,
+      @Nullable ArrayPool arrayPool,
+      boolean respectExifOrientation,
+      boolean rejectExplicitVideoFrames) {
+    this.rejectExplicitVideoFrames = rejectExplicitVideoFrames;
     this.exifOrientationOptionsApplier =
         respectExifOrientation ? new ExifOrientationOptionsApplier(parsers, arrayPool) : null;
     this.wrapped =
@@ -50,6 +65,9 @@ public final class ByteBufferBitmapImageDecoderResourceDecoder
 
   @Override
   public boolean handles(@NonNull ByteBuffer source, @NonNull Options options) throws IOException {
+    if (rejectExplicitVideoFrames && ImageDecoderSupport.hasExplicitVideoFrame(options)) {
+      return false;
+    }
     return true;
   }
 

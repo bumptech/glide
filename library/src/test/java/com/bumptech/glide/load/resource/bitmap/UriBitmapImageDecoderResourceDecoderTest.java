@@ -43,13 +43,6 @@ public final class UriBitmapImageDecoderResourceDecoderTest {
   }
 
   @Test
-  @Config(sdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-  public void handles_onSdkLessThanVanillaIceCream_returnsFalse() throws IOException {
-    Uri uri = Uri.parse("file:///path/to/image.png");
-    assertThat(decoder.handles(uri, options)).isFalse();
-  }
-
-  @Test
   public void handles_returnsTrueForUri() throws IOException {
     ContentValues values = new ContentValues();
     values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
@@ -96,6 +89,46 @@ public final class UriBitmapImageDecoderResourceDecoderTest {
     Uri uri = Uri.parse("file:///path/to/image.png");
     options.set(VideoDecoder.TARGET_FRAME, 1000L);
     assertThat(decoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
+  public void handles_withZeroTargetFrameOption_returnsFalse() throws IOException {
+    Uri uri = Uri.parse("file:///path/to/image.png");
+    options.set(VideoDecoder.TARGET_FRAME, 0L);
+    assertThat(decoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
+  public void handles_onlyRejectPositiveVideoFrames_zeroTargetFrame_returnsTrueForImageUri()
+      throws IOException {
+    UriBitmapImageDecoderResourceDecoder positiveFrameOnlyDecoder =
+        new UriBitmapImageDecoderResourceDecoder(
+            context, /* onlyRejectPositiveVideoFrames= */ true);
+    Uri uri = Uri.parse("file:///path/to/image.png");
+    options.set(VideoDecoder.TARGET_FRAME, 0L);
+    assertThat(positiveFrameOnlyDecoder.handles(uri, options)).isTrue();
+  }
+
+  @Test
+  public void handles_onlyRejectPositiveVideoFrames_zeroTargetFrame_returnsFalseForVideoUri()
+      throws IOException {
+    UriBitmapImageDecoderResourceDecoder positiveFrameOnlyDecoder =
+        new UriBitmapImageDecoderResourceDecoder(
+            context, /* onlyRejectPositiveVideoFrames= */ true);
+    Uri uri = Uri.parse("file:///path/to/video.mp4");
+    options.set(VideoDecoder.TARGET_FRAME, 0L);
+    assertThat(positiveFrameOnlyDecoder.handles(uri, options)).isFalse();
+  }
+
+  @Test
+  public void handles_onlyRejectPositiveVideoFrames_positiveTargetFrame_returnsFalse()
+      throws IOException {
+    UriBitmapImageDecoderResourceDecoder positiveFrameOnlyDecoder =
+        new UriBitmapImageDecoderResourceDecoder(
+            context, /* onlyRejectPositiveVideoFrames= */ true);
+    Uri uri = Uri.parse("file:///path/to/image.png");
+    options.set(VideoDecoder.TARGET_FRAME, 1000L);
+    assertThat(positiveFrameOnlyDecoder.handles(uri, options)).isFalse();
   }
 
   @Test

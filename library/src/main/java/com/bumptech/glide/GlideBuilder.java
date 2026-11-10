@@ -547,6 +547,29 @@ public final class GlideBuilder {
   }
 
   /**
+   * Set to {@code true} to make Glide prefer file descriptor sources when decoding {@link Bitmap}s
+   * with {@link android.graphics.ImageDecoder} on Android Q and higher.
+   *
+   * <p>When enabled, {@link android.graphics.ImageDecoder} based {@link Bitmap} decoders only
+   * reject requests with a positive {@link
+   * com.bumptech.glide.load.resource.bitmap.VideoDecoder#TARGET_FRAME}, so that requests with
+   * {@code frame(0)} are still decoded when the source is a still image.
+   *
+   * <p>This functionality is also guarded by {@link #setImageDecoderEnabledForBitmaps(boolean)} and
+   * will only be active if that flag is also enabled.
+   *
+   * <p>Calls to this method on versions of Android less than Q are ignored.
+   *
+   * <p>This flag is experimental and may be removed without deprecation in a future version.
+   */
+  public GlideBuilder setFileDescriptorImageDecoderEnabled(boolean isEnabled) {
+    glideExperimentsBuilder.update(
+        new EnableFileDescriptorImageDecoder(),
+        /* isEnabled= */ isEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
+    return this;
+  }
+
+  /**
    * Set to {@code true} to make Glide use a heap buffer instead of a direct buffer when decoding
    * {@link Bitmap}s from an {@link java.io.InputStream} using {@link
    * android.graphics.ImageDecoder}.
@@ -893,6 +916,8 @@ public final class GlideBuilder {
   static final class EnableImageDecoderForBitmaps implements Experiment {}
 
   static final class EnableUriImageDecoder implements Experiment {}
+
+  static final class EnableFileDescriptorImageDecoder implements Experiment {}
 
   /** See {@link #setUseHeapBufferForImageDecoderWithInputStream(boolean)}. */
   public static final class UseHeapBufferForImageDecoderWithInputStream implements Experiment {}

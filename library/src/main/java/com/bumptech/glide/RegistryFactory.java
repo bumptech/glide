@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import androidx.annotation.Nullable;
 import androidx.tracing.Trace;
+import com.bumptech.glide.GlideBuilder.EnableFileDescriptorImageDecoder;
 import com.bumptech.glide.GlideBuilder.EnableImageDecoderForBitmaps;
 import com.bumptech.glide.GlideBuilder.EnableUriImageDecoder;
 import com.bumptech.glide.GlideBuilder.UseMediaStoreOpenFileApisIfPossible;
@@ -170,6 +171,10 @@ final class RegistryFactory {
     ResourceDecoder<Uri, Bitmap> uriBitmapDecoder = null;
     ResourceDecoder<ByteBuffer, Bitmap> fallbackByteBufferBitmapDecoder = null;
     ResourceDecoder<InputStream, Bitmap> fallbackStreamBitmapDecoder = null;
+    boolean isFileDescriptorImageDecoderEnabled =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+            && experiments.isEnabled(EnableImageDecoderForBitmaps.class)
+            && experiments.isEnabled(EnableFileDescriptorImageDecoder.class);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
         && experiments.isEnabled(EnableImageDecoderForBitmaps.class)) {
       if (experiments.isEnabled(
@@ -187,17 +192,21 @@ final class RegistryFactory {
                 arrayPool,
                 experiments.isEnabled(
                     GlideBuilder.UseArrayPoolForImageDecoderByteBufferAllocation.class),
-                experiments.isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class));
+                experiments.isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class),
+                /* rejectExplicitVideoFrames= */ isFileDescriptorImageDecoderEnabled);
         fallbackStreamBitmapDecoder = new StreamBitmapDecoder(downsampler, arrayPool);
       }
       byteBufferBitmapDecoder =
           new ByteBufferBitmapImageDecoderResourceDecoder(
               imageHeaderParsers,
               arrayPool,
-              experiments.isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class));
+              experiments.isEnabled(GlideBuilder.RespectExifOrientationInImageDecoder.class),
+              /* rejectExplicitVideoFrames= */ isFileDescriptorImageDecoderEnabled);
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
           && experiments.isEnabled(EnableUriImageDecoder.class)) {
-        uriBitmapDecoder = new UriBitmapImageDecoderResourceDecoder(context);
+        uriBitmapDecoder =
+            new UriBitmapImageDecoderResourceDecoder(
+                context, /* onlyRejectPositiveVideoFrames= */ isFileDescriptorImageDecoderEnabled);
       }
       fallbackByteBufferBitmapDecoder = new ByteBufferBitmapDecoder(downsampler);
     } else {

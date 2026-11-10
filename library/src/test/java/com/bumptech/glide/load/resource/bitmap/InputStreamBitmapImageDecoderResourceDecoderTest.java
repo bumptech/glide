@@ -97,4 +97,45 @@ public final class InputStreamBitmapImageDecoderResourceDecoderTest {
 
     assertThat(decoder.decode(stream, 100, 100, options)).isNull();
   }
+
+  @Test
+  public void handles_withRejectExplicitVideoFrames_positiveTargetFrame_returnsFalse()
+      throws IOException {
+    InputStreamBitmapImageDecoderResourceDecoder decoder =
+        newDecoder(/* rejectExplicitVideoFrames= */ true);
+    options.set(VideoDecoder.TARGET_FRAME, 1000L);
+    assertThat(decoder.handles(new ByteArrayInputStream(new byte[] {1, 2, 3, 4}), options))
+        .isFalse();
+  }
+
+  @Test
+  public void handles_withRejectExplicitVideoFrames_zeroTargetFrame_returnsTrue()
+      throws IOException {
+    InputStreamBitmapImageDecoderResourceDecoder decoder =
+        newDecoder(/* rejectExplicitVideoFrames= */ true);
+    options.set(VideoDecoder.TARGET_FRAME, 0L);
+    assertThat(decoder.handles(new ByteArrayInputStream(new byte[] {1, 2, 3, 4}), options))
+        .isTrue();
+  }
+
+  @Test
+  public void handles_withoutRejectExplicitVideoFrames_positiveTargetFrame_returnsTrue()
+      throws IOException {
+    InputStreamBitmapImageDecoderResourceDecoder decoder =
+        newDecoder(/* rejectExplicitVideoFrames= */ false);
+    options.set(VideoDecoder.TARGET_FRAME, 1000L);
+    assertThat(decoder.handles(new ByteArrayInputStream(new byte[] {1, 2, 3, 4}), options))
+        .isTrue();
+  }
+
+  private InputStreamBitmapImageDecoderResourceDecoder newDecoder(
+      boolean rejectExplicitVideoFrames) {
+    return new InputStreamBitmapImageDecoderResourceDecoder(
+        parsers,
+        /* useHeapBuffer= */ true,
+        /* arrayPool= */ null,
+        /* useArrayPool= */ false,
+        /* respectExifOrientation= */ false,
+        rejectExplicitVideoFrames);
+  }
 }
