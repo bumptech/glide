@@ -663,7 +663,7 @@ public class EngineTest {
     verify(harness.job, never()).start(anyDecodeJobOrNull());
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
+  @SuppressWarnings("rawtypes")
   private static DecodeJob anyDecodeJobOrNull() {
     return any();
   }

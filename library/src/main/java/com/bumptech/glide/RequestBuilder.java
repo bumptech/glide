@@ -69,9 +69,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
   private final Glide glide;
   private final GlideContext glideContext;
 
-  @NonNull
-  @SuppressWarnings("unchecked")
-  private TransitionOptions<?, ? super TranscodeType> transitionOptions;
+  @NonNull private TransitionOptions<?, ? super TranscodeType> transitionOptions;
 
   @Nullable private Object model;
   // model may occasionally be null, so to enforce that load() was called, put a boolean rather
@@ -186,7 +184,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    */
   @NonNull
   @CheckResult
-  @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> listener(
       @Nullable RequestListener<TranscodeType> requestListener) {
     if (isAutoCloneEnabled()) {
@@ -361,7 +358,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    */
   @NonNull
   @CheckResult
-  @SuppressWarnings("unchecked")
   public RequestBuilder<TranscodeType> thumbnail(
       @Nullable RequestBuilder<TranscodeType> thumbnailRequest) {
     if (isAutoCloneEnabled()) {
@@ -436,7 +432,7 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    * @see #thumbnail(RequestBuilder)
    * @return This request builder.
    */
-  @SuppressWarnings({"CheckResult", "unchecked"})
+  @SuppressWarnings("CheckResult")
   @NonNull
   @CheckResult
   public RequestBuilder<TranscodeType> thumbnail(
@@ -509,7 +505,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    */
   @NonNull
   @CheckResult
-  @SuppressWarnings("unchecked")
   @Deprecated
   public RequestBuilder<TranscodeType> thumbnail(float sizeMultiplier) {
     if (isAutoCloneEnabled()) {
@@ -531,7 +526,6 @@ public class RequestBuilder<TranscodeType> extends BaseRequestOptions<RequestBui
    */
   @NonNull
   @CheckResult
-  @SuppressWarnings("unchecked")
   @Override
   public RequestBuilder<TranscodeType> load(@Nullable Object model) {
     return loadGeneric(model);

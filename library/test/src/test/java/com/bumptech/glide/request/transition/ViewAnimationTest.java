@@ -26,7 +26,6 @@ public class ViewAnimationTest {
   private ImageView view;
   private ViewTransition.ViewTransitionAnimationFactory viewTransitionAnimationFactory;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
     viewTransitionAnimationFactory = mock(ViewTransition.ViewTransitionAnimationFactory.class);

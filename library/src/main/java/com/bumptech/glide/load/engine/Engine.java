@@ -440,7 +440,6 @@ public final class Engine
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public synchronized void onEngineJobComplete(
       EngineJob<?> engineJob, Key key, EngineResource<?> resource) {

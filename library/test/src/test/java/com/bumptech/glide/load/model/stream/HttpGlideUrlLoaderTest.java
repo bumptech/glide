@@ -19,7 +19,6 @@ public class HttpGlideUrlLoaderTest {
   private HttpGlideUrlLoader loader;
   private GlideUrl model;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
     loader = new HttpGlideUrlLoader();

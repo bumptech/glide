@@ -12,7 +12,6 @@ import java.util.Map;
  * Contains an ordered list of {@link ResourceDecoder}s capable of decoding arbitrary data types
  * into arbitrary resource types from highest priority decoders to lowest priority decoders.
  */
-@SuppressWarnings("rawtypes")
 public class ResourceDecoderRegistry {
   private final List<String> bucketPriorityList = new ArrayList<>();
   private final Map<String, List<Entry<?, ?>>> decoders = new HashMap<>();

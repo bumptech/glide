@@ -39,7 +39,6 @@ public class BaseGlideUrlLoaderTest {
   private TestLoader urlLoader;
   private Options options;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);

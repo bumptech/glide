@@ -1003,8 +1003,6 @@ public class SingleRequestTest {
   }
 
   @Test
-  // Varargs
-  @SuppressWarnings("unchecked")
   public void testIsEquivalentTo() {
     EquivalenceTester<SingleRequestBuilder> tester =
         EquivalenceTester.of(
@@ -1054,7 +1052,6 @@ public class SingleRequestTest {
     private Drawable errorDrawable = null;
     private Drawable fallbackDrawable = null;
 
-    @SuppressWarnings("unchecked")
     private List<RequestListener<List>> requestListeners = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
@@ -1199,7 +1196,6 @@ public class SingleRequestTest {
     return isA(GlideException.class);
   }
 
-  @SuppressWarnings("unchecked")
   private static <T> Transition<T> anyTransition() {
     return any();
   }

@@ -57,7 +57,6 @@ public class DiskLruCacheWrapper implements DiskCache {
    * @param maxSize The max size for the disk cache
    * @return The new disk cache with the given arguments
    */
-  @SuppressWarnings("deprecation")
   public static DiskCache create(File directory, long maxSize) {
     return new DiskLruCacheWrapper(directory, maxSize);
   }

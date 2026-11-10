@@ -18,7 +18,6 @@ public class DrawableCrossFadeFactoryTest {
 
   private DrawableCrossFadeFactory factory;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() {
     factory = new DrawableCrossFadeFactory(100 /*duration*/, false /*isCrossFadeEnabled*/);

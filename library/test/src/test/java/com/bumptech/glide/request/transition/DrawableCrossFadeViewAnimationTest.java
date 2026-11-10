@@ -62,7 +62,6 @@ public class DrawableCrossFadeViewAnimationTest {
     assertTrue(harness.animation.transition(harness.current, harness.adapter));
   }
 
-  @SuppressWarnings("unchecked")
   private static class CrossFadeHarness {
     final Drawable current = new ColorDrawable(Color.GRAY);
     final ViewAdapter adapter = mock(ViewAdapter.class);

@@ -494,7 +494,6 @@ public class GlideTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void testNonDefaultModelWithRegisteredFactoryDoesNotThrow() {
     registerMockStreamModelLoader(Float.class);
 
@@ -703,7 +702,6 @@ public class GlideTest {
         .onResourceReady(ArgumentMatchers.<Drawable>notNull(), isA(Transition.class));
   }
 
-  @SuppressWarnings("unchecked")
   private <T, Z> void registerFailFactory(Class<T> failModel, Class<Z> failResource) {
     DataFetcher<Z> failFetcher = mock(DataFetcher.class);
     doAnswer(new Util.CallDataReady<>(null))
@@ -744,7 +742,6 @@ public class GlideTest {
     return uri.toString();
   }
 
-  @SuppressWarnings("unchecked")
   private <T> void registerMockStreamModelLoader(final Class<T> modelClass) {
     ModelLoader<T, InputStream> modelLoader = mockStreamModelLoader(modelClass);
     ModelLoaderFactory<T, InputStream> modelLoaderFactory = mock(ModelLoaderFactory.class);
@@ -753,7 +750,6 @@ public class GlideTest {
     Glide.get(context).getRegistry().prepend(modelClass, InputStream.class, modelLoaderFactory);
   }
 
-  @SuppressWarnings("unchecked")
   private <T> ModelLoader<T, InputStream> mockStreamModelLoader(final Class<T> modelClass) {
     ModelLoader<T, InputStream> modelLoader = mock(ModelLoader.class);
     DataFetcher<InputStream> fetcher = mock(DataFetcher.class);

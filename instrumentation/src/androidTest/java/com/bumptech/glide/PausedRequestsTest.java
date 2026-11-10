@@ -24,7 +24,6 @@ public final class PausedRequestsTest {
   private final ConcurrencyHelper concurrency = new ConcurrencyHelper();
   private final Context context = ApplicationProvider.getApplicationContext();
 
-  @SuppressWarnings("unchecked")
   @Test
   public void load_withPlaceHolderSet_requestsPaused_displaysPlaceholder() {
     final ImageView imageView = new ImageView(context);

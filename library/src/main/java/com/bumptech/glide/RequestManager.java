@@ -97,7 +97,6 @@ public class RequestManager
 
   private boolean clearOnStop;
 
-  @SuppressWarnings("this-escape")
   public RequestManager(
       @NonNull Glide glide,
       @NonNull Lifecycle lifecycle,
@@ -508,7 +507,6 @@ public class RequestManager
    *
    * @return A new request builder for loading a {@link Drawable} using the given model.
    */
-  @SuppressWarnings("deprecation")
   @NonNull
   @CheckResult
   @Override

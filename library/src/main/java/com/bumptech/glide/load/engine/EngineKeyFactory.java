@@ -7,7 +7,6 @@ import java.util.Map;
 
 class EngineKeyFactory {
 
-  @SuppressWarnings("rawtypes")
   EngineKey buildKey(
       Object model,
       Key signature,

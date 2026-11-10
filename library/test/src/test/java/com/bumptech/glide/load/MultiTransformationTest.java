@@ -28,7 +28,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
-@SuppressWarnings("unchecked")
 public class MultiTransformationTest {
   @Rule public final KeyTester keyTester = new KeyTester();
 

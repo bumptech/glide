@@ -920,7 +920,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
    * @see #optionalTransform(Class, Transformation)
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings({"unchecked", "varargs", "CheckResult"})
+  @SuppressWarnings({"unchecked", "CheckResult"})
   @NonNull
   @CheckResult
   public T transform(@NonNull Transformation<Bitmap>... transformations) {
@@ -947,7 +947,7 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
    * @see #optionalTransform(Class, Transformation)
    */
   // Guaranteed to modify the current object by the isAutoCloneEnabledCheck.
-  @SuppressWarnings({"unchecked", "varargs", "CheckResult"})
+  @SuppressWarnings({"unchecked", "CheckResult"})
   @NonNull
   @CheckResult
   @Deprecated
@@ -1282,7 +1282,6 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
    * <p>Once locked, the only way to unlock is to use {@link #clone()}
    */
   @NonNull
-  @SuppressWarnings("unchecked")
   public T lock() {
     isLocked = true;
     // This is the only place we should not check locked.
@@ -1308,7 +1307,6 @@ public abstract class BaseRequestOptions<T extends BaseRequestOptions<T>> implem
   }
 
   @NonNull
-  @SuppressWarnings("unchecked")
   protected final T selfOrThrowIfLocked() {
     if (isLocked) {
       throw new IllegalStateException("You cannot modify locked T, consider clone()");

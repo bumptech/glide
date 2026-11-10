@@ -198,7 +198,6 @@ public class EngineJobTest {
     assertTrue(job.isCancelled());
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void removingSomeCallbacksDoesNotCancelRunner() {
     EngineJob<Object> job = harness.getJob();
