@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,6 +36,7 @@ import com.bumptech.glide.load.model.MultiModelLoaderFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.ByteBuffer;
@@ -648,6 +650,118 @@ public class ChromiumUrlFetcherTest {
     builder.discard();
     release.countDown();
     assertThat(nextBufferTask.get(2, TimeUnit.SECONDS)).isNotNull();
+  }
+
+  @Test
+  public void cancelWithDiscardEnabled_discardsLateReadsAndPreservesNewerJob() throws Exception {
+    DataLogger logger = mock(DataLogger.class);
+    Options opts = Options.builder().setDiscardBuffersOnCancel(true).build();
+    ChromiumRequestSerializer ser =
+        new ChromiumRequestSerializer(cronetRequestFactory, logger, null, opts);
+    DataFetcher<ByteBuffer> first = new ChromiumUrlFetcher<>(ser, parser, glideUrl);
+    first.loadData(Priority.HIGH, callback);
+    Callback cb = urlRequestListenerCaptor.getValue();
+    cb.onResponseStarted(request, getInfo(8, 200));
+    first.cancel();
+    cb.onReadCompleted(request, getInfo(8, 200), ByteBuffer.allocate(8));
+    verify(request).read(any(ByteBuffer.class));
+    first.loadData(Priority.HIGH, secondCallback);
+    cb.onCanceled(request, getInfo(8, 200));
+    verify(logger, timeout(1000)).logNetworkData(any(), anyLong(), anyLong(), anyLong());
+    first.cancel();
+    verify(request, times(3)).cancel();
+  }
+
+  private static GlideExecutor singleThreadExecutor() {
+    return GlideExecutor.newSourceBuilder()
+        .setThreadCount(1)
+        .setUncaughtThrowableStrategy(UncaughtThrowableStrategy.THROW)
+        .build();
+  }
+
+  private static ByteBuffer directBufferAtPosition(int capacity, int position) {
+    ByteBuffer buffer = ByteBuffer.allocateDirect(capacity);
+    buffer.position(position);
+    return buffer;
+  }
+
+  private int limitAfterQueuedCancel(Options opts) throws Exception {
+    CountDownLatch gate = new CountDownLatch(1);
+    GlideExecutor exec = singleThreadExecutor();
+    exec.execute(() -> Uninterruptibles.awaitUninterruptibly(gate));
+    ByteBuffer chunk2 = directBufferAtPosition(15, 10);
+    try {
+      ChromiumRequestSerializer ser =
+          new ChromiumRequestSerializer(cronetRequestFactory, null, exec, opts);
+      ChromiumUrlFetcher<ByteBuffer> lowFetcher = new ChromiumUrlFetcher<>(ser, parser, glideUrl);
+      lowFetcher.loadData(Priority.LOW, callback);
+      Callback cb = urlRequestListenerCaptor.getValue();
+      UrlResponseInfo info = getInfo(20, 200);
+      cb.onResponseStarted(request, info);
+      cb.onReadCompleted(request, info, directBufferAtPosition(20, 20));
+      cb.onReadCompleted(request, info, chunk2);
+      cb.onSucceeded(request, info);
+      lowFetcher.cancel();
+      gate.countDown();
+      exec.shutdown();
+      assertThat(exec.awaitTermination(2, TimeUnit.SECONDS)).isTrue();
+      return chunk2.limit();
+    } finally {
+      gate.countDown();
+      exec.shutdownNow();
+    }
+  }
+
+  @Test
+  public void onSucceeded_whenCancelledBeforeSerializerRuns_skipsCoalesceOnlyWhenEnabled()
+      throws Exception {
+    assertThat(limitAfterQueuedCancel(Options.builder().setDiscardBuffersOnCancel(true).build()))
+        .isEqualTo(15);
+    assertThat(limitAfterQueuedCancel(Options.builder().build())).isEqualTo(10);
+  }
+
+  @Test
+  public void onFailed_afterCancel_withDiscardEnabled_treatsAsCancelled() throws Exception {
+    UrlResponseInfo normalInfo = getInfo(8, 200);
+    for (boolean enabled : new boolean[] {true, false}) {
+      CountDownLatch started = new CountDownLatch(1);
+      CountDownLatch gate = new CountDownLatch(1);
+      GlideExecutor exec = singleThreadExecutor();
+      exec.execute(() -> {
+        started.countDown();
+        Uninterruptibles.awaitUninterruptibly(gate);
+      });
+      AtomicReference<UrlResponseInfo> firstLogged = new AtomicReference<>();
+      DataLogger logger = (info, start, resp, end) -> firstLogged.compareAndSet(null, info);
+      Options opts = Options.builder().setDiscardBuffersOnCancel(enabled).build();
+      ChromiumRequestSerializer ser =
+          new ChromiumRequestSerializer(cronetRequestFactory, logger, exec, opts);
+      UrlResponseInfo failedInfo = spy(getInfo(20, HttpURLConnection.HTTP_INTERNAL_ERROR));
+      try {
+        assertThat(started.await(2, TimeUnit.SECONDS)).isTrue();
+        int base = urlRequestListenerCaptor.getAllValues().size();
+        new ChromiumUrlFetcher<>(ser, parser, new GlideUrl("http://a"))
+            .loadData(Priority.NORMAL, firstCallback);
+        succeed(
+            normalInfo, urlRequestListenerCaptor.getAllValues().get(base), ByteBuffer.allocate(8));
+        ChromiumUrlFetcher<ByteBuffer> lowFetcher =
+            new ChromiumUrlFetcher<>(ser, parser, new GlideUrl("http://b"));
+        lowFetcher.loadData(Priority.LOW, callback);
+        Callback lowCb = urlRequestListenerCaptor.getAllValues().get(base + 1);
+        lowCb.onResponseStarted(request, failedInfo);
+        lowFetcher.cancel();
+        lowCb.onFailed(request, failedInfo, /* error= */ null);
+        gate.countDown();
+        exec.shutdown();
+        assertThat(exec.awaitTermination(2, TimeUnit.SECONDS)).isTrue();
+      } finally {
+        gate.countDown();
+        exec.shutdownNow();
+      }
+      assertThat(firstLogged.get()).isSameInstanceAs(enabled ? failedInfo : normalInfo);
+      verify(failedInfo, times(enabled ? 0 : 2)).getHttpStatusCode();
+    }
+    verify(callback, never()).onLoadFailed(any(Exception.class));
   }
 
   private static Map<String, String> anyHeaders() {
