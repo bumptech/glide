@@ -548,9 +548,9 @@ public final class GlideBuilder {
 
   /**
    * Set to {@code true} to make Glide use {@link android.graphics.ImageDecoder} when decoding
-   * {@link Bitmap}s from {@link android.os.ParcelFileDescriptor}s on Android Q and higher, and
-   * prefer {@link android.os.ParcelFileDescriptor} loaders over {@link java.io.InputStream}
-   * loaders.
+   * {@link Bitmap}s from {@link android.os.ParcelFileDescriptor}s and {@link
+   * android.content.res.AssetFileDescriptor}s on Android Q and higher, and prefer file descriptor
+   * loaders over {@link java.io.InputStream} loaders.
    *
    * <p>When enabled, {@link android.graphics.ImageDecoder} based {@link Bitmap} decoders only
    * reject requests with a positive {@link
