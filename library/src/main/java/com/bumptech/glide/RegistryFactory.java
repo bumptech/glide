@@ -55,6 +55,7 @@ import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.ExifInterfaceImageHeaderParser;
 import com.bumptech.glide.load.resource.bitmap.InputStreamBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.ParcelFileDescriptorBitmapDecoder;
+import com.bumptech.glide.load.resource.bitmap.ParcelFileDescriptorBitmapImageDecoderResourceDecoder;
 import com.bumptech.glide.load.resource.bitmap.ResourceBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.StreamBitmapDecoder;
 import com.bumptech.glide.load.resource.bitmap.UnitBitmapDecoder;
@@ -169,12 +170,17 @@ final class RegistryFactory {
     ResourceDecoder<ByteBuffer, Bitmap> byteBufferBitmapDecoder;
     ResourceDecoder<InputStream, Bitmap> streamBitmapDecoder;
     ResourceDecoder<Uri, Bitmap> uriBitmapDecoder = null;
+    ResourceDecoder<ParcelFileDescriptor, Bitmap> parcelFileDescriptorBitmapImageDecoder = null;
     ResourceDecoder<ByteBuffer, Bitmap> fallbackByteBufferBitmapDecoder = null;
     ResourceDecoder<InputStream, Bitmap> fallbackStreamBitmapDecoder = null;
     boolean isFileDescriptorImageDecoderEnabled =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
             && experiments.isEnabled(EnableImageDecoderForBitmaps.class)
             && experiments.isEnabled(EnableFileDescriptorImageDecoder.class);
+    if (isFileDescriptorImageDecoderEnabled) {
+      parcelFileDescriptorBitmapImageDecoder =
+          new ParcelFileDescriptorBitmapImageDecoderResourceDecoder(imageHeaderParsers, arrayPool);
+    }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
         && experiments.isEnabled(EnableImageDecoderForBitmaps.class)) {
       if (experiments.isEnabled(
@@ -256,6 +262,13 @@ final class RegistryFactory {
       registry.prepend(Uri.class, Uri.class, UnitModelLoader.Factory.<Uri>getInstance());
     }
 
+    if (parcelFileDescriptorBitmapImageDecoder != null) {
+      registry.append(
+          Registry.BUCKET_BITMAP,
+          ParcelFileDescriptor.class,
+          Bitmap.class,
+          parcelFileDescriptorBitmapImageDecoder);
+    }
     if (ParcelFileDescriptorRewinder.isSupported()) {
       registry.append(
           Registry.BUCKET_BITMAP,
@@ -286,7 +299,15 @@ final class RegistryFactory {
             Registry.BUCKET_BITMAP_DRAWABLE,
             ByteBuffer.class,
             BitmapDrawable.class,
-            new BitmapDrawableDecoder<>(resources, byteBufferBitmapDecoder))
+            new BitmapDrawableDecoder<>(resources, byteBufferBitmapDecoder));
+    if (parcelFileDescriptorBitmapImageDecoder != null) {
+      registry.append(
+          Registry.BUCKET_BITMAP_DRAWABLE,
+          ParcelFileDescriptor.class,
+          BitmapDrawable.class,
+          new BitmapDrawableDecoder<>(resources, parcelFileDescriptorBitmapImageDecoder));
+    }
+    registry
         .append(
             Registry.BUCKET_BITMAP_DRAWABLE,
             InputStream.class,
@@ -332,9 +353,17 @@ final class RegistryFactory {
         /* Files */
         .register(new ByteBufferRewinder.Factory())
         .append(File.class, ByteBuffer.class, new ByteBufferFileLoader.Factory())
-        .append(File.class, InputStream.class, new FileLoader.StreamFactory())
-        .append(File.class, File.class, new FileDecoder())
-        .append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory())
+        .append(File.class, File.class, new FileDecoder());
+    if (isFileDescriptorImageDecoderEnabled) {
+      registry
+          .append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory())
+          .append(File.class, InputStream.class, new FileLoader.StreamFactory());
+    } else {
+      registry
+          .append(File.class, InputStream.class, new FileLoader.StreamFactory())
+          .append(File.class, ParcelFileDescriptor.class, new FileLoader.FileDescriptorFactory());
+    }
+    registry
         // Compilation with Gradle requires the type to be specified for UnitModelLoader here.
         .append(File.class, File.class, UnitModelLoader.Factory.<File>getInstance())
         /* Models */
@@ -386,9 +415,19 @@ final class RegistryFactory {
 
     registry
         .append(String.class, InputStream.class, new DataUrlLoader.StreamFactory<String>())
-        .append(Uri.class, InputStream.class, new DataUrlLoader.StreamFactory<Uri>())
-        .append(String.class, InputStream.class, new StringLoader.StreamFactory())
-        .append(String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory())
+        .append(Uri.class, InputStream.class, new DataUrlLoader.StreamFactory<Uri>());
+    if (isFileDescriptorImageDecoderEnabled) {
+      registry
+          .append(
+              String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory())
+          .append(String.class, InputStream.class, new StringLoader.StreamFactory());
+    } else {
+      registry
+          .append(String.class, InputStream.class, new StringLoader.StreamFactory())
+          .append(
+              String.class, ParcelFileDescriptor.class, new StringLoader.FileDescriptorFactory());
+    }
+    registry
         .append(
             String.class, AssetFileDescriptor.class, new StringLoader.AssetFileDescriptorFactory())
         .append(Uri.class, InputStream.class, new AssetUriLoader.StreamFactory(context.getAssets()))
@@ -399,25 +438,48 @@ final class RegistryFactory {
         .append(Uri.class, InputStream.class, new MediaStoreImageThumbLoader.Factory(context))
         .append(Uri.class, InputStream.class, new MediaStoreVideoThumbLoader.Factory(context));
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-      registry.append(
-          Uri.class, InputStream.class, new QMediaStoreUriLoader.InputStreamFactory(context));
-      registry.append(
-          Uri.class,
-          ParcelFileDescriptor.class,
-          new QMediaStoreUriLoader.FileDescriptorFactory(context));
+      if (isFileDescriptorImageDecoderEnabled) {
+        registry.append(
+            Uri.class,
+            ParcelFileDescriptor.class,
+            new QMediaStoreUriLoader.FileDescriptorFactory(context));
+        registry.append(
+            Uri.class, InputStream.class, new QMediaStoreUriLoader.InputStreamFactory(context));
+      } else {
+        registry.append(
+            Uri.class, InputStream.class, new QMediaStoreUriLoader.InputStreamFactory(context));
+        registry.append(
+            Uri.class,
+            ParcelFileDescriptor.class,
+            new QMediaStoreUriLoader.FileDescriptorFactory(context));
+      }
     }
     boolean useMediaStoreOpenFileApisIfPossible =
         experiments.isEnabled(UseMediaStoreOpenFileApisIfPossible.class);
+    if (isFileDescriptorImageDecoderEnabled) {
+      registry
+          .append(
+              Uri.class,
+              ParcelFileDescriptor.class,
+              new UriLoader.FileDescriptorFactory(
+                  contentResolver, useMediaStoreOpenFileApisIfPossible))
+          .append(
+              Uri.class,
+              InputStream.class,
+              new UriLoader.StreamFactory(contentResolver, useMediaStoreOpenFileApisIfPossible));
+    } else {
+      registry
+          .append(
+              Uri.class,
+              InputStream.class,
+              new UriLoader.StreamFactory(contentResolver, useMediaStoreOpenFileApisIfPossible))
+          .append(
+              Uri.class,
+              ParcelFileDescriptor.class,
+              new UriLoader.FileDescriptorFactory(
+                  contentResolver, useMediaStoreOpenFileApisIfPossible));
+    }
     registry
-        .append(
-            Uri.class,
-            InputStream.class,
-            new UriLoader.StreamFactory(contentResolver, useMediaStoreOpenFileApisIfPossible))
-        .append(
-            Uri.class,
-            ParcelFileDescriptor.class,
-            new UriLoader.FileDescriptorFactory(
-                contentResolver, useMediaStoreOpenFileApisIfPossible))
         .append(
             Uri.class,
             AssetFileDescriptor.class,
