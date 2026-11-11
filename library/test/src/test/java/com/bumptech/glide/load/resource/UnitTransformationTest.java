@@ -32,14 +32,14 @@ public class UnitTransformationTest {
   }
 
   @Test
-  public void testReturnsGivenResource() {
+  public void returnsGivenResource() {
     Resource<Object> resource = mockResource();
     UnitTransformation<Object> transformation = UnitTransformation.get();
     assertEquals(resource, transformation.transform(app, resource, 10, 10));
   }
 
   @Test
-  public void testEqualsHashCodeDigest() throws NoSuchAlgorithmException {
+  public void equalsHashCodeDigest() throws NoSuchAlgorithmException {
     @SuppressWarnings("unchecked")
     Transformation<Object> other = mock(Transformation.class);
     doAnswer(new Util.WriteDigest("other"))

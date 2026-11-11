@@ -19,19 +19,19 @@ public class SimpleResourceTest {
   }
 
   @Test
-  public void testReturnsGivenObject() {
+  public void returnsGivenObject() {
     assertEquals(object, resource.get());
   }
 
   @Test
-  public void testReturnsGivenObjectMultipleTimes() {
+  public void returnsGivenObjectMultipleTimes() {
     assertEquals(object, resource.get());
     assertEquals(object, resource.get());
     assertEquals(object, resource.get());
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfGivenNullData() {
+  public void throwsIfGivenNullData() {
     new SimpleResource<>(null);
   }
 

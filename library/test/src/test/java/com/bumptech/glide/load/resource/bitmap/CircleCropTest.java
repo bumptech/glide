@@ -51,7 +51,7 @@ public class CircleCropTest {
   }
 
   @Test
-  public void testTransform_withSquare() {
+  public void transform_withSquare() {
     Bitmap redSquare = createSolidRedBitmap(50, 50);
     Bitmap result = circleCrop.transform(bitmapPool, redSquare, 50, 50);
     Bitmap expected = createBitmapWithRedCircle(50, 50);
@@ -60,7 +60,7 @@ public class CircleCropTest {
   }
 
   @Test
-  public void testTransform_reusesBitmap() {
+  public void transform_reusesBitmap() {
     Bitmap toReuse = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888);
     when(bitmapPool.get(50, 50, Bitmap.Config.ARGB_8888)).thenReturn(toReuse);
 
@@ -71,7 +71,7 @@ public class CircleCropTest {
   }
 
   @Test
-  public void testTransform_withWideRectangle() {
+  public void transform_withWideRectangle() {
     Bitmap redWideRectangle = createSolidRedBitmap(100, 50);
     Bitmap result = circleCrop.transform(bitmapPool, redWideRectangle, 80, 50);
     Bitmap expected = createBitmapWithRedCircle(80, 50);
@@ -80,7 +80,7 @@ public class CircleCropTest {
   }
 
   @Test
-  public void testTransform_withNarrowRectangle() {
+  public void transform_withNarrowRectangle() {
     Bitmap redNarrowRectangle = createSolidRedBitmap(20, 50);
     Bitmap result = circleCrop.transform(bitmapPool, redNarrowRectangle, 40, 80);
     Bitmap expected = createBitmapWithRedCircle(40, 80);
@@ -89,7 +89,7 @@ public class CircleCropTest {
   }
 
   @Test
-  public void testEquals() {
+  public void equals() {
     keyTester
         .addEquivalenceGroup(circleCrop, new CircleCrop())
         .addEquivalenceGroup(mock(Transformation.class))

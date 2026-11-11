@@ -41,7 +41,7 @@ public class UriLoaderTest {
   }
 
   @Test
-  public void testHandlesFileUris() throws IOException {
+  public void handlesFileUris() throws IOException {
     Uri fileUri = Uri.fromFile(new File("f"));
     when(factory.build(eq(fileUri))).thenReturn(localUriFetcher);
 
@@ -53,7 +53,7 @@ public class UriLoaderTest {
   }
 
   @Test
-  public void testHandlesContentUris() {
+  public void handlesContentUris() {
     Uri contentUri = Uri.parse("content://com.bumptech.glide");
     when(factory.build(eq(contentUri))).thenReturn(localUriFetcher);
 

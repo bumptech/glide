@@ -62,7 +62,7 @@ public class NotificationTargetTest {
   }
 
   @Test
-  public void testSetsBitmapOnRemoteViewsWithGivenImageIdOnResourceReady() {
+  public void setsBitmapOnRemoteViewsWithGivenImageIdOnResourceReady() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     target.onResourceReady(bitmap, null /*glideAnimation*/);
     verify(remoteViews).setImageViewBitmap(eq(viewId), eq(bitmap));
@@ -80,7 +80,7 @@ public class NotificationTargetTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfContextIsNull() {
+  public void throwsIfContextIsNull() {
     new NotificationTarget(
         null /*context*/,
         100 /*width*/,
@@ -93,7 +93,7 @@ public class NotificationTargetTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfNotificationIsNull() {
+  public void throwsIfNotificationIsNull() {
     new NotificationTarget(
         ApplicationProvider.getApplicationContext(),
         100 /*width*/,
@@ -106,7 +106,7 @@ public class NotificationTargetTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfRemoteViewsIsNull() {
+  public void throwsIfRemoteViewsIsNull() {
     new NotificationTarget(
         ApplicationProvider.getApplicationContext(),
         100 /*width*/,

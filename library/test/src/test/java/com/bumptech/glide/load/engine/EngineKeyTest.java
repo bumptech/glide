@@ -35,7 +35,7 @@ public class EngineKeyTest {
 
   @Test
   public void updateDiskCacheKey_throwsException() throws NoSuchAlgorithmException {
-    // If this test fails, update testEqualsAndHashcode to use KeyTester including regression tests.
+    // If this test fails, update equalsAndHashCode to use KeyTester including regression tests.
     final EngineKey key =
         new EngineKey(
             "id",
@@ -57,7 +57,7 @@ public class EngineKeyTest {
   }
 
   @Test
-  public void testEqualsAndHashCode() {
+  public void equalsAndHashCode() {
     Options memoryOptions = new Options();
     memoryOptions.set(Option.memory("key", new Object()), new Object());
 

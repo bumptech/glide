@@ -30,7 +30,7 @@ public class GifDrawableBytesTranscoderTest {
   }
 
   @Test
-  public void testReturnsBytesOfGivenGifDrawable() {
+  public void returnsBytesOfGivenGifDrawable() {
     for (String fakeData : new String[] {"test", "1235asfklaw3", "@$@#"}) {
       ByteBuffer expected = ByteBuffer.wrap(fakeData.getBytes(Charset.defaultCharset()));
       when(gifDrawable.getBuffer()).thenReturn(expected);

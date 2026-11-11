@@ -69,7 +69,7 @@ public class CenterCropTest {
   }
 
   @Test
-  public void testDoesNotPutNullBitmapAcquiredFromPool() {
+  public void doesNotPutNullBitmapAcquiredFromPool() {
     reset(pool);
     when(pool.get(anyInt(), anyInt(), any(Bitmap.Config.class))).thenReturn(null);
 
@@ -79,21 +79,21 @@ public class CenterCropTest {
   }
 
   @Test
-  public void testReturnsGivenResourceIfMatchesSizeExactly() {
+  public void returnsGivenResourceIfMatchesSizeExactly() {
     Resource<Bitmap> result = centerCrop.transform(context, resource, bitmapWidth, bitmapHeight);
 
     assertEquals(resource, result);
   }
 
   @Test
-  public void testDoesNotRecycleGivenResourceIfMatchesSizeExactly() {
+  public void doesNotRecycleGivenResourceIfMatchesSizeExactly() {
     centerCrop.transform(context, resource, bitmapWidth, bitmapHeight);
 
     verify(resource, never()).recycle();
   }
 
   @Test
-  public void testDoesNotRecycleGivenResource() {
+  public void doesNotRecycleGivenResource() {
     centerCrop.transform(context, resource, 50, 50);
 
     verify(resource, never()).recycle();
@@ -101,7 +101,7 @@ public class CenterCropTest {
 
   @Test
   @Config(sdk = Config.OLDEST_SDK)
-  public void testAsksBitmapPoolForArgb8888IfInConfigIsNull() {
+  public void asksBitmapPoolForArgb8888IfInConfigIsNull() {
     bitmap.setConfig(null);
 
     centerCrop.transform(context, resource, 10, 10);
@@ -111,7 +111,7 @@ public class CenterCropTest {
   }
 
   @Test
-  public void testReturnsBitmapWithExactlyGivenDimensionsIfBitmapIsLargerThanTarget() {
+  public void returnsBitmapWithExactlyGivenDimensionsIfBitmapIsLargerThanTarget() {
     int expectedWidth = 75;
     int expectedHeight = 74;
 
@@ -129,7 +129,7 @@ public class CenterCropTest {
   }
 
   @Test
-  public void testReturnsBitmapWithExactlyGivenDimensionsIfBitmapIsSmallerThanTarget() {
+  public void returnsBitmapWithExactlyGivenDimensionsIfBitmapIsSmallerThanTarget() {
     int expectedWidth = 100;
     int expectedHeight = 100;
 
@@ -146,7 +146,7 @@ public class CenterCropTest {
   }
 
   @Test
-  public void testEquals() throws NoSuchAlgorithmException {
+  public void equals() throws NoSuchAlgorithmException {
     doAnswer(new Util.WriteDigest("other"))
         .when(transformation)
         .updateDiskCacheKey(any(MessageDigest.class));

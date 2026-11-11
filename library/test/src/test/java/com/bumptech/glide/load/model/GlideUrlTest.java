@@ -18,22 +18,22 @@ import org.robolectric.annotation.Config;
 public class GlideUrlTest {
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfGivenURLIsNull() {
+  public void throwsIfGivenURLIsNull() {
     new GlideUrl((URL) null);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfGivenStringUrlIsNull() {
+  public void throwsIfGivenStringUrlIsNull() {
     new GlideUrl((String) null);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfGivenStringURLIsEmpty() {
+  public void throwsIfGivenStringURLIsEmpty() {
     new GlideUrl("");
   }
 
   @Test
-  public void testCanCompareGlideUrlsCreatedWithDifferentTypes() throws MalformedURLException {
+  public void canCompareGlideUrlsCreatedWithDifferentTypes() throws MalformedURLException {
     String stringUrl = "http://www.google.com";
     URL url = new URL(stringUrl);
 
@@ -41,7 +41,7 @@ public class GlideUrlTest {
   }
 
   @Test
-  public void testCanCompareHashcodeOfGlideUrlsCreatedWithDifferentTypes()
+  public void canCompareHashcodeOfGlideUrlsCreatedWithDifferentTypes()
       throws MalformedURLException {
     String stringUrl = "http://nytimes.com";
     URL url = new URL(stringUrl);
@@ -50,7 +50,7 @@ public class GlideUrlTest {
   }
 
   @Test
-  public void testProducesEquivalentUrlFromString() throws MalformedURLException {
+  public void producesEquivalentUrlFromString() throws MalformedURLException {
     String stringUrl = "http://www.google.com";
     GlideUrl glideUrl = new GlideUrl(stringUrl);
 
@@ -59,7 +59,7 @@ public class GlideUrlTest {
   }
 
   @Test
-  public void testProducesEquivalentStringFromURL() throws MalformedURLException {
+  public void producesEquivalentStringFromURL() throws MalformedURLException {
     String expected = "http://www.washingtonpost.com";
     URL url = new URL(expected);
     GlideUrl glideUrl = new GlideUrl(url);
@@ -68,7 +68,7 @@ public class GlideUrlTest {
   }
 
   @Test
-  public void testIssue133() throws MalformedURLException {
+  public void issue133() throws MalformedURLException {
     // u00e0=à
     final String original =
         "http://www.commitstrip.com/wp-content/uploads/2014/07/"
@@ -102,7 +102,7 @@ public class GlideUrlTest {
   }
 
   @Test
-  public void testEquals() throws MalformedURLException {
+  public void equals() throws MalformedURLException {
     Headers headers = mock(Headers.class);
     Headers otherHeaders = mock(Headers.class);
     String url = "http://www.google.com";

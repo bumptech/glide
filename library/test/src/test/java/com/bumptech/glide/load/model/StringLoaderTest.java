@@ -49,7 +49,7 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testHandlesPaths() {
+  public void handlesPaths() {
     // TODO fix drive letter parsing somehow
     assumeTrue("it will fail with schema being the drive letter (C:\\... -> C)", !Util.isWindows());
 
@@ -67,7 +67,7 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testCanHandleComplexFilePaths() {
+  public void canHandleComplexFilePaths() {
     String testPath =
         "/storage/emulated/0/DCIM/Camera/IMG_20140520_100001:nopm:.jpg,mimeType=image/jpeg,"
             + "2448x3264,orientation=0,date=Tue";
@@ -83,7 +83,7 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testHandlesFileUris() {
+  public void handlesFileUris() {
     File f = ApplicationProvider.getApplicationContext().getCacheDir();
 
     Uri expected = Uri.fromFile(f);
@@ -99,7 +99,7 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testHandlesResourceUris() {
+  public void handlesResourceUris() {
     Uri resourceUri = Uri.parse("android.resource://com.bumptech.glide.tests/raw/ic_launcher");
 
     when(uriLoader.buildLoadData(eq(resourceUri), eq(IMAGE_SIDE), eq(IMAGE_SIDE), eq(options)))
@@ -114,7 +114,7 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testHandlesHttp() {
+  public void handlesHttp() {
     String url = "http://www.google.com";
 
     Uri expected = Uri.parse(url);
@@ -129,7 +129,7 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testHandlesHttps() {
+  public void handlesHttps() {
     String url = "https://www.google.com";
 
     Uri expected = Uri.parse(url);
@@ -144,7 +144,7 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testHandlesContent() {
+  public void handlesContent() {
     String content = "content://com.bumptech.glide";
 
     Uri expected = Uri.parse(content);
@@ -159,7 +159,7 @@ public class StringLoaderTest {
   }
 
   @Test
-  public void testGetResourceFetcher_withEmptyString_returnsNull() {
+  public void getResourceFetcher_withEmptyString_returnsNull() {
     assertThat(loader.buildLoadData("", IMAGE_SIDE, IMAGE_SIDE, options)).isNull();
     assertThat(loader.buildLoadData("    ", IMAGE_SIDE, IMAGE_SIDE, options)).isNull();
     assertThat(loader.buildLoadData("  \n", IMAGE_SIDE, IMAGE_SIDE, options)).isNull();

@@ -49,7 +49,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testAppend_addsModelLoaderForModelClass() {
+  public void append_addsModelLoaderForModelClass() {
     multiFactory.append(String.class, String.class, firstFactory);
 
     List<ModelLoader<String, ?>> modelLoaders = multiFactory.build(String.class);
@@ -57,7 +57,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testAppend_addsModelLoaderForModelAndDataClass() {
+  public void append_addsModelLoaderForModelAndDataClass() {
     multiFactory.append(String.class, String.class, firstFactory);
 
     ModelLoader<String, String> modelLoader = multiFactory.build(String.class, String.class);
@@ -65,7 +65,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testPrepend_addsModelLoaderForModelClass() {
+  public void prepend_addsModelLoaderForModelClass() {
     multiFactory.prepend(String.class, String.class, firstFactory);
 
     List<ModelLoader<String, ?>> modelLoaders = multiFactory.build(String.class);
@@ -73,7 +73,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testPrepend_addsModelLoaderForModelAndDataClass() {
+  public void prepend_addsModelLoaderForModelAndDataClass() {
     multiFactory.prepend(String.class, String.class, firstFactory);
 
     ModelLoader<String, String> modelLoader = multiFactory.build(String.class, String.class);
@@ -81,7 +81,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testReplace_addsModelLoaderForModelClass() {
+  public void replace_addsModelLoaderForModelClass() {
     multiFactory.replace(String.class, String.class, firstFactory);
 
     List<ModelLoader<String, ?>> modelLoaders = multiFactory.build(String.class);
@@ -89,7 +89,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testReplace_addsModelLoaderForModelAndDataClasses() {
+  public void replace_addsModelLoaderForModelAndDataClasses() {
     multiFactory.replace(String.class, String.class, firstFactory);
 
     ModelLoader<String, String> modelLoader = multiFactory.build(String.class, String.class);
@@ -97,7 +97,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testReplace_returnsPreviouslyRegisteredFactories_withModelAndDataClasses() {
+  public void replace_returnsPreviouslyRegisteredFactories_withModelAndDataClasses() {
     ModelLoaderFactory<String, String> firstOtherFactory = mockFactory();
     ModelLoaderFactory<String, String> secondOtherFactory = mockFactory();
     multiFactory.append(String.class, String.class, firstOtherFactory);
@@ -109,7 +109,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testReplace_removesPreviouslyRegisteredFactories_withModelAndDataClasses() {
+  public void replace_removesPreviouslyRegisteredFactories_withModelAndDataClasses() {
     appendFactoryFor(String.class, String.class);
     appendFactoryFor(String.class, String.class);
 
@@ -120,7 +120,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testRemove_returnsPreviouslyRegisteredFactories_withModelAndDataClasses() {
+  public void remove_returnsPreviouslyRegisteredFactories_withModelAndDataClasses() {
     ModelLoaderFactory<String, String> other = mockFactory();
     multiFactory.append(String.class, String.class, other);
     multiFactory.append(String.class, String.class, firstFactory);
@@ -131,7 +131,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testRemove_removesPreviouslyRegisteredFactories_withModelAndDataClasses() {
+  public void remove_removesPreviouslyRegisteredFactories_withModelAndDataClasses() {
     appendFactoryFor(String.class, String.class);
     appendFactoryFor(String.class, String.class);
 
@@ -142,7 +142,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testBuild_withModelClass_returnsMultipleModelLoaders_ofGivenModelAndDataClasses() {
+  public void build_withModelClass_returnsMultipleModelLoaders_ofGivenModelAndDataClasses() {
     ModelLoader<String, String> otherLoader = appendFactoryFor(String.class, String.class);
     multiFactory.append(String.class, String.class, firstFactory);
 
@@ -152,7 +152,7 @@ public class MultiModelLoaderFactoryTest {
 
   @Test
   public void
-      testBuild_withModelClass_returnsMultipleModelLoaders_ofGivenModelClassWithDifferentDataClasses() {
+      build_withModelClass_returnsMultipleModelLoaders_ofGivenModelClassWithDifferentDataClasses() {
     ModelLoader<String, Integer> otherLoader = appendFactoryFor(String.class, Integer.class);
     multiFactory.append(String.class, String.class, firstFactory);
 
@@ -162,7 +162,7 @@ public class MultiModelLoaderFactoryTest {
 
   @SuppressWarnings("TruthIncompatibleType")
   @Test
-  public void testBuild_withModelClass_excludesModelLoadersForOtherModelClasses() {
+  public void build_withModelClass_excludesModelLoadersForOtherModelClasses() {
     multiFactory.append(String.class, String.class, firstFactory);
     List<ModelLoader<Integer, ?>> modelLoaders = multiFactory.build(Integer.class);
     assertThat(modelLoaders)
@@ -172,7 +172,7 @@ public class MultiModelLoaderFactoryTest {
 
   @Test
   public void
-      testBuild_withModelAndDataClasses_returnsMultipleModelLoaders_ofGivenModelAndDataClasses() {
+      build_withModelAndDataClasses_returnsMultipleModelLoaders_ofGivenModelAndDataClasses() {
     ModelLoader<String, String> otherLoader = appendFactoryFor(String.class, String.class);
     multiFactory.append(String.class, String.class, firstFactory);
 
@@ -181,7 +181,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testBuild_withModelAndDataClasses_excludesModelLoadersForOtherDataClasses() {
+  public void build_withModelAndDataClasses_excludesModelLoadersForOtherDataClasses() {
     multiFactory.append(String.class, String.class, firstFactory);
 
     assertThrows(
@@ -195,7 +195,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testBuild_withModelAndDataClasses_excludesModelLoadersForOtherModelClasses() {
+  public void build_withModelAndDataClasses_excludesModelLoadersForOtherModelClasses() {
     multiFactory.append(String.class, String.class, firstFactory);
 
     assertThrows(
@@ -209,21 +209,21 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testBuild_withModelClass_doesNotMatchSubclassesOfModelClass() {
+  public void build_withModelClass_doesNotMatchSubclassesOfModelClass() {
     ModelLoader<String, Object> subclass = appendFactoryFor(String.class, Object.class);
     List<ModelLoader<Object, ?>> modelLoaders = multiFactory.build(Object.class);
     assertThat(modelLoaders).doesNotContain(subclass);
   }
 
   @Test
-  public void testBuild_withModelClass_matchesSuperclassesOfModelClass() {
+  public void build_withModelClass_matchesSuperclassesOfModelClass() {
     ModelLoader<Object, Object> superclass = appendFactoryFor(Object.class, Object.class);
     List<ModelLoader<String, ?>> modelLoaders = multiFactory.build(String.class);
     assertThat(modelLoaders).contains(superclass);
   }
 
   @Test
-  public void testBuild_withModelAndDataClass_doesNotMatchSubclassesOfModelClass() {
+  public void build_withModelAndDataClass_doesNotMatchSubclassesOfModelClass() {
     appendFactoryFor(String.class, Object.class);
 
     assertThrows(
@@ -237,7 +237,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testBuild_withModelAndDataClass_doesNotMatchSubclassesOfDataClass() {
+  public void build_withModelAndDataClass_doesNotMatchSubclassesOfDataClass() {
     appendFactoryFor(Object.class, String.class);
     assertThrows(
         NoModelLoaderAvailableException.class,
@@ -250,7 +250,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testBuild_withModelAndDataClass_doesMatchSuperclassesOfModelClass() {
+  public void build_withModelAndDataClass_doesMatchSuperclassesOfModelClass() {
     ModelLoader<Object, Object> firstSuperClass = appendFactoryFor(Object.class, Object.class);
     ModelLoader<Object, Object> secondSuperClass = appendFactoryFor(Object.class, Object.class);
     List<ModelLoader<String, Object>> modelLoaders = buildModelLoaders(String.class, Object.class);
@@ -258,7 +258,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testBuild_withModelAndDataClass_matchesSuperclassesOfDataClass() {
+  public void build_withModelAndDataClass_matchesSuperclassesOfDataClass() {
     ModelLoader<Object, Object> firstSuperClass = appendFactoryFor(Object.class, Object.class);
     ModelLoader<Object, Object> secondSuperClass = appendFactoryFor(Object.class, Object.class);
     List<ModelLoader<Object, String>> modelLoaders = buildModelLoaders(Object.class, String.class);
@@ -266,7 +266,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testBuild_withModelAndDataClass_matchesSuperclassOfModelAndDataClass() {
+  public void build_withModelAndDataClass_matchesSuperclassOfModelAndDataClass() {
     ModelLoader<Object, Object> firstSuperclass = appendFactoryFor(Object.class, Object.class);
     ModelLoader<Object, Object> secondSuperclass = appendFactoryFor(Object.class, Object.class);
     List<ModelLoader<String, String>> modelLoaders = buildModelLoaders(String.class, String.class);
@@ -274,7 +274,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testBuild_respectsAppendOrder() {
+  public void build_respectsAppendOrder() {
     ModelLoader<String, String> first = appendFactoryFor(String.class, String.class);
     ModelLoader<String, String> second = appendFactoryFor(String.class, String.class);
     ModelLoader<String, String> third = appendFactoryFor(String.class, String.class);
@@ -283,7 +283,7 @@ public class MultiModelLoaderFactoryTest {
   }
 
   @Test
-  public void testBuild_respectsPrependOrder() {
+  public void build_respectsPrependOrder() {
     ModelLoader<String, String> first = prependFactoryFor(String.class, String.class);
     ModelLoader<String, String> second = prependFactoryFor(String.class, String.class);
     ModelLoader<String, String> third = prependFactoryFor(String.class, String.class);

@@ -42,14 +42,14 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  public void testBitmapIsEncoded() throws IOException {
+  public void bitmapIsEncoded() throws IOException {
     harness.bitmap.setHasAlpha(false);
 
     assertThat(harness.encode()).isEqualTo(harness.expectedData(CompressFormat.JPEG, 90));
   }
 
   @Test
-  public void testBitmapIsEncodedWithGivenQuality() throws IOException {
+  public void bitmapIsEncodedWithGivenQuality() throws IOException {
     int quality = 7;
     harness.setQuality(quality);
     harness.bitmap.setHasAlpha(false);
@@ -58,7 +58,7 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  public void testEncoderObeysNonNullCompressFormat() throws IOException {
+  public void encoderObeysNonNullCompressFormat() throws IOException {
     Bitmap.CompressFormat format = Bitmap.CompressFormat.WEBP;
     harness.setFormat(format);
 
@@ -66,7 +66,7 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  public void testEncoderEncodesJpegWithNullFormatAndBitmapWithoutAlpha() throws IOException {
+  public void encoderEncodesJpegWithNullFormatAndBitmapWithoutAlpha() throws IOException {
     harness.setFormat(null);
     harness.bitmap.setHasAlpha(false);
 
@@ -74,7 +74,7 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  public void testEncoderEncodesPngWithNullFormatAndBitmapWithAlpha() throws IOException {
+  public void encoderEncodesPngWithNullFormatAndBitmapWithAlpha() throws IOException {
     harness.setFormat(null);
     harness.bitmap.setHasAlpha(true);
 
@@ -82,13 +82,13 @@ public class BitmapEncoderTest {
   }
 
   @Test
-  public void testReturnsTrueFromWrite() {
+  public void returnsTrueFromWrite() {
     BitmapEncoder encoder = new BitmapEncoder(harness.arrayPool);
     assertTrue(encoder.encode(harness.resource, harness.file, harness.options));
   }
 
   @Test
-  public void testEncodeStrategy_alwaysReturnsTransformed() {
+  public void encodeStrategy_alwaysReturnsTransformed() {
     BitmapEncoder encoder = new BitmapEncoder(harness.arrayPool);
     assertEquals(EncodeStrategy.TRANSFORMED, encoder.getEncodeStrategy(harness.options));
   }

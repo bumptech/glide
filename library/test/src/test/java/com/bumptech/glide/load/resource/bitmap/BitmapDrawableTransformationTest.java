@@ -69,7 +69,7 @@ public class BitmapDrawableTransformationTest {
   }
 
   @Test
-  public void testReturnsOriginalResourceIfTransformationDoesNotTransform() {
+  public void returnsOriginalResourceIfTransformationDoesNotTransform() {
     int outWidth = 123;
     int outHeight = 456;
     when(wrapped.transform(anyContext(), Util.<Bitmap>anyResource(), eq(outWidth), eq(outHeight)))
@@ -89,7 +89,7 @@ public class BitmapDrawableTransformationTest {
   }
 
   @Test
-  public void testReturnsNewResourceIfTransformationDoesTransform() {
+  public void returnsNewResourceIfTransformationDoesTransform() {
     int outWidth = 999;
     int outHeight = 555;
 
@@ -106,7 +106,7 @@ public class BitmapDrawableTransformationTest {
   }
 
   @Test
-  public void testProvidesBitmapFromGivenResourceToWrappedTransformation() {
+  public void providesBitmapFromGivenResourceToWrappedTransformation() {
     int outWidth = 332;
     int outHeight = 111;
     Resource<Bitmap> transformed = Util.mockResource();
@@ -124,7 +124,7 @@ public class BitmapDrawableTransformationTest {
   }
 
   @Test
-  public void testEquals() throws NoSuchAlgorithmException {
+  public void equals() throws NoSuchAlgorithmException {
     doAnswer(new Util.WriteDigest("wrapped"))
         .when(wrapped)
         .updateDiskCacheKey(any(MessageDigest.class));

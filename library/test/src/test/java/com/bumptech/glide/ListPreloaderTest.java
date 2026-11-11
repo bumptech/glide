@@ -42,7 +42,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testGetItemsIsCalledIncreasing() {
+  public void getItemsIsCalledIncreasing() {
     final AtomicBoolean called = new AtomicBoolean(false);
     final AtomicInteger calledCount = new AtomicInteger();
 
@@ -64,7 +64,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testGetItemsIsCalledInOrderIncreasing() {
+  public void getItemsIsCalledInOrderIncreasing() {
     final int toPreload = 10;
     final List<Object> objects = new ArrayList<>();
     for (int i = 0; i < toPreload; i++) {
@@ -101,7 +101,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testGetItemsIsCalledDecreasing() {
+  public void getItemsIsCalledDecreasing() {
     final AtomicBoolean called = new AtomicBoolean(false);
     final AtomicInteger calledCount = new AtomicInteger();
     ListPreloaderAdapter preloaderAdapter =
@@ -127,7 +127,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testGetItemsIsCalledInOrderDecreasing() {
+  public void getItemsIsCalledInOrderDecreasing() {
     final int toPreload = 10;
     final List<Object> objects = new ArrayList<>();
     for (int i = 0; i < toPreload; i++) {
@@ -168,7 +168,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testGetItemsIsNeverCalledWithEndGreaterThanTotalItems() {
+  public void getItemsIsNeverCalledWithEndGreaterThanTotalItems() {
     final AtomicBoolean called = new AtomicBoolean(false);
     final AtomicInteger calledCount = new AtomicInteger();
     ListPreloaderAdapter preloaderAdapter =
@@ -189,7 +189,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testGetItemsIsNeverCalledWithStartLessThanZero() {
+  public void getItemsIsNeverCalledWithStartLessThanZero() {
     final AtomicBoolean called = new AtomicBoolean(false);
     final AtomicInteger calledCount = new AtomicInteger();
     ListPreloaderAdapter preloaderAdapter =
@@ -215,7 +215,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testDontPreloadItemsRepeatedlyWhileIncreasing() {
+  public void dontPreloadItemsRepeatedlyWhileIncreasing() {
     final AtomicInteger called = new AtomicInteger();
     ListPreloaderAdapter preloaderAdapter =
         new ListPreloaderAdapter() {
@@ -237,7 +237,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testDontPreloadItemsRepeatedlyWhileDecreasing() {
+  public void dontPreloadItemsRepeatedlyWhileDecreasing() {
     final AtomicInteger called = new AtomicInteger();
     ListPreloaderAdapter preloaderAdapter =
         new ListPreloaderAdapter() {
@@ -262,7 +262,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testMultipleItemsForPositionIncreasing() {
+  public void multipleItemsForPositionIncreasing() {
     final List<Object> objects = new ArrayList<>();
     objects.add(new Object());
     objects.add(new Object());
@@ -301,7 +301,7 @@ public class ListPreloaderTest {
   }
 
   @Test
-  public void testMultipleItemsForPositionDecreasing() {
+  public void multipleItemsForPositionDecreasing() {
     final List<Object> objects = new ArrayList<>();
     objects.add(new Object());
     objects.add(new Object());
@@ -357,7 +357,7 @@ public class ListPreloaderTest {
   // It's safe to ignore the return value of containsAllIn.
   @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
-  public void testItemsArePreloadedWithGlide() {
+  public void itemsArePreloadedWithGlide() {
     final List<Object> objects = new ArrayList<>();
     objects.add(new Object());
     objects.add(new Object());

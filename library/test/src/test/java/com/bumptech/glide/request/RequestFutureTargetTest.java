@@ -47,19 +47,19 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testCallsSizeReadyCallbackOnGetSize() {
+  public void callsSizeReadyCallbackOnGetSize() {
     SizeReadyCallback cb = mock(SizeReadyCallback.class);
     future.getSize(cb);
     verify(cb).onSizeReady(eq(width), eq(height));
   }
 
   @Test
-  public void testReturnsFalseForDoneBeforeDone() {
+  public void returnsFalseForDoneBeforeDone() {
     assertFalse(future.isDone());
   }
 
   @Test
-  public void testReturnsTrueFromIsDoneIfDone() {
+  public void returnsTrueFromIsDoneIfDone() {
     future.onResourceReady(
         /* resource= */ new Object(),
         /* model= */ null,
@@ -70,12 +70,12 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testReturnsFalseForIsCancelledBeforeCancelled() {
+  public void returnsFalseForIsCancelledBeforeCancelled() {
     assertFalse(future.isCancelled());
   }
 
   @Test
-  public void testReturnsTrueFromCancelIfNotYetDone() {
+  public void returnsTrueFromCancelIfNotYetDone() {
     assertTrue(future.cancel(false));
   }
 
@@ -94,7 +94,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testDoesNotRepeatedlyClearRequestIfCancelledRepeatedly() {
+  public void doesNotRepeatedlyClearRequestIfCancelledRepeatedly() {
     future.cancel(true);
     future.cancel(true);
 
@@ -102,7 +102,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testDoesNotClearRequestIfCancelledAfterDone() {
+  public void doesNotClearRequestIfCancelledAfterDone() {
     future.onResourceReady(
         /* resource= */ new Object(),
         /* model= */ null,
@@ -115,13 +115,13 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testReturnsTrueFromDoneIfCancelled() {
+  public void returnsTrueFromDoneIfCancelled() {
     future.cancel(true);
     assertTrue(future.isDone());
   }
 
   @Test
-  public void testReturnsFalseFromIsCancelledIfCancelledAfterDone() {
+  public void returnsFalseFromIsCancelledIfCancelledAfterDone() {
     future.onResourceReady(
         /* resource= */ new Object(),
         /* model= */ null,
@@ -134,13 +134,13 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testReturnsTrueFromCancelIfCancelled() {
+  public void returnsTrueFromCancelIfCancelled() {
     future.cancel(true);
     assertTrue(future.isCancelled());
   }
 
   @Test
-  public void testReturnsFalseFromCancelIfDone() {
+  public void returnsFalseFromCancelIfDone() {
     future.onResourceReady(
         /* resource= */ new Object(),
         /* model= */ null,
@@ -151,8 +151,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testReturnsResourceOnGetIfAlreadyDone()
-      throws ExecutionException, InterruptedException {
+  public void returnsResourceOnGetIfAlreadyDone() throws ExecutionException, InterruptedException {
     Object expected = new Object();
     future.onResourceReady(
         /* resource= */ expected,
@@ -165,7 +164,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testReturnsResourceOnGetWithTimeoutIfAlreadyDone()
+  public void returnsResourceOnGetWithTimeoutIfAlreadyDone()
       throws InterruptedException, ExecutionException, TimeoutException {
     Object expected = new Object();
     future.onResourceReady(
@@ -179,55 +178,55 @@ public class RequestFutureTargetTest {
   }
 
   @Test(expected = CancellationException.class)
-  public void testThrowsCancellationExceptionIfCancelledBeforeGet()
+  public void throwsCancellationExceptionIfCancelledBeforeGet()
       throws ExecutionException, InterruptedException {
     future.cancel(true);
     future.get();
   }
 
   @Test(expected = CancellationException.class)
-  public void testThrowsCancellationExceptionIfCancelledBeforeGetWithTimeout()
+  public void throwsCancellationExceptionIfCancelledBeforeGetWithTimeout()
       throws InterruptedException, ExecutionException, TimeoutException {
     future.cancel(true);
     future.get(100, TimeUnit.MILLISECONDS);
   }
 
   @Test(expected = ExecutionException.class)
-  public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGet()
+  public void throwsExecutionExceptionOnGetIfExceptionBeforeGet()
       throws ExecutionException, InterruptedException {
     future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
     future.get();
   }
 
   @Test(expected = ExecutionException.class)
-  public void testThrowsExecutionExceptionOnGetIfExceptionWithNullValueBeforeGet()
+  public void throwsExecutionExceptionOnGetIfExceptionWithNullValueBeforeGet()
       throws ExecutionException, InterruptedException, TimeoutException {
     future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
     future.get(100, TimeUnit.MILLISECONDS);
   }
 
   @Test(expected = ExecutionException.class)
-  public void testThrowsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout()
+  public void throwsExecutionExceptionOnGetIfExceptionBeforeGetWithTimeout()
       throws ExecutionException, InterruptedException, TimeoutException {
     future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
     future.get(100, TimeUnit.MILLISECONDS);
   }
 
   @Test(expected = TimeoutException.class)
-  public void testThrowsTimeoutExceptionOnGetIfFailedToReceiveResourceInTime()
+  public void throwsTimeoutExceptionOnGetIfFailedToReceiveResourceInTime()
       throws InterruptedException, ExecutionException, TimeoutException {
     future.get(1, TimeUnit.MILLISECONDS);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsExceptionIfGetCalledOnMainThread()
+  public void throwsExceptionIfGetCalledOnMainThread()
       throws ExecutionException, InterruptedException {
     future = new RequestFutureTarget<>(width, height, true, waiter);
     future.get();
   }
 
   @Test
-  public void testGetSucceedsOnMainThreadIfDone() throws ExecutionException, InterruptedException {
+  public void getSucceedsOnMainThreadIfDone() throws ExecutionException, InterruptedException {
     future = new RequestFutureTarget<>(width, height, true, waiter);
     future.onResourceReady(
         /* resource= */ new Object(),
@@ -239,7 +238,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test(expected = InterruptedException.class)
-  public void testThrowsInterruptedExceptionIfThreadInterruptedWhenDoneWaiting()
+  public void throwsInterruptedExceptionIfThreadInterruptedWhenDoneWaiting()
       throws InterruptedException, ExecutionException {
     doAnswer(
             new Answer<Void>() {
@@ -256,7 +255,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test(expected = ExecutionException.class)
-  public void testThrowsExecutionExceptionIfLoadFailsWhileWaiting()
+  public void throwsExecutionExceptionIfLoadFailsWhileWaiting()
       throws ExecutionException, InterruptedException {
     doAnswer(
             new Answer<Void>() {
@@ -273,7 +272,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test(expected = CancellationException.class)
-  public void testThrowsCancellationExceptionIfCancelledWhileWaiting()
+  public void throwsCancellationExceptionIfCancelledWhileWaiting()
       throws ExecutionException, InterruptedException {
     doAnswer(
             new Answer<Void>() {
@@ -289,25 +288,25 @@ public class RequestFutureTargetTest {
   }
 
   @Test(expected = TimeoutException.class)
-  public void testThrowsTimeoutExceptionIfFinishesWaitingWithTimeoutAndDoesNotReceiveResult()
+  public void throwsTimeoutExceptionIfFinishesWaitingWithTimeoutAndDoesNotReceiveResult()
       throws ExecutionException, InterruptedException, TimeoutException {
     future.get(1, TimeUnit.MILLISECONDS);
   }
 
   @Test(expected = AssertionError.class)
-  public void testThrowsAssertionErrorIfFinishesWaitingWithoutTimeoutAndDoesNotReceiveResult()
+  public void throwsAssertionErrorIfFinishesWaitingWithoutTimeoutAndDoesNotReceiveResult()
       throws ExecutionException, InterruptedException {
     future.get();
   }
 
   @Test
-  public void testNotifiesAllWhenLoadFails() {
+  public void notifiesAllWhenLoadFails() {
     future.onLoadFailed(/* e= */ null, /* model= */ null, future, /* isFirstResource= */ true);
     verify(waiter).notifyAll(eq(future));
   }
 
   @Test
-  public void testNotifiesAllWhenResourceReady() {
+  public void notifiesAllWhenResourceReady() {
     future.onResourceReady(
         /* resource= */ new Object(),
         /* model= */ null,
@@ -318,13 +317,13 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testNotifiesAllOnCancelIfNotCancelled() {
+  public void notifiesAllOnCancelIfNotCancelled() {
     future.cancel(false);
     verify(waiter).notifyAll(eq(future));
   }
 
   @Test
-  public void testDoesNotNotifyAllOnSecondCancel() {
+  public void doesNotNotifyAllOnSecondCancel() {
     future.cancel(true);
     verify(waiter).notifyAll(eq(future));
     future.cancel(true);
@@ -332,7 +331,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testReturnsResourceIfReceivedWhileWaiting()
+  public void returnsResourceIfReceivedWhileWaiting()
       throws ExecutionException, InterruptedException {
     final Object expected = new Object();
     doAnswer(
@@ -354,7 +353,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testWaitsForeverIfNoTimeoutSet() throws InterruptedException {
+  public void waitsForeverIfNoTimeoutSet() throws InterruptedException {
     try {
       future.get();
     } catch (ExecutionException e) {
@@ -366,7 +365,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testWaitsForGivenTimeoutMillisIfTimeoutSet() throws InterruptedException {
+  public void waitsForGivenTimeoutMillisIfTimeoutSet() throws InterruptedException {
     long timeout = 2;
     try {
       future.get(timeout, TimeUnit.MILLISECONDS);
@@ -380,7 +379,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testConvertsOtherTimeUnitsToMillisForWaiter() throws InterruptedException {
+  public void convertsOtherTimeUnitsToMillisForWaiter() throws InterruptedException {
     long timeoutMicros = 1000;
     try {
       future.get(timeoutMicros, TimeUnit.MICROSECONDS);
@@ -395,7 +394,7 @@ public class RequestFutureTargetTest {
   }
 
   @Test
-  public void testDoesNotWaitIfGivenTimeOutEqualToZero() throws InterruptedException {
+  public void doesNotWaitIfGivenTimeOutEqualToZero() throws InterruptedException {
     try {
       future.get(0, TimeUnit.MILLISECONDS);
     } catch (InterruptedException | ExecutionException e) {

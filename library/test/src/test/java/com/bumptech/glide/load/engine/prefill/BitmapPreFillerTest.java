@@ -62,7 +62,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testAllocationOrderContainsEnoughSizesToFillPoolAndMemoryCache() {
+  public void allocationOrderContainsEnoughSizesToFillPoolAndMemoryCache() {
     PreFillQueue allocationOrder =
         bitmapPreFiller.generateAllocationOrder(
             new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
@@ -73,7 +73,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testAllocationOrderThatDoesNotFitExactlyIntoGivenSizeRoundsDown() {
+  public void allocationOrderThatDoesNotFitExactlyIntoGivenSizeRoundsDown() {
     PreFillType[] sizes =
         new PreFillType[] {
           new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
@@ -108,7 +108,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testAllocationOrderDoesNotOverFillWithMultipleSizes() {
+  public void allocationOrderDoesNotOverFillWithMultipleSizes() {
     PreFillQueue allocationOrder =
         bitmapPreFiller.generateAllocationOrder(
             new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
@@ -132,7 +132,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testAllocationOrderDoesNotOverFillWithMultipleSizesAndWeights() {
+  public void allocationOrderDoesNotOverFillWithMultipleSizesAndWeights() {
     PreFillQueue allocationOrder =
         bitmapPreFiller.generateAllocationOrder(
             new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
@@ -158,7 +158,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testAllocationOrderContainsSingleSizeIfSingleSizeIsProvided() {
+  public void allocationOrderContainsSingleSizeIfSingleSizeIsProvided() {
     PreFillQueue allocationOrder =
         bitmapPreFiller.generateAllocationOrder(
             new PreFillType.Builder(DEFAULT_BITMAP_WIDTH, DEFAULT_BITMAP_HEIGHT)
@@ -174,7 +174,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testAllocationOrderSplitsEvenlyBetweenEqualSizesWithEqualWeights() {
+  public void allocationOrderSplitsEvenlyBetweenEqualSizesWithEqualWeights() {
     PreFillType smallWidth =
         new PreFillType.Builder(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT)
             .setConfig(defaultBitmapConfig)
@@ -202,7 +202,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testAllocationOrderSplitsByteSizeEvenlyBetweenUnEqualSizesWithEqualWeights() {
+  public void allocationOrderSplitsByteSizeEvenlyBetweenUnEqualSizesWithEqualWeights() {
     PreFillType smallWidth =
         new PreFillType.Builder(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT)
             .setConfig(defaultBitmapConfig)
@@ -230,7 +230,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testAllocationOrderSplitsByteSizeUnevenlyBetweenEqualSizesWithUnequalWeights() {
+  public void allocationOrderSplitsByteSizeUnevenlyBetweenEqualSizesWithUnequalWeights() {
     PreFillType doubleWeight =
         new PreFillType.Builder(DEFAULT_BITMAP_WIDTH / 2, DEFAULT_BITMAP_HEIGHT)
             .setConfig(defaultBitmapConfig)
@@ -259,7 +259,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testAllocationOrderRoundRobinsDifferentSizes() {
+  public void allocationOrderRoundRobinsDifferentSizes() {
     when(pool.getMaxSize()).thenReturn(defaultBitmapSize);
     when(cache.getMaxSize()).thenReturn(defaultBitmapSize);
     PreFillType smallWidth =
@@ -291,7 +291,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testSetsConfigOnBuildersToDefaultIfNotSet() {
+  public void setsConfigOnBuildersToDefaultIfNotSet() {
     PreFillType.Builder builder = mock(PreFillType.Builder.class);
     when(builder.build())
         .thenReturn(new PreFillType.Builder(100).setConfig(Bitmap.Config.RGB_565).build());
@@ -309,7 +309,7 @@ public class BitmapPreFillerTest {
   }
 
   @Test
-  public void testDoesNotSetConfigOnBuildersIfConfigIsAlreadySet() {
+  public void doesNotSetConfigOnBuildersIfConfigIsAlreadySet() {
     PreFillType.Builder builder = mock(PreFillType.Builder.class);
 
     when(builder.getConfig()).thenReturn(Bitmap.Config.ARGB_4444);

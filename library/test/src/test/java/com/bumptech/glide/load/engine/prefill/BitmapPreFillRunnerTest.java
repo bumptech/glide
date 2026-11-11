@@ -69,7 +69,7 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testAllocatesABitmapPerSizeInAllocationOrder() {
+  public void allocatesABitmapPerSizeInAllocationOrder() {
     PreFillType size = new PreFillType.Builder(100).setConfig(Bitmap.Config.ARGB_8888).build();
     final int toAdd = 3;
     Map<PreFillType, Integer> allocationOrder = new HashMap<>();
@@ -83,7 +83,7 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testAllocatesBitmapsInOrderGivenByAllocationOrder() {
+  public void allocatesBitmapsInOrderGivenByAllocationOrder() {
     PreFillType smallWidth =
         new PreFillType.Builder(50, 100).setConfig(Bitmap.Config.ARGB_8888).build();
     PreFillType smallHeight =
@@ -117,7 +117,7 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testStopsAllocatingBitmapsUntilNextIdleCallIfAllocationsTakeLongerThanLimit() {
+  public void stopsAllocatingBitmapsUntilNextIdleCallIfAllocationsTakeLongerThanLimit() {
     PreFillType size = new PreFillType.Builder(1).setConfig(Bitmap.Config.ARGB_8888).build();
     Map<PreFillType, Integer> allocationOrder = new HashMap<>();
     allocationOrder.put(size, 3);
@@ -133,14 +133,14 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testPreFillHandlerDoesNotPostIfHasNoBitmapsToAllocate() {
+  public void preFillHandlerDoesNotPostIfHasNoBitmapsToAllocate() {
     BitmapPreFillRunner handler = getHandler(new HashMap<PreFillType, Integer>());
     handler.run();
     verify(mainHandler, never()).postDelayed(any(Runnable.class), anyLong());
   }
 
   @Test
-  public void testPreFillHandlerPostsIfHasBitmapsToAllocateAfterRunning() {
+  public void preFillHandlerPostsIfHasBitmapsToAllocateAfterRunning() {
     PreFillType size = new PreFillType.Builder(1).setConfig(Bitmap.Config.ARGB_8888).build();
     Map<PreFillType, Integer> allocationOrder = new HashMap<>();
     allocationOrder.put(size, 2);
@@ -152,7 +152,7 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testPreFillHandlerPostsWithBackoffIfHasBitmapsToAllocateAfterRunning() {
+  public void preFillHandlerPostsWithBackoffIfHasBitmapsToAllocateAfterRunning() {
     PreFillType size = new PreFillType.Builder(1).setConfig(Bitmap.Config.ARGB_8888).build();
     Map<PreFillType, Integer> allocationOrder = new HashMap<>();
     allocationOrder.put(size, 100);
@@ -190,7 +190,7 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testPreFillHandlerDoesNotPostIfHasBitmapsButIsCancelled() {
+  public void preFillHandlerDoesNotPostIfHasBitmapsButIsCancelled() {
     PreFillType size = new PreFillType.Builder(1).setConfig(Bitmap.Config.ARGB_8888).build();
     Map<PreFillType, Integer> allocationOrder = new HashMap<>();
     allocationOrder.put(size, 2);
@@ -204,7 +204,7 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testAddsBitmapsToMemoryCacheIfMemoryCacheHasEnoughSpaceRemaining() {
+  public void addsBitmapsToMemoryCacheIfMemoryCacheHasEnoughSpaceRemaining() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     when(cache.getMaxSize()).thenReturn(Long.valueOf(Util.getBitmapByteSize(bitmap)));
 
@@ -224,7 +224,7 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testAddsBitmapsToBitmapPoolIfMemoryCacheIsFull() {
+  public void addsBitmapsToBitmapPoolIfMemoryCacheIsFull() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     when(cache.getMaxSize()).thenReturn(0L);
 
@@ -244,7 +244,7 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testAddsBitmapsToPoolIfMemoryCacheIsNotFullButCannotFitBitmap() {
+  public void addsBitmapsToPoolIfMemoryCacheIsNotFullButCannotFitBitmap() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     when(cache.getMaxSize()).thenReturn((long) Util.getBitmapByteSize(bitmap) / 2);
 
@@ -264,7 +264,7 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testDoesAGetFromPoolBeforeAddingForEachSize() {
+  public void doesAGetFromPoolBeforeAddingForEachSize() {
     Bitmap first = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     PreFillType firstSize =
         new PreFillType.Builder(first.getWidth(), first.getHeight())
@@ -299,7 +299,7 @@ public class BitmapPreFillRunnerTest {
   }
 
   @Test
-  public void testDoesNotGetMoreThanOncePerSize() {
+  public void doesNotGetMoreThanOncePerSize() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     PreFillType size =
         new PreFillType.Builder(bitmap.getWidth(), bitmap.getHeight())

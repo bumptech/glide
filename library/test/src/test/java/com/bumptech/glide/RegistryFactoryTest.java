@@ -102,7 +102,7 @@ public class RegistryFactoryTest {
   }
 
   @Test
-  public void testImageDecoderDecodesTinyGif() throws Exception {
+  public void imageDecoderDecodesTinyGif() throws Exception {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
       return;
     }

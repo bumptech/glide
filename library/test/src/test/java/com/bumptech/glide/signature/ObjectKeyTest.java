@@ -12,7 +12,7 @@ public class ObjectKeyTest {
   @Rule public final KeyTester keyTester = new KeyTester();
 
   @Test
-  public void testEqualsHashCodeAndDigest() throws NoSuchAlgorithmException {
+  public void equalsHashCodeAndDigest() throws NoSuchAlgorithmException {
     Object object = new Object();
     keyTester
         .addEquivalenceGroup(new ObjectKey(object), new ObjectKey(object))

@@ -21,7 +21,7 @@ public class FileResourceTest {
   }
 
   @Test
-  public void testReturnsGivenFile() {
+  public void returnsGivenFile() {
     assertEquals(file, resource.get());
   }
 }

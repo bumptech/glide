@@ -75,56 +75,56 @@ public class ByteBufferGifDecoderTest {
   }
 
   @Test
-  public void testDoesNotHandleStreamIfEnabledButNotAGif() throws IOException {
+  public void doesNotHandleStreamIfEnabledButNotAGif() throws IOException {
     assertThat(decoder.handles(ByteBuffer.allocate(0), options)).isFalse();
   }
 
   @Test
-  public void testHandlesStreamIfContainsGifHeaderAndDisabledIsNotSet() throws IOException {
+  public void handlesStreamIfContainsGifHeaderAndDisabledIsNotSet() throws IOException {
     assertThat(decoder.handles(ByteBuffer.wrap(GIF_HEADER), options)).isTrue();
   }
 
   @Test
-  public void testHandlesStreamIfContainsGifHeaderAndDisabledIsFalse() throws IOException {
+  public void handlesStreamIfContainsGifHeaderAndDisabledIsFalse() throws IOException {
     options.set(GifOptions.DISABLE_ANIMATION, false);
     assertThat(decoder.handles(ByteBuffer.wrap(GIF_HEADER), options)).isTrue();
   }
 
   @Test
-  public void testDoesNotHandleStreamIfDisabled() throws IOException {
+  public void doesNotHandleStreamIfDisabled() throws IOException {
     options.set(GifOptions.DISABLE_ANIMATION, true);
     assertThat(decoder.handles(ByteBuffer.wrap(GIF_HEADER), options)).isFalse();
   }
 
   @Test
-  public void testReturnsNullIfParsedHeaderHasZeroFrames() throws IOException {
+  public void returnsNullIfParsedHeaderHasZeroFrames() throws IOException {
     when(gifHeader.getNumFrames()).thenReturn(0);
 
     assertNull(decoder.decode(ByteBuffer.allocate(10), 100, 100, options));
   }
 
   @Test
-  public void testReturnsNullIfParsedHeaderHasFormatError() {
+  public void returnsNullIfParsedHeaderHasFormatError() {
     when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_FORMAT_ERROR);
 
     assertNull(decoder.decode(ByteBuffer.allocate(10), 100, 100, options));
   }
 
   @Test
-  public void testReturnsNullIfParsedHeaderHasOpenError() {
+  public void returnsNullIfParsedHeaderHasOpenError() {
     when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OPEN_ERROR);
 
     assertNull(decoder.decode(ByteBuffer.allocate(10), 100, 100, options));
   }
 
   @Test
-  public void testReturnsParserToPool() throws IOException {
+  public void returnsParserToPool() throws IOException {
     decoder.decode(ByteBuffer.allocate(10), 100, 100, options);
     verify(parserPool).release(eq(parser));
   }
 
   @Test
-  public void testReturnsParserToPoolWhenParserThrows() {
+  public void returnsParserToPoolWhenParserThrows() {
     when(parser.parseHeader()).thenThrow(new RuntimeException("Test"));
     try {
       decoder.decode(ByteBuffer.allocate(10), 100, 100, options);
@@ -137,7 +137,7 @@ public class ByteBufferGifDecoderTest {
   }
 
   @Test
-  public void testReturnsNullIfGifDecoderFailsToDecodeFirstFrame() {
+  public void returnsNullIfGifDecoderFailsToDecodeFirstFrame() {
     when(gifHeader.getNumFrames()).thenReturn(1);
     when(gifHeader.getStatus()).thenReturn(GifDecoder.STATUS_OK);
     when(gifDecoder.getNextFrame()).thenReturn(null);

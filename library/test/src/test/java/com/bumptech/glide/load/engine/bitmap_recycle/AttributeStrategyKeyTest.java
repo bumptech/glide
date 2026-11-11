@@ -28,7 +28,7 @@ public class AttributeStrategyKeyTest {
   }
 
   @Test
-  public void testEquality() {
+  public void equality() {
     Key first = new Key(keyPool);
     first.init(100, 100, Bitmap.Config.ARGB_4444);
     Key second = new Key(keyPool);
@@ -52,7 +52,7 @@ public class AttributeStrategyKeyTest {
   }
 
   @Test
-  public void testReturnsSelfToPoolOnOffer() {
+  public void returnsSelfToPoolOnOffer() {
     Key key = new Key(keyPool);
     key.offer();
 
@@ -60,7 +60,7 @@ public class AttributeStrategyKeyTest {
   }
 
   @Test
-  public void testInitSetsAttributes() {
+  public void initSetsAttributes() {
     Key key = new Key(keyPool);
     key.init(100, 100, Bitmap.Config.ARGB_4444);
 

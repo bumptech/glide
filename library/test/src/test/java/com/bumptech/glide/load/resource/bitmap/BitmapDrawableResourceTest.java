@@ -28,12 +28,12 @@ public class BitmapDrawableResourceTest {
   }
 
   @Test
-  public void testReturnsGivenBitmapFromGet() {
+  public void returnsGivenBitmapFromGet() {
     assertEquals(harness.bitmap, harness.create().get().getBitmap());
   }
 
   @Test
-  public void testReturnsDifferentDrawableEachTime() {
+  public void returnsDifferentDrawableEachTime() {
     BitmapDrawableResource resource = harness.create();
     BitmapDrawable first = resource.get();
     BitmapDrawable second = resource.get();
@@ -42,13 +42,13 @@ public class BitmapDrawableResourceTest {
   }
 
   @Test
-  public void testReturnsSizeFromGivenBitmap() {
+  public void returnsSizeFromGivenBitmap() {
     assertEquals(
         harness.bitmap.getHeight() * harness.bitmap.getRowBytes(), harness.create().getSize());
   }
 
   @Test
-  public void testBitmapIsReturnedToPoolOnRecycle() {
+  public void bitmapIsReturnedToPoolOnRecycle() {
     harness.create().recycle();
 
     verify(harness.bitmapPool).put(eq(harness.bitmap));

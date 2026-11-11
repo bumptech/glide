@@ -41,7 +41,7 @@ public class MemorySizeCalculatorTest {
   }
 
   @Test
-  public void testDefaultMemoryCacheSizeIsTwiceScreenSize() {
+  public void defaultMemoryCacheSizeIsTwiceScreenSize() {
     Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
     float memoryCacheSize = harness.getCalculator().getMemoryCacheSize();
@@ -50,7 +50,7 @@ public class MemorySizeCalculatorTest {
   }
 
   @Test
-  public void testCanSetCustomMemoryCacheSize() {
+  public void canSetCustomMemoryCacheSize() {
     harness.memoryCacheScreens = 9.5f;
     Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
@@ -60,7 +60,7 @@ public class MemorySizeCalculatorTest {
   }
 
   @Test
-  public void testDefaultMemoryCacheSizeIsLimitedByMemoryClass() {
+  public void defaultMemoryCacheSizeIsLimitedByMemoryClass() {
     final int memoryClassBytes =
         Math.round(harness.getScreenSize() * harness.memoryCacheScreens * harness.sizeMultiplier);
 
@@ -72,7 +72,7 @@ public class MemorySizeCalculatorTest {
   }
 
   @Test
-  public void testDefaultBitmapPoolSize() {
+  public void defaultBitmapPoolSize() {
     Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
     float bitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
@@ -81,7 +81,7 @@ public class MemorySizeCalculatorTest {
   }
 
   @Test
-  public void testCanSetCustomBitmapPoolSize() {
+  public void canSetCustomBitmapPoolSize() {
     harness.bitmapPoolScreens = 2f;
     Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass());
 
@@ -91,7 +91,7 @@ public class MemorySizeCalculatorTest {
   }
 
   @Test
-  public void testDefaultBitmapPoolSizeIsLimitedByMemoryClass() {
+  public void defaultBitmapPoolSizeIsLimitedByMemoryClass() {
     final int memoryClassBytes =
         Math.round(harness.getScreenSize() * harness.bitmapPoolScreens * harness.sizeMultiplier);
 
@@ -104,7 +104,7 @@ public class MemorySizeCalculatorTest {
   }
 
   @Test
-  public void testCumulativePoolAndMemoryCacheSizeAreLimitedByMemoryClass() {
+  public void cumulativePoolAndMemoryCacheSizeAreLimitedByMemoryClass() {
     final int memoryClassBytes =
         Math.round(
             harness.getScreenSize()
@@ -120,7 +120,7 @@ public class MemorySizeCalculatorTest {
   }
 
   @Test
-  public void testCumulativePoolAndMemoryCacheSizesAreSmallerOnLowMemoryDevices() {
+  public void cumulativePoolAndMemoryCacheSizesAreSmallerOnLowMemoryDevices() {
     Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass() / 2);
     final int normalMemoryCacheSize = harness.getCalculator().getMemoryCacheSize();
     final int normalBitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
@@ -137,7 +137,7 @@ public class MemorySizeCalculatorTest {
   }
 
   @Test
-  public void testByteArrayPoolSize_withLowRamDevice_isHalfTheSpecifiedBytes() {
+  public void byteArrayPoolSize_withLowRamDevice_isHalfTheSpecifiedBytes() {
     LowRamActivityManager activityManager = Shadow.extract(harness.activityManager);
     activityManager.setMemoryClass(getLargeEnoughMemoryClass());
     activityManager.setIsLowRam();

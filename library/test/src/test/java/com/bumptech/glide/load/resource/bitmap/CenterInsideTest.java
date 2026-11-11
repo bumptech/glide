@@ -65,42 +65,42 @@ public class CenterInsideTest {
   }
 
   @Test
-  public void testReturnsGivenResourceIfMatchesSizeExactly() {
+  public void returnsGivenResourceIfMatchesSizeExactly() {
     Resource<Bitmap> result = centerInside.transform(context, resource, bitmapWidth, bitmapHeight);
 
     assertEquals(resource, result);
   }
 
   @Test
-  public void testReturnsGivenResourceIfSmallerThanTarget() {
+  public void returnsGivenResourceIfSmallerThanTarget() {
     Resource<Bitmap> result = centerInside.transform(context, resource, 150, 150);
 
     assertEquals(resource, result);
   }
 
   @Test
-  public void testReturnsNewResourceIfLargerThanTarget() {
+  public void returnsNewResourceIfLargerThanTarget() {
     Resource<Bitmap> result = centerInside.transform(context, resource, 50, 50);
 
     assertNotEquals(resource, result);
   }
 
   @Test
-  public void testDoesNotRecycleGivenResourceIfMatchesSizeExactly() {
+  public void doesNotRecycleGivenResourceIfMatchesSizeExactly() {
     centerInside.transform(context, resource, bitmapWidth, bitmapHeight);
 
     verify(resource, never()).recycle();
   }
 
   @Test
-  public void testDoesNotRecycleGivenResource() {
+  public void doesNotRecycleGivenResource() {
     centerInside.transform(context, resource, 50, 50);
 
     verify(resource, never()).recycle();
   }
 
   @Test
-  public void testEquals() throws NoSuchAlgorithmException {
+  public void equals() throws NoSuchAlgorithmException {
     doAnswer(new Util.WriteDigest("other"))
         .when(transformation)
         .updateDiskCacheKey(any(MessageDigest.class));

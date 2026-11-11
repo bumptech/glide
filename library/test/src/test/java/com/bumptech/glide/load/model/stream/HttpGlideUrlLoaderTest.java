@@ -26,7 +26,7 @@ public class HttpGlideUrlLoaderTest {
   }
 
   @Test
-  public void testReturnsValidFetcher() {
+  public void returnsValidFetcher() {
     DataFetcher<InputStream> result =
         Preconditions.checkNotNull(loader.buildLoadData(model, 100, 100, new Options())).fetcher;
     assertThat(result).isInstanceOf(HttpUrlFetcher.class);

@@ -23,12 +23,12 @@ public class AttributeStrategyTest {
   }
 
   @Test
-  public void testIGetNullIfNoMatchingBitmapExists() {
+  public void iGetNullIfNoMatchingBitmapExists() {
     assertNull(strategy.get(100, 100, Bitmap.Config.ARGB_8888));
   }
 
   @Test
-  public void testICanAddAndGetABitmapOfTheSameSizeAndDimensions() {
+  public void iCanAddAndGetABitmapOfTheSameSizeAndDimensions() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
     assertEquals(
@@ -36,42 +36,42 @@ public class AttributeStrategyTest {
   }
 
   @Test
-  public void testICantGetABitmapOfTheSameDimensionsButDifferentConfigs() {
+  public void iCantGetABitmapOfTheSameDimensionsButDifferentConfigs() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
     assertNull(strategy.get(100, 100, Bitmap.Config.RGB_565));
   }
 
   @Test
-  public void testICantGetABitmapOfTheSameDimensionsAndSizeButDifferentConfigs() {
+  public void iCantGetABitmapOfTheSameDimensionsAndSizeButDifferentConfigs() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     strategy.put(bitmap);
     assertNull(strategy.get(100, 100, Bitmap.Config.RGB_565));
   }
 
   @Test
-  public void testICantGetABitmapOfDifferentWidths() {
+  public void iCantGetABitmapOfDifferentWidths() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
     assertNull(strategy.get(99, 100, Bitmap.Config.ARGB_8888));
   }
 
   @Test
-  public void testICantGetABitmapOfDifferentHeights() {
+  public void iCantGetABitmapOfDifferentHeights() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
     assertNull(strategy.get(100, 99, Bitmap.Config.ARGB_8888));
   }
 
   @Test
-  public void testICantGetABitmapOfDifferentDimensionsButTheSameSize() {
+  public void iCantGetABitmapOfDifferentDimensionsButTheSameSize() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     strategy.put(bitmap);
     assertNull(strategy.get(50, 200, Bitmap.Config.ARGB_8888));
   }
 
   @Test
-  public void testMultipleBitmapsOfDifferentAttributesCanBeAddedAtOnce() {
+  public void multipleBitmapsOfDifferentAttributesCanBeAddedAtOnce() {
     Bitmap first = Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565);
     Bitmap second = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     Bitmap third = Bitmap.createBitmap(120, 120, Bitmap.Config.RGB_565);
@@ -86,7 +86,7 @@ public class AttributeStrategyTest {
   }
 
   @Test
-  public void testLeastRecentlyUsedAttributeSetIsRemovedFirst() {
+  public void leastRecentlyUsedAttributeSetIsRemovedFirst() {
     final Bitmap leastRecentlyUsed = Bitmap.createBitmap(100, 100, Bitmap.Config.ALPHA_8);
     final Bitmap other = Bitmap.createBitmap(1000, 1000, Bitmap.Config.RGB_565);
     final Bitmap mostRecentlyUsed = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);

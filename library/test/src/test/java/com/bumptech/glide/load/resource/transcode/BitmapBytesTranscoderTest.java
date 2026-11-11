@@ -28,18 +28,18 @@ public class BitmapBytesTranscoderTest {
   }
 
   @Test
-  public void testReturnsBytesOfGivenBitmap() {
+  public void returnsBytesOfGivenBitmap() {
     assertThat(harness.getTranscodeResult()).isEqualTo(harness.getExpectedData());
   }
 
   @Test
-  public void testUsesGivenQuality() {
+  public void usesGivenQuality() {
     harness.quality = 66;
     assertThat(harness.getTranscodeResult()).isEqualTo(harness.getExpectedData());
   }
 
   @Test
-  public void testUsesGivenFormat() {
+  public void usesGivenFormat() {
     for (Bitmap.CompressFormat format : Bitmap.CompressFormat.values()) {
       harness.compressFormat = format;
       assertThat(harness.getTranscodeResult()).isEqualTo(harness.getExpectedData());
@@ -47,7 +47,7 @@ public class BitmapBytesTranscoderTest {
   }
 
   @Test
-  public void testBitmapResourceIsRecycled() {
+  public void bitmapResourceIsRecycled() {
     harness.getTranscodeResult();
 
     verify(harness.bitmapResource).recycle();

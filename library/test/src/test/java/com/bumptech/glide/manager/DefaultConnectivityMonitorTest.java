@@ -60,14 +60,14 @@ public class DefaultConnectivityMonitorTest {
   }
 
   @Test
-  public void testRegistersReceiverOnStart() {
+  public void registersReceiverOnStart() {
     monitor.onStart();
 
     assertThat(harness.getRegisteredReceivers()).isEqualTo(1);
   }
 
   @Test
-  public void testDoesNotRegisterTwiceOnStart() {
+  public void doesNotRegisterTwiceOnStart() {
     monitor.onStart();
     monitor.onStart();
 
@@ -75,7 +75,7 @@ public class DefaultConnectivityMonitorTest {
   }
 
   @Test
-  public void testUnregistersReceiverOnStop() {
+  public void unregistersReceiverOnStop() {
     monitor.onStart();
     monitor.onStop();
 
@@ -83,7 +83,7 @@ public class DefaultConnectivityMonitorTest {
   }
 
   @Test
-  public void testHandlesUnregisteringTwiceInARow() {
+  public void handlesUnregisteringTwiceInARow() {
     monitor.onStop();
     monitor.onStop();
 
@@ -91,7 +91,7 @@ public class DefaultConnectivityMonitorTest {
   }
 
   @Test
-  public void testDoesNotNotifyListenerIfConnectedAndBecomesConnected() {
+  public void doesNotNotifyListenerIfConnectedAndBecomesConnected() {
     harness.connect();
 
     monitor.onStart();
@@ -101,7 +101,7 @@ public class DefaultConnectivityMonitorTest {
   }
 
   @Test
-  public void testNotifiesListenerIfConnectedAndBecomesDisconnected() {
+  public void notifiesListenerIfConnectedAndBecomesDisconnected() {
     harness.connect();
 
     monitor.onStart();
@@ -112,7 +112,7 @@ public class DefaultConnectivityMonitorTest {
   }
 
   @Test
-  public void testNotifiesListenerIfDisconnectedAndBecomesConnected() {
+  public void notifiesListenerIfDisconnectedAndBecomesConnected() {
     harness.disconnect();
 
     monitor.onStart();
@@ -123,7 +123,7 @@ public class DefaultConnectivityMonitorTest {
   }
 
   @Test
-  public void testDoesNotNotifyListenerWhenNotRegistered() {
+  public void doesNotNotifyListenerWhenNotRegistered() {
     harness.disconnect();
 
     monitor.onStart();

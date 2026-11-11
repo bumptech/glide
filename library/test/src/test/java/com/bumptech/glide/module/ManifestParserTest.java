@@ -66,12 +66,12 @@ public class ManifestParserTest {
   }
 
   @Test
-  public void testParse_returnsEmptyListIfNoModulesListed() {
+  public void parse_returnsEmptyListIfNoModulesListed() {
     assertThat(parser.parse()).isEmpty();
   }
 
   @Test
-  public void testParse_withSingleValidModuleName_returnsListContainingModule() {
+  public void parse_withSingleValidModuleName_returnsListContainingModule() {
     addModuleToManifest(TestModule1.class);
 
     List<GlideModule> modules = parser.parse();
@@ -80,7 +80,7 @@ public class ManifestParserTest {
   }
 
   @Test
-  public void testParse_withMultipleValidModuleNames_returnsListContainingModules() {
+  public void parse_withMultipleValidModuleNames_returnsListContainingModules() {
     addModuleToManifest(TestModule1.class);
     addModuleToManifest(TestModule2.class);
 
@@ -92,20 +92,20 @@ public class ManifestParserTest {
   }
 
   @Test
-  public void testParse_withValidModuleName_ignoresMetadataWithoutGlideModuleValue() {
+  public void parse_withValidModuleName_ignoresMetadataWithoutGlideModuleValue() {
     applicationInfo.metaData.putString(TestModule1.class.getName(), MODULE_VALUE + "test");
     assertThat(parser.parse()).isEmpty();
   }
 
   @Test(expected = RuntimeException.class)
-  public void testThrows_whenModuleNameNotFound() {
+  public void throws_whenModuleNameNotFound() {
     addToManifest("fakeClassName");
 
     parser.parse();
   }
 
   @Test(expected = RuntimeException.class)
-  public void testThrows_whenClassInManifestIsNotAModule() {
+  public void throws_whenClassInManifestIsNotAModule() {
     addModuleToManifest(InvalidClass.class);
 
     parser.parse();

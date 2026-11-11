@@ -19,7 +19,7 @@ public class OptionsTest {
   @Rule public final KeyTester keyTester = new KeyTester();
 
   @Test
-  public void testEquals() {
+  public void equals() {
     Option<Object> firstMemoryOption = Option.memory("firstKey");
     Object firstValue = new Object();
     Option<Object> secondMemoryOption = Option.memory("secondKey");

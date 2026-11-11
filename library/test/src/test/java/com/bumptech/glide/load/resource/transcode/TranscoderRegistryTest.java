@@ -20,12 +20,12 @@ public class TranscoderRegistryTest {
   }
 
   @Test
-  public void testReturnsUnitDecoderIfClassesAreIdentical() {
+  public void returnsUnitDecoderIfClassesAreIdentical() {
     assertEquals(UnitTranscoder.get(), factories.get(Object.class, Object.class));
   }
 
   @Test
-  public void testCanRegisterAndRetrieveResourceTranscoder() {
+  public void canRegisterAndRetrieveResourceTranscoder() {
     @SuppressWarnings("unchecked")
     ResourceTranscoder<File, String> transcoder = mock(ResourceTranscoder.class);
     factories.register(File.class, String.class, transcoder);
@@ -34,7 +34,7 @@ public class TranscoderRegistryTest {
   }
 
   @Test
-  public void testDoesNotThrowIfRequestCanBeSatisfiedByUnitTranscoder() {
+  public void doesNotThrowIfRequestCanBeSatisfiedByUnitTranscoder() {
     // Assignable from.
     assertNotNull(factories.get(Integer.class, Number.class));
     // Equal to.
@@ -42,7 +42,7 @@ public class TranscoderRegistryTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfNoTranscoderRegistered() {
+  public void throwsIfNoTranscoderRegistered() {
     factories.get(File.class, Integer.class);
   }
 }

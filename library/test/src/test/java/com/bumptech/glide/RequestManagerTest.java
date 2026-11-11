@@ -97,21 +97,21 @@ public class RequestManagerTest {
   }
 
   @Test
-  public void testPauseRequestsPausesRequests() {
+  public void pauseRequestsPausesRequests() {
     manager.pauseRequests();
 
     verify(requestTracker).pauseRequests();
   }
 
   @Test
-  public void testResumeRequestsResumesRequests() {
+  public void resumeRequestsResumesRequests() {
     manager.resumeRequests();
 
     verify(requestTracker).resumeRequests();
   }
 
   @Test
-  public void testPausesRequestsOnStop() {
+  public void pausesRequestsOnStop() {
     manager.onStart();
     manager.onStop();
 
@@ -119,38 +119,38 @@ public class RequestManagerTest {
   }
 
   @Test
-  public void testResumesRequestsOnStart() {
+  public void resumesRequestsOnStart() {
     manager.onStart();
 
     verify(requestTracker).resumeRequests();
   }
 
   @Test
-  public void testClearsRequestsOnDestroy() {
+  public void clearsRequestsOnDestroy() {
     manager.onDestroy();
 
     verify(requestTracker).clearRequests();
   }
 
   @Test
-  public void testAddsConnectivityMonitorToLifecycleWhenConstructed() {
+  public void addsConnectivityMonitorToLifecycleWhenConstructed() {
     verify(lifecycle).addListener(eq(connectivityMonitor));
   }
 
   @Test
-  public void testAddsSelfToLifecycleWhenConstructed() {
+  public void addsSelfToLifecycleWhenConstructed() {
     verify(lifecycle).addListener(eq(manager));
   }
 
   @Test
-  public void testRestartsRequestOnConnected() {
+  public void restartsRequestOnConnected() {
     connectivityListener.onConnectivityChanged(true);
 
     verify(requestTracker).restartRequests();
   }
 
   @Test
-  public void testDoesNotRestartRequestsOnDisconnected() {
+  public void doesNotRestartRequestsOnDisconnected() {
     connectivityListener.onConnectivityChanged(false);
 
     verify(requestTracker, never()).restartRequests();
@@ -181,7 +181,7 @@ public class RequestManagerTest {
   }
 
   @Test
-  public void testDelegatesIsPausedToRequestTracker() {
+  public void delegatesIsPausedToRequestTracker() {
     when(requestTracker.isPaused()).thenReturn(true);
     assertTrue(manager.isPaused());
     when(requestTracker.isPaused()).thenReturn(false);

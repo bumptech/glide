@@ -69,19 +69,19 @@ public class DataUrlLoaderTest {
   }
 
   @Test
-  public void testHandleDataUri() {
+  public void handleDataUri() {
     assertTrue(dataUrlLoader.handles(VALID_PNG));
   }
 
   @Test
-  public void testHandleFalseDataUri() {
+  public void handleFalseDataUri() {
     assertFalse(dataUrlLoader.handles(INVALID_URL_WRONG_SCHEME1));
     assertFalse(dataUrlLoader.handles(INVALID_URL_WRONG_SCHEME2));
     assertFalse(dataUrlLoader.handles(INVALID_URL_WRONG_SCHEME3));
   }
 
   @Test
-  public void testDecode() throws IOException {
+  public void decode() throws IOException {
     byte[] expected =
         Base64.decode(VALID_PNG.substring(VALID_PNG.indexOf(',') + 1), Base64.DEFAULT);
     CallBack callback = new CallBack();
@@ -93,7 +93,7 @@ public class DataUrlLoaderTest {
   }
 
   @Test
-  public void testDecodeInvalidScheme() {
+  public void decodeInvalidScheme() {
     fetcher = dataUrlLoader.buildLoadData(INVALID_URL_WRONG_SCHEME1, -1, -1, options).fetcher;
     CallBack callback = new CallBack();
     fetcher.loadData(Priority.HIGH, callback);
@@ -101,7 +101,7 @@ public class DataUrlLoaderTest {
   }
 
   @Test
-  public void testDecodeMissingComma() {
+  public void decodeMissingComma() {
     fetcher = dataUrlLoader.buildLoadData(INVALID_URL_MISSING_COMMA, -1, -1, options).fetcher;
     CallBack callback = new CallBack();
     fetcher.loadData(Priority.HIGH, callback);
@@ -109,7 +109,7 @@ public class DataUrlLoaderTest {
   }
 
   @Test
-  public void testDecodeWrongEncoding() {
+  public void decodeWrongEncoding() {
     fetcher = dataUrlLoader.buildLoadData(INVALID_URL_WRONG_ENCODING, -1, -1, options).fetcher;
     CallBack callback = new CallBack();
     fetcher.loadData(Priority.HIGH, callback);

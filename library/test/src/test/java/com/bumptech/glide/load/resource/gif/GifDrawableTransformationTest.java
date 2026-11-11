@@ -60,7 +60,7 @@ public class GifDrawableTransformationTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  public void testSetsTransformationAsFrameTransformation() {
+  public void setsTransformationAsFrameTransformation() {
     Resource<GifDrawable> resource = mockResource();
     GifDrawable gifDrawable = mock(GifDrawable.class);
     Transformation<Bitmap> unitTransformation = UnitTransformation.get();
@@ -86,7 +86,7 @@ public class GifDrawableTransformationTest {
   }
 
   @Test
-  public void testEquals() throws NoSuchAlgorithmException {
+  public void equals() throws NoSuchAlgorithmException {
     doAnswer(new Util.WriteDigest("first"))
         .when(wrapped)
         .updateDiskCacheKey(isA(MessageDigest.class));

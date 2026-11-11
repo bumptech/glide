@@ -34,7 +34,7 @@ public class ByteArrayLoaderTest {
   }
 
   @Test
-  public void testCanHandleByteArray() {
+  public void canHandleByteArray() {
     byte[] data = new byte[10];
     DataFetcher<Object> fetcher =
         Preconditions.checkNotNull(loader.buildLoadData(data, -1, -1, options)).fetcher;
@@ -42,7 +42,7 @@ public class ByteArrayLoaderTest {
   }
 
   @Test
-  public void testFetcherReturnsObjectReceivedFromConverter() throws IOException {
+  public void fetcherReturnsObjectReceivedFromConverter() throws IOException {
     byte[] data = "fake".getBytes("UTF-8");
     Object expected = new Object();
     when(converter.convert(eq(data))).thenReturn(expected);
@@ -54,7 +54,7 @@ public class ByteArrayLoaderTest {
   }
 
   @Test
-  public void testFetcherReturnsDataClassFromConverter() {
+  public void fetcherReturnsDataClassFromConverter() {
     when(converter.getDataClass()).thenReturn(Object.class);
     assertEquals(
         Object.class,

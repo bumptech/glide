@@ -44,12 +44,12 @@ public class ExceptionPassthroughInputStreamTest {
   }
 
   @Test
-  public void testReturnsWrappedAvailable() throws IOException {
+  public void returnsWrappedAvailable() throws IOException {
     assertEquals(validInputStream.available(), validWrapper.available());
   }
 
   @Test
-  public void testCallsCloseOnWrapped() throws IOException {
+  public void callsCloseOnWrapped() throws IOException {
     ExceptionPassthroughInputStream wrapper = new ExceptionPassthroughInputStream();
     final AtomicBoolean isClosed = new AtomicBoolean();
     wrapper.setInputStream(
@@ -70,7 +70,7 @@ public class ExceptionPassthroughInputStreamTest {
   }
 
   @Test
-  public void testCallsMarkOnWrapped() throws IOException {
+  public void callsMarkOnWrapped() throws IOException {
     int toMark = 5;
     validWrapper.mark(toMark);
     assertThat(validWrapper.read(new byte[5], 0, 5)).isEqualTo(5);
@@ -79,18 +79,18 @@ public class ExceptionPassthroughInputStreamTest {
   }
 
   @Test
-  public void testReturnsWrappedMarkSupported() {
+  public void returnsWrappedMarkSupported() {
     assertTrue(validWrapper.markSupported());
   }
 
   @Test
-  public void testCallsReadByteArrayOnWrapped() throws IOException {
+  public void callsReadByteArrayOnWrapped() throws IOException {
     byte[] buffer = new byte[8];
     assertEquals(buffer.length, validWrapper.read(buffer));
   }
 
   @Test
-  public void testCallsReadArrayWithOffsetAndCountOnWrapped() throws IOException {
+  public void callsReadArrayWithOffsetAndCountOnWrapped() throws IOException {
     int offset = 1;
     int count = 4;
     byte[] buffer = new byte[5];
@@ -99,14 +99,14 @@ public class ExceptionPassthroughInputStreamTest {
   }
 
   @Test
-  public void testCallsReadOnWrapped() throws IOException {
+  public void callsReadOnWrapped() throws IOException {
     assertEquals(0, validWrapper.read());
     assertEquals(1, validWrapper.read());
     assertEquals(2, validWrapper.read());
   }
 
   @Test
-  public void testCallsResetOnWrapped() throws IOException {
+  public void callsResetOnWrapped() throws IOException {
     validWrapper.mark(5);
     assertThat(validWrapper.read()).isEqualTo(0);
     assertThat(validWrapper.read()).isEqualTo(1);
@@ -115,14 +115,14 @@ public class ExceptionPassthroughInputStreamTest {
   }
 
   @Test
-  public void testCallsSkipOnWrapped() throws IOException {
+  public void callsSkipOnWrapped() throws IOException {
     int toSkip = 5;
     assertThat(validWrapper.skip(toSkip)).isEqualTo(toSkip);
     assertThat(validWrapper.read()).isEqualTo(5);
   }
 
   @Test
-  public void testCatchesExceptionOnRead() {
+  public void catchesExceptionOnRead() {
     SocketTimeoutException expected =
         assertThrows(
             SocketTimeoutException.class,
@@ -136,7 +136,7 @@ public class ExceptionPassthroughInputStreamTest {
   }
 
   @Test
-  public void testCatchesExceptionOnReadBuffer() {
+  public void catchesExceptionOnReadBuffer() {
     SocketTimeoutException exception =
         assertThrows(
             SocketTimeoutException.class,
@@ -150,7 +150,7 @@ public class ExceptionPassthroughInputStreamTest {
   }
 
   @Test
-  public void testCatchesExceptionOnReadBufferWithOffsetAndCount() {
+  public void catchesExceptionOnReadBufferWithOffsetAndCount() {
     SocketTimeoutException exception =
         assertThrows(
             SocketTimeoutException.class,
@@ -164,7 +164,7 @@ public class ExceptionPassthroughInputStreamTest {
   }
 
   @Test
-  public void testCatchesExceptionOnSkip() {
+  public void catchesExceptionOnSkip() {
     SocketTimeoutException exception =
         assertThrows(
             SocketTimeoutException.class,
@@ -178,13 +178,13 @@ public class ExceptionPassthroughInputStreamTest {
   }
 
   @Test
-  public void testExceptionIsNotSetInitially() {
+  public void exceptionIsNotSetInitially() {
     assertNull(validWrapper.getException());
   }
 
   @SuppressWarnings("ResultOfMethodCallIgnored")
   @Test
-  public void testResetsExceptionToNullOnRelease() {
+  public void resetsExceptionToNullOnRelease() {
     assertThrows(
         SocketTimeoutException.class,
         new ThrowingRunnable() {
@@ -198,14 +198,14 @@ public class ExceptionPassthroughInputStreamTest {
   }
 
   @Test
-  public void testCanReleaseAnObtainFromPool() {
+  public void canReleaseAnObtainFromPool() {
     validWrapper.release();
     InputStream fromPool = ExceptionPassthroughInputStream.obtain(validInputStream);
     assertEquals(validWrapper, fromPool);
   }
 
   @Test
-  public void testCanObtainNewStreamFromPool() throws IOException {
+  public void canObtainNewStreamFromPool() throws IOException {
     InputStream fromPool = ExceptionPassthroughInputStream.obtain(validInputStream);
     int read = fromPool.read();
     assertEquals(0, read);

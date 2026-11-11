@@ -32,7 +32,7 @@ public class PreloadTargetTest {
   }
 
   @Test
-  public void testCallsSizeReadyWithGivenDimensions() {
+  public void callsSizeReadyWithGivenDimensions() {
     int width = 1234;
     int height = 456;
     PreloadTarget<Object> target = PreloadTarget.obtain(requestManager, width, height);

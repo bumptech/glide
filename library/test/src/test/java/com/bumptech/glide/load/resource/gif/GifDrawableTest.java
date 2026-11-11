@@ -95,7 +95,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testShouldDrawFirstFrameBeforeAnyFrameRead() {
+  public void shouldDrawFirstFrameBeforeAnyFrameRead() {
     Canvas canvas = new Canvas();
     drawable.draw(canvas);
 
@@ -110,7 +110,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testDoesDrawCurrentFrameIfOneIsAvailable() {
+  public void doesDrawCurrentFrameIfOneIsAvailable() {
     Canvas canvas = mock(Canvas.class);
     Bitmap currentFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_4444);
     when(frameLoader.getCurrentFrame()).thenReturn(currentFrame);
@@ -121,7 +121,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testRequestsNextFrameOnStart() {
+  public void requestsNextFrameOnStart() {
     drawable.setVisible(true, true);
     drawable.start();
 
@@ -129,14 +129,14 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testRequestsNextFrameOnStartWithoutCallToSetVisible() {
+  public void requestsNextFrameOnStartWithoutCallToSetVisible() {
     drawable.start();
 
     verify(frameLoader).subscribe(eq(drawable));
   }
 
   @Test
-  public void testDoesNotRequestNextFrameOnStartIfGotCallToSetVisibleWithVisibleFalse() {
+  public void doesNotRequestNextFrameOnStartIfGotCallToSetVisibleWithVisibleFalse() {
     drawable.setVisible(false, false);
     drawable.start();
 
@@ -144,7 +144,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testDoesNotRequestNextFrameOnStartIfHasSingleFrame() {
+  public void doesNotRequestNextFrameOnStartIfHasSingleFrame() {
     when(frameLoader.getFrameCount()).thenReturn(1);
     drawable.setVisible(true, false);
     drawable.start();
@@ -153,7 +153,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testInvalidatesSelfOnStartIfHasSingleFrame() {
+  public void invalidatesSelfOnStartIfHasSingleFrame() {
     when(frameLoader.getFrameCount()).thenReturn(1);
     drawable.setVisible(true, false);
     drawable.start();
@@ -162,7 +162,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testShouldInvalidateSelfOnRun() {
+  public void shouldInvalidateSelfOnRun() {
     drawable.setVisible(true, true);
     drawable.start();
 
@@ -170,7 +170,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testShouldNotScheduleItselfIfAlreadyRunning() {
+  public void shouldNotScheduleItselfIfAlreadyRunning() {
     drawable.setVisible(true, true);
     drawable.start();
     drawable.start();
@@ -179,12 +179,12 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testReturnsFalseFromIsRunningWhenNotRunning() {
+  public void returnsFalseFromIsRunningWhenNotRunning() {
     assertFalse(drawable.isRunning());
   }
 
   @Test
-  public void testReturnsTrueFromIsRunningWhenRunning() {
+  public void returnsTrueFromIsRunningWhenRunning() {
     drawable.setVisible(true, true);
     drawable.start();
 
@@ -192,7 +192,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testInvalidatesSelfWhenFrameReady() {
+  public void invalidatesSelfWhenFrameReady() {
     drawable.setIsRunning(true);
     drawable.onFrameReady();
 
@@ -200,7 +200,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testDoesNotStartLoadingNextFrameWhenCurrentFinishesIfHasNoCallback() {
+  public void doesNotStartLoadingNextFrameWhenCurrentFinishesIfHasNoCallback() {
     drawable.setIsRunning(true);
     drawable.setCallback(null);
     drawable.onFrameReady();
@@ -209,7 +209,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testStopsWhenCurrentFrameFinishesIfHasNoCallback() {
+  public void stopsWhenCurrentFrameFinishesIfHasNoCallback() {
     drawable.setIsRunning(true);
     drawable.setCallback(null);
     drawable.onFrameReady();
@@ -218,7 +218,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testUnsubscribesWhenCurrentFinishesIfHasNoCallback() {
+  public void unsubscribesWhenCurrentFinishesIfHasNoCallback() {
     drawable.setIsRunning(true);
     drawable.setCallback(null);
     drawable.onFrameReady();
@@ -227,7 +227,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testSetsIsRunningFalseOnStop() {
+  public void setsIsRunningFalseOnStop() {
     drawable.start();
     drawable.stop();
 
@@ -235,7 +235,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testStopsOnSetVisibleFalse() {
+  public void stopsOnSetVisibleFalse() {
     drawable.start();
 
     drawable.setVisible(false, true);
@@ -244,7 +244,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testStartsOnSetVisibleTrueIfRunning() {
+  public void startsOnSetVisibleTrueIfRunning() {
     drawable.start();
     drawable.setVisible(false, false);
     drawable.setVisible(true, true);
@@ -253,14 +253,14 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testDoesNotStartOnVisibleTrueIfNotRunning() {
+  public void doesNotStartOnVisibleTrueIfNotRunning() {
     drawable.setVisible(true, true);
 
     assertFalse(drawable.isRunning());
   }
 
   @Test
-  public void testDoesNotStartOnSetVisibleIfStartedAndStopped() {
+  public void doesNotStartOnSetVisibleIfStartedAndStopped() {
     drawable.start();
     drawable.stop();
     drawable.setVisible(true, true);
@@ -269,7 +269,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testDoesNotImmediatelyRunIfStartedWhileNotVisible() {
+  public void doesNotImmediatelyRunIfStartedWhileNotVisible() {
     drawable.setVisible(false, false);
     drawable.start();
 
@@ -277,12 +277,12 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testGetOpacityReturnsTransparent() {
+  public void getOpacityReturnsTransparent() {
     assertEquals(PixelFormat.TRANSPARENT, drawable.getOpacity());
   }
 
   @Test
-  public void testReturnsFrameCountFromDecoder() {
+  public void returnsFrameCountFromDecoder() {
     int expected = 4;
     when(frameLoader.getFrameCount()).thenReturn(expected);
 
@@ -290,7 +290,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testReturnsDefaultFrameIndex() {
+  public void returnsDefaultFrameIndex() {
     final int expected = -1;
 
     when(frameLoader.getCurrentIndex()).thenReturn(expected);
@@ -299,7 +299,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testReturnsNonDefaultFrameIndex() {
+  public void returnsNonDefaultFrameIndex() {
     final int expected = 100;
 
     when(frameLoader.getCurrentIndex()).thenReturn(expected);
@@ -308,31 +308,31 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testRecycleCallsClearOnFrameManager() {
+  public void recycleCallsClearOnFrameManager() {
     drawable.recycle();
 
     verify(frameLoader).clear();
   }
 
   @Test
-  public void testIsNotRecycledIfNotRecycled() {
+  public void isNotRecycledIfNotRecycled() {
     assertFalse(drawable.isRecycled());
   }
 
   @Test
-  public void testIsRecycledAfterRecycled() {
+  public void isRecycledAfterRecycled() {
     drawable.recycle();
 
     assertTrue(drawable.isRecycled());
   }
 
   @Test
-  public void testReturnsNonNullConstantState() {
+  public void returnsNonNullConstantState() {
     assertNotNull(drawable.getConstantState());
   }
 
   @Test
-  public void testReturnsSizeFromFrameLoader() {
+  public void returnsSizeFromFrameLoader() {
     int size = 1243;
     when(frameLoader.getSize()).thenReturn(size);
 
@@ -340,7 +340,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testReturnsNewDrawableFromConstantState() {
+  public void returnsNewDrawableFromConstantState() {
     Bitmap firstFrame = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     drawable =
         new GifDrawable(
@@ -359,13 +359,13 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testReturnsFrameWidthAndHeightForIntrinsicDimensions() {
+  public void returnsFrameWidthAndHeightForIntrinsicDimensions() {
     assertEquals(frameWidth, drawable.getIntrinsicWidth());
     assertEquals(frameHeight, drawable.getIntrinsicHeight());
   }
 
   @Test
-  public void testLoopsASingleTimeIfLoopCountIsSetToOne() {
+  public void loopsASingleTimeIfLoopCountIsSetToOne() {
     final int loopCount = 1;
     final int frameCount = 2;
     when(frameLoader.getFrameCount()).thenReturn(frameCount);
@@ -380,7 +380,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testLoopsForeverIfLoopCountIsSetToLoopForever() {
+  public void loopsForeverIfLoopCountIsSetToLoopForever() {
     final int loopCount = 40;
     final int frameCount = 2;
 
@@ -396,7 +396,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testLoopsOnceIfLoopCountIsSetToOneWithThreeFrames() {
+  public void loopsOnceIfLoopCountIsSetToOneWithThreeFrames() {
     final int loopCount = 1;
     final int frameCount = 3;
 
@@ -412,7 +412,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testLoopsThreeTimesIfLoopCountIsSetToThree() {
+  public void loopsThreeTimesIfLoopCountIsSetToThree() {
     final int loopCount = 3;
     final int frameCount = 2;
 
@@ -428,7 +428,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testCallingStartResetsLoopCounter() {
+  public void callingStartResetsLoopCounter() {
     when(frameLoader.getFrameCount()).thenReturn(2);
     drawable.setLoopCount(1);
     drawable.setVisible(true, true);
@@ -452,7 +452,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testChangingTheLoopCountAfterHittingTheMaxLoopCount() {
+  public void changingTheLoopCountAfterHittingTheMaxLoopCount() {
     final int initialLoopCount = 1;
     final int frameCount = 2;
 
@@ -478,12 +478,12 @@ public class GifDrawableTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testThrowsIfGivenLoopCountLessThanZeroAndNotInfinite() {
+  public void throwsIfGivenLoopCountLessThanZeroAndNotInfinite() {
     drawable.setLoopCount(-2);
   }
 
   @Test
-  public void testUsesDecoderTotalLoopCountIfLoopCountIsLoopIntrinsic() {
+  public void usesDecoderTotalLoopCountIfLoopCountIsLoopIntrinsic() {
     final int frameCount = 3;
     final int loopCount = 2;
     when(frameLoader.getLoopCount()).thenReturn(loopCount);
@@ -499,7 +499,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testLoopsForeverIfLoopCountIsLoopIntrinsicAndTotalIterationCountIsForever() {
+  public void loopsForeverIfLoopCountIsLoopIntrinsicAndTotalIterationCountIsForever() {
     final int frameCount = 3;
     final int loopCount = 40;
     when(frameLoader.getLoopCount()).thenReturn(GifDecoder.TOTAL_ITERATION_COUNT_FOREVER);
@@ -515,7 +515,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testDoesNotDrawFrameAfterRecycle() {
+  public void doesNotDrawFrameAfterRecycle() {
     Bitmap bitmap = Bitmap.createBitmap(100, 112341, Bitmap.Config.RGB_565);
     drawable.setVisible(true, true);
     drawable.start();
@@ -528,7 +528,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testSetsFrameTransformationOnFrameManager() {
+  public void setsFrameTransformationOnFrameManager() {
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     drawable.setFrameTransformation(transformation, bitmap);
 
@@ -536,7 +536,7 @@ public class GifDrawableTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfConstructedWithNullFirstFrame() {
+  public void throwsIfConstructedWithNullFirstFrame() {
     new GifDrawable(
         ApplicationProvider.getApplicationContext(),
         mock(GifDecoder.class),
@@ -547,7 +547,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testAppliesGravityOnDrawAfterBoundsChange() {
+  public void appliesGravityOnDrawAfterBoundsChange() {
     Rect bounds = new Rect(0, 0, frameWidth * 2, frameHeight * 2);
     drawable.setBounds(bounds);
 
@@ -558,14 +558,14 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testSetAlphaSetsAlphaOnPaint() {
+  public void setAlphaSetsAlphaOnPaint() {
     int alpha = 100;
     drawable.setAlpha(alpha);
     verify(paint).setAlpha(eq(alpha));
   }
 
   @Test
-  public void testSetColorFilterSetsColorFilterOnPaint() {
+  public void setColorFilterSetsColorFilterOnPaint() {
     ColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, Mode.ADD);
     drawable.setColorFilter(colorFilter);
 
@@ -577,7 +577,7 @@ public class GifDrawableTest {
   }
 
   @Test
-  public void testReturnsCurrentTransformationInGetFrameTransformation() {
+  public void returnsCurrentTransformationInGetFrameTransformation() {
     @SuppressWarnings("unchecked")
     Transformation<Bitmap> newTransformation = mock(Transformation.class);
     Bitmap bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
@@ -587,7 +587,7 @@ public class GifDrawableTest {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfCreatedWithNullState() {
+  public void throwsIfCreatedWithNullState() {
     new GifDrawable(null);
   }
 

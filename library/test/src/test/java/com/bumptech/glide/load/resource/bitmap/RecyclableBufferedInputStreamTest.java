@@ -46,12 +46,12 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testReturnsTrueForMarkSupported() {
+  public void returnsTrueForMarkSupported() {
     assertTrue(stream.markSupported());
   }
 
   @Test
-  public void testCanReadIndividualBytes() throws IOException {
+  public void canReadIndividualBytes() throws IOException {
     for (int i = 0; i < data.length; i++) {
       assertEquals(i, stream.read());
     }
@@ -59,7 +59,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanReadBytesInBulkLargerThanBufferSize() throws IOException {
+  public void canReadBytesInBulkLargerThanBufferSize() throws IOException {
     byte[] buffer = new byte[DATA_SIZE];
     assertEquals(DATA_SIZE, stream.read(buffer, 0, DATA_SIZE));
     for (int i = 0; i < DATA_SIZE; i++) {
@@ -68,7 +68,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanReadBytesInBulkSmallerThanBufferSize() throws IOException {
+  public void canReadBytesInBulkSmallerThanBufferSize() throws IOException {
     int toRead = BUFFER_SIZE / 2;
     byte[] buffer = new byte[toRead];
     assertEquals(toRead, stream.read(buffer, 0, toRead));
@@ -78,7 +78,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testReadingZeroBytesIntoBufferReadsZeroBytes() throws IOException {
+  public void readingZeroBytesIntoBufferReadsZeroBytes() throws IOException {
     // Make sure the next value is not 0.
     stream.read();
     byte[] buffer = new byte[BUFFER_SIZE];
@@ -90,7 +90,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanReadIntoBufferLargerThanDataSize() throws IOException {
+  public void canReadIntoBufferLargerThanDataSize() throws IOException {
     int toRead = DATA_SIZE * 2;
     byte[] buffer = new byte[toRead];
     assertEquals(DATA_SIZE, stream.read(buffer, 0, toRead));
@@ -103,7 +103,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanReadBytesInBulkWithLimit() throws IOException {
+  public void canReadBytesInBulkWithLimit() throws IOException {
     int toRead = BUFFER_SIZE / 2;
     byte[] buffer = new byte[BUFFER_SIZE];
     assertEquals(toRead, stream.read(buffer, 0, toRead));
@@ -118,7 +118,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanReadBytesInBulkWithOffset() throws IOException {
+  public void canReadBytesInBulkWithOffset() throws IOException {
     int toRead = BUFFER_SIZE / 2;
     byte[] buffer = new byte[BUFFER_SIZE];
     assertEquals(toRead, stream.read(buffer, BUFFER_SIZE - toRead, toRead));
@@ -132,7 +132,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanReadBytesInBulkWhenSomeButNotAllBytesAreInBuffer() throws IOException {
+  public void canReadBytesInBulkWhenSomeButNotAllBytesAreInBuffer() throws IOException {
     stream.read();
     byte[] buffer = new byte[BUFFER_SIZE];
     assertEquals(BUFFER_SIZE, stream.read(buffer, 0, BUFFER_SIZE));
@@ -142,7 +142,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanSkipBytes() throws IOException {
+  public void canSkipBytes() throws IOException {
     int toSkip = data.length / 2;
     assertEquals(toSkip, stream.skip(toSkip));
     for (int i = toSkip; i < data.length; i++) {
@@ -152,19 +152,19 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testSkipReturnsZeroIfSkipByteCountIsZero() throws IOException {
+  public void skipReturnsZeroIfSkipByteCountIsZero() throws IOException {
     assertEquals(0, stream.skip(0));
     assertEquals(0, stream.read());
   }
 
   @Test
-  public void testSkipReturnsZeroIfSkipByteCountIsNegative() throws IOException {
+  public void skipReturnsZeroIfSkipByteCountIsNegative() throws IOException {
     assertEquals(0, stream.skip(-13));
     assertEquals(0, stream.read());
   }
 
   @Test
-  public void testCloseClosesWrappedStream() throws IOException {
+  public void closeClosesWrappedStream() throws IOException {
     InputStream wrapped = mock(InputStream.class);
     stream = new RecyclableBufferedInputStream(wrapped, byteArrayPool);
     stream.close();
@@ -172,7 +172,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanSafelyBeClosedMultipleTimes() throws IOException {
+  public void canSafelyBeClosedMultipleTimes() throws IOException {
     InputStream wrapped = mock(InputStream.class);
     stream = new RecyclableBufferedInputStream(wrapped, byteArrayPool);
     stream.close();
@@ -183,7 +183,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanMarkAndReset() throws IOException {
+  public void canMarkAndReset() throws IOException {
     byte[] buffer = new byte[BUFFER_SIZE];
     stream.mark(BUFFER_SIZE);
     assertEquals(BUFFER_SIZE, stream.read(buffer, 0, BUFFER_SIZE));
@@ -200,7 +200,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanResetRepeatedlyAfterMarking() throws IOException {
+  public void canResetRepeatedlyAfterMarking() throws IOException {
     byte[] buffer = new byte[BUFFER_SIZE];
     stream.mark(BUFFER_SIZE);
     for (int repeat = 0; repeat < 10; repeat++) {
@@ -213,7 +213,7 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testCanMarkInMiddleOfBufferAndStillReadUpToBufferLengthBeforeResetting()
+  public void canMarkInMiddleOfBufferAndStillReadUpToBufferLengthBeforeResetting()
       throws IOException {
     int markPos = BUFFER_SIZE / 2;
     for (int i = 0; i < markPos; i++) {
@@ -230,18 +230,18 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test
-  public void testAvailableReturnsWrappedAvailableIfNoBytesRead() throws IOException {
+  public void availableReturnsWrappedAvailableIfNoBytesRead() throws IOException {
     assertEquals(DATA_SIZE, stream.available());
   }
 
   @Test
-  public void testAvailableIncludesDataInBufferAndWrappedAvailableIfBytesRead() throws IOException {
+  public void availableIncludesDataInBufferAndWrappedAvailableIfBytesRead() throws IOException {
     stream.read();
     assertEquals(DATA_SIZE - 1, stream.available());
   }
 
   @Test(expected = IOException.class)
-  public void testCloseThrowsIfWrappedStreamThrowsOnClose() throws IOException {
+  public void closeThrowsIfWrappedStreamThrowsOnClose() throws IOException {
     InputStream wrapped = mock(InputStream.class);
     doThrow(new IOException()).when(wrapped).close();
     stream = new RecyclableBufferedInputStream(wrapped, byteArrayPool);
@@ -249,42 +249,42 @@ public class RecyclableBufferedInputStreamTest {
   }
 
   @Test(expected = IOException.class)
-  public void testAvailableThrowsIfStreamIsClosed() throws IOException {
+  public void availableThrowsIfStreamIsClosed() throws IOException {
     stream.close();
     stream.available();
   }
 
   @Test(expected = IOException.class)
-  public void testReadThrowsIfStreamIsClosed() throws IOException {
+  public void readThrowsIfStreamIsClosed() throws IOException {
     stream.close();
     stream.read();
   }
 
   @Test(expected = IOException.class)
-  public void testReadBulkThrowsIfStreamIsClosed() throws IOException {
+  public void readBulkThrowsIfStreamIsClosed() throws IOException {
     stream.close();
     stream.read(new byte[1], 0, 1);
   }
 
   @Test(expected = IOException.class)
-  public void testResetThrowsIfStreamIsClosed() throws IOException {
+  public void resetThrowsIfStreamIsClosed() throws IOException {
     stream.close();
     stream.reset();
   }
 
   @Test(expected = IOException.class)
-  public void testSkipThrowsIfStreamIsClosed() throws IOException {
+  public void skipThrowsIfStreamIsClosed() throws IOException {
     stream.close();
     stream.skip(10);
   }
 
   @Test(expected = RecyclableBufferedInputStream.InvalidMarkException.class)
-  public void testResetThrowsIfMarkNotSet() throws IOException {
+  public void resetThrowsIfMarkNotSet() throws IOException {
     stream.reset();
   }
 
   @Test(expected = RecyclableBufferedInputStream.InvalidMarkException.class)
-  public void testResetThrowsIfMarkIsInvalid() throws IOException {
+  public void resetThrowsIfMarkIsInvalid() throws IOException {
     stream.mark(1);
     stream.read(new byte[BUFFER_SIZE], 0, BUFFER_SIZE);
     stream.read();

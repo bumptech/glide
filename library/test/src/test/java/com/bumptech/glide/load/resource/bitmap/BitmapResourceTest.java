@@ -36,36 +36,36 @@ public class BitmapResourceTest {
   }
 
   @Test
-  public void testCanGetBitmap() {
+  public void canGetBitmap() {
     assertEquals(harness.bitmap, harness.resource.get());
   }
 
   @Test
-  public void testSizeIsBasedOnDimensPreKitKat() {
+  public void sizeIsBasedOnDimensPreKitKat() {
     Util.setSdkVersionInt(18);
     assertEquals(
         harness.bitmap.getWidth() * harness.bitmap.getHeight() * 4, harness.resource.getSize());
   }
 
   @Test
-  public void testPutsBitmapInPoolOnRecycle() {
+  public void putsBitmapInPoolOnRecycle() {
     harness.resource.recycle();
 
     verify(harness.bitmapPool).put(eq(harness.bitmap));
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfBitmapIsNull() {
+  public void throwsIfBitmapIsNull() {
     new BitmapResource(null, mock(BitmapPool.class));
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfBitmapPoolIsNull() {
+  public void throwsIfBitmapPoolIsNull() {
     new BitmapResource(Bitmap.createBitmap(100, 100, Bitmap.Config.RGB_565), null);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testThrowsIfBitmapAndBitmapPoolAreNull() {
+  public void throwsIfBitmapAndBitmapPoolAreNull() {
     new BitmapResource(null, null);
   }
 

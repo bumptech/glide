@@ -73,13 +73,13 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testIncludesEagerHeaders() {
+  public void includesEagerHeaders() {
     Map<String, String> headers = new Builder().addHeader("key", "value").build().getHeaders();
     assertThat(headers).containsEntry("key", "value");
   }
 
   @Test
-  public void testIncludesLazyHeaders() {
+  public void includesLazyHeaders() {
     LazyHeaderFactory factory = mock(LazyHeaderFactory.class);
     when(factory.buildHeader()).thenReturn("value");
     Map<String, String> headers = new Builder().addHeader("key", factory).build().getHeaders();
@@ -88,7 +88,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testMultipleEagerValuesAreSeparatedByCommas() {
+  public void multipleEagerValuesAreSeparatedByCommas() {
     Map<String, String> headers =
         new Builder().addHeader("key", "first").addHeader("key", "second").build().getHeaders();
 
@@ -96,7 +96,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testMultipleLazyValuesAreSeparatedByCommas() {
+  public void multipleLazyValuesAreSeparatedByCommas() {
     LazyHeaderFactory first = mock(LazyHeaderFactory.class);
     when(first.buildHeader()).thenReturn("first");
     LazyHeaderFactory second = mock(LazyHeaderFactory.class);
@@ -108,7 +108,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testMixedEagerAndLazyValuesAreIncluded() {
+  public void mixedEagerAndLazyValuesAreIncluded() {
     LazyHeaderFactory factory = mock(LazyHeaderFactory.class);
     when(factory.buildHeader()).thenReturn("first");
     Map<String, String> headers =
@@ -123,7 +123,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testCanAddMultipleKeys() {
+  public void canAddMultipleKeys() {
     LazyHeaderFactory factory = mock(LazyHeaderFactory.class);
     when(factory.buildHeader()).thenReturn("lazy");
     Map<String, String> headers =
@@ -134,7 +134,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testUpdatingBuilderAfterBuildingDoesNotModifyOriginalHeaders() {
+  public void updatingBuilderAfterBuildingDoesNotModifyOriginalHeaders() {
     Builder builder = new Builder();
     builder.addHeader("key", "firstValue");
     builder.addHeader("otherKey", "otherValue");
@@ -156,7 +156,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testSetHeaderReplacesExistingHeaders() {
+  public void setHeaderReplacesExistingHeaders() {
     Builder builder = new Builder();
     builder.addHeader("key", "first").addHeader("key", "second").setHeader("key", "third");
     LazyHeaders headers = builder.build();
@@ -164,7 +164,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testSetHeaderWithNullStringRemovesExistingHeader() {
+  public void setHeaderWithNullStringRemovesExistingHeader() {
     Builder builder = new Builder();
     builder.addHeader("key", "first").addHeader("key", "second").setHeader("key", (String) null);
     LazyHeaders headers = builder.build();
@@ -172,7 +172,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testSetHeaderWithNullLazyHeaderFactoryRemovesExistingHeader() {
+  public void setHeaderWithNullLazyHeaderFactoryRemovesExistingHeader() {
     Builder builder = new Builder();
     builder
         .addHeader("key", "first")
@@ -183,7 +183,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testAddingEncodingHeaderReplacesDefaultThenAppends() {
+  public void addingEncodingHeaderReplacesDefaultThenAppends() {
     Builder builder = new Builder();
     builder.addHeader("Accept-Encoding", "false");
 
@@ -196,7 +196,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testRemovingAndAddingEncodingHeaderReplacesDefaultThenAppends() {
+  public void removingAndAddingEncodingHeaderReplacesDefaultThenAppends() {
     Builder builder = new Builder();
     builder.setHeader("Accept-Encoding", (String) null);
     LazyHeaders headers = builder.build();
@@ -212,7 +212,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testAddingUserAgentHeaderReplacesDefaultThenAppends() {
+  public void addingUserAgentHeaderReplacesDefaultThenAppends() {
     Builder builder = new Builder();
     builder.addHeader("User-Agent", "false");
 
@@ -225,7 +225,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testRemovingAndAddingUserAgentHeaderReplacesDefaultThenAppends() {
+  public void removingAndAddingUserAgentHeaderReplacesDefaultThenAppends() {
     Builder builder = new Builder();
     builder.setHeader("User-Agent", (String) null);
     LazyHeaders headers = builder.build();
@@ -241,7 +241,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testKeyNotIncludedWithFactoryThatReturnsNullValue() {
+  public void keyNotIncludedWithFactoryThatReturnsNullValue() {
     Builder builder = new Builder();
     builder.setHeader(
         "test",
@@ -257,7 +257,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testKeyNotIncludedWithFactoryThatReturnsEmptyValue() {
+  public void keyNotIncludedWithFactoryThatReturnsEmptyValue() {
     Builder builder = new Builder();
     builder.setHeader(
         "test",
@@ -273,7 +273,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testKeyIncludedWithOneFactoryThatReturnsNullAndOneFactoryThatDoesNotReturnNull() {
+  public void keyIncludedWithOneFactoryThatReturnsNullAndOneFactoryThatDoesNotReturnNull() {
     Builder builder = new Builder();
     builder.addHeader(
         "test",
@@ -298,7 +298,7 @@ public class LazyHeadersTest {
   }
 
   @Test
-  public void testEquals() {
+  public void equals() {
     LazyHeaderFactory firstLazyFactory = mock(LazyHeaderFactory.class);
     LazyHeaderFactory secondLazyFactory = mock(LazyHeaderFactory.class);
     new EqualsTester()

@@ -39,7 +39,7 @@ public class StreamEncoderTest {
   }
 
   @Test
-  public void testWritesDataFromInputStreamToOutputStream() throws IOException {
+  public void writesDataFromInputStreamToOutputStream() throws IOException {
     String fakeData = "SomeRandomFakeData";
     ByteArrayInputStream is = new ByteArrayInputStream(fakeData.getBytes("UTF-8"));
     encoder.encode(is, file, new Options());

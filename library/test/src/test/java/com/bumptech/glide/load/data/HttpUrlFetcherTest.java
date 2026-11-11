@@ -116,19 +116,19 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testSetsReadTimeout() {
+  public void setsReadTimeout() {
     fetcher.loadData(Priority.HIGH, callback);
     verify(urlConnection).setReadTimeout(eq(TIMEOUT_MS));
   }
 
   @Test
-  public void testSetsConnectTimeout() {
+  public void setsConnectTimeout() {
     fetcher.loadData(Priority.IMMEDIATE, callback);
     verify(urlConnection).setConnectTimeout(eq(TIMEOUT_MS));
   }
 
   @Test
-  public void testReturnsNullIfCancelledBeforeConnects() throws IOException {
+  public void returnsNullIfCancelledBeforeConnects() throws IOException {
     InputStream notExpected = new ByteArrayInputStream(new byte[0]);
     when(urlConnection.getInputStream()).thenReturn(notExpected);
 
@@ -138,7 +138,7 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testDisconnectsUrlOnCleanup() {
+  public void disconnectsUrlOnCleanup() {
     fetcher.loadData(Priority.HIGH, callback);
     fetcher.cleanup();
 
@@ -146,17 +146,17 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testDoesNotThrowIfCleanupCalledBeforeStarted() {
+  public void doesNotThrowIfCleanupCalledBeforeStarted() {
     fetcher.cleanup();
   }
 
   @Test
-  public void testDoesNotThrowIfCancelCalledBeforeStart() {
+  public void doesNotThrowIfCancelCalledBeforeStart() {
     fetcher.cancel();
   }
 
   @Test
-  public void testCancelDoesNotDisconnectIfAlreadyConnected() {
+  public void cancelDoesNotDisconnectIfAlreadyConnected() {
     fetcher.loadData(Priority.HIGH, callback);
     fetcher.cancel();
 
@@ -164,7 +164,7 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testClosesStreamInCleanupIfNotNull() throws IOException {
+  public void closesStreamInCleanupIfNotNull() throws IOException {
     fetcher.loadData(Priority.HIGH, callback);
     fetcher.cleanup();
 
@@ -172,7 +172,7 @@ public class HttpUrlFetcherTest {
   }
 
   @Test
-  public void testClosesStreamBeforeDisconnectingConnection() throws IOException {
+  public void closesStreamBeforeDisconnectingConnection() throws IOException {
     fetcher.loadData(Priority.NORMAL, callback);
     fetcher.cleanup();
 

@@ -37,7 +37,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testIsRunningIsFalseIfNeitherRequestIsRunning() {
+  public void isRunningIsFalseIfNeitherRequestIsRunning() {
     assertFalse(coordinator.isRunning());
   }
 
@@ -62,21 +62,21 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testStartsFullOnRunIfNotRunning() {
+  public void startsFullOnRunIfNotRunning() {
     coordinator.begin();
 
     verify(full).begin();
   }
 
   @Test
-  public void testStartsThumbOnRunIfNotRunning() {
+  public void startsThumbOnRunIfNotRunning() {
     coordinator.begin();
 
     verify(thumb).begin();
   }
 
   @Test
-  public void testDoesNotStartFullOnRunIfRunning() {
+  public void doesNotStartFullOnRunIfRunning() {
     coordinator.begin();
     coordinator.begin();
 
@@ -84,7 +84,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testDoesNotStartThumbOnRunIfRunning() {
+  public void doesNotStartThumbOnRunIfRunning() {
     coordinator.begin();
     coordinator.begin();
 
@@ -110,7 +110,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testDoesNotStartFullIfClearedByThumb() {
+  public void doesNotStartFullIfClearedByThumb() {
     doAnswer(
             new Answer<Void>() {
               @Override
@@ -129,7 +129,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testCallsClearOnRequestsWhenCleared() {
+  public void callsClearOnRequestsWhenCleared() {
     coordinator.clear();
     InOrder order = inOrder(thumb, full);
     order.verify(thumb).clear();
@@ -146,14 +146,14 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testCanSetImageReturnsTrueForFullRequestIfCoordinatorIsNull() {
+  public void canSetImageReturnsTrueForFullRequestIfCoordinatorIsNull() {
     coordinator = newCoordinator();
     coordinator.setRequests(full, thumb);
     assertTrue(coordinator.canSetImage(full));
   }
 
   @Test
-  public void testCanSetImageReturnsTrueForFullRequestIfParentAllowsSetImage() {
+  public void canSetImageReturnsTrueForFullRequestIfParentAllowsSetImage() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(full, thumb);
     when(parent.canSetImage(eq(coordinator))).thenReturn(true);
@@ -161,7 +161,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testCanSetImageReturnsFalseForFullRequestIfParentDoesNotAllowSetImage() {
+  public void canSetImageReturnsFalseForFullRequestIfParentDoesNotAllowSetImage() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(full, thumb);
     when(parent.canSetImage(eq(coordinator))).thenReturn(false);
@@ -197,12 +197,12 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testCanNotifyStatusChangedIfFullAndNoRequestsAreComplete() {
+  public void canNotifyStatusChangedIfFullAndNoRequestsAreComplete() {
     assertTrue(coordinator.canNotifyStatusChanged(full));
   }
 
   @Test
-  public void testCanNotNotifyStatusChangedIfThumb() {
+  public void canNotNotifyStatusChangedIfThumb() {
     assertFalse(coordinator.canNotifyStatusChanged(thumb));
   }
 
@@ -221,7 +221,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testCanNotNotifyStatusChangedIfParentHasResourceSet() {
+  public void canNotNotifyStatusChangedIfParentHasResourceSet() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(full, thumb);
     when(parent.isAnyResourceSet()).thenReturn(true);
@@ -229,7 +229,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testCanNotifyStatusChangedIfParentAllowsNotify() {
+  public void canNotifyStatusChangedIfParentAllowsNotify() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(full, thumb);
     when(parent.canNotifyStatusChanged(eq(coordinator))).thenReturn(true);
@@ -237,7 +237,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testCanNotNotifyStatusChangedIfParentDoesNotAllowNotify() {
+  public void canNotNotifyStatusChangedIfParentDoesNotAllowNotify() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(full, thumb);
     when(parent.canNotifyStatusChanged(eq(coordinator))).thenReturn(false);
@@ -274,7 +274,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testIsNotCompleteIfNeitherRequestIsComplete() {
+  public void isNotCompleteIfNeitherRequestIsComplete() {
     assertFalse(coordinator.isComplete());
   }
 
@@ -291,13 +291,13 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testClearsThumbRequestOnFullRequestComplete_withNullParent() {
+  public void clearsThumbRequestOnFullRequestComplete_withNullParent() {
     coordinator.onRequestSuccess(full);
     verify(thumb).clear();
   }
 
   @Test
-  public void testNotifiesParentOnFullRequestComplete_withNonNullParent() {
+  public void notifiesParentOnFullRequestComplete_withNonNullParent() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(full, thumb);
     coordinator.onRequestSuccess(full);
@@ -305,7 +305,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testClearsThumbRequestOnFullRequestComplete_withNonNullParent() {
+  public void clearsThumbRequestOnFullRequestComplete_withNonNullParent() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(full, thumb);
     coordinator.onRequestSuccess(full);
@@ -313,20 +313,20 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testDoesNotClearThumbOnThumbRequestComplete() {
+  public void doesNotClearThumbOnThumbRequestComplete() {
     coordinator.onRequestSuccess(thumb);
     verify(thumb, never()).clear();
   }
 
   @Test
-  public void testDoesNotClearThumbOnFullComplete_whenThumbIsComplete() {
+  public void doesNotClearThumbOnFullComplete_whenThumbIsComplete() {
     coordinator.onRequestSuccess(thumb);
     coordinator.onRequestSuccess(full);
     verify(thumb, never()).clear();
   }
 
   @Test
-  public void testDoesNotNotifyParentOnThumbRequestComplete() {
+  public void doesNotNotifyParentOnThumbRequestComplete() {
     coordinator = newCoordinator(parent);
     coordinator.setRequests(full, thumb);
     coordinator.onRequestSuccess(thumb);
@@ -381,7 +381,7 @@ public class ThumbnailRequestCoordinatorTest {
   }
 
   @Test
-  public void testIsEquivalentTo() {
+  public void isEquivalentTo() {
     ThumbnailRequestCoordinator first = newCoordinator();
     when(full.isEquivalentTo(full)).thenReturn(true);
     when(thumb.isEquivalentTo(thumb)).thenReturn(true);

@@ -63,7 +63,7 @@ public class DiskLruCacheWrapperTest {
   }
 
   @Test
-  public void testCanInsertAndGet() throws IOException {
+  public void canInsertAndGet() throws IOException {
     cache.put(
         key,
         new DiskCache.Writer() {
@@ -84,7 +84,7 @@ public class DiskLruCacheWrapperTest {
   }
 
   @Test
-  public void testDoesNotCommitIfWriterReturnsFalse() {
+  public void doesNotCommitIfWriterReturnsFalse() {
     cache.put(
         key,
         new DiskCache.Writer() {
@@ -98,7 +98,7 @@ public class DiskLruCacheWrapperTest {
   }
 
   @Test
-  public void testDoesNotCommitIfWriterWritesButReturnsFalse() {
+  public void doesNotCommitIfWriterWritesButReturnsFalse() {
     cache.put(
         key,
         new DiskCache.Writer() {
@@ -117,7 +117,7 @@ public class DiskLruCacheWrapperTest {
   }
 
   @Test
-  public void testEditIsAbortedIfWriterThrows() throws IOException {
+  public void editIsAbortedIfWriterThrows() throws IOException {
     try {
       cache.put(
           key,

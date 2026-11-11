@@ -48,19 +48,19 @@ public class BaseGlideUrlLoaderTest {
   }
 
   @Test
-  public void testReturnsNullIfUrlIsNull() {
+  public void returnsNullIfUrlIsNull() {
     urlLoader.resultUrl = null;
     assertNull(urlLoader.buildLoadData(new Object(), 100, 100, options));
   }
 
   @Test
-  public void testReturnsNullIfUrlIsEmpty() {
+  public void returnsNullIfUrlIsEmpty() {
     urlLoader.resultUrl = "    ";
     assertNull(urlLoader.buildLoadData(new Object(), 100, 100, options));
   }
 
   @Test
-  public void testReturnsUrlFromCacheIfPresent() {
+  public void returnsUrlFromCacheIfPresent() {
     Object model = new Object();
     int width = 100;
     int height = 200;
@@ -76,7 +76,7 @@ public class BaseGlideUrlLoaderTest {
   }
 
   @Test
-  public void testBuildsNewUrlIfNotPresentInCache() {
+  public void buildsNewUrlIfNotPresentInCache() {
     int width = 10;
     int height = 11;
 
@@ -99,7 +99,7 @@ public class BaseGlideUrlLoaderTest {
   }
 
   @Test
-  public void testAddsNewUrlToCacheIfNotPresentInCache() {
+  public void addsNewUrlToCacheIfNotPresentInCache() {
     urlLoader.resultUrl = "fakeUrl";
     Object model = new Object();
     int width = 400;
@@ -123,7 +123,7 @@ public class BaseGlideUrlLoaderTest {
   }
 
   @Test
-  public void testDoesNotInteractWithModelCacheIfNull() {
+  public void doesNotInteractWithModelCacheIfNull() {
     TestLoader urlLoader = new TestLoader(wrapped, null);
     urlLoader.resultUrl = "fakeUrl";
 

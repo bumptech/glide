@@ -36,19 +36,19 @@ public class ViewAnimationTest {
   }
 
   @Test
-  public void testClearsAnimationOnAnimate() {
+  public void clearsAnimationOnAnimate() {
     viewAnimation.transition(null, adapter);
 
     verify(view).clearAnimation();
   }
 
   @Test
-  public void testAlwaysReturnsFalse() {
+  public void alwaysReturnsFalse() {
     assertFalse(viewAnimation.transition(null, adapter));
   }
 
   @Test
-  public void testStartsAnimationOnAnimate() {
+  public void startsAnimationOnAnimate() {
     Animation animation = mock(Animation.class);
     when(viewTransitionAnimationFactory.build(anyContextOrNull())).thenReturn(animation);
     viewAnimation.transition(null, adapter);

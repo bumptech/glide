@@ -14,7 +14,7 @@ import org.robolectric.annotation.Config;
 public class UtilTest {
 
   @Test
-  public void testReturnsCorrectBitmapSizeForDifferentDimensions() {
+  public void returnsCorrectBitmapSizeForDifferentDimensions() {
     int width = 100;
     int height = 100;
     Bitmap.Config config = Bitmap.Config.ARGB_8888;
@@ -29,7 +29,7 @@ public class UtilTest {
   }
 
   @Test
-  public void testReturnsCorrectBitmapSizeForAlpha8Bitmap() {
+  public void returnsCorrectBitmapSizeForAlpha8Bitmap() {
     int width = 110;
     int height = 43;
 
@@ -38,7 +38,7 @@ public class UtilTest {
   }
 
   @Test
-  public void testReturnsCorrectBitmapSizeForRgb565() {
+  public void returnsCorrectBitmapSizeForRgb565() {
     int width = 34;
     int height = 1444;
 
@@ -47,7 +47,7 @@ public class UtilTest {
   }
 
   @Test
-  public void testReturnsCorrectBitmapSizeForARGB4444() {
+  public void returnsCorrectBitmapSizeForARGB4444() {
     int width = 4454;
     int height = 1235;
 
@@ -56,7 +56,7 @@ public class UtilTest {
   }
 
   @Test
-  public void testReturnsCorrectBitmapSizeForARGB8888() {
+  public void returnsCorrectBitmapSizeForARGB8888() {
     int width = 943;
     int height = 3584;
 
@@ -65,7 +65,7 @@ public class UtilTest {
   }
 
   @Test
-  public void testReturnsLargestSizeForNullConfig() {
+  public void returnsLargestSizeForNullConfig() {
     int width = 999;
     int height = 41324;
     int size = Util.getBitmapByteSize(width, height, null);

@@ -34,12 +34,12 @@ public class LruArrayPoolTest {
   }
 
   @Test
-  public void testNewPoolIsEmpty() {
+  public void newPoolIsEmpty() {
     assertEquals(pool.getCurrentSize(), 0);
   }
 
   @Test
-  public void testICanAddAndGetValidArray() {
+  public void iCanAddAndGetValidArray() {
     int size = 758;
     int value = 564;
     fillPool(pool, size - 1, value);
@@ -52,42 +52,42 @@ public class LruArrayPoolTest {
   }
 
   @Test
-  public void testItIsSizeLimited() {
+  public void itIsSizeLimited() {
     fillPool(pool, MAX_SIZE / ADAPTER.getElementSizeInBytes() + 1, 1);
     assertTrue(pool.getCurrentSize() <= MAX_SIZE);
   }
 
   @Test
-  public void testArrayLargerThanPoolIsNotAdded() {
+  public void arrayLargerThanPoolIsNotAdded() {
     pool = new LruArrayPool(MAX_SIZE);
     pool.put(createArray(ARRAY_CLASS, MAX_SIZE / ADAPTER.getElementSizeInBytes() + 1, 0));
     assertEquals(0, pool.getCurrentSize());
   }
 
   @Test
-  public void testClearMemoryRemovesAllArrays() {
+  public void clearMemoryRemovesAllArrays() {
     fillPool(pool, MAX_SIZE / ADAPTER.getElementSizeInBytes() + 1, 0);
     pool.clearMemory();
     assertEquals(0, pool.getCurrentSize());
   }
 
   @Test
-  public void testTrimMemoryUiHiddenOrLessRemovesHalfOfArrays() {
+  public void trimMemoryUiHiddenOrLessRemovesHalfOfArrays() {
     testTrimMemory(MAX_SIZE, TRIM_MEMORY_UI_HIDDEN, MAX_SIZE / 2);
   }
 
   @Test
-  public void testTrimMemoryRunningCriticalRemovesHalfOfBitmaps() {
+  public void trimMemoryRunningCriticalRemovesHalfOfBitmaps() {
     testTrimMemory(MAX_SIZE, TRIM_MEMORY_RUNNING_CRITICAL, MAX_SIZE / 2);
   }
 
   @Test
-  public void testTrimMemoryUiHiddenOrLessRemovesNoArraysIfPoolLessThanHalfFull() {
+  public void trimMemoryUiHiddenOrLessRemovesNoArraysIfPoolLessThanHalfFull() {
     testTrimMemory(MAX_SIZE / 2, TRIM_MEMORY_UI_HIDDEN, MAX_SIZE / 2);
   }
 
   @Test
-  public void testTrimMemoryBackgroundOrGreaterRemovesAllArrays() {
+  public void trimMemoryBackgroundOrGreaterRemovesAllArrays() {
     for (int trimLevel : new int[] {TRIM_MEMORY_BACKGROUND, TRIM_MEMORY_COMPLETE}) {
       testTrimMemory(MAX_SIZE, trimLevel, 0);
     }

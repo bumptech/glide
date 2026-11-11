@@ -14,7 +14,7 @@ public class EmptySignatureTest {
   @Rule public final KeyTester keyTester = new KeyTester();
 
   @Test
-  public void testEquals() {
+  public void equals() {
     keyTester
         .addEquivalenceGroup(EmptySignature.obtain(), EmptySignature.obtain())
         .addEquivalenceGroup(mock(Key.class))

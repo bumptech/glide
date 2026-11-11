@@ -34,7 +34,7 @@ public class ImageReaderTest {
   }
 
   @Test
-  public void testByteBufferReader_heapBuffer_decodesBitmap() throws IOException {
+  public void byteBufferReader_heapBuffer_decodesBitmap() throws IOException {
     byte[] imageBytes = openResourceBytes(ROTATED_JPEG_RESOURCE_NAME);
     ByteBuffer buffer = ByteBuffer.wrap(imageBytes);
     ImageReader.ByteBufferReader reader =
@@ -49,7 +49,7 @@ public class ImageReaderTest {
   }
 
   @Test
-  public void testByteBufferReader_directBuffer_decodesBitmap() throws IOException {
+  public void byteBufferReader_directBuffer_decodesBitmap() throws IOException {
     byte[] imageBytes = openResourceBytes(ROTATED_JPEG_RESOURCE_NAME);
     ByteBuffer buffer = ByteBuffer.allocateDirect(imageBytes.length);
     buffer.put(imageBytes);
@@ -66,7 +66,7 @@ public class ImageReaderTest {
   }
 
   @Test
-  public void testByteBufferReader_sliceBuffer_decodesBitmap() throws IOException {
+  public void byteBufferReader_sliceBuffer_decodesBitmap() throws IOException {
     byte[] imageBytes = openResourceBytes(ROTATED_JPEG_RESOURCE_NAME);
     ByteBuffer buffer = ByteBuffer.allocate(imageBytes.length + 10);
     buffer.position(5);
@@ -86,7 +86,7 @@ public class ImageReaderTest {
   }
 
   @Test
-  public void testByteBufferReader_experimentDisabled_decodesBitmapWithStream() throws IOException {
+  public void byteBufferReader_experimentDisabled_decodesBitmapWithStream() throws IOException {
     byte[] imageBytes = openResourceBytes(ROTATED_JPEG_RESOURCE_NAME);
     ByteBuffer buffer = ByteBuffer.wrap(imageBytes);
     ImageReader.ByteBufferReader reader =

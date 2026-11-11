@@ -22,19 +22,19 @@ public class ViewPropertyViewTransitionAnimationFactoryTest {
   }
 
   @Test
-  public void testReturnsNoAnimationIfFromMemoryCache() {
+  public void returnsNoAnimationIfFromMemoryCache() {
     assertEquals(
         NoTransition.get(), factory.build(DataSource.MEMORY_CACHE, true /*isFirstResource*/));
   }
 
   @Test
-  public void testReturnsNoAnimationIfNotFirstResource() {
+  public void returnsNoAnimationIfNotFirstResource() {
     assertEquals(
         NoTransition.get(), factory.build(DataSource.DATA_DISK_CACHE, false /*isFirstResource*/));
   }
 
   @Test
-  public void testReturnsAnimationIfNotFromMemoryCacheAndFirstResource() {
+  public void returnsAnimationIfNotFromMemoryCacheAndFirstResource() {
     assertNotEquals(
         NoTransition.get(), factory.build(DataSource.DATA_DISK_CACHE, true /*isFirstResource*/));
   }

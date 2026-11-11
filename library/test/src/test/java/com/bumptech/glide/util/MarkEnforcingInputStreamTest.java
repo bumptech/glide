@@ -17,7 +17,7 @@ public class MarkEnforcingInputStreamTest {
   private static final int DATA_SIZE = MARK_LIMIT + 1;
 
   @Test
-  public void testReturnsByte_whenReadsUpToMarkLimit_withMoreBytesAvailable() throws IOException {
+  public void returnsByte_whenReadsUpToMarkLimit_withMoreBytesAvailable() throws IOException {
     MarkEnforcingInputStream is =
         new MarkEnforcingInputStream(new ByteArrayInputStream(new byte[DATA_SIZE]));
     is.mark(MARK_LIMIT);
@@ -28,7 +28,7 @@ public class MarkEnforcingInputStreamTest {
   }
 
   @Test
-  public void testReturnsByte_whenReadsUpToMarkLimit_withNoMoreBytesAvailable() throws IOException {
+  public void returnsByte_whenReadsUpToMarkLimit_withNoMoreBytesAvailable() throws IOException {
     MarkEnforcingInputStream is =
         new MarkEnforcingInputStream(new ByteArrayInputStream(new byte[MARK_LIMIT]));
 
@@ -38,7 +38,7 @@ public class MarkEnforcingInputStreamTest {
   }
 
   @Test
-  public void testReturnsEndOfStream_whenReadsSingleBytePastMarkLimit() throws IOException {
+  public void returnsEndOfStream_whenReadsSingleBytePastMarkLimit() throws IOException {
     MarkEnforcingInputStream is =
         new MarkEnforcingInputStream(new ByteArrayInputStream(new byte[DATA_SIZE]));
 
@@ -52,7 +52,7 @@ public class MarkEnforcingInputStreamTest {
 
   @Test
   public void
-      testOverridesByteCount_whenReadBufferLargerThanMarkLimit_withNonZeroBytesRemainingInMarkLimit()
+      overridesByteCount_whenReadBufferLargerThanMarkLimit_withNonZeroBytesRemainingInMarkLimit()
           throws IOException {
     MarkEnforcingInputStream is =
         new MarkEnforcingInputStream(new ByteArrayInputStream(new byte[DATA_SIZE]));
@@ -64,7 +64,7 @@ public class MarkEnforcingInputStreamTest {
 
   @Test
   public void
-      testReturnsEndOfStream_whenReadBufferLargerThanMarkLimit_withZeroBytesRemainingInMarkLimit()
+      returnsEndOfStream_whenReadBufferLargerThanMarkLimit_withZeroBytesRemainingInMarkLimit()
           throws IOException {
     MarkEnforcingInputStream is =
         new MarkEnforcingInputStream(new ByteArrayInputStream(new byte[DATA_SIZE]));
@@ -76,7 +76,7 @@ public class MarkEnforcingInputStreamTest {
   }
 
   @Test
-  public void testDoesNotReadIntoBuffer_withZeroBytesRemainingInMarkLimit() throws IOException {
+  public void doesNotReadIntoBuffer_withZeroBytesRemainingInMarkLimit() throws IOException {
     byte[] expected = new byte[MARK_LIMIT];
     for (int i = 0; i < MARK_LIMIT; i++) {
       expected[i] = (byte) (i + 1);
@@ -98,7 +98,7 @@ public class MarkEnforcingInputStreamTest {
   }
 
   @Test
-  public void testResetUnsetsLimit() throws IOException {
+  public void resetUnsetsLimit() throws IOException {
     MarkEnforcingInputStream is =
         new MarkEnforcingInputStream(new ByteArrayInputStream(new byte[DATA_SIZE]));
     is.mark(MARK_LIMIT);
@@ -116,7 +116,7 @@ public class MarkEnforcingInputStreamTest {
 
   @Test
   public void
-      testOverridesByteCount_whenSkipCountLargerThanMarkLimit_withNonZeroBytesRemainingInMarkLimit()
+      overridesByteCount_whenSkipCountLargerThanMarkLimit_withNonZeroBytesRemainingInMarkLimit()
           throws IOException {
     MarkEnforcingInputStream is =
         new MarkEnforcingInputStream(new ByteArrayInputStream(new byte[DATA_SIZE]));
@@ -126,7 +126,7 @@ public class MarkEnforcingInputStreamTest {
   }
 
   @Test
-  public void testReturnsEndOfStream_whenSkipping_withZeroBytesRemainingInMarkLimit()
+  public void returnsEndOfStream_whenSkipping_withZeroBytesRemainingInMarkLimit()
       throws IOException {
     MarkEnforcingInputStream is =
         new MarkEnforcingInputStream(new ByteArrayInputStream(new byte[DATA_SIZE]));
@@ -137,7 +137,7 @@ public class MarkEnforcingInputStreamTest {
   }
 
   @Test
-  public void testReturnsStreamAvailable_whenMarkIsNotSet() throws IOException {
+  public void returnsStreamAvailable_whenMarkIsNotSet() throws IOException {
     ByteArrayInputStream wrapped = new ByteArrayInputStream(new byte[MARK_LIMIT]);
     MarkEnforcingInputStream is = new MarkEnforcingInputStream(wrapped);
 
@@ -145,7 +145,7 @@ public class MarkEnforcingInputStreamTest {
   }
 
   @Test
-  public void testReturnsStreamAvailable_whenMarkIsSet_withMarkGreaterThanStreamAvailable()
+  public void returnsStreamAvailable_whenMarkIsSet_withMarkGreaterThanStreamAvailable()
       throws IOException {
     ByteArrayInputStream wrapped = new ByteArrayInputStream(new byte[MARK_LIMIT]);
     MarkEnforcingInputStream is = new MarkEnforcingInputStream(wrapped);
@@ -155,7 +155,7 @@ public class MarkEnforcingInputStreamTest {
   }
 
   @Test
-  public void testReturnsMarkLimitAsAvailable_whenMarkIsSet_withMarkLessThanStreamAvailable()
+  public void returnsMarkLimitAsAvailable_whenMarkIsSet_withMarkLessThanStreamAvailable()
       throws IOException {
     ByteArrayInputStream wrapped = new ByteArrayInputStream(new byte[MARK_LIMIT]);
     MarkEnforcingInputStream is = new MarkEnforcingInputStream(wrapped);

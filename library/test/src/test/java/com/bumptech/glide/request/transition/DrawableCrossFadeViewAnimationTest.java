@@ -29,7 +29,7 @@ public class DrawableCrossFadeViewAnimationTest {
   }
 
   @Test
-  public void testIgnoresNullViews() {
+  public void ignoresNullViews() {
     when(harness.adapter.getView()).thenReturn(null);
     harness.animation.transition(harness.current, harness.adapter);
   }

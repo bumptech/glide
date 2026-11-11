@@ -80,7 +80,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testReturnsInputStreamOnStatusOk() throws Exception {
+  public void returnsInputStreamOnStatusOk() throws Exception {
     String expected = "fakedata";
     mockWebServer.enqueue(new MockResponse().setBody(expected).setResponseCode(200));
     DataFetcher<InputStream> fetcher = getFetcher();
@@ -91,7 +91,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testHandlesRedirect301s() throws Exception {
+  public void handlesRedirect301s() throws Exception {
     String expected = "fakedata";
     mockWebServer.enqueue(
         new MockResponse()
@@ -105,7 +105,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testHandlesRedirect302s() throws Exception {
+  public void handlesRedirect302s() throws Exception {
     String expected = "fakedata";
     mockWebServer.enqueue(
         new MockResponse()
@@ -119,7 +119,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testHandlesUpToFiveRedirects() throws Exception {
+  public void handlesUpToFiveRedirects() throws Exception {
     int numRedirects = 4;
     String expected = "redirectedData";
     String redirectBase = "/redirect";
@@ -143,7 +143,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testCallsLoadFailedIfRedirectLocationIsEmpty() throws Exception {
+  public void callsLoadFailedIfRedirectLocationIsEmpty() throws Exception {
     for (int i = 0; i < 2; i++) {
       mockWebServer.enqueue(new MockResponse().setResponseCode(301));
     }
@@ -154,7 +154,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testCallsLoadFailedIfStatusCodeIsNegativeOne() throws Exception {
+  public void callsLoadFailedIfStatusCodeIsNegativeOne() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(-1));
     getFetcher().loadData(Priority.LOW, callback);
     waitForResponseLatch.await();
@@ -162,7 +162,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testCallsLoadFailedAfterTooManyRedirects() throws Exception {
+  public void callsLoadFailedAfterTooManyRedirects() throws Exception {
     for (int i = 0; i < 20; i++) {
       mockWebServer.enqueue(
           new MockResponse()
@@ -175,7 +175,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testCallsLoadFailedIfStatusCodeIs500() throws Exception {
+  public void callsLoadFailedIfStatusCodeIs500() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(500).setBody("error"));
     getFetcher().loadData(Priority.NORMAL, callback);
     waitForResponseLatch.await();
@@ -183,7 +183,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testCallsLoadFailedIfStatusCodeIs400() throws Exception {
+  public void callsLoadFailedIfStatusCodeIs400() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(400).setBody("error"));
     getFetcher().loadData(Priority.LOW, callback);
     waitForResponseLatch.await();
@@ -191,7 +191,7 @@ public class VolleyStreamFetcherServerTest {
   }
 
   @Test
-  public void testAppliesHeadersInGlideUrl() throws Exception {
+  public void appliesHeadersInGlideUrl() throws Exception {
     mockWebServer.enqueue(new MockResponse().setResponseCode(200));
     String headerField = "field";
     String headerValue = "value";

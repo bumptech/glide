@@ -28,13 +28,13 @@ public class AndroidResourceSignatureTest {
   }
 
   @Test
-  public void testCanGetKeyForSignature() {
+  public void canGetKeyForSignature() {
     Key key = AndroidResourceSignature.obtain(context);
     assertNotNull(key);
   }
 
   @Test
-  public void testKeyForSignatureIsTheSameAcrossCallsInTheSamePackage() {
+  public void keyForSignatureIsTheSameAcrossCallsInTheSamePackage() {
     keyTester
         .addEquivalenceGroup(
             AndroidResourceSignature.obtain(context), AndroidResourceSignature.obtain(context))
@@ -46,7 +46,7 @@ public class AndroidResourceSignatureTest {
   }
 
   @Test
-  public void testKeyForSignatureDiffersByNightMode() {
+  public void keyForSignatureDiffersByNightMode() {
     RuntimeEnvironment.setQualifiers("notnight");
     keyTester
         .addEquivalenceGroup(
@@ -66,7 +66,7 @@ public class AndroidResourceSignatureTest {
   }
 
   @Test
-  public void testMissingPackageInfo() throws NameNotFoundException {
+  public void missingPackageInfo() throws NameNotFoundException {
     // Make getPackageInfo throw NameNotFoundException.
     Shadows.shadowOf(context.getPackageManager()).removePackage(context.getPackageName());
     Key key = AndroidResourceSignature.obtain(context);

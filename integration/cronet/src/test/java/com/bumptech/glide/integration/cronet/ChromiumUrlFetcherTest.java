@@ -103,7 +103,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testLoadData_createsAndStartsRequest() {
+  public void loadData_createsAndStartsRequest() {
     when(cronetRequestFactory.newRequest(
             eq(glideUrl.toStringUrl()),
             eq(UrlRequest.Builder.REQUEST_PRIORITY_LOWEST),
@@ -117,7 +117,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testLoadData_providesHeadersFromGlideUrl() {
+  public void loadData_providesHeadersFromGlideUrl() {
     LazyHeaders.Builder headersBuilder = new Builder();
     headersBuilder.addHeader("key", "value");
     LazyHeaders headers = headersBuilder.build();
@@ -137,7 +137,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testLoadData_withInProgressRequest_doesNotStartNewRequest() {
+  public void loadData_withInProgressRequest_doesNotStartNewRequest() {
     ChromiumUrlFetcher<ByteBuffer> firstFetcher =
         new ChromiumUrlFetcher<>(serializer, parser, glideUrl);
     ChromiumUrlFetcher<ByteBuffer> secondFetcher =
@@ -155,7 +155,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testLoadData_withInProgressRequest_isNotifiedWhenRequestCompletes() throws Exception {
+  public void loadData_withInProgressRequest_isNotifiedWhenRequestCompletes() throws Exception {
     ChromiumUrlFetcher<ByteBuffer> firstFetcher =
         new ChromiumUrlFetcher<>(serializer, parser, glideUrl);
     ChromiumUrlFetcher<ByteBuffer> secondFetcher =
@@ -232,7 +232,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testCancel_withMultipleInProgressRequests_doesNotCancelChromiumRequest() {
+  public void cancel_withMultipleInProgressRequests_doesNotCancelChromiumRequest() {
     ChromiumUrlFetcher<ByteBuffer> firstFetcher =
         new ChromiumUrlFetcher<>(serializer, parser, glideUrl);
     ChromiumUrlFetcher<ByteBuffer> secondFetcher =
@@ -247,7 +247,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testCancel_afterCancellingAllInProgressRequests_cancelsChromiumRequest() {
+  public void cancel_afterCancellingAllInProgressRequests_cancelsChromiumRequest() {
     ChromiumUrlFetcher<ByteBuffer> firstFetcher =
         new ChromiumUrlFetcher<>(serializer, parser, glideUrl);
     ChromiumUrlFetcher<ByteBuffer> secondFetcher =
@@ -263,12 +263,12 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testCancel_withNoStartedRequest_doesNothing() {
+  public void cancel_withNoStartedRequest_doesNothing() {
     fetcher.cancel();
   }
 
   @Test
-  public void testCancel_withStartedRequest_cancelsRequest() {
+  public void cancel_withStartedRequest_cancelsRequest() {
     fetcher.loadData(Priority.LOW, callback);
 
     fetcher.cancel();
@@ -277,7 +277,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testRequestComplete_withNonNullException_callsCallbackWithException() {
+  public void requestComplete_withNonNullException_callsCallbackWithException() {
     CronetException expected =
         new CronetException("test", /* cause= */ null) {
           static final long serialVersionUID = 1;
@@ -289,8 +289,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testRequestComplete_withNon200StatusCode_callsCallbackWithException()
-      throws Exception {
+  public void requestComplete_withNon200StatusCode_callsCallbackWithException() throws Exception {
     UrlResponseInfo info = getInfo(0, HttpURLConnection.HTTP_INTERNAL_ERROR);
     fetcher.loadData(Priority.LOW, callback);
     UrlRequest.Callback urlCallback = urlRequestListenerCaptor.getValue();
@@ -311,7 +310,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testRequestComplete_withUnauthorizedStatusCode_callsCallbackWithAuthError()
+  public void requestComplete_withUnauthorizedStatusCode_callsCallbackWithAuthError()
       throws Exception {
     UrlResponseInfo info = getInfo(0, HttpURLConnection.HTTP_FORBIDDEN);
     fetcher.loadData(Priority.LOW, callback);
@@ -322,7 +321,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testRequestComplete_whenCancelledAndUnauthorized_callsCallbackWithNullError()
+  public void requestComplete_whenCancelledAndUnauthorized_callsCallbackWithNullError()
       throws Exception {
     UrlResponseInfo info = getInfo(0, HttpURLConnection.HTTP_FORBIDDEN);
     fetcher.loadData(Priority.HIGH, callback);
@@ -341,7 +340,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testRequestComplete_with200AndCancelled_callsCallbackWithNullException()
+  public void requestComplete_with200AndCancelled_callsCallbackWithNullException()
       throws Exception {
     UrlResponseInfo info = getInfo(0, 200);
     fetcher.loadData(Priority.LOW, callback);
@@ -353,7 +352,7 @@ public class ChromiumUrlFetcherTest {
   }
 
   @Test
-  public void testRequestComplete_with200NotCancelledMatchingLength_callsCallbackWithValidData()
+  public void requestComplete_with200NotCancelledMatchingLength_callsCallbackWithValidData()
       throws Exception {
     String data = "data";
     ByteBuffer expected = ByteBuffer.wrap(data.getBytes());

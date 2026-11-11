@@ -24,7 +24,7 @@ public class DefaultConnectivityMonitorFactoryTest {
   }
 
   @Test
-  public void testReturnsDefaultConnectivityMonitorWhenHasPermission() {
+  public void returnsDefaultConnectivityMonitorWhenHasPermission() {
     shadowOf((Application) ApplicationProvider.getApplicationContext())
         .grantPermissions("android.permission.ACCESS_NETWORK_STATE");
     ConnectivityMonitor connectivityMonitor =
@@ -35,7 +35,7 @@ public class DefaultConnectivityMonitorFactoryTest {
   }
 
   @Test
-  public void testReturnsNullConnectivityMonitorWhenDoesNotHavePermission() {
+  public void returnsNullConnectivityMonitorWhenDoesNotHavePermission() {
     ConnectivityMonitor connectivityMonitor =
         factory.build(
             ApplicationProvider.getApplicationContext(),

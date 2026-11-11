@@ -76,7 +76,7 @@ public class LruResourceCacheTest {
   }
 
   @Test
-  public void testTrimMemoryBackground() {
+  public void trimMemoryBackground() {
     TrimClearMemoryCacheHarness harness = new TrimClearMemoryCacheHarness();
 
     harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
@@ -86,7 +86,7 @@ public class LruResourceCacheTest {
   }
 
   @Test
-  public void testTrimMemoryModerate() {
+  public void trimMemoryModerate() {
     TrimClearMemoryCacheHarness harness = new TrimClearMemoryCacheHarness();
 
     harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
@@ -96,7 +96,7 @@ public class LruResourceCacheTest {
   }
 
   @Test
-  public void testTrimMemoryUiHidden() {
+  public void trimMemoryUiHidden() {
     TrimClearMemoryCacheHarness harness = new TrimClearMemoryCacheHarness();
 
     harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
@@ -106,7 +106,7 @@ public class LruResourceCacheTest {
   }
 
   @Test
-  public void testTrimMemoryRunningCritical() {
+  public void trimMemoryRunningCritical() {
     TrimClearMemoryCacheHarness harness = new TrimClearMemoryCacheHarness();
 
     harness.resourceCache.trimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL);
@@ -116,7 +116,7 @@ public class LruResourceCacheTest {
   }
 
   @Test
-  public void testResourceRemovedListenerIsNotifiedWhenResourceIsRemoved() {
+  public void resourceRemovedListenerIsNotifiedWhenResourceIsRemoved() {
     LruResourceCache resourceCache = new LruResourceCache(100);
     Resource<?> resource = mockResource();
     when(resource.getSize()).thenReturn(200);
@@ -130,7 +130,7 @@ public class LruResourceCacheTest {
   }
 
   @Test
-  public void testSizeIsBasedOnResource() {
+  public void sizeIsBasedOnResource() {
     LruResourceCache resourceCache = new LruResourceCache(100);
     Resource<?> first = getResource(50);
     MockKey firstKey = new MockKey();
@@ -152,7 +152,7 @@ public class LruResourceCacheTest {
   }
 
   @Test
-  public void testPreventEviction() {
+  public void preventEviction() {
     final MemoryCache cache = new LruResourceCache(100);
     final Resource<?> first = getResource(30);
     final Key firstKey = new MockKey();

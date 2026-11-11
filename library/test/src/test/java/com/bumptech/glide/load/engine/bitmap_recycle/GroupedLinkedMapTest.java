@@ -22,13 +22,13 @@ public class GroupedLinkedMapTest {
   }
 
   @Test
-  public void testReturnsNullForGetWithNoBitmap() {
+  public void returnsNullForGetWithNoBitmap() {
     Key key = new Key("key", /* width= */ 1, /* height= */ 1);
     assertNull(map.get(key));
   }
 
   @Test
-  public void testCanAddAndRemoveABitmap() {
+  public void canAddAndRemoveABitmap() {
     Key key = new Key("key", 1, 1);
     Object expected = new Object();
 
@@ -38,7 +38,7 @@ public class GroupedLinkedMapTest {
   }
 
   @Test
-  public void testCanAddAndRemoveMoreThanOneBitmapForAGivenKey() {
+  public void canAddAndRemoveMoreThanOneBitmapForAGivenKey() {
     Key key = new Key("key", 1, 1);
     Integer value = 20;
 
@@ -54,7 +54,7 @@ public class GroupedLinkedMapTest {
   }
 
   @Test
-  public void testLeastRecentlyRetrievedKeyIsLeastRecentlyUsed() {
+  public void leastRecentlyRetrievedKeyIsLeastRecentlyUsed() {
     Key firstKey = new Key("key", 1, 1);
     Integer firstValue = 10;
     map.put(firstKey, firstValue);
@@ -70,7 +70,7 @@ public class GroupedLinkedMapTest {
   }
 
   @Test
-  public void testAddingAnEntryDoesNotMakeItMostRecentlyUsed() {
+  public void addingAnEntryDoesNotMakeItMostRecentlyUsed() {
     Key firstKey = new Key("key", 1, 1);
     Integer firstValue = 10;
 
