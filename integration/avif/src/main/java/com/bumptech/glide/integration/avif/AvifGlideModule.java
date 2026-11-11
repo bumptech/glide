@@ -22,7 +22,7 @@ public final class AvifGlideModule extends LibraryGlideModule {
     // Add the Avif ResourceDecoders before any of the available system decoders. This ensures that
     // the integration will be preferred for Avif images.
     AvifByteBufferBitmapDecoder byteBufferBitmapDecoder =
-        new AvifByteBufferBitmapDecoder(glide.getBitmapPool());
+        new AvifByteBufferBitmapDecoder(registry.getImageHeaderParsers(), glide.getBitmapPool());
     registry.prepend(
         Registry.BUCKET_BITMAP, ByteBuffer.class, Bitmap.class, byteBufferBitmapDecoder);
     registry.prepend(
