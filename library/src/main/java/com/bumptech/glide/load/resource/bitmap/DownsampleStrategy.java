@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.resource.bitmap;
 
-import android.os.Build;
 import com.bumptech.glide.load.Option;
 import com.bumptech.glide.util.Synthetic;
 
@@ -96,10 +95,6 @@ public abstract class DownsampleStrategy {
       Option.memory(
           "com.bumptech.glide.load.resource.bitmap.Downsampler.DownsampleStrategy", DEFAULT);
 
-  @Synthetic
-  static final boolean IS_BITMAP_FACTORY_SCALING_SUPPORTED =
-      Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-
   /**
    * Returns a float (0, +infinity) indicating a scale factor to apply to the source width and
    * height when displayed in the requested width and height.
@@ -141,31 +136,16 @@ public abstract class DownsampleStrategy {
     @Override
     public float getScaleFactor(
         int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight) {
-      if (IS_BITMAP_FACTORY_SCALING_SUPPORTED) {
-        float widthPercentage = requestedWidth / (float) sourceWidth;
-        float heightPercentage = requestedHeight / (float) sourceHeight;
+      float widthPercentage = requestedWidth / (float) sourceWidth;
+      float heightPercentage = requestedHeight / (float) sourceHeight;
 
-        return Math.min(widthPercentage, heightPercentage);
-      } else {
-        // Similar to AT_LEAST, but only require one dimension or the other to be >= requested
-        // rather than both.
-        int maxIntegerFactor =
-            Math.max(sourceHeight / requestedHeight, sourceWidth / requestedWidth);
-        return maxIntegerFactor == 0 ? 1f : 1f / Integer.highestOneBit(maxIntegerFactor);
-      }
+      return Math.min(widthPercentage, heightPercentage);
     }
 
     @Override
     public SampleSizeRounding getSampleSizeRounding(
         int sourceWidth, int sourceHeight, int requestedWidth, int requestedHeight) {
-      if (IS_BITMAP_FACTORY_SCALING_SUPPORTED) {
-        return SampleSizeRounding.QUALITY;
-      } else {
-        // TODO: This doesn't seem right, but otherwise we can skip a sample size because QUALITY
-        // prefers the smaller of the width and height scale factor. MEMORY is a hack that
-        // lets us prefer the larger of the two.
-        return SampleSizeRounding.MEMORY;
-      }
+      return SampleSizeRounding.QUALITY;
     }
   }
 

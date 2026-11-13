@@ -99,7 +99,7 @@ Comments/bugs/questions/pull requests are always welcome! Please read [CONTRIBUT
 Compatibility
 -------------
 
- * **Minimum Android SDK**: Glide v4 requires a minimum API level of 14.
+ * **Minimum Android SDK**: Glide v4 requires a minimum API level of 23.
  * **Compile Android SDK**: Glide v4 requires you to compile against API 26 or later.
 
  If you need to support older versions of Android, consider staying on [Glide v3][14], which works on API 10, but is not actively maintained.

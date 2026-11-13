@@ -416,11 +416,6 @@ public class VideoDecoder<T> implements ResourceDecoder<T, Bitmap> {
   /** Returns true if the format type is unsupported on the device. */
   private boolean isUnsupportedFormat(
       @NonNull T resource, MediaMetadataRetriever mediaMetadataRetriever) {
-    // MediaFormat.KEY_MIME check below requires at least JELLY_BEAN
-    if (Build.VERSION.SDK_INT < VERSION_CODES.JELLY_BEAN) {
-      return false;
-    }
-
     // The primary known problem is vp8 video on ChromeOS (ARC) devices.
     boolean isArc = Build.DEVICE != null && Build.DEVICE.matches(".+_cheets|cheets_.+");
     if (!isArc) {

@@ -323,7 +323,7 @@ public final class GlideExecutor implements ExecutorService {
   public static int calculateBestThreadCount() {
     if (bestThreadCount == 0) {
       bestThreadCount =
-          Math.min(MAXIMUM_AUTOMATIC_THREAD_COUNT, RuntimeCompat.availableProcessors());
+          Math.min(MAXIMUM_AUTOMATIC_THREAD_COUNT, Runtime.getRuntime().availableProcessors());
     }
     return bestThreadCount;
   }

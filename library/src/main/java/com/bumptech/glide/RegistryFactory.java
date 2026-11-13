@@ -277,15 +277,12 @@ final class RegistryFactory {
           new ParcelFileDescriptorBitmapDecoder(downsampler));
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-      registry.append(
-          Registry.BUCKET_BITMAP,
-          AssetFileDescriptor.class,
-          Bitmap.class,
-          VideoDecoder.asset(bitmapPool));
-    }
-
     registry
+        .append(
+            Registry.BUCKET_BITMAP,
+            AssetFileDescriptor.class,
+            Bitmap.class,
+            VideoDecoder.asset(bitmapPool))
         .append(
             Registry.BUCKET_BITMAP,
             ParcelFileDescriptor.class,
@@ -504,7 +501,7 @@ final class RegistryFactory {
                 bitmapPool, bitmapBytesTranscoder, gifDrawableBytesTranscoder))
         .register(GifDrawable.class, byte[].class, gifDrawableBytesTranscoder);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    {
       ResourceDecoder<ByteBuffer, Bitmap> byteBufferVideoDecoder =
           VideoDecoder.byteBuffer(bitmapPool);
       registry.append(ByteBuffer.class, Bitmap.class, byteBufferVideoDecoder);

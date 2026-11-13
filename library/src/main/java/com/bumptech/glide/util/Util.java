@@ -1,8 +1,6 @@
 package com.bumptech.glide.util;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -66,7 +64,6 @@ public final class Util {
   }
 
   /** Returns the in memory size of the given {@link Bitmap} in bytes. */
-  @TargetApi(Build.VERSION_CODES.KITKAT)
   public static int getBitmapByteSize(@NonNull Bitmap bitmap) {
     // The return value of getAllocationByteCount silently changes for recycled bitmaps from the
     // internal buffer size to row bytes * height. To avoid random inconsistencies in caches, we
@@ -82,15 +79,14 @@ public final class Util {
               + "] "
               + bitmap.getConfig());
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      // Workaround for KitKat initial release NPE in Bitmap, fixed in MR1. See issue #148.
-      try {
-        return bitmap.getAllocationByteCount();
-      } catch (
-          @SuppressWarnings("PMD.AvoidCatchingNPE")
-          NullPointerException e) {
-        // Do nothing.
-      }
+    // Workaround for KitKat initial release NPE in Bitmap, fixed in MR1. See issue #148.
+    // The try-catch is left here out of an abundance of caution.
+    try {
+      return bitmap.getAllocationByteCount();
+    } catch (
+        @SuppressWarnings("PMD.AvoidCatchingNPE")
+        NullPointerException e) {
+      // Do nothing.
     }
     return bitmap.getHeight() * bitmap.getRowBytes();
   }

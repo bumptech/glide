@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -28,7 +27,6 @@ import androidx.annotation.Nullable;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.request.Request;
 import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.tests.Util;
 import com.bumptech.glide.util.Preconditions;
 import java.util.HashSet;
 import java.util.List;
@@ -64,12 +62,10 @@ public class ViewTargetTest {
   private PreDrawShadowViewTreeObserver shadowObserver;
   @Mock private SizeReadyCallback cb;
   @Mock private Request request;
-  private int sdkVersion;
   private AttachStateTarget attachStateTarget;
 
   @Before
   public void setUp() {
-    sdkVersion = Build.VERSION.SDK_INT;
     MockitoAnnotations.initMocks(this);
     view = new View(ApplicationProvider.getApplicationContext());
     target = new TestViewTarget(view);
@@ -81,7 +77,6 @@ public class ViewTargetTest {
 
   @After
   public void tearDown() {
-    Util.setSdkVersionInt(sdkVersion);
     ViewTarget.SizeDeterminer.maxDisplayLength = null;
   }
 
@@ -415,16 +410,6 @@ public class ViewTargetTest {
         .setWidth(100)
         .setHeight(100)
         .setIsLaidOut(false);
-    target.getSize(cb);
-
-    verify(cb).onSizeReady(100, 100);
-  }
-
-  @Test
-  public void getSize_withValidWidthAndHeight_preV19_layoutRequested_callsSizeReady() {
-    Util.setSdkVersionInt(18);
-    shadowView.setWidth(100).setHeight(100).requestLayout();
-
     target.getSize(cb);
 
     verify(cb).onSizeReady(100, 100);

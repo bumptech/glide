@@ -71,7 +71,7 @@ public class VideoDecoderTest {
 
   @Test
   public void returnsRetrievedFrameForResource() throws IOException {
-    Util.setSdkVersionInt(19);
+    Util.setSdkVersionInt(VERSION_CODES.M);
     Bitmap expected = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
     when(retriever.getFrameAtTime(VideoDecoder.DEFAULT_FRAME, VideoDecoder.DEFAULT_FRAME_OPTION))
         .thenReturn(expected);
@@ -85,7 +85,7 @@ public class VideoDecoderTest {
 
   @Test
   public void releasesMediaMetadataRetriever() {
-    Util.setSdkVersionInt(19);
+    Util.setSdkVersionInt(VERSION_CODES.M);
     assertThrows(
         RuntimeException.class,
         new ThrowingRunnable() {
@@ -103,14 +103,14 @@ public class VideoDecoderTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void throwsExceptionIfCalledWithInvalidFrame() throws IOException {
-    Util.setSdkVersionInt(19);
+    Util.setSdkVersionInt(VERSION_CODES.M);
     options.set(VideoDecoder.TARGET_FRAME, -5L);
     new VideoDecoder<>(bitmapPool, initializer, factory).decode(resource, 100, 100, options);
   }
 
   @Test
   public void specifiesThumbnailFrameIfICalledWithFrameNumber() {
-    Util.setSdkVersionInt(19);
+    Util.setSdkVersionInt(VERSION_CODES.M);
     long frame = 5;
     options.set(VideoDecoder.TARGET_FRAME, frame);
     decoder = new VideoDecoder<>(bitmapPool, initializer, factory);
@@ -129,7 +129,7 @@ public class VideoDecoderTest {
 
   @Test
   public void doesNotSpecifyThumbnailFrameIfCalledWithoutFrameNumber() {
-    Util.setSdkVersionInt(19);
+    Util.setSdkVersionInt(VERSION_CODES.M);
     decoder = new VideoDecoder<>(bitmapPool, initializer, factory);
     assertThrows(
         RuntimeException.class,

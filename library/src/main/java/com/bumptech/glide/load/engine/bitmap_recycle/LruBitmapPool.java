@@ -221,14 +221,7 @@ public class LruBitmapPool implements BitmapPool {
   // from Bitmap.createBitmap.
   private static void normalize(Bitmap bitmap) {
     bitmap.setHasAlpha(true);
-    maybeSetPreMultiplied(bitmap);
-  }
-
-  @TargetApi(Build.VERSION_CODES.KITKAT)
-  private static void maybeSetPreMultiplied(Bitmap bitmap) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      bitmap.setPremultiplied(true);
-    }
+    bitmap.setPremultiplied(true);
   }
 
   @Override
@@ -239,7 +232,6 @@ public class LruBitmapPool implements BitmapPool {
     trimToSize(0);
   }
 
-  @SuppressWarnings("checkstyle:UnnecessaryParentheses") // Readability
   @SuppressLint("InlinedApi")
   @Override
   public void trimMemory(int level) {
@@ -247,11 +239,9 @@ public class LruBitmapPool implements BitmapPool {
       Log.d(TAG, "trimMemory, level=" + level);
     }
     if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
-        || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-            && level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)) {
+        || level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
       clearMemory();
-    } else if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
-        || level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+    } else if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
       trimToSize(getMaxSize() / 2);
     }
   }
@@ -305,24 +295,16 @@ public class LruBitmapPool implements BitmapPool {
   }
 
   private static LruPoolStrategy getDefaultStrategy() {
-    final LruPoolStrategy strategy;
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      strategy = new SizeConfigStrategy();
-    } else {
-      strategy = new AttributeStrategy();
-    }
-    return strategy;
+    return new SizeConfigStrategy();
   }
 
   @TargetApi(Build.VERSION_CODES.O)
   private static Set<Bitmap.Config> getDefaultAllowedConfigs() {
     Set<Bitmap.Config> configs = new HashSet<>(Arrays.asList(Bitmap.Config.values()));
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      // GIFs, among other types, end up with a native Bitmap config that doesn't map to a java
-      // config and is treated as null in java code. On KitKat+ these Bitmaps can be reconfigured
-      // and are suitable for re-use.
-      configs.add(null);
-    }
+    // GIFs, among other types, end up with a native Bitmap config that doesn't map to a java
+    // config and is treated as null in java code. On KitKat+ these Bitmaps can be reconfigured
+    // and are suitable for re-use.
+    configs.add(null);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       configs.remove(Bitmap.Config.HARDWARE);
     }

@@ -7,32 +7,21 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.graphics.Bitmap;
-import android.os.Build;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.tests.Util;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-// TODO: add a test for bitmap size using getAllocationByteSize when robolectric supports kitkat.
 @RunWith(RobolectricTestRunner.class)
 @Config(sdk = ROBOLECTRIC_SDK)
 public class BitmapResourceTest {
-  private int currentBuildVersion;
   private BitmapResourceHarness harness;
 
   @Before
   public void setUp() {
-    currentBuildVersion = Build.VERSION.SDK_INT;
     harness = new BitmapResourceHarness();
-  }
-
-  @After
-  public void tearDown() {
-    Util.setSdkVersionInt(currentBuildVersion);
   }
 
   @Test
@@ -41,10 +30,8 @@ public class BitmapResourceTest {
   }
 
   @Test
-  public void sizeIsBasedOnDimensPreKitKat() {
-    Util.setSdkVersionInt(18);
-    assertEquals(
-        harness.bitmap.getWidth() * harness.bitmap.getHeight() * 4, harness.resource.getSize());
+  public void canGetSize() {
+    assertEquals(harness.bitmap.getAllocationByteCount(), harness.resource.getSize());
   }
 
   @Test

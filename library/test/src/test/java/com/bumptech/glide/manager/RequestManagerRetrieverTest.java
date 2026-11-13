@@ -8,18 +8,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.annotation.LooperMode.Mode.LEGACY;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentController;
@@ -29,13 +26,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.tests.BackgroundUtil.BackgroundTester;
 import com.bumptech.glide.tests.TearDownGlide;
-import com.bumptech.glide.tests.Util;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.android.controller.ActivityController;
@@ -51,7 +46,6 @@ public class RequestManagerRetrieverTest {
 
   private static final String PARENT_TAG = "parent";
   private Context appContext;
-  private int initialSdkVersion;
   private RequestManagerRetriever retriever;
 
   @Before
@@ -59,15 +53,10 @@ public class RequestManagerRetrieverTest {
     appContext = ApplicationProvider.getApplicationContext();
 
     retriever = new RequestManagerRetriever(/* factory= */ null);
-
-    initialSdkVersion = Build.VERSION.SDK_INT;
-    Util.setSdkVersionInt(18);
   }
 
   @After
   public void tearDown() {
-    Util.setSdkVersionInt(initialSdkVersion);
-
     shadowOf(Looper.getMainLooper()).runToEndOfTasks();
   }
 
@@ -133,19 +122,9 @@ public class RequestManagerRetrieverTest {
     assertEquals(manager, retriever.get(fragment));
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void canGetRequestManagerFromDetachedFragment() {
-    helpTestCanGetRequestManagerFromDetachedFragment();
-  }
-
-  @Test
-  public void canGetRequestManagerFromDetachedFragment_PreJellyBeanMr1() {
-    Util.setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
-    helpTestCanGetRequestManagerFromDetachedFragment();
-  }
-
-  @SuppressWarnings("deprecation")
-  private void helpTestCanGetRequestManagerFromDetachedFragment() {
     Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
     android.app.Fragment fragment = new android.app.Fragment();
     activity
@@ -162,16 +141,6 @@ public class RequestManagerRetrieverTest {
 
   @Test
   public void supportCanGetRequestManagerFromDetachedFragment() {
-    helpTestSupportCanGetRequestManagerFromDetachedFragment();
-  }
-
-  @Test
-  public void supportCanGetRequestManagerFromDetachedFragment_PreJellyBeanMr1() {
-    Util.setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
-    helpTestSupportCanGetRequestManagerFromDetachedFragment();
-  }
-
-  private void helpTestSupportCanGetRequestManagerFromDetachedFragment() {
     FragmentActivity activity =
         Robolectric.buildActivity(FragmentActivity.class).create().start().resume().get();
     Fragment fragment = new Fragment();
@@ -279,32 +248,6 @@ public class RequestManagerRetrieverTest {
     // expect) our message to not run immediately
     shadowOf(Looper.getMainLooper()).pause();
     Robolectric.buildActivity(Issue117Activity.class).create().start().resume().visible();
-  }
-
-  @Test
-  @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-  public void doesNotThrowIfAskedToGetManagerForActivityPreJellYBeanMr1() {
-    Util.setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
-    Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
-    Activity spyActivity = Mockito.spy(activity);
-    when(spyActivity.isDestroyed()).thenThrow(new NoSuchMethodError());
-
-    assertNotNull(retriever.get(spyActivity));
-  }
-
-  @SuppressWarnings("deprecation")
-  @Test
-  @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-  public void doesNotThrowIfAskedToGetManagerForFragmentPreJellyBeanMr1() {
-    Util.setSdkVersionInt(Build.VERSION_CODES.JELLY_BEAN);
-    Activity activity = Robolectric.buildActivity(Activity.class).create().start().resume().get();
-    android.app.Fragment fragment = new android.app.Fragment();
-
-    activity.getFragmentManager().beginTransaction().add(fragment, "test").commit();
-    android.app.Fragment spyFragment = Mockito.spy(fragment);
-    when(spyFragment.getChildFragmentManager()).thenThrow(new NoSuchMethodError());
-
-    assertNotNull(retriever.get(spyFragment));
   }
 
   @Test

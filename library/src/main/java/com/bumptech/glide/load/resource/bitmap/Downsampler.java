@@ -37,7 +37,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
@@ -156,12 +155,6 @@ public final class Downsampler {
           // Do nothing.
         }
       };
-  private static final Set<ImageHeaderParser.ImageType> TYPES_THAT_USE_POOL_PRE_KITKAT =
-      Collections.unmodifiableSet(
-          EnumSet.of(
-              ImageHeaderParser.ImageType.JPEG,
-              ImageHeaderParser.ImageType.PNG_A,
-              ImageHeaderParser.ImageType.PNG));
   private static final Queue<BitmapFactory.Options> OPTIONS_QUEUE = Util.createQueue(0);
 
   private final BitmapPool bitmapPool;
@@ -406,54 +399,47 @@ public final class Downsampler {
         targetWidth,
         targetHeight);
 
-    boolean isKitKatOrGreater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-    // Prior to KitKat, the inBitmap size must exactly match the size of the bitmap we're decoding.
-    if ((options.inSampleSize == 1 || isKitKatOrGreater) && shouldUsePool(imageType)) {
-      int expectedWidth;
-      int expectedHeight;
-      if (sourceWidth >= 0
-          && sourceHeight >= 0
-          && fixBitmapToRequestedDimensions
-          && isKitKatOrGreater) {
-        expectedWidth = targetWidth;
-        expectedHeight = targetHeight;
-      } else {
-        float densityMultiplier =
-            isScaling(options) ? (float) options.inTargetDensity / options.inDensity : 1f;
-        int sampleSize = options.inSampleSize;
-        int downsampledWidth = (int) Math.ceil(sourceWidth / (float) sampleSize);
-        int downsampledHeight = (int) Math.ceil(sourceHeight / (float) sampleSize);
-        expectedWidth = Math.round(downsampledWidth * densityMultiplier);
-        expectedHeight = Math.round(downsampledHeight * densityMultiplier);
+    int expectedWidth;
+    int expectedHeight;
+    if (sourceWidth >= 0 && sourceHeight >= 0 && fixBitmapToRequestedDimensions) {
+      expectedWidth = targetWidth;
+      expectedHeight = targetHeight;
+    } else {
+      float densityMultiplier =
+          isScaling(options) ? (float) options.inTargetDensity / options.inDensity : 1f;
+      int sampleSize = options.inSampleSize;
+      int downsampledWidth = (int) Math.ceil(sourceWidth / (float) sampleSize);
+      int downsampledHeight = (int) Math.ceil(sourceHeight / (float) sampleSize);
+      expectedWidth = Math.round(downsampledWidth * densityMultiplier);
+      expectedHeight = Math.round(downsampledHeight * densityMultiplier);
 
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-          Log.v(
-              TAG,
-              "Calculated target ["
-                  + expectedWidth
-                  + "x"
-                  + expectedHeight
-                  + "] for source"
-                  + " ["
-                  + sourceWidth
-                  + "x"
-                  + sourceHeight
-                  + "]"
-                  + ", sampleSize: "
-                  + sampleSize
-                  + ", targetDensity: "
-                  + options.inTargetDensity
-                  + ", density: "
-                  + options.inDensity
-                  + ", density multiplier: "
-                  + densityMultiplier);
-        }
+      if (Log.isLoggable(TAG, Log.VERBOSE)) {
+        Log.v(
+            TAG,
+            "Calculated target ["
+                + expectedWidth
+                + "x"
+                + expectedHeight
+                + "] for source"
+                + " ["
+                + sourceWidth
+                + "x"
+                + sourceHeight
+                + "]"
+                + ", sampleSize: "
+                + sampleSize
+                + ", targetDensity: "
+                + options.inTargetDensity
+                + ", density: "
+                + options.inDensity
+                + ", density multiplier: "
+                + densityMultiplier);
       }
-      // If this isn't an image, or BitmapFactory was unable to parse the size, width and height
-      // will be -1 here.
-      if (expectedWidth > 0 && expectedHeight > 0) {
-        setInBitmap(options, bitmapPool, expectedWidth, expectedHeight, experiments);
-      }
+    }
+    // If this isn't an image, or BitmapFactory was unable to parse the size, width and height
+    // will be -1 here.
+    if (expectedWidth > 0 && expectedHeight > 0) {
+      setInBitmap(options, bitmapPool, expectedWidth, expectedHeight, experiments);
     }
 
     if (preferredColorSpace != null) {
@@ -666,12 +652,8 @@ public final class Downsampler {
         downsampleStrategy.getScaleFactor(
             powerOfTwoWidth, powerOfTwoHeight, targetWidth, targetHeight);
 
-    // Density scaling is only supported if inBitmap is null prior to KitKat. Avoid setting
-    // densities here so we calculate the final Bitmap size correctly.
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      options.inTargetDensity = adjustTargetDensityForError(adjustedScaleFactor);
-      options.inDensity = getDensityMultiplier(adjustedScaleFactor);
-    }
+    options.inTargetDensity = adjustTargetDensityForError(adjustedScaleFactor);
+    options.inDensity = getDensityMultiplier(adjustedScaleFactor);
     if (isScaling(options)) {
       options.inScaled = true;
     } else {
@@ -738,18 +720,6 @@ public final class Downsampler {
     return (int) (value + 0.5d);
   }
 
-  private boolean shouldUsePool(ImageType imageType) {
-    // On KitKat+, any bitmap (of a given config) can be used to decode any other bitmap
-    // (with the same config).
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      return true;
-    }
-
-    // We cannot reuse bitmaps when decoding images that are not PNG or JPG prior to KitKat.
-    // See: https://groups.google.com/forum/#!msg/android-developers/Mp0MFVFi1Fo/e8ZQ9FGdWdEJ
-    return TYPES_THAT_USE_POOL_PRE_KITKAT.contains(imageType);
-  }
-
   @SuppressWarnings("deprecation")
   private void calculateConfig(
       ImageReader imageReader,
@@ -769,9 +739,7 @@ public final class Downsampler {
       return;
     }
 
-    // Changing configs can cause skewing on 4.1, see issue #128.
-    if (format == DecodeFormat.PREFER_ARGB_8888
-        || Build.VERSION.SDK_INT == Build.VERSION_CODES.JELLY_BEAN) {
+    if (format == DecodeFormat.PREFER_ARGB_8888) {
       optionsWithScaling.inPreferredConfig = Bitmap.Config.ARGB_8888;
       return;
     }
@@ -917,16 +885,12 @@ public final class Downsampler {
   }
 
   @Nullable
-  @TargetApi(Build.VERSION_CODES.KITKAT)
   private static String getBitmapString(Bitmap bitmap) {
     if (bitmap == null) {
       return null;
     }
 
-    String sizeString =
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
-            ? " (" + bitmap.getAllocationByteCount() + ")"
-            : "";
+    String sizeString = " (" + bitmap.getAllocationByteCount() + ")";
     return "["
         + bitmap.getWidth()
         + "x"

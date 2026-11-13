@@ -96,11 +96,8 @@ public class RequestManagerLifecycleTest {
   @Test
   public void get_withActivityOnDestroy_afterJellyBeanAndbeforeQ_doesNotCrash() {
     // Activity#isDestroyed's behavior seems to have changed in Q. On <Q, isDestroyed returns true
-    // during onDestroy, triggering an assertion in Glide. < Jelly bean, isDestroyed is not
-    // available as a method.
-    assumeTrue(
-        Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN
-            && Build.VERSION.SDK_INT < Build.VERSION_CODES.Q);
+    // during onDestroy, triggering an assertion in Glide.
+    assumeTrue(Build.VERSION.SDK_INT < Build.VERSION_CODES.Q);
     AtomicReference<Exception> thrownException = new AtomicReference<>();
     scenario.moveToState(State.CREATED);
 

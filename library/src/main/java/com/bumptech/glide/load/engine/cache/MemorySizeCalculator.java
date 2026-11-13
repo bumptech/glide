@@ -1,6 +1,5 @@
 package com.bumptech.glide.load.engine.cache;
 
-import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
@@ -110,17 +109,9 @@ public final class MemorySizeCalculator {
     return Formatter.formatFileSize(context, bytes);
   }
 
-  @TargetApi(Build.VERSION_CODES.KITKAT)
   @Synthetic
   static boolean isLowMemoryDevice(ActivityManager activityManager) {
-    // Explicitly check with an if statement, on some devices both parts of boolean expressions
-    // can be evaluated even if we'd normally expect a short circuit.
-    //noinspection SimplifiableIfStatement
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      return activityManager.isLowRamDevice();
-    } else {
-      return true;
-    }
+    return activityManager.isLowRamDevice();
   }
 
   /**

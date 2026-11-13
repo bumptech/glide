@@ -6,12 +6,9 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.os.Build;
 import androidx.test.core.app.ApplicationProvider;
 import com.bumptech.glide.load.engine.cache.MemorySizeCalculatorTest.LowRamActivityManager;
-import com.bumptech.glide.tests.Util;
 import com.google.common.collect.Range;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,17 +24,10 @@ import org.robolectric.shadows.ShadowActivityManager;
 @Config(sdk = Config.OLDEST_SDK, shadows = LowRamActivityManager.class)
 public class MemorySizeCalculatorTest {
   private MemorySizeHarness harness;
-  private int initialSdkVersion;
 
   @Before
   public void setUp() {
-    initialSdkVersion = Build.VERSION.SDK_INT;
     harness = new MemorySizeHarness();
-  }
-
-  @After
-  public void tearDown() {
-    Util.setSdkVersionInt(initialSdkVersion);
   }
 
   @Test
@@ -121,11 +111,12 @@ public class MemorySizeCalculatorTest {
 
   @Test
   public void cumulativePoolAndMemoryCacheSizesAreSmallerOnLowMemoryDevices() {
-    Shadows.shadowOf(harness.activityManager).setMemoryClass(getLargeEnoughMemoryClass() / 2);
+    LowRamActivityManager activityManager = Shadow.extract(harness.activityManager);
+    activityManager.setMemoryClass(getLargeEnoughMemoryClass() / 2);
     final int normalMemoryCacheSize = harness.getCalculator().getMemoryCacheSize();
     final int normalBitmapPoolSize = harness.getCalculator().getBitmapPoolSize();
 
-    Util.setSdkVersionInt(10);
+    activityManager.setIsLowRam();
 
     // Keep the bitmap pool size constant, even though normally it would change.
     harness.byteArrayPoolSizeBytes *= 2;
