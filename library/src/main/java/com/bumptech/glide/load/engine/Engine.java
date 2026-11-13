@@ -385,7 +385,8 @@ public final class Engine
   }
 
   @Nullable
-  private EngineResource<?> loadFromActiveResources(Key key, boolean isReleaseRaceFixEnabled) {
+  private EngineResource<?> loadFromActiveResources(
+      EngineKey key, boolean isReleaseRaceFixEnabled) {
     EngineResource<?> active = activeResources.get(key);
     if (active != null) {
       if (isReleaseRaceFixEnabled) {
@@ -402,7 +403,7 @@ public final class Engine
     return active;
   }
 
-  private EngineResource<?> loadFromCache(Key key) {
+  private EngineResource<?> loadFromCache(EngineKey key) {
     EngineResource<?> cached = getEngineResourceFromCache(key);
     if (cached != null) {
       cached.acquire();
@@ -411,7 +412,7 @@ public final class Engine
     return cached;
   }
 
-  private EngineResource<?> getEngineResourceFromCache(Key key) {
+  private EngineResource<?> getEngineResourceFromCache(EngineKey key) {
     Resource<?> cached = cache.remove(key);
 
     final EngineResource<?> result;
@@ -442,7 +443,7 @@ public final class Engine
 
   @Override
   public synchronized void onEngineJobComplete(
-      EngineJob<?> engineJob, Key key, EngineResource<?> resource) {
+      EngineJob<?> engineJob, EngineKey key, EngineResource<?> resource) {
     // A null resource indicates that the load failed, usually due to an exception.
     if (resource != null && resource.isMemoryCacheable()) {
       activeResources.activate(key, resource);
@@ -452,7 +453,7 @@ public final class Engine
   }
 
   @Override
-  public synchronized void onEngineJobCancelled(EngineJob<?> engineJob, Key key) {
+  public synchronized void onEngineJobCancelled(EngineJob<?> engineJob, EngineKey key) {
     jobs.removeIfCurrent(key, engineJob);
   }
 
@@ -464,7 +465,7 @@ public final class Engine
   }
 
   @Override
-  public void onResourceReleased(Key cacheKey, EngineResource<?> resource) {
+  public void onResourceReleased(EngineKey cacheKey, EngineResource<?> resource) {
     activeResources.deactivate(cacheKey);
     if (resource.isMemoryCacheable()) {
       cache.put(cacheKey, resource);
@@ -655,7 +656,7 @@ public final class Engine
 
     @SuppressWarnings("unchecked")
     <R> EngineJob<R> build(
-        Key key,
+        EngineKey key,
         boolean isMemoryCacheable,
         boolean useUnlimitedSourceGeneratorPool,
         boolean useAnimationPool,

@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.os.Looper;
 import androidx.core.util.Pools;
 import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.load.engine.executor.MockGlideExecutor;
@@ -248,7 +247,7 @@ public class EngineJobTest {
         .onEngineJobComplete(
             eq(job), eq(harness.key), ArgumentMatchers.<EngineResource<?>>isNull());
     verify(harness.engineJobListener, never())
-        .onEngineJobCancelled(any(EngineJob.class), any(Key.class));
+        .onEngineJobCancelled(any(EngineJob.class), any(EngineKey.class));
   }
 
   @Test
@@ -512,7 +511,7 @@ public class EngineJobTest {
 
   @SuppressWarnings("unchecked")
   private static class MultiCbHarness {
-    final Key key = mock(Key.class);
+    final EngineKey key = mock(EngineKey.class);
     final Resource<Object> resource = mockResource();
     final EngineResource<Object> engineResource = mock(EngineResource.class);
     final EngineJobListener engineJobListener = mock(EngineJobListener.class);
@@ -564,7 +563,7 @@ public class EngineJobTest {
   @SuppressWarnings("unchecked")
   private static class EngineJobHarness {
     final EngineJob.EngineResourceFactory factory = mock(EngineJob.EngineResourceFactory.class);
-    final Key key = mock(Key.class);
+    final EngineKey key = mock(EngineKey.class);
     final Handler mainHandler = new Handler();
     final ResourceCallback cb = mockResourceCallback();
     final Resource<Object> resource = mockResource();

@@ -12,7 +12,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.bumptech.glide.load.Key;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +25,7 @@ import org.robolectric.annotation.Config;
 public class EngineResourceTest {
   private EngineResource<Object> engineResource;
   @Mock private EngineResource.ResourceListener listener;
-  @Mock private Key cacheKey;
+  @Mock private EngineKey cacheKey;
   @Mock private Resource<Object> resource;
 
   @Before
@@ -184,7 +183,7 @@ public class EngineResourceTest {
             resource, /* isMemoryCacheable= */ true, /* isRecyclable= */ false, cacheKey, listener);
     engineResource.recycle();
 
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    verify(listener, never()).onResourceReleased(any(EngineKey.class), any(EngineResource.class));
     verify(resource, never()).recycle();
   }
 }

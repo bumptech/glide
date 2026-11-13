@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
 import androidx.annotation.NonNull;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.ActiveResources.DequeuedResourceCallback;
 import com.bumptech.glide.load.engine.ActiveResources.ResourceWeakReference;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
@@ -31,7 +30,7 @@ import org.robolectric.Shadows;
 public class ActiveResourcesTest {
 
   @Mock private ResourceListener listener;
-  @Mock private Key key;
+  @Mock private EngineKey key;
   @Mock private Resource<Object> resource;
 
   private ActiveResources resources;
@@ -131,7 +130,7 @@ public class ActiveResourcesTest {
     resources.activeEngineResources.get(key).clear();
     resources.get(key);
 
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    verify(listener, never()).onResourceReleased(any(EngineKey.class), any(EngineResource.class));
   }
 
   @Test
@@ -144,7 +143,7 @@ public class ActiveResourcesTest {
 
     enqueueAndWaitForRef(weakRef);
 
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    verify(listener, never()).onResourceReleased(any(EngineKey.class), any(EngineResource.class));
   }
 
   @Test
@@ -176,7 +175,7 @@ public class ActiveResourcesTest {
     weakRef.enqueue();
     enqueueAndWaitForRef(weakRef);
 
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    verify(listener, never()).onResourceReleased(any(EngineKey.class), any(EngineResource.class));
   }
 
   @Test
@@ -230,7 +229,7 @@ public class ActiveResourcesTest {
 
     waitForLatch(latch);
 
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    verify(listener, never()).onResourceReleased(any(EngineKey.class), any(EngineResource.class));
   }
 
   @Test
@@ -271,7 +270,7 @@ public class ActiveResourcesTest {
 
       waitForLatch(latch);
 
-      verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+      verify(listener, never()).onResourceReleased(any(EngineKey.class), any(EngineResource.class));
     } finally {
       resources.shutdown();
       com.bumptech.glide.util.Executors.shutdownAndAwaitTermination(delegate);
@@ -318,7 +317,7 @@ public class ActiveResourcesTest {
 
       waitForLatch(latch);
 
-      verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+      verify(listener, never()).onResourceReleased(any(EngineKey.class), any(EngineResource.class));
     } finally {
       resources.shutdown();
       com.bumptech.glide.util.Executors.shutdownAndAwaitTermination(delegate);
@@ -342,7 +341,7 @@ public class ActiveResourcesTest {
     resources.activeEngineResources.get(key).clear();
     resources.get(key);
 
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    verify(listener, never()).onResourceReleased(any(EngineKey.class), any(EngineResource.class));
   }
 
   @Test
@@ -360,7 +359,7 @@ public class ActiveResourcesTest {
 
     waitForLatch(latch);
 
-    verify(listener, never()).onResourceReleased(any(Key.class), any(EngineResource.class));
+    verify(listener, never()).onResourceReleased(any(EngineKey.class), any(EngineResource.class));
   }
 
   private void enqueueAndWaitForRef(ResourceWeakReference ref) {

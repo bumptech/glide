@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.util.Pools;
 import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.Key;
 import com.bumptech.glide.load.engine.EngineResource.ResourceListener;
 import com.bumptech.glide.load.engine.executor.GlideExecutor;
 import com.bumptech.glide.request.ResourceCallback;
@@ -42,7 +41,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   private final GlideExecutor animationExecutor;
   private final AtomicInteger pendingCallbacks = new AtomicInteger();
 
-  private Key key;
+  private EngineKey key;
   private boolean isCacheable;
   private boolean useUnlimitedSourceGeneratorPool;
   private boolean useAnimationPool;
@@ -112,7 +111,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
 
   @VisibleForTesting
   synchronized EngineJob<R> init(
-      Key key,
+      EngineKey key,
       boolean isCacheable,
       boolean useUnlimitedSourceGeneratorPool,
       boolean useAnimationPool,
@@ -228,7 +227,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   @Synthetic
   void notifyCallbacksOfResult() {
     ResourceCallbacksAndExecutors copy;
-    Key localKey;
+    EngineKey localKey;
     EngineResource<?> localResource;
     synchronized (this) {
       stateVerifier.throwIfRecycled();
@@ -349,7 +348,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   @Synthetic
   void notifyCallbacksOfException() {
     ResourceCallbacksAndExecutors copy;
-    Key localKey;
+    EngineKey localKey;
     synchronized (this) {
       stateVerifier.throwIfRecycled();
       if (isCancelled) {
@@ -512,7 +511,7 @@ class EngineJob<R> implements DecodeJob.Callback<R>, Poolable {
   @VisibleForTesting
   static class EngineResourceFactory {
     public <R> EngineResource<R> build(
-        Resource<R> resource, boolean isMemoryCacheable, Key key, ResourceListener listener) {
+        Resource<R> resource, boolean isMemoryCacheable, EngineKey key, ResourceListener listener) {
       return new EngineResource<>(
           resource, isMemoryCacheable, /* isRecyclable= */ true, key, listener);
     }
