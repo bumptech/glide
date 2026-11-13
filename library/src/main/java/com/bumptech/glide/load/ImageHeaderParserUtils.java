@@ -17,9 +17,12 @@ import java.util.List;
 
 /** Utilities for the ImageHeaderParser. */
 public final class ImageHeaderParserUtils {
-  // 5MB. This is the max image header size we can handle, we preallocate a much smaller buffer but
-  // will resize up to this amount if necessary.
-  private static final int MARK_READ_LIMIT = 5 * 1024 * 1024;
+  /**
+   * Max image header size (5MB).
+   *
+   * <p>We preallocate a much smaller buffer but will resize up to this amount if necessary.
+   */
+  public static final int MARK_READ_LIMIT = 5 * 1024 * 1024;
 
   private ImageHeaderParserUtils() {}
 

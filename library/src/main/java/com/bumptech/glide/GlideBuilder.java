@@ -547,10 +547,11 @@ public final class GlideBuilder {
   }
 
   /**
-   * Set to {@code true} to make Glide use {@link android.graphics.ImageDecoder} when decoding
-   * {@link Bitmap}s from {@link android.os.ParcelFileDescriptor}s on Android Q and higher, and
-   * prefer {@link android.os.ParcelFileDescriptor} loaders over {@link java.io.InputStream}
-   * loaders.
+   * Set to {@code true} to prioritize {@link android.os.ParcelFileDescriptor} and {@link
+   * android.content.res.AssetFileDescriptor} loaders over {@link java.io.InputStream} loaders, and
+   * decode {@link Bitmap}s from {@link android.os.ParcelFileDescriptor}s and {@link
+   * android.content.res.AssetFileDescriptor}s using {@link android.graphics.ImageDecoder} on
+   * Android Q and higher.
    *
    * <p>When enabled, {@link android.graphics.ImageDecoder} based {@link Bitmap} decoders only
    * reject requests with a positive {@link
@@ -564,9 +565,10 @@ public final class GlideBuilder {
    *
    * <p>This flag is experimental and may be removed without deprecation in a future version.
    */
-  public GlideBuilder setFileDescriptorImageDecoderEnabled(boolean isEnabled) {
+  @CanIgnoreReturnValue
+  public GlideBuilder setPrioritizeFileDescriptorOverInputStream(boolean isEnabled) {
     glideExperimentsBuilder.update(
-        new EnableFileDescriptorImageDecoder(),
+        new PrioritizeFileDescriptorOverInputStream(),
         /* isEnabled= */ isEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q);
     return this;
   }
@@ -919,7 +921,7 @@ public final class GlideBuilder {
 
   static final class EnableUriImageDecoder implements Experiment {}
 
-  static final class EnableFileDescriptorImageDecoder implements Experiment {}
+  static final class PrioritizeFileDescriptorOverInputStream implements Experiment {}
 
   /** See {@link #setUseHeapBufferForImageDecoderWithInputStream(boolean)}. */
   public static final class UseHeapBufferForImageDecoderWithInputStream implements Experiment {}

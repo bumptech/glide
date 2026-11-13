@@ -150,10 +150,11 @@ public class RegistryFactoryTest {
   }
 
   @Test
-  public void fileModelLoaders_whenFileDescriptorImageDecoderDisabled_prefersInputStream() {
+  public void
+      fileModelLoaders_whenPrioritizeFileDescriptorOverInputStreamDisabled_prefersInputStream() {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ false);
+        /* prioritizeFileDescriptorOverInputStream= */ false);
 
     List<Class<?>> dataClasses =
         getFetcherDataClasses(Glide.get(context).getRegistry(), new File("/tmp/image.jpg"));
@@ -165,10 +166,11 @@ public class RegistryFactoryTest {
   }
 
   @Test
-  public void fileModelLoaders_whenFileDescriptorImageDecoderEnabled_prefersParcelFileDescriptor() {
+  public void
+      fileModelLoaders_whenPrioritizeFileDescriptorOverInputStreamEnabled_prefersParcelFileDescriptor() {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ true);
+        /* prioritizeFileDescriptorOverInputStream= */ true);
 
     List<Class<?>> dataClasses =
         getFetcherDataClasses(Glide.get(context).getRegistry(), new File("/tmp/image.jpg"));
@@ -183,7 +185,7 @@ public class RegistryFactoryTest {
   public void fileModelLoaders_withoutImageDecoderForBitmaps_prefersInputStream() {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ false,
-        /* isFileDescriptorImageDecoderEnabled= */ true);
+        /* prioritizeFileDescriptorOverInputStream= */ true);
 
     List<Class<?>> dataClasses =
         getFetcherDataClasses(Glide.get(context).getRegistry(), new File("/tmp/image.jpg"));
@@ -195,10 +197,11 @@ public class RegistryFactoryTest {
   }
 
   @Test
-  public void stringModelLoaders_whenFileDescriptorImageDecoderDisabled_prefersInputStream() {
+  public void
+      stringModelLoaders_whenPrioritizeFileDescriptorOverInputStreamDisabled_prefersInputStream() {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ false);
+        /* prioritizeFileDescriptorOverInputStream= */ false);
 
     List<Class<?>> dataClasses =
         getFetcherDataClasses(Glide.get(context).getRegistry(), "/tmp/image.jpg");
@@ -210,24 +213,25 @@ public class RegistryFactoryTest {
 
   @Test
   public void
-      stringModelLoaders_whenFileDescriptorImageDecoderEnabled_prefersParcelFileDescriptor() {
+      stringModelLoaders_whenPrioritizeFileDescriptorOverInputStreamEnabled_prefersFileDescriptorsOverInputStream() {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ true);
+        /* prioritizeFileDescriptorOverInputStream= */ true);
 
     List<Class<?>> dataClasses =
         getFetcherDataClasses(Glide.get(context).getRegistry(), "/tmp/image.jpg");
 
     assertThat(dataClasses)
-        .containsExactly(ParcelFileDescriptor.class, InputStream.class, AssetFileDescriptor.class)
+        .containsExactly(ParcelFileDescriptor.class, AssetFileDescriptor.class, InputStream.class)
         .inOrder();
   }
 
   @Test
-  public void contentUriModelLoaders_whenFileDescriptorImageDecoderDisabled_prefersInputStream() {
+  public void
+      contentUriModelLoaders_whenPrioritizeFileDescriptorOverInputStreamDisabled_prefersInputStream() {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ false);
+        /* prioritizeFileDescriptorOverInputStream= */ false);
     Uri contentUri = Uri.parse("content://com.example.provider/images/1");
 
     List<Class<?>> dataClasses =
@@ -244,10 +248,10 @@ public class RegistryFactoryTest {
 
   @Test
   public void
-      contentUriModelLoaders_whenFileDescriptorImageDecoderEnabled_prefersParcelFileDescriptor() {
+      contentUriModelLoaders_whenPrioritizeFileDescriptorOverInputStreamEnabled_prefersFileDescriptorsOverInputStream() {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ true);
+        /* prioritizeFileDescriptorOverInputStream= */ true);
     Uri contentUri = Uri.parse("content://com.example.provider/images/1");
 
     List<Class<?>> dataClasses =
@@ -256,18 +260,18 @@ public class RegistryFactoryTest {
     assertThat(dataClasses)
         .containsExactly(
             ParcelFileDescriptor.class,
-            InputStream.class,
             AssetFileDescriptor.class,
+            InputStream.class,
             contentUri.getClass())
         .inOrder();
   }
 
   @Test
   public void
-      mediaStoreUriModelLoaders_whenFileDescriptorImageDecoderDisabled_prefersInputStream() {
+      mediaStoreUriModelLoaders_whenPrioritizeFileDescriptorOverInputStreamDisabled_prefersInputStream() {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ false);
+        /* prioritizeFileDescriptorOverInputStream= */ false);
     Uri mediaStoreUri =
         MediaStore.Images.Media.EXTERNAL_CONTENT_URI.buildUpon().appendPath("1").build();
 
@@ -288,10 +292,10 @@ public class RegistryFactoryTest {
 
   @Test
   public void
-      mediaStoreUriModelLoaders_whenFileDescriptorImageDecoderEnabled_prefersParcelFileDescriptor() {
+      mediaStoreUriModelLoaders_whenPrioritizeFileDescriptorOverInputStreamEnabled_prefersFileDescriptorsOverInputStream() {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ true);
+        /* prioritizeFileDescriptorOverInputStream= */ true);
     Uri mediaStoreUri =
         MediaStore.Images.Media.EXTERNAL_CONTENT_URI.buildUpon().appendPath("1").build();
 
@@ -303,8 +307,8 @@ public class RegistryFactoryTest {
             ParcelFileDescriptor.class,
             InputStream.class,
             ParcelFileDescriptor.class,
-            InputStream.class,
             AssetFileDescriptor.class,
+            InputStream.class,
             File.class,
             mediaStoreUri.getClass())
         .inOrder();
@@ -312,11 +316,107 @@ public class RegistryFactoryTest {
 
   @Test
   public void
-      parcelFileDescriptorLoadPath_whenFileDescriptorImageDecoderDisabled_usesFallbackDecoder()
+      assetUriModelLoaders_whenPrioritizeFileDescriptorOverInputStreamDisabled_prefersInputStream() {
+    initGlide(
+        /* isImageDecoderEnabledForBitmaps= */ true,
+        /* prioritizeFileDescriptorOverInputStream= */ false);
+    Uri assetUri = Uri.parse("file:///android_asset/image.jpg");
+
+    List<Class<?>> dataClasses = getFetcherDataClasses(Glide.get(context).getRegistry(), assetUri);
+
+    assertThat(dataClasses).containsAtLeast(InputStream.class, AssetFileDescriptor.class).inOrder();
+  }
+
+  @Test
+  public void
+      assetUriModelLoaders_whenPrioritizeFileDescriptorOverInputStreamEnabled_prefersAssetFileDescriptor() {
+    initGlide(
+        /* isImageDecoderEnabledForBitmaps= */ true,
+        /* prioritizeFileDescriptorOverInputStream= */ true);
+    Uri assetUri = Uri.parse("file:///android_asset/image.jpg");
+
+    List<Class<?>> dataClasses = getFetcherDataClasses(Glide.get(context).getRegistry(), assetUri);
+
+    assertThat(dataClasses).containsAtLeast(AssetFileDescriptor.class, InputStream.class).inOrder();
+  }
+
+  @Test
+  public void
+      resourceUriModelLoaders_whenPrioritizeFileDescriptorOverInputStreamDisabled_prefersInputStream() {
+    initGlide(
+        /* isImageDecoderEnabledForBitmaps= */ true,
+        /* prioritizeFileDescriptorOverInputStream= */ false);
+    Uri resourceUri = Uri.parse("android.resource://" + context.getPackageName() + "/1");
+
+    List<Class<?>> dataClasses =
+        getFetcherDataClasses(Glide.get(context).getRegistry(), resourceUri);
+
+    assertThat(dataClasses)
+        .containsExactly(
+            InputStream.class,
+            AssetFileDescriptor.class,
+            InputStream.class,
+            ParcelFileDescriptor.class,
+            AssetFileDescriptor.class,
+            resourceUri.getClass())
+        .inOrder();
+  }
+
+  @Test
+  public void
+      resourceUriModelLoaders_whenPrioritizeFileDescriptorOverInputStreamEnabled_prefersAssetFileDescriptor() {
+    initGlide(
+        /* isImageDecoderEnabledForBitmaps= */ true,
+        /* prioritizeFileDescriptorOverInputStream= */ true);
+    Uri resourceUri = Uri.parse("android.resource://" + context.getPackageName() + "/1");
+
+    List<Class<?>> dataClasses =
+        getFetcherDataClasses(Glide.get(context).getRegistry(), resourceUri);
+
+    assertThat(dataClasses)
+        .containsExactly(
+            AssetFileDescriptor.class,
+            InputStream.class,
+            ParcelFileDescriptor.class,
+            AssetFileDescriptor.class,
+            InputStream.class,
+            resourceUri.getClass())
+        .inOrder();
+  }
+
+  @Test
+  public void
+      assetFileDescriptorLoadPath_whenPrioritizeFileDescriptorOverInputStreamDisabled_usesFallbackDecoder()
           throws Exception {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ false);
+        /* prioritizeFileDescriptorOverInputStream= */ false);
+    Bitmap decoded = decodePngAssetFileDescriptor(new RequestOptions());
+
+    assertThat(decoded.getWidth()).isEqualTo(1);
+    assertThat(decoded.getHeight()).isEqualTo(1);
+  }
+
+  @Test
+  public void
+      assetFileDescriptorLoadPath_whenPrioritizeFileDescriptorOverInputStreamEnabled_usesImageDecoderAheadOfFallback()
+          throws Exception {
+    initGlide(
+        /* isImageDecoderEnabledForBitmaps= */ true,
+        /* prioritizeFileDescriptorOverInputStream= */ true);
+    Bitmap decoded = decodePngAssetFileDescriptor(new RequestOptions());
+
+    assertThat(decoded.getWidth()).isEqualTo(10);
+    assertThat(decoded.getHeight()).isEqualTo(10);
+  }
+
+  @Test
+  public void
+      parcelFileDescriptorLoadPath_whenPrioritizeFileDescriptorOverInputStreamDisabled_usesFallbackDecoder()
+          throws Exception {
+    initGlide(
+        /* isImageDecoderEnabledForBitmaps= */ true,
+        /* prioritizeFileDescriptorOverInputStream= */ false);
     Bitmap decoded = decodePngParcelFileDescriptor(new RequestOptions());
 
     assertThat(decoded.getWidth()).isEqualTo(1);
@@ -325,11 +425,11 @@ public class RegistryFactoryTest {
 
   @Test
   public void
-      parcelFileDescriptorLoadPath_whenFileDescriptorImageDecoderEnabled_usesImageDecoderAheadOfFallback()
+      parcelFileDescriptorLoadPath_whenPrioritizeFileDescriptorOverInputStreamEnabled_usesImageDecoderAheadOfFallback()
           throws Exception {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ true);
+        /* prioritizeFileDescriptorOverInputStream= */ true);
     Bitmap decoded = decodePngParcelFileDescriptor(new RequestOptions());
 
     assertThat(decoded.getWidth()).isEqualTo(10);
@@ -342,7 +442,7 @@ public class RegistryFactoryTest {
           throws Exception {
     initGlide(
         /* isImageDecoderEnabledForBitmaps= */ true,
-        /* isFileDescriptorImageDecoderEnabled= */ true);
+        /* prioritizeFileDescriptorOverInputStream= */ true);
     Bitmap decoded = decodePngParcelFileDescriptor(new RequestOptions().frame(1000L));
 
     assertThat(decoded.getWidth()).isEqualTo(1);
@@ -350,12 +450,12 @@ public class RegistryFactoryTest {
   }
 
   private void initGlide(
-      boolean isImageDecoderEnabledForBitmaps, boolean isFileDescriptorImageDecoderEnabled) {
+      boolean isImageDecoderEnabledForBitmaps, boolean prioritizeFileDescriptorOverInputStream) {
     Glide.init(
         context,
         new GlideBuilder()
             .setImageDecoderEnabledForBitmaps(isImageDecoderEnabledForBitmaps)
-            .setFileDescriptorImageDecoderEnabled(isFileDescriptorImageDecoderEnabled));
+            .setPrioritizeFileDescriptorOverInputStream(prioritizeFileDescriptorOverInputStream));
   }
 
   private static <T> List<Class<?>> getFetcherDataClasses(Registry registry, T model) {
@@ -397,6 +497,40 @@ public class RegistryFactoryTest {
               Glide.with(context)
                   .asBitmap()
                   .load(pfd)
+                  .apply(requestOptions)
+                  .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                  .get())
+          .get(5, TimeUnit.SECONDS);
+    }
+  }
+
+  private Bitmap decodePngAssetFileDescriptor(RequestOptions extraOptions) throws Exception {
+    File pngFile = createTenByTenPngFile();
+    Glide.get(context)
+        .getRegistry()
+        .prepend(
+            AssetFileDescriptor.class,
+            AssetFileDescriptor.class,
+            UnitModelLoader.Factory.getInstance())
+        .append(
+            Registry.BUCKET_BITMAP,
+            AssetFileDescriptor.class,
+            Bitmap.class,
+            new OneByOneFallbackBitmapDecoder<>());
+    RequestOptions requestOptions =
+        new RequestOptions()
+            .apply(extraOptions)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .skipMemoryCache(true);
+    try (ParcelFileDescriptor pfd =
+            ParcelFileDescriptor.open(pngFile, ParcelFileDescriptor.MODE_READ_ONLY);
+        AssetFileDescriptor afd =
+            new AssetFileDescriptor(pfd, /* startOffset= */ 0, pngFile.length())) {
+      return Executors.newSingleThreadExecutor()
+          .submit(() ->
+              Glide.with(context)
+                  .asBitmap()
+                  .load(afd)
                   .apply(requestOptions)
                   .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                   .get())
